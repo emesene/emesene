@@ -1,0 +1,11 @@
+(ONLINE, OFFLINE, BUSY, AWAY, IDLE) = range(5)
+
+ORDERED = [ONLINE, BUSY, AWAY, IDLE, OFFLINE]
+ALL = ORDERED
+
+STATUS = {}
+STATUS[ONLINE] = "online"
+STATUS[OFFLINE] = "offline"
+STATUS[BUSY] = "busy"
+STATUS[AWAY] = "away"
+STATUS[IDLE] = "idle"
