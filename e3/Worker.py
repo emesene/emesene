@@ -494,7 +494,7 @@ class Worker(threading.Thread):
 
     def _on_challenge(self, message):
         '''handle the challenge sent by the server'''
-        out = doChallenge(message.params[0][:-2])
+        out = do_challenge(message.params[0][:-2])
         self.socket.send_command('QRY', (_PRODUCT_ID,) , out)
 
     def _on_online_change(self, message):
@@ -586,7 +586,8 @@ class Worker(threading.Thread):
 
     def _on_conversation_request(self, message):
         '''handle a conversation request, example
-        RNG 1581441881 64.4.37.33:1863 CKI 252199185.167235214 eltuza@gmail.com tuza U messenger.msn.com'''
+        RNG 1581441881 64.4.37.33:1863 CKI 252199185.167235214 
+        eltuza@gmail.com tuza U messenger.msn.com'''
         session_id = message.tid
         (chost, auth_type, auth_id, user, username, unk, server) = \
         message.params
@@ -720,58 +721,60 @@ _PRODUCT_KEY = 'O4BG@C7BWLYQX?5G'
 _PRODUCT_ID = 'PROD01065C%ZFN6F' 
 MSNP11_MAGIC_NUM = 0x0E79A9C1
 
-def doChallenge(chlData):
-    md5digest = md5.md5(chlData + _PRODUCT_KEY).digest()
+def do_challenge(challenge_data):
+    '''create the response to a challenge'''
+    md5digest = md5.md5(challenge_data + _PRODUCT_KEY).digest()
 
     # Make array of md5 string ints
-    md5Ints = struct.unpack("<llll", md5digest)
-    md5Ints = [(x & 0x7fffffff) for x in md5Ints]
+    md5_ints = struct.unpack("<llll", md5digest)
+    md5_ints = [(x & 0x7fffffff) for x in md5_ints]
 
     # Make array of chl string ints
-    chlData += _PRODUCT_ID
-    amount = 8 - len(chlData) % 8
-    chlData += "".zfill(amount)
-    chlInts = struct.unpack("<%di" % (len(chlData)/4), chlData)
+    challenge_data += _PRODUCT_ID
+    amount = 8 - len(challenge_data) % 8
+    challenge_data += "".zfill(amount)
+    chl_ints = struct.unpack("<%di" % (len(challenge_data)/4), challenge_data)
 
     # Make the key
     high = 0
     low = 0
     i = 0
-    while i < len(chlInts) - 1:
-        temp = chlInts[i]
+    while i < len(chl_ints) - 1:
+        temp = chl_ints[i]
         temp = (MSNP11_MAGIC_NUM * temp) % 0x7FFFFFFF
         temp += high
-        temp = md5Ints[0] * temp + md5Ints[1]
+        temp = md5_ints[0] * temp + md5_ints[1]
         temp = temp % 0x7FFFFFFF
 
-        high = chlInts[i + 1]
+        high = chl_ints[i + 1]
         high = (high + temp) % 0x7FFFFFFF
-        high = md5Ints[2] * high + md5Ints[3]
+        high = md5_ints[2] * high + md5_ints[3]
         high = high % 0x7FFFFFFF
 
         low = low + high + temp
 
         i += 2
 
-    high = littleEndify((high + md5Ints[1]) % 0x7FFFFFFF)
-    low = littleEndify((low + md5Ints[3]) % 0x7FFFFFFF)
+    high = littleendify((high + md5_ints[1]) % 0x7FFFFFFF)
+    low = littleendify((low + md5_ints[3]) % 0x7FFFFFFF)
     key = (high << 32L) + low
-    key = littleEndify(key, "Q")
+    key = littleendify(key, "Q")
 
     longs = [x for x in struct.unpack(">QQ", md5digest)]
-    longs = [littleEndify(x, "Q") for x in longs]
+    longs = [littleendify(x, "Q") for x in longs]
     longs = [x ^ key for x in longs]
-    longs = [littleEndify(abs(x), "Q") for x in longs]
+    longs = [littleendify(abs(x), "Q") for x in longs]
     
     out = ""
-    for x in longs:
-        x = hex(long(x))
-        x = x[2:-1]
-        x = x.zfill(16)
-        out += x.lower()
+    for long_ in longs:
+        long_ = hex(long(long_))
+        long_ = long_[2:-1]
+        long_ = long_.zfill(16)
+        out += long_.lower()
     
     return out
 
-def littleEndify(num, c="L"):
-    return struct.unpack(">" + c, struct.pack("<" + c, num))[0]
+def littleendify(num, ccc="L"):
+    '''return a number in little endian'''
+    return struct.unpack(">" + ccc, struct.pack("<" + ccc, num))[0]
 # ------------------------------ TO HERE ----------------------------------

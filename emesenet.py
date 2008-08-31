@@ -178,5 +178,5 @@ if __name__ == '__main__':
     emesenet = EmeseNET()
     #emesenet.documentation()
     emesenet.run(globals())
-    emesenet.do_login('', '', status.ONLINE)
+    emesenet.do_login('xmxsxn@hotmail.com', 'contrasena', status.ONLINE)
     gobject.MainLoop().run()

@@ -74,18 +74,6 @@ class Conversation(threading.Thread):
                 self.socket.send_command(cmd.command, cmd.params, cmd.payload)
             except Queue.Empty:
                 pass
-            
-            try:
-                action = self.session.actions.get(True, 0.1)
-
-                if action.id_ == Action.ACTION_QUIT:
-                    print 'closing thread'
-                    self.socket.input.put('quit')
-                    break
-
-                self._process_action(action)
-            except Queue.Empty:
-                pass
 
     def _on_message(self, command):
         '''handle the message'''

@@ -2,4 +2,3 @@
 from MsnSocket import MsnSocket
 from Worker import Worker
 from Worker import EVENTS
-from Worker import doChallenge
