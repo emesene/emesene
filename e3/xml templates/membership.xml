@@ -8,7 +8,9 @@
        </ABApplicationHeader>
        <ABAuthHeader xmlns="http://www.msn.com/webservices/AddressBook">
            <ManagedGroupRequest xmlns="http://www.msn.com/webservices/AddressBook">false</ManagedGroupRequest>
+        <TicketToken>%s</TicketToken>
        </ABAuthHeader>
+
    </soap:Header>
    <soap:Body xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
        <FindMembership xmlns="http://www.msn.com/webservices/AddressBook">

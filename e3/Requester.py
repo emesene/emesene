@@ -83,7 +83,8 @@ class Membership(Requester):
         Requester.__init__(self, session, 
           'http://www.msn.com/webservices/AddressBook/FindMembership',
           'contacts.msn.com', 443, '/abservice/SharingService.asmx',
-          XmlManager.get('membership') + '\r\n')
+          XmlManager.get('membership') % session.extras['contacts.msn.com']\
+                                  ['security'].replace('&', '&amp;') + '\r\n')
 
         self.command_queue = command_queue
         self.on_login = on_login
@@ -147,7 +148,8 @@ class DynamicItems(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABFindAll',
           'contacts.msn.com', 443, '/abservice/abservice.asmx',
-          XmlManager.get('dynamicitems'))
+          XmlManager.get('dynamicitems') % session.extras['contacts.msn.com']\
+                                            ['security'].replace('&', '&amp;'))
 
         self.command_queue = command_queue
         self.on_login = on_login

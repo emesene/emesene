@@ -16,6 +16,7 @@
             <ManagedGroupRequest>
                 false
             </ManagedGroupRequest>
+            <TicketToken>%s</TicketToken>
         </ABAuthHeader>
     </soap:Header>
     <soap:Body>

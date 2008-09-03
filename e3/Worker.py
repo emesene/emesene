@@ -10,7 +10,9 @@ import urlparse
 import threading
 import xml.sax.saxutils
 
-import XmlManager
+import mbi
+import XmlManager 
+from XmlParser import SSoParser
 import Conversation
 import Requester
 import protocol.base.Event as Event
@@ -273,25 +275,29 @@ class Worker(threading.Thread):
 
     def do_passport_identification(self):
         '''do the passport identification and get our passport id'''
-        hash_ = self.session.extras['hash'].replace(',', '&amp;')
+        hash_ = self.session.extras['hash'].split()[-1]
         template = XmlManager.get('passport')
         # TODO: see if the quote here works
         template = template % (self.session.account.account,
-                                urllib.quote(self.session.account.password),
-                                hash_)
+                                urllib.quote(self.session.account.password))
+        
+        if '@msn.com' not in self.session.account.account:
+            server = "login.live.com"
+            url = "/RST.srf"
+        else:
+            server = "msnia.login.live.com"
+            url = "/pp550/RST.srf"
 
         #create the headers
         headers = { \
-        'Accept' :  'text/*',
-        'User-Agent' : 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
-        'Host' : 'loginnet.passport.com',
-        'Content-Length' : str(len(template)),
-        'Connection' : 'Keep-Alive',
-        'Cache-Control' : 'no-cache'
+          'Accept' :  'text/*',
+          'User-Agent' : 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
+          'Host' : server,
+          'Content-Length' : str(len(template)),
+          'Connection' : 'Keep-Alive',
+          'Cache-Control' : 'no-cache'
         }
 
-        server = 'loginnet.passport.com'
-        url = '/RST.srf'
         succeeded = False
 
         for i in range(5):
@@ -328,12 +334,8 @@ class Worker(threading.Thread):
                 'Too many redirections')
 
         # try to get the ticket from the received data
-        try:
-            twnticket = data.split(
-                '<wsse:BinarySecurityToken Id="PPToken1">')[1].split(
-                    '</wsse:BinarySecurityToken>')[0]
-            twnticket = twnticket.replace('&amp;','&')
-        except Exception, exception:
+        self.session.extras.update(SSoParser(data).tokens)
+        if 'messengerclear.live.com' not in self.session.extras:
             # try to get the faultstring
             try:
                 faultstring = data.split('<faultstring>')\
@@ -343,7 +345,8 @@ class Worker(threading.Thread):
 
             return self.session.add_event(Event.EVENT_LOGIN_FAILED, faultstring)
 
-        return twnticket
+        self.session.extras['mbiblob'] = mbi.encrypt(
+               self.session.extras['messengerclear.live.com']['secret'], hash_)
 
     def set_status(self, stat):
         '''set our status'''
@@ -354,12 +357,12 @@ class Worker(threading.Thread):
     def _on_version(self, message):
         '''handle version'''
         self.socket.send_command('CVR', 
-            ('0x0c0a', 'winnt', '5.1', 'i386', 'MSNMSGR', '8.0.0792', 
+            ('0x0c0a', 'winnt', '5.1', 'i386', 'MSNMSGR', '8.1.0178', 
             'msmsgs', self.session.account.account))
 
     def _on_client_version(self, message):
         '''handle client version'''
-        self.socket.send_command('USR', ('TWN', 'I', 
+        self.socket.send_command('USR', ('SSO', 'I', 
             self.session.account.account))
 
     def _on_transfer(self, message):
@@ -374,27 +377,28 @@ class Worker(threading.Thread):
                     'invalid XFR command')
 
             self.socket.reconnect(host, int(port))
-            self.socket.send_command('VER', ('MSNP13', 'CVR0'))
+            self.socket.send_command('VER', ('MSNP15', 'CVR0'))
         else:
             self.session.add_event(Event.EVENT_LOGIN_FAILED, 
                 'invalid XFR command')
 
     def _on_user(self, message):
         '''handle user response'''
-        if message.param_num_is(0, 'TWN'):
+        if message.param_num_is(0, 'SSO'):
             hash_ = ' '.join(message.params[2:])
             self.session.extras['hash'] = urllib.unquote(hash_)
-            passport_id = self.do_passport_identification()
-            self.session.extras['t'] = passport_id.split('&p=')[0][2:]
-            self.session.extras['MSPProf'] = passport_id.split('&p=')[1]
+            passport_auth = self.do_passport_identification()
 
             # if returned a tuple with a signal, we return it
-            if type(passport_id) == tuple:
-                return passport_id
-
+            if type(passport_auth) == tuple:
+                return passport_auth
+            
+            passport_id = self.session.extras['messengerclear.live.com']\
+                                          ['security'].replace("&amp;" , "&")
             self.session.extras['passport id'] = passport_id
 
             try:
+                self.session.extras['MSPProf'] = passport_id.split('&p=')[1]
                 ticket = passport_id.split('&p=')[0][2:]
                 param = passport_id.split('&p=')[1]
                 self.session.extras['t'] = ticket
@@ -404,8 +408,8 @@ class Worker(threading.Thread):
                     'Incorrect passport id')
 
             # we introduce ourselves again
-            self.socket.send_command('USR', ('TWN', 'S', \
-                passport_id))
+            self.socket.send_command('USR', ('SSO', 'S', \
+                passport_id, self.session.extras['mbiblob']))
         elif message.param_num_is(0, 'OK'):
             pass       
 
@@ -589,7 +593,7 @@ class Worker(threading.Thread):
         RNG 1581441881 64.4.37.33:1863 CKI 252199185.167235214 
         eltuza@gmail.com tuza U messenger.msn.com'''
         session_id = message.tid
-        (chost, auth_type, auth_id, user, username, unk, server) = \
+        (chost, auth_type, auth_id, user, username, unk, server, unk2) = \
         message.params
 
         (host, port) = chost.split(':')
@@ -639,7 +643,7 @@ class Worker(threading.Thread):
         self.session.account.password = password
         self.session.account.status = status_
 
-        self.socket.send_command('VER', ('MSNP13', 'CVR0'))
+        self.socket.send_command('VER', ('MSNP15', 'CVR0'))
         self.session.add_event(Event.EVENT_LOGIN_STARTED)
         self.in_login = True
 
