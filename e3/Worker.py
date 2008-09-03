@@ -22,7 +22,7 @@ import protocol.base.status as status
 EVENTS = (\
  'login started'         , 'login info'           , 
  'login succeed'         , 'login failed'         , 
- 'disconnected'          , 'user list ready'      ,
+ 'disconnected'          , 'contact list ready'      ,
  'contact attr changed'  , 'contact added'        , 
  'contact add succeed'   , 'contact add failed'   , 
  'contact remove succeed', 'contact remove failed', 

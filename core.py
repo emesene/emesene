@@ -12,7 +12,7 @@ from protocol.base.ContactManager import ContactManager
 from naf.ngobject import Server;Server.set_events(e3.EVENTS)
 from naf.ngobject import validate
 
-class EmeseNET(Server):
+class Core(Server):
     '''the class that builds a server that exposes the e3 library with a web
     API'''
 
@@ -175,8 +175,8 @@ if __name__ == '__main__':
     import gobject
     import time
     gobject.threads_init()
-    emesenet = EmeseNET()
-    #emesenet.documentation()
-    emesenet.run(globals())
-    emesenet.do_login('xmxsxn@hotmail.com', 'contrasena', status.ONLINE)
+    core = Core()
+    #core.documentation()
+    core.run(globals())
+    core.do_login('xmxsxn@hotmail.com', 'contrasena', status.ONLINE)
     gobject.MainLoop().run()

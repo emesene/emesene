@@ -228,6 +228,6 @@ class DynamicItems(Requester):
                 for adl in self.session.contacts.get_adls():
                     self.command_queue.put(Command('ADL', payload=adl))
 
-            self.session.events.put(Event(Event.EVENT_USER_LIST_READY))
+            self.session.events.put(Event(Event.EVENT_CONTACT_LIST_READY))
         else:
             print 'error requestion dynamic items'
