@@ -12,6 +12,12 @@ import protocol.base.Contact as Contact
 
 from Command import Command
 
+def build_adl(account, type_):
+    '''build a xml message to send on ADLs'''
+    (name, host) = account.split('@')
+    return '<ml><d n="%s"><c n="%s" l="1" t="%d" /></d></ml>' % \
+        (host, name, type_)
+
 class Requester(threading.Thread):
     '''a class that makes a soap request on a thread'''
 
@@ -231,3 +237,59 @@ class DynamicItems(Requester):
             self.session.events.put(Event(Event.EVENT_CONTACT_LIST_READY))
         else:
             print 'error requestion dynamic items'
+
+class AddContact(Requester):
+    '''make the request to add a contact to the contact list'''
+    def __init__(self, session, account, command_queue):
+        '''command_queue is a reference to a queue that is used
+        by the worker to get commands that other threads need to 
+        send'''
+        Requester.__init__(self, session,
+          'http://www.msn.com/webservices/AddressBook/ABContactAdd',
+          'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
+          XmlManager.get('addcontact') % \
+          (session.extras['contacts.msn.com']['security'].replace('&', '&amp;'),
+           account)
+
+        self.account = account
+        self.command_queue = command_queue
+
+    def handle_response(self):
+        '''handle the response'''
+        if self.status == 200:
+            self.command_queue.put(Command('ADL', 
+                payload=build_adl(self.account, 1)))
+            self.command_queue.put(Command('ADL', 
+                payload=build_adl(self.account, 2)))
+            self.session.events.put(Event(Event.EVENT_CONTACT_ADD_SUCCEED, 
+                self.account))
+        else:
+            self.session.events.put(Event(Event.EVENT_CONTACT_ADD_FAILED, 
+                self.account))
+
+class RemoveContact(Requester):
+    '''make the request to remove a contact to the contact list'''
+    def __init__(self, session, cid, account, command_queue):
+        '''command_queue is a reference to a queue that is used
+        by the worker to get commands that other threads need to 
+        send'''
+        Requester.__init__(self, session,
+          'http://www.msn.com/webservices/AddressBook/ABContactDelete',
+          'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
+          XmlManager.get('addcontact') % \
+          (session.extras['contacts.msn.com']['security'].replace('&', '&amp;'),
+           account)
+
+        self.cid = cid
+        self.account = account
+        self.command_queue = command_queue
+
+    def handle_response(self):
+        '''handle the response'''
+        if self.status == 200:
+            self.session.events.put(Event(Event.EVENT_CONTACT_REMOVE_SUCCEED, 
+                self.account))
+        else:
+            self.session.events.put(Event(Event.EVENT_CONTACT_REMOVE_FAILED, 
+                self.account))
+
