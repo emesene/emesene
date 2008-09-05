@@ -36,6 +36,10 @@ class ContactManager(object):
         else:
             return False
 
+    def get(self, account):
+        '''return a contact from an account'''
+        return self.contacts.get(account, None)
+
     # actions on our contact
     def get_no_group(self):
         '''return a list of contacts that dont belong to any group'''

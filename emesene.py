@@ -36,6 +36,7 @@ class Controller(object):
         self.window.content.contact_list.order_by_status = False
         self.window.content.contact_list.show_offline = True
         self.window.content.contact_list.fill()
+        self.core.do_set_message('hola!')
 
     def on_login_connect(self, account, remember):
         self.core.do_login(account.account, account.password, account.status)

@@ -6,12 +6,13 @@ import Socket
 
 from Command import Command
 
-PAYLOAD_CMDS = ['GCF', 'MSG', 'UBX']
+PAYLOAD_CMDS = ['GCF', 'MSG', 'UBX', 'NOT']
 # the position on params where the number of bytes to read is located
 PAYLOAD_POSITION = {
     'GCF' : 0,
     'MSG' : 1,
-    'UBX' : 0,
+    'UBX' : 1,
+    'NOT' : -1,
 }
 
 class MsnSocket(Socket.Socket):
@@ -51,7 +52,13 @@ class MsnSocket(Socket.Socket):
             command = Command.parse(data)
 
             if command.command in PAYLOAD_CMDS:
-                size = int(command.params[PAYLOAD_POSITION[command.command]])
+                position = PAYLOAD_POSITION[command.command]
+
+                if position == -1:
+                    size = int(command.tid)
+                else:
+                    size = int(command.params[position])
+
                 command.payload = self.socket.recv(size, socket.MSG_WAITALL)
 
             self.output.put(command)

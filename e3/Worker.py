@@ -8,9 +8,9 @@ import md5
 import httplib
 import urlparse
 import threading
-import xml.sax.saxutils
 
 import mbi
+import common
 import XmlManager 
 from XmlParser import SSoParser
 import Conversation
@@ -22,17 +22,20 @@ import protocol.base.status as status
 EVENTS = (\
  'login started'         , 'login info'           , 
  'login succeed'         , 'login failed'         , 
- 'disconnected'          , 'contact list ready'      ,
+ 'disconnected'          , 'contact list ready'   ,
  'contact attr changed'  , 'contact added'        , 
  'contact add succeed'   , 'contact add failed'   , 
  'contact remove succeed', 'contact remove failed', 
  'contact move succeed'  , 'contact move failed'  , 
  'contact copy succeed'  , 'contact copy failed'  , 
  'contact block succeed' , 'contact block failed' , 
+ 'contact unblock succeed' , 'contact unblock failed' , 
  'contact alias succeed' , 'contact alias failed' , 
  'group add succeed'     , 'group add failed'     , 
  'group remove succeed'  , 'group remove failed'  , 
  'group rename succeed'  , 'group rename failed'  ,  
+ 'group add contact succeed'     , 'group add contact failed'   ,  
+ 'group remove contact succeed'  , 'group remove contact failed',  
  'status change succeed' , 'status change failed' , 
  'nick change succeed'   , 'nick change failed'   , 
  'message change succeed', 'message change failed', 
@@ -44,7 +47,8 @@ EVENTS = (\
 
 ACTIONS = (\
  'login'            , 'logout'           ,
- 'change status'    , 'block contact'    ,
+ 'change status'    , 
+ 'block contact'    , 'unblock contact'  ,
  'add contact'      , 'remove contact'   ,
  'set contact alias', 'quit'             ,
  'add to group'     , 'remove from group',
@@ -76,42 +80,6 @@ CLIENT_ID |= 0x4     # ink
 CLIENT_ID |= 0x20    # multi-packet MIME messages
 CLIENT_ID |= 0x8000  # winks
 CLIENT_ID |= 0x40000 # voice clips
-
-def get_value_between(string_, start, stop, default=''):
-    '''get the value of string_ between start and stop, return default if
-    the value cant be extracted. If multiple time appear start on string_
-    just the first will be used, if start or stop are not found default will
-    be returned'''
-    parts = string_.split(start, 1)
-
-    if len(parts) != 2:
-        return default
-
-    parts = parts[1].split(stop, 1)
-    
-    if len(parts) != 2:
-        return default
-
-    return parts[0]
-
-dic = {
-    '\"'    :    '&quot;',
-    '\''    :    '&apos;'
-}
-
-dic_inv = {
-    '&quot;'    :'\"',
-    '&apos;'    :'\''
-}
-
-def escape(string_):
-    '''replace the values on dic keys with the values'''
-    return xml.sax.saxutils.escape(string_, dic)
-
-def unescape(string_):
-    '''replace the values on dic_inv keys with the values'''
-    return xml.sax.saxutils.unescape(string_, dic_inv)
-
 
 class Worker(threading.Thread):
     '''this class represent an object that waits for commands from the queue 
@@ -150,6 +118,7 @@ class Worker(threading.Thread):
         dah[Action.ACTION_ADD_GROUP] = self._handle_action_add_group
         dah[Action.ACTION_ADD_TO_GROUP] = self._handle_action_add_to_group
         dah[Action.ACTION_BLOCK_CONTACT] = self._handle_action_block_contact
+        dah[Action.ACTION_UNBLOCK_CONTACT] = self._handle_action_unblock_contact
         dah[Action.ACTION_CHANGE_STATUS] = self._handle_action_change_status
         dah[Action.ACTION_LOGIN] = self._handle_action_login
         dah[Action.ACTION_LOGOUT] = self._handle_action_logout
@@ -348,7 +317,7 @@ class Worker(threading.Thread):
         self.session.extras['mbiblob'] = mbi.encrypt(
                self.session.extras['messengerclear.live.com']['secret'], hash_)
 
-    def set_status(self, stat):
+    def _set_status(self, stat):
         '''set our status'''
         self.session.account.status = stat
         self.session.contacts.me.status = stat
@@ -426,7 +395,7 @@ class Worker(threading.Thread):
 
         self.session.add_event(Event.EVENT_LOGIN_SUCCEED)
         self.in_login = False
-        self.set_status(self.session.account.status)
+        self._set_status(self.session.account.status)
         Requester.Membership(self.session, self.command_queue, 
             True).start()
                 
@@ -466,8 +435,8 @@ class Worker(threading.Thread):
         if int(message.params[0]) == 0:
             return
 
-        pmessage = get_value_between(message.payload, '<PSM>', '</PSM>')
-        pmessage = unescape(pmessage)
+        pmessage = common.get_value_between(message.payload, '<PSM>', '</PSM>')
+        pmessage = common.unescape(pmessage)
         account = message.tid
 
         contact = self.session.contacts.contacts.get(account, None)
@@ -477,7 +446,7 @@ class Worker(threading.Thread):
 
         contact.message = pmessage
        
-        media = get_value_between(message.payload, '<CurrentMedia>', 
+        media = common.get_value_between(message.payload, '<CurrentMedia>', 
             '<CurrentMedia>')
 
         mhead = media.find('\\0Music\\01\\0')
@@ -490,7 +459,7 @@ class Worker(threading.Thread):
             for args in range(1, len(margs)):
                 media = media.replace('{%s}' % (args-1), margs[args])
 
-            media = unescape(media)
+            media = common.unescape(media)
                 
             contact.media = media
 
@@ -614,27 +583,40 @@ class Worker(threading.Thread):
     def _handle_action_add_contact(self, account):
         '''handle Action.ACTION_ADD_CONTACT
         '''
-        pass
+        Requester.AddContact(self.session, account, self.command_queue).start()
 
     def _handle_action_add_group(self, name):
         '''handle Action.ACTION_ADD_GROUP
         '''
-        pass
+        Requester.AddGroup(self.session, name, self.command_queue).start()
 
     def _handle_action_add_to_group(self, account, gid):
         '''handle Action.ACTION_ADD_TO_GROUP
         '''
-        pass
+        contact = self.session.contacts.get(account)
+
+        if contact is None:
+            return
+
+        Requester.AddToGroup(self.session, contact.identifier, gid, \
+            self.command_queue).start()
 
     def _handle_action_block_contact(self, account):
         '''handle Action.ACTION_BLOCK_CONTACT
         '''
-        pass
+        Requester.BlockContact(self.session, account, self.command_queue)\
+            .start()
+
+    def _handle_action_unblock_contact(self, account):
+        '''handle Action.ACTION_UNBLOCK_CONTACT
+        '''
+        Requester.UnblockContact(self.session, account, self.command_queue)\
+            .start()
 
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS
         '''
-        pass
+        self._set_status(status_)
 
     def _handle_action_login(self, account, password, status_):
         '''handle Action.ACTION_LOGIN
@@ -655,42 +637,69 @@ class Worker(threading.Thread):
     def _handle_action_move_to_group(self, account, src_gid, dest_gid):
         '''handle Action.ACTION_MOVE_TO_GROUP
         '''
-        pass
+        contact = self.session.contacts.get(account)
+
+        if contact is None:
+            return
+
+        Requester.MoveContact(self.session, contact.identifier, src_gid, 
+            dest_gid, self.command_queue).start()
 
     def _handle_action_remove_contact(self, account):
         '''handle Action.ACTION_REMOVE_CONTACT
         '''
-        pass
+        contact = self.session.contacts.get(account)
+
+        if contact is None:
+            return
+
+        Requester.RemoveContact(self.session, contact.identifier, account, \
+            self.command_queue).start()
 
     def _handle_action_remove_from_group(self, account, gid):
         '''handle Action.ACTION_REMOVE_FROM_GROUP
         '''
-        pass
+        contact = self.session.contacts.get(account)
+
+        if contact is None:
+            return
+
+        Requester.RemoveFromGroup(self.session, contact.identifier, gid, \
+            self.command_queue).start()
 
     def _handle_action_remove_group(self, gid):
         '''handle Action.ACTION_REMOVE_GROUP
         '''
-        pass
+        Requester.RemoveGroup(self.session, gid, self.command_queue).start()
 
     def _handle_action_rename_group(self, gid, name):
         '''handle Action.ACTION_RENAME_GROUP
         '''
-        pass
+        Requester.RenameGroup(self.session, gid, name, 
+            self.command_queue).start()
 
     def _handle_action_set_contact_alias(self, account, alias):
         '''handle Action.ACTION_SET_CONTACT_ALIAS
         '''
-        pass
+        contact = self.session.contacts.get(account)
+
+        if contact is None:
+            return
+
+        Requester.ChangeAlias(self.session, contact.identifier, account, \
+            alias, self.command_queue).start()
 
     def _handle_action_set_message(self, message):
         '''handle Action.ACTION_SET_MESSAGE
         '''
-        pass
+        self.socket.send_command('UUX', payload='<Data><PSM>' + \
+            common.escape(message) + '</PSM><CurrentMedia></CurrentMedia>' + \
+            '<MachineGuid></MachineGuid></Data>')
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK
         '''
-        pass
+        Requester.ChangeNick(self.session, nick, self.command_queue).start()
 
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE

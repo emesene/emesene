@@ -1,5 +1,7 @@
 import urllib
 
+import common
+
 class Message(object):
     '''a class that represent a msn message'''
     (TYPE_MESSAGE, TYPE_TYPING, TYPE_P2P, TYPE_UNK) = range(4)
@@ -51,14 +53,14 @@ class Message(object):
         '''parse a message from a command object and return a Message object'''
         (head, body) = command.payload.split('\r\n\r\n')
 
-        type_ = get_value_between(head, 'Content-Type: ', '\r\n')
+        type_ = common.get_value_between(head, 'Content-Type: ', '\r\n')
         style = None
         
         if type_.startswith('text/plain'):
             mtype = Message.TYPE_MESSAGE
-            font = urllib.unquote(get_value_between(head, 'FN=', ';'))
-            effects = get_value_between(head, 'EF=', ';')
-            color = get_value_between(head, 'CO=', ';', '000000')
+            font = urllib.unquote(common.get_value_between(head, 'FN=', ';'))
+            effects = common.get_value_between(head, 'EF=', ';')
+            color = common.get_value_between(head, 'CO=', ';', '000000')
 
             if color.startswith('#'):
                 color = color[1:]
@@ -180,19 +182,3 @@ class Color(object):
 
         return Color(red, green, blue)
 
-def get_value_between(string_, start, stop, default=''):
-    '''get the value of string_ between start and stop, return default if
-    the value cant be extracted. If multiple time appear start on string_
-    just the first will be used, if start or stop are not found default will
-    be returned'''
-    parts = string_.split(start, 1)
-
-    if len(parts) != 2:
-        return default
-
-    parts = parts[1].split(stop, 1)
-    
-    if len(parts) != 2:
-        return default
-
-    return parts[0]

@@ -70,6 +70,7 @@ class Core(Server):
         session.extras = {}
         session.contacts = ContactManager(account)
         session.groups = {}
+        session.protocol = self
 
         self.add_action(session, Action.ACTION_LOGIN, 
             (account, password, status))
@@ -99,6 +100,11 @@ class Core(Server):
         '''block the contact'''
         self.add_action(session, Action.ACTION_BLOCK_CONTACT, (account,))
         
+    @validate(str)
+    def do_unblock_contact(self, session, account):
+        '''block the contact'''
+        self.add_action(session, Action.ACTION_UNBLOCK_CONTACT, (account,))
+        
     @validate(str, str)
     def do_set_contact_alias(self, session, account, alias):
         '''set the alias of a contact'''
@@ -113,7 +119,8 @@ class Core(Server):
     @validate(str, str)
     def do_remove_from_group(self, session, account, gid):
         '''remove a contact from a group'''
-        self.add_action(session, Action.ACTION_REMOVE_FROM_GROUP, (account, gid))
+        self.add_action(session, Action.ACTION_REMOVE_FROM_GROUP, 
+            (account, gid))
         
     @validate(str, str, str)
     def do_move_to_group(self, session, account, src_gid, dest_gid):

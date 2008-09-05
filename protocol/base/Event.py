@@ -20,7 +20,7 @@
 class Event(object):
     '''an object that represents an event'''
 
-    def __init__(self, id_, args=None):
+    def __init__(self, id_, *args):
         '''class constructor'''
         self.id_ = id_
 
