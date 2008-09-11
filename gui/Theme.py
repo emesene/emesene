@@ -15,6 +15,7 @@ class Theme(object):
         self.theme_path = os.path.join("themes", self.name)
 
         self.user = os.path.join(self.theme_path, "user.png")
+        self.users = os.path.join(self.theme_path, "users.png")
         self.password = os.path.join(self.theme_path, "password.png")
         self.logo = os.path.join(self.theme_path, "logo.png")
 

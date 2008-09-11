@@ -13,14 +13,17 @@ class Window(gtk.Window):
 
         self.set_default_size(width, height)
         self.set_title("emesene")
-        if utils.file_readable(gui.theme.logo):
-            self.set_icon(utils.safe_gtk_image_load(gui.theme.logo).\
-                get_pixbuf())
+        self.set_icon(gui.theme.logo)
 
         self.cb_on_close = cb_on_close
 
         self.connect("delete-event", self._on_delete_event)
         self.content = None
+
+    def set_icon(self, icon):
+        '''set the icon of the window'''
+        if utils.file_readable(icon):
+            self.set_icon(utils.safe_gtk_image_load(icon).get_pixbuf())
 
     def clear(self):
         if self.get_child():
@@ -35,6 +38,12 @@ class Window(gtk.Window):
     def go_main(self, session):
         '''change to the main window'''
         self.content = MainWindow.MainWindow(session)
+        self.add(self.content)
+        self.content.show()
+
+    def go_conversation(self, session):
+        '''change to a conversation window'''
+        self.content = MainConversation.MainConversation(session)
         self.add(self.content)
         self.content.show()
 

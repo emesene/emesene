@@ -30,6 +30,9 @@ class Conversation(threading.Thread):
         self.status = Conversation.STATUS_PENDING
 
         self.pending_invites = []
+        # indicates if the first action made by the user to justify opening
+        # a new conversation has been made or not
+        self.first_action = False
 
         # this queue receives a Command object
         self.command_queue = Queue.Queue()
@@ -78,6 +81,12 @@ class Conversation(threading.Thread):
     def _on_message(self, command):
         '''handle the message'''
         message = MsnMessage.Message.parse(command)
+        # TODO: nudge and file transfer invitations goes here too
+        if message.type == MsnMessage.Message.TYPE_MESSAGE and \
+            not self.first_action:
+            self.first_action = True
+            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION)
+
         if message.type == MsnMessage.Message.TYPE_MESSAGE or \
                 message.type == MsnMessage.Message.TYPE_TYPING:
             self.session.add_event(Event.EVENT_CONV_MESSAGE, 

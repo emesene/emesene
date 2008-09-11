@@ -158,15 +158,18 @@ class Radio(Togglable):
 
 def build(element):
     '''build an element with the defined toolkit and return it'''
-    raise NotImplementedError
+    raise NotImplementedError()
 
 def build_menu_bar(menu):
     '''build a menu with the form of a menu bar'''
-    raise NotImplementedError
+    raise NotImplementedError()
 
 def build_pop_up(menu, x=0, y=0):
     '''build a pop up menu, if positions are given and needed by the toolkit
     will be used to show the pop up on that position'''
-    raise NotImplementedError
+    raise NotImplementedError()
 
+def build_toolbar(menu):
+    '''build a menu with the form of a toolbar'''
+    raise NotImplementedError()
 

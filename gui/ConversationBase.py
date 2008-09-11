@@ -23,29 +23,29 @@ class ConversationBase(object):
     # override this methods to implement your toolkit
     def clear_input(self):
         '''clear the input text area'''
-        pass
+        self.input.clear()
 
     def clear_output(self):
         '''clear the output text area'''
-        pass
+        self.output.clear()
 
     def set_input_text(self, text):
         '''set the text on input, text is a base.Message object, returns 
         None if no message is available'''
-        pass
+        self.input.set_text(text)
     
     def set_output_text(self, text):
         '''set the text on output, text is a base.Message object, returns
         None if no message is available'''
-        pass
+        self.output.set_text(text)
 
     def append_input_text(self, text):
         '''append text to the input, text is a base.Message object'''
-        pass
+        self.input.append(text)
 
     def append_output_text(self, text):
         '''append text to the output, text is a base.Message object'''
-        pass
+        self.output.append(text)
 
     def get_input_message(self):
         '''return the content of input as a base.Message object'''

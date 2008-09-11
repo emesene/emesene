@@ -63,6 +63,40 @@ def build_pop_up(menu, x=0, y=0):
 
     return gtk_menu
 
+def build_toolbar(menu):
+    '''build a menu with the form of a toolbar'''
+    gtk_tb = gtk.Toolbar()
+    tooltips = gtk.Tooltips()
+    tooltips.enable()
+
+    for child in menu:
+        item = _build_toolbutton(child, tooltips)
+        item.show()
+        gtk_tb.add(item)
+
+    menu.signal_connect("enabled", _set_sensitive, gtk_tb, True)
+    menu.signal_connect("disabled", _set_sensitive, gtk_tb, False)
+
+def _build_toolbutton(item, tooltips=None):
+    '''build a toolbutton and return it'''
+    # TODO: accel y las seniales
+    button = gtk.ToolButton()
+    button.set_label(item.text)
+
+    if item.is_stock():
+        image = gtk.image_new_from_stock(
+            stock.map_stock(item.image, gtk.STOCK_MISSING_IMAGE),
+            gtk.ICON_SIZE_MENU)
+        button.set_icon_widget(image)
+    elif menuitem.is_image_path():
+        image = gtk.image_new_from_file(item.get_image_path())
+        button.set_icon_widget(image)
+
+    if tooltips:
+        button.set_tooltip(tooltips, item.text)
+
+    return button
+
 def _set_sensitive(item, widget, enabled):
     '''set sensitive on widget to enabled'''
     widget.set_sensitive(enabled)

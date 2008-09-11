@@ -43,7 +43,7 @@ EVENTS = (\
  'conv contact joined'   , 'conv contact left'  ,
  'conv started'          , 'conv ended'           ,
  'conv group started'    , 'conv group ended'     ,
- 'conv message'          , )
+ 'conv message'          , 'conv first action')
 
 ACTIONS = (\
  'login'            , 'logout'           ,
