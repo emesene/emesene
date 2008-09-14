@@ -23,7 +23,8 @@ class Window(gtk.Window):
     def set_icon(self, icon):
         '''set the icon of the window'''
         if utils.file_readable(icon):
-            self.set_icon(utils.safe_gtk_image_load(icon).get_pixbuf())
+            gtk.Window.set_icon(self, 
+                utils.safe_gtk_image_load(icon).get_pixbuf())
 
     def clear(self):
         if self.get_child():

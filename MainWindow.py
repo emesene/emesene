@@ -2,9 +2,10 @@
 import os
 import gtk
 
-import ContactList
-import dialog
 import Menu
+import dialog
+import UserPanel
+import ContactList
 import gui.MainMenu as MainMenu
 import gui.ContactMenu as ContactMenu
 import gui.GroupMenu as GroupMenu
@@ -22,15 +23,19 @@ class MainWindow(gtk.VBox):
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         self.session = session
 
-        self.menu = MainMenu.MainMenu(dialog, 
+        self._menu = MainMenu.MainMenu(dialog, 
             self.session.contacts, self.session.groups, 
                 self.contact_list)
+        self.menu = Menu.build_menu_bar(self._menu)
 
-        entry = gtk.Entry()
-        entry.connect('changed', self._on_entry_changed)
+        self.panel = UserPanel.UserPanel(session)
 
-        self.pack_start(Menu.build_menu_bar(self.menu), False)
-        self.pack_start(entry, False)
+        self.entry = gtk.Entry()
+        self.entry.connect('changed', self._on_entry_changed)
+
+        self.pack_start(self.menu, False)
+        self.pack_start(self.panel, False)
+        self.pack_start(self.entry, False)
         self.pack_start(scroll, True, True)
 
         self.contact_list.signal_connect('contact-selected', 
@@ -43,11 +48,15 @@ class MainWindow(gtk.VBox):
             self._on_group_menu_selected)
 
         scroll.add(self.contact_list)
-        self.show_all()
+        scroll.show_all()
 
     def show(self):
         '''show the widget'''
-        self.show_all()
+        gtk.VBox.show(self)
+        self.menu.show_all()
+        self.panel.show()
+        self.entry.show()
+        self.contact_list.show()
 
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''

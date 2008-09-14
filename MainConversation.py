@@ -58,7 +58,7 @@ class Conversation(gtk.VBox):
     def _on_panel_show(self, widget):
         '''callback called when the panel is shown, resize the panel'''
         position = self.panel.get_position()
-        self.panel.set_position(position + int(position * 0.3))
+        self.panel.set_position(position + int(position * 0.5))
         self.panel.disconnect(self.temp)
         del self.temp
 
