@@ -1,7 +1,5 @@
 '''defines an object that handles msn commands received from a socket'''
 
-import socket
-
 import Socket
 
 from Command import Command
@@ -59,7 +57,7 @@ class MsnSocket(Socket.Socket):
                 else:
                     size = int(command.params[position])
 
-                command.payload = self.socket.recv(size, socket.MSG_WAITALL)
+                command.payload = self.receive_fixed_size(size)
 
             self.output.put(command)
 

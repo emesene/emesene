@@ -90,6 +90,18 @@ class Socket(threading.Thread):
         output.seek(0)
         return output.read()
 
+    def receive_fixed_size(self, size):
+        '''receive a fixed size of bytes, return it as string'''
+        output = StringIO.StringIO()
+
+        for byte_num in xrange(size):
+            output.write(self.socket.recv(1))
+
+        output.seek(0)
+
+        return output.read()
+
+
     def reconnect(self, host, port):
         '''connect to a different host'''
         self.host = host
