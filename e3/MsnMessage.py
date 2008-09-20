@@ -4,13 +4,17 @@ import common
 
 class Message(object):
     '''a class that represent a msn message'''
-    (TYPE_MESSAGE, TYPE_TYPING, TYPE_P2P, TYPE_UNK) = range(4)
+    (TYPE_MESSAGE, TYPE_TYPING, TYPE_NUDGE, TYPE_P2P, TYPE_UNK) = range(5)
 
     def __init__(self, type_, body, account, style=None):
         self.type = type_
         self.body = body
         self.account = account
-        self.style = style
+
+        if style is not None:
+            self.style = style
+        else:
+            self.style = Style()
 
     def __str__(self):
         '''return a string representation of a message'''
@@ -51,9 +55,28 @@ class Message(object):
     @classmethod
     def parse(cls, command):
         '''parse a message from a command object and return a Message object'''
-        (head, body) = command.payload.split('\r\n\r\n')
+        parts = command.payload.split('\r\n\r\n')
+
+        if len(parts) == 1:
+            head = parts[0]
+            body = ''
+        elif len(parts) == 2:
+            (head, body) = parts
+        elif len(parts) == 3:
+            head = parts[0]
+            body = parts[1]
+        else:
+            print 'unknown message:', repr(parts)
+            # (?)
+            head = ''
+            body = ''
 
         type_ = common.get_value_between(head, 'Content-Type: ', '\r\n')
+
+        # if content type is the last line we should not use \r\n as terminator
+        if type_ == '' and 'Content-Type: ' in head:
+            type_ = head.split('Content-Type: ')[1]
+
         style = None
         
         if type_.startswith('text/plain'):
@@ -82,6 +105,8 @@ class Message(object):
             mtype = Message.TYPE_TYPING
         elif type_ == 'application/x-msnmsgrp2p':
             mtype = Message.TYPE_P2P
+        elif type_ == 'text/x-msnmsgr-datacast' and body == 'ID: 1':
+            mtype = Message.TYPE_NUDGE
         else:
             mtype = Message.TYPE_UNK
 
@@ -90,10 +115,15 @@ class Message(object):
 class Style(object):
     '''a class that represents the style of a message'''
 
-    def __init__(self, font, color, bold=False, italic=False, underline=False, 
-        strike=False):
+    def __init__(self, font='Arial', color=None, bold=False, italic=False, 
+        underline=False, strike=False):
         self.font = font
-        self.color = color
+
+        if color is not None:
+            self.color = color
+        else:
+            self.color = Color.from_hex('#000000')
+
         self.bold = bold
         self.italic = italic
         self.underline = underline

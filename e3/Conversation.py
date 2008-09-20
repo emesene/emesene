@@ -82,15 +82,17 @@ class Conversation(threading.Thread):
         '''handle the message'''
         message = MsnMessage.Message.parse(command)
         # TODO: nudge and file transfer invitations goes here too
-        if message.type == MsnMessage.Message.TYPE_MESSAGE and \
+        if (message.type == MsnMessage.Message.TYPE_MESSAGE or \
+            message.type == MsnMessage.Message.TYPE_NUDGE) and \
             not self.first_action:
             self.first_action = True
-            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION)
+            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, self.cid)
 
         if message.type == MsnMessage.Message.TYPE_MESSAGE or \
-                message.type == MsnMessage.Message.TYPE_TYPING:
+                message.type == MsnMessage.Message.TYPE_TYPING or \
+                message.type == MsnMessage.Message.TYPE_NUDGE:
             self.session.add_event(Event.EVENT_CONV_MESSAGE, 
-                message.account, message)
+                self.cid, message.account, message)
         
     def _on_usr(self, message):
         '''handle the message'''

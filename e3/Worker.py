@@ -136,6 +136,7 @@ class Worker(threading.Thread):
         dah[Action.ACTION_SET_PREFERENCES] = self._handle_action_set_preferences
         dah[Action.ACTION_NEW_CONVERSATION] = \
             self._handle_action_new_conversation
+        dah[Action.ACTION_SEND_MESSAGE] = self._handle_action_send_message
 
         self.action_handlers = dah
 
