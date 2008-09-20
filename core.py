@@ -67,9 +67,6 @@ class Core(Server):
         socket.start()
         worker.start()
         session.account = Account(account, password, status)
-        session.extras = {}
-        session.contacts = ContactManager(account)
-        session.groups = {}
         session.protocol = self
 
         self.add_action(session, Action.ACTION_LOGIN, 

@@ -98,7 +98,6 @@ class Conversation(threading.Thread):
         '''handle the message'''
         if message.param_num_is(0, 'OK'):
             self.status = Conversation.STATUS_ESTABLISHED
-            self.session.add_event(Event.EVENT_CONV_STARTED, self.cid)
 
             for account in self.pending_invites:
                 self.socket.send_command('CAL', (account,))
@@ -121,6 +120,7 @@ class Conversation(threading.Thread):
         '''handle the message'''
         account = message.tid
 
+        self.session.add_event(Event.EVENT_CONV_STARTED, self.cid)
         self.session.add_event(Event.EVENT_CONV_CONTACT_JOINED, self.cid, 
             account)
 

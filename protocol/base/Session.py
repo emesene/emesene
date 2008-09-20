@@ -19,7 +19,7 @@
 
 import Queue
 
-import Event
+from protocol.base.Event import Event
 import ContactManager
 
 class Session(object):
@@ -36,4 +36,5 @@ class Session(object):
 
     def add_event(self, id_, *args):
         '''add an event to the events queue'''
-        self.events.put(Event(id_, tuple(args)))
+        self.events.put(Event(id_, *args))
+

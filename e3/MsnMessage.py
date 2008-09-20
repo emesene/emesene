@@ -29,6 +29,8 @@ class Message(object):
             return self._format_typing()
         elif self.type == Message.TYPE_P2P:
             return self._format_p2p()
+        elif self.type == Message.TYPE_NUDGE:
+            return self._format_nudge()
         else:
             raise ValueError('Invalid type formating message')
 
@@ -51,6 +53,14 @@ class Message(object):
     def _format_p2p(self):
         '''format a message like a TYPE_P2P'''
         return ''
+
+    def _format_nudge(self):
+        '''format a message like a TYPE_NUDGE'''
+        output = 'MIME-Version: 1.0\r\n'
+        output += 'Content-Type: text/x-msnmsgr-datacast\r\n\r\n'
+        output += 'ID: 1\r\n\r\n'
+
+        return output
 
     @classmethod
     def parse(cls, command):

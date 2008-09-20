@@ -528,7 +528,14 @@ class Worker(threading.Thread):
     def _on_conversation_transfer(self, message):
         '''handle a message that inform us that we must start a new switchboard
         with a server'''
-        (sb_, chost, cki, session_id, unk, server) = message.params
+        # XFR 10 
+        # SB 207.46.27.178:1863 CKI 212949295.5321588.019445 U 
+        # messenger.msn.com 1
+
+        if len(message.params) == 6:
+            (sb_, chost, cki, session_id, unk, server) = message.params
+        else:
+            (sb_, chost, cki, session_id, unk, server, one) = message.params
 
         (host, port) = chost.split(':')
         account = self.pending_conversations[int(message.tid)]
