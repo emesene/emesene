@@ -15,6 +15,7 @@ class Controller(object):
     def __init__(self):
         '''class constructor'''
         self.window = None
+        self.conversations = None
         self.core = Core()
         self.core.connect('login-succeed', self.on_login_succeed)
         self.core.connect('login-failed', self.on_login_failed)
@@ -49,17 +50,20 @@ class Controller(object):
         '''callback called when the other user does an action that justify
         opeinig a conversation'''
         cid = args[0]
-        # this lines show how to send a message to the conversation identified
-        # by cid, if you want to add some style to the message, check the 
-        # e3.MsnMessage.Style class and the e3.MsnMessage.Message constructor
-        # parameters.
-        # if you uncomment the lines below, you will respond with a message 
-        # saying "hola!" to the first action done by the other user (a message
-        # or a nudge)
-        #account = self.core.session.account.account
-        #message = e3.Message(e3.Message.TYPE_MESSAGE, 'hola!', account)
-        #self.core.add_action(self.core.session, Action.ACTION_SEND_MESSAGE,
-        #   (cid, message))
+
+        if self.conversations is None:
+            window = Window.Window(self._on_conversation_window_close)
+            window.set_default_size(640, 480)
+            window.go_conversation(self.core.session)
+            self.conversations = window.content
+            window.show()
+
+        conversation = self.conversations.new_conversation(cid)
+        conversation.show_all()
+
+    def _on_conversation_window_close(self):
+        '''method called when the conversation window is closed'''
+        self.conversations = None
 
     def start(self, account=None):
         self.window = Window.Window(self.on_close)

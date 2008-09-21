@@ -5,6 +5,7 @@ import Login
 import gui
 import utils
 import MainWindow
+import MainConversation
 
 class Window(gtk.Window):
     

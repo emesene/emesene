@@ -49,7 +49,7 @@ def window_add_label(window, text):
     '''add a label with the text (as pango) on the window'''
 
     label = gtk.Label()
-    label.set_selectable(True)
+    #label.set_selectable(True)
     label.set_use_markup(True)
     label.set_markup('<span>' + \
         text + "</span>")

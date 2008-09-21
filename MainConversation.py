@@ -1,6 +1,7 @@
 '''a module that define classes to build the conversation widget'''
 import gtk
 
+import gui
 import utils
 
 class MainConversation(gtk.Notebook):
@@ -10,6 +11,7 @@ class MainConversation(gtk.Notebook):
         '''class constructor'''
         gtk.Notebook.__init__(self)
         self.session = session
+        self.conversations = {}
         if self.session:
             self.session.protocol.connect('conv-first-action', 
                 self._on_first_action)
@@ -19,9 +21,10 @@ class MainConversation(gtk.Notebook):
         creation of a new Conversation'''
         self.new_conversation()
 
-    def new_conversation(self):
+    def new_conversation(self, cid):
         '''create a new conversation widget and append it to the tabs'''
         conversation = Conversation(self.session)
+        self.conversations[cid] = conversation
         self.append_page(conversation)
         return conversation
 

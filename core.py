@@ -61,13 +61,16 @@ class Core(Server):
     @validate(str, str, int)
     def do_login(self, session, account, password, status):
         '''start the login process'''
-        print 'doing login'
         socket = MsnSocket('messenger.hotmail.com', 1863)
         worker = Worker(socket, session)
         socket.start()
         worker.start()
         session.account = Account(account, password, status)
         session.protocol = self
+        session.extras = {}
+        session.contacts = ContactManager(account)
+        session.groups = {}
+
 
         self.add_action(session, Action.ACTION_LOGIN, 
             (account, password, status))
