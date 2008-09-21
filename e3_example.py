@@ -1,3 +1,4 @@
+import time
 import Queue
 
 import e3
@@ -68,20 +69,32 @@ class Example(object):
         for contact in self.session.contacts.get_no_group():
             print contact.account
 
-        # we start a conversation with someone, when the conversation starts
-        # we will send a "hey you!" message
-        self.start_conversation('luismarianoguerra@gmail.com')
+        # we start a conversation with someone
+        cid = time.time()
+        account = self.session.account.account
+        message1 = e3.Message(e3.Message.TYPE_MESSAGE, 'welcome', account)
+        message2 = e3.Message(e3.Message.TYPE_MESSAGE, ';)', account)
+        message3 = e3.Message(e3.Message.TYPE_NUDGE, '', account)
+
+        # put here a mail address that exists on your the contact list of the
+        # account that is logged in
+        self.start_conversation('bob@gmail.com', cid)
+        self.send_message(cid, message1)
+        self.send_message(cid, message2)
+        self.send_message(cid, message3)
 
     def _handle_conv_first_action(self, cid):
         '''handle'''
         account = self.session.account.account
-        message = e3.Message(e3.Message.TYPE_MESSAGE, 'welcome', account)
+        # we send this message the first time the other user interact with 
+        # us (that means, when he send us a message or a nudge)
+        message = e3.Message(e3.Message.TYPE_MESSAGE, 'finally!', account)
         self.send_message(cid, message)
 
     def _handle_conv_started(self, cid):
         '''handle a new conversation created'''
-        print '#' * 200
         account = self.session.account.account
+        # we send this message when the conversation is stablished
         mymessage = e3.Message(e3.Message.TYPE_MESSAGE, 'hey you!', account)
         self.send_message(cid, mymessage)
 
@@ -113,13 +126,13 @@ class Example(object):
         account = self.session.account.account
         self.add_action(Action.ACTION_SEND_MESSAGE, (cid, message))
 
-    def start_conversation(self, account):
+    def start_conversation(self, account, cid):
         '''start a conversation with account'''
-        self.add_action(Action.ACTION_NEW_CONVERSATION, (account,))
+        self.add_action(Action.ACTION_NEW_CONVERSATION, (account, cid))
 
 if __name__ == '__main__':
     gobject.threads_init()
-    example = Example('xmxsxn@hotmail.com', 'contrasena', status.ONLINE) 
+    example = Example('dude@hotmail.com', 'secret', status.ONLINE) 
     example.login()
 
     gobject.timeout_add(500, example.process)

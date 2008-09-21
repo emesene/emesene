@@ -98,7 +98,6 @@ class Worker(threading.Thread):
         self.session = session
 
         self.last_ping_response = 0.0
-        self.cid = 0
 
         # this queue receives a Command object
         self.command_queue = Queue.Queue()
@@ -112,6 +111,12 @@ class Worker(threading.Thread):
         # contains the tid when the switchboard was requested as key and the
         # account that should be invited when we get the switchboard as value   
         self.pending_conversations = {}
+        # this list contains all the conversation ids that are not still
+        # opened, it is used to store pending messages to be sent when
+        # the conversation is ready to send messages
+        self.pending_cids = []
+        # contains a pending cid as key and a list of messages as value
+        self.pending_messages = {}
 
     def _set_handlers(self):
         '''set a dict with the action id as key and the handler as value'''
@@ -538,16 +543,25 @@ class Worker(threading.Thread):
             (sb_, chost, cki, session_id, unk, server, one) = message.params
 
         (host, port) = chost.split(':')
-        account = self.pending_conversations[int(message.tid)]
-        del self.pending_conversations[int(message.tid)]
+        account, cid = self.pending_conversations[int(message.tid)]
+        messages = self.pending_messages[cid]
 
-        cid = self.cid
-        self.cid += 1
+        del self.pending_conversations[int(message.tid)]
+        del self.pending_messages[cid]
+
+        if cid in self.pending_cids:
+            self.pending_cids.remove(cid)
+
         con = Conversation.Conversation(self.session, cid, host, int(port), 
             account, session_id)
         self.conversations[cid] = con
         con.send_presentation()
         con.invite(account)
+    
+        # send all the pending messages
+        for message in messages:
+            con.send_message(message)
+
         con.start()
 
     def _on_server_message(self, message):
@@ -578,8 +592,7 @@ class Worker(threading.Thread):
 
         (host, port) = chost.split(':')
 
-        cid = self.cid
-        self.cid += 1
+        cid = time.time()
         con = Conversation.Conversation(self.session, cid, host, int(port), 
             user, session_id, auth_id)
         self.conversations[cid] = con
@@ -722,10 +735,12 @@ class Worker(threading.Thread):
         '''
         pass
 
-    def _handle_action_new_conversation(self, account):
+    def _handle_action_new_conversation(self, account, cid):
         '''handle Action.ACTION_NEW_CONVERSATION
         '''
-        self.pending_conversations[self.socket.tid] = account
+        self.pending_conversations[self.socket.tid] = (account, cid)
+        self.pending_cids.append(cid)
+        self.pending_messages[cid] = []
         self.socket.send_command('XFR', ('SB',))
 
     def _handle_action_send_message(self, cid, message):
@@ -733,10 +748,13 @@ class Worker(threading.Thread):
         cid is the conversation id, message is a MsnMessage object
         '''
         if cid not in self.conversations:
-            self.session.add_event(Event.EVENT_ERROR, 'invalid conversation id')
-            return
-
-        self.conversations[cid].send_message(message)
+            if cid in self.pending_cids:
+                self.pending_messages[cid].append(message)
+            else:
+                self.session.add_event(Event.EVENT_ERROR, 
+                    'invalid conversation id')
+        else:    
+            self.conversations[cid].send_message(message)
 
 #------------------------- FROM HERE -----------------------------
 # Copyright 2005 James Bunton <james@delx.cjb.net>

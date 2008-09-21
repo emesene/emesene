@@ -28,6 +28,7 @@ class Conversation(threading.Thread):
         self.socket = MsnSocket.MsnSocket(host, port)
 
         self.status = Conversation.STATUS_PENDING
+        self.started = False
 
         self.pending_invites = []
         # indicates if the first action made by the user to justify opening
@@ -39,6 +40,9 @@ class Conversation(threading.Thread):
 
         self._handlers = {}
         self.members = []
+        # messages that are requested to be sent before we are ready to do it
+        # are stored here and sent when we stablish the conversation
+        self.pending_messages = []
         self._set_handlers()
 
     def _set_handlers(self):
@@ -108,6 +112,8 @@ class Conversation(threading.Thread):
 
         (unk1, unk2, account, nick, unk3) = message.params
 
+        self._check_if_started()
+
         self.session.add_event(Event.EVENT_CONV_CONTACT_JOINED, self.cid, 
             account)
 
@@ -119,8 +125,9 @@ class Conversation(threading.Thread):
     def _on_join(self, message):
         '''handle the message'''
         account = message.tid
+        
+        self._check_if_started()
 
-        self.session.add_event(Event.EVENT_CONV_STARTED, self.cid)
         self.session.add_event(Event.EVENT_CONV_CONTACT_JOINED, self.cid, 
             account)
 
@@ -152,6 +159,22 @@ class Conversation(threading.Thread):
 
     # action handlers
 
+    def _check_if_started(self):
+        '''check if the conversation has already been started, if not,
+        send an event to inform that we are ready to chat.
+         Send the pending messages if there are some.
+        '''
+
+        if not self.started:
+            self.session.add_event(Event.EVENT_CONV_STARTED, self.cid)
+            self.started = True
+
+            if len(self.pending_messages) > 0:
+                for message in self.pending_messages:
+                    self.socket.send_command('MSG', ('A',), message.format())
+
+                self.pending_messages = []
+
     def invite(self, account):
         '''invite a contact to the conversation'''
         if self.status != Conversation.STATUS_ESTABLISHED:
@@ -171,4 +194,7 @@ class Conversation(threading.Thread):
 
     def send_message(self, message):
         '''send a message to the conversation'''
-        self.socket.send_command('MSG', ('A',), message.format())
+        if not self.started:
+            self.pending_messages.append(message)
+        else:
+            self.socket.send_command('MSG', ('A',), message.format())
