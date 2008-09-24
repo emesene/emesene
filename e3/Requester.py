@@ -346,6 +346,8 @@ class AddContact(Requester):
                 payload=common.build_adl(self.account, 1)))
             self.command_queue.put(Command('ADL', 
                 payload=common.build_adl(self.account, 2)))
+
+            self.session.contacts.contacts[self.account] = Contact(self.account)
             self.session.events.put(Event(Event.EVENT_CONTACT_ADD_SUCCEED, 
                 self.account))
         else:
@@ -370,6 +372,9 @@ class RemoveContact(Requester):
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
+            if self.account in self.session.contacts.contacts:
+                del self.session.contacts.contacts[self.account]
+
             self.session.events.put(Event(Event.EVENT_CONTACT_REMOVE_SUCCEED, 
                 self.account))
         else:
@@ -413,12 +418,14 @@ class ChangeAlias(Requester):
           XmlManager.get('renamecontact') % (get_key(session), cid, 
             common.escape(alias)))
 
+        self.alias = alias
         self.account = account
         self.command_queue = command_queue
 
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
+            self.session.contacts.contacts[self.account].alias = self.alias
             self.session.events.put(Event(Event.EVENT_CONTACT_ALIAS_SUCCEED,
                 self.account))
         else:
@@ -444,6 +451,8 @@ class AddGroup(Requester):
         '''handle the response'''
         if response.status == 200:
             gid = common.get_value_between(response.body, '<guid>', '</guid>')
+            self.session.groups[gid] = Group(self.name, gid)
+
             self.session.events.put(Event(Event.EVENT_GROUP_ADD_SUCCEED,
                 self.name, gid))
         else:
@@ -468,6 +477,9 @@ class RemoveGroup(Requester):
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
+            if self.gid in self.session.groups:
+                del self.session.groups[self.gid]
+
             self.session.events.put(Event(Event.EVENT_GROUP_REMOVE_SUCCEED,
                 self.gid))
         else:
@@ -494,6 +506,8 @@ class RenameGroup(Requester):
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
+            self.session.groups[self.gid] = Group(self.name, self.gid)
+
             self.session.events.put(Event(Event.EVENT_GROUP_RENAME_SUCCEED,
                 self.gid, self.name))
         else:
@@ -503,7 +517,7 @@ class RenameGroup(Requester):
 
 class AddToGroup(Requester):
     '''add a contact to a group'''
-    def __init__(self, session, cid, gid, command_queue):
+    def __init__(self, session, cid, account, gid, command_queue):
         '''command_queue is a reference to a queue that is used
         by the worker to get commands that other threads need to 
         send'''
@@ -514,11 +528,15 @@ class AddToGroup(Requester):
 
         self.cid = cid
         self.gid = gid
+        self.account = account
         self.command_queue = command_queue
 
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
+            self.session.contacts.contacts[self.account].groups.append(self.gid)
+            self.session.groups[self.gid].contacts.append(self.account)
+
             self.session.events.put(Event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
                 self.gid, self.cid))
         else:
@@ -528,7 +546,7 @@ class AddToGroup(Requester):
 
 class RemoveFromGroup(Requester):
     '''remove a contact from a group'''
-    def __init__(self, session, cid, gid, command_queue):
+    def __init__(self, session, cid, account, gid, command_queue):
         '''command_queue is a reference to a queue that is used
         by the worker to get commands that other threads need to 
         send'''
@@ -539,11 +557,19 @@ class RemoveFromGroup(Requester):
 
         self.cid = cid
         self.gid = gid
+        self.account = account
         self.command_queue = command_queue
 
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
+            if self.account in self.session.groups[self.gid].contacts:
+                self.session.groups[self.gid].contacts.remove(self.account)
+
+            if self.gid in self.session.contacts.contacts[self.account].groups:
+                self.session.contacts.contacts[self.account].groups\
+                    .remove(self.gid)
+
             self.session.events.put(Event(\
                 Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, self.gid, self.cid))
         else:
@@ -576,6 +602,9 @@ class BlockContact(TwoStageRequester):
         '''handle the second request if succeeded'''
         self.command_queue.put(Command('ADL', 
             payload=common.build_adl(self.account, 4)))
+
+        self.session.contacts.contacts[self.account].blocked = True
+
         self.session.events.put(Event(Event.EVENT_CONTACT_BLOCK_SUCCEED,
             self.account))
 
@@ -611,6 +640,9 @@ class UnblockContact(TwoStageRequester):
         '''handle the second request if succeeded'''
         self.command_queue.put(Command('ADL', 
             payload=common.build_adl(self.account, 2)))
+
+        self.session.contacts.contacts[self.account].blocked = False
+
         self.session.events.put(Event(Event.EVENT_CONTACT_UNBLOCK_SUCCEED,
             self.account))
 
@@ -624,7 +656,7 @@ class UnblockContact(TwoStageRequester):
 class MoveContact(TwoStageRequester):
     '''remove a contact from a group and add it to another'''
 
-    def __init__(self, session, cid, src_gid, dest_gid, command_queue):
+    def __init__(self, session, cid, account, src_gid, dest_gid, command_queue):
         TwoStageRequester.__init__(self, session, command_queue,
             Request(\
               'http://www.msn.com/webservices/AddressBook/ABGroupContactAdd',
@@ -645,6 +677,7 @@ class MoveContact(TwoStageRequester):
         self.src_gid = src_gid
         self.dest_gid = dest_gid
         self.cid = cid
+        self.account = account
 
     def _on_first_failed(self, response):
         '''handle the first request if failed'''
@@ -653,6 +686,13 @@ class MoveContact(TwoStageRequester):
 
     def _on_second_succeed(self, response):
         '''handle the second request if succeeded'''
+        self.session.contacts.contacts[self.account]\
+            .groups.append(self.dest_gid)
+        self.session.contacts.contacts[self.account]\
+            .groups.remove(self.src_gid)
+        self.session.groups[self.src_gid].contacts.remove(self.account)
+        self.session.groups[self.dest_gid].contacts.append(self.account)
+
         self.session.events.put(Event(Event.EVENT_CONTACT_MOVE_SUCCEED,
             self.cid, self.src_gid, self.dest_gid))
 

@@ -99,9 +99,9 @@ class Message(object):
                 color = color[1:]
 
             if len(color) < 3:
-                color += '0' * 3 - len(color)
+                color += '0' * (3 - len(color))
             elif len(color) > 3 and len(color) < 6:
-                color += '0' * 6 - len(color)
+                color += '0' * (6 - len(color))
 
             color = Color.from_hex(color)
 

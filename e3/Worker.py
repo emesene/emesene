@@ -622,8 +622,8 @@ class Worker(threading.Thread):
         if contact is None:
             return
 
-        Requester.AddToGroup(self.session, contact.identifier, gid, \
-            self.command_queue).start()
+        Requester.AddToGroup(self.session, contact.identifier, contact.account,
+            gid, self.command_queue).start()
 
     def _handle_action_block_contact(self, account):
         '''handle Action.ACTION_BLOCK_CONTACT
@@ -666,8 +666,8 @@ class Worker(threading.Thread):
         if contact is None:
             return
 
-        Requester.MoveContact(self.session, contact.identifier, src_gid, 
-            dest_gid, self.command_queue).start()
+        Requester.MoveContact(self.session, contact.identifier, contact.account,
+            src_gid, dest_gid, self.command_queue).start()
 
     def _handle_action_remove_contact(self, account):
         '''handle Action.ACTION_REMOVE_CONTACT
@@ -688,8 +688,8 @@ class Worker(threading.Thread):
         if contact is None:
             return
 
-        Requester.RemoveFromGroup(self.session, contact.identifier, gid, \
-            self.command_queue).start()
+        Requester.RemoveFromGroup(self.session, contact.identifier, 
+            contact.account, gid, self.command_queue).start()
 
     def _handle_action_remove_group(self, gid):
         '''handle Action.ACTION_REMOVE_GROUP
