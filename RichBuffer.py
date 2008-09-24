@@ -1,3 +1,5 @@
+'''a module that contains a class to insert rich text into a textview'''
+
 import gtk
 import pango
 
@@ -34,8 +36,6 @@ class RichBuffer(gtk.TextBuffer):
         '''insert text at the current position with the style defined by the 
         optional parameters'''
         if tags is not None:
-            print tags
-            print
             self.insert_with_tags(iterator, text, *tags)
         else:
             self.insert(iterator, text)
@@ -133,9 +133,11 @@ class RichBuffer(gtk.TextBuffer):
         self.size_tags[value] = size_tag
         return size_tag
 
-if __name__ == '__main__':
+def test():
+    '''do some tests with the buffer'''
     import sys
     def on_close(widget, event):
+        '''method called when the window is closed'''
         sys.exit(0)
 
     window = gtk.Window()
@@ -153,3 +155,6 @@ if __name__ == '__main__':
     buff.put_text('un poco mas\n', '#CCCCCC', '#0000CC', 'Andale Mono', 16, 
         False, True, False, True)
     gtk.main()
+
+if __name__ == '__main__':
+    test()
