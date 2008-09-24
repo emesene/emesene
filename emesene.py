@@ -64,7 +64,6 @@ class Controller(object):
     def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''
         self.conversations = None
-        self.core.do_add_contact('mguerra@guic.com.ar')
 
     def start(self, account=None):
         self.window = Window.Window(self.on_close)
