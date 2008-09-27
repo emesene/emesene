@@ -413,7 +413,7 @@ class Worker(threading.Thread):
         the status of the contacts that were connected before our connection'''
 
         param_length = len(message.params)
-        (status_, email, nick) = message.params[:3]
+        (status_, email, one, nick) = message.params[:4]
         msnobj = None
 
         if param_length == 5:

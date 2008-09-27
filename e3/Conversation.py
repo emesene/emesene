@@ -90,7 +90,8 @@ class Conversation(threading.Thread):
             message.type == MsnMessage.Message.TYPE_NUDGE) and \
             not self.first_action:
             self.first_action = True
-            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, self.cid)
+            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, self.cid,
+                self.members[:])
 
         if message.type == MsnMessage.Message.TYPE_MESSAGE or \
                 message.type == MsnMessage.Message.TYPE_TYPING or \

@@ -176,6 +176,13 @@ class Core(Server):
     def do_quit(self, session):
         '''close the worker and socket threads'''
         self.add_action(session, Action.ACTION_QUIT, ())
+    
+    @validate(float, str)
+    def do_send_message(self, session, cid, text):
+        '''send a common message'''
+        account = session.account.account
+        message = e3.Message(e3.Message.TYPE_MESSAGE, text, account)
+        self.add_action(session, Action.ACTION_SEND_MESSAGE, (cid, message))
 
 if __name__ == '__main__':
     import protocol.base.status as status

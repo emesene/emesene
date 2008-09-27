@@ -49,7 +49,7 @@ class Controller(object):
     def on_new_conversation(self, core, args):
         '''callback called when the other user does an action that justify
         opeinig a conversation'''
-        cid = args[0]
+        (cid, members) = args
 
         if self.conversations is None:
             window = Window.Window(self._on_conversation_window_close)
@@ -58,7 +58,7 @@ class Controller(object):
             self.conversations = window.content
             window.show()
 
-        conversation = self.conversations.new_conversation(cid)
+        conversation = self.conversations.new_conversation(cid, members)
         conversation.show_all()
 
     def _on_conversation_window_close(self):

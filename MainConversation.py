@@ -1,8 +1,13 @@
 '''a module that define classes to build the conversation widget'''
 import gtk
+import pango
+import gobject
 
 import gui
 import utils
+
+from RichBuffer import RichBuffer
+from e3 import Message
 
 class MainConversation(gtk.Notebook):
     '''the main conversation, it only contains other widgets'''
@@ -10,35 +15,114 @@ class MainConversation(gtk.Notebook):
     def __init__(self, session):
         '''class constructor'''
         gtk.Notebook.__init__(self)
+        self.set_scrollable(True)
+        self.popup_enable()
+
         self.session = session
         self.conversations = {}
         if self.session:
-            self.session.protocol.connect('conv-first-action', 
-                self._on_first_action)
+            self.session.protocol.connect('conv-message', 
+                self._on_message)
+            self.session.protocol.connect('conv-contact-joined', 
+                self._on_contact_joined)
+            self.session.protocol.connect('conv-contact-left', 
+                self._on_contact_left)
+            self.session.protocol.connect('conv-group-started', 
+                self._on_group_started)
+            self.session.protocol.connect('conv-group-ended', 
+                self._on_group_ended)
 
-    def _on_first_action(self, protocol):
-        '''called when an action is made on a conversation to justify the
-        creation of a new Conversation'''
-        self.new_conversation()
+    def _on_message(self, protocol, args):
+        '''called when a message is received'''
+        (cid, account, message) = args
+        conversation = self.conversations.get(cid, None)
 
-    def new_conversation(self, cid):
+        if conversation and message.type == Message.TYPE_MESSAGE:
+            contact = self.session.contacts.get(account)
+
+            if contact:
+                nick = contact.display_name
+            else:
+                nick = account
+
+            conversation.output.buffer.put_text(nick + ': ', bold=True)
+            conversation.output.buffer.put_text(message.body + '\n', 
+                *self.format_from_message(message))
+        elif not conversation:
+            print 'conversation', cid, 'not found'
+
+    def _on_contact_joined(self, protocol, args):
+        '''called when a contact join the conversation'''
+        (cid, account) = args
+        conversation = self.conversations.get(cid, None)
+
+        if conversation:
+            conversation.on_contact_joined(account)
+
+    def _on_contact_left(self, protocol, args):
+        '''called when a contact leaves the conversation'''
+        (cid, account) = args
+        conversation = self.conversations.get(cid, None)
+
+        if conversation:
+            conversation.on_contact_left(account)
+
+    def _on_group_started(self, protocol, args):
+        '''called when a group conversation starts'''
+        cid = args[0]
+        conversation = self.conversations.get(cid, None)
+
+        if conversation:
+            conversation.on_group_started()
+
+    def _on_group_ended(self, protocol, args):
+        '''called when a group conversation ends'''
+        cid = args[0]
+        conversation = self.conversations.get(cid, None)
+
+        if conversation:
+            conversation.on_group_ended()
+
+    def format_from_message(self, message):
+        '''return a tuple containing all the format arguments received by
+        RichBuffer.put_text'''
+        stl = message.style
+
+        result = ('#' + stl.color.to_hex(), None, stl.font, None, stl.bold, 
+            stl.italic, stl.underline, stl.strike)
+        return result
+
+    def new_conversation(self, cid, members=None):
         '''create a new conversation widget and append it to the tabs'''
-        conversation = Conversation(self.session)
+        label = gtk.Label('conversation')
+        label.set_ellipsize(pango.ELLIPSIZE_END)
+
+        conversation = Conversation(self.session, cid, label, members)
         self.conversations[cid] = conversation
-        self.append_page(conversation)
+        self.append_page(conversation, label)
+        self.set_tab_label_packing(conversation, True, True, gtk.PACK_START)
+        self.set_tab_reorderable(conversation, True)
         return conversation
 
 class Conversation(gtk.VBox):
     '''a widget that contains all the components inside'''
 
-    def __init__(self, session):
+    def __init__(self, session, cid, tab_label, members=None):
         '''constructor'''
         gtk.VBox.__init__(self)
         self.session = session
+        self.tab_label = tab_label
+        self.cid = cid
+
+        if members is None:
+            self.members = []
+        else:
+            self.members = members
+
         self.panel = gtk.VPaned()
         self.header = Header()
         self.output = OutputText()
-        self.input = InputText()
+        self.input = InputText(self._on_send_message)
         self.info = ContactInfo()
 
         self.panel.pack1(self.output, True, False)
@@ -51,19 +135,88 @@ class Conversation(gtk.VBox):
         self.pack_start(self.header, False)
         self.pack_start(hbox, True, True)
 
-        self.temp = self.panel.connect('map', self._on_panel_show)
-        self.header.information = Header.INFO_TEMPLATE % ('account@host.com',
-            'this is my personal message')
+        self.temp = self.panel.connect('map-event', self._on_panel_show)
+
+        if len(self.members) == 0:
+            self.header.information = Header.INFO_TEMPLATE % \
+                ('account@host.com', 'this is my personal message')
+        elif len(self.members) == 1:
+            self.set_data(self.members[0])
+        else:
+            self.set_group_data()
+
         self.header.set_image(gui.theme.user)
         self.info.first = utils.safe_gtk_image_load(gui.theme.logo)
         self.info.last = utils.safe_gtk_image_load(gui.theme.logo)
 
-    def _on_panel_show(self, widget):
+    def _on_panel_show(self, widget, event):
         '''callback called when the panel is shown, resize the panel'''
         position = self.panel.get_position()
         self.panel.set_position(position + int(position * 0.5))
         self.panel.disconnect(self.temp)
         del self.temp
+
+    def _on_send_message(self, text):
+        '''method called when the user press enter on the input text'''
+        self.session.protocol.do_send_message(self.cid, text)
+        nick = self.session.contacts.me.display_name
+        self.output.buffer.put_text(nick + ': ', bold=True)
+        self.output.buffer.put_text(text + '\n')
+
+    def on_contact_joined(self, account):
+        '''called when a contact joins the conversation'''
+        if account not in self.members:
+            self.members.append(account)
+
+            if len(self.members) == 1:
+                self.set_data(account)
+            else:
+                self.set_group_data()
+
+    def on_contact_left(self, account):
+        '''called when a contact lefts the conversation'''
+        if account in self.members:
+            self.members.remove(account)
+
+            if len(self.members) == 1:
+                self.set_data(self.members[0])
+            else:
+                self.set_group_data()
+
+    def on_group_started(self):
+        '''called when a group conversation starts'''
+        self.set_group_data()
+
+    def on_group_ended(self):
+        '''called when a group conversation ends'''
+        self.header.set_image(gui.theme.user)
+
+        if len(self.members) == 1:
+            self.set_data(self.members[0])
+
+    def set_data(self, account):
+        '''set the data of the conversation to the data of the account'''
+        contact = self.session.contacts.get(account)
+
+        if contact:
+            message = gobject.markup_escape_text(contact.message)
+            nick = gobject.markup_escape_text(contact.display_name)
+        else:
+            message = ''
+            nick = account
+
+        self.header.information = Header.INFO_TEMPLATE % (nick, message)
+        self.tab_label.set_markup(nick)
+
+    def set_group_data(self):
+        '''set the data of the conversation to reflect a group chat'''
+        self.header.set_image(gui.theme.users)
+        text = 'group chat'
+
+        self.header.information = Header.INFO_TEMPLATE % \
+            (text, '%d members' % (len(self.members) + 1,))
+
+        self.tab_label.set_text(text)
 
 class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
@@ -75,6 +228,7 @@ class TextBox(gtk.ScrolledWindow):
         self.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
         self.textbox = gtk.TextView()
+        self.textbox.set_wrap_mode(gtk.WRAP_WORD)
         self.textbox.show()
         self.buffer = self.textbox.get_buffer()
         self.add(self.textbox)
@@ -103,9 +257,22 @@ class TextBox(gtk.ScrolledWindow):
 class InputText(TextBox):
     '''a widget that is used to insert the messages to send'''
 
-    def __init__(self):
+    def __init__(self, on_send_message):
         '''constructor'''
         TextBox.__init__(self)
+        self.on_send_message = on_send_message
+
+        self.buffer = RichBuffer()
+        self.textbox.set_buffer(self.buffer)
+
+        self.textbox.connect('key-press-event', self._on_key_press_event)
+
+    def _on_key_press_event(self, widget, event):
+        '''method called when a key is pressed on the input widget'''
+        if event.keyval == gtk.keysyms.Return:
+            self.on_send_message(self.text)
+            self.text = ''
+            return True
 
 class OutputText(TextBox):
     '''a widget that is used to display the messages on the conversation'''
@@ -114,6 +281,8 @@ class OutputText(TextBox):
         '''constructor'''
         TextBox.__init__(self)
         self.textbox.set_editable(False)
+        self.buffer = RichBuffer()
+        self.textbox.set_buffer(self.buffer)
 
 class Header(gtk.HBox):
     '''a widget used to display some information about the conversation'''
@@ -134,6 +303,7 @@ class Header(gtk.HBox):
         self.remove(self.image)
         self.image = utils.safe_gtk_image_load(path)
         self.pack_start(self.image, False)
+        self.image.show()
 
     def _set_information(self, text):
         '''set the text on the information'''

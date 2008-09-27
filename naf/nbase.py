@@ -58,7 +58,8 @@ class validate(object):
             for (index, arg) in enumerate(f_args[1:]):
                 if type(arg) != self.values[index]:
                     raise ValueError('Type of arg ' + str(index + 2) \
-                      + ' is invalid')
+                      + ' is invalid\n' + str(self.values[index]) + \
+                      ' expected got ' + str(type(arg)))
                 final_args.append(arg)
 
             return function(*final_args)

@@ -103,7 +103,7 @@ class Message(object):
             elif len(color) > 3 and len(color) < 6:
                 color += '0' * (6 - len(color))
 
-            color = Color.from_hex(color)
+            color = Color.from_hex(color[4:6] + color[2:4] + color[0:2])
 
             bold = 'B' in effects
             italic = 'I' in effects

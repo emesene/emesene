@@ -18,12 +18,16 @@ class Login(gtk.Alignment):
 
         self.txt_account = gtk.Entry()
         self.txt_account.set_text(account.account)
+        self.txt_account.connect('key-press-event', 
+            self._on_account_key_press)
 
         self.btn_status = StatusButton.StatusButton()
         
         self.txt_password = gtk.Entry()
         self.txt_password.set_visibility(False)
         self.txt_password.set_text(account.password)
+        self.txt_password.connect('key-press-event', 
+            self._on_password_key_press)
 
         self.remember_password = gtk.CheckButton("Remember password")
         
@@ -81,10 +85,24 @@ class Login(gtk.Alignment):
         self.remember_password.set_sensitive(sensitive)
 
     def _on_connect_clicked(self, button):
+        self.do_connect()
+
+    def do_connect(self):
+        '''do all the staff needed to connect'''
         user = self.txt_account.get_text()
         password = self.txt_password.get_text()
         account = Account(user, password, self.btn_status.status)
         remember = self.remember_password.get_active()
         self.set_sensitive(False)
         self.callback(account, remember)
+
+    def _on_password_key_press(self, widget, event):
+        '''called when a key is pressed on the password field'''
+        if event.keyval == gtk.keysyms.Return:
+            self.do_connect()
+
+    def _on_account_key_press(self, widget, event):
+        '''called when a key is pressed on the password field'''
+        if event.keyval == gtk.keysyms.Return:
+            self.txt_password.grab_focus()
 
