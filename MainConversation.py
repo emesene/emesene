@@ -93,7 +93,19 @@ class MainConversation(gtk.Notebook):
         return result
 
     def new_conversation(self, cid, members=None):
-        '''create a new conversation widget and append it to the tabs'''
+        '''create a new conversation widget and append it to the tabs, 
+        if the cid already exists or there is already a conversation with
+        that member, return the existing conversation.
+        this methid returns a tuple containing a boolean and a conversation
+        object. If the conversation already exists, return True on as first
+        value'''
+        if cid in self.conversations:
+            return (True, self.conversations[cid])
+        elif members is not None:   
+            for (key, conversation) in self.conversations.iteritems():
+                if conversation.members == members:
+                    return (True, conversation)
+
         label = gtk.Label('conversation')
         label.set_ellipsize(pango.ELLIPSIZE_END)
 
@@ -102,7 +114,7 @@ class MainConversation(gtk.Notebook):
         self.append_page(conversation, label)
         self.set_tab_label_packing(conversation, True, True, gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
-        return conversation
+        return (False, conversation)
 
 class Conversation(gtk.VBox):
     '''a widget that contains all the components inside'''
@@ -125,8 +137,8 @@ class Conversation(gtk.VBox):
         self.input = InputText(self._on_send_message)
         self.info = ContactInfo()
 
-        self.panel.pack1(self.output, True, False)
-        self.panel.pack2(self.input)
+        self.panel.pack1(self.output, True, True)
+        self.panel.pack2(self.input, True, True)
 
         hbox = gtk.HBox()
         hbox.pack_start(self.panel, True, True)
@@ -139,7 +151,7 @@ class Conversation(gtk.VBox):
 
         if len(self.members) == 0:
             self.header.information = Header.INFO_TEMPLATE % \
-                ('account@host.com', 'this is my personal message')
+                ('connecting', 'creating conversation')
         elif len(self.members) == 1:
             self.set_data(self.members[0])
         else:
@@ -228,9 +240,12 @@ class TextBox(gtk.ScrolledWindow):
         self.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
         self.textbox = gtk.TextView()
-        self.textbox.set_wrap_mode(gtk.WRAP_WORD)
+        self.textbox.set_left_margin(6)
+        self.textbox.set_right_margin(6)
+        self.textbox.set_wrap_mode(gtk.WRAP_WORD_CHAR)
         self.textbox.show()
-        self.buffer = self.textbox.get_buffer()
+        self.buffer = RichBuffer()
+        self.textbox.set_buffer(self.buffer)
         self.add(self.textbox)
 
     def clear(self):
@@ -261,15 +276,12 @@ class InputText(TextBox):
         '''constructor'''
         TextBox.__init__(self)
         self.on_send_message = on_send_message
-
-        self.buffer = RichBuffer()
-        self.textbox.set_buffer(self.buffer)
-
         self.textbox.connect('key-press-event', self._on_key_press_event)
 
     def _on_key_press_event(self, widget, event):
         '''method called when a key is pressed on the input widget'''
-        if event.keyval == gtk.keysyms.Return:
+        if event.keyval == gtk.keysyms.Return and \
+                not event.state == gtk.gdk.SHIFT_MASK:
             self.on_send_message(self.text)
             self.text = ''
             return True
@@ -281,8 +293,7 @@ class OutputText(TextBox):
         '''constructor'''
         TextBox.__init__(self)
         self.textbox.set_editable(False)
-        self.buffer = RichBuffer()
-        self.textbox.set_buffer(self.buffer)
+        self.textbox.set_cursor_visible(False)
 
 class Header(gtk.HBox):
     '''a widget used to display some information about the conversation'''
@@ -292,6 +303,7 @@ class Header(gtk.HBox):
         '''constructor'''
         gtk.HBox.__init__(self)
         self._information = gtk.Label('info')
+        self._information.set_ellipsize(pango.ELLIPSIZE_END)
         self._information.set_alignment(0.0, 0.5)
         self.image = gtk.Image()
 

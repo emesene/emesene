@@ -315,13 +315,14 @@ class DynamicItems(Requester):
 
             if self.on_login:
                 # set our nick
-                nick = urllib.quote(nick)
-                self.command_queue.put(Command('PRP', params=('MFN', nick)))
+                self.command_queue.put(Command('PRP', params=('MFN', 
+                    urllib.quote(nick))))
+                self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, nick)
                 self.command_queue.put(Command('BLP', params=('BL',)))
                 for adl in self.session.contacts.get_adls():
                     self.command_queue.put(Command('ADL', payload=adl))
 
-            self.session.events.put(Event(Event.EVENT_CONTACT_LIST_READY))
+            self.session.add_event(Event.EVENT_CONTACT_LIST_READY)
         else:
             print 'error requestion dynamic items'
 
@@ -348,11 +349,10 @@ class AddContact(Requester):
                 payload=common.build_adl(self.account, 2)))
 
             self.session.contacts.contacts[self.account] = Contact(self.account)
-            self.session.events.put(Event(Event.EVENT_CONTACT_ADD_SUCCEED, 
-                self.account))
+            self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, 
+                self.account)
         else:
-            self.session.events.put(Event(Event.EVENT_CONTACT_ADD_FAILED, 
-                self.account))
+            self.session.add_event(Event.EVENT_CONTACT_ADD_FAILED, self.account)
 
 class RemoveContact(Requester):
     '''make the request to remove a contact from the contact list'''
@@ -375,12 +375,12 @@ class RemoveContact(Requester):
             if self.account in self.session.contacts.contacts:
                 del self.session.contacts.contacts[self.account]
 
-            self.session.events.put(Event(Event.EVENT_CONTACT_REMOVE_SUCCEED, 
-                self.account))
+            self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED, 
+                self.account)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.events.put(Event(Event.EVENT_CONTACT_REMOVE_FAILED, 
-                self.account))
+            self.session.add_event(Event.EVENT_CONTACT_REMOVE_FAILED, 
+                self.account)
 
 class ChangeNick(Requester):
     '''make the request to change the nick on the server'''
@@ -394,17 +394,18 @@ class ChangeNick(Requester):
           XmlManager.get('changenick') % (get_key(session), 'Me', 
             common.escape(nick)))
 
-        self.nick = urllib.quote(nick)
+        self.nick = nick
         self.command_queue = command_queue
 
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
-            self.command_queue.put(Command('PRP', params=('MFN', self.nick)))
-            self.session.events.put(Event(Event.EVENT_NICK_CHANGE_SUCCEED))
+            self.command_queue.put(Command('PRP', params=('MFN', 
+                urllib.quote(self.nick))))
+            self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, self.nick)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.events.put(Event(Event.EVENT_NICK_CHANGE_FAILED))
+            self.session.add_event(Event.EVENT_NICK_CHANGE_FAILED, self.nick)
 
 class ChangeAlias(Requester):
     '''make the request to change the alias on the server'''
@@ -426,12 +427,12 @@ class ChangeAlias(Requester):
         '''handle the response'''
         if response.status == 200:
             self.session.contacts.contacts[self.account].alias = self.alias
-            self.session.events.put(Event(Event.EVENT_CONTACT_ALIAS_SUCCEED,
-                self.account))
+            self.session.add_event(Event.EVENT_CONTACT_ALIAS_SUCCEED,
+                self.account)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.events.put(Event(Event.EVENT_CONTACT_ALIAS_FAILED,
-                self.account))
+            self.session.add_event(Event.EVENT_CONTACT_ALIAS_FAILED,
+                self.account)
 
 class AddGroup(Requester):
     '''make the request to add a group'''
@@ -453,12 +454,11 @@ class AddGroup(Requester):
             gid = common.get_value_between(response.body, '<guid>', '</guid>')
             self.session.groups[gid] = Group(self.name, gid)
 
-            self.session.events.put(Event(Event.EVENT_GROUP_ADD_SUCCEED,
-                self.name, gid))
+            self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, 
+                self.name, gid)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.events.put(Event(Event.EVENT_GROUP_ADD_FAILED,
-                self.name))
+            self.session.add_event(Event.EVENT_GROUP_ADD_FAILED, self.name)
 
 class RemoveGroup(Requester):
     '''make the request to remove a group'''
@@ -480,12 +480,10 @@ class RemoveGroup(Requester):
             if self.gid in self.session.groups:
                 del self.session.groups[self.gid]
 
-            self.session.events.put(Event(Event.EVENT_GROUP_REMOVE_SUCCEED,
-                self.gid))
+            self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, self.gid)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.events.put(Event(Event.EVENT_GROUP_REMOVE_FAILED,
-                self.gid))
+            self.session.add_event(Event.EVENT_GROUP_REMOVE_FAILED, self.gid)
 
 class RenameGroup(Requester):
     '''make the request to rename a group'''
@@ -508,12 +506,12 @@ class RenameGroup(Requester):
         if response.status == 200:
             self.session.groups[self.gid] = Group(self.name, self.gid)
 
-            self.session.events.put(Event(Event.EVENT_GROUP_RENAME_SUCCEED,
-                self.gid, self.name))
+            self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED,
+                self.gid, self.name)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.events.put(Event(Event.EVENT_GROUP_RENAME_FAILED,
-                self.gid, self.name))
+            self.session.add_event(Event.EVENT_GROUP_RENAME_FAILED,
+                self.gid, self.name)
 
 class AddToGroup(Requester):
     '''add a contact to a group'''
@@ -537,12 +535,12 @@ class AddToGroup(Requester):
             self.session.contacts.contacts[self.account].groups.append(self.gid)
             self.session.groups[self.gid].contacts.append(self.account)
 
-            self.session.events.put(Event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
-                self.gid, self.cid))
+            self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
+                self.gid, self.cid)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.events.put(Event(Event.EVENT_GROUP_ADD_CONTACT_FAILED,
-                self.gid, self.cid))
+            self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_FAILED,
+                self.gid, self.cid)
 
 class RemoveFromGroup(Requester):
     '''remove a contact from a group'''
@@ -570,12 +568,12 @@ class RemoveFromGroup(Requester):
                 self.session.contacts.contacts[self.account].groups\
                     .remove(self.gid)
 
-            self.session.events.put(Event(\
-                Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, self.gid, self.cid))
+            self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, 
+                self.gid, self.cid)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.events.put(Event(\
-                Event.EVENT_GROUP_REMOVE_CONTACT_FAILED, self.gid, self.cid))
+            self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_FAILED, 
+                self.gid, self.cid)
 
 class BlockContact(TwoStageRequester):
     '''add a contact to the Block role and remove him from the Allow role'''
@@ -595,8 +593,7 @@ class BlockContact(TwoStageRequester):
 
     def _on_first_failed(self, response):
         '''handle the first request if failed'''
-        self.session.events.put(Event(Event.EVENT_CONTACT_BLOCK_FAILED,
-            self.account))
+        self.session.add_event(Event.EVENT_CONTACT_BLOCK_FAILED, self.account)
 
     def _on_second_succeed(self, response):
         '''handle the second request if succeeded'''
@@ -605,15 +602,13 @@ class BlockContact(TwoStageRequester):
 
         self.session.contacts.contacts[self.account].blocked = True
 
-        self.session.events.put(Event(Event.EVENT_CONTACT_BLOCK_SUCCEED,
-            self.account))
+        self.session.add_event(Event.EVENT_CONTACT_BLOCK_SUCCEED, self.account)
 
     def _on_second_failed(self, response):
         '''handle the second request if failed'''
         self.command_queue.put(Command('ADL', 
             payload=common.build_adl(self.account, 2)))
-        self.session.events.put(Event(Event.EVENT_CONTACT_BLOCK_FAILED,
-            self.account))
+        self.session.add_event(Event.EVENT_CONTACT_BLOCK_FAILED, self.account)
 
 class UnblockContact(TwoStageRequester):
     '''add a contact to the Allow role and remove him from the Block role'''
@@ -633,8 +628,7 @@ class UnblockContact(TwoStageRequester):
 
     def _on_first_failed(self, response):
         '''handle the first request if failed'''
-        self.session.events.put(Event(Event.EVENT_CONTACT_UNBLOCK_FAILED,
-            self.account))
+        self.session.add_event(Event.EVENT_CONTACT_UNBLOCK_FAILED, self.account)
 
     def _on_second_succeed(self, response):
         '''handle the second request if succeeded'''
@@ -643,15 +637,14 @@ class UnblockContact(TwoStageRequester):
 
         self.session.contacts.contacts[self.account].blocked = False
 
-        self.session.events.put(Event(Event.EVENT_CONTACT_UNBLOCK_SUCCEED,
-            self.account))
+        self.session.add_event(Event.EVENT_CONTACT_UNBLOCK_SUCCEED,
+            self.account)
 
     def _on_second_failed(self, response):
         '''handle the second request if failed'''
         self.command_queue.put(Command('ADL', 
             payload=common.build_adl(self.account, 4)))
-        self.session.events.put(Event(Event.EVENT_CONTACT_UNBLOCK_FAILED,
-            self.account))
+        self.session.add_event(Event.EVENT_CONTACT_UNBLOCK_FAILED, self.account)
 
 class MoveContact(TwoStageRequester):
     '''remove a contact from a group and add it to another'''
@@ -681,8 +674,8 @@ class MoveContact(TwoStageRequester):
 
     def _on_first_failed(self, response):
         '''handle the first request if failed'''
-        self.session.events.put(Event(Event.EVENT_CONTACT_MOVE_FAILED,
-            self.cid, self.src_gid, self.dest_gid))
+        self.session.add_event(Event.EVENT_CONTACT_MOVE_FAILED,
+            self.cid, self.src_gid, self.dest_gid)
 
     def _on_second_succeed(self, response):
         '''handle the second request if succeeded'''
@@ -693,11 +686,11 @@ class MoveContact(TwoStageRequester):
         self.session.groups[self.src_gid].contacts.remove(self.account)
         self.session.groups[self.dest_gid].contacts.append(self.account)
 
-        self.session.events.put(Event(Event.EVENT_CONTACT_MOVE_SUCCEED,
-            self.cid, self.src_gid, self.dest_gid))
+        self.session.add_event(Event.EVENT_CONTACT_MOVE_SUCCEED,
+            self.cid, self.src_gid, self.dest_gid)
 
     def _on_second_failed(self, response):
         '''handle the second request if failed'''
-        self.session.events.put(Event(Event.EVENT_CONTACT_MOVE_FAILED,
-            self.cid, self.src_gid, self.dest_gid))
+        self.session.add_event(Event.EVENT_CONTACT_MOVE_FAILED,
+            self.cid, self.src_gid, self.dest_gid)
 

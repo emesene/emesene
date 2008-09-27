@@ -19,7 +19,10 @@ class Window(gtk.Window):
         self.cb_on_close = cb_on_close
 
         self.connect("delete-event", self._on_delete_event)
+        self.connect('key-press-event', self._on_key_press)
         self.content = None
+
+        self.content_type = 'empty'
 
     def set_icon(self, icon):
         '''set the icon of the window'''
@@ -36,23 +39,31 @@ class Window(gtk.Window):
         self.content = Login.Login(callback, account)
         self.add(self.content)
         self.content.show()
+        self.content_type = 'login'
 
-    def go_main(self, session):
+    def go_main(self, session, on_new_conversation):
         '''change to the main window'''
-        self.content = MainWindow.MainWindow(session)
+        self.content = MainWindow.MainWindow(session, on_new_conversation)
         self.add(self.content)
         self.content.show()
+        self.content_type = 'main'
 
     def go_conversation(self, session):
         '''change to a conversation window'''
         self.content = MainConversation.MainConversation(session)
         self.add(self.content)
         self.content.show()
+        self.content_type = 'conversation'
 
     def _on_delete_event(self, widget, event):
         '''call the cb_on_close callback, if the callback return True
         then dont close the window'''
         return self.cb_on_close()
+
+    def _on_key_press(self, widget, event):
+        '''called when a key is pressed on the window'''
+        if self.content_type == 'main':
+            self.content._on_key_press(widget, event)
 
 def test():
     def callback(account, remember):

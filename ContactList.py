@@ -17,8 +17,12 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''a gtk implementation of gui.ContactList'''
 import gtk
+import pango
 import gobject
 
+import gui
+import utils
+import dialog
 import gui.ContactList
 import protocol.base.status as status
 from protocol.base.Group import Group
@@ -27,7 +31,7 @@ from protocol.base.Contact import Contact
 class ContactList(gui.ContactList.ContactList, gtk.TreeView):
     '''a gtk implementation of gui.ContactList'''
 
-    def __init__(self, contacts, groups, dialog):
+    def __init__(self, contacts, groups):
         '''class constructor'''
         gui.ContactList.ContactList.__init__(self, contacts, groups, 
             dialog)
@@ -45,6 +49,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         self.set_model(self.model)
         
         crt = gtk.CellRendererText()
+        crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         column = gtk.TreeViewColumn()
         column.set_expand(True)
         
@@ -219,7 +224,8 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
     def add_contact(self, contact, group=None):
         '''add a contact to the contact list, add it to the group if 
         group is not None'''
-        contact_data = (None, contact, self.format_nick(contact))
+        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact, 
+            self.format_nick(contact))
       
         # if no group add it to the root, but check that it's not on a group
         # or in the root already
@@ -236,7 +242,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
                 elif type(obj) == Contact and obj.account == contact.account:
                     return row.iter
 
-            return self._model.append(None, contact_data) 
+            return self._model.append(None, contact_data)
 
         for row in self._model:
             obj = row[1]
@@ -298,7 +304,8 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
     def update_contact(self, contact):
         '''update the data of contact'''
-        contact_data = (None, contact, self.format_nick(contact))
+        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact, 
+            self.format_nick(contact))
 
         for row in self._model:
             obj = row[1]
@@ -378,8 +385,7 @@ def test():
     import dialog
     import string
     import random
-    import ContactManager
-    import GroupManager
+    import protocol.base.ContactManager as ContactManager
 
     def _on_contact_selected(contact_list, contact):
         '''callback for the contact-selected signal'''
@@ -414,14 +420,13 @@ def test():
         '''generate a random mail'''
         return random_string() + '@' + random_string() + '.com'
 
-    contactm = ContactManager.ContactManager(dialog, None, 'msn@msn.com')
-    groupm = GroupManager.GroupManager(dialog, None)
+    contactm = ContactManager('msn@msn.com')
 
     window = gtk.Window()
     window.set_default_size(200, 200)
     scroll = gtk.ScrolledWindow()
     scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-    conlist = ContactList(contactm, groupm, dialog)
+    conlist = ContactList(contactm, dialog)
 
     conlist.signal_connect('contact-selected', _on_contact_selected)
     conlist.signal_connect('contact-menu-selected', _on_contact_menu_selected)
@@ -437,13 +442,11 @@ def test():
 
     for i in range(6):
         group = Group(random_string())
-        groupm.register(group)
         for j in range(6):
             contact = Contact(random_mail(), i * 10 + j, random_string())
             contact.status = random.choice(status.ORDERED)
             contact.message = random_string()
             group.contacts.append(contact.account)
-            contactm.register(contact)
 
             conlist.add_contact(contact, group)
 
@@ -451,7 +454,6 @@ def test():
         contact = Contact(random_mail(), 100 + j, random_string())
         contact.status = random.choice(status.ORDERED)
         contact.message = random_string()
-        contactm.register(contact)
 
         conlist.add_contact(contact)
 

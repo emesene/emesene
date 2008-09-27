@@ -719,6 +719,7 @@ class Worker(threading.Thread):
         self.socket.send_command('UUX', payload='<Data><PSM>' + \
             common.escape(message) + '</PSM><CurrentMedia></CurrentMedia>' + \
             '<MachineGuid></MachineGuid></Data>')
+        self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK

@@ -167,10 +167,10 @@ class Core(Server):
         and value is the new value of that preference'''
         self.add_action(session, Action.ACTION_SET_PREFERENCE, (preferences,))
 
-    @validate(str)
-    def do_new_conversation(self, session, account):
+    @validate(str, float)
+    def do_new_conversation(self, session, account, cid):
         '''start a new conversation with account'''
-        self.add_action(session, Action.ACTION_NEW_CONVERSATION, (account,))
+        self.add_action(session, Action.ACTION_NEW_CONVERSATION, (account, cid))
     
     @validate()
     def do_quit(self, session):

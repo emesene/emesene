@@ -69,46 +69,6 @@ class ContactList(Object.Object):
         # + TOTAL_COUNT
         self.group_template = '%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)'
         
-    def on_contact_added(self, contact):
-        '''callback called when a contact is added to the userlist'''
-        self.add_contact(contact)
-
-    def on_contact_removed(self, contact):
-        '''callback called when a contact is removed from the userlist'''
-        self.remove_contact(contact)
-
-    def on_contact_changed(self, contact):
-        '''callback called when an attr changes on a contact'''
-        self.update_contact(contact)
-
-    def on_group_added(self, group):
-        '''called when a group is added'''
-        self.add_group(group)
-    
-    def on_group_removed(self, group):
-        '''called when a group'''
-        self.remove_group(group)
-    
-    def on_group_changed(self, group):
-        '''called when an attr from a group changed'''
-        self.update_group(group)
-    
-    def on_contact_added_to_group(self, account, group):
-        '''callback called when a contact is added to the a group'''
-        contact = self.contacts.contacts.get(account, None)
-        if contact:
-            self.add_contact(contact, group)
-        else:
-            print account, 'has no contact associated'
-    
-    def on_contact_removed_from_group(self, account, group):
-        '''callback called when a contact is removed from the a group'''
-        contact = self.contacts.contacts.get(account, None)
-        if contact:
-            self.remove_contact(contact, group)
-        else:
-            print account, 'has no contact associated'
-
     def _get_order_by_status(self):
         '''return the value of order by status'''
         return not self.order_by_group

@@ -1,4 +1,5 @@
 import gtk
+import pango
 import gobject
 
 import dialog
@@ -20,17 +21,21 @@ class TextField(gtk.VBox):
         gtk.VBox.__init__(self)
 
         self.entry = gtk.Entry()
+        self.label = gtk.Label()
+        self.label.set_ellipsize(pango.ELLIPSIZE_END)
+        self.label.set_justify(gtk.JUSTIFY_LEFT)
         self.button = gtk.Button()
         self.button.set_relief(gtk.RELIEF_NONE)
 
-        self.text = text
+        self._text = text
         self.empty_text = empty_text
         self.allow_empty = allow_empty
 
         self.pack_start(self.button, True, True)
         self.pack_start(self.entry, True, True)
 
-        self.button.set_label(self.text or self.empty_text)
+        self.button.add(self.label)
+        self.label.set_text(self._text or self.empty_text)
 
         self.button.connect('clicked', self.on_button_clicked)
         self.entry.connect('activate', self.on_entry_activate)
@@ -48,13 +53,12 @@ class TextField(gtk.VBox):
             dialog.error("Empty text not allowed")
             return
 
-        if self.entry.get_text() != self.text:
-            old_text = self.text
+        if self.entry.get_text() != self._text:
+            old_text = self._text
             self.text = self.entry.get_text()
-            self.emit('text-changed', old_text, self.text)
+            self.emit('text-changed', old_text, self._text)
 
         self.entry.hide()
-        self.button.set_label(self.text)
         self.button.show()
 
     def show(self):
@@ -62,11 +66,24 @@ class TextField(gtk.VBox):
         gtk.VBox.show(self)
         self.button.show()
         self.entry.hide()
+        self.label.show()
 
     def show_all(self):
         '''override the show method to not show both widgets on a show_all
         call'''
         self.show()
+
+    def _get_text(self):
+        '''return the value of text'''
+        return self._text
+
+    def _set_text(self, value):
+        '''set the value of text'''
+        self._text = value
+        self.label.set_text(self._text)
+        self.entry.set_text(self._text)
+
+    text = property(fget=_get_text, fset=_set_text)
 
 if __name__ == '__main__':
 
