@@ -19,7 +19,7 @@ class MainWindow(gtk.VBox):
         '''class constructor'''
         gtk.VBox.__init__(self, spacing=2)
         self.contact_list = ContactList.ContactList(session.contacts, 
-            session.groups, dialog)
+            session.groups)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
