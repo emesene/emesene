@@ -39,7 +39,7 @@ class MainMenu(Menu.Menu):
 
         self.signal_add('quit-selected', 0)
         self.signal_add('disconnect-selected', 0)
-        self.signal_add('prefereces-selected', 0)
+        self.signal_add('preferences-selected', 0)
         self.signal_add('plugins-selected', 0)
         self.signal_add('about-selected', 0)
 
@@ -234,6 +234,7 @@ class MainMenu(Menu.Menu):
         self.help_menu = Menu.Menu(_('_Help'))
         self.about_item = Menu.Item(_('_About'), Menu.Item.TYPE_STOCK, 
             stock.ABOUT)
+        self.about_item.signal_connect('selected', self._on_about_selected)
 
         self.help_menu.append(self.about_item)
 

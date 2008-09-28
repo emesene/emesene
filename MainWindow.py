@@ -3,6 +3,9 @@ import os
 import gtk
 import time
 
+import gui
+import utils
+
 import Menu
 import dialog
 import UserPanel
@@ -15,7 +18,7 @@ class MainWindow(gtk.VBox):
     '''this class represents the widget that is shown when the user is logged
     in (menu, contact list etc)'''
 
-    def __init__(self, session, on_new_conversation):
+    def __init__(self, session, on_new_conversation, on_close):
         '''class constructor'''
         gtk.VBox.__init__(self, spacing=2)
         self.contact_list = ContactList.ContactList(session.contacts, 
@@ -25,6 +28,7 @@ class MainWindow(gtk.VBox):
         scroll.set_shadow_type(gtk.SHADOW_IN)
         self.session = session
         self.on_new_conversation = on_new_conversation
+        self.on_close = on_close
 
         self.session.protocol.connect('contact-attr-changed', 
             self._on_contact_attr_changed)
@@ -32,6 +36,13 @@ class MainWindow(gtk.VBox):
         self._menu = MainMenu.MainMenu(dialog, 
             self.session.contacts, self.session.groups, 
                 self.contact_list)
+        self._menu.signal_connect('quit-selected', self._on_quit_selected)
+        self._menu.signal_connect('disconnect-selected', 
+            self._on_disconnect_selected)
+        self._menu.signal_connect('preferences-selected', 
+            self._on_preferences_selected)
+        self._menu.signal_connect('plugins-selected', self._on_plugins_selected)
+        self._menu.signal_connect('about-selected', self._on_about_selected)
         self.menu = Menu.build_menu_bar(self._menu)
 
         self.panel = UserPanel.UserPanel(session)
@@ -128,6 +139,40 @@ class MainWindow(gtk.VBox):
                 event.state == gtk.gdk.CONTROL_MASK:
             self.entry.show()
             self.entry.grab_focus()
+
+    def _on_quit_selected(self, menu):
+        '''callback called when the quit option is selected'''
+        self.on_close()
+
+    def _on_disconnect_selected(self, menu):
+        '''callback called when the disconnect option is selected'''
+        pass
+
+    def _on_preferences_selected(self, menu):
+        '''callback called when the preferences option is selected'''
+        dialog.information('Not implemented')
+
+    def _on_plugins_selected(self, menu):
+        '''callback called when the plugins option is selected'''
+        dialog.information('Not implemented')
+
+    def _on_about_selected(self, menu):
+        '''callback called when the about option is selected'''
+        about = gtk.AboutDialog()
+        about.set_name('mesinyer')
+        about.set_version('2.0 alpha 0.0.1')
+        about.set_copyright('marianoguerra')
+        about.set_license('GPL v3')
+        about.set_website('www.emesene.org')
+        about.set_authors(['mariano guerra'])
+        about.set_artists(['vdepizzol'])
+        icon = utils.safe_gtk_pixbuf_load(gui.theme.logo)
+        about.set_logo(icon)
+        about.set_icon(icon)
+        about.set_program_name('emesene')
+
+        about.run()
+        about.hide()
 
     def do_test(self):
         '''do some test to the contact list'''

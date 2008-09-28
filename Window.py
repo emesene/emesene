@@ -41,9 +41,10 @@ class Window(gtk.Window):
         self.content.show()
         self.content_type = 'login'
 
-    def go_main(self, session, on_new_conversation):
+    def go_main(self, session, on_new_conversation, on_close):
         '''change to the main window'''
-        self.content = MainWindow.MainWindow(session, on_new_conversation)
+        self.content = MainWindow.MainWindow(session, on_new_conversation,
+            on_close)
         self.add(self.content)
         self.content.show()
         self.content_type = 'main'

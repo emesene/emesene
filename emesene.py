@@ -32,7 +32,8 @@ class Controller(object):
     def on_login_succeed(self, core, args):
         '''callback called on login succeed'''
         self.window.clear()
-        self.window.go_main(core.session, self.on_new_conversation)
+        self.window.go_main(core.session, self.on_new_conversation,
+            self.on_close)
 
     def on_login_failed(self, core, args):
         '''callback called on login failed'''
