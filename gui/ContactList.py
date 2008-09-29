@@ -179,9 +179,12 @@ class ContactList(Object.Object):
         then remove him from all groups'''
         raise NotImplementedError()
 
-    def fill(self):
+    def fill(self, clear=True):
         '''fill the contact list with the contacts and groups from
         self.contacts and self.groups'''
+        if clear:
+            self.clear()
+
         for group in self.groups.values():
             # get a list of contact objects from a list of accounts
             contacts = self.contacts.get_contacts(group.contacts)

@@ -433,8 +433,6 @@ class Worker(threading.Thread):
         contact.nick = nick
         contact.attrs['msnobj'] = msnobj
         
-        #import pprint
-        #pprint.pprint(self.session.contacts.get_sorted_list_by_status())
         # don't genetate an event here, because it's after the client
         # requests the contact list
 

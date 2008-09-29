@@ -96,7 +96,13 @@ class MainMenu(Menu.Menu):
         '''build and return the view menu'''
         self.view_menu = Menu.Menu(_('_View'))
 
-        self.order_option = Menu.Option()
+        if self.contact_list.order_by_group:
+            index = 1
+        else:
+            index = 0
+            
+
+        self.order_option = Menu.Option(index)
         self.by_status_option = Menu.Radio(_('Order by _status'))
         self.by_status_option.signal_connect('toggled', 
             self._on_by_status_toggled)
@@ -107,15 +113,18 @@ class MainMenu(Menu.Menu):
         self.order_option.append(self.by_status_option)
         self.order_option.append(self.by_group_option)
 
-        self.show_by_nick_option = Menu.CheckBox(_('Show by _nick'))
+        self.show_by_nick_option = Menu.CheckBox(_('Show by _nick'),
+            self.contact_list.show_nick)
         self.show_by_nick_option.signal_connect('toggled', 
             self._on_by_nick_toggled)
 
-        self.show_offline_option = Menu.CheckBox(_('Show _offline'))
+        self.show_offline_option = Menu.CheckBox(_('Show _offline'),
+            self.contact_list.show_offline)
         self.show_offline_option.signal_connect('toggled', 
             self._on_show_offline_toggled)
 
-        self.show_empty_groups_option = Menu.CheckBox(_('Show _empty groups'))
+        self.show_empty_groups_option = Menu.CheckBox(_('Show _empty groups'),
+            self.contact_list.show_empty_groups)
         self.show_empty_groups_option.signal_connect('toggled', 
             self._on_empty_groups_toggled)
 
@@ -258,11 +267,13 @@ class MainMenu(Menu.Menu):
         '''called when order by status is toggled'''
         if value:
             self.contact_list.order_by_status = value
+            self.contact_list.fill()
     
     def _on_by_group_toggled(self, option, value):
         '''called when order by group is toggled'''
         if value:
             self.contact_list.order_by_group = value
+            self.contact_list.fill()
 
     def _on_by_nick_toggled(self, check, value):
         '''called when show by nick is toggled'''

@@ -25,6 +25,7 @@ class TextField(gtk.VBox):
         self.label.set_ellipsize(pango.ELLIPSIZE_END)
         self.label.set_justify(gtk.JUSTIFY_LEFT)
         self.button = gtk.Button()
+        self.button.set_alignment(0.0, 0.5)
         self.button.set_relief(gtk.RELIEF_NONE)
 
         self._text = text
@@ -39,6 +40,7 @@ class TextField(gtk.VBox):
 
         self.button.connect('clicked', self.on_button_clicked)
         self.entry.connect('activate', self.on_entry_activate)
+        self.entry.connect('focus-out-event', self._on_focus_out)
 
     def on_button_clicked(self, button):
         '''method called when the button is clicked'''
@@ -60,6 +62,10 @@ class TextField(gtk.VBox):
 
         self.entry.hide()
         self.button.show()
+
+    def _on_focus_out(self, widget, event):
+        '''called when the widget lost the focus'''
+        self.on_entry_activate(self.entry)
 
     def show(self):
         '''override show'''
