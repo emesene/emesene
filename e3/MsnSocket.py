@@ -1,24 +1,17 @@
 '''defines an object that handles msn commands received from a socket'''
 
+import common
 import Socket
+import Command
 
-from Command import Command
-
-PAYLOAD_CMDS = ['GCF', 'MSG', 'UBX', 'NOT']
-# the position on params where the number of bytes to read is located
-PAYLOAD_POSITION = {
-    'GCF' : 0,
-    'MSG' : 1,
-    'UBX' : 1,
-    'NOT' : -1,
-}
 
 class MsnSocket(Socket.Socket):
     '''a socket object specialized to be used to connecto with the msn network
     '''
 
-    def __init__(self, host, port):
-        '''class constructor'''
+    def __init__(self, host='messenger.hotmail.com', port=1863, *args, **kwds):
+        '''class constructor, args is there to be compatible with 
+        MsnHttpSocket constructor'''
         Socket.Socket.__init__(self, host, port)
         self.tid = 1
 
@@ -47,10 +40,10 @@ class MsnSocket(Socket.Socket):
         data = self._readline()
         # if we got something add it to the output queue
         if data:
-            command = Command.parse(data)
+            command = Command.Command.parse(data)
 
-            if command.command in PAYLOAD_CMDS:
-                position = PAYLOAD_POSITION[command.command]
+            if command.command in common.PAYLOAD_CMDS:
+                position = common.PAYLOAD_POSITION[command.command]
 
                 if position == -1:
                     size = int(command.tid)

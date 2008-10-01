@@ -3,6 +3,7 @@ import Queue
 
 import e3
 import e3.Worker as Worker
+import e3.MsnHttpSocket as MsnHttpSocket
 import e3.MsnSocket as MsnSocket
 
 from protocol.base import status
@@ -20,12 +21,18 @@ import gobject
 class Example(object):
     '''a example object, you can do it on another way..'''
 
-    def __init__(self, account, password, status):
+    def __init__(self, account, password, status, use_http_method=False):
         '''class constructor'''
         self.account = Account(account, password, status)
         self.session = Session(self.account)
-        self.socket = MsnSocket('messenger.hotmail.com', 1863)
-        self.worker = Worker(self.socket, self.session)
+
+        if use_http_method:
+            class_ = MsnHttpSocket
+        else:
+            class_ = MsnSocket
+
+        self.socket = class_('messenger.hotmail.com', 1863, dest_type='NS')
+        self.worker = Worker(self.socket, self.session, class_)
 
         hdrs = {}
         hdrs[Event.EVENT_LOGIN_SUCCEED] = self._handle_login_succeed
@@ -49,15 +56,15 @@ class Example(object):
         '''add an event to the session queue'''
         self.session.actions.put(Action(id_, args))
 
-    def _handle_login_succeed(self, ):
+    def _handle_login_succeed(self):
         '''handle login succeed'''
         print 'we are in! :)'
 
-    def _handle_login_failed(self, ):
+    def _handle_login_failed(self, reason):
         '''handle login failed'''
-        print 'login failed :('
+        print 'login failed :(', reason
 
-    def _handle_contact_list_ready(self, ):
+    def _handle_contact_list_ready(self):
         '''handle contact list ready'''
         for group in self.session.groups.values():
             # get a list of contact objects from a list of accounts
@@ -78,12 +85,12 @@ class Example(object):
 
         # put here a mail address that exists on your the contact list of the
         # account that is logged in
-        self.start_conversation('bob@gmail.com', cid)
+        self.start_conversation('alice@gmail.com', cid)
         self.send_message(cid, message1)
         self.send_message(cid, message2)
         self.send_message(cid, message3)
 
-    def _handle_conv_first_action(self, cid):
+    def _handle_conv_first_action(self, cid, members):
         '''handle'''
         account = self.session.account.account
         # we send this message the first time the other user interact with 
@@ -132,7 +139,7 @@ class Example(object):
 
 if __name__ == '__main__':
     gobject.threads_init()
-    example = Example('dude@hotmail.com', 'secret', status.ONLINE) 
+    example = Example('bob@hotmail.com', 'secret', status.ONLINE, True) 
     example.login()
 
     gobject.timeout_add(500, example.process)

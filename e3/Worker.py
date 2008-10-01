@@ -88,7 +88,7 @@ class Worker(threading.Thread):
     '''this class represent an object that waits for commands from the queue 
     of a socket, process them and add it as events to its own queue'''
 
-    def __init__(self, socket, session):
+    def __init__(self, socket, session, msn_socket_class):
         '''class constructor'''
         threading.Thread.__init__(self)
         self.socket = socket
@@ -96,6 +96,9 @@ class Worker(threading.Thread):
 
         self.in_login = False
         self.session = session
+        # the class used to create the conversation sockets, since sockets
+        # or http method can be used
+        self.msn_socket_class = msn_socket_class
 
         self.last_ping_response = 0.0
 
@@ -321,10 +324,13 @@ class Worker(threading.Thread):
             except IndexError:
                 faultstring = str(exception)
 
-            return self.session.add_event(Event.EVENT_LOGIN_FAILED, faultstring)
+            self.session.add_event(Event.EVENT_LOGIN_FAILED, faultstring)
+            return False
 
         self.session.extras['mbiblob'] = mbi.encrypt(
                self.session.extras['messengerclear.live.com']['secret'], hash_)
+
+        return True
 
     def _set_status(self, stat):
         '''set our status'''
@@ -365,11 +371,11 @@ class Worker(threading.Thread):
         if message.param_num_is(0, 'SSO'):
             hash_ = ' '.join(message.params[2:])
             self.session.extras['hash'] = urllib.unquote(hash_)
-            passport_auth = self.do_passport_identification()
+            succeed = self.do_passport_identification()
 
             # if returned a tuple with a signal, we return it
-            if type(passport_auth) == tuple:
-                return passport_auth
+            if not succeed:
+                return
             
             passport_id = self.session.extras['messengerclear.live.com']\
                                           ['security'].replace("&amp;" , "&")
@@ -550,8 +556,8 @@ class Worker(threading.Thread):
         if cid in self.pending_cids:
             self.pending_cids.remove(cid)
 
-        con = Conversation.Conversation(self.session, cid, host, int(port), 
-            account, session_id)
+        con = Conversation.Conversation(self.session, cid, 
+            self.msn_socket_class, host, int(port), account, session_id)
         self.conversations[cid] = con
         con.send_presentation()
         con.invite(account)

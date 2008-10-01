@@ -3,7 +3,6 @@ import threading
 
 import protocol.base.Action as Action
 import protocol.base.Event as Event
-import MsnSocket
 import MsnMessage
 
 class Conversation(threading.Thread):
@@ -11,8 +10,8 @@ class Conversation(threading.Thread):
     (STATUS_PENDING, STATUS_CONNECTED, STATUS_ESTABLISHED, STATUS_CLOSED,
     STATUS_ERROR) = range(5)
 
-    def __init__(self, session, cid, host, port, account, session_id, 
-        auth_id=None):
+    def __init__(self, session, cid, MsnSocket, host, port, account, 
+        session_id, auth_id=None):
         '''class constructor, create a socket and connect it to the specified
         server'''
         threading.Thread.__init__(self)
@@ -25,7 +24,7 @@ class Conversation(threading.Thread):
         self.account = account
         self.auth_id = auth_id
         self.session_id = session_id
-        self.socket = MsnSocket.MsnSocket(host, port)
+        self.socket = MsnSocket(host, port)
 
         self.status = Conversation.STATUS_PENDING
         self.started = False

@@ -1,5 +1,14 @@
 import xml.sax.saxutils
 
+PAYLOAD_CMDS = ['GCF', 'MSG', 'UBX', 'NOT']
+# the position on params where the number of bytes to read is located
+PAYLOAD_POSITION = {
+    'GCF' : 0,
+    'MSG' : 1,
+    'UBX' : 1,
+    'NOT' : -1,
+}
+
 dic = {
     '\"'    :    '&quot;',
     '\''    :    '&apos;'
