@@ -29,7 +29,8 @@ class RichBuffer(gtk.TextBuffer):
         optional parameters'''
         tags = self._parse_tags(fg_color, bg_color, font, size, bold, italic,
             underline, strike)
-        iterator = self.get_iter_at_mark(self.get_insert())
+        #iterator = self.get_iter_at_mark(self.get_insert())
+        iterator = self.get_end_iter()
         self._insert(iterator, text, tags)
 
     def _insert(self, iterator, text, tags=None):

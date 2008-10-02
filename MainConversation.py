@@ -31,6 +31,8 @@ class MainConversation(gtk.Notebook):
                 self._on_group_started)
             self.session.protocol.connect('conv-group-ended', 
                 self._on_group_ended)
+            self.session.protocol.connect('conv-message-send-failed', 
+                self._on_message_send_failed)
 
     def _on_message(self, protocol, args):
         '''called when a message is received'''
@@ -45,11 +47,21 @@ class MainConversation(gtk.Notebook):
             else:
                 nick = account
 
-            conversation.output.buffer.put_text(nick + ': ', bold=True)
-            conversation.output.buffer.put_text(message.body + '\n', 
+            conversation.output.append(nick + ': ', bold=True)
+            conversation.output.append(message.body + '\n', True,  
                 *self.format_from_message(message))
         elif not conversation:
             print 'conversation', cid, 'not found'
+
+    def _on_message_send_failed(self, protocol, args):
+        '''called when a message is received'''
+        (cid, message) = args
+        conversation = self.conversations.get(cid, None)
+
+        conversation.output.append('message could not be sent: ', True, 
+            fg_color='#A52A2A', bold=True)
+        conversation.output.append(message.body + '\n', True,  
+            *self.format_from_message(message))
 
     def _on_contact_joined(self, protocol, args):
         '''called when a contact join the conversation'''
@@ -172,8 +184,8 @@ class Conversation(gtk.VBox):
         '''method called when the user press enter on the input text'''
         self.session.protocol.do_send_message(self.cid, text)
         nick = self.session.contacts.me.display_name
-        self.output.buffer.put_text(nick + ': ', bold=True)
-        self.output.buffer.put_text(text + '\n')
+        self.output.append(nick + ': ', bold=True)
+        self.output.append(text + '\n')
 
     def on_contact_joined(self, account):
         '''called when a contact joins the conversation'''
@@ -192,7 +204,7 @@ class Conversation(gtk.VBox):
 
             if len(self.members) == 1:
                 self.set_data(self.members[0])
-            else:
+            elif len(self.members) > 1:
                 self.set_group_data()
 
     def on_group_started(self):
@@ -252,10 +264,16 @@ class TextBox(gtk.ScrolledWindow):
         '''clear the content'''
         self.buffer.set_text('')
 
-    def append(self, text):
+    def append(self, text, scroll=True, fg_color=None, bg_color=None, 
+        font=None, size=None, bold=False, italic=False, underline=False, 
+        strike=False):
         '''append text to the widget'''
-        end_iter = self.buffer.get_end_iter()
-        self.buffer.insert(end_iter, text)
+        self.buffer.put_text(text, fg_color, bg_color, font, size, bold, 
+            italic, underline, strike)
+
+        if scroll:
+            end_iter = self.buffer.get_end_iter()
+            self.textbox.scroll_to_iter(end_iter, 0.0, yalign=1.0)
 
     def _set_text(self, text):
         '''set the text on the widget'''

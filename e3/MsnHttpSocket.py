@@ -26,12 +26,8 @@ class MsnHttpSocket(threading.Thread):
         self.timestamp = time.time()
 
         if host is not None:
-            proxy_info = {
-                'user' : user,
-                'pass' : password,
-                'host' : host,
-                'port' : port
-            }
+            proxy_info = {'user': user, 'pass': password, 'host': host, 
+                'port' : port}
 
             proxy_support = urllib2.ProxyHandler({"http" : \
             "http://%(user)s:%(pass)s@%(host)s:%(port)d" % proxy_info})
@@ -40,17 +36,6 @@ class MsnHttpSocket(threading.Thread):
             # install it
             urllib2.install_opener(opener)
         
-        self.headers = {}
-        self.headers['Accept'] = '*/*'
-        self.headers['Accept-Language'] = 'en-us'
-        self.headers['User-Agent'] = 'MSMSGS'
-        self.headers['Host'] = 'gateway.messenger.hotmail.com'
-        self.headers['Proxy-Connection'] = 'Keep-Alive'
-        self.headers['Connection'] = 'Keep-Alive'
-        self.headers['Pragma'] = 'no-cache'
-        self.headers['Content-Type'] = 'application/x-msn-messenger'
-        self.headers['Content-Length'] = '18'
-
         self.input = Queue.Queue()
         self.output = Queue.Queue()
         self.setDaemon(True)
@@ -124,7 +109,6 @@ class MsnHttpSocket(threading.Thread):
 
     def send_req(self, data, path=None, is_retry=False):
         '''send a request to the server and expect the response'''
-        self.headers['Content-Length'] = str(len(data))
 
         if path is None:
             path = self.path

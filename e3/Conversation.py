@@ -42,6 +42,11 @@ class Conversation(threading.Thread):
         # messages that are requested to be sent before we are ready to do it
         # are stored here and sent when we stablish the conversation
         self.pending_messages = []
+        # a dict that contains the tid where the message was sent and the
+        # message, when we receive an ack, we emit the message send succeed
+        # and remove it from the dict, if we get a NAK we remove it and emit
+        # the message send failed.
+        self.sent_messages = {}
         self._set_handlers()
 
     def _set_handlers(self):
@@ -52,6 +57,8 @@ class Conversation(threading.Thread):
         self._handlers['JOI'] = self._on_join
         self._handlers['ANS'] = self._on_answer
         self._handlers['BYE'] = self._on_bye
+        self._handlers['ACK'] = self._on_message_send_succeed
+        self._handlers['NAK'] = self._on_message_send_failed
 
     def _process(self, message):
         '''process a command and call the respective handler'''
@@ -143,7 +150,7 @@ class Conversation(threading.Thread):
             self.session.add_event(Event.EVENT_CONV_STARTED, self.cid)
 
     def _on_bye(self, message):
-        '''handle the message'''
+        '''handle the bye message'''
         account = message.tid.replace('\r\n', '')
         self.session.add_event(Event.EVENT_CONV_CONTACT_LEFT, self.cid, 
             account)
@@ -152,6 +159,26 @@ class Conversation(threading.Thread):
 
         if len(self.members) == 1:
             self.session.add_event(Event.EVENT_CONV_GROUP_ENDED, self.cid)
+        elif len(self.members) == 0:
+            self.invite(account)
+
+    def _on_message_send_succeed(self, command):
+        '''handle the acknowledge of a message'''
+        tid = int(command.tid)
+        if tid in self.sent_messages:
+            message = self.sent_messages[tid]
+            del self.sent_messages[tid]
+            self.session.add_event(Event.EVENT_CONV_MESSAGE_SEND_SUCCEED,
+                self.cid, message)
+
+    def _on_message_send_failed(self, command):
+        '''handle a message that inform us that a message could not be sent'''
+        tid = int(command.tid)
+        if tid in self.sent_messages:
+            message = self.sent_messages[tid]
+            del self.sent_messages[tid]
+            self.session.add_event(Event.EVENT_CONV_MESSAGE_SEND_FAILED,
+                self.cid, message)
 
     def _on_unknown_command(self, message):
         '''handle the unknown commands'''
@@ -171,7 +198,7 @@ class Conversation(threading.Thread):
 
             if len(self.pending_messages) > 0:
                 for message in self.pending_messages:
-                    self.socket.send_command('MSG', ('A',), message.format())
+                    self.send_message(message)
 
                 self.pending_messages = []
 
@@ -197,4 +224,6 @@ class Conversation(threading.Thread):
         if not self.started:
             self.pending_messages.append(message)
         else:
+            print 'actual tid', self.socket.tid, type(self.socket.tid)
+            self.sent_messages[self.socket.tid] = message
             self.socket.send_command('MSG', ('A',), message.format())
