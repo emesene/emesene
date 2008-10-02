@@ -24,6 +24,8 @@ class Controller(object):
         self.core.connect('nick-change-succeed', self.on_nick_change_succeed)
         self.core.connect('message-change-succeed', 
             self.on_message_change_succeed)
+        self.core.connect('status-change-succeed', 
+            self.on_status_change_succeed)
 
     def on_close(self):
         '''called on close'''
@@ -46,11 +48,17 @@ class Controller(object):
         self.window.content.contact_list.show_offline = True
         self.window.content.contact_list.fill()
         self.window.content.contact_list.refilter()
+        self.window.content.panel.enabled = True
 
     def on_nick_change_succeed(self, core, args):
         '''callback called when the nick has been changed successfully'''
         nick = args[0]
         self.window.content.panel.nick.text = nick
+
+    def on_status_change_succeed(self, core, args):
+        '''callback called when the status has been changed successfully'''
+        stat = args[0]
+        self.window.content.panel.status.set_status(stat)
 
     def on_message_change_succeed(self, core, args):
         '''callback called when the message has been changed successfully'''

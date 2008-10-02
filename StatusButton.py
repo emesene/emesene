@@ -19,7 +19,7 @@ class StatusButton(gtk.Button):
         self.menu = Menu.build_pop_up(gui.StatusMenu.StatusMenu(contacts,
             self._on_status_selected))
 
-        self._set_status(status.ONLINE)
+        self.set_status(status.ONLINE)
         self.set_relief(gtk.RELIEF_NONE)
         self.set_border_width(0)
 
@@ -31,9 +31,9 @@ class StatusButton(gtk.Button):
 
     def _on_status_selected(self, stat):
         '''method called when a status is selected on the popup'''
-        self._set_status(stat)
+        self.set_status(stat)
         
-    def _set_status(self, stat):
+    def set_status(self, stat):
         '''load an image representing a status and store it on cache'''
         if stat not in status.ALL:
             return

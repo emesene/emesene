@@ -48,6 +48,7 @@ class MainWindow(gtk.VBox):
         self.panel = UserPanel.UserPanel(session)
         self.panel.nick.connect('text-changed', self._on_nick_changed)
         self.panel.message.connect('text-changed', self._on_message_changed)
+        self.panel.enabled = False
 
         self.entry = gtk.Entry()
         self.entry.connect('changed', self._on_entry_changed)

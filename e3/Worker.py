@@ -338,6 +338,7 @@ class Worker(threading.Thread):
         self.session.account.status = stat
         self.session.contacts.me.status = stat
         self.socket.send_command('CHG', (STATUS_MAP[stat], str(CLIENT_ID), '0'))
+        self.session.add_event(Event.EVENT_STATUS_CHANGE_SUCCEED, stat)
 
     def _on_version(self, message):
         '''handle version'''

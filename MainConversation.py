@@ -162,8 +162,8 @@ class Conversation(gtk.VBox):
         self.temp = self.panel.connect('map-event', self._on_panel_show)
 
         if len(self.members) == 0:
-            self.header.information = Header.INFO_TEMPLATE % \
-                ('connecting', 'creating conversation')
+            self.header.information = Header.INFO_TPL % \
+                ('connecting', 'creating conversation', '')
         elif len(self.members) == 1:
             self.set_data(self.members[0])
         else:
@@ -229,7 +229,7 @@ class Conversation(gtk.VBox):
             message = ''
             nick = account
 
-        self.header.information = Header.INFO_TEMPLATE % (nick, message)
+        self.header.information = Header.INFO_TPL % (nick, message, account)
         self.tab_label.set_markup(nick)
 
     def set_group_data(self):
@@ -237,8 +237,8 @@ class Conversation(gtk.VBox):
         self.header.set_image(gui.theme.users)
         text = 'group chat'
 
-        self.header.information = Header.INFO_TEMPLATE % \
-            (text, '%d members' % (len(self.members) + 1,))
+        self.header.information = Header.INFO_TPL % \
+            (text, '%d members' % (len(self.members) + 1, ''))
 
         self.tab_label.set_text(text)
 
@@ -315,11 +315,14 @@ class OutputText(TextBox):
 
 class Header(gtk.HBox):
     '''a widget used to display some information about the conversation'''
-    INFO_TEMPLATE = '%s\n<span size="small">%s</span>'
+    INFO_TPL = '<span weight="bold">%s</span>\n'
+    INFO_TPL += '<span style="italic">%s</span>\n'
+    INFO_TPL += '<span size="small">%s</span>'
 
     def __init__(self):
         '''constructor'''
         gtk.HBox.__init__(self)
+        self.set_border_width(4)
         self._information = gtk.Label('info')
         self._information.set_ellipsize(pango.ELLIPSIZE_END)
         self._information.set_alignment(0.0, 0.5)
@@ -398,8 +401,8 @@ class ContactInfo(gtk.VBox):
 if __name__ == '__main__':
     import gui
     mconv = MainConversation(None) 
-    conv = mconv.new_conversation()
-    mconv.new_conversation()
+    conv = mconv.new_conversation(123)
+    mconv.new_conversation(1233)
     window = gtk.Window()
     window.add(mconv)
     window.set_default_size(640, 480)
