@@ -183,8 +183,9 @@ class ContactManager(object):
                 partial = []
                 total_length = 0
 
-        partial.append('</ml>')
-        result.append(''.join(partial))
+        if partial:
+            partial.append('</ml>')
+            result.append(''.join(partial))
 
         return result
 

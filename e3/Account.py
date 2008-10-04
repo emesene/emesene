@@ -17,77 +17,89 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-class Account(object):
+import protocol.base.Account
+import protocol.base.Action as Action
+
+class Account(protocol.base.Account):
     '''a class to handle the account'''
-    
-    def __init__(self, account, password, status):
-        self.account = account
-        self.password = password
-        self.status = status
+
+    def __init__(self, account, password, status, actions):
+        '''constructor'''
+        protocol.base.Account.__init__(self, account, password, status)
+        self.actions = actions
+        
+        self.nick = account
+        self.message = ''
+
+    def add_action(self, id_, args=()):
+        '''add an event to the session queue'''
+        self.actions.put(Action(id_, args))
 
     def set_nick(self, nick):
         '''set the nick of our account to nick'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_SET_NICK, (nick,))
 
     def set_personal_message(self, personal_message):
         '''set the personal message of our account to personal_message'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_SET_MESSAGE, (personal_message,))
 
     def set_current_media(self, current_media):
         '''set the current media on our account to current_media'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_SET_MESSAGE, (current_media,))
 
     def set_status(self, status):
         '''set the status to status, the status should be one of the
         constants on status.py, consider calling status.is_valid.
         Also you should convert it to the values on the library'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_CHANGE_STATUS, (status,))
 
     # actions on other contacts
 
     def set_alias(self, account, alias):
         '''set the contact alias, give an empty alias to reset'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_SET_CONTACT_ALIAS, 
+            (account, alias))
 
     def block(self, account):
         '''block an user'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_BLOCK_CONTACT, (account,))
     
     def unblock(self, account):
         '''unblock an user'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_UNBLOCK_CONTACT, (account,))
 
     def remove(self, account):
         '''remove an user'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_REMOVE_CONTACT, (account,))
     
     def add(self, account):
         '''add an user'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_ADD_CONTACT, (account,))
 
-    def move_to_group(self, account, src_group, dest_group):
+    def move_to_group(self, account, src_gid, dest_gid):
         '''move a user from src_group to dest_group'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_MOVE_TO_GROUP, (account, src_gid, 
+            dest_gid))
 
-    def add_to_group(self, account, group):
+    def add_to_group(self, account, gid):
         '''add an user to a group, return True on success'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_ADD_TO_GROUP, (account, gid))
     
-    def remove_from_group(self, account, group):
+    def remove_from_group(self, account, gid):
         '''remove an user from a group'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(sAction.ACTION_REMOVE_FROM_GROUP, (account, gid))
 
     # group stuff
 
     def add_group(self, name):
         '''add a group'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_ADD_GROUP, (name,))
 
     def rename_group(self, gid, name):
         '''rename a group'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_RENAME_GROUP, (gid, name))
 
     def remove_group(self, gid):
         '''remove a group'''
-        raise NotImplementedError("This method isn't implemented")
+        self.add_action(Action.ACTION_REMOVE_GROUP, (gid,))
 

@@ -45,9 +45,7 @@ class Controller(object):
     def on_contact_list_ready(self, core, args):
         '''callback called when the contact list is ready to be used'''
         self.window.content.contact_list.order_by_status = False
-        self.window.content.contact_list.show_offline = True
         self.window.content.contact_list.fill()
-        self.window.content.contact_list.refilter()
         self.window.content.panel.enabled = True
 
     def on_nick_change_succeed(self, core, args):

@@ -362,14 +362,14 @@ def set_message(message, response_cb,
         message, response_cb, title, message)
     window.show()
 
-def rename_group(name, response_cb, title=_("Rename group")):
+def rename_group(group, response_cb, title=_("Rename group")):
     '''show a dialog with the group name and ask to rename it, the
     response callback receives stock.ACCEPT, stock.CANCEL or stock.CLOSE
     the old and the new name.
     cb args: response, old_name, new_name
     '''
-    window = entry_window(_("New group name"), name, response_cb, 
-        title, name)
+    window = entry_window(_("New group name"), group.name, response_cb, 
+        title, group)
     window.show()
 
 def set_contact_alias(account, alias, response_cb, 

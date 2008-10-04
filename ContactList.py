@@ -39,8 +39,10 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         # the image (None for groups) the object (group or contact), 
         # the string to display and a boolean indicating if the pixbuff should
-        # be shown (False for groups, True for contacts)
-        self._model = gtk.TreeStore(gtk.gdk.Pixbuf, object, str, bool)
+        # be shown (False for groups, True for contacts), the last is the status
+        # image
+        self._model = gtk.TreeStore(gtk.gdk.Pixbuf, object, str, bool,
+            gtk.gdk.Pixbuf)
         self.model = self._model.filter_new(root=None)
         self.model.set_visible_func(self._visible_func)
 
@@ -52,24 +54,27 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         crt = gtk.CellRendererText()
         crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr = gtk.CellRendererPixbuf()
+        pbr_status = gtk.CellRendererPixbuf()
 
         column = gtk.TreeViewColumn()
         column.set_expand(True)
         
-        exp_column = gtk.TreeViewColumn()
-        exp_column.set_max_width(16)       
+        self.exp_column = gtk.TreeViewColumn()
+        self.exp_column.set_max_width(16)       
         
-        self.append_column(exp_column)
+        self.append_column(self.exp_column)
         self.append_column(column)
-        self.set_expander_column(exp_column)
+        self.set_expander_column(self.exp_column)
         
         column.pack_start(pbr, False)
         column.pack_start(crt, True)
-        column.set_expand(True)
+        column.pack_start(pbr_status, False)
         
         column.add_attribute(pbr, 'pixbuf', 0)
         column.add_attribute(crt, 'markup', 2)
         column.add_attribute(pbr, 'visible', 3)
+        column.add_attribute(pbr_status, 'visible', 3)
+        column.add_attribute(pbr_status, 'pixbuf', 4)
         
         self.set_search_column(2)
         self.set_headers_visible(False)
@@ -210,7 +215,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         if self.order_by_status:
             return None
 
-        group_data = (None, group, self.format_group(group), False)
+        group_data = (None, group, self.format_group(group), False, None)
 
         for row in self._model:
             obj = row[1]
@@ -232,7 +237,8 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         '''add a contact to the contact list, add it to the group if 
         group is not None'''
         contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact, 
-            self.format_nick(contact), True)
+            self.format_nick(contact), True, 
+            utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]))
       
         # if no group add it to the root, but check that it's not on a group
         # or in the root already
@@ -309,10 +315,15 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         '''clear the contact list'''
         self._model.clear()
 
+        # this is the best place to put this code without putting gtk code
+        # on gui.ContactList
+        self.exp_column.set_visible(not self.order_by_status)
+
     def update_contact(self, contact):
         '''update the data of contact'''
         contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact, 
-            self.format_nick(contact), True)
+            self.format_nick(contact), True,
+            utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]))
 
         for row in self._model:
             obj = row[1]
@@ -327,7 +338,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
     def update_group(self, group):
         '''update the data of group'''
-        group_data = (None, group, self.format_group(group), False)
+        group_data = (None, group, self.format_group(group), False, None)
 
         for row in self._model:
             obj = row[1]

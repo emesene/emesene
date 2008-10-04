@@ -189,11 +189,9 @@ class ContactList(Object.Object):
             # get a list of contact objects from a list of accounts
             contacts = self.contacts.get_contacts(group.contacts)
             for contact in contacts:
-                print 'add', contact.account, 'to', group.name
                 self.add_contact(contact, group)
 
         for contact in self.contacts.get_no_group():
-            print 'add to no group', contact.account
             self.add_contact(contact)
 
     def clear(self):

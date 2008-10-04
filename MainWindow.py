@@ -33,9 +33,8 @@ class MainWindow(gtk.VBox):
         self.session.protocol.connect('contact-attr-changed', 
             self._on_contact_attr_changed)
 
-        self._menu = MainMenu.MainMenu(dialog, 
-            self.session.contacts, self.session.groups, 
-                self.contact_list)
+        self._menu = MainMenu.MainMenu(dialog, self.session.account, 
+            self.contact_list)
         self._menu.signal_connect('quit-selected', self._on_quit_selected)
         self._menu.signal_connect('disconnect-selected', 
             self._on_disconnect_selected)
@@ -128,11 +127,11 @@ class MainWindow(gtk.VBox):
 
     def _on_nick_changed(self, textfield, old_text, new_text):
         '''method called when the nick is changed on the panel'''
-        self.session.protocol.do_set_nick(new_text)
+        self.session.account.set_nick(new_text)
 
     def _on_message_changed(self, textfield, old_text, new_text):
         '''method called when the nick is changed on the panel'''
-        self.session.protocol.do_set_message(new_text)
+        self.session.account.set_message(new_text)
 
     def _on_key_press(self, widget, event):
         '''method called when a key is pressed on the input widget'''

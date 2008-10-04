@@ -2,7 +2,7 @@ import e3
 import e3.Worker as Worker
 import e3.MsnSocket as MsnSocket
 import protocol.base.Action as Action
-import protocol.base.Account as Account
+from e3.Account import Account
 from protocol.base.ContactManager import ContactManager
 
 #from naf.nweb import Server
@@ -65,7 +65,7 @@ class Core(Server):
         worker = Worker(socket, session, MsnSocket)
         socket.start()
         worker.start()
-        session.account = Account(account, password, status)
+        session.account = Account(account, password, status, session.actions)
         session.protocol = self
         session.extras = {}
         session.contacts = ContactManager(account)

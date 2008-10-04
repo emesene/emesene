@@ -28,13 +28,12 @@ import protocol.base.status as status
 class MainMenu(Menu.Menu):
     '''a class that has all the fields of of the main menu'''
 
-    def __init__(self, dialog, contacts, groups, contact_list):
+    def __init__(self, dialog, account, contact_list):
         '''class contructor'''
         Menu.Menu.__init__(self)
         
         self.dialog = dialog
-        self.contacts = contacts
-        self.groups = groups
+        self.account = account
         self.contact_list = contact_list
 
         self.signal_add('quit-selected', 0)
@@ -261,7 +260,7 @@ class MainMenu(Menu.Menu):
 
     def _on_status_selected(self, item, stat):
         '''called when a status is selected'''
-        self.contacts.set_status(stat)
+        self.account.set_status(stat)
 
     def _on_by_status_toggled(self, option, value):
         '''called when order by status is toggled'''
@@ -301,21 +300,14 @@ class MainMenu(Menu.Menu):
 
     def _on_add_group_selected(self, item):
         '''called when add_group is selected'''
-        self.groups.add_dialog()
+        self.add_group_dialog()
 
     def _on_remove_group_selected(self, item):
         '''called when remove_group is selected'''
         group = self.contact_list.get_group_selected()
 
-        def _yes_no_cb(response):
-            '''callback from the confirmation dialog'''
-            if response == stock.YES:
-                self.groups.remove(group.name)
-
         if group:
-            self.dialog.yes_no(
-                _('Are you sure you want to remove group %s?') % \
-                (group.name,), _yes_no_cb)
+            self.remove_group_dialog(group.identifier, group.name)
         else:
             self.dialog.error(_('No group selected'))
 
@@ -324,27 +316,20 @@ class MainMenu(Menu.Menu):
         group = self.contact_list.get_group_selected()
         
         if group:
-            self.groups.rename_dialog(group.name)
+            self.rename_group_dialog(group)
         else:
             self.dialog.error(_('No group selected'))
 
     def _on_add_contact_selected(self, item):
         '''called when add is selected'''
-        self.contacts.add_dialog()
+        self.add_dialog()
 
     def _on_remove_selected(self, item):
         '''called when remove is selected'''
         contact = self.contact_list.get_contact_selected()
 
-        def _yes_no_cb(response):
-            '''callback from the confirmation dialog'''
-            if response == stock.YES:
-                self.contacts.remove(contact.account)
-
         if contact:
-            self.dialog.yes_no(
-                _('Are you sure you want to remove contact %s?') % \
-                (contact.account,), _yes_no_cb)
+            self.remove_dialog(contact.account)
         else:
             self.dialog.error(_('No contact selected'))
 
@@ -353,7 +338,7 @@ class MainMenu(Menu.Menu):
         contact = self.contact_list.get_contact_selected()
         
         if contact:
-            self.contacts.block(contact.account)
+            self.account.block(contact.account)
         else:
             self.dialog.error(_('No contact selected'))
 
@@ -362,7 +347,7 @@ class MainMenu(Menu.Menu):
         contact = self.contact_list.get_contact_selected()
         
         if contact:
-            self.contacts.unblock(contact.account)
+            self.account.unblock(contact.account)
         else:
             self.dialog.error(_('No contact selected'))
 
@@ -375,20 +360,151 @@ class MainMenu(Menu.Menu):
         contact = self.contact_list.get_contact_selected()
         
         if contact:
-            self.contacts.set_alias_dialog(contact.account)
+            self.set_alias_dialog(contact.account)
         else:
             self.dialog.error(_('No contact selected'))
 
     def _on_set_nick_selected(self, item):
         '''called when set nick is selected'''
-        self.contacts.set_nick_dialog()
+        self.set_nick_dialog(self.account.nick)
 
     def _on_set_message_selected(self, item):
         '''called when set message is selected'''
-        self.contacts.set_message_dialog(\
-            self.contacts.me.message)
+        self.set_personal_message_dialog(self.account.message)
 
     def _on_set_picture_selected(self, item):
         '''called when set picture is selected'''
-        self.contacts.set_picture_dialog()
+        self.set_picture_dialog()
+    
+    # dialog
 
+    def set_nick_dialog(self, old_nick):
+        '''show a dialog asking to change the nick'''
+        self.dialog.set_nick(old_nick, self.set_nick_cb)
+
+    def set_personal_message_dialog(self, old_personal_message):
+        '''show a dialog asking to change the personal message'''
+        self.dialog.set_message(old_personal_message, 
+            self.set_personal_message_cb)
+
+    def set_alias_dialog(self, account, old_alias):
+        '''show the alias dialog'''
+        self.dialog.set_contact_alias(account, old_alias, self.set_alias_cb)
+
+    def remove_dialog(self, account):
+        '''show a confirmation dialog to ask if sure to remove the
+        user, it's optional to use, but recomended'''
+        self.dialog.yes_no(
+            _("Are you sure you want to delete %s?") % (account, ),
+            self.remove_cb, account)
+    
+    def add_dialog(self):
+        '''show a dialog to ask for the account, and if the account
+        is valid, add the user'''
+        self.dialog.add_contact(self.add_cb)
+
+    # callbacks
+
+    def set_nick_cb(self, response, old_nick, new_nick):
+        '''callback for the DialogManager.set_nick method'''
+
+        if response == stock.ACCEPT:
+            if old_nick == new_nick:
+                debug('old nick and new nick are the same')
+                return
+            elif new_nick == '':
+                debug('empty new nick')
+                return
+
+            self.account.set_nick(new_nick)
+
+    def set_personal_message_cb(self, response, old_pm, new_pm):
+        '''callback for the DialogManager.set_personal_message method'''
+
+        if response == stock.ACCEPT:
+            if old_pm == new_pm:
+                debug('old and new personal messages are the same')
+                return
+
+            self.account.set_personal_message(new_pm)
+
+    def set_alias_cb(self, response, account, old_alias, new_alias):
+        '''callback for the DialogManager.set_contact_alias method,
+        the parameters and the values are described on that method'''
+
+        if response == stock.ACCEPT:
+            if old_alias == new_alias:
+                debug('old alias and new alias are the same')
+                return
+
+            self.account.set_alias(account, new_alias)
+        elif response == stock.CLEAR:
+            self.account.set_alias(account, '')
+
+    def remove_cb(self, response, account):
+        '''callback for DialogManager.yes_no, asking to confirm the 
+        user remove'''
+
+        if response == stock.YES:
+            self.account.remove(account)
+
+    def add_cb(self, response, account, groups):
+        '''callback to the add_dialog method, add the user and add him 
+        to the defined groups'''
+
+        if response == stock.ADD:
+            self.account.add(account)
+            # TODO: this doesn't work
+            if groups:
+                for group in groups:
+                    self.account.add_to_group(account, group)
+    # group dialogs
+
+    def add_group_dialog(self):
+        '''show a dialog to add a group'''
+        self.dialog.add_group(self.add_group_cb)
+
+    def rename_group_dialog(self, group):
+        '''show a dialog showing the actual name of a group
+        and asking for the new one'''
+        self.dialog.rename_group(group, self.rename_group_cb)
+
+    def remove_group_dialog(self, gid, name):
+        '''ask for confirmation on group deletion, it can be used the method
+        directly, but it's good to ask :P'''
+        self.dialog.yes_no(_(
+            _("Are you shure you want to delete the %s group?") % (name, )),
+            self.remove_group_cb, gid)
+
+    # callbacks
+
+    def add_group_cb(self, response, group_name):
+        '''callback for the DialogManager.add_group method'''
+
+        if response == stock.ACCEPT:
+            if group_name:
+                self.account.add_group(group_name)
+
+    def rename_group_cb(self, response, group, new_name):
+        '''callback called by DialogManager.rename_group'''
+
+        if response == stock.ACCEPT:
+            if group.name == new_name:
+                debug("old and new name are the same")
+            elif new_name:
+                self.account.rename_group(group.identifier, new_name)
+            else:
+                debug("new name not valid")
+
+    def remove_group_cb(self, response, gid):
+        '''callback for the DialogManager.yes_no method, asking for
+        confirmation un group delete'''
+
+        if response == stock.YES:
+            self.account.remove_group(gid)
+
+def debug(msg):
+    '''debug method, the module send the debug here, it can be changed
+    to use another debugging method'''
+
+    print 'MainMenu.py:', msg
