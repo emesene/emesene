@@ -13,6 +13,9 @@ from protocol.base.ContactManager import ContactManager
 from naf.ngobject import Server;Server.set_events(e3.EVENTS)
 from naf.ngobject import validate
 
+import protocol.base.Config as Config
+import protocol.base.ConfigDir as ConfigDir
+
 class Core(Server):
     '''the class that builds a server that exposes the e3 library with a web
     API'''
@@ -63,7 +66,7 @@ class Core(Server):
     def do_login(self, session, account, password, status):
         '''start the login process'''
         socket = MsnSocket('messenger.hotmail.com', 1863, dest_type='NS')
-        worker = Worker(socket, session, MsnSocket)
+        worker = Worker('emesene2', socket, session, MsnSocket)
         socket.start()
         worker.start()
         session.account = Account(account, password, status, session.actions)
@@ -71,7 +74,6 @@ class Core(Server):
         session.extras = {}
         session.contacts = ContactManager(account)
         session.groups = {}
-
 
         self.add_action(session, Action.ACTION_LOGIN, 
             (account, password, status))
@@ -185,13 +187,3 @@ class Core(Server):
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, account)
         self.add_action(session, Action.ACTION_SEND_MESSAGE, (cid, message))
 
-if __name__ == '__main__':
-    import protocol.base.status as status
-    import gobject
-    import time
-    gobject.threads_init()
-    core = Core()
-    #core.documentation()
-    core.run(globals())
-    core.do_login('xmxsxn@hotmail.com', 'contrasena', status.ONLINE)
-    gobject.MainLoop().run()

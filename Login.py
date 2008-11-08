@@ -1,4 +1,5 @@
 import gtk
+import gobject
 
 import gui
 import protocol.base.Account as Account
@@ -9,15 +10,32 @@ import StatusButton
 
 class Login(gtk.Alignment):
     
-    def __init__(self, callback, account=None):
+    def __init__(self, accounts, callback, account=None):
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0, 
             yscale=0.9)
 
         account = account or Account("", "", status.ONLINE)
         self.callback = callback
 
+        completion = gtk.EntryCompletion()
+        liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
+        completion.set_model(liststore)
+        pixbufcell = gtk.CellRendererPixbuf()
+        completion.pack_start(pixbufcell)
+        completion.add_attribute(pixbufcell, 'pixbuf', 1)
+        completion.set_text_column(0)
+
+        pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
+
+        for mail in accounts:
+            liststore.append([mail, pixbuf])
+
         self.txt_account = gtk.Entry()
-        self.txt_account.set_text(account.account)
+
+        if account:
+            self.txt_account.set_text(account.account)
+
+        self.txt_account.set_completion(completion)
         self.txt_account.connect('key-press-event', 
             self._on_account_key_press)
 
@@ -25,7 +43,10 @@ class Login(gtk.Alignment):
         
         self.txt_password = gtk.Entry()
         self.txt_password.set_visibility(False)
-        self.txt_password.set_text(account.password)
+
+        if account:
+            self.txt_password.set_text(account.password)
+
         self.txt_password.connect('key-press-event', 
             self._on_password_key_press)
 

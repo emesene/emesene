@@ -36,7 +36,9 @@ class Window(gtk.Window):
             self.content = None
 
     def go_login(self, callback, account=None):
-        self.content = Login.Login(callback, account)
+        # TODO: load the mails from a file
+        self.content = Login.Login(['foo@bar.com', 'bar@bar.com'], 
+            callback, account)
         self.add(self.content)
         self.content.show()
         self.content_type = 'login'

@@ -32,7 +32,7 @@ class Example(object):
             class_ = MsnSocket
 
         self.socket = class_('messenger.hotmail.com', 1863, dest_type='NS')
-        self.worker = Worker(self.socket, self.session, class_)
+        self.worker = Worker('e3_example', self.socket, self.session, class_)
 
         hdrs = {}
         hdrs[Event.EVENT_LOGIN_SUCCEED] = self._handle_login_succeed

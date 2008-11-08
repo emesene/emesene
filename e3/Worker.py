@@ -18,6 +18,8 @@ import Requester
 import protocol.base.Event as Event
 import protocol.base.Action as Action
 import protocol.base.status as status
+import protocol.base.Config as Config
+import protocol.base.ConfigDir as ConfigDir
 
 EVENTS = (\
  'login started'         , 'login info'           , 
@@ -89,11 +91,13 @@ class Worker(threading.Thread):
     '''this class represent an object that waits for commands from the queue 
     of a socket, process them and add it as events to its own queue'''
 
-    def __init__(self, socket, session, msn_socket_class):
+    def __init__(self, app_name, socket, session, msn_socket_class):
         '''class constructor'''
         threading.Thread.__init__(self)
         self.socket = socket
         self.setDaemon(True)
+
+        self.app_name = app_name
 
         self.in_login = False
         self.session = session
@@ -409,6 +413,13 @@ class Worker(threading.Thread):
             if line:
                 (key, value) = line.split(': ')
                 self.session.extras[key] = value
+
+        self.session.config = Config.Config()
+        self.session.config_dir = CondigDir.ConfigDir(self.app_name)
+        self.session.config_dir.base_dir = os.path.join(
+            self.session.config_dir.base_dir, self.session.account.account)
+        self.session.config_dir.create('')
+        self.session.config.load(self.session.config_dir.join('config'))
 
         self.session.add_event(Event.EVENT_LOGIN_SUCCEED)
         self.in_login = False
