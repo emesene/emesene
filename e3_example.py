@@ -85,7 +85,7 @@ class Example(object):
 
         # put here a mail address that exists on your the contact list of the
         # account that is logged in
-        self.start_conversation('alice@gmail.com', cid)
+        self.start_conversation('luismarianoguerra@gmail.com', cid)
         self.send_message(cid, message1)
         self.send_message(cid, message2)
         self.send_message(cid, message3)
@@ -128,6 +128,8 @@ class Example(object):
 
         return True
 
+    # Helpers
+
     def send_message(self, cid, message):
         '''send a common message'''
         account = self.session.account.account
@@ -139,7 +141,7 @@ class Example(object):
 
 if __name__ == '__main__':
     gobject.threads_init()
-    example = Example('bob@hotmail.com', 'secret', status.ONLINE, True) 
+    example = Example('foo@hotmail.com', 'secret', status.ONLINE, True) 
     example.login()
 
     gobject.timeout_add(500, example.process)

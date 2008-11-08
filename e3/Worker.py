@@ -599,8 +599,8 @@ class Worker(threading.Thread):
         (host, port) = chost.split(':')
 
         cid = time.time()
-        con = Conversation.Conversation(self.session, cid, host, int(port), 
-            user, session_id, auth_id)
+        con = Conversation.Conversation(self.session, cid, 
+            self.msn_socket_class, host, int(port), user, session_id, auth_id)
         self.conversations[cid] = con
         con.answer()
         con.start()

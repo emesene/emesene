@@ -1,6 +1,7 @@
 import e3
 import e3.Worker as Worker
 import e3.MsnSocket as MsnSocket
+#import e3.MsnHttpSocket as MsnSocket
 import protocol.base.Action as Action
 from e3.Account import Account
 from protocol.base.ContactManager import ContactManager
