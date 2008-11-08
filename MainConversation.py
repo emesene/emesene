@@ -238,7 +238,7 @@ class Conversation(gtk.VBox):
         text = 'group chat'
 
         self.header.information = Header.INFO_TPL % \
-            (text, '%d members' % (len(self.members) + 1, ''))
+            (text, '%d members' % (len(self.members) + 1,), '')
 
         self.tab_label.set_text(text)
 
