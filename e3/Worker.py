@@ -1,5 +1,6 @@
 '''a thread that handles the connection with the main server'''
 
+import os
 import time
 import Queue
 import struct
@@ -415,7 +416,7 @@ class Worker(threading.Thread):
                 self.session.extras[key] = value
 
         self.session.config = Config.Config()
-        self.session.config_dir = CondigDir.ConfigDir(self.app_name)
+        self.session.config_dir = ConfigDir.ConfigDir(self.app_name)
         self.session.config_dir.base_dir = os.path.join(
             self.session.config_dir.base_dir, self.session.account.account)
         self.session.config_dir.create('')
