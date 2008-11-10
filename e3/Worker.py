@@ -14,6 +14,7 @@ import mbi
 import common
 import XmlManager 
 from XmlParser import SSoParser
+from UbxParser import UbxParser
 import Conversation
 import Requester
 import protocol.base.Event as Event
@@ -462,34 +463,15 @@ class Worker(threading.Thread):
         if int(message.params[0]) == 0:
             return
 
-        pmessage = common.get_value_between(message.payload, '<PSM>', '</PSM>')
-        pmessage = common.unescape(pmessage)
         account = message.tid
-
         contact = self.session.contacts.contacts.get(account, None)
 
         if not contact:
             return
 
-        contact.message = pmessage
-       
-        media = common.get_value_between(message.payload, '<CurrentMedia>', 
-            '<CurrentMedia>')
-
-        mhead = media.find('\\0Music\\01\\0')
-
-        if mhead != -1:
-            media = media[mhead+12:]
-            margs = media.split('\\0')
-            media = margs[0]
-
-            for args in range(1, len(margs)):
-                media = media.replace('{%s}' % (args-1), margs[args])
-
-            media = common.unescape(media)
-                
-            contact.media = media
-
+        parsed = UbxParser(message.payload)
+        contact.message = parsed.psm
+        contact.media = parsed.current_media
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
 
     def _on_challenge(self, message):
