@@ -31,14 +31,17 @@ class Window(gtk.Window):
                 utils.safe_gtk_image_load(icon).get_pixbuf())
 
     def clear(self):
+        '''remove the content from the main window'''
         if self.get_child():
             self.remove(self.get_child())
             self.content = None
 
-    def go_login(self, callback, account=None):
-        # TODO: load the mails from a file
-        self.content = Login.Login(['foo@bar.com', 'bar@bar.com'], 
-            callback, account)
+    def go_login(self, callback, account=None, accounts=None, 
+           remember_account=None, remember_password=None, statuses=None):
+        '''draw the login window on the main window'''
+
+        self.content = Login.Login(callback, account, accounts,
+            remember_account, remember_password, statuses)
         self.add(self.content)
         self.content.show()
         self.content_type = 'login'

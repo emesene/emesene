@@ -418,9 +418,14 @@ class Worker(threading.Thread):
 
         self.session.config = Config.Config()
         self.session.config_dir = ConfigDir.ConfigDir(self.app_name)
+        # set the base dir of the config to the base dir plus the account
         self.session.config_dir.base_dir = os.path.join(
             self.session.config_dir.base_dir, self.session.account.account)
         self.session.config_dir.create('')
+        # load the global configuration
+        self.session.config.load(
+            os.path.join(self.session.config_dir.default_base_dir, 'config'))
+        # load the account configuration
         self.session.config.load(self.session.config_dir.join('config'))
 
         self.session.add_event(Event.EVENT_LOGIN_SUCCEED)

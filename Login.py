@@ -1,4 +1,5 @@
 import gtk
+import base64
 import gobject
 
 import gui
@@ -10,12 +11,17 @@ import StatusButton
 
 class Login(gtk.Alignment):
     
-    def __init__(self, accounts, callback, account=None):
+    def __init__(self, callback, account, accounts=None, remember_account=None,
+            remember_password=None, statuses=None):
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0, 
             yscale=0.9)
 
         account = account or Account("", "", status.ONLINE)
         self.callback = callback
+        self.accounts = accounts or {}
+        self.l_remember_account = remember_account or []
+        self.l_remember_password = remember_password or []
+        self.statuses = statuses or {}
 
         completion = gtk.EntryCompletion()
         liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
@@ -27,7 +33,7 @@ class Login(gtk.Alignment):
 
         pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
 
-        for mail in accounts:
+        for mail in sorted(self.accounts):
             liststore.append([mail, pixbuf])
 
         self.txt_account = gtk.Entry()
@@ -38,6 +44,8 @@ class Login(gtk.Alignment):
         self.txt_account.set_completion(completion)
         self.txt_account.connect('key-press-event', 
             self._on_account_key_press)
+        self.txt_account.connect('changed', 
+            self._on_account_changed)
 
         self.btn_status = StatusButton.StatusButton()
         
@@ -50,7 +58,13 @@ class Login(gtk.Alignment):
         self.txt_password.connect('key-press-event', 
             self._on_password_key_press)
 
+        self.remember_account = gtk.CheckButton("Remember account")
         self.remember_password = gtk.CheckButton("Remember password")
+
+        self.remember_account.connect('toggled', 
+            self._on_remember_account_toggled)
+        self.remember_password.connect('toggled', 
+            self._on_remember_password_toggled)
         
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect("clicked", self._on_connect_clicked)
@@ -76,7 +90,9 @@ class Login(gtk.Alignment):
             yscale=0.0)
         al_password = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
             yscale=0.0)
-        al_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
+        al_remember_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
+            yscale=0.2)
+        al_remember_passwd = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
             yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
             yscale=0.1)
@@ -85,14 +101,16 @@ class Login(gtk.Alignment):
 
         al_account.add(hbox_account)
         al_password.add(hbox_password)
-        al_remember.add(self.remember_password)
+        al_remember_account.add(self.remember_account)
+        al_remember_passwd.add(self.remember_password)
         al_button.add(self.b_connect)
         al_logo.add(img_logo)
 
         vbox.pack_start(al_logo, True, True, 10)
         vbox.pack_start(al_account, True, True)
         vbox.pack_start(al_password, True, True)
-        vbox.pack_start(al_remember, True, True)
+        vbox.pack_start(al_remember_account, True, True)
+        vbox.pack_start(al_remember_passwd, True, True)
         vbox.pack_start(al_button, True, True)
 
         self.add(vbox)
@@ -103,6 +121,7 @@ class Login(gtk.Alignment):
         self.txt_password.set_sensitive(sensitive)
         self.btn_status.set_sensitive(sensitive)
         self.b_connect.set_sensitive(sensitive)
+        self.remember_account.set_sensitive(sensitive)
         self.remember_password.set_sensitive(sensitive)
 
     def _on_connect_clicked(self, button):
@@ -113,9 +132,10 @@ class Login(gtk.Alignment):
         user = self.txt_account.get_text()
         password = self.txt_password.get_text()
         account = Account(user, password, self.btn_status.status)
-        remember = self.remember_password.get_active()
+        remember_password = self.remember_password.get_active()
+        remember_account = self.remember_account.get_active()
         self.set_sensitive(False)
-        self.callback(account, remember)
+        self.callback(account, remember_account, remember_password)
 
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
@@ -127,3 +147,40 @@ class Login(gtk.Alignment):
         if event.keyval == gtk.keysyms.Return:
             self.txt_password.grab_focus()
 
+    def _on_account_changed(self, entry):
+        '''called when the content of the account entry changes'''
+        self._update_fields(self.txt_account.get_text()) 
+
+    def _update_fields(self, account):   
+        '''update the different fields according to the account that is
+        on the account entry'''
+        if account in self.l_remember_password:
+            self.remember_password.set_active(True)
+        elif account in self.l_remember_account:
+            self.remember_account.set_active(True)
+        else:
+            self.remember_account.set_active(False)
+
+        if account in self.accounts:
+            self.txt_password.set_text(base64.b64decode(self.accounts[account]))
+        else:
+            self.txt_password.set_text('')
+
+        if account in self.statuses:
+            try:
+                self.btn_status.set_status(int(self.statuses[account]))
+            except ValueError:
+                print 'invalid status'
+        else:
+            self.btn_status.set_status(status.ONLINE)
+            
+
+    def _on_remember_account_toggled(self, button):
+        '''called when the remember account check button is toggled'''
+        if not self.remember_account.get_active():
+            self.remember_password.set_active(False)
+
+    def _on_remember_password_toggled(self, button):
+        '''called when the remember password check button is toggled'''
+        if self.remember_password.get_active():
+            self.remember_account.set_active(True)
