@@ -1,4 +1,6 @@
 import time
+import Queue
+import threading
 import sqlite3.dbapi2 as sqlite
 
 class Account(object):
@@ -320,7 +322,7 @@ class Logger(object):
 
     # utility methods
 
-    def add_event(self, event, src, dest, payload):
+    def add_event(self, event, payload, src, dest=None):
         '''add an event on the fact and the dimensiones using the actual time'''
         id_event = self.insert_event(event)
         id_src = self.insert_account(src.account, src.status, src.nick, 
@@ -404,6 +406,108 @@ class Logger(object):
 
         return [(x[0], x[1], x[2]) for x in self.cursor.fetchall()]
 
+class LoggerProcess(threading.Thread):
+    '''a process that exposes a thread safe api to log events of a session'''
+
+    def __init__(self, path):
+        '''constructor'''
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
+
+        self.path = path
+        self.logger = None
+        self.input = Queue.Queue()
+        self.output = Queue.Queue()
+
+        self.actions = {}
+
+    def run(self):
+        '''main method'''
+        data = None
+        self.logger = Logger(self.path)
+
+        self.actions['get_event'] = self.logger.get_event
+        self.actions['get_nicks'] = self.logger.get_nicks
+        self.actions['get_messages'] = self.logger.get_messages
+        self.actions['get_status'] = self.logger.get_status
+        self.actions['get_images'] = self.logger.get_images
+        self.actions['get_sent_messages'] = self.logger.get_sent_messages
+        self.actions['get_chats'] = self.logger.get_chats
+
+        while True:
+            try:
+                data = self.input.get(True)
+                quit = self._process(data)
+
+                if quit:
+                    self.logger.close()
+                    print 'closing logger thread'
+                    break
+
+            except Queue.Empty:
+                pass
+
+    def _process(self, data):
+        '''process the received data'''
+        (action, args) = data
+
+        if action == 'log':
+            (event, payload, src, dest) = args
+            self.logger.add_event(event, payload, src, dest)
+        elif action == 'quit':
+            return True
+        else:
+            if action in self.actions:
+
+                try:
+                    self.output.put((action, self.actions[action](*args)))
+                except:
+                    print 'error calling action', action, 'on LoggerProcess'
+        
+        return False
+
+    def log(self, event, payload, src, dest=None):
+        '''add an event to the log database'''
+        self.input.put(('log', (event, payload, src, dest)))
+
+    def quit(self):
+        '''stop the logger thread, and close the logger'''
+        self.input.put(('quit', None))
+
+    def get_event(self, account, event, limit=10):
+        '''return the last # events of account, if event or account doesnt 
+        exist return None'''
+        self.input.put(('get_event', (account, event, limit)))
+
+    def get_nicks(self, account, limit=10):
+        '''return the last # nicks from account, where # is the limit value'''
+        self.input.put(('get_nicks', (account, limit)))
+
+    def get_messages(self, account, limit=10):
+        '''return the last # messages from account, where # is the limit value
+        '''
+        self.input.put(('get_message', (account, limit)))
+
+    def get_status(self, account, limit=10):
+        '''return the last # status from account, where # is the limit value
+        '''
+        self.input.put(('get_status', (account, limit)))
+
+    def get_images(self, account, limit=10):
+        '''return the last # images from account, where # is the limit value
+        '''
+        self.input.put(('get_images', (account, limit)))
+
+    def get_sent_messages(self, src, dest, limit=10):
+        '''return the last # sent from src to dest , where # is the limit value
+        '''
+        self.input.put(('get_sent_messages', (src, dest, limit)))
+
+    def get_chats(self, src, dest, limit=10):
+        '''return the last # sent from src to dest or from dest to src , 
+        where # is the limit value
+        '''
+        self.input.put(('get_chats', (src, dest, limit)))
 
 def test():
     '''test the logger class'''
@@ -486,7 +590,7 @@ def test():
             dest = None
 
         t1 = time.time()
-        logger.add_event(event, src, dest, payload)
+        logger.add_event(event, payload, src, dest)
 
         if event == 'message':
             print time.time() - t1, event, 'from', src, 'to', dest, ':', payload

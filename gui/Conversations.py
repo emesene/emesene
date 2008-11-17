@@ -1,4 +1,4 @@
-import protocol.base.Object as Object
+import protocol.Object as Object
 
 class Conversations(Object):
     '''this class contains one or more ConversationBase objects and allows

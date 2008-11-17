@@ -22,8 +22,8 @@ _ = gettext.gettext
 
 import gui
 import Menu
-import protocol.base.stock as stock
-import protocol.base.status as status
+import protocol.stock as stock
+import protocol.status as status
 
 class MainMenu(Menu.Menu):
     '''a class that has all the fields of of the main menu'''

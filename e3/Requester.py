@@ -6,9 +6,9 @@ import threading
 
 import XmlParser
 import XmlManager
-import protocol.base.Event as Event
-import protocol.base.Group as Group
-import protocol.base.Contact as Contact
+import protocol.Event as Event
+import protocol.Group as Group
+import protocol.Contact as Contact
 
 from Command import Command
 import common
@@ -384,7 +384,7 @@ class RemoveContact(Requester):
 
 class ChangeNick(Requester):
     '''make the request to change the nick on the server'''
-    def __init__(self, session, nick, command_queue):
+    def __init__(self, session, nick, account, command_queue):
         '''command_queue is a reference to a queue that is used
         by the worker to get commands that other threads need to 
         send'''
@@ -395,6 +395,7 @@ class ChangeNick(Requester):
             common.escape(nick)))
 
         self.nick = nick
+        self.account = account
         self.command_queue = command_queue
 
     def handle_response(self, request, response):
@@ -402,7 +403,9 @@ class ChangeNick(Requester):
         if response.status == 200:
             self.command_queue.put(Command('PRP', params=('MFN', 
                 urllib.quote(self.nick))))
+            self.session.contacts.me.nick = self.nick
             self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, self.nick)
+            self.session.logger.log('nick change', self.nick, self.account)
         else:
             print '\n', response.body, '\n', request.body, '\n'
             self.session.add_event(Event.EVENT_NICK_CHANGE_FAILED, self.nick)

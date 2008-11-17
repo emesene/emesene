@@ -1,6 +1,6 @@
-import protocol.base.status as status
-import protocol.base.Object as Object
-import protocol.base.validator as validator
+import protocol.status as status
+import protocol.Object as Object
+import protocol.validator as validator
 
 class UserPanel(Object.Object):
     '''this class represents a component that allows the user to change all his

@@ -6,13 +6,13 @@ import e3.Worker as Worker
 import e3.MsnHttpSocket as MsnHttpSocket
 import e3.MsnSocket as MsnSocket
 
-from protocol.base import status
-from protocol.base import Event
-from protocol.base import Action
-from protocol.base import Session
-import protocol.base.Account as Account
+from protocol import status
+from protocol import Event
+from protocol import Action
+from protocol import Session
+import protocol.Account as Account
 
-from protocol.base.ContactManager import ContactManager
+from protocol.ContactManager import ContactManager
 
 # i will use the gobject main loop, but you can use what you want..
 import gobject

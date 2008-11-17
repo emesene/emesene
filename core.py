@@ -2,9 +2,9 @@ import e3
 import e3.Worker as Worker
 import e3.MsnSocket as MsnSocket
 #import e3.MsnHttpSocket as MsnSocket
-import protocol.base.Action as Action
+import protocol.Action as Action
 from e3.Account import Account
-from protocol.base.ContactManager import ContactManager
+from protocol.ContactManager import ContactManager
 
 #from naf.nweb import Server
 #from naf.nweb import validate
@@ -12,9 +12,6 @@ from protocol.base.ContactManager import ContactManager
 #from naf.nlocal import validate
 from naf.ngobject import Server;Server.set_events(e3.EVENTS)
 from naf.ngobject import validate
-
-import protocol.base.Config as Config
-import protocol.base.ConfigDir as ConfigDir
 
 class Core(Server):
     '''the class that builds a server that exposes the e3 library with a web

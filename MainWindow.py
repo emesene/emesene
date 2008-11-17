@@ -131,7 +131,7 @@ class MainWindow(gtk.VBox):
 
     def _on_message_changed(self, textfield, old_text, new_text):
         '''method called when the nick is changed on the panel'''
-        self.session.account.set_message(new_text)
+        self.session.account.set_personal_message(new_text)
 
     def _on_key_press(self, widget, event):
         '''method called when a key is pressed on the input widget'''
@@ -178,9 +178,9 @@ class MainWindow(gtk.VBox):
         '''do some test to the contact list'''
         import random
         import string
-        import protocol.base.Contact as Contact
-        import protocol.base.Group as Group
-        import protocol.base.status as status
+        import protocol.Contact as Contact
+        import protocol.Group as Group
+        import protocol.status as status
         self.contact_list.show_by_group = True
 
         def random_string(length=6):

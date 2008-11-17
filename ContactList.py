@@ -24,9 +24,9 @@ import gui
 import utils
 import dialog
 import gui.ContactList
-import protocol.base.status as status
-from protocol.base.Group import Group
-from protocol.base.Contact import Contact
+import protocol.status as status
+from protocol.Group import Group
+from protocol.Contact import Contact
 
 class ContactList(gui.ContactList.ContactList, gtk.TreeView):
     '''a gtk implementation of gui.ContactList'''
@@ -403,7 +403,7 @@ def test():
     import dialog
     import string
     import random
-    import protocol.base.ContactManager as ContactManager
+    import protocol.ContactManager as ContactManager
 
     def _on_contact_selected(contact_list, contact):
         '''callback for the contact-selected signal'''

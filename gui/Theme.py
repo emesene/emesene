@@ -1,5 +1,5 @@
 import os
-import protocol.base.status as status
+import protocol.status as status
 
 class Theme(object):
     '''this class contains all the paths and information regarding a theme'''

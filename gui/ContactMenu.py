@@ -18,7 +18,7 @@
 '''a class that represent a contextual menu of a contact'''
 
 import Menu
-import protocol.base.stock as stock
+import protocol.stock as stock
 
 # TODO: remove this
 _ = lambda x: x

@@ -1,8 +1,10 @@
 import Queue
 import threading
 
-import protocol.base.Action as Action
-import protocol.base.Event as Event
+import protocol.Contact
+import protocol.Action as Action
+import protocol.Event as Event
+import protocol.Logger as Logger
 import MsnMessage
 
 class Conversation(threading.Thread):
@@ -84,6 +86,11 @@ class Conversation(threading.Thread):
 
             try:
                 cmd = self.command_queue.get(True, 0.1)
+
+                if cmd == 'quit':
+                    print 'exiting conversation', self.cid
+                    break
+
                 self.socket.send_command(cmd.command, cmd.params, cmd.payload)
             except Queue.Empty:
                 pass
@@ -104,6 +111,18 @@ class Conversation(threading.Thread):
                 message.type == MsnMessage.Message.TYPE_NUDGE:
             self.session.add_event(Event.EVENT_CONV_MESSAGE, 
                 self.cid, message.account, message)
+
+            # log the message
+            if message.type != MsnMessage.Message.TYPE_TYPING:
+                contact = self.session.contacts.get(message.account)
+
+                if contact is None:
+                    contact = protocol.Contact.Contact(message.account)
+
+                account =  Logger.Account(None, contact.account, contact.status,
+                    contact.nick, contact.message, contact.picture)
+
+                self.session.logger.log('message', message.format(), account)
         
     def _on_usr(self, message):
         '''handle the message'''
@@ -224,6 +243,12 @@ class Conversation(threading.Thread):
         if not self.started:
             self.pending_messages.append(message)
         else:
-            print 'actual tid', self.socket.tid, type(self.socket.tid)
             self.sent_messages[self.socket.tid] = message
             self.socket.send_command('MSG', ('A',), message.format())
+
+            # log the message
+            contact = self.session.contacts.me
+            account =  Logger.Account(None, contact.account, contact.status,
+                contact.nick, contact.message, contact.picture)
+
+            self.session.logger.log('message', message.format(), account)

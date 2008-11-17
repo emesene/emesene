@@ -17,15 +17,15 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import protocol.base.Account
-import protocol.base.Action as Action
+import protocol.Account
+import protocol.Action as Action
 
-class Account(protocol.base.Account):
+class Account(protocol.Account):
     '''a class to handle the account'''
 
     def __init__(self, account, password, status, actions):
         '''constructor'''
-        protocol.base.Account.__init__(self, account, password, status)
+        protocol.Account.__init__(self, account, password, status)
         self.actions = actions
         
         self.nick = account

@@ -4,7 +4,7 @@ import functools
 import Queue
 import inspect
 
-import protocol.base.Action as Action
+import protocol.Action as Action
 
 class Session(object):
     '''base class for session object, contains basic session information'''

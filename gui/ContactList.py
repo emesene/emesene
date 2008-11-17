@@ -16,8 +16,8 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''a abstract object that define the API of a contact list and some behavior'''
-import protocol.base.status as status
-import protocol.base.Object as Object
+import protocol.status as status
+import protocol.Object as Object
 
 class ContactList(Object.Object):
     '''an abstract class that defines the api that the contact list should

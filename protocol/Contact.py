@@ -35,7 +35,7 @@ class Contact(object):
         self.status = _status
         self.alias = alias
         self.blocked = blocked
-        self.picture = None
+        self.picture = ''
         self.groups = []
 
         # extra atributes (use contact.attrs.get("attr", "default"))

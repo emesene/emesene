@@ -20,7 +20,7 @@
 import Menu
 import gui
 
-import protocol.base.status as status
+import protocol.status as status
 
 class StatusMenu(Menu.Menu):
     '''a class that represents a menu popup to select a status'''

@@ -1,27 +1,29 @@
 '''a thread that handles the connection with the main server'''
 
 import os
+import md5
 import time
 import Queue
 import struct
 import urllib
-import md5
 import httplib
 import urlparse
 import threading
 
 import mbi
 import common
+import Requester
 import XmlManager 
+import Conversation
+import protocol.Event as Event
+import protocol.Action as Action
+import protocol.status as status
+import protocol.Logger as Logger
+import protocol.Config as Config
+import protocol.ConfigDir as ConfigDir
+
 from XmlParser import SSoParser
 from UbxParser import UbxParser
-import Conversation
-import Requester
-import protocol.base.Event as Event
-import protocol.base.Action as Action
-import protocol.base.status as status
-import protocol.base.Config as Config
-import protocol.base.ConfigDir as ConfigDir
 
 EVENTS = (\
  'login started'         , 'login info'           , 
@@ -67,27 +69,27 @@ Event.set_constants(EVENTS)
 Action.set_constants(ACTIONS)
 
 STATUS_MAP = {}
-STATUS_MAP[status.ONLINE] = 'NLN'
-STATUS_MAP[status.OFFLINE] = 'HDN'
 STATUS_MAP[status.BUSY] = 'BSY'
 STATUS_MAP[status.AWAY] = 'AWY'
 STATUS_MAP[status.IDLE] = 'IDL'
+STATUS_MAP[status.ONLINE] = 'NLN'
+STATUS_MAP[status.OFFLINE] = 'HDN'
 
 STATUS_MAP_REVERSE = {}
-STATUS_MAP_REVERSE['NLN'] = status.ONLINE
-STATUS_MAP_REVERSE['HDN'] = status.OFFLINE
 STATUS_MAP_REVERSE['BSY'] = status.BUSY
 STATUS_MAP_REVERSE['AWY'] = status.AWAY
 STATUS_MAP_REVERSE['BRB'] = status.AWAY
 STATUS_MAP_REVERSE['PHN'] = status.AWAY
 STATUS_MAP_REVERSE['LUN'] = status.AWAY
 STATUS_MAP_REVERSE['IDL'] = status.IDLE
+STATUS_MAP_REVERSE['NLN'] = status.ONLINE
+STATUS_MAP_REVERSE['HDN'] = status.OFFLINE
 
-CLIENT_ID = 0x50000000 | 0x2  # msnc5 + reset capabilities
-CLIENT_ID |= 0x4     # ink
+CLIENT_ID = 0x4     # ink
 CLIENT_ID |= 0x20    # multi-packet MIME messages
 CLIENT_ID |= 0x8000  # winks
 CLIENT_ID |= 0x40000 # voice clips
+CLIENT_ID |= 0x50000000 | 0x2  # msnc5 + reset capabilities
 
 class Worker(threading.Thread):
     '''this class represent an object that waits for commands from the queue 
@@ -219,6 +221,11 @@ class Worker(threading.Thread):
                 if action.id_ == Action.ACTION_QUIT:
                     print 'closing thread'
                     self.socket.input.put('quit')
+                    self.session.logger.quit()
+
+                    for (cid, conversation) in self.conversations.iteritems():
+                        conversation.command_queue.put('quit')
+
                     break
 
                 self._process_action(action)
@@ -346,6 +353,13 @@ class Worker(threading.Thread):
         self.socket.send_command('CHG', (STATUS_MAP[stat], str(CLIENT_ID), '0'))
         self.session.add_event(Event.EVENT_STATUS_CHANGE_SUCCEED, stat)
 
+        # log the status
+        contact = self.session.contacts.me
+        account =  Logger.Account(None, contact.account, stat, 
+            contact.nick, contact.message, contact.picture)
+
+        self.session.logger.log('status change', str(stat), account)
+
     def _on_version(self, message):
         '''handle version'''
         self.socket.send_command('CVR', 
@@ -462,6 +476,10 @@ class Worker(threading.Thread):
         # don't genetate an event here, because it's after the client
         # requests the contact list
 
+        self.session.logger.log('status change', str(status_), 
+            Logger.Account(None, contact.account, contact.status, contact.nick,
+                contact.message, contact.picture))
+
     def _on_information_change(self, message):
         '''handle the change of the information of a contact (personal 
         message)'''
@@ -478,6 +496,9 @@ class Worker(threading.Thread):
         contact.message = parsed.psm
         contact.media = parsed.current_media
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
+        self.session.logger.log('message change', contact.message, 
+            Logger.Account(None, contact.account, contact.status, contact.nick,
+                contact.message, contact.picture))
 
     def _on_challenge(self, message):
         '''handle the challenge sent by the server'''
@@ -500,6 +521,7 @@ class Worker(threading.Thread):
             return
 
         contact.status = status_
+        old_nick = contact.nick
         contact.nick = nick
 
         if params_length == 4:
@@ -507,7 +529,14 @@ class Worker(threading.Thread):
             contact.attrs['CID'] = int(message.params[2])
         
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
+        account =  Logger.Account(None, contact.account, contact.status, 
+            contact.nick, contact.message, contact.picture)
 
+        self.session.logger.log('status change', str(status_), account)
+
+        if old_nick != nick:
+            self.session.logger.log('nick change', str(status_), account)
+            
         # TODO: here we should check the old and the new msnobj and request the
         # new image if needed
 
@@ -522,6 +551,9 @@ class Worker(threading.Thread):
         contact.status = status.OFFLINE
         
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
+        self.session.logger.log('status change', str(status.OFFLINE), 
+            Logger.Account(None, contact.account, contact.status, contact.nick,
+                contact.message, contact.picture))
 
     def _on_conversation_invitation(self, message):
         '''handle the invitation to start a conversation'''
@@ -725,11 +757,24 @@ class Worker(threading.Thread):
             common.escape(message) + '</PSM><CurrentMedia></CurrentMedia>' + \
             '<MachineGuid></MachineGuid></Data>')
         self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
+        self.session.contacts.me.message = message
+
+        # log the change
+        contact = self.session.contacts.me
+        account =  Logger.Account(None, contact.account, contact.status, 
+            contact.nick, message, contact.picture)
+
+        self.session.logger.log('message change', message, account)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK
         '''
-        Requester.ChangeNick(self.session, nick, self.command_queue).start()
+        contact = self.session.contacts.me
+        account =  Logger.Account(None, contact.account, contact.status, 
+            nick, contact.message, contact.picture)
+
+        Requester.ChangeNick(self.session, nick, account, 
+            self.command_queue).start()
 
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE

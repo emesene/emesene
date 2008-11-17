@@ -17,7 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''an abstract class to define menus, and their content'''
 
-import protocol.base.Object as Object
+import protocol.Object as Object
 
 class Accel(object):
     '''an abstract class representing an accel (for example Ctrl+Q)'''

@@ -4,7 +4,7 @@ import gui
 import Menu
 import utils
 import gui.StatusMenu
-import protocol.base.status as status
+import protocol.status as status
 
 class StatusButton(gtk.Button):
     '''a cutton that when clicked displays a popup that allows the user to

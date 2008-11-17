@@ -19,7 +19,7 @@
 
 import Queue
 
-from protocol.base.Event import Event
+from protocol.Event import Event
 import ContactManager
 
 class Session(object):

@@ -1,5 +1,6 @@
 import sys
 import gtk
+import time
 import base64
 import gobject
 
@@ -8,9 +9,10 @@ import dialog
 import Window
 
 import e3
-from protocol.base import Action
-from protocol.base import Config
-from protocol.base import ConfigDir
+from protocol import Action
+from protocol import Config
+from protocol import ConfigDir
+from protocol import Logger
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -36,6 +38,9 @@ class Controller(object):
 
     def on_close(self):
         '''called on close'''
+        self.core.do_quit()
+        self.window.hide()
+        time.sleep(2)
         sys.exit(0)
 
     def on_login_succeed(self, core, args):
@@ -110,6 +115,9 @@ class Controller(object):
 
         self._set_accounts()
 
+        self.core.session.logger = Logger.LoggerProcess(
+            self.config_dir.join(account.account, 'log'))
+        self.core.session.logger.start()
         self.core.do_login(account.account, account.password, account.status)
 
     def on_new_conversation(self, core, args):

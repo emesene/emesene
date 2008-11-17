@@ -22,7 +22,7 @@ import os
 import gtk
 import gobject
 
-import protocol.base.stock as stock
+import protocol.stock as stock
 
 # TODO: remove this
 _ = lambda x: x
