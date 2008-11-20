@@ -122,7 +122,9 @@ class Conversation(threading.Thread):
                 account =  Logger.Account(None, contact.account, contact.status,
                     contact.nick, contact.message, contact.picture)
 
-                self.session.logger.log('message', message.format(), account)
+                # we remove the content type part since it's always equal
+                self.session.logger.log('message', 
+                    message.format().split('\r\n', 1)[1], account)
         
     def _on_usr(self, message):
         '''handle the message'''

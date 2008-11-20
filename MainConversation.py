@@ -5,6 +5,7 @@ import gobject
 
 import gui
 import utils
+import protocol.status
 
 from RichBuffer import RichBuffer
 from e3 import Message
@@ -12,13 +13,15 @@ from e3 import Message
 class MainConversation(gtk.Notebook):
     '''the main conversation, it only contains other widgets'''
 
-    def __init__(self, session):
+    def __init__(self, session, on_last_close):
         '''class constructor'''
         gtk.Notebook.__init__(self)
         self.set_scrollable(True)
         self.popup_enable()
 
         self.session = session
+        self.on_last_close = on_last_close
+
         self.conversations = {}
         if self.session:
             self.session.protocol.connect('conv-message', 
@@ -70,6 +73,8 @@ class MainConversation(gtk.Notebook):
 
         if conversation:
             conversation.on_contact_joined(account)
+        else:
+            print 'conversation is None'
 
     def _on_contact_left(self, protocol, args):
         '''called when a contact leaves the conversation'''
@@ -118,15 +123,28 @@ class MainConversation(gtk.Notebook):
                 if conversation.members == members:
                     return (True, conversation)
 
-        label = gtk.Label('conversation')
-        label.set_ellipsize(pango.ELLIPSIZE_END)
 
-        conversation = Conversation(self.session, cid, label, members)
+        conversation = Conversation(self.session, cid, None, members)
+        label = TabWidget('Connecting', self._on_tab_close, conversation)
+        label.set_image(gui.theme.connect)
+        conversation.tab_label = label
         self.conversations[cid] = conversation
-        self.append_page(conversation, label)
+        self.append_page_menu(conversation, label)
         self.set_tab_label_packing(conversation, True, True, gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
         return (False, conversation)
+
+    def _on_tab_close(self, button, conversation):
+        '''called when the user clicks the close button on a tab'''
+        # TODO: we can check the last message timstamp and if it's less than
+        # certains seconds, inform that there is a new message (to avoid 
+        # closing a tab instants after you receive a new message)
+
+        if self.get_n_pages() == 1:
+            self.on_last_close()
+
+        page_num = self.page_num(conversation)
+        self.remove_page(page_num)
 
 class Conversation(gtk.VBox):
     '''a widget that contains all the components inside'''
@@ -164,10 +182,6 @@ class Conversation(gtk.VBox):
         if len(self.members) == 0:
             self.header.information = Header.INFO_TPL % \
                 ('connecting', 'creating conversation', '')
-        elif len(self.members) == 1:
-            self.set_data(self.members[0])
-        else:
-            self.set_group_data()
 
         self.header.set_image(gui.theme.user)
         self.info.first = utils.safe_gtk_image_load(gui.theme.logo)
@@ -192,20 +206,20 @@ class Conversation(gtk.VBox):
         if account not in self.members:
             self.members.append(account)
 
-            if len(self.members) == 1:
-                self.set_data(account)
-            else:
-                self.set_group_data()
+        if len(self.members) == 1:
+            self.set_data(account)
+        else:
+            self.set_group_data()
 
     def on_contact_left(self, account):
         '''called when a contact lefts the conversation'''
         if account in self.members:
             self.members.remove(account)
 
-            if len(self.members) == 1:
-                self.set_data(self.members[0])
-            elif len(self.members) > 1:
-                self.set_group_data()
+        if len(self.members) == 1:
+            self.set_data(self.members[0])
+        elif len(self.members) > 1:
+            self.set_group_data()
 
     def on_group_started(self):
         '''called when a group conversation starts'''
@@ -230,7 +244,9 @@ class Conversation(gtk.VBox):
             nick = account
 
         self.header.information = Header.INFO_TPL % (nick, message, account)
-        self.tab_label.set_markup(nick)
+        self.tab_label.set_text(nick)
+        self.tab_label.set_image(gui.theme.status_icons.get(contact.status, 
+            protocol.status.OFFLINE))
 
     def set_group_data(self):
         '''set the data of the conversation to reflect a group chat'''
@@ -241,6 +257,7 @@ class Conversation(gtk.VBox):
             (text, '%d members' % (len(self.members) + 1,), '')
 
         self.tab_label.set_text(text)
+        self.tab_label.set_image(gui.theme.group_chat) 
 
 class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
@@ -249,7 +266,7 @@ class TextBox(gtk.ScrolledWindow):
     def __init__(self):
         '''constructor'''
         gtk.ScrolledWindow.__init__(self)
-        self.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
         self.textbox = gtk.TextView()
         self.textbox.set_left_margin(6)
@@ -397,6 +414,48 @@ class ContactInfo(gtk.VBox):
         return self._last
 
     last = property(fget=_get_last, fset=_set_last)
+
+class TabWidget(gtk.HBox):
+    '''a widget that is placed on the tab on a notebook'''
+
+    def __init__(self, text, on_close_clicked, *args):
+        '''constructor'''
+        gtk.HBox.__init__(self)
+        self.set_spacing(4)
+
+        self.image = gtk.Image()
+        self.label = gtk.Label(text)
+        self.close = gtk.Button()
+        self.close.set_relief(gtk.RELIEF_NONE)
+        self.close.set_image(gtk.image_new_from_stock(gtk.STOCK_CLOSE, 
+            gtk.ICON_SIZE_MENU))
+
+        self.label.set_max_width_chars(20)
+        self.label.set_use_markup(True)
+
+        self.pack_start(self.image, False)
+        self.pack_start(self.label, True, True)
+        self.pack_start(self.close, False)
+
+        self.image.show()
+        self.label.show()
+        self.close.show()
+
+        self.close.connect('clicked', on_close_clicked, *args)
+
+    def set_image(self, path):
+        '''set the image from path'''
+        if utils.file_readable(path):
+            self.image.set_from_file(path)
+            self.image.show()
+            return True
+
+        return False
+
+    def set_text(self, text):
+        '''set the text of the label'''
+        self.label.set_markup(text)
+
 
 if __name__ == '__main__':
     import gui

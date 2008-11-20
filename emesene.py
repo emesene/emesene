@@ -40,6 +40,10 @@ class Controller(object):
         '''called on close'''
         self.core.do_quit()
         self.window.hide()
+
+        while gtk.events_pending():
+            gtk.main_iteration(False)
+
         time.sleep(2)
         sys.exit(0)
 
@@ -207,4 +211,5 @@ if __name__ == "__main__":
     gtk.gdk.threads_init()
     controller = Controller()
     controller.start()
+    gtk.quit_add(0, controller.on_close)
     gtk.main()

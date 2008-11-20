@@ -56,7 +56,8 @@ class Window(gtk.Window):
 
     def go_conversation(self, session):
         '''change to a conversation window'''
-        self.content = MainConversation.MainConversation(session)
+        self.content = MainConversation.MainConversation(session, 
+            self._on_last_tab_close)
         self.add(self.content)
         self.content.show()
         self.content_type = 'conversation'
@@ -70,6 +71,12 @@ class Window(gtk.Window):
         '''called when a key is pressed on the window'''
         if self.content_type == 'main':
             self.content._on_key_press(widget, event)
+
+    def _on_last_tab_close(self):
+        '''do the action when the last tab is closed on a conversation window
+        '''
+        self.cb_on_close()
+        self.hide()
 
 def test():
     def callback(account, remember):
