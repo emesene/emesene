@@ -35,7 +35,7 @@ class Server(nlocal.Server, gobject.GObject):
 
                 if event.id_ in self.event_to_name:
                     event_name = self.event_to_name[event.id_].replace(' ', '-')
-                    print 'emiting:', event_name, 'args:', event.args
+                    #print 'emiting:', event_name, 'args:', event.args
                     self.emit(event_name, event.args)
             except Queue.Empty:
                 break

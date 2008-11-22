@@ -64,7 +64,7 @@ class Conversation(threading.Thread):
 
     def _process(self, message):
         '''process a command and call the respective handler'''
-        print '<c<', message
+        #print '<c<', message
         handler = self._handlers.get(message.command, None)
 
         if handler:
@@ -119,12 +119,19 @@ class Conversation(threading.Thread):
                 if contact is None:
                     contact = protocol.Contact.Contact(message.account)
 
-                account =  Logger.Account(None, contact.account, contact.status,
-                    contact.nick, contact.message, contact.picture)
+                account =  Logger.Account(None, None, contact.account, 
+                    contact.status, contact.nick, contact.message, 
+                    contact.picture)
 
                 # we remove the content type part since it's always equal
-                self.session.logger.log('message', 
-                    message.format().split('\r\n', 1)[1], account)
+                msgstr = message.format().split('\r\n', 1)[1]
+                # remove the Content-type, X-MMS-IM-Format and TypingUser 
+                msgstr = msgstr.replace('Content-Type: ', '')
+                msgstr = msgstr.replace('X-MMS-IM-Format: ', '')
+                msgstr = msgstr.replace('TypingUser: ', '')
+
+                self.session.logger.log('message', contact.status, msgstr, 
+                    account)
         
     def _on_usr(self, message):
         '''handle the message'''
@@ -250,7 +257,8 @@ class Conversation(threading.Thread):
 
             # log the message
             contact = self.session.contacts.me
-            account =  Logger.Account(None, contact.account, contact.status,
-                contact.nick, contact.message, contact.picture)
+            account =  Logger.Account(None, None, contact.account, 
+                contact.status, contact.nick, contact.message, contact.picture)
 
-            self.session.logger.log('message', message.format(), account)
+            self.session.logger.log('message', contact.status, message.format(),
+                account)

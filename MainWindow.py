@@ -26,6 +26,7 @@ class MainWindow(gtk.VBox):
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
+        scroll.set_border_width(2)
         self.session = session
         self.on_new_conversation = on_new_conversation
         self.on_close = on_close

@@ -52,7 +52,6 @@ class MainMenu(Menu.Menu):
         self.append(self._build_file(logged_in))
         
         if logged_in:
-            self.append(self._build_view(logged_in))
             self.append(self._build_actions(logged_in))
 
         self.append(self._build_options(logged_in))
@@ -91,50 +90,6 @@ class MainMenu(Menu.Menu):
 
         return self.file_menu
 
-    def _build_view(self, logged_in):
-        '''build and return the view menu'''
-        self.view_menu = Menu.Menu(_('_View'))
-
-        if self.contact_list.order_by_group:
-            index = 1
-        else:
-            index = 0
-            
-
-        self.order_option = Menu.Option(index)
-        self.by_status_option = Menu.Radio(_('Order by _status'))
-        self.by_status_option.signal_connect('toggled', 
-            self._on_by_status_toggled)
-        self.by_group_option = Menu.Radio(_('Order by _group'))
-        self.by_group_option.signal_connect('toggled', 
-            self._on_by_group_toggled)
-
-        self.order_option.append(self.by_status_option)
-        self.order_option.append(self.by_group_option)
-
-        self.show_by_nick_option = Menu.CheckBox(_('Show by _nick'),
-            self.contact_list.show_nick)
-        self.show_by_nick_option.signal_connect('toggled', 
-            self._on_by_nick_toggled)
-
-        self.show_offline_option = Menu.CheckBox(_('Show _offline'),
-            self.contact_list.show_offline)
-        self.show_offline_option.signal_connect('toggled', 
-            self._on_show_offline_toggled)
-
-        self.show_empty_groups_option = Menu.CheckBox(_('Show _empty groups'),
-            self.contact_list.show_empty_groups)
-        self.show_empty_groups_option.signal_connect('toggled', 
-            self._on_empty_groups_toggled)
-
-        self.view_menu.append(self.order_option)
-        self.view_menu.append(Menu.Item('-'))
-        self.view_menu.append(self.show_by_nick_option)
-        self.view_menu.append(self.show_offline_option)
-        self.view_menu.append(self.show_empty_groups_option)
-
-        return self.view_menu
-        
     def _build_actions(self, logged_in):
         '''build and return the actions menu'''
         self.actions_menu = Menu.Menu(_('_Actions'))
@@ -222,11 +177,50 @@ class MainMenu(Menu.Menu):
     def _build_options(self, logged_in):
         '''build and return the option menu'''
         self.option_menu = Menu.Menu(_('_Options'))
+
+        if self.contact_list.order_by_group:
+            index = 1
+        else:
+            index = 0
+
+        self.order_option = Menu.Option(index)
+        self.by_status_option = Menu.Radio(_('Order by _status'))
+        self.by_status_option.signal_connect('toggled', 
+            self._on_by_status_toggled)
+        self.by_group_option = Menu.Radio(_('Order by _group'))
+        self.by_group_option.signal_connect('toggled', 
+            self._on_by_group_toggled)
+
+        self.order_option.append(self.by_status_option)
+        self.order_option.append(self.by_group_option)
+
+        self.show_by_nick_option = Menu.CheckBox(_('Show by _nick'),
+            self.contact_list.show_nick)
+        self.show_by_nick_option.signal_connect('toggled', 
+            self._on_by_nick_toggled)
+
+        self.show_offline_option = Menu.CheckBox(_('Show _offline'),
+            self.contact_list.show_offline)
+        self.show_offline_option.signal_connect('toggled', 
+            self._on_show_offline_toggled)
+
+        self.show_empty_groups_option = Menu.CheckBox(_('Show _empty groups'),
+            self.contact_list.show_empty_groups)
+        self.show_empty_groups_option.signal_connect('toggled', 
+            self._on_empty_groups_toggled)
+
         self.prefs_item = Menu.Item(_('_Preferences'), Menu.Item.TYPE_STOCK, 
             stock.PREFERENCES, Menu.Accel('P'))
         self.prefs_item.signal_connect('selected', self._on_preferences_selected)
 
         if logged_in:
+            self.option_menu.append(self.order_option)
+            self.option_menu.append(Menu.Item('-'))
+            self.option_menu.append(self.show_by_nick_option)
+            self.option_menu.append(self.show_offline_option)
+            self.option_menu.append(self.show_empty_groups_option)
+            self.option_menu.append(Menu.Item('-'))
+
             self.plugins_item = Menu.Item(_('Plug_ins'), Menu.Item.TYPE_STOCK, 
                 stock.DISCONNECT)
             self.plugins_item.signal_connect('selected', 

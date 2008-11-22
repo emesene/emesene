@@ -88,7 +88,7 @@ class Controller(object):
             self.config.l_remember_password = []
 
         if remember_password:
-            self.accounts[account.account] = account.password
+            self.accounts[account.account] = base64.b64encode(account.password)
             self.statuses[account.account] = account.status
             
             if account.account not in self.config.l_remember_account:
@@ -142,6 +142,11 @@ class Controller(object):
         if exists:
             self.conversations.set_current_page(
                 self.conversations.page_num(conversation))
+        else:
+            if len(members) == 1:
+                conversation.set_data(members[0])
+            else:
+                conversation.set_group_data()
 
         conversation.show_all()
 
@@ -186,7 +191,7 @@ class Controller(object):
 
         for (account, password) in self.accounts.iteritems():
             self.config.l_accounts.append(account)
-            self.config.l_accounts.append(base64.b64encode(password))
+            self.config.l_accounts.append(password)
 
         for (account, stat) in self.statuses.iteritems():
             self.config.l_statuses.append(account)

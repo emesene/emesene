@@ -405,7 +405,8 @@ class ChangeNick(Requester):
                 urllib.quote(self.nick))))
             self.session.contacts.me.nick = self.nick
             self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, self.nick)
-            self.session.logger.log('nick change', self.nick, self.account)
+            self.session.logger.log('nick change', self.account.status, 
+                self.nick, self.account)
         else:
             print '\n', response.body, '\n', request.body, '\n'
             self.session.add_event(Event.EVENT_NICK_CHANGE_FAILED, self.nick)

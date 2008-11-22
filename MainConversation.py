@@ -113,7 +113,7 @@ class MainConversation(gtk.Notebook):
         '''create a new conversation widget and append it to the tabs, 
         if the cid already exists or there is already a conversation with
         that member, return the existing conversation.
-        this methid returns a tuple containing a boolean and a conversation
+        this method returns a tuple containing a boolean and a conversation
         object. If the conversation already exists, return True on as first
         value'''
         if cid in self.conversations:
@@ -122,7 +122,6 @@ class MainConversation(gtk.Notebook):
             for (key, conversation) in self.conversations.iteritems():
                 if conversation.members == members:
                     return (True, conversation)
-
 
         conversation = Conversation(self.session, cid, None, members)
         label = TabWidget('Connecting', self._on_tab_close, conversation)

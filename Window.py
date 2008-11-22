@@ -9,7 +9,7 @@ import MainConversation
 
 class Window(gtk.Window):
     
-    def __init__(self, cb_on_close, height=450, width=250):
+    def __init__(self, cb_on_close, height=410, width=250):
         gtk.Window.__init__(self)
 
         self.set_default_size(width, height)

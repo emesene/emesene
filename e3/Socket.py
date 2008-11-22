@@ -55,7 +55,7 @@ class Socket(threading.Thread):
 
             # if we can write and there is something to write
             if owtd and input_:
-                print '>>>', input_
+                #print '>>>', input_
                 self.socket.send(input_)
                 input_ = None
 
@@ -72,7 +72,7 @@ class Socket(threading.Thread):
         data = self._readline()
         # if we got something add it to the output queue
         if data:
-            print 'received', data
+            #print 'received', data
             self.output.put(data)
 
     def _readline(self):

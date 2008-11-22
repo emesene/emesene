@@ -234,7 +234,7 @@ class Worker(threading.Thread):
 
     def _process(self, message):
         '''process the data'''
-        print '<<<', message
+        #print '<<<', message
 
         if self.in_login:
             self._process_login(message)
@@ -355,10 +355,10 @@ class Worker(threading.Thread):
 
         # log the status
         contact = self.session.contacts.me
-        account =  Logger.Account(None, contact.account, stat, 
+        account =  Logger.Account(None, None, contact.account, stat, 
             contact.nick, contact.message, contact.picture)
 
-        self.session.logger.log('status change', str(stat), account)
+        self.session.logger.log('status change', stat, str(stat), account)
 
     def _on_version(self, message):
         '''handle version'''
@@ -476,9 +476,9 @@ class Worker(threading.Thread):
         # don't genetate an event here, because it's after the client
         # requests the contact list
 
-        self.session.logger.log('status change', str(status_), 
-            Logger.Account(None, contact.account, contact.status, contact.nick,
-                contact.message, contact.picture))
+        self.session.logger.log('status change', status_, str(status_), 
+            Logger.Account(None, None, contact.account, contact.status, 
+                contact.nick, contact.message, contact.picture))
 
     def _on_information_change(self, message):
         '''handle the change of the information of a contact (personal 
@@ -496,8 +496,9 @@ class Worker(threading.Thread):
         contact.message = parsed.psm
         contact.media = parsed.current_media
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
-        self.session.logger.log('message change', contact.message, 
-            Logger.Account(None, contact.account, contact.status, contact.nick,
+        self.session.logger.log('message change', contact.status, 
+            contact.message, Logger.Account(None, None, contact.account, 
+                contact.status, contact.nick,
                 contact.message, contact.picture))
 
     def _on_challenge(self, message):
@@ -529,13 +530,14 @@ class Worker(threading.Thread):
             contact.attrs['CID'] = int(message.params[2])
         
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
-        account =  Logger.Account(None, contact.account, contact.status, 
+        account =  Logger.Account(None, None, contact.account, contact.status, 
             contact.nick, contact.message, contact.picture)
 
-        self.session.logger.log('status change', str(status_), account)
+        self.session.logger.log('status change', status_, str(status_), account)
 
         if old_nick != nick:
-            self.session.logger.log('nick change', str(status_), account)
+            self.session.logger.log('nick change', status_, str(status_), 
+                account)
             
         # TODO: here we should check the old and the new msnobj and request the
         # new image if needed
@@ -551,9 +553,10 @@ class Worker(threading.Thread):
         contact.status = status.OFFLINE
         
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
-        self.session.logger.log('status change', str(status.OFFLINE), 
-            Logger.Account(None, contact.account, contact.status, contact.nick,
-                contact.message, contact.picture))
+        self.session.logger.log('status change', status.OFFLINE,
+            str(status.OFFLINE), 
+            Logger.Account(None, None, contact.account, contact.status, 
+                contact.nick, contact.message, contact.picture))
 
     def _on_conversation_invitation(self, message):
         '''handle the invitation to start a conversation'''
@@ -761,16 +764,17 @@ class Worker(threading.Thread):
 
         # log the change
         contact = self.session.contacts.me
-        account =  Logger.Account(None, contact.account, contact.status, 
+        account =  Logger.Account(None, None, contact.account, contact.status, 
             contact.nick, message, contact.picture)
 
-        self.session.logger.log('message change', message, account)
+        self.session.logger.log('message change', contact.status, message, 
+            account)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK
         '''
         contact = self.session.contacts.me
-        account =  Logger.Account(None, contact.account, contact.status, 
+        account =  Logger.Account(None, None, contact.account, contact.status, 
             nick, contact.message, contact.picture)
 
         Requester.ChangeNick(self.session, nick, account, 
