@@ -69,13 +69,12 @@ class MainMenu(Menu.Menu):
         if logged_in:
             self.status_item = Menu.Menu(_('_Status'))
             for stat in status.ORDERED:
-                if stat != status.OFFLINE:
-                    temp_item = Menu.Item(status.STATUS[stat], 
-                        Menu.Item.TYPE_IMAGE_PATH, 
-                        gui.theme.status_icons[stat])
-                    temp_item.signal_connect('selected', 
-                        self._on_status_selected, stat)
-                    self.status_item.append(temp_item)
+                temp_item = Menu.Item(status.STATUS[stat], 
+                    Menu.Item.TYPE_IMAGE_PATH, 
+                    gui.theme.status_icons[stat])
+                temp_item.signal_connect('selected', 
+                    self._on_status_selected, stat)
+                self.status_item.append(temp_item)
         
             self.disconnect_item = Menu.Item(_('_Disconnect'), 
                 Menu.Item.TYPE_STOCK, stock.DISCONNECT)

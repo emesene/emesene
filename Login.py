@@ -86,14 +86,16 @@ class Login(gtk.Alignment):
         hbox_password.pack_start(self.txt_password, True, False)
         hbox_password.pack_start(gtk.Label('       '), False)
 
-        b_preferences = gtk.Button()
+        self.b_preferences = gtk.Button()
         self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES, 
             gtk.ICON_SIZE_MENU)
         self.img_preferences.set_sensitive(False)
-        b_preferences.set_image(self.img_preferences)
-        b_preferences.set_relief(gtk.RELIEF_NONE)
-        b_preferences.connect('enter-notify-event', self._on_preferences_enter)
-        b_preferences.connect('leave-notify-event', self._on_preferences_leave)
+        self.b_preferences.set_image(self.img_preferences)
+        self.b_preferences.set_relief(gtk.RELIEF_NONE)
+        self.b_preferences.connect('enter-notify-event', 
+            self._on_preferences_enter)
+        self.b_preferences.connect('leave-notify-event', 
+            self._on_preferences_leave)
 
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
             yscale=0.0)
@@ -115,7 +117,7 @@ class Login(gtk.Alignment):
         al_remember_passwd.add(self.remember_password)
         al_button.add(self.b_connect)
         al_logo.add(img_logo)
-        al_preferences.add(b_preferences)
+        al_preferences.add(self.b_preferences)
 
         vbox.pack_start(al_logo, True, True, 10)
         vbox.pack_start(al_account, True, True)
@@ -135,6 +137,7 @@ class Login(gtk.Alignment):
         self.b_connect.set_sensitive(sensitive)
         self.remember_account.set_sensitive(sensitive)
         self.remember_password.set_sensitive(sensitive)
+        self.b_preferences.set_sensitive(sensitive)
 
     def _on_connect_clicked(self, button):
         self.do_connect()

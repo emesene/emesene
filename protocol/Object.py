@@ -19,7 +19,6 @@
 methods that are connected to those signals'''
 
 import gc
-import weakref
 import inspect
 
 class Object(object):
@@ -29,6 +28,7 @@ class Object(object):
         '''constructor'''
         self.signals = {}
         self.callbacks = {}
+        print self, hasattr(self, 'signals')
 
     def signal_add(self, name, param_count):
         '''add a supported signal to the object with the name 

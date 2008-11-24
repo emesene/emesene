@@ -24,6 +24,8 @@ import gobject
 
 import protocol.stock as stock
 
+import ContactInformation
+
 # TODO: remove this
 _ = lambda x: x
 
@@ -420,3 +422,6 @@ def about_dialog(name, version, copyright, comments, license, website,
     about.set_logo(icon)
     about.run()
 
+def contact_information_dialog(session, account):
+    '''shows information about the account'''
+    ContactInformation.ContactInformation(session, account).show()

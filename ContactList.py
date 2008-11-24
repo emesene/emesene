@@ -90,7 +90,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         # + MESSAGE
         self.nick_template = '%DISPLAY_NAME%\n'
         self.nick_template += '<span foreground="#AAAAAA" size="small">'
-        self.nick_template += '%ACCOUNT%\n(%STATUS%) - %MESSAGE%</span>'
+        self.nick_template += '%STATUS% %ACCOUNT%\n%MESSAGE%</span>'
         # valid values:
         # + NAME
         # + ONLINE_COUNT

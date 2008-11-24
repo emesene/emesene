@@ -64,6 +64,8 @@ class Controller(object):
         self.window.content.contact_list.fill()
         self.window.content.panel.enabled = True
 
+        gobject.timeout_add(500, self.core.session.logger.check)
+
     def on_nick_change_succeed(self, core, args):
         '''callback called when the nick has been changed successfully'''
         nick = args[0]

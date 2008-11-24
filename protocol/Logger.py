@@ -152,7 +152,7 @@ class Logger(object):
     '''
 
     SELECT_ACCOUNT_EVENT = '''
-        SELECT tmstp, payload from fact_event 
+        SELECT status, tmstp, payload from fact_event 
         WHERE id_event=? and id_src_acc=?  
         ORDER BY tmstp LIMIT ?;
     '''
@@ -166,11 +166,12 @@ class Logger(object):
     '''
 
     SELECT_CHATS = '''
-        SELECT f.tmstp, f.payload, f.id_src_acc 
-        FROM fact_event f 
+        SELECT f.status, f.tmstp, f.payload, i.nick 
+        FROM fact_event f, d_info i 
         WHERE f.id_event=? and 
-            (f.id_src_acc=? and id_dest_acc=? or 
-            f.id_dest_acc=? and id_src_acc=?) 
+            ((f.id_src_acc=? and id_dest_acc=?) or 
+            (f.id_dest_acc=? and id_src_acc=?)) and
+            f.id_src_info = i.id_info
         ORDER BY tmstp LIMIT ?;
     '''
 
@@ -445,8 +446,8 @@ class Logger(object):
         if id_event is None:
             return None
 
-        self.execute(Logger.SELECT_CHATS, (id_event, id_src, id_dest, id_dest, 
-            id_src, limit))
+        self.execute(Logger.SELECT_CHATS, (id_event, id_src, id_dest, id_src, 
+            id_dest, limit))
 
         return self.cursor.fetchall()
 
@@ -519,7 +520,7 @@ class LoggerProcess(threading.Thread):
         callback that was passed to the get_* call'''
 
         try:
-            while:
+            while True:
                 (action, result, callback) = self.output.get(False)
                 callback(result)
         except Queue.Empty:
@@ -548,7 +549,7 @@ class LoggerProcess(threading.Thread):
     def get_messages(self, account, limit, callback):
         '''return the last # messages from account, where # is the limit value
         '''
-        self.input.put(('get_message', (account, limit, callback)))
+        self.input.put(('get_messages', (account, limit, callback)))
 
     def get_status(self, account, limit, callback):
         '''return the last # status from account, where # is the limit value

@@ -7,7 +7,7 @@ import gui.StatusMenu
 import protocol.status as status
 
 class StatusButton(gtk.Button):
-    '''a cutton that when clicked displays a popup that allows the user to
+    '''a button that when clicked displays a popup that allows the user to
     select a status'''
 
     def __init__(self, contacts=None):

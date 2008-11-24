@@ -493,13 +493,16 @@ class Worker(threading.Thread):
             return
 
         parsed = UbxParser(message.payload)
+        old_message = contact.message
         contact.message = parsed.psm
         contact.media = parsed.current_media
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
-        self.session.logger.log('message change', contact.status, 
-            contact.message, Logger.Account(None, None, contact.account, 
-                contact.status, contact.nick,
-                contact.message, contact.picture))
+
+        if old_message != contact.message:
+            self.session.logger.log('message change', contact.status, 
+                contact.message, Logger.Account(None, None, contact.account, 
+                    contact.status, contact.nick,
+                    contact.message, contact.picture))
 
     def _on_challenge(self, message):
         '''handle the challenge sent by the server'''
@@ -510,7 +513,7 @@ class Worker(threading.Thread):
         '''handle the status change of a contact that comes from offline'''
         status_ = STATUS_MAP_REVERSE[message.tid]
         account = message.params[0].lower()
-        nick = message.params[0]
+        nick = message.params[2]
         params_length = len(message.params)
 
         nick = urllib.unquote(nick)
@@ -521,6 +524,7 @@ class Worker(threading.Thread):
         if not contact:
             return
 
+        old_status = contact.status
         contact.status = status_
         old_nick = contact.nick
         contact.nick = nick
@@ -533,10 +537,12 @@ class Worker(threading.Thread):
         account =  Logger.Account(None, None, contact.account, contact.status, 
             contact.nick, contact.message, contact.picture)
 
-        self.session.logger.log('status change', status_, str(status_), account)
+        if old_status != status_:
+            self.session.logger.log('status change', status_, str(status_), 
+                account)
 
         if old_nick != nick:
-            self.session.logger.log('nick change', status_, str(status_), 
+            self.session.logger.log('nick change', status_, nick, 
                 account)
             
         # TODO: here we should check the old and the new msnobj and request the

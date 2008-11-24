@@ -32,12 +32,16 @@ class StatusMenu(Menu.Menu):
         self.contacts = contacts
         self.callback = callback
 
+        self.some_list = []
+
         for stat in status.ORDERED:
             temp_item = Menu.Item(status.STATUS[stat], 
                 Menu.Item.TYPE_IMAGE_PATH, 
                 gui.theme.status_icons[stat])
-            temp_item.signal_connect('selected', self._on_status_selected, stat)
+            temp_item.signal_connect('selected', 
+                self._on_status_selected, stat)
             self.append(temp_item)
+            self.some_list.append(temp_item.signals)
 
     def _on_status_selected(self, item, stat):
         '''called when a status is selected'''

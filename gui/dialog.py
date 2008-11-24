@@ -150,3 +150,7 @@ def about_dialog(name, version, copyright, comments, license, website,
     * translators: a string containing the translators
     '''
     pass
+
+def contact_information_dialog(session, account):
+    '''shows information about the account'''
+    pass

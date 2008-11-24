@@ -151,6 +151,8 @@ class Conversation(gtk.VBox):
     def __init__(self, session, cid, tab_label, members=None):
         '''constructor'''
         gtk.VBox.__init__(self)
+        self.set_border_width(2)
+
         self.session = session
         self.tab_label = tab_label
         self.cid = cid

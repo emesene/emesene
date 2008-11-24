@@ -26,12 +26,13 @@ _ = lambda x: x
 class ContactMenu(Menu.Menu):
     '''class that represent a contextual menu of a contact'''
 
-    def __init__(self, contact, contacts, dialog):
+    def __init__(self, contact, session, dialog):
         '''class constructor'''
         Menu.Menu.__init__(self)
 
         self.contact = contact
-        self.contacts = contacts
+        self.session = session
+        self.contacts = session.contacts
         self.dialog = dialog
         
         self._build()
@@ -62,12 +63,19 @@ class ContactMenu(Menu.Menu):
             stock.EDIT)
         self.set_alias_item.signal_connect('selected', 
             self._on_set_alias_selected)
+        self.set_alias_item.signal_connect('selected', 
+            self._on_set_alias_selected)
+        self.view_info_item = Menu.Item(_('View _Information'), 
+            Menu.Item.TYPE_STOCK, stock.INFORMATION)
+        self.view_info_item.signal_connect('selected', 
+            self._on_view_info_selected)
         
         self.append(self.remove_item)
         self.append(self.block_item)
         self.append(self.unblock_item)
         self.append(self.set_alias_item)
         self.append(self.move_item)
+        self.append(self.view_info_item)
     
     def _on_remove_selected(self, item):
         '''called when remove is selected'''
@@ -98,4 +106,14 @@ class ContactMenu(Menu.Menu):
 
     def _on_set_alias_selected(self, item):
         '''called when set_alias is selected'''
-        self.contacts.set_alias_dialog(self.contact.account)
+        self.dialog.set_contact_alias(self.contact.account, self.contact.alias,
+            self._not_implemented)
+
+    def _on_view_info_selected(self, item):
+        '''called when set_alias is selected'''
+        self.dialog.contact_information_dialog(self.session, 
+            self.contact.account)
+
+    def _not_implemented(self, *args):
+        '''show a dialog to finish this :D'''
+        self.dialog.error('not implemented :(')

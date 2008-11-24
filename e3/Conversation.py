@@ -117,11 +117,16 @@ class Conversation(threading.Thread):
                 contact = self.session.contacts.get(message.account)
 
                 if contact is None:
-                    contact = protocol.Contact.Contact(message.account)
+                    contact = protocol.Contact(message.account)
 
-                account =  Logger.Account(None, None, contact.account, 
+                src =  Logger.Account(None, None, contact.account, 
                     contact.status, contact.nick, contact.message, 
                     contact.picture)
+
+                dst = self.session.contacts.me
+
+                dest =  Logger.Account(None, None, dst.account, 
+                    dst.status, dst.nick, dst.message, dst.picture)
 
                 # we remove the content type part since it's always equal
                 msgstr = message.format().split('\r\n', 1)[1]
@@ -131,7 +136,7 @@ class Conversation(threading.Thread):
                 msgstr = msgstr.replace('TypingUser: ', '')
 
                 self.session.logger.log('message', contact.status, msgstr, 
-                    account)
+                    src, dest)
         
     def _on_usr(self, message):
         '''handle the message'''
@@ -257,8 +262,21 @@ class Conversation(threading.Thread):
 
             # log the message
             contact = self.session.contacts.me
-            account =  Logger.Account(None, None, contact.account, 
+            src =  Logger.Account(None, None, contact.account, 
                 contact.status, contact.nick, contact.message, contact.picture)
 
-            self.session.logger.log('message', contact.status, message.format(),
-                account)
+            # we remove the content type part since it's always equal
+            msgstr = message.format().split('\r\n', 1)[1]
+            # remove the Content-type, X-MMS-IM-Format and TypingUser 
+            msgstr = msgstr.replace('Content-Type: ', '')
+            msgstr = msgstr.replace('X-MMS-IM-Format: ', '')
+            msgstr = msgstr.replace('TypingUser: ', '')
+
+            for dst_account in self.members:
+                dst = self.session.contacts.get(dst_account)
+                dest =  Logger.Account(None, None, dst.account, 
+                    dst.status, dst.nick, dst.message, dst.picture)
+
+                self.session.logger.log('message', contact.status, msgstr, 
+                    src, dest)
+
