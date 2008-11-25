@@ -20,13 +20,13 @@ class MainWindow(gtk.VBox):
 
     def __init__(self, session, on_new_conversation, on_close):
         '''class constructor'''
-        gtk.VBox.__init__(self, spacing=2)
+        gtk.VBox.__init__(self)
         self.contact_list = ContactList.ContactList(session.contacts, 
             session.groups)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
-        scroll.set_border_width(2)
+        scroll.set_border_width(1)
         self.session = session
         self.on_new_conversation = on_new_conversation
         self.on_close = on_close
@@ -48,6 +48,7 @@ class MainWindow(gtk.VBox):
         self.panel = UserPanel.UserPanel(session)
         self.panel.nick.connect('text-changed', self._on_nick_changed)
         self.panel.message.connect('text-changed', self._on_message_changed)
+        self.panel.search.connect('toggled', self._on_search_toggled)
         self.panel.enabled = False
 
         self.entry = gtk.Entry()
@@ -174,6 +175,14 @@ class MainWindow(gtk.VBox):
 
         about.run()
         about.hide()
+
+    def _on_search_toggled(self, button):
+        '''called when the searhc button is toggled'''
+        if button.get_active():
+            self.entry.show()
+        else:
+            self.entry.set_text('')
+            self.entry.hide()
 
     def do_test(self):
         '''do some test to the contact list'''

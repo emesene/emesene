@@ -28,7 +28,6 @@ class Object(object):
         '''constructor'''
         self.signals = {}
         self.callbacks = {}
-        print self, hasattr(self, 'signals')
 
     def signal_add(self, name, param_count):
         '''add a supported signal to the object with the name 
