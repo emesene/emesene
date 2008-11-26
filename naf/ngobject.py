@@ -1,7 +1,6 @@
 import gobject
 import Queue
 
-from nbase import Session
 from nbase import Event
 from nbase import ServerBase
 from nbase import validate

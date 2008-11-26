@@ -66,11 +66,9 @@ class Core(Server):
         worker = Worker('emesene2', socket, session, MsnSocket)
         socket.start()
         worker.start()
+
         session.account = Account(account, password, status, session.actions)
         session.protocol = self
-        session.extras = {}
-        session.contacts = ContactManager(account)
-        session.groups = {}
 
         self.add_action(session, Action.ACTION_LOGIN, 
             (account, password, status))

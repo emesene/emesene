@@ -10,6 +10,7 @@ class Config(dict):
     i_bar is int
     f_baz is float
     l_lala is list
+    d_argh is dict (key and value are strings)
     when you try to get an attribute, if it doesn't exist it will
     return None, if the parse fails the value will not be set,
     doing this allows you to get values and don't fill the code
@@ -39,14 +40,15 @@ class Config(dict):
         for (name, value) in parser.items(section):
             try:
                 if name.startswith('b_'):
-                    value = bool(value)
+                    value = bool(int(value))
                 elif name.startswith('i_'):
                     value = int(value)
                 elif name.startswith('f_'):
                     value = float(value)
+                elif name.startswith('d_'):
+                    value = Config.string_to_dict(value)
                 elif name.startswith('l_'):
-                    value = [urllib.unquote(x.replace('%%', '%')) 
-                        for x in value.split(':')]
+                    value = Config.string_to_list(value)
 
                 setattr(self, name, value)
             except ValueError:
@@ -58,14 +60,47 @@ class Config(dict):
 
         for (key, value) in self.__dict__.iteritems():
             if key.startswith('l_'):
-                parser.set(section, key, 
-                    ':'.join([urllib.quote(str(x)).replace('%', '%%') 
-                        for x in value]))
+                parser.set(section, key, Config.list_to_string(value))
+            elif key.startswith('d_'):
+                parser.set(section, key, Config.dict_to_string(value))
+            elif key.startswith('b_'):
+                parser.set(section, key, str(int(value)))
             else:
                 parser.set(section, key, str(value))
         
         parser.write(file(path, 'w'))
 
+    @classmethod
+    def string_to_list(cls, value):
+        '''convert a properly formated string to a list'''
+        return [urllib.unquote(x.replace('%%', '%')) for x in value.split(':')]
+
+    @classmethod
+    def string_to_dict(cls, value):
+        '''convert a properly formated string to a dict'''
+        return cls.list_to_dict(cls.string_to_list(value))
+
+    @classmethod
+    def list_to_dict(cls, value):
+        '''convert a list of strings into a dict'''
+        iterator = iter(value)
+
+        return dict(zip(iterator, iterator))
+
+    @classmethod
+    def list_to_string(cls, val):
+        '''convert a list of strings into a string'''
+        return ':'.join([urllib.quote(str(x)).replace('%', '%%') for x in val])
+
+    @classmethod
+    def dict_to_string(cls, val):
+        '''convert a dict to a string'''
+        lst = []
+        for key, value in val.iteritems():
+            lst.append(key)
+            lst.append(value)
+
+        return cls.list_to_string(lst)
 
 def test():
     '''test the implementation'''

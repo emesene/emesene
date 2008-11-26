@@ -23,7 +23,7 @@ class ContactList(Object.Object):
     '''an abstract class that defines the api that the contact list should
     have'''
 
-    def __init__(self, contacts, groups, dialog):
+    def __init__(self, session, dialog):
         '''class constructor'''
         Object.Object.__init__(self)
 
@@ -39,19 +39,37 @@ class ContactList(Object.Object):
         # a contextual menu to do operations on the group
         self.signal_add('contact-menu-selected', 1)
 
-        self.contacts = contacts
-        self.groups = groups
+        self.contacts = session.contacts
+        self.groups = session.groups
+        self.session = session
         self.dialog = dialog
 
         self.group_state = {}
-        # self.order_by_status is a property that resturn the inverse
-        # value as the one of order_by_status, the setter, set the inverse
+
+        if self.session.config.b_order_by_group is None:
+            self.session.config.b_order_by_group = True 
+
+        if self.session.config.b_show_nick is None:
+            self.session.config.b_show_nick = True 
+
+        if self.session.config.b_show_empty_groups is None:
+            self.session.config.b_show_empty_groups = False 
+
+        if self.session.config.b_show_group_count is None:
+            self.session.config.b_show_group_count = False 
+
+        if self.session.config.b_show_offline is None:
+            self.session.config.b_show_offline = False 
+
+
+        # self.order_by_status is a property that returns the inverse
+        # value as the one of self.order_by_group, the setter, set the inverse
         # value to this attribute
-        self.order_by_group = True
-        self.show_nick = True
-        self.show_empty_groups = False
-        self.show_group_count = False
-        self._show_offline = False
+        self.order_by_group = self.session.config.b_order_by_group
+        self.show_nick = self.session.config.b_show_nick
+        self.show_empty_groups = self.session.config.b_show_empty_groups
+        self.show_group_count = self.session.config.b_show_group_count
+        self._show_offline = self.session.config.b_show_offline
 
         self._filter_text = ''
 
@@ -80,6 +98,18 @@ class ContactList(Object.Object):
     order_by_status = property(fget=_get_order_by_status, 
         fset=_set_order_by_status)
 
+    def _get_order_by_group(self):
+        '''return the value of order by group'''
+        return self._order_by_group
+
+    def _set_order_by_group(self, value):
+        '''set the value of order by group'''
+        self._order_by_group = value
+        self.session.config.b_order_by_group = value
+
+    order_by_group = property(fget=_get_order_by_group, 
+        fset=_set_order_by_group)
+
     def _get_show_offline(self):
         '''return the value of self._show_offline'''
         return self._show_offline
@@ -88,6 +118,7 @@ class ContactList(Object.Object):
         '''set the value of self._show_offline to value and call to 
         self.refilter()'''
         self._show_offline = value
+        self.session.config.b_show_offline = self._show_offline
         self.refilter()
     
     show_offline = property(fget=_get_show_offline, fset=_set_show_offline)

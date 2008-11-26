@@ -31,10 +31,9 @@ from protocol.Contact import Contact
 class ContactList(gui.ContactList.ContactList, gtk.TreeView):
     '''a gtk implementation of gui.ContactList'''
 
-    def __init__(self, contacts, groups):
+    def __init__(self, session):
         '''class constructor'''
-        gui.ContactList.ContactList.__init__(self, contacts, groups, 
-            dialog)
+        gui.ContactList.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
         # the image (None for groups) the object (group or contact), 

@@ -3,7 +3,7 @@
 import inspect
 import functools
 
-from nbase import Session
+from protocol.Session import Session
 from nbase import Event
 from nbase import ServerBase
 from nbase import validate
