@@ -85,6 +85,7 @@ class MainWindow(gtk.VBox):
     def _on_entry_key_press(self, entry, event):
         '''called when a key is pressed on the search box'''
         if event.keyval == gtk.keysyms.Escape:
+            self.panel.search.set_active(False)
             entry.hide()
 
     def _on_contact_selected(self, contact_list, contact):
@@ -138,6 +139,7 @@ class MainWindow(gtk.VBox):
         '''method called when a key is pressed on the input widget'''
         if event.keyval == gtk.keysyms.f and \
                 event.state == gtk.gdk.CONTROL_MASK:
+            self.panel.search.set_active(True)
             self.entry.show()
             self.entry.grab_focus()
 
@@ -179,6 +181,7 @@ class MainWindow(gtk.VBox):
         '''called when the searhc button is toggled'''
         if button.get_active():
             self.entry.show()
+            self.entry.grab_focus()
         else:
             self.entry.set_text('')
             self.entry.hide()

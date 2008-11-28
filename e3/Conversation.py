@@ -274,6 +274,10 @@ class Conversation(threading.Thread):
 
             for dst_account in self.members:
                 dst = self.session.contacts.get(dst_account)
+
+                if dst is None:
+                    dst = protocol.Contact(message.account)
+
                 dest =  Logger.Account(None, None, dst.account, 
                     dst.status, dst.nick, dst.message, dst.picture)
 

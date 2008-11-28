@@ -20,6 +20,8 @@ class Theme(object):
         self.logo = os.path.join(self.theme_path, "logo.png")
         self.connect = os.path.join(self.theme_path, "connect.png")
         self.group_chat = os.path.join(self.theme_path, "group-chat.png")
+        self.typing = os.path.join(self.theme_path, "typing.png")
+        self.new_message = os.path.join(self.theme_path, "new-message.png")
 
         self.status_icons = {}
         self.status_icons[status.ONLINE] = \

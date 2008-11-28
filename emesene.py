@@ -48,6 +48,9 @@ class Controller(object):
         self.window.hide()
         self.core.session.save_config()
 
+        if self.conversations:
+            self.conversations.hide()
+
         while gtk.events_pending():
             gtk.main_iteration(False)
 

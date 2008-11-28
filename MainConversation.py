@@ -37,6 +37,8 @@ class MainConversation(gtk.Notebook):
             self.session.protocol.connect('conv-message-send-failed', 
                 self._on_message_send_failed)
 
+        self.connect('switch-page', self._on_switch_page)
+
     def _on_message(self, protocol, args):
         '''called when a message is received'''
         (cid, account, message) = args
@@ -53,8 +55,26 @@ class MainConversation(gtk.Notebook):
             conversation.output.append(nick + ': ', bold=True)
             conversation.output.append(message.body + '\n', True,  
                 *self.format_from_message(message))
+
+            parent = self.get_parent()
+
+            if not parent.is_focus():
+                parent.set_urgency_hint(True)
+                conversation.message_waiting = True
         elif not conversation:
             print 'conversation', cid, 'not found'
+
+    def _on_focus(self, widget, event):
+        '''called when the widget receives the focus'''
+        self.get_parent().set_urgency_hint(False)
+        page_num = self.get_current_page()
+        page = self.get_nth_page(page_num)
+        page.message_waiting = False
+
+    def _on_switch_page(self, notebook, page, page_num):
+        '''called when the user changes the tab'''
+        page = self.get_nth_page(page_num)
+        page.message_waiting = False
 
     def _on_message_send_failed(self, protocol, args):
         '''called when a message is received'''
@@ -145,6 +165,7 @@ class MainConversation(gtk.Notebook):
         page_num = self.page_num(conversation)
         self.remove_page(page_num)
 
+
 class Conversation(gtk.VBox):
     '''a widget that contains all the components inside'''
 
@@ -156,6 +177,8 @@ class Conversation(gtk.VBox):
         self.session = session
         self.tab_label = tab_label
         self.cid = cid
+
+        self._message_waiting = False
 
         if members is None:
             self.members = []
@@ -188,6 +211,29 @@ class Conversation(gtk.VBox):
         self.info.first = utils.safe_gtk_image_load(gui.theme.logo)
         self.info.last = utils.safe_gtk_image_load(gui.theme.logo)
 
+        self.output.grab_focus()
+
+    def _get_message_waiting(self):
+        '''return True if a message is waiting'''
+        return self._message_waiting
+
+    def _set_message_waiting(self, value):
+        '''set the value of message waiting, update the gui to reflect
+        the value'''
+        self._message_waiting = value
+        self.update_tab()
+
+    message_waiting = property(fget=_get_message_waiting, 
+        fset=_set_message_waiting)
+
+    def _get_group_chat(self):
+        '''return True if the conversation contains more than one member,
+        false otherwise'''
+
+        return len(self.members) > 1
+
+    group_chat = property(fget=_get_group_chat)
+
     def _on_panel_show(self, widget, event):
         '''callback called when the panel is shown, resize the panel'''
         position = self.panel.get_position()
@@ -202,36 +248,57 @@ class Conversation(gtk.VBox):
         self.output.append(nick + ': ', bold=True)
         self.output.append(text + '\n')
 
+    def update_data(self):
+        '''update the data on the conversation'''
+        if len(self.members) == 1:
+            self.set_data(self.members[0])
+        elif len(self.members) > 1:
+            self.set_group_data()
+
+    def update_tab(self):
+        '''update the values of the tab'''
+        if self.message_waiting:
+            self.tab_label.set_image(gui.theme.new_message) 
+        elif self.group_chat:
+            self.tab_label.set_text('Group chat')
+            self.tab_label.set_image(gui.theme.group_chat)
+        else:
+            contact = self.session.contacts.get(self.members[0])
+
+            # can be false if we are un a group chat with someone we dont 
+            # have and the last contact leaves..
+            if contact:
+                nick = contact.nick
+                stat = contact.status
+            else:
+                nick = self.members[0]
+                stat = protocol.status.ONLINE
+
+            self.tab_label.set_text(nick)
+            self.tab_label.set_image(gui.theme.status_icons.get(stat, 
+                protocol.status.OFFLINE))
+
     def on_contact_joined(self, account):
         '''called when a contact joins the conversation'''
         if account not in self.members:
             self.members.append(account)
 
-        if len(self.members) == 1:
-            self.set_data(account)
-        else:
-            self.set_group_data()
+        self.update_data()
 
     def on_contact_left(self, account):
         '''called when a contact lefts the conversation'''
         if account in self.members:
             self.members.remove(account)
 
-        if len(self.members) == 1:
-            self.set_data(self.members[0])
-        elif len(self.members) > 1:
-            self.set_group_data()
+        self.update_data()
 
     def on_group_started(self):
         '''called when a group conversation starts'''
-        self.set_group_data()
+        self.update_data()
 
     def on_group_ended(self):
         '''called when a group conversation ends'''
-        self.header.set_image(gui.theme.user)
-
-        if len(self.members) == 1:
-            self.set_data(self.members[0])
+        self.update_data()
 
     def set_data(self, account):
         '''set the data of the conversation to the data of the account'''
@@ -245,20 +312,17 @@ class Conversation(gtk.VBox):
             nick = account
 
         self.header.information = Header.INFO_TPL % (nick, message, account)
-        self.tab_label.set_text(nick)
-        self.tab_label.set_image(gui.theme.status_icons.get(contact.status, 
-            protocol.status.OFFLINE))
+        self.update_tab()
 
     def set_group_data(self):
         '''set the data of the conversation to reflect a group chat'''
         self.header.set_image(gui.theme.users)
-        text = 'group chat'
+        text = 'Group chat'
 
         self.header.information = Header.INFO_TPL % \
             (text, '%d members' % (len(self.members) + 1,), '')
 
-        self.tab_label.set_text(text)
-        self.tab_label.set_image(gui.theme.group_chat) 
+        self.update_tab()
 
 class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the

@@ -59,6 +59,7 @@ class Window(gtk.Window):
         self.content = MainConversation.MainConversation(session, 
             self._on_last_tab_close)
         self.add(self.content)
+        self.connect('focus-in-event', self.content._on_focus)
         self.content.show()
         self.content_type = 'conversation'
 
