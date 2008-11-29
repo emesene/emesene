@@ -42,7 +42,7 @@ class MainConversation(gtk.Notebook):
     def _on_message(self, protocol, args):
         '''called when a message is received'''
         (cid, account, message) = args
-        conversation = self.conversations.get(cid, None)
+        conversation = self.conversations.get(float(cid), None)
 
         if conversation and message.type == Message.TYPE_MESSAGE:
             contact = self.session.contacts.get(account)
@@ -79,35 +79,40 @@ class MainConversation(gtk.Notebook):
     def _on_message_send_failed(self, protocol, args):
         '''called when a message is received'''
         (cid, message) = args
-        conversation = self.conversations.get(cid, None)
+        conversation = self.conversations.get(float(cid), None)
 
-        conversation.output.append('message could not be sent: ', True, 
-            fg_color='#A52A2A', bold=True)
-        conversation.output.append(message.body + '\n', True,  
-            *self.format_from_message(message))
+        if conversation is not None:
+            conversation.output.append('message could not be sent: ', True, 
+                fg_color='#A52A2A', bold=True)
+            conversation.output.append(message.body + '\n', True,  
+                *self.format_from_message(message))
+        else:
+            print 'conversation', cid, 'not found'
 
     def _on_contact_joined(self, protocol, args):
         '''called when a contact join the conversation'''
         (cid, account) = args
-        conversation = self.conversations.get(cid, None)
+        conversation = self.conversations.get(float(cid), None)
 
         if conversation:
             conversation.on_contact_joined(account)
         else:
-            print 'conversation is None'
+            print 'on_contact_joined: conversation is None'
 
     def _on_contact_left(self, protocol, args):
         '''called when a contact leaves the conversation'''
         (cid, account) = args
-        conversation = self.conversations.get(cid, None)
+        conversation = self.conversations.get(float(cid), None)
 
         if conversation:
             conversation.on_contact_left(account)
+        else:
+            print 'on_contact_left: conversation is None'
 
     def _on_group_started(self, protocol, args):
         '''called when a group conversation starts'''
         cid = args[0]
-        conversation = self.conversations.get(cid, None)
+        conversation = self.conversations.get(float(cid), None)
 
         if conversation:
             conversation.on_group_started()
@@ -115,7 +120,7 @@ class MainConversation(gtk.Notebook):
     def _on_group_ended(self, protocol, args):
         '''called when a group conversation ends'''
         cid = args[0]
-        conversation = self.conversations.get(cid, None)
+        conversation = self.conversations.get(float(cid), None)
 
         if conversation:
             conversation.on_group_ended()
@@ -136,6 +141,7 @@ class MainConversation(gtk.Notebook):
         this method returns a tuple containing a boolean and a conversation
         object. If the conversation already exists, return True on as first
         value'''
+        cid = float(cid)
         if cid in self.conversations:
             return (True, self.conversations[cid])
         elif members is not None:   
@@ -159,11 +165,12 @@ class MainConversation(gtk.Notebook):
         # certains seconds, inform that there is a new message (to avoid 
         # closing a tab instants after you receive a new message)
 
-        if self.get_n_pages() == 1:
-            self.on_last_close()
-
         page_num = self.page_num(conversation)
         self.remove_page(page_num)
+        self.session.close_conversation(conversation.cid)
+
+        if self.get_n_pages() == 0:
+            self.on_last_close()
 
 
 class Conversation(gtk.VBox):
@@ -176,7 +183,7 @@ class Conversation(gtk.VBox):
 
         self.session = session
         self.tab_label = tab_label
-        self.cid = cid
+        self.cid = float(cid)
 
         self._message_waiting = False
 
@@ -268,7 +275,7 @@ class Conversation(gtk.VBox):
             # can be false if we are un a group chat with someone we dont 
             # have and the last contact leaves..
             if contact:
-                nick = contact.nick
+                nick = contact.display_name
                 stat = contact.status
             else:
                 nick = self.members[0]

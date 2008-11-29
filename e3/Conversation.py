@@ -94,7 +94,7 @@ class Conversation(threading.Thread):
                 cmd = self.command_queue.get(True, 0.1)
 
                 if cmd == 'quit':
-                    print 'exiting conversation', self.cid
+                    print 'closing conversation', self.cid
                     break
 
                 self.socket.send_command(cmd.command, cmd.params, cmd.payload)

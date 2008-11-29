@@ -808,6 +808,8 @@ class Worker(threading.Thread):
         if cid in self.conversations:
             self.conversations[cid].command_queue.put('quit')
             del self.conversations[cid]
+        else:
+            print 'conversation', cid, 'not found'
 
     def _handle_action_send_message(self, cid, message):
         '''handle Action.ACTION_SEND_MESSAGE

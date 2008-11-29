@@ -94,6 +94,10 @@ class Session(object):
         '''start a new conversation with account'''
         self.add_action(Action.ACTION_NEW_CONVERSATION, (account, cid))
 
+    def close_conversation(self, cid):
+        '''close a conversation identified by cid'''
+        self.add_action(Action.ACTION_CLOSE_CONVERSATION, (cid,))
+
     def quit(self):
         '''close the worker and socket threads'''
         self.add_action(Action.ACTION_QUIT, ())

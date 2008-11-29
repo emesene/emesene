@@ -96,7 +96,8 @@ def entry_cb(widget, window, response_cb, *args):
 def add_contact_cb(widget, window, response_cb, response):
     '''callback called when a button is selected on the add_contact dialog'''
     contact = window.entry.get_text()
-    group = window.combo.get_model().get_value(window.combo.get_active_iter(), 0)
+    group = window.combo.get_model().get_value(window.combo.get_active_iter(),
+        0)
 
     window.hide()
     response_cb(response, contact, group)
@@ -278,7 +279,7 @@ def contact_added_you(accounts, response_cb,
     means remind me later.'''
     raise NotImplementedError("This method isn't implemented")
 
-def add_contact(groups, group, response_cb, title=_("Add user")):
+def add_contact(groups, group_selected, response_cb, title=_("Add user")):
     '''show a dialog asking for an user address, and (optional)
     the group(s) where the user should be added, the response callback
     receives the response type (stock.ADD, stock.CANCEL or stock.CLOSE)
@@ -303,10 +304,10 @@ def add_contact(groups, group, response_cb, title=_("Add user")):
 
     selected = 0
 
-    for (index, group_name) in enumerate(groups):
-        combo.append_text(group_name)
+    for (index, group) in enumerate(groups):
+        combo.append_text(group.name)
 
-        if group == group_name:
+        if group_selected == group.name:
             selected = index + 1
 
     combo.set_active(selected)

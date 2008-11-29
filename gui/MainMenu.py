@@ -353,17 +353,17 @@ class MainMenu(Menu.Menu):
         contact = self.contact_list.get_contact_selected()
         
         if contact:
-            self.set_alias_dialog(contact.account)
+            self.set_alias_dialog(contact.account, contact.alias)
         else:
             self.dialog.error(_('No contact selected'))
 
     def _on_set_nick_selected(self, item):
         '''called when set nick is selected'''
-        self.set_nick_dialog(self.session.account.nick)
+        self.set_nick_dialog(self.session.contacts.me.nick)
 
     def _on_set_message_selected(self, item):
         '''called when set message is selected'''
-        self.set_personal_message_dialog(self.session.account.message)
+        self.set_personal_message_dialog(self.session.me.message)
 
     def _on_set_picture_selected(self, item):
         '''called when set picture is selected'''
@@ -394,7 +394,8 @@ class MainMenu(Menu.Menu):
     def add_dialog(self):
         '''show a dialog to ask for the account, and if the account
         is valid, add the user'''
-        self.dialog.add_contact(self.add_cb)
+        self.dialog.add_contact(self.session.groups.values(), None,
+            self.add_cb)
 
     # callbacks
 
