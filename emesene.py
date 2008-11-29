@@ -162,6 +162,7 @@ class Controller(object):
 
     def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''
+        self.conversations.close_all()
         self.conversations = None
 
     def start(self, account=None, accounts=None):

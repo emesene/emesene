@@ -164,13 +164,24 @@ class MainConversation(gtk.Notebook):
         # TODO: we can check the last message timstamp and if it's less than
         # certains seconds, inform that there is a new message (to avoid 
         # closing a tab instants after you receive a new message)
-
-        page_num = self.page_num(conversation)
-        self.remove_page(page_num)
-        self.session.close_conversation(conversation.cid)
+        self.close(conversation)
 
         if self.get_n_pages() == 0:
             self.on_last_close()
+
+    def close(self, conversation):
+        '''close a conversation'''
+        self.session.close_conversation(conversation.cid)
+        page_num = self.page_num(conversation)
+        self.remove_page(page_num)
+        del self.conversations[conversation.cid]
+
+    def close_all(self):
+        '''close and finish all conversations'''
+        conversations = self.conversations.values()
+        for conversation in conversations:
+            self.close(conversation)
+
 
 
 class Conversation(gtk.VBox):
