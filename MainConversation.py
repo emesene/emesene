@@ -58,7 +58,7 @@ class MainConversation(gtk.Notebook):
 
             parent = self.get_parent()
 
-            if not parent.is_focus():
+            if not parent.is_active():
                 parent.set_urgency_hint(True)
                 conversation.message_waiting = True
         elif not conversation:

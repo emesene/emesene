@@ -246,12 +246,13 @@ class Conversation(threading.Thread):
         self.session_id = session_id
         self.socket.input.put('quit')
         self.socket = MsnSocket(host, port)
-        self.socket.start()
         self.send_presentation()
 
         while len(self.members):
             member = self.members.pop()
             self.invite(member)
+
+        self.socket.start()
 
     def invite(self, account):
         '''invite a contact to the conversation'''

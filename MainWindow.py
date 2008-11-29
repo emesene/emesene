@@ -95,6 +95,11 @@ class MainWindow(gtk.VBox):
 
         if not existed:
             self.session.new_conversation(contact.account, cid)
+            
+        parent = self.get_parent()
+
+        if not parent.is_active():
+            parent.present()
         
     def _on_group_selected(self, contact_list, group):
         '''callback for the group-selected signal'''
