@@ -1,4 +1,5 @@
 '''main file from the e3 library'''
+from Account import Account
 from MsnMessage import Message
 from MsnSocket import MsnSocket
 from MsnHttpSocket import MsnHttpSocket

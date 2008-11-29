@@ -55,8 +55,11 @@ class Socket(threading.Thread):
 
             # if we can write and there is something to write
             if owtd and input_:
-                #print '>>>', input_
-                self.socket.send(input_)
+                try:
+                    self.socket.send(input_)
+                    print '>>>', input_
+                except socket.error:
+                    self._on_socket_error()
                 input_ = None
 
             # if we can read, we try to read
@@ -79,10 +82,18 @@ class Socket(threading.Thread):
         '''read until new line'''
         output = StringIO.StringIO()
 
-        chunk = self.socket.recv(1)
+        try:
+            chunk = self.socket.recv(1)
+        except socket.error:
+            self._on_socket_error()
+            return None
+
         while chunk != '\n' and chunk != '':
             output.write(chunk) 
-            chunk = self.socket.recv(1)
+            try:
+                chunk = self.socket.recv(1)
+            except socket.error:
+                self._on_socket_error()
         
         if chunk == '\n':
             output.write(chunk)
@@ -94,13 +105,15 @@ class Socket(threading.Thread):
         '''receive a fixed size of bytes, return it as string'''
         output = StringIO.StringIO()
 
-        for byte_num in xrange(size):
-            output.write(self.socket.recv(1))
+        while output.len < size:
+            try:
+                output.write(self.socket.recv(size - output.len))
+            except socket.error:
+                self._on_socket_error()
 
         output.seek(0)
 
         return output.read()
-
 
     def reconnect(self, host, port):
         '''connect to a different host'''
@@ -109,3 +122,7 @@ class Socket(threading.Thread):
         self.socket.close()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.host, self.port))
+
+    def _on_socket_error(self):
+        '''send a message that the socket was closed'''
+        self.output.put(0)

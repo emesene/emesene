@@ -49,7 +49,7 @@ class Controller(object):
         self.core.session.save_config()
 
         if self.conversations:
-            self.conversations.hide()
+            self.conversations.get_parent().hide()
 
         while gtk.events_pending():
             gtk.main_iteration(False)

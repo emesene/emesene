@@ -243,7 +243,7 @@ class Conversation(gtk.VBox):
 
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
-        self.session.protocol.do_send_message(self.cid, text)
+        self.session.send_message(self.cid, text)
         nick = self.session.contacts.me.display_name
         self.output.append(nick + ': ', bold=True)
         self.output.append(text + '\n')
@@ -262,7 +262,7 @@ class Conversation(gtk.VBox):
         elif self.group_chat:
             self.tab_label.set_text('Group chat')
             self.tab_label.set_image(gui.theme.group_chat)
-        else:
+        elif len(self.members) == 1:
             contact = self.session.contacts.get(self.members[0])
 
             # can be false if we are un a group chat with someone we dont 

@@ -338,7 +338,7 @@ class Logger(object):
         if self._count >= Logger.COMMIT_LIMIT:
             t1 = time.time()
             self.connection.commit()
-            print 'commit', time.time() - t1
+            #print 'commit', time.time() - t1
             self._count = 0
 
         self._count += 1

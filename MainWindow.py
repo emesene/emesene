@@ -33,8 +33,7 @@ class MainWindow(gtk.VBox):
         self.session.protocol.connect('contact-attr-changed', 
             self._on_contact_attr_changed)
 
-        self._menu = MainMenu.MainMenu(dialog, self.session.account, 
-            self.contact_list)
+        self._menu = MainMenu.MainMenu(dialog, self.session, self.contact_list)
         self._menu.signal_connect('quit-selected', self._on_quit_selected)
         self._menu.signal_connect('disconnect-selected', 
             self._on_disconnect_selected)
@@ -95,7 +94,7 @@ class MainWindow(gtk.VBox):
             self.session.protocol, (cid, [contact.account]))
 
         if not existed:
-            self.session.protocol.do_new_conversation(contact.account, cid)
+            self.session.new_conversation(contact.account, cid)
         
     def _on_group_selected(self, contact_list, group):
         '''callback for the group-selected signal'''
@@ -129,11 +128,11 @@ class MainWindow(gtk.VBox):
 
     def _on_nick_changed(self, textfield, old_text, new_text):
         '''method called when the nick is changed on the panel'''
-        self.session.account.set_nick(new_text)
+        self.session.set_nick(new_text)
 
     def _on_message_changed(self, textfield, old_text, new_text):
         '''method called when the nick is changed on the panel'''
-        self.session.account.set_personal_message(new_text)
+        self.session.set_message(new_text)
 
     def _on_key_press(self, widget, event):
         '''method called when a key is pressed on the input widget'''

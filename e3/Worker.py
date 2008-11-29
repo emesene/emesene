@@ -63,7 +63,8 @@ ACTIONS = (\
  'add group'        , 'remove group'     ,
  'set nick'         , 'set message'      ,
  'set picture'      , 'set preferences'  ,
- 'new conversation' , 'send message')
+ 'new conversation' , 'close conversation',
+ 'send message')
 
 Event.set_constants(EVENTS)
 Action.set_constants(ACTIONS)
@@ -156,6 +157,8 @@ class Worker(threading.Thread):
         dah[Action.ACTION_SET_PREFERENCES] = self._handle_action_set_preferences
         dah[Action.ACTION_NEW_CONVERSATION] = \
             self._handle_action_new_conversation
+        dah[Action.ACTION_CLOSE_CONVERSATION] = \
+            self._handle_action_close_conversation
         dah[Action.ACTION_SEND_MESSAGE] = self._handle_action_send_message
 
         self.action_handlers = dah
@@ -234,7 +237,7 @@ class Worker(threading.Thread):
 
     def _process(self, message):
         '''process the data'''
-        #print '<<<', message
+        print '<<<', message
 
         if self.in_login:
             self._process_login(message)
@@ -590,17 +593,20 @@ class Worker(threading.Thread):
         if cid in self.pending_cids:
             self.pending_cids.remove(cid)
 
-        con = Conversation.Conversation(self.session, cid, 
-            self.msn_socket_class, host, int(port), account, session_id)
-        self.conversations[cid] = con
-        con.send_presentation()
-        con.invite(account)
+        if cid not in self.conversations:
+            con = Conversation.Conversation(self.session, cid, 
+                self.msn_socket_class, host, int(port), account, session_id)
+            self.conversations[cid] = con
+            con.send_presentation()
+            con.invite(account)
+            con.start()
+        else:
+            con = self.conversations[cid]
+            con.reconnect(self.msn_socket_class, host, int(port), session_id)
     
         # send all the pending messages
         for message in messages:
             con.send_message(message)
-
-        con.start()
 
     def _on_server_message(self, message):
         '''handle a server message when we are not on the login stage'''
@@ -795,6 +801,13 @@ class Worker(threading.Thread):
         self.pending_cids.append(cid)
         self.pending_messages[cid] = []
         self.socket.send_command('XFR', ('SB',))
+
+    def _handle_action_close_conversation(self, cid):
+        '''handle Action.ACTION_CLOSE_CONVERSATION
+        '''
+        if cid in self.conversations:
+            self.conversations[cid].command_queue.put('quit')
+            del self.conversations[cid]
 
     def _handle_action_send_message(self, cid, message):
         '''handle Action.ACTION_SEND_MESSAGE

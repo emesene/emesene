@@ -28,12 +28,12 @@ import protocol.status as status
 class MainMenu(Menu.Menu):
     '''a class that has all the fields of of the main menu'''
 
-    def __init__(self, dialog, account, contact_list):
+    def __init__(self, dialog, session, contact_list):
         '''class contructor'''
         Menu.Menu.__init__(self)
         
         self.dialog = dialog
-        self.account = account
+        self.session = session
         self.contact_list = contact_list
 
         self.signal_add('quit-selected', 0)
@@ -253,7 +253,7 @@ class MainMenu(Menu.Menu):
 
     def _on_status_selected(self, item, stat):
         '''called when a status is selected'''
-        self.account.set_status(stat)
+        self.session.set_status(stat)
 
     def _on_by_status_toggled(self, option, value):
         '''called when order by status is toggled'''
@@ -331,7 +331,7 @@ class MainMenu(Menu.Menu):
         contact = self.contact_list.get_contact_selected()
         
         if contact:
-            self.account.block(contact.account)
+            self.session.block(contact.account)
         else:
             self.dialog.error(_('No contact selected'))
 
@@ -340,7 +340,7 @@ class MainMenu(Menu.Menu):
         contact = self.contact_list.get_contact_selected()
         
         if contact:
-            self.account.unblock(contact.account)
+            self.session.unblock(contact.account)
         else:
             self.dialog.error(_('No contact selected'))
 
@@ -359,11 +359,11 @@ class MainMenu(Menu.Menu):
 
     def _on_set_nick_selected(self, item):
         '''called when set nick is selected'''
-        self.set_nick_dialog(self.account.nick)
+        self.set_nick_dialog(self.session.account.nick)
 
     def _on_set_message_selected(self, item):
         '''called when set message is selected'''
-        self.set_personal_message_dialog(self.account.message)
+        self.set_personal_message_dialog(self.session.account.message)
 
     def _on_set_picture_selected(self, item):
         '''called when set picture is selected'''
@@ -409,7 +409,7 @@ class MainMenu(Menu.Menu):
                 debug('empty new nick')
                 return
 
-            self.account.set_nick(new_nick)
+            self.session.set_nick(new_nick)
 
     def set_personal_message_cb(self, response, old_pm, new_pm):
         '''callback for the DialogManager.set_personal_message method'''
@@ -419,7 +419,7 @@ class MainMenu(Menu.Menu):
                 debug('old and new personal messages are the same')
                 return
 
-            self.account.set_personal_message(new_pm)
+            self.session.set_message(new_pm)
 
     def set_alias_cb(self, response, account, old_alias, new_alias):
         '''callback for the DialogManager.set_contact_alias method,
@@ -430,27 +430,27 @@ class MainMenu(Menu.Menu):
                 debug('old alias and new alias are the same')
                 return
 
-            self.account.set_alias(account, new_alias)
+            self.session.set_alias(account, new_alias)
         elif response == stock.CLEAR:
-            self.account.set_alias(account, '')
+            self.session.set_alias(account, '')
 
     def remove_cb(self, response, account):
         '''callback for DialogManager.yes_no, asking to confirm the 
         user remove'''
 
         if response == stock.YES:
-            self.account.remove(account)
+            self.session.remove_contact(account)
 
     def add_cb(self, response, account, groups):
         '''callback to the add_dialog method, add the user and add him 
         to the defined groups'''
 
         if response == stock.ADD:
-            self.account.add(account)
+            self.session.add_contact(account)
             # TODO: this doesn't work
             if groups:
                 for group in groups:
-                    self.account.add_to_group(account, group)
+                    self.session.add_to_group(account, group)
     # group dialogs
 
     def add_group_dialog(self):
@@ -476,7 +476,7 @@ class MainMenu(Menu.Menu):
 
         if response == stock.ACCEPT:
             if group_name:
-                self.account.add_group(group_name)
+                self.session.add_group(group_name)
 
     def rename_group_cb(self, response, group, new_name):
         '''callback called by DialogManager.rename_group'''
@@ -485,7 +485,7 @@ class MainMenu(Menu.Menu):
             if group.name == new_name:
                 debug("old and new name are the same")
             elif new_name:
-                self.account.rename_group(group.identifier, new_name)
+                self.session.rename_group(group.identifier, new_name)
             else:
                 debug("new name not valid")
 
@@ -494,7 +494,7 @@ class MainMenu(Menu.Menu):
         confirmation un group delete'''
 
         if response == stock.YES:
-            self.account.remove_group(gid)
+            self.session.remove_group(gid)
 
 def debug(msg):
     '''debug method, the module send the debug here, it can be changed

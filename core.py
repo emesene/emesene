@@ -1,11 +1,4 @@
 import e3
-import e3.Worker as Worker
-import e3.MsnSocket as MsnSocket
-#import e3.MsnHttpSocket as MsnSocket
-import protocol.Action as Action
-from e3.Account import Account
-from protocol.ContactManager import ContactManager
-
 #from naf.nweb import Server
 #from naf.nweb import validate
 #from naf.nlocal import Server
@@ -62,123 +55,109 @@ class Core(Server):
     @validate(str, str, int)
     def do_login(self, session, account, password, status):
         '''start the login process'''
-        socket = MsnSocket('messenger.hotmail.com', 1863, dest_type='NS')
-        worker = Worker('emesene2', socket, session, MsnSocket)
-        socket.start()
-        worker.start()
-
-        session.account = Account(account, password, status, session.actions)
-        session.protocol = self
-
-        self.add_action(session, Action.ACTION_LOGIN, 
-            (account, password, status))
+        session.login(self, account, password, status)
         
     @validate()
     def do_logout(self, session):
         '''close the session'''
-        self.add_action(session, Action.ACTION_LOGOUT, ())
+        session.logout()
         
     @validate(int)
     def do_change_status(self, session, status):
         '''change the status of the session'''
-        self.add_action(session, Action.ACTION_CHANGE_STATUS, (status,))
+        session.set_status(status)
         
     @validate(str)
     def do_add_contact(self, session, account):
         '''add the contact to our contact list'''
-        self.add_action(session, Action.ACTION_ADD_CONTACT, (account,))
+        session.add_contact(account)
         
     @validate(str)
     def do_remove_contact(self, session, account):
         '''remove the contact from our contact list'''
-        self.add_action(session, Action.ACTION_REMOVE_CONTACT, (account,))
+        session.remove_contact(account)
         
     @validate(str)
     def do_block_contact(self, session, account):
         '''block the contact'''
-        self.add_action(session, Action.ACTION_BLOCK_CONTACT, (account,))
+        session.block(account)
         
     @validate(str)
     def do_unblock_contact(self, session, account):
         '''block the contact'''
-        self.add_action(session, Action.ACTION_UNBLOCK_CONTACT, (account,))
+        session.unblock(account)
         
     @validate(str, str)
     def do_set_contact_alias(self, session, account, alias):
         '''set the alias of a contact'''
-        self.add_action(session, Action.ACTION_SET_CONTACT_ALIAS, 
-            (account, alias))
+        session.set_alias(account)
         
     @validate(str, str)
     def do_add_to_group(self, session, account, gid):
         '''add a contact to a group'''
-        self.add_action(session, Action.ACTION_ADD_TO_GROUP, (account, gid))
+        session.add_to_group(account, gid)
         
     @validate(str, str)
     def do_remove_from_group(self, session, account, gid):
         '''remove a contact from a group'''
-        self.add_action(session, Action.ACTION_REMOVE_FROM_GROUP, 
-            (account, gid))
+        session.remove_from_group(account, gid)
         
     @validate(str, str, str)
     def do_move_to_group(self, session, account, src_gid, dest_gid):
         '''remove a contact from the group identified by src_gid and add it
         to dest_gid'''
-        self.add_action(session, Action.ACTION_MOVE_TO_GROUP, (account, 
-        src_gid, dest_gid))
+        session.move_to_group(account, src_gid, dest_gid)
         
     @validate(str)
     def do_add_group(self, session, name):
         '''add a group '''
-        self.add_action(session, Action.ACTION_ADD_GROUP, (name,))
+        session.add_group(name)
         
     @validate(str)
     def do_remove_group(self, session, gid):
         '''remove the group identified by gid'''
-        self.add_action(session, Action.ACTION_REMOVE_GROUP, (gid,))
+        session.remove_group(gid)
         
     @validate(str, str)
     def do_rename_group(self, session, gid, name):
         '''rename the group identified by gid with the new name'''
-        self.add_action(session, Action.ACTION_RENAME_GROUP, (gid, name))
+        session.rename_group(gid, name)
         
     @validate(str)
     def do_set_nick(self, session, nick):
         '''set the nick of the session'''
-        self.add_action(session, Action.ACTION_SET_NICK, (nick,))
+        session.set_nick(nick)
 
     @validate(str)
     def do_set_message(self, session, message):
         '''set the message of the session'''
-        self.add_action(session, Action.ACTION_SET_MESSAGE, (message,))
+        session.set_message(message)
 
     @validate(str)
     def do_set_picture(self, session, picture_name):
         '''set the picture of the session to the picture with picture_name as
         name'''
-        self.add_action(session, Action.ACTION_SET_PICTURE, (picture_name,))
+        session.set_picture(picture_name)
     
     @validate(dict)
     def do_set_preferences(self, session, preferences):
         '''set the preferences of the session to preferences, that is a 
         dict containing key:value pairs where the keys are the preference name
         and value is the new value of that preference'''
-        self.add_action(session, Action.ACTION_SET_PREFERENCE, (preferences,))
+        session.set_preferences(preferences)
 
     @validate(str, float)
     def do_new_conversation(self, session, account, cid):
         '''start a new conversation with account'''
-        self.add_action(session, Action.ACTION_NEW_CONVERSATION, (account, cid))
+        session.new_conversation(account, cid)
     
     @validate()
     def do_quit(self, session):
         '''close the worker and socket threads'''
-        self.add_action(session, Action.ACTION_QUIT, ())
+        session.quit()
     
     @validate(float, str)
     def do_send_message(self, session, cid, text):
         '''send a common message'''
-        account = session.account.account
-        message = e3.Message(e3.Message.TYPE_MESSAGE, text, account)
-        self.add_action(session, Action.ACTION_SEND_MESSAGE, (cid, message))
+        session.send_message(cid, text)
 

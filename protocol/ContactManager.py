@@ -146,7 +146,7 @@ class ContactManager(object):
                 # if we reach the size limit we append this
                 # list to the adls list and start another
                 # on the same domain
-                if length > 7200:
+                if length > 5000:
                     adl.append('</d>')
                     adls.append((domain, length, adl))
 
@@ -176,7 +176,7 @@ class ContactManager(object):
             partial.append(''.join(adl))
             total_length += length
 
-            if total_length > 7200:
+            if total_length > 5000:
                 partial.append('</ml>')
 
                 result.append(''.join(partial))

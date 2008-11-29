@@ -64,7 +64,7 @@ class Conversation(threading.Thread):
 
     def _process(self, message):
         '''process a command and call the respective handler'''
-        #print '<c<', message
+        print '<c<', message
         handler = self._handlers.get(message.command, None)
 
         if handler:
@@ -80,7 +80,13 @@ class Conversation(threading.Thread):
         while True:
             try:
                 data = self.socket.output.get(True, 0.1)
-                self._process(data)
+
+                if type(data) == int and data == 0:
+                    self.status = Conversation.STATUS_PENDING
+                    self.started = False
+                    self.session.new_conversation(None, self.cid)
+                else:
+                    self._process(data)
             except Queue.Empty:
                 pass
 
@@ -217,8 +223,6 @@ class Conversation(threading.Thread):
         '''handle the unknown commands'''
         print 'unknown command:', str(message)
 
-    # action handlers
-
     def _check_if_started(self):
         '''check if the conversation has already been started, if not,
         send an event to inform that we are ready to chat.
@@ -234,6 +238,20 @@ class Conversation(threading.Thread):
                     self.send_message(message)
 
                 self.pending_messages = []
+
+    def reconnect(self, MsnSocket, host, port, session_id):
+        '''restablish connection with the switchboard server'''
+        self.host = host
+        self.port = port
+        self.session_id = session_id
+        self.socket.input.put('quit')
+        self.socket = MsnSocket(host, port)
+        self.socket.start()
+        self.send_presentation()
+
+        while len(self.members):
+            member = self.members.pop()
+            self.invite(member)
 
     def invite(self, account):
         '''invite a contact to the conversation'''
