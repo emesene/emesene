@@ -12,6 +12,7 @@ import threading
 
 import mbi
 import common
+import Transfer
 import Requester
 import XmlManager 
 import Conversation
@@ -50,7 +51,11 @@ EVENTS = (\
  'conv started'          , 'conv ended'           ,
  'conv group started'    , 'conv group ended'     ,
  'conv message'          , 'conv first action'    ,
- 'conv message send succeed'  , 'conv message send failed')
+ 'conv message send succeed'  , 'conv message send failed',
+ 'p2p invitation',      'p2p finished',
+ 'p2p error',           'p2p canceled',
+ 'p2p accepted',        'p2p progress',
+ 'media received')
 
 ACTIONS = (\
  'login'            , 'logout'           ,
@@ -64,7 +69,10 @@ ACTIONS = (\
  'set nick'         , 'set message'      ,
  'set picture'      , 'set preferences'  ,
  'new conversation' , 'close conversation',
- 'send message')
+ 'send message',
+ 'p2p invite'       , 'p2p accept',
+ 'p2p cancel'       , 'media send' # media send if got Wink and audio clips
+ )
 
 Event.set_constants(EVENTS)
 Action.set_constants(ACTIONS)
@@ -121,6 +129,7 @@ class Worker(threading.Thread):
         self._set_handlers()
 
         self.conversations = {}
+        self.transfers = {}
         # contains the tid when the switchboard was requested as key and the
         # account that should be invited when we get the switchboard as value   
         self.pending_conversations = {}
@@ -160,6 +169,11 @@ class Worker(threading.Thread):
         dah[Action.ACTION_CLOSE_CONVERSATION] = \
             self._handle_action_close_conversation
         dah[Action.ACTION_SEND_MESSAGE] = self._handle_action_send_message
+        
+        # p2p actions
+        dah[Action.ACTION_P2P_INVITE] = self._handle_action_p2p_invite
+        dah[Action.ACTION_P2P_ACCEPT] = self._handle_action_p2p_accept
+        dah[Action.ACTION_P2P_CANCEL] = self._handle_action_p2p_cancel
 
         self.action_handlers = dah
 
@@ -228,6 +242,9 @@ class Worker(threading.Thread):
 
                     for (cid, conversation) in self.conversations.iteritems():
                         conversation.command_queue.put('quit')
+
+                    for (pid, transfer) in self.transfers.iteritems():
+                        transfer.add_action(Action.ACTION_QUIT)
 
                     break
 
@@ -823,6 +840,50 @@ class Worker(threading.Thread):
                     'invalid conversation id')
         else:    
             self.conversations[cid].send_message(message)
+
+    # p2p handlers
+
+    def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
+        '''handle Action.ACTION_P2P_INVITE,
+         cid is the conversation id
+         pid is the p2p session id, both are numbers that identify the 
+            conversation and the session respectively, time.time() is 
+            recommended to be used.
+         dest is the destination account
+         type_ is one of the protocol.Transfer.TYPE_* constants
+         identifier is the data that is needed to be sent for the invitation
+        '''
+        if cid not in self.conversations:
+            print 'conversation', cid, 'does not exist'
+            return
+
+        conversation = self.conversations[cid]
+
+        transfer = Transfer.Transfer(cid, pid, conversation.socket,
+            self.session.events)
+        transfer.add_action(Action.ACTION_P2P_INVITE, dest, type_, identifier)
+
+        conversation.add_transfer(transfer)
+        transfer.start()
+
+        if pid in self.transfers:
+            print 'transfer', pid, 'does not exist'
+
+        self.transfers[pid] = transfer
+
+    def _handle_action_p2p_accept(self, pid):
+        '''handle Action.ACTION_P2P_ACCEPT'''
+        if pid in self.transfers:
+            self.transfers[pid].add_action(Action.ACTION_P2P_ACCEPT)
+        else:
+            print 'p2p session', pid, 'does not exist'
+
+    def _handle_action_p2p_cancel(self, pid):
+        '''handle Action.ACTION_P2P_CANCEL'''
+        if pid in self.transfers:
+            self.transfers[pid].add_action(Action.ACTION_P2P_CANCEL)
+        else:
+            print 'p2p session', pid, 'does not exist'
 
 #------------------------- FROM HERE -----------------------------
 # Copyright 2005 James Bunton <james@delx.cjb.net>

@@ -10,6 +10,8 @@ import protocol.status
 from RichBuffer import RichBuffer
 from e3 import Message
 
+import TinyButton
+
 class MainConversation(gtk.Notebook):
     '''the main conversation, it only contains other widgets'''
 
@@ -159,7 +161,7 @@ class MainConversation(gtk.Notebook):
         self.set_tab_reorderable(conversation, True)
         return (False, conversation)
 
-    def _on_tab_close(self, button, conversation):
+    def _on_tab_close(self, button, event, conversation):
         '''called when the user clicks the close button on a tab'''
         # TODO: we can check the last message timstamp and if it's less than
         # certains seconds, inform that there is a new message (to avoid 
@@ -508,10 +510,8 @@ class TabWidget(gtk.HBox):
 
         self.image = gtk.Image()
         self.label = gtk.Label(text)
-        self.close = gtk.Button()
-        self.close.set_relief(gtk.RELIEF_NONE)
-        self.close.set_image(gtk.image_new_from_stock(gtk.STOCK_CLOSE, 
-            gtk.ICON_SIZE_MENU))
+        self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
+        self.close.connect('button_press_event', on_close_clicked, *args)
 
         self.label.set_max_width_chars(20)
         self.label.set_use_markup(True)
@@ -523,8 +523,6 @@ class TabWidget(gtk.HBox):
         self.image.show()
         self.label.show()
         self.close.show()
-
-        self.close.connect('clicked', on_close_clicked, *args)
 
     def set_image(self, path):
         '''set the image from path'''

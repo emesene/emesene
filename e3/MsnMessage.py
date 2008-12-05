@@ -52,6 +52,7 @@ class Message(object):
 
     def _format_p2p(self):
         '''format a message like a TYPE_P2P'''
+        # TODO: dx will do it
         return ''
 
     def _format_nudge(self):

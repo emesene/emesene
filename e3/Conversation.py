@@ -32,6 +32,8 @@ class Conversation(threading.Thread):
         self.started = False
 
         self.pending_invites = []
+        # active p2p transfers on this conversation
+        self.transfers = {}
         # indicates if the first action made by the user to justify opening
         # a new conversation has been made or not
         self.first_action = False
@@ -143,6 +145,13 @@ class Conversation(threading.Thread):
 
                 self.session.logger.log('message', contact.status, msgstr, 
                     src, dest)
+        elif message.type == MsnMessage.Message.TYPE_P2P:
+            #TODO: dx should add support here using self.transfers to decide
+            # which Transfer should handle the message if it's a message
+            # from an active p2p session
+            # if it's an invite, then create the transfer and add it to 
+            # self.transfers
+            pass
         
     def _on_usr(self, message):
         '''handle the message'''
@@ -238,6 +247,11 @@ class Conversation(threading.Thread):
                     self.send_message(message)
 
                 self.pending_messages = []
+
+    def add_transfer(self, transfer):
+        '''add a transfer to the list of active transfers on this conversation
+        '''
+        self.transfers[transfer.pid] = transfer
 
     def reconnect(self, MsnSocket, host, port, session_id):
         '''restablish connection with the switchboard server'''
