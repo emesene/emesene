@@ -4,6 +4,7 @@ import pango
 import gobject
 
 import gui
+import Menu
 import utils
 import protocol.status
 
@@ -208,6 +209,8 @@ class Conversation(gtk.VBox):
         self.panel = gtk.VPaned()
         self.header = Header()
         self.output = OutputText()
+        self.output.textbox.connect('button-press-event' , 
+            self._on_button_press_event)
         self.input = InputText(self._on_send_message)
         self.info = ContactInfo()
 
@@ -257,7 +260,7 @@ class Conversation(gtk.VBox):
     def _on_panel_show(self, widget, event):
         '''callback called when the panel is shown, resize the panel'''
         position = self.panel.get_position()
-        self.panel.set_position(position + int(position * 0.5))
+        self.panel.set_position(position + int(position * 0.6))
         self.panel.disconnect(self.temp)
         del self.temp
 
@@ -267,6 +270,16 @@ class Conversation(gtk.VBox):
         nick = self.session.contacts.me.display_name
         self.output.append(nick + ': ', bold=True)
         self.output.append(text + '\n')
+
+    def _on_button_press_event(self, widget, event):
+        '''callback called when the user press a button over a widget
+        chek if it's the right button and display the menu'''
+        if event.button == 3:
+            menu_ = gui.ConversationMenu(None, None, None)
+            menu = Menu.build_pop_up(menu_)
+            menu.popup(None, None, None, 0, 0)
+            print 'hola'
+            return True
 
     def update_data(self):
         '''update the data on the conversation'''

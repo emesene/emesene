@@ -170,7 +170,7 @@ class TwoStageRequester(BaseRequester):
 
 class Membership(Requester):
     '''make the request to get the membership list'''
-    def __init__(self, session, command_queue, on_login):
+    def __init__(self, session, command_queue, on_login, started_from_cache):
         '''command_queue is a reference to a queue that is used
         by the worker to get commands that other threads need to be
         sent, if on_login is true, then some commands need to be
@@ -182,6 +182,7 @@ class Membership(Requester):
 
         self.command_queue = command_queue
         self.on_login = on_login
+        self.started_from_cache = started_from_cache
 
     def handle_response(self, request, response):
         '''handle the response'''
@@ -227,14 +228,14 @@ class Membership(Requester):
                         print 'exception in membership requester: ', str(error)
                     
             DynamicItems(self.session, self.command_queue, 
-                self.on_login).start()
+                self.on_login, self.started_from_cache).start()
         else:
             print 'error requesting membership', response.status
             print response.body
         
 class DynamicItems(Requester):
     '''make the request to get the dynamic items'''
-    def __init__(self, session, command_queue, on_login):
+    def __init__(self, session, command_queue, on_login, started_from_cache):
         '''command_queue is a reference to a queue that is used
         by the worker to get commands that other threads need to be
         sent, if on_login is true, then some commands need to be
@@ -246,6 +247,7 @@ class DynamicItems(Requester):
 
         self.command_queue = command_queue
         self.on_login = on_login
+        self.started_from_cache = started_from_cache
 
     def handle_response(self, request, response):
         '''handle the response'''
@@ -268,7 +270,7 @@ class DynamicItems(Requester):
                   and 'passportName' in contact_dict \
                   and contact_dict['isMessengerUser'] == 'true':
                     # valid
-                    email = contact_dict['passportName']
+                    email = contact_dict['passportName'].lower()
                     if email in self.session.contacts.contacts:
                         contact = self.session.contacts.contacts[email]
                     else:
@@ -283,17 +285,16 @@ class DynamicItems(Requester):
                 contact.groups = []
                 for guid in contact_dict['groupIds']:
                     contact.groups.append(guid)
-                    self.session.groups[guid].contacts.append(
-                        contact.account)
-
+                    self.session.groups[guid].contacts.append(contact.account)
 
                 for ann in contact_dict['Annotations']:
                     if ann.get('Name', None) == 'AB.NickName':
                         contact.alias = urllib.unquote(ann['Value'])
                         break
 
-                contact.nick = urllib.unquote(contact_dict.get('displayName', 
-                    contact.account))
+                if not contact.nick:
+                    contact.nick = urllib.unquote(contact_dict.get(
+                        'displayName', contact.account))
 
                 contact.attrs['mobile'] = \
                     contact_dict.get('isMobileIMEnabled', None) == 'true'
@@ -311,18 +312,24 @@ class DynamicItems(Requester):
             except IndexError:
                 nick = self.session.contacts.me.account
 
-            self.session.contacts.me.nick = nick
+            if not self.session.contacts.me.nick:
+                self.session.contacts.me.nick = nick
 
             if self.on_login:
                 # set our nick
                 self.command_queue.put(Command('PRP', params=('MFN', 
                     urllib.quote(nick))))
                 self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, nick)
-                self.command_queue.put(Command('BLP', params=('BL',)))
+
+                if not self.started_from_cache:
+                    self.command_queue.put(Command('BLP', params=('BL',)))
+
                 for adl in self.session.contacts.get_adls():
                     self.command_queue.put(Command('ADL', payload=adl))
 
             self.session.add_event(Event.EVENT_CONTACT_LIST_READY)
+            self.session.logger.add_contact_by_group(
+                self.session.contacts.contacts, self.session.groups)
         else:
             print 'error requestion dynamic items'
 

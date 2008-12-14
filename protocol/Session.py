@@ -59,6 +59,7 @@ class Session(object):
         self.config_dir.base_dir = os.path.join(
             self.config_dir.base_dir, self._account.account)
         self.logger = protocol.Logger.LoggerProcess(self.config_dir.join('log'))
+        self.logger.start()
 
     def _get_account(self):
         '''return the value of account'''

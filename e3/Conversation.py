@@ -127,14 +127,14 @@ class Conversation(threading.Thread):
                 if contact is None:
                     contact = protocol.Contact(message.account)
 
-                src =  Logger.Account(None, None, contact.account, 
-                    contact.status, contact.nick, contact.message, 
-                    contact.picture)
+                src =  Logger.Account(contact.attrs.get('CID', None), None, 
+                    contact.account, contact.status, contact.nick, 
+                    contact.message, contact.picture)
 
                 dst = self.session.contacts.me
 
-                dest =  Logger.Account(None, None, dst.account, 
-                    dst.status, dst.nick, dst.message, dst.picture)
+                dest =  Logger.Account(dst.attrs.get('CID', None), None, 
+                    dst.account, dst.status, dst.nick, dst.message, dst.picture)
 
                 # we remove the content type part since it's always equal
                 msgstr = message.format().split('\r\n', 1)[1]
@@ -227,6 +227,7 @@ class Conversation(threading.Thread):
             del self.sent_messages[tid]
             self.session.add_event(Event.EVENT_CONV_MESSAGE_SEND_FAILED,
                 self.cid, message)
+            self._log_message(message, True)
 
     def _on_unknown_command(self, message):
         '''handle the unknown commands'''
@@ -292,11 +293,14 @@ class Conversation(threading.Thread):
         else:
             self.sent_messages[self.socket.tid] = message
             self.socket.send_command('MSG', ('A',), message.format())
+            self._log_message(message)
 
+    def _log_message(self, message, error=False):
             # log the message
             contact = self.session.contacts.me
-            src =  Logger.Account(None, None, contact.account, 
-                contact.status, contact.nick, contact.message, contact.picture)
+            src =  Logger.Account(contact.attrs.get('CID', None), None, 
+                contact.account, contact.status, contact.nick, contact.message,
+                contact.picture)
 
             # we remove the content type part since it's always equal
             msgstr = message.format().split('\r\n', 1)[1]
@@ -305,15 +309,20 @@ class Conversation(threading.Thread):
             msgstr = msgstr.replace('X-MMS-IM-Format: ', '')
             msgstr = msgstr.replace('TypingUser: ', '')
 
+            if error:
+                event = 'message-error'
+            else:
+                event = 'message'
+
             for dst_account in self.members:
                 dst = self.session.contacts.get(dst_account)
 
                 if dst is None:
                     dst = protocol.Contact(message.account)
 
-                dest =  Logger.Account(None, None, dst.account, 
-                    dst.status, dst.nick, dst.message, dst.picture)
+                dest =  Logger.Account(dst.attrs.get('CID', None), None, 
+                    dst.account, dst.status, dst.nick, dst.message, dst.picture)
 
-                self.session.logger.log('message', contact.status, msgstr, 
+                self.session.logger.log(event, contact.status, msgstr, 
                     src, dest)
 

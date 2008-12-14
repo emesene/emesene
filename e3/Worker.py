@@ -16,6 +16,7 @@ import Transfer
 import Requester
 import XmlManager 
 import Conversation
+import protocol.Contact
 import protocol.Event as Event
 import protocol.Action as Action
 import protocol.status as status
@@ -219,6 +220,13 @@ class Worker(threading.Thread):
         while True:
             try:
                 data = self.socket.output.get(True, 0.1)
+
+                if type(data) == int and data == 0:
+                    self.session.add_event(Event.EVENT_ERROR,
+                        'Connection closed')
+                    print 'Worker connection closed'
+                    break
+
                 self._process(data)
             except Queue.Empty:
                 pass
@@ -333,6 +341,7 @@ class Worker(threading.Thread):
             else:
                 self.session.add_event(Event.EVENT_LOGIN_FAILED,
                  'Can\'t connect to HTTPS server: ' + str(exception))
+                self._on_login_failed()
 
             if data.find('<faultcode>psf:Redirect</faultcode>') > 0:
                 url = urlparse.urlparse(data.split('<psf:redirectUrl>')\
@@ -347,6 +356,7 @@ class Worker(threading.Thread):
         if not succeeded:
             self.session.add_event(Event.EVENT_LOGIN_FAILED, 
                 'Too many redirections')
+            self._on_login_failed()
 
         # try to get the ticket from the received data
         self.session.extras.update(SSoParser(data).tokens)
@@ -359,6 +369,7 @@ class Worker(threading.Thread):
                 faultstring = str(exception)
 
             self.session.add_event(Event.EVENT_LOGIN_FAILED, faultstring)
+            self._on_login_failed()
             return False
 
         self.session.extras['mbiblob'] = mbi.encrypt(
@@ -375,10 +386,49 @@ class Worker(threading.Thread):
 
         # log the status
         contact = self.session.contacts.me
-        account =  Logger.Account(None, None, contact.account, stat, 
-            contact.nick, contact.message, contact.picture)
+        account =  Logger.Account(contact.attrs.get('CID', None), None, 
+            contact.account, stat, contact.nick, contact.message, 
+            contact.picture)
 
         self.session.logger.log('status change', stat, str(stat), account)
+
+    def _start_from_cache(self):
+        '''try to send the adl with the data from cache'''
+        logger = self.session.logger.logger
+
+        if len(logger.accounts) < 2:
+            return False
+
+        for (account, contact) in logger.accounts.iteritems():
+            new_contact = protocol.Contact(account, contact.cid)
+            new_contact.groups = contact.groups[:]
+            self.session.contacts.contacts[account] = new_contact
+
+        for (gid, group) in logger.groups.iteritems():
+            new_group = protocol.Group(group.name, gid)
+            new_group.contacts = group.accounts[:]
+            self.session.groups[gid] = new_group
+
+        my_account = self.session.account.account
+        account_info = logger.accounts.get(my_account, None)
+
+        # TODO: this doesn't get the nick
+        if account_info:
+            if account_info.nick:
+                nick = account_info.nick
+            else:
+                nick = my_account
+
+        self.socket.send_command('PRP', ('MFN', urllib.quote(nick)))
+        self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, nick)
+        self.socket.send_command('BLP', ('BL',))
+
+        for adl in self.session.contacts.get_adls():
+            self.socket.send_command('ADL', payload=adl)
+
+        self.session.add_event(Event.EVENT_CONTACT_LIST_READY)
+
+        return True
 
     def _on_version(self, message):
         '''handle version'''
@@ -401,12 +451,14 @@ class Worker(threading.Thread):
             except ValueError:
                 self.session.add_event(Event.EVENT_LOGIN_FAILED,
                     'invalid XFR command')
+                self._on_login_failed()
 
             self.socket.reconnect(host, int(port))
             self.socket.send_command('VER', ('MSNP15', 'CVR0'))
         else:
             self.session.add_event(Event.EVENT_LOGIN_FAILED, 
                 'invalid XFR command')
+            self._on_login_failed()
 
     def _on_user(self, message):
         '''handle user response'''
@@ -432,6 +484,7 @@ class Worker(threading.Thread):
             except IndexError:
                 self.session.add_event(Event.EVENT_LOGIN_FAILED, 
                     'Incorrect passport id')
+                self._on_login_failed()
 
             # we introduce ourselves again
             self.socket.send_command('USR', ('SSO', 'S', \
@@ -443,6 +496,10 @@ class Worker(threading.Thread):
         '''handle (or dont) the sbs message'''
         pass
 
+    def _on_login_failed(self):
+        '''called when the login process fails, do cleanup here'''
+        self.session.logger.stop() 
+
     def _on_login_message(self, message):
         '''handle server message on login'''
         for line in message.payload.split('\r\n'):
@@ -452,13 +509,13 @@ class Worker(threading.Thread):
 
         self.session.load_config()
         self.session.create_config()
-        self.session.logger.start()
 
         self.session.add_event(Event.EVENT_LOGIN_SUCCEED)
         self.in_login = False
         self._set_status(self.session.account.status)
+        started_from_cache = self._start_from_cache()
         Requester.Membership(self.session, self.command_queue, 
-            True).start()
+            True, started_from_cache).start()
                 
     def _on_initial_status_change(self, message):
         '''handle the first status change of the contacts, that means
@@ -489,8 +546,9 @@ class Worker(threading.Thread):
         # requests the contact list
 
         self.session.logger.log('status change', status_, str(status_), 
-            Logger.Account(None, None, contact.account, contact.status, 
-                contact.nick, contact.message, contact.picture))
+            Logger.Account(contact.attrs.get('CID', None), None, 
+                contact.account, contact.status, contact.nick, contact.message,
+                contact.picture))
 
     def _on_information_change(self, message):
         '''handle the change of the information of a contact (personal 
@@ -512,8 +570,8 @@ class Worker(threading.Thread):
 
         if old_message != contact.message:
             self.session.logger.log('message change', contact.status, 
-                contact.message, Logger.Account(None, None, contact.account, 
-                    contact.status, contact.nick,
+                contact.message, Logger.Account(contact.attrs.get('CID', None),
+                    None, contact.account, contact.status, contact.nick,
                     contact.message, contact.picture))
 
     def _on_challenge(self, message):
@@ -546,8 +604,9 @@ class Worker(threading.Thread):
             contact.attrs['CID'] = int(message.params[2])
         
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
-        account =  Logger.Account(None, None, contact.account, contact.status, 
-            contact.nick, contact.message, contact.picture)
+        account =  Logger.Account(contact.attrs.get('CID', None), None, 
+            contact.account, contact.status, contact.nick, contact.message, 
+            contact.picture)
 
         if old_status != status_:
             self.session.logger.log('status change', status_, str(status_), 
@@ -573,8 +632,9 @@ class Worker(threading.Thread):
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
         self.session.logger.log('status change', status.OFFLINE,
             str(status.OFFLINE), 
-            Logger.Account(None, None, contact.account, contact.status, 
-                contact.nick, contact.message, contact.picture))
+            Logger.Account(contact.attrs.get('CID', None), None, 
+                contact.account, contact.status, contact.nick, contact.message,
+                contact.picture))
 
     def _on_conversation_invitation(self, message):
         '''handle the invitation to start a conversation'''
@@ -785,8 +845,9 @@ class Worker(threading.Thread):
 
         # log the change
         contact = self.session.contacts.me
-        account =  Logger.Account(None, None, contact.account, contact.status, 
-            contact.nick, message, contact.picture)
+        account =  Logger.Account(contact.attrs.get('CID', None), None, 
+            contact.account, contact.status, contact.nick, message, 
+            contact.picture)
 
         self.session.logger.log('message change', contact.status, message, 
             account)
@@ -795,8 +856,9 @@ class Worker(threading.Thread):
         '''handle Action.ACTION_SET_NICK
         '''
         contact = self.session.contacts.me
-        account =  Logger.Account(None, None, contact.account, contact.status, 
-            nick, contact.message, contact.picture)
+        account =  Logger.Account(contact.attrs.get('CID', None), None, 
+            contact.account, contact.status, nick, contact.message, 
+            contact.picture)
 
         Requester.ChangeNick(self.session, nick, account, 
             self.command_queue).start()
