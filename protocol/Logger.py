@@ -462,7 +462,10 @@ class Logger(object):
 
     def insert_account_by_group(self, id_account, id_group):
         '''insert the relation between an account and a group'''
-        self.execute(Logger.INSERT_ACCOUNT_BY_GROUP, (id_account, id_group))
+        try:
+            self.execute(Logger.INSERT_ACCOUNT_BY_GROUP, (id_account, id_group))
+        except sqlite.IntegrityError, e:
+            print str(e)
 
         self._stat()
 

@@ -259,6 +259,12 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         for row in self._model:
             obj = row[1]
             if type(obj) == Group and obj.name == group.name:
+                # if the contact is already on the group, then dont add it
+                for contact_row in row.iterchildren():
+                    con = contact_row[1]
+                    if con.account == contact.account:
+                        return contact_row.iter
+                    
                 return_iter = self._model.append(row.iter, contact_data)
                 self.update_group(group)
 
