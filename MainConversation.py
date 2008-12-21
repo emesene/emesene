@@ -415,6 +415,9 @@ class InputText(TextBox):
         '''method called when a key is pressed on the input widget'''
         if event.keyval == gtk.keysyms.Return and \
                 not event.state == gtk.gdk.SHIFT_MASK:
+            if not self.text:
+                return True
+
             self.on_send_message(self.text)
             self.text = ''
             return True
