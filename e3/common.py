@@ -19,6 +19,22 @@ dic_inv = {
     '&apos;'    :'\''
 }
 
+full_dic = {
+    '\"': '&quot;',
+    '\'': '&apos;',
+    '<': '&lt;',   
+    '>': '&gt;',
+    '&': '&amp;'
+}
+
+full_dic_inv = {
+    '&quot;': '\"',
+    '&apos;': '\'',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&amp;': '&'
+}
+
 def escape(string_):
     '''replace the values on dic keys with the values'''
     return xml.sax.saxutils.escape(string_, dic)
@@ -26,6 +42,14 @@ def escape(string_):
 def unescape(string_):
     '''replace the values on dic_inv keys with the values'''
     return xml.sax.saxutils.unescape(string_, dic_inv)
+
+def full_escape(string_):
+    '''replace the values on dic keys with the values'''
+    return xml.sax.saxutils.escape(string_, full_dic)
+
+def full_unescape(string_):
+    '''replace the values on dic_inv keys with the values'''
+    return xml.sax.saxutils.unescape(string_, full_dic_inv)
 
 def build_adl(account, type_):
     '''build a xml message to send on ADLs'''

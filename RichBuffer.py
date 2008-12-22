@@ -3,6 +3,9 @@
 import gtk
 import pango
 
+import e3.common
+import BasicFormatParser
+
 class RichBuffer(gtk.TextBuffer):
     '''a buffer that makes it easy to manipulate a gtk textview with 
     rich text'''
@@ -32,6 +35,21 @@ class RichBuffer(gtk.TextBuffer):
         #iterator = self.get_iter_at_mark(self.get_insert())
         iterator = self.get_end_iter()
         self._insert(iterator, text, tags)
+
+    def put_formatted(self, text):
+        '''insert text at the current position with the style defined inside
+        text'''
+        result = BasicFormatParser.BasicFormatParser(text).result
+
+        for part in result:
+            bold = part.get('b', False)
+            italic = part.get('i', False)
+            underline = part.get('u', False)
+            strike = part.get('s', False)
+            data = part.get('data', '')
+            
+            self.put_text(e3.common.full_unescape(data), None, None, None, None, 
+                bold, italic, underline, strike)
 
     def _insert(self, iterator, text, tags=None):
         '''insert text at the current position with the style defined by the 

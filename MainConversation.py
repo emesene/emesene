@@ -6,6 +6,7 @@ import gobject
 import gui
 import Menu
 import utils
+import MessageFormatter
 import protocol.status
 
 from RichBuffer import RichBuffer
@@ -25,6 +26,8 @@ class MainConversation(gtk.Notebook):
         self.session = session
         self.on_last_close = on_last_close
 
+        self.formatter = MessageFormatter.MessageFormatter(session.contacts.me)
+
         self.conversations = {}
         if self.session:
             self.session.protocol.connect('conv-message', 
@@ -39,6 +42,8 @@ class MainConversation(gtk.Notebook):
                 self._on_group_ended)
             self.session.protocol.connect('conv-message-send-failed', 
                 self._on_message_send_failed)
+            self.session.protocol.connect('contact-attr-changed', 
+                self._on_contact_attr_changed)
 
         self.connect('switch-page', self._on_switch_page)
 
@@ -55,9 +60,18 @@ class MainConversation(gtk.Notebook):
             else:
                 nick = account
 
-            conversation.output.append(nick + ': ', bold=True)
-            conversation.output.append(message.body + '\n', True,  
-                *self.format_from_message(message))
+            (is_raw, consecutive, outgoing, first, last) = \
+                self.formatter.format(contact) 
+
+            conversation.output.append_formatted(first)
+
+            if is_raw:
+                conversation.output.append(message.body)
+            else:
+                conversation.output.append(message.body, True,
+                    *self.format_from_message(message))
+
+            conversation.output.append_formatted(last)
 
             parent = self.get_parent()
 
@@ -85,6 +99,7 @@ class MainConversation(gtk.Notebook):
         conversation = self.conversations.get(float(cid), None)
 
         if conversation is not None:
+            # TODO: use formatter here
             conversation.output.append('message could not be sent: ', True, 
                 fg_color='#A52A2A', bold=True)
             conversation.output.append(message.body + '\n', True,  
@@ -152,7 +167,8 @@ class MainConversation(gtk.Notebook):
                 if conversation.members == members:
                     return (True, conversation)
 
-        conversation = Conversation(self.session, cid, None, members)
+        conversation = Conversation(self.session, cid, None, self.formatter, 
+            members)
         label = TabWidget('Connecting', self._on_tab_close, conversation)
         label.set_image(gui.theme.connect)
         conversation.tab_label = label
@@ -161,6 +177,14 @@ class MainConversation(gtk.Notebook):
         self.set_tab_label_packing(conversation, True, True, gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
         return (False, conversation)
+
+    def _on_contact_attr_changed(self, protocol, args):
+        '''called when an attribute of a contact changes'''
+        account = args[0]
+
+        for conversation in self.conversations.values():
+            if account in conversation.members:
+                conversation.update_data()
 
     def _on_tab_close(self, button, event, conversation):
         '''called when the user clicks the close button on a tab'''
@@ -186,11 +210,10 @@ class MainConversation(gtk.Notebook):
             self.close(conversation)
 
 
-
 class Conversation(gtk.VBox):
     '''a widget that contains all the components inside'''
 
-    def __init__(self, session, cid, tab_label, members=None):
+    def __init__(self, session, cid, tab_label, formatter, members=None):
         '''constructor'''
         gtk.VBox.__init__(self)
         self.set_border_width(1)
@@ -198,6 +221,7 @@ class Conversation(gtk.VBox):
         self.session = session
         self.tab_label = tab_label
         self.cid = float(cid)
+        self.formatter = formatter
 
         self._message_waiting = False
 
@@ -268,8 +292,20 @@ class Conversation(gtk.VBox):
         '''method called when the user press enter on the input text'''
         self.session.send_message(self.cid, text)
         nick = self.session.contacts.me.display_name
-        self.output.append(nick + ': ', bold=True)
-        self.output.append(text + '\n')
+
+        (is_raw, consecutive, outgoing, first, last) = \
+            self.formatter.format(self.session.contacts.me) 
+
+        self.output.append_formatted(first)
+
+        if is_raw:
+            self.output.append(text)
+        else:
+            self.output.append(text) 
+            # TODO: format here
+                #, True, *self.format_from_message(message))
+
+        self.output.append_formatted(last)
 
     def _on_button_press_event(self, widget, event):
         '''callback called when the user press a button over a widget
@@ -387,8 +423,19 @@ class TextBox(gtk.ScrolledWindow):
             italic, underline, strike)
 
         if scroll:
-            end_iter = self.buffer.get_end_iter()
-            self.textbox.scroll_to_iter(end_iter, 0.0, yalign=1.0)
+            self.scroll_to_end()
+
+    def append_formatted(self, text, scroll=True):
+        '''append formatted text to the widget'''
+        self.buffer.put_formatted(text)
+
+        if scroll:
+            self.scroll_to_end()
+
+    def scroll_to_end(self):
+        '''scroll to the end of the content'''
+        end_iter = self.buffer.get_end_iter()
+        self.textbox.scroll_to_iter(end_iter, 0.0, yalign=1.0)
 
     def _set_text(self, text):
         '''set the text on the widget'''

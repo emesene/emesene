@@ -16,6 +16,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''a abstract object that define the API of a contact list and some behavior'''
+import protocol.Contact
 import protocol.status as status
 import protocol.Object as Object
 
