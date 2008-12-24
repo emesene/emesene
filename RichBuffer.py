@@ -78,6 +78,8 @@ class RichBuffer(gtk.TextBuffer):
             if type(child) == str or type(child) == unicode:
                 self.put_text(child, fg_color, bg_color, font, size, 
                     bold, italic, underline, strike)
+            elif child.tag == 'img':
+                self.put_image(child.src, child.alt)
             else:
                 self._put_formatted(child, fg_color, bg_color, font, size, 
                     bold, italic, underline, strike)
@@ -243,9 +245,9 @@ def test():
 <u>under<s>lin<b>ed</b></s></u> 
 <em>emph<strong>as<span style="color: #CC0000; background-color: #00CC00">is</span></strong></em>
 <span style="font-size: 14;">size <span style="font-family: Arial;">test</span></span>
+<img src="themes/emotes/default/face-sad.png" alt=":("/> &lt;-- see that? it is an image!
     '''
     buff.put_formatted(text)
-    buff.put_image('loading.gif')
     
     # we have to insert every widget in the textview
     while buff.widgets:

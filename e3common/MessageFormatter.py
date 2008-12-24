@@ -1,6 +1,6 @@
 import time
 
-import e3.common
+import MarkupParser
 import protocol.status
 
 class MessageFormatter(object):
@@ -76,19 +76,19 @@ class MessageFormatter(object):
         formated_time = time.strftime('%c', time.gmtime(timestamp)) 
 
         template = template.replace('%NICK%', 
-            e3.common.full_escape(contact.nick))
+            MarkupParser.escape(contact.nick))
         template = template.replace('%ALIAS%', 
-            e3.common.full_escape(contact.alias))
+            MarkupParser.escape(contact.alias))
         template = template.replace('%ACCOUNT%', 
-            e3.common.full_escape(contact.account))
+            MarkupParser.escape(contact.account))
         template = template.replace('%DISPLAYNAME%', 
-            e3.common.full_escape(contact.display_name))
+            MarkupParser.escape(contact.display_name))
         template = template.replace('%TIME%', 
-            e3.common.full_escape(formated_time))
+            MarkupParser.escape(formated_time))
         template = template.replace('%STATUS%', 
-            e3.common.full_escape(protocol.status.STATUS[contact.status]))
+            MarkupParser.escape(protocol.status.STATUS[contact.status]))
         template = template.replace('%PERSONALMESSAGE%', 
-            e3.common.full_escape(contact.message))
+            MarkupParser.escape(contact.message))
         template = template.replace('%NL%', self.new_line)
 
         # TODO: ValueError will be raised if the theme doent 

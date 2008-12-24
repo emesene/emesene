@@ -6,6 +6,7 @@ import gobject
 import gui
 import Menu
 import utils
+import e3common.MarkupParser
 import e3common.MessageFormatter
 import protocol.status
 
@@ -67,10 +68,11 @@ class MainConversation(gtk.Notebook):
             conversation.output.append_formatted(first)
 
             if is_raw:
-                conversation.output.append(message.body)
+                conversation.output.append(
+                    e3common.MarkupParser.escape(message.body))
             else:
-                conversation.output.append(message.body, True,
-                    *self.format_from_message(message))
+                conversation.output.append_formatted(
+                    e3common.MarkupParser.escape(message.body))
 
             conversation.output.append_formatted(last)
 
@@ -300,9 +302,10 @@ class Conversation(gtk.VBox):
         self.output.append_formatted(first)
 
         if is_raw:
-            self.output.append(text)
+            self.output.append(e3common.MarkupParser.escape(text))
         else:
-            self.output.append(text) 
+            self.output.append_formatted(
+                e3common.MarkupParser.escape(text))
             # TODO: format here
                 #, True, *self.format_from_message(message))
 
@@ -428,7 +431,13 @@ class TextBox(gtk.ScrolledWindow):
 
     def append_formatted(self, text, scroll=True):
         '''append formatted text to the widget'''
+        print text
+        text = e3common.MarkupParser.parse_emotes(text)
         self.buffer.put_formatted(text)
+        [self.textbox.add_child_at_anchor(*item)
+            for item in self.buffer.widgets]
+
+        self.buffer.widgets = []
 
         if scroll:
             self.scroll_to_end()

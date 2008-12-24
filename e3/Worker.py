@@ -17,8 +17,8 @@ import Requester
 import XmlManager 
 import Conversation
 import protocol.Contact
-import protocol.Event as Event
-import protocol.Action as Action
+from  protocol.Event import Event
+from  protocol.Action import Action
 import protocol.status as status
 import protocol.Logger as Logger
 
