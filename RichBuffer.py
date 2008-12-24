@@ -26,6 +26,8 @@ class RichBuffer(gtk.TextBuffer):
             underline=pango.UNDERLINE_SINGLE) 
         self.strike_tag = self.create_tag("strike", strikethrough=True) 
 
+        self.widgets = []
+
     def put_text(self, text, fg_color=None, bg_color=None, font=None, size=None,
         bold=False, italic=False, underline=False, strike=False):
         '''insert text at the current position with the style defined by the 
@@ -80,6 +82,41 @@ class RichBuffer(gtk.TextBuffer):
                 self._put_formatted(child, fg_color, bg_color, font, size, 
                     bold, italic, underline, strike)
 
+    def put_widget(self, widget):
+        '''insert a widget at the current position'''
+        iterator = self.get_end_iter()
+        anchor = self.create_child_anchor(iterator)
+
+        self.widgets.append((widget, anchor))
+
+    def put_image(self, path, tip=None):
+        '''insert an image at the current position
+        tip it's the alt text on mouse over'''
+        img_fd = open(path)
+
+        loader = gtk.gdk.PixbufLoader()
+        loader.write(img_fd.read())
+        loader.close()
+
+        img_fd.close()
+
+        img = gtk.Image()
+        img.set_from_animation(loader.get_animation())
+        img.show()
+
+        if tip:
+            tooltip = gtk.Tooltips()
+            tooltip.set_tip(img, tip)
+
+        self.put_widget(img)
+
+    def _insert(self, iterator, text, tags=None):
+        '''insert text at the current position with the style defined by the 
+        optional parameters'''
+        if tags is not None:
+            self.insert_with_tags(iterator, text, *tags)
+        else:
+            self.insert(iterator, text)
     def _insert(self, iterator, text, tags=None):
         '''insert text at the current position with the style defined by the 
         optional parameters'''
@@ -208,6 +245,12 @@ def test():
 <span style="font-size: 14;">size <span style="font-family: Arial;">test</span></span>
     '''
     buff.put_formatted(text)
+    buff.put_image('loading.gif')
+    
+    # we have to insert every widget in the textview
+    while buff.widgets:
+        textview.add_child_at_anchor(*buff.widgets.pop())
+
     gtk.main()
 
 if __name__ == '__main__':
