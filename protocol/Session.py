@@ -24,10 +24,10 @@ import Queue
 
 from protocol.Event import Event
 from protocol.Action import Action
-import protocol.ContactManager
-import protocol.Config
 import protocol.Logger
-import protocol.ConfigDir
+import e3common.Config
+import e3common.ConfigDir
+import protocol.ContactManager
 
 import e3
 
@@ -48,8 +48,8 @@ class Session(object):
 
         self.groups = {}
 
-        self.config = protocol.Config.Config()
-        self.config_dir = protocol.ConfigDir.ConfigDir('emesene2')
+        self.config = e3common.Config.Config()
+        self.config_dir = e3common.ConfigDir.ConfigDir('emesene2')
         # set the base dir of the config to the base dir plus the account
 
     def _set_account(self, account):

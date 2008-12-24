@@ -25,6 +25,5 @@ def safe_gtk_pixbuf_load(path):
     else:
         return None 
 
-
 def file_readable(path):
     return os.access(path, os.R_OK) and os.path.isfile(path)

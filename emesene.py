@@ -10,9 +10,9 @@ import Window
 
 import e3
 from protocol import Action
-from protocol import Config
-from protocol import ConfigDir
 from protocol import Logger
+from e3common import Config
+from e3common import ConfigDir
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''

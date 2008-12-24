@@ -21,8 +21,6 @@ import protocol.Event as Event
 import protocol.Action as Action
 import protocol.status as status
 import protocol.Logger as Logger
-import protocol.Config as Config
-import protocol.ConfigDir as ConfigDir
 
 from XmlParser import SSoParser
 from UbxParser import UbxParser

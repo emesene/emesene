@@ -4,7 +4,7 @@ import gtk
 import pango
 
 import e3.common
-import BasicFormatParser
+import e3common.XmlParser
 
 class RichBuffer(gtk.TextBuffer):
     '''a buffer that makes it easy to manipulate a gtk textview with 
@@ -32,24 +32,53 @@ class RichBuffer(gtk.TextBuffer):
         optional parameters'''
         tags = self._parse_tags(fg_color, bg_color, font, size, bold, italic,
             underline, strike)
-        #iterator = self.get_iter_at_mark(self.get_insert())
         iterator = self.get_end_iter()
         self._insert(iterator, text, tags)
 
-    def put_formatted(self, text):
+    def put_formatted(self, text, fg_color=None, bg_color=None, font=None, size=None,
+        bold=False, italic=False, underline=False, strike=False):
         '''insert text at the current position with the style defined inside
         text'''
-        result = BasicFormatParser.BasicFormatParser(text).result
+        result = e3common.XmlParser.XmlParser('<span>' + text + '</span>').result
+        dct = e3common.XmlParser.DictObj(result)
+        self._put_formatted(dct, fg_color, bg_color, font, size, 
+            bold, italic, underline, strike)
 
-        for part in result:
-            bold = part.get('b', False)
-            italic = part.get('i', False)
-            underline = part.get('u', False)
-            strike = part.get('s', False)
-            data = part.get('data', '')
-            
-            self.put_text(e3.common.full_unescape(data), None, None, None, None, 
-                bold, italic, underline, strike)
+    def _put_formatted(self, dct, fg_color=None, bg_color=None, font=None, size=None,
+        bold=False, italic=False, underline=False, strike=False):
+        '''insert text at the current position with the style defined inside
+        text'''
+        # override the values if defined, keep the old ones if no new defined
+        bold = dct.tag == 'b' or dct.tag == 'strong' or bold
+        italic = dct.tag == 'i' or dct.tag == 'em' or italic
+        underline = dct.tag == 'u' or underline
+        strike = dct.tag == 's' or strike
+
+        if dct.tag == 'span' and dct.style:
+            style = e3common.XmlParser.parse_css(dct.style)
+            font = style.font_family or font
+
+            try:
+                # TODO: handle different units?
+                size = int(style.font_size) or size
+            except ValueError:
+                pass
+            except TypeError:
+                pass
+
+            fg_color = style.color or fg_color
+            bg_color = style.background_color or bg_color
+
+        if dct.childs is None:
+            return
+
+        for child in dct.childs:
+            if type(child) == str or type(child) == unicode:
+                self.put_text(child, fg_color, bg_color, font, size, 
+                    bold, italic, underline, strike)
+            else:
+                self._put_formatted(child, fg_color, bg_color, font, size, 
+                    bold, italic, underline, strike)
 
     def _insert(self, iterator, text, tags=None):
         '''insert text at the current position with the style defined by the 
@@ -167,12 +196,18 @@ def test():
     textview.set_buffer(buff)
     window.add(textview)
     window.show_all()
-    buff.put_text('buenas, como va? ', '#CCCCCC', '#000000', 'Arial', 12)
+    '''buff.put_text('buenas, como va? ', '#CCCCCC', '#000000', 'Arial', 12)
     buff.put_text('esto es una prueba\n', '#CC0000', '#AAAAAA', 'Purisa', 14)
     buff.put_text('un poco de formato\n', '#00CC00', '#FFFFFF', 'Andale Mono', 
         8, True, True, True, True)
     buff.put_text('un poco mas\n', '#CCCCCC', '#0000CC', 'Andale Mono', 16, 
-        False, True, False, True)
+        False, True, False, True)'''
+    text = '''<i>ital<b>i</b>c</i> 
+<u>under<s>lin<b>ed</b></s></u> 
+<em>emph<strong>as<span style="color: #CC0000; background-color: #00CC00">is</span></strong></em>
+<span style="font-size: 14;">size <span style="font-family: Arial;">test</span></span>
+    '''
+    buff.put_formatted(text)
     gtk.main()
 
 if __name__ == '__main__':

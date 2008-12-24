@@ -6,7 +6,7 @@ import gobject
 import gui
 import Menu
 import utils
-import MessageFormatter
+import e3common.MessageFormatter
 import protocol.status
 
 from RichBuffer import RichBuffer
@@ -26,7 +26,8 @@ class MainConversation(gtk.Notebook):
         self.session = session
         self.on_last_close = on_last_close
 
-        self.formatter = MessageFormatter.MessageFormatter(session.contacts.me)
+        self.formatter = e3common.MessageFormatter.MessageFormatter(
+            session.contacts.me)
 
         self.conversations = {}
         if self.session:
