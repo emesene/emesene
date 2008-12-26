@@ -19,22 +19,13 @@
 
 from Session import Session
 from Account import Account
-from Proxy import Proxy
-from Server import Server
 
 from Group import Group
 from Event import Event
 from Action import Action
 from Contact import Contact
-from Conversation import Conversation
 
 from ContactManager import ContactManager
-from ConversationManager import ConversationManager
-
-from Message import Text
-from Message import Color
-from Message import Message
 
 import stock
 import status
-import validator

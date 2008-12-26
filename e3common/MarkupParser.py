@@ -54,5 +54,3 @@ def parse_emotes(message):
     return ''.join(chunks)
         
 
-if __name__ == '__main__':
-    print parser_emotes('hi! :D how are you doing ;) :P')
