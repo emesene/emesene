@@ -1,0 +1,198 @@
+import gtk
+import pango
+import cairo
+
+import e3 # for e3.Color
+import RichWidget
+import e3common.XmlParser
+
+class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
+    '''a widget that can display rich text'''
+
+    # Draw in response to an expose-event
+    __gsignals__ = { "expose-event": "override" }
+
+    def __init__(self, text=None, border_width=0):
+        '''constructor'''
+        RichWidget.RichWidget.__init__(self)
+        gtk.DrawingArea.__init__(self)
+
+        self.do_new_line = False 
+        # the x and y coordinates of the next item
+        # to be added
+        self.next_item_x = 0
+        self.next_item_y = None
+
+        self.text = text
+        
+    def _set_text(self, text):
+        '''set the value of text and parse the value'''
+        self._text = text
+        result = e3common.XmlParser.XmlParser(
+            '<span>' + text.replace('\n', '') + '</span>').result
+        # hold the parsed structure to not parse it every time we 
+        # draw the widget
+        self._parsed = e3common.XmlParser.DictObj(result)
+
+    def _get_text(self):
+        '''return the value of text'''
+        return self._text
+
+    text = property(fget=_get_text, fset=_set_text)
+
+    # Handle the expose-event by drawing
+    def do_expose_event(self, event):
+        '''override the expose event handler'''
+
+        # Create the cairo context
+        cr = self.window.cairo_create()
+
+        # Restrict Cairo to the exposed area; avoid extra work
+        cr.rectangle(event.area.x, event.area.y,
+                event.area.width, event.area.height)
+        cr.clip()
+
+        self.draw(cr, *self.window.get_size())
+
+    def _draw_image(self, x, y, path):
+        '''draw an image in the current position'''
+        sf_base = cairo.ImageSurface.create_from_png(path)
+        width = sf_base.get_width()
+        height = sf_base.get_height()
+
+        x, y = self._update_coords(height, x, y)
+
+        cr = self.window.cairo_create()
+        cr.set_source_surface(sf_base, x, y - height)
+        cr.paint()
+
+        return (x + width, y)
+
+    def _draw_text(self, x, y, text, fg_color=None, bg_color=None, font=None, 
+        size=None, bold=False, italic=False, underline=False, strike=False):
+        '''draw text in the current position with the properties defined'''
+        foreground = None
+        background = None
+
+        cr = self.window.cairo_create()
+        rgb = cr.get_source().get_rgba()[:3]
+
+        if font is None:
+            font = self.get_style().font_desc.get_family()
+
+        if size is None or size < 0 or size > 48:
+            size = self.get_style().font_desc.get_size() / pango.SCALE
+
+        bold_style = cairo.FONT_WEIGHT_NORMAL
+        
+        if bold:
+            bold_style = cairo.FONT_WEIGHT_BOLD
+
+        italic_style = cairo.FONT_SLANT_NORMAL
+
+        if italic:
+            italic_style = cairo.FONT_SLANT_ITALIC
+
+        cr.select_font_face(font, italic_style, bold_style)
+
+        if size:
+            cr.set_font_size(size)
+
+        fascent, fdescent, fheight, fxadvance, fyadvance = cr.font_extents()
+        xbearing, ybearing, width, height, xadvance, yadvance = \
+            cr.text_extents(text)
+
+        x, y = self._update_coords(height, x, y)
+
+        if bg_color:
+            background = e3.Color.from_hex(bg_color)
+            cr.set_source_rgb(*tuple(background))
+            cr.rectangle(x + xbearing, y + ybearing, width, height)
+            cr.fill()
+
+        if fg_color:
+            foreground = e3.Color.from_hex(fg_color)
+            cr.set_source_rgb(*tuple(foreground))
+        else:
+            cr.set_source_rgb(*rgb)
+
+        cr.move_to (x + xbearing, y)
+        cr.show_text(text)
+
+        cr.set_line_width(1 * self.px)
+
+        if strike:
+            cr.move_to(x, y - height / 2)
+            cr.rel_line_to(xadvance + xbearing, 0)
+
+        if underline:
+            cr.move_to(x, y + 2 * self.px)
+            cr.rel_line_to(xadvance + xbearing, 0)
+
+        cr.stroke ()
+        cr.set_source_rgb(*rgb)
+
+        return (x + xadvance + xbearing, y)
+
+    def _update_coords(self, height, x, y):
+        '''update the coordinates'''
+        # if this is the first item calculate the initial y coords
+        if self.next_item_y is None:
+            y = height
+            self.next_item_y = y
+
+        if self.do_new_line:
+            y += height + self.px * 5
+            self.next_item_y = y
+            x = self.next_item_x = 0
+            self.do_new_line = False
+
+        return x, y
+
+    def draw(self, cr, width, height):
+        '''called to draw the widget content'''
+        self.next_item_y = None
+        self.next_item_x = 0
+        self.px = max(cr.device_to_user_distance(1, 1))
+
+        self.width = width
+        self.height = height
+        self._put_formatted(self._parsed)
+
+    def put_image(self, path, alt=None):
+        '''put an image on the widget'''
+        (next_x, next_y) = self._draw_image(self.next_item_x, 
+            self.next_item_y, path)
+
+        self.next_item_x = next_x
+        self.next_item_y = next_y
+
+    def put_text(self, text, fg_color=None, bg_color=None, font=None, size=None,
+        bold=False, italic=False, underline=False, strike=False):
+        '''insert text at the current position with the style defined by the 
+        optional parameters'''
+        (next_x, next_y) = self._draw_text(self.next_item_x, 
+            self.next_item_y, text, fg_color, bg_color, font, size, bold, 
+            italic, underline, strike)
+
+        self.next_item_x = next_x
+        self.next_item_y = next_y
+
+    def new_line(self):
+        '''put a new line on the text'''
+        self.do_new_line = True
+
+if __name__ == "__main__":
+    window = gtk.Window()
+    window.connect("delete-event", gtk.main_quit)
+    text = '''<i>ital<b>i</b>c</i><br/>
+<u>under<s>lin<b>ed</b></s></u><br/>
+<em>emph<strong>as<span style="color: #CC0000; background-color: #00CC00">is</span></strong></em><br/>
+<span style="font-size: 14;">size <span style="font-family: Arial;">test</span></span>
+<img src="themes/emotes/default/face-sad.png" alt=":("/><img src="themes/emotes/default/face-smile.png" alt=":)"/> 
+&lt;-- see that? it is an image! <b>asd</b>'''
+    widget = RichLabel(text)
+    widget.show()
+    window.add(widget)
+    window.present()
+    gtk.main()

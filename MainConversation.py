@@ -54,8 +54,13 @@ class MainConversation(gtk.Notebook):
         (cid, account, message) = args
         conversation = self.conversations.get(float(cid), None)
 
-        if conversation and message.type == Message.TYPE_MESSAGE:
-            contact = self.session.contacts.get(account)
+        if not conversation:
+            print 'conversation', cid, 'not found'
+            return
+
+        contact = self.session.contacts.get(account)
+
+        if message.type == Message.TYPE_MESSAGE:
 
             if contact:
                 nick = contact.display_name
@@ -72,17 +77,20 @@ class MainConversation(gtk.Notebook):
                     e3common.MarkupParser.escape(message.body))
             else:
                 conversation.output.append_formatted(
-                    e3common.MarkupParser.escape(message.body))
+                    self.format_from_message(message))
 
             conversation.output.append_formatted(last)
 
-            parent = self.get_parent()
+        elif message.type == Message.TYPE_NUDGE:
+            (is_raw, consecutive, outgoing, first, last) = \
+                self.formatter.format(contact, message.type) 
+            conversation.output.append_formatted(first)
 
-            if not parent.is_active():
-                parent.set_urgency_hint(True)
-                conversation.message_waiting = True
-        elif not conversation:
-            print 'conversation', cid, 'not found'
+        parent = self.get_parent()
+
+        if not parent.is_active():
+            parent.set_urgency_hint(True)
+            conversation.message_waiting = True
 
     def _on_focus(self, widget, event):
         '''called when the widget receives the focus'''
@@ -102,11 +110,10 @@ class MainConversation(gtk.Notebook):
         conversation = self.conversations.get(float(cid), None)
 
         if conversation is not None:
-            # TODO: use formatter here
-            conversation.output.append('message could not be sent: ', True, 
-                fg_color='#A52A2A', bold=True)
-            conversation.output.append(message.body + '\n', True,  
-                *self.format_from_message(message))
+            error = self.formatter.format_error('message couldn\'t be sent: ')
+            conversation.output.append_formatted(error)
+            conversation.output.append_formatted(
+                self.format_from_message(message))
         else:
             print 'conversation', cid, 'not found'
 
@@ -151,8 +158,35 @@ class MainConversation(gtk.Notebook):
         RichBuffer.put_text'''
         stl = message.style
 
-        result = ('#' + stl.color.to_hex(), None, stl.font, None, stl.bold, 
-            stl.italic, stl.underline, stl.strike)
+        style_start = ''
+        style_end = ''
+        style = 'color: #' + stl.color.to_hex() + ';'
+
+        if stl.bold:
+            style_start = style_start + '<b>'
+            style_end = '</b>' + style_end
+
+        if stl.italic:
+            style_start = style_start + '<i>'
+            style_end = '</i>' + style_end
+
+        if stl.underline:
+            style_start = style_start + '<u>'
+            style_end = '</u>' + style_end
+
+        if stl.strike:
+            style_start = style_start + '<s>'
+            style_end = '</s>' + style_end
+
+        if stl.font:
+            style += 'font-family: ' + stl.font
+
+        style_start += '<span style="%s; ">' % (style, )
+        style_end = '</span>' + style_end
+
+        result = style_start + e3common.MarkupParser.escape(message.body) + \
+            style_end
+
         return result
 
     def new_conversation(self, cid, members=None):
@@ -306,8 +340,6 @@ class Conversation(gtk.VBox):
         else:
             self.output.append_formatted(
                 e3common.MarkupParser.escape(text))
-            # TODO: format here
-                #, True, *self.format_from_message(message))
 
         self.output.append_formatted(last)
 
@@ -318,7 +350,6 @@ class Conversation(gtk.VBox):
             menu_ = gui.ConversationMenu(None, None, None)
             menu = Menu.build_pop_up(menu_)
             menu.popup(None, None, None, 0, 0)
-            print 'hola'
             return True
 
     def update_data(self):
@@ -431,7 +462,6 @@ class TextBox(gtk.ScrolledWindow):
 
     def append_formatted(self, text, scroll=True):
         '''append formatted text to the widget'''
-        print text
         text = e3common.MarkupParser.parse_emotes(text)
         self.buffer.put_formatted(text)
         [self.textbox.add_child_at_anchor(*item)
@@ -608,7 +638,7 @@ class TabWidget(gtk.HBox):
 
     def set_text(self, text):
         '''set the text of the label'''
-        self.label.set_markup(text)
+        self.label.set_markup(gobject.markup_escape_text(text))
 
 
 if __name__ == '__main__':

@@ -312,7 +312,8 @@ class DynamicItems(Requester):
             except IndexError:
                 nick = self.session.contacts.me.account
 
-            if not self.session.contacts.me.nick:
+            if not self.session.contacts.me.nick or \
+                self.session.contacts.me != self.session.account.account:
                 self.session.contacts.me.nick = nick
 
             if self.on_login:

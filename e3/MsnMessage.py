@@ -201,6 +201,12 @@ class Color(object):
         return '<Color red="%d" green="%d" blue="%d" alpha="%d">' % \
             (self.red, self.green, self.blue, self.alpha)
 
+    def __iter__(self):
+        '''return an iterator'''
+        yield self.red
+        yield self.green
+        yield self.blue
+
     @classmethod
     def from_hex(cls, hex_str):
         '''return a color from an hexadecimal representation of type

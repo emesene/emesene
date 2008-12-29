@@ -2,6 +2,7 @@ import time
 
 import MarkupParser
 import protocol.status
+import e3 # e3.Message used
 
 class MessageFormatter(object):
     '''a class that holds the state of a conversation and
@@ -29,7 +30,7 @@ class MessageFormatter(object):
     br: new line
     '''
 
-    def __init__(self, contact, new_line='\n'):
+    def __init__(self, contact, new_line='<br/>'):
         '''constructor'''
 
         # the contact who sends the messages 
@@ -45,8 +46,33 @@ class MessageFormatter(object):
         self.consecutive_outgoing = '  %MESSAGE%%NL%'
         self.offline_incoming = \
             '<i>(offline message)</i><b>%DISPLAYNAME%</b>: %MESSAGE%%NL%'
+        self.information = '<i>%MESSAGE%</i>%NL%'
+        self.error = \
+            '<span style="color: #A52A2A;"><b>%MESSAGE%</b></span>%NL%'
+        self.nudge = \
+            '<i>%DISPLAYNAME% sent you a nudge!</i>%NL%'
 
-    def format(self, contact):
+    def format_message(self, template, message):
+        '''format a message from the template, include new line
+        if new_line is True'''
+        template = template.replace('%NL%', self.new_line)
+        template = template.replace('%MESSAGE%', message)
+
+        return template
+
+    def format_error(self, message):
+        '''format an error message from the template, include new line
+        if new_line is True'''
+        self.last_message_sender = None
+        return self.format_message(self.error, message)
+
+    def format_information(self, message):
+        '''format an info message from the template, include new line
+        if new_line is True'''
+        self.last_message_sender = None
+        return self.format_message(self.information, message)
+
+    def format(self, contact, message_type=e3.Message.TYPE_MESSAGE):
         '''format the message according to the template'''
         outgoing = False
         consecutive = False
@@ -62,16 +88,20 @@ class MessageFormatter(object):
         self.last_message_sender = contact
         self.last_message_time = timestamp
         
-        if consecutive:
-            if outgoing:
-                template = self.consecutive_outgoing
+        if message_type == e3.Message.TYPE_MESSAGE:
+            if consecutive:
+                if outgoing:
+                    template = self.consecutive_outgoing
+                else:
+                    template = self.consecutive_incoming
             else:
-                template = self.consecutive_incoming
-        else:
-            if outgoing:
-                template = self.outgoing
-            else:
-                template = self.incoming
+                if outgoing:
+                    template = self.outgoing
+                else:
+                    template = self.incoming
+        if message_type == e3.Message.TYPE_NUDGE:
+            template = self.nudge
+            self.last_message_sender = None
 
         formated_time = time.strftime('%c', time.gmtime(timestamp)) 
 
@@ -91,14 +121,16 @@ class MessageFormatter(object):
             MarkupParser.escape(contact.message))
         template = template.replace('%NL%', self.new_line)
 
-        # TODO: ValueError will be raised if the theme doent 
-        # contain a MESSAGE or RAWMESSAGE tags
+        is_raw = False
+
         if '%MESSAGE%' in template:
             (first, last) = template.split('%MESSAGE%')
-            is_raw = False
-        else:
+        elif '%RAWMESSAGE%' in template:
             (first, last) = template.split('%RAWMESSAGE%')
             is_raw = True
+        else:
+            first = template
+            last = ''
                 
         return (is_raw, consecutive, outgoing, first, last) 
 

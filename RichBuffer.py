@@ -3,15 +3,15 @@
 import gtk
 import pango
 
-import e3.common
-import e3common.XmlParser
+import RichWidget
 
-class RichBuffer(gtk.TextBuffer):
+class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
     '''a buffer that makes it easy to manipulate a gtk textview with 
     rich text'''
 
     def __init__(self):
         '''constructor'''
+        RichWidget.RichWidget.__init__(self)
         gtk.TextBuffer.__init__(self)
 
         self.colormap = gtk.gdk.colormap_get_system()
@@ -36,53 +36,6 @@ class RichBuffer(gtk.TextBuffer):
             underline, strike)
         iterator = self.get_end_iter()
         self._insert(iterator, text, tags)
-
-    def put_formatted(self, text, fg_color=None, bg_color=None, font=None, size=None,
-        bold=False, italic=False, underline=False, strike=False):
-        '''insert text at the current position with the style defined inside
-        text'''
-        result = e3common.XmlParser.XmlParser('<span>' + text + '</span>').result
-        dct = e3common.XmlParser.DictObj(result)
-        self._put_formatted(dct, fg_color, bg_color, font, size, 
-            bold, italic, underline, strike)
-
-    def _put_formatted(self, dct, fg_color=None, bg_color=None, font=None, size=None,
-        bold=False, italic=False, underline=False, strike=False):
-        '''insert text at the current position with the style defined inside
-        text'''
-        # override the values if defined, keep the old ones if no new defined
-        bold = dct.tag == 'b' or dct.tag == 'strong' or bold
-        italic = dct.tag == 'i' or dct.tag == 'em' or italic
-        underline = dct.tag == 'u' or underline
-        strike = dct.tag == 's' or strike
-
-        if dct.tag == 'span' and dct.style:
-            style = e3common.XmlParser.parse_css(dct.style)
-            font = style.font_family or font
-
-            try:
-                # TODO: handle different units?
-                size = int(style.font_size) or size
-            except ValueError:
-                pass
-            except TypeError:
-                pass
-
-            fg_color = style.color or fg_color
-            bg_color = style.background_color or bg_color
-
-        if dct.childs is None:
-            return
-
-        for child in dct.childs:
-            if type(child) == str or type(child) == unicode:
-                self.put_text(child, fg_color, bg_color, font, size, 
-                    bold, italic, underline, strike)
-            elif child.tag == 'img':
-                self.put_image(child.src, child.alt)
-            else:
-                self._put_formatted(child, fg_color, bg_color, font, size, 
-                    bold, italic, underline, strike)
 
     def put_widget(self, widget):
         '''insert a widget at the current position'''
@@ -112,13 +65,11 @@ class RichBuffer(gtk.TextBuffer):
 
         self.put_widget(img)
 
-    def _insert(self, iterator, text, tags=None):
-        '''insert text at the current position with the style defined by the 
-        optional parameters'''
-        if tags is not None:
-            self.insert_with_tags(iterator, text, *tags)
-        else:
-            self.insert(iterator, text)
+    def new_line(self):
+        '''insert a new_line on the text'''
+        iterator = self.get_end_iter()
+        self._insert(iterator, '\n')
+
     def _insert(self, iterator, text, tags=None):
         '''insert text at the current position with the style defined by the 
         optional parameters'''
@@ -241,12 +192,11 @@ def test():
         8, True, True, True, True)
     buff.put_text('un poco mas\n', '#CCCCCC', '#0000CC', 'Andale Mono', 16, 
         False, True, False, True)'''
-    text = '''<i>ital<b>i</b>c</i> 
-<u>under<s>lin<b>ed</b></s></u> 
-<em>emph<strong>as<span style="color: #CC0000; background-color: #00CC00">is</span></strong></em>
+    text = '''<i>ital<b>i</b>c</i><br/>
+<u>under<s>lin<b>ed</b></s></u><br/>
+<em>emph<strong>as<span style="color: #CC0000; background-color: #00CC00">is</span></strong></em><br/>
 <span style="font-size: 14;">size <span style="font-family: Arial;">test</span></span>
-<img src="themes/emotes/default/face-sad.png" alt=":("/> &lt;-- see that? it is an image!
-    '''
+<img src="themes/emotes/default/face-sad.png" alt=":("/> &lt;-- see that? it is an image! <b>asd</b>'''
     buff.put_formatted(text)
     
     # we have to insert every widget in the textview
