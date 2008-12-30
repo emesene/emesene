@@ -4,15 +4,18 @@ import time
 import base64
 import gobject
 
-from core import Core
 import dialog
 import Window
 
 import e3
+import Signals
+import protocol.Session
 from protocol import Action
 from protocol import Logger
 from e3common import Config
 from e3common import ConfigDir
+
+Signals.Signals.set_events(e3.EVENTS)
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -21,7 +24,6 @@ class Controller(object):
         '''class constructor'''
         self.window = None
         self.conversations = None
-        self.core = Core()
         self.config = Config.Config()
         self.config_dir = ConfigDir.ConfigDir('emesene2')
         self.config.load(self.config_dir.join('config'))
@@ -32,21 +34,26 @@ class Controller(object):
         if self.config.d_accounts is None:
             self.config.d_accounts = {}
 
-        self.core.connect('login-succeed', self.on_login_succeed)
-        self.core.connect('login-failed', self.on_login_failed)
-        self.core.connect('contact-list-ready', self.on_contact_list_ready)
-        self.core.connect('conv-first-action', self.on_new_conversation)
-        self.core.connect('nick-change-succeed', self.on_nick_change_succeed)
-        self.core.connect('message-change-succeed', 
+        self.session = protocol.Session()
+        self.session.signals = Signals.Signals(self.session.events)
+        self.session.signals.connect('login-succeed', self.on_login_succeed)
+        self.session.signals.connect('login-failed', self.on_login_failed)
+        self.session.signals.connect('contact-list-ready', 
+            self.on_contact_list_ready)
+        self.session.signals.connect('conv-first-action', 
+            self.on_new_conversation)
+        self.session.signals.connect('nick-change-succeed', 
+            self.on_nick_change_succeed)
+        self.session.signals.connect('message-change-succeed', 
             self.on_message_change_succeed)
-        self.core.connect('status-change-succeed', 
+        self.session.signals.connect('status-change-succeed', 
             self.on_status_change_succeed)
 
     def on_close(self):
         '''called on close'''
-        self.core.do_quit()
+        self.session.quit()
         self.window.hide()
-        self.core.session.save_config()
+        self.session.save_config()
 
         if self.conversations:
             self.conversations.get_parent().hide()
@@ -57,35 +64,35 @@ class Controller(object):
         time.sleep(2)
         sys.exit(0)
 
-    def on_login_succeed(self, core, args):
+    def on_login_succeed(self, signals, args):
         '''callback called on login succeed'''
         self.window.clear()
-        self.window.go_main(core.session, self.on_new_conversation,
+        self.window.go_main(self.session, self.on_new_conversation,
             self.on_close)
 
-    def on_login_failed(self, core, args):
+    def on_login_failed(self, signals, args):
         '''callback called on login failed'''
         dialog.error(args[0])
         self.window.content.set_sensitive(True)
 
-    def on_contact_list_ready(self, core, args):
+    def on_contact_list_ready(self, signals, args):
         '''callback called when the contact list is ready to be used'''
         self.window.content.contact_list.fill()
         self.window.content.panel.enabled = True
 
-        gobject.timeout_add(500, self.core.session.logger.check)
+        gobject.timeout_add(500, self.session.logger.check)
 
-    def on_nick_change_succeed(self, core, args):
+    def on_nick_change_succeed(self, signals, args):
         '''callback called when the nick has been changed successfully'''
         nick = args[0]
         self.window.content.panel.nick.text = nick
 
-    def on_status_change_succeed(self, core, args):
+    def on_status_change_succeed(self, signals, args):
         '''callback called when the status has been changed successfully'''
         stat = args[0]
         self.window.content.panel.status.set_status(stat)
 
-    def on_message_change_succeed(self, core, args):
+    def on_message_change_succeed(self, signals, args):
         '''callback called when the message has been changed successfully'''
         message = args[0]
         self.window.content.panel.message.text = message
@@ -130,9 +137,9 @@ class Controller(object):
                 del self.config.d_status[account.account]
 
         self.config.save(self.config_dir.join('config'))
-        self.core.do_login(account.account, account.password, account.status)
+        self.session.login(account.account, account.password, account.status)
 
-    def on_new_conversation(self, core, args):
+    def on_new_conversation(self, signals, args):
         '''callback called when the other user does an action that justify
         opeinig a conversation'''
         (cid, members) = args
@@ -140,7 +147,7 @@ class Controller(object):
         if self.conversations is None:
             window = Window.Window(self._on_conversation_window_close)
             window.set_default_size(640, 480)
-            window.go_conversation(self.core.session)
+            window.go_conversation(self.session)
             self.conversations = window.content
             window.show()
 

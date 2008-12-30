@@ -20,6 +20,7 @@
 # TODO: move all the MSN specific code to a subclass on e3
 
 import os
+import time
 import Queue
 
 from protocol.Event import Event
@@ -33,8 +34,12 @@ import e3
 
 class Session(object):
     
-    def __init__(self, id_, account=None):
+    def __init__(self, id_=None, account=None):
         self.id_ = id_
+
+        if self.id_ is None:
+            self.id_ = time.time()
+
         self._account = None
         self.contacts = None
         self.logger = None
@@ -103,7 +108,7 @@ class Session(object):
         '''close the worker and socket threads'''
         self.add_action(Action.ACTION_QUIT, ())
 
-    def login(self, core, account, password, status):
+    def login(self, account, password, status):
         '''start the login process'''
         socket = e3.MsnSocket('messenger.hotmail.com', 1863, dest_type='NS')
         worker = e3.Worker('emesene2', socket, self, e3.MsnSocket)
@@ -111,11 +116,8 @@ class Session(object):
         worker.start()
 
         self.account = e3.Account(account, password, status)
-        # TODO: get rid of core!
-        self.protocol = core
 
-        self.add_action(Action.ACTION_LOGIN, 
-            (account, password, status))
+        self.add_action(Action.ACTION_LOGIN, (account, password, status))
         
     def logout(self):
         '''close the session'''

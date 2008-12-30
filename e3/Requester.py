@@ -6,9 +6,9 @@ import threading
 
 import XmlParser
 import XmlManager
-import protocol.Event as Event
 import protocol.Group as Group
 import protocol.Contact as Contact
+from protocol.Event import Event
 
 from Command import Command
 import common

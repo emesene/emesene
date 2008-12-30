@@ -1,11 +1,11 @@
 import Queue
 import threading
 
+import MsnMessage
 import protocol.Contact
 import protocol.Action as Action
-import protocol.Event as Event
 import protocol.Logger as Logger
-import MsnMessage
+from  protocol.Event import Event
 
 class Conversation(threading.Thread):
     '''a thread that handles a conversation'''

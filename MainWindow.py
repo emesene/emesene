@@ -30,7 +30,7 @@ class MainWindow(gtk.VBox):
         self.on_new_conversation = on_new_conversation
         self.on_close = on_close
 
-        self.session.protocol.connect('contact-attr-changed', 
+        self.session.signals.connect('contact-attr-changed', 
             self._on_contact_attr_changed)
 
         self._menu = MainMenu.MainMenu(dialog, self.session, self.contact_list)
@@ -91,7 +91,7 @@ class MainWindow(gtk.VBox):
         '''callback for the contact-selected signal'''
         cid = time.time()
         (existed, conversation) = self.on_new_conversation(
-            self.session.protocol, (cid, [contact.account]))
+            self.session.signals, (cid, [contact.account]))
 
         if not existed:
             self.session.new_conversation(contact.account, cid)

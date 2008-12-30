@@ -32,19 +32,19 @@ class MainConversation(gtk.Notebook):
 
         self.conversations = {}
         if self.session:
-            self.session.protocol.connect('conv-message', 
+            self.session.signals.connect('conv-message', 
                 self._on_message)
-            self.session.protocol.connect('conv-contact-joined', 
+            self.session.signals.connect('conv-contact-joined', 
                 self._on_contact_joined)
-            self.session.protocol.connect('conv-contact-left', 
+            self.session.signals.connect('conv-contact-left', 
                 self._on_contact_left)
-            self.session.protocol.connect('conv-group-started', 
+            self.session.signals.connect('conv-group-started', 
                 self._on_group_started)
-            self.session.protocol.connect('conv-group-ended', 
+            self.session.signals.connect('conv-group-ended', 
                 self._on_group_ended)
-            self.session.protocol.connect('conv-message-send-failed', 
+            self.session.signals.connect('conv-message-send-failed', 
                 self._on_message_send_failed)
-            self.session.protocol.connect('contact-attr-changed', 
+            self.session.signals.connect('contact-attr-changed', 
                 self._on_contact_attr_changed)
 
         self.connect('switch-page', self._on_switch_page)

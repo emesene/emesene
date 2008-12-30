@@ -17,10 +17,10 @@ import Requester
 import XmlManager 
 import Conversation
 import protocol.Contact
-from  protocol.Event import Event
-from  protocol.Action import Action
 import protocol.status as status
 import protocol.Logger as Logger
+from  protocol.Event import Event
+from  protocol.Action import Action
 
 from XmlParser import SSoParser
 from UbxParser import UbxParser
@@ -623,6 +623,7 @@ class Worker(threading.Thread):
         contact = self.session.contacts.contacts.get(account, None)
         
         if not contact:
+            print 'account: ', account, 'not found on contact list'
             return
 
         contact.status = status.OFFLINE
