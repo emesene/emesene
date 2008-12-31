@@ -103,6 +103,9 @@ class MainConversation(gtk.Notebook):
         '''called when the user changes the tab'''
         page = self.get_nth_page(page_num)
         page.message_waiting = False
+        parent = self.get_parent()
+        parent.set_title(page.text)
+        parent.set_icon(page.icon)
 
     def _on_message_send_failed(self, protocol, args):
         '''called when a message is received'''
@@ -360,6 +363,55 @@ class Conversation(gtk.VBox):
             menu.popup(None, None, None, 0, 0)
             return True
 
+    def _get_icon(self):
+        '''return the icon that represent the current status of the 
+            conversation (the status of the contact on a single
+            conversation, a group icon on group chat or a waiting icon)
+        '''
+        if self.message_waiting:
+            icon = gui.theme.new_message
+        elif self.group_chat:
+            icon = gui.theme.group_chat
+        elif len(self.members) == 1:
+            contact = self.session.contacts.get(self.members[0])
+
+            # can be false if we are un a group chat with someone we dont 
+            # have and the last contact leaves..
+            if contact:
+                stat = contact.status
+            else:
+                stat = protocol.status.ONLINE
+
+            icon = gui.theme.status_icons.get(stat, protocol.status.OFFLINE)
+        else:
+            print 'unknown state on Conversation._get_icon'
+            return None
+
+        return icon
+
+    icon = property(fget=_get_icon)
+
+    def _get_text(self):
+        '''return the text that represent the conversation title'''
+        if self.group_chat:
+            text = 'Group chat'
+        elif len(self.members) == 1:
+            contact = self.session.contacts.get(self.members[0])
+
+            # can be false if we are un a group chat with someone we dont 
+            # have and the last contact leaves..
+            if contact:
+                text = contact.display_name
+            else:
+                text = self.members[0]
+        else:
+            print 'unknown state on Conversation._get_text'
+            text = '(?)'
+
+        return text
+
+    text = property(fget=_get_text)
+
     def update_data(self):
         '''update the data on the conversation'''
         if len(self.members) == 1:
@@ -369,26 +421,8 @@ class Conversation(gtk.VBox):
 
     def update_tab(self):
         '''update the values of the tab'''
-        if self.message_waiting:
-            self.tab_label.set_image(gui.theme.new_message) 
-        elif self.group_chat:
-            self.tab_label.set_text('Group chat')
-            self.tab_label.set_image(gui.theme.group_chat)
-        elif len(self.members) == 1:
-            contact = self.session.contacts.get(self.members[0])
-
-            # can be false if we are un a group chat with someone we dont 
-            # have and the last contact leaves..
-            if contact:
-                nick = contact.display_name
-                stat = contact.status
-            else:
-                nick = self.members[0]
-                stat = protocol.status.ONLINE
-
-            self.tab_label.set_text(nick)
-            self.tab_label.set_image(gui.theme.status_icons.get(stat, 
-                protocol.status.OFFLINE))
+        self.tab_label.set_image(self.icon)
+        self.tab_label.set_text(self.text)
 
     def on_contact_joined(self, account):
         '''called when a contact joins the conversation'''

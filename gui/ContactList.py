@@ -68,7 +68,7 @@ class ContactList(Object.Object):
         # value to this attribute
         self.order_by_group = self.session.config.b_order_by_group
         self.show_nick = self.session.config.b_show_nick
-        self.show_empty_groups = self.session.config.b_show_empty_groups
+        self._show_empty_groups = self.session.config.b_show_empty_groups
         self.show_group_count = self.session.config.b_show_group_count
         self._show_offline = self.session.config.b_show_offline
 
@@ -123,6 +123,20 @@ class ContactList(Object.Object):
         self.refilter()
     
     show_offline = property(fget=_get_show_offline, fset=_set_show_offline)
+
+    def _get_show_empty_groups(self):
+        '''return the value of show_emptry_groups'''
+        return self._show_empty_groups
+
+    def _set_show_empty_groups(self, value):
+        '''set the value of self._show_empty_groups to value and call to
+        self.refilter()'''
+        self._show_empty_groups = value
+        self.session.config.b_show_empty_groups = value
+        self.refilter()
+
+    show_empty_groups = property(fget=_get_show_empty_groups, 
+        fset=_set_show_empty_groups)
 
     def _get_filter_text(self):
         '''return the filter_text value'''
