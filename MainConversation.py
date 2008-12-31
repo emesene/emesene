@@ -22,7 +22,6 @@ class MainConversation(gtk.Notebook):
         '''class constructor'''
         gtk.Notebook.__init__(self)
         self.set_scrollable(True)
-        self.popup_enable()
 
         self.session = session
         self.on_last_close = on_last_close
@@ -205,7 +204,8 @@ class MainConversation(gtk.Notebook):
                     return (True, conversation)
 
         conversation = Conversation(self.session, cid, None, members)
-        label = TabWidget('Connecting', self._on_tab_close, conversation)
+        label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close, 
+            conversation)
         label.set_image(gui.theme.connect)
         conversation.tab_label = label
         self.conversations[cid] = conversation
@@ -231,6 +231,11 @@ class MainConversation(gtk.Notebook):
 
         if self.get_n_pages() == 0:
             self.on_last_close()
+
+    def _on_tab_menu(self, widget, event, conversation):
+        '''called when the user right clicks on the tab'''
+        if event.button == 3:
+            conversation.show_tab_menu()
 
     def close(self, conversation):
         '''close a conversation'''
@@ -260,6 +265,10 @@ class Conversation(gtk.VBox):
         self.formatter = e3common.MessageFormatter.MessageFormatter(
             session.contacts.me)
 
+        self._header_visible = True
+        self._image_visible = True
+        self._toolbar_visible = True
+
         self._message_waiting = False
 
         if members is None:
@@ -270,8 +279,6 @@ class Conversation(gtk.VBox):
         self.panel = gtk.VPaned()
         self.header = Header()
         self.output = OutputText()
-        self.output.textbox.connect('button-press-event' , 
-            self._on_button_press_event)
         self.input = InputText(self._on_send_message)
         self.info = ContactInfo()
 
@@ -351,14 +358,12 @@ class Conversation(gtk.VBox):
 
         self.output.append_formatted(last)
 
-    def _on_button_press_event(self, widget, event):
+    def show_tab_menu(self):
         '''callback called when the user press a button over a widget
         chek if it's the right button and display the menu'''
-        if event.button == 3:
-            menu_ = gui.ConversationMenu(None, None, None)
-            menu = Menu.build_pop_up(menu_)
-            menu.popup(None, None, None, 0, 0)
-            return True
+        menu_ = gui.ConversationMenu(self)
+        menu = Menu.build_pop_up(menu_)
+        menu.popup(None, None, None, 0, 0)
 
     def _get_icon(self):
         '''return the icon that represent the current status of the 
@@ -466,6 +471,55 @@ class Conversation(gtk.VBox):
             (text, '%d members' % (len(self.members) + 1,), '')
 
         self.update_tab()
+
+    def _set_image_visible(self, value):
+        '''hide or show the widget according to value'''
+        if value:
+            self.info.show()
+        else:
+            self.info.hide()
+
+        self._image_visible = value
+
+    def _get_image_visible(self):
+        '''return the value of image_visible'''
+        return self._image_visible
+
+    image_visible = property(fget=_get_image_visible, 
+        fset=_set_image_visible)
+    
+    def _set_header_visible(self, value):
+        '''hide or show the widget according to value'''
+        if value:
+            self.header.show()
+        else:
+            self.header.hide()
+
+        self._header_visible = value
+
+    def _get_header_visible(self):
+        '''return the value of image_visible'''
+        return self._header_visible
+
+    header_visible = property(fget=_get_header_visible, 
+        fset=_set_header_visible)
+
+    def _set_toolbar_visible(self, value):
+        '''hide or show the widget according to value'''
+        if value:
+            self.toolbar.show()
+        else:
+            self.toolbar.hide()
+
+        self._toolbar_visible = value
+
+    def _get_toolbar_visible(self):
+        '''return the value of image_visible'''
+        return self._toolbar_visible
+
+    toolbar_visible = property(fget=_get_toolbar_visible, 
+        fset=_set_toolbar_visible)
+
 
 class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
@@ -645,23 +699,31 @@ class ContactInfo(gtk.VBox):
 class TabWidget(gtk.HBox):
     '''a widget that is placed on the tab on a notebook'''
 
-    def __init__(self, text, on_close_clicked, *args):
+    def __init__(self, text, on_tab_menu, on_close_clicked, conversation):
         '''constructor'''
         gtk.HBox.__init__(self)
         self.set_spacing(4)
 
+        event = gtk.EventBox()
+        event.set_events(gtk.gdk.BUTTON_RELEASE_MASK)
+        event.connect('button_release_event', on_tab_menu, conversation)
+
         self.image = gtk.Image()
         self.label = gtk.Label(text)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
-        self.close.connect('button_press_event', on_close_clicked, *args)
+        self.close.connect('button_press_event', on_close_clicked, 
+            conversation)
 
         self.label.set_max_width_chars(20)
         self.label.set_use_markup(True)
 
+        event.add(self.label)
+
         self.pack_start(self.image, False)
-        self.pack_start(self.label, True, True)
+        self.pack_start(event, True, True)
         self.pack_start(self.close, False)
 
+        event.show()
         self.image.show()
         self.label.show()
         self.close.show()

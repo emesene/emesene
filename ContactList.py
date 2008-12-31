@@ -79,7 +79,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         self.set_headers_visible(False)
 
         self.connect('row-activated', self._on_row_activated)
-        self.connect('button-press-event' , self._on_button_press_event)
+        self.connect('button-release-event' , self._on_button_press_event)
         
         # valid values:
         # + NICK
