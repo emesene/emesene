@@ -27,9 +27,6 @@ class MainConversation(gtk.Notebook):
         self.session = session
         self.on_last_close = on_last_close
 
-        self.formatter = e3common.MessageFormatter.MessageFormatter(
-            session.contacts.me)
-
         self.conversations = {}
         if self.session:
             self.session.signals.connect('conv-message', 
@@ -68,7 +65,7 @@ class MainConversation(gtk.Notebook):
                 nick = account
 
             (is_raw, consecutive, outgoing, first, last) = \
-                self.formatter.format(contact) 
+                conversation.formatter.format(contact) 
 
             conversation.output.append_formatted(first)
 
@@ -83,7 +80,7 @@ class MainConversation(gtk.Notebook):
 
         elif message.type == Message.TYPE_NUDGE:
             (is_raw, consecutive, outgoing, first, last) = \
-                self.formatter.format(contact, message.type) 
+                conversation.formatter.format(contact, message.type) 
             conversation.output.append_formatted(first)
 
         parent = self.get_parent()
@@ -113,7 +110,7 @@ class MainConversation(gtk.Notebook):
         conversation = self.conversations.get(float(cid), None)
 
         if conversation is not None:
-            error = self.formatter.format_error('message couldn\'t be sent: ')
+            error = conversation.formatter.format_error('message couldn\'t be sent: ')
             conversation.output.append_formatted(error)
             conversation.output.append_formatted(
                 self.format_from_message(message))
@@ -207,8 +204,7 @@ class MainConversation(gtk.Notebook):
                 if conversation.members == members:
                     return (True, conversation)
 
-        conversation = Conversation(self.session, cid, None, self.formatter, 
-            members)
+        conversation = Conversation(self.session, cid, None, members)
         label = TabWidget('Connecting', self._on_tab_close, conversation)
         label.set_image(gui.theme.connect)
         conversation.tab_label = label
@@ -253,7 +249,7 @@ class MainConversation(gtk.Notebook):
 class Conversation(gtk.VBox):
     '''a widget that contains all the components inside'''
 
-    def __init__(self, session, cid, tab_label, formatter, members=None):
+    def __init__(self, session, cid, tab_label, members=None):
         '''constructor'''
         gtk.VBox.__init__(self)
         self.set_border_width(1)
@@ -261,7 +257,8 @@ class Conversation(gtk.VBox):
         self.session = session
         self.tab_label = tab_label
         self.cid = float(cid)
-        self.formatter = formatter
+        self.formatter = e3common.MessageFormatter.MessageFormatter(
+            session.contacts.me)
 
         self._message_waiting = False
 

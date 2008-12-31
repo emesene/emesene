@@ -74,7 +74,7 @@ class Login(gtk.Alignment):
         img_logo = utils.safe_gtk_image_load(gui.theme.logo)
 
         vbox = gtk.VBox()
-        vbox.set_border_width(10)
+        vbox.set_border_width(2)
 
         hbox_account = gtk.HBox(spacing=5)
         hbox_account.pack_start(img_account, False)
