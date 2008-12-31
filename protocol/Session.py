@@ -17,8 +17,6 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-# TODO: move all the MSN specific code to a subclass on e3
-
 import os
 import time
 import Queue
@@ -29,8 +27,6 @@ import protocol.Logger
 import e3common.Config
 import e3common.ConfigDir
 import protocol.ContactManager
-
-import e3
 
 class Session(object):
     
@@ -110,14 +106,7 @@ class Session(object):
 
     def login(self, account, password, status):
         '''start the login process'''
-        socket = e3.MsnSocket('messenger.hotmail.com', 1863, dest_type='NS')
-        worker = e3.Worker('emesene2', socket, self, e3.MsnSocket)
-        socket.start()
-        worker.start()
-
-        self.account = e3.Account(account, password, status)
-
-        self.add_action(Action.ACTION_LOGIN, (account, password, status))
+        raise NotImplementedError('Not implemented')
         
     def logout(self):
         '''close the session'''
@@ -196,7 +185,5 @@ class Session(object):
 
     def send_message(self, cid, text):
         '''send a common message'''
-        account = self.account.account
-        message = e3.Message(e3.Message.TYPE_MESSAGE, text, account)
-        self.add_action(Action.ACTION_SEND_MESSAGE, (cid, message))
+        raise NotImplementedError('Not implemented')
 

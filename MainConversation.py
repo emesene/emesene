@@ -285,7 +285,11 @@ class Conversation(gtk.VBox):
         self.pack_start(self.header, False)
         self.pack_start(hbox, True, True)
 
-        self.temp = self.panel.connect('map-event', self._on_panel_show)
+        self._panel_show_id = self.panel.connect('map-event', 
+            self._on_panel_show)
+        # FIXME: this doesnt work :S
+        self._textbox_expose_id = self.output.textbox.connect('show', 
+            self._on_textbox_expose)
 
         if len(self.members) == 0:
             self.header.information = Header.INFO_TPL % \
@@ -294,8 +298,6 @@ class Conversation(gtk.VBox):
         self.header.set_image(gui.theme.user)
         self.info.first = utils.safe_gtk_image_load(gui.theme.logo)
         self.info.last = utils.safe_gtk_image_load(gui.theme.logo)
-
-        self.output.grab_focus()
 
     def _get_message_waiting(self):
         '''return True if a message is waiting'''
@@ -322,8 +324,14 @@ class Conversation(gtk.VBox):
         '''callback called when the panel is shown, resize the panel'''
         position = self.panel.get_position()
         self.panel.set_position(position + int(position * 0.6))
-        self.panel.disconnect(self.temp)
-        del self.temp
+        self.panel.disconnect(self._panel_show_id)
+        del self._panel_show_id
+
+    def _on_textbox_expose(self, widget, event):
+        '''called when the textbox is shown'''
+        self.output.textbox.grab_focus()
+        self.output.textbox.disconnect(self._textbox_expose_id)
+        del self._textbox_expose_id
 
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''

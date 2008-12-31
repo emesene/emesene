@@ -56,9 +56,11 @@ class TextField(gtk.VBox):
             dialog.error("Empty text not allowed")
             return
 
-        if self.entry.get_text() != self._text:
+        new_text = self.entry.get_text()
+
+        if new_text != self._text:
             old_text = self._text
-            self.text = gobject.markup_escape_text(self.entry.get_text())
+            self.text = self.entry.get_text()
             self.emit('text-changed', old_text, self._text)
 
         self.entry.hide()

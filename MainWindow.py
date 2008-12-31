@@ -116,8 +116,7 @@ class MainWindow(gtk.VBox):
 
     def _on_group_menu_selected(self, contact_list, group):
         '''callback for the group-menu-selected signal'''
-        group_menu = GroupMenu.GroupMenu(group, 
-            self.session.groups, self.session.contacts, dialog)
+        group_menu = GroupMenu.GroupMenu(group, self.session, dialog)
         menu = Menu.build_pop_up(group_menu)
         menu.popup(None, None, None, 0, 0)
 

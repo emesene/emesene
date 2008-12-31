@@ -308,7 +308,7 @@ class DynamicItems(Requester):
             try:
                 nick = response.body.split('<contactType>Me</contactType>')\
                     [1].split('</displayName>')[0].split('<displayName>')[1]
-                nick = nick.replace('&apos;', '\'').replace('&quot;', '"')
+                nick = common.unescape(nick)
             except IndexError:
                 nick = self.session.contacts.me.account
 
@@ -412,7 +412,8 @@ class ChangeNick(Requester):
             self.command_queue.put(Command('PRP', params=('MFN', 
                 urllib.quote(self.nick))))
             self.session.contacts.me.nick = self.nick
-            self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, self.nick)
+            self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, 
+               self.nick)
             self.session.logger.log('nick change', self.account.status, 
                 self.nick, self.account)
         else:

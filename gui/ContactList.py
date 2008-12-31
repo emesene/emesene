@@ -220,6 +220,7 @@ class ContactList(Object.Object):
         for group in self.groups.values():
             # get a list of contact objects from a list of accounts
             contacts = self.contacts.get_contacts(group.contacts)
+            self.add_group(group)
             for contact in contacts:
                 self.add_contact(contact, group)
 

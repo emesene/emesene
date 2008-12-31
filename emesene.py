@@ -9,7 +9,6 @@ import Window
 
 import e3
 import Signals
-import protocol.Session
 from protocol import Action
 from protocol import Logger
 from e3common import Config
@@ -34,7 +33,7 @@ class Controller(object):
         if self.config.d_accounts is None:
             self.config.d_accounts = {}
 
-        self.session = protocol.Session()
+        self.session = e3.Session()
         self.session.signals = Signals.Signals(self.session.events)
         self.session.signals.connect('login-succeed', self.on_login_succeed)
         self.session.signals.connect('login-failed', self.on_login_failed)

@@ -26,13 +26,14 @@ _ = lambda x: x
 class GroupMenu(Menu.Menu):
     '''class that represent a contextual menu of a group'''
 
-    def __init__(self, group, groups, contacts, dialog):
+    def __init__(self, group, session, dialog):
         '''class constructor'''
         Menu.Menu.__init__(self)
 
         self.group = group
-        self.groups = groups
-        self.contacts = contacts
+        self.groups = session.groups
+        self.contacts = session.contacts
+        self.session = session
         self.dialog = dialog
         
         self._build()
@@ -60,7 +61,7 @@ class GroupMenu(Menu.Menu):
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
             if response == stock.YES:
-                self.groups.remove(self.groups.name)
+                self.session.remove_group(self.group.identifier)
 
         self.dialog.yes_no(
             _('Are you sure you want to remove group %s?') % \
@@ -68,7 +69,13 @@ class GroupMenu(Menu.Menu):
 
     def _on_rename_selected(self, item):
         '''called when rename is selected'''
-        self.groups.rename_dialog(self.group.name)
+        def rename_cb(response, old_name, new_name):
+            '''callback for the add_contact dialog'''
+            if response == stock.ACCEPT and \
+                    old_name != new_name:
+                self.session.rename_group(self.group.identifier, new_name)
+
+        self.dialog.rename_group(self.group, rename_cb)
     
     def _on_add_selected(self, item):
         '''called when rename is selected'''
@@ -76,13 +83,14 @@ class GroupMenu(Menu.Menu):
             '''callback for the add_contact dialog'''
             if response == stock.ACCEPT:
                 if account:
-                    self.contacts.add(account)
+                    self.session.add_contact(account)
 
                     if group:
-                        self.contacts.add_to_group(account, group)
+                        self.session.add_to_group(account, 
+                            self.group.identifier)
                 else:
                     self.dialog.warning(_("Empty account"))
 
-        self.dialog.add_contact(self.groups.groups.keys(), self.group.name, 
+        self.dialog.add_contact(self.groups.values(), self.group, 
             add_contact_cb)
 
