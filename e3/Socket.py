@@ -27,6 +27,10 @@ class Socket(threading.Thread):
         '''add data to the input queue'''
         self.input.put(data)
 
+    def quit(self):
+        '''close the thread'''
+        self.send('quit')
+
     def run(self):
         '''the main method of the socket, wait until there is something to 
         send or there is something to read, if there is something to send, get 
@@ -45,6 +49,7 @@ class Socket(threading.Thread):
 
                     if input_ == 'quit':
                         print 'closing socket thread'
+                        self.socket.close()
                         break
                 except Queue.Empty:
                     # nothing to send

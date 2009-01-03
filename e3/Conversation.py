@@ -30,6 +30,8 @@ class Conversation(threading.Thread):
 
         self.status = Conversation.STATUS_PENDING
         self.started = False
+        # the last account to leave the conversation 
+        self.last_member = None
 
         self.pending_invites = []
         # active p2p transfers on this conversation
@@ -84,9 +86,8 @@ class Conversation(threading.Thread):
                 data = self.socket.output.get(True, 0.1)
 
                 if type(data) == int and data == 0:
-                    self.status = Conversation.STATUS_PENDING
-                    self.started = False
-                    self.session.new_conversation(None, self.cid)
+                    self._close()
+                    break
                 else:
                     self._process(data)
             except Queue.Empty:
@@ -96,12 +97,20 @@ class Conversation(threading.Thread):
                 cmd = self.command_queue.get(True, 0.1)
 
                 if cmd == 'quit':
-                    print 'closing conversation', self.cid
+                    self._close()
                     break
 
                 self.socket.send_command(cmd.command, cmd.params, cmd.payload)
             except Queue.Empty:
                 pass
+
+    def _close(self):
+        '''set all the attributes to reflect a closed conversation
+        caution: it doesn't stop the main thread'''
+        print 'closing conversation', self.cid
+        self.status = Conversation.STATUS_CLOSED
+        self.started = False
+        self.socket.quit()
 
     def _on_message(self, command):
         '''handle the message'''
@@ -161,6 +170,8 @@ class Conversation(threading.Thread):
             for account in self.pending_invites:
                 self.socket.send_command('CAL', (account,))
 
+            self.pending_invites = []
+
     def _on_iro(self, message):
         '''handle the message
         IRO 1 1 1 luismarianoguerra@gmail.com marianoguerra. 1342472230'''
@@ -208,7 +219,8 @@ class Conversation(threading.Thread):
         if len(self.members) == 1:
             self.session.add_event(Event.EVENT_CONV_GROUP_ENDED, self.cid)
         elif len(self.members) == 0:
-            self.invite(account)
+            self._close()
+            self.last_member = account
 
     def _on_message_send_succeed(self, command):
         '''handle the acknowledge of a message'''
@@ -259,13 +271,20 @@ class Conversation(threading.Thread):
         self.host = host
         self.port = port
         self.session_id = session_id
-        self.socket.input.put('quit')
+        self.socket.quit()
         self.socket = MsnSocket(host, port)
         self.send_presentation()
 
-        while len(self.members):
-            member = self.members.pop()
-            self.invite(member)
+        if len(self.members) == 0 and self.last_member:
+            self.invite(self.last_member)
+            self.last_member = None
+        else:
+            print 'reinviting members', self.members
+            members = self.members
+            self.members = []
+            while len(self.members):
+                member = self.members.pop()
+                self.invite(member)
 
         self.socket.start()
 
@@ -274,6 +293,7 @@ class Conversation(threading.Thread):
         if self.status != Conversation.STATUS_ESTABLISHED:
             self.pending_invites.append(account)
         else:
+            print 'sending CAL', account
             self.socket.send_command('CAL', (account,))
 
     def answer(self):

@@ -285,12 +285,12 @@ class Conversation(gtk.VBox):
         self.panel.pack1(self.output, True, True)
         self.panel.pack2(self.input, True, True)
 
-        hbox = gtk.HBox()
-        hbox.pack_start(self.panel, True, True)
-        hbox.pack_start(self.info, False)
+        self.hbox = gtk.HBox()
+        self.hbox.pack_start(self.panel, True, True)
+        self.hbox.pack_start(self.info, False)
 
         self.pack_start(self.header, False)
-        self.pack_start(hbox, True, True)
+        self.pack_start(self.hbox, True, True)
 
         self._panel_show_id = self.panel.connect('map-event', 
             self._on_panel_show)
@@ -305,6 +305,25 @@ class Conversation(gtk.VBox):
         self.header.set_image(gui.theme.user)
         self.info.first = utils.safe_gtk_image_load(gui.theme.logo)
         self.info.last = utils.safe_gtk_image_load(gui.theme.logo)
+
+    def show(self):
+        '''override the show method'''
+        gtk.VBox.show(self)
+
+        if self.session.config.b_show_header is None:
+            self.session.config.b_show_header = True
+
+        if self.session.config.b_show_info is None:
+            self.session.config.b_show_info = True
+
+        if self.session.config.b_show_header:
+            self.header.show_all()
+
+        if self.session.config.b_show_info:
+            self.info.show_all()
+
+        self.hbox.show()
+        self.panel.show_all()
 
     def _get_message_waiting(self):
         '''return True if a message is waiting'''
@@ -387,7 +406,7 @@ class Conversation(gtk.VBox):
             icon = gui.theme.status_icons.get(stat, protocol.status.OFFLINE)
         else:
             print 'unknown state on Conversation._get_icon'
-            return None
+            return gui.theme.connect
 
         return icon
 

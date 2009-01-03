@@ -900,7 +900,13 @@ class Worker(threading.Thread):
                 self.session.add_event(Event.EVENT_ERROR, 
                     'invalid conversation id')
         else:    
-            self.conversations[cid].send_message(message)
+            conversation = self.conversations[cid]
+
+            if conversation.status == Conversation.Conversation.STATUS_CLOSED:
+                conversation.status = Conversation.Conversation.STATUS_PENDING
+                self._handle_action_new_conversation(None, conversation.cid)
+
+            conversation.send_message(message)
 
     # p2p handlers
 

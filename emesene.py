@@ -162,7 +162,7 @@ class Controller(object):
             else:
                 conversation.set_group_data()
 
-        conversation.show_all()
+        conversation.show()
 
         return (exists, conversation)
 
