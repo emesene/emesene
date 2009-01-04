@@ -50,9 +50,8 @@ class MainConversation(gtk.Notebook):
         (cid, account, message) = args
         conversation = self.conversations.get(float(cid), None)
 
-        if not conversation:
-            print 'conversation', cid, 'not found'
-            return
+        if conversation is None:
+            (exists, conversation) = self.new_conversation(cid, [account])
 
         contact = self.session.contacts.get(account)
 
@@ -201,6 +200,13 @@ class MainConversation(gtk.Notebook):
         elif members is not None:   
             for (key, conversation) in self.conversations.iteritems():
                 if conversation.members == members:
+                    old_cid = conversation.cid
+
+                    if old_cid in self.conversations:
+                        del self.conversations[old_cid]
+
+                    conversation.cid = cid
+                    self.conversations[cid] = conversation
                     return (True, conversation)
 
         conversation = Conversation(self.session, cid, None, members)
@@ -454,10 +460,9 @@ class Conversation(gtk.VBox):
 
     def on_contact_left(self, account):
         '''called when a contact lefts the conversation'''
-        if account in self.members:
+        if account in self.members and len(self.members) > 1:
             self.members.remove(account)
-
-        self.update_data()
+            self.update_data()
 
     def on_group_started(self):
         '''called when a group conversation starts'''
