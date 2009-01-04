@@ -33,6 +33,16 @@ class Controller(object):
         if self.config.d_accounts is None:
             self.config.d_accounts = {}
 
+        self.session = None
+        self._new_session()
+
+    def _new_session(self):
+        '''create a new session object'''
+
+        if self.session is not None:
+            print 'quit!'
+            self.session.quit()
+
         self.session = e3.Session()
         self.session.signals = Signals.Signals(self.session.events)
         self.session.signals.connect('login-succeed', self.on_login_succeed)
@@ -71,6 +81,7 @@ class Controller(object):
 
     def on_login_failed(self, signals, args):
         '''callback called on login failed'''
+        self._new_session()
         dialog.error(args[0])
         self.window.content.set_sensitive(True)
 
@@ -153,14 +164,8 @@ class Controller(object):
         (exists, conversation) = self.conversations.new_conversation(cid, 
             members)
 
-        if exists:
-            self.conversations.set_current_page(
-                self.conversations.page_num(conversation))
-        else:
-            if len(members) == 1:
-                conversation.set_data(members[0])
-            else:
-                conversation.set_group_data()
+        conversation.update_data()
+        self.conversations.get_parent().present()
 
         conversation.show()
 

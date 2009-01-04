@@ -398,7 +398,8 @@ class Worker(threading.Thread):
             return False
 
         for (account, contact) in logger.accounts.iteritems():
-            new_contact = protocol.Contact(account, contact.cid)
+            new_contact = protocol.Contact(account, contact.cid, 
+                contact.nick, contact.message)
             new_contact.groups = contact.groups[:]
             self.session.contacts.contacts[account] = new_contact
 
@@ -410,7 +411,6 @@ class Worker(threading.Thread):
         my_account = self.session.account.account
         account_info = logger.accounts.get(my_account, None)
 
-        # TODO: this doesn't get the nick
         if account_info:
             if account_info.nick:
                 nick = account_info.nick
@@ -496,7 +496,7 @@ class Worker(threading.Thread):
 
     def _on_login_failed(self):
         '''called when the login process fails, do cleanup here'''
-        self.session.logger.stop() 
+        self.session.logger.quit() 
 
     def _on_login_message(self, message):
         '''handle server message on login'''
