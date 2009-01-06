@@ -363,11 +363,11 @@ class MainMenu(Menu.Menu):
 
     def _on_set_message_selected(self, item):
         '''called when set message is selected'''
-        self.set_personal_message_dialog(self.session.me.message)
+        self.set_personal_message_dialog(self.session.contacts.me.message)
 
     def _on_set_picture_selected(self, item):
         '''called when set picture is selected'''
-        self.set_picture_dialog()
+        self.dialog.set_picture()
     
     # dialog
 

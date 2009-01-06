@@ -25,11 +25,11 @@ import protocol.status as status
 class StatusMenu(Menu.Menu):
     '''a class that represents a menu popup to select a status'''
 
-    def __init__(self, contacts, callback):
+    def __init__(self, session, callback):
         '''class constructor'''
         Menu.Menu.__init__(self)
 
-        self.contacts = contacts
+        self.session = session
         self.callback = callback
 
         self.some_list = []
@@ -45,7 +45,8 @@ class StatusMenu(Menu.Menu):
 
     def _on_status_selected(self, item, stat):
         '''called when a status is selected'''
-        if self.contacts != None:
-            self.contacts.set_status(stat)
+        if self.session != None:
+            self.session.set_status(stat)
+
         self.callback(stat)
 

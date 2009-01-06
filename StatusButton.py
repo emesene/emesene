@@ -10,13 +10,13 @@ class StatusButton(gtk.Button):
     '''a button that when clicked displays a popup that allows the user to
     select a status'''
 
-    def __init__(self, contacts=None):
+    def __init__(self, session=None):
         gtk.Button.__init__(self)
 
         # a cache of gtk.Images to not load the images everytime we change
         # our status
         self.cache_imgs = {}
-        self.menu = Menu.build_pop_up(gui.StatusMenu.StatusMenu(contacts,
+        self.menu = Menu.build_pop_up(gui.StatusMenu.StatusMenu(session,
             self._on_status_selected))
 
         self.set_status(status.ONLINE)

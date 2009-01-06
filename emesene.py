@@ -8,13 +8,16 @@ import dialog
 import Window
 
 import e3
+import yaber
 import Signals
 from protocol import Action
 from protocol import Logger
 from e3common import Config
 from e3common import ConfigDir
 
-Signals.Signals.set_events(e3.EVENTS)
+from protocol.Worker import EVENTS
+
+Signals.Signals.set_events(EVENTS)
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -40,9 +43,9 @@ class Controller(object):
         '''create a new session object'''
 
         if self.session is not None:
-            print 'quit!'
             self.session.quit()
 
+        #self.session = yaber.Session()
         self.session = e3.Session()
         self.session.signals = Signals.Signals(self.session.events)
         self.session.signals.connect('login-succeed', self.on_login_succeed)

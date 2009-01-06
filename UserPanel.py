@@ -19,7 +19,7 @@ class UserPanel(gtk.VBox):
 
         self.image = utils.safe_gtk_image_load(gui.theme.user)
         self.nick = TextField.TextField(account, '', False)
-        self.status = StatusButton.StatusButton()
+        self.status = StatusButton.StatusButton(session)
         self.search = gtk.ToggleButton()
         self.search.set_image(gtk.image_new_from_stock(gtk.STOCK_FIND, 
             gtk.ICON_SIZE_MENU))
