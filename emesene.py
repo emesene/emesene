@@ -10,8 +10,6 @@ import Window
 import e3
 import yaber
 import Signals
-from protocol import Action
-from protocol import Logger
 from e3common import Config
 from e3common import ConfigDir
 

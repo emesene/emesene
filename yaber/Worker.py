@@ -18,9 +18,10 @@ class Worker(protocol.Worker):
         '''class constructor'''
         protocol.Worker.__init__(self, app_name, session)
         self.jid = xmpp.protocol.JID(session.account.account)
-        self.client = xmpp.Client(self.jid.getDomain(), debug=[]) # 'always'])
+        self.client = xmpp.Client(self.jid.getDomain(), debug=[]) #'always'])
 
         self.conversations = {}
+        self.rconversations = {}
         self.roster = None
     
     def run(self):
@@ -42,7 +43,7 @@ class Worker(protocol.Worker):
 
                 self._process_action(action)
             except Queue.Empty:
-                time.sleep(0.1)
+                pass
 
     def _on_presence(self, client, presence):
         '''handle the reception of a presence message'''
@@ -92,12 +93,25 @@ class Worker(protocol.Worker):
 
     def _on_message(self, client, message):
         '''handle the reception of a message'''
-        print 'on message', client, message
         body = message.getBody()
-        account = message.getFrom()
-        msgobj = protocol.Message(protocol.Message.TYPE_MESSAGE, body, account)
-        self.session.add_event(Event.EVENT_CONV_MESSAGE, 
-            self.cid, account, msgobj)
+        account = message.getFrom().getStripped()
+
+        if account in self.conversations:
+            cid = self.conversations[account]
+        else:
+            cid = time.time()
+            self.conversations[account] = cid
+            self.rconversations[cid] = [account]
+            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
+                [account])
+
+        if body is None:
+            type_ = protocol.Message.TYPE_TYPING
+        else:
+            type_ = protocol.Message.TYPE_MESSAGE
+
+        msgobj = protocol.Message(type_, body, account)
+        self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
 
     # action handlers 
     def _handle_action_add_contact(self, account):
@@ -144,27 +158,38 @@ class Worker(protocol.Worker):
                 'Authentication error')
             return
 
+        self.session.add_event(Event.EVENT_LOGIN_SUCCEED)
+
+        self.client.RegisterHandler('message', self._on_message)
+
         self.client.sendInitPresence()
 
-        self.session.add_event(Event.EVENT_LOGIN_SUCCEED)
+        while self.client.Process(1) != '0':
+            pass
 
         self.roster = self.client.getRoster()
 
         for account in self.roster.getItems():
             name = self.roster.getName(account)
+
+            if account == self.session.account.account:
+                if name is not None:
+                    self.session.contacts.me.nick = name
+                    self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, 
+                        nick)
+
+                continue
+
             if account in self.session.contacts.contacts:
                 contact = self.session.contacts.contacts[account]
             else:
                 contact = protocol.Contact(account)
                 self.session.contacts.contacts[account] = contact
 
-            contact.nick = name | account
-
-            #for group in self.roster.getGroups(account):
-            #    print 'group', group, type(group)
-
+            if name is not None:
+                contact.nick = name
+            
         self.session.add_event(Event.EVENT_CONTACT_LIST_READY)
-        self.client.RegisterHandler('message', self._on_message)
         self.client.RegisterHandler('presence', self._on_presence)
 
     def _handle_action_logout(self):
@@ -225,7 +250,8 @@ class Worker(protocol.Worker):
     def _handle_action_new_conversation(self, account, cid):
         '''handle Action.ACTION_NEW_CONVERSATION
         '''
-        pass
+        self.conversations[account] = cid
+        self.rconversations[cid] = [account]
 
     def _handle_action_close_conversation(self, cid):
         '''handle Action.ACTION_CLOSE_CONVERSATION
@@ -237,11 +263,12 @@ class Worker(protocol.Worker):
         cid is the conversation id, message is a MsnMessage object
         '''
 
-        recipients = self.conversations.get(cid, ())
+        recipients = self.rconversations.get(cid, ())
 
         # TODO: see if this is correct on jabber
         for recipient in recipients:
-            self.client.send(xmpp.protocol.Message(recipient, message, 'chat'))
+            self.client.send(xmpp.protocol.Message(recipient, message.body, 
+                'chat'))
 
     # p2p handlers
 
