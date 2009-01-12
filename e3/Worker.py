@@ -195,10 +195,8 @@ class Worker(protocol.Worker):
     def do_passport_identification(self):
         '''do the passport identification and get our passport id'''
         hash_ = self.session.extras['hash'].split()[-1]
-        template = XmlManager.get('passport')
-        # TODO: see if the quote here works
-        template = template % (self.session.account.account,
-                                urllib.quote(self.session.account.password))
+        template = XmlManager.get('passport',
+            self.session.account.account, self.session.account.password)
         
         if '@msn.com' not in self.session.account.account:
             server = "login.live.com"
@@ -225,7 +223,9 @@ class Worker(protocol.Worker):
             # send the SOAP request
             for i in range(3):
                 try:
+
                     conn = httplib.HTTPSConnection(server, 443)
+                    conn.debuglevel = 1
                     conn.request('POST', url, template, headers)
                     response = conn.getresponse()
                     break
@@ -234,6 +234,7 @@ class Worker(protocol.Worker):
 
             if response:
                 data = response.read()
+                print data
             else:
                 self.session.add_event(Event.EVENT_LOGIN_FAILED,
                  'Can\'t connect to HTTPS server: ' + str(exception))

@@ -18,10 +18,10 @@ def build_role(account, role, key, add=True):
     build the request to remove account from the role'''
     if add:
         action = 'http://www.msn.com/webservices/AddressBook/AddMember'
-        body = XmlManager.get('addmember') % (key, role, account)
+        body = XmlManager.get('addmember', key, role, account)
     else:
         action = 'http://www.msn.com/webservices/AddressBook/DeleteMember'
-        body = XmlManager.get('deletemember') % (key, role, account)
+        body = XmlManager.get('deletemember', key, role, account)
 
     return Request(action, 'omega.contacts.msn.com', 443, 
         '/abservice/SharingService.asmx', body)
@@ -178,7 +178,7 @@ class Membership(Requester):
         Requester.__init__(self, session, 
           'http://www.msn.com/webservices/AddressBook/FindMembership',
           'contacts.msn.com', 443, '/abservice/SharingService.asmx',
-          XmlManager.get('membership') % get_key(session))
+          XmlManager.get('membership', get_key(session)))
 
         self.command_queue = command_queue
         self.on_login = on_login
@@ -243,7 +243,7 @@ class DynamicItems(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABFindAll',
           'contacts.msn.com', 443, '/abservice/abservice.asmx',
-          XmlManager.get('dynamicitems') % get_key(session))
+          XmlManager.get('dynamicitems', get_key(session)))
 
         self.command_queue = command_queue
         self.on_login = on_login
@@ -343,7 +343,7 @@ class AddContact(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABContactAdd',
           'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-          XmlManager.get('addcontact') % (get_key(session), account))
+          XmlManager.get('addcontact', get_key(session), account))
 
         self.account = account
         self.command_queue = command_queue
@@ -371,7 +371,7 @@ class RemoveContact(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABContactDelete',
           'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-          XmlManager.get('deletecontact') % (get_key(session), cid))
+          XmlManager.get('deletecontact', get_key(session), cid))
 
         self.cid = cid
         self.account = account
@@ -399,8 +399,7 @@ class ChangeNick(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABContactUpdate',
           'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-          XmlManager.get('changenick') % (get_key(session), 'Me', 
-            common.escape(nick)))
+          XmlManager.get('changenick', get_key(session), 'Me', nick))
 
         self.nick = nick
         self.account = account
@@ -429,8 +428,7 @@ class ChangeAlias(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABContactUpdate',
           'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-          XmlManager.get('renamecontact') % (get_key(session), cid, 
-            common.escape(alias)))
+          XmlManager.get('renamecontact', get_key(session), cid, alias))
 
         self.alias = alias
         self.account = account
@@ -456,7 +454,7 @@ class AddGroup(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupAdd',
           'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-          XmlManager.get('addgroup') % (get_key(session), common.escape(name)))
+          XmlManager.get('addgroup', get_key(session), name))
 
         self.name = name
         self.command_queue = command_queue
@@ -482,7 +480,7 @@ class RemoveGroup(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupDelete', \
           'omega.contacts.msn.com', 443, '/abservice/abservice.asmx', \
-          XmlManager.get('deletegroup') % (get_key(session), gid))
+          XmlManager.get('deletegroup', get_key(session), gid))
 
         self.gid = gid
         self.command_queue = command_queue
@@ -507,8 +505,7 @@ class RenameGroup(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupUpdate', \
           'omega.contacts.msn.com', 443, '/abservice/abservice.asmx', \
-          XmlManager.get('renamegroup') % (get_key(session), gid, 
-          common.escape(name)))
+          XmlManager.get('renamegroup', get_key(session), gid, name))
 
         self.gid = gid
         self.name = name
@@ -535,7 +532,7 @@ class AddToGroup(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupContactAdd',
           'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-          XmlManager.get('moveusertogroup') % (get_key(session), gid, cid))
+          XmlManager.get('moveusertogroup', get_key(session), gid, cid))
 
         self.cid = cid
         self.gid = gid
@@ -564,7 +561,7 @@ class RemoveFromGroup(Requester):
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupContactDelete',
           'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-          XmlManager.get('deleteuserfromgroup') % (get_key(session), cid, gid))
+          XmlManager.get('deleteuserfromgroup', get_key(session), cid, gid))
 
         self.cid = cid
         self.gid = gid
@@ -667,17 +664,17 @@ class MoveContact(TwoStageRequester):
             Request(\
               'http://www.msn.com/webservices/AddressBook/ABGroupContactAdd',
               'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-              XmlManager.get('moveusertogroup') % (get_key(session), dest_gid, 
+              XmlManager.get('moveusertogroup', get_key(session), dest_gid, 
                  cid)),
             Request(\
               'http://www.msn.com/webservices/AddressBook/ABGroupContactDelete',
               'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-              XmlManager.get('deleteuserfromgroup') % (get_key(session), cid,
+              XmlManager.get('deleteuserfromgroup', get_key(session), cid,
                 src_gid)),
             Request(\
               'http://www.msn.com/webservices/AddressBook/ABGroupContactDelete',
               'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-              XmlManager.get('deleteuserfromgroup') % (get_key(session), cid, 
+              XmlManager.get('deleteuserfromgroup', get_key(session), cid, 
                 dest_gid)))
 
         self.src_gid = src_gid

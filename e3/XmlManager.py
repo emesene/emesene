@@ -1,10 +1,11 @@
 '''handle the requests to get the xml templates'''
 
 import os
+import common
 
 TEMPLATE_FOLDER = os.path.abspath(os.path.dirname(__file__)) + '/xml templates'
 
-def get(name):
+def get(name, *args):
     '''try to get a template from the template folder and return it,
     return None if not found'''
     
@@ -13,7 +14,7 @@ def get(name):
         xml = file(name, 'r')
         template = xml.read()
         xml.close()
-        return template
+        return template % tuple([common.escape(x) for x in args])
     
     return None
 
