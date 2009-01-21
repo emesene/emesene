@@ -273,15 +273,30 @@ class ContactList(Object.Object):
         groups'''
         self.group_state.update({group.name:True})
 
-    def compare_groups(self, group1, group2):
+    def compare_groups(self, group1, group2, order1=0, order2=0):
         '''compare two groups and return 1 if group1 should go first, 0
-        if equal, -1 if group2 should go first'''
+        if equal, -1 if group2 should go first, use order1 and order2 to
+        override the group sorting (the user can set the values on these to
+        have custom ordering)'''
+
+        override = cmp(order2, order1)
+
+        if override != 0:
+            return override
 
         return cmp(group1.name, group2.name)
 
-    def compare_contacts(self, contact1, contact2):
+    def compare_contacts(self, contact1, contact2, order1=0, order2=0):
         '''compare two contacts and return 1 if contact1 should go first, 0
-        if equal and -1 if contact2 should go first'''
+        if equal and -1 if contact2 should go first, use order1 and order2 to
+        override the group sorting (the user can set the values on these to
+        have custom ordering)'''
+
+        override = cmp(order2, order1)
+
+        if override != 0:
+            return override
+
 
         result = cmp(status.ORDERED.index(contact1.status), 
             status.ORDERED.index(contact2.status))

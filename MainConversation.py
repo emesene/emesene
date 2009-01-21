@@ -284,8 +284,9 @@ class Conversation(gtk.VBox):
 
         self.panel = gtk.VPaned()
         self.header = Header()
-        self.output = OutputText()
-        self.input = InputText(self._on_send_message)
+        self.output = OutputText(self.session.config)
+        self.input = InputText(self.session.config,
+            self._on_send_message)
         self.info = ContactInfo()
 
         self.panel.pack1(self.output, True, True)
@@ -549,9 +550,15 @@ class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
     text in the widget'''
 
-    def __init__(self):
+    def __init__(self, config):
         '''constructor'''
         gtk.ScrolledWindow.__init__(self)
+
+        self.config = config
+
+        if self.config.b_show_emoticons is None:
+            self.config.b_show_emoticons = True
+
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
         self.textbox = gtk.TextView()
@@ -567,11 +574,11 @@ class TextBox(gtk.ScrolledWindow):
         '''clear the content'''
         self.buffer.set_text('')
 
-    def append(self, text, scroll=True, fg_color=None, bg_color=None, 
-        font=None, size=None, bold=False, italic=False, underline=False, 
+    def append(self, text, scroll=True, fg_color=None, bg_color=None,
+        font=None, size=None, bold=False, italic=False, underline=False,
         strike=False):
         '''append text to the widget'''
-        self.buffer.put_text(text, fg_color, bg_color, font, size, bold, 
+        self.buffer.put_text(text, fg_color, bg_color, font, size, bold,
             italic, underline, strike)
 
         if scroll:
@@ -579,7 +586,9 @@ class TextBox(gtk.ScrolledWindow):
 
     def append_formatted(self, text, scroll=True):
         '''append formatted text to the widget'''
-        text = e3common.MarkupParser.parse_emotes(text)
+        if self.config.b_show_emoticons:
+            text = e3common.MarkupParser.parse_emotes(text)
+
         self.buffer.put_formatted(text)
         [self.textbox.add_child_at_anchor(*item)
             for item in self.buffer.widgets]
@@ -609,9 +618,9 @@ class TextBox(gtk.ScrolledWindow):
 class InputText(TextBox):
     '''a widget that is used to insert the messages to send'''
 
-    def __init__(self, on_send_message):
+    def __init__(self, config, on_send_message):
         '''constructor'''
-        TextBox.__init__(self)
+        TextBox.__init__(self, config)
         self.on_send_message = on_send_message
         self.textbox.connect('key-press-event', self._on_key_press_event)
 
@@ -629,9 +638,9 @@ class InputText(TextBox):
 class OutputText(TextBox):
     '''a widget that is used to display the messages on the conversation'''
 
-    def __init__(self):
+    def __init__(self, config):
         '''constructor'''
-        TextBox.__init__(self)
+        TextBox.__init__(self, config)
         self.textbox.set_editable(False)
         self.textbox.set_cursor_visible(False)
 

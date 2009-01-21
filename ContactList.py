@@ -36,12 +36,15 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         gui.ContactList.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
-        # the image (None for groups) the object (group or contact), 
-        # the string to display and a boolean indicating if the pixbuff should
-        # be shown (False for groups, True for contacts), the last is the status
-        # image
+        if self.session.config.d_weights is None:
+            self.session.config.d_weights = {}
+
+        # the image (None for groups) the object (group or contact),
+        # the string to display and a boolean indicating if the pixbuf should
+        # be shown (False for groups, True for contacts), the status
+        # image, and an int that is used to allow ordering specified by the user
         self._model = gtk.TreeStore(gtk.gdk.Pixbuf, object, str, bool,
-            gtk.gdk.Pixbuf)
+            gtk.gdk.Pixbuf, int)
         self.model = self._model.filter_new(root=None)
         self.model.set_visible_func(self._visible_func)
 
@@ -49,7 +52,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         self._model.set_sort_column_id(1, gtk.SORT_ASCENDING)
 
         self.set_model(self.model)
-        
+
         crt = gtk.CellRendererText()
         crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr = gtk.CellRendererPixbuf()
@@ -57,30 +60,30 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         column = gtk.TreeViewColumn()
         column.set_expand(True)
-        
+
         self.exp_column = gtk.TreeViewColumn()
-        self.exp_column.set_max_width(16)       
-        
+        self.exp_column.set_max_width(16)
+
         self.append_column(self.exp_column)
         self.append_column(column)
         self.set_expander_column(self.exp_column)
-        
+
         column.pack_start(pbr, False)
         column.pack_start(crt, True)
         column.pack_start(pbr_status, False)
-        
+
         column.add_attribute(pbr, 'pixbuf', 0)
         column.add_attribute(crt, 'markup', 2)
         column.add_attribute(pbr, 'visible', 3)
         column.add_attribute(pbr_status, 'visible', 3)
         column.add_attribute(pbr_status, 'pixbuf', 4)
-        
+
         self.set_search_column(2)
         self.set_headers_visible(False)
 
         self.connect('row-activated', self._on_row_activated)
         self.connect('button-release-event' , self._on_button_press_event)
-        
+
         # valid values:
         # + NICK
         # + ACCOUNT
@@ -117,7 +120,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         # and searching on one string is faster (and the user cant add
         # a new line to the entry so..)
         if self._filter_text:
-            if '\n'.join((obj.account, obj.alias, obj.nick, obj.message, 
+            if '\n'.join((obj.account, obj.alias, obj.nick, obj.message,
                 obj.account)).lower().find(self._filter_text) == -1:
                 return False
             else:
@@ -133,11 +136,13 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         obj1 = self._model[iter1][1]
         obj2 = self._model[iter2][1]
+        order1 = self._model[iter1][5]
+        order2 = self._model[iter2][5]
 
         if type(obj1) == Group and type(obj2) == Group:
-            return self.compare_groups(obj1, obj2)
+            return self.compare_groups(obj1, obj2, order1, order2)
         elif type(obj1) == Contact and type(obj2) == Contact:
-            return self.compare_contacts(obj1, obj2)
+            return self.compare_contacts(obj1, obj2, order1, order2)
         elif type(obj1) == Group and type(obj2) == Contact:
             return -1
         else:
@@ -165,14 +170,14 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         chek if it's the roght button and emit a signal on that case'''
         if event.button == 3:
             paths = self.get_path_at_pos(int(event.x), int(event.y))
-            
+
             if paths is None:
                 print 'invalid path'
             elif len(paths) > 0:
                 iterator = self.model.get_iter(paths[0])
                 child_iter = self.model.convert_iter_to_child_iter(iterator)
                 obj = self._model[child_iter][1]
-               
+
                 if type(obj) == Group:
                     self.signal_emit('group-menu-selected', obj)
                 elif type(obj) == Contact:
@@ -198,7 +203,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         '''
         if self.is_group_selected():
             return self._model[self._get_selected()][1]
-            
+
         return None
 
     def get_contact_selected(self):
@@ -206,7 +211,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         '''
         if self.is_contact_selected():
             return self._model[self._get_selected()][1]
-            
+
         return None
 
     def add_group(self, group):
@@ -214,7 +219,15 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         if self.order_by_status:
             return None
 
-        group_data = (None, group, self.format_group(group), False, None)
+        try:
+            weight = int(self.session.config.d_weights.get(group.identifier, 0))
+        except ValueError:
+            weight = 0
+
+        self.session.config.d_weights[group.identifier] = weight
+
+        group_data = (None, group, self.format_group(group), False, None,
+            weight)
 
         for row in self._model:
             obj = row[1]
@@ -233,12 +246,20 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
                 del self._model[row.iter]
 
     def add_contact(self, contact, group=None):
-        '''add a contact to the contact list, add it to the group if 
+        '''add a contact to the contact list, add it to the group if
         group is not None'''
-        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact, 
-            self.format_nick(contact), True, 
-            utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]))
-      
+        try:
+            weight = int(self.session.config.d_weights.get(contact.account, 0))
+        except ValueError:
+            weight = 0
+
+        self.session.config.d_weights[contact.account] = weight
+
+        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact,
+            self.format_nick(contact), True,
+            utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
+            weight)
+
         # if no group add it to the root, but check that it's not on a group
         # or in the root already
         if not group or self.order_by_status:
@@ -264,7 +285,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
                     con = contact_row[1]
                     if con.account == contact.account:
                         return contact_row.iter
-                    
+
                 return_iter = self._model.append(row.iter, contact_data)
                 self.update_group(group)
 
@@ -277,7 +298,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
                         del self._model[irow.iter]
 
                 return return_iter
-        else:            
+        else:
             self.add_group(group)
             return self.add_contact(contact, group)
 
@@ -326,9 +347,17 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
     def update_contact(self, contact):
         '''update the data of contact'''
-        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact, 
+        try:
+            weight = int(self.session.config.d_weights.get(contact.account, 0))
+        except ValueError:
+            weight = 0
+
+        self.session.config.d_weights[contact.account] = weight
+
+        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact,
             self.format_nick(contact), True,
-            utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]))
+            utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
+            weight)
 
         for row in self._model:
             obj = row[1]
@@ -343,7 +372,15 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
     def update_group(self, group):
         '''update the data of group'''
-        group_data = (None, group, self.format_group(group), False, None)
+        try:
+            weight = int(self.session.config.d_weights.get(group.identifier, 0))
+        except ValueError:
+            weight = 0
+
+        self.session.config.d_weights[group.identifier] = weight
+
+        group_data = (None, group, self.format_group(group), False, None,
+            weight)
 
         for row in self._model:
             obj = row[1]
@@ -361,7 +398,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
                     self.expand_row(path, False)
                 else:
                     self.collapse_row(path)
-    
+
     def format_nick(self, contact):
         '''replace the appearance of the template vars using the values of
         the contact
@@ -373,15 +410,15 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         # + MESSAGE
         '''
         template = self.nick_template
-        template = template.replace('%NICK%', 
+        template = template.replace('%NICK%',
             gobject.markup_escape_text(contact.nick))
         template = template.replace('%ACCOUNT%',
             gobject.markup_escape_text(contact.account))
-        template = template.replace('%MESSAGE%', 
+        template = template.replace('%MESSAGE%',
             gobject.markup_escape_text(contact.message))
-        template = template.replace('%STATUS%', 
+        template = template.replace('%STATUS%',
             gobject.markup_escape_text(status.STATUS[contact.status]))
-        template = template.replace('%DISPLAY_NAME%', 
+        template = template.replace('%DISPLAY_NAME%',
             gobject.markup_escape_text(contact.display_name))
 
         return template
@@ -395,9 +432,9 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         # + TOTAL_COUNT
         '''
         contacts = self.contacts.get_contacts(group.contacts)
-        (online, total) = self.contacts.get_online_total_count(contacts)       
+        (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
-        template = template.replace('%NAME%', 
+        template = template.replace('%NAME%',
             gobject.markup_escape_text(group.name))
         template = template.replace('%ONLINE_COUNT%', str(online))
         template = template.replace('%TOTAL_COUNT%', str(total))
@@ -423,7 +460,7 @@ def test():
         print 'group selected: ', group.name
         group.name = random_string()
         contact_list.update_group(group)
-    
+
     def _on_contact_menu_selected(contact_list, contact):
         '''callback for the contact-menu-selected signal'''
         print 'contact menu selected: ', contact.display_name

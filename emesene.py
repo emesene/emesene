@@ -19,7 +19,7 @@ Signals.Signals.set_events(EVENTS)
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
-    
+
     def __init__(self):
         '''class constructor'''
         self.window = None
@@ -48,15 +48,15 @@ class Controller(object):
         self.session.signals = Signals.Signals(self.session.events)
         self.session.signals.connect('login-succeed', self.on_login_succeed)
         self.session.signals.connect('login-failed', self.on_login_failed)
-        self.session.signals.connect('contact-list-ready', 
+        self.session.signals.connect('contact-list-ready',
             self.on_contact_list_ready)
-        self.session.signals.connect('conv-first-action', 
+        self.session.signals.connect('conv-first-action',
             self.on_new_conversation)
-        self.session.signals.connect('nick-change-succeed', 
+        self.session.signals.connect('nick-change-succeed',
             self.on_nick_change_succeed)
-        self.session.signals.connect('message-change-succeed', 
+        self.session.signals.connect('message-change-succeed',
             self.on_message_change_succeed)
-        self.session.signals.connect('status-change-succeed', 
+        self.session.signals.connect('status-change-succeed',
             self.on_status_change_succeed)
 
     def on_close(self):
