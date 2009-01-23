@@ -79,20 +79,3 @@ class Window(gtk.Window):
         self.cb_on_close()
         self.hide()
 
-def test():
-    def callback(account, remember):
-        print account.account
-        print account.password
-        print remember
-
-    def on_close():
-        sys.exit(0)
-
-    window = Window(on_close)
-    window.go_login(callback)
-    window.show()
-    gtk.main()
-
-if __name__ == "__main__":
-    test()
-

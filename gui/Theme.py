@@ -131,9 +131,10 @@ class Theme(object):
             return None
 
         path = os.path.join(self.emote_path, Theme.EMOTES[shortcut]) + '.png'
+        path = os.path.abspath(path)
 
         if os.access(path, os.R_OK) and os.path.isfile(path):
-            return path
+            return 'file://' + path
 
         return None
 

@@ -40,10 +40,14 @@ class MessageFormatter(object):
         self.new_line = new_line
 
         # default formats
-        self.incoming = '<b>%DISPLAYNAME%</b>: %MESSAGE%%NL%'
-        self.outgoing = self.incoming
-        self.consecutive_incoming = '  %MESSAGE%%NL%'
-        self.consecutive_outgoing = '  %MESSAGE%%NL%'
+        self.incoming = '<div class="message-incomming">'\
+            '<b>%DISPLAYNAME%</b>: %MESSAGE%%NL%</div>'
+        self.outgoing = '<div class="message-outgoing">'\
+            '<b>%DISPLAYNAME%</b>: %MESSAGE%%NL%</div>'
+        self.consecutive_incoming = '<div class="consecutive-incomming">'\
+            '    %MESSAGE%%NL%</div>'
+        self.consecutive_outgoing = '<div class="consecutive-outgoing">'\
+            '    %MESSAGE%%NL%</div>'
         self.offline_incoming = \
             '<i>(offline message)</i><b>%DISPLAYNAME%</b>: %MESSAGE%%NL%'
         self.information = '<i>%MESSAGE%</i>%NL%'

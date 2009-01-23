@@ -6,11 +6,18 @@ import gobject
 import gui
 import Menu
 import utils
+import TextBox
+import WebKitTextBox
+
+if WebKitTextBox.ERROR:
+    from TextBox import OutputText
+else:
+    from WebKitTextBox import OutputText
+
 import e3common.MarkupParser
 import e3common.MessageFormatter
 import protocol.status
 
-from RichBuffer import RichBuffer
 from e3 import Message
 
 import TinyButton
@@ -28,19 +35,19 @@ class MainConversation(gtk.Notebook):
 
         self.conversations = {}
         if self.session:
-            self.session.signals.connect('conv-message', 
+            self.session.signals.connect('conv-message',
                 self._on_message)
-            self.session.signals.connect('conv-contact-joined', 
+            self.session.signals.connect('conv-contact-joined',
                 self._on_contact_joined)
-            self.session.signals.connect('conv-contact-left', 
+            self.session.signals.connect('conv-contact-left',
                 self._on_contact_left)
-            self.session.signals.connect('conv-group-started', 
+            self.session.signals.connect('conv-group-started',
                 self._on_group_started)
-            self.session.signals.connect('conv-group-ended', 
+            self.session.signals.connect('conv-group-ended',
                 self._on_group_ended)
-            self.session.signals.connect('conv-message-send-failed', 
+            self.session.signals.connect('conv-message-send-failed',
                 self._on_message_send_failed)
-            self.session.signals.connect('contact-attr-changed', 
+            self.session.signals.connect('contact-attr-changed',
                 self._on_contact_attr_changed)
 
         self.connect('switch-page', self._on_switch_page)
@@ -63,23 +70,19 @@ class MainConversation(gtk.Notebook):
                 nick = account
 
             (is_raw, consecutive, outgoing, first, last) = \
-                conversation.formatter.format(contact) 
-
-            conversation.output.append_formatted(first)
+                conversation.formatter.format(contact)
 
             if is_raw:
-                conversation.output.append(
-                    e3common.MarkupParser.escape(message.body))
+                middle = e3common.MarkupParser.escape(message.body)
             else:
-                conversation.output.append_formatted(
-                    self.format_from_message(message))
+                middle = self.format_from_message(message)
 
-            conversation.output.append_formatted(last)
+            conversation.output.append(first + middle + last)
 
         elif message.type == Message.TYPE_NUDGE:
             (is_raw, consecutive, outgoing, first, last) = \
-                conversation.formatter.format(contact, message.type) 
-            conversation.output.append_formatted(first)
+                conversation.formatter.format(contact, message.type)
+            conversation.output.append(first)
 
         parent = self.get_parent()
 
@@ -91,8 +94,9 @@ class MainConversation(gtk.Notebook):
         '''called when the widget receives the focus'''
         self.get_parent().set_urgency_hint(False)
         page_num = self.get_current_page()
-        page = self.get_nth_page(page_num)
-        page.message_waiting = False
+        if page_num != -1:
+            page = self.get_nth_page(page_num)
+            page.message_waiting = False
 
     def _on_switch_page(self, notebook, page, page_num):
         '''called when the user changes the tab'''
@@ -109,8 +113,8 @@ class MainConversation(gtk.Notebook):
 
         if conversation is not None:
             error = conversation.formatter.format_error('message couldn\'t be sent: ')
-            conversation.output.append_formatted(error)
-            conversation.output.append_formatted(
+            conversation.output.append(error)
+            conversation.output.append(
                 self.format_from_message(message))
         else:
             print 'conversation', cid, 'not found'
@@ -152,8 +156,7 @@ class MainConversation(gtk.Notebook):
             conversation.on_group_ended()
 
     def format_from_message(self, message):
-        '''return a tuple containing all the format arguments received by
-        RichBuffer.put_text'''
+        '''return a markup text representing the format on the message'''
         stl = message.style
 
         style_start = ''
@@ -188,7 +191,7 @@ class MainConversation(gtk.Notebook):
         return result
 
     def new_conversation(self, cid, members=None):
-        '''create a new conversation widget and append it to the tabs, 
+        '''create a new conversation widget and append it to the tabs,
         if the cid already exists or there is already a conversation with
         that member, return the existing conversation.
         this method returns a tuple containing a boolean and a conversation
@@ -197,7 +200,7 @@ class MainConversation(gtk.Notebook):
         cid = float(cid)
         if cid in self.conversations:
             return (True, self.conversations[cid])
-        elif members is not None:   
+        elif members is not None:  
             for (key, conversation) in self.conversations.iteritems():
                 if conversation.members == members:
                     old_cid = conversation.cid
@@ -210,7 +213,7 @@ class MainConversation(gtk.Notebook):
                     return (True, conversation)
 
         conversation = Conversation(self.session, cid, None, members)
-        label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close, 
+        label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close,
             conversation)
         label.set_image(gui.theme.connect)
         conversation.tab_label = label
@@ -231,7 +234,7 @@ class MainConversation(gtk.Notebook):
     def _on_tab_close(self, button, event, conversation):
         '''called when the user clicks the close button on a tab'''
         # TODO: we can check the last message timstamp and if it's less than
-        # certains seconds, inform that there is a new message (to avoid 
+        # certains seconds, inform that there is a new message (to avoid
         # closing a tab instants after you receive a new message)
         self.close(conversation)
 
@@ -285,7 +288,7 @@ class Conversation(gtk.VBox):
         self.panel = gtk.VPaned()
         self.header = Header()
         self.output = OutputText(self.session.config)
-        self.input = InputText(self.session.config,
+        self.input = TextBox.InputText(self.session.config,
             self._on_send_message)
         self.info = ContactInfo()
 
@@ -299,11 +302,8 @@ class Conversation(gtk.VBox):
         self.pack_start(self.header, False)
         self.pack_start(self.hbox, True, True)
 
-        self._panel_show_id = self.panel.connect('map-event', 
+        self._panel_show_id = self.panel.connect('map-event',
             self._on_panel_show)
-        # FIXME: this doesnt work :S
-        self._textbox_expose_id = self.output.textbox.connect('show', 
-            self._on_textbox_expose)
 
         if len(self.members) == 0:
             self.header.information = Header.INFO_TPL % \
@@ -342,7 +342,7 @@ class Conversation(gtk.VBox):
         self._message_waiting = value
         self.update_tab()
 
-    message_waiting = property(fget=_get_message_waiting, 
+    message_waiting = property(fget=_get_message_waiting,
         fset=_set_message_waiting)
 
     def _get_group_chat(self):
@@ -360,29 +360,20 @@ class Conversation(gtk.VBox):
         self.panel.disconnect(self._panel_show_id)
         del self._panel_show_id
 
-    def _on_textbox_expose(self, widget, event):
-        '''called when the textbox is shown'''
-        self.output.textbox.grab_focus()
-        self.output.textbox.disconnect(self._textbox_expose_id)
-        del self._textbox_expose_id
-
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
         self.session.send_message(self.cid, text)
         nick = self.session.contacts.me.display_name
 
         (is_raw, consecutive, outgoing, first, last) = \
-            self.formatter.format(self.session.contacts.me) 
-
-        self.output.append_formatted(first)
+            self.formatter.format(self.session.contacts.me)
 
         if is_raw:
-            self.output.append(e3common.MarkupParser.escape(text))
+            middle = e3common.MarkupParser.escape(text)
         else:
-            self.output.append_formatted(
-                e3common.MarkupParser.escape(text))
+            middle = e3common.MarkupParser.escape(text)
 
-        self.output.append_formatted(last)
+        self.output.append(first + middle + last)
 
     def show_tab_menu(self):
         '''callback called when the user press a button over a widget
@@ -392,7 +383,7 @@ class Conversation(gtk.VBox):
         menu.popup(None, None, None, 0, 0)
 
     def _get_icon(self):
-        '''return the icon that represent the current status of the 
+        '''return the icon that represent the current status of the
             conversation (the status of the contact on a single
             conversation, a group icon on group chat or a waiting icon)
         '''
@@ -403,7 +394,7 @@ class Conversation(gtk.VBox):
         elif len(self.members) == 1:
             contact = self.session.contacts.get(self.members[0])
 
-            # can be false if we are un a group chat with someone we dont 
+            # can be false if we are un a group chat with someone we dont
             # have and the last contact leaves..
             if contact:
                 stat = contact.status
@@ -426,7 +417,7 @@ class Conversation(gtk.VBox):
         elif len(self.members) == 1:
             contact = self.session.contacts.get(self.members[0])
 
-            # can be false if we are un a group chat with someone we dont 
+            # can be false if we are un a group chat with someone we dont
             # have and the last contact leaves..
             if contact:
                 text = contact.display_name
@@ -510,9 +501,9 @@ class Conversation(gtk.VBox):
         '''return the value of image_visible'''
         return self._image_visible
 
-    image_visible = property(fget=_get_image_visible, 
+    image_visible = property(fget=_get_image_visible,
         fset=_set_image_visible)
-    
+   
     def _set_header_visible(self, value):
         '''hide or show the widget according to value'''
         if value:
@@ -526,7 +517,7 @@ class Conversation(gtk.VBox):
         '''return the value of image_visible'''
         return self._header_visible
 
-    header_visible = property(fget=_get_header_visible, 
+    header_visible = property(fget=_get_header_visible,
         fset=_set_header_visible)
 
     def _set_toolbar_visible(self, value):
@@ -542,107 +533,10 @@ class Conversation(gtk.VBox):
         '''return the value of image_visible'''
         return self._toolbar_visible
 
-    toolbar_visible = property(fget=_get_toolbar_visible, 
+    toolbar_visible = property(fget=_get_toolbar_visible,
         fset=_set_toolbar_visible)
 
 
-class TextBox(gtk.ScrolledWindow):
-    '''a text box inside a scroll that provides methods to get and set the
-    text in the widget'''
-
-    def __init__(self, config):
-        '''constructor'''
-        gtk.ScrolledWindow.__init__(self)
-
-        self.config = config
-
-        if self.config.b_show_emoticons is None:
-            self.config.b_show_emoticons = True
-
-        self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.set_shadow_type(gtk.SHADOW_IN)
-        self.textbox = gtk.TextView()
-        self.textbox.set_left_margin(6)
-        self.textbox.set_right_margin(6)
-        self.textbox.set_wrap_mode(gtk.WRAP_WORD_CHAR)
-        self.textbox.show()
-        self.buffer = RichBuffer()
-        self.textbox.set_buffer(self.buffer)
-        self.add(self.textbox)
-
-    def clear(self):
-        '''clear the content'''
-        self.buffer.set_text('')
-
-    def append(self, text, scroll=True, fg_color=None, bg_color=None,
-        font=None, size=None, bold=False, italic=False, underline=False,
-        strike=False):
-        '''append text to the widget'''
-        self.buffer.put_text(text, fg_color, bg_color, font, size, bold,
-            italic, underline, strike)
-
-        if scroll:
-            self.scroll_to_end()
-
-    def append_formatted(self, text, scroll=True):
-        '''append formatted text to the widget'''
-        if self.config.b_show_emoticons:
-            text = e3common.MarkupParser.parse_emotes(text)
-
-        self.buffer.put_formatted(text)
-        [self.textbox.add_child_at_anchor(*item)
-            for item in self.buffer.widgets]
-
-        self.buffer.widgets = []
-
-        if scroll:
-            self.scroll_to_end()
-
-    def scroll_to_end(self):
-        '''scroll to the end of the content'''
-        end_iter = self.buffer.get_end_iter()
-        self.textbox.scroll_to_iter(end_iter, 0.0, yalign=1.0)
-
-    def _set_text(self, text):
-        '''set the text on the widget'''
-        self.buffer.set_text(text)
-
-    def _get_text(self):
-        '''return the text of the widget'''
-        start_iter = self.buffer.get_start_iter()
-        end_iter = self.buffer.get_end_iter()
-        return self.buffer.get_text(start_iter, end_iter, True)
-
-    text = property(fget=_get_text, fset=_set_text)
-
-class InputText(TextBox):
-    '''a widget that is used to insert the messages to send'''
-
-    def __init__(self, config, on_send_message):
-        '''constructor'''
-        TextBox.__init__(self, config)
-        self.on_send_message = on_send_message
-        self.textbox.connect('key-press-event', self._on_key_press_event)
-
-    def _on_key_press_event(self, widget, event):
-        '''method called when a key is pressed on the input widget'''
-        if event.keyval == gtk.keysyms.Return and \
-                not event.state == gtk.gdk.SHIFT_MASK:
-            if not self.text:
-                return True
-
-            self.on_send_message(self.text)
-            self.text = ''
-            return True
-
-class OutputText(TextBox):
-    '''a widget that is used to display the messages on the conversation'''
-
-    def __init__(self, config):
-        '''constructor'''
-        TextBox.__init__(self, config)
-        self.textbox.set_editable(False)
-        self.textbox.set_cursor_visible(False)
 
 class Header(gtk.HBox):
     '''a widget used to display some information about the conversation'''
@@ -692,7 +586,7 @@ class ContactInfo(gtk.VBox):
         self._last_alig = None
 
     def _set_first(self, first):
-        '''set the first element and add it to the widget (remove the 
+        '''set the first element and add it to the widget (remove the
         previous if not None'''
 
         if self._first_alig is not None:
@@ -711,7 +605,7 @@ class ContactInfo(gtk.VBox):
     first = property(fget=_get_first, fset=_set_first)
 
     def _set_last(self, last):
-        '''set the last element and add it to the widget (remove the 
+        '''set the last element and add it to the widget (remove the
         previous if not None'''
 
         if self._last_alig is not None:
@@ -744,7 +638,7 @@ class TabWidget(gtk.HBox):
         self.image = gtk.Image()
         self.label = gtk.Label(text)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
-        self.close.connect('button_press_event', on_close_clicked, 
+        self.close.connect('button_press_event', on_close_clicked,
             conversation)
 
         self.label.set_max_width_chars(20)
@@ -777,7 +671,7 @@ class TabWidget(gtk.HBox):
 
 if __name__ == '__main__':
     import gui
-    mconv = MainConversation(None) 
+    mconv = MainConversation(None)
     conv = mconv.new_conversation(123)
     mconv.new_conversation(1233)
     window = gtk.Window()

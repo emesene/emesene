@@ -47,7 +47,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
     def put_image(self, path, tip=None):
         '''insert an image at the current position
         tip it's the alt text on mouse over'''
-        img_fd = open(path)
+        img_fd = open(path[7:]) # to remove file://
 
         loader = gtk.gdk.PixbufLoader()
         loader.write(img_fd.read())

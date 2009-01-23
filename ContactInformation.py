@@ -5,7 +5,7 @@ import pango
 import gui
 import utils
 import protocol.status
-from MainConversation import OutputText
+import TextBox
 
 class ContactInformation(gtk.Window):
     '''a window that displays information about a contact'''
@@ -230,7 +230,7 @@ class ChatWidget(gtk.VBox):
         if self.session:
             self.contact = self.session.contacts.get(account)
 
-        self.text = OutputText()
+        self.text = TextBox.OutputText()
         self.text.show()
 
         self.pack_start(self.text, True, True)
