@@ -18,7 +18,7 @@
 '''a module that map the abstract.stock module to gtk'''
 import gtk
 
-from protocol.stock import *
+from gui.stock import *
 
 MAP = {}
 MAP[ACCEPT] = gtk.STOCK_OK

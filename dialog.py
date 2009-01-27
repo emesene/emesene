@@ -22,7 +22,7 @@ import os
 import gtk
 import gobject
 
-import protocol.stock as stock
+import gui.stock as stock
 
 import ContactInformation
 
@@ -403,25 +403,21 @@ def about_dialog(name, version, copyright, comments, license, website,
     * translators: a string containing the translators
     '''
 
-    def close_about(widget, response_id):
-        if response_id == gtk.RESPONSE_CANCEL:
-            widget.destroy()
-
     about = gtk.AboutDialog()
     about.set_name(name)
     about.set_version(version)
     about.set_copyright(copyright)
     about.set_comments(comments)
-    about.connect('response', close_about)
     about.set_license(license)
     about.set_website(website)
 
     about.set_authors(authors)
     about.set_translator_credits(translators)
-    icon = gtk.image_new_from_file(logo_path)
+    icon = gtk.gdk.pixbuf_new_from_file(logo_path)
     about.set_icon(icon)
     about.set_logo(icon)
     about.run()
+    about.hide()
 
 def contact_information_dialog(session, account):
     '''shows information about the account'''

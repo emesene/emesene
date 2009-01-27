@@ -3,9 +3,9 @@ import base64
 import gobject
 
 import gui
+import gui.stock as stock
 import protocol.Account as Account
 import protocol.status as status
-import protocol.stock as stock
 import utils
 import StatusButton
 

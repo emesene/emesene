@@ -1,5 +1,5 @@
-from ConversationMenu import ConversationMenu
 from Theme import Theme
+import components
 
 theme = Theme()
 

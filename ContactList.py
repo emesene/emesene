@@ -100,7 +100,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         self.group_template = '<b>%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)</b>'
 
     def _visible_func(self, model, _iter):
-        '''return True if the row should be displayed according to the 
+        '''return True if the row should be displayed according to the
         value of the config'''
         obj = self._model[_iter][1]
 
@@ -150,8 +150,12 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
     def _get_selected(self):
         '''return the selected row or None'''
-        return self.model.convert_iter_to_child_iter(\
-            self.get_selection().get_selected()[1])
+        iter_ = self.get_selection().get_selected()[1]
+
+        if iter_ is None:
+            return None
+
+        return self.model.convert_iter_to_child_iter(iter_)
 
     def _on_row_activated(self, treeview, path, view_column):
         '''callback called when the user selects a row'''
@@ -159,9 +163,9 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         contact = self.get_contact_selected()
 
         if group:
-            self.signal_emit('group-selected', group)
+            self.group_selected.emit(group)
         elif contact:
-            self.signal_emit('contact-selected', contact)
+            self.contact_selected.emit(contact)
         else:
             print 'nothing selected?'
 
@@ -179,9 +183,9 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
                 obj = self._model[child_iter][1]
 
                 if type(obj) == Group:
-                    self.signal_emit('group-menu-selected', obj)
+                    self.group_menu_selected.emit(obj)
                 elif type(obj) == Contact:
-                    self.signal_emit('contact-menu-selected', obj)
+                    self.contact_menu_selected.emit(obj)
             else:
                 print 'empty paths?'
 
@@ -192,25 +196,45 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
     def is_group_selected(self):
         '''return True if a group is selected'''
-        return type(self._model[self._get_selected()][1]) == Group
+        selected = self._get_selected()
+
+        if selected is None:
+            return False
+
+        return type(self._model[selected][1]) == Group
 
     def is_contact_selected(self):
         '''return True if a contact is selected'''
-        return type(self._model[self._get_selected()][1]) == Contact
+        selected = self._get_selected()
+
+        if selected is None:
+            return False
+
+        return type(self._model[selected][1]) == Contact
 
     def get_group_selected(self):
         '''return a group object if there is a group selected, None otherwise
         '''
+        selected = self._get_selected()
+
+        if selected is None:
+            return None
+
         if self.is_group_selected():
-            return self._model[self._get_selected()][1]
+            return self._model[selected][1]
 
         return None
 
     def get_contact_selected(self):
         '''return a contact object if there is a group selected, None otherwise
         '''
+        selected = self._get_selected()
+
+        if selected is None:
+            return None
+
         if self.is_contact_selected():
-            return self._model[self._get_selected()][1]
+            return self._model[selected][1]
 
         return None
 
@@ -228,6 +252,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         group_data = (None, group, self.format_group(group), False, None,
             weight)
+        print 'updating group', group.name, group_data[2]
 
         for row in self._model:
             obj = row[1]
@@ -441,83 +466,3 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         return template
 
-def test():
-    import dialog
-    import string
-    import random
-    import protocol.ContactManager as ContactManager
-
-    def _on_contact_selected(contact_list, contact):
-        '''callback for the contact-selected signal'''
-        print 'contact selected: ', contact.display_name
-        contact.nick = random_string()
-        contact.status = random.choice(status.ORDERED)
-        contact.message = random_string()
-        contact_list.update_contact(contact)
-
-    def _on_group_selected(contact_list, group):
-        '''callback for the group-selected signal'''
-        print 'group selected: ', group.name
-        group.name = random_string()
-        contact_list.update_group(group)
-
-    def _on_contact_menu_selected(contact_list, contact):
-        '''callback for the contact-menu-selected signal'''
-        print 'contact menu selected: ', contact.display_name
-        contact_list.remove_contact(contact)
-
-    def _on_group_menu_selected(contact_list, group):
-        '''callback for the group-menu-selected signal'''
-        print 'group menu selected: ', group.name
-        contact_list.remove_group(group)
-
-    def random_string(length=6):
-        '''generate a random string of length "length"'''
-        return ''.join([random.choice(string.ascii_letters) for i \
-            in range(length)])
-
-    def random_mail():
-        '''generate a random mail'''
-        return random_string() + '@' + random_string() + '.com'
-
-    contactm = ContactManager('msn@msn.com')
-
-    window = gtk.Window()
-    window.set_default_size(200, 200)
-    scroll = gtk.ScrolledWindow()
-    scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-    conlist = ContactList(contactm, dialog)
-
-    conlist.signal_connect('contact-selected', _on_contact_selected)
-    conlist.signal_connect('contact-menu-selected', _on_contact_menu_selected)
-    conlist.signal_connect('group-selected', _on_group_selected)
-    conlist.signal_connect('group-menu-selected', _on_group_menu_selected)
-    conlist.order_by_status = True
-    conlist.show_offline = True
-
-    scroll.add(conlist)
-    window.add(scroll)
-    window.connect("delete-event", gtk.main_quit)
-    window.show_all()
-
-    for i in range(6):
-        group = Group(random_string())
-        for j in range(6):
-            contact = Contact(random_mail(), i * 10 + j, random_string())
-            contact.status = random.choice(status.ORDERED)
-            contact.message = random_string()
-            group.contacts.append(contact.account)
-
-            conlist.add_contact(contact, group)
-
-    for j in range(6):
-        contact = Contact(random_mail(), 100 + j, random_string())
-        contact.status = random.choice(status.ORDERED)
-        contact.message = random_string()
-
-        conlist.add_contact(contact)
-
-    gtk.main()
-
-if __name__ == '__main__':
-    test()

@@ -123,7 +123,7 @@ class Theme(object):
 
         self.emote_path = os.path.join('themes', 'emotes', 'default')
 
-    def emote_to_path(self, shortcut):
+    def emote_to_path(self, shortcut, remove_protocol=False):
         '''return a string representing the path to load the emote if it exist
         None otherwise'''
 
@@ -134,7 +134,10 @@ class Theme(object):
         path = os.path.abspath(path)
 
         if os.access(path, os.R_OK) and os.path.isfile(path):
-            return 'file://' + path
+            if remove_protocol:
+                return path
+            else:
+                return 'file://' + path
 
         return None
 

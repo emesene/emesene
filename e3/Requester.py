@@ -285,7 +285,10 @@ class DynamicItems(Requester):
                 contact.groups = []
                 for guid in contact_dict['groupIds']:
                     contact.groups.append(guid)
-                    self.session.groups[guid].contacts.append(contact.account)
+                    group = self.session.groups[guid]
+
+                    if contact.account not in group.contacts:
+                        group.contacts.append(contact.account)
 
                 for ann in contact_dict['Annotations']:
                     if ann.get('Name', None) == 'AB.NickName':

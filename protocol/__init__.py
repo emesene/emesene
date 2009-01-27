@@ -31,5 +31,4 @@ from Contact import Contact
 
 from ContactManager import ContactManager
 
-import stock
 import status

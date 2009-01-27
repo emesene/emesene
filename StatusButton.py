@@ -1,9 +1,7 @@
 import gtk
 
 import gui
-import Menu
 import utils
-import gui.StatusMenu
 import protocol.status as status
 
 class StatusButton(gtk.Button):
@@ -12,27 +10,27 @@ class StatusButton(gtk.Button):
 
     def __init__(self, session=None):
         gtk.Button.__init__(self)
-
+        self.session = session
         # a cache of gtk.Images to not load the images everytime we change
         # our status
         self.cache_imgs = {}
-        self.menu = Menu.build_pop_up(gui.StatusMenu.StatusMenu(session,
-            self._on_status_selected))
 
         self.set_status(status.ONLINE)
         self.set_relief(gtk.RELIEF_NONE)
         self.set_border_width(0)
+        self.menu = gui.components.build_status_menu(self._on_status_selected)
+        self.gtk_menu = self.menu.build_as_popup()
 
         self.connect('clicked', self._on_clicked)
 
     def _on_clicked(self, button):
         '''callback called when the button is clicked'''
-        self.menu.popup(None, None, None, 0, 0)
+        self.gtk_menu.popup(None, None, None, 0, 0)
 
     def _on_status_selected(self, stat):
         '''method called when a status is selected on the popup'''
         self.set_status(stat)
-        
+
     def set_status(self, stat):
         '''load an image representing a status and store it on cache'''
         if stat not in status.ALL:

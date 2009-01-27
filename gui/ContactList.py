@@ -18,27 +18,22 @@
 '''a abstract object that define the API of a contact list and some behavior'''
 import protocol.Contact
 import protocol.status as status
-import protocol.Object as Object
 
-class ContactList(Object.Object):
+import Signal
+
+class ContactList(object):
     '''an abstract class that defines the api that the contact list should
     have'''
 
     def __init__(self, session, dialog):
         '''class constructor'''
-        Object.Object.__init__(self)
 
         # define the class signals
         # the param is the contact object
-        self.signal_add('contact-selected', 1)
-        # the param is the group object
-        self.signal_add('group-selected', 1)
-        # the signal is the contact object, the callback should display
-        # a contextual menu to do operations on the contact
-        self.signal_add('group-menu-selected', 1)
-        # the signal is the group object, the callback should display
-        # a contextual menu to do operations on the group
-        self.signal_add('contact-menu-selected', 1)
+        self.contact_selected = Signal.Signal()
+        self.group_selected = Signal.Signal()
+        self.contact_menu_selected = Signal.Signal()
+        self.group_menu_selected = Signal.Signal()
 
         self.contacts = session.contacts
         self.groups = session.groups
@@ -48,19 +43,19 @@ class ContactList(Object.Object):
         self.group_state = {}
 
         if self.session.config.b_order_by_group is None:
-            self.session.config.b_order_by_group = True 
+            self.session.config.b_order_by_group = True
 
         if self.session.config.b_show_nick is None:
-            self.session.config.b_show_nick = True 
+            self.session.config.b_show_nick = True
 
         if self.session.config.b_show_empty_groups is None:
-            self.session.config.b_show_empty_groups = False 
-
-        if self.session.config.b_show_group_count is None:
-            self.session.config.b_show_group_count = False 
+            self.session.config.b_show_empty_groups = False
 
         if self.session.config.b_show_offline is None:
-            self.session.config.b_show_offline = False 
+            self.session.config.b_show_offline = False
+
+        if self.session.config.b_show_blocked is None:
+            self.session.config.b_show_blocked = False
 
 
         # self.order_by_status is a property that returns the inverse
@@ -69,8 +64,8 @@ class ContactList(Object.Object):
         self.order_by_group = self.session.config.b_order_by_group
         self.show_nick = self.session.config.b_show_nick
         self._show_empty_groups = self.session.config.b_show_empty_groups
-        self.show_group_count = self.session.config.b_show_group_count
         self._show_offline = self.session.config.b_show_offline
+        self._show_blocked = self.session.config.b_show_blocked
 
         self._filter_text = ''
 
@@ -87,7 +82,7 @@ class ContactList(Object.Object):
         # + ONLINE_COUNT
         # + TOTAL_COUNT
         self.group_template = '%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)'
-        
+
     def _get_order_by_status(self):
         '''return the value of order by status'''
         return not self.order_by_group
@@ -96,7 +91,7 @@ class ContactList(Object.Object):
         '''set the value of order by status'''
         self.order_by_group = not value
 
-    order_by_status = property(fget=_get_order_by_status, 
+    order_by_status = property(fget=_get_order_by_status,
         fset=_set_order_by_status)
 
     def _get_order_by_group(self):
@@ -108,7 +103,7 @@ class ContactList(Object.Object):
         self._order_by_group = value
         self.session.config.b_order_by_group = value
 
-    order_by_group = property(fget=_get_order_by_group, 
+    order_by_group = property(fget=_get_order_by_group,
         fset=_set_order_by_group)
 
     def _get_show_offline(self):
@@ -116,13 +111,26 @@ class ContactList(Object.Object):
         return self._show_offline
 
     def _set_show_offline(self, value):
-        '''set the value of self._show_offline to value and call to 
+        '''set the value of self._show_offline to value and call to
         self.refilter()'''
         self._show_offline = value
         self.session.config.b_show_offline = self._show_offline
         self.refilter()
-    
+
     show_offline = property(fget=_get_show_offline, fset=_set_show_offline)
+
+    def _get_show_blocked(self):
+        '''return the value of self._show_blocked'''
+        return self._show_blocked
+
+    def _set_show_blocked(self, value):
+        '''set the value of self._show_blocked to value and call to
+        self.refilter()'''
+        self._show_blocked = value
+        self.session.config.b_show_blocked = self._show_blocked
+        self.refilter()
+
+    show_blocked = property(fget=_get_show_blocked, fset=_set_show_blocked)
 
     def _get_show_empty_groups(self):
         '''return the value of show_emptry_groups'''
@@ -135,7 +143,7 @@ class ContactList(Object.Object):
         self.session.config.b_show_empty_groups = value
         self.refilter()
 
-    show_empty_groups = property(fget=_get_show_empty_groups, 
+    show_empty_groups = property(fget=_get_show_empty_groups,
         fset=_set_show_empty_groups)
 
     def _get_filter_text(self):
@@ -177,7 +185,7 @@ class ContactList(Object.Object):
         # + TOTAL_COUNT
         '''
         contacts = self.contacts.get_contacts(group.contacts)
-        (online, total) = self.contacts.get_online_total_count(contacts)       
+        (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
         template = template.replace('%NAME%', group.name)
         template = template.replace('%ONLINE_COUNT%', str(online))
@@ -216,10 +224,10 @@ class ContactList(Object.Object):
         raise NotImplementedError()
 
     def add_contact(self, contact, group=None):
-        '''add a contact to the contact list, add it to the group if 
+        '''add a contact to the contact list, add it to the group if
         group is not None'''
         raise NotImplementedError()
-    
+
     def remove_contact(self, contact, group=None):
         '''remove a contact from the specified group, if group is None
         then remove him from all groups'''
@@ -267,7 +275,7 @@ class ContactList(Object.Object):
         '''called when a group is collapsed, update the status of the
         groups'''
         self.group_state.update({group.name:False})
-    
+
     def on_group_expanded(self, group):
         '''called when a group is expanded, update the status of the
         groups'''
@@ -297,8 +305,7 @@ class ContactList(Object.Object):
         if override != 0:
             return override
 
-
-        result = cmp(status.ORDERED.index(contact1.status), 
+        result = cmp(status.ORDERED.index(contact1.status),
             status.ORDERED.index(contact2.status))
 
         if result != 0:
@@ -306,7 +313,7 @@ class ContactList(Object.Object):
 
         if self.order_by_status:
             return cmp(contact1.display_name, contact2.display_name)
-        
+
         if len(contact1.groups) == 0:
             if len(contact2.groups) == 0:
                 return cmp(contact1.display_name, contact2.display_name)

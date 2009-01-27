@@ -19,230 +19,252 @@
 import gtk
 
 import stock
-from gui.Menu import *
+from gui.Menu import Accel
+from gui.Menu import Image
+from gui.Menu import MenuOption as BaseMenuOption
+from gui.Menu import OptionGroup as BaseOptionGroup
+from gui.Menu import MenuItem as BaseMenuItem
 
 accel_group = gtk.AccelGroup()
 
-def build(element):
-    '''build an element with the defined toolkit and return it'''
-    if type(element) is Menu:
-        return _build_menu(element)
-    elif type(element) is Item:
-        return _build_menuitem(element)
-    elif type(element) is Option:
-        return _build_option(element)
-    elif type(element) is CheckBox:
-        return _build_checkbox(element)
+class MenuOption(BaseMenuOption):
+    '''an object representing a menu item that has two states and
+    can be toggled
+    '''
 
-    raise ValueError('Not valid type', type(element), Menu)
+    def __init__(self, label, active=False, accel=None):
+        '''constructor'''
+        BaseMenuOption.__init__(self, label, active, accel)
 
-def build_menu_bar(menu):
-    '''build a menu with the form of a menu bar'''
-    gtk_menubar = gtk.MenuBar()
+    def build(self):
+        '''build as a checkbox, you should implement
+        this method for your toolkit'''
+        self.gtk_item = gtk.CheckMenuItem(self.label)
+        self.gtk_item.set_active(self.active)
+        self.gtk_item.connect('toggled', self._toggled_cb)
 
-    for child in menu:
-        gtk_menubar.add(build(child))
-    
-    menu.signal_connect("enabled", _set_sensitive, gtk_menubar, True)
-    menu.signal_connect("disabled", _set_sensitive, gtk_menubar, False)
+        return self.gtk_item
 
-    return gtk_menubar
+    def _set_active(self, active):
+        '''set the value of active, you must implement it on your toolkit
+        to make it reflect the value on the widget
+        WARNING! active changes the status of the item on the last widget that
+        was built, not on all of them'''
+        self._active = active
 
-def build_pop_up(menu, x=0, y=0):
-    '''build a pop up menu, if positions are given and needed by the toolkit
-    will be used to show the pop up on that position'''
-    gtk_menu = gtk.Menu()
+        if hasattr(self, 'gtk_item'):
+            self.gtk_item.set_active(active)
 
-    for child in menu:
-        item = build(child)
-        item.show()
-        gtk_menu.add(item)
-    
-    menu.signal_connect("enabled", _set_sensitive, gtk_menu, True)
-    menu.signal_connect("disabled", _set_sensitive, gtk_menu, False)
+        self.toggled.emit(active)
 
-    return gtk_menu
+    def _toggled_cb(self, gtk_item):
+        '''callback called when a Item is selected, emit the selected signal
+        on Item'''
+        self._active = gtk_item.get_active()
+        self.toggled.emit(self.active)
 
-def build_toolbar(menu):
-    '''build a menu with the form of a toolbar'''
-    gtk_tb = gtk.Toolbar()
-    tooltips = gtk.Tooltips()
-    tooltips.enable()
+class MenuItem(BaseMenuItem):
+    '''an object representing a menu item'''
 
-    for child in menu:
-        item = _build_toolbutton(child, tooltips)
-        item.show()
-        gtk_tb.add(item)
+    def __init__(self, label=None, image=None, accel=None):
+        '''constructor'''
+        BaseMenuItem.__init__(self, label, image, accel)
 
-    menu.signal_connect("enabled", _set_sensitive, gtk_tb, True)
-    menu.signal_connect("disabled", _set_sensitive, gtk_tb, False)
+    def build(self):
+        '''build as a menu item, you should implement this
+        this method for your toolkit'''
+        if self.label == '-':
+            return gtk.SeparatorMenuItem()
 
-def _build_toolbutton(item, tooltips=None):
-    '''build a toolbutton and return it'''
-    # TODO: accel y las seniales
-    button = gtk.ToolButton()
-    button.set_label(item.text)
+        gtk_menuitem = gtk.ImageMenuItem(self.label)
 
-    if item.is_stock():
-        image = gtk.image_new_from_stock(
-            stock.map_stock(item.image, gtk.STOCK_MISSING_IMAGE),
-            gtk.ICON_SIZE_MENU)
-        button.set_icon_widget(image)
-    elif menuitem.is_image_path():
-        image = gtk.image_new_from_file(item.get_image_path())
-        button.set_icon_widget(image)
+        if self.image is not None:
+            if self.image.type == Image.TYPE_STOCK:
+                image = gtk.image_new_from_stock(
+                    stock.map_stock(self.image.value, gtk.STOCK_MISSING_IMAGE),
+                        gtk.ICON_SIZE_MENU)
+                gtk_menuitem.set_image(image)
+            elif self.image.type == Image.TYPE_IMAGE:
+                image = gtk.image_new_from_file(self.image.value)
+                gtk_menuitem.set_image(image)
 
-    if tooltips:
-        button.set_tooltip(tooltips, item.text)
+        if self.accel is not None:
+            special_keys = 0
 
-    return button
+            if self.accel.ctrl:
+                special_keys = special_keys | gtk.gdk.CONTROL_MASK
+            if self.accel.alt:
+                special_keys = special_keys | gtk.gdk.MOD1_MASK
 
-def _set_sensitive(item, widget, enabled):
-    '''set sensitive on widget to enabled'''
-    widget.set_sensitive(enabled)
+            gtk_menuitem.add_accelerator('activate', accel_group,
+                ord(self.accel.key), special_keys, gtk.ACCEL_VISIBLE)
 
-def _build_menu(menu):
-    '''build a gtk.Menu from a gui.Menu.Menu'''
+        gtk_menuitem.connect('activate', self._activated_cb)
 
-    gtk_menu = gtk.Menu()
-    gtk_menu_item = gtk.MenuItem(menu.text)
-    gtk_menu_item.set_submenu(gtk_menu)
+        if len(self._childs):
+            gtk_menu = gtk.Menu()
+            gtk_menuitem.set_submenu(gtk_menu)
 
-    for item in menu:
-        if type(item) is Item:
-            if item.text == '-':
-                gtk_menu.add(gtk.SeparatorMenuItem())
-            else:
-                gtk_menu.add(_build_menuitem(item))
-        elif type(item) is Option:
-            for option in _build_option(item):
-                gtk_menu.add(option)
+            for child in self._childs:
+                if type(child) == OptionGroup:
+                    for option in child.build():
+                        gtk_menu.add(option)
+                else:
+                    gtk_menu.add(child.build())
+
+        return gtk_menuitem
+
+    def build_as_popup(self):
+        '''build as a popup, you should implement this
+        this method for your toolkit'''
+        gtk_menu = gtk.Menu()
+
+        for child in self._childs:
+            item = child.build()
+            item.show()
+            gtk_menu.add(item)
+       
+        return gtk_menu
+
+    def build_as_menu_bar(self):
+        '''build as a menu bar, you should implement this
+        this method for your toolkit'''
+        gtk_menubar = gtk.MenuBar()
+
+        for child in self._childs:
+            gtk_menubar.add(child.build())
+
+        return gtk_menubar
+
+    def build_as_toolbar(self, **kwds):
+        '''build as a toolbar, you should implement this
+        this method for your toolkit'''
+        gtk_tb = gtk.Toolbar()
+
+        if kwds.get('style', '') == 'only icons':
+            gtk_tb.set_style(gtk.TOOLBAR_ICONS)
+
+        tooltips = gtk.Tooltips()
+        tooltips.enable()
+
+        for child in self._childs:
+            item = child._build_as_toolbutton(tooltips)
+            item.show()
+            gtk_tb.add(item)
+
+        return gtk_tb
+
+    def _build_as_toolbutton(self, tooltips=None):
+        '''build this item as a toolbutton'''
+        if len(self._childs):
+            button = gtk.MenuToolButton(None, self.label.replace('_', ''))
+        elif self.label == '-':
+            return gtk.SeparatorToolItem()
         else:
-            gtk_menu.add(build(item))
+            button = gtk.ToolButton()
+        button.set_label(self.label.replace('_', ''))
 
-    menu.signal_connect("enabled", _set_sensitive, gtk_menu_item, True)
-    menu.signal_connect("disabled", _set_sensitive, gtk_menu_item, False)
-            
-    return gtk_menu_item
+        if self.image is not None:
+            if self.image.type == Image.TYPE_STOCK:
+                image = gtk.image_new_from_stock(
+                    stock.map_stock(self.image.value, gtk.STOCK_MISSING_IMAGE),
+                        gtk.ICON_SIZE_MENU)
+                button.set_icon_widget(image)
+            elif self.image.type == Image.TYPE_IMAGE:
+                image = gtk.image_new_from_file(self.image.value)
+                button.set_icon_widget(image)
 
-def _build_option(option):
-    '''build an option object, return a list of gtk.RadioMenuItems'''
-    option_list = []
-    gtk_option = gtk.RadioMenuItem(None, option[0].text)
+        if self.accel is not None:
+            special_keys = 0
 
-    if option.selected_index <= 0 or option.selected_index >= len(option):
-        gtk_option.set_active(True)
+            if self.accel.ctrl:
+                special_keys = special_keys | gtk.gdk.CONTROL_MASK
+            if self.accel.alt:
+                special_keys = special_keys | gtk.gdk.MOD1_MASK
 
-    gtk_option.connect('activate', _option_cb, option[0], option)
-    option_list.append(gtk_option)
+            button.add_accelerator('clicked', accel_group,
+                ord(self.accel.key), special_keys, gtk.ACCEL_VISIBLE)
 
-    for (count, opt) in enumerate(option[1:]):
-        gtk_opt = gtk.RadioMenuItem(gtk_option, opt.text)
-        option.signal_connect("enabled", _set_sensitive, gtk_opt, True)
-        option.signal_connect("disabled", _set_sensitive, gtk_opt, False)
+        button.connect('clicked', self._activated_cb)
 
-        if option.selected_index == count + 1:
-            gtk_opt.set_active(True)
+        if tooltips:
+            button.set_tooltip(tooltips, self.label)
 
-        gtk_opt.connect('activate', _option_cb, opt, option)
-        option_list.append(gtk_opt)
-    
-    option.signal_connect("enabled", _set_sensitive, gtk_option, True)
-    option.signal_connect("disabled", _set_sensitive, gtk_option, False)
+        if len(self._childs):
+            gtk_menu = gtk.Menu()
+            button.set_menu(gtk_menu)
 
-    return option_list
+            for child in self._childs:
+                if type(child) == OptionGroup:
+                    for option in child.build():
+                        option.show_all()
+                        gtk_menu.add(option)
+                else:
+                    item = child.build()
+                    item.show_all()
+                    gtk_menu.add(item)
 
-def _build_checkbox(checkbox):
-    '''build a checkbox and return it'''
-    gtk_checkbox = gtk.CheckMenuItem(checkbox.text)
-    gtk_checkbox.set_active(checkbox.toggled)
-    gtk_checkbox.connect('toggled', _checkbox_cb, checkbox)
-    
-    checkbox.signal_connect("enabled", _set_sensitive, gtk_checkbox, True)
-    checkbox.signal_connect("disabled", _set_sensitive, gtk_checkbox, False)
+        return button
 
-    return gtk_checkbox
+    def _activated_cb(self, gtk_item):
+        '''callback called when a Item is selected, emit the selected signal
+        on Item'''
+        self.selected.emit()
 
-def _build_menuitem(menuitem):
-    '''build a menu item from a gui.Menu.Item'''
-    gtk_menuitem = gtk.ImageMenuItem(menuitem.text) 
+class OptionGroup(BaseOptionGroup):
+    '''a menu item that groups MenuOptions into a radio button group'''
 
-    if menuitem.is_stock():
-        image = gtk.image_new_from_stock(
-            stock.map_stock(menuitem.image, gtk.STOCK_MISSING_IMAGE),
-            gtk.ICON_SIZE_MENU)
-        gtk_menuitem.set_image(image)
-    elif menuitem.is_image_path():
-        image = gtk.image_new_from_file(menuitem.get_image_path())
-        gtk_menuitem.set_image(image)
+    def __init__(self):
+        '''constructor'''
+        BaseOptionGroup.__init__(self)
 
-    if menuitem.accel:
-        special_keys = 0
+    def build(self):
+        '''build as a radio group, you should implement
+        this method for your toolkit'''
+        option_list = []
+        gtk_option = gtk.RadioMenuItem(None, self._childs[0].label)
+        self._childs[0].gtk_item = gtk_option
 
-        if menuitem.accel.ctrl:
-            special_keys = special_keys | gtk.gdk.CONTROL_MASK
-        if menuitem.accel.alt:
-            special_keys = special_keys | gtk.gdk.MOD1_MASK
+        gtk_option.connect('activate', self._option_cb, 0)
+        option_list.append(gtk_option)
 
-        gtk_menuitem.add_accelerator('activate', accel_group, 
-            ord(menuitem.accel.key), special_keys, gtk.ACCEL_VISIBLE)
+        for (count, opt) in enumerate(self._childs[1:]):
+            gtk_opt = gtk.RadioMenuItem(gtk_option, opt.label)
+            opt.gtk_item = gtk_opt
 
-    gtk_menuitem.connect('activate', _menu_item_cb, menuitem)
+            if opt.active:
+                gtk_opt.set_active(True)
 
-    menuitem.signal_connect("enabled", _set_sensitive, 
-        gtk_menuitem, True)
-    menuitem.signal_connect("disabled", _set_sensitive, 
-        gtk_menuitem, False)
+            gtk_opt.connect('activate', self._option_cb, count + 1)
+            option_list.append(gtk_opt)
 
-    return gtk_menuitem
+        return option_list
 
-def _menu_item_cb(gtk_mitem, mitem):
-    '''callback called when a Item is selected, emit the selected signal
-    on Item'''
-    mitem.signal_emit('selected')
+    def _option_cb(self, gtk_item, count):
+        option = self._childs[count]
+        option._active = gtk_item.get_active()
 
-def _option_cb(gtk_option, option, options):
-    '''callback selected when an option is toggled'''
-    option.toggled = gtk_option.get_active()
-    option.signal_emit('toggled', option.toggled)
+        if option.active:
+            self.toggled.emit(count)
 
-def _checkbox_cb(gtk_checkbox, checkbox):
-    '''callback called when the checbox is toggled'''
-    checkbox.toggled = gtk_checkbox.get_active()
-    checkbox.signal_emit('toggled', checkbox.toggled)
+        option.toggled.emit(option.active)
 
-def test():
-    '''test the implementation'''
-    import dialog
-    import gui.MainMenu as MainMenu
-
-    def quit_cb(item):
-        '''method called when the quit item is selected'''
-        gtk.main_quit()
-
-    def status_cb(item, stat):
-        '''method called when a status is selected'''
-        print 'status', status.STATUS[stat], 'selected'
+def __test():
+    import gtk
+    import sys
+    import gui.components
+    gui.components.Menu = sys.modules[__name__]
+    components = gui.components.Components(None)
 
     window = gtk.Window()
-    window.set_default_size(200, 200)
     window.connect('delete-event', gtk.main_quit)
     vbox = gtk.VBox()
-
-    logged_in = True
-
-    menu = MainMenu.MainMenu(dialog, None, None, None)
-    vbox.pack_start(build_menu_bar(menu), False)
-    vbox.pack_start(gtk.Label('test'), True, True)
-    vbox.pack_start(gtk.Statusbar(), False)
     window.add(vbox)
+    vbox.pack_start(components.main_menu.build_as_menu_bar())
+    vbox.pack_start(components.build_conversation_toolbar().build_as_toolbar(
+        style='only icons'))
     window.show_all()
-    menu.status_item.enabled = False
-    menu.order_option.enabled = False
-    menu.quit_item.enabled = False
-    menu.help_menu.enabled = False
-    menu.show_by_nick_option.enabled = False
     gtk.main()
 
 if __name__ == '__main__':
-    test()
+    __test()

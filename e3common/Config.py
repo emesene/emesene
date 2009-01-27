@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+'''a module that defines a session object'''
+
+#   This file is part of emesene.
+#
+#    Emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import urllib
 
 import ConfigParser
@@ -73,7 +91,7 @@ class Config(dict):
     @classmethod
     def string_to_list(cls, value):
         '''convert a properly formated string to a list'''
-        return [urllib.unquote(x.replace('%%', '%')) for x in value.split(':')]
+        return [urllib.unquote(x.replace('§', '%')) for x in value.split(':')]
 
     @classmethod
     def string_to_dict(cls, value):
@@ -90,7 +108,7 @@ class Config(dict):
     @classmethod
     def list_to_string(cls, val):
         '''convert a list of strings into a string'''
-        return ':'.join([urllib.quote(str(x)).replace('%', '%%') for x in val])
+        return ':'.join([urllib.quote(str(x)).replace('%', '§') for x in val])
 
     @classmethod
     def dict_to_string(cls, val):

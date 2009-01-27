@@ -4,7 +4,6 @@ import pango
 import gobject
 
 import gui
-import Menu
 import utils
 import TextBox
 import WebKitTextBox
@@ -287,13 +286,20 @@ class Conversation(gtk.VBox):
 
         self.panel = gtk.VPaned()
         self.header = Header()
+        self.toolbar = gui.components.build_conversation_toolbar(
+            self.session.config)
+        self.gtk_toolbar = self.toolbar.build_as_toolbar(style='only icons')
         self.output = OutputText(self.session.config)
         self.input = TextBox.InputText(self.session.config,
             self._on_send_message)
         self.info = ContactInfo()
 
+        input_box = gtk.VBox()
+        input_box.pack_start(self.gtk_toolbar, False)
+        input_box.pack_start(self.input, True, True)
+        
         self.panel.pack1(self.output, True, True)
-        self.panel.pack2(self.input, True, True)
+        self.panel.pack2(input_box, True, True)
 
         self.hbox = gtk.HBox()
         self.hbox.pack_start(self.panel, True, True)
@@ -378,9 +384,7 @@ class Conversation(gtk.VBox):
     def show_tab_menu(self):
         '''callback called when the user press a button over a widget
         chek if it's the right button and display the menu'''
-        menu_ = gui.ConversationMenu(self)
-        menu = Menu.build_pop_up(menu_)
-        menu.popup(None, None, None, 0, 0)
+        pass
 
     def _get_icon(self):
         '''return the icon that represent the current status of the

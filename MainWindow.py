@@ -4,15 +4,15 @@ import gtk
 import time
 
 import gui
-import utils
-
 import Menu
+import utils
+import e3common
+
+gui.components.Menu = Menu
+
 import dialog
 import UserPanel
 import ContactList
-import gui.MainMenu as MainMenu
-import gui.ContactMenu as ContactMenu
-import gui.GroupMenu as GroupMenu
 
 class MainWindow(gtk.VBox):
     '''this class represents the widget that is shown when the user is logged
@@ -33,15 +33,11 @@ class MainWindow(gtk.VBox):
         self.session.signals.connect('contact-attr-changed', 
             self._on_contact_attr_changed)
 
-        self._menu = MainMenu.MainMenu(dialog, self.session, self.contact_list)
-        self._menu.signal_connect('quit-selected', self._on_quit_selected)
-        self._menu.signal_connect('disconnect-selected', 
-            self._on_disconnect_selected)
-        self._menu.signal_connect('preferences-selected', 
-            self._on_preferences_selected)
-        self._menu.signal_connect('plugins-selected', self._on_plugins_selected)
-        self._menu.signal_connect('about-selected', self._on_about_selected)
-        self.menu = Menu.build_menu_bar(self._menu)
+        handler = e3common.MenuHandler(session, dialog, self.contact_list,
+            self.on_disconnect, self.on_close)
+
+        self.menu = gui.components.build_main_menu(handler, session.config)
+        self.gtk_menu = self.menu.build_as_menu_bar()
 
         self.panel = UserPanel.UserPanel(session)
         self.panel.nick.connect('text-changed', self._on_nick_changed)
@@ -53,18 +49,16 @@ class MainWindow(gtk.VBox):
         self.entry.connect('changed', self._on_entry_changed)
         self.entry.connect('key-press-event', self._on_entry_key_press)
 
-        self.pack_start(self.menu, False)
+        self.pack_start(self.gtk_menu, False)
         self.pack_start(self.panel, False)
         self.pack_start(scroll, True, True)
         self.pack_start(self.entry, False)
 
-        self.contact_list.signal_connect('contact-selected', 
-            self._on_contact_selected)
-        self.contact_list.signal_connect('contact-menu-selected', 
+        self.contact_list.contact_selected.suscribe(self._on_contact_selected)
+        self.contact_list.group_selected.suscribe(self._on_group_selected)
+        self.contact_list.contact_menu_selected.suscribe(
             self._on_contact_menu_selected)
-        self.contact_list.signal_connect('group-selected', 
-            self._on_group_selected)
-        self.contact_list.signal_connect('group-menu-selected', 
+        self.contact_list.group_menu_selected.suscribe(
             self._on_group_menu_selected)
 
         scroll.add(self.contact_list)
@@ -73,7 +67,7 @@ class MainWindow(gtk.VBox):
     def show(self):
         '''show the widget'''
         gtk.VBox.show(self)
-        self.menu.show_all()
+        self.gtk_menu.show_all()
         self.panel.show()
         self.contact_list.show()
 
@@ -87,7 +81,7 @@ class MainWindow(gtk.VBox):
             self.panel.search.set_active(False)
             entry.hide()
 
-    def _on_contact_selected(self, contact_list, contact):
+    def _on_contact_selected(self, contact):
         '''callback for the contact-selected signal'''
         cid = time.time()
         (existed, conversation) = self.on_new_conversation(
@@ -95,25 +89,18 @@ class MainWindow(gtk.VBox):
 
         if not existed:
             self.session.new_conversation(contact.account, cid)
-        
-    def _on_group_selected(self, contact_list, group):
+
+    def _on_group_selected(self, group):
         '''callback for the group-selected signal'''
         print 'group selected: ', group.name
-    
-    def _on_contact_menu_selected(self, contact_list, contact):
-        '''callback for the contact-menu-selected signal'''
-        contact_menu = ContactMenu.ContactMenu(contact, 
-            self.session, dialog)
-        menu = Menu.build_pop_up(contact_menu)
-        contact_menu.block_item.enabled = not contact.blocked
-        contact_menu.unblock_item.enabled = contact.blocked
-        menu.popup(None, None, None, 0, 0)
 
-    def _on_group_menu_selected(self, contact_list, group):
+    def _on_contact_menu_selected(self, contact):
+        '''callback for the contact-menu-selected signal'''
+        print 'contact menu', contact.account
+
+    def _on_group_menu_selected(self, group):
         '''callback for the group-menu-selected signal'''
-        group_menu = GroupMenu.GroupMenu(group, self.session, dialog)
-        menu = Menu.build_pop_up(group_menu)
-        menu.popup(None, None, None, 0, 0)
+        print 'group menu', group.name
 
     def _on_contact_attr_changed(self, protocol, args):
         '''callback called when an attribute of a contact changed'''
@@ -141,13 +128,14 @@ class MainWindow(gtk.VBox):
             self.entry.show()
             self.entry.grab_focus()
 
-    def _on_quit_selected(self, menu):
-        '''callback called when the quit option is selected'''
-        self.on_close()
-
-    def _on_disconnect_selected(self, menu):
+    def on_disconnect(self):
         '''callback called when the disconnect option is selected'''
-        pass
+        self.contact_list.contact_selected.unsuscribe(self._on_contact_selected)
+        self.contact_list.group_selected.unsuscribe(self._on_group_selected)
+        self.contact_list.contact_menu_selected.unsuscribe(
+            self._on_contact_menu_selected)
+        self.contact_list.group_menu_selected.unsuscribe(
+            self._on_group_menu_selected)
 
     def _on_preferences_selected(self, menu):
         '''callback called when the preferences option is selected'''
