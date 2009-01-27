@@ -379,7 +379,8 @@ class Conversation(gtk.VBox):
         else:
             middle = e3common.MarkupParser.escape(text)
 
-        self.output.append(first + middle + last)
+        all = first + middle + last
+        self.output.append(all)
 
     def show_tab_menu(self):
         '''callback called when the user press a button over a widget

@@ -37,6 +37,7 @@ class OutputText(gtk.ScrolledWindow):
         if not self.config or self.config.b_show_emoticons:
             text = e3common.MarkupParser.parse_emotes(text)
 
+        text = text.replace('\n', '<br/>')
         # TODO: si se llama muy rapido puede que el mensaje no aparezca
         self._textbox.execute_script(
             'add_message("%s");' % (text.replace('"', '\\"'),))
