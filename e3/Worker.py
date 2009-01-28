@@ -14,7 +14,7 @@ import mbi
 import common
 import Transfer
 import Requester
-import XmlManager 
+import XmlManager
 import Conversation
 import protocol.Worker
 import protocol.Contact
@@ -49,8 +49,10 @@ CLIENT_ID |= 0x8000  # winks
 CLIENT_ID |= 0x40000 # voice clips
 CLIENT_ID |= 0x50000000 | 0x2  # msnc5 + reset capabilities
 
+KNOWN_UNHANDLED_RESPONSES = ['PRP', 'BLP', 'CHG', 'QRY', 'GCF', 'UUX']
+
 class Worker(protocol.Worker):
-    '''this class represent an object that waits for commands from the queue 
+    '''this class represent an object that waits for commands from the queue
     of a socket, process them and add it as events to its own queue'''
 
     def __init__(self, app_name, socket, session, msn_socket_class):
@@ -72,7 +74,7 @@ class Worker(protocol.Worker):
         self.conversations = {}
         self.transfers = {}
         # contains the tid when the switchboard was requested as key and the
-        # account that should be invited when we get the switchboard as value   
+        # account that should be invited when we get the switchboard as value
         self.pending_conversations = {}
         # this list contains all the conversation ids that are not still
         # opened, it is used to store pending messages to be sent when
@@ -118,7 +120,7 @@ class Worker(protocol.Worker):
         self._common_handlers = common_handlers
 
     def run(self):
-        '''main method, block waiting for data, process it, and send data back 
+        '''main method, block waiting for data, process it, and send data back
         to the socket or add a new event to the socket depending on the data'''
         data = None
 
@@ -141,7 +143,7 @@ class Worker(protocol.Worker):
                 self.socket.send_command(cmd.command, cmd.params, cmd.payload)
             except Queue.Empty:
                 pass
-            
+
             if self.in_login:
                 continue
 
@@ -197,7 +199,7 @@ class Worker(protocol.Worker):
         hash_ = self.session.extras['hash'].split()[-1]
         template = XmlManager.get('passport',
             self.session.account.account, self.session.account.password)
-        
+
         if '@msn.com' not in self.session.account.account:
             server = "login.live.com"
             url = "/RST.srf"
@@ -249,9 +251,9 @@ class Worker(protocol.Worker):
             else:
                 succeeded = True
                 break
-        
+
         if not succeeded:
-            self.session.add_event(Event.EVENT_LOGIN_FAILED, 
+            self.session.add_event(Event.EVENT_LOGIN_FAILED,
                 'Too many redirections')
             self._on_login_failed()
 
@@ -283,8 +285,8 @@ class Worker(protocol.Worker):
 
         # log the status
         contact = self.session.contacts.me
-        account =  Logger.Account(contact.attrs.get('CID', None), None, 
-            contact.account, stat, contact.nick, contact.message, 
+        account =  Logger.Account(contact.attrs.get('CID', None), None,
+            contact.account, stat, contact.nick, contact.message,
             contact.picture)
 
         self.session.logger.log('status change', stat, str(stat), account)
@@ -297,7 +299,7 @@ class Worker(protocol.Worker):
             return False
 
         for (account, contact) in logger.accounts.iteritems():
-            new_contact = protocol.Contact(account, contact.cid, 
+            new_contact = protocol.Contact(account, contact.cid,
                 contact.nick, contact.message)
             new_contact.groups = contact.groups[:]
             self.session.contacts.contacts[account] = new_contact
@@ -329,13 +331,13 @@ class Worker(protocol.Worker):
 
     def _on_version(self, message):
         '''handle version'''
-        self.socket.send_command('CVR', 
-            ('0x0c0a', 'winnt', '5.1', 'i386', 'MSNMSGR', '8.1.0178', 
+        self.socket.send_command('CVR',
+            ('0x0c0a', 'winnt', '5.1', 'i386', 'MSNMSGR', '8.1.0178',
             'msmsgs', self.session.account.account))
 
     def _on_client_version(self, message):
         '''handle client version'''
-        self.socket.send_command('USR', ('SSO', 'I', 
+        self.socket.send_command('USR', ('SSO', 'I',
             self.session.account.account))
 
     def _on_transfer(self, message):
@@ -353,7 +355,7 @@ class Worker(protocol.Worker):
             self.socket.reconnect(host, int(port))
             self.socket.send_command('VER', ('MSNP15', 'CVR0'))
         else:
-            self.session.add_event(Event.EVENT_LOGIN_FAILED, 
+            self.session.add_event(Event.EVENT_LOGIN_FAILED,
                 'invalid XFR command')
             self._on_login_failed()
 
@@ -367,7 +369,7 @@ class Worker(protocol.Worker):
             # if returned a tuple with a signal, we return it
             if not succeed:
                 return
-            
+
             passport_id = self.session.extras['messengerclear.live.com']\
                                           ['security'].replace("&amp;" , "&")
             self.session.extras['passport id'] = passport_id
@@ -379,7 +381,7 @@ class Worker(protocol.Worker):
                 self.session.extras['t'] = ticket
                 self.session.extras['p'] = param
             except IndexError:
-                self.session.add_event(Event.EVENT_LOGIN_FAILED, 
+                self.session.add_event(Event.EVENT_LOGIN_FAILED,
                     'Incorrect passport id')
                 self._on_login_failed()
 
@@ -387,7 +389,7 @@ class Worker(protocol.Worker):
             self.socket.send_command('USR', ('SSO', 'S', \
                 passport_id, self.session.extras['mbiblob']))
         elif message.param_num_is(0, 'OK'):
-            pass       
+            pass
 
     def _on_sbs(self, message):
         '''handle (or dont) the sbs message'''
@@ -395,7 +397,7 @@ class Worker(protocol.Worker):
 
     def _on_login_failed(self):
         '''called when the login process fails, do cleanup here'''
-        self.session.logger.quit() 
+        self.session.logger.quit()
 
     def _on_login_message(self, message):
         '''handle server message on login'''
@@ -411,9 +413,9 @@ class Worker(protocol.Worker):
         self.in_login = False
         self._set_status(self.session.account.status)
         started_from_cache = self._start_from_cache()
-        Requester.Membership(self.session, self.command_queue, 
+        Requester.Membership(self.session, self.command_queue,
             True, started_from_cache).start()
-                
+
     def _on_initial_status_change(self, message):
         '''handle the first status change of the contacts, that means
         the status of the contacts that were connected before our connection'''
@@ -438,17 +440,17 @@ class Worker(protocol.Worker):
         contact.status = status_
         contact.nick = nick
         contact.attrs['msnobj'] = msnobj
-        
+
         # don't genetate an event here, because it's after the client
         # requests the contact list
 
-        self.session.logger.log('status change', status_, str(status_), 
-            Logger.Account(contact.attrs.get('CID', None), None, 
+        self.session.logger.log('status change', status_, str(status_),
+            Logger.Account(contact.attrs.get('CID', None), None,
                 contact.account, contact.status, contact.nick, contact.message,
                 contact.picture))
 
     def _on_information_change(self, message):
-        '''handle the change of the information of a contact (personal 
+        '''handle the change of the information of a contact (personal
         message)'''
         if int(message.params[0]) == 0:
             return
@@ -466,7 +468,7 @@ class Worker(protocol.Worker):
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
 
         if old_message != contact.message:
-            self.session.logger.log('message change', contact.status, 
+            self.session.logger.log('message change', contact.status,
                 contact.message, Logger.Account(contact.attrs.get('CID', None),
                     None, contact.account, contact.status, contact.nick,
                     contact.message, contact.picture))
@@ -485,9 +487,9 @@ class Worker(protocol.Worker):
 
         nick = urllib.unquote(nick)
         nick = nick.decode('utf-8', 'replace').encode('utf-8')
-        
+
         contact = self.session.contacts.contacts.get(account, None)
-        
+
         if not contact:
             return
 
@@ -499,20 +501,20 @@ class Worker(protocol.Worker):
         if params_length == 4:
             msnobj = urllib.unquote(message.params[3])
             contact.attrs['CID'] = int(message.params[2])
-        
+
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
-        account =  Logger.Account(contact.attrs.get('CID', None), None, 
-            contact.account, contact.status, contact.nick, contact.message, 
+        account =  Logger.Account(contact.attrs.get('CID', None), None,
+            contact.account, contact.status, contact.nick, contact.message,
             contact.picture)
 
         if old_status != status_:
-            self.session.logger.log('status change', status_, str(status_), 
+            self.session.logger.log('status change', status_, str(status_),
                 account)
 
         if old_nick != nick:
-            self.session.logger.log('nick change', status_, nick, 
+            self.session.logger.log('nick change', status_, nick,
                 account)
-            
+
         # TODO: here we should check the old and the new msnobj and request the
         # new image if needed
 
@@ -520,17 +522,17 @@ class Worker(protocol.Worker):
         '''handle the disconnection of a contact'''
         account = message.tid
         contact = self.session.contacts.contacts.get(account, None)
-        
+
         if not contact:
             print 'account: ', account, 'not found on contact list'
             return
 
         contact.status = status.OFFLINE
-        
+
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
         self.session.logger.log('status change', status.OFFLINE,
-            str(status.OFFLINE), 
-            Logger.Account(contact.attrs.get('CID', None), None, 
+            str(status.OFFLINE),
+            Logger.Account(contact.attrs.get('CID', None), None,
                 contact.account, contact.status, contact.nick, contact.message,
                 contact.picture))
 
@@ -549,8 +551,8 @@ class Worker(protocol.Worker):
     def _on_conversation_transfer(self, message):
         '''handle a message that inform us that we must start a new switchboard
         with a server'''
-        # XFR 10 
-        # SB 207.46.27.178:1863 CKI 212949295.5321588.019445 U 
+        # XFR 10
+        # SB 207.46.27.178:1863 CKI 212949295.5321588.019445 U
         # messenger.msn.com 1
 
         if len(message.params) == 6:
@@ -569,7 +571,7 @@ class Worker(protocol.Worker):
             self.pending_cids.remove(cid)
 
         if cid not in self.conversations:
-            con = Conversation.Conversation(self.session, cid, 
+            con = Conversation.Conversation(self.session, cid,
                 self.msn_socket_class, host, int(port), account, session_id)
             self.conversations[cid] = con
             con.send_presentation()
@@ -578,7 +580,7 @@ class Worker(protocol.Worker):
         else:
             con = self.conversations[cid]
             con.reconnect(self.msn_socket_class, host, int(port), session_id)
-    
+
         # send all the pending messages
         for message in messages:
             con.send_message(message)
@@ -603,7 +605,7 @@ class Worker(protocol.Worker):
 
     def _on_conversation_request(self, message):
         '''handle a conversation request, example
-        RNG 1581441881 64.4.37.33:1863 CKI 252199185.167235214 
+        RNG 1581441881 64.4.37.33:1863 CKI 252199185.167235214
         eltuza@gmail.com tuza U messenger.msn.com'''
         session_id = message.tid
         (chost, auth_type, auth_id, user, username, unk, server, unk2) = \
@@ -612,7 +614,7 @@ class Worker(protocol.Worker):
         (host, port) = chost.split(':')
 
         cid = time.time()
-        con = Conversation.Conversation(self.session, cid, 
+        con = Conversation.Conversation(self.session, cid,
             self.msn_socket_class, host, int(port), user, session_id, auth_id)
         self.conversations[cid] = con
         con.answer()
@@ -620,7 +622,8 @@ class Worker(protocol.Worker):
 
     def _on_unknown_command(self, message):
         '''handle the unknown commands'''
-        print 'unknown command:', str(message)
+        if message.command not in KNOWN_UNHANDLED_RESPONSES:
+            print 'unknown command:', str(message)
 
     # action handlers
     def _handle_action_add_contact(self, account):
@@ -707,7 +710,7 @@ class Worker(protocol.Worker):
         if contact is None:
             return
 
-        Requester.RemoveFromGroup(self.session, contact.identifier, 
+        Requester.RemoveFromGroup(self.session, contact.identifier,
             contact.account, gid, self.command_queue).start()
 
     def _handle_action_remove_group(self, gid):
@@ -718,7 +721,7 @@ class Worker(protocol.Worker):
     def _handle_action_rename_group(self, gid, name):
         '''handle Action.ACTION_RENAME_GROUP
         '''
-        Requester.RenameGroup(self.session, gid, name, 
+        Requester.RenameGroup(self.session, gid, name,
             self.command_queue).start()
 
     def _handle_action_set_contact_alias(self, account, alias):
@@ -743,22 +746,22 @@ class Worker(protocol.Worker):
 
         # log the change
         contact = self.session.contacts.me
-        account =  Logger.Account(contact.attrs.get('CID', None), None, 
-            contact.account, contact.status, contact.nick, message, 
+        account =  Logger.Account(contact.attrs.get('CID', None), None,
+            contact.account, contact.status, contact.nick, message,
             contact.picture)
 
-        self.session.logger.log('message change', contact.status, message, 
+        self.session.logger.log('message change', contact.status, message,
             account)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK
         '''
         contact = self.session.contacts.me
-        account =  Logger.Account(contact.attrs.get('CID', None), None, 
-            contact.account, contact.status, nick, contact.message, 
+        account =  Logger.Account(contact.attrs.get('CID', None), None,
+            contact.account, contact.status, nick, contact.message,
             contact.picture)
 
-        Requester.ChangeNick(self.session, nick, account, 
+        Requester.ChangeNick(self.session, nick, account,
             self.command_queue).start()
 
     def _handle_action_set_picture(self, picture_name):
@@ -804,9 +807,9 @@ class Worker(protocol.Worker):
             if cid in self.pending_cids:
                 self.pending_messages[cid].append(message)
             else:
-                self.session.add_event(Event.EVENT_ERROR, 
+                self.session.add_event(Event.EVENT_ERROR,
                     'invalid conversation id')
-        else:    
+        else:
             conversation = self.conversations[cid]
 
             if conversation.status == Conversation.Conversation.STATUS_CLOSED:
@@ -820,8 +823,8 @@ class Worker(protocol.Worker):
     def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
         '''handle Action.ACTION_P2P_INVITE,
          cid is the conversation id
-         pid is the p2p session id, both are numbers that identify the 
-            conversation and the session respectively, time.time() is 
+         pid is the p2p session id, both are numbers that identify the
+            conversation and the session respectively, time.time() is
             recommended to be used.
          dest is the destination account
          type_ is one of the protocol.Transfer.TYPE_* constants
@@ -863,7 +866,7 @@ class Worker(protocol.Worker):
 # Copyright 2005 James Bunton <james@delx.cjb.net>
 # Licensed for distribution under the GPL version 2, check COPYING for details
 _PRODUCT_KEY = 'O4BG@C7BWLYQX?5G'
-_PRODUCT_ID = 'PROD01065C%ZFN6F' 
+_PRODUCT_ID = 'PROD01065C%ZFN6F'
 MSNP11_MAGIC_NUM = 0x0E79A9C1
 
 def do_challenge(challenge_data):
@@ -909,14 +912,14 @@ def do_challenge(challenge_data):
     longs = [littleendify(x, "Q") for x in longs]
     longs = [x ^ key for x in longs]
     longs = [littleendify(abs(x), "Q") for x in longs]
-    
+
     out = ""
     for long_ in longs:
         long_ = hex(long(long_))
         long_ = long_[2:-1]
         long_ = long_.zfill(16)
         out += long_.lower()
-    
+
     return out
 
 def littleendify(num, ccc="L"):

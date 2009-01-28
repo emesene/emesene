@@ -8,7 +8,8 @@ import status as pstatus
 class Account(object):
     '''a class to store account data'''
 
-    def __init__(self, id_, id_account, account, status, nick='', message='', path='', cid=None):
+    def __init__(self, id_, id_account, account, status, nick='', message='',
+        path='', cid=None):
         '''constructor'''
         self.id = id_
         self.id_account = id_account
@@ -21,7 +22,7 @@ class Account(object):
         self.groups = []
 
     def equals(self, id_account, account, nick, message, path):
-        '''return True if all the fields except the id and the status are 
+        '''return True if all the fields except the id and the status are
         equals
         '''
         if self.id_account == id_account and self.account == account and \
@@ -124,7 +125,7 @@ class Logger(object):
           id_dest_info INTEGER,
           id_src_acc INTEGER,
           id_dest_acc INTEGER,
-          
+
           status INTEGER,
           payload TEXT,
           tmstp FLOAT
@@ -150,12 +151,12 @@ class Logger(object):
     '''
 
     INSERT_INFO = '''
-        INSERT INTO d_info(id_info, id_account, nick, message, path) 
+        INSERT INTO d_info(id_info, id_account, nick, message, path)
         VALUES(NULL, ?, ?, ?, ?);
     '''
 
     INSERT_ACCOUNT = '''
-        INSERT INTO d_account(id_account, account, cid, enabled) 
+        INSERT INTO d_account(id_account, account, cid, enabled)
         VALUES(NULL, ?, ?, ?);
     '''
 
@@ -168,14 +169,14 @@ class Logger(object):
     '''
 
     INSERT_FACT_EVENT = '''
-        INSERT INTO fact_event(id_time, id_event, id_src_info, id_dest_info, 
-            id_src_acc, id_dest_acc, status, payload, tmstp) 
+        INSERT INTO fact_event(id_time, id_event, id_src_info, id_dest_info,
+            id_src_acc, id_dest_acc, status, payload, tmstp)
         VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
     '''
 
     INSERT_LAST_ACCOUNT = '''
-        INSERT INTO last_account(id_info, id_account, account, status, nick, 
-            message, path) 
+        INSERT INTO last_account(id_info, id_account, account, status, nick,
+            message, path)
         VALUES(?, ?, ?, ?, ?, ?, ?);
     '''
 
@@ -185,8 +186,8 @@ class Logger(object):
     '''
 
     UPDATE_LAST_ACCOUNT = '''
-        UPDATE last_account SET id_info=?, id_account=?, status=?, nick=?, 
-            message=?, path=? 
+        UPDATE last_account SET id_info=?, id_account=?, status=?, nick=?,
+            message=?, path=?
         WHERE account=?;
     '''
 
@@ -199,7 +200,7 @@ class Logger(object):
     '''
 
     SELECT_LAST_ACCOUNTS = '''
-        SELECT id_info, id_account, account, status, nick, message, path 
+        SELECT id_info, id_account, account, status, nick, message, path
         FROM last_account
     '''
 
@@ -212,36 +213,36 @@ class Logger(object):
     '''
 
     SELECT_ACCOUNT_EVENT = '''
-        SELECT status, tmstp, payload from fact_event 
-        WHERE id_event=? and id_src_acc=?  
+        SELECT status, tmstp, payload from fact_event
+        WHERE id_event=? and id_src_acc=?
         ORDER BY tmstp LIMIT ?;
     '''
 
     SELECT_ACCOUNT_BY_GROUP = '''
-        SELECT a.cid, a.account, g.gid 
+        SELECT a.cid, a.account, g.gid
         FROM d_account a, t_group g, account_by_group b
         WHERE a.id_account = b.id_account AND
           g.id_group = b.id_group;
     '''
 
     DELETE_ACCOUNT_BY_GROUP = '''
-        DELETE FROM account_by_group 
+        DELETE FROM account_by_group
         WHERE id_account=? AND id_group=?
     '''
 
     SELECT_SENT_MESSAGES = '''
-        SELECT f.tmstp, f.payload 
+        SELECT f.tmstp, f.payload
         FROM fact_event f
-        WHERE f.id_event=? and f.id_src_acc=? and 
-            id_dest_acc=? 
+        WHERE f.id_event=? and f.id_src_acc=? and
+            id_dest_acc=?
         ORDER BY tmstp LIMIT ?;
     '''
 
     SELECT_CHATS = '''
-        SELECT f.status, f.tmstp, f.payload, i.nick 
-        FROM fact_event f, d_info i 
-        WHERE f.id_event=? and 
-            ((f.id_src_acc=? and id_dest_acc=?) or 
+        SELECT f.status, f.tmstp, f.payload, i.nick
+        FROM fact_event f, d_info i
+        WHERE f.id_event=? and
+            ((f.id_src_acc=? and id_dest_acc=?) or
             (f.id_dest_acc=? and id_src_acc=?)) and
             f.id_src_info = i.id_info
         ORDER BY tmstp LIMIT ?;
@@ -290,7 +291,7 @@ class Logger(object):
 
         for (id_info, id_account, account, status, nick, message, path) in \
                 self.cursor.fetchall():
-            self.accounts[account] = Account(id_info, id_account, account, 
+            self.accounts[account] = Account(id_info, id_account, account,
                 status, nick, message, path)
 
     def _load_events(self):
@@ -325,7 +326,7 @@ class Logger(object):
 
     def insert_time(self, year, month, day, wday, hour, minute, seconds):
         '''insert a row into the d_time table, returns the id'''
-        self.execute(Logger.INSERT_TIME, 
+        self.execute(Logger.INSERT_TIME,
             (year, month, day, wday, hour, minute, seconds))
 
         self._stat()
@@ -333,15 +334,15 @@ class Logger(object):
         return self.cursor.lastrowid
 
     def insert_time_now(self):
-        '''insert a row into the d_time table with the time information of 
+        '''insert a row into the d_time table with the time information of
         this moment, returns the id'''
         (year, month, day, hour, minute, seconds, wday, yday, tm_isdst) = \
             time.gmtime()
 
-        return self.insert_time(year, month, day, wday, hour, minute, 
+        return self.insert_time(year, month, day, wday, hour, minute,
             seconds)
 
-    def insert_info(self, account, cid, status, nick, message, path): 
+    def insert_info(self, account, cid, status, nick, message, path):
         '''insert a row into the d_account table, returns the id'''
 
         exists = False
@@ -351,7 +352,6 @@ class Logger(object):
             acc = self.accounts[account]
             if acc.equals(acc.id_account, account, nick, message, path) and \
                 acc.id_account:
-                print account, 'exists'
                 return (acc.id, acc.id_account)
 
         id_account = self.insert_account(account, cid, True)
@@ -360,7 +360,7 @@ class Logger(object):
             (id_account, unicode(nick), unicode(message), unicode(path)))
 
         id_info = self.cursor.lastrowid
-        self.accounts[account] = Account(id_info, id_account, account, 
+        self.accounts[account] = Account(id_info, id_account, account,
             status, nick, message, path)
 
         if exists:
@@ -379,11 +379,11 @@ class Logger(object):
         if account in self.accounts and self.accounts[account].id_account:
             return self.accounts[account].id_account
 
-        self.execute(Logger.INSERT_ACCOUNT, (unicode(account), unicode(cid), 
+        self.execute(Logger.INSERT_ACCOUNT, (unicode(account), unicode(cid),
             int(enabled)))
         id_account = self.cursor.lastrowid
 
-        self.accounts[account] = Account(0, id_account, account, 
+        self.accounts[account] = Account(0, id_account, account,
             0, account, '', '')
 
         self._stat()
@@ -395,7 +395,7 @@ class Logger(object):
         if gid in self.groups and self.groups[gid].id:
             return self.groups[gid].id
 
-        self.execute(Logger.INSERT_GROUP, (unicode(name), unicode(gid), 
+        self.execute(Logger.INSERT_GROUP, (unicode(name), unicode(gid),
             int(enabled)))
         id_ = self.cursor.lastrowid
 
@@ -422,7 +422,7 @@ class Logger(object):
     def insert_fact_event(self, id_time, id_event, id_src_info, id_dest_info,
             id_src_acc, id_dest_acc, status, payload, timestamp):
         '''insert a row into the fact_event table, returns the id'''
-        self.execute(Logger.INSERT_FACT_EVENT, 
+        self.execute(Logger.INSERT_FACT_EVENT,
             (id_time, id_event, id_src_info, id_dest_info, id_src_acc,
                 id_dest_acc, status, unicode(payload), timestamp))
 
@@ -430,20 +430,20 @@ class Logger(object):
 
         return self.cursor.lastrowid
 
-    def insert_last_account(self, id_info, id_account, account, status, nick, 
+    def insert_last_account(self, id_info, id_account, account, status, nick,
         message, path):
         '''insert a row into the d_account table, returns the id'''
         self.execute(Logger.INSERT_LAST_ACCOUNT,
-            (id_info, id_account, unicode(account), status, unicode(nick), 
+            (id_info, id_account, unicode(account), status, unicode(nick),
                 unicode(message), unicode(path)))
 
         self._stat()
 
-    def update_last_account(self, id_info, id_account, account, status, nick, 
+    def update_last_account(self, id_info, id_account, account, status, nick,
         message, path):
         '''update a row into the last_account table'''
         self.execute(Logger.UPDATE_LAST_ACCOUNT,
-            (id_info, id_account, status, unicode(nick), unicode(message), 
+            (id_info, id_account, status, unicode(nick), unicode(message),
                 unicode(path), unicode(account)))
 
         self._stat()
@@ -501,7 +501,7 @@ class Logger(object):
             src.status, src.nick, src.message, src.path)
 
         if dest:
-            (id_dest_info, id_dest_acc) = self.insert_info(dest.account, 
+            (id_dest_info, id_dest_acc) = self.insert_info(dest.account,
                 dest.id, dest.status, dest.nick, dest.message, dest.path)
         else:
             id_dest_info = None
@@ -510,7 +510,7 @@ class Logger(object):
         id_time = self.insert_time_now()
         timestamp = time.time()
 
-        self.insert_fact_event(id_time, id_event, id_src_info, id_dest_info, 
+        self.insert_fact_event(id_time, id_event, id_src_info, id_dest_info,
             id_src_acc, id_dest_acc, status, payload, timestamp)
 
     def close(self):
@@ -520,7 +520,7 @@ class Logger(object):
         self.connection.close()
 
     def get_event(self, account, event, limit):
-        '''return the last # events of account, if event or account doesnt 
+        '''return the last # events of account, if event or account doesnt
         exist return None'''
 
         if account not in self.accounts:
@@ -570,13 +570,13 @@ class Logger(object):
         if id_event is None:
             return None
 
-        self.execute(Logger.SELECT_SENT_MESSAGES, (id_event, id_src, id_dest, 
+        self.execute(Logger.SELECT_SENT_MESSAGES, (id_event, id_src, id_dest,
             limit))
 
         return self.cursor.fetchall()
 
     def get_chats(self, src, dest, limit):
-        '''return the last # sent from src to dest or from dest to src , 
+        '''return the last # sent from src to dest or from dest to src ,
         where # is the limit value
         '''
         id_event = self.events.get('message', None)
@@ -590,7 +590,7 @@ class Logger(object):
         if id_event is None:
             return None
 
-        self.execute(Logger.SELECT_CHATS, (id_event, id_src, id_dest, id_src, 
+        self.execute(Logger.SELECT_CHATS, (id_event, id_src, id_dest, id_src,
             id_dest, limit))
 
         return self.cursor.fetchall()
@@ -599,9 +599,9 @@ class Logger(object):
         '''add all groups to the database'''
         existing = set(self.groups.keys())
         to_include = set(groups.keys())
-        new_groups = to_include.difference(existing)  
+        new_groups = to_include.difference(existing)
         common = existing.intersection(to_include)
-        removed = existing.difference(to_include) 
+        removed = existing.difference(to_include)
 
         for gid in new_groups:
             group = groups[gid]
@@ -615,14 +615,14 @@ class Logger(object):
         '''add all contacts to the database'''
         existing = set(self.accounts.keys())
         to_include = set(accounts.keys())
-        new_accounts = to_include.difference(existing)  
+        new_accounts = to_include.difference(existing)
         common = existing.intersection(to_include)
-        removed = existing.difference(to_include) 
-        
+        removed = existing.difference(to_include)
+
         for acc in new_accounts:
             account = accounts[acc]
             cid = account.attrs.get('CID', None)
-            self.insert_info(acc, cid, pstatus.OFFLINE, '', '', '') 
+            self.insert_info(acc, cid, pstatus.OFFLINE, '', '', '')
 
         for acc in removed:
             account = self.accounts[acc]
@@ -648,13 +648,13 @@ class Logger(object):
             removed = existing.difference(to_include)
 
             for gid in new_groups:
-                local_group = self.groups[gid]    
+                local_group = self.groups[gid]
 
                 if gid not in local_account.groups:
                     self.insert_account_by_group(local_account.id_account, local_group.id)
 
             for gid in removed:
-                local_group = self.groups[gid]    
+                local_group = self.groups[gid]
                 local_account.groups.remove(gid)
                 self.delete_account_by_group(local_account.id_account, local_group.id)
 
@@ -722,12 +722,12 @@ class LoggerProcess(threading.Thread):
             #except Exception, e:
             #    print 'error calling action', action, 'on LoggerProcess'
             #    print e
-        
+
         return False
 
     def check(self):
         '''call this method from the main thread if you dont want to have
-        problems with threads, it will extract the results and call the 
+        problems with threads, it will extract the results and call the
         callback that was passed to the get_* call'''
 
         try:
@@ -748,7 +748,7 @@ class LoggerProcess(threading.Thread):
         self.input.put(('quit', None))
 
     def get_event(self, account, event, limit, callback):
-        '''return the last # events of account, if event or account doesnt 
+        '''return the last # events of account, if event or account doesnt
         exist return None'''
         self.input.put(('get_event', (account, event, limit, callback)))
 
@@ -777,7 +777,7 @@ class LoggerProcess(threading.Thread):
         self.input.put(('get_sent_messages', (src, dest, limit, callback)))
 
     def get_chats(self, src, dest, limit, callback):
-        '''return the last # sent from src to dest or from dest to src , 
+        '''return the last # sent from src to dest or from dest to src ,
         where # is the limit value
         '''
         self.input.put(('get_chats', (src, dest, limit, callback)))
@@ -802,7 +802,7 @@ def test():
     import string
 
     import status
-    
+
     logger = Logger(os.path.expanduser('~/logger_test.db'))
 
     accounts = {}
@@ -828,7 +828,7 @@ def test():
         '''return a random account'''
         domains = ('hotmail.com', 'live.com', 'gmail.com')
         users = ('bob', 'melinda', 'steve', 'linus', 'bill')
-    
+
         return '@'.join((random.choice(users), random.choice(domains)))
 
     def get_status():

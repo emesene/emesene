@@ -121,16 +121,6 @@ def _build_options_menu(options_menu=None, config=None):
     plugins = Menu.MenuItem('Plug_ins',
         Menu.Image(stock.CONNECT, Menu.Image.TYPE_STOCK))
 
-    if options_menu:
-        order_by_group.toggled.suscribe(
-            options_menu.on_order_by_group_toggled)
-        order_by_status.toggled.suscribe(
-            options_menu.on_order_by_status_toggled)
-        show_offline.toggled.suscribe(options_menu.on_show_offline_toggled)
-        show_empty_groups.toggled.suscribe(
-            options_menu.on_show_empty_groups_toggled)
-        show_blocked.toggled.suscribe(options_menu.on_show_blocked_toggled)
-
     options_mi.add_child(order_option)
     options_mi.add_child(Menu.MenuItem('-'))
     options_mi.add_child(show_offline)
@@ -140,31 +130,38 @@ def _build_options_menu(options_menu=None, config=None):
     options_mi.add_child(preferences)
     options_mi.add_child(plugins)
 
-    if config is None:
-        return options_mi
+    if config is not None:
+        if config.b_order_by_group is None:
+            config.b_order_by_group = True
 
-    if config.b_order_by_group is None:
-        config.b_order_by_group = True
+        if config.b_show_nick is None:
+            config.b_show_nick = True
 
-    if config.b_show_nick is None:
-        config.b_show_nick = True
+        if config.b_show_empty_groups is None:
+            config.b_show_empty_groups = False
 
-    if config.b_show_empty_groups is None:
-        config.b_show_empty_groups = False
+        if config.b_show_offline is None:
+            config.b_show_offline = False
 
-    if config.b_show_offline is None:
-        config.b_show_offline = False
+        if config.b_show_blocked is None:
+            config.b_show_blocked = False
 
-    if config.b_show_blocked is None:
-        config.b_show_blocked = False
+        order_by_group.active = config.b_order_by_group
+        order_by_status.active = not order_by_group.active
 
-    order_by_status.active = not config.b_order_by_group
-    order_by_group.active = config.b_order_by_group
-
-    show_offline.active = config.b_show_offline
-    show_empty_groups.active = config.b_show_empty_groups
-    show_blocked.active = config.b_show_blocked
+        show_offline.active = config.b_show_offline
+        show_empty_groups.active = config.b_show_empty_groups
+        show_blocked.active = config.b_show_blocked
      
+    if options_menu:
+        order_by_group.toggled.suscribe(
+            options_menu.on_order_by_group_toggled)
+        order_by_status.toggled.suscribe(
+            options_menu.on_order_by_status_toggled)
+        show_offline.toggled.suscribe(options_menu.on_show_offline_toggled)
+        show_empty_groups.toggled.suscribe(
+            options_menu.on_show_empty_groups_toggled)
+        show_blocked.toggled.suscribe(options_menu.on_show_blocked_toggled)
 
     return options_mi
 

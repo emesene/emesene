@@ -222,22 +222,33 @@ class OptionGroup(BaseOptionGroup):
         '''build as a radio group, you should implement
         this method for your toolkit'''
         option_list = []
-        gtk_option = gtk.RadioMenuItem(None, self._childs[0].label)
-        self._childs[0].gtk_item = gtk_option
+        first = self._childs[0]
+        gtk_option = gtk.RadioMenuItem(None, first.label)
+        first.gtk_item = gtk_option
 
         gtk_option.connect('activate', self._option_cb, 0)
-        gtk_option.set_active(True)
+
+        active_set = False
+        if first.active:
+            gtk_option.set_active(True)
+            active_set = True
+
         option_list.append(gtk_option)
 
         for (count, opt) in enumerate(self._childs[1:]):
             gtk_opt = gtk.RadioMenuItem(gtk_option, opt.label)
             opt.gtk_item = gtk_opt
+            gtk_opt.connect('activate', self._option_cb, count + 1)
 
             if opt.active:
                 gtk_opt.set_active(True)
+                active_set = True
 
-            gtk_opt.connect('activate', self._option_cb, count + 1)
             option_list.append(gtk_opt)
+
+        if not active_set:
+            first.active = True
+            gtk_option.set_active(True)
 
         return option_list
 

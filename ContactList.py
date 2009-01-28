@@ -252,7 +252,6 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         group_data = (None, group, self.format_group(group), False, None,
             weight)
-        print 'updating group', group.name, group_data[2]
 
         for row in self._model:
             obj = row[1]

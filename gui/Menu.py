@@ -63,13 +63,12 @@ class MenuOption(object):
         to make it reflect the value on the widget'''
         self._set_active(active)
 
+    active = property(__get_active, __set_active)
+
     def _set_active(self, active):
         '''set the value of active, you must implement it on your toolkit
         to make it reflect the value on the widget'''
         raise NotImplementedError("Not implemented")
-
-    active = property(fget=__get_active, fset=__set_active)
-
 
 
 class MenuItem(object):

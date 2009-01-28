@@ -23,7 +23,7 @@ def build_role(account, role, key, add=True):
         action = 'http://www.msn.com/webservices/AddressBook/DeleteMember'
         body = XmlManager.get('deletemember', key, role, account)
 
-    return Request(action, 'omega.contacts.msn.com', 443, 
+    return Request(action, 'omega.contacts.msn.com', 443,
         '/abservice/SharingService.asmx', body)
 
 def get_key(session):
@@ -43,7 +43,7 @@ class Request(object):
 
 class Response(object):
     '''a class that represents a response'''
-    
+
     def __init__(self, body, status, reason):
         '''class constructor'''
         self.body = body
@@ -71,18 +71,18 @@ class BaseRequester(threading.Thread):
             'Connection': 'Keep-Alive',
             'Cache-Control': 'no-cache',
         }
-        
+
         #print headers
         conn = None
-        
+
         if request.port == 443:
-            conn = httplib.HTTPSConnection(request.host, request.port)  
+            conn = httplib.HTTPSConnection(request.host, request.port)
         else:
             conn = httplib.HTTPConnection(request.host, request.port)
-        
+
         conn.request('POST', request.path, request.body, headers)
         conn_response = conn.getresponse()
-        
+
         response = Response(conn_response.read(), conn_response.status,
             conn_response.reason)
 
@@ -112,10 +112,10 @@ class Requester(BaseRequester):
 
 class TwoStageRequester(BaseRequester):
     '''a class that does two request sequentially, if the first request fails
-    then the second request doesn't run, if the second request fails 
+    then the second request doesn't run, if the second request fails
     a fallback is ran'''
 
-    def __init__(self, session, command_queue, first_req, second_req, 
+    def __init__(self, session, command_queue, first_req, second_req,
         fallback_req=None):
         '''class constructor'''
         BaseRequester.__init__(self, session)
@@ -175,7 +175,7 @@ class Membership(Requester):
         by the worker to get commands that other threads need to be
         sent, if on_login is true, then some commands need to be
         sent in order to inform the server about our contacts'''
-        Requester.__init__(self, session, 
+        Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/FindMembership',
           'contacts.msn.com', 443, '/abservice/SharingService.asmx',
           XmlManager.get('membership', get_key(session)))
@@ -203,7 +203,7 @@ class Membership(Requester):
                             contact = self.session.contacts.contacts[email]
                         else:
                             contact = Contact(email)
-                            
+
                             if role == 'Pending':
                                 self.session.contacts.pending[email] = contact
                             elif role == 'Reverse':
@@ -226,13 +226,13 @@ class Membership(Requester):
 
                     except Exception, error:
                         print 'exception in membership requester: ', str(error)
-                    
-            DynamicItems(self.session, self.command_queue, 
+
+            DynamicItems(self.session, self.command_queue,
                 self.on_login, self.started_from_cache).start()
         else:
             print 'error requesting membership', response.status
             print response.body
-        
+
 class DynamicItems(Requester):
     '''make the request to get the dynamic items'''
     def __init__(self, session, command_queue, on_login, started_from_cache):
@@ -304,7 +304,7 @@ class DynamicItems(Requester):
 
                 contact.attrs['space'] = \
                     contact_dict.get('hasSpace', None) == 'true'
-                
+
             print 'dynamic finished'
 
             # get our nick
@@ -321,7 +321,7 @@ class DynamicItems(Requester):
 
             if self.on_login:
                 # set our nick
-                self.command_queue.put(Command('PRP', params=('MFN', 
+                self.command_queue.put(Command('PRP', params=('MFN',
                     urllib.quote(nick))))
                 self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, nick)
 
@@ -341,7 +341,7 @@ class AddContact(Requester):
     '''make the request to add a contact to the contact list'''
     def __init__(self, session, account, command_queue):
         '''command_queue is a reference to a queue that is used
-        by the worker to get commands that other threads need to 
+        by the worker to get commands that other threads need to
         send'''
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABContactAdd',
@@ -354,13 +354,13 @@ class AddContact(Requester):
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
-            self.command_queue.put(Command('ADL', 
+            self.command_queue.put(Command('ADL',
                 payload=common.build_adl(self.account, 1)))
-            self.command_queue.put(Command('ADL', 
+            self.command_queue.put(Command('ADL',
                 payload=common.build_adl(self.account, 2)))
 
             self.session.contacts.contacts[self.account] = Contact(self.account)
-            self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, 
+            self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED,
                 self.account)
         else:
             self.session.add_event(Event.EVENT_CONTACT_ADD_FAILED, self.account)
@@ -369,7 +369,7 @@ class RemoveContact(Requester):
     '''make the request to remove a contact from the contact list'''
     def __init__(self, session, cid, account, command_queue):
         '''command_queue is a reference to a queue that is used
-        by the worker to get commands that other threads need to 
+        by the worker to get commands that other threads need to
         send'''
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABContactDelete',
@@ -386,18 +386,18 @@ class RemoveContact(Requester):
             if self.account in self.session.contacts.contacts:
                 del self.session.contacts.contacts[self.account]
 
-            self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED, 
+            self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED,
                 self.account)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.add_event(Event.EVENT_CONTACT_REMOVE_FAILED, 
+            self.session.add_event(Event.EVENT_CONTACT_REMOVE_FAILED,
                 self.account)
 
 class ChangeNick(Requester):
     '''make the request to change the nick on the server'''
     def __init__(self, session, nick, account, command_queue):
         '''command_queue is a reference to a queue that is used
-        by the worker to get commands that other threads need to 
+        by the worker to get commands that other threads need to
         send'''
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABContactUpdate',
@@ -411,12 +411,12 @@ class ChangeNick(Requester):
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
-            self.command_queue.put(Command('PRP', params=('MFN', 
+            self.command_queue.put(Command('PRP', params=('MFN',
                 urllib.quote(self.nick))))
             self.session.contacts.me.nick = self.nick
-            self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, 
+            self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED,
                self.nick)
-            self.session.logger.log('nick change', self.account.status, 
+            self.session.logger.log('nick change', self.account.status,
                 self.nick, self.account)
         else:
             print '\n', response.body, '\n', request.body, '\n'
@@ -426,7 +426,7 @@ class ChangeAlias(Requester):
     '''make the request to change the alias on the server'''
     def __init__(self, session, cid, account, alias, command_queue):
         '''command_queue is a reference to a queue that is used
-        by the worker to get commands that other threads need to 
+        by the worker to get commands that other threads need to
         send'''
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABContactUpdate',
@@ -452,7 +452,7 @@ class AddGroup(Requester):
     '''make the request to add a group'''
     def __init__(self, session, name, command_queue):
         '''command_queue is a reference to a queue that is used
-        by the worker to get commands that other threads need to 
+        by the worker to get commands that other threads need to
         send'''
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupAdd',
@@ -468,7 +468,7 @@ class AddGroup(Requester):
             gid = common.get_value_between(response.body, '<guid>', '</guid>')
             self.session.groups[gid] = Group(self.name, gid)
 
-            self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, 
+            self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED,
                 self.name, gid)
         else:
             print '\n', response.body, '\n', request.body, '\n'
@@ -478,7 +478,7 @@ class RemoveGroup(Requester):
     '''make the request to remove a group'''
     def __init__(self, session, gid, command_queue):
         '''command_queue is a reference to a queue that is used
-        by the worker to get commands that other threads need to 
+        by the worker to get commands that other threads need to
         send'''
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupDelete', \
@@ -503,7 +503,7 @@ class RenameGroup(Requester):
     '''make the request to rename a group'''
     def __init__(self, session, gid, name, command_queue):
         '''command_queue is a reference to a queue that is used
-        by the worker to get commands that other threads need to 
+        by the worker to get commands that other threads need to
         send'''
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupUpdate', \
@@ -530,7 +530,7 @@ class AddToGroup(Requester):
     '''add a contact to a group'''
     def __init__(self, session, cid, account, gid, command_queue):
         '''command_queue is a reference to a queue that is used
-        by the worker to get commands that other threads need to 
+        by the worker to get commands that other threads need to
         send'''
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupContactAdd',
@@ -559,7 +559,7 @@ class RemoveFromGroup(Requester):
     '''remove a contact from a group'''
     def __init__(self, session, cid, account, gid, command_queue):
         '''command_queue is a reference to a queue that is used
-        by the worker to get commands that other threads need to 
+        by the worker to get commands that other threads need to
         send'''
         Requester.__init__(self, session,
           'http://www.msn.com/webservices/AddressBook/ABGroupContactDelete',
@@ -581,11 +581,11 @@ class RemoveFromGroup(Requester):
                 self.session.contacts.contacts[self.account].groups\
                     .remove(self.gid)
 
-            self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, 
+            self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED,
                 self.gid, self.cid)
         else:
             print '\n', response.body, '\n', request.body, '\n'
-            self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_FAILED, 
+            self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_FAILED,
                 self.gid, self.cid)
 
 class BlockContact(TwoStageRequester):
@@ -601,7 +601,7 @@ class BlockContact(TwoStageRequester):
 
     def _on_first_succeed(self, response):
         '''handle the first request if succeeded'''
-        self.command_queue.put(Command('RML', 
+        self.command_queue.put(Command('RML',
             payload=common.build_adl(self.account, 2)))
 
     def _on_first_failed(self, response):
@@ -610,7 +610,7 @@ class BlockContact(TwoStageRequester):
 
     def _on_second_succeed(self, response):
         '''handle the second request if succeeded'''
-        self.command_queue.put(Command('ADL', 
+        self.command_queue.put(Command('ADL',
             payload=common.build_adl(self.account, 4)))
 
         self.session.contacts.contacts[self.account].blocked = True
@@ -619,7 +619,7 @@ class BlockContact(TwoStageRequester):
 
     def _on_second_failed(self, response):
         '''handle the second request if failed'''
-        self.command_queue.put(Command('ADL', 
+        self.command_queue.put(Command('ADL',
             payload=common.build_adl(self.account, 2)))
         self.session.add_event(Event.EVENT_CONTACT_BLOCK_FAILED, self.account)
 
@@ -636,7 +636,7 @@ class UnblockContact(TwoStageRequester):
 
     def _on_first_succeed(self, response):
         '''handle the first request if succeeded'''
-        self.command_queue.put(Command('RML', 
+        self.command_queue.put(Command('RML',
             payload=common.build_adl(self.account, 4)))
 
     def _on_first_failed(self, response):
@@ -645,7 +645,7 @@ class UnblockContact(TwoStageRequester):
 
     def _on_second_succeed(self, response):
         '''handle the second request if succeeded'''
-        self.command_queue.put(Command('ADL', 
+        self.command_queue.put(Command('ADL',
             payload=common.build_adl(self.account, 2)))
 
         self.session.contacts.contacts[self.account].blocked = False
@@ -655,7 +655,7 @@ class UnblockContact(TwoStageRequester):
 
     def _on_second_failed(self, response):
         '''handle the second request if failed'''
-        self.command_queue.put(Command('ADL', 
+        self.command_queue.put(Command('ADL',
             payload=common.build_adl(self.account, 4)))
         self.session.add_event(Event.EVENT_CONTACT_UNBLOCK_FAILED, self.account)
 
@@ -667,7 +667,7 @@ class MoveContact(TwoStageRequester):
             Request(\
               'http://www.msn.com/webservices/AddressBook/ABGroupContactAdd',
               'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-              XmlManager.get('moveusertogroup', get_key(session), dest_gid, 
+              XmlManager.get('moveusertogroup', get_key(session), dest_gid,
                  cid)),
             Request(\
               'http://www.msn.com/webservices/AddressBook/ABGroupContactDelete',
@@ -677,7 +677,7 @@ class MoveContact(TwoStageRequester):
             Request(\
               'http://www.msn.com/webservices/AddressBook/ABGroupContactDelete',
               'omega.contacts.msn.com', 443, '/abservice/abservice.asmx',
-              XmlManager.get('deleteuserfromgroup', get_key(session), cid, 
+              XmlManager.get('deleteuserfromgroup', get_key(session), cid,
                 dest_gid)))
 
         self.src_gid = src_gid
