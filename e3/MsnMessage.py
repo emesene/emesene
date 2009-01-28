@@ -10,8 +10,8 @@ class Message(protocol.Message):
         protocol.Message.__init__(self, type_, body, account, style)
 
         if style:
-            self.style = Style(style.font, style.color, style.bold, style.italic, 
-                style.underline, style.strike)
+            self.style = Style(style.font, style.color, style.bold, 
+                style.italic, style.underline, style.strike)
         else:
             self.style = Style()
 
@@ -142,6 +142,9 @@ class Style(protocol.Style):
         if self.strike:
             effects += 'S'
 
+        color = self.color.to_hex()
+        color = color[4:6] + color[2:4] + color[0:2]
+
         return 'FN=%s; EF=%s; CO=%s; PF=0;RL=0' % (urllib.quote(self.font),
-            effects, self.color.to_hex())
+            effects, color)
 

@@ -260,7 +260,7 @@ class Worker(protocol.Worker):
 
     def _handle_action_send_message(self, cid, message):
         '''handle Action.ACTION_SEND_MESSAGE
-        cid is the conversation id, message is a MsnMessage object
+        cid is the conversation id, message is a Message object
         '''
 
         recipients = self.rconversations.get(cid, ())

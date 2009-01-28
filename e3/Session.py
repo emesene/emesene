@@ -26,3 +26,8 @@ class Session(protocol.Session):
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, account, style)
         self.add_action(Action.ACTION_SEND_MESSAGE, (cid, message))
 
+    def request_attention(self, cid):
+        '''send a nudge message'''
+        account = self.account.account
+        message = e3.Message(e3.Message.TYPE_NUDGE, None, account)
+        self.add_action(Action.ACTION_SEND_MESSAGE, (cid, message))

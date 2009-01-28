@@ -274,7 +274,7 @@ class Conversation(gtk.VBox):
         input_box = gtk.VBox()
         input_box.pack_start(self.gtk_toolbar, False)
         input_box.pack_start(self.input, True, True)
-        
+
         self.panel.pack1(self.output, True, True)
         self.panel.pack2(input_box, True, True)
 
@@ -322,8 +322,8 @@ class Conversation(gtk.VBox):
         if self.session.config.i_font_size is None:
             self.session.config.i_font_size = 10
         elif self.session.config.i_font_size < 6 or \
-                self.session.config.i_font_size > 32: 
-            self.session.config.i_font_size = 10 
+                self.session.config.i_font_size > 32:
+            self.session.config.i_font_size = 10
 
         if self.session.config.b_font_bold is None:
             self.session.config.b_font_bold = False
@@ -347,9 +347,15 @@ class Conversation(gtk.VBox):
         font_underline = self.session.config.b_font_underline
         font_strike = self.session.config.b_font_strike
         font_color = self.session.config.font_color
-        color = protocol.Color.from_hex(font_color)
 
-        self.style = protocol.Style(font, color, font_bold, font_italic, 
+        try:
+            color = protocol.Color.from_hex(font_color)
+        except ValueError:
+            self.session.config.font_color = '#000000'
+            font_color = self.session.config.font_color
+            color = protocol.Color.from_hex(font_color)
+
+        self.style = protocol.Style(font, color, font_bold, font_italic,
             font_underline, font_strike, font_size)
 
     def on_font_selected(self, style):
@@ -380,7 +386,9 @@ class Conversation(gtk.VBox):
 
     def on_notify_atention(self):
         '''called when the nudge button is clicked'''
-        print 'nudge!'
+        self.session.request_attention(self.cid)
+        self.output.append(
+            self.formatter.format_information('you just sent a nudge!'))
 
     def show(self):
         '''override the show method'''

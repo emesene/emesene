@@ -55,18 +55,21 @@ class Color(object):
     def to_hex(self):
         '''return a hexa representation of the color, usefull for pango'''
 
-        if self.red > 255:
-            red = self.red / 255
+        red = self.red
+        if red > 255:
+            red /= 255
 
-        if self.green > 255:
-            green = self.green / 255
+        green = self.green
+        if green > 255:
+            green /= 255
 
-        if self.blue > 255:
-            blue = self.blue / 255
+        blue = self.blue
+        if blue > 255:
+            blue /= 255
 
-        red = hex(self.red)[2:]
-        green = hex(self.green)[2:]
-        blue = hex(self.blue)[2:]
+        red = hex(red)[2:]
+        green = hex(green)[2:]
+        blue = hex(blue)[2:]
 
         if len(red) == 1:
             red = '0' + red
