@@ -57,8 +57,11 @@ class Session(object):
         '''set the value of account'''
         self._account = account
         self.contacts = protocol.ContactManager(self._account.account)
+
         self.config_dir.base_dir = os.path.join(
             self.config_dir.base_dir, self._account.account)
+        self.config_dir.create_if_not_exists('')
+
         self.logger = protocol.Logger.LoggerProcess(self.config_dir.join('log'))
         self.logger.start()
 
