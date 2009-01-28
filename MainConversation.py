@@ -5,6 +5,7 @@ import gobject
 
 import gui
 import utils
+import dialog
 import TextBox
 import WebKitTextBox
 
@@ -15,6 +16,7 @@ else:
 
 import e3common.MarkupParser
 import e3common.MessageFormatter
+import protocol
 import protocol.status
 
 from e3 import Message
@@ -71,9 +73,8 @@ class MainConversation(gtk.Notebook):
             (is_raw, consecutive, outgoing, first, last) = \
                 conversation.formatter.format(contact)
 
-            if is_raw:
-                middle = e3common.MarkupParser.escape(message.body)
-            else:
+            middle = e3common.MarkupParser.escape(message.body)
+            if not is_raw:
                 middle = self.format_from_message(message)
 
             conversation.output.append(first + middle + last)
@@ -111,7 +112,8 @@ class MainConversation(gtk.Notebook):
         conversation = self.conversations.get(float(cid), None)
 
         if conversation is not None:
-            error = conversation.formatter.format_error('message couldn\'t be sent: ')
+            error = conversation.formatter.format_error(
+                'message couldn\'t be sent: ')
             conversation.output.append(error)
             conversation.output.append(
                 self.format_from_message(message))
@@ -156,38 +158,7 @@ class MainConversation(gtk.Notebook):
 
     def format_from_message(self, message):
         '''return a markup text representing the format on the message'''
-        stl = message.style
-
-        style_start = ''
-        style_end = ''
-        style = 'color: #' + stl.color.to_hex() + ';'
-
-        if stl.bold:
-            style_start = style_start + '<b>'
-            style_end = '</b>' + style_end
-
-        if stl.italic:
-            style_start = style_start + '<i>'
-            style_end = '</i>' + style_end
-
-        if stl.underline:
-            style_start = style_start + '<u>'
-            style_end = '</u>' + style_end
-
-        if stl.strike:
-            style_start = style_start + '<s>'
-            style_end = '</s>' + style_end
-
-        if stl.font:
-            style += 'font-family: ' + stl.font
-
-        style_start += '<span style="%s; ">' % (style, )
-        style_end = '</span>' + style_end
-
-        result = style_start + e3common.MarkupParser.escape(message.body) + \
-            style_end
-
-        return result
+        return utils.add_style_to_message(message.body, message.style)
 
     def new_conversation(self, cid, members=None):
         '''create a new conversation widget and append it to the tabs,
@@ -286,13 +257,19 @@ class Conversation(gtk.VBox):
 
         self.panel = gtk.VPaned()
         self.header = Header()
+        toolbar_handler = e3common.ConversationToolbarHandler(self.session,
+            dialog, gui.theme, self)
         self.toolbar = gui.components.build_conversation_toolbar(
-            self.session.config)
+            toolbar_handler)
         self.gtk_toolbar = self.toolbar.build_as_toolbar(style='only icons')
         self.output = OutputText(self.session.config)
         self.input = TextBox.InputText(self.session.config,
             self._on_send_message)
         self.info = ContactInfo()
+
+        self._style = None
+        self._load_style()
+
 
         input_box = gtk.VBox()
         input_box.pack_start(self.gtk_toolbar, False)
@@ -318,6 +295,92 @@ class Conversation(gtk.VBox):
         self.header.set_image(gui.theme.user)
         self.info.first = utils.safe_gtk_image_load(gui.theme.logo)
         self.info.last = utils.safe_gtk_image_load(gui.theme.logo)
+
+    def _get_style(self):
+        '''return the value of style'''
+        return self._style
+
+    def _set_style(self, style):
+        '''set the value of style and update the style on input'''
+        self._style = style
+        self.session.config.font = style.font
+        self.session.config.i_font_size = style.size
+        self.session.config.b_font_bold = style.bold
+        self.session.config.b_font_italic = style.italic
+        self.session.config.b_font_underline = style.underline
+        self.session.config.b_font_strike = style.strike
+        self.session.config.font_color = '#' + style.color.to_hex()
+        self.input.update_style(style)
+
+    style = property(fget=_get_style, fset=_set_style)
+
+    def _load_style(self):
+        '''load the default style from the configuration'''
+        if self.session.config.font is None:
+            self.session.config.font = 'Sans'
+
+        if self.session.config.i_font_size is None:
+            self.session.config.i_font_size = 10
+        elif self.session.config.i_font_size < 6 or \
+                self.session.config.i_font_size > 32: 
+            self.session.config.i_font_size = 10 
+
+        if self.session.config.b_font_bold is None:
+            self.session.config.b_font_bold = False
+
+        if self.session.config.b_font_italic is None:
+            self.session.config.b_font_italic = False
+
+        if self.session.config.b_font_underline is None:
+            self.session.config.b_font_underline = False
+
+        if self.session.config.b_font_strike is None:
+            self.session.config.b_font_strike = False
+
+        if self.session.config.font_color is None:
+            self.session.config.font_color = '#000000'
+
+        font = self.session.config.font
+        font_size = self.session.config.i_font_size
+        font_bold = self.session.config.b_font_bold
+        font_italic = self.session.config.b_font_italic
+        font_underline = self.session.config.b_font_underline
+        font_strike = self.session.config.b_font_strike
+        font_color = self.session.config.font_color
+        color = protocol.Color.from_hex(font_color)
+
+        self.style = protocol.Style(font, color, font_bold, font_italic, 
+            font_underline, font_strike, font_size)
+
+    def on_font_selected(self, style):
+        '''called when a new font is selected'''
+        self.style = style
+
+    def on_color_selected(self, color):
+        '''called when a new font is selected'''
+        self.style.color = color
+        self.session.config.font_color = '#' + color.to_hex()
+        self.input.update_style(self.style)
+
+    def on_style_selected(self, style):
+        '''called when a new font is selected'''
+        self.style = style
+
+    def on_invite(self, account):
+        '''called when a contact is selected to be invited'''
+        self.session.conversation_invite(account)
+
+    def on_clean(self):
+        '''called when the clean button is clicked'''
+        self.output.clear()
+
+    def on_emote(self, emote):
+        '''called when a emote is selected on the emote window'''
+        self.input.append(emote)
+
+    def on_notify_atention(self):
+        '''called when the nudge button is clicked'''
+        print 'nudge!'
 
     def show(self):
         '''override the show method'''
@@ -368,7 +431,7 @@ class Conversation(gtk.VBox):
 
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
-        self.session.send_message(self.cid, text)
+        self.session.send_message(self.cid, text, self.style)
         nick = self.session.contacts.me.display_name
 
         (is_raw, consecutive, outgoing, first, last) = \
@@ -378,6 +441,7 @@ class Conversation(gtk.VBox):
             middle = e3common.MarkupParser.escape(text)
         else:
             middle = e3common.MarkupParser.escape(text)
+            middle = utils.add_style_to_message(middle, self.style, False)
 
         all = first + middle + last
         self.output.append(all)

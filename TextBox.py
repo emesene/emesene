@@ -1,5 +1,6 @@
 import gtk
 
+import utils
 import RichBuffer
 import e3common.MarkupParser
 
@@ -79,10 +80,13 @@ class InputText(TextBox):
         '''constructor'''
         TextBox.__init__(self, config)
         self.on_send_message = on_send_message
+        self._tag = None
         self._textbox.connect('key-press-event', self._on_key_press_event)
+        self._buffer.connect('changed', self.on_changed_event)
 
     def _on_key_press_event(self, widget, event):
         '''method called when a key is pressed on the input widget'''
+        self.apply_tag()
         if event.keyval == gtk.keysyms.Return and \
                 not event.state == gtk.gdk.SHIFT_MASK:
             if not self.text:
@@ -91,6 +95,42 @@ class InputText(TextBox):
             self.on_send_message(self.text)
             self.text = ''
             return True
+
+    def update_style(self, style):
+        '''update the global style of the widget'''
+        try:
+            color = gtk.gdk.color_parse('#' + style.color.to_hex())
+            gtk.gdk.colormap_get_system().alloc_color(color)
+        except ValueError:
+            return
+
+        is_new = False
+        if self._tag is None:
+            self._tag = gtk.TextTag()
+            is_new = True
+
+        self._tag.set_property('font-desc', 
+            utils.style_to_pango_font_description(style))
+
+        self._tag.set_property('foreground', '#' + style.color.to_hex())
+        self._tag.set_property('strikethrough', style.strike)
+        self._tag.set_property('underline', style.underline)
+
+        if is_new:
+            self._buffer.get_tag_table().add(self._tag)
+
+        self.apply_tag()
+
+    def on_changed_event(self, *args):
+        '''called when the content of the buffer changes'''
+        self.apply_tag()
+
+    def apply_tag(self):
+        '''apply the tag that contains the global style to the text in
+        the widget'''
+        if self._tag:
+            self._buffer.apply_tag(self._tag, self._buffer.get_start_iter(),
+                self._buffer.get_end_iter())
 
 class OutputText(TextBox):
     '''a widget that is used to display the messages on the conversation'''

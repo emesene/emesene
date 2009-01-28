@@ -49,7 +49,7 @@ ACTIONS = (\
  'set nick'         , 'set message'      ,
  'set picture'      , 'set preferences'  ,
  'new conversation' , 'close conversation',
- 'send message',
+ 'send message'     , 'conv invite',
  'p2p invite'       , 'p2p accept',
  'p2p cancel'       , 'media send' # media send if got Wink and audio clips
  )
@@ -105,6 +105,8 @@ class Worker(threading.Thread):
             self._handle_action_new_conversation
         dah[Action.ACTION_CLOSE_CONVERSATION] = \
             self._handle_action_close_conversation
+        dah[Action.ACTION_CONV_INVITE] = \
+            self._handle_action_conv_invite
         dah[Action.ACTION_SEND_MESSAGE] = self._handle_action_send_message
         
         # p2p actions
@@ -227,6 +229,11 @@ class Worker(threading.Thread):
 
     def _handle_action_close_conversation(self, cid):
         '''handle Action.ACTION_CLOSE_CONVERSATION
+        '''
+        pass
+
+    def _handle_action_conv_invite(self, cid, account):
+        '''handle Action.ACTION_CONV_INVITE
         '''
         pass
 

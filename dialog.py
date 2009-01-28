@@ -20,8 +20,11 @@
 
 import os
 import gtk
+import pango
 import gobject
 
+import utils
+import protocol
 import gui.stock as stock
 
 import ContactInformation
@@ -155,7 +158,7 @@ def add_button(window, gtk_stock, stock_id, response_cb,
 
     return button
     
-def new_window(title, response_cb, *args):
+def new_window(title, response_cb=None, *args):
     '''build a window with the default values and connect the common
     signals, return the window'''
 
@@ -422,3 +425,89 @@ def about_dialog(name, version, copyright, comments, license, website,
 def contact_information_dialog(session, account):
     '''shows information about the account'''
     ContactInformation.ContactInformation(session, account).show()
+
+def select_font(style, callback):
+    '''select font and if available size and style, receives a 
+    protocol.Message.Style object with the current style
+    the callback receives a new style object with the new selection
+    '''
+    def select_font_cb(button, window, callback, response, color_sel, color):
+        '''callback called on button selection'''
+        if response == stock.ACCEPT:
+            window.hide()
+            fdesc = pango.FontDescription(font_sel.get_font_name())
+            style = utils.pango_font_description_to_style(fdesc)
+            style.color.red = color.red
+            style.color.green = color.green
+            style.color.blue = color.blue
+            style.color.alpha = color.alpha
+
+            callback(style)
+
+        window.hide()
+
+    window = new_window('Select font')
+
+    font_sel = gtk.FontSelection()
+    font_sel.set_preview_text('OMG PONNIES! I\'m a preview text!')
+    fdesc = utils.style_to_pango_font_description(style)
+
+    window.hbox.pack_start(font_sel, True, True)
+    font_sel.set_font_name(fdesc.to_string())
+
+    add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback, select_font_cb,        font_sel, style.color)
+    add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback, select_font_cb, 
+        font_sel, style.color)
+    window.show_all()
+
+def select_color(color, callback):
+    '''select color, receives a protocol.Message.Color with the current color
+    the callback receives a new color object woth the new selection
+    '''
+    def select_color_cb(button, window, callback, response, color_sel):
+        '''callback called on button selection'''
+
+        if response == stock.ACCEPT:
+            window.hide()
+            gtk_color = color_sel.get_current_color()
+            color = protocol.Color(gtk_color.red, gtk_color.green, 
+                gtk_color.blue)
+            callback(color)
+
+        window.hide()
+
+    window = new_window('Select color')
+
+    color_sel = gtk.ColorSelection()
+
+    window.hbox.pack_start(color_sel, True, True)
+    color_sel.set_current_color(gtk.gdk.color_parse('#' + color.to_hex()))
+
+    add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback, 
+        select_color_cb, color_sel)
+    add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback, select_color_cb, 
+        color_sel)
+    window.show_all()
+
+def select_style(style, callback):
+    '''select bold, italic, underline and strike, receives 
+    a protocol.Message.Style object with the current style
+    the callback receives the response and a new style object with the 
+    selection
+    '''
+    pass
+
+def select_emote(theme, callback):
+    '''select an emoticon, receives a gui.Theme object with the theme settings
+    the callback receives the response and a string representing the selected
+    emoticon
+    '''
+    pass
+
+def invite_dialog(session, callback):
+    '''select a contact to add to the conversation, receives a session object
+    of the current session
+    the callback receives the response and a string containing the selected 
+    account
+    '''
+    pass

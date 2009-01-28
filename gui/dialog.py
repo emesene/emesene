@@ -154,3 +154,39 @@ def about_dialog(name, version, copyright, comments, license, website,
 def contact_information_dialog(session, account):
     '''shows information about the account'''
     pass
+
+def select_font(style, callback):
+    '''select font and if available size and style, receives a 
+    protocol.Message.Style object with the current style
+    the callback receives a new style object with the new selection
+    '''
+    pass
+
+def select_color(color, callback):
+    '''select color, receives a protocol.Message.Color with the current color
+    the callback receives a new color object woth the new selection
+    '''
+    pass
+
+def select_style(style, callback):
+    '''select bold, italic, underline and strike, receives 
+    a protocol.Message.Style object with the current style
+    the callback receives the response and a new style object with the 
+    selection
+    '''
+    pass
+
+def select_emote(theme, callback):
+    '''select an emoticon, receives a gui.Theme object with the theme settings
+    the callback receives the response and a string representing the selected
+    emoticon
+    '''
+    pass
+
+def invite_dialog(session, callback):
+    '''select a contact to add to the conversation, receives a session object
+    of the current session
+    the callback receives the response and a string containing the selected 
+    account
+    '''
+    pass

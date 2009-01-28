@@ -300,3 +300,48 @@ class MyAccountHandler(object):
         '''called when set picture is selected'''
         pass
 
+class ConversationToolbarHandler(object):
+    '''this handler contains all the methods to handle a conversation toolbar
+    '''
+
+    def __init__(self, session, dialog, theme, conversation):
+        '''constructor'''
+        self.session = session
+        self.dialog = dialog
+        self.conversation = conversation
+        self.theme = theme
+
+    def on_font_selected(self):
+        '''called when the Font button is selected'''
+        self.dialog.select_font(self.conversation.style, 
+            self.conversation.on_font_selected)
+
+    def on_color_selected(self):
+        '''called when the Color button is selected'''
+        self.dialog.select_color(self.conversation.style.color, 
+            self.conversation.on_color_selected)
+
+    def on_style_selected(self):
+        '''called when the Style button is selected'''
+        self.dialog.select_style(self.conversation.style, 
+            self.conversation.on_style_selected)
+
+    def on_invite_selected(self):
+        '''called when the Invite button is selected'''
+        self.dialog.invite_dialog(self.session, 
+            self.conversation.on_invite)
+
+    def on_clean_selected(self):
+        '''called when the Clean button is selected'''
+        self.conversation.on_clean()
+
+    def on_emotes_selected(self):
+        '''called when the emotes button is selected'''
+        self.dialog.select_emote(self.theme, self.conversation.on_emote)
+
+    def on_notify_atention_selected(self):
+        '''called when the nudge button is selected'''
+        self.conversation.on_notify_atention()
+
+
+

@@ -68,7 +68,7 @@ class Conversation(threading.Thread):
 
     def _process(self, message):
         '''process a command and call the respective handler'''
-        print '<c<', message
+        #print '<c<', message
         handler = self._handlers.get(message.command, None)
 
         if handler:

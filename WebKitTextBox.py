@@ -33,6 +33,8 @@ class OutputText(gtk.ScrolledWindow):
 
     def clear(self):
         '''clear the content'''
+        self.__texts = []
+        self.loaded = False
         self._textbox.load_string(HTML_BODY, "text/html", "utf-8", "")
 
     def append(self, text, scroll=True):
@@ -47,7 +49,8 @@ class OutputText(gtk.ScrolledWindow):
         text = text.replace('\n', '<br/>')
         # TODO: si se llama muy rapido puede que el mensaje no aparezca
         self._textbox.execute_script(
-            'add_message("%s");' % (text.replace('"', '\\"'),))
+            'add_message("%s");' % (text.replace('"', '\\"').\
+                replace('\n', '\\n'),))
 
         if scroll:
             self.scroll_to_end()

@@ -167,7 +167,7 @@ class Worker(protocol.Worker):
 
     def _process(self, message):
         '''process the data'''
-        print '<<<', message
+        #print '<<<', message
 
         if self.in_login:
             self._process_login(message)
@@ -785,6 +785,14 @@ class Worker(protocol.Worker):
         if cid in self.conversations:
             self.conversations[cid].command_queue.put('quit')
             del self.conversations[cid]
+        else:
+            print 'conversation', cid, 'not found'
+
+    def _handle_action_conv_invite(self, cid, account):
+        '''handle Action.ACTION_CONV_INVITE
+        '''
+        if cid in self.conversations:
+            self.conversations[cid].invite(account)
         else:
             print 'conversation', cid, 'not found'
 

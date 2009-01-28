@@ -62,7 +62,7 @@ class Socket(threading.Thread):
             if owtd and input_:
                 try:
                     self.socket.send(input_)
-                    print '>>>', input_
+                    #print '>>>', input_
                 except socket.error:
                     self._on_socket_error()
                 input_ = None

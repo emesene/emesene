@@ -20,9 +20,9 @@ class Session(protocol.Session):
 
         self.add_action(Action.ACTION_LOGIN, (account, password, status))
 
-    def send_message(self, cid, text):
+    def send_message(self, cid, text, style=None):
         '''send a common message'''
         account = self.account.account
-        message = e3.Message(e3.Message.TYPE_MESSAGE, text, account)
+        message = e3.Message(e3.Message.TYPE_MESSAGE, text, account, style)
         self.add_action(Action.ACTION_SEND_MESSAGE, (cid, message))
 

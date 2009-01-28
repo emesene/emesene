@@ -30,14 +30,17 @@ class MainWindow(gtk.VBox):
         self.on_new_conversation = on_new_conversation
         self.on_close = on_close
 
-        self.session.signals.connect('contact-attr-changed', 
+        self.session.signals.connect('contact-attr-changed',
             self._on_contact_attr_changed)
 
-        handler = e3common.MenuHandler(session, dialog, self.contact_list,
-            self.on_disconnect, self.on_close)
+        self.menu = None
+        self.gtk_menu = None
+        self.contact_menu = None
+        self.gtk_contact_menu = None
+        self.group_menu = None
+        self.gtk_group_menu = None
 
-        self.menu = gui.components.build_main_menu(handler, session.config)
-        self.gtk_menu = self.menu.build_as_menu_bar()
+        self._build_menus()
 
         self.panel = UserPanel.UserPanel(session)
         self.panel.nick.connect('text-changed', self._on_nick_changed)
@@ -63,6 +66,25 @@ class MainWindow(gtk.VBox):
 
         scroll.add(self.contact_list)
         scroll.show_all()
+
+    def _build_menus(self):
+        '''buildall the menus used on the client'''
+        handler = e3common.MenuHandler(self.session, dialog, self.contact_list,
+            self.on_disconnect, self.on_close)
+
+        contact_handler = e3common.ContactHandler(self.session, dialog,
+            self.contact_list)
+        group_handler = e3common.GroupHandler(self.session, dialog,
+            self.contact_list)
+
+        self.menu = gui.components.build_main_menu(handler, self.session.config)
+        self.gtk_menu = self.menu.build_as_menu_bar()
+
+        self.contact_menu = gui.components.build_contact_menu(contact_handler)
+        self.gtk_contact_menu = self.contact_menu.build_as_popup()
+
+        self.group_menu = gui.components.build_group_menu(group_handler)
+        self.gtk_group_menu = self.group_menu.build_as_popup()
 
     def show(self):
         '''show the widget'''
@@ -92,15 +114,15 @@ class MainWindow(gtk.VBox):
 
     def _on_group_selected(self, group):
         '''callback for the group-selected signal'''
-        print 'group selected: ', group.name
+        pass
 
     def _on_contact_menu_selected(self, contact):
         '''callback for the contact-menu-selected signal'''
-        print 'contact menu', contact.account
+        self.gtk_contact_menu.popup(None, None, None, 0, 0)
 
     def _on_group_menu_selected(self, group):
         '''callback for the group-menu-selected signal'''
-        print 'group menu', group.name
+        self.gtk_group_menu.popup(None, None, None, 0, 0)
 
     def _on_contact_attr_changed(self, protocol, args):
         '''callback called when an attribute of a contact changed'''
@@ -137,32 +159,6 @@ class MainWindow(gtk.VBox):
         self.contact_list.group_menu_selected.unsuscribe(
             self._on_group_menu_selected)
 
-    def _on_preferences_selected(self, menu):
-        '''callback called when the preferences option is selected'''
-        dialog.information('Not implemented')
-
-    def _on_plugins_selected(self, menu):
-        '''callback called when the plugins option is selected'''
-        dialog.information('Not implemented')
-
-    def _on_about_selected(self, menu):
-        '''callback called when the about option is selected'''
-        about = gtk.AboutDialog()
-        about.set_name('mesinyer')
-        about.set_version('2.0 alpha 0.0.1')
-        about.set_copyright('marianoguerra')
-        about.set_license('GPL v3')
-        about.set_website('www.emesene.org')
-        about.set_authors(['mariano guerra'])
-        about.set_artists(['vdepizzol'])
-        icon = utils.safe_gtk_pixbuf_load(gui.theme.logo)
-        about.set_logo(icon)
-        about.set_icon(icon)
-        about.set_program_name('emesene')
-
-        about.run()
-        about.hide()
-
     def _on_search_toggled(self, button):
         '''called when the searhc button is toggled'''
         if button.get_active():
@@ -172,37 +168,4 @@ class MainWindow(gtk.VBox):
             self.entry.set_text('')
             self.entry.hide()
 
-    def do_test(self):
-        '''do some test to the contact list'''
-        import random
-        import string
-        import protocol.Contact as Contact
-        import protocol.Group as Group
-        import protocol.status as status
-        self.contact_list.show_by_group = True
-
-        def random_string(length=6):
-            '''generate a random string of length "length"'''
-            return ''.join([random.choice(string.ascii_letters) for i \
-                in range(length)])
-
-        def random_mail():
-            '''generate a random mail'''
-            return random_string() + '@' + random_string() + '.com'
-
-        for i in range(6):
-            group = Group(random_string())
-            for j in range(6):
-                contact = Contact(random_mail(), i * 10 + j, random_string())
-                contact.status = random.choice(status.ORDERED)
-                contact.message = random_string()
-                group.contacts.append(contact.account)
-                self.contact_list.add_contact(contact, group)
-
-        for j in range(6):
-            contact = Contact(random_mail(), 100 + j, random_string())
-            contact.status = random.choice(status.ORDERED)
-            contact.message = random_string()
-
-            self.contact_list.add_contact(contact)
 

@@ -90,8 +90,8 @@ def _build_actions_menu(actions_handler=None):
         group_handler = None
         my_account_handler = None
 
-    contact = _build_contact_menu(contact_handler)
-    group = _build_group_menu(group_handler)
+    contact = build_contact_menu(contact_handler)
+    group = build_group_menu(group_handler)
     my_account = _build_my_account_menu(my_account_handler)
 
     actions_mi.add_child(contact)
@@ -202,7 +202,7 @@ def build_status_menu(on_status_change=None):
 
     return status
 
-def _build_contact_menu(contact_handler=None):
+def build_contact_menu(contact_handler=None):
     '''build the  menu'''
     contact_mi = Menu.MenuItem('_Contact')
 
@@ -237,7 +237,7 @@ def _build_contact_menu(contact_handler=None):
 
     return contact_mi
 
-def _build_group_menu(group_handler=None):
+def build_group_menu(group_handler=None):
     '''build the  menu'''
     group_mi = Menu.MenuItem('_Group')
 
@@ -287,7 +287,7 @@ def _build_my_account_menu(my_account_handler=None):
 
     return my_account_mi
 
-def build_conversation_toolbar(config):
+def build_conversation_toolbar(handler=None):
     '''build the  menu'''
     toolbar = Menu.MenuItem()
 
@@ -317,6 +317,17 @@ def build_conversation_toolbar(config):
     toolbar.add_child(Menu.MenuItem('-'))
     toolbar.add_child(invite_mi)
     toolbar.add_child(clean_mi)
+
+    if handler is None:
+        return toolbar
+
+    font_mi.selected.suscribe(handler.on_font_selected)
+    color_mi.selected.suscribe(handler.on_color_selected)
+    style_mi.selected.suscribe(handler.on_style_selected)
+    emotes_mi.selected.suscribe(handler.on_emotes_selected)
+    nudge_mi.selected.suscribe(handler.on_notify_atention_selected)
+    invite_mi.selected.suscribe(handler.on_invite_selected)
+    clean_mi.selected.suscribe(handler.on_clean_selected)
 
     return toolbar
 

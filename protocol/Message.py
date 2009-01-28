@@ -21,8 +21,9 @@ class Style(object):
     '''a class that represents the style of a message'''
 
     def __init__(self, font='Arial', color=None, bold=False, italic=False, 
-        underline=False, strike=False):
+        underline=False, strike=False, size_=None):
         self.font = font
+        self.size = size_
 
         if color is not None:
             self.color = color
@@ -40,7 +41,6 @@ class Style(object):
             % (self.font, str(self.color), self.bold, self.italic, 
                 self.underline, self.strike)
 
-
 class Color(object):
     '''a class representing a RGBA color'''
 
@@ -55,9 +55,18 @@ class Color(object):
     def to_hex(self):
         '''return a hexa representation of the color, usefull for pango'''
 
-        red = hex(self.red % 256)[2:]
-        green = hex(self.green % 256)[2:]
-        blue = hex(self.blue % 256)[2:]
+        if self.red > 255:
+            red = self.red / 255
+
+        if self.green > 255:
+            green = self.green / 255
+
+        if self.blue > 255:
+            blue = self.blue / 255
+
+        red = hex(self.red)[2:]
+        green = hex(self.green)[2:]
+        blue = hex(self.blue)[2:]
 
         if len(red) == 1:
             red = '0' + red

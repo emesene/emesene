@@ -100,6 +100,10 @@ class Session(object):
         '''close a conversation identified by cid'''
         self.add_action(Action.ACTION_CLOSE_CONVERSATION, (cid,))
 
+    def conversation_invite(self, cid, account):
+        '''invite a contact to aconversation identified by cid'''
+        self.add_action(Action.ACTION_CONV_INVITE, (cid, account))
+
     def quit(self):
         '''close the worker and socket threads'''
         self.add_action(Action.ACTION_QUIT, ())
@@ -183,7 +187,7 @@ class Session(object):
         and value is the new value of that preference'''
         self.add_action(Action.ACTION_SET_PREFERENCE, (preferences,))
 
-    def send_message(self, cid, text):
+    def send_message(self, cid, text, style=None):
         '''send a common message'''
         raise NotImplementedError('Not implemented')
 

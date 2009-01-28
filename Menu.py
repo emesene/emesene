@@ -226,6 +226,7 @@ class OptionGroup(BaseOptionGroup):
         self._childs[0].gtk_item = gtk_option
 
         gtk_option.connect('activate', self._option_cb, 0)
+        gtk_option.set_active(True)
         option_list.append(gtk_option)
 
         for (count, opt) in enumerate(self._childs[1:]):
