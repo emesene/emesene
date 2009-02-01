@@ -57,11 +57,11 @@ class MainWindow(gtk.VBox):
         self.pack_start(scroll, True, True)
         self.pack_start(self.entry, False)
 
-        self.contact_list.contact_selected.suscribe(self._on_contact_selected)
-        self.contact_list.group_selected.suscribe(self._on_group_selected)
-        self.contact_list.contact_menu_selected.suscribe(
+        self.contact_list.contact_selected.subscribe(self._on_contact_selected)
+        self.contact_list.group_selected.subscribe(self._on_group_selected)
+        self.contact_list.contact_menu_selected.subscribe(
             self._on_contact_menu_selected)
-        self.contact_list.group_menu_selected.suscribe(
+        self.contact_list.group_menu_selected.subscribe(
             self._on_group_menu_selected)
 
         scroll.add(self.contact_list)
@@ -152,11 +152,12 @@ class MainWindow(gtk.VBox):
 
     def on_disconnect(self):
         '''callback called when the disconnect option is selected'''
-        self.contact_list.contact_selected.unsuscribe(self._on_contact_selected)
-        self.contact_list.group_selected.unsuscribe(self._on_group_selected)
-        self.contact_list.contact_menu_selected.unsuscribe(
+        self.contact_list.contact_selected.unsubscribe(
+            self._on_contact_selected)
+        self.contact_list.group_selected.unsubscribe(self._on_group_selected)
+        self.contact_list.contact_menu_selected.unsubscribe(
             self._on_contact_menu_selected)
-        self.contact_list.group_menu_selected.unsuscribe(
+        self.contact_list.group_menu_selected.unsubscribe(
             self._on_group_menu_selected)
 
     def _on_search_toggled(self, button):

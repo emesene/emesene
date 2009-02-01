@@ -105,6 +105,7 @@ class Theme(object):
         self.password = os.path.join(self.theme_path, "password.png")
         self.logo = os.path.join(self.theme_path, "logo.png")
         self.connect = os.path.join(self.theme_path, "connect.png")
+        self.chat = os.path.join(self.theme_path, "chat.png")
         self.group_chat = os.path.join(self.theme_path, "group-chat.png")
         self.typing = os.path.join(self.theme_path, "typing.png")
         self.new_message = os.path.join(self.theme_path, "new-message.png")

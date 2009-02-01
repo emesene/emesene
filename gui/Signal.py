@@ -17,34 +17,34 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 class Signal(object):
-    '''an object that represents a signalm a callback can suscribe
+    '''an object that represents a signalm a callback can subscribe
     to the signal, when emited all the callbacks are called until the end or
     until one callback returns False'''
 
     def __init__(self):
         '''constructor'''
-        self._suscribers = []
+        self._subscribers = []
         self._params = {}
 
-    def suscribe(self, callback, *args, **kwargs):
-        '''suscribe to the signal, when the signal is emited, callback will be
+    def subscribe(self, callback, *args, **kwargs):
+        '''subscribe to the signal, when the signal is emited, callback will be
         called
         '''
-        self._suscribers.append(callback)
+        self._subscribers.append(callback)
         self._params[callback] = (args, kwargs)
 
-    def unsuscribe(self, callback):
-        '''remove the callback from the suscribers list, raise ValueError if
+    def unsubscribe(self, callback):
+        '''remove the callback from the subscribers list, raise ValueError if
         the callback is not registeres (made this way to avoid abuse of the api)
         '''
-        self._suscribers.remove(callback)
+        self._subscribers.remove(callback)
         del self._params[callback]
 
     def emit(self, *args, **kwargs):
         '''emit the signal with args and kwargs, if a callback returns False
         then the remaining callbacks are not called
         '''
-        for callback in self._suscribers:
+        for callback in self._subscribers:
             cargs, ckwargs = self._params[callback]
             args += cargs
             kwargs.update(ckwargs)

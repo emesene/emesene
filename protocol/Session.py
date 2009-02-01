@@ -29,7 +29,7 @@ import e3common.ConfigDir
 import protocol.ContactManager
 
 class Session(object):
-    
+
     def __init__(self, id_=None, account=None):
         self.id_ = id_
 
@@ -60,8 +60,7 @@ class Session(object):
 
         self.config_dir.base_dir = os.path.join(
             self.config_dir.base_dir, self._account.account)
-        self.config_dir.create_if_not_exists('')
-
+        self.create_config()
         self.logger = protocol.Logger.LoggerProcess(self.config_dir.join('log'))
         self.logger.start()
 

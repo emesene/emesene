@@ -62,8 +62,8 @@ def _build_file_menu(file_handler=None):
 
     if file_handler:
         on_status_selected = file_handler.on_status_selected
-        disconnect.selected.suscribe(file_handler.on_disconnect_selected)
-        quit_mi.selected.suscribe(file_handler.on_quit_selected)
+        disconnect.selected.subscribe(file_handler.on_disconnect_selected)
+        quit_mi.selected.subscribe(file_handler.on_quit_selected)
     else:
         on_status_selected = None
 
@@ -154,14 +154,14 @@ def _build_options_menu(options_menu=None, config=None):
         show_blocked.active = config.b_show_blocked
      
     if options_menu:
-        order_by_group.toggled.suscribe(
+        order_by_group.toggled.subscribe(
             options_menu.on_order_by_group_toggled)
-        order_by_status.toggled.suscribe(
+        order_by_status.toggled.subscribe(
             options_menu.on_order_by_status_toggled)
-        show_offline.toggled.suscribe(options_menu.on_show_offline_toggled)
-        show_empty_groups.toggled.suscribe(
+        show_offline.toggled.subscribe(options_menu.on_show_offline_toggled)
+        show_empty_groups.toggled.subscribe(
             options_menu.on_show_empty_groups_toggled)
-        show_blocked.toggled.suscribe(options_menu.on_show_blocked_toggled)
+        show_blocked.toggled.subscribe(options_menu.on_show_blocked_toggled)
 
     return options_mi
 
@@ -174,8 +174,8 @@ def _build_help_menu(help_handler=None):
         Menu.Image(stock.ABOUT, Menu.Image.TYPE_STOCK))
 
     if help_handler:
-        site.selected.suscribe(help_handler.on_website_selected)
-        about.selected.suscribe(help_handler.on_about_selected)
+        site.selected.subscribe(help_handler.on_website_selected)
+        about.selected.subscribe(help_handler.on_about_selected)
 
     help_mi.add_child(site)
     help_mi.add_child(Menu.MenuItem('-'))
@@ -186,14 +186,15 @@ def _build_help_menu(help_handler=None):
 def build_status_menu(on_status_change=None):
     '''build the  menu'''
 
-    status = Menu.MenuItem('_Status')
+    status = Menu.MenuItem('_Status',
+        Menu.Image(stock.EDIT, Menu.Image.TYPE_STOCK))
 
     for stat in protocol.status.ORDERED:
         temp_item = Menu.MenuItem(protocol.status.STATUS[stat],
             Menu.Image(gui.theme.status_icons[stat]))
 
         if on_status_change:
-            temp_item.selected.suscribe(on_status_change, stat)
+            temp_item.selected.subscribe(on_status_change, stat)
 
         status.add_child(temp_item)
 
@@ -201,7 +202,7 @@ def build_status_menu(on_status_change=None):
 
 def build_contact_menu(contact_handler=None):
     '''build the  menu'''
-    contact_mi = Menu.MenuItem('_Contact')
+    contact_mi = Menu.MenuItem('_Contact', Menu.Image(gui.theme.chat))
 
     add_contact_mi = Menu.MenuItem('_Add',
         Menu.Image(stock.ADD, Menu.Image.TYPE_STOCK))
@@ -215,15 +216,15 @@ def build_contact_menu(contact_handler=None):
         Menu.Image(stock.EDIT, Menu.Image.TYPE_STOCK))
 
     if contact_handler:
-        add_contact_mi.selected.suscribe(
+        add_contact_mi.selected.subscribe(
             contact_handler.on_add_contact_selected)
-        remove_contact_mi.selected.suscribe(
+        remove_contact_mi.selected.subscribe(
             contact_handler.on_remove_contact_selected)
-        block_contact_mi.selected.suscribe(
+        block_contact_mi.selected.subscribe(
             contact_handler.on_block_contact_selected)
-        unblock_contact_mi.selected.suscribe(
+        unblock_contact_mi.selected.subscribe(
             contact_handler.on_unblock_contact_selected)
-        set_alias_contact_mi.selected.suscribe(
+        set_alias_contact_mi.selected.subscribe(
             contact_handler.on_set_alias_contact_selected)
 
     contact_mi.add_child(add_contact_mi)
@@ -236,7 +237,7 @@ def build_contact_menu(contact_handler=None):
 
 def build_group_menu(group_handler=None):
     '''build the  menu'''
-    group_mi = Menu.MenuItem('_Group')
+    group_mi = Menu.MenuItem('_Group', Menu.Image(gui.theme.group_chat))
 
     add_group_mi = Menu.MenuItem('_Add',
         Menu.Image(stock.ADD, Menu.Image.TYPE_STOCK))
@@ -246,11 +247,11 @@ def build_group_menu(group_handler=None):
         Menu.Image(stock.EDIT, Menu.Image.TYPE_STOCK))
 
     if group_handler:
-        add_group_mi.selected.suscribe(
+        add_group_mi.selected.subscribe(
             group_handler.on_add_group_selected)
-        remove_group_mi.selected.suscribe(
+        remove_group_mi.selected.subscribe(
             group_handler.on_remove_group_selected)
-        rename_group_mi.selected.suscribe(
+        rename_group_mi.selected.subscribe(
             group_handler.on_rename_group_selected)
 
     group_mi.add_child(add_group_mi)
@@ -261,7 +262,7 @@ def build_group_menu(group_handler=None):
 
 def _build_my_account_menu(my_account_handler=None):
     '''build the  menu'''
-    my_account_mi = Menu.MenuItem('_My account')
+    my_account_mi = Menu.MenuItem('_My account', Menu.Image(gui.theme.chat))
 
     set_nick_contact_mi = Menu.MenuItem('Set _nick',
         Menu.Image(stock.EDIT, Menu.Image.TYPE_STOCK))
@@ -271,11 +272,11 @@ def _build_my_account_menu(my_account_handler=None):
         Menu.Image(stock.EDIT, Menu.Image.TYPE_STOCK))
 
     if my_account_handler:
-        set_nick_contact_mi.selected.suscribe(
+        set_nick_contact_mi.selected.subscribe(
             my_account_handler.on_set_nick_selected)
-        set_message_contact_mi.selected.suscribe(
+        set_message_contact_mi.selected.subscribe(
             my_account_handler.on_set_message_selected)
-        set_picture_contact_mi.selected.suscribe(
+        set_picture_contact_mi.selected.subscribe(
             my_account_handler.on_set_picture_selected)
 
     my_account_mi.add_child(set_nick_contact_mi)
@@ -318,13 +319,13 @@ def build_conversation_toolbar(handler=None):
     if handler is None:
         return toolbar
 
-    font_mi.selected.suscribe(handler.on_font_selected)
-    color_mi.selected.suscribe(handler.on_color_selected)
-    style_mi.selected.suscribe(handler.on_style_selected)
-    emotes_mi.selected.suscribe(handler.on_emotes_selected)
-    nudge_mi.selected.suscribe(handler.on_notify_atention_selected)
-    invite_mi.selected.suscribe(handler.on_invite_selected)
-    clean_mi.selected.suscribe(handler.on_clean_selected)
+    font_mi.selected.subscribe(handler.on_font_selected)
+    color_mi.selected.subscribe(handler.on_color_selected)
+    style_mi.selected.subscribe(handler.on_style_selected)
+    emotes_mi.selected.subscribe(handler.on_emotes_selected)
+    nudge_mi.selected.subscribe(handler.on_notify_atention_selected)
+    invite_mi.selected.subscribe(handler.on_invite_selected)
+    clean_mi.selected.subscribe(handler.on_clean_selected)
 
     return toolbar
 
