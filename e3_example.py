@@ -9,7 +9,6 @@ import e3.MsnSocket as MsnSocket
 from protocol import status
 from protocol import Event
 from protocol import Action
-from protocol import Session
 import protocol.Account as Account
 
 from protocol.ContactManager import ContactManager
@@ -24,15 +23,12 @@ class Example(object):
     def __init__(self, account, password, status, use_http_method=False):
         '''class constructor'''
         self.account = Account(account, password, status)
-        self.session = Session(self.account)
+        self.session = e3.Session(self.account)
 
         if use_http_method:
             class_ = MsnHttpSocket
         else:
             class_ = MsnSocket
-
-        self.socket = class_('messenger.hotmail.com', 1863, dest_type='NS')
-        self.worker = Worker('e3_example', self.socket, self.session, class_)
 
         hdrs = {}
         hdrs[Event.EVENT_LOGIN_SUCCEED] = self._handle_login_succeed
@@ -44,13 +40,7 @@ class Example(object):
 
         self._handlers = hdrs
 
-    def login(self):
-        '''start the login process'''
-        self.socket.start()
-        self.worker.start()
-
-        self.add_action(Action.ACTION_LOGIN, 
-            (self.account.account, self.account.password, self.account.status))
+        self.session.login(account, password, status)
 
     def add_action(self, id_, args=()):
         '''add an event to the session queue'''
@@ -141,8 +131,8 @@ class Example(object):
 
 if __name__ == '__main__':
     gobject.threads_init()
-    example = Example('foo@hotmail.com', 'secret', status.ONLINE, True) 
-    example.login()
+    example = Example('dude@gmail.com', 'secret',
+        status.OFFLINE, True)
 
     gobject.timeout_add(500, example.process)
     gobject.MainLoop().run()
