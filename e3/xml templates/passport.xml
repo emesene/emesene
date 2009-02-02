@@ -57,7 +57,7 @@
             <wsa:Address>contacts.msn.com</wsa:Address>
           </wsa:EndpointReference>
         </wsp:AppliesTo>
-        <wsse:PolicyReference URI="?fs=1&amp;id=24000&amp;kv=9&amp;rn=93S9SWWw&amp;tw=0&amp;ver=2.1.6000.1"></wsse:PolicyReference>
+        <wsse:PolicyReference URI="MBI"></wsse:PolicyReference>
         </wst:RequestSecurityToken>
         <wst:RequestSecurityToken Id="RST4">
           <wst:RequestType>http://schemas.xmlsoap.org/ws/2004/04/security/trust/Issue</wst:RequestType>
