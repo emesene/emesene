@@ -10,9 +10,9 @@ import httplib
 import urlparse
 import threading
 
+import p2p
 import mbi
 import common
-import Transfer
 import Requester
 import XmlManager
 import Conversation
@@ -82,6 +82,8 @@ class Worker(protocol.Worker):
         self.pending_cids = []
         # contains a pending cid as key and a list of messages as value
         self.pending_messages = {}
+
+        self.p2p = Queue.Queue() # p2p manager input queue
 
     def _set_handlers(self):
         '''set a dict with the action id as key and the handler as value'''
@@ -572,7 +574,8 @@ class Worker(protocol.Worker):
 
         if cid not in self.conversations:
             con = Conversation.Conversation(self.session, cid,
-                self.msn_socket_class, host, int(port), account, session_id)
+                self.msn_socket_class, host, int(port), account, session_id,
+                self.p2p)
             self.conversations[cid] = con
             con.send_presentation()
             con.invite(account)
@@ -615,7 +618,8 @@ class Worker(protocol.Worker):
 
         cid = time.time()
         con = Conversation.Conversation(self.session, cid,
-            self.msn_socket_class, host, int(port), user, session_id, auth_id)
+            self.msn_socket_class, host, int(port), user, session_id,
+            self.p2p, auth_id)
         self.conversations[cid] = con
         con.answer()
         con.start()
@@ -817,50 +821,6 @@ class Worker(protocol.Worker):
                 self._handle_action_new_conversation(None, conversation.cid)
 
             conversation.send_message(message)
-
-    # p2p handlers
-
-    def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
-        '''handle Action.ACTION_P2P_INVITE,
-         cid is the conversation id
-         pid is the p2p session id, both are numbers that identify the
-            conversation and the session respectively, time.time() is
-            recommended to be used.
-         dest is the destination account
-         type_ is one of the protocol.Transfer.TYPE_* constants
-         identifier is the data that is needed to be sent for the invitation
-        '''
-        if cid not in self.conversations:
-            print 'conversation', cid, 'does not exist'
-            return
-
-        conversation = self.conversations[cid]
-
-        transfer = Transfer.Transfer(cid, pid, conversation.socket,
-            self.session.events)
-        transfer.add_action(Action.ACTION_P2P_INVITE, dest, type_, identifier)
-
-        conversation.add_transfer(transfer)
-        transfer.start()
-
-        if pid in self.transfers:
-            print 'transfer', pid, 'does not exist'
-
-        self.transfers[pid] = transfer
-
-    def _handle_action_p2p_accept(self, pid):
-        '''handle Action.ACTION_P2P_ACCEPT'''
-        if pid in self.transfers:
-            self.transfers[pid].add_action(Action.ACTION_P2P_ACCEPT)
-        else:
-            print 'p2p session', pid, 'does not exist'
-
-    def _handle_action_p2p_cancel(self, pid):
-        '''handle Action.ACTION_P2P_CANCEL'''
-        if pid in self.transfers:
-            self.transfers[pid].add_action(Action.ACTION_P2P_CANCEL)
-        else:
-            print 'p2p session', pid, 'does not exist'
 
 #------------------------- FROM HERE -----------------------------
 # Copyright 2005 James Bunton <james@delx.cjb.net>

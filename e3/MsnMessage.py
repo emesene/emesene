@@ -6,9 +6,10 @@ import protocol
 class Message(protocol.Message):
     '''a class that represent a msn message'''
 
-    def __init__(self, type_, body, account, style=None):
+    def __init__(self, type_, body, account, style=None, dest=''):
         protocol.Message.__init__(self, type_, body, account, style)
 
+        self.dest = dest
         if style:
             self.style = Style(style.font, style.color, style.bold, 
                 style.italic, style.underline, style.strike)
@@ -46,8 +47,11 @@ class Message(protocol.Message):
 
     def _format_p2p(self):
         '''format a message like a TYPE_P2P'''
-        # TODO: dx will do it
-        return ''
+        output = ('MIME-Version: 1.0\r\n'
+            'Content-Type: application/x-msnmsgrp2p\r\n'
+            'P2P-Src: %s\r\n'  # WLM 9.0/14.0
+            'P2P-Dest: %s\r\n\r\n%s')
+        return output % (self.account, self.dest, self.body)
 
     def _format_nudge(self):
         '''format a message like a TYPE_NUDGE'''
@@ -60,21 +64,12 @@ class Message(protocol.Message):
     @classmethod
     def parse(cls, command):
         '''parse a message from a command object and return a Message object'''
-        parts = command.payload.split('\r\n\r\n')
-
+        parts = command.payload.split('\r\n\r\n', 1)
         if len(parts) == 1:
             head = parts[0]
             body = ''
         elif len(parts) == 2:
             (head, body) = parts
-        elif len(parts) == 3:
-            head = parts[0]
-            body = parts[1]
-        else:
-            print 'unknown message:', repr(parts)
-            # (?)
-            head = ''
-            body = ''
 
         type_ = common.get_value_between(head, 'Content-Type: ', '\r\n')
 
@@ -83,6 +78,7 @@ class Message(protocol.Message):
             type_ = head.split('Content-Type: ')[1]
 
         style = None
+        dest = ''
         
         if type_.startswith('text/plain'):
             mtype = Message.TYPE_MESSAGE
@@ -110,12 +106,13 @@ class Message(protocol.Message):
             mtype = Message.TYPE_TYPING
         elif type_ == 'application/x-msnmsgrp2p':
             mtype = Message.TYPE_P2P
+            dest = common.get_value_between(head, 'P2P-Dest: ', '\r\n')
         elif type_ == 'text/x-msnmsgr-datacast' and body == 'ID: 1':
             mtype = Message.TYPE_NUDGE
         else:
             mtype = Message.TYPE_UNK
 
-        return cls(mtype, body, command.tid, style)
+        return cls(mtype, body, command.tid, style, dest)
 
 class Style(protocol.Style):
     '''a class that represents the style of a message'''

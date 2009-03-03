@@ -2,10 +2,11 @@ import Queue
 import threading
 
 import MsnMessage
+import p2p.Manager
 import protocol.Contact
 import protocol.Action as Action
 import protocol.Logger as Logger
-from  protocol.Event import Event
+from protocol.Event import Event
 
 class Conversation(threading.Thread):
     '''a thread that handles a conversation'''
@@ -13,7 +14,7 @@ class Conversation(threading.Thread):
     STATUS_ERROR) = range(5)
 
     def __init__(self, session, cid, MsnSocket, host, port, account, 
-        session_id, auth_id=None):
+        session_id, p2p_input, auth_id=None):
         '''class constructor, create a socket and connect it to the specified
         server'''
         threading.Thread.__init__(self)
@@ -34,11 +35,11 @@ class Conversation(threading.Thread):
         self.last_member = None
 
         self.pending_invites = []
-        # active p2p transfers on this conversation
-        self.transfers = {}
         # indicates if the first action made by the user to justify opening
         # a new conversation has been made or not
         self.first_action = False
+
+        self.p2p_input = p2p_input
 
         # this queue receives a Command object
         self.command_queue = Queue.Queue()
@@ -148,19 +149,18 @@ class Conversation(threading.Thread):
                 # we remove the content type part since it's always equal
                 msgstr = message.format().split('\r\n', 1)[1]
                 # remove the Content-type, X-MMS-IM-Format and TypingUser 
+                # XXX WHAT THE HELL
                 msgstr = msgstr.replace('Content-Type: ', '')
                 msgstr = msgstr.replace('X-MMS-IM-Format: ', '')
                 msgstr = msgstr.replace('TypingUser: ', '')
 
                 self.session.logger.log('message', contact.status, msgstr, 
                     src, dest)
-        elif message.type == MsnMessage.Message.TYPE_P2P:
-            #TODO: dx should add support here using self.transfers to decide
-            # which Transfer should handle the message if it's a message
-            # from an active p2p session
-            # if it's an invite, then create the transfer and add it to 
-            # self.transfers
-            pass
+        elif message.type == MsnMessage.Message.TYPE_P2P and \
+                message.dest == self.account and \
+                len(self.members) == 0:
+            self.p2p_input.put((p2p.Manager.ACTION_INPUT,
+                self.members[0], message))
         
     def _on_usr(self, message):
         '''handle the message'''
@@ -185,6 +185,8 @@ class Conversation(threading.Thread):
 
         if len(self.members) == 1:
             self.session.add_event(Event.EVENT_CONV_GROUP_STARTED, self.cid)
+        else:
+            self.p2p_input.put((p2p.Manager.ACTION_REGISTER, self.cid))
 
         self.members.append(account)
 
@@ -199,6 +201,8 @@ class Conversation(threading.Thread):
 
         if len(self.members) == 1:
             self.session.add_event(Event.EVENT_CONV_GROUP_STARTED, self.cid)
+        else:
+            self.p2p_input.put((p2p.Manager.ACTION_REGISTER, self.cid))
 
         self.members.append(account)
 
@@ -221,6 +225,7 @@ class Conversation(threading.Thread):
         elif len(self.members) == 0:
             self._close()
             self.last_member = account
+            self.p2p_input.put((p2p.Manager.ACTION_UNREGISTER, self.cid))
 
     def _on_message_send_succeed(self, command):
         '''handle the acknowledge of a message'''
@@ -312,6 +317,7 @@ class Conversation(threading.Thread):
             self.pending_messages.append(message)
         else:
             self.sent_messages[self.socket.tid] = message
+            # TODO: change that A when applies
             self.socket.send_command('MSG', ('A',), message.format())
             self._log_message(message)
 
