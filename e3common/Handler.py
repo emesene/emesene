@@ -156,7 +156,7 @@ class ContactHandler(object):
     def on_block_contact_selected(self):
         '''called when block contact is selected'''
         contact = self.contact_list.get_contact_selected()
-        
+
         if contact:
             self.session.block(contact.account)
         else:
@@ -165,7 +165,7 @@ class ContactHandler(object):
     def on_unblock_contact_selected(self):
         '''called when unblock contact is selected'''
         contact = self.contact_list.get_contact_selected()
-        
+
         if contact:
             self.session.unblock(contact.account)
         else:
@@ -187,7 +187,7 @@ class ContactHandler(object):
                 self.session.set_alias(account, '')
 
         contact = self.contact_list.get_contact_selected()
-        
+
         if contact:
             self.dialog.set_contact_alias(contact.account, contact.alias,
                  set_alias_cb)
@@ -248,8 +248,8 @@ class GroupHandler(object):
                     print "new name not valid"
 
         group = self.contact_list.get_group_selected()
-        
-        if group: 
+
+        if group:
             self.dialog.rename_group(group, rename_group_cb)
         else:
             self.dialog.error('No group selected')
@@ -293,7 +293,7 @@ class MyAccountHandler(object):
 
                 self.session.set_message(new_pm)
 
-        self.dialog.set_message(self.session.contacts.me.message, 
+        self.dialog.set_message(self.session.contacts.me.message,
             set_message_cb)
 
     def on_set_picture_selected(self):
@@ -313,22 +313,22 @@ class ConversationToolbarHandler(object):
 
     def on_font_selected(self):
         '''called when the Font button is selected'''
-        self.dialog.select_font(self.conversation.style, 
+        self.dialog.select_font(self.conversation.style,
             self.conversation.on_font_selected)
 
     def on_color_selected(self):
         '''called when the Color button is selected'''
-        self.dialog.select_color(self.conversation.style.color, 
+        self.dialog.select_color(self.conversation.style.color,
             self.conversation.on_color_selected)
 
     def on_style_selected(self):
         '''called when the Style button is selected'''
-        self.dialog.select_style(self.conversation.style, 
+        self.dialog.select_style(self.conversation.style,
             self.conversation.on_style_selected)
 
     def on_invite_selected(self):
         '''called when the Invite button is selected'''
-        self.dialog.invite_dialog(self.session, 
+        self.dialog.invite_dialog(self.session,
             self.conversation.on_invite)
 
     def on_clean_selected(self):
@@ -342,6 +342,5 @@ class ConversationToolbarHandler(object):
     def on_notify_atention_selected(self):
         '''called when the nudge button is selected'''
         self.conversation.on_notify_atention()
-
 
 

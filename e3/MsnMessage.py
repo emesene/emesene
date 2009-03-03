@@ -11,7 +11,7 @@ class Message(protocol.Message):
 
         self.dest = dest
         if style:
-            self.style = Style(style.font, style.color, style.bold, 
+            self.style = Style(style.font, style.color, style.bold,
                 style.italic, style.underline, style.strike)
         else:
             self.style = Style()
@@ -79,7 +79,7 @@ class Message(protocol.Message):
 
         style = None
         dest = ''
-        
+
         if type_.startswith('text/plain'):
             mtype = Message.TYPE_MESSAGE
             font = urllib.unquote(common.get_value_between(head, 'FN=', ';'))
@@ -117,9 +117,9 @@ class Message(protocol.Message):
 class Style(protocol.Style):
     '''a class that represents the style of a message'''
 
-    def __init__(self, font='Arial', color=None, bold=False, italic=False, 
+    def __init__(self, font='Arial', color=None, bold=False, italic=False,
         underline=False, strike=False):
-        protocol.Style.__init__(self, font, color, bold, italic, 
+        protocol.Style.__init__(self, font, color, bold, italic,
             underline, strike)
 
     def format(self):
@@ -142,6 +142,6 @@ class Style(protocol.Style):
         color = self.color.to_hex()
         color = color[4:6] + color[2:4] + color[0:2]
 
-        return 'FN=%s; EF=%s; CO=%s; PF=0;RL=0' % (urllib.quote(self.font),
+        return 'FN=%s; EF=%s; CO=%s; PF=0; RL=0' % (urllib.quote(self.font),
             effects, color)
 

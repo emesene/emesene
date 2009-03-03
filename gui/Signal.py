@@ -15,6 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import functools
 
 class Signal(object):
     '''an object that represents a signalm a callback can subscribe
@@ -51,3 +52,35 @@ class Signal(object):
             if callback(*args, **kwargs) == False:
                 break
 
+def extend(func):
+    '''allow the extention of a method'''
+
+    func.on_entry = Signal()
+    func.on_exit = Signal()
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+       func.on_entry.emit(args, kwargs)
+       result = func(*args, **kwargs)
+       func.on_exit.emit(result, args, kwargs)
+       return result
+
+    return wrapper
+
+if __name__ == '__main__':
+    @extend
+    def do_stuff(foo, bar, baz=4):
+        print 'do_stuff'
+        return 'return value'
+
+    def pre(args, kwargs):
+        print 'pre', args, kwargs
+
+    def post(result, args, kwargs):
+        print 'post', result, args, kwargs
+
+    do_stuff.on_entry.subscribe(pre)
+    do_stuff.on_exit.subscribe(post)
+
+    do_stuff('one', False)
+    do_stuff('two', True, 7)
