@@ -2,7 +2,7 @@ import time
 
 import MarkupParser
 import protocol.status
-import e3 # e3.Message used
+import protocol
 
 class MessageFormatter(object):
     '''a class that holds the state of a conversation and
@@ -76,7 +76,7 @@ class MessageFormatter(object):
         self.last_message_sender = None
         return self.format_message(self.information, message)
 
-    def format(self, contact, message_type=e3.Message.TYPE_MESSAGE):
+    def format(self, contact, message_type=protocol.Message.TYPE_MESSAGE):
         '''format the message according to the template'''
         outgoing = False
         consecutive = False
@@ -92,7 +92,7 @@ class MessageFormatter(object):
         self.last_message_sender = contact
         self.last_message_time = timestamp
         
-        if message_type == e3.Message.TYPE_MESSAGE:
+        if message_type == protocol.Message.TYPE_MESSAGE:
             if consecutive:
                 if outgoing:
                     template = self.consecutive_outgoing
@@ -103,7 +103,7 @@ class MessageFormatter(object):
                     template = self.outgoing
                 else:
                     template = self.incoming
-        if message_type == e3.Message.TYPE_NUDGE:
+        if message_type == protocol.Message.TYPE_NUDGE:
             template = self.nudge
             self.last_message_sender = None
 

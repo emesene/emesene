@@ -107,7 +107,7 @@ class Message(protocol.Message):
         elif type_ == 'application/x-msnmsgrp2p':
             mtype = Message.TYPE_P2P
             dest = common.get_value_between(head, 'P2P-Dest: ', '\r\n')
-        elif type_ == 'text/x-msnmsgr-datacast' and body == 'ID: 1':
+        elif type_ == 'text/x-msnmsgr-datacast' and body == 'ID: 1\r\n\r\n':
             mtype = Message.TYPE_NUDGE
         else:
             mtype = Message.TYPE_UNK

@@ -313,17 +313,17 @@ class ConversationToolbarHandler(object):
 
     def on_font_selected(self):
         '''called when the Font button is selected'''
-        self.dialog.select_font(self.conversation.style,
+        self.dialog.select_font(self.conversation.cstyle,
             self.conversation.on_font_selected)
 
     def on_color_selected(self):
         '''called when the Color button is selected'''
-        self.dialog.select_color(self.conversation.style.color,
+        self.dialog.select_color(self.conversation.cstyle.color,
             self.conversation.on_color_selected)
 
     def on_style_selected(self):
         '''called when the Style button is selected'''
-        self.dialog.select_style(self.conversation.style,
+        self.dialog.select_style(self.conversation.cstyle,
             self.conversation.on_style_selected)
 
     def on_invite_selected(self):

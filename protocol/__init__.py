@@ -17,17 +17,17 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from Session import Session
-from Account import Account
 
 from Group import Group
 from Event import Event
 from Worker import Worker
 from Action import Action
+from Message import Message
 from Message import Style
 from Message import Color
-from Message import Message
 from Contact import Contact
+from Session import Session
+from Account import Account
 
 from ContactManager import ContactManager
 
