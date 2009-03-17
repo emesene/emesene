@@ -4,18 +4,15 @@ import time
 import base64
 import gobject
 
-import dialog
-import Window
-
 import e3
 import yaber
-import Signals
 from e3common import Config
 from e3common import ConfigDir
 
-from protocol.Worker import EVENTS
+import dummy_components
+import e3gtk
 
-Signals.Signals.set_events(EVENTS)
+e3gtk.setup()
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -43,9 +40,11 @@ class Controller(object):
         if self.session is not None:
             self.session.quit()
 
+        # TODO: add to components
         #self.session = yaber.Session()
         self.session = e3.Session()
-        self.session.signals = Signals.Signals(self.session.events)
+        # TODO: make this gobject independent
+        self.session.signals = e3gtk.Signals.Signals(self.session.events)
         self.session.signals.connect('login-succeed', self.on_login_succeed)
         self.session.signals.connect('login-failed', self.on_login_failed)
         self.session.signals.connect('contact-list-ready',
@@ -83,6 +82,7 @@ class Controller(object):
     def on_login_failed(self, signals, args):
         '''callback called on login failed'''
         self._new_session()
+        dialog = dummy_components.get_default('gtk dialog')
         dialog.error(args[0])
         self.window.content.set_sensitive(True)
 
@@ -156,7 +156,8 @@ class Controller(object):
         (cid, members) = args
 
         if self.conversations is None:
-            window = Window.Window(self._on_conversation_window_close)
+            Window = dummy_components.get_default('gtk window frame')
+            window = Window(self._on_conversation_window_close)
             window.set_default_size(640, 480)
             window.go_conversation(self.session)
             self.conversations = window.content
@@ -178,7 +179,8 @@ class Controller(object):
         self.conversations = None
 
     def start(self, account=None, accounts=None):
-        self.window = Window.Window(self.on_close)
+        Window = dummy_components.get_default('gtk window frame')
+        self.window = Window(self.on_close)
 
         self.window.go_login(self.on_login_connect, account, 
             self.config.d_accounts, self.config.l_remember_account, 

@@ -1,7 +1,6 @@
 import webbrowser
 
 import gui
-import stock
 
 class MenuHandler(object):
     '''this handler contains all the handlers needed to handle all the
@@ -126,7 +125,7 @@ class ContactHandler(object):
             '''callback to the add_dialog method, add the user and add him 
             to the defined groups'''
 
-            if response == stock.ADD:
+            if response == gui.stock.ADD:
                 self.session.add_contact(account)
                 # TODO: this doesn't work
                 if groups:
@@ -141,7 +140,7 @@ class ContactHandler(object):
             '''callback for DialogManager.yes_no, asking to confirm the 
             user remove'''
 
-            if response == stock.YES:
+            if response == gui.stock.YES:
                 self.session.remove_contact(account)
 
         contact = self.contact_list.get_contact_selected()
@@ -177,13 +176,13 @@ class ContactHandler(object):
             '''callback for the set_alias method,
             the parameters and the values are described on that method'''
 
-            if response == stock.ACCEPT:
+            if response == gui.stock.ACCEPT:
                 if old_alias == new_alias:
                     print 'old alias and new alias are the same'
                     return
 
                 self.session.set_alias(account, new_alias)
-            elif response == stock.CLEAR:
+            elif response == gui.stock.CLEAR:
                 self.session.set_alias(account, '')
 
         contact = self.contact_list.get_contact_selected()
@@ -210,7 +209,7 @@ class GroupHandler(object):
         def add_group_cb(response, group_name):
             '''callback for the add_group method'''
 
-            if response == stock.ACCEPT:
+            if response == gui.stock.ACCEPT:
                 if group_name:
                     self.session.add_group(group_name)
 
@@ -222,7 +221,7 @@ class GroupHandler(object):
             '''callback for the yes_no method, asking for
             confirmation un group delete'''
 
-            if response == stock.YES:
+            if response == gui.stock.YES:
                 self.session.remove_group(gid)
 
         group = self.contact_list.get_group_selected()
@@ -239,7 +238,7 @@ class GroupHandler(object):
         def rename_group_cb(response, group, new_name):
             '''callback called by rename_group'''
 
-            if response == stock.ACCEPT:
+            if response == gui.stock.ACCEPT:
                 if group.name == new_name:
                     print "old and new name are the same"
                 elif new_name:
@@ -269,7 +268,7 @@ class MyAccountHandler(object):
         def set_nick_cb(response, old_nick, new_nick):
             '''callback for the set_nick method'''
 
-            if response == stock.ACCEPT:
+            if response == gui.stock.ACCEPT:
                 if old_nick == new_nick:
                     print 'old nick and new nick are the same'
                     return
@@ -286,7 +285,7 @@ class MyAccountHandler(object):
         def set_message_cb(response, old_pm, new_pm):
             '''callback for the set_message method'''
 
-            if response == stock.ACCEPT:
+            if response == gui.stock.ACCEPT:
                 if old_pm == new_pm:
                     print 'old and new personal messages are the same'
                     return
