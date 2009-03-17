@@ -7,12 +7,11 @@ import gui
 import Menu
 import utils
 import e3common
+import dummy_components
 
 gui.components.Menu = Menu
 
 import dialog
-import UserPanel
-import ContactList
 
 class MainWindow(gtk.VBox):
     '''this class represents the widget that is shown when the user is logged
@@ -21,7 +20,10 @@ class MainWindow(gtk.VBox):
     def __init__(self, session, on_new_conversation, on_close):
         '''class constructor'''
         gtk.VBox.__init__(self)
-        self.contact_list = ContactList.ContactList(session)
+        UserPanel = dummy_components.get_default('gtk user panel')
+        ContactList = dummy_components.get_default('gtk contact list')
+
+        self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
@@ -42,7 +44,7 @@ class MainWindow(gtk.VBox):
 
         self._build_menus()
 
-        self.panel = UserPanel.UserPanel(session)
+        self.panel = UserPanel(session)
         self.panel.nick.connect('text-changed', self._on_nick_changed)
         self.panel.message.connect('text-changed', self._on_message_changed)
         self.panel.search.connect('toggled', self._on_search_toggled)

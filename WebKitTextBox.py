@@ -27,6 +27,7 @@ class OutputText(gtk.ScrolledWindow):
         self.loaded = False
         self._textbox = webkit.WebView()
         self._textbox.connect('load-finished', self._loading_stop_cb)
+        self._textbox.connect('console-message', self._error_cb)
         self.clear()
         self._textbox.show()
         self.add(self._textbox)
@@ -47,13 +48,18 @@ class OutputText(gtk.ScrolledWindow):
             text = e3common.MarkupParser.parse_emotes(text)
 
         text = text.replace('\n', '<br/>')
-        # TODO: si se llama muy rapido puede que el mensaje no aparezca
         self._textbox.execute_script(
             'add_message("%s");' % (text.replace('"', '\\"').\
                 replace('\n', '\\n'),))
 
         if scroll:
             self.scroll_to_end()
+
+    def _error_cb(self, view, message, line, source_id):
+        '''called when a message is sent to the console'''
+        message = "Webkit message: %s %s %s" % (message, line, source_id)
+        self.append(message)
+        print message
 
     def _loading_stop_cb(self, view, frame):
         '''method called when the page finish loading'''
