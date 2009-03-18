@@ -4,12 +4,9 @@ import gtk
 import time
 
 import gui
-import Menu
 import utils
 import e3common
 import dummy_components
-
-gui.components.Menu = Menu
 
 import dialog
 
@@ -36,11 +33,9 @@ class MainWindow(gtk.VBox):
             self._on_contact_attr_changed)
 
         self.menu = None
-        self.gtk_menu = None
         self.contact_menu = None
-        self.gtk_contact_menu = None
+        self.contact_menu = None
         self.group_menu = None
-        self.gtk_group_menu = None
 
         self._build_menus()
 
@@ -54,7 +49,7 @@ class MainWindow(gtk.VBox):
         self.entry.connect('changed', self._on_entry_changed)
         self.entry.connect('key-press-event', self._on_entry_key_press)
 
-        self.pack_start(self.gtk_menu, False)
+        self.pack_start(self.menu, False)
         self.pack_start(self.panel, False)
         self.pack_start(scroll, True, True)
         self.pack_start(self.entry, False)
@@ -79,19 +74,21 @@ class MainWindow(gtk.VBox):
         group_handler = e3common.GroupHandler(self.session, dialog,
             self.contact_list)
 
-        self.menu = gui.components.build_main_menu(handler, self.session.config)
-        self.gtk_menu = self.menu.build_as_menu_bar()
+        MainMenu = dummy_components.get_default('gtk main menu')
+        ContactMenu = dummy_components.get_default('gtk menu contact')
+        GroupMenu = dummy_components.get_default('gtk menu group')
 
-        self.contact_menu = gui.components.build_contact_menu(contact_handler)
-        self.gtk_contact_menu = self.contact_menu.build_as_popup()
+        self.menu = MainMenu(handler)
 
-        self.group_menu = gui.components.build_group_menu(group_handler)
-        self.gtk_group_menu = self.group_menu.build_as_popup()
+        self.contact_menu = ContactMenu(contact_handler)
+        self.group_menu = GroupMenu(group_handler)
+        self.contact_menu.show_all()
+        self.group_menu.show_all()
 
     def show(self):
         '''show the widget'''
         gtk.VBox.show(self)
-        self.gtk_menu.show_all()
+        self.menu.show_all()
         self.panel.show()
         self.contact_list.show()
 
@@ -120,11 +117,13 @@ class MainWindow(gtk.VBox):
 
     def _on_contact_menu_selected(self, contact):
         '''callback for the contact-menu-selected signal'''
-        self.gtk_contact_menu.popup(None, None, None, 0, 0)
+        print 'contact menu selected'
+        self.contact_menu.popup(None, None, None, 0, 0)
 
     def _on_group_menu_selected(self, group):
         '''callback for the group-menu-selected signal'''
-        self.gtk_group_menu.popup(None, None, None, 0, 0)
+        print 'group menu selected'
+        self.group_menu.popup(None, None, None, 0, 0)
 
     def _on_contact_attr_changed(self, protocol, args):
         '''callback called when an attribute of a contact changed'''

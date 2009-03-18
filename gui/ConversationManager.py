@@ -166,7 +166,7 @@ class ConversationManager(object):
             if account in conversation.members:
                 conversation.update_data()
 
-    def on_conversation_close(self):
+    def on_conversation_close(self, conversation):
         """
         called when the user wants to close a conversation widget
         """

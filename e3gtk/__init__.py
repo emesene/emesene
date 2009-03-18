@@ -4,14 +4,20 @@ import Header
 import Window
 import TextBox
 import Signals
+import MainMenu
 import UserPanel
 import TabWidget
+import GroupMenu
+import StatusMenu
 import MainWindow
+import ContactMenu
+import AccountMenu
 import ContactList
 import ContactInfo
 import Conversation
 import WebKitTextBox
 import ConversationManager
+import ConversationToolbar
 
 import dummy_components
 
@@ -30,12 +36,25 @@ def setup():
     dummy_components.categories['gtk contact list'] = ContactList.ContactList
     dummy_components.categories['gtk user panel'] = UserPanel.UserPanel
 
-    dummy_components.categories['gtk conversation window'] = ConversationManager.ConversationManager
+    dummy_components.categories['gtk main menu'] = MainMenu.MainMenu
+    dummy_components.categories['gtk menu file'] = MainMenu.FileMenu
+    dummy_components.categories['gtk menu actions'] = MainMenu.ActionsMenu
+    dummy_components.categories['gtk menu options'] = MainMenu.OptionsMenu
+    dummy_components.categories['gtk menu contact'] = ContactMenu.ContactMenu
+    dummy_components.categories['gtk menu group'] = GroupMenu.GroupMenu
+    dummy_components.categories['gtk menu account'] = AccountMenu.AccountMenu
+    dummy_components.categories['gtk menu help'] = MainMenu.HelpMenu
+    dummy_components.categories['gtk menu status'] = StatusMenu.StatusMenu
+
+    dummy_components.categories['gtk conversation window'] = \
+        ConversationManager.ConversationManager
     dummy_components.categories['gtk conversation'] = Conversation.Conversation
     dummy_components.categories['gtk conversation header'] = Header.Header
     dummy_components.categories['gtk conversation info'] = ContactInfo.ContactInfo
     dummy_components.categories['gtk conversation tab'] = TabWidget.TabWidget
     dummy_components.categories['gtk conversation input'] = TextBox.InputText
+    dummy_components.categories['gtk conversation toolbar'] = \
+        ConversationToolbar.ConversationToolbar 
 
     if not WebKitTextBox.ERROR:
         dummy_components.categories['gtk conversation output'] = WebKitTextBox.OutputText

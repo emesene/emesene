@@ -27,19 +27,20 @@ class Conversation(gtk.VBox, gui.Conversation):
         OutputText = dummy_components.get_default('gtk conversation output')
         InputText = dummy_components.get_default('gtk conversation input')
         ContactInfo = dummy_components.get_default('gtk conversation info')
+        ConversationToolbar = dummy_components.get_default(
+            'gtk conversation toolbar')
+
 
         self.header = Header()
         toolbar_handler = e3common.ConversationToolbarHandler(self.session,
             dialog, gui.theme, self)
-        self.toolbar = gui.components.build_conversation_toolbar(
-            toolbar_handler)
-        self.gtk_toolbar = self.toolbar.build_as_toolbar(style='only icons')
+        self.toolbar = ConversationToolbar(toolbar_handler)
         self.output = OutputText(self.session.config)
         self.input = InputText(self.session.config, self._on_send_message)
         self.info = ContactInfo()
 
         input_box = gtk.VBox()
-        input_box.pack_start(self.gtk_toolbar, False)
+        input_box.pack_start(self.toolbar, False)
         input_box.pack_start(self.input, True, True)
 
         self.panel.pack1(self.output, True, True)
