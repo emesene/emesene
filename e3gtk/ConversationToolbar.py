@@ -1,5 +1,8 @@
 import gtk
 
+import gui
+import utils
+
 class ConversationToolbar(gtk.Toolbar):
     """
     A class that represents the toolbar on the conversation window
@@ -13,3 +16,39 @@ class ConversationToolbar(gtk.Toolbar):
         """
         gtk.Toolbar.__init__(self)
         self.handler = handler
+
+        self.font = gtk.ToolButton(gtk.STOCK_SELECT_FONT)
+        self.font.connect('clicked', 
+            lambda *args: self.handler.on_font_selected())
+        self.color = gtk.ToolButton(gtk.STOCK_SELECT_COLOR)
+        self.color.connect('clicked', 
+            lambda *args: self.handler.on_color_selected())
+
+        self.emotes = gtk.ToolButton( 
+            utils.safe_gtk_image_load(gui.theme.emote_to_path(':D', True)), 'Emotes')
+        self.emotes.connect('clicked', 
+            lambda *args: self.handler.on_emotes_selected())
+        self.nudge = gtk.ToolButton( 
+            utils.safe_gtk_image_load(gui.theme.emote_to_path(':S', True)), 'Nudge')
+        self.nudge.connect('clicked', 
+            lambda *args: self.handler.on_notify_atention_selected())
+
+        self.invite = gtk.ToolButton(gtk.STOCK_ADD)
+        self.invite.connect('clicked', 
+            lambda *args: self.handler.on_invite_selected())
+        self.clean = gtk.ToolButton(gtk.STOCK_CLEAR)
+        self.clean.connect('clicked', 
+            lambda *args: self.handler.on_clean_selected())
+
+        self.add(self.font)
+        self.add(self.color)
+        self.add(gtk.SeparatorToolItem())
+
+        self.add(self.emotes)
+        self.add(self.nudge)
+        self.add(gtk.SeparatorToolItem())
+
+        self.add(self.invite)
+        self.add(self.clean)
+
+

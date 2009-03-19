@@ -78,7 +78,7 @@ class MainWindow(gtk.VBox):
         ContactMenu = dummy_components.get_default('gtk menu contact')
         GroupMenu = dummy_components.get_default('gtk menu group')
 
-        self.menu = MainMenu(handler)
+        self.menu = MainMenu(handler, self.session.config)
 
         self.contact_menu = ContactMenu(contact_handler)
         self.group_menu = GroupMenu(group_handler)

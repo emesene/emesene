@@ -15,8 +15,19 @@ class GroupMenu(gtk.Menu):
         self.handler = handler
 
         self.add = gtk.ImageMenuItem(gtk.STOCK_ADD)
+        self.add.connect('activate', 
+            lambda *args: self.handler.on_add_group_selected())
+
         self.remove = gtk.ImageMenuItem(gtk.STOCK_REMOVE)
+        self.remove.connect('activate', 
+            lambda *args: self.handler.on_remove_group_selected())
+
         self.rename = gtk.ImageMenuItem('Rename')
+        self.rename.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
+            gtk.ICON_SIZE_MENU))
+        self.rename.connect('activate', 
+            lambda *args: self.handler.on_rename_group_selected())
+
 
         self.append(self.add)
         self.append(self.remove)

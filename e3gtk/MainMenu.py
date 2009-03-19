@@ -1,5 +1,8 @@
 import gtk
 
+import gui
+import utils
+
 import dummy_components
 
 class MainMenu(gtk.MenuBar):
@@ -7,7 +10,7 @@ class MainMenu(gtk.MenuBar):
     A widget that represents the main menu of the main window
     """
 
-    def __init__(self, handlers):
+    def __init__(self, handlers, config):
         """
         constructor
 
@@ -22,19 +25,19 @@ class MainMenu(gtk.MenuBar):
         OptionsMenu = dummy_components.get_default('gtk menu options')
         HelpMenu = dummy_components.get_default('gtk menu help')
 
-        self.file = gtk.MenuItem('File')
+        self.file = gtk.MenuItem('_File')
         self.file_menu = FileMenu(self.handlers.file_handler)
         self.file.set_submenu(self.file_menu)
 
-        self.actions = gtk.MenuItem('Actions')
+        self.actions = gtk.MenuItem('_Actions')
         self.actions_menu = ActionsMenu(self.handlers.actions_handler)
         self.actions.set_submenu(self.actions_menu)
 
-        self.options = gtk.MenuItem('Options')
-        self.options_menu = OptionsMenu(self.handlers.options_handler)
+        self.options = gtk.MenuItem('_Options')
+        self.options_menu = OptionsMenu(self.handlers.options_handler, config)
         self.options.set_submenu(self.options_menu)
 
-        self.help = gtk.MenuItem('Help')
+        self.help = gtk.MenuItem('_Help')
         self.help_menu = HelpMenu(self.handlers.help_handler)
         self.help.set_submenu(self.help_menu)
 
@@ -42,7 +45,7 @@ class MainMenu(gtk.MenuBar):
         self.append(self.actions)
         self.append(self.options)
         self.append(self.help)
-        
+
 
 class FileMenu(gtk.Menu):
     """
@@ -59,7 +62,9 @@ class FileMenu(gtk.Menu):
         self.handler = handler
 
         StatusMenu = dummy_components.get_default('gtk menu status')
-        self.status = gtk.MenuItem('Status')
+        self.status = gtk.ImageMenuItem('Status')
+        self.status.set_image(gtk.image_new_from_stock(gtk.STOCK_CONVERT,
+            gtk.ICON_SIZE_MENU))
         self.status_menu = StatusMenu(handler.on_status_selected)
         self.status.set_submenu(self.status_menu)
 
@@ -93,13 +98,16 @@ class ActionsMenu(gtk.Menu):
         GroupsMenu = dummy_components.get_default('gtk menu group')
         AccountMenu = dummy_components.get_default('gtk menu account')
 
-        self.contact = gtk.MenuItem('Contact')
+        self.contact = gtk.ImageMenuItem('_Contact')
+        self.contact.set_image(utils.safe_gtk_image_load(gui.theme.chat))
         self.contact_menu = ContactsMenu(self.handler.contact_handler)
         self.contact.set_submenu(self.contact_menu)
-        self.group = gtk.MenuItem('Group')
+        self.group = gtk.ImageMenuItem('_Group')
+        self.group.set_image(utils.safe_gtk_image_load(gui.theme.group_chat))
         self.group_menu = GroupsMenu(self.handler.group_handler)
         self.group.set_submenu(self.group_menu)
-        self.account = gtk.MenuItem('Account')
+        self.account = gtk.ImageMenuItem('_Account')
+        self.account.set_image(utils.safe_gtk_image_load(gui.theme.chat))
         self.account_menu = AccountMenu(self.handler.my_account_handler)
         self.account.set_submenu(self.account_menu)
 
@@ -112,7 +120,7 @@ class OptionsMenu(gtk.Menu):
     A widget that represents the Options popup menu located on the main menu
     """
 
-    def __init__(self, handler):
+    def __init__(self, handler, config):
         """
         constructor
 
@@ -120,6 +128,49 @@ class OptionsMenu(gtk.Menu):
         """
         gtk.Menu.__init__(self)
         self.handler = handler
+
+        self.by_status = gtk.RadioMenuItem(None, 'Order by _status')
+        self.by_group = gtk.RadioMenuItem(self.by_status, 'Order by _group')
+        self.by_group.set_active(config.b_order_by_group)
+        self.by_status.set_active(not config.b_order_by_group)
+
+        self.show_offline = gtk.CheckMenuItem('Show _offline contacts')
+        self.show_offline.set_active(config.b_show_offline)
+        self.show_empty_groups = gtk.CheckMenuItem('Show _empty groups')
+        self.show_empty_groups.set_active(config.b_show_empty_groups)
+        self.show_blocked = gtk.CheckMenuItem('Show _blocked contacts')
+        self.show_blocked.set_active(config.b_show_blocked)
+
+        self.preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
+        self.plugins = gtk.ImageMenuItem('Plug_ins')
+        self.plugins.set_image(gtk.image_new_from_stock(gtk.STOCK_CONNECT,
+            gtk.ICON_SIZE_MENU))
+
+        self.by_status.connect('toggled', 
+            lambda *args: self.handler.on_order_by_status_toggled(
+                self.by_status.get_active()))
+        self.by_group.connect('toggled', 
+            lambda *args: self.handler.on_order_by_group_toggled(
+                self.by_group.get_active()))
+        self.show_empty_groups.connect('toggled', 
+            lambda *args: self.handler.on_show_empty_groups_toggled(
+                self.show_empty_groups.get_active()))
+        self.show_offline.connect('toggled', 
+            lambda *args: self.handler.on_show_offline_toggled(
+                self.show_offline.get_active()))
+        self.show_blocked.connect('toggled', 
+            lambda *args: self.handler.on_show_blocked_toggled(
+                self.show_blocked.get_active()))
+
+        self.append(self.by_status)
+        self.append(self.by_group)
+        self.append(gtk.SeparatorMenuItem())
+        self.append(self.show_offline)
+        self.append(self.show_empty_groups)
+        self.append(self.show_blocked)
+        self.append(gtk.SeparatorMenuItem())
+        self.append(self.preferences)
+        self.append(self.plugins)
 
 class HelpMenu(gtk.Menu):
     """
@@ -135,7 +186,9 @@ class HelpMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        self.website = gtk.MenuItem('Website')
+        self.website = gtk.ImageMenuItem('_Website')
+        self.website.set_image(gtk.image_new_from_stock(gtk.STOCK_HOME,
+            gtk.ICON_SIZE_MENU))
         self.website.connect('activate',
             lambda *args: self.handler.on_website_selected())
         self.about = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
