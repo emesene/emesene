@@ -12,8 +12,6 @@ from e3common import ConfigDir
 import extension
 import e3gtk
 
-e3gtk.setup()
-
 class Controller(object):
     '''class that handle the transition between states of the windows'''
 
@@ -32,7 +30,22 @@ class Controller(object):
             self.config.d_accounts = {}
 
         self.session = None
+        self.setup()
         self._new_session()
+
+    def setup(self):
+        '''register core extensions'''
+        e3gtk.setup()
+        extension.category_register('session', e3.Session)
+        extension.register('session', yaber.Session)
+
+        if self.config.session is None:
+            default_id = extension.get_category('session').default_id
+            self.config.session = default_id
+        else:
+            default_id = self.config.session
+
+        extension.set_default_by_id('session', default_id)
 
     def _new_session(self):
         '''create a new session object'''
@@ -40,9 +53,8 @@ class Controller(object):
         if self.session is not None:
             self.session.quit()
 
-        # TODO: add to components
-        #self.session = yaber.Session()
-        self.session = e3.Session()
+        Session = extension.get_default('session')
+        self.session = Session()
         # TODO: make this gobject independent
         self.session.signals = e3gtk.Signals.Signals(self.session.events)
         self.session.signals.connect('login-succeed', self.on_login_succeed)
@@ -58,10 +70,28 @@ class Controller(object):
         self.session.signals.connect('status-change-succeed',
             self.on_status_change_succeed)
 
+    def save_extensions_config(self):
+        '''save the state of the extensions to the config'''
+        if self.session.config.d_extensions is None:
+            self.session.config.d_extensions = {}
+
+        for name, category in extension.get_categories().iteritems():
+            self.session.config.d_extensions[name] = \
+                category.default_id
+
+    def set_default_extensions_from_config(self):
+        '''get the ids of the default extensions stored on config
+        and set them as default on the extensions module'''
+
+        if self.session.config.d_extensions is not None:
+            for cat_name, ext_id in self.session.config.d_extensions.iteritems():
+                extension.set_default_by_id(cat_name, ext_id)
+
     def on_close(self):
         '''called on close'''
         self.session.quit()
         self.window.hide()
+        self.save_extensions_config()
         self.session.save_config()
 
         if self.conversations:
@@ -76,6 +106,7 @@ class Controller(object):
     def on_login_succeed(self, signals, args):
         '''callback called on login succeed'''
         self.window.clear()
+        self.set_default_extensions_from_config()
         self.window.go_main(self.session, self.on_new_conversation,
             self.on_close)
 
@@ -120,7 +151,7 @@ class Controller(object):
             self.config.d_accounts[account.account] = base64.b64encode(
                 account.password)
             self.config.d_status[account.account] = account.status
-            
+
             if account.account not in self.config.l_remember_account:
                 self.config.l_remember_account.append(account.account)
 

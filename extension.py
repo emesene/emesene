@@ -7,30 +7,30 @@ Extensions in your code
     Basic
     -----
         If you want to use extensions, you'll have to "initialize" a category first::
-        
+
             import extensions
             extensions.category_register("category name")
-        
+
 
         This should be done only once. Anyway, doing this more than once is not an error.::
-        
+
             extensions.get_extensions("category name") #if you want a LIST of extensions
             extensions.get_default("category name") #if you want ONE extension
-        
+
     Advanced
     --------
         Sometimes you want to be SURE that the extensions behave "the right way".
         To do this, you can provide an interface: an interface is just
         a class that has all the method we require; example::
-        
+
             Class IFoo:
                 def __init__(self, some, args):
-                    raise NotImplementedError
+                    raise NotImplementedError()
                 def method_foo(self, we, like, args):
-                    raise NotImplementedError
+                    raise NotImplementedError()
                 def method_bar(self, some, other, args):
-                    raise NotImplementedError
-        
+                    raise NotImplementedError()
+
         When you create the category with category_register, you can specify
         it using C{extensions.category_register("category name", IFoo)}
 
@@ -49,8 +49,11 @@ Providing extensions
     implementing
 '''
 
+import os
+import sys
 
-class Category:
+
+class Category(object):
     '''This completely handles a category'''
     def __init__(self, name, system_default, interfaces):
         '''Constructor: creates a new category
@@ -66,10 +69,13 @@ class Category:
         else:
             self.interfaces = tuple(interfaces)
 
+        # id: class
         self.classes = {}
         self.instances = {}
+        # class: id
+        self.ids = {}
 
-        self.set_default(system_default)
+        self.default = system_default
 
     def register(self, cls):
         '''This will "add" a class to the possible extension.
@@ -78,40 +84,44 @@ class Category:
         '''
         for interface in self.interfaces:
             if not is_implementation(cls, interface):
-                raise ValueError, \
-                        "cls doesn't agree to the interface: %s" % \
-                         (str(interface))
+                raise ValueError("cls doesn't agree to the interface: %s" % \
+                 (str(interface)))
 
         class_name = _get_class_name(cls)
         self.classes[class_name] = cls
+        self.ids[cls] = class_name
 
     def get_extensions(self):
-        '''return a list of ready-to-use extension instances'''
-        return [self._instance_of(class_name)
-            for class_name in self.classes.keys()]
+        '''return a list of the available extensions'''
+        return self.classes.values()
 
-    def _instance_of(self, class_name):
-        '''Given a class name, will return a ready-to-use instance.
-        Every "trick" (hey, only if necessary), will be done here.
-        '''
-        if class_name in self.instances:
-            return self.instances[class_name]
-
-        instance = self.classes[class_name]()
-        self.instances[class_name] = instance
-        return instance
-
-    def set_default(self, cls):
+    def _set_default(self, cls):
         '''register the default extension for this category, if it's not
         registered then register it and set it as default'''
-        if cls not in self.classes.values():
+        if cls not in self.ids:
             self.register(cls)
 
-        self.default = cls
+        self.default_id = _get_class_name(cls)
+
+    def _get_default(self):
+        '''return the default extension for this category'''
+        return self.classes[self.default_id]
+
+    default = property(fget=_get_default, fset=_set_default)
+
+    def set_default_by_id(self, id_):
+        '''set the default extension through his id (generated
+        by _get_class_name method), if the id is not available it will raise
+        ValueError'''
+
+        if id_ not in self.classes:
+            raise ValueError('extension id not registered on %s' % (self.name,))
+
+        self.default = self.classes[id_]
 
 _categories = {} #'CategoryName': Category('ClassName')
 
-def category_register(category, system_default=None, *interfaces):
+def category_register(category, system_default, *interfaces):
     '''Add a category'''
     _categories[category] = Category(category, system_default, interfaces)
 
@@ -128,18 +138,28 @@ def get_category(category_name):
     '''Get a Category object'''
     return _categories[category_name]
 
+def get_categories():
+    '''return a dict with all the categories'''
+    return _categories
+
 def get_extensions(category_name):
-    '''return a list of ready-to-use extension instances'''
+    '''return a list of extensions registeres on a category'''
     return get_category(category_name).get_extensions()
 
 def get_default(category_name):
-    '''This will return a "default" extension, chosen through Config (TODO)'''
+    '''This will return a "default" extension'''
     return get_category(category_name).default
 
 def set_default(category_name, cls):
     '''set the cls as default for the category category_name, if cls is not
     on the list of registered extensions, then if will be registered'''
     get_category(category_name).set_default(cls)
+
+def set_default_by_id(category_name, id_):
+    '''set the default extension of a category through his id (generated
+    by _get_class_name method), if the id is not available it will raise
+    ValueError'''
+    get_category(category_name).set_default_by_id(id_)
 
 def get_system_default(category_name):
     '''return the default category registered by core, it can be used as
@@ -158,7 +178,14 @@ def is_implementation(cls, interface_cls):
     return True
 
 def _get_class_name(cls):
-    '''Returns the full name of a class: module.class
+    '''Returns the full path of a class
     For instances, call get_full_name(self.__class__)'''
-    return '.'.join([cls.__module__, cls.__name__])
+    path = os.path.abspath(sys.modules[cls.__module__].__file__)
+
+    if path.endswith('.pyc'):
+        path = path[:-1]
+
+    path += ':' + cls.__name__
+
+    return path
 
