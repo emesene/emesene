@@ -3,7 +3,7 @@ import gtk
 import gui
 import utils
 
-import dummy_components
+import extension
 
 class MainMenu(gtk.MenuBar):
     """
@@ -20,10 +20,10 @@ class MainMenu(gtk.MenuBar):
 
         self.handlers = handlers
 
-        FileMenu = dummy_components.get_default('gtk menu file')
-        ActionsMenu = dummy_components.get_default('gtk menu actions')
-        OptionsMenu = dummy_components.get_default('gtk menu options')
-        HelpMenu = dummy_components.get_default('gtk menu help')
+        FileMenu = extension.get_default('gtk menu file')
+        ActionsMenu = extension.get_default('gtk menu actions')
+        OptionsMenu = extension.get_default('gtk menu options')
+        HelpMenu = extension.get_default('gtk menu help')
 
         self.file = gtk.MenuItem('_File')
         self.file_menu = FileMenu(self.handlers.file_handler)
@@ -61,7 +61,7 @@ class FileMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        StatusMenu = dummy_components.get_default('gtk menu status')
+        StatusMenu = extension.get_default('gtk menu status')
         self.status = gtk.ImageMenuItem('Status')
         self.status.set_image(gtk.image_new_from_stock(gtk.STOCK_CONVERT,
             gtk.ICON_SIZE_MENU))
@@ -94,9 +94,9 @@ class ActionsMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        ContactsMenu = dummy_components.get_default('gtk menu contact')
-        GroupsMenu = dummy_components.get_default('gtk menu group')
-        AccountMenu = dummy_components.get_default('gtk menu account')
+        ContactsMenu = extension.get_default('gtk menu contact')
+        GroupsMenu = extension.get_default('gtk menu group')
+        AccountMenu = extension.get_default('gtk menu account')
 
         self.contact = gtk.ImageMenuItem('_Contact')
         self.contact.set_image(utils.safe_gtk_image_load(gui.theme.chat))

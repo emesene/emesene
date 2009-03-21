@@ -6,9 +6,7 @@ import time
 import gui
 import utils
 import e3common
-import dummy_components
-
-import dialog
+import extension
 
 class MainWindow(gtk.VBox):
     '''this class represents the widget that is shown when the user is logged
@@ -17,8 +15,8 @@ class MainWindow(gtk.VBox):
     def __init__(self, session, on_new_conversation, on_close):
         '''class constructor'''
         gtk.VBox.__init__(self)
-        UserPanel = dummy_components.get_default('gtk user panel')
-        ContactList = dummy_components.get_default('gtk contact list')
+        UserPanel = extension.get_default('gtk user panel')
+        ContactList = extension.get_default('gtk contact list')
 
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
@@ -66,6 +64,8 @@ class MainWindow(gtk.VBox):
 
     def _build_menus(self):
         '''buildall the menus used on the client'''
+        dialog = extension.get_default('gtk dialog')
+
         handler = e3common.MenuHandler(self.session, dialog, self.contact_list,
             self.on_disconnect, self.on_close)
 
@@ -74,9 +74,9 @@ class MainWindow(gtk.VBox):
         group_handler = e3common.GroupHandler(self.session, dialog,
             self.contact_list)
 
-        MainMenu = dummy_components.get_default('gtk main menu')
-        ContactMenu = dummy_components.get_default('gtk menu contact')
-        GroupMenu = dummy_components.get_default('gtk menu group')
+        MainMenu = extension.get_default('gtk main menu')
+        ContactMenu = extension.get_default('gtk menu contact')
+        GroupMenu = extension.get_default('gtk menu group')
 
         self.menu = MainMenu(handler, self.session.config)
 

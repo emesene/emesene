@@ -2,9 +2,8 @@ import gtk
 
 import gui
 import utils
-import dialog
 import e3common
-import dummy_components
+import extension
 
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
@@ -23,14 +22,14 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel = gtk.VPaned()
 
-        Header = dummy_components.get_default('gtk conversation header')
-        OutputText = dummy_components.get_default('gtk conversation output')
-        InputText = dummy_components.get_default('gtk conversation input')
-        ContactInfo = dummy_components.get_default('gtk conversation info')
-        ConversationToolbar = dummy_components.get_default(
+        Header = extension.get_default('gtk conversation header')
+        OutputText = extension.get_default('gtk conversation output')
+        InputText = extension.get_default('gtk conversation input')
+        ContactInfo = extension.get_default('gtk conversation info')
+        ConversationToolbar = extension.get_default(
             'gtk conversation toolbar')
 
-
+        dialog = extension.get_default('gtk dialog')
         self.header = Header()
         toolbar_handler = e3common.ConversationToolbarHandler(self.session,
             dialog, gui.theme, self)

@@ -3,7 +3,7 @@ import gtk
 
 import gui
 import utils
-import dummy_components
+import extension
 
 class Window(gtk.Window):
     
@@ -37,7 +37,7 @@ class Window(gtk.Window):
     def go_login(self, callback, account=None, accounts=None, 
            remember_account=None, remember_password=None, statuses=None):
         '''draw the login window on the main window'''
-        LoginWindow = dummy_components.get_default('gtk login window')
+        LoginWindow = extension.get_default('gtk login window')
 
         self.content = LoginWindow(callback, account, accounts,
             remember_account, remember_password, statuses)
@@ -47,7 +47,7 @@ class Window(gtk.Window):
 
     def go_main(self, session, on_new_conversation, on_close):
         '''change to the main window'''
-        MainWindow = dummy_components.get_default('gtk main window')
+        MainWindow = extension.get_default('gtk main window')
         self.content = MainWindow(session, on_new_conversation,
             on_close)
         self.add(self.content)
@@ -56,7 +56,7 @@ class Window(gtk.Window):
 
     def go_conversation(self, session):
         '''change to a conversation window'''
-        ConversationManager = dummy_components.get_default('gtk conversation window')
+        ConversationManager = extension.get_default('gtk conversation window')
         self.content = ConversationManager(session, self._on_last_tab_close)
         self.add(self.content)
         self.connect('focus-in-event', self.content._on_focus)

@@ -1,5 +1,5 @@
 import Login
-import dialog
+import Dialog
 import Header
 import Window
 import TextBox
@@ -19,7 +19,7 @@ import WebKitTextBox
 import ConversationManager
 import ConversationToolbar
 
-import dummy_components
+import extension
 
 from protocol.Worker import EVENTS
 
@@ -29,35 +29,35 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    dummy_components.categories['gtk dialog'] = dialog
-    dummy_components.categories['gtk login window'] = Login.Login
-    dummy_components.categories['gtk window frame'] = Window.Window
-    dummy_components.categories['gtk main window'] = MainWindow.MainWindow
-    dummy_components.categories['gtk contact list'] = ContactList.ContactList
-    dummy_components.categories['gtk user panel'] = UserPanel.UserPanel
+    extension.category_register('gtk dialog', Dialog.Dialog)
+    extension.category_register('gtk login window', Login.Login)
+    extension.category_register('gtk window frame', Window.Window)
+    extension.category_register('gtk main window', MainWindow.MainWindow)
+    extension.category_register('gtk contact list', ContactList.ContactList)
+    extension.category_register('gtk user panel', UserPanel.UserPanel)
 
-    dummy_components.categories['gtk main menu'] = MainMenu.MainMenu
-    dummy_components.categories['gtk menu file'] = MainMenu.FileMenu
-    dummy_components.categories['gtk menu actions'] = MainMenu.ActionsMenu
-    dummy_components.categories['gtk menu options'] = MainMenu.OptionsMenu
-    dummy_components.categories['gtk menu contact'] = ContactMenu.ContactMenu
-    dummy_components.categories['gtk menu group'] = GroupMenu.GroupMenu
-    dummy_components.categories['gtk menu account'] = AccountMenu.AccountMenu
-    dummy_components.categories['gtk menu help'] = MainMenu.HelpMenu
-    dummy_components.categories['gtk menu status'] = StatusMenu.StatusMenu
+    extension.category_register('gtk main menu', MainMenu.MainMenu)
+    extension.category_register('gtk menu file', MainMenu.FileMenu)
+    extension.category_register('gtk menu actions', MainMenu.ActionsMenu)
+    extension.category_register('gtk menu options', MainMenu.OptionsMenu)
+    extension.category_register('gtk menu contact', ContactMenu.ContactMenu)
+    extension.category_register('gtk menu group', GroupMenu.GroupMenu)
+    extension.category_register('gtk menu account', AccountMenu.AccountMenu)
+    extension.category_register('gtk menu help', MainMenu.HelpMenu)
+    extension.category_register('gtk menu status', StatusMenu.StatusMenu)
 
-    dummy_components.categories['gtk conversation window'] = \
-        ConversationManager.ConversationManager
-    dummy_components.categories['gtk conversation'] = Conversation.Conversation
-    dummy_components.categories['gtk conversation header'] = Header.Header
-    dummy_components.categories['gtk conversation info'] = ContactInfo.ContactInfo
-    dummy_components.categories['gtk conversation tab'] = TabWidget.TabWidget
-    dummy_components.categories['gtk conversation input'] = TextBox.InputText
-    dummy_components.categories['gtk conversation toolbar'] = \
-        ConversationToolbar.ConversationToolbar 
+    extension.category_register('gtk conversation window', \
+        ConversationManager.ConversationManager)
+    extension.category_register('gtk conversation', Conversation.Conversation)
+    extension.category_register('gtk conversation header', Header.Header)
+    extension.category_register('gtk conversation info', ContactInfo.ContactInfo)
+    extension.category_register('gtk conversation tab', TabWidget.TabWidget)
+    extension.category_register('gtk conversation input', TextBox.InputText)
+    extension.category_register('gtk conversation toolbar', \
+        ConversationToolbar.ConversationToolbar)
 
     if not WebKitTextBox.ERROR:
-        dummy_components.categories['gtk conversation output'] = WebKitTextBox.OutputText
+        extension.category_register('gtk conversation output', WebKitTextBox.OutputText)
     else:
-        dummy_components.categories['gtk conversation output'] = TextBox.OutputText
+        extension.category_register('gtk conversation output', TextBox.OutputText)
 

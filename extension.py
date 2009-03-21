@@ -40,7 +40,7 @@ Providing extensions
     of enhancing emesene. They are just classes with a predefined API, 
     "connected" to a category.
     This is done through extensions.register("category name", extension_class)
-    When developing an extension, always check if it has a required interface:
+    When developing an extension, always check if it has a required interfaces:
     if so, implement it all, or your extension will be rejected!
     Thanks to L{plugin_lint} (TODO) you should be able to check if your
     extension is well-formed.
@@ -52,37 +52,46 @@ Providing extensions
 
 class Category:
     '''This completely handles a category'''
-    def __init__(self, name, interface):
+    def __init__(self, name, system_default, interfaces):
         '''Constructor: creates a new category
     @param name: The name of the new category.
-    @param interface: The interface every extension is required to match. 
+    @param interface: The interface every extension is required to match.
         If it's None, no interface is required
         '''
         self.name = name
-        self.interface = interface
+        self.system_default = system_default
+
+        if interfaces is None:
+            self.interfaces = ()
+        else:
+            self.interfaces = tuple(interfaces)
+
         self.classes = {}
         self.instances = {}
-    
+
+        self.set_default(system_default)
+
     def register(self, cls):
         '''This will "add" a class to the possible extension.
     @param cls: A Class, NOT an instance
-    @raise ValueError: if cls doesn't agree to the interface
+    @raise ValueError: if cls doesn't agree to the interfaces
         '''
-        if self.interface is not None:
-            if not is_implementation(cls, self.interface):
+        for interface in self.interfaces:
+            if not is_implementation(cls, interface):
                 raise ValueError, \
                         "cls doesn't agree to the interface: %s" % \
-                         (str(self.interface))
+                         (str(interface))
+
         class_name = _get_class_name(cls)
         self.classes[class_name] = cls
 
     def get_extensions(self):
         '''return a list of ready-to-use extension instances'''
-        return [self._instance_of(class_name) 
+        return [self._instance_of(class_name)
             for class_name in self.classes.keys()]
 
     def _instance_of(self, class_name):
-        '''Given a class name, will return a ready-to-use instance. 
+        '''Given a class name, will return a ready-to-use instance.
         Every "trick" (hey, only if necessary), will be done here.
         '''
         if class_name in self.instances:
@@ -92,24 +101,23 @@ class Category:
         self.instances[class_name] = instance
         return instance
 
-    def get_default(self):
-        '''return ONE extension instance. It will be chosen with preferences'''
-        #put here your choosing logic (preferences)
-        available = self.get_extensions()
-        if available:
-            return available[0] #that's just a test: we should choose better
-        return None
+    def set_default(self, cls):
+        '''register the default extension for this category, if it's not
+        registered then register it and set it as default'''
+        if cls not in self.classes.values():
+            self.register(cls)
 
+        self.default = cls
 
 _categories = {} #'CategoryName': Category('ClassName')
 
-def category_register(category, interface=None):
+def category_register(category, system_default=None, *interfaces):
     '''Add a category'''
-    _categories[category] = Category(category, interface)
+    _categories[category] = Category(category, system_default, interfaces)
 
 def register(category_name, cls):
-    '''Register cls as an Extension for category. 
-    If the class doesn't agree to the required interface, raises ValueError.
+    '''Register cls as an Extension for category.
+    If the class doesn't agree to the required interfaces, raises ValueError.
     If the category doesn't exist, it creates it(but returns False).
     It doesn't instanciate that class immediately.
     @return: False if the category didn't exist. Probably you made a mistake, True otherwise.
@@ -126,7 +134,18 @@ def get_extensions(category_name):
 
 def get_default(category_name):
     '''This will return a "default" extension, chosen through Config (TODO)'''
-    return get_category(category_name).get_default()
+    return get_category(category_name).default
+
+def set_default(category_name, cls):
+    '''set the cls as default for the category category_name, if cls is not
+    on the list of registered extensions, then if will be registered'''
+    get_category(category_name).set_default(cls)
+
+def get_system_default(category_name):
+    '''return the default category registered by core, it can be used as
+    fallback if the default extension on the category raises
+    an Exception when instantiated'''
+    return get_category(category_name).system_default
 
 def is_implementation(cls, interface_cls):
     '''Check if cls implements all the methods provided by interface_cls.

@@ -3,7 +3,7 @@ import gtk
 import gui
 import utils
 import protocol.status as status
-import dummy_components
+import extension
 
 class StatusButton(gtk.Button):
     '''a button that when clicked displays a popup that allows the user to
@@ -19,7 +19,7 @@ class StatusButton(gtk.Button):
         self.set_status(status.ONLINE)
         self.set_relief(gtk.RELIEF_NONE)
         self.set_border_width(0)
-        StatusMenu = dummy_components.get_default('gtk menu status')
+        StatusMenu = extension.get_default('gtk menu status')
         self.menu = StatusMenu(self.set_status)
         self.menu.show_all()
         self.connect('clicked', self._on_clicked)

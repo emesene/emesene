@@ -9,7 +9,7 @@ import yaber
 from e3common import Config
 from e3common import ConfigDir
 
-import dummy_components
+import extension
 import e3gtk
 
 e3gtk.setup()
@@ -82,7 +82,7 @@ class Controller(object):
     def on_login_failed(self, signals, args):
         '''callback called on login failed'''
         self._new_session()
-        dialog = dummy_components.get_default('gtk dialog')
+        dialog = extension.get_default('gtk dialog')
         dialog.error(args[0])
         self.window.content.set_sensitive(True)
 
@@ -156,7 +156,7 @@ class Controller(object):
         (cid, members) = args
 
         if self.conversations is None:
-            Window = dummy_components.get_default('gtk window frame')
+            Window = extension.get_default('gtk window frame')
             window = Window(self._on_conversation_window_close)
             window.set_default_size(640, 480)
             window.go_conversation(self.session)
@@ -179,7 +179,7 @@ class Controller(object):
         self.conversations = None
 
     def start(self, account=None, accounts=None):
-        Window = dummy_components.get_default('gtk window frame')
+        Window = extension.get_default('gtk window frame')
         self.window = Window(self.on_close)
 
         self.window.go_login(self.on_login_connect, account, 
