@@ -11,6 +11,10 @@ import extension
 class MainWindow(gtk.VBox):
     '''this class represents the widget that is shown when the user is logged
     in (menu, contact list etc)'''
+    NAME = 'Main Window'
+    DESCRIPTION = 'The window used when an account is logged in'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, session, on_new_conversation, on_close):
         '''class constructor'''

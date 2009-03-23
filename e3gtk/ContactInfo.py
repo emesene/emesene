@@ -3,6 +3,10 @@ import gtk
 class ContactInfo(gtk.VBox):
     '''a widget that contains the display pictures of the contacts and our
     own display picture'''
+    NAME = 'Contact info'
+    DESCRIPTION = 'The panel to show contact display pictures'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, first=None, last=None):
         gtk.VBox.__init__(self)

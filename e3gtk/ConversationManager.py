@@ -7,6 +7,10 @@ import extension
 
 class ConversationManager(gtk.Notebook, gui.ConversationManager):
     '''the main conversation, it only contains other widgets'''
+    NAME = 'Conversation Manager'
+    DESCRIPTION = 'The widget that contains a group of conversations'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, session, on_last_close):
         '''class constructor'''

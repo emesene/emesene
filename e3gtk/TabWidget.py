@@ -6,6 +6,10 @@ import TinyButton
 
 class TabWidget(gtk.HBox):
     '''a widget that is placed on the tab on a notebook'''
+    NAME = 'Tab Widget'
+    DESCRIPTION = 'A widget to display the tab information'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, text, on_tab_menu, on_close_clicked, conversation):
         '''constructor'''

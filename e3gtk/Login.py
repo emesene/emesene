@@ -4,24 +4,36 @@ import gobject
 
 import gui
 import gui.stock as stock
-import protocol.Account as Account
-import protocol.status as status
+import protocol
 import utils
+import extension
 import StatusButton
 
 class Login(gtk.Alignment):
     
-    def __init__(self, callback, account, accounts=None, remember_account=None,
-            remember_password=None, statuses=None):
+    def __init__(self, callback, on_preferences_changed, account, 
+            accounts=None, remember_account=None, remember_password=None, 
+            statuses=None, proxy=None, use_http=False, session_id=None):
+
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0, 
             yscale=1.0)
 
-        account = account or Account("", "", status.ONLINE)
+        account = account or protocol.Account("", "", protocol.status.ONLINE)
         self.callback = callback
+        self.on_preferences_changed = on_preferences_changed
         self.accounts = accounts or {}
         self.l_remember_account = remember_account or []
         self.l_remember_password = remember_password or []
         self.statuses = statuses or {}
+        # the id of the default extension that handles the session
+        # used to select the default session on the preference dialog
+        self.use_http = use_http
+        self.session_id = session_id
+
+        if proxy is None:
+            self.proxy = protocol.Proxy()
+        else:
+            self.proxy = proxy
 
         completion = gtk.EntryCompletion()
         liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
@@ -96,6 +108,8 @@ class Login(gtk.Alignment):
             self._on_preferences_enter)
         self.b_preferences.connect('leave-notify-event', 
             self._on_preferences_leave)
+        self.b_preferences.connect('clicked', 
+            self._on_preferences_selected)
 
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
             yscale=0.0)
@@ -146,11 +160,21 @@ class Login(gtk.Alignment):
         '''do all the staff needed to connect'''
         user = self.txt_account.get_text()
         password = self.txt_password.get_text()
-        account = Account(user, password, self.btn_status.status)
+        account = protocol.Account(user, password, self.btn_status.status)
         remember_password = self.remember_password.get_active()
         remember_account = self.remember_account.get_active()
+
+        if user == '':
+            extension.get_default('gtk dialog').error('Empty user')
+            return
+
+        if password == '':
+            extension.get_default('gtk dialog').error('Empty password')
+            return
+
         self.set_sensitive(False)
-        self.callback(account, remember_account, remember_password)
+        self.callback(account, remember_account, remember_password, 
+            self.session_id, self.proxy, self.use_http)
 
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
@@ -187,7 +211,7 @@ class Login(gtk.Alignment):
             except ValueError:
                 print 'invalid status'
         else:
-            self.btn_status.set_status(status.ONLINE)
+            self.btn_status.set_status(protocol.status.ONLINE)
             
 
     def _on_remember_account_toggled(self, button):
@@ -208,3 +232,15 @@ class Login(gtk.Alignment):
         '''called when the mouse leaves the preferences button'''
         self.img_preferences.set_sensitive(False)
 
+    def _on_preferences_selected(self, button):
+        '''called when the user clicks the preference button'''
+        extension.get_default('gtk dialog').login_preferences(self.session_id,
+            self._on_new_preferences, self.use_http, self.proxy)
+
+    def _on_new_preferences(self, use_http, use_proxy, host, port, 
+        use_auth, user, passwd, session_id):
+        '''called when the user press accept on the preferences dialog'''
+        self.proxy = protocol.Proxy(use_proxy, host, port, use_auth, user, passwd)
+        self.session_id = session_id
+        self.use_http = use_http
+        self.on_preferences_changed(self.use_http, self.proxy, self.session_id)

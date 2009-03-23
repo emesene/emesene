@@ -29,6 +29,11 @@ import e3common.ConfigDir
 import protocol.ContactManager
 
 class Session(object):
+    NAME = 'Base session'
+    DESCRIPTION = '''This is a base session implementation, 
+    other classes inherit from this one'''
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, id_=None, account=None):
         self.id_ = id_
@@ -110,7 +115,7 @@ class Session(object):
         '''close the worker and socket threads'''
         self.add_action(Action.ACTION_QUIT, ())
 
-    def login(self, account, password, status):
+    def login(self, account, password, status, proxy, use_http=False):
         '''start the login process'''
         raise NotImplementedError('Not implemented')
         
@@ -156,7 +161,7 @@ class Session(object):
         '''remove a contact from the group identified by src_gid and add it
         to dest_gid'''
         self.add_action(Action.ACTION_MOVE_TO_GROUP, (account, 
-        src_gid, dest_gid))
+            src_gid, dest_gid))
         
     def add_group(self, name):
         '''add a group '''

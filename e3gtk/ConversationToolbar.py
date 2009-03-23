@@ -7,6 +7,10 @@ class ConversationToolbar(gtk.Toolbar):
     """
     A class that represents the toolbar on the conversation window
     """
+    NAME = 'Conversation Toolbar'
+    DESCRIPTION = 'The toolbar for a conversation'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, handler):
         """

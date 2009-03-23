@@ -92,8 +92,8 @@ class Category(object):
         self.ids[cls] = class_name
 
     def get_extensions(self):
-        '''return a list of the available extensions'''
-        return self.classes.values()
+        '''return a dict of the available extensions id:class'''
+        return self.classes
 
     def _set_default(self, cls):
         '''register the default extension for this category, if it's not
@@ -143,7 +143,7 @@ def get_categories():
     return _categories
 
 def get_extensions(category_name):
-    '''return a list of extensions registeres on a category'''
+    '''return a dict of the available extensions id:class'''
     return get_category(category_name).get_extensions()
 
 def get_default(category_name):

@@ -9,6 +9,10 @@ class MainMenu(gtk.MenuBar):
     """
     A widget that represents the main menu of the main window
     """
+    NAME = 'Main Menu'
+    DESCRIPTION = 'The Main Menu of the main window'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, handlers, config):
         """

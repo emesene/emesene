@@ -6,6 +6,7 @@ import gobject
 
 import e3
 import yaber
+import protocol
 from e3common import Config
 from e3common import ConfigDir
 
@@ -21,7 +22,8 @@ class Controller(object):
         self.conversations = None
         self.config = Config.Config()
         self.config_dir = ConfigDir.ConfigDir('emesene2')
-        self.config.load(self.config_dir.join('config'))
+        self.config_path = self.config_dir.join('config')
+        self.config.load(self.config_path)
 
         if self.config.d_status is None:
             self.config.d_status = {}
@@ -30,10 +32,9 @@ class Controller(object):
             self.config.d_accounts = {}
 
         self.session = None
-        self.setup()
-        self._new_session()
+        self._setup()
 
-    def setup(self):
+    def _setup(self):
         '''register core extensions'''
         e3gtk.setup()
         extension.category_register('session', e3.Session)
@@ -72,6 +73,9 @@ class Controller(object):
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
+        if self.session is None:
+            return
+
         if self.session.config.d_extensions is None:
             self.session.config.d_extensions = {}
 
@@ -87,12 +91,41 @@ class Controller(object):
             for cat_name, ext_id in self.session.config.d_extensions.iteritems():
                 extension.set_default_by_id(cat_name, ext_id)
 
+    def _get_proxy_settings(self):
+        '''return the values of the proxy settings as a protocol.Proxy object
+        initialize the values on config if not exist'''
+
+        use_proxy = self.config.get_or_set('b_use_proxy', False)
+        use_proxy_auth = self.config.get_or_set('b_use_proxy_auth', False)
+        host = self.config.get_or_set('proxy_host', '')
+        port = self.config.get_or_set('proxy_port', '')
+        user = self.config.get_or_set('proxy_user', '')
+        passwd = self.config.get_or_set('proxy_passwd', '')
+
+        return protocol.Proxy(use_proxy, host, port, use_proxy_auth, user,
+            passwd)
+
+    def _save_proxy_settings(self, proxy):
+        '''save the values of the proxy settings to config'''
+        self.config.b_use_proxy = proxy.use_proxy
+        self.config.b_use_proxy_auth = proxy.use_auth
+        self.config.proxy_host = proxy.host
+        self.config.proxy_port = proxy.port
+        self.config.proxy_user = proxy.user
+        self.config.proxy_passwd = proxy.passwd
+
     def on_close(self):
         '''called on close'''
-        self.session.quit()
+        if self.session is not None:
+            self.session.quit()
+
         self.window.hide()
         self.save_extensions_config()
-        self.session.save_config()
+
+        if self.session is not None:
+            self.session.save_config()
+
+        self.config.save(self.config_path)
 
         if self.conversations:
             self.conversations.get_parent().hide()
@@ -106,6 +139,7 @@ class Controller(object):
     def on_login_succeed(self, signals, args):
         '''callback called on login succeed'''
         self.window.clear()
+        self.config.save(self.config_path)
         self.set_default_extensions_from_config()
         self.window.go_main(self.session, self.on_new_conversation,
             self.on_close)
@@ -139,8 +173,18 @@ class Controller(object):
         message = args[0]
         self.window.content.panel.message.text = message
 
-    def on_login_connect(self, account, remember_account, remember_password):
+    def on_preferences_changed(self, use_http, proxy, session_id):
+        '''called when the preferences on login change'''
+        self.config.session = session_id
+        extension.set_default_by_id('session', session_id)
+        self.config.b_use_http = use_http
+        self._save_proxy_settings(proxy)
+
+    def on_login_connect(self, account, remember_account, remember_password,
+        session_id, proxy, use_http):
         '''called when the user press the connect button'''
+        self.on_preferences_changed(use_http, proxy, session_id)
+
         if self.config.l_remember_account is None:
             self.config.l_remember_account = []
 
@@ -178,8 +222,9 @@ class Controller(object):
             if account.account in self.config.d_status:
                 del self.config.d_status[account.account]
 
-        self.config.save(self.config_dir.join('config'))
-        self.session.login(account.account, account.password, account.status)
+        self._new_session()
+        self.session.login(account.account, account.password, account.status, 
+            proxy, use_http)
 
     def on_new_conversation(self, signals, args):
         '''callback called when the other user does an action that justify
@@ -213,9 +258,14 @@ class Controller(object):
         Window = extension.get_default('gtk window frame')
         self.window = Window(self.on_close)
 
-        self.window.go_login(self.on_login_connect, account, 
+        proxy = self._get_proxy_settings()
+        use_http = self.config.get_or_set('b_use_http', False)
+
+        self.window.go_login(self.on_login_connect, 
+            self.on_preferences_changed,account, 
             self.config.d_accounts, self.config.l_remember_account, 
-            self.config.l_remember_password, self.config.d_status)
+            self.config.l_remember_password, self.config.d_status,
+            self.config.session, proxy, use_http, self.config.session)
 
         self.window.show()
 

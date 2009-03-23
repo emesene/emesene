@@ -11,6 +11,10 @@ import e3common.MarkupParser
 class OutputText(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
     text in the widget'''
+    NAME = 'Webkit Output'
+    DESCRIPTION = 'A widget to display conversation messages using webkit'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, config):
         '''constructor'''

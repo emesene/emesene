@@ -4,12 +4,16 @@ from protocol.Action import Action
 
 class Session(protocol.Session):
     '''a specialization of protocol.Session'''
+    NAME = 'MSN session'
+    DESCRIPTION = 'Session to connect to the MSN network'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, id_=None, account=None):
         '''constructor'''
         protocol.Session.__init__(self, id_, account)
 
-    def login(self, account, password, status):
+    def login(self, account, password, status, proxy, use_http=False):
         '''start the login process'''
         socket = e3.MsnSocket('messenger.hotmail.com', 1863, dest_type='NS')
         worker = e3.Worker('emesene2', socket, self, e3.MsnSocket)

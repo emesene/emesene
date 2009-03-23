@@ -4,6 +4,10 @@ class AccountMenu(gtk.Menu):
     """
     A class that represents a menu to handle contact related information
     """
+    NAME = 'Account menu'
+    DESCRIPTION = 'The menu to handle account options'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, handler):
         """

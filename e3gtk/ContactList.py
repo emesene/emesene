@@ -30,6 +30,10 @@ from protocol.Contact import Contact
 
 class ContactList(gui.ContactList.ContactList, gtk.TreeView):
     '''a gtk implementation of gui.ContactList'''
+    NAME = 'Contact List'
+    DESCRIPTION = 'The widget that displays the contact list on the main window'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, session):
         '''class constructor'''

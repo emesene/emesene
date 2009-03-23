@@ -46,6 +46,14 @@ class Config(dict):
         else:
             return None
 
+    def get_or_set(self, name, default):
+        '''return the value of the name config value, if not set
+        then set it to default and return that value'''
+        if not hasattr(self, name):
+            setattr(self, name, default)
+
+        return getattr(self, name)
+
     def load(self, path, clear=False, section='DEFAULT'):
         '''load the config file from path, clear old values if
         clear is set to True'''

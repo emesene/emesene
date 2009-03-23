@@ -8,6 +8,10 @@ class StatusMenu(gtk.Menu):
     """
     A widget that contains the statuses and allows to change the current status
     """
+    NAME = 'Status Menu'
+    DESCRIPTION = 'A menu to select the status'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, on_status_selected):
         """

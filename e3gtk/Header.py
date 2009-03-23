@@ -9,6 +9,11 @@ class Header(gtk.HBox):
     INFO_TPL += '<span style="italic">%s</span>\n'
     INFO_TPL += '<span size="small">%s</span>'
 
+    NAME = 'Header'
+    DESCRIPTION = 'The widget that displays information about the conversation'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
+
     def __init__(self):
         '''constructor'''
         gtk.HBox.__init__(self)

@@ -8,6 +8,10 @@ import StatusButton
 
 class UserPanel(gtk.VBox):
     '''a panel to display and manipulate the user information'''
+    NAME = 'User Panel'
+    DESCRIPTION = 'A widget to display/modify the account information on the main window'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, session):
         '''constructor'''

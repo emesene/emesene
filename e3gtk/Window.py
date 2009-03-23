@@ -6,6 +6,12 @@ import utils
 import extension
 
 class Window(gtk.Window):
+    '''the class used to create all the windows of emesene'''
+
+    NAME = 'Window'
+    DESCRIPTION = 'The window used to contain all the content of emesene'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
     
     def __init__(self, cb_on_close, height=410, width=250):
         gtk.Window.__init__(self)
@@ -34,13 +40,16 @@ class Window(gtk.Window):
             self.remove(self.get_child())
             self.content = None
 
-    def go_login(self, callback, account=None, accounts=None, 
-           remember_account=None, remember_password=None, statuses=None):
+    def go_login(self, callback, on_preferences_changed,
+            account=None, accounts=None, 
+            remember_account=None, remember_password=None, statuses=None,
+            session=None, proxy=None, use_http=False, session_id=None):
         '''draw the login window on the main window'''
         LoginWindow = extension.get_default('gtk login window')
 
-        self.content = LoginWindow(callback, account, accounts,
-            remember_account, remember_password, statuses)
+        self.content = LoginWindow(callback, on_preferences_changed, 
+            account, accounts, remember_account, remember_password, statuses, 
+            proxy, use_http, session_id)
         self.add(self.content)
         self.content.show()
         self.content_type = 'login'

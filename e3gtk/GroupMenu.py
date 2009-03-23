@@ -4,6 +4,10 @@ class GroupMenu(gtk.Menu):
     """
     A class that represents a menu to handle contact related information
     """
+    NAME = 'Group Menu'
+    DESCRIPTION = 'The menu that displays all the group options'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, handler):
         """

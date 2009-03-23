@@ -8,6 +8,10 @@ import extension
 class StatusButton(gtk.Button):
     '''a button that when clicked displays a popup that allows the user to
     select a status'''
+    NAME = 'Status Button'
+    DESCRIPTION = 'A button to select the status'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, session=None):
         gtk.Button.__init__(self)

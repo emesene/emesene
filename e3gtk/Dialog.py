@@ -21,9 +21,11 @@
 import gtk
 import pango
 
+import gui
 import utils
+import stock
 import protocol
-import gui.stock as stock
+import extension
 
 import ContactInformation
 
@@ -32,6 +34,10 @@ _ = lambda x: x
 
 class Dialog(object):
     '''a class full of static methods to handle dialogs, dont instantiate it'''
+    NAME = 'Dialog'
+    DESCRIPTION = 'Class to show all the dialogs of the application'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     @classmethod
     def window_add_image(cls, window, stock_id):
@@ -181,6 +187,7 @@ class Dialog(object):
         window.set_default_size(150, 100)
         window.set_position(gtk.WIN_POS_CENTER)
         window.set_border_width(8)
+        window.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
 
         vbox = gtk.VBox(spacing=4)
         hbox = gtk.HBox(spacing=4)
@@ -550,3 +557,124 @@ class Dialog(object):
         a string containing the selected account
         '''
         pass
+
+    @classmethod
+    def login_preferences(cls, session, callback, use_http, proxy):
+        """
+        display the preferences dialog for the login window
+        
+        cls -- the dialog class
+        session -- the session string identifier
+        callback -- callback to call if the user press accept, call with the
+            new values
+        use_http -- boolean that indicates if the protocol should use http
+            method
+        proxy -- a protocol.Proxy object
+        """
+
+        content = gtk.VBox()
+        box = gtk.Table(9, 2)
+
+        combo = gtk.combo_box_new_text()
+
+        t_host = gtk.Entry()
+        t_port = gtk.Entry()
+        t_user = gtk.Entry()
+        t_passwd = gtk.Entry()
+
+        def on_toggled(check_button, *entries):
+            '''called when a check button is toggled, receive a set
+            of entries, enable or disable them deppending on the state
+            of the check button'''
+            for entry in entries:
+                entry.set_sensitive(check_button.get_active())
+
+        c_use_http = gtk.CheckButton('Use HTTP method')
+        c_use_proxy = gtk.CheckButton('Use proxy')
+        c_use_proxy.connect('toggled', on_toggled, t_host, t_port)
+        c_use_auth = gtk.CheckButton('Use authentication')
+        c_use_auth.connect('toggled', on_toggled, t_user, t_passwd)
+
+        t_host.set_text(proxy.host or '')
+        t_port.set_text(proxy.port or '')
+        t_user.set_text(proxy.user or '')
+        t_passwd.set_text(proxy.passwd or '')
+        t_passwd.set_visibility(False)
+        c_use_http.set_active(use_http)
+        c_use_proxy.set_active(proxy.use_proxy)
+        c_use_proxy.toggled()
+        c_use_proxy.toggled()
+        c_use_auth.set_active(proxy.use_auth)
+        c_use_auth.toggled()
+        c_use_auth.toggled()
+
+        l_session = gtk.Label('Session')
+        l_session.set_alignment(0.0, 0.5)
+        l_host = gtk.Label('Host')
+        l_host.set_alignment(0.0, 0.5)
+        l_port = gtk.Label('Port')
+        l_port.set_alignment(0.0, 0.5)
+        l_user = gtk.Label('User')
+        l_user.set_alignment(0.0, 0.5)
+        l_passwd = gtk.Label('Password')
+        l_passwd.set_alignment(0.0, 0.5)
+
+        box.attach(l_session, 0, 1, 0, 1)
+        box.attach(combo, 1, 2, 0, 1)
+        box.attach(c_use_http, 0, 2, 1, 2)
+        box.attach(c_use_proxy, 0, 2, 2, 3)
+        box.attach(l_host, 0, 1, 3, 4)
+        box.attach(t_host, 1, 2, 3, 4)
+        box.attach(l_port, 0, 1, 4, 5)
+        box.attach(t_port, 1, 2, 4, 5)
+        box.attach(c_use_auth, 0, 2, 5, 6)
+        box.attach(l_user, 0, 1, 6, 7)
+        box.attach(t_user, 1, 2, 6, 7)
+        box.attach(l_passwd, 0, 1, 7, 8)
+        box.attach(t_passwd, 1, 2, 7, 8)
+
+        index = 0
+        count = 0
+        name_to_id = {}
+        for ext_id, ext in extension.get_extensions('session').iteritems():
+            if session == ext_id:
+                index = count
+
+            combo.append_text(ext.NAME)
+            name_to_id[ext.NAME] = ext_id
+            count += 1
+
+        combo.set_active(index)
+
+        def response_cb(response):
+            '''called on any response (close, accept, cancel) if accept
+            get the new values and call callback with those values'''
+            if response == stock.ACCEPT:
+                use_http = c_use_http.get_active()
+                use_proxy = c_use_proxy.get_active()
+                use_auth = c_use_auth.get_active()
+                host = t_host.get_text()
+                port = t_port.get_text()
+                user = t_user.get_text()
+                passwd = t_passwd.get_text()
+
+                session_id = name_to_id[combo.get_active_text()]
+                callback(use_http, use_proxy, host, port, use_auth, user, passwd, 
+                    session_id)
+
+            window.hide()
+
+        def button_cb(button, window, response_cb, response):
+            '''called when a button is pressedm get the response id and call
+            the response_cb that will handle the event according to the 
+            response'''
+            response_cb(response)
+
+        window = cls.new_window('Preferences', response_cb)
+        window.hbox.pack_start(content, True, True)
+        content.pack_start(box, True, True)
+
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb, button_cb)
+        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb, button_cb)
+        window.show_all()
+

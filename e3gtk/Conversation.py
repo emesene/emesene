@@ -7,6 +7,10 @@ import extension
 
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
+    NAME = 'Conversation'
+    DESCRIPTION = 'The widget that displays a conversation'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, session, cid, tab_label, members=None):
         '''constructor'''

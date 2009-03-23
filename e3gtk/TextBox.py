@@ -75,6 +75,10 @@ class TextBox(gtk.ScrolledWindow):
 
 class InputText(TextBox):
     '''a widget that is used to insert the messages to send'''
+    NAME = 'Input Text'
+    DESCRIPTION = 'A widget to enter messages on the conversation'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, config, on_send_message):
         '''constructor'''
@@ -134,6 +138,10 @@ class InputText(TextBox):
 
 class OutputText(TextBox):
     '''a widget that is used to display the messages on the conversation'''
+    NAME = 'Output Text'
+    DESCRIPTION = 'A widget to display the conversation messages'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, config):
         '''constructor'''
