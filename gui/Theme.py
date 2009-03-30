@@ -142,3 +142,7 @@ class Theme(object):
 
         return None
 
+    def get_emotes_count(self):
+        '''return the number of emoticons registered'''
+        return len(set(Theme.EMOTES.values()))
+

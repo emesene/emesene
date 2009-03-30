@@ -543,12 +543,12 @@ class Dialog(object):
         pass
 
     @classmethod
-    def select_emote(cls, theme, callback):
+    def select_emote(cls, theme, callback, max_width=8):
         '''select an emoticon, receives a gui.Theme object with the theme 
         settings the callback receives the response and a string representing 
         the selected emoticon
         '''
-        pass
+        EmotesWindow(callback, max_width).show()
 
     @classmethod
     def invite_dialog(cls, session, callback):
@@ -562,7 +562,7 @@ class Dialog(object):
     def login_preferences(cls, session, callback, use_http, proxy):
         """
         display the preferences dialog for the login window
-        
+
         cls -- the dialog class
         session -- the session string identifier
         callback -- callback to call if the user press accept, call with the
@@ -677,4 +677,64 @@ class Dialog(object):
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb, button_cb)
         cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb, button_cb)
         window.show_all()
+
+class EmotesWindow(gtk.Window):
+    """
+    This class represents a window to select an emoticon
+    """
+
+    def __init__(self, emote_selected, max_width=8):
+        """
+        Constructor.
+        max_width -- the maximum number of columns
+        """
+        gtk.Window.__init__(self)
+        self.set_decorated(False)
+        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        self.set_position(gtk.WIN_POS_MOUSE)
+        self.set_resizable(False)
+
+        self.max_width = max_width
+        self.emote_selected = emote_selected
+
+        emotes_count = gui.theme.get_emotes_count()
+        rows = emotes_count/max_width
+        self.table = gtk.Table(max_width, rows)
+
+        self._fill_emote_table(max_width)
+
+        box = gtk.VBox()
+        box.pack_start(self.table)
+        self.add(box)
+        box.show_all()
+
+    def _fill_emote_table(self, columns):
+        '''fill the gtk.Table with the emoticons'''
+        emotes = []
+
+        count = 0
+        for shortcut, name in gui.theme.EMOTES.iteritems():
+            if name in emotes:
+                continue
+
+            column = count % columns
+            row = count / columns
+            button = gtk.Button()
+            path = gui.theme.emote_to_path(shortcut, True)
+
+            if path is None:
+                print shortcut, 'has no path'
+                continue
+
+            button.set_image(utils.safe_gtk_image_load(path))
+            button.connect('clicked', self._on_emote_selected, shortcut)
+            self.table.attach(button, column, column + 1, row, row + 1)
+
+            count += 1
+
+    def _on_emote_selected(self, button, shortcut):
+        '''called when an emote is selected'''
+        self.emote_selected(shortcut)
+        self.hide()
+
 

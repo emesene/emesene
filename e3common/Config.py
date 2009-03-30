@@ -85,15 +85,18 @@ class Config(dict):
         parser = ConfigParser.SafeConfigParser()
 
         for (key, value) in self.__dict__.iteritems():
-            if key.startswith('l_'):
-                parser.set(section, key, Config.list_to_string(value))
-            elif key.startswith('d_'):
-                parser.set(section, key, Config.dict_to_string(value))
-            elif key.startswith('b_'):
-                parser.set(section, key, str(int(value)))
-            else:
-                parser.set(section, key, str(value))
-        
+            try:
+                if key.startswith('l_'):
+                    parser.set(section, key, Config.list_to_string(value))
+                elif key.startswith('d_'):
+                    parser.set(section, key, Config.dict_to_string(value))
+                elif key.startswith('b_'):
+                    parser.set(section, key, str(int(value)))
+                else:
+                    parser.set(section, key, str(value))
+            except Exception, ex:
+                print 'couldn\'t save %s:%s invalid type' % (key, value)
+
         parser.write(file(path, 'w'))
 
     @classmethod

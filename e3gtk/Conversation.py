@@ -169,3 +169,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         else:
             self.toolbar.hide()
 
+
+    def on_emote(self, emote):
+        '''called when an emoticon is selected'''
+        self.input.append(emote)

@@ -102,6 +102,8 @@ class Controller(object):
         user = self.config.get_or_set('proxy_user', '')
         passwd = self.config.get_or_set('proxy_passwd', '')
 
+        use_http = self.config.get_or_set('b_use_http', False)
+
         return protocol.Proxy(use_proxy, host, port, use_proxy_auth, user,
             passwd)
 
