@@ -40,7 +40,7 @@ class Example(object):
 
         self._handlers = hdrs
 
-        self.session.login(account, password, status)
+        self.session.login(account, password, status, None)
 
     def add_action(self, id_, args=()):
         '''add an event to the session queue'''

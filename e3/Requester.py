@@ -4,14 +4,18 @@ import urllib
 import httplib
 import threading
 
+from uuid import uuid4
+
 import XmlParser
 import XmlManager
+import msgs
 import protocol.Group as Group
 import protocol.Contact as Contact
 from protocol.Event import Event
 
 from Command import Command
 import common
+import challenge
 
 def build_role(account, role, key, add=True):
     '''build a request to add account to the role if add is True, if False
@@ -707,3 +711,127 @@ class MoveContact(TwoStageRequester):
         self.session.add_event(Event.EVENT_CONTACT_MOVE_FAILED,
             self.cid, self.src_gid, self.dest_gid)
 
+class SendOIM(Requester):
+    '''make the request to send an oim'''
+    def __init__(self, session, msg_queue, contact, message, 
+                  lockkey='', seq=1, first=True):
+        '''command_queue is a reference to a queue that is used
+        by the worker to get commands that other threads need to
+        send'''
+        me = session.contacts.me
+        passport_id = session.extras['messengersecure.live.com']['security']
+        nick = '=?%s?%s?=%s?=' % (
+                'utf-8','B', me.display_name.encode('base64').strip())
+        
+        run_id = str(uuid4())
+
+        content = message.encode('base64').strip()
+        send_xml = XmlManager.get('sendoim', me.account, nick, common.MSNP_VER,
+                                  common.BUILD_VER, contact, passport_id, 
+                                  challenge._PRODUCT_ID, str(lockkey),
+                                  str(seq), run_id, str(seq), content)
+        send_xml = send_xml.replace('\\r\\n', '\r\n')
+
+        Requester.__init__(self, session,
+          'http://messenger.live.com/ws/2006/09/oim/Store2',
+          'ows.messenger.msn.com',443,'/OimWS/oim.asmx',
+          send_xml.strip())
+
+        self.contact = contact
+        self.message = message
+        self.oid = ''
+        self.seq = seq
+        self.first = first
+        self.msg_queue = msg_queue
+
+        print 'FROM:%s TO:%s' % (me.display_name, contact)
+
+    def handle_response(self, request, response):
+        '''handle the response'''
+        if response.status == 200:
+            #self.msg_queue.add_event(Event.EVENT_OIM_SEND_SUCCEED, self.oid)
+            print '[OIM sent]', self.contact
+        else:
+            start = '<LockKeyChallenge xmlns="http://messenger.msn.com/'\
+                    'ws/2004/09/oim/">'
+            end = '</LockKeyChallenge>'
+            lockkey_hash = common.get_value_between(response.body, start, end)
+            
+            if lockkey_hash:
+                lockkey = challenge.do_challenge(str(lockkey_hash))
+                SendOIM(self.session, self.msg_queue, self.contact,
+                        self.message, lockkey, self.seq+1, False).start()
+            else:
+                print 'Can\'t send OIM, fail'
+                print response.body
+                self.session.add_event(Event.EVENT_ERROR, 
+                             'to many retries sending oims')
+                print 'to many retries sending oim'
+
+class RetriveOIM(Requester):
+    '''make the request to retrive an oim'''
+    def __init__(self, session, oim_data, msg_queue):
+        '''command_queue is a reference to a queue that is used
+        by the worker to get commands that other threads need to
+        send'''
+        t, p = session.extras['messenger.msn.com']['security'][2:].split('&p=')
+        xml_oim = XmlManager.get('getoim', t, p, oim_data['id'])
+        Requester.__init__(self, session,
+          'http://www.hotmail.msn.com/ws/2004/09/oim/rsi/GetMessage',
+          'rsi.hotmail.com', 443 ,'/rsi/rsi.asmx',
+          xml_oim
+          )
+        self.msg_queue = msg_queue
+        self.oim_data = oim_data
+
+    def handle_response(self, request, response):
+        '''handle the response'''
+        if response.status == 200:
+           oim = msgs.OimParser(response.body)
+
+           oim.id = self.oim_data['id']
+
+           self.msg_queue.put((msgs.Manager.ACTION_OIM_RECEIVED, oim))
+        else:
+            self.session.add_event(Event.EVENT_ERROR,
+                           'Can\'t get oim', self.oim_data['id'])
+
+class RetriveTooLarge(Requester):
+    '''make the request to get oims from a soap request'''
+    def __init__(self, session, msg_queue):
+        '''Return the mail data using soap if there are too many OIMs'''
+        t, p = session.extras['messenger.msn.com']['security'][2:].split('&p=')
+        xml_oim = XmlManager.get('getmaildata', t, p)
+        Requester.__init__(self, session,
+          'http://www.hotmail.msn.com/ws/2004/09/oim/rsi/GetMetadata',
+          'rsi.hotmail.com', 443 ,'/rsi/rsi.asmx',
+          xml_oim
+          )
+        self.msg_queue = msg_queue
+
+    def handle_response(self, request, response):
+        '''handle the response'''
+        if response.status == 200:
+            self.msg_queue.put((msgs.Manager.ACTION_MAIL_DATA, response.body))
+        else:
+            self.session.add_event(Event.EVENT_ERROR, 'Can\'t retrive oims')
+
+class DeleteOIM(Requester):
+    '''make the request to delete an oim'''
+    def __init__(self, session, oid, msg_queue):
+        '''Delete a viewed oim'''
+        t, p = session.extras['messenger.msn.com']['security'][2:].split('&p=')
+        xml_del_oim = XmlManager.get('deleteoim', t, p, oid)
+        Requester.__init__(self, session,
+          'http://www.hotmail.msn.com/ws/2004/09/oim/rsi/DeleteMessages',
+          'rsi.hotmail.com', 443 ,'/rsi/rsi.asmx',
+          xml_del_oim
+          )
+        self.msg_queue = msg_queue
+        self.id = oid
+
+    def handle_response(self, request, response):
+        '''handle the response'''
+        if response.status != 200:
+            self.session.add_event(Event.EVENT_ERROR, 
+                             'Can\'t delete oim %s' % self.id)

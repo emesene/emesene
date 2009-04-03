@@ -54,6 +54,7 @@ class Conversation(threading.Thread):
         # and remove it from the dict, if we get a NAK we remove it and emit
         # the message send failed.
         self.sent_messages = {}
+
         self._set_handlers()
 
     def _set_handlers(self):
@@ -193,7 +194,7 @@ class Conversation(threading.Thread):
     def _on_join(self, message):
         '''handle the message'''
         account = message.tid
-        
+
         self._check_if_started()
 
         self.session.add_event(Event.EVENT_CONV_CONTACT_JOINED, self.cid, 

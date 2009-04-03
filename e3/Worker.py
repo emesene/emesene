@@ -1,18 +1,18 @@
 '''a thread that handles the connection with the main server'''
 
 import os
-import md5
 import time
 import Queue
-import struct
 import urllib
 import httplib
 import urlparse
 import threading
 
-import p2p
 import mbi
+import p2p
+import msgs
 import common
+import challenge
 import Requester
 import XmlManager
 import Conversation
@@ -84,6 +84,9 @@ class Worker(protocol.Worker):
         self.pending_messages = {}
 
         self.p2p = Queue.Queue() # p2p manager input queue
+        
+        self.msg_manager = msgs.Manager(session) # msg manager
+        self.msg_manager.start()
 
     def _set_handlers(self):
         '''set a dict with the action id as key and the handler as value'''
@@ -121,6 +124,7 @@ class Worker(protocol.Worker):
 
         self._common_handlers = common_handlers
 
+
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         to the socket or add a new event to the socket depending on the data'''
@@ -156,6 +160,7 @@ class Worker(protocol.Worker):
                     print 'closing thread'
                     self.socket.input.put('quit')
                     self.session.logger.quit()
+                    self.msg_manager.quit()
 
                     for (cid, conversation) in self.conversations.iteritems():
                         conversation.command_queue.put('quit')
@@ -266,7 +271,7 @@ class Worker(protocol.Worker):
             try:
                 faultstring = data.split('<faultstring>')\
                     [1].split('</faultstring>')[0]
-            except IndexError:
+            except IndexError, exception:
                 faultstring = str(exception)
 
             self.session.add_event(Event.EVENT_LOGIN_FAILED, faultstring)
@@ -477,8 +482,8 @@ class Worker(protocol.Worker):
 
     def _on_challenge(self, message):
         '''handle the challenge sent by the server'''
-        out = do_challenge(message.params[0][:-2])
-        self.socket.send_command('QRY', (_PRODUCT_ID,) , out)
+        out = challenge.do_challenge(message.params[0][:-2])
+        self.socket.send_command('QRY', (challenge._PRODUCT_ID,) , out)
 
     def _on_online_change(self, message):
         '''handle the status change of a contact that comes from offline'''
@@ -590,7 +595,7 @@ class Worker(protocol.Worker):
 
     def _on_server_message(self, message):
         '''handle a server message when we are not on the login stage'''
-        print 'server message:', message.payload
+        self.msg_manager.put(msgs.Manager.ACTION_MSG_RECEIVED, message)
 
     def _on_notification(self, message):
         '''handle a notification message'''
@@ -821,68 +826,3 @@ class Worker(protocol.Worker):
                 self._handle_action_new_conversation(None, conversation.cid)
 
             conversation.send_message(message)
-
-#------------------------- FROM HERE -----------------------------
-# Copyright 2005 James Bunton <james@delx.cjb.net>
-# Licensed for distribution under the GPL version 2, check COPYING for details
-_PRODUCT_KEY = 'O4BG@C7BWLYQX?5G'
-_PRODUCT_ID = 'PROD01065C%ZFN6F'
-MSNP11_MAGIC_NUM = 0x0E79A9C1
-
-def do_challenge(challenge_data):
-    '''create the response to a challenge'''
-    md5digest = md5.md5(challenge_data + _PRODUCT_KEY).digest()
-
-    # Make array of md5 string ints
-    md5_ints = struct.unpack("<llll", md5digest)
-    md5_ints = [(x & 0x7fffffff) for x in md5_ints]
-
-    # Make array of chl string ints
-    challenge_data += _PRODUCT_ID
-    amount = 8 - len(challenge_data) % 8
-    challenge_data += "".zfill(amount)
-    chl_ints = struct.unpack("<%di" % (len(challenge_data)/4), challenge_data)
-
-    # Make the key
-    high = 0
-    low = 0
-    i = 0
-    while i < len(chl_ints) - 1:
-        temp = chl_ints[i]
-        temp = (MSNP11_MAGIC_NUM * temp) % 0x7FFFFFFF
-        temp += high
-        temp = md5_ints[0] * temp + md5_ints[1]
-        temp = temp % 0x7FFFFFFF
-
-        high = chl_ints[i + 1]
-        high = (high + temp) % 0x7FFFFFFF
-        high = md5_ints[2] * high + md5_ints[3]
-        high = high % 0x7FFFFFFF
-
-        low = low + high + temp
-
-        i += 2
-
-    high = littleendify((high + md5_ints[1]) % 0x7FFFFFFF)
-    low = littleendify((low + md5_ints[3]) % 0x7FFFFFFF)
-    key = (high << 32L) + low
-    key = littleendify(key, "Q")
-
-    longs = [x for x in struct.unpack(">QQ", md5digest)]
-    longs = [littleendify(x, "Q") for x in longs]
-    longs = [x ^ key for x in longs]
-    longs = [littleendify(abs(x), "Q") for x in longs]
-
-    out = ""
-    for long_ in longs:
-        long_ = hex(long(long_))
-        long_ = long_[2:-1]
-        long_ = long_.zfill(16)
-        out += long_.lower()
-
-    return out
-
-def littleendify(num, ccc="L"):
-    '''return a number in little endian'''
-    return struct.unpack(">" + ccc, struct.pack("<" + ccc, num))[0]
-# ------------------------------ TO HERE ----------------------------------

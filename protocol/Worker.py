@@ -32,6 +32,7 @@ EVENTS = (\
  'conv group started'    , 'conv group ended'     ,
  'conv message'          , 'conv first action'    ,
  'conv message send succeed'  , 'conv message send failed',
+ 'oim received',       'oims data received',
  'p2p invitation',      'p2p finished',
  'p2p error',           'p2p canceled',
  'p2p accepted',        'p2p progress',
@@ -51,7 +52,8 @@ ACTIONS = (\
  'new conversation' , 'close conversation',
  'send message'     , 'conv invite',
  'p2p invite'       , 'p2p accept',
- 'p2p cancel'       , 'media send' # media send if got Wink and audio clips
+ 'p2p cancel'       , 'media send', # media send if got Wink and audio clips
+ 'send oim'
  )
 
 Event.set_constants(EVENTS)
@@ -108,6 +110,7 @@ class Worker(threading.Thread):
         dah[Action.ACTION_CONV_INVITE] = \
             self._handle_action_conv_invite
         dah[Action.ACTION_SEND_MESSAGE] = self._handle_action_send_message
+        dah[Action.ACTION_SEND_OIM] = self._handle_action_send_oim
         
         # p2p actions
         dah[Action.ACTION_P2P_INVITE] = self._handle_action_p2p_invite
@@ -240,6 +243,13 @@ class Worker(threading.Thread):
     def _handle_action_send_message(self, cid, message):
         '''handle Action.ACTION_SEND_MESSAGE
         cid is the conversation id, message is a MsnMessage object
+        '''
+        pass
+    
+    def _handle_action_send_oim(self, cid, dest, message):
+        '''handle Action.ACTION_SEND_OIM
+        cid is the conversation id, message is a string
+        dest is the oim receiver account
         '''
         pass
 

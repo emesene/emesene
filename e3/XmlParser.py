@@ -19,39 +19,39 @@
 
 import xml.parsers.expat
 
-class DynamicParser:
+class DynamicParser(object):
     '''Parse dynamic xml'''
     def __init__(self, xml_raw):
         '''init parser and setup handlers'''
         self.parser = xml.parsers.expat.ParserCreate()
         self.parser.buffer_text = True
         self.parser.returns_unicode = False
-        
+
         self.groups = []
         self.contacts = []
         self.annotations = []
         self.group_ids = []
-        
+
         self.in_group = False
         self.in_contact = False
         self.in_annotation = False
         self.in_group_ids = False
-        
+
         self.group_data = {}
         self.contact_data = {}
         self.annotation_data = {}
         self.group_ids_data = {}
-        
+
         self.current_tag = ''
-        
+
         #connect handlers
         self.parser.StartElementHandler = self.start_element
         self.parser.EndElementHandler = self.end_element
         self.parser.CharacterDataHandler = self.char_data
         self.parser.Parse(xml_raw)
-                
+
         del(xml_raw)
-        
+
     def start_element(self, name, attrs):
         '''Start xml element handler'''
         if name == 'Group':
@@ -63,7 +63,7 @@ class DynamicParser:
         elif name == 'groupIds':
             self.in_group_ids = True
         self.current_tag = name
-        
+
     def end_element(self, name):
         '''End xml element handler'''
         if name == 'Group':
@@ -106,32 +106,32 @@ class DynamicParser:
         elif self.in_contact:
             self.contact_data.update({self.current_tag:data})
 
-class MembershipParser:
+class MembershipParser(object):
     '''Parse membership xml'''
     def __init__(self, xml_raw):
         '''init parser and setup handlers'''
         self.parser = xml.parsers.expat.ParserCreate()
         self.parser.buffer_text = True
         self.parser.returns_unicode = False
-        
+
         self.memberships = []
         self.members = []
-        
+
         self.in_membership = False
         self.in_member = False
-        
+
         self.membership_data = {}
         self.member_data = {}
-        
+
         self.current_tag = ''
-        
+
         #connect handlers
         self.parser.StartElementHandler = self.start_element
         self.parser.EndElementHandler = self.end_element
         self.parser.CharacterDataHandler = self.char_data
         self.parser.Parse(xml_raw)
         del(xml_raw)
-        
+
     def start_element(self, name, attrs):
         '''Start xml element handler'''
         if name == 'Membership':
@@ -139,7 +139,7 @@ class MembershipParser:
         elif name == 'Member':
             self.in_member = True
         self.current_tag = name
-        
+
     def end_element(self, name):
         '''End xml element handler'''
         if name == 'Membership':
@@ -162,60 +162,61 @@ class MembershipParser:
         elif self.in_membership:
             self.membership_data.update({self.current_tag:data})
 
-class SSoParser:
+class SSoParser(object):
     '''Parse sso xml'''
     def __init__(self, xml_raw):
         '''init parser and setup handlers'''
         self.parser = xml.parsers.expat.ParserCreate()
         self.parser.buffer_text = True
         self.parser.returns_unicode = False
-        
+
         self.tokens = {}
-        
+
         self.in_token_response = False
         self.in_address = False
-        self.in_binary_secret = False
-        self.in_binary_security = False
-        
+
+        self.token_extra = {'wst:BinarySecret': 'secret',
+                            'wsse:BinarySecurityToken': 'security',
+                            'wsu:Created': 'created',
+                            'wsu:Expires': 'expires'}
+
+        self.in_token_extra = ''
+
         self.current_tag = ''
         self.current_token = ''
-        
+
         #connect handlers
         self.parser.StartElementHandler = self.start_element
         self.parser.EndElementHandler = self.end_element
         self.parser.CharacterDataHandler = self.char_data
         self.parser.Parse(xml_raw)
         del(xml_raw)
-        
+
     def start_element(self, name, attrs):
         '''Start xml element handler'''
         if name == 'RequestSecurityTokenResponse':
             self.in_token_response = True
         elif name == 'wsa:Address':
             self.in_address = True
-        elif name == 'wst:BinarySecret':
-            self.in_binary_secret = True
-        elif name == 'wsse:BinarySecurityToken':
-            self.in_binary_security = True
+        elif name in self.token_extra:
+            self.in_token_extra = name
         self.current_tag = name
-        
+
     def end_element(self, name):
         '''End xml element handler'''
         if name == 'RequestSecurityTokenResponse':
             self.in_token_response = False
         elif name == 'wsa:Address':
             self.in_address = False
-        elif name == 'wst:BinarySecret':
-            self.in_binary_secret = False
-        elif name == 'wsse:BinarySecurityToken':
-            self.in_binary_security = False
+        elif name in self.token_extra:
+            self.in_token_extra = ''
 
     def char_data(self, data):
         '''Char xml element handler'''
         if self.in_address:
             self.tokens.update({data:{}})
             self.current_token = data
-        elif self.in_binary_secret:
-            self.tokens[self.current_token].update({'secret':data})
-        elif self.in_binary_security:
-            self.tokens[self.current_token].update({'security':data})
+        elif self.in_token_extra:
+            self.tokens[self.current_token].update(
+                      {self.token_extra[self.in_token_extra]: data}
+                    )
