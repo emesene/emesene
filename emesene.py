@@ -45,6 +45,7 @@ class Controller(object):
         e3gtk.setup()
         extension.category_register('session', e3.Session)
         extension.register('session', yaber.Session)
+        extension.category_register('sound', play_sound.play)
 
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
@@ -261,9 +262,10 @@ class Controller(object):
 
         conversation.show()
 
+        play = extension.get_default('sound')
         if self.session.contacts.me.status != protocol.status.BUSY and \
                 self.session.config.b_play_first_send:
-            play_sound.play(gui.theme.sound_send)
+            play(gui.theme.sound_send)
 
         return (exists, conversation)
 

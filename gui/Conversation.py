@@ -1,8 +1,7 @@
 import gui
 import e3common
 import protocol
-
-from e3common import play_sound
+import extension
 
 class Conversation(object):
     '''a widget that contains all the components inside'''
@@ -347,23 +346,26 @@ class Conversation(object):
         """
         play the nudge sound
         """
+        play = extension.get_default('sound')
         if self.session.contacts.me.status != protocol.status.BUSY and \
                 self.session.config.b_play_nudge:
-            play_sound.play(gui.theme.sound_nudge)
+            play(gui.theme.sound_nudge)
 
     def play_send(self):
         """
         play the send sound
         """
+        play = extension.get_default('sound')
         if self.session.contacts.me.status != protocol.status.BUSY and \
                 self.session.config.b_play_send:
-            play_sound.play(gui.theme.sound_send)
+            play(gui.theme.sound_send)
 
     def play_type(self):
         """
         play the send sound
         """
+        play = extension.get_default('sound')
         if self.session.contacts.me.status != protocol.status.BUSY and \
                 self.session.config.b_play_type:
-            play_sound.play(gui.theme.sound_type)
+            play(gui.theme.sound_type)
 
