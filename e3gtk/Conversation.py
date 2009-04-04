@@ -91,7 +91,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def update_message_waiting(self, is_waiting):
         """
         update the information on the conversation to inform if a message is waiting
-        
+
         is_waiting -- boolean value that indicates if a message is waiting
         """
         self.update_tab()
@@ -99,7 +99,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def update_single_information(self, nick, message, account):
         """
         update the information for a conversation with a single user
-        
+
         nick -- the nick of the other account (escaped)
         message -- the message of the other account (escaped)
         account -- the account
@@ -139,7 +139,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def set_image_visible(self, is_visible):
         """
         set the visibility of the widget that displays the images of the members
-        
+
         is_visible -- boolean that says if the widget should be shown or hidden
         """
         if is_visible:
@@ -150,7 +150,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def set_header_visible(self, is_visible):
         '''
         hide or show the widget according to is_visible
-        
+
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
         if is_visible:
@@ -161,14 +161,13 @@ class Conversation(gtk.VBox, gui.Conversation):
     def set_toolbar_visible(self, is_visible):
         '''
         hide or show the widget according to is_visible
-        
+
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
         if is_visible:
             self.toolbar.show()
         else:
             self.toolbar.hide()
-
 
     def on_emote(self, emote):
         '''called when an emoticon is selected'''

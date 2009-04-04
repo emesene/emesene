@@ -1,4 +1,5 @@
 import e3common
+
 from protocol import Message
 
 class ConversationManager(object):
@@ -55,11 +56,13 @@ class ConversationManager(object):
                 middle = self.format_from_message(message)
 
             conversation.output.append(first + middle + last)
+            conversation.play_send()
 
         elif message.type == Message.TYPE_NUDGE:
             conversation.output.append(
                 conversation.formatter.format_information(
                     '%s just sent you a nudge!' % (nick,)))
+            conversation.play_nudge()
 
         self.set_message_waiting(conversation, True)
 

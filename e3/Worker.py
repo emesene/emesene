@@ -65,7 +65,7 @@ class Worker(protocol.Worker):
         if proxy is None:
             self.proxy = protocol.Proxy()
         else:
-            self.proxy = proxy 
+            self.proxy = proxy
 
         if self.proxy.use_proxy or use_http:
             self.socket = MsnHttpSocket(dest_type='NS', proxy=self.proxy)
@@ -97,7 +97,7 @@ class Worker(protocol.Worker):
         self.pending_messages = {}
 
         self.p2p = Queue.Queue() # p2p manager input queue
-        
+
         self.msg_manager = msgs.Manager(session) # msg manager
         self.msg_manager.start()
 

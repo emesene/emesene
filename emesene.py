@@ -5,10 +5,12 @@ import base64
 import gobject
 
 import e3
+import gui
 import yaber
 import protocol
 from e3common import Config
 from e3common import ConfigDir
+from e3common import play_sound
 
 import extension
 import e3gtk
@@ -225,7 +227,13 @@ class Controller(object):
                 del self.config.d_status[account.account]
 
         self._new_session()
-        self.session.login(account.account, account.password, account.status, 
+        self.session.config.get_or_set('b_play_send', True)
+        self.session.config.get_or_set('b_play_nudge', True)
+        self.session.config.get_or_set('b_play_first_send', True)
+        self.session.config.get_or_set('b_play_type', True)
+        self.session.config.get_or_set('b_play_contact_online', True)
+        self.session.config.get_or_set('b_play_contact_offline', True)
+        self.session.login(account.account, account.password, account.status,
             proxy, use_http)
 
     def on_new_conversation(self, signals, args):
@@ -241,13 +249,17 @@ class Controller(object):
             self.conversations = window.content
             window.show()
 
-        (exists, conversation) = self.conversations.new_conversation(cid, 
+        (exists, conversation) = self.conversations.new_conversation(cid,
             members)
 
         conversation.update_data()
         self.conversations.get_parent().present()
 
         conversation.show()
+
+        if self.session.contacts.me.status != protocol.status.BUSY and \
+                self.session.config.b_play_first_send:
+            play_sound.play(gui.theme.sound_send)
 
         return (exists, conversation)
 
@@ -262,10 +274,10 @@ class Controller(object):
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
-             
-        self.window.go_login(self.on_login_connect, 
-            self.on_preferences_changed, account, 
-            self.config.d_accounts, self.config.l_remember_account, 
+
+        self.window.go_login(self.on_login_connect,
+            self.on_preferences_changed, account,
+            self.config.d_accounts, self.config.l_remember_account,
             self.config.l_remember_password, self.config.d_status,
             self.config.session, proxy, use_http, self.config.session)
 

@@ -7,25 +7,25 @@ from  protocol.Event import Event
 from  protocol.Action import Action
 
 EVENTS = (\
- 'login started'         , 'login info'           , 
- 'login succeed'         , 'login failed'         , 
+ 'login started'         , 'login info'           ,
+ 'login succeed'         , 'login failed'         ,
  'disconnected'          , 'contact list ready'   ,
- 'contact attr changed'  , 'contact added'        , 
- 'contact add succeed'   , 'contact add failed'   , 
- 'contact remove succeed', 'contact remove failed', 
- 'contact move succeed'  , 'contact move failed'  , 
- 'contact copy succeed'  , 'contact copy failed'  , 
- 'contact block succeed' , 'contact block failed' , 
- 'contact unblock succeed' , 'contact unblock failed' , 
- 'contact alias succeed' , 'contact alias failed' , 
- 'group add succeed'     , 'group add failed'     , 
- 'group remove succeed'  , 'group remove failed'  , 
- 'group rename succeed'  , 'group rename failed'  ,  
- 'group add contact succeed'     , 'group add contact failed'   ,  
- 'group remove contact succeed'  , 'group remove contact failed',  
- 'status change succeed' , 'status change failed' , 
- 'nick change succeed'   , 'nick change failed'   , 
- 'message change succeed', 'message change failed', 
+ 'contact attr changed'  , 'contact added'        ,
+ 'contact add succeed'   , 'contact add failed'   ,
+ 'contact remove succeed', 'contact remove failed',
+ 'contact move succeed'  , 'contact move failed'  ,
+ 'contact copy succeed'  , 'contact copy failed'  ,
+ 'contact block succeed' , 'contact block failed' ,
+ 'contact unblock succeed' , 'contact unblock failed',
+ 'contact alias succeed' , 'contact alias failed' ,
+ 'group add succeed'     , 'group add failed'     ,
+ 'group remove succeed'  , 'group remove failed'  ,
+ 'group rename succeed'  , 'group rename failed'  ,
+ 'group add contact succeed'     , 'group add contact failed'   ,
+ 'group remove contact succeed'  , 'group remove contact failed',
+ 'status change succeed' , 'status change failed' ,
+ 'nick change succeed'   , 'nick change failed'   ,
+ 'message change succeed', 'message change failed',
  'picture change succeed', 'error'                ,
  'conv contact joined'   , 'conv contact left'  ,
  'conv started'          , 'conv ended'           ,
@@ -40,7 +40,7 @@ EVENTS = (\
 
 ACTIONS = (\
  'login'            , 'logout'           ,
- 'change status'    , 
+ 'change status'    ,
  'block contact'    , 'unblock contact'  ,
  'add contact'      , 'remove contact'   ,
  'set contact alias', 'quit'             ,
@@ -60,7 +60,7 @@ Event.set_constants(EVENTS)
 Action.set_constants(ACTIONS)
 
 class Worker(threading.Thread):
-    '''this class represent an object that waits for commands from the queue 
+    '''this class represent an object that waits for commands from the queue
     of a socket, process them and add it as events to its own queue'''
 
     def __init__(self, app_name, session):
@@ -111,7 +111,7 @@ class Worker(threading.Thread):
             self._handle_action_conv_invite
         dah[Action.ACTION_SEND_MESSAGE] = self._handle_action_send_message
         dah[Action.ACTION_SEND_OIM] = self._handle_action_send_oim
-        
+
         # p2p actions
         dah[Action.ACTION_P2P_INVITE] = self._handle_action_p2p_invite
         dah[Action.ACTION_P2P_ACCEPT] = self._handle_action_p2p_accept
@@ -120,7 +120,7 @@ class Worker(threading.Thread):
         self.action_handlers = dah
 
     def run(self):
-        '''main method, block waiting for data, process it, and send data back 
+        '''main method, block waiting for data, process it, and send data back
         '''
         raise NotImplentedError('not implemented')
 
@@ -130,7 +130,7 @@ class Worker(threading.Thread):
             try:
                 self.action_handlers[action.id_](*action.args)
             except TypeError:
-                self.session.add_event(Event.EVENT_ERROR, 
+                self.session.add_event(Event.EVENT_ERROR,
                     'Error calling action handler', action.id_)
 
 
@@ -245,7 +245,7 @@ class Worker(threading.Thread):
         cid is the conversation id, message is a MsnMessage object
         '''
         pass
-    
+
     def _handle_action_send_oim(self, cid, dest, message):
         '''handle Action.ACTION_SEND_OIM
         cid is the conversation id, message is a string
@@ -258,8 +258,8 @@ class Worker(threading.Thread):
     def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
         '''handle Action.ACTION_P2P_INVITE,
          cid is the conversation id
-         pid is the p2p session id, both are numbers that identify the 
-            conversation and the session respectively, time.time() is 
+         pid is the p2p session id, both are numbers that identify the
+            conversation and the session respectively, time.time() is
             recommended to be used.
          dest is the destination account
          type_ is one of the protocol.Transfer.TYPE_* constants

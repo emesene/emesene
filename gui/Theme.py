@@ -99,6 +99,7 @@ class Theme(object):
         self.name = name
 
         self.theme_path = os.path.join("themes", self.name)
+        self.sound_theme_path = os.path.join("themes", "sounds", self.name)
 
         self.user = os.path.join(self.theme_path, "user.png")
         self.users = os.path.join(self.theme_path, "users.png")
@@ -109,6 +110,13 @@ class Theme(object):
         self.group_chat = os.path.join(self.theme_path, "group-chat.png")
         self.typing = os.path.join(self.theme_path, "typing.png")
         self.new_message = os.path.join(self.theme_path, "new-message.png")
+
+        self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
+        self.sound_nudge = os.path.join(self.sound_theme_path, "nudge.wav")
+        self.sound_offline = os.path.join(self.sound_theme_path, "offline.wav")
+        self.sound_online = os.path.join(self.sound_theme_path, "online.wav")
+        self.sound_send = os.path.join(self.sound_theme_path, "send.wav")
+        self.sound_type = os.path.join(self.sound_theme_path, "type.wav")
 
         self.status_icons = {}
         self.status_icons[status.ONLINE] = \

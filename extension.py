@@ -123,7 +123,8 @@ _categories = {} #'CategoryName': Category('ClassName')
 
 def category_register(category, system_default, *interfaces):
     '''Add a category'''
-    _categories[category] = Category(category, system_default, interfaces)
+    if category not in _categories:
+        _categories[category] = Category(category, system_default, interfaces)
 
 def register(category_name, cls):
     '''Register cls as an Extension for category.

@@ -4,7 +4,6 @@ import gtk
 import gui
 import extension
 
-
 class ConversationManager(gtk.Notebook, gui.ConversationManager):
     '''the main conversation, it only contains other widgets'''
     NAME = 'Conversation Manager'

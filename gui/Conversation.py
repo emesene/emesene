@@ -2,6 +2,8 @@ import gui
 import e3common
 import protocol
 
+from e3common import play_sound
+
 class Conversation(object):
     '''a widget that contains all the components inside'''
 
@@ -117,6 +119,7 @@ class Conversation(object):
         self.session.request_attention(self.cid)
         self.output.append(
             self.formatter.format_information('you just sent a nudge!'))
+        self.play_nudge()
 
     def show(self):
         '''override the show method'''
@@ -125,7 +128,7 @@ class Conversation(object):
     def update_message_waiting(self, is_waiting):
         """
         update the information on the conversation to inform if a message is waiting
-        
+
         is_waiting -- boolean value that indicates if a message is waiting
         """
         raise NotImplementedError("Method not implemented")
@@ -133,7 +136,7 @@ class Conversation(object):
     def update_single_information(self, nick, message, account):
         """
         update the information for a conversation with a single user
-        
+
         nick -- the nick of the other account (escaped)
         message -- the message of the other account (escaped)
         account -- the account
@@ -149,7 +152,7 @@ class Conversation(object):
     def set_image_visible(self, is_visible):
         """
         set the visibility of the widget that displays the images of the members
-        
+
         is_visible -- boolean that says if the message should be shown or hidden
         """
         raise NotImplementedError("Method not implemented")
@@ -157,7 +160,7 @@ class Conversation(object):
     def set_header_visible(self, is_visible):
         '''
         hide or show the widget according to is_visible
-        
+
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
         raise NotImplementedError("Method not implemented")
@@ -165,7 +168,7 @@ class Conversation(object):
     def set_toolbar_visible(self, is_visible):
         '''
         hide or show the widget according to is_visible
-        
+
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
         raise NotImplementedError("Method not implemented")
@@ -207,6 +210,7 @@ class Conversation(object):
 
         all = first + middle + last
         self.output.append(all)
+        self.play_type()
 
     def _get_icon(self):
         '''return the icon that represent the current status of the
@@ -314,7 +318,7 @@ class Conversation(object):
 
     image_visible = property(fget=_get_image_visible,
         fset=_set_image_visible)
-   
+
     def _set_header_visible(self, value):
         '''hide or show the widget according to value'''
         self.set_header_visible(value)
@@ -338,3 +342,28 @@ class Conversation(object):
 
     toolbar_visible = property(fget=_get_toolbar_visible,
         fset=_set_toolbar_visible)
+
+    def play_nudge(self):
+        """
+        play the nudge sound
+        """
+        if self.session.contacts.me.status != protocol.status.BUSY and \
+                self.session.config.b_play_nudge:
+            play_sound.play(gui.theme.sound_nudge)
+
+    def play_send(self):
+        """
+        play the send sound
+        """
+        if self.session.contacts.me.status != protocol.status.BUSY and \
+                self.session.config.b_play_send:
+            play_sound.play(gui.theme.sound_send)
+
+    def play_type(self):
+        """
+        play the send sound
+        """
+        if self.session.contacts.me.status != protocol.status.BUSY and \
+                self.session.config.b_play_type:
+            play_sound.play(gui.theme.sound_type)
+
