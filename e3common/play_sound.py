@@ -31,7 +31,6 @@ elif os.name == 'posix':
             """
             _player = gst.element_factory_make("playbin", "player")
             uri = "file://" + os.path.abspath(path)
-            print 'playing', uri
             _player.set_property('uri', uri)
             _player.set_state(gst.STATE_PLAYING)
     except ImportError:

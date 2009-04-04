@@ -97,7 +97,7 @@ class MsnHttpSocket(threading.Thread):
                         command = self.input.get(True, 1.0)
 
                         if command == 'quit':
-                            print 'closing socket thread'
+                            dbg('closing socket thread', 'hsock', 1)
                             break
                         else:
                             input_.append(command)
@@ -106,7 +106,7 @@ class MsnHttpSocket(threading.Thread):
                     pass
 
             if input_:
-                print '>>>', '\n'.join(input_)
+                dbg('>>> ' + '\n'.join(input_), 'hsock', 2)
                 self.send_req(''.join(input_))
                 input_ = None
                 self.timestamp = time.time()
@@ -144,11 +144,11 @@ class MsnHttpSocket(threading.Thread):
             self.parse_response_header(response.info())
             self.parse_response_body(response.read())
         except Exception, ex:
-            print 'exception on http request'
-            print ex
+            dbg('exception on http request', 'hsock', 1)
+            dbg(str(ex), 'hsock', 2)
             # retry once
             if not is_retry:
-                print 'retrying'
+                dbg('retrying http request', 'hsock', 1)
                 self.send_req(data, path, True)
 
 

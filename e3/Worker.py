@@ -150,7 +150,7 @@ class Worker(protocol.Worker):
                 if type(data) == int and data == 0:
                     self.session.add_event(Event.EVENT_ERROR,
                         'Connection closed')
-                    print 'Worker connection closed'
+                    dbg('Worker connection closed', 'worker')
                     break
 
                 self._process(data)
@@ -170,7 +170,7 @@ class Worker(protocol.Worker):
                 action = self.session.actions.get(True, 0.1)
 
                 if action.id_ == Action.ACTION_QUIT:
-                    print 'closing thread'
+                    dbg('closing thread', 'worker')
                     self.socket.input.put('quit')
                     self.session.logger.quit()
                     self.msg_manager.quit()
@@ -189,7 +189,7 @@ class Worker(protocol.Worker):
 
     def _process(self, message):
         '''process the data'''
-        #print '<<<', message
+        dbg('<<< ' + str(message), 'worker', 2)
 
         if self.in_login:
             self._process_login(message)
@@ -256,7 +256,7 @@ class Worker(protocol.Worker):
 
             if response:
                 data = response.read()
-                print data
+                dbg(data, 'worker', 3)
             else:
                 self.session.add_event(Event.EVENT_LOGIN_FAILED,
                  'Can\'t connect to HTTPS server: ' + str(exception))
@@ -544,7 +544,7 @@ class Worker(protocol.Worker):
         contact = self.session.contacts.contacts.get(account, None)
 
         if not contact:
-            print 'account: ', account, 'not found on contact list'
+            dbg('account: ' + account + 'not found on contact list', 'worker', 4)
             return
 
         contact.status = status.OFFLINE
@@ -611,7 +611,7 @@ class Worker(protocol.Worker):
 
     def _on_notification(self, message):
         '''handle a notification message'''
-        print 'server notification:', message.payload
+        dbg('server notification: ' + message.payload, 'worker', 2)
 
     def _on_server_disconnection(self, message):
         '''handle the message that inform us that we were disconnected from
@@ -643,7 +643,7 @@ class Worker(protocol.Worker):
     def _on_unknown_command(self, message):
         '''handle the unknown commands'''
         if message.command not in KNOWN_UNHANDLED_RESPONSES:
-            print 'unknown command:', str(message)
+            dbg('unknown command: ' + str(message), 'worker', 4)
 
     # action handlers
     def _handle_action_add_contact(self, account):
@@ -809,7 +809,7 @@ class Worker(protocol.Worker):
             self.conversations[cid].command_queue.put('quit')
             del self.conversations[cid]
         else:
-            print 'conversation', cid, 'not found'
+            dbg('conversation ' + cid + ' not found', 'worker', 4)
 
     def _handle_action_conv_invite(self, cid, account):
         '''handle Action.ACTION_CONV_INVITE
@@ -817,7 +817,7 @@ class Worker(protocol.Worker):
         if cid in self.conversations:
             self.conversations[cid].invite(account)
         else:
-            print 'conversation', cid, 'not found'
+            dbg('conversation ' + cid + ' not found', 'worker', 4)
 
     def _handle_action_send_message(self, cid, message):
         '''handle Action.ACTION_SEND_MESSAGE

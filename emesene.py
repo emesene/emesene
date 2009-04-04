@@ -4,6 +4,10 @@ import time
 import base64
 import gobject
 
+# keep this one above all the others!
+import debugger
+setattr(__builtins__, 'dbg', debugger.dbg)
+
 import e3
 import gui
 import yaber

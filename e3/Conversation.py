@@ -79,7 +79,7 @@ class Conversation(threading.Thread):
 
     def _process(self, message):
         '''process a command and call the respective handler'''
-        #print '<c<', message
+        dbg('<c< ' + str(message), 'conv', 2)
         handler = self._handlers.get(message.command, None)
 
         if handler:
@@ -118,7 +118,7 @@ class Conversation(threading.Thread):
     def _close(self):
         '''set all the attributes to reflect a closed conversation
         caution: it doesn't stop the main thread'''
-        print 'closing conversation', self.cid
+        dbg('closing conversation', 'conv', 1)
         self.status = Conversation.STATUS_CLOSED
         self.started = False
         self.socket.quit()
@@ -258,7 +258,7 @@ class Conversation(threading.Thread):
 
     def _on_unknown_command(self, message):
         '''handle the unknown commands'''
-        print 'unknown command:', str(message)
+        dbg('unknown command: ' + str(message), 'conv', 4)
 
     def _check_if_started(self):
         '''check if the conversation has already been started, if not,
@@ -294,7 +294,7 @@ class Conversation(threading.Thread):
             self.invite(self.last_member)
             self.last_member = None
         else:
-            print 'reinviting members', self.members
+            dbg('reinviting members ' + str(self.members), 'conv', 3)
             members = self.members
             self.members = []
             while len(self.members):
@@ -308,7 +308,7 @@ class Conversation(threading.Thread):
         if self.status != Conversation.STATUS_ESTABLISHED:
             self.pending_invites.append(account)
         else:
-            print 'sending CAL', account
+            dbg('sending CAL ' + account, 'conv', 3)
             self.socket.send_command('CAL', (account,))
 
     def answer(self):

@@ -76,7 +76,6 @@ class BaseRequester(threading.Thread):
             'Cache-Control': 'no-cache',
         }
 
-        #print headers
         conn = None
 
         if request.port == 443:
@@ -105,10 +104,10 @@ class Requester(BaseRequester):
     def run(self):
         '''main method of the thread, make the request and handle the response
         '''
-        print 'running request', self.request.action
+        dbg('running request ' + self.request.action, 'req', 1)
         response = self.make_request(self.request)
         self.handle_response(self.request, response)
-        print 'request finished'
+        dbg('request finished', 'req', 1)
 
     def handle_response(self, request, response):
         '''override this to do something with the response'''
@@ -131,30 +130,29 @@ class TwoStageRequester(BaseRequester):
 
     def run(self):
         '''the main method on the class'''
-        print 'running first request', self.first_req.action
+        dbg('running first request ' + self.first_req.action, 'req', 1)
         response = self.make_request(self.first_req)
         if response.status != 200:
-            print 'first request', self.first_req.action, 'failed, cleanning up'
+            dbg('first request ' + self.first_req.action + ' failed, cleanning up', 'req', 1)
             self._on_first_failed(response)
-            print response.body
+            dbg(response.body, 'req', 4)
             return
         else:
             self._on_first_succeed(response)
 
-        print 'running second request', self.second_req.action
+        dbg('running second request ' + self.second_req.action, 'req', 1)
         response = self.make_request(self.second_req)
         if response.status != 200:
-            print 'second request', self.second_req.action, \
-                'failed, cleanning up'
-            print response.body
+            dbg('second request ' + self.second_req.action + ' failed, cleanning up', 'req', 1)
+            dbg(response.body, 'req', 4)
             self._on_second_failed(response)
             if self.fallback_req is not None:
-                print 'running fallback request', self.fallback_req.action
+                dbg('running fallback request ' + self.fallback_req.action, 'req', 1)
                 self.make_request(self.fallback_req)
         else:
             self._on_second_succeed(response)
 
-        print 'request finished'
+        dbg('request finished', 'req', 1)
 
     def _on_first_succeed(self, response):
         '''handle the first request if succeeded'''
@@ -229,13 +227,13 @@ class Membership(Requester):
                             contact.attrs['Reverse'] = True
 
                     except Exception, error:
-                        print 'exception in membership requester: ', str(error)
+                        dbg('exception in membership requester: ' + str(error), 'req', 1)
 
             DynamicItems(self.session, self.command_queue,
                 self.on_login, self.started_from_cache).start()
         else:
-            print 'error requesting membership', response.status
-            print response.body
+            dbg('error requesting membership ' + response.status, 'req', 1)
+            dbg(response.body, 'req', 4)
 
 class DynamicItems(Requester):
     '''make the request to get the dynamic items'''
@@ -309,7 +307,7 @@ class DynamicItems(Requester):
                 contact.attrs['space'] = \
                     contact_dict.get('hasSpace', None) == 'true'
 
-            print 'dynamic finished'
+            dbg('dynamic finished', 'req', 1)
 
             # get our nick
             try:
@@ -339,7 +337,7 @@ class DynamicItems(Requester):
             self.session.logger.add_contact_by_group(
                 self.session.contacts.contacts, self.session.groups)
         else:
-            print 'error requestion dynamic items'
+            dbg('error requestion dynamic items', 'req', 1)
 
 class AddContact(Requester):
     '''make the request to add a contact to the contact list'''
@@ -393,7 +391,7 @@ class RemoveContact(Requester):
             self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED,
                 self.account)
         else:
-            print '\n', response.body, '\n', request.body, '\n'
+            dbg(response.body + '\n' + request.body, 'req', 4)
             self.session.add_event(Event.EVENT_CONTACT_REMOVE_FAILED,
                 self.account)
 
@@ -423,7 +421,7 @@ class ChangeNick(Requester):
             self.session.logger.log('nick change', self.account.status,
                 self.nick, self.account)
         else:
-            print '\n', response.body, '\n', request.body, '\n'
+            dbg(response.body + '\n' + request.body, 'req', 4)
             self.session.add_event(Event.EVENT_NICK_CHANGE_FAILED, self.nick)
 
 class ChangeAlias(Requester):
@@ -448,7 +446,7 @@ class ChangeAlias(Requester):
             self.session.add_event(Event.EVENT_CONTACT_ALIAS_SUCCEED,
                 self.account)
         else:
-            print '\n', response.body, '\n', request.body, '\n'
+            dbg(response.body + '\n' + request.body, 'req', 4)
             self.session.add_event(Event.EVENT_CONTACT_ALIAS_FAILED,
                 self.account)
 
@@ -475,7 +473,7 @@ class AddGroup(Requester):
             self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED,
                 self.name, gid)
         else:
-            print '\n', response.body, '\n', request.body, '\n'
+            dbg(response.body + '\n' + request.body, 'req', 4)
             self.session.add_event(Event.EVENT_GROUP_ADD_FAILED, self.name)
 
 class RemoveGroup(Requester):
@@ -500,7 +498,7 @@ class RemoveGroup(Requester):
 
             self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, self.gid)
         else:
-            print '\n', response.body, '\n', request.body, '\n'
+            dbg(response.body + '\n' + request.body, 'req', 4)
             self.session.add_event(Event.EVENT_GROUP_REMOVE_FAILED, self.gid)
 
 class RenameGroup(Requester):
@@ -526,7 +524,7 @@ class RenameGroup(Requester):
             self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED,
                 self.gid, self.name)
         else:
-            print '\n', response.body, '\n', request.body, '\n'
+            dbg(response.body + '\n' + request.body, 'req', 4)
             self.session.add_event(Event.EVENT_GROUP_RENAME_FAILED,
                 self.gid, self.name)
 
@@ -555,7 +553,7 @@ class AddToGroup(Requester):
             self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
                 self.gid, self.cid)
         else:
-            print '\n', response.body, '\n', request.body, '\n'
+            dbg(response.body + '\n' + request.body, 'req', 4)
             self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_FAILED,
                 self.gid, self.cid)
 
@@ -588,7 +586,7 @@ class RemoveFromGroup(Requester):
             self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED,
                 self.gid, self.cid)
         else:
-            print '\n', response.body, '\n', request.body, '\n'
+            dbg(response.body + '\n' + request.body, 'req', 4)
             self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_FAILED,
                 self.gid, self.cid)
 
@@ -722,7 +720,7 @@ class SendOIM(Requester):
         passport_id = session.extras['messengersecure.live.com']['security']
         nick = '=?%s?%s?=%s?=' % (
                 'utf-8','B', me.display_name.encode('base64').strip())
-        
+
         run_id = str(uuid4())
 
         content = message.encode('base64').strip()
@@ -744,29 +742,29 @@ class SendOIM(Requester):
         self.first = first
         self.msg_queue = msg_queue
 
-        print 'FROM:%s TO:%s' % (me.display_name, contact)
+        dbg('FROM:%s TO:%s' % (me.display_name, contact), 'req', 1)
 
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
             #self.msg_queue.add_event(Event.EVENT_OIM_SEND_SUCCEED, self.oid)
-            print '[OIM sent]', self.contact
+            dbg('OIM sent ' + self.contact, 'req', 1)
         else:
             start = '<LockKeyChallenge xmlns="http://messenger.msn.com/'\
                     'ws/2004/09/oim/">'
             end = '</LockKeyChallenge>'
             lockkey_hash = common.get_value_between(response.body, start, end)
-            
+
             if lockkey_hash:
                 lockkey = challenge.do_challenge(str(lockkey_hash))
                 SendOIM(self.session, self.msg_queue, self.contact,
                         self.message, lockkey, self.seq+1, False).start()
             else:
-                print 'Can\'t send OIM, fail'
-                print response.body
-                self.session.add_event(Event.EVENT_ERROR, 
+                dbg('Can\'t send OIM, fail', 'req', 1)
+                dbg(response.body, 'req', 4)
+                self.session.add_event(Event.EVENT_ERROR,
                              'to many retries sending oims')
-                print 'to many retries sending oim'
+                dbg('to many retries sending oim', 'req', 1)
 
 class RetriveOIM(Requester):
     '''make the request to retrive an oim'''

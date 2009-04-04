@@ -48,7 +48,7 @@ class Socket(threading.Thread):
                     input_ = self.input.get(True, 0.3)
 
                     if input_ == 'quit':
-                        print 'closing socket thread'
+                        dbg('closing socket thread', 'sock', 1)
                         self.socket.close()
                         break
                 except Queue.Empty:
@@ -62,7 +62,7 @@ class Socket(threading.Thread):
             if owtd and input_:
                 try:
                     self.socket.send(input_)
-                    #print '>>>', input_
+                    dbg('>>> ' + str(input_), 'sock', 2)
                 except socket.error:
                     self._on_socket_error()
                 input_ = None
@@ -80,7 +80,7 @@ class Socket(threading.Thread):
         data = self._readline()
         # if we got something add it to the output queue
         if data:
-            #print 'received', data
+            dbg('<<< ' + data, 'sock', 3)
             self.output.put(data)
 
     def _readline(self):
