@@ -175,7 +175,7 @@ def build_window(item):
 
     buttons.pack_start(b_cancel)
     buttons.pack_start(b_ok)
-    
+
     box.pack_start(buttons, False)
 
     window.add(box)
@@ -185,7 +185,6 @@ def build_window(item):
 
 def _validate(widget, window, item):
     '''validate and update all the items'''
-    print 'validating'
     item.validate()
     window.hide()
 

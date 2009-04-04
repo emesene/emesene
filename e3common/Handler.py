@@ -7,7 +7,7 @@ class MenuHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, contact_list, on_disconnect=None, 
+    def __init__(self, session, dialog, contact_list, on_disconnect=None,
             on_quit=None):
         '''constructor'''
         self.file_handler = FileHandler(session, dialog, on_disconnect, on_quit)
@@ -178,7 +178,7 @@ class ContactHandler(object):
 
             if response == gui.stock.ACCEPT:
                 if old_alias == new_alias:
-                    print 'old alias and new alias are the same'
+                    dbg('old alias and new alias are the same', 'handler', 1)
                     return
 
                 self.session.set_alias(account, new_alias)
@@ -240,11 +240,11 @@ class GroupHandler(object):
 
             if response == gui.stock.ACCEPT:
                 if group.name == new_name:
-                    print "old and new name are the same"
+                    dbg("old and new name are the same", 'handler', 1)
                 elif new_name:
                     self.session.rename_group(group.identifier, new_name)
                 else:
-                    print "new name not valid"
+                    dbg("new name not valid", 'handler', 1)
 
         group = self.contact_list.get_group_selected()
 
@@ -270,10 +270,10 @@ class MyAccountHandler(object):
 
             if response == gui.stock.ACCEPT:
                 if old_nick == new_nick:
-                    print 'old nick and new nick are the same'
+                    dbg('old nick and new nick are the same', 'handler', 1)
                     return
                 elif new_nick == '':
-                    print 'empty new nick'
+                    dbg('empty new nick', 'handler', 1)
                     return
 
                 self.session.set_nick(new_nick)
@@ -287,7 +287,8 @@ class MyAccountHandler(object):
 
             if response == gui.stock.ACCEPT:
                 if old_pm == new_pm:
-                    print 'old and new personal messages are the same'
+                    dbg('old and new personal messages are the same',
+                        'handler', 1)
                     return
 
                 self.session.set_message(new_pm)

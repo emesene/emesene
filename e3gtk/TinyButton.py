@@ -31,13 +31,3 @@ class TinyButton(gtk.EventBox):
         '''called when the mouse leaves the button'''
         self.modify_bg(gtk.STATE_NORMAL, self.normal_color)
 
-
-if __name__ == '__main__':
-    def callback(button, event):
-        print 'click'
-
-    window = gtk.Window()
-    b = TinyButton(gtk.STOCK_CLOSE)
-    window.add(b)
-    window.show_all()
-    gtk.main()

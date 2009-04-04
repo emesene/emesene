@@ -60,7 +60,6 @@ class Item(Base):
     def validate(self):
         '''validate all the childs'''
         new_value = self._get_gui_value()
-        print self.name, self.value, '->', new_value
 
         for validator in self.validators:
             result = validator(new_value)

@@ -172,7 +172,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         elif contact:
             self.contact_selected.emit(contact)
         else:
-            print 'nothing selected?'
+            dbg('nothing selected?', 'contactlist', 1)
 
     def _on_button_press_event(self, treeview, event):
         '''callback called when the user press a button over a row
@@ -181,7 +181,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
             paths = self.get_path_at_pos(int(event.x), int(event.y))
 
             if paths is None:
-                print 'invalid path'
+                dbg('invalid path', 'contactlist', 1)
             elif len(paths) > 0:
                 iterator = self.model.get_iter(paths[0])
                 child_iter = self.model.convert_iter_to_child_iter(iterator)
@@ -192,7 +192,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
                 elif type(obj) == Contact:
                     self.contact_menu_selected.emit(obj)
             else:
-                print 'empty paths?'
+                dbg('empty paths?', 'contactlist', 1)
 
     # overrided methods
     def refilter(self):
@@ -262,7 +262,8 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
             obj = row[1]
             if type(obj) == Group:
                 if obj.name == group.name:
-                    print 'Trying to add an existing group!', obj.name
+                    dbg('Trying to add an existing group! ' + obj.name,
+                        'contactlist', 1)
                     return row.iter
 
         return self._model.append(None, group_data)

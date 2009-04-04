@@ -12,12 +12,12 @@ class Manager(threading.Thread):
         threading.Thread.__init__(self)
 
         self.mail = mail
-        
+
         self.switchboard = SwitchboardTransport(self)
 
         self.input = input
         self.output = output
- 
+
     def output_action(self, id_, *args):
         self.output.put(protocol.Action(id_, *args))
 
@@ -46,7 +46,7 @@ class Manager(threading.Thread):
 
     def receive(self, payload):
         # tlp.receive?
-        print "p2p manager receive payload size", len(payload)
+        dbg("p2p manager receive payload size " + len(payload), 'p2p', 3)
 
 
 class SwitchboardTransport(object):

@@ -92,7 +92,7 @@ class ConversationManager(object):
             conversation.output.append(
                 self.format_from_message(message))
         else:
-            print 'conversation', cid, 'not found'
+            dbg('conversation ' + cid + ' not found', 'convmanager', 1)
 
     def _on_contact_joined(self, protocol, args):
         '''called when a contact join the conversation'''
@@ -102,7 +102,7 @@ class ConversationManager(object):
         if conversation:
             conversation.on_contact_joined(account)
         else:
-            print 'on_contact_joined: conversation is None'
+            dbg('on_contact_joined: conversation is None', 'convmanager', 1)
 
     def _on_contact_left(self, protocol, args):
         '''called when a contact leaves the conversation'''
@@ -112,7 +112,7 @@ class ConversationManager(object):
         if conversation:
             conversation.on_contact_left(account)
         else:
-            print 'on_contact_left: conversation is None'
+            dbg('on_contact_left: conversation is None', 'convmanager', 1)
 
     def _on_group_started(self, protocol, args):
         '''called when a group conversation starts'''

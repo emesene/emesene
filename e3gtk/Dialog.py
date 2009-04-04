@@ -723,7 +723,7 @@ class EmotesWindow(gtk.Window):
             path = gui.theme.emote_to_path(shortcut, True)
 
             if path is None:
-                print shortcut, 'has no path'
+                dbg(shortcut + ' has no path', 'dialog', 1)
                 continue
 
             button.set_image(utils.safe_gtk_image_load(path))

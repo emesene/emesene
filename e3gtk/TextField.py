@@ -109,15 +109,3 @@ class TextField(gtk.VBox):
 
     enabled = property(fget=_get_enabled, fset=_set_enabled)
 
-if __name__ == '__main__':
-
-    def _on_text_changed(text_field, old, new):
-        print 'text changed from', old, ' to ', new
-
-    w = gtk.Window()
-    t = TextField("", "<click here to change nick>", False)
-    t.connect('text-changed', _on_text_changed)
-    w.add(t)
-    t.show()
-    w.show()
-    gtk.main()

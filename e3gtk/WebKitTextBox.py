@@ -63,7 +63,7 @@ class OutputText(gtk.ScrolledWindow):
         '''called when a message is sent to the console'''
         message = "Webkit message: %s %s %s" % (message, line, source_id)
         self.append(message)
-        print message
+        dbg(message, 'webkittb', 1)
 
     def _loading_stop_cb(self, view, frame):
         '''method called when the page finish loading'''
@@ -76,12 +76,6 @@ class OutputText(gtk.ScrolledWindow):
     def scroll_to_end(self):
         '''scroll to the end of the content'''
         vadjustment = self.get_vadjustment()
-        '''print 'lower', vadjustment.lower
-        print 'upper', vadjustment.upper
-        print 'value', vadjustment.value
-        print 'step_increment', vadjustment.step_increment
-        print 'page_increment', vadjustment.page_increment
-        print 'page_size', vadjustment.page_size'''
         if vadjustment.upper != vadjustment.page_size:
             vadjustment.set_value(vadjustment.upper)
 

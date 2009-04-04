@@ -121,12 +121,10 @@ class MainWindow(gtk.VBox):
 
     def _on_contact_menu_selected(self, contact):
         '''callback for the contact-menu-selected signal'''
-        print 'contact menu selected'
         self.contact_menu.popup(None, None, None, 0, 0)
 
     def _on_group_menu_selected(self, group):
         '''callback for the group-menu-selected signal'''
-        print 'group menu selected'
         self.group_menu.popup(None, None, None, 0, 0)
 
     def _on_contact_attr_changed(self, protocol, args):
@@ -137,7 +135,8 @@ class MainWindow(gtk.VBox):
         if contact:
             self.contact_list.update_contact(contact)
         else:
-            print 'account', account, 'not found on contacts'
+            dbg('account ' + account + ' not found on contacts',
+                'mainwindow', 1)
 
     def _on_nick_changed(self, textfield, old_text, new_text):
         '''method called when the nick is changed on the panel'''

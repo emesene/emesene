@@ -309,13 +309,13 @@ class Logger(object):
             if gid in self.groups:
                 self.groups[gid].accounts.append(account)
             else:
-                print gid, 'not in self.groups'
+                dbg(gid + ' not in self.groups', 'logger', 1)
 
             if account in self.accounts:
                 self.accounts[account].groups.append(gid)
                 self.accounts[account].cid = cid
             else:
-                print account, 'not in self.accounts'
+                dbg(account + ' not in self.accounts', 'logger', 1)
 
     def _load_groups(self):
         '''load the groups from the d_event table and store them in a dict'''
@@ -465,7 +465,7 @@ class Logger(object):
         try:
             self.execute(Logger.INSERT_ACCOUNT_BY_GROUP, (id_account, id_group))
         except sqlite.IntegrityError, e:
-            print str(e)
+            dbg(str(e), 'logger', 1)
 
         self._stat()
 
@@ -482,14 +482,14 @@ class Logger(object):
         if self._count >= Logger.COMMIT_LIMIT:
             t1 = time.time()
             self.connection.commit()
-            #print 'commit', time.time() - t1
+            dbg('commit ' + str(time.time() - t1), 'logger', 4)
             self._count = 0
 
         self._count += 1
 
     def execute(self, query, args=()):
         '''execute the query with optional args'''
-        #print query, args
+        dbg(query + str(args), 'logger', 5)
         self.cursor.execute(query, args)
 
     # utility methods
@@ -639,7 +639,8 @@ class Logger(object):
             local_account = self.accounts.get(account.account, None)
 
             if local_account is None:
-                print account.account, 'not found in self.accounts'
+                dbg(account.account + ' not found in self.accounts',
+                    'logger', 1)
                 continue
 
             existing = set(local_account.groups)
@@ -696,7 +697,7 @@ class LoggerProcess(threading.Thread):
 
                 if quit:
                     self.logger.close()
-                    print 'closing logger thread'
+                    dbg('closing logger thread', 'logger', 1)
                     break
 
             except Queue.Empty:
@@ -712,16 +713,17 @@ class LoggerProcess(threading.Thread):
         elif action == 'quit':
             return True
         elif action in self.actions:
-            #try:
-            f_args = args[:-1]
-            callback = args[-1]
-            result = self.actions[action](*f_args)
+            try:
+                f_args = args[:-1]
+                callback = args[-1]
+                result = self.actions[action](*f_args)
 
-            if callback:
-                self.output.put((action, result, callback))
-            #except Exception, e:
-            #    print 'error calling action', action, 'on LoggerProcess'
-            #    print e
+                if callback:
+                    self.output.put((action, result, callback))
+            except Exception, e:
+                dbg('error calling action ' + action + ' on LoggerProcess',
+                    'logger', 1)
+                dbg(str(e), 'logger', 1)
 
         return False
 
@@ -794,95 +796,3 @@ class LoggerProcess(threading.Thread):
         '''add all contacts, groups and relations to the database'''
         self.input.put(('add_contact_by_group', (contacts, groups, None)))
 
-
-def test():
-    '''test the logger class'''
-    import os
-    import random
-    import string
-
-    import status
-
-    logger = Logger(os.path.expanduser('~/logger_test.db'))
-
-    accounts = {}
-
-    def get_full_account():
-        '''returns a full account object'''
-        acc = get_account()
-        if acc in accounts:
-            return accounts[acc]
-
-        stat = get_status()
-        nick = get_text()
-        message = get_text()
-        path = get_text()
-
-        account = Account(0, 0, acc, stat, nick, message, path)
-
-        accounts[acc] = account
-
-        return account
-
-    def get_account():
-        '''return a random account'''
-        domains = ('hotmail.com', 'live.com', 'gmail.com')
-        users = ('bob', 'melinda', 'steve', 'linus', 'bill')
-
-        return '@'.join((random.choice(users), random.choice(domains)))
-
-    def get_status():
-        '''return a random status'''
-        return random.choice(status.ORDERED)
-
-    def get_event():
-        '''returns a random event'''
-        return random.choice(Logger.EVENTS)
-
-    def get_text():
-        '''returns a random text'''
-        return ''.join(random.choice(string.letters) for x in \
-                range(random.randint(8, 128)))
-
-    def get_payload(event):
-        '''returns a random payload that is useful for the event'''
-        if event == 'status change':
-            return get_status()
-        else:
-            return get_text()
-
-    def modify_account(event, payload, account):
-        '''modify the field of an account accordint to the event'''
-        if event == 'nick change':
-            accounts[account.account].nick = payload
-        elif event == 'message change':
-            accounts[account.account].message = payload
-        elif event == 'image change':
-            accounts[account.account].path = payload
-        elif event == 'status change':
-            accounts[account.account].status = payload
-
-    while True:
-        #time.sleep(random.randint(1, 4))
-
-        stat = get_status()
-        event = get_event()
-        payload = get_payload(event)
-        src = get_full_account()
-        dest = get_full_account()
-
-        modify_account(event, payload, src)
-
-        if event != 'message':
-            dest = None
-
-        t1 = time.time()
-        logger.add_event(event, stat, payload, src, dest)
-
-        if event == 'message':
-            print time.time() - t1, event, 'from', src, 'to', dest, ':', payload
-        else:
-            print time.time() - t1, event, 'from', src, ':', payload
-
-if __name__ == '__main__':
-    test()

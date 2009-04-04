@@ -49,7 +49,7 @@ class Worker(protocol.Worker):
                 action = self.session.actions.get(True, 0.1)
 
                 if action.id_ == Action.ACTION_QUIT:
-                    print 'closing thread'
+                    dbg('closing thread', 'yworker', 1)
                     self.session.logger.quit()
                     break
 

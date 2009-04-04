@@ -10,12 +10,12 @@ import extension
 import StatusButton
 
 class Login(gtk.Alignment):
-    
-    def __init__(self, callback, on_preferences_changed, account, 
-            accounts=None, remember_account=None, remember_password=None, 
+
+    def __init__(self, callback, on_preferences_changed, account,
+            accounts=None, remember_account=None, remember_password=None,
             statuses=None, proxy=None, use_http=False, session_id=None):
 
-        gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0, 
+        gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
 
         account = account or protocol.Account("", "", protocol.status.ONLINE)
@@ -209,10 +209,10 @@ class Login(gtk.Alignment):
             try:
                 self.btn_status.set_status(int(self.statuses[account]))
             except ValueError:
-                print 'invalid status'
+                dbg('invalid status', 'login', 1)
         else:
             self.btn_status.set_status(protocol.status.ONLINE)
-            
+
 
     def _on_remember_account_toggled(self, button):
         '''called when the remember account check button is toggled'''

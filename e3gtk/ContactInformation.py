@@ -89,7 +89,7 @@ class ContactInformation(gtk.Window):
         '''called when the chat history is ready'''
 
         for (stat, timestamp, message, nick) in results:
-            date_text = time.strftime('[%c]', time.gmtime(timestamp)) 
+            date_text = time.strftime('[%c]', time.gmtime(timestamp))
             tokens = message.split('\r\n')
             type_ = tokens[0]
 
@@ -102,7 +102,7 @@ class ContactInformation(gtk.Window):
                 (type_, format, empty, text) = tokens
                 self.chats.text.append(text + '\n')
             else:
-                print 'unknown message type on ContactInfo'
+                dbg('unknown message type on ContactInfo', 'contactinfo', 1)
 
 
 class InformationWidget(gtk.VBox):

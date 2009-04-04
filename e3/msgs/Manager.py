@@ -3,7 +3,7 @@ import time
 import Queue
 import threading
 
-from e3 import Requester 
+from e3 import Requester
 from protocol import Action, Event
 
 from Parser import MailDataParser
@@ -12,12 +12,13 @@ class Manager(threading.Thread):
     '''Offline Messages Manager'''
 
     (ACTION_MSG_RECEIVED, ACTION_MAIL_DATA,
-     ACTION_OIM_REQUEST, ACTION_OIM_SEND, 
+     ACTION_OIM_REQUEST, ACTION_OIM_SEND,
      ACTION_OIM_RECEIVED, ACTION_OIM_DELETE, ACTION_QUIT) = range(7)
 
     def __init__(self, session):
         '''Offline Messages Manager Constructor'''
         threading.Thread.__init__(self)
+        self.setDaemon(True)
 
         self.input = Queue.Queue() #Input queue
         self.session = session
@@ -116,7 +117,7 @@ class Manager(threading.Thread):
 
         if isinstance(payload, dict):
             payload = payload['Mail-Data']
-        
+
         if payload != 'too-large':
             mail_data = MailDataParser(payload)
             oim_list = []
@@ -126,25 +127,26 @@ class Manager(threading.Thread):
             for oim in oim_list:
                 Requester.RetriveOIM(self.session, oim, self.input).start()
         else:
-            print '[Too Large] retriving oims from a SOAP request'
+            dbg('[Too Large] retriving oims from a SOAP request', 'oim', 1)
             Requester.RetriveTooLarge(self.session, self.input).start()
 
     def _on_oim_request(self, oim):
         self.waiting_requests += 1
-     
+
     def _on_oim_receive(self, oim):
         self.requested.append(oim)
         self.oims_notify()
 
     def _on_unknown_msg(self, payload):
         '''handle the unknown MSG'''
-        print 'unknown MSG:', payload['Content-Type']
+        dbg('unknown MSG: ' + str(payload['Content-Type']), 'oim', 1)
 
     def oims_notify(self):
         if self.waiting_requests == len(self.requested):
             self.requested.sort(key=lambda oim:oim.date)
             for oim in self.requested:
-                print '[OIM]', oim.nick, oim.mail, oim.date, oim.message
+                dbg('[OIM] ' + oim.nick + ' ' + oim.mail + ' ' + str(oim.date) + \
+                    ' ' + oim.message, 'oim', 1)
                 #self.put(Manager.ACTION_OIM_DELETE, oim.id)
                 self.session.add_event(Event.EVENT_OIM_RECEIVED, oim)
             self.waiting_requests = 0

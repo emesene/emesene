@@ -78,7 +78,7 @@ class Config(dict):
 
                 setattr(self, name, value)
             except ValueError:
-                print 'invalid config value', name, value
+                dbg('invalid config value ' + name + ' ' + value, 'config', 1)
 
     def save(self, path, section='DEFAULT'):
         '''save to a config file'''
@@ -95,7 +95,8 @@ class Config(dict):
                 else:
                     parser.set(section, key, str(value))
             except Exception, ex:
-                print 'couldn\'t save %s:%s invalid type' % (key, value)
+                dbg('couldn\'t save %s:%s invalid type' % (key, value),
+                    'config', 1)
 
         parser.write(file(path, 'w'))
 
@@ -131,24 +132,3 @@ class Config(dict):
 
         return cls.list_to_string(lst)
 
-def test():
-    '''test the implementation'''
-    config = Config(i_foo=4, b_bar=False, baz="hello!", f_argh=2.3,
-        l_lala=['sar:asa', 4, False, 2.3, None])
-    config.save('test.ini')
-
-    c = Config()
-    c.load('test.ini')
-
-    print c.i_foo, type(c.i_foo)
-    print c.b_bar, type(c.b_bar)
-    print c.baz, type(c.baz)
-    print c.f_argh, type(c.f_argh)
-    print c.l_lala, type(c.l_lala)
-    # inexisting values
-    print c.inexisting, type(c.inexisting)
-
-    return c
-
-if __name__ == '__main__':
-    test()

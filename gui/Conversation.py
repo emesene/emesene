@@ -233,7 +233,7 @@ class Conversation(object):
 
             icon = gui.theme.status_icons.get(stat, protocol.status.OFFLINE)
         else:
-            print 'unknown state on Conversation._get_icon'
+            dbg('unknown state on Conversation._get_icon', 'conversation', 1)
             return gui.theme.connect
 
         return icon
@@ -254,7 +254,7 @@ class Conversation(object):
             else:
                 text = self.members[0]
         else:
-            print 'unknown state on Conversation._get_text'
+            dbg('unknown state on Conversation._get_text', 'conversation', 1)
             text = '(?)'
 
         return text

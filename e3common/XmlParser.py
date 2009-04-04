@@ -1,7 +1,7 @@
 import xml.parsers.expat
 
 class XmlParser(object):
-    '''a class that parses a xml string an generates a nested 
+    '''a class that parses a xml string an generates a nested
     dict/list structure
     '''
 
@@ -129,14 +129,3 @@ def parse_css(css):
 
     return DictObj(result)
 
-if __name__ == '__main__':
-    import pprint
-
-    def test():
-        #pprint.pprint(XmlParser('<span><b>unnested</b> <i>test</i> <u>!</u><s>!</s></span>').result)
-        #pprint.pprint(XmlParser('<span><b>simple nested <i>test</i> <u>!</u></b></span>').result)
-        #pprint.pprint(XmlParser('<span><b>complex <i>nested <u>test <s>!</s></u></i></b></span>').result)
-        #pprint.pprint(XmlParser('<span><b>image</b> <i>test</i> <img src="foo.png" alt="foo"/> <u>!</u><s>!</s></span>').result)
-        pprint.pprint(XmlParser('<span><a href="google.com">go<s>o</s>gle</a> <i>test</i> <img src="foo.png" alt="foo"/> <u>!</u><s>!</s></span>').result)
-
-    test()

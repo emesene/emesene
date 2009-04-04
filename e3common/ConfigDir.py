@@ -75,21 +75,3 @@ class ConfigDir(object):
         fd.write(content)
         fd.close()
 
-def _test():
-    print 'remember to remove the config dir between tests :)'
-    cfg = ConfigDir('emesene2')
-    print 'defaul base dir:', cfg.default_base_dir
-    print 'base dir:', cfg.base_dir
-    print 'dir %s exists? %s' % (cfg.join('test', 'foo'), 
-        cfg.dir_exists('test', 'foo'))
-    print 'create if not exists'
-    cfg.create_if_not_exists('test', 'foo')
-    print 'file %s readable? %s' % (cfg.join('test', 'foo', 'config.txt'), 
-        cfg.file_readable('test', 'foo', 'config.txt'))
-    print 'write some content to the file'
-    cfg.write('this is the content!', 'test', 'foo', 'config.txt')
-    print 'the content written is:'
-    print cfg.read('test', 'foo', 'config.txt')
-
-if __name__ == '__main__':
-    _test()

@@ -7,7 +7,7 @@ class Signals(gobject.GObject):
 
     def __init__(self, events):
         gobject.GObject.__init__(self)
-        gobject.timeout_add(100, self._handle_events) 
+        gobject.timeout_add(100, self._handle_events)
 
         self.events = events
 
@@ -35,8 +35,10 @@ class Signals(gobject.GObject):
                 event = self.events.get(False)
 
                 if event.id_ in Signals.EVENT_TO_NAME:
-                    event_name = Signals.EVENT_TO_NAME[event.id_].replace(' ', '-')
-                    #print 'emiting:', event_name, 'args:', event.args
+                    event_name = Signals.EVENT_TO_NAME[event.id_].replace(' ',
+                        '-')
+                    dbg('emiting: ' + event_name + ' args: ' + str(event.args),
+                        'signals', 4)
                     self.emit(event_name, event.args)
             except Queue.Empty:
                 break

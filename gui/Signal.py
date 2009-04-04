@@ -67,20 +67,3 @@ def extend(func):
 
     return wrapper
 
-if __name__ == '__main__':
-    @extend
-    def do_stuff(foo, bar, baz=4):
-        print 'do_stuff'
-        return 'return value'
-
-    def pre(args, kwargs):
-        print 'pre', args, kwargs
-
-    def post(result, args, kwargs):
-        print 'post', result, args, kwargs
-
-    do_stuff.on_entry.subscribe(pre)
-    do_stuff.on_exit.subscribe(post)
-
-    do_stuff('one', False)
-    do_stuff('two', True, 7)
