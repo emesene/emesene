@@ -16,10 +16,13 @@ import challenge
 import Requester
 import XmlManager
 import Conversation
+import protocol.Proxy
 import protocol.Worker
 import protocol.Contact
 import protocol.status as status
 import protocol.Logger as Logger
+from MsnSocket import MsnSocket
+from MsnHttpSocket import MsnHttpSocket
 from  protocol.Event import Event
 from  protocol.Action import Action
 
@@ -55,15 +58,25 @@ class Worker(protocol.Worker):
     '''this class represent an object that waits for commands from the queue
     of a socket, process them and add it as events to its own queue'''
 
-    def __init__(self, app_name, socket, session, msn_socket_class):
+    def __init__(self, app_name, session, proxy=None, use_http=False):
         '''class constructor'''
         protocol.Worker.__init__(self, app_name, session)
-        self.socket = socket
+
+        if proxy is None:
+            self.proxy = protocol.Proxy()
+        else:
+            self.proxy = proxy 
+
+        if self.proxy.use_proxy or use_http:
+            self.socket = MsnHttpSocket(dest_type='NS', proxy=self.proxy)
+        else:
+            self.socket = MsnSocket()
+
+        self.socket.start()
 
         self.in_login = False
         # the class used to create the conversation sockets, since sockets
         # or http method can be used
-        self.msn_socket_class = msn_socket_class
 
         self.last_ping_response = 0.0
 
@@ -579,15 +592,14 @@ class Worker(protocol.Worker):
 
         if cid not in self.conversations:
             con = Conversation.Conversation(self.session, cid,
-                self.msn_socket_class, host, int(port), account, session_id,
-                self.p2p)
+                host, int(port), account, session_id, self.p2p, self.proxy)
             self.conversations[cid] = con
             con.send_presentation()
             con.invite(account)
             con.start()
         else:
             con = self.conversations[cid]
-            con.reconnect(self.msn_socket_class, host, int(port), session_id)
+            con.reconnect(host, int(port), session_id)
 
         # send all the pending messages
         for message in messages:
@@ -623,8 +635,7 @@ class Worker(protocol.Worker):
 
         cid = time.time()
         con = Conversation.Conversation(self.session, cid,
-            self.msn_socket_class, host, int(port), user, session_id,
-            self.p2p, auth_id)
+            host, int(port), user, session_id, self.p2p, auth_id)
         self.conversations[cid] = con
         con.answer()
         con.start()

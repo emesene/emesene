@@ -49,10 +49,10 @@ class Config(dict):
     def get_or_set(self, name, default):
         '''return the value of the name config value, if not set
         then set it to default and return that value'''
-        if not hasattr(self, name):
-            setattr(self, name, default)
+        if name not in self.__dict__:
+            self.__dict__[name] = default
 
-        return getattr(self, name)
+        return self.__dict__[name]
 
     def load(self, path, clear=False, section='DEFAULT'):
         '''load the config file from path, clear old values if

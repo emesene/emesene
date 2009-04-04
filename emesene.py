@@ -262,9 +262,9 @@ class Controller(object):
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
-
+             
         self.window.go_login(self.on_login_connect, 
-            self.on_preferences_changed,account, 
+            self.on_preferences_changed, account, 
             self.config.d_accounts, self.config.l_remember_account, 
             self.config.l_remember_password, self.config.d_status,
             self.config.session, proxy, use_http, self.config.session)

@@ -3,22 +3,31 @@ import threading
 
 import MsnMessage
 import p2p.Manager
+import protocol.Proxy
 import protocol.Contact
 import protocol.Action as Action
 import protocol.Logger as Logger
+from MsnSocket import MsnSocket
 from protocol.Event import Event
+from MsnHttpSocket import MsnHttpSocket
 
 class Conversation(threading.Thread):
     '''a thread that handles a conversation'''
     (STATUS_PENDING, STATUS_CONNECTED, STATUS_ESTABLISHED, STATUS_CLOSED,
     STATUS_ERROR) = range(5)
 
-    def __init__(self, session, cid, MsnSocket, host, port, account, 
-        session_id, p2p_input, auth_id=None):
+    def __init__(self, session, cid, host, port, account, 
+        session_id, p2p_input, auth_id=None, proxy=None, use_http=False):
         '''class constructor, create a socket and connect it to the specified
         server'''
         threading.Thread.__init__(self)
         self.setDaemon(True)
+
+        self.use_http = use_http
+        if proxy is None:
+            self.proxy = protocol.Proxy()
+        else:
+            self.proxy = proxy 
 
         self.cid = cid
         self.host = host
@@ -27,7 +36,7 @@ class Conversation(threading.Thread):
         self.account = account
         self.auth_id = auth_id
         self.session_id = session_id
-        self.socket = MsnSocket(host, port)
+        self.socket = self._get_socket(host, port)
 
         self.status = Conversation.STATUS_PENDING
         self.started = False
@@ -272,13 +281,13 @@ class Conversation(threading.Thread):
         '''
         self.transfers[transfer.pid] = transfer
 
-    def reconnect(self, MsnSocket, host, port, session_id):
+    def reconnect(self, host, port, session_id):
         '''restablish connection with the switchboard server'''
         self.host = host
         self.port = port
         self.session_id = session_id
         self.socket.quit()
-        self.socket = MsnSocket(host, port)
+        self.socket = self._get_socket(host, port)
         self.send_presentation()
 
         if len(self.members) == 0 and self.last_member:
@@ -353,3 +362,13 @@ class Conversation(threading.Thread):
                 self.session.logger.log(event, contact.status, msgstr, 
                     src, dest)
 
+    def _get_socket(self, host, port):
+        """
+        return a socket according to the proxy settings
+        """
+        if self.proxy.use_proxy or self.use_http:
+            socket = MsnHttpSocket(host, port, dest_type='NS', proxy=self.proxy)
+        else:
+            socket = MsnSocket(host, port)
+
+        return socket

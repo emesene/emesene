@@ -14,12 +14,24 @@ import protocol.Logger as Logger
 class Worker(protocol.Worker):
     '''wrapper of xmpppy to make it work like protocol.Worker'''
 
-    def __init__(self, app_name, session):
+    def __init__(self, app_name, session, proxy, use_http=False):
         '''class constructor'''
         protocol.Worker.__init__(self, app_name, session)
         self.jid = xmpp.protocol.JID(session.account.account)
         self.client = xmpp.Client(self.jid.getDomain(), debug=[]) #'always'])
 
+        self.proxy = proxy
+        self.proxy_data = None
+
+        if self.proxy.use_proxy:
+            self.proxy_data = {}
+            self.proxy_data['host'] = self.proxy.host
+            self.proxy_data['port'] = self.proxy.port
+
+            if self.proxy.use_auth:
+                self.proxy_data['username'] = self.proxy.user
+                self.proxy_data['password'] = self.proxy.passwd
+            
         self.conversations = {}
         self.rconversations = {}
         self.roster = None
@@ -147,7 +159,8 @@ class Worker(protocol.Worker):
     def _handle_action_login(self, account, password, status_):
         '''handle Action.ACTION_LOGIN
         '''
-        if self.client.connect(('talk.google.com', 5223)) == "":
+        if self.client.connect(('talk.google.com', 5223), 
+                proxy=self.proxy_data) == "":
             self.session.add_event(Event.EVENT_LOGIN_FAILED, 
                 'Connection error')
             return

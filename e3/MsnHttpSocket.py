@@ -4,6 +4,7 @@ import urllib2
 import threading
 
 import common
+import protocol.Proxy
 import Command
 
 class MsnHttpSocket(threading.Thread):
@@ -11,11 +12,17 @@ class MsnHttpSocket(threading.Thread):
     output queue, the data to be sent is added to the input queue'''
 
     def __init__(self, dest_ip='messenger.hotmail.com', port_unused=1863,
-        dest_type='SB', host=None, port=None, user=None, password=None):
+        dest_type='SB', proxy=None):
         '''class contructor, port_unused is unused (duh!) but there for 
         API compatibility with MsnSocket'''
         threading.Thread.__init__(self)
+        self.setDaemon(True)
         self.tid = 1
+
+        if proxy is None:
+            self.proxy = protocol.Proxy()
+        else:
+            self.proxy = proxy
 
         self.host = 'http://gateway.messenger.hotmail.com'
         self.dest_type = dest_type
@@ -25,12 +32,19 @@ class MsnHttpSocket(threading.Thread):
         self.session_id = None
         self.timestamp = time.time()
 
-        if host is not None:
-            proxy_info = {'user': user, 'pass': password, 'host': host, 
-                'port' : port}
+        if self.proxy.use_proxy:
+            proxy_info = {'host': self.proxy.host, 'port' : self.proxy.port}
 
-            proxy_support = urllib2.ProxyHandler({"http" : \
-            "http://%(user)s:%(pass)s@%(host)s:%(port)d" % proxy_info})
+            if self.proxy.use_auth:
+                proxy_info['user'] = self.proxy.user
+                proxy_info['pass'] = self.proxy.passwd
+
+                proxy_support = urllib2.ProxyHandler({"http" : \
+                "http://%(user)s:%(pass)s@%(host)s:%(port)s" % proxy_info})
+            else:
+                proxy_support = urllib2.ProxyHandler({"http" : \
+                "http://%(host)s:%(port)s" % proxy_info})
+
             opener = urllib2.build_opener(proxy_support, urllib2.HTTPHandler)
 
             # install it
@@ -105,7 +119,7 @@ class MsnHttpSocket(threading.Thread):
     def poll(self):
         '''send a poll to the server and expect the response'''
         self.send_req('', '/gateway/gateway.dll?Action=poll&SessionID=' + \
-            self.session_id)
+            str(self.session_id))
 
     def send_req(self, data, path=None, is_retry=False):
         '''send a request to the server and expect the response'''

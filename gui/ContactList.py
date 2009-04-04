@@ -42,20 +42,16 @@ class ContactList(object):
 
         self.group_state = {}
 
-        if self.session.config.b_order_by_group is None:
-            self.session.config.b_order_by_group = True
-
-        if self.session.config.b_show_nick is None:
-            self.session.config.b_show_nick = True
-
-        if self.session.config.b_show_empty_groups is None:
-            self.session.config.b_show_empty_groups = False
-
-        if self.session.config.b_show_offline is None:
-            self.session.config.b_show_offline = False
-
-        if self.session.config.b_show_blocked is None:
-            self.session.config.b_show_blocked = False
+        self.session.config.b_order_by_group = \
+            self.session.config.get_or_set('b_order_by_group', True)
+        self.session.config.b_show_nick = \
+            self.session.config.get_or_set('b_show_nick', True)
+        self.session.config.b_show_empty_groups = \
+            self.session.config.get_or_set('b_show_empty_groups', False)
+        self.session.config.b_show_offline = \
+            self.session.config.get_or_set('b_show_offline', False)
+        self.session.config.b_show_blocked = \
+            self.session.config.get_or_set('b_show_blocked', False)
 
 
         # self.order_by_status is a property that returns the inverse

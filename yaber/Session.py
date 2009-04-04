@@ -18,7 +18,7 @@ class Session(protocol.Session):
     def login(self, account, password, status, proxy, use_http=False):
         '''start the login process'''
         self.account = protocol.Account(account, password, status)
-        worker = yaber.Worker('emesene2', self)
+        worker = yaber.Worker('emesene2', self, proxy, use_http)
         worker.start()
 
         self.add_action(Action.ACTION_LOGIN, (account, password, status))
