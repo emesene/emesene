@@ -31,7 +31,7 @@ class MainWindow(gtk.VBox):
         self.on_new_conversation = on_new_conversation
         self.on_close = on_close
 
-        self.session.signals.connect('contact-attr-changed',
+        self.session.signals.contact_attr_changed.subscribe(
             self._on_contact_attr_changed)
 
         self.menu = None
@@ -109,8 +109,7 @@ class MainWindow(gtk.VBox):
     def _on_contact_selected(self, contact):
         '''callback for the contact-selected signal'''
         cid = time.time()
-        (existed, conversation) = self.on_new_conversation(
-            self.session.signals, (cid, [contact.account]))
+        (existed, conversation) = self.on_new_conversation(cid, [contact.account])
 
         if not existed:
             self.session.new_conversation(contact.account, cid)
@@ -127,9 +126,8 @@ class MainWindow(gtk.VBox):
         '''callback for the group-menu-selected signal'''
         self.group_menu.popup(None, None, None, 0, 0)
 
-    def _on_contact_attr_changed(self, protocol, args):
+    def _on_contact_attr_changed(self, account):
         '''callback called when an attribute of a contact changed'''
-        account = args[0]
         contact = self.session.contacts.get(account)
 
         if contact:

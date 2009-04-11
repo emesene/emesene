@@ -12,19 +12,19 @@ class ConversationManager(object):
 
         self.conversations = {}
         if self.session:
-            self.session.signals.connect('conv-message',
+            self.session.signals.conv_message.subscribe(
                 self._on_message)
-            self.session.signals.connect('conv-contact-joined',
+            self.session.signals.conv_contact_joined.subscribe(
                 self._on_contact_joined)
-            self.session.signals.connect('conv-contact-left',
+            self.session.signals.conv_contact_left.subscribe(
                 self._on_contact_left)
-            self.session.signals.connect('conv-group-started',
+            self.session.signals.conv_group_started.subscribe(
                 self._on_group_started)
-            self.session.signals.connect('conv-group-ended',
+            self.session.signals.conv_group_ended.subscribe(
                 self._on_group_ended)
-            self.session.signals.connect('conv-message-send-failed',
+            self.session.signals.conv_message_send_failed.subscribe(
                 self._on_message_send_failed)
-            self.session.signals.connect('contact-attr-changed',
+            self.session.signals.contact_attr_changed.subscribe(
                 self._on_contact_attr_changed)
 
     def add_new_conversation(self, session, cid, members):
@@ -33,9 +33,8 @@ class ConversationManager(object):
         """
         raise NotImplementedError("This method is not implemented")
 
-    def _on_message(self, protocol, args):
+    def _on_message(self, cid, account, message):
         '''called when a message is received'''
-        (cid, account, message) = args
         conversation = self.conversations.get(float(cid), None)
 
         if conversation is None:
@@ -80,9 +79,8 @@ class ConversationManager(object):
         """
         raise NotImplementedError("Method not implemented")
 
-    def _on_message_send_failed(self, protocol, args):
+    def _on_message_send_failed(self, cid, message):
         '''called when a message is received'''
-        (cid, message) = args
         conversation = self.conversations.get(float(cid), None)
 
         if conversation is not None:
@@ -94,9 +92,8 @@ class ConversationManager(object):
         else:
             dbg('conversation ' + cid + ' not found', 'convmanager', 1)
 
-    def _on_contact_joined(self, protocol, args):
+    def _on_contact_joined(self, cid, account):
         '''called when a contact join the conversation'''
-        (cid, account) = args
         conversation = self.conversations.get(float(cid), None)
 
         if conversation:
@@ -104,9 +101,8 @@ class ConversationManager(object):
         else:
             dbg('on_contact_joined: conversation is None', 'convmanager', 1)
 
-    def _on_contact_left(self, protocol, args):
+    def _on_contact_left(self, cid, account):
         '''called when a contact leaves the conversation'''
-        (cid, account) = args
         conversation = self.conversations.get(float(cid), None)
 
         if conversation:
@@ -114,17 +110,15 @@ class ConversationManager(object):
         else:
             dbg('on_contact_left: conversation is None', 'convmanager', 1)
 
-    def _on_group_started(self, protocol, args):
+    def _on_group_started(self, cid):
         '''called when a group conversation starts'''
-        cid = args[0]
         conversation = self.conversations.get(float(cid), None)
 
         if conversation:
             conversation.on_group_started()
 
-    def _on_group_ended(self, protocol, args):
+    def _on_group_ended(self, cid):
         '''called when a group conversation ends'''
-        cid = args[0]
         conversation = self.conversations.get(float(cid), None)
 
         if conversation:
@@ -161,10 +155,8 @@ class ConversationManager(object):
 
         return (False, conversation)
 
-    def _on_contact_attr_changed(self, protocol, args):
+    def _on_contact_attr_changed(self, account):
         '''called when an attribute of a contact changes'''
-        account = args[0]
-
         for conversation in self.conversations.values():
             if account in conversation.members:
                 conversation.update_data()

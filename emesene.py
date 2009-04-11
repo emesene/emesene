@@ -63,19 +63,19 @@ class Controller(object):
 
         Session = extension.get_default('session')
         self.session = Session()
-        # TODO: make this gobject independent
-        self.session.signals = e3gtk.Signals.Signals(self.session.events)
-        self.session.signals.connect('login-succeed', self.on_login_succeed)
-        self.session.signals.connect('login-failed', self.on_login_failed)
-        self.session.signals.connect('contact-list-ready',
+        self.session.signals = gui.Signals(protocol.EVENTS,
+            self.session.events)
+        self.session.signals.login_succeed.subscribe(self.on_login_succeed)
+        self.session.signals.login_failed.subscribe(self.on_login_failed)
+        self.session.signals.contact_list_ready.subscribe(
             self.on_contact_list_ready)
-        self.session.signals.connect('conv-first-action',
+        self.session.signals.conv_first_action.subscribe(
             self.on_new_conversation)
-        self.session.signals.connect('nick-change-succeed',
+        self.session.signals.nick_change_succeed.subscribe(
             self.on_nick_change_succeed)
-        self.session.signals.connect('message-change-succeed',
+        self.session.signals.message_change_succeed.subscribe(
             self.on_message_change_succeed)
-        self.session.signals.connect('status-change-succeed',
+        self.session.signals.status_change_succeed.subscribe(
             self.on_status_change_succeed)
 
     def save_extensions_config(self):
@@ -145,7 +145,7 @@ class Controller(object):
         time.sleep(2)
         sys.exit(0)
 
-    def on_login_succeed(self, signals, args):
+    def on_login_succeed(self):
         '''callback called on login succeed'''
         self.window.clear()
         self.config.save(self.config_path)
@@ -153,33 +153,30 @@ class Controller(object):
         self.window.go_main(self.session, self.on_new_conversation,
             self.on_close)
 
-    def on_login_failed(self, signals, args):
+    def on_login_failed(self, reason):
         '''callback called on login failed'''
         self._new_session()
         dialog = extension.get_default('gtk dialog')
-        dialog.error(args[0])
+        dialog.error(reason)
         self.window.content.set_sensitive(True)
 
-    def on_contact_list_ready(self, signals, args):
+    def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
         self.window.content.contact_list.fill()
         self.window.content.panel.enabled = True
 
         gobject.timeout_add(500, self.session.logger.check)
 
-    def on_nick_change_succeed(self, signals, args):
+    def on_nick_change_succeed(self, nick):
         '''callback called when the nick has been changed successfully'''
-        nick = args[0]
         self.window.content.panel.nick.text = nick
 
-    def on_status_change_succeed(self, signals, args):
+    def on_status_change_succeed(self, stat):
         '''callback called when the status has been changed successfully'''
-        stat = args[0]
         self.window.content.panel.status.set_status(stat)
 
-    def on_message_change_succeed(self, signals, args):
+    def on_message_change_succeed(self, message):
         '''callback called when the message has been changed successfully'''
-        message = args[0]
         self.window.content.panel.message.text = message
 
     def on_preferences_changed(self, use_http, proxy, session_id):
@@ -240,12 +237,11 @@ class Controller(object):
         self.session.config.get_or_set('b_play_contact_offline', True)
         self.session.login(account.account, account.password, account.status,
             proxy, use_http)
+        gobject.timeout_add(200, self.session.signals._handle_events)
 
-    def on_new_conversation(self, signals, args):
+    def on_new_conversation(self, cid, members):
         '''callback called when the other user does an action that justify
         opeinig a conversation'''
-        (cid, members) = args
-
         if self.conversations is None:
             Window = extension.get_default('gtk window frame')
             window = Window(self._on_conversation_window_close)

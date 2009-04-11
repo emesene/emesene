@@ -278,9 +278,8 @@ class Worker(protocol.Worker):
 
         recipients = self.rconversations.get(cid, ())
 
-        # TODO: see if this is correct on jabber
         for recipient in recipients:
-            self.client.send(xmpp.protocol.Message(recipient, message.body, 
+            self.client.send(xmpp.protocol.Message(recipient, message.body,
                 'chat'))
 
     # p2p handlers

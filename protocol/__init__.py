@@ -29,6 +29,7 @@ from Contact import Contact
 from Session import Session
 from Account import Account
 
+from Worker import EVENTS
 from ContactManager import ContactManager
 
 import status

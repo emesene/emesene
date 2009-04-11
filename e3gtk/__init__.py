@@ -3,7 +3,6 @@ import Dialog
 import Header
 import Window
 import TextBox
-import Signals
 import MainMenu
 import UserPanel
 import TabWidget
@@ -20,10 +19,6 @@ import ConversationManager
 import ConversationToolbar
 
 import extension
-
-from protocol.Worker import EVENTS
-
-Signals.Signals.set_events(EVENTS)
 
 def setup():
     """
