@@ -7,6 +7,8 @@ import common
 import protocol.Proxy
 import Command
 
+from debugger import dbg
+
 class MsnHttpSocket(threading.Thread):
     '''a socket that runs on a thread, it reads the data and put it on the 
     output queue, the data to be sent is added to the input queue'''

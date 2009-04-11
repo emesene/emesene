@@ -8,6 +8,7 @@ import protocol
 import utils
 import extension
 import StatusButton
+from debugger import dbg
 
 class Login(gtk.Alignment):
 

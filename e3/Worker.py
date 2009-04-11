@@ -29,6 +29,8 @@ from  protocol.Action import Action
 from XmlParser import SSoParser
 from UbxParser import UbxParser
 
+from debugger import dbg
+
 STATUS_MAP = {}
 STATUS_MAP[status.BUSY] = 'BSY'
 STATUS_MAP[status.AWAY] = 'AWY'
@@ -247,7 +249,6 @@ class Worker(protocol.Worker):
                 try:
 
                     conn = httplib.HTTPSConnection(server, 443)
-                    conn.debuglevel = 1
                     conn.request('POST', url, template, headers)
                     response = conn.getresponse()
                     break

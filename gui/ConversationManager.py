@@ -1,6 +1,7 @@
 import e3common
 
 from protocol import Message
+from debugger import dbg
 
 class ConversationManager(object):
     '''the main conversation, it only contains other conversations'''

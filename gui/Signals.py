@@ -16,7 +16,6 @@ class Signals(object):
 
     def _handle_events(self):
         '''convert Event object on the queue to gui.Signal'''
-
         while True:
             try:
                 event = self.event_queue.get(False)
@@ -24,9 +23,7 @@ class Signals(object):
                 if event.id_ < len(self.event_names):
                     event_name = self.event_names[event.id_].replace(' ', '_')
                     signal = getattr(self, event_name)
-                    dbg('handling ' + event_name, 'signal', 5)
                     signal.emit(*event.args)
             except Queue.Empty:
                 break
-
         return True

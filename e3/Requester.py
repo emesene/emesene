@@ -11,11 +11,13 @@ import XmlManager
 import msgs
 import protocol.Group as Group
 import protocol.Contact as Contact
-from protocol.Event import Event
 
-from Command import Command
 import common
 import challenge
+
+from debugger import dbg
+from Command import Command
+from protocol.Event import Event
 
 def build_role(account, role, key, add=True):
     '''build a request to add account to the role if add is True, if False

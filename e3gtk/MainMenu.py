@@ -4,6 +4,7 @@ import gui
 import utils
 
 import extension
+from debugger import dbg
 
 class MainMenu(gtk.MenuBar):
     """

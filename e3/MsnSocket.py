@@ -4,6 +4,7 @@ import common
 import Socket
 import Command
 
+from debugger import dbg
 
 class MsnSocket(Socket.Socket):
     '''a socket object specialized to be used to connecto with the msn network

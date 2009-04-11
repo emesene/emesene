@@ -11,6 +11,8 @@ from MsnSocket import MsnSocket
 from protocol.Event import Event
 from MsnHttpSocket import MsnHttpSocket
 
+from debugger import dbg
+
 class Conversation(threading.Thread):
     '''a thread that handles a conversation'''
     (STATUS_PENDING, STATUS_CONNECTED, STATUS_ESTABLISHED, STATUS_CLOSED,

@@ -4,6 +4,7 @@ import threading
 import sqlite3.dbapi2 as sqlite
 
 import status as pstatus
+from debugger import dbg
 
 class Account(object):
     '''a class to store account data'''

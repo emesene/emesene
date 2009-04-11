@@ -7,6 +7,7 @@ except ImportError:
     ERROR = True
 
 import e3common.MarkupParser
+from debugger import dbg
 
 class OutputText(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
@@ -51,10 +52,9 @@ class OutputText(gtk.ScrolledWindow):
         if not self.config or self.config.b_show_emoticons:
             text = e3common.MarkupParser.parse_emotes(text)
 
-        text = text.replace('\n', '<br/>')
-        self._textbox.execute_script(
-            'add_message("%s");' % (text.replace('"', '\\"').\
-                replace('\n', '\\n'),))
+        text = text.replace('\r\n', '<br/>').replace('\n', '<br/>')
+        text = text.replace('"', '\\"')
+        self._textbox.execute_script('add_message("%s");' % (text,))
 
         if scroll:
             self.scroll_to_end()

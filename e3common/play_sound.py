@@ -22,24 +22,14 @@ if os.name == 'nt':
     def play(path):
         winsound.PlaySound(path, winsound.SND_FILENAME)
 elif os.name == 'posix':
-    try:
-        import gst
-
+    if is_on_path('play'):
         def play(path):
-            """
-            play a sound using gstreamer api
-            """
-            _player = gst.element_factory_make("playbin", "player")
-            uri = "file://" + os.path.abspath(path)
-            _player.set_property('uri', uri)
-            _player.set_state(gst.STATE_PLAYING)
-    except ImportError:
-        if is_on_path('play'):
-            play = lambda path: os.popen4('play ' + path)
-        elif is_on_path('aplay'):
-            play = lambda path: os.popen4('aplay ' + path)
-        else:
-            play = dummy_play
+            os.popen4('play ' + path)
+    elif is_on_path('aplay'):
+        def play(path):
+            os.popen4('aplay ' + path)
+    else:
+        play = dummy_play
 elif os.name == 'mac':
     from AppKit import NSSound
     def play(path):

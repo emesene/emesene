@@ -115,7 +115,7 @@ class Category(object):
         ValueError'''
 
         if id_ not in self.classes:
-            raise ValueError('extension id not registered on %s' % (self.name,))
+            raise ValueError('extension id %s not registered on %s' % (id_, self.name,))
 
         self.default = self.classes[id_]
 

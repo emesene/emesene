@@ -20,6 +20,8 @@ import urllib
 
 import ConfigParser
 
+from debugger import dbg
+
 class Config(dict):
     '''a class that contains all the configurations of the user,
     the config keys follow a convention, all the names start with

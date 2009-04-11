@@ -28,6 +28,7 @@ import protocol
 import extension
 
 import ContactInformation
+from debugger import dbg
 
 # TODO: remove this
 _ = lambda x: x

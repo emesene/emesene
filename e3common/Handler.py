@@ -2,6 +2,8 @@ import webbrowser
 
 import gui
 
+from debugger import dbg
+
 class MenuHandler(object):
     '''this handler contains all the handlers needed to handle all the
     menu items

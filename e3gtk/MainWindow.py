@@ -109,7 +109,7 @@ class MainWindow(gtk.VBox):
     def _on_contact_selected(self, contact):
         '''callback for the contact-selected signal'''
         cid = time.time()
-        (existed, conversation) = self.on_new_conversation(cid, [contact.account])
+        (existed, conversation) = self.on_new_conversation(cid, [contact.account], False)
 
         if not existed:
             self.session.new_conversation(contact.account, cid)

@@ -3,6 +3,8 @@ import threading
 
 import protocol.Action
 
+from debugger import dbg
+
 class Manager(threading.Thread):
     '''P2P manager, a single thread for everything'''
 

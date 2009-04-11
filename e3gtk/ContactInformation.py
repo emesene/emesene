@@ -7,6 +7,8 @@ import utils
 import protocol.status
 import TextBox
 
+from debugger import dbg
+
 class ContactInformation(gtk.Window):
     '''a window that displays information about a contact'''
 

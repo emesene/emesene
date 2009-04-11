@@ -2,6 +2,7 @@ import gui
 import e3common
 import protocol
 import extension
+from debugger import dbg
 
 class Conversation(object):
     '''a widget that contains all the components inside'''

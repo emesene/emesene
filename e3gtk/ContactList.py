@@ -27,6 +27,7 @@ import gui.ContactList
 import protocol.status as status
 from protocol.Group import Group
 from protocol.Contact import Contact
+from debugger import dbg
 
 class ContactList(gui.ContactList.ContactList, gtk.TreeView):
     '''a gtk implementation of gui.ContactList'''

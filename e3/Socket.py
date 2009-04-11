@@ -7,6 +7,8 @@ import select
 import StringIO
 import threading
 
+from debugger import dbg
+
 class Socket(threading.Thread):
     '''a socket that runs on a thread, it reads the data and put it on the 
     output queue, the data to be sent is added to the input queue'''

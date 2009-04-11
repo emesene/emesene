@@ -4,9 +4,7 @@ import time
 import base64
 import gobject
 
-# keep this one above all the others!
 import debugger
-setattr(__builtins__, 'dbg', debugger.dbg)
 
 import e3
 import gui
@@ -237,9 +235,9 @@ class Controller(object):
         self.session.config.get_or_set('b_play_contact_offline', True)
         self.session.login(account.account, account.password, account.status,
             proxy, use_http)
-        gobject.timeout_add(200, self.session.signals._handle_events)
+        gobject.timeout_add(500, self.session.signals._handle_events)
 
-    def on_new_conversation(self, cid, members):
+    def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
         opeinig a conversation'''
         if self.conversations is None:
@@ -259,8 +257,10 @@ class Controller(object):
         conversation.show()
 
         play = extension.get_default('sound')
-        if self.session.contacts.me.status != protocol.status.BUSY and \
-                self.session.config.b_play_first_send:
+        if other_started and \
+            self.session.contacts.me.status != protocol.status.BUSY and \
+            self.session.config.b_play_first_send:
+
             play(gui.theme.sound_send)
 
         return (exists, conversation)
@@ -286,9 +286,16 @@ class Controller(object):
         self.window.show()
 
 
-if __name__ == "__main__":
+def main():
+    """
+    the main method of emesene
+    """
     gtk.gdk.threads_init()
     controller = Controller()
     controller.start()
     gtk.quit_add(0, controller.on_close)
     gtk.main()
+
+if __name__ == "__main__":
+    main()
+

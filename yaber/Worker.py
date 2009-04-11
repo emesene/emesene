@@ -10,6 +10,7 @@ from  protocol.Event import Event
 from  protocol.Action import Action
 
 import protocol.Logger as Logger
+from debugger import dbg
 
 class Worker(protocol.Worker):
     '''wrapper of xmpppy to make it work like protocol.Worker'''
