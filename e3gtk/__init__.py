@@ -4,6 +4,7 @@ import Header
 import Window
 import TextBox
 import MainMenu
+import TrayIcon
 import UserPanel
 import TabWidget
 import GroupMenu
@@ -30,6 +31,7 @@ def setup():
     extension.category_register('gtk main window', MainWindow.MainWindow)
     extension.category_register('gtk contact list', ContactList.ContactList)
     extension.category_register('gtk user panel', UserPanel.UserPanel)
+    extension.category_register('gtk tray icon', TrayIcon.TrayIcon)
 
     extension.category_register('gtk main menu', MainMenu.MainMenu)
     extension.category_register('gtk menu file', MainMenu.FileMenu)

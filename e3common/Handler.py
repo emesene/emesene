@@ -12,7 +12,7 @@ class MenuHandler(object):
     def __init__(self, session, dialog, contact_list, on_disconnect=None,
             on_quit=None):
         '''constructor'''
-        self.file_handler = FileHandler(session, dialog, on_disconnect, on_quit)
+        self.file_handler = FileHandler(session, on_disconnect, on_quit)
         self.actions_handler = ActionsHandler(session, dialog, contact_list)
         self.options_handler = OptionsHandler(session, contact_list)
         self.help_handler = HelpHandler(dialog)
@@ -22,10 +22,9 @@ class FileHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, on_disconnect=None, on_quit=None):
+    def __init__(self, session, on_disconnect=None, on_quit=None):
         '''constructor'''
         self.session = session
-        self.dialog = dialog
         self.on_disconnect = on_disconnect
         self.on_quit = on_quit
 
@@ -345,4 +344,17 @@ class ConversationToolbarHandler(object):
         '''called when the nudge button is selected'''
         self.conversation.on_notify_atention()
 
+class TrayIconHandler(FileHandler):
+    """
+    this handler contains all the methods to handle a tray icon
+    """
 
+    def __init__(self, session, theme, on_disconnect=None, on_quit=None):
+        """
+        constructor
+
+        session -- a protocol.Session implementation
+        theme -- a gui.Theme object
+        """
+        FileHandler.__init__(self, session, on_disconnect, on_quit)
+        self.theme = theme

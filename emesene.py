@@ -9,10 +9,8 @@ import debugger
 import e3
 import gui
 import yaber
+import e3common
 import protocol
-from e3common import Config
-from e3common import ConfigDir
-from e3common import play_sound
 
 import extension
 import e3gtk
@@ -24,8 +22,8 @@ class Controller(object):
         '''class constructor'''
         self.window = None
         self.conversations = None
-        self.config = Config.Config()
-        self.config_dir = ConfigDir.ConfigDir('emesene2')
+        self.config = e3common.Config.Config()
+        self.config_dir = e3common.ConfigDir.ConfigDir('emesene2')
         self.config_path = self.config_dir.join('config')
         self.config.load(self.config_path)
 
@@ -43,7 +41,7 @@ class Controller(object):
         e3gtk.setup()
         extension.category_register('session', e3.Session)
         extension.register('session', yaber.Session)
-        extension.category_register('sound', play_sound.play)
+        extension.category_register('sound', e3common.play_sound.play)
 
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
@@ -146,6 +144,7 @@ class Controller(object):
     def on_login_succeed(self):
         '''callback called on login succeed'''
         self.window.clear()
+        self.tray_icon.set_main(self.session)
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
         self.window.go_main(self.session, self.on_new_conversation,
@@ -272,7 +271,11 @@ class Controller(object):
 
     def start(self, account=None, accounts=None):
         Window = extension.get_default('gtk window frame')
+        TrayIcon = extension.get_default('gtk tray icon')
         self.window = Window(self.on_close)
+        handler = e3common.TrayIconHandler(self.session, gui.theme, 
+            self.on_disconnect, self.on_close)
+        self.tray_icon = TrayIcon(handler)
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
@@ -284,6 +287,12 @@ class Controller(object):
             self.config.session, proxy, use_http, self.config.session)
 
         self.window.show()
+
+    def on_disconnect(self):
+        """
+        method called when the user selects disconnect
+        """
+        pass
 
 
 def main():
