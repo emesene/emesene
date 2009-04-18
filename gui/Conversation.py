@@ -347,26 +347,18 @@ class Conversation(object):
         """
         play the nudge sound
         """
-        play = extension.get_default('sound')
-        if self.session.contacts.me.status != protocol.status.BUSY and \
-                self.session.config.b_play_nudge:
-            play(gui.theme.sound_nudge)
+        gui.play(self.session, gui.theme.sound_nudge)
 
     def play_send(self):
         """
         play the send sound
         """
-        play = extension.get_default('sound')
-        if self.session.contacts.me.status != protocol.status.BUSY and \
-                self.session.config.b_play_send:
-            play(gui.theme.sound_send)
+        gui.play(self.session, gui.theme.sound_send)
 
     def play_type(self):
         """
         play the send sound
         """
-        play = extension.get_default('sound')
-        if self.session.contacts.me.status != protocol.status.BUSY and \
-                self.session.config.b_play_type:
-            play(gui.theme.sound_type)
+        gui.play(self.session, gui.theme.sound_type)
+
 

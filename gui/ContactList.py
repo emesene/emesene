@@ -162,6 +162,7 @@ class ContactList(object):
         # + DISPLAY_NAME (alias if available, or nick if available or mail)
         # + STATUS
         # + MESSAGE
+        # + BLOCKED
         '''
         template = self.nick_template
         template = template.replace('%NICK%', contact.nick)
@@ -169,6 +170,12 @@ class ContactList(object):
         template = template.replace('%MESSAGE%', contact.message)
         template = template.replace('%STATUS%', status.STATUS[contact.status])
         template = template.replace('%DISPLAY_NAME%', contact.display_name)
+
+        blocked_text = ''
+        if contact.blocked:
+            blocked_text = '(blocked)'
+
+        template = template.replace('%BLOCKED%', blocked_text)
 
         return template
 

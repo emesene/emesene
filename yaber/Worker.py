@@ -85,24 +85,29 @@ class Worker(protocol.Worker):
         contact.message = message
         contact.status = stat
 
-        log_account =  Logger.Account(contact.attrs.get('CID', None), None, 
-            contact.account, contact.status, contact.nick, contact.message, 
+        log_account =  Logger.Account(contact.attrs.get('CID', None), None,
+            contact.account, contact.status, contact.nick, contact.message,
             contact.picture)
 
-        changed = False
-
         if old_status != stat:
-            changed = True
-            self.session.logger.log('status change', stat, str(stat), 
+            change_type = 'status'
+
+            if old_status == protocol.status.OFFLINE:
+                change_type = 'online'
+
+            if stat == protocol.status.OFFLINE:
+                change_type = 'offline'
+
+            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account,
+                change_type, old_status)
+            self.session.logger.log('status change', stat, str(stat),
                 log_account)
 
         if old_message != contact.message:
-            changed = True
+            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account,
+                'message', old_message)
             self.session.logger.log('message change', contact.status, 
                 contact.message, log_account)
-
-        if changed:
-            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account)
 
     def _on_message(self, client, message):
         '''handle the reception of a message'''

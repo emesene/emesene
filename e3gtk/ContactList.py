@@ -96,9 +96,10 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         # + DISPLAY_NAME (alias if available, or nick if available or mail)
         # + STATUS
         # + MESSAGE
+        # + BLOCKED (show the text "(blocked)" if the account is blocked)
         self.nick_template = '%DISPLAY_NAME%\n'
         self.nick_template += '<span foreground="#AAAAAA" size="small">'
-        self.nick_template += '%ACCOUNT%\n%MESSAGE%</span>'
+        self.nick_template += '%BLOCKED% %ACCOUNT%\n%MESSAGE%</span>'
         # valid values:
         # + NAME
         # + ONLINE_COUNT
@@ -133,6 +134,9 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
                 return True
 
         if not self.show_offline and obj.status == status.OFFLINE:
+            return False
+
+        if not self.show_blocked and obj.blocked:
             return False
 
         return True
@@ -451,6 +455,12 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
             gobject.markup_escape_text(status.STATUS[contact.status]))
         template = template.replace('%DISPLAY_NAME%',
             gobject.markup_escape_text(contact.display_name))
+
+        blocked_text = ''
+        if contact.blocked:
+            blocked_text = '(blocked)'
+
+        template = template.replace('%BLOCKED%', blocked_text)
 
         return template
 

@@ -47,7 +47,9 @@ class ContactManager(object):
             if not contact.groups]
 
     def get_contacts(self, accounts):
-        '''return a list of contact objects from a list of accounts'''
+        '''return a list of contact objects from a list of accounts
+        if in_reverse is True, check that the account is also on the reverse 
+        list'''
         return [self.contacts[account] for account in accounts if account \
             in self.contacts]
 

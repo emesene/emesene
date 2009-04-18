@@ -156,7 +156,7 @@ class ConversationManager(object):
 
         return (False, conversation)
 
-    def _on_contact_attr_changed(self, account):
+    def _on_contact_attr_changed(self, account, change_type, old_value):
         '''called when an attribute of a contact changes'''
         for conversation in self.conversations.values():
             if account in conversation.members:

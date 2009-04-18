@@ -32,3 +32,4 @@ def add_style_to_message(text, stl, escape=True):
         text = e3common.MarkupParser.escape(text)
 
     return style_start + text + style_end
+

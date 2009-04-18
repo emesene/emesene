@@ -192,6 +192,9 @@ class Membership(Requester):
         '''handle the response'''
         if response.status == 200:
             parser = XmlParser.MembershipParser(response.body)
+            pending = self.session.contacts.pending
+            reverse = self.session.contacts.reverse
+            contacts = self.session.contacts.contacts
 
             for membership in parser.memberships:
                 role = membership['MemberRole']
@@ -203,30 +206,38 @@ class Membership(Requester):
                         else:
                             continue
 
-                        if email in self.session.contacts.contacts:
-                            contact = self.session.contacts.contacts[email]
+                        if email in contacts:
+                            contact = contacts[email]
                         else:
                             contact = Contact(email)
 
-                            if role == 'Pending':
-                                self.session.contacts.pending[email] = contact
-                            elif role == 'Reverse':
-                                self.session.contacts.reverse[email] = contact
-                            else:
-                                self.session.contacts.contacts[email] = contact
-
-                        if 'CID' in member:
-                            contact.attrs['CID'] = member['CID']
-
                         if role == 'Pending':
+                            pending[email] = contact
                             contact.attrs['pending'] = True
 
                             if 'DisplayName' in member:
                                 contact.nick = member['DisplayName']
-                        elif role == 'Block':
-                            contact.blocked = True
-                        elif role == 'Reverse':
+                        elif email in pending:
+                            del pending[email]
+
+                        if role == 'Reverse':
+                            reverse[email] = contact
                             contact.attrs['Reverse'] = True
+                        elif email in reverse:
+                            del reverse[email]
+
+                        if role == 'Allow':
+                            contacts[email] = contact
+                        elif email in contacts:
+                            del contacts[email]
+
+                        if role == 'Block':
+                            contact.blocked = True
+                        else:
+                            contact.blocked = False
+
+                        if 'CID' in member:
+                            contact.attrs['CID'] = member['CID']
 
                     except Exception, error:
                         dbg('exception in membership requester: ' + str(error), 'req', 1)

@@ -8,6 +8,8 @@ import utils
 import e3common
 import extension
 
+from debugger import dbg
+
 class MainWindow(gtk.VBox):
     '''this class represents the widget that is shown when the user is logged
     in (menu, contact list etc)'''
@@ -126,15 +128,27 @@ class MainWindow(gtk.VBox):
         '''callback for the group-menu-selected signal'''
         self.group_menu.popup(None, None, None, 0, 0)
 
-    def _on_contact_attr_changed(self, account):
+    def _on_contact_attr_changed(self, account, change_type, old_value):
         '''callback called when an attribute of a contact changed'''
         contact = self.session.contacts.get(account)
-
-        if contact:
-            self.contact_list.update_contact(contact)
-        else:
+        if not contact:
             dbg('account ' + account + ' not found on contacts',
                 'mainwindow', 1)
+
+        if change_type == 'online':
+            if self.session.config.b_notify_contact_online:
+                gui.notify("emesene 2", "%s is now online" % (contact.display_name, ))
+
+            if self.session.config.b_play_contact_online:
+                gui.play(self.session, gui.theme.sound_online)
+        elif change_type == 'offline':
+            if self.session.config.b_notify_contact_offline:
+                gui.notify("emesene 2", "%s is now offline" % (contact.display_name, ))
+
+            if self.session.config.b_play_contact_offline:
+                gui.play(self.session, gui.theme.sound_offline)
+
+        self.contact_list.update_contact(contact)
 
     def _on_nick_changed(self, textfield, old_text, new_text):
         '''method called when the nick is changed on the panel'''
