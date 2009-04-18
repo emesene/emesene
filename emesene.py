@@ -302,6 +302,7 @@ def main():
     """
     the main method of emesene
     """
+    gobject.threads_init()
     gtk.gdk.threads_init()
     controller = Controller()
     controller.start()

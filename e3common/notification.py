@@ -4,7 +4,7 @@ def _dummy_notify(title, message, image_path):
     """
     print title
     print '  ', message
-    
+
 try:
     import gobject
     import pynotify
