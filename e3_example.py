@@ -1,61 +1,56 @@
 import time
 import Queue
-
-import e3
-import e3.Worker as Worker
-import e3.MsnHttpSocket as MsnHttpSocket
-import e3.MsnSocket as MsnSocket
-
-from protocol import status
-from protocol import Event
-from protocol import Action
-import protocol.Account as Account
-
-from protocol.ContactManager import ContactManager
-
 # i will use the gobject main loop, but you can use what you want..
 import gobject
 
+import e3
+import gui
+
+import protocol
+import debugger
+debugger.max_level = 0
 
 class Example(object):
     '''a example object, you can do it on another way..'''
 
-    def __init__(self, account, password, status, use_http_method=False):
+    def __init__(self, account, password, status, proxy, use_http_method=False):
         '''class constructor'''
-        self.account = Account(account, password, status)
-        self.session = e3.Session(self.account)
+        self.session = e3.Session()
+        self.session.signals = gui.Signals(protocol.EVENTS,
+            self.session.events)
+        self.session.signals.login_succeed.subscribe(self.on_login_succeed)
+        self.session.signals.login_failed.subscribe(self.on_login_failed)
+        self.session.signals.contact_list_ready.subscribe(
+            self.on_contact_list_ready)
+        self.session.signals.conv_first_action.subscribe(
+            self.on_conv_first_action)
+        self.session.signals.conv_started.subscribe(
+            self.on_conv_started)
+        self.session.signals.conv_message.subscribe(
+            self.on_conv_message)
 
-        if use_http_method:
-            class_ = MsnHttpSocket
-        else:
-            class_ = MsnSocket
+        self.session.login(account, password, status,
+            proxy, use_http_method)
+        gobject.timeout_add(500, self.session.signals._handle_events)
 
-        hdrs = {}
-        hdrs[Event.EVENT_LOGIN_SUCCEED] = self._handle_login_succeed
-        hdrs[Event.EVENT_LOGIN_FAILED] = self._handle_login_failed
-        hdrs[Event.EVENT_CONTACT_LIST_READY] = self._handle_contact_list_ready
-        hdrs[Event.EVENT_CONV_FIRST_ACTION] = self._handle_conv_first_action
-        hdrs[Event.EVENT_CONV_MESSAGE] = self._handle_conv_message
-        hdrs[Event.EVENT_CONV_STARTED] = self._handle_conv_started
+        self.first_contact_list_ready = True
 
-        self._handlers = hdrs
-
-        self.session.login(account, password, status, None)
-
-    def add_action(self, id_, args=()):
-        '''add an event to the session queue'''
-        self.session.actions.put(Action(id_, args))
-
-    def _handle_login_succeed(self):
+    def on_login_succeed(self):
         '''handle login succeed'''
         print 'we are in! :)'
 
-    def _handle_login_failed(self, reason):
+    def on_login_failed(self, reason):
         '''handle login failed'''
         print 'login failed :(', reason
 
-    def _handle_contact_list_ready(self):
+    def on_contact_list_ready(self):
         '''handle contact list ready'''
+        # avoid the second contact list ready if the session uses cache
+        if not self.first_contact_list_ready:
+            return
+
+        self.first_contact_list_ready = False
+
         for group in self.session.groups.values():
             # get a list of contact objects from a list of accounts
             contacts = self.session.contacts.get_contacts(group.contacts)
@@ -68,71 +63,37 @@ class Example(object):
 
         # we start a conversation with someone
         cid = time.time()
-        account = self.session.account.account
-        message1 = e3.Message(e3.Message.TYPE_MESSAGE, 'welcome', account)
-        message2 = e3.Message(e3.Message.TYPE_MESSAGE, ';)', account)
-        message3 = e3.Message(e3.Message.TYPE_NUDGE, '', account)
 
         # put here a mail address that exists on your the contact list of the
         # account that is logged in
-        self.start_conversation('luismarianoguerra@gmail.com', cid)
-        self.send_message(cid, message1)
-        self.send_message(cid, message2)
-        self.send_message(cid, message3)
+        self.session.new_conversation('luismarianoguerra@gmail.com', cid)
+        self.session.send_message(cid, 'welcome')
+        self.session.send_message(cid, ';)')
+        self.session.request_attention(cid)
 
-    def _handle_conv_first_action(self, cid, members):
+    def on_conv_first_action(self, cid, members):
         '''handle'''
-        account = self.session.account.account
-        # we send this message the first time the other user interact with 
+        # we send this message the first time the other user interact with
         # us (that means, when he send us a message or a nudge)
-        message = e3.Message(e3.Message.TYPE_MESSAGE, 'finally!', account)
-        self.send_message(cid, message)
+        self.session.send_message(cid, 'finally!')
 
-    def _handle_conv_started(self, cid):
+    def on_conv_started(self, cid):
         '''handle a new conversation created'''
-        account = self.session.account.account
         # we send this message when the conversation is stablished
-        mymessage = e3.Message(e3.Message.TYPE_MESSAGE, 'hey you!', account)
-        self.send_message(cid, mymessage)
+        self.session.send_message(cid, 'hey you!')
 
-    def _handle_conv_message(self, cid, sender, message):
+    def on_conv_message(self, cid, sender, message):
         '''handle a message'''
-        # when we receive a message, we return the same message and 
+        # when we receive a message, we return the same message and
         # send a new one with a smile
         # it will also return the typing messages, so if you are typing
         # you will get a typing notification and a smile from nowere :P
-        self.send_message(cid, message)
-        account = self.session.account.account
-        mymessage = e3.Message(e3.Message.TYPE_MESSAGE, ':)', account)
-        self.send_message(cid, mymessage)
-
-    def process(self):
-        '''get events from the event Queue and process them'''
-        try:
-            event = self.session.events.get(False)
-
-            if event.id_ in self._handlers:
-                self._handlers[event.id_](*event.args)
-        except Queue.Empty:
-            pass
-
-        return True
-
-    # Helpers
-
-    def send_message(self, cid, message):
-        '''send a common message'''
-        account = self.session.account.account
-        self.add_action(Action.ACTION_SEND_MESSAGE, (cid, message))
-
-    def start_conversation(self, account, cid):
-        '''start a conversation with account'''
-        self.add_action(Action.ACTION_NEW_CONVERSATION, (account, cid))
+        self.session.send_message(cid, message.body)
+        self.session.send_message(cid, ';)')
 
 if __name__ == '__main__':
     gobject.threads_init()
-    example = Example('dude@gmail.com', 'secret',
-        status.OFFLINE, True)
+    example = Example('dude@hotmail.com', 'secret',
+        protocol.status.ONLINE, None, False)
 
-    gobject.timeout_add(500, example.process)
     gobject.MainLoop().run()

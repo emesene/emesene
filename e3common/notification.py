@@ -1,16 +1,9 @@
-def _dummy_notify(title, message, image_path):
-    """
-    notify message to the user
-    """
-    print title
-    print '  ', message
-
 try:
     import gobject
     import pynotify
 
     if not pynotify.init("emesene 2"):
-        notify = _dummy_notify
+        raise ImportError()
 
     def notify(title, text, image_path=None):
 
@@ -24,4 +17,9 @@ try:
         except gobject.GError:
             return
 except ImportError:
-    notify = _dummy_notify
+    def notify(title, message, image_path):
+        """
+        notify message to the user
+        """
+        print title
+        print '  ', message
