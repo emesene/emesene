@@ -22,7 +22,7 @@ import ConfigParser
 
 from debugger import dbg
 
-class Config(dict):
+class Config(object):
     '''a class that contains all the configurations of the user,
     the config keys follow a convention, all the names start with
     the type they have, for example:
@@ -39,7 +39,6 @@ class Config(dict):
 
     def __init__(self, **kwargs):
         '''constructor'''
-        dict.__init__(self)
         self.__dict__ = kwargs
 
     def __getattr__(self, name):
@@ -48,6 +47,10 @@ class Config(dict):
         else:
             return None
 
+    def __setattr__(self, item, value):
+        object.__setattr__(self, item, value)
+        self.notify_change(item, value)
+
     def get_or_set(self, name, default):
         '''return the value of the name config value, if not set
         then set it to default and return that value'''
@@ -55,6 +58,53 @@ class Config(dict):
             self.__dict__[name] = default
 
         return self.__dict__[name]
+
+    def notify_change(self, item, value):
+        '''notify the callbacks that item has changed its value'''
+        if self._callbacks is None:
+            self._callbacks = []
+
+        if self._item_callbacks is None:
+            self._item_callbacks = {}
+
+        for callback in self._callbacks:
+            callback(item, value)
+
+        for callback in self._item_callbacks.get(item, ()):
+            callback(value)
+
+    def subscribe(self, callback, item=None):
+        '''add callback to the list of callbacks to be notified
+        on an attribute change, if item is None then notify on
+        all item changes, it item is a string, then notify on
+        the change of that item'''
+        if self._callbacks is None:
+            self._callbacks = []
+
+        if self._item_callbacks is None:
+            self._item_callbacks = {}
+
+        if item is None:
+            if callback not in self._callbacks:
+                self._callbacks.append(callback)
+        else:
+            if item not in self._item_callbacks:
+                self._item_callbacks[item] = []
+
+            if callback not in self._item_callbacks[item]:
+                self._item_callbacks[item].append(callback)
+
+    def unsubscribe(self, callback, item=None):
+        '''remove the callback from the callback list, if item is None
+        try to remove the callback from the global callback list, if it's
+        a string try to remove from the callback list of that item'''
+        if item is None:
+            if callback in self._callbacks:
+                self._callbacks.remove(callback)
+        else:
+            if item in self._item_callbacks and\
+                    callback in self._item_callbacks[item]:
+                self._item_callbacks[item].remove(callback)
 
     def load(self, path, clear=False, section='DEFAULT'):
         '''load the config file from path, clear old values if
@@ -87,6 +137,9 @@ class Config(dict):
         parser = ConfigParser.SafeConfigParser()
 
         for (key, value) in self.__dict__.iteritems():
+            if key.startswith('_'):
+                continue
+
             try:
                 if key.startswith('l_'):
                     parser.set(section, key, Config.list_to_string(value))

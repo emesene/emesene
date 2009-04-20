@@ -147,6 +147,8 @@ class OptionsMenu(gtk.Menu):
         self.show_blocked.set_active(config.b_show_blocked)
 
         self.preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
+        self.preferences.connect('activate',
+            lambda *args: self.handler.on_preferences_selected())
         self.plugins = gtk.ImageMenuItem('Plug_ins')
         self.plugins.set_image(gtk.image_new_from_stock(gtk.STOCK_CONNECT,
             gtk.ICON_SIZE_MENU))

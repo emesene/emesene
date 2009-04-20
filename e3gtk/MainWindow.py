@@ -68,6 +68,19 @@ class MainWindow(gtk.VBox):
         scroll.add(self.contact_list)
         scroll.show_all()
 
+        if self.session.config.b_show_userpanel:
+            self.panel.hide()
+
+        self.session.config.subscribe(self._on_show_userpanel_changed,
+            'b_show_userpanel')
+
+    def _on_show_userpanel_changed(self, value):
+        '''callback called when config.b_show_userpanel changes'''
+        if value:
+            self.panel.show()
+        else:
+            self.panel.hide()
+
     def _build_menus(self):
         '''buildall the menus used on the client'''
         dialog = extension.get_default('gtk dialog')
@@ -175,6 +188,8 @@ class MainWindow(gtk.VBox):
             self._on_contact_menu_selected)
         self.contact_list.group_menu_selected.unsubscribe(
             self._on_group_menu_selected)
+        self.session.config.unsubscribe(self._on_show_userpanel_changed,
+            'b_show_userpanel')
 
     def _on_search_toggled(self, button):
         '''called when the searhc button is toggled'''

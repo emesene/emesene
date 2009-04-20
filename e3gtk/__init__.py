@@ -10,10 +10,11 @@ import TabWidget
 import GroupMenu
 import StatusMenu
 import MainWindow
-import ContactMenu
 import AccountMenu
+import ContactMenu
 import ContactList
 import ContactInfo
+import Preferences 
 import Conversation
 import WebKitTextBox
 import ConversationManager
@@ -26,6 +27,7 @@ def setup():
     define all the components for a gtk environment
     """
     extension.category_register('gtk dialog', Dialog.Dialog)
+    extension.category_register('gtk preferences', Preferences.Preferences)
     extension.category_register('gtk login window', Login.Login)
     extension.category_register('gtk window frame', Window.Window)
     extension.category_register('gtk main window', MainWindow.MainWindow)

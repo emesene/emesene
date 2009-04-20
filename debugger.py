@@ -1,6 +1,6 @@
 import time
 
-max_level = 4
+max_level = 0
 blacklist = []
 callback = None
 

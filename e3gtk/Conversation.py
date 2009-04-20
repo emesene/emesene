@@ -20,9 +20,9 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.tab_label = tab_label
 
-        self._header_visible = True
-        self._image_visible = True
-        self._toolbar_visible = True
+        self._header_visible = session.config.b_show_header
+        self._image_visible = session.config.b_show_info
+        self._toolbar_visible = session.config.b_show_toolbar
 
         self.panel = gtk.VPaned()
 
@@ -69,24 +69,55 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self._load_style()
 
+        self.session.config.subscribe(self._on_show_toolbar_changed,
+            'b_show_toolbar')
+        self.session.config.subscribe(self._on_show_header_changed,
+            'b_show_header')
+        self.session.config.subscribe(self._on_show_info_changed,
+            'b_show_info')
+
+    def _on_show_toolbar_changed(self, value):
+        '''callback called when config.b_show_toolbar changes'''
+        if value:
+            self.toolbar.show()
+        else:
+            self.toolbar.hide()
+
+    def _on_show_header_changed(self, value):
+        '''callback called when config.b_show_header changes'''
+        if value:
+            self.header.show()
+        else:
+            self.header.hide()
+
+    def _on_show_info_changed(self, value):
+        '''callback called when config.b_show_info changes'''
+        if value:
+            self.info.show()
+        else:
+            self.info.hide()
+
+    def on_close(self):
+        '''called when the conversation is closed'''
+        self.session.config.unsubscribe(self._on_show_toolbar_changed,
+            'b_show_toolbar')
+
     def show(self):
         '''override the show method'''
         gtk.VBox.show(self)
 
-        if self.session.config.b_show_header is None:
-            self.session.config.b_show_header = True
-
-        if self.session.config.b_show_info is None:
-            self.session.config.b_show_info = True
-
         if self.session.config.b_show_header:
             self.header.show_all()
 
-        if self.session.config.b_show_info:
-            self.info.show_all()
+        self.info.show_all()
+        if not self.session.config.b_show_info:
+            self.info.hide()
 
         self.hbox.show()
         self.panel.show_all()
+
+        if not self.session.config.b_show_toolbar:
+            self.toolbar.hide()
 
     def update_message_waiting(self, is_waiting):
         """

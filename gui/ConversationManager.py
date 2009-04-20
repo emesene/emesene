@@ -176,6 +176,7 @@ class ConversationManager(object):
         self.session.close_conversation(conversation.cid)
         self.remove_conversation(conversation)
         del self.conversations[conversation.cid]
+        conversation.on_close()
 
     def close_all(self):
         '''close and finish all conversations'''

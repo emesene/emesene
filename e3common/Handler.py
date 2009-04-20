@@ -1,6 +1,7 @@
 import webbrowser
 
 import gui
+import extension
 
 from debugger import dbg
 
@@ -86,6 +87,11 @@ class OptionsHandler(object):
     def on_show_blocked_toggled(self, active):
         '''called when the show blocked item is toggled'''
         self.contact_list.show_blocked = active
+
+    def on_preferences_selected(self):
+        '''called when the preference button is selected'''
+        Preferences = extension.get_default('gtk preferences')
+        Preferences(self.session).show()
 
 
 class HelpHandler(object):

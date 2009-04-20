@@ -235,6 +235,11 @@ class Controller(object):
         self.session.config.get_or_set('b_play_contact_offline', True)
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
+        self.session.config.get_or_set('b_show_userpanel', True)
+        self.session.config.get_or_set('b_show_emoticons', True)
+        self.session.config.get_or_set('b_show_header', True)
+        self.session.config.get_or_set('b_show_info', True)
+        self.session.config.get_or_set('b_show_toolbar', True)
         self.session.login(account.account, account.password, account.status,
             proxy, use_http)
         gobject.timeout_add(500, self.session.signals._handle_events)

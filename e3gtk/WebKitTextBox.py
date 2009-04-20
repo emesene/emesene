@@ -23,9 +23,6 @@ class OutputText(gtk.ScrolledWindow):
 
         self.config = config
 
-        if self.config and self.config.b_show_emoticons is None:
-            self.config.b_show_emoticons = True
-
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
         self.__texts = []

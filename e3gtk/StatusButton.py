@@ -32,10 +32,6 @@ class StatusButton(gtk.Button):
         '''callback called when the button is clicked'''
         self.menu.popup(None, None, None, 0, 0)
 
-    def _on_status_selected(self, stat):
-        '''method called when a status is selected on the popup'''
-        self.set_status(stat)
-
     def set_status(self, stat):
         '''load an image representing a status and store it on cache'''
         if stat not in status.ALL:
@@ -51,3 +47,4 @@ class StatusButton(gtk.Button):
             gtk_img = self.cache_imgs[stat]
 
         self.set_image(gtk_img)
+
