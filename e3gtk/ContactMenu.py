@@ -19,33 +19,41 @@ class ContactMenu(gtk.Menu):
         self.handler = handler
 
         self.add = gtk.ImageMenuItem(gtk.STOCK_ADD)
-        self.add.connect('activate', 
+        self.add.connect('activate',
             lambda *args: self.handler.on_add_contact_selected())
 
         self.remove = gtk.ImageMenuItem(gtk.STOCK_REMOVE)
-        self.remove.connect('activate', 
+        self.remove.connect('activate',
             lambda *args: self.handler.on_remove_contact_selected())
 
         self.block = gtk.ImageMenuItem('Block')
         self.block.set_image(gtk.image_new_from_stock(gtk.STOCK_CANCEL,
             gtk.ICON_SIZE_MENU))
-        self.block.connect('activate', 
+        self.block.connect('activate',
             lambda *args: self.handler.on_block_contact_selected())
 
         self.unblock = gtk.ImageMenuItem('Unblock')
         self.unblock.set_image(gtk.image_new_from_stock(gtk.STOCK_APPLY,
             gtk.ICON_SIZE_MENU))
-        self.unblock.connect('activate', 
+        self.unblock.connect('activate',
             lambda *args: self.handler.on_unblock_contact_selected())
 
         self.set_alias = gtk.ImageMenuItem('Set alias')
         self.set_alias.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
             gtk.ICON_SIZE_MENU))
-        self.set_alias.connect('activate', 
+        self.set_alias.connect('activate',
             lambda *args: self.handler.on_set_alias_contact_selected())
+
+        self.view_info = gtk.ImageMenuItem('View information')
+        self.view_info.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
+            gtk.ICON_SIZE_MENU))
+        self.view_info.connect('activate',
+            lambda *args: self.handler.on_view_information_selected())
 
         self.append(self.add)
         self.append(self.remove)
         self.append(self.block)
         self.append(self.unblock)
         self.append(self.set_alias)
+        self.append(self.view_info)
+

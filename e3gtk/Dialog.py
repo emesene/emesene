@@ -112,7 +112,7 @@ class Dialog(object):
 
     @classmethod
     def add_contact_cb(cls, widget, window, response_cb, response):
-        '''callback called when a button is selected on the add_contact 
+        '''callback called when a button is selected on the add_contact
         dialog'''
         contact = window.entry.get_text()
         group = window.combo.get_model().get_value(
@@ -154,9 +154,9 @@ class Dialog(object):
         entry.connect('activate', cls.entry_cb, window, response_cb, *args)
 
         window.hbox.pack_start(entry, True, True)
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb, 
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.entry_cb, *args)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb, 
+        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
             cls.entry_cb, *args)
 
         setattr(window, 'entry', entry)
@@ -177,7 +177,7 @@ class Dialog(object):
         button.show()
 
         return button
-        
+
     @classmethod
     def new_window(cls, title, response_cb=None, *args):
         '''build a window with the default values and connect the common
@@ -220,7 +220,7 @@ class Dialog(object):
         have only the option to close and the response callback is optional
         since in few cases one want to know when the error dialog was closed,
         but it can happen, so return stock.CLOSE to the callback if its set'''
-        cls.message_window(message, gtk.STOCK_DIALOG_ERROR, response_cb, 
+        cls.message_window(message, gtk.STOCK_DIALOG_ERROR, response_cb,
             title).show()
 
     @classmethod
@@ -230,18 +230,18 @@ class Dialog(object):
         callback is optional, but you have to check if it's not None and
         send the response (that can be stock.ACCEPT or stock.CLOSE, if
         the user closed the window with the x)'''
-        cls.message_window(message, gtk.STOCK_DIALOG_WARNING, response_cb, 
+        cls.message_window(message, gtk.STOCK_DIALOG_WARNING, response_cb,
             title).show()
 
     @classmethod
-    def information(cls, message, response_cb=None, 
+    def information(cls, message, response_cb=None,
                             title=_("Information"),):
         '''show a warning dialog displaying the messge, this dialog should
         have only the option to accept, like the error dialog, the response
         callback is optional, but you have to check if it's not None and
         send the response (that can be stock.ACCEPT or stock.CLOSE, if
         the user closed the window with the x)'''
-        cls.message_window(message, gtk.STOCK_DIALOG_INFO, response_cb, 
+        cls.message_window(message, gtk.STOCK_DIALOG_INFO, response_cb,
             title).show()
 
     @classmethod
@@ -261,11 +261,11 @@ class Dialog(object):
         '''show a confirm dialog displaying a question and two buttons:
         Yes and No, return the response as stock.YES or stock.NO or
         stock.CLOSE if the user closes the window'''
-        window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION, 
+        window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION,
             response_cb, _("Confirm"))
-        cls.add_button(window, gtk.STOCK_YES, stock.YES, response_cb, 
+        cls.add_button(window, gtk.STOCK_YES, stock.YES, response_cb,
             cls.default_cb, *args)
-        cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb, 
+        cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb,
             cls.default_cb, *args)
 
         window.show()
@@ -275,13 +275,13 @@ class Dialog(object):
         '''show a confirm dialog displaying a question and three buttons:
         Yes and No and Cancel, return the response as stock.YES, stock.NO,
         stock.CANCEL or stock.CLOSE if the user closes the window'''
-        window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION, 
+        window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION,
             response_cb, _("Confirm"))
-        cls.add_button(window, gtk.STOCK_YES, stock.YES, response_cb, 
+        cls.add_button(window, gtk.STOCK_YES, stock.YES, response_cb,
             cls.default_cb, *args)
-        cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb, 
+        cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb,
             cls.default_cb, *args)
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb, 
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.default_cb, *args)
 
         window.show()
@@ -289,19 +289,19 @@ class Dialog(object):
     @classmethod
     def accept_cancel(cls, message, response_cb, *args):
         '''show a confirm dialog displaying information and two buttons:
-        Accept and Cancel, return stock.ACCEPT, stock.CANCEL or 
+        Accept and Cancel, return stock.ACCEPT, stock.CANCEL or
         stock.CLOSE'''
-        window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION, 
+        window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION,
             response_cb, _("Confirm"))
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb, 
+        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
             cls.default_cb, *args)
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb, 
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.default_cb, *args)
 
         window.show()
 
     @classmethod
-    def contact_added_you(cls, accounts, response_cb, 
+    def contact_added_you(cls, accounts, response_cb,
                                 title=_("User invitation")):
         '''show a dialog displaying information about users
         that added you to their userlists, the accounts parameter is
@@ -314,14 +314,14 @@ class Dialog(object):
         raise NotImplementedError("This method isn't implemented")
 
     @classmethod
-    def add_contact(cls, groups, group_selected, response_cb, 
+    def add_contact(cls, groups, group_selected, response_cb,
         title=_("Add user")):
         '''show a dialog asking for an user address, and (optional)
         the group(s) where the user should be added, the response callback
         receives the response type (stock.ADD, stock.CANCEL or stock.CLOSE)
-        the account and a tuple of group names where the user should be 
-        added (give a empty tuple if you don't implement this feature, 
-        the controls are made by the callback, you just ask for the email, 
+        the account and a tuple of group names where the user should be
+        added (give a empty tuple if you don't implement this feature,
+        the controls are made by the callback, you just ask for the email,
         don't make any control, you are just implementing a GUI! :P'''
         window = cls.new_window(title, response_cb)
         label = gtk.Label(_("Account"))
@@ -358,9 +358,9 @@ class Dialog(object):
 
         window.hbox.pack_start(table, True, True)
 
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb, 
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.add_contact_cb)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb, 
+        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
             cls.add_contact_cb)
 
         setattr(window, 'entry', entry)
@@ -385,7 +385,7 @@ class Dialog(object):
     @classmethod
     def set_nick(cls, nick, response_cb, title=_("Change nick")):
         '''show a dialog asking for a new nick and displaying the current
-        one, the response_cb receives the old nick, the new nick, 
+        one, the response_cb receives the old nick, the new nick,
         and the response (stock.ACCEPT, stock.CANCEL or stock.CLOSE)
         cb args: response, old_nick, new_nick'''
         window = cls.entry_window(_("New nick"), nick, response_cb, title,
@@ -393,14 +393,14 @@ class Dialog(object):
         window.show()
 
     @classmethod
-    def set_message(cls, message, response_cb, 
+    def set_message(cls, message, response_cb,
         title=_("Change personal message")):
-        '''show a dialog asking for a new personal message and displaying 
+        '''show a dialog asking for a new personal message and displaying
         the current one, the response_cb receives the old personal message
-        , the new personal message and the response 
+        , the new personal message and the response
         (stock.ACCEPT, stock.CANCEL or stock.CLOSE)
         cb args: response, old_pm, new_pm'''
-        window = cls.entry_window(_("New personal message"), 
+        window = cls.entry_window(_("New personal message"),
             message, response_cb, title, message)
         window.show()
 
@@ -411,20 +411,20 @@ class Dialog(object):
         the old and the new name.
         cb args: response, old_name, new_name
         '''
-        window = cls.entry_window(_("New group name"), group.name, response_cb, 
+        window = cls.entry_window(_("New group name"), group.name, response_cb,
             title, group)
         window.show()
 
     @classmethod
-    def set_contact_alias(cls, account, alias, response_cb, 
+    def set_contact_alias(cls, account, alias, response_cb,
                             title=_("Set alias")):
         '''show a dialog showing the current alias and asking for the new
-        one, the response callback receives,  the response 
-        (stock.ACCEPT, stock.CANCEL, stock.CLEAR <- to remove the alias 
+        one, the response callback receives,  the response
+        (stock.ACCEPT, stock.CANCEL, stock.CLEAR <- to remove the alias
         or stock.CLOSE), the account, the old and the new alias.
         cb args: response, account, old_alias, new_alias'''
         alias = alias or ''
-        window = cls.entry_window(_("Contact alias"), alias, response_cb, 
+        window = cls.entry_window(_("Contact alias"), alias, response_cb,
             title, account, alias)
         cls.add_button(window, gtk.STOCK_CLEAR, stock.CLEAR, response_cb,
             cls.entry_cb, account, alias)
@@ -468,11 +468,11 @@ class Dialog(object):
 
     @classmethod
     def select_font(cls, style, callback):
-        '''select font and if available size and style, receives a 
+        '''select font and if available size and style, receives a
         protocol.Message.Style object with the current style
         the callback receives a new style object with the new selection
         '''
-        def select_font_cb(button, window, callback, response, color_sel, 
+        def select_font_cb(button, window, callback, response, color_sel,
             color):
             '''callback called on button selection'''
             if response == stock.ACCEPT:
@@ -497,15 +497,15 @@ class Dialog(object):
         window.hbox.pack_start(font_sel, True, True)
         font_sel.set_font_name(fdesc.to_string())
 
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback, 
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback,
             select_font_cb, font_sel, style.color)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback, 
+        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback,
             select_font_cb, font_sel, style.color)
         window.show_all()
 
     @classmethod
     def select_color(cls, color, callback):
-        '''select color, receives a protocol.Message.Color with the current 
+        '''select color, receives a protocol.Message.Color with the current
         color the callback receives a new color object woth the new selection
         '''
 
@@ -515,7 +515,7 @@ class Dialog(object):
             if response == stock.ACCEPT:
                 window.hide()
                 gtk_color = color_sel.get_current_color()
-                color = protocol.Color(gtk_color.red, gtk_color.green, 
+                color = protocol.Color(gtk_color.red, gtk_color.green,
                     gtk_color.blue)
                 callback(color)
 
@@ -528,33 +528,33 @@ class Dialog(object):
         window.hbox.pack_start(color_sel, True, True)
         color_sel.set_current_color(gtk.gdk.color_parse('#' + color.to_hex()))
 
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback, 
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback,
             select_color_cb, color_sel)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback, 
+        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback,
             select_color_cb, color_sel)
         window.show_all()
 
     @classmethod
     def select_style(cls, style, callback):
-        '''select bold, italic, underline and strike, receives 
+        '''select bold, italic, underline and strike, receives
         a protocol.Message.Style object with the current style
-        the callback receives the response and a new style object with the 
+        the callback receives the response and a new style object with the
         selection
         '''
         pass
 
     @classmethod
     def select_emote(cls, theme, callback, max_width=8):
-        '''select an emoticon, receives a gui.Theme object with the theme 
-        settings the callback receives the response and a string representing 
+        '''select an emoticon, receives a gui.Theme object with the theme
+        settings the callback receives the response and a string representing
         the selected emoticon
         '''
         EmotesWindow(callback, max_width).show()
 
     @classmethod
     def invite_dialog(cls, session, callback):
-        '''select a contact to add to the conversation, receives a session 
-        object of the current session the callback receives the response and 
+        '''select a contact to add to the conversation, receives a session
+        object of the current session the callback receives the response and
         a string containing the selected account
         '''
         pass
@@ -660,14 +660,14 @@ class Dialog(object):
                 passwd = t_passwd.get_text()
 
                 session_id = name_to_id[combo.get_active_text()]
-                callback(use_http, use_proxy, host, port, use_auth, user, passwd, 
+                callback(use_http, use_proxy, host, port, use_auth, user, passwd,
                     session_id)
 
             window.hide()
 
         def button_cb(button, window, response_cb, response):
             '''called when a button is pressedm get the response id and call
-            the response_cb that will handle the event according to the 
+            the response_cb that will handle the event according to the
             response'''
             response_cb(response)
 

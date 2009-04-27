@@ -5,7 +5,7 @@ import pango
 import gui
 import utils
 import protocol.status
-import TextBox
+import extension
 
 from debugger import dbg
 
@@ -25,7 +25,7 @@ class ContactInformation(gtk.Window):
 
         self._create_tabs()
         self.tabs.show_all()
-        
+
         self.add(self.tabs)
 
         if self.session:
@@ -41,17 +41,17 @@ class ContactInformation(gtk.Window):
     def fill_messages(self):
         '''fill the messages history (clear and refill if called another time)
         '''
-        self.session.logger.get_messages(self.account, 1000, 
+        self.session.logger.get_messages(self.account, 1000,
             self._on_messages_ready)
 
     def fill_status(self):
         '''fill the status history (clear and refill if called another time)'''
-        self.session.logger.get_status(self.account, 1000, 
+        self.session.logger.get_status(self.account, 1000,
             self._on_status_ready)
 
     def fill_chats(self):
         '''fill the chats history (clear and refill if called another time)'''
-        self.session.logger.get_chats(self.account, 
+        self.session.logger.get_chats(self.account,
             self.session.account.account, 1000, self._on_chats_ready)
 
     def _create_tabs(self):
@@ -70,39 +70,35 @@ class ContactInformation(gtk.Window):
 
     def _on_nicks_ready(self, results):
         '''called when the nick history is ready'''
-
         for (stat, timestamp, nick) in results:
             self.nicks.add(stat, timestamp, nick)
 
     def _on_messages_ready(self, results):
         '''called when the message history is ready'''
-
         for (stat, timestamp, message) in results:
             self.messages.add(stat, timestamp, message)
 
     def _on_status_ready(self, results):
         '''called when the status history is ready'''
-
         for (stat, timestamp, stat_) in results:
             self.status.add(stat, timestamp, protocol.status.STATUS.get(stat,
                 'unknown'))
 
     def _on_chats_ready(self, results):
         '''called when the chat history is ready'''
-
         for (stat, timestamp, message, nick) in results:
             date_text = time.strftime('[%c]', time.gmtime(timestamp))
             tokens = message.split('\r\n')
             type_ = tokens[0]
 
             self.chats.text.append(date_text + ' ')
-            self.chats.text.append(nick + ': ', bold=True)
+            self.chats.text.append(nick + ': ')
 
             if type_ == 'text/x-msnmsgr-datacast':
-                self.chats.text.append('<<nudge>>\n', italic=True)
+                self.chats.text.append('<i>nudge</i><br/>')
             elif type_.find('text/plain;') != -1:
                 (type_, format, empty, text) = tokens
-                self.chats.text.append(text + '\n')
+                self.chats.text.append(text + '<br/>')
             else:
                 dbg('unknown message type on ContactInfo', 'contactinfo', 1)
 
@@ -199,7 +195,7 @@ class ListWidget(gtk.VBox):
         self.list.append_column(column1)
         self.list.append_column(column2)
         self.list.set_headers_visible(False)
-        
+
         column.pack_start(pbr, False)
         column1.pack_start(crt_timestamp, False)
         column2.pack_start(crt, True)
@@ -217,7 +213,7 @@ class ListWidget(gtk.VBox):
     def add(self, stat, timestamp, text):
         '''add a row to the widget'''
         pix = utils.safe_gtk_pixbuf_load(gui.theme.status_icons[stat])
-        date_text = time.strftime('%c', time.gmtime(timestamp)) 
+        date_text = time.strftime('%c', time.gmtime(timestamp))
         self.model.append((pix, date_text, text))
 
 class ChatWidget(gtk.VBox):
@@ -231,27 +227,9 @@ class ChatWidget(gtk.VBox):
         self.session = session
         if self.session:
             self.contact = self.session.contacts.get(account)
-
-        self.text = TextBox.OutputText()
+        OutputText = extension.get_default('gtk conversation output')
+        self.text = OutputText(session.config)
         self.text.show()
 
         self.pack_start(self.text, True, True)
 
-if __name__ == '__main__':
-    import protocol.status as status
-    import random
-    contact_info = ContactInformation(None, None) 
-    contact_info.show()
-
-    nicks = ['my other nick is a ferrari', 'oh hai', 'john doe', 'just a nick']
-    messages = ['...', 'out to lunch', 'this is just a test', 'I dont know']
-
-    for i in range(100):
-        contact_info.nicks.add(random.choice(status.ORDERED), time.time(),
-            random.choice(nicks))
-        contact_info.messages.add(random.choice(status.ORDERED), time.time(),
-            random.choice(messages))
-        stat = random.choice(status.ORDERED)
-        contact_info.status.add(stat, time.time(), status.STATUS[stat])
-
-    gtk.main()

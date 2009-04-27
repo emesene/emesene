@@ -149,19 +149,3 @@ HTML_BODY = '''
 </html>
 '''
 
-if __name__ == '__main__':
-    def _on_activate(entry, *args):
-        output.append(entry.get_text())
-        entry.set_text("")
-
-    window = gtk.Window()
-    vbox = gtk.VBox()
-    output = OutputText(None)
-    input = gtk.Entry()
-    input.connect("activate", _on_activate)
-    vbox.pack_start(output, True, True)
-    vbox.pack_start(input, False)
-    window.add(vbox)
-    window.show_all()
-    gtk.main()
-

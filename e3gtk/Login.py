@@ -55,30 +55,30 @@ class Login(gtk.Alignment):
             self.txt_account.set_text(account.account)
 
         self.txt_account.set_completion(completion)
-        self.txt_account.connect('key-press-event', 
+        self.txt_account.connect('key-press-event',
             self._on_account_key_press)
-        self.txt_account.connect('changed', 
+        self.txt_account.connect('changed',
             self._on_account_changed)
 
         self.btn_status = StatusButton.StatusButton()
-        
+
         self.txt_password = gtk.Entry()
         self.txt_password.set_visibility(False)
 
         if account:
             self.txt_password.set_text(account.password)
 
-        self.txt_password.connect('key-press-event', 
+        self.txt_password.connect('key-press-event',
             self._on_password_key_press)
 
         self.remember_account = gtk.CheckButton("Remember account")
         self.remember_password = gtk.CheckButton("Remember password")
 
-        self.remember_account.connect('toggled', 
+        self.remember_account.connect('toggled',
             self._on_remember_account_toggled)
-        self.remember_password.connect('toggled', 
+        self.remember_password.connect('toggled',
             self._on_remember_password_toggled)
-        
+
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect("clicked", self._on_connect_clicked)
 
@@ -92,37 +92,37 @@ class Login(gtk.Alignment):
         hbox_account = gtk.HBox(spacing=5)
         hbox_account.pack_start(img_account, False)
         hbox_account.pack_start(self.txt_account, True, False)
-        hbox_account.pack_start(self.btn_status, False)
+        hbox_account.pack_start(gtk.Label('       '), False)
 
         hbox_password = gtk.HBox(spacing=5)
         hbox_password.pack_start(img_password, False)
         hbox_password.pack_start(self.txt_password, True, False)
-        hbox_password.pack_start(gtk.Label('       '), False)
+        hbox_password.pack_start(self.btn_status, False)
 
         self.b_preferences = gtk.Button()
-        self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES, 
+        self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
             gtk.ICON_SIZE_MENU)
         self.img_preferences.set_sensitive(False)
         self.b_preferences.set_image(self.img_preferences)
         self.b_preferences.set_relief(gtk.RELIEF_NONE)
-        self.b_preferences.connect('enter-notify-event', 
+        self.b_preferences.connect('enter-notify-event',
             self._on_preferences_enter)
-        self.b_preferences.connect('leave-notify-event', 
+        self.b_preferences.connect('leave-notify-event',
             self._on_preferences_leave)
-        self.b_preferences.connect('clicked', 
+        self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
-        al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
+        al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
-        al_password = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
+        al_password = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
-        al_remember_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
+        al_remember_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.2)
-        al_remember_passwd = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
+        al_remember_passwd = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.2)
-        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
+        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.1)
-        al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0, 
+        al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
 
@@ -191,7 +191,7 @@ class Login(gtk.Alignment):
         '''called when the content of the account entry changes'''
         self._update_fields(self.txt_account.get_text()) 
 
-    def _update_fields(self, account):   
+    def _update_fields(self, account):
         '''update the different fields according to the account that is
         on the account entry'''
         if account in self.l_remember_password:

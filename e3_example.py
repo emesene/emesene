@@ -4,6 +4,7 @@ import Queue
 import gobject
 
 import e3
+import yaber
 import gui
 
 import protocol
@@ -16,6 +17,7 @@ class Example(object):
     def __init__(self, account, password, status, proxy, use_http_method=False):
         '''class constructor'''
         self.session = e3.Session()
+        #self.session = yaber.Session()
         self.session.signals = gui.Signals(protocol.EVENTS,
             self.session.events)
         self.session.signals.login_succeed.subscribe(self.on_login_succeed)

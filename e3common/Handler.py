@@ -105,9 +105,9 @@ class HelpHandler(object):
 
     def on_about_selected(self):
         '''called when the about item is selected'''
-        self.dialog.about_dialog('emesene', '2.0', 'marianoguerra', 
-            'A simple yet powerful MSN & Gtalk client', 'GPL v3', 
-            'http://www.emesene.org', ['marianoguerra'], '', 
+        self.dialog.about_dialog('emesene', '2.0', 'marianoguerra',
+            'A simple yet powerful MSN & Gtalk client', 'GPL v3',
+            'http://www.emesene.org', ['marianoguerra'], '',
             gui.theme.logo)
 
     def on_website_selected(self):
@@ -129,7 +129,7 @@ class ContactHandler(object):
     def on_add_contact_selected(self):
         '''called when add contact is selected'''
         def add_cb(response, account, groups):
-            '''callback to the add_dialog method, add the user and add him 
+            '''callback to the add_dialog method, add the user and add him
             to the defined groups'''
 
             if response == gui.stock.ADD:
@@ -144,7 +144,7 @@ class ContactHandler(object):
     def on_remove_contact_selected(self):
         '''called when remove contact is selected'''
         def remove_cb(response, account):
-            '''callback for DialogManager.yes_no, asking to confirm the 
+            '''callback for DialogManager.yes_no, asking to confirm the
             user remove'''
 
             if response == gui.stock.YES:
@@ -197,6 +197,16 @@ class ContactHandler(object):
         if contact:
             self.dialog.set_contact_alias(contact.account, contact.alias,
                  set_alias_cb)
+        else:
+            self.dialog.error('No contact selected')
+
+    def on_view_information_selected(self):
+        '''called when view information is selected'''
+        contact = self.contact_list.get_contact_selected()
+
+        if contact:
+            self.dialog.contact_information_dialog(self.session,
+                contact.account)
         else:
             self.dialog.error('No contact selected')
 

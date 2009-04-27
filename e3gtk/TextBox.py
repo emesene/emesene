@@ -41,9 +41,6 @@ class TextBox(gtk.ScrolledWindow):
 
     def append(self, text, scroll=True):
         '''append formatted text to the widget'''
-        if self.config.b_show_emoticons:
-            text = e3common.MarkupParser.parse_emotes(text)
-
         self._buffer.put_formatted(text)
         [self._textbox.add_child_at_anchor(*item)
             for item in self._buffer.widgets]
@@ -85,6 +82,12 @@ class InputText(TextBox):
         self._textbox.connect('key-press-event', self._on_key_press_event)
         self._buffer.connect('changed', self.on_changed_event)
 
+    def grab_focus(self):
+        """
+        override grab_focus method
+        """
+        self._textbox.grab_focus()
+
     def _on_key_press_event(self, widget, event):
         '''method called when a key is pressed on the input widget'''
         self.apply_tag()
@@ -110,7 +113,7 @@ class InputText(TextBox):
             self._tag = gtk.TextTag()
             is_new = True
 
-        self._tag.set_property('font-desc', 
+        self._tag.set_property('font-desc',
             utils.style_to_pango_font_description(style))
 
         self._tag.set_property('foreground', '#' + style.color.to_hex())
@@ -145,3 +148,10 @@ class OutputText(TextBox):
         TextBox.__init__(self, config)
         self._textbox.set_editable(False)
         self._textbox.set_cursor_visible(False)
+
+    def append(self, text, scroll=True):
+        '''append formatted text to the widget'''
+        if self.config.b_show_emoticons:
+            text = e3common.MarkupParser.parse_emotes(text)
+
+        TextBox.append(self, text, scroll)

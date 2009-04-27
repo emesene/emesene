@@ -1,4 +1,5 @@
 import gtk
+import gobject
 
 import gui
 import utils
@@ -202,4 +203,5 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_emote(self, emote):
         '''called when an emoticon is selected'''
-        self.input.append(emote)
+        self.input.append(gobject.markup_escape_text(emote))
+        self.input.grab_focus()
