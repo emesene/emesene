@@ -339,6 +339,7 @@ class Worker(protocol.Worker):
             else:
                 nick = my_account
 
+        nick = nick.decode('utf-8', 'replace').encode('utf-8')
         self.socket.send_command('PRP', ('MFN', urllib.quote(nick)))
         self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, nick)
         self.socket.send_command('BLP', ('BL',))
@@ -458,17 +459,27 @@ class Worker(protocol.Worker):
         if not contact:
             return
 
+        account = contact.account
+        old_status = contact.status
+        old_nick = contact.nick
         contact.status = status_
         contact.nick = nick
         contact.attrs['msnobj'] = msnobj
-
-        # don't genetate an event here, because it's after the client
-        # requests the contact list
-
-        self.session.logger.log('status change', status_, str(status_),
-            Logger.Account(contact.attrs.get('CID', None), None,
+        log_account = Logger.Account(contact.attrs.get('CID', None), None,
                 contact.account, contact.status, contact.nick, contact.message,
-                contact.picture))
+                contact.picture)
+
+        if old_status != status_:
+            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account,
+                'status', old_status)
+            self.session.logger.log('status change', status_, str(status_),
+                log_account)
+
+        if old_nick != nick:
+            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account,
+                'nick', old_nick)
+            self.session.logger.log('nick change', status_, nick,
+                log_account)
 
     def _on_information_change(self, message):
         '''handle the change of the information of a contact (personal
@@ -545,7 +556,7 @@ class Worker(protocol.Worker):
             if old_status == status.OFFLINE:
                 change_type = 'online'
 
-            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account, 
+            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 change_type, old_status)
             self.session.logger.log('status change', status_, str(status_),
                 log_account)

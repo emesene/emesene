@@ -394,15 +394,19 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
             weight)
 
+        found = False
+
         for row in self._model:
             obj = row[1]
             if type(obj) == Group:
                 for contact_row in row.iterchildren():
                     con = contact_row[1]
                     if con.account == contact.account:
+                        found = True
                         self._model[contact_row.iter] = contact_data
                         self.update_group(obj)
             elif type(obj) == Contact and obj.account == contact.account:
+                found = True
                 self._model[row.iter] = contact_data
 
     def update_group(self, group):

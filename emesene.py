@@ -309,12 +309,12 @@ def main():
     """
     gobject.threads_init()
     gtk.gdk.threads_init()
-    gtk.threads_enter()
+    gtk.gdk.threads_enter()
     controller = Controller()
     controller.start()
     gtk.quit_add(0, controller.on_close)
     gtk.main()
-    gtk.threads_leave()
+    gtk.gdk.threads_leave()
 
 if __name__ == "__main__":
     main()

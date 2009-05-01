@@ -192,55 +192,58 @@ class Membership(Requester):
         '''handle the response'''
         if response.status == 200:
             parser = XmlParser.MembershipParser(response.body)
+            self.session.contacts.pending = {}
+            self.session.contacts.reverse = {}
             pending = self.session.contacts.pending
             reverse = self.session.contacts.reverse
             contacts = self.session.contacts.contacts
+            new_accounts = []
 
             for membership in parser.memberships:
                 role = membership['MemberRole']
 
                 for member in membership['Members']:
-                    try:
-                        if 'PassportName' in member:
-                            email = member['PassportName'].lower()
-                        else:
-                            continue
+                    if 'PassportName' in member:
+                        email = member['PassportName'].lower()
+                    else:
+                        continue
 
-                        if email in contacts:
-                            contact = contacts[email]
-                        else:
-                            contact = Contact(email)
+                    if email in contacts:
+                        contact = contacts[email]
+                    else:
+                        contact = Contact(email)
 
-                        if role == 'Pending':
-                            pending[email] = contact
-                            contact.attrs['pending'] = True
+                    if role == 'Pending':
+                        pending[email] = contact
+                        contact.attrs['pending'] = True
 
-                            if 'DisplayName' in member:
-                                contact.nick = member['DisplayName']
-                        elif email in pending:
-                            del pending[email]
+                        if 'DisplayName' in member:
+                            contact.nick = member['DisplayName']
 
-                        if role == 'Reverse':
-                            reverse[email] = contact
-                            contact.attrs['Reverse'] = True
-                        elif email in reverse:
-                            del reverse[email]
+                    if role == 'Reverse':
+                        reverse[email] = contact
+                        contact.attrs['Reverse'] = True
 
-                        if role == 'Allow':
-                            contacts[email] = contact
-                        elif email in contacts:
-                            del contacts[email]
+                    if role == 'Allow':
+                        new_accounts.append(email)
+                        contacts[email] = contact
 
-                        if role == 'Block':
-                            contact.blocked = True
-                        else:
-                            contact.blocked = False
+                    if role == 'Block':
+                        contact.blocked = True
+                    else:
+                        contact.blocked = False
 
-                        if 'CID' in member:
-                            contact.attrs['CID'] = member['CID']
+                    if 'CID' in member:
+                        contact.attrs['CID'] = member['CID']
 
-                    except Exception, error:
-                        dbg('exception in membership requester: ' + str(error), 'req', 1)
+                all_accounts = set(contacts.keys())
+                removed_accounts = all_accounts.difference(new_accounts)
+
+                for email in removed_accounts:
+                    # TODO: send some kind of signal to inform to remove the
+                    # contact
+                    del contacts[email]
+
 
             DynamicItems(self.session, self.command_queue,
                 self.on_login, self.started_from_cache).start()
@@ -343,12 +346,14 @@ class DynamicItems(Requester):
                 if not self.started_from_cache:
                     self.command_queue.put(Command('BLP', params=('BL',)))
 
-                for adl in self.session.contacts.get_adls():
-                    self.command_queue.put(Command('ADL', payload=adl))
-
             self.session.add_event(Event.EVENT_CONTACT_LIST_READY)
             self.session.logger.add_contact_by_group(
                 self.session.contacts.contacts, self.session.groups)
+
+            if not self.started_from_cache:
+                for adl in self.session.contacts.get_adls():
+                    self.command_queue.put(Command('ADL', payload=adl))
+
         else:
             dbg('error requestion dynamic items', 'req', 1)
 
