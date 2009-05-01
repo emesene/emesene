@@ -45,7 +45,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         parent.set_title(page.text)
         parent.set_icon(page.icon)
 
-    def _on_tab_close(self, button, event, conversation):
+    def _on_tab_close(self, button, conversation):
         '''called when the user clicks the close button on a tab'''
         # TODO: we can check the last message timstamp and if it's less than
         # certains seconds, inform that there is a new message (to avoid

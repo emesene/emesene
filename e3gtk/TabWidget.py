@@ -14,28 +14,22 @@ class TabWidget(gtk.HBox):
     def __init__(self, text, on_tab_menu, on_close_clicked, conversation):
         '''constructor'''
         gtk.HBox.__init__(self)
+        self.set_border_width(0)
         self.set_spacing(4)
-
-        event = gtk.EventBox()
-        event.set_events(gtk.gdk.BUTTON_RELEASE_MASK)
-        event.connect('button_release_event', on_tab_menu, conversation)
 
         self.image = gtk.Image()
         self.label = gtk.Label(text)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
-        self.close.connect('button_press_event', on_close_clicked,
+        self.close.connect('clicked', on_close_clicked,
             conversation)
 
         self.label.set_max_width_chars(20)
         self.label.set_use_markup(True)
 
-        event.add(self.label)
+        self.pack_start(self.image, False, False, 0)
+        self.pack_start(self.label, True, True, 0)
+        self.pack_start(self.close, False, False, 0)
 
-        self.pack_start(self.image, False)
-        self.pack_start(event, True, True)
-        self.pack_start(self.close, False)
-
-        event.show()
         self.image.show()
         self.label.show()
         self.close.show()

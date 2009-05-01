@@ -122,7 +122,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def update_message_waiting(self, is_waiting):
         """
-        update the information on the conversation to inform if a message is waiting
+        update the information on the conversation to inform if a message
+        is waiting
 
         is_waiting -- boolean value that indicates if a message is waiting
         """
@@ -142,7 +143,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def _on_panel_show(self, widget, event):
         '''callback called when the panel is shown, resize the panel'''
         position = self.panel.get_position()
-        self.panel.set_position(position + int(position * 0.6))
+        self.panel.set_position(position + int(position * 0.8))
         self.panel.disconnect(self._panel_show_id)
         del self._panel_show_id
 

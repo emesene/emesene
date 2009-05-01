@@ -20,6 +20,7 @@
 
 import gtk
 import pango
+import gobject
 
 import gui
 import utils
@@ -708,6 +709,26 @@ class EmotesWindow(gtk.Window):
         box.pack_start(self.table)
         self.add(box)
         box.show_all()
+
+        self.connect('leave-notify-event', self.on_leave_notify_event)
+        self.connect('enter-notify-event', self.on_enter_notify_event)
+
+        self.tag = None
+
+    def on_leave_notify_event(self, *args):
+        """
+        callback called when the mouse leaves this window
+        """
+        if self.tag is None:
+            self.tag = gobject.timeout_add(500, self.hide)
+
+    def on_enter_notify_event(self, *args):
+        """
+        callback called when the mouse enters this window
+        """
+        if self.tag:
+            gobject.source_remove(self.tag)
+            self.tag = None
 
     def _fill_emote_table(self, columns):
         '''fill the gtk.Table with the emoticons'''

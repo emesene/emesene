@@ -1,33 +1,25 @@
 import gtk
 
-class TinyButton(gtk.EventBox):
+class TinyButton(gtk.Button):
     '''a simple and tiny button'''
 
     def __init__(self, stock):
         '''constructor'''
-        gtk.EventBox.__init__(self)
-        self.set_above_child(True)
+        gtk.Button.__init__(self)
 
         self.image = gtk.image_new_from_stock(stock, gtk.ICON_SIZE_MENU)
+        self.set_image(self.image)
+        width, height = gtk.icon_size_lookup(gtk.ICON_SIZE_BUTTON)
+        self.set_size_request(width + 2, height + 2)
         self.image.show()
+        self.image.set_padding(0, 0)
+        self.set_border_width(0)
 
-        self.add(self.image)
+        self.set_focus_on_click(False)
+        self.set_relief(gtk.RELIEF_NONE)
 
-        self.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        # TODO: when see if changing the theme maintins the colors
-        self.normal_color = self.get_style().bg[gtk.STATE_NORMAL]
-        self.prelight_color = self.get_style().bg[gtk.STATE_PRELIGHT]
-        self.set_events(gtk.gdk.ENTER_NOTIFY_MASK)
-        self.set_events(gtk.gdk.LEAVE_NOTIFY_MASK)
-
-        self.connect('enter_notify_event', self._on_enter)
-        self.connect('leave_notify_event', self._on_leave)
-
-    def _on_enter(self, widget, event):
-        '''called when the mouse enters the button'''
-        self.modify_bg(gtk.STATE_NORMAL, self.prelight_color)
-
-    def _on_leave(self, widget, event):
-        '''called when the mouse leaves the button'''
-        self.modify_bg(gtk.STATE_NORMAL, self.normal_color)
-
+if __name__ == '__main__':
+    w = gtk.Window()
+    w.add(TinyButton(gtk.STOCK_CLOSE))
+    w.show_all()
+    gtk.main()
