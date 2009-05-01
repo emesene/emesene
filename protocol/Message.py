@@ -14,13 +14,13 @@ class Message(object):
 
     def __str__(self):
         '''return a string representation of a message'''
-        return '<message from="%s" style="%s" type="%i">' % (self.account, 
+        return '<message from="%s" style="%s" type="%i">' % (self.account,
             str(self.style), self.type)
 
 class Style(object):
     '''a class that represents the style of a message'''
 
-    def __init__(self, font='Arial', color=None, bold=False, italic=False, 
+    def __init__(self, font='Arial', color=None, bold=False, italic=False,
         underline=False, strike=False, size_=None):
         self.font = font
         self.size = size_

@@ -9,11 +9,9 @@ class TinyButton(gtk.Button):
 
         self.image = gtk.image_new_from_stock(stock, gtk.ICON_SIZE_MENU)
         self.set_image(self.image)
-        width, height = gtk.icon_size_lookup(gtk.ICON_SIZE_BUTTON)
+        width, height = gtk.icon_size_lookup(gtk.ICON_SIZE_MENU)
         self.set_size_request(width + 2, height + 2)
         self.image.show()
-        self.image.set_padding(0, 0)
-        self.set_border_width(0)
 
         self.set_focus_on_click(False)
         self.set_relief(gtk.RELIEF_NONE)

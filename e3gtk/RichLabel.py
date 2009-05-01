@@ -2,35 +2,40 @@ import gtk
 import pango
 import cairo
 
-import e3 # for e3.Color
+import protocol 
 import RichWidget
 import e3common.XmlParser
 
 class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
     '''a widget that can display rich text'''
 
-    # Draw in response to an expose-event
-    __gsignals__ = { "expose-event": "override" }
-
-    def __init__(self, text=None, border_width=0):
+    def __init__(self, text='', border_width=0, margin_top=2, margin_left=2,
+            margin_bottom=2, margin_right=2):
         '''constructor'''
         RichWidget.RichWidget.__init__(self)
         gtk.DrawingArea.__init__(self)
 
-        self.do_new_line = False 
+        self.do_new_line = False
         # the x and y coordinates of the next item
         # to be added
         self.next_item_x = 0
         self.next_item_y = None
+        self.max_x = 0
+
+        self.margin_top = margin_top
+        self.margin_bottom = margin_bottom
+        self.margin_left = margin_left
+        self.margin_right = margin_right
 
         self.text = text
-        
+        self.connect("expose_event", self.do_expose_event)
+
     def _set_text(self, text):
         '''set the value of text and parse the value'''
         self._text = text
         result = e3common.XmlParser.XmlParser(
             '<span>' + text.replace('\n', '') + '</span>').result
-        # hold the parsed structure to not parse it every time we 
+        # hold the parsed structure to not parse it every time we
         # draw the widget
         self._parsed = e3common.XmlParser.DictObj(result)
 
@@ -41,7 +46,7 @@ class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
     text = property(fget=_get_text, fset=_set_text)
 
     # Handle the expose-event by drawing
-    def do_expose_event(self, event):
+    def do_expose_event(self, widget, event):
         '''override the expose event handler'''
 
         # Create the cairo context
@@ -51,7 +56,7 @@ class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
         cr.rectangle(event.area.x, event.area.y,
                 event.area.width, event.area.height)
         cr.clip()
-
+        print 'expose'
         self.draw(cr, *self.window.get_size())
 
     def _draw_image(self, x, y, path):
@@ -68,7 +73,7 @@ class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
 
         return (x + width, y)
 
-    def _draw_text(self, x, y, text, fg_color=None, bg_color=None, font=None, 
+    def _draw_text(self, x, y, text, fg_color=None, bg_color=None, font=None,
         size=None, bold=False, italic=False, underline=False, strike=False):
         '''draw text in the current position with the properties defined'''
         foreground = None
@@ -84,7 +89,7 @@ class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
             size = self.get_style().font_desc.get_size() / pango.SCALE
 
         bold_style = cairo.FONT_WEIGHT_NORMAL
-        
+
         if bold:
             bold_style = cairo.FONT_WEIGHT_BOLD
 
@@ -105,13 +110,13 @@ class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
         x, y = self._update_coords(height, x, y)
 
         if bg_color:
-            background = e3.Color.from_hex(bg_color)
+            background = protocol.Color.from_hex(bg_color)
             cr.set_source_rgb(*tuple(background))
             cr.rectangle(x + xbearing, y + ybearing, width, height)
             cr.fill()
 
         if fg_color:
-            foreground = e3.Color.from_hex(fg_color)
+            foreground = protocol.Color.from_hex(fg_color)
             cr.set_source_rgb(*tuple(foreground))
         else:
             cr.set_source_rgb(*rgb)
@@ -139,7 +144,7 @@ class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
         # if this is the first item calculate the initial y coords
         if self.next_item_y is None:
             y = height
-            self.next_item_y = y
+            self.next_item_y = y + self.margin_left * self.px
 
         if self.do_new_line:
             y += height + self.px * 5
@@ -147,13 +152,16 @@ class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
             x = self.next_item_x = 0
             self.do_new_line = False
 
+        self.set_size_request(int(self.max_x + self.margin_right * self.px),
+                int(self.next_item_y + self.margin_bottom * self.px))
+
         return x, y
 
     def draw(self, cr, width, height):
         '''called to draw the widget content'''
         self.next_item_y = None
-        self.next_item_x = 0
         self.px = max(cr.device_to_user_distance(1, 1))
+        self.next_item_x = self.margin_top * self.px
 
         self.width = width
         self.height = height
@@ -161,19 +169,25 @@ class RichLabel(gtk.DrawingArea, RichWidget.RichWidget):
 
     def put_image(self, path, alt=None):
         '''put an image on the widget'''
-        (next_x, next_y) = self._draw_image(self.next_item_x, 
+        (next_x, next_y) = self._draw_image(self.next_item_x,
             self.next_item_y, path)
+
+        if next_x > self.max_x:
+            self.max_x = next_x
 
         self.next_item_x = next_x
         self.next_item_y = next_y
 
     def put_text(self, text, fg_color=None, bg_color=None, font=None, size=None,
         bold=False, italic=False, underline=False, strike=False):
-        '''insert text at the current position with the style defined by the 
+        '''insert text at the current position with the style defined by the
         optional parameters'''
-        (next_x, next_y) = self._draw_text(self.next_item_x, 
-            self.next_item_y, text, fg_color, bg_color, font, size, bold, 
+        (next_x, next_y) = self._draw_text(self.next_item_x,
+            self.next_item_y, text, fg_color, bg_color, font, size, bold,
             italic, underline, strike)
+
+        if next_x > self.max_x:
+            self.max_x = next_x
 
         self.next_item_x = next_x
         self.next_item_y = next_y
@@ -189,7 +203,7 @@ if __name__ == "__main__":
 <u>under<s>lin<b>ed</b></s></u><br/>
 <em>emph<strong>as<span style="color: #CC0000; background-color: #00CC00">is</span></strong></em><br/>
 <span style="font-size: 14;">size <span style="font-family: Arial;">test</span></span>
-<img src="themes/emotes/default/face-sad.png" alt=":("/><img src="themes/emotes/default/face-smile.png" alt=":)"/> 
+<img src="themes/emotes/default/face-sad.png" alt=":("/><img src="themes/emotes/default/face-smile.png" alt=":)"/>
 &lt;-- see that? it is an image! <b>asd</b>'''
     widget = RichLabel(text)
     widget.show()

@@ -9,6 +9,7 @@ import debugger
 import e3
 import gui
 import yaber
+import dummy
 import e3common
 import protocol
 
@@ -41,6 +42,7 @@ class Controller(object):
         e3gtk.setup()
         extension.category_register('session', e3.Session)
         extension.register('session', yaber.Session)
+        extension.register('session', dummy.Session)
         extension.category_register('sound', e3common.play_sound.play)
         extension.category_register('notification', e3common.notification.notify)
 

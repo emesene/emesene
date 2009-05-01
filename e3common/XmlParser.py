@@ -62,7 +62,7 @@ class DictObj(dict):
                 return DictObj(obj)
             elif type(obj) == list:
                 return ListObj(obj)
-            
+
             return obj
         else:
             return None
@@ -98,7 +98,7 @@ class ListObj(list):
             count += 1
 
 def raw_string(dct_):
-    '''return a string containing just the string parts removing all the 
+    '''return a string containing just the string parts removing all the
     xml stuff'''
 
     def helper(dct):
