@@ -11,7 +11,7 @@ def safe_gtk_image_load(path):
     if file_readable(path):
         return gtk.image_new_from_file(path)
     else:
-        return gtk.image_new_from_stock(gtk.STOCK_MISSING_IMAGE, 
+        return gtk.image_new_from_stock(gtk.STOCK_MISSING_IMAGE,
             gtk.ICON_SIZE_DIALOG)
 
 def safe_gtk_pixbuf_load(path):
@@ -26,7 +26,7 @@ def safe_gtk_pixbuf_load(path):
             pixbufs[path] = pixbuf
             return pixbuf
     else:
-        return None 
+        return None
 
 def file_readable(path):
     return os.access(path, os.R_OK) and os.path.isfile(path)

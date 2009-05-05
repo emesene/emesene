@@ -43,6 +43,7 @@ class Login(gtk.Alignment):
         completion.pack_start(pixbufcell)
         completion.add_attribute(pixbufcell, 'pixbuf', 1)
         completion.set_text_column(0)
+        completion.set_inline_selection(True)
 
         pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
 

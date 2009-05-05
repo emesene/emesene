@@ -1,5 +1,7 @@
 import gtk
+import gobject
 
+import gui
 import utils
 import RichBuffer
 import e3common.MarkupParser
@@ -82,6 +84,12 @@ class InputText(TextBox):
         self._textbox.connect('key-press-event', self._on_key_press_event)
         self._buffer.connect('changed', self.on_changed_event)
 
+        self.changed = False
+        gobject.timeout_add(500, self.parse_emotes)
+        self.invisible_tag = gtk.TextTag()
+        self.invisible_tag.set_property('invisible', True)
+        self._buffer.get_tag_table().add(self.invisible_tag)
+
     def grab_focus(self):
         """
         override grab_focus method
@@ -90,6 +98,7 @@ class InputText(TextBox):
 
     def _on_key_press_event(self, widget, event):
         '''method called when a key is pressed on the input widget'''
+        self.changed = True
         self.apply_tag()
         if event.keyval == gtk.keysyms.Return and \
                 not event.state == gtk.gdk.SHIFT_MASK:
@@ -99,6 +108,47 @@ class InputText(TextBox):
             self.on_send_message(self.text)
             self.text = ''
             return True
+
+    def parse_emotes(self):
+        """
+        parse the emoticons in the widget and replace them with
+        images
+        """
+        if not self.changed:
+            return True
+
+        self.changed = False
+        emos = []
+
+        for code in gui.Theme.EMOTES:
+            start = self._buffer.get_start_iter()
+            path = gui.theme.emote_to_path(code, True)
+            result = start.forward_search(code,
+                    gtk.TEXT_SEARCH_VISIBLE_ONLY)
+
+            if result is None:
+                continue
+
+            while result:
+                position, end = result
+                image = utils.safe_gtk_image_load(path)
+                image.show()
+
+                self._buffer.apply_tag(self.invisible_tag, position, end)
+
+                mark_position = self._buffer.create_mark(None, position)
+                mark_end = self._buffer.create_mark(None, end)
+
+                emos.append((image, position))
+                start = end
+                result = start.forward_search(code,
+                        gtk.TEXT_SEARCH_VISIBLE_ONLY)
+
+        for image, position in emos:
+                anchor = self._buffer.create_child_anchor(position)
+                self._textbox.add_child_at_anchor(image, anchor)
+
+        return True
 
     def update_style(self, style):
         '''update the global style of the widget'''
