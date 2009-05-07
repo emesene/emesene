@@ -47,7 +47,8 @@ class Worker(protocol.Worker):
         self._add_contact('dx@emesene.org', 'XD', status.ONLINE, '', False)
         self._add_contact('roger@emesene.org', 'r0x0r', status.ONLINE,
                 '', False)
-        self._add_contact('boyska@emesene.org', 'boyska', status.ONLINE,                 '', True)
+        self._add_contact('boyska@emesene.org', 'boyska', status.ONLINE,
+                '', True)
         self._add_contact('pochu@emesene.org', '<3 debian', status.BUSY,
                 '', False)
         self._add_contact('cloud@emesene.org', 'nube', status.BUSY,
@@ -69,12 +70,15 @@ class Worker(protocol.Worker):
                 '', False)
         self._add_contact('wariano@emesene.org', 'wariano', status.OFFLINE,
                 '', False)
+        self._add_contact('Faith_Nahn@emesene.org', 'Gtk styler', status.BUSY,
+                '', False)
         self._add_contact('you@emesene.org', 'I\'m on emesene code!',
                 status.OFFLINE, '', True)
 
         self._add_group('ninjas')
         self._add_group('pirates')
         self._add_group('lulz')
+        self._add_group('code quiz ninjas')
         self._add_group('empty')
 
         self._add_contact_to_group('you@emesene.org', 'pirates')
@@ -89,6 +93,7 @@ class Worker(protocol.Worker):
         self._add_contact_to_group('roger@emesene.org', 'ninjas')
         self._add_contact_to_group('c0n0@emesene.org', 'ninjas')
         self._add_contact_to_group('boyska@emesene.org', 'ninjas')
+        self._add_contact_to_group('Faith_Nahn@emesene.org', 'code quiz ninjas')
 
     def _add_contact(self, mail, nick, status_, alias, blocked):
         """
