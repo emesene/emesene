@@ -5,8 +5,7 @@ import utils
 
 class Header(gtk.HBox):
     '''a widget used to display some information about the conversation'''
-    INFO_TPL = '<span weight="bold">%s</span>\n'
-    INFO_TPL += '<span style="italic">%s</span>\n'
+    INFO_TPL = '<span>%s</span>\n'
     INFO_TPL += '<span size="small">%s</span>'
 
     NAME = 'Header'

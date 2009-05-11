@@ -61,8 +61,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             self._on_panel_show)
 
         if len(self.members) == 0:
-            self.header.information = ('connecting', 'creating conversation', 
-                '')
+            self.header.information = ('connecting', 'creating conversation')
 
         self.header.set_image(gui.theme.user)
         self.info.first = utils.safe_gtk_image_load(gui.theme.logo)
@@ -137,7 +136,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         message -- the message of the other account (escaped)
         account -- the account
         """
-        self.header.information = (nick, message, account)
+        self.header.information = (message, account)
         self.update_tab()
 
     def _on_panel_show(self, widget, event):
@@ -165,7 +164,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         text = 'Group chat'
 
         self.header.information = \
-            (text, '%d members' % (len(self.members) + 1,), '')
+            (text, '%d members' % (len(self.members) + 1,))
 
         self.update_tab()
 

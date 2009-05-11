@@ -2,7 +2,12 @@
 # Licensed for distribution under the GPL version 2, check COPYING for details
 
 import struct
-import md5
+
+try:
+    import hashlib
+    md5 = hashlib.md5
+except ImportError:
+    from md5 import md5
 
 _PRODUCT_KEY = 'O4BG@C7BWLYQX?5G'
 _PRODUCT_ID = 'PROD01065C%ZFN6F'
@@ -10,7 +15,7 @@ MSNP11_MAGIC_NUM = 0x0E79A9C1
 
 def do_challenge(challenge_data):
     '''create the response to a challenge'''
-    md5digest = md5.md5(challenge_data + _PRODUCT_KEY).digest()
+    md5digest = md5(challenge_data + _PRODUCT_KEY).digest()
 
     # Make array of md5 string ints
     md5_ints = struct.unpack("<llll", md5digest)

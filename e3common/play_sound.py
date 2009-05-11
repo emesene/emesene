@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 def is_on_path(fname):
     """
@@ -24,10 +25,10 @@ if os.name == 'nt':
 elif os.name == 'posix':
     if is_on_path('play'):
         def play(path):
-            os.popen4('play ' + path)
+            subprocess.Popen('play ' + path, shell=True)
     elif is_on_path('aplay'):
         def play(path):
-            os.popen4('aplay ' + path)
+            subprocess.Popen('aplay ' + path, shell=True)
     else:
         play = dummy_play
 elif os.name == 'mac':
