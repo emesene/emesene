@@ -103,12 +103,12 @@ class Login(gtk.Alignment):
         hbox_account = gtk.HBox(spacing=6)
         hbox_account.pack_start(img_account, False)
         hbox_account.pack_start(self.txt_account, True, True)
-        hbox_account.pack_start(gtk.Label('       '), False)
+        hbox_account.pack_start(status_padding, False)
 
         hbox_password = gtk.HBox(spacing=6)
         hbox_password.pack_start(img_password, False)
         hbox_password.pack_start(self.txt_password, True, True)
-        hbox_password.pack_start(status_padding, False)
+        hbox_password.pack_start(self.btn_status, False)
         
         vbox_entries = gtk.VBox(spacing=12)
         vbox_entries.set_border_width(8)
