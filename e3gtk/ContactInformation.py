@@ -17,6 +17,8 @@ class ContactInformation(gtk.Window):
         gtk.Window.__init__(self)
         self.set_default_size(500, 350)
         self.set_title('Contact information (%s)' % (account,))
+        self.set_role("dialog")
+        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
         self.session = session
         self.account = account

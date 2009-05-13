@@ -63,6 +63,9 @@ class Login(gtk.Alignment):
 
         self.btn_status = StatusButton.StatusButton()
 
+        status_padding = gtk.Label()
+        status_padding.set_size_request(*self.btn_status.size_request())
+        
         self.txt_password = gtk.Entry()
         self.txt_password.set_visibility(False)
 
@@ -71,6 +74,7 @@ class Login(gtk.Alignment):
 
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
+        
 
         self.remember_account = gtk.CheckButton("Remember account")
         self.remember_password = gtk.CheckButton("Remember password")
@@ -80,8 +84,14 @@ class Login(gtk.Alignment):
         self.remember_password.connect('toggled',
             self._on_remember_password_toggled)
 
+        vbox_remember = gtk.VBox(spacing=4)
+        vbox_remember.set_border_width(8)
+        vbox_remember.pack_start(self.remember_account)
+        vbox_remember.pack_start(self.remember_password)
+        
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect("clicked", self._on_connect_clicked)
+        self.b_connect.set_border_width(8)
 
         img_account = utils.safe_gtk_image_load(gui.theme.user)
         img_password = utils.safe_gtk_image_load(gui.theme.password)
@@ -90,15 +100,20 @@ class Login(gtk.Alignment):
         vbox = gtk.VBox()
         vbox.set_border_width(2)
 
-        hbox_account = gtk.HBox(spacing=5)
+        hbox_account = gtk.HBox(spacing=6)
         hbox_account.pack_start(img_account, False)
-        hbox_account.pack_start(self.txt_account, True, False)
+        hbox_account.pack_start(self.txt_account, True, True)
         hbox_account.pack_start(gtk.Label('       '), False)
 
-        hbox_password = gtk.HBox(spacing=5)
+        hbox_password = gtk.HBox(spacing=6)
         hbox_password.pack_start(img_password, False)
-        hbox_password.pack_start(self.txt_password, True, False)
-        hbox_password.pack_start(self.btn_status, False)
+        hbox_password.pack_start(self.txt_password, True, True)
+        hbox_password.pack_start(status_padding, False)
+        
+        vbox_entries = gtk.VBox(spacing=12)
+        vbox_entries.set_border_width(8)
+        vbox_entries.pack_start(hbox_account)
+        vbox_entries.pack_start(hbox_password)
 
         self.b_preferences = gtk.Button()
         self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
@@ -113,13 +128,9 @@ class Login(gtk.Alignment):
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
-        al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
+        al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
             yscale=0.0)
-        al_password = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
-            yscale=0.0)
-        al_remember_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
-            yscale=0.2)
-        al_remember_passwd = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
+        al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
             yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.1)
@@ -127,19 +138,15 @@ class Login(gtk.Alignment):
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
 
-        al_account.add(hbox_account)
-        al_password.add(hbox_password)
-        al_remember_account.add(self.remember_account)
-        al_remember_passwd.add(self.remember_password)
+        al_vbox_entries.add(vbox_entries)
+        al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
         al_logo.add(img_logo)
         al_preferences.add(self.b_preferences)
 
         vbox.pack_start(al_logo, True, True, 10)
-        vbox.pack_start(al_account, True, True)
-        vbox.pack_start(al_password, True, True)
-        vbox.pack_start(al_remember_account, True, True)
-        vbox.pack_start(al_remember_passwd, True, True)
+        vbox.pack_start(al_vbox_entries, True, True)
+        vbox.pack_start(al_vbox_remember, True, True)
         vbox.pack_start(al_button, True, True)
         vbox.pack_start(al_preferences, False)
 

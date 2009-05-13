@@ -186,6 +186,8 @@ class Dialog(object):
 
         window = gtk.Window()
         window.set_title(title)
+        window.set_role("dialog")
+        window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         window.set_default_size(150, 100)
         window.set_position(gtk.WIN_POS_CENTER)
         window.set_border_width(8)
@@ -692,6 +694,7 @@ class EmotesWindow(gtk.Window):
         """
         gtk.Window.__init__(self)
         self.set_decorated(False)
+        self.set_role("emotes")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_position(gtk.WIN_POS_MOUSE)
         self.set_resizable(False)

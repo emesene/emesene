@@ -25,10 +25,12 @@ if os.name == 'nt':
 elif os.name == 'posix':
     if is_on_path('play'):
         def play(path):
-            subprocess.Popen('play ' + path, shell=True)
+            subprocess.Popen(['play', path],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     elif is_on_path('aplay'):
         def play(path):
-            subprocess.Popen('aplay ' + path, shell=True)
+            subprocess.Popen(['aplay', path],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     else:
         play = dummy_play
 elif os.name == 'mac':

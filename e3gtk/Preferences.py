@@ -14,7 +14,11 @@ class Preferences(gtk.Window):
         """
         gtk.Window.__init__(self)
         self.set_title("Preferences")
+
         self.set_default_size(320, 260)
+        self.set_role("preferences")
+        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+
         if utils.file_readable(gui.theme.logo):
             self.set_icon(
                 utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())

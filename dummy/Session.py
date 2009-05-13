@@ -33,6 +33,6 @@ class Session(protocol.Session):
     def request_attention(self, cid):
         '''request the attention of the contact'''
         account = self.account.account
-        message = protocol.Message(e3.Message.TYPE_MESSAGE, 
+        message = protocol.Message(protocol.Message.TYPE_MESSAGE, 
             '%s requests your attention' % (account, ), account)
         self.add_action(Action.ACTION_SEND_MESSAGE, (cid, message))

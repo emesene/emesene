@@ -160,6 +160,7 @@ def build_window(item):
     validations'''
     window = gtk.Window()
     window.set_title(item.name)
+    window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
     box = gtk.VBox()
     box.set_spacing(SPACING)
