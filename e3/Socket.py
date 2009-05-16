@@ -42,9 +42,16 @@ class Socket(threading.Thread):
         input_ = None
 
         while True:
-            # if we couldn't send the data the last loop we dont try to get 
-            # another one
-            if not input_:
+            # see if we can send or read something
+            (iwtd, owtd) = select.select([self], [self], [])[:2]
+
+            # if we can read, we try to read
+            if iwtd:
+                self._receive()
+                # do not write until everything is read
+                continue
+
+            if owtd:
                 # try to get something to send, wait 0.3 seconds
                 try:
                     input_ = self.input.get(True, 0.3)
@@ -55,23 +62,14 @@ class Socket(threading.Thread):
                         break
                 except Queue.Empty:
                     # nothing to send
-                    pass
+                    continue
 
-            # see if we can send or read something
-            (iwtd, owtd) = select.select([self], [self], [self])[:2]
-
-            # if we can write and there is something to write
-            if owtd and input_:
                 try:
                     self.socket.send(input_)
                     dbg('>>> ' + str(input_), 'sock', 2)
                 except socket.error:
                     self._on_socket_error()
-                input_ = None
 
-            # if we can read, we try to read
-            if iwtd:
-                self._receive()
 
     def fileno(self):
         '''method that is used by select'''

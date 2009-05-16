@@ -156,6 +156,7 @@ class Worker(protocol.Worker):
                     break
 
                 self._process(data)
+                continue
             except Queue.Empty:
                 pass
 
