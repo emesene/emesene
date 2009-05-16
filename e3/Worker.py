@@ -68,12 +68,9 @@ class Worker(protocol.Worker):
             self.proxy = protocol.Proxy()
         else:
             self.proxy = proxy
+        self.use_http = use_http
 
-        if self.proxy.use_proxy or use_http:
-            self.socket = MsnHttpSocket(dest_type='NS', proxy=self.proxy)
-        else:
-            self.socket = MsnSocket()
-
+        self.socket = self._get_socket()
         self.socket.start()
 
         self.in_login = False
@@ -102,6 +99,14 @@ class Worker(protocol.Worker):
 
         self.msg_manager = msgs.Manager(session) # msg manager
         self.msg_manager.start()
+
+    def _get_socket(self, host='messenger.hotmail.com', port=1863):
+        '''return a socket according to the proxy settings'''
+        if self.proxy.use_proxy or self.use_http:
+            socket = MsnHttpSocket(host, port, dest_type='NS', proxy=self.proxy)
+        else:
+            socket = MsnSocket(host, port)
+        return socket
 
     def _set_handlers(self):
         '''set a dict with the action id as key and the handler as value'''
@@ -375,7 +380,8 @@ class Worker(protocol.Worker):
                     'invalid XFR command')
                 self._on_login_failed()
 
-            self.socket.reconnect(host, int(port))
+            self.socket = self._get_socket(host, int(port))
+            self.socket.start()
             self.socket.send_command('VER', ('MSNP15', 'CVR0'))
         else:
             self.session.add_event(Event.EVENT_LOGIN_FAILED,

@@ -45,13 +45,18 @@ class MsnSocket(Socket.Socket):
 
             if command.command in common.PAYLOAD_CMDS:
                 position = common.PAYLOAD_POSITION[command.command]
-
-                if position == -1:
-                    size = int(command.tid)
-                else:
-                    size = int(command.params[position])
-
-                command.payload = self.receive_fixed_size(size)
+                
+                try:
+                    if position == -1:
+                        size = int(command.tid)
+                    else:
+                        size = int(command.params[position])
+                    command.payload = self.receive_fixed_size(size)
+                except ValueError:
+                    # For commands such as ADL and RML
+                    pass
 
             self.output.put(command)
+            return True
+        return False
 

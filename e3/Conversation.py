@@ -369,7 +369,7 @@ class Conversation(threading.Thread):
         return a socket according to the proxy settings
         """
         if self.proxy.use_proxy or self.use_http:
-            socket = MsnHttpSocket(host, port, dest_type='NS', proxy=self.proxy)
+            socket = MsnHttpSocket(host, port, dest_type='SB', proxy=self.proxy)
         else:
             socket = MsnSocket(host, port)
 

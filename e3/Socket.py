@@ -47,29 +47,32 @@ class Socket(threading.Thread):
 
             # if we can read, we try to read
             if iwtd:
-                self._receive()
+                if not self._receive():
+                    # nothing received, socket closed
+                    break
                 # do not write until everything is read
                 continue
 
-            if owtd:
+            try:
+                input_ = self.input.get(True, 0.3)
+
+                if input_ == 'quit':
+                    break
+            except Queue.Empty:
+                # nothing to send
+                continue
+
+            if owtd and input_:
                 # try to get something to send, wait 0.3 seconds
-                try:
-                    input_ = self.input.get(True, 0.3)
-
-                    if input_ == 'quit':
-                        dbg('closing socket thread', 'sock', 1)
-                        self.socket.close()
-                        break
-                except Queue.Empty:
-                    # nothing to send
-                    continue
-
                 try:
                     self.socket.send(input_)
                     dbg('>>> ' + str(input_), 'sock', 2)
                 except socket.error:
                     self._on_socket_error()
+                    break
 
+        dbg('closing socket thread', 'sock', 1)
+        self.socket.close()
 
     def fileno(self):
         '''method that is used by select'''
@@ -82,6 +85,8 @@ class Socket(threading.Thread):
         if data:
             dbg('<<< ' + data, 'sock', 3)
             self.output.put(data)
+            return True
+        return False
 
     def _readline(self):
         '''read until new line'''
@@ -119,14 +124,6 @@ class Socket(threading.Thread):
         output.seek(0)
 
         return output.read()
-
-    def reconnect(self, host, port):
-        '''connect to a different host'''
-        self.host = host
-        self.port = port
-        self.socket.close()
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((self.host, self.port))
 
     def _on_socket_error(self):
         '''send a message that the socket was closed'''

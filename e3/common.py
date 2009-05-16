@@ -3,13 +3,15 @@ import xml.sax.saxutils
 MSNP_VER = 'MSNP15'
 BUILD_VER = '8.0.0792'
 
-PAYLOAD_CMDS = ['GCF', 'MSG', 'UBX', 'NOT']
+PAYLOAD_CMDS = ['GCF', 'MSG', 'UBX', 'NOT', 'ADL', 'RML']
 # the position on params where the number of bytes to read is located
 PAYLOAD_POSITION = {
     'GCF' : 0,
     'MSG' : 1,
     'UBX' : 1,
     'NOT' : -1,
+    'ADL' : 0,
+    'RML' : 0,
 }
 
 dic = {
