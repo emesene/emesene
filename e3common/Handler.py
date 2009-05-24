@@ -90,7 +90,7 @@ class OptionsHandler(object):
 
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
-        Preferences = extension.get_default('gtk preferences')
+        Preferences = extension.get_default('preferences')
         Preferences(self.session).show()
 
 

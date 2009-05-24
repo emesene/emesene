@@ -44,7 +44,6 @@ class Dialog(object):
     @classmethod
     def window_add_image(cls, window, stock_id):
         '''add a stock image as the first element of the window.hbox'''
-
         image = gtk.image_new_from_stock(stock_id, gtk.ICON_SIZE_DIALOG)
         window.hbox.pack_start(image, False)
         image.show()
@@ -190,7 +189,6 @@ class Dialog(object):
         window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         window.set_default_size(150, 100)
         window.set_position(gtk.WIN_POS_CENTER)
-        window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         window.set_border_width(8)
         window.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
 
@@ -679,8 +677,10 @@ class Dialog(object):
         window.hbox.pack_start(content, True, True)
         content.pack_start(box, True, True)
 
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb, button_cb)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb, button_cb)
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
+                button_cb)
+        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
+                button_cb)
         window.show_all()
 
 class EmotesWindow(gtk.Window):
@@ -774,6 +774,9 @@ class InviteWindow(gtk.Window):
         constructor
         """
         gtk.Window.__init__(self)
+        self.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
+        self.set_title(_('Invite friend'))
+        self.set_default_size(300, 250)
         self.session = session
         self.callback = callback
         ContactList = extension.get_default('contact list')
@@ -796,11 +799,16 @@ class InviteWindow(gtk.Window):
         bclose = gtk.Button(stock=gtk.STOCK_CLOSE)
 
         search = gtk.Entry()
+        scroll = gtk.ScrolledWindow()
+        scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        scroll.set_shadow_type(gtk.SHADOW_IN)
+        scroll.set_border_width(1)
+        scroll.add(self.contact_list)
 
         bbox.pack_start(bclose)
         bbox.pack_start(badd)
 
-        vbox.pack_start(self.contact_list, True, True)
+        vbox.pack_start(scroll, True, True)
         vbox.pack_start(search, False)
         vbox.pack_start(bbox, False)
         self.add(vbox)
