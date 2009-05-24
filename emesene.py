@@ -39,7 +39,6 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
-        e3gtk.setup()
         extension.category_register('session', e3.Session)
         extension.register('session', yaber.Session)
         extension.register('session', dummy.Session)
@@ -156,7 +155,7 @@ class Controller(object):
     def on_login_failed(self, reason):
         '''callback called on login failed'''
         self._new_session()
-        dialog = extension.get_default('gtk dialog')
+        dialog = extension.get_default('dialog')
         dialog.error(reason)
         self.window.content.set_sensitive(True)
 
@@ -250,7 +249,7 @@ class Controller(object):
         '''callback called when the other user does an action that justify
         opeinig a conversation'''
         if self.conversations is None:
-            Window = extension.get_default('gtk window frame')
+            Window = extension.get_default('window frame')
             window = Window(self._on_conversation_window_close)
             window.set_default_size(640, 480)
             window.go_conversation(self.session)
@@ -280,10 +279,10 @@ class Controller(object):
         self.conversations = None
 
     def start(self, account=None, accounts=None):
-        Window = extension.get_default('gtk window frame')
-        TrayIcon = extension.get_default('gtk tray icon')
+        Window = extension.get_default('window frame')
+        TrayIcon = extension.get_default('tray icon')
         self.window = Window(self.on_close)
-        handler = e3common.TrayIconHandler(self.session, gui.theme, 
+        handler = e3common.TrayIconHandler(self.session, gui.theme,
             self.on_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler)
 
@@ -309,14 +308,8 @@ def main():
     """
     the main method of emesene
     """
-    gobject.threads_init()
-    gtk.gdk.threads_init()
-    gtk.gdk.threads_enter()
-    controller = Controller()
-    controller.start()
-    gtk.quit_add(0, controller.on_close)
-    gtk.main()
-    gtk.gdk.threads_leave()
+    main_method = extension.get_default('gtk main')
+    main_method(Controller)
 
 if __name__ == "__main__":
     main()

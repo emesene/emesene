@@ -229,7 +229,7 @@ class ChatWidget(gtk.VBox):
         self.session = session
         if self.session:
             self.contact = self.session.contacts.get(account)
-        OutputText = extension.get_default('gtk conversation output')
+        OutputText = extension.get_default('conversation output')
         self.text = OutputText(session.config)
         self.text.show()
 

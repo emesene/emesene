@@ -1,3 +1,6 @@
+import gtk
+import gobject
+
 import Login
 import Dialog
 import Header
@@ -14,7 +17,7 @@ import AccountMenu
 import ContactMenu
 import ContactList
 import ContactInfo
-import Preferences 
+import Preferences
 import Conversation
 import WebKitTextBox
 import ConversationManager
@@ -22,41 +25,57 @@ import ConversationToolbar
 
 import extension
 
+def main(Controller):
+    """
+    main method for gtk frontend
+    """
+    setup()
+    gobject.threads_init()
+    gtk.gdk.threads_init()
+    gtk.gdk.threads_enter()
+    controller = Controller()
+    controller.start()
+    gtk.quit_add(0, controller.on_close)
+    gtk.main()
+    gtk.gdk.threads_leave()
+
+extension.category_register('gtk main', main)
+
 def setup():
     """
     define all the components for a gtk environment
     """
-    extension.category_register('gtk dialog', Dialog.Dialog)
-    extension.category_register('gtk preferences', Preferences.Preferences)
-    extension.category_register('gtk login window', Login.Login)
-    extension.category_register('gtk window frame', Window.Window)
-    extension.category_register('gtk main window', MainWindow.MainWindow)
-    extension.category_register('gtk contact list', ContactList.ContactList)
-    extension.category_register('gtk user panel', UserPanel.UserPanel)
-    extension.category_register('gtk tray icon', TrayIcon.TrayIcon)
+    extension.category_register('dialog', Dialog.Dialog)
+    extension.category_register('preferences', Preferences.Preferences)
+    extension.category_register('login window', Login.Login)
+    extension.category_register('window frame', Window.Window)
+    extension.category_register('main window', MainWindow.MainWindow)
+    extension.category_register('contact list', ContactList.ContactList)
+    extension.category_register('user panel', UserPanel.UserPanel)
+    extension.category_register('tray icon', TrayIcon.TrayIcon)
 
-    extension.category_register('gtk main menu', MainMenu.MainMenu)
-    extension.category_register('gtk menu file', MainMenu.FileMenu)
-    extension.category_register('gtk menu actions', MainMenu.ActionsMenu)
-    extension.category_register('gtk menu options', MainMenu.OptionsMenu)
-    extension.category_register('gtk menu contact', ContactMenu.ContactMenu)
-    extension.category_register('gtk menu group', GroupMenu.GroupMenu)
-    extension.category_register('gtk menu account', AccountMenu.AccountMenu)
-    extension.category_register('gtk menu help', MainMenu.HelpMenu)
-    extension.category_register('gtk menu status', StatusMenu.StatusMenu)
+    extension.category_register('main menu', MainMenu.MainMenu)
+    extension.category_register('menu file', MainMenu.FileMenu)
+    extension.category_register('menu actions', MainMenu.ActionsMenu)
+    extension.category_register('menu options', MainMenu.OptionsMenu)
+    extension.category_register('menu contact', ContactMenu.ContactMenu)
+    extension.category_register('menu group', GroupMenu.GroupMenu)
+    extension.category_register('menu account', AccountMenu.AccountMenu)
+    extension.category_register('menu help', MainMenu.HelpMenu)
+    extension.category_register('menu status', StatusMenu.StatusMenu)
 
-    extension.category_register('gtk conversation window', \
+    extension.category_register('conversation window', \
         ConversationManager.ConversationManager)
-    extension.category_register('gtk conversation', Conversation.Conversation)
-    extension.category_register('gtk conversation header', Header.Header)
-    extension.category_register('gtk conversation info', ContactInfo.ContactInfo)
-    extension.category_register('gtk conversation tab', TabWidget.TabWidget)
-    extension.category_register('gtk conversation input', TextBox.InputText)
-    extension.category_register('gtk conversation toolbar', \
+    extension.category_register('conversation', Conversation.Conversation)
+    extension.category_register('conversation header', Header.Header)
+    extension.category_register('conversation info', ContactInfo.ContactInfo)
+    extension.category_register('conversation tab', TabWidget.TabWidget)
+    extension.category_register('conversation input', TextBox.InputText)
+    extension.category_register('conversation toolbar', \
         ConversationToolbar.ConversationToolbar)
 
     if not WebKitTextBox.ERROR:
-        extension.category_register('gtk conversation output', WebKitTextBox.OutputText)
+        extension.category_register('conversation output', WebKitTextBox.OutputText)
     else:
-        extension.category_register('gtk conversation output', TextBox.OutputText)
+        extension.category_register('conversation output', TextBox.OutputText)
 

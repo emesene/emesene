@@ -104,7 +104,7 @@ class Conversation(object):
 
     def on_invite(self, account):
         '''called when a contact is selected to be invited'''
-        self.session.conversation_invite(account)
+        self.session.conversation_invite(self.cid, account)
 
     def on_clean(self):
         '''called when the clean button is clicked'''

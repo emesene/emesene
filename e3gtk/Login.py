@@ -174,11 +174,11 @@ class Login(gtk.Alignment):
         remember_account = self.remember_account.get_active()
 
         if user == '':
-            extension.get_default('gtk dialog').error('Empty user')
+            extension.get_default('dialog').error('Empty user')
             return
 
         if password == '':
-            extension.get_default('gtk dialog').error('Empty password')
+            extension.get_default('dialog').error('Empty password')
             return
 
         self.set_sensitive(False)
@@ -243,7 +243,7 @@ class Login(gtk.Alignment):
 
     def _on_preferences_selected(self, button):
         '''called when the user clicks the preference button'''
-        extension.get_default('gtk dialog').login_preferences(self.session_id,
+        extension.get_default('dialog').login_preferences(self.session_id,
             self._on_new_preferences, self.use_http, self.proxy)
 
     def _on_new_preferences(self, use_http, use_proxy, host, port, 

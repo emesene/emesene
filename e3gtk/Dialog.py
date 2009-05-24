@@ -190,6 +190,7 @@ class Dialog(object):
         window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         window.set_default_size(150, 100)
         window.set_position(gtk.WIN_POS_CENTER)
+        window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         window.set_border_width(8)
         window.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
 
@@ -560,7 +561,7 @@ class Dialog(object):
         object of the current session the callback receives the response and
         a string containing the selected account
         '''
-        pass
+        InviteWindow(session, callback).show()
 
     @classmethod
     def login_preferences(cls, session, callback, use_http, proxy):
@@ -762,4 +763,78 @@ class EmotesWindow(gtk.Window):
         self.emote_selected(shortcut)
         self.hide()
 
+class InviteWindow(gtk.Window):
+    """
+    A window that display a list of users to select the ones to invite to
+    the conversarion
+    """
 
+    def __init__(self, session, callback):
+        """
+        constructor
+        """
+        gtk.Window.__init__(self)
+        self.session = session
+        self.callback = callback
+        ContactList = extension.get_default('contact list')
+        self.contact_list = ContactList(session)
+        self.contact_list.nick_template = \
+            '%DISPLAY_NAME%\n<span foreground="#AAAAAA" size="small">' \
+            '%ACCOUNT%</span>'
+        self.contact_list.order_by_group = False
+
+        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        self.set_position(gtk.WIN_POS_CENTER)
+
+        vbox = gtk.VBox()
+
+        bbox = gtk.HButtonBox()
+        bbox.set_spacing(4)
+        bbox.set_layout(gtk.BUTTONBOX_END)
+
+        badd = gtk.Button(stock=gtk.STOCK_ADD)
+        bclose = gtk.Button(stock=gtk.STOCK_CLOSE)
+
+        search = gtk.Entry()
+
+        bbox.pack_start(bclose)
+        bbox.pack_start(badd)
+
+        vbox.pack_start(self.contact_list, True, True)
+        vbox.pack_start(search, False)
+        vbox.pack_start(bbox, False)
+        self.add(vbox)
+
+        vbox.show_all()
+        badd.connect('clicked', self._on_add_clicked)
+        bclose.connect('clicked', lambda *args: self.hide())
+        search.connect('changed', self._on_search_changed)
+        self.connect('delete-event', lambda *args: self.hide())
+        self.contact_list.contact_selected.subscribe(self._on_contact_selected)
+        self.contact_list.fill()
+
+    def _on_add_clicked(self, button):
+        """
+        method called when the add button is clicked
+        """
+        contact = self.contact_list.get_contact_selected()
+
+        if contact is None:
+            Dialog.error(_("No contact selected"))
+            return
+
+        self.callback(contact.account)
+        self.hide()
+
+    def _on_search_changed(self, entry):
+        """
+        called when the content of the entry changes
+        """
+        self.contact_list.filter_text = entry.get_text()
+
+    def _on_contact_selected(self, contact):
+        """
+        method called when the contact is selected
+        """
+        self.callback(contact.account)
+        self.hide()

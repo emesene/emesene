@@ -45,7 +45,7 @@ class Window(gtk.Window):
             remember_account=None, remember_password=None, statuses=None,
             session=None, proxy=None, use_http=False, session_id=None):
         '''draw the login window on the main window'''
-        LoginWindow = extension.get_default('gtk login window')
+        LoginWindow = extension.get_default('login window')
 
         self.content = LoginWindow(callback, on_preferences_changed, 
             account, accounts, remember_account, remember_password, statuses, 
@@ -56,7 +56,7 @@ class Window(gtk.Window):
 
     def go_main(self, session, on_new_conversation, on_close):
         '''change to the main window'''
-        MainWindow = extension.get_default('gtk main window')
+        MainWindow = extension.get_default('main window')
         self.content = MainWindow(session, on_new_conversation,
             on_close)
         self.add(self.content)
@@ -65,7 +65,7 @@ class Window(gtk.Window):
 
     def go_conversation(self, session):
         '''change to a conversation window'''
-        ConversationManager = extension.get_default('gtk conversation window')
+        ConversationManager = extension.get_default('conversation window')
         self.content = ConversationManager(session, self._on_last_tab_close)
         self.add(self.content)
         self.connect('focus-in-event', self.content._on_focus)

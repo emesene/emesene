@@ -70,8 +70,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         """
         create and append a new conversation
         """
-        Conversation = extension.get_default('gtk conversation')
-        TabWidget = extension.get_default('gtk conversation tab')
+        Conversation = extension.get_default('conversation')
+        TabWidget = extension.get_default('conversation tab')
         conversation = Conversation(self.session, cid, None, members)
         label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close,
             conversation)

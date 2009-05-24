@@ -27,14 +27,14 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel = gtk.VPaned()
 
-        Header = extension.get_default('gtk conversation header')
-        OutputText = extension.get_default('gtk conversation output')
-        InputText = extension.get_default('gtk conversation input')
-        ContactInfo = extension.get_default('gtk conversation info')
+        Header = extension.get_default('conversation header')
+        OutputText = extension.get_default('conversation output')
+        InputText = extension.get_default('conversation input')
+        ContactInfo = extension.get_default('conversation info')
         ConversationToolbar = extension.get_default(
-            'gtk conversation toolbar')
+            'conversation toolbar')
 
-        dialog = extension.get_default('gtk dialog')
+        dialog = extension.get_default('dialog')
         self.header = Header()
         toolbar_handler = e3common.ConversationToolbarHandler(self.session,
             dialog, gui.theme, self)

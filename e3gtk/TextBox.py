@@ -108,6 +108,12 @@ class InputText(TextBox):
             self.on_send_message(self.text)
             self.text = ''
             return True
+        elif event.keyval == gtk.keysyms.BackSpace:
+            # do backspace while we are at an invisible tag
+            iter_ = self._buffer.get_iter_at_mark(self._buffer.get_mark('insert'))
+            while iter_.ends_tag(self.invisible_tag) or \
+                    iter_.begins_tag(self.invisible_tag):
+                self._buffer.backspace(iter_, True, True)
 
     def parse_emotes(self):
         """

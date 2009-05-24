@@ -38,7 +38,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
     def __init__(self, session):
         '''class constructor'''
-        dialog = extension.get_default('gtk dialog')
+        dialog = extension.get_default('dialog')
         gui.ContactList.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 

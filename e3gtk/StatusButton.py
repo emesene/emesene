@@ -23,7 +23,7 @@ class StatusButton(gtk.Button):
         self.set_status(status.ONLINE)
         self.set_relief(gtk.RELIEF_NONE)
         self.set_border_width(0)
-        StatusMenu = extension.get_default('gtk menu status')
+        StatusMenu = extension.get_default('menu status')
         self.menu = StatusMenu(self.set_status)
         self.menu.show_all()
         self.connect('clicked', self._on_clicked)
