@@ -307,13 +307,18 @@ class Dialog(object):
                                 title=_("User invitation")):
         '''show a dialog displaying information about users
         that added you to their userlists, the accounts parameter is
-        a tuple of mails that represent all the users that added you,
+        a tuple of mail, nick that represent all the users that added you,
         the way you confirm (one or more dialogs) doesn't matter, but
-        you should call the response callback only once with a tuple
-        like: ((mail1, stock.YES), (mail2, stock.NO), (mail3, stock.CANCEL))
-        YES means add him to your userlist, NO means block him, CANCEL
-        means remind me later.'''
-        raise NotImplementedError("This method isn't implemented")
+        you should call the response callback only once with a dict
+        with two keys 'accepted' and 'rejected' and a tuple of accounts as
+        values
+        '''
+        dialog = AddBuddy(response_cb)
+
+        for account, nick in accounts:
+            dialog.append(nick, account)
+
+        dialog.show()
 
     @classmethod
     def add_contact(cls, groups, group_selected, response_cb,
@@ -774,6 +779,7 @@ class InviteWindow(gtk.Window):
         constructor
         """
         gtk.Window.__init__(self)
+        self.set_border_width(1)
         self.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
         self.set_title(_('Invite friend'))
         self.set_default_size(300, 250)
@@ -790,9 +796,10 @@ class InviteWindow(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
 
         vbox = gtk.VBox()
+        vbox.set_spacing(1)
 
         bbox = gtk.HButtonBox()
-        bbox.set_spacing(4)
+        bbox.set_spacing(1)
         bbox.set_layout(gtk.BUTTONBOX_END)
 
         badd = gtk.Button(stock=gtk.STOCK_ADD)
@@ -846,3 +853,221 @@ class InviteWindow(gtk.Window):
         """
         self.callback(contact.account)
         self.hide()
+
+class AddBuddy(gtk.Window):
+    '''Confirm dialog informing that someone has added you
+    ask if you want to add him to your contact list'''
+
+    def __init__(self, callback):
+        '''Constructor. Packs widgets'''
+        gtk.Window.__init__(self)
+
+        self.mails = []  # [(mail, nick), ...]
+        self.rejected = []
+        self.accepted = []
+        self.callback = callback
+        self.pointer = 0
+
+        # window
+        self.set_title(_("Add contact"))
+        self.set_border_width(4)
+        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        self.move(30, 30) # top-left
+        self.connect('delete-event', self.cb_delete)
+
+        ## widgets
+
+        # main vbox
+        self.vbox = gtk.VBox()
+
+        # hbox with image, pages, and main text
+        self.hbox = gtk.HBox()
+        self.hbox.set_spacing(4)
+        self.hbox.set_border_width(4)
+
+        # the contents of the hbox (image+vboxtext)
+        self.image = gtk.Image()
+        self.image.set_from_stock(gtk.STOCK_DIALOG_QUESTION, \
+            gtk.ICON_SIZE_DIALOG)
+        self.imagebox = gtk.HBox()
+        self.imagebox.set_border_width(4)
+        self.image.set_alignment(0.0, 0.5)
+
+        # the vboxtext (pages+text)
+        self.vboxtext = gtk.VBox()
+        self.pages = self._buildpages()
+        self.text = gtk.Label()
+        self.text.set_selectable(True)
+        self.text.set_ellipsize(3) #pango.ELLIPSIZE_END
+        self.text.set_alignment(0.0, 0.0) # top left
+        self.text.set_width_chars(60)
+
+        # hboxbuttons + button box
+        self.hboxbuttons = gtk.HBox()
+        self.hboxbuttons.set_spacing(4)
+        self.hboxbuttons.set_border_width(4)
+        self.buttonbox = gtk.HButtonBox()
+        self.buttonbox.set_layout(gtk.BUTTONBOX_END)
+
+        # the contents of the buttonbox
+        self.later = gtk.Button()
+        self.later.add(gtk.Label(_('Remind me later')))
+        self.later.connect('clicked', self.cb_cancel)
+        self.reject = gtk.Button(stock=gtk.STOCK_REMOVE)
+        self.reject.connect('clicked', self.cb_reject)
+        self.addbutton = gtk.Button(stock=gtk.STOCK_ADD)
+        self.addbutton.connect('clicked', self.cb_add)
+
+        ## packing
+        self.add(self.vbox)
+        self.vbox.pack_start(self.hbox, True, True)
+        self.vbox.pack_start(self.hboxbuttons, False, False)
+
+        self.imagebox.pack_start(self.image)
+        self.hbox.pack_start(self.imagebox, False, False)
+        self.hbox.pack_start(self.vboxtext, True, True)
+        self.vboxtext.pack_start(self.pages, False, False)
+        self.vboxtext.pack_start(self.text, True, True)
+
+        self.hboxbuttons.pack_start(self.later, False, False)
+        self.hboxbuttons.pack_start(self.reject, False, False)
+        self.hboxbuttons.pack_start(self.buttonbox)
+        self.buttonbox.pack_start(self.addbutton)
+
+    def _buildpages(self):
+        '''Builds hboxpages, that is a bit complex to include in __init__'''
+        hboxpages = gtk.HBox()
+
+        arrowleft = TinyArrow(gtk.ARROW_LEFT)
+        self.buttonleft = gtk.Button()
+        self.buttonleft.set_relief(gtk.RELIEF_NONE)
+        self.buttonleft.add(arrowleft)
+        self.buttonleft.connect('clicked', self.switchmail, -1)
+
+        arrowright = TinyArrow(gtk.ARROW_RIGHT)
+        self.buttonright = gtk.Button()
+        self.buttonright.set_relief(gtk.RELIEF_NONE)
+        self.buttonright.add(arrowright)
+        self.buttonright.connect('clicked', self.switchmail, 1)
+
+        self.currentpage = gtk.Label()
+
+        hboxpages.pack_start(gtk.Label(), True, True) # align to right
+        hboxpages.pack_start(self.buttonleft, False, False)
+        hboxpages.pack_start(self.currentpage, False, False)
+        hboxpages.pack_start(self.buttonright, False, False)
+
+        return hboxpages
+
+    def append(self, nick, mail):
+        '''Adds a new pending user'''
+        self.mails.append((mail, gobject.markup_escape_text(nick)))
+        self.update()
+        self.show_all()
+        self.present()
+
+    def update(self):
+        '''Update the GUI, including labels, arrow buttons, etc'''
+        try:
+            mail, nick = self.mails[self.pointer]
+        except IndexError:
+            self.hide()
+            return
+
+        if nick != mail:
+            mailstring = "<b>%s</b>\n<b>(%s)</b>" % (nick, mail)
+        else:
+            mailstring = '<b>%s</b>' % mail
+
+        self.text.set_markup(mailstring + _(' has added you.\n'
+            'Do you want to add him/her to your contact list?'))
+
+        self.buttonleft.set_sensitive(True)
+        self.buttonright.set_sensitive(True)
+        if self.pointer == 0:
+            self.buttonleft.set_sensitive(False)
+        if self.pointer == len(self.mails) - 1:
+            self.buttonright.set_sensitive(False)
+
+        self.currentpage.set_markup('<b>(%s/%s)</b>' % \
+            (self.pointer + 1, len(self.mails)))
+
+    def switchmail(self, button, order):
+        '''Moves the mail pointer +1 or -1'''
+        if (self.pointer + order) >= 0:
+            if (self.pointer + order) < len(self.mails):
+                self.pointer += order
+            else:
+                self.pointer = 0
+        else:
+            self.pointer = len(self.mails) - 1
+
+        self.update()
+
+    def hide(self):
+        '''Called to hide the window'''
+        self.callback({'accepted': self.accepted, 'rejected': self.rejected})
+        gtk.Window.hide(self)
+
+    def cb_delete(self, *args):
+        '''Callback when the window is destroyed'''
+        self.destroy()
+
+    def cb_cancel(self, button):
+        '''Callback when the cancel button is clicked'''
+        self.mails.pop(self.pointer)
+        self.switchmail(None, -1)
+
+    def cb_reject(self, button):
+        '''Callback when the view reject button is clicked'''
+        mail, nick = self.mails[self.pointer]
+        self.rejected.append(mail)
+        self.mails.pop(self.pointer)
+        self.switchmail(None, -1)
+
+    def cb_add(self, button):
+        '''Callback when the add button is clicked'''
+        mail, nick = self.mails[self.pointer]
+        self.accepted.append(mail)
+        self.mails.pop(self.pointer)
+        self.switchmail(None, -1)
+
+class TinyArrow(gtk.DrawingArea):
+    LENGTH = 8
+    WIDTH = 5
+
+    def __init__(self, arrow_type, shadow=gtk.SHADOW_NONE):
+        gtk.DrawingArea.__init__(self)
+        self.arrow_type = arrow_type
+        self.shadow = shadow
+        self.margin = 0
+
+        self.set_size_request(*self.get_size())
+        self.connect("expose_event", self.expose)
+
+    def get_size(self):
+        if self.arrow_type in (gtk.ARROW_LEFT, gtk.ARROW_RIGHT):
+            return (TinyArrow.WIDTH + self.margin*2, \
+                    TinyArrow.LENGTH + self.margin*2)
+        else:
+            return (TinyArrow.LENGTH + self.margin*2, \
+                    TinyArrow.WIDTH + self.margin*2)
+
+    def expose(self, widget=None, event=None):
+        if self.window is None:
+            return
+        self.window.clear()
+        width, height = self.get_size()
+        self.get_style().paint_arrow(self.window, self.state, \
+            self.shadow, None, self, '', self.arrow_type, True, \
+            0, 0, width, height)
+
+        return False
+
+    def set(self, arrow_type, shadow=gtk.SHADOW_NONE, margin=None):
+        self.arrow_type = arrow_type
+        self.shadow = shadow
+        if margin is not None:
+            self.margin = margin
+        self.set_size_request(*self.get_size())
+        self.expose()

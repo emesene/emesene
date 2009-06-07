@@ -30,7 +30,7 @@ import protocol.ContactManager
 
 class Session(object):
     NAME = 'Base session'
-    DESCRIPTION = '''This is a base session implementation, 
+    DESCRIPTION = '''This is a base session implementation,
     other classes inherit from this one'''
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
@@ -118,63 +118,67 @@ class Session(object):
     def login(self, account, password, status, proxy, use_http=False):
         '''start the login process'''
         raise NotImplementedError('Not implemented')
-        
+
     def logout(self):
         '''close the session'''
         self.add_action(Action.ACTION_LOGOUT, ())
-        
+
     def set_status(self, status):
         '''change the status of the session'''
         self.add_action(Action.ACTION_CHANGE_STATUS, (status,))
-        
+
     def add_contact(self, account):
         '''add the contact to our contact list'''
         self.add_action(Action.ACTION_ADD_CONTACT, (account,))
-        
+
     def remove_contact(self, account):
         '''remove the contact from our contact list'''
         self.add_action(Action.ACTION_REMOVE_CONTACT, (account,))
-        
+
+    def reject_contact(self, account):
+        '''reject a contact that added us'''
+        self.add_action(Action.ACTION_REJECT_CONTACT, (account,))
+
     def block(self, account):
         '''block the contact'''
         self.add_action(Action.ACTION_BLOCK_CONTACT, (account,))
-        
+
     def unblock(self, account):
         '''block the contact'''
         self.add_action(Action.ACTION_UNBLOCK_CONTACT, (account,))
-        
+
     def set_alias(self, account, alias):
         '''set the alias of a contact'''
-        self.add_action(Action.ACTION_SET_CONTACT_ALIAS, 
+        self.add_action(Action.ACTION_SET_CONTACT_ALIAS,
             (account, alias))
-        
+
     def add_to_group(self, account, gid):
         '''add a contact to a group'''
         self.add_action(Action.ACTION_ADD_TO_GROUP, (account, gid))
-        
+
     def remove_from_group(self, account, gid):
         '''remove a contact from a group'''
-        self.add_action(Action.ACTION_REMOVE_FROM_GROUP, 
+        self.add_action(Action.ACTION_REMOVE_FROM_GROUP,
             (account, gid))
-        
+
     def move_to_group(self, account, src_gid, dest_gid):
         '''remove a contact from the group identified by src_gid and add it
         to dest_gid'''
-        self.add_action(Action.ACTION_MOVE_TO_GROUP, (account, 
+        self.add_action(Action.ACTION_MOVE_TO_GROUP, (account,
             src_gid, dest_gid))
-        
+
     def add_group(self, name):
         '''add a group '''
         self.add_action(Action.ACTION_ADD_GROUP, (name,))
-        
+
     def remove_group(self, gid):
         '''remove the group identified by gid'''
         self.add_action(Action.ACTION_REMOVE_GROUP, (gid,))
-        
+
     def rename_group(self, gid, name):
         '''rename the group identified by gid with the new name'''
         self.add_action(Action.ACTION_RENAME_GROUP, (gid, name))
-        
+
     def set_nick(self, nick):
         '''set the nick of the session'''
         self.add_action(Action.ACTION_SET_NICK, (nick,))
@@ -187,9 +191,9 @@ class Session(object):
         '''set the picture of the session to the picture with picture_name as
         name'''
         self.add_action(Action.ACTION_SET_PICTURE, (picture_name,))
-    
+
     def set_preferences(self, preferences):
-        '''set the preferences of the session to preferences, that is a 
+        '''set the preferences of the session to preferences, that is a
         dict containing key:value pairs where the keys are the preference name
         and value is the new value of that preference'''
         self.add_action(Action.ACTION_SET_PREFERENCE, (preferences,))

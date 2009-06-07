@@ -32,13 +32,13 @@ class Worker(protocol.Worker):
             if self.proxy.use_auth:
                 self.proxy_data['username'] = self.proxy.user
                 self.proxy_data['password'] = self.proxy.passwd
-            
+
         self.conversations = {}
         self.rconversations = {}
         self.roster = None
-    
+
     def run(self):
-        '''main method, block waiting for data, process it, and send data back 
+        '''main method, block waiting for data, process it, and send data back
         '''
         data = None
 
@@ -106,7 +106,7 @@ class Worker(protocol.Worker):
         if old_message != contact.message:
             self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 'message', old_message)
-            self.session.logger.log('message change', contact.status, 
+            self.session.logger.log('message change', contact.status,
                 contact.message, log_account)
 
     def _on_message(self, client, message):
@@ -131,7 +131,7 @@ class Worker(protocol.Worker):
         msgobj = protocol.Message(type_, body, account)
         self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
 
-    # action handlers 
+    # action handlers
     def _handle_action_add_contact(self, account):
         '''handle Action.ACTION_ADD_CONTACT
         '''
@@ -165,15 +165,15 @@ class Worker(protocol.Worker):
     def _handle_action_login(self, account, password, status_):
         '''handle Action.ACTION_LOGIN
         '''
-        if self.client.connect(('talk.google.com', 5223), 
+        if self.client.connect(('talk.google.com', 5223),
                 proxy=self.proxy_data) == "":
-            self.session.add_event(Event.EVENT_LOGIN_FAILED, 
+            self.session.add_event(Event.EVENT_LOGIN_FAILED,
                 'Connection error')
             return
 
-        if self.client.auth(self.jid.getNode(), 
+        if self.client.auth(self.jid.getNode(),
             self.session.account.password) == None:
-            self.session.add_event(Event.EVENT_LOGIN_FAILED, 
+            self.session.add_event(Event.EVENT_LOGIN_FAILED,
                 'Authentication error')
             return
 
@@ -194,7 +194,7 @@ class Worker(protocol.Worker):
             if account == self.session.account.account:
                 if name is not None:
                     self.session.contacts.me.nick = name
-                    self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, 
+                    self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED,
                         nick)
 
                 continue
@@ -207,7 +207,7 @@ class Worker(protocol.Worker):
 
             if name is not None:
                 contact.nick = name
-            
+
         self.session.add_event(Event.EVENT_CONTACT_LIST_READY)
         self.client.RegisterHandler('presence', self._on_presence)
 
@@ -223,6 +223,11 @@ class Worker(protocol.Worker):
 
     def _handle_action_remove_contact(self, account):
         '''handle Action.ACTION_REMOVE_CONTACT
+        '''
+        pass
+
+    def _handle_action_reject_contact(self, account):
+        '''handle Action.ACTION_REJECT_CONTACT
         '''
         pass
 
@@ -293,8 +298,8 @@ class Worker(protocol.Worker):
     def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
         '''handle Action.ACTION_P2P_INVITE,
          cid is the conversation id
-         pid is the p2p session id, both are numbers that identify the 
-            conversation and the session respectively, time.time() is 
+         pid is the p2p session id, both are numbers that identify the
+            conversation and the session respectively, time.time() is
             recommended to be used.
          dest is the destination account
          type_ is one of the protocol.Transfer.TYPE_* constants

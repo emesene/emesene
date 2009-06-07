@@ -164,6 +164,24 @@ class Controller(object):
         self.window.content.contact_list.fill()
         self.window.content.panel.enabled = True
 
+        def on_contact_added_you(responses):
+            '''
+            callback called when the dialog is closed
+            '''
+            for account in responses['accepted']:
+                self.session.add_contact(account)
+
+            for account in responses['rejected']:
+                self.session.reject_contact(account)
+
+        if self.session.contacts.pending:
+            accounts = []
+            for contact in self.session.contacts.pending.values():
+                accounts.append((contact.account, contact.display_name))
+
+            dialog = extension.get_default('dialog')
+            dialog.contact_added_you(accounts, on_contact_added_you)
+
         gobject.timeout_add(500, self.session.logger.check)
 
     def on_nick_change_succeed(self, nick):

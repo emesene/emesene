@@ -174,6 +174,11 @@ class Worker(protocol.Worker):
         '''
         self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED, account)
 
+    def _handle_action_reject_contact(self, account):
+        '''handle Action.ACTION_REJECT_CONTACT
+        '''
+        self.session.add_event(Event.EVENT_CONTACT_REJECT_SUCCEED, account)
+
     def _handle_action_remove_from_group(self, account, gid):
         '''handle Action.ACTION_REMOVE_FROM_GROUP
         '''

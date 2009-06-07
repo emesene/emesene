@@ -764,6 +764,11 @@ class Worker(protocol.Worker):
         Requester.RemoveContact(self.session, contact.identifier, account, \
             self.command_queue).start()
 
+    def _handle_action_reject_contact(self, account):
+        '''handle Action.ACTION_REJECT_CONTACT
+        '''
+        Requester.RemovePendingContact(self.session, account).start()
+
     def _handle_action_remove_from_group(self, account, gid):
         '''handle Action.ACTION_REMOVE_FROM_GROUP
         '''

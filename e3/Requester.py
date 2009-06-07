@@ -244,12 +244,12 @@ class Membership(Requester):
                     # contact
                     del contacts[email]
 
-
             DynamicItems(self.session, self.command_queue,
                 self.on_login, self.started_from_cache).start()
         else:
             dbg('error requesting membership ' + response.status, 'req', 1)
             dbg(response.body, 'req', 4)
+
 
 class DynamicItems(Requester):
     '''make the request to get the dynamic items'''
@@ -346,6 +346,15 @@ class DynamicItems(Requester):
                 if not self.started_from_cache:
                     self.command_queue.put(Command('BLP', params=('BL',)))
 
+            accounts = self.session.contacts.pending.keys()
+            for account in accounts:
+                # account in pending that is already on some other role
+                # (corrupted userlist)
+                if account in self.session.contacts.contacts or account in self.session.contacts.reverse:
+                    del self.session.contacts.pending[account]
+                    # this line doen't work for accounts on corrupted userlists
+                    # RemovePendingContact(self.session, account).start()
+
             self.session.add_event(Event.EVENT_CONTACT_LIST_READY)
             self.session.logger.add_contact_by_group(
                 self.session.contacts.contacts, self.session.groups)
@@ -411,6 +420,31 @@ class RemoveContact(Requester):
         else:
             dbg(response.body + '\n' + request.body, 'req', 4)
             self.session.add_event(Event.EVENT_CONTACT_REMOVE_FAILED,
+                self.account)
+
+class RemovePendingContact(Requester):
+    '''make the request to remove a contact from the contact list'''
+    def __init__(self, session, account):
+        '''command_queue is a reference to a queue that is used
+        by the worker to get commands that other threads need to
+        send'''
+        Requester.__init__(self, session,
+          'http://www.msn.com/webservices/AddressBook/DeleteMember',
+          'omega.contacts.msn.com', 443, '/abservice/SharingService.asmx',
+          XmlManager.get('deletemember', get_key(session), 'Pending', account))
+
+        self.account = account
+
+    def handle_response(self, request, response):
+        '''handle the response'''
+        if response.status == 200:
+            if self.account in self.session.contacts.pending:
+                del self.session.contacts.pending[self.account]
+            self.session.add_event(Event.EVENT_CONTACT_REJECT_SUCCEED,
+                self.account)
+        else:
+            dbg(response.body + '\n' + request.body, 'req', 4)
+            self.session.add_event(Event.EVENT_CONTACT_REJECT_FAILED,
                 self.account)
 
 class ChangeNick(Requester):

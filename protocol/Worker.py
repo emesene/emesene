@@ -13,6 +13,7 @@ EVENTS = (\
  'contact attr changed'  , 'contact added'        ,
  'contact add succeed'   , 'contact add failed'   ,
  'contact remove succeed', 'contact remove failed',
+ 'contact reject succeed', 'contact reject failed',
  'contact move succeed'  , 'contact move failed'  ,
  'contact copy succeed'  , 'contact copy failed'  ,
  'contact block succeed' , 'contact block failed' ,
@@ -42,7 +43,7 @@ ACTIONS = (\
  'login'            , 'logout'           ,
  'change status'    ,
  'block contact'    , 'unblock contact'  ,
- 'add contact'      , 'remove contact'   ,
+ 'add contact'      , 'remove contact'   , 'reject contact',
  'set contact alias', 'quit'             ,
  'add to group'     , 'remove from group',
  'move to group'    , 'rename group'     ,
@@ -93,6 +94,7 @@ class Worker(threading.Thread):
         dah[Action.ACTION_LOGOUT] = self._handle_action_logout
         dah[Action.ACTION_MOVE_TO_GROUP] = self._handle_action_move_to_group
         dah[Action.ACTION_REMOVE_CONTACT] = self._handle_action_remove_contact
+        dah[Action.ACTION_REJECT_CONTACT] = self._handle_action_reject_contact
         dah[Action.ACTION_REMOVE_FROM_GROUP] = \
             self._handle_action_remove_from_group
         dah[Action.ACTION_REMOVE_GROUP] = self._handle_action_remove_group
@@ -182,6 +184,11 @@ class Worker(threading.Thread):
 
     def _handle_action_remove_contact(self, account):
         '''handle Action.ACTION_REMOVE_CONTACT
+        '''
+        pass
+
+    def _handle_action_reject_contact(self, account):
+        '''handle Action.ACTION_REJECT_CONTACT
         '''
         pass
 

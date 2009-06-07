@@ -28,7 +28,7 @@ class ContactManager(object):
         self.pending = {}
 
         self.me = Contact(account)
-        
+
     def exists(self, account):
         '''check if the account is on self.contacts, return True if exists'''
         if account in self.contacts:
@@ -48,14 +48,14 @@ class ContactManager(object):
 
     def get_contacts(self, accounts):
         '''return a list of contact objects from a list of accounts
-        if in_reverse is True, check that the account is also on the reverse 
+        if in_reverse is True, check that the account is also on the reverse
         list'''
         return [self.contacts[account] for account in accounts if account \
             in self.contacts]
 
     def get_sorted_list_by_status(self, contacts=None):
         '''return a dict with status.* (OFFLINE, ONLINE etc) as key and
-        a list of contact objects as value, you can use then 
+        a list of contact objects as value, you can use then
         status.ORDERED to cycle over the keys.
         The contacts are sorted inside the status by display_name.
         if contacts is None, then use the internal list of contacts
@@ -67,7 +67,7 @@ class ContactManager(object):
             sorted_dict[stat] = [contact for contact in contacts \
                 if contact.status == stat]
 
-            sorted_dict[stat].sort(cmp=lambda x, y: cmp(x.display_name, 
+            sorted_dict[stat].sort(cmp=lambda x, y: cmp(x.display_name,
                 y.display_name))
 
         return sorted_dict
@@ -87,7 +87,7 @@ class ContactManager(object):
             if sort_by_status:
                 sorted_dict[group] = self.get_sorted_list_by_status(contacts)
             else:
-                contacts.sort(cmp=lambda x, y: cmp(x.display_name, 
+                contacts.sort(cmp=lambda x, y: cmp(x.display_name,
                     y.display_name))
                 sorted_dict[group] = contacts
 
@@ -116,8 +116,9 @@ class ContactManager(object):
         adl = []
         tag = ''
 
+        domain = None
         for (domain, accounts) in self.get_by_domain().iteritems():
-            # if it's not the first time we must add the adl of the 
+            # if it's not the first time we must add the adl of the
             # lsat domain in the adls list
             if adl:
                 adl.append('</d>')
@@ -132,7 +133,7 @@ class ContactManager(object):
 
             length += len(tag)
 
-            # for each account we add a tag 
+            # for each account we add a tag
             for account in accounts:
                 email = account + '@' + domain
 
@@ -160,8 +161,9 @@ class ContactManager(object):
 
                     length += len(tag)
 
-        adl.append('</d>')
-        adls.append((domain, length, adl))
+        if domain is not None:
+            adl.append('</d>')
+            adls.append((domain, length, adl))
 
         result = []
         partial = []
@@ -194,7 +196,7 @@ class ContactManager(object):
     def get_online_list(self, contacts=None):
         '''return a list of non offline contacts'''
         contacts = contacts or self.contacts.values()
-        
+
         return [contact for contact in contacts \
                 if contact.status != status.OFFLINE]
 
