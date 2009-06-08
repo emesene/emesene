@@ -29,6 +29,7 @@ class Preferences(gtk.Window):
         self.interface = Interface(session)
         self.sound = Sound(session)
         self.notification = Notification(session)
+        self.theme = Theme(session)
 
         self.buttons = gtk.HButtonBox()
         self.buttons.set_layout(gtk.BUTTONBOX_END)
@@ -39,6 +40,7 @@ class Preferences(gtk.Window):
         self.tabs.append_page(self.interface, gtk.Label('Interface'))
         self.tabs.append_page(self.sound, gtk.Label('Sounds'))
         self.tabs.append_page(self.notification, gtk.Label('Notifications'))
+        self.tabs.append_page(self.theme, gtk.Label('Themes'))
 
         self.box.pack_start(self.tabs, True, True)
         self.box.pack_start(self.buttons, False)
@@ -69,7 +71,7 @@ class BaseTable(gtk.Table):
             row = self.current_row
             increment_current_row = True
 
-        self.attach(widget, 0, self.columns, row, row + 1)
+        self.attach(widget, 0, self.columns, row, row + 1, yoptions=gtk.EXPAND)
 
         if increment_current_row:
             self.current_row += 1
@@ -84,6 +86,41 @@ class BaseTable(gtk.Table):
         widget.set_active(default)
         widget.connect('toggled', self.on_toggled, property_name)
         self.append_row(widget, row)
+
+    def append_combo(self, text, getter, property_name):
+        """
+        append a row with a check box with text as label and
+        set the check state with default
+        """
+        default = self.get_attr(property_name)
+        hbox = gtk.HBox()
+        hbox.set_homogeneous(True)
+        label = gtk.Label(text)
+        label.set_alignment(0.0, 0.5)
+        combo = gtk.combo_box_new_text()
+
+        count = 0
+        default_count = 0
+        for item in getter():
+            combo.append_text(item)
+            if item == default:
+                default_count = count
+
+            count += 1
+
+        combo.set_active(default_count)
+
+        hbox.pack_start(label, True, True)
+        hbox.pack_start(combo, False)
+
+        combo.connect('changed', self.on_combo_changed, property_name)
+        self.append_row(hbox, None)
+
+    def on_combo_changed(self, combo, property_name):
+        """
+        callback called when the selection of the combo changed
+        """
+        self.set_attr(property_name, combo.get_active_text())
 
     def on_toggled(self, checkbutton, property_name):
         """
@@ -131,13 +168,13 @@ class Interface(BaseTable):
         BaseTable.__init__(self, 4, 1)
         self.session = session
         self.append_check('Show emoticons', 'session.config.b_show_emoticons')
-        self.append_check('Show conversation header', 
+        self.append_check('Show conversation header',
             'session.config.b_show_header')
-        self.append_check('Show conversation side panel', 
+        self.append_check('Show conversation side panel',
             'session.config.b_show_info')
-        self.append_check('Show conversation toolbar', 
+        self.append_check('Show conversation toolbar',
             'session.config.b_show_toolbar')
-        self.append_check('Show user panel', 
+        self.append_check('Show user panel',
             'session.config.b_show_userpanel')
         self.show_all()
 
@@ -152,17 +189,17 @@ class Sound(BaseTable):
         """
         BaseTable.__init__(self, 6, 1)
         self.session = session
-        self.append_check('Play sound on first sent message', 
+        self.append_check('Play sound on first sent message',
             'session.config.b_play_first_send')
-        self.append_check('Play sound on sent message', 
+        self.append_check('Play sound on sent message',
             'session.config.b_play_send')
-        self.append_check('Play sound on received message', 
+        self.append_check('Play sound on received message',
             'session.config.b_play_type')
-        self.append_check('Play sound on nudge', 
+        self.append_check('Play sound on nudge',
             'session.config.b_play_nudge')
-        self.append_check('Play sound on contact online', 
+        self.append_check('Play sound on contact online',
             'session.config.b_play_contact_online')
-        self.append_check('Play sound on contact offline', 
+        self.append_check('Play sound on contact offline',
             'session.config.b_play_contact_offline')
         self.show_all()
 
@@ -177,9 +214,26 @@ class Notification(BaseTable):
         """
         BaseTable.__init__(self, 2, 1)
         self.session = session
-        self.append_check('Notify on contact online', 
+        self.append_check('Notify on contact online',
             'session.config.b_notify_contact_online')
-        self.append_check('Notify on contact offline', 
+        self.append_check('Notify on contact offline',
             'session.config.b_notify_contact_offline')
         self.show_all()
 
+class Theme(BaseTable):
+    """
+    the panel to display/modify the config related to the theme
+    """
+
+    def __init__(self, session):
+        """
+        constructor
+        """
+        BaseTable.__init__(self, 3, 1)
+        self.session = session
+        self.append_combo('Image theme', gui.theme.get_image_themes,
+            'session.config.image_theme')
+        self.append_combo('Sound theme', gui.theme.get_sound_themes,
+            'session.config.sound_theme')
+        self.append_combo('Emote theme', gui.theme.get_emote_themes,
+            'session.config.emote_theme')

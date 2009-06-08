@@ -10,24 +10,24 @@ class Theme(object):
     EMOTES[';)'] = 'face-wink'
     EMOTES['|-)'] = 'face-tired'
     EMOTES[':D'] = 'face-laugh'
-    EMOTES[':d'] = EMOTES[':D'] 
+    EMOTES[':d'] = EMOTES[':D']
     EMOTES[':S'] = 'face-worried'
-    EMOTES[':s'] = EMOTES[':S'] 
+    EMOTES[':s'] = EMOTES[':S']
     EMOTES[':('] = 'face-sad'
     EMOTES['(K)'] = 'face-kiss'
-    EMOTES['(k)'] = EMOTES['(K)'] 
+    EMOTES['(k)'] = EMOTES['(K)']
     EMOTES[':P'] = 'face-raspberry'
-    EMOTES[':p'] = EMOTES[':P'] 
+    EMOTES[':p'] = EMOTES[':P']
     EMOTES[':|'] = 'face-plain'
     EMOTES['*-)'] = 'face-uncertain'
     EMOTES[':O'] = 'face-surprise'
-    EMOTES[':o'] = EMOTES[':O'] 
+    EMOTES[':o'] = EMOTES[':O']
     EMOTES[':$'] = 'face-embarrassed'
     EMOTES[':\'('] = 'face-crying'
     EMOTES[':@'] = 'face-angry'
     EMOTES['(6)'] = 'face-devilish'
     EMOTES['(A)'] = 'face-angel'
-    EMOTES['(a)'] = EMOTES['(A)'] 
+    EMOTES['(a)'] = EMOTES['(A)']
     #EMOTES['<:o)'] = ''
     EMOTES['(ap)'] = 'airplane'
     EMOTES['(au)'] = 'car'
@@ -90,16 +90,44 @@ class Theme(object):
     EMOTES['(w)'] = 'rose-dead'
     EMOTES['(xx)'] = 'console'
 
-    def __init__(self, name="default"):
+    SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
+            'send.wav', 'type.wav']
+    EMOTE_FILES = ['airplane.png', 'bad.png', 'bat.png', 'beer.png', 'bomb.png',
+        'bowl.png', 'boy.png', 'bunny.png', 'c10ud.png', 'cake.png',
+        'camera.png', 'can.png', 'car.png', 'cat.png', 'cigarette.png',
+        'clock.png', 'clown.png', 'coffee.png', 'coins.png', 'computer.png',
+        'console.png', 'cow.png', 'dog.png', 'drink.png', 'face-angel.png',
+        'face-angry.png', 'face-crying.png', 'face-devilish.png',
+        'face-embarrassed.png', 'face-kiss.png', 'face-laugh.png',
+        'face-plain.png', 'face-raspberry.png', 'face-sad.png', 'face-sick.png',
+        'face-smile.png', 'face-surprise.png', 'face-tired.png',
+        'face-uncertain.png', 'face-wink.png', 'face-worried.png', 'ghost.png',
+        'girl.png', 'goat.png', 'good.png', 'handcuffs.png', 'hifive.png',
+        'hugleft.png', 'hugright.png', 'island.png', 'lamp.png',
+        'love-over.png', 'love.png', 'mail.png', 'mobile.png', 'moon.png',
+        'msn.png', 'music.png', 'phone.png', 'pizza.png', 'plate.png',
+        'present.png', 'rainbow.png', 'rain.png', 'rose-dead.png', 'rose.png',
+        'secret.png', 'sheep.png', 'snail.png', 'soccerball.png', 'star.png',
+        'sun.png', 'turtle.png', 'tv.png', 'umbrella.png', 'video.png']
+    IMAGE_FILES = ['away.png', 'busy.png', 'chat.png', 'connect.png',
+        'group-chat.png', 'idle.png', 'logo.png', 'new-message.png',
+        'offline.png', 'online.png', 'password.png', 'typing.png', 'user.png',
+        'users.png']
+
+    def __init__(self, image_name="default", emote_name="default",
+            sound_name="default"):
         '''class constructor'''
-        self.set_theme(name)
+        self.set_theme(image_name, emote_name, sound_name)
 
-    def set_theme(self, name):
+    def set_theme(self, image_name, emote_name, sound_name):
         '''set the theme name and change all the paths to reflect the change'''
-        self.name = name
+        self.image_name = image_name
+        self.emote_name = emote_name
+        self.sound_name = sound_name
 
-        self.theme_path = os.path.join("themes", self.name)
-        self.sound_theme_path = os.path.join("themes", "sounds", self.name)
+        self.theme_path = os.path.join("themes", "images", self.image_name)
+        self.sound_theme_path = os.path.join("themes", "sounds",
+                self.sound_name)
 
         self.user = os.path.join(self.theme_path, "user.png")
         self.users = os.path.join(self.theme_path, "users.png")
@@ -130,7 +158,7 @@ class Theme(object):
         self.status_icons[status.IDLE] = \
             os.path.join(self.theme_path, "idle.png")
 
-        self.emote_path = os.path.join('themes', 'emotes', 'default')
+        self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
 
     def emote_to_path(self, shortcut, remove_protocol=False):
         '''return a string representing the path to load the emote if it exist
@@ -154,3 +182,54 @@ class Theme(object):
         '''return the number of emoticons registered'''
         return len(set(Theme.EMOTES.values()))
 
+
+    def is_valid_theme(self, file_list, path):
+        """
+        return True if the path contains a valid theme
+        """
+
+        for file_name in file_list:
+            if not os.path.isfile(os.path.join(path, file_name)):
+                return False
+
+        return True
+
+    def get_image_themes(self):
+        '''return a list of names for the image themes'''
+        themes = []
+
+        for theme in self.get_child_dirs(os.path.join('themes', 'images')):
+            if self.is_valid_theme(Theme.IMAGE_FILES,
+                    os.path.join('themes', 'images', theme)):
+                themes.append(theme)
+
+        return themes
+
+    def get_emote_themes(self):
+        '''return a list of names for the emote themes'''
+        themes = []
+
+        for theme in self.get_child_dirs(os.path.join('themes', 'emotes')):
+            if self.is_valid_theme(Theme.EMOTE_FILES,
+                    os.path.join('themes', 'emotes', theme)):
+                themes.append(theme)
+
+        return themes
+
+    def get_sound_themes(self):
+        '''return a list of names for the sound themes'''
+        themes = []
+
+        for theme in self.get_child_dirs(os.path.join('themes', 'sounds')):
+            if self.is_valid_theme(Theme.SOUND_FILES,
+                    os.path.join('themes', 'sounds', theme)):
+                themes.append(theme)
+
+        return themes
+
+    def get_child_dirs(self, dir_path):
+        '''return a list of dirs inside a given path'''
+        try:
+            return os.walk(dir_path).next()[1]
+        except StopIteration:
+            return ()

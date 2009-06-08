@@ -155,6 +155,10 @@ class Controller(object):
         '''callback called on login succeed'''
         self.window.clear()
         self.tray_icon.set_main(self.session)
+        image_name = self.session.config.get_or_set('image_theme', 'default')
+        emote_name = self.session.config.get_or_set('emote_theme', 'default')
+        sound_name = self.session.config.get_or_set('sound_theme', 'default')
+        gui.theme.set_theme(image_name, emote_name, sound_name)
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
         self.window.go_main(self.session, self.on_new_conversation,
