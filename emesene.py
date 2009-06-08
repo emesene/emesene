@@ -22,6 +22,7 @@ class Controller(object):
     def __init__(self):
         '''class constructor'''
         self.window = None
+        self.tray_icon = None
         self.conversations = None
         self.config = e3common.Config.Config()
         self.config_dir = e3common.ConfigDir.ConfigDir('emesene2')
@@ -308,15 +309,17 @@ class Controller(object):
         self.conversations.close_all()
         self.conversations = None
 
-    def start(self, account=None, accounts=None, first_time=True):
+    def start(self, account=None, accounts=None):
         Window = extension.get_default('window frame')
         self.window = Window(self.on_close)
 
-        if first_time:
-            TrayIcon = extension.get_default('tray icon')
-            handler = e3common.TrayIconHandler(self.session, gui.theme,
-                self.on_disconnect, self.on_close)
-            self.tray_icon = TrayIcon(handler)
+        if self.tray_icon is not None:
+            self.tray_icon.set_visible(False)
+
+        TrayIcon = extension.get_default('tray icon')
+        handler = e3common.TrayIconHandler(self.session, gui.theme,
+            self.on_disconnect, self.on_close)
+        self.tray_icon = TrayIcon(handler)
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
@@ -334,7 +337,7 @@ class Controller(object):
         method called when the user selects disconnect
         """
         self.close_session(False)
-        self.start(first_time=False)
+        self.start()
 
 
 def main():
