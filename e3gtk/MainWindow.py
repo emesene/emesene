@@ -18,7 +18,8 @@ class MainWindow(gtk.VBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, session, on_new_conversation, on_close):
+    def __init__(self, session, on_new_conversation, on_close,
+                on_disconnect_cb):
         '''class constructor'''
         gtk.VBox.__init__(self)
         UserPanel = extension.get_default('user panel')
@@ -32,6 +33,7 @@ class MainWindow(gtk.VBox):
         self.session = session
         self.on_new_conversation = on_new_conversation
         self.on_close = on_close
+        self.on_disconnect_cb = on_disconnect_cb
 
         self.session.signals.contact_attr_changed.subscribe(
             self._on_contact_attr_changed)
@@ -190,6 +192,7 @@ class MainWindow(gtk.VBox):
             self._on_group_menu_selected)
         self.session.config.unsubscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
+        self.on_disconnect_cb()
 
     def _on_search_toggled(self, button):
         '''called when the searhc button is toggled'''

@@ -12,7 +12,7 @@ class Window(gtk.Window):
     DESCRIPTION = 'The window used to contain all the content of emesene'
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
-    
+
     def __init__(self, cb_on_close, height=410, width=250):
         gtk.Window.__init__(self)
 
@@ -54,11 +54,11 @@ class Window(gtk.Window):
         self.content.show()
         self.content_type = 'login'
 
-    def go_main(self, session, on_new_conversation, on_close):
+    def go_main(self, session, on_new_conversation, on_close, on_disconnect):
         '''change to the main window'''
         MainWindow = extension.get_default('main window')
         self.content = MainWindow(session, on_new_conversation,
-            on_close)
+            on_close, on_disconnect)
         self.add(self.content)
         self.content.show()
         self.content_type = 'main'

@@ -123,25 +123,33 @@ class Controller(object):
 
     def on_close(self):
         '''called on close'''
+        self.close_session()
+
+    def close_session(self, exit=True):
         if self.session is not None:
             self.session.quit()
 
         self.window.hide()
+        self.window = None
+
         self.save_extensions_config()
 
         if self.session is not None:
             self.session.save_config()
+            self.session = None
 
         self.config.save(self.config_path)
 
         if self.conversations:
             self.conversations.get_parent().hide()
+            self.conversations = None
 
-        while gtk.events_pending():
-            gtk.main_iteration(False)
+        if exit:
+            while gtk.events_pending():
+                gtk.main_iteration(False)
 
-        time.sleep(2)
-        sys.exit(0)
+            time.sleep(2)
+            sys.exit(0)
 
     def on_login_succeed(self):
         '''callback called on login succeed'''
@@ -150,7 +158,7 @@ class Controller(object):
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
         self.window.go_main(self.session, self.on_new_conversation,
-            self.on_close)
+            self.on_close, self.on_disconnect)
 
     def on_login_failed(self, reason):
         '''callback called on login failed'''
@@ -296,13 +304,15 @@ class Controller(object):
         self.conversations.close_all()
         self.conversations = None
 
-    def start(self, account=None, accounts=None):
+    def start(self, account=None, accounts=None, first_time=True):
         Window = extension.get_default('window frame')
-        TrayIcon = extension.get_default('tray icon')
         self.window = Window(self.on_close)
-        handler = e3common.TrayIconHandler(self.session, gui.theme,
-            self.on_disconnect, self.on_close)
-        self.tray_icon = TrayIcon(handler)
+
+        if first_time:
+            TrayIcon = extension.get_default('tray icon')
+            handler = e3common.TrayIconHandler(self.session, gui.theme,
+                self.on_disconnect, self.on_close)
+            self.tray_icon = TrayIcon(handler)
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
@@ -319,7 +329,8 @@ class Controller(object):
         """
         method called when the user selects disconnect
         """
-        pass
+        self.close_session(False)
+        self.start(first_time=False)
 
 
 def main():
