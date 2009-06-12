@@ -30,13 +30,13 @@ months_names = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
 months_name_number = dict(zip(months_names,range(1,13)))
 
 def string2datetime(datestring):
-    '''returns month number'''
-    dstr, mseconds = datestring.split('.')
-    for name in months_names:
-        dstr = dstr.replace(name, str(months_name_number[name]))
-    dtime = datetime.strptime(dstr, '%d %m %Y %H:%M:%S')
-    return dtime.replace(microsecond=int(mseconds.split(' ')[0]))
-
+    '''returns a datestring from string'''
+    datestring = datestring.replace('.', ' ').replace(':', ' ')
+    (day, month, year, hours,
+     minutes, seconds, microseconds) = datestring.split(' ')[:7]
+    
+    return datetime(int(year), months_name_number[month], int(day),
+                 int(hours), int(minutes), int(seconds), int(microseconds))
 
 class MailDataParser(object):
     '''Parse Mail Xml'''
