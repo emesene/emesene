@@ -100,7 +100,8 @@ class InputText(TextBox):
         '''method called when a key is pressed on the input widget'''
         self.changed = True
         self.apply_tag()
-        if event.keyval == gtk.keysyms.Return and \
+        if (event.keyval == gtk.keysyms.Return or \
+                event.keyval == gtk.keysyms.KP_Enter) and \
                 not event.state == gtk.gdk.SHIFT_MASK:
             if not self.text:
                 return True

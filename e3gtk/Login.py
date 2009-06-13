@@ -187,12 +187,14 @@ class Login(gtk.Alignment):
 
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
-        if event.keyval == gtk.keysyms.Return:
+        if event.keyval == gtk.keysyms.Return or \
+           event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
 
     def _on_account_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
-        if event.keyval == gtk.keysyms.Return:
+        if event.keyval == gtk.keysyms.Return or \
+           event.keyval == gtk.keysyms.KP_Enter:
             self.txt_password.grab_focus()
 
     def _on_account_changed(self, entry):
