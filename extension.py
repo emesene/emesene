@@ -23,7 +23,7 @@ Extensions in your code
         To do this, you can provide an interface: an interface is just
         a class that has all the method we require; example::
 
-            Class IFoo:
+            Class IFoo(object):
                 def __init__(self, some, args):
                     raise NotImplementedError()
                 def method_foo(self, we, like, args):
@@ -37,7 +37,7 @@ Extensions in your code
 Providing extensions
 ====================
     Extensions can be provided through plugins, and they are a powerful way
-    of enhancing emesene. They are just classes with a predefined API, 
+    of enhancing emesene. They are just classes with a predefined API,
     "connected" to a category.
     This is done through extensions.register("category name", extension_class)
     When developing an extension, always check if it has a required interfaces:
@@ -51,14 +51,16 @@ Providing extensions
 
 import os
 import sys
+import traceback
 
+from debugger import dbg
 
 class Category(object):
     '''This completely handles a category'''
     def __init__(self, name, system_default, interfaces):
         '''Constructor: creates a new category
-    @param name: The name of the new category.
-    @param interface: The interface every extension is required to match.
+        @param name: The name of the new category.
+        @param interface: The interface every extension is required to match.
         If it's None, no interface is required
         '''
         self.name = name
@@ -79,8 +81,8 @@ class Category(object):
 
     def register(self, cls):
         '''This will "add" a class to the possible extension.
-    @param cls: A Class, NOT an instance
-    @raise ValueError: if cls doesn't agree to the interfaces
+        @param cls: A Class, NOT an instance
+        @raise ValueError: if cls doesn't agree to the interfaces
         '''
         for interface in self.interfaces:
             if not is_implementation(cls, interface):
@@ -115,7 +117,9 @@ class Category(object):
         ValueError'''
 
         if id_ not in self.classes:
-            print 'extension id %s not registered on %s' % (id_, self.name,)
+            traceback.print_stack()
+            dbg('extension id %s not registered on %s' % (id_, self.name,),
+                'extension')
         else:
             self.default = self.classes[id_]
 
@@ -129,15 +133,19 @@ def category_register(category, system_default, *interfaces):
 def register(category_name, cls):
     '''Register cls as an Extension for category.
     If the class doesn't agree to the required interfaces, raises ValueError.
-    If the category doesn't exist, it creates it(but returns False).
-    It doesn't instanciate that class immediately.
-    @return: False if the category didn't exist. Probably you made a mistake, True otherwise.
+    If the category doesn't exist, return False
+    If exists register the cls and return True
     '''
-    get_category(category_name).register(cls)
+    category = get_category(category_name)
+    if category is not None:
+        category.register(cls)
+        return True
+
+    return False
 
 def get_category(category_name):
-    '''Get a Category object'''
-    return _categories[category_name]
+    '''Get a Category object, return the category if exists, None otherwise'''
+    return _categories.get(category_name, None)
 
 def get_categories():
     '''return a dict with all the categories'''
@@ -145,28 +153,56 @@ def get_categories():
 
 def get_extensions(category_name):
     '''return a dict of the available extensions id:class'''
-    return get_category(category_name).get_extensions()
+    category = get_category(category_name)
+    if category is not None:
+        return category.get_extensions()
+
+    return None
 
 def get_default(category_name):
-    '''This will return a "default" extension'''
-    return get_category(category_name).default
+    '''This will return a "default" extension if the category is registered
+    if not, return None'''
+    category = get_category(category_name)
+    if category is not None:
+        return category.default
+
+    return None
 
 def set_default(category_name, cls):
     '''set the cls as default for the category category_name, if cls is not
-    on the list of registered extensions, then if will be registered'''
-    get_category(category_name).set_default(cls)
+    on the list of registered extensions, then if will be registered,
+    if the category exists and the extension is registered return True,
+    if the category doesn't exists, return False'''
+    category = get_category(category_name)
+    if category is not None:
+        category.default = cls
+        return True
+
+    return False
 
 def set_default_by_id(category_name, id_):
     '''set the default extension of a category through his id (generated
     by _get_class_name method), if the id is not available it will raise
-    ValueError'''
-    get_category(category_name).set_default_by_id(id_)
+    ValueError
+    if the category exists and the extension is registered return True,
+    if the category doesn't exists, return False'''
+    category = get_category(category_name)
+    if category is not None:
+        category.set_default_by_id(id_)
+        return True
+
+    return False
 
 def get_system_default(category_name):
     '''return the default category registered by core, it can be used as
     fallback if the default extension on the category raises
-    an Exception when instantiated'''
-    return get_category(category_name).system_default
+    an Exception when instantiated, if the category is not registerd
+    return None'''
+    category = get_category(category_name)
+    if category is not None:
+        return category.system_default
+
+    return None
 
 def is_implementation(cls, interface_cls):
     '''Check if cls implements all the methods provided by interface_cls.

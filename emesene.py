@@ -154,6 +154,11 @@ class Controller(object):
 
     def on_login_succeed(self):
         '''callback called on login succeed'''
+        self.draw_main_screen()
+
+    def draw_main_screen(self):
+        """create and populate the main screen
+        """
         self.window.clear()
         self.tray_icon.set_main(self.session)
         image_name = self.session.config.get_or_set('image_theme', 'default')
@@ -349,4 +354,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

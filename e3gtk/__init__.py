@@ -1,27 +1,3 @@
-import gtk
-import gobject
-
-import Login
-import Dialog
-import Header
-import Window
-import TextBox
-import MainMenu
-import TrayIcon
-import UserPanel
-import TabWidget
-import GroupMenu
-import StatusMenu
-import MainWindow
-import AccountMenu
-import ContactMenu
-import ContactList
-import ContactInfo
-import Preferences
-import Conversation
-import WebKitTextBox
-import ConversationManager
-import ConversationToolbar
 
 import extension
 
@@ -29,6 +5,31 @@ def main(Controller):
     """
     main method for gtk frontend
     """
+    import gtk
+    import gobject
+
+    import Login
+    import Dialog
+    import Header
+    import Window
+    import TextBox
+    import MainMenu
+    import TrayIcon
+    import UserPanel
+    import TabWidget
+    import GroupMenu
+    import StatusMenu
+    import MainWindow
+    import AccountMenu
+    import ContactMenu
+    import ContactList
+    import ContactInfo
+    import Preferences
+    import Conversation
+    import WebKitTextBox
+    import ConversationManager
+    import ConversationToolbar
+
     setup()
     gobject.threads_init()
     gtk.gdk.threads_init()
@@ -76,6 +77,7 @@ def setup():
 
     if not WebKitTextBox.ERROR:
         extension.category_register('conversation output', WebKitTextBox.OutputText)
+        extension.register('conversation output', TextBox.OutputText)
     else:
         extension.category_register('conversation output', TextBox.OutputText)
 
