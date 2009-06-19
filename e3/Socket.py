@@ -99,12 +99,12 @@ class Socket(threading.Thread):
             return None
 
         while chunk != '\n' and chunk != '':
-            output.write(chunk) 
+            output.write(chunk)
             try:
                 chunk = self.socket.recv(1)
             except socket.error:
                 self._on_socket_error()
-        
+
         if chunk == '\n':
             output.write(chunk)
 

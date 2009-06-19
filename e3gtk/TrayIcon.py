@@ -7,7 +7,7 @@ class TrayIcon(gtk.StatusIcon):
     A widget that implements the tray icon of emesene for gtk
     """
 
-    def __init__(self, handler):
+    def __init__(self, handler, mainWindow=None):
         """
         constructor
 
@@ -16,6 +16,8 @@ class TrayIcon(gtk.StatusIcon):
         gtk.StatusIcon.__init__(self)
         self.handler = handler
         self.set_from_file(self.handler.theme.logo)
+
+        self.mainWindow = mainWindow
 
         self.connect('activate', self._on_activate)
         self.connect('popup-menu', self._on_popup)
@@ -41,12 +43,19 @@ class TrayIcon(gtk.StatusIcon):
     def _on_activate(self, trayicon):
         """
         callback called when the status icon is activated
+        (includes clicking the icon)
         """
-        print 'activate'
+
+        if(self.mainWindow != None):
+            if(self.mainWindow.get_property("visible")):
+                self.mainWindow.hide()
+            else:
+                self.mainWindow.show()
 
     def _on_popup(self, trayicon, button, activate_time):
         """
         callback called when the popup of the status icon is activated
+        (usually through right-clicking the status icon)
         """
         self.menu.popup(None, None, None, button, activate_time)
 

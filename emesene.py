@@ -283,7 +283,7 @@ class Controller(object):
 
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
-        opeinig a conversation'''
+        opening a conversation'''
         if self.conversations is None:
             Window = extension.get_default('window frame')
             window = Window(self._on_conversation_window_close)
@@ -316,7 +316,7 @@ class Controller(object):
 
     def start(self, account=None, accounts=None):
         Window = extension.get_default('window frame')
-        self.window = Window(self.on_close)
+        self.window = Window(None) # main window
 
         if self.tray_icon is not None:
             self.tray_icon.set_visible(False)
@@ -324,7 +324,7 @@ class Controller(object):
         TrayIcon = extension.get_default('tray icon')
         handler = e3common.TrayIconHandler(self.session, gui.theme,
             self.on_disconnect, self.on_close)
-        self.tray_icon = TrayIcon(handler)
+        self.tray_icon = TrayIcon(handler, self.window)
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)

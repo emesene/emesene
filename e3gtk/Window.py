@@ -20,7 +20,10 @@ class Window(gtk.Window):
         self.set_title("emesene")
         self.set_icon(gui.theme.logo)
 
-        self.cb_on_close = cb_on_close
+        if cb_on_close is not None:
+            self.cb_on_close = cb_on_close
+        else: # we're the main window: close button only hides it
+            self.cb_on_close = self.hide_on_delete
 
         self.connect("delete-event", self._on_delete_event)
         self.connect('key-press-event', self._on_key_press)
@@ -31,7 +34,7 @@ class Window(gtk.Window):
     def set_icon(self, icon):
         '''set the icon of the window'''
         if utils.file_readable(icon):
-            gtk.Window.set_icon(self, 
+            gtk.Window.set_icon(self,
                 utils.safe_gtk_image_load(icon).get_pixbuf())
 
     def clear(self):
@@ -41,14 +44,14 @@ class Window(gtk.Window):
             self.content = None
 
     def go_login(self, callback, on_preferences_changed,
-            account=None, accounts=None, 
+            account=None, accounts=None,
             remember_account=None, remember_password=None, statuses=None,
             session=None, proxy=None, use_http=False, session_id=None):
         '''draw the login window on the main window'''
         LoginWindow = extension.get_default('login window')
 
-        self.content = LoginWindow(callback, on_preferences_changed, 
-            account, accounts, remember_account, remember_password, statuses, 
+        self.content = LoginWindow(callback, on_preferences_changed,
+            account, accounts, remember_account, remember_password, statuses,
             proxy, use_http, session_id)
         self.add(self.content)
         self.content.show()

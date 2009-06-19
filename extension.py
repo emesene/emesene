@@ -112,7 +112,7 @@ class Category(object):
     default = property(fget=_get_default, fset=_set_default)
 
     def set_default_by_id(self, id_):
-        '''set the default extension through his id (generated
+        '''set the default extension through its id (generated
         by _get_class_name method), if the id is not available it will raise
         ValueError'''
 
@@ -181,7 +181,7 @@ def set_default(category_name, cls):
     return False
 
 def set_default_by_id(category_name, id_):
-    '''set the default extension of a category through his id (generated
+    '''set the default extension of a category through its id (generated
     by _get_class_name method), if the id is not available it will raise
     ValueError
     if the category exists and the extension is registered return True,
