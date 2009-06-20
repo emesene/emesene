@@ -152,13 +152,13 @@ class MainWindow(gtk.VBox):
 
         if change_type == 'online':
             if self.session.config.b_notify_contact_online:
-                gui.notify("emesene 2", "%s is now online" % (contact.display_name, ))
+                gui.notify(contact.display_name, "is now online")
 
             if self.session.config.b_play_contact_online:
                 gui.play(self.session, gui.theme.sound_online)
         elif change_type == 'offline':
             if self.session.config.b_notify_contact_offline:
-                gui.notify("emesene 2", "%s is now offline" % (contact.display_name, ))
+                gui.notify(contact.display_name, "is now offline")
 
             if self.session.config.b_play_contact_offline:
                 gui.play(self.session, gui.theme.sound_offline)
