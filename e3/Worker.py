@@ -60,6 +60,8 @@ class Worker(protocol.Worker):
     '''this class represent an object that waits for commands from the queue
     of a socket, process them and add it as events to its own queue'''
 
+    NOTIFICATION_DELAY = 60
+
     def __init__(self, app_name, session, proxy=None, use_http=False):
         '''class constructor'''
         protocol.Worker.__init__(self, app_name, session)
@@ -81,6 +83,7 @@ class Worker(protocol.Worker):
 
         self._login_handlers = None
         self._common_handlers = None
+        self.start_time = None
         self._set_handlers()
 
         self.conversations = {}
@@ -563,8 +566,11 @@ class Worker(protocol.Worker):
             if old_status == status.OFFLINE:
                 change_type = 'online'
 
+            do_notify = (self.start_time + Worker.NOTIFICATION_DELAY) < \
+                    time.time()
+
             self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account,
-                change_type, old_status)
+                change_type, old_status, do_notify)
             self.session.logger.log('status change', status_, str(status_),
                 log_account)
 
@@ -590,7 +596,7 @@ class Worker(protocol.Worker):
         contact.status = status.OFFLINE
 
         if old_status != contact.status:
-            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account, 
+            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 'offline', old_status)
             self.session.logger.log('status change', status.OFFLINE,
                 str(status.OFFLINE),
@@ -736,6 +742,7 @@ class Worker(protocol.Worker):
         self.socket.send_command('VER', ('MSNP15', 'CVR0'))
         self.session.add_event(Event.EVENT_LOGIN_STARTED)
         self.in_login = True
+        self.start_time = time.time()
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT

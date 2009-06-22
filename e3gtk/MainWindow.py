@@ -143,14 +143,15 @@ class MainWindow(gtk.VBox):
         '''callback for the group-menu-selected signal'''
         self.group_menu.popup(None, None, None, 0, 0)
 
-    def _on_contact_attr_changed(self, account, change_type, old_value):
+    def _on_contact_attr_changed(self, account, change_type, old_value,
+            do_notify=True):
         '''callback called when an attribute of a contact changed'''
         contact = self.session.contacts.get(account)
         if not contact:
             dbg('account ' + account + ' not found on contacts',
                 'mainwindow', 1)
 
-        if change_type == 'online':
+        if change_type == 'online' and do_notify:
             if self.session.config.b_notify_contact_online:
                 gui.notify(contact.display_name, "is now online")
 

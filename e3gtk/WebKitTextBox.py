@@ -1,4 +1,6 @@
 import gtk
+import webbrowser
+import re
 
 try:
     import webkit
@@ -30,6 +32,7 @@ class OutputText(gtk.ScrolledWindow):
         self._textbox = webkit.WebView()
         self._textbox.connect('load-finished', self._loading_stop_cb)
         self._textbox.connect('console-message', self._error_cb)
+        self._textbox.connect('navigation-requested', self._navigation_requested_cb)
         self.clear()
         self._textbox.show()
         self.add(self._textbox)
@@ -38,7 +41,7 @@ class OutputText(gtk.ScrolledWindow):
         '''clear the content'''
         self.__texts = []
         self.loaded = False
-        self._textbox.load_string(HTML_BODY, "text/html", "utf-8", "")
+        self._textbox.load_string(HTML_BODY, "text/html", "utf-8", "file://")
 
     def append(self, text, scroll=True):
         '''append formatted text to the widget'''
@@ -50,11 +53,23 @@ class OutputText(gtk.ScrolledWindow):
             text = e3common.MarkupParser.parse_emotes(text)
 
         text = text.replace('\r\n', '<br/>').replace('\n', '<br/>')
+        text = self.parse_url(text)
         text = text.replace('"', '\\"')
         self._textbox.execute_script('add_message("%s");' % (text,))
 
         if scroll:
             self.scroll_to_end()
+
+    def parse_url(self, text):
+        urlfinders = [
+            re.compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|(((news|telnet|nttp|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+)(:[0-9]*)?/[-A-Za-z0-9_\\$\\.\\+\\!\\*\\(\\),;:@&=\\?/~\\#\\%]*[^]'\\.}>\\),\\\"]"),
+            re.compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|(((news|telnet|nttp|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+)(:[0-9]*)?"),
+            re.compile("'\\<((mailto:)|)[-A-Za-z0-9\\.]+@[-A-Za-z0-9\\.]+"),
+        ]
+        for i in urlfinders:
+            text = i.sub("<a href=\"\g<0>\">\g<0></a>", text)
+
+        return text
 
     def _error_cb(self, view, message, line, source_id):
         '''called when a message is sent to the console'''
@@ -69,6 +84,16 @@ class OutputText(gtk.ScrolledWindow):
             self.append(text)
 
         del self.__texts
+
+    def _navigation_requested_cb(self, view, frame, networkRequest):
+        uri = networkRequest.get_uri()
+        uri = uri.replace('file://', '')
+
+        if re.match("^(news|telnet|nttp|http|ftp|https)://", uri) is None:
+            uri = 'http://' + uri
+
+        webbrowser.open(uri)
+        return 1
 
     def scroll_to_end(self):
         '''scroll to the end of the content'''
