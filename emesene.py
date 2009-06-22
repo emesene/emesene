@@ -76,6 +76,8 @@ class Controller(object):
             self.on_message_change_succeed)
         self.session.signals.status_change_succeed.subscribe(
             self.on_status_change_succeed)
+        self.session.signals.disconnected.subscribe(
+            self.on_disconnected)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -125,6 +127,13 @@ class Controller(object):
     def on_close(self):
         '''called on close'''
         self.close_session()
+
+    def on_disconnect(self, reason):
+        '''called when the server disconnect us'''
+        dialog = extension.get_default('dialog')
+        dialog.error('Session disconnected by server')
+        self.close_session(False)
+        self.start()
 
     def close_session(self, exit=True):
         if self.session is not None:
