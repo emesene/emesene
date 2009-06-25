@@ -64,7 +64,8 @@ class ConversationManager(object):
                     '%s just sent you a nudge!' % (nick,)))
             conversation.play_nudge()
 
-        self.set_message_waiting(conversation, True)
+        if message.type != Message.TYPE_TYPING:
+            self.set_message_waiting(conversation, True)
 
     def set_message_waiting(self, conversation, is_waiting):
         """
