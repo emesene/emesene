@@ -305,9 +305,23 @@ class Controller(object):
             members)
 
         conversation.update_data()
+
+        # the following lines (up to and including the second show() ) 
+        # do 2 things: 
+        # a) make sure proper tab is selected (if multiple tabs are opened)
+        #    when clicking on a user icon
+        # b) place cursor on text box
+        # both the show() calls are needed - won't work otherwise
+
+        conversation.show() # puts widget visible
+
+        # conversation widget MUST be visible (cf. previous line)
+        self.conversations.set_current_page(conversation.tab_index)
+
+        # raises the container (tabbed windows) if its minimized
         self.conversations.get_parent().present()
 
-        conversation.show()
+        conversation.show() # puts cursor in textbox
 
         play = extension.get_default('sound')
         if other_started and \

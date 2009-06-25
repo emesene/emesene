@@ -76,6 +76,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.session.config.subscribe(self._on_show_info_changed,
             'b_show_info')
 
+        self.tab_index=-1 # used to select an existing conversation
+
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
         if value:
@@ -115,6 +117,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.hbox.show()
         self.panel.show_all()
+
+        self.input.grab_focus()
 
         if not self.session.config.b_show_toolbar:
             self.toolbar.hide()

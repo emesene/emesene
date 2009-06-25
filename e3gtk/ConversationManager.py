@@ -77,9 +77,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             conversation)
         label.set_image(gui.theme.connect)
         conversation.tab_label = label
-        self.append_page_menu(conversation, label)
+        conversation.tab_index=self.append_page_menu(conversation, label)
         self.set_tab_label_packing(conversation, True, True, gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
         return conversation
-
 
