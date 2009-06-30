@@ -1,38 +1,33 @@
 import time
 import logging
 
+import inspect
+import os.path
+
 _logger = logging.getLogger('emesene')
 _console_handler = logging.StreamHandler()
-_formatter = logging.Formatter('[%(asctime)s %(mod)s] %(message)s', '%H:%M:%S')
+_formatter = logging.Formatter('[%(asctime)s %(caller)s] %(message)s', '%H:%M:%S')
 _console_handler.setFormatter(_formatter)
 _console_handler.setLevel(logging.INFO)
 _logger.addHandler(_console_handler)
 _logger.setLevel(logging.INFO)
 
 
-
-######## OLD PART ########
-max_level = 4
-blacklist = []
-callback = None
-
-def _dbg(text, module, level=1):
-    """
-    show the debug on the console
-    """
-    if level <= max_level and module not in blacklist:
-        output = "[%s %8s] %s" % (time.strftime('%H:%M:%S'), module, text)
-        if callback is None:
-            print output
-        else:
-            callback(text, module, level, output)
-
-######## NEW dbg ########
-
-old_dbg = _dbg
-def dbg(text, module, level=1):
+def dbg(text, caller=None, level=1):
     '''
     debug the code through our mighty debugger
     '''
+    if not caller:
+        #Get class.method_name. Not used now, but could be useful
+        #caller_obj = inspect.stack()[1]
+        #try:
+        #    parent_class = '%s.' % caller_obj.f_locals['self'].__class__.__name__
+        #except:
+        #    parent_class = ''
+        #class_method = '%s%s' % (parent_class, caller_obj[3])
+        filename = caller_obj[0].f_code.co_filename
+        caller = '%s' % (os.path.basename(filename).split('.py')[0])
+
+
     #old_dbg(text, module, level)
-    _logger.warning(text, extra={'mod':module})
+    _logger.warning(text, extra={'caller':caller})
