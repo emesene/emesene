@@ -16,7 +16,7 @@ class Window(gtk.Window):
     def __init__(self, cb_on_close, height=410, width=250):
         gtk.Window.__init__(self)
 
-        self.set_default_size(width, height)
+        self.set_location(width, height, 100, 100)
         self.set_title("emesene")
         self.set_icon(gui.theme.logo)
 
@@ -57,7 +57,8 @@ class Window(gtk.Window):
         self.content.show()
         self.content_type = 'login'
 
-    def go_main(self, session, on_new_conversation, on_close, on_disconnect):
+    def go_main(self, session, on_new_conversation,
+            on_close, on_disconnect):
         '''change to the main window'''
         MainWindow = extension.get_default('main window')
         self.content = MainWindow(session, on_new_conversation,
@@ -75,10 +76,29 @@ class Window(gtk.Window):
         self.content.show()
         self.content_type = 'conversation'
 
+    def set_location(self, width, height, posx, posy):
+        """place the window on the given coordinates
+        """
+        self.width = width
+        self.height = height
+        self.posx = posx
+        self.posy = posy
+        self.set_default_size(width, height)
+        self.move(posx, posy)
+
+    def get_dimensions(self):
+        """return width, height, posx, posy from the window
+        """
+        posx, posy = self.get_position()
+        width, height = self.get_size()
+
+        return width, height, posx, posy
+
     def _on_delete_event(self, widget, event):
         '''call the cb_on_close callback, if the callback return True
         then dont close the window'''
-        return self.cb_on_close()
+        width, height, posx, posy = self.get_dimensions()
+        return self.cb_on_close(width, height, posx, posy)
 
     def _on_key_press(self, widget, event):
         '''called when a key is pressed on the window'''
@@ -90,4 +110,16 @@ class Window(gtk.Window):
         '''
         self.cb_on_close()
         self.hide()
+
+    def hide(self):
+        '''override the method to remember the position
+        '''
+        self.width, self.height, self.posx, self.posy = self.get_dimensions()
+        gtk.Window.hide(self)
+
+    def show(self):
+        '''override the method to set the position
+        '''
+        gtk.Window.show(self)
+        self.set_location(self.width, self.height, self.posx, self.posy)
 

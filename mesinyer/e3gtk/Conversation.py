@@ -51,14 +51,15 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.panel.pack2(input_box, True, True)
 
         self.hbox = gtk.HBox()
-        self.hbox.pack_start(self.panel, True, True)
-        self.hbox.pack_start(self.info, False)
+        if self.session.config.get_or_set('b_avatar_on_left', False):
+            self.hbox.pack_start(self.info, False)
+            self.hbox.pack_start(self.panel, True, True)
+        else:
+            self.hbox.pack_start(self.panel, True, True)
+            self.hbox.pack_start(self.info, False)
 
         self.pack_start(self.header, False)
         self.pack_start(self.hbox, True, True)
-
-        self._panel_show_id = self.panel.connect('map-event',
-            self._on_panel_show)
 
         if len(self.members) == 0:
             self.header.information = ('connecting', 'creating conversation')
@@ -123,6 +124,13 @@ class Conversation(gtk.VBox, gui.Conversation):
         if not self.session.config.b_show_toolbar:
             self.toolbar.hide()
 
+    def update_panel_position(self):
+        """update the panel position to be on the 80% of the height
+        """
+        position = self.panel.get_position()
+        if position:
+            self.panel.set_position(int(position * 0.8))
+
     def update_message_waiting(self, is_waiting):
         """
         update the information on the conversation to inform if a message
@@ -142,13 +150,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         self.header.information = (message, account)
         self.update_tab()
-
-    def _on_panel_show(self, widget, event):
-        '''callback called when the panel is shown, resize the panel'''
-        position = self.panel.get_position()
-        self.panel.set_position(position + int(position * 0.8))
-        self.panel.disconnect(self._panel_show_id)
-        del self._panel_show_id
 
     def show_tab_menu(self):
         '''callback called when the user press a button over a widget

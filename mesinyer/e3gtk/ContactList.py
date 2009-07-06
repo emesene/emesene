@@ -39,6 +39,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
     def __init__(self, session):
         '''class constructor'''
         dialog = extension.get_default('dialog')
+        self.pbr = gtk.CellRendererPixbuf()
         gui.ContactList.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
@@ -61,7 +62,6 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         crt = gtk.CellRendererText()
         crt.set_property('ellipsize', pango.ELLIPSIZE_END)
-        pbr = gtk.CellRendererPixbuf()
         pbr_status = gtk.CellRendererPixbuf()
 
         column = gtk.TreeViewColumn()
@@ -74,13 +74,13 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         self.append_column(column)
         self.set_expander_column(self.exp_column)
 
-        column.pack_start(pbr, False)
+        column.pack_start(self.pbr, False)
         column.pack_start(crt, True)
         column.pack_start(pbr_status, False)
 
-        column.add_attribute(pbr, 'pixbuf', 0)
+        column.add_attribute(self.pbr, 'pixbuf', 0)
         column.add_attribute(crt, 'markup', 2)
-        column.add_attribute(pbr, 'visible', 3)
+        column.add_attribute(self.pbr, 'visible', 3)
         column.add_attribute(pbr_status, 'visible', 3)
         column.add_attribute(pbr_status, 'pixbuf', 4)
 
@@ -486,3 +486,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         return template
 
+    def set_image_size(self, width, height):
+        """set the size of the avatars on the contact list
+        """
+        self.pbr.set_fixed_size(width, height)

@@ -113,6 +113,30 @@ class BaseTable(gtk.Table):
         widget.connect('toggled', self.on_toggled, property_name)
         self.append_row(widget, row)
 
+    def append_range(self, text, property_name, min_val, max_val, is_int=True):
+        """append a row with a scale to select an integer value between
+        min and max
+        """
+        hbox = gtk.HBox()
+        hbox.set_homogeneous(True)
+        label = gtk.Label(text)
+        label.set_alignment(0.0, 0.5)
+        default = self.get_attr(property_name)
+
+        scale = gtk.HScale()
+        scale.set_range(min_val, max_val)
+        scale.set_value(default)
+
+        if is_int:
+            scale.set_digits(0)
+
+        hbox.pack_start(label, True, True)
+        hbox.pack_start(scale, False)
+
+        scale.connect('value-changed', self.on_range_changed, property_name,
+                is_int)
+        self.append_row(hbox, None)
+
     def append_combo(self, text, getter, property_name):
         """append a row with a check box with text as label and
         set the check state with default
@@ -145,6 +169,16 @@ class BaseTable(gtk.Table):
         """callback called when the selection of the combo changed
         """
         self.set_attr(property_name, combo.get_active_text())
+
+    def on_range_changed(self, scale, property_name, is_int):
+        """callback called when the selection of the combo changed
+        """
+        value = scale.get_value()
+
+        if is_int:
+            value = int(value)
+
+        self.set_attr(property_name, value)
 
     def on_toggled(self, checkbutton, property_name):
         """default callback for a cehckbutton, set property_name
@@ -194,6 +228,7 @@ class Interface(BaseTable):
         """
         BaseTable.__init__(self, 4, 1)
         self.session = session
+        self.session.config.get_or_set('b_avatar_on_left', False)
         self.append_check('Show emoticons', 'session.config.b_show_emoticons')
         self.append_check('Show conversation header',
             'session.config.b_show_header')
@@ -203,6 +238,12 @@ class Interface(BaseTable):
             'session.config.b_show_toolbar')
         self.append_check('Show user panel',
             'session.config.b_show_userpanel')
+        self.append_check('Avatar on conversation left side',
+            'session.config.b_avatar_on_left')
+        self.append_range('Contact list avatar width',
+            'session.config.i_avatar_width', 18, 64)
+        self.append_range('Contact list avatar height',
+            'session.config.i_avatar_height', 18, 64)
         self.show_all()
 
 class Sound(BaseTable):

@@ -42,17 +42,16 @@ class ContactList(object):
 
         self.group_state = {}
 
-        self.session.config.b_order_by_group = \
-            self.session.config.get_or_set('b_order_by_group', True)
-        self.session.config.b_show_nick = \
-            self.session.config.get_or_set('b_show_nick', True)
-        self.session.config.b_show_empty_groups = \
-            self.session.config.get_or_set('b_show_empty_groups', False)
-        self.session.config.b_show_offline = \
-            self.session.config.get_or_set('b_show_offline', False)
-        self.session.config.b_show_blocked = \
-            self.session.config.get_or_set('b_show_blocked', False)
+        self.session.config.get_or_set('b_order_by_group', True)
+        self.session.config.get_or_set('b_show_nick', True)
+        self.session.config.get_or_set('b_show_empty_groups', False)
+        self.session.config.get_or_set('b_show_offline', False)
+        self.session.config.get_or_set('b_show_blocked', False)
 
+        avatar_width = self.session.config.get_or_set('i_avatar_width', 48)
+        avatar_height = self.session.config.get_or_set('i_avatar_height', 48)
+
+        self.set_image_size(avatar_width, avatar_height)
 
         # self.order_by_status is a property that returns the inverse
         # value as the one of self.order_by_group, the setter, set the inverse
@@ -234,6 +233,11 @@ class ContactList(object):
     def remove_contact(self, contact, group=None):
         '''remove a contact from the specified group, if group is None
         then remove him from all groups'''
+        raise NotImplementedError()
+
+    def set_image_size(self, width, height):
+        """set the size of the avatars on the contact list
+        """
         raise NotImplementedError()
 
     def fill(self, clear=True):

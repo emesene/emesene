@@ -139,20 +139,23 @@ class Controller(object):
         if self.session is not None:
             self.session.quit()
 
-        self.window.hide()
-        self.window = None
-
         self.save_extensions_config()
 
         if self.session is not None:
+            self._save_main_dimensions()
             self.session.save_config()
             self.session = None
+        else:
+            self._save_login_dimensions()
 
         self.config.save(self.config_path)
 
         if self.conversations:
             self.conversations.get_parent().hide()
             self.conversations = None
+
+        self.window.hide()
+        self.window = None
 
         if exit:
             while gtk.events_pending():
@@ -161,8 +164,30 @@ class Controller(object):
             time.sleep(2)
             sys.exit(0)
 
+    def _save_login_dimensions(self):
+        '''save the dimensions of the login window
+        '''
+        width, height, posx, posy = self.window.get_dimensions()
+
+        self.config.i_login_posx = posx
+        self.config.i_login_posy = posy
+        self.config.i_login_width = width
+        self.config.i_login_height = height
+
+    def _save_main_dimensions(self):
+        '''save the dimensions of the main window
+        '''
+        width, height, posx, posy = self.window.get_dimensions()
+
+        self.session.config.i_main_width = width
+        self.session.config.i_main_height = height
+        self.session.config.i_main_posx = posx
+        self.session.config.i_main_posy = posy
+
     def on_login_succeed(self):
         '''callback called on login succeed'''
+        self._save_login_dimensions()
+        self.config.save(self.config_path)
         self.draw_main_screen()
 
     def draw_main_screen(self):
@@ -176,8 +201,15 @@ class Controller(object):
         gui.theme.set_theme(image_name, emote_name, sound_name)
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
-        self.window.go_main(self.session, self.on_new_conversation,
-            self.on_close, self.on_disconnect)
+
+        posx = self.session.config.get_or_set('i_main_posx', 100)
+        posy = self.session.config.get_or_set('i_main_posy', 100)
+        width = self.session.config.get_or_set('i_main_width', 250)
+        height = self.session.config.get_or_set('i_main_height', 410)
+
+        self.window.go_main(self.session,
+                self.on_new_conversation, self.on_close, self.on_disconnect)
+        self.window.set_location(width, height, posx, posy)
 
     def on_login_failed(self, reason):
         '''callback called on login failed'''
@@ -296,8 +328,14 @@ class Controller(object):
         if self.conversations is None:
             Window = extension.get_default('window frame')
             window = Window(self._on_conversation_window_close)
-            window.set_default_size(640, 480)
+
+            posx = self.session.config.get_or_set('i_conv_posx', 100)
+            posy = self.session.config.get_or_set('i_conv_posy', 100)
+            width = self.session.config.get_or_set('i_conv_width', 600)
+            height = self.session.config.get_or_set('i_conv_height', 400)
+
             window.go_conversation(self.session)
+            window.set_location(width, height, posx, posy)
             self.conversations = window.content
             window.show()
 
@@ -306,8 +344,8 @@ class Controller(object):
 
         conversation.update_data()
 
-        # the following lines (up to and including the second show() ) 
-        # do 2 things: 
+        # the following lines (up to and including the second show() )
+        # do 2 things:
         # a) make sure proper tab is selected (if multiple tabs are opened)
         #    when clicking on a user icon
         # b) place cursor on text box
@@ -332,8 +370,13 @@ class Controller(object):
 
         return (exists, conversation)
 
-    def _on_conversation_window_close(self):
+    def _on_conversation_window_close(self, width, height, posx, posy):
         '''method called when the conversation window is closed'''
+        self.session.config.i_conv_width = width
+        self.session.config.i_conv_height = height
+        self.session.config.i_conv_posx = posx
+        self.session.config.i_conv_posy = posy
+
         self.conversations.close_all()
         self.conversations = None
 
@@ -352,11 +395,17 @@ class Controller(object):
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
 
+        posx = self.config.get_or_set('i_login_posx', 100)
+        posy = self.config.get_or_set('i_login_posy', 100)
+        width = self.config.get_or_set('i_login_width', 250)
+        height = self.config.get_or_set('i_login_height', 410)
+
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed, account,
             self.config.d_accounts, self.config.l_remember_account,
             self.config.l_remember_password, self.config.d_status,
             self.config.session, proxy, use_http, self.config.session)
+        self.window.set_location(width, height, posx, posy)
 
         self.window.show()
 
