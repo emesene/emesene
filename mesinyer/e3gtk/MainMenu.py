@@ -202,5 +202,10 @@ class HelpMenu(gtk.Menu):
         self.about.connect('activate',
             lambda *args: self.handler.on_about_selected())
 
+        self.debug = gtk.MenuItem('Debug')
+        self.debug.connect('activate',
+                lambda *args: self.handler.on_debug_selected())
+
         self.append(self.website)
         self.append(self.about)
+        self.append(self.debug)

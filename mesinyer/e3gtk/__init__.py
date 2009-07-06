@@ -29,6 +29,7 @@ def main(Controller):
     import WebKitTextBox
     import ConversationManager
     import ConversationToolbar
+    import DebugWindow
 
     setup()
     gobject.threads_init()
@@ -54,6 +55,7 @@ def setup():
     extension.category_register('contact list', ContactList.ContactList)
     extension.category_register('user panel', UserPanel.UserPanel)
     extension.category_register('tray icon', TrayIcon.TrayIcon)
+    extension.category_register('debug window', DebugWindow.DebugWindow)
 
     extension.category_register('main menu', MainMenu.MainMenu)
     extension.category_register('menu file', MainMenu.FileMenu)

@@ -76,7 +76,7 @@ class DebugView( gtk.TextView ):
 
     def filter_caller(self, pattern):
         self.store.filter_caller(pattern)
-        self.buffer = DebugBuffer(self.store.filter)
+        self.buffer = DebugBuffer(self.store.custom_filter)
         self.set_buffer(self.buffer)
 
 class DebugBuffer( gtk.TextBuffer ):

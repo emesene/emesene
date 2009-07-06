@@ -114,6 +114,11 @@ class HelpHandler(object):
         '''called when the website item is selected'''
         webbrowser.open("http://www.emesene.org")
 
+    def on_debug_selected(self):
+        '''called when the preference button is selected'''
+        DebugWindow = extension.get_default('debug window')
+        DebugWindow().show()
+
 
 class ContactHandler(object):
     '''this handler contains all the handlers needed to handle the contact
