@@ -15,6 +15,7 @@ class Preferences(gtk.Window):
         """
         gtk.Window.__init__(self)
         self.set_title("Preferences")
+        self.session = session
 
         self.set_default_size(320, 260)
         self.set_role("preferences")
@@ -102,6 +103,40 @@ class BaseTable(gtk.Table):
 
         if increment_current_row:
             self.current_row += 1
+
+    def append_entry_default(self, text, property_name, default):
+        """append a row with a label and a entry, set the value to the
+        value of property_name if exists, if not set it to default.
+         Add a reset button that sets the value to the default"""
+
+        def on_reset_clicked(button, entry, default):
+            """called when the reset button is clicked, set
+            entry text to default"""
+            entry.set_text(default)
+
+        def on_entry_changed(entry, property_name):
+            """called when the content of an entry changes,
+            set the value of the property to the new value"""
+            self.set_attr(property_name, entry.get_text())
+
+        hbox = gtk.HBox(spacing=4)
+        hbox.set_homogeneous(True)
+        label = gtk.Label(text)
+        label.set_alignment(0.0, 0.5)
+        text = self.get_attr(property_name)
+
+        entry = gtk.Entry()
+        entry.set_text(text)
+
+        reset = gtk.Button(stock=gtk.STOCK_CLEAR)
+
+        hbox.pack_start(label, True, True)
+        hbox.pack_start(entry, False)
+        hbox.pack_start(reset, False)
+
+        reset.connect('clicked', on_reset_clicked, entry, default)
+        entry.connect('changed', on_entry_changed, property_name)
+        self.append_row(hbox, None)
 
     def append_check(self, text, property_name, row=None):
         """append a row with a check box with text as label and
@@ -240,10 +275,8 @@ class Interface(BaseTable):
             'session.config.b_show_userpanel')
         self.append_check('Avatar on conversation left side',
             'session.config.b_avatar_on_left')
-        self.append_range('Contact list avatar width',
-            'session.config.i_avatar_width', 18, 64)
-        self.append_range('Contact list avatar height',
-            'session.config.i_avatar_height', 18, 64)
+        self.append_range('Contact list avatar size',
+            'session.config.i_avatar_size', 18, 64)
         self.show_all()
 
 class Sound(BaseTable):
@@ -291,14 +324,21 @@ class Theme(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 3, 1)
+        BaseTable.__init__(self, 5, 1)
         self.session = session
+
+        ContactList = extension.get_default('contact list')
+
         self.append_combo('Image theme', gui.theme.get_image_themes,
             'session.config.image_theme')
         self.append_combo('Sound theme', gui.theme.get_sound_themes,
             'session.config.sound_theme')
         self.append_combo('Emote theme', gui.theme.get_emote_themes,
             'session.config.emote_theme')
+        self.append_entry_default('Nick format',
+                'session.config.nick_template', ContactList.NICK_TPL)
+        self.append_entry_default('Group format',
+                'session.config.group_template', ContactList.GROUP_TPL)
 
 class Extension(BaseTable):
     """the panel to display/modify the config related to the extensions

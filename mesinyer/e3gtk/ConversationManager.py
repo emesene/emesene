@@ -19,6 +19,66 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         self.set_scrollable(True)
         self.connect('switch-page', self._on_switch_page)
 
+    def _set_accels(self):
+        """set the keyboard shortcuts
+        """
+        accel_group = gtk.AccelGroup()
+        self.get_parent().add_accel_group(accel_group)
+        self.accel_group = accel_group
+        accel_group.connect_group(gtk.keysyms.Page_Down, \
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED, \
+                                  self.on_key_cycle_tabs)
+        accel_group.connect_group(gtk.keysyms.Page_Up, \
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED, \
+                                  self.on_key_cycle_tabs)
+        accel_group.connect_group(gtk.keysyms.W, \
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED, \
+                                  self.on_key_close_tab)
+
+        for i in range(1, 10):
+            accel_group.connect_group(gtk.keysyms._0 + i, \
+                                  gtk.gdk.MOD1_MASK, gtk.ACCEL_LOCKED, \
+                                  self.on_key_change_tab)
+
+    def on_key_close_tab(self, accel_group, window, keyval, modifier):
+        '''Catches events like Ctrl+W and closes current tab'''
+        index = self.get_current_page()
+        conversation = self.get_nth_page(index)
+        self.on_conversation_close(conversation)
+
+    def on_key_change_tab(self, accelGroup, window, keyval, modifier):
+        '''Catches alt+number and shows tab number-1  '''
+        pages = self.get_n_pages()
+        new = keyval - gtk.keysyms._0 - 1
+        if new < pages:
+            self.set_current_page(new)
+
+    def on_key_cycle_tabs(self, accelGroup, window, keyval, modifier):
+        '''Catches events like Ctrl+AvPag and consequently changes current
+        tab'''
+
+        if not modifier == gtk.gdk.CONTROL_MASK:
+            return
+
+        last = self.get_n_pages() - 1
+
+        if keyval == gtk.keysyms.Page_Down:
+            current = self.get_current_page()
+
+            if current < last:
+                self.next_page()
+            else:
+                self.set_current_page(0)
+        elif keyval == gtk.keysyms.Page_Up:
+            current = self.get_current_page()
+
+            if current > 0:
+                self.prev_page()
+            else:
+                self.set_current_page(last)
+
+        return True
+
     def set_message_waiting(self, conversation, is_waiting):
         """
         inform the user that a message is waiting for the conversation

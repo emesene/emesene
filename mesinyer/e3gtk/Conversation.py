@@ -49,6 +49,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel.pack1(self.output, True, True)
         self.panel.pack2(input_box, True, True)
+        self.panel_signal_id = self.panel.connect_after('expose-event',
+                self.update_panel_position)
 
         self.hbox = gtk.HBox()
         if self.session.config.get_or_set('b_avatar_on_left', False):
@@ -124,12 +126,14 @@ class Conversation(gtk.VBox, gui.Conversation):
         if not self.session.config.b_show_toolbar:
             self.toolbar.hide()
 
-    def update_panel_position(self):
+    def update_panel_position(self, *args):
         """update the panel position to be on the 80% of the height
         """
-        position = self.panel.get_position()
-        if position:
-            self.panel.set_position(int(position * 0.8))
+        height = self.panel.get_position()
+        if height > 0:
+            self.panel.set_position(int(height * 1.5))
+            self.panel.disconnect(self.panel_signal_id)
+            del self.panel_signal_id
 
     def update_message_waiting(self, is_waiting):
         """

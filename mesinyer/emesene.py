@@ -9,6 +9,7 @@ import debugger
 import e3
 import gui
 import yaber
+import utils
 import dummy
 import e3common
 import protocol
@@ -193,6 +194,8 @@ class Controller(object):
     def draw_main_screen(self):
         """create and populate the main screen
         """
+        # clear image cache
+        utils.pixbufs = {}
         self.window.clear()
         self.tray_icon.set_main(self.session)
         image_name = self.session.config.get_or_set('image_theme', 'default')
@@ -370,8 +373,9 @@ class Controller(object):
 
         return (exists, conversation)
 
-    def _on_conversation_window_close(self, width, height, posx, posy):
+    def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''
+        width, height, posx, posy = self.conversations.get_parent().get_dimensions()
         self.session.config.i_conv_width = width
         self.session.config.i_conv_height = height
         self.session.config.i_conv_posx = posx

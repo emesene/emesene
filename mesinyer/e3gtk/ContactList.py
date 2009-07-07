@@ -36,6 +36,11 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
+    NICK_TPL = '%DISPLAY_NAME%%NL%' \
+        '<span foreground="#AAAAAA" size="small">' \
+        '%BLOCKED% %ACCOUNT%%NL%%MESSAGE%</span>'
+    GROUP_TPL = '<b>%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)</b>'
+
     def __init__(self, session):
         '''class constructor'''
         dialog = extension.get_default('dialog')
@@ -97,14 +102,15 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         # + STATUS
         # + MESSAGE
         # + BLOCKED (show the text "(blocked)" if the account is blocked)
-        self.nick_template = '%DISPLAY_NAME%\n'
-        self.nick_template += '<span foreground="#AAAAAA" size="small">'
-        self.nick_template += '%BLOCKED% %ACCOUNT%\n%MESSAGE%</span>'
+        # + NL (new line)
+        self.nick_template = session.config.get_or_set('nick_template',
+                ContactList.NICK_TPL)
         # valid values:
         # + NAME
         # + ONLINE_COUNT
         # + TOTAL_COUNT
-        self.group_template = '<b>%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)</b>'
+        self.group_template = session.config.get_or_set('group_template',
+                ContactList.GROUP_TPL)
 
     def _visible_func(self, model, _iter):
         '''return True if the row should be displayed according to the
@@ -290,7 +296,8 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         self.session.config.d_weights[contact.account] = weight
 
-        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact,
+        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user,
+            (self.avatar_size, self.avatar_size)), contact,
             self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
             weight)
@@ -389,7 +396,8 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         self.session.config.d_weights[contact.account] = weight
 
-        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user), contact,
+        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user,
+            (self.avatar_size, self.avatar_size)), contact,
             self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
             weight)
@@ -447,18 +455,24 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         # + DISPLAY_NAME (alias if available, or nick if available or mail)
         # + STATUS
         # + MESSAGE
+        # + NL
         '''
+        message = gobject.markup_escape_text(
+                contact.message).replace('%MESSAGE%', '% MESSAGE %')
+        nick = gobject.markup_escape_text(
+                contact.nick).replace('%NICK%', '% NICK %')
+        display_name = gobject.markup_escape_text(
+                contact.display_name).replace('%DISPLAY_NAME%', '% DISPLAY_NAME %')
+
         template = self.nick_template
-        template = template.replace('%NICK%',
-            gobject.markup_escape_text(contact.nick))
+        template = template.replace('%NL%', '\n')
         template = template.replace('%ACCOUNT%',
             gobject.markup_escape_text(contact.account))
-        template = template.replace('%MESSAGE%',
-            gobject.markup_escape_text(contact.message))
         template = template.replace('%STATUS%',
             gobject.markup_escape_text(status.STATUS[contact.status]))
-        template = template.replace('%DISPLAY_NAME%',
-            gobject.markup_escape_text(contact.display_name))
+        template = template.replace('%DISPLAY_NAME%', display_name)
+        template = template.replace('%MESSAGE%', message)
+        template = template.replace('%NICK%', nick)
 
         blocked_text = ''
         if contact.blocked:
@@ -476,17 +490,20 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
         # + ONLINE_COUNT
         # + TOTAL_COUNT
         '''
+        name = gobject.markup_escape_text(group.name).replace('%NAME%',
+            '% NAME %')
+
         contacts = self.contacts.get_contacts(group.contacts)
         (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
-        template = template.replace('%NAME%',
-            gobject.markup_escape_text(group.name))
         template = template.replace('%ONLINE_COUNT%', str(online))
         template = template.replace('%TOTAL_COUNT%', str(total))
+        template = template.replace('%NAME%', name)
 
         return template
 
-    def set_image_size(self, width, height):
+    def set_avatar_size(self, size):
         """set the size of the avatars on the contact list
         """
-        self.pbr.set_fixed_size(width, height)
+        self.avatar_size = size
+        self.pbr.set_fixed_size(size, size)

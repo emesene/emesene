@@ -75,6 +75,7 @@ class Window(gtk.Window):
         self.connect('focus-in-event', self.content._on_focus)
         self.content.show()
         self.content_type = 'conversation'
+        self.content._set_accels()
 
     def set_location(self, width, height, posx, posy):
         """place the window on the given coordinates
@@ -97,8 +98,7 @@ class Window(gtk.Window):
     def _on_delete_event(self, widget, event):
         '''call the cb_on_close callback, if the callback return True
         then dont close the window'''
-        width, height, posx, posy = self.get_dimensions()
-        return self.cb_on_close(width, height, posx, posy)
+        return self.cb_on_close()
 
     def _on_key_press(self, widget, event):
         '''called when a key is pressed on the window'''

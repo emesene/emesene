@@ -48,10 +48,8 @@ class ContactList(object):
         self.session.config.get_or_set('b_show_offline', False)
         self.session.config.get_or_set('b_show_blocked', False)
 
-        avatar_width = self.session.config.get_or_set('i_avatar_width', 48)
-        avatar_height = self.session.config.get_or_set('i_avatar_height', 48)
-
-        self.set_image_size(avatar_width, avatar_height)
+        self.avatar_size = self.session.config.get_or_set('i_avatar_size', 32)
+        self.set_avatar_size(self.avatar_size)
 
         # self.order_by_status is a property that returns the inverse
         # value as the one of self.order_by_group, the setter, set the inverse
@@ -235,10 +233,10 @@ class ContactList(object):
         then remove him from all groups'''
         raise NotImplementedError()
 
-    def set_image_size(self, width, height):
+    def set_avatar_size(self, size):
         """set the size of the avatars on the contact list
         """
-        raise NotImplementedError()
+        self.avatar_size = size
 
     def fill(self, clear=True):
         '''fill the contact list with the contacts and groups from

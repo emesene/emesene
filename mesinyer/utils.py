@@ -14,16 +14,21 @@ def safe_gtk_image_load(path):
         return gtk.image_new_from_stock(gtk.STOCK_MISSING_IMAGE,
             gtk.ICON_SIZE_DIALOG)
 
-def safe_gtk_pixbuf_load(path):
+def safe_gtk_pixbuf_load(path, size=None):
     '''try to return a gtk pixbuf from path, if fials, return None'''
     path = os.path.abspath(path)
 
     if file_readable(path):
-        if path in pixbufs:
-            return pixbufs[path]
+        if (path, size) in pixbufs:
+            return pixbufs[(path, size)]
         else:
             pixbuf = gtk.gdk.pixbuf_new_from_file(path)
-            pixbufs[path] = pixbuf
+
+            if size is not None:
+                width, height = size
+                pixbuf = pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+
+            pixbufs[(path, size)] = pixbuf
             return pixbuf
     else:
         return None

@@ -127,6 +127,8 @@ class Config(object):
                     value = Config.string_to_dict(value)
                 elif name.startswith('l_'):
                     value = Config.string_to_list(value)
+                else:
+                    value = value.replace('§', '%')
 
                 setattr(self, name, value)
             except ValueError:
@@ -148,10 +150,10 @@ class Config(object):
                 elif key.startswith('b_'):
                     parser.set(section, key, str(int(value)))
                 else:
-                    parser.set(section, key, str(value))
+                    parser.set(section, key, str(value).replace('%', '§'))
             except Exception, ex:
-                dbg('couldn\'t save %s:%s invalid type' % (key, value),
-                    'config', 1)
+                dbg('couldn\'t save %s:%s invalid type (%s)' % (key, value,
+                    str(ex)), 'config', 1)
 
         parser.write(file(path, 'w'))
 
