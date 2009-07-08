@@ -4,6 +4,7 @@ import pango
 
 import gui
 import utils
+import e3common
 import protocol.status
 import extension
 
@@ -22,6 +23,7 @@ class ContactInformation(gtk.Window):
 
         self.session = session
         self.account = account
+        self.formatter = e3common.MessageFormatter(session.contacts.me)
 
         self.tabs = gtk.Notebook()
 
@@ -90,17 +92,19 @@ class ContactInformation(gtk.Window):
         '''called when the chat history is ready'''
         for (stat, timestamp, message, nick) in results:
             date_text = time.strftime('[%c]', time.gmtime(timestamp))
-            tokens = message.split('\r\n')
+            tokens = message.split('\r\n', 3)
             type_ = tokens[0]
 
-            self.chats.text.append(date_text + ' ')
-            self.chats.text.append(nick + ': ')
-
             if type_ == 'text/x-msnmsgr-datacast':
-                self.chats.text.append('<i>nudge</i><br/>')
+                self.chats.text.append(date_text + ' ' + nick + ': ' + '<i>nudge</i><br/>')
             elif type_.find('text/plain;') != -1:
-                (type_, format, empty, text) = tokens
-                self.chats.text.append(text + '<br/>')
+                try:
+                    (type_, format, empty, text) = tokens
+                    self.chats.text.append(self.formatter.format_history(
+                        date_text, nick, text))
+                except ValueError:
+                    dbg('Invalid number of tokens' + str(tokens),
+                            'contactinfo', 1)
             else:
                 dbg('unknown message type on ContactInfo', 'contactinfo', 1)
 
@@ -233,5 +237,18 @@ class ChatWidget(gtk.VBox):
         self.text = OutputText(session.config)
         self.text.show()
 
+        buttons = gtk.HButtonBox()
+        buttons.set_border_width(2)
+        buttons.set_layout(gtk.BUTTONBOX_END)
+        save = gtk.Button(stock=gtk.STOCK_SAVE)
+        buttons.pack_start(save)
+
+        save.connect('clicked', self._on_save_clicked)
+
         self.pack_start(self.text, True, True)
+        self.pack_start(buttons, False)
+
+    def _on_save_clicked(self, button):
+        '''called when the save button is clicked'''
+        print self.text.text
 
