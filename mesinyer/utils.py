@@ -56,7 +56,7 @@ def style_to_pango_font_description(style):
 def pango_font_description_to_style(fdesc):
     '''receives a pango.FontDescription and returns a protocol.Style'''
     font = fdesc.get_family()
-    
+
     font_italic = False
     if fdesc.get_style() != pango.STYLE_NORMAL:
         font_italic = True
@@ -74,6 +74,6 @@ def pango_font_description_to_style(fdesc):
     if font_size < 6 or font_size > 32:
         font_size = 10
 
-    return protocol.Style(font, protocol.Color(0, 0, 0), font_bold, 
+    return protocol.Style(font, protocol.Color(0, 0, 0), font_bold,
         font_italic, font_underline, font_strike, font_size)
 

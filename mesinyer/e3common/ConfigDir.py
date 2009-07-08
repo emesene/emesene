@@ -18,7 +18,7 @@ class ConfigDir(object):
     def _get_default_base_dir(self):
         '''return the default base dir for configuration according to the OS'''
         if os.name == 'posix' or os.name == 'nt' or os.name == 'mac':
-            return os.path.expanduser(os.path.join('~', '.config', 
+            return os.path.expanduser(os.path.join('~', '.config',
                 self.app_name))
         else:
             return os.path.abspath(self.app_name)

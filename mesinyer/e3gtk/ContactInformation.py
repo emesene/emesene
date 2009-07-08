@@ -1,3 +1,4 @@
+import os
 import gtk
 import time
 import pango
@@ -20,6 +21,7 @@ class ContactInformation(gtk.Window):
         self.set_title('Contact information (%s)' % (account,))
         self.set_role("dialog")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        self.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
 
         self.session = session
         self.account = account
@@ -124,7 +126,9 @@ class InformationWidget(gtk.VBox):
             self.contact = None
 
         self.nick = gtk.Label()
+        self.nick.set_ellipsize(pango.ELLIPSIZE_END)
         self.message = gtk.Label()
+        self.message.set_ellipsize(pango.ELLIPSIZE_END)
         self.status = gtk.Image()
         self.image = gtk.Image()
 
@@ -136,11 +140,13 @@ class InformationWidget(gtk.VBox):
         l_image = gtk.Label('Image')
         l_image.set_alignment(0.0, 0.5)
         l_nick = gtk.Label('Nick')
+        l_nick.set_ellipsize(pango.ELLIPSIZE_END)
         l_nick.set_alignment(0.0, 0.5)
         l_status = gtk.Label('Status')
         l_status.set_alignment(0.0, 0.5)
         l_message = gtk.Label('Message')
         l_message.set_alignment(0.0, 0.5)
+        l_message.set_ellipsize(pango.ELLIPSIZE_END)
 
         table.attach(l_image, 0, 1, 0, 1)
         table.attach(self.image, 1, 2, 0, 1)
@@ -210,8 +216,6 @@ class ListWidget(gtk.VBox):
         column1.add_attribute(crt_timestamp, 'text', 1)
         column2.add_attribute(crt, 'markup', 2)
 
-        self.list.show()
-
         scroll.add(self.list)
 
         self.pack_start(scroll, True, True)
@@ -231,11 +235,13 @@ class ChatWidget(gtk.VBox):
         self.set_border_width(2)
 
         self.session = session
+        self.account = account
+
         if self.session:
             self.contact = self.session.contacts.get(account)
+
         OutputText = extension.get_default('conversation output')
         self.text = OutputText(session.config)
-        self.text.show()
 
         buttons = gtk.HButtonBox()
         buttons.set_border_width(2)
@@ -250,5 +256,43 @@ class ChatWidget(gtk.VBox):
 
     def _on_save_clicked(self, button):
         '''called when the save button is clicked'''
-        print self.text.text
+        def save_cb(response, filename=None):
+            '''called when the closes the save dialog'''
+            if filename is not None and response == gui.stock.SAVE:
+                self.save_chats(filename)
+
+        home = os.path.expanduser('~')
+        dialog = extension.get_default('dialog')
+        dialog.save_as(home, save_cb)
+
+    def save_chats(self, path, amount=1000):
+        '''request amount of messages between our account and the current
+        account, save it to path'''
+        def _on_save_chats_ready(results):
+            '''called when the chats requested are ready
+            '''
+            handle = file(path, 'w')
+
+            for (stat, timestamp, message, nick) in results:
+                date_text = time.strftime('[%c]', time.gmtime(timestamp))
+                tokens = message.split('\r\n', 3)
+                type_ = tokens[0]
+
+                if type_ == 'text/x-msnmsgr-datacast':
+                    handle.write(date_text + ' ' + nick + ': ' + '<<nudge>>\n')
+                elif type_.find('text/plain;') != -1:
+                    try:
+                        (type_, format, empty, text) = tokens
+                        handle.write("%s %s: %s\n" % \
+                            (date_text, nick, text))
+                    except ValueError:
+                        dbg('Invalid number of tokens' + str(tokens),
+                                'contactinfo', 1)
+                else:
+                    dbg('unknown message type on ContactInfo', 'contactinfo', 1)
+
+            handle.close()
+
+        self.session.logger.get_chats(self.account,
+            self.session.account.account, amount, _on_save_chats_ready)
 

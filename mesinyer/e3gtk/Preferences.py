@@ -36,6 +36,7 @@ class Preferences(gtk.Window):
         self.extension = Extension(session)
 
         self.buttons = gtk.HButtonBox()
+        self.buttons.set_border_width(2)
         self.buttons.set_layout(gtk.BUTTONBOX_END)
         self.close = gtk.Button(stock=gtk.STOCK_CLOSE)
         self.close.connect('clicked', lambda *args: self.hide())
