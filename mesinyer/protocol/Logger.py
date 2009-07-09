@@ -249,6 +249,17 @@ class Logger(object):
         ORDER BY tmstp LIMIT ?;
     '''
 
+    SELECT_CHATS_BETWEEN = '''
+        SELECT f.status, f.tmstp, f.payload, i.nick
+        FROM fact_event f, d_info i
+        WHERE f.id_event=? and
+            ((f.id_src_acc=? and id_dest_acc=?) or
+            (f.id_dest_acc=? and id_src_acc=?)) and
+            f.id_src_info = i.id_info and
+            f.tmstp >= ? and f.tmstp <= ?
+        ORDER BY tmstp LIMIT ?;
+    '''
+
     def __init__(self, path):
         '''constructor'''
         self.path = path
@@ -596,6 +607,26 @@ class Logger(object):
 
         return self.cursor.fetchall()
 
+    def get_chats_between(self, src, dest, from_t, to_t, limit):
+        '''return the last # sent from src to dest or from dest to src ,
+        where # is the limit value
+        '''
+        id_event = self.events.get('message', None)
+
+        if src not in self.accounts or dest not in self.accounts:
+            return None
+
+        id_src = self.accounts[src].id_account
+        id_dest = self.accounts[dest].id_account
+
+        if id_event is None:
+            return None
+
+        self.execute(Logger.SELECT_CHATS_BETWEEN, (id_event, id_src, id_dest, id_src,
+            id_dest, from_t, to_t, limit))
+
+        return self.cursor.fetchall()
+
     def add_groups(self, groups):
         '''add all groups to the database'''
         existing = set(self.groups.keys())
@@ -687,6 +718,7 @@ class LoggerProcess(threading.Thread):
         self.actions['get_images'] = self.logger.get_images
         self.actions['get_sent_messages'] = self.logger.get_sent_messages
         self.actions['get_chats'] = self.logger.get_chats
+        self.actions['get_chats_between'] = self.logger.get_chats_between
         self.actions['add_groups'] = self.logger.add_groups
         self.actions['add_contacts'] = self.logger.add_contacts
         self.actions['add_contact_by_group'] = self.logger.add_contact_by_group
@@ -785,6 +817,12 @@ class LoggerProcess(threading.Thread):
         '''
         self.input.put(('get_chats', (src, dest, limit, callback)))
 
+    def get_chats_between(self, src, dest, from_t, to_t, limit, callback):
+        '''return the last # sent from src to dest or from dest to src ,
+        between two timestamps from_t and to_t, where # is the limit value
+        '''
+        self.input.put(('get_chats_between', (src, dest, from_t, to_t, limit, callback)))
+
     def add_groups(self, groups):
         '''add all groups to the database'''
         self.input.put(('add_groups', (groups, None)))
@@ -797,3 +835,28 @@ class LoggerProcess(threading.Thread):
         '''add all contacts, groups and relations to the database'''
         self.input.put(('add_contact_by_group', (contacts, groups, None)))
 
+def save_logs_as_txt(results, path):
+    '''save the chats in results (from get_chats or get_chats_between) as txt
+    to path
+    '''
+    handle = file(path, 'w')
+
+    for (stat, timestamp, message, nick) in results:
+        date_text = time.strftime('[%c]', time.gmtime(timestamp))
+        tokens = message.split('\r\n', 3)
+        type_ = tokens[0]
+
+        if type_ == 'text/x-msnmsgr-datacast':
+            handle.write(date_text + ' ' + nick + ': ' + '<<nudge>>\n')
+        elif type_.find('text/plain;') != -1:
+            try:
+                (type_, format, empty, text) = tokens
+                handle.write("%s %s: %s\n" % \
+                    (date_text, nick, text))
+            except ValueError:
+                dbg('Invalid number of tokens' + str(tokens),
+                        'contactinfo', 1)
+        else:
+            dbg('unknown message type on ContactInfo', 'contactinfo', 1)
+
+    handle.close()

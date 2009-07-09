@@ -46,6 +46,8 @@ class Controller(object):
         extension.register('session', dummy.Session)
         extension.category_register('sound', e3common.play_sound.play)
         extension.category_register('notification', e3common.notification.notify)
+        extension.category_register('history exporter',
+                protocol.Logger.save_logs_as_txt)
 
         if self.config.session is None:
             default_id = extension.get_category('session').default_id

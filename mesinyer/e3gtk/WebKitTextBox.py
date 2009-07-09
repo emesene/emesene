@@ -27,7 +27,7 @@ class OutputText(gtk.ScrolledWindow):
 
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
-        self.__texts = []
+        self._texts = []
         self.loaded = False
         self._textbox = webkit.WebView()
         self._textbox.connect('load-finished', self._loading_stop_cb)
@@ -39,14 +39,14 @@ class OutputText(gtk.ScrolledWindow):
 
     def clear(self):
         '''clear the content'''
-        self.__texts = []
+        self._texts = []
         self.loaded = False
         self.text = HTML_BODY
 
     def append(self, text, scroll=True):
         '''append formatted text to the widget'''
         if not self.loaded:
-            self.__texts.append(text)
+            self._texts.append(text)
             return
 
         if not self.config or self.config.b_show_emoticons:
@@ -80,10 +80,10 @@ class OutputText(gtk.ScrolledWindow):
     def _loading_stop_cb(self, view, frame):
         '''method called when the page finish loading'''
         self.loaded = True
-        for text in self.__texts:
+        for text in self._texts:
             self.append(text)
 
-        del self.__texts
+        self._texts = []
 
     def _navigation_requested_cb(self, view, frame, networkRequest):
         uri = networkRequest.get_uri()
