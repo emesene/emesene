@@ -286,16 +286,21 @@ class ChatWidget(gtk.VBox):
         '''refresh the history according to the values on the calendars
         '''
         self.text.clear()
+        self.request_chats_between(1000, self._on_chats_ready)
+
+    def request_chats_between(self, limit, callback):
         from_year, from_month, from_day = self.from_calendar.get_date()
-        from_t = time.mktime(datetime.date(from_year, from_month + 1, from_day).timetuple())
+        from_t = time.mktime(datetime.date(from_year, from_month + 1,
+            from_day).timetuple())
 
         to_year, to_month, to_day = self.to_calendar.get_date()
-        to_t = time.mktime(datetime.date(to_year, to_month + 1, to_day).timetuple())
+        to_t = time.mktime(datetime.date(to_year, to_month + 1,
+            to_day).timetuple())
 
         self.session.logger.get_chats_between(self.account,
-            self.session.account.account, from_t, to_t, 1000, self._on_chats_ready)
+            self.session.account.account, from_t, to_t, limit, callback)
 
-    def save_chats(self, path, amount=1000):
+    def save_chats(self, path, limit=1000):
         '''request amount of messages between our account and the current
         account, save it to path'''
         def _on_save_chats_ready(results):
@@ -304,8 +309,7 @@ class ChatWidget(gtk.VBox):
             exporter = extension.get_default('history exporter')
             exporter(results, path)
 
-        self.session.logger.get_chats(self.account,
-            self.session.account.account, amount, _on_save_chats_ready)
+        self.request_chats_between(limit, _on_save_chats_ready)
 
     def _on_chats_ready(self, results):
         '''called when the chat history is ready'''
