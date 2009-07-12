@@ -26,8 +26,16 @@ class DebugWindow():
         self.test_box = gtk.HBox()
 
         self.filter_entry = gtk.Entry()
+        self.filter_level = gtk.combo_box_new_text()
+        self.filter_level.append_text("Debug")
+        self.filter_level.append_text("Info")
+        self.filter_level.append_text("Warning")
+        self.filter_level.append_text("Error")
+        self.filter_level.append_text("Critical")
+        self.filter_level.set_active(0)
         self.filter_btn = gtk.Button("Filter")
         self.filter_box.pack_start(self.filter_entry)
+        self.filter_box.pack_start(self.filter_level,False)
         self.filter_box.pack_start(self.filter_btn, False)
         self.vbox.pack_start(self.filter_box, False)
 
@@ -41,19 +49,23 @@ class DebugWindow():
 
         self.filter_btn.connect("clicked", self.on_filter_clicked)
         self.filter_entry.connect("activate", self.on_filter_clicked)
+        self.filter_level.connect("changed", self.on_filter_clicked)
         self.close_btn.connect("clicked", self.on_close)
 
-        print self.view.size_request()
         self.window.set_default_size(*self.view.size_request())
 
     def show( self ):
         '''shows the window'''
         self.window.show_all()
 
-    def on_filter_clicked(self, button, data=None):
+    def on_filter_clicked(self, widget, data=None):
         '''used when the filter button is clicked'''
         pattern = self.filter_entry.get_text()
-        self.view.filter_caller(pattern)
+        level = self.filter_level.get_active_text()
+        d = {'Debug':logging.DEBUG, 'Info': logging.INFO, 'Warning': logging.WARNING,
+                'Error':logging.ERROR, 'Critical':logging.CRITICAL}
+        levelno = d[level]
+        self.view.filter_caller(pattern, levelno)
 
     def safely_close(self):
         self.window.hide()
@@ -81,8 +93,8 @@ class DebugView( gtk.TextView ):
 
         self.set_editable(False)
 
-    def filter_caller(self, pattern):
-        self.store.filter_caller(pattern)
+    def filter_caller(self, pattern, level):
+        self.store.filter_caller(pattern, level)
         self.buffer = DebugBuffer(self.store.custom_filter)
         self.set_buffer(self.buffer)
 
@@ -132,14 +144,21 @@ class DebugStore( gtk.ListStore, logging.Handler ):
     def on_message_added(self, message):
         self.append([message.caller, message.msg.strip(), message.levelno])
 
-    def filter_caller( self, name ):
-        '''displays only the messages whose caller matches "name"'''
+    def filter_caller( self, name, level ):
+        '''
+        displays only the messages whose caller matches "name"
+        and level is AT LEAST level.
+        '''
         del self.custom_filter
         self.custom_filter = self.filter_new()
-        self.custom_filter.set_visible_func(filter_func, name)
+        self.custom_filter.set_visible_func(filter_func, (name, level))
     
-def filter_func(model, iter, name):
-    '''returns true if the caller column matches name'''
+def filter_func(model, iter, (name, required_level)):
+    '''returns true if the caller column matches name
+    AND level is at least required_level'''
+    level = model.get_value(iter, 2)
+    if level < required_level:
+        return False
     caller = model.get_value(iter, 0)
     if not caller:
         return False
