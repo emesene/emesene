@@ -43,6 +43,9 @@ class DebugWindow():
         self.filter_entry.connect("activate", self.on_filter_clicked)
         self.close_btn.connect("clicked", self.on_close)
 
+        print self.view.size_request()
+        self.window.set_default_size(*self.view.size_request())
+
     def show( self ):
         '''shows the window'''
         self.window.show_all()
