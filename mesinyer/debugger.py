@@ -1,17 +1,9 @@
 import time
 import logging
+from collections import deque
 
 import inspect
 import os.path
-
-_logger = logging.getLogger('emesene')
-_console_handler = logging.StreamHandler()
-_formatter = logging.Formatter('[%(asctime)s %(caller)s] %(message)s', '%H:%M:%S')
-_console_handler.setFormatter(_formatter)
-_console_handler.setLevel(logging.INFO)
-_logger.addHandler(_console_handler)
-_logger.setLevel(logging.DEBUG)
-
 
 def _build_caller():
     #Get class.method_name. Not used now, but could be useful
@@ -87,5 +79,35 @@ def critical(text, caller):
     if not caller:
         caller = _build_caller()
     _logger.critical(text, extra={'caller':caller})
+
+
+class IdleHandler(logging.Handler):
+    def __init__(self, maxlen=50):
+        logging.Handler.__init__(self)
+        self.queue = deque(maxlen=maxlen)
+
+    def emit(self, record):
+        self.queue.append(record)
+
+    def get_all(self):
+        l = len(self.queue)
+        for i in range(l):
+            record = self.queue.pop()
+            self.queue.appendleft(record)
+            yield record
+
+_logger = logging.getLogger('emesene')
+_console_handler = logging.StreamHandler()
+_formatter = logging.Formatter('[%(asctime)s %(caller)s] %(message)s', '%H:%M:%S')
+_console_handler.setFormatter(_formatter)
+_console_handler.setLevel(logging.INFO)
+_logger.addHandler(_console_handler)
+
+idle_handler = IdleHandler()
+idle_handler.setFormatter(_formatter)
+idle_handler.setLevel(logging.DEBUG)
+_logger.addHandler(idle_handler)
+
+_logger.setLevel(logging.DEBUG)
 
 

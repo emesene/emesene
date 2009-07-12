@@ -4,6 +4,7 @@ import pango
 
 from debugger import warning,debug
 from debugger import _logger
+from debugger import idle_handler
 import logging
 
 class DebugWindow():
@@ -116,6 +117,8 @@ class DebugStore( gtk.ListStore, logging.Handler ):
         logging.Handler.__init__(self)
         self.custom_filter = self.filter_new()
         
+        for message in idle_handler.get_all():
+            self.on_message_added(message)
         #for message in _logger.get_all():
         #    self.on_message_added(message)
         #_logger.connect('message-added', self.on_message_added)
