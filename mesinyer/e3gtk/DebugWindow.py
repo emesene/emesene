@@ -2,7 +2,7 @@
 import gtk
 import pango
 
-from debugger import warning
+from debugger import warning,debug
 from debugger import _logger
 import logging
 
@@ -51,17 +51,20 @@ class DebugWindow():
         pattern = self.filter_entry.get_text()
         self.view.filter_caller(pattern)
 
+    def safely_close(self):
+        self.window.hide()
+        _logger.removeHandler(self.store)
     def on_add(self, button, data=None):
         caller = self.test_entry.get_text()
         #self.store.append([caller, "just a test"])
         self.store.add({'category':caller, 'message':'just a test'})
 
     def on_close(self, button, data=None):
-        self.window.hide()
+        self.safely_close()
         return False
 
     def on_delete(self, widget, event, data=None):
-        self.window.hide()
+        self.safely_close()
         return False
 
 class DebugView( gtk.TextView ):
