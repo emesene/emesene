@@ -130,7 +130,7 @@ class DebugStore( gtk.ListStore, logging.Handler ):
         self.on_message_added(record)
     
     def on_message_added(self, message):
-        self.append([message.caller, message.msg, message.levelno])
+        self.append([message.caller, message.msg.strip(), message.levelno])
 
     def filter_caller( self, name ):
         '''displays only the messages whose caller matches "name"'''
