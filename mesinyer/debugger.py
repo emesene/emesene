@@ -81,7 +81,7 @@ def critical(text, caller):
     _logger.critical(text, extra={'caller':caller})
 
 
-class IdleHandler(logging.Handler):
+class QueueHandler(logging.Handler):
     def __init__(self, maxlen=50):
         logging.Handler.__init__(self)
         self.queue = deque(maxlen=maxlen)
@@ -103,10 +103,10 @@ _console_handler.setFormatter(_formatter)
 _console_handler.setLevel(logging.INFO)
 _logger.addHandler(_console_handler)
 
-idle_handler = IdleHandler()
-idle_handler.setFormatter(_formatter)
-idle_handler.setLevel(logging.DEBUG)
-_logger.addHandler(idle_handler)
+queue_handler = QueueHandler()
+queue_handler.setFormatter(_formatter)
+queue_handler.setLevel(logging.DEBUG)
+_logger.addHandler(queue_handler)
 
 _logger.setLevel(logging.DEBUG)
 
