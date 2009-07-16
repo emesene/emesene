@@ -1,5 +1,6 @@
 import extension
 from interfaces.bar import IBar
+import plugin_base
 
 class IFoo:
     '''this can extend bar'''
@@ -8,8 +9,8 @@ class IFoo:
         raise NotImplementedError
 
 
+@plugin_base.implements(IBar)
 class Bar:
-    implements = (IBar)
     print 'bar is parsed'
     def __init__(self):
         assert extension.is_implementation(Bar, IBar)
