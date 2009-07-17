@@ -104,7 +104,6 @@ _console_handler.setLevel(logging.INFO)
 _logger.addHandler(_console_handler)
 
 queue_handler = QueueHandler()
-queue_handler.setFormatter(_formatter)
 queue_handler.setLevel(logging.DEBUG)
 _logger.addHandler(queue_handler)
 

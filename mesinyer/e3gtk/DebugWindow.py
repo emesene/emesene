@@ -1,4 +1,6 @@
 '''A module to handle a debug console'''
+import time
+
 import gtk
 import pango
 
@@ -106,29 +108,36 @@ class DebugBuffer( gtk.TextBuffer ):
 
         self.create_tag("caller", weight=pango.WEIGHT_BOLD)
         self.create_tag("message")
+        self.create_tag("level", invisible=True) #if we find a good style it could be useful
+        self.create_tag("time", scale=pango.SCALE_SMALL, weight=pango.WEIGHT_LIGHT)
 
         self.iter = self.get_start_iter()
         for row in store:
-            self.insert_with_tags_by_name(self.iter, row[0], "caller")
-            self.insert_with_tags_by_name(self.iter, ": " + row[1], "message")
-            self.insert(self.iter, '\n')
+            self.add_line(row[0], row[1], row[2], row[3])
 
         store.connect("row-changed", self.on_store_insert)
-
 
     def on_store_insert(self, model, path, iter):
         caller = model.get_value(iter, 0)
         message =  model.get_value(iter, 1)
         level =  model.get_value(iter, 2)
-        if caller and message and level:
-            self.insert_with_tags_by_name(self.iter, caller, "caller")
-            self.insert_with_tags_by_name(self.iter, ": " + message + '\n', "message")
+        date = model.get_value(iter, 3)
+        self.add_line(caller,message,level, date)
+
+    def add_line(self, caller, message, level, date):
+        if caller and message and level and date:
+            record_date = time.localtime(float(date))
+            record_time = time.strftime("%H:%M:%S", record_date)
+            self.insert_with_tags_by_name(self.iter, "(%s) " % record_time, "time")
+            self.insert_with_tags_by_name(self.iter, "%s " % level, "level")
+            self.insert_with_tags_by_name(self.iter, caller + ":" , "caller")
+            self.insert_with_tags_by_name(self.iter, message + '\n', "message")
 
 class DebugStore( gtk.ListStore, logging.Handler ):
     '''A ListStore with filtering and more, optimized for debug'''
     def __init__( self):
         '''constructor'''
-        gtk.ListStore.__init__(self, str, str, int) #caller, message
+        gtk.ListStore.__init__(self, str, str, int, str) #caller, message, level, time
         logging.Handler.__init__(self)
         self.custom_filter = self.filter_new()
         
@@ -142,7 +151,7 @@ class DebugStore( gtk.ListStore, logging.Handler ):
         self.on_message_added(record)
     
     def on_message_added(self, message):
-        self.append([message.caller, message.msg.strip(), message.levelno])
+        self.append([message.caller, message.msg.strip(), message.levelno, message.created])
 
     def filter_caller( self, name, level ):
         '''
