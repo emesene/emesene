@@ -12,8 +12,9 @@ except ImportError, description:
 
 if not ERROR:
     BUS_NAME = "com.emesene"
+    BUS_PATH = "/com/emesene"
 
-    def create_dbusmethod(func, in_sign, out_sign):
+    def create_dbusmethod(name, func, in_sign, out_sign):
         type_map = {int: 'i', str:'s', list:'a', dict:'d'}
         if not out_sign:
             out_string = None
@@ -31,16 +32,16 @@ if not ERROR:
                 if typ in type_map:
                     in_string = '%s%s' % (in_string, type_map[typ])
         
+        real_func_name = func.__name__
+        func.__name__ = 'callback' #so ugly hack, but it makes the magic work
         class DBusMethod(dbus.service.Object):
+            #we are decorating func!
+            callback =  dbus.service.method('%s.%s' % (BUS_NAME,name),
+                    in_signature=in_string, out_signature=out_string)(func)
             def __init__(self):
                 bus_name = dbus.service.BusName(BUS_NAME, bus=dbus.SessionBus())
-                dbus.service.Object.__init__(self, bus_name, '/com/emesene/%s' % func.__name__)
-                self.func = func
+                dbus.service.Object.__init__(self, bus_name, '%s/%s' % (BUS_PATH, real_func_name))
 
-            @dbus.service.method(BUS_NAME+'.extra', in_signature=in_string, out_signature=out_string)
-            def callback(self, *args, **kwargs):
-                return self.func(*args, **kwargs)
-        
         method = DBusMethod()
         return method
 
@@ -53,7 +54,7 @@ if not ERROR:
             self.bus_name = dbus.service.BusName(BUS_NAME, bus=self.session_bus)
 
         def expose_method(self, name, callback, input_types, output_types):
-            create_dbusmethod(callback, input_types, output_types)
+            create_dbusmethod(name, callback, input_types, output_types)
 
         def delete_method(self, name, callback):
             return True
