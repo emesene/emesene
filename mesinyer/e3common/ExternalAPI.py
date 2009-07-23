@@ -53,11 +53,15 @@ if not ERROR:
             self.session_bus = dbus.SessionBus()
             self.bus_name = dbus.service.BusName(BUS_NAME, bus=self.session_bus)
 
-        def expose_method(self, name, callback, input_types, output_types):
-            create_dbusmethod(name, callback, input_types, output_types)
+            self.objects = {} #name: instance
 
-        def delete_method(self, name, callback):
-            return True
+        def expose_method(self, name, callback, input_types, output_types):
+            if name in self.objects:
+                self.delete_method(name)
+            self.objects[name] = create_dbusmethod(name, callback, input_types, output_types)
+
+        def delete_method(self, name):
+            self.objects[name].remove_from_connection()
 
     extension.register('external api', DBus)
 
