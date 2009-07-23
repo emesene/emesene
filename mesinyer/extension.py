@@ -253,3 +253,11 @@ def _get_class_name(cls):
 
     return path
 
+
+def implements(*interfaces):
+    '''decorator to nicely show which interfaces we are implementing'''
+    def _impl(typ):
+        typ.implements = interfaces
+        return typ
+    return _impl
+

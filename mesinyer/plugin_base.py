@@ -4,14 +4,6 @@ It will be inherited by every plugin.
 
 '''
 
-def implements(*interfaces):
-    '''decorators to nicely show which interfaces we are implementing'''
-    def _impl(typ):
-        typ.implements = interfaces
-        return typ
-    return _impl
-
-
 class PluginBase:
     def __init__(self):
         pass
