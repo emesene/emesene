@@ -4,7 +4,7 @@ import time
 import base64
 import gobject
 
-import debugger
+from debugger import warning
 
 import e3
 import gui
@@ -16,6 +16,8 @@ import protocol
 
 from pluginmanager import get_pluginmanager
 import extension
+import interfaces
+
 import e3gtk
 
 class Controller(object):
@@ -49,6 +51,7 @@ class Controller(object):
         extension.category_register('notification', e3common.notification.notify)
         extension.category_register('history exporter',
                 protocol.Logger.save_logs_as_txt)
+        extension.category_register('external api', None, interfaces.IExternalAPI)
 
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
@@ -398,6 +401,16 @@ class Controller(object):
         handler = e3common.TrayIconHandler(self.session, gui.theme,
             self.on_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler, self.window)
+
+        self.external_api = []
+        for ext in extension.get_extensions('external api').values():
+            try:
+                inst = ext()
+            except Exception, description: #on error, just discard it
+                warning("errors occured when instancing %s: '%s'" % (str(ext), str(description)))
+            else:
+                self.external_api.append(inst)
+
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
