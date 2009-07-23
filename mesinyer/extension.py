@@ -93,6 +93,24 @@ class Category(object):
         self.classes[class_name] = cls
         self.ids[cls] = class_name
 
+    def set_interfaces(self, interfaces):
+        '''
+        If this category doesn't have an interface, just add it and delete
+        all extensions that doesn't match our interface and return True.
+        If an interface is already set, return False.
+        '''
+        if not self.interfaces:
+            self.interfaces = tuple(interfaces)
+            for cls in self.classes:
+                for interface in self.interfaces:
+                    if not is_implementation(cls, interface):
+                        self.classes.remove(cls)
+            return True
+        else:
+            return False
+
+            
+
     def get_extensions(self):
         '''return a dict of the available extensions id:class'''
         return self.classes
@@ -127,8 +145,10 @@ _categories = {} #'CategoryName': Category('ClassName')
 
 def category_register(category, system_default, *interfaces):
     '''Add a category'''
-    if category not in _categories:
+    if category not in _categories: #doesn't exist
         _categories[category] = Category(category, system_default, interfaces)
+    else: #already exist
+        _categories[category].set_interface(interfaces)
 
 def register(category_name, cls):
     '''Register cls as an Extension for category.
@@ -137,7 +157,9 @@ def register(category_name, cls):
     If exists register the cls and return True
     '''
     category = get_category(category_name)
-    if category is not None:
+    if category is None: #doesn't exist
+        return category_register(category_name, cls)
+    else: #already exists
         category.register(cls)
         return True
 
