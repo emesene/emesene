@@ -64,7 +64,8 @@ class Category(object):
         If it's None, no interface is required
         '''
         self.name = name
-        self.system_default = system_default
+        if system_default:
+            self.system_default = system_default
 
         if interfaces is None:
             self.interfaces = ()
@@ -93,18 +94,22 @@ class Category(object):
         self.classes[class_name] = cls
         self.ids[cls] = class_name
 
-    def set_interfaces(self, interfaces):
+    def set_interface(self, interfaces):
         '''
         If this category doesn't have an interface, just add it and delete
         all extensions that doesn't match our interface and return True.
         If an interface is already set, return False.
         '''
+        to_remove = []
         if not self.interfaces:
             self.interfaces = tuple(interfaces)
-            for cls in self.classes:
+            for cls in self.classes.values():
                 for interface in self.interfaces:
                     if not is_implementation(cls, interface):
-                        self.classes.remove(cls)
+                        to_remove.append(cls)
+            for cls in to_remove:
+                del self.classes[cls]
+
             return True
         else:
             return False
