@@ -22,7 +22,7 @@ import e3gtk
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
-
+    
     def __init__(self):
         '''class constructor'''
         self.window = None
@@ -41,7 +41,7 @@ class Controller(object):
 
         self.session = None
         self._setup()
-
+    
     def _setup(self):
         '''register core extensions'''
         extension.category_register('session', e3.Session, single_instance=True)
@@ -52,7 +52,7 @@ class Controller(object):
         extension.category_register('history exporter',
                 protocol.Logger.save_logs_as_txt)
         extension.category_register('external api', None, interfaces.IExternalAPI)
-
+        
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
             self.config.session = default_id
