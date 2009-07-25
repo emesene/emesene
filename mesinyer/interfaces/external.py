@@ -5,4 +5,9 @@ class IExternalAPI(object):
         raise NotImplementedError
     def delete_method(self, name, callback):
         raise NotImplementedError
+    def expose_event(self, name, output_types):
+        raise NotImplementedError
+    def emit_event(self, name, output_types):
+        raise NotImplementedError
+
 
