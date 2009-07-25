@@ -82,6 +82,11 @@ def critical(text, caller):
 
 
 class QueueHandler(logging.Handler):
+    '''
+    An Handler that just keeps the last messages in memory, using a queue.
+    This is useful when you want to know (i.e. in case of errors) the last
+    debug messages.
+    '''
     def __init__(self, maxlen=50):
         logging.Handler.__init__(self)
         self.queue = deque(maxlen=maxlen)
