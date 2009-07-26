@@ -79,7 +79,7 @@ class Category(object):
         self.ids = {}
 
         self.is_single = single_instance
-        self.instance = None
+        self.instance = None #a weakref to the saved (single)instance
 
         self.default_id = None
         self.default = system_default
@@ -140,6 +140,16 @@ class Category(object):
 
     default = property(fget=_get_default, fset=_set_default)
 
+    def get_instance(self):
+        '''
+        If the category is a "single interface" one, and we have an instance,
+        return it.
+        Otherwise None
+        '''
+        if self.instance:
+            return self.instance() #it could even be None (it's a weakref!)
+        return None
+
     def get_and_instantiate(self, *args, **kwargs):
         '''
         Get an instance of the default extension. 
@@ -149,8 +159,8 @@ class Category(object):
         return that one, NOT a new one.
         '''
         #check if we have a ref, and if is still valid (remember: it's a weakref!)
-        if self.instance and self.instance():
-            return self.instance()
+        if self.get_instance():
+            return self.get_instance()
         cls = self.default
         inst = cls(*args, **kwargs)
         if self.is_single:
