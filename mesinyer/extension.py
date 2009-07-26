@@ -52,12 +52,13 @@ Providing extensions
 import os
 import sys
 import traceback
+import weakref
 
 from debugger import dbg
 
 class Category(object):
     '''This completely handles a category'''
-    def __init__(self, name, system_default, interfaces):
+    def __init__(self, name, system_default, interfaces, single_instance=False):
         '''Constructor: creates a new category
         @param name: The name of the new category.
         @param interface: The interface every extension is required to match.
@@ -74,10 +75,13 @@ class Category(object):
 
         # id: class
         self.classes = {}
-        self.instances = {}
         # class: id
         self.ids = {}
 
+        self.is_single = single_instance
+        self.instance = None
+
+        self.default_id = None
         self.default = system_default
 
     def register(self, cls):
@@ -114,7 +118,6 @@ class Category(object):
         else:
             return False
 
-            
 
     def get_extensions(self):
         '''return a dict of the available extensions id:class'''
@@ -126,13 +129,34 @@ class Category(object):
         if cls not in self.ids:
             self.register(cls)
 
-        self.default_id = _get_class_name(cls)
+        id = _get_class_name(cls)
+        if self.default_id != id:
+            self.default_id = id
+            self.instance = None
 
     def _get_default(self):
         '''return the default extension for this category'''
         return self.classes[self.default_id]
 
     default = property(fget=_get_default, fset=_set_default)
+
+    def get_and_instantiate(self, *args, **kwargs):
+        '''
+        Get an instance of the default extension. 
+        If this category is a "single interface" one, it will also save
+        a reference to that instance.
+        If this method is called when a reference is already saved, it will
+        return that one, NOT a new one.
+        '''
+        if self.instance and self.is_single:
+            return self.instance
+        cls = self.default
+        inst = cls(*args, **kwargs)
+        if self.is_single:
+            self.instance = inst
+            return weakref.ref(self.instance)()
+        return inst
+
 
     def set_default_by_id(self, id_):
         '''set the default extension through its id (generated
@@ -148,10 +172,14 @@ class Category(object):
 
 _categories = {} #'CategoryName': Category('ClassName')
 
-def category_register(category, system_default, *interfaces):
+def category_register(category, system_default, interfaces=(), single_instance=False):
     '''Add a category'''
+    try:
+        iter(interfaces)
+    except TypeError:
+        interfaces = (interfaces,)
     if category not in _categories: #doesn't exist
-        _categories[category] = Category(category, system_default, interfaces)
+        _categories[category] = Category(category, system_default, interfaces, single_instance)
     else: #already exist
         _categories[category].set_interface(interfaces)
 
@@ -193,6 +221,12 @@ def get_default(category_name):
     if category is not None:
         return category.default
 
+    return None
+
+def get_and_instantiate(category_name, *args, **kwargs):
+    category = get_category(category_name)
+    if category is not None:
+        return category.get_and_instantiate(*args, **kwargs)
     return None
 
 def set_default(category_name, cls):
