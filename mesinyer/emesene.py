@@ -41,7 +41,7 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', e3.Session)
+        extension.category_register('session', e3.Session, single_instance=True)
         extension.register('session', yaber.Session)
         extension.register('session', dummy.Session)
         extension.category_register('sound', e3common.play_sound.play)
@@ -63,8 +63,7 @@ class Controller(object):
         if self.session is not None:
             self.session.quit()
 
-        Session = extension.get_default('session')
-        self.session = Session()
+        self.session = extension.get_and_instantiate('session')
         self.session.signals = gui.Signals(protocol.EVENTS,
             self.session.events)
         self.session.signals.login_succeed.subscribe(self.on_login_succeed)
