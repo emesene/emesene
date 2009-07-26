@@ -148,13 +148,14 @@ class Category(object):
         If this method is called when a reference is already saved, it will
         return that one, NOT a new one.
         '''
-        if self.instance and self.is_single:
-            return self.instance
+        #check if we have a ref, and if is still valid (remember: it's a weakref!)
+        if self.instance and self.instance():
+            return self.instance()
         cls = self.default
         inst = cls(*args, **kwargs)
         if self.is_single:
-            self.instance = inst
-            return weakref.ref(self.instance)()
+            self.instance = weakref.ref(inst)
+            return inst
         return inst
 
 
