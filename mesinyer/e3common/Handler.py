@@ -93,6 +93,11 @@ class OptionsHandler(object):
         Preferences = extension.get_default('preferences')
         Preferences(self.session).show()
 
+    def on_plugins_selected(self):
+        '''called when the plugins button is selected'''
+        Plugins = extension.get_default('plugin window')
+        Plugins().show_all()
+
 
 class HelpHandler(object):
     '''this handler contains all the handlers needed to handle the help

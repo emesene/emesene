@@ -30,6 +30,7 @@ def main(Controller):
     import ConversationManager
     import ConversationToolbar
     import DebugWindow
+    import PluginWindow
 
     setup()
     gobject.threads_init()
@@ -76,6 +77,8 @@ def setup():
     extension.category_register('conversation input', TextBox.InputText)
     extension.category_register('conversation toolbar', \
         ConversationToolbar.ConversationToolbar)
+    extension.category_register('plugin window', \
+        PluginWindow.PluginWindow)
 
     if not WebKitTextBox.ERROR:
         extension.category_register('conversation output', WebKitTextBox.OutputText)

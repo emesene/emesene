@@ -14,6 +14,7 @@ import dummy
 import e3common
 import protocol
 
+from pluginmanager import get_pluginmanager
 import extension
 import e3gtk
 
@@ -56,6 +57,7 @@ class Controller(object):
             default_id = self.config.session
 
         extension.set_default_by_id('session', default_id)
+        get_pluginmanager().scan_directory('plugins')
 
     def _new_session(self):
         '''create a new session object'''

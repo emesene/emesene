@@ -51,8 +51,6 @@ Providing extensions
 
 import os
 import sys
-import traceback
-import weakref
 
 from debugger import dbg
 
@@ -175,7 +173,6 @@ class Category(object):
         ValueError'''
 
         if id_ not in self.classes:
-            traceback.print_stack()
             dbg('extension id %s not registered on %s' % (id_, self.name,),
                 'extension')
         else:
