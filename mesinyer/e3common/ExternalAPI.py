@@ -53,12 +53,8 @@ if not ERROR:
             for typ in out_sign:
                 if typ in type_map:
                     out_string = '%s%s' % (out_string, type_map[typ])
-        code = 'def _f(inst'
-        for i in range(len(out_string)):
-            code += ', arg%d' % i
-        code += '): pass\n'
-        exec code in locals()
-        func = _f
+        #create a function with right number of arguments (len(out_string))
+        func = eval("lambda %s: None" % ','.join([chr(x + ord('a')) for x in range(len(out_string)+1)]))
 
         func.__name__ = 'event'
         class DBusEvent(dbus.service.Object):
