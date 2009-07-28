@@ -2,10 +2,8 @@
 import os
 import sys
 
-from debugger import warning,debug,info
-
-
-from contextlib import contextmanager
+from debugger import warning, info
+from copy import copy
 
 
 class PluginHandler:
@@ -23,7 +21,7 @@ class PluginHandler:
 
     def _do_import(self):
         '''Does the dirty stuff with __import__'''
-        old_syspath = sys.path
+        old_syspath = copy(sys.path)
         try:
             sys.path += [os.curdir, 'plugins']
             self.module = __import__(self.name, globals(), locals(), ['plugin'])
@@ -76,6 +74,7 @@ class PluginHandler:
 
 
 class PackageResource:
+    '''Handle various files that could be put in tha package'''
     def __init__(self, base_dir, directory):
         self.path = directory #'''Path to the package'''
         self.base_path = base_dir
@@ -95,11 +94,11 @@ class PackageResource:
         If you can use it, you're reccomended to.
         See self.get_resource for more info.
         '''
-        f = get_resource(relative_path)
-        if not f:
+        buffer = self.get_resource(relative_path)
+        if not buffer:
             return
         try:
-            yield f
+            yield buffer
         finally:
             self.close_resource(relative_path)
         
@@ -206,7 +205,7 @@ class PackageHandler:
         if self.is_active():
             self._instance.stop()
             self._instance.resource.close()
-            inst._started = False
+            self._instance._started = False
 
     def is_active(self):
         '''@return True if an instance exist and is started. False otherwise'''
@@ -271,10 +270,12 @@ class PluginManager:
         return self._plugins[name].is_active()
     
     def get_plugins(self):
+        '''return the list of plugin names'''
         return self._plugins.keys()
 
 _instance = None
 def get_pluginmanager():
+    '''instance the pluginmanager, if needed. otherwise, return it'''
     global _instance
     if _instance:
         return _instance

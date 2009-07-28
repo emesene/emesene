@@ -51,6 +51,7 @@ Providing extensions
 
 import os
 import sys
+import weakref
 
 from debugger import dbg
 
