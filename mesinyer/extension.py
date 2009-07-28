@@ -234,7 +234,25 @@ def get_default(category_name):
 
     return None
 
+def get_instance(category_name):
+    '''
+    If the category is a "single interface" one, and we have an instance,
+    return it.
+    Otherwise None
+    '''
+    category = get_category(category_name)
+    if category is not None:
+        return category.get_instance()
+    return None
+
 def get_and_instantiate(category_name, *args, **kwargs):
+    '''
+    Get an instance of the default extension. 
+    If this category is a "single interface" one, it will also save
+    a reference to that instance.
+    If this method is called when a reference is already saved, it will
+    return that one, NOT a new one.
+    '''
     category = get_category(category_name)
     if category is not None:
         return category.get_and_instantiate(*args, **kwargs)
