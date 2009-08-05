@@ -32,6 +32,7 @@ from debugger import dbg
 from e3common import Plus
 import RichBuffer
 
+@extension.implements('nick renderer')
 class CellRendererPlus(gtk.GenericCellRenderer):
     __gproperties__ = {
             'markup': (gobject.TYPE_STRING,
@@ -181,8 +182,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         self.set_model(self.model)
 
-        #crt = gtk.CellRendererText()
-        crt = CellRendererPlus()
+        crt = extension.get_default('nick renderer')()
         #crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr_status = gtk.CellRendererPixbuf()
 
