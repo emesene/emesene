@@ -190,6 +190,10 @@ def msnplus(msnplus):
     message_stack = [{'tag':'', 'childs':[]}]
     return DictObj(dictlike)
 
+def msnplus_strip(msnplus):
+    tag_re = re.compile('\[/?\w(=\d+)?\]')
+    return tag_re.sub('', msnplus)
+
 if __name__ == '__main__':
     nick = '''[a=5]foo[b]bar[/b] rulez, [i]ain't it?[/i][/a=3] we say'''
     nick = '''Implement[i]ing[/i] [c=2]MSN[/c] [c=3]PLUS[/c]'''
