@@ -17,7 +17,7 @@ COLOR_MAP = (
 
 open_tag_re = re.compile('''(.*?)\[(/?)(\w)(\=(\d+))?\]''')
 message_stack = [{'tag':'', 'childs':[]}]
-def msnplus_to_dict(msnplus):
+def _msnplus_to_dict(msnplus):
     '''convert it into a dict, as the one used by XmlParser'''
     #STATUS: seems to work! (with gradients too)
     match = open_tag_re.match(msnplus)
@@ -42,24 +42,24 @@ def msnplus_to_dict(msnplus):
         tag_we_re_closing = message_stack.pop() #-1
         message_stack[-1]['childs'].append(tag_we_re_closing)
     #go recursive!
-    msnplus_to_dict(msnplus[len(match.group(0)):])
+    _msnplus_to_dict(msnplus[len(match.group(0)):])
 
     return {'tag':'span', 'childs':message_stack}
 
 
-def nchars_dict(msgdict):
+def _nchars_dict(msgdict):
     '''count how many character are there'''
     nchars = 0
     for child in msgdict['childs']:
         if type(child) == str:
             nchars += len(child)
         else:
-            nchars += nchars_dict(child)
+            nchars += _nchars_dict(child)
 
     return nchars
 
 #stolen from mohrtutchy: ty!
-def color_gradient(col1,col2,length):
+def _color_gradient(col1,col2,length):
     '''returns a list of colors. Its length is length'''
     def dec2hex(n):
         """return the hexadecimal string representation of integer n"""
@@ -107,7 +107,7 @@ def color_gradient(col1,col2,length):
        colors[i] = R[i] + G[i] + B[i]
     return colors
 
-def hex_colors(msgdict):
+def _hex_colors(msgdict):
     '''convert colors to hex'''
     if msgdict['tag']:
         tag = msgdict['tag']
@@ -124,8 +124,8 @@ def hex_colors(msgdict):
                     msgdict[tag] = COLOR_MAP[int(param)]
     for child in msgdict['childs']:
         if child and type(child) != str:
-            hex_colors(child)
-def gradientify_string(msg, attr, colors):
+            _hex_colors(child)
+def _gradientify_string(msg, attr, colors):
     '''apply sequence "colors" of colors (type attr) to msg'''
     result = {'tag':'', 'childs':[]}
     for char in msg:
@@ -133,7 +133,7 @@ def gradientify_string(msg, attr, colors):
         result['childs'].append({'tag': attr, attr:color, 'childs':[char]})
     return result
 
-def gradientify(msgdict, attr=None, colors=None):
+def _gradientify(msgdict, attr=None, colors=None):
     '''apply a gradient to that msgdict'''
     if not attr:
         attr = msgdict['tag']
@@ -141,7 +141,7 @@ def gradientify(msgdict, attr=None, colors=None):
         param_from, param_to = msgdict[attr]
         #param_from = COLOR_MAP[int(param_from)]
         #param_to = COLOR_MAP[int(param_to)]
-        colors = color_gradient(param_from, param_to, nchars_dict(msgdict))
+        colors = _color_gradient(param_from, param_to, _nchars_dict(msgdict))
         msgdict['tag'] = ''
         del msgdict[attr]
 
@@ -149,22 +149,22 @@ def gradientify(msgdict, attr=None, colors=None):
     while colors and i < len(msgdict['childs']):
         this_child = msgdict['childs'][i]
         if type(this_child) == str:
-            msgdict['childs'][i] = gradientify_string(this_child, attr, colors) #will consumate some items from colors!
+            msgdict['childs'][i] = _gradientify_string(this_child, attr, colors) #will consumate some items from colors!
         else:
-            gradientify(this_child, attr, colors)
+            _gradientify(this_child, attr, colors)
         i = i+1
 
-def dict_gradients(msgdict):
+def _dict_gradients(msgdict):
     '''apply gradients where needed'''
     if type(msgdict) != dict: return
     for subdict in msgdict['childs']:
         if type(subdict) == dict:
             tag = subdict['tag']
             if tag in subdict and type(subdict[tag]) == tuple:
-                gradientify(subdict)
-            dict_gradients(subdict)
+                _gradientify(subdict)
+            _dict_gradients(subdict)
 
-def dict_translate_tags(msgdict):
+def _dict_translate_tags(msgdict):
     '''translate 'a' to 'span' etc...'''
     #Work on this
     if msgdict['tag'] == 'a':
@@ -179,18 +179,22 @@ def dict_translate_tags(msgdict):
     #Then go recursive!
     for child in msgdict['childs']:
         if type(child) == dict:
-            dict_translate_tags(child)
+            _dict_translate_tags(child)
 
 def msnplus(msnplus):
+    '''given a string with msn+ formatting, give a DictObj
+    representing its formatting.'''
     global message_stack
-    dictlike = msnplus_to_dict(msnplus)
-    hex_colors(dictlike)
-    dict_gradients(dictlike)
-    dict_translate_tags(dictlike)
+    dictlike = _msnplus_to_dict(msnplus)
+    _hex_colors(dictlike)
+    _dict_gradients(dictlike)
+    _dict_translate_tags(dictlike)
     message_stack = [{'tag':'', 'childs':[]}]
     return DictObj(dictlike)
 
 def msnplus_strip(msnplus):
+    '''given a string with msn+ formatting, give a string with same text but 
+    without MSN+ markup'''
     tag_re = re.compile('\[/?\w(=\d+)?\]')
     return tag_re.sub('', msnplus)
 
