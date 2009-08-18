@@ -111,4 +111,14 @@ else: #ERROR
             pass
     extension.register('external api', DummyExternalAPI)
 
+class expose(object):
+	'''This is actually a decorator. It can be used to easily expose a method'''
+	def __init__(self, in_sign, out_sign):
+		self.in_sign = in_sign
+		self.out_sign = out_sign
+	
+	def __call__(self, func):
+		external = extension.get_and_instantiate('external api')
+		external.expose_method(func.__name__, func, self.in_sign, self.out_sign)
+		
 
