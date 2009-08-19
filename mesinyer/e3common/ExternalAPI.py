@@ -14,6 +14,27 @@ if not ERROR:
     BUS_NAME = "com.gtk.emesene"
     BUS_PATH = "/com/gtk/emesene"
 
+    
+    def create_function(name,Qargs):
+        '''hack to create a function with a certain number of arguments'''
+        def y():
+            pass
+        
+        y_code = types.CodeType(args,\
+                    y.func_code.co_nlocals,\
+                    y.func_code.co_stacksize,\
+                    y.func_code.co_flags,\
+                    y.func_code.co_code,\
+                    y.func_code.co_consts,\
+                    y.func_code.co_names,\
+                    y.func_code.co_varnames,\
+                    y.func_code.co_filename,\
+                    name,\
+                    y.func_code.co_firstlineno,\
+                    y.func_code.co_lnotab
+                )
+        return types.FunctionType(y_code, y.func_globals, name)
+
     def create_dbus_method(name, func, in_sign, out_sign):
         type_map = {int: 'i', str:'s', list:'a', dict:'d'}
         if not out_sign:
@@ -53,10 +74,9 @@ if not ERROR:
             for typ in out_sign:
                 if typ in type_map:
                     out_string = '%s%s' % (out_string, type_map[typ])
-        #create a function with right number of arguments (len(out_string))
-        func = eval("lambda %s: None" % ','.join([chr(x + ord('a')) for x in range(len(out_string)+1)]))
+        #create a function with right number of arguments (len(out_string+1))
+        func = create_function('event', len(out_string)+1)
 
-        func.__name__ = 'event'
         class DBusEvent(dbus.service.Object):
             event = dbus.service.signal('%s.%s' % (BUS_NAME, name),
                     signature=out_string)(func)
@@ -69,8 +89,8 @@ if not ERROR:
                 
 
 
+    @extension.implements('external api')
     class DBus(object):
-        provides=('external api', )
         def __init__(self):
             debug('instancing dbus') 
             self.loop = DBusGMainLoop(set_as_default=True)
