@@ -25,8 +25,8 @@ class PluginHandler:
         try:
             sys.path += [os.curdir, 'plugins']
             self.module = __import__(self.name, globals(), locals(), ['plugin'])
-        except ImportError, reason:
-            warning('error loading "%s": %s' % (self.name, reason))
+            self.module.Plugin #this is just to make sure that a Plugin class exists
+            #exception WON'T be catched (so they arrive to PluginManager ;)
         finally:
             sys.path = old_syspath
 
@@ -54,7 +54,7 @@ class PluginHandler:
             return False
         try:
             self._instance.start()
-            self._instance.started = True
+            self._instance._started = True
         except Exception, reason:
             warning('error starting "%s": %s' % (self.name, reason))
             return False
@@ -64,13 +64,19 @@ class PluginHandler:
         '''Stop the plugin, of course'''
         if self._instance and self.is_active():
             self._instance.stop()
-            self._instance.started = False
+            self._instance._started = False
 
     def is_active(self):
         '''@return True if an instance exist and is started. False otherwise'''
         if not self._instance:
             return False
         return self._instance.is_active()
+    
+    def get_info(self):
+        return {'description': self.module.Plugin._description,
+                'name': self.name,
+                'authors': self.module.Plugin._authors
+                }
 
 
 class PackageResource:
@@ -163,9 +169,8 @@ class PackageHandler:
             sys.path += ['.', self.base_dir]
             self.module = __import__(self.directory, globals(), None, ['plugin'])
             self.module = self.module.plugin
-        except Exception, reason:
-            warning('error importing "%s": %s' % (self.name, reason))
-            self.module = None
+            self.module.Plugin #this is just to make sure that a Plugin class exists
+            #exception WON'T be catched (so they arrive to PluginManager ;)
         finally:
             sys.path = old_syspath
 
@@ -213,6 +218,12 @@ class PackageHandler:
             return False
         return self._instance.is_active()
 
+    def get_info(self):
+        return {'description': self.module.Plugin._description,
+                'name': self.name,
+                'authors': self.module.Plugin._authors
+                }
+
 
 class PluginManager:
     '''Scan directories and manage plugins loading/unloading/control'''
@@ -232,14 +243,14 @@ class PluginManager:
                 mod = PackageHandler(dir_, directory)
                 self._plugins[mod.name] = mod
             except Exception, reason:
-                warning('Exception while importing %s:\n%s' % (directory, reason))
+                warning('Exception while importing %s: %s' % (directory, reason))
         
         for filename in [x for x in files if x.endswith('.py')]:
             try:
                 mod = PluginHandler(filename)
                 self._plugins[mod.name] = mod
             except Exception, reason:
-                warning('Exception while importing %s:\n%s' % (filename, reason))
+                warning('Exception while importing %s: %s' % (filename, reason))
     
     def plugin_start(self, name):
         '''Starts a plugin.
@@ -248,8 +259,7 @@ class PluginManager:
         if not name in self._plugins:
             return False
         info('starting plugin "%s"' % name)
-        self._plugins[name].start()
-        return True
+        return self._plugins[name].start()
     
     def plugin_stop(self, name):
         '''Stops a plugin.
@@ -269,6 +279,9 @@ class PluginManager:
             return False
         return self._plugins[name].is_active()
     
+    def get_info(self, name):
+        '''@return: a dict with info on plugin `name`'''
+        return self._plugins[name].get_info()
     def get_plugins(self):
         '''return the list of plugin names'''
         return self._plugins.keys()
