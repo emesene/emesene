@@ -5,7 +5,9 @@ It will be inherited by every plugin.
 
 '''
 
-class PluginBase:
+class PluginBase(object):
+    _description = "No description"
+    _authors = {}
     def __init__(self):
         self._started = False
         pass
