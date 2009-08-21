@@ -1,6 +1,6 @@
 '''
 This provides extensions functionality.
-You should use both if you want to provide or to use them.
+You should use this if you want to provide or to use them.
 
 Extensions in your code
 =======================
@@ -55,12 +55,90 @@ import weakref
 
 from debugger import dbg
 
+class MultipleObjects(object):
+    '''
+    Provides a simple way to do operations to a group of objects.
+
+    You could use it as if it was just one of those object, and the action you'll say will be executed on all of it.
+
+    Example
+    =======
+        Calling methods
+        ---------------
+            Suppose you want to call the method "func" of the member "x" of some objects:
+
+            C{multiple_object.x.func(some, args)}
+
+            and you're done. 
+
+        Getting return values
+        ---------------------
+            If you even want to know the result of this:
+
+            C{multiple_object.x.func(some, args).get_result()}
+
+            This return a list of results.
+
+    It will automatically handle exceptions, discarding that results.
+    B{TODO}: knowing what reported errors.
+    '''
+    def __init__(self, dict_of_objs):
+        self.objects = dict_of_objs
+
+    def get_result(self):
+        '''
+        @return: the object/return value you want
+        '''
+        return self.objects
+
+    def __str__(self):
+        return str(self.objects)
+
+    def __iter__(self):
+        for obj in self.objects:
+            yield obj
+
+    def __getattr__(self, attr):
+        result = {}
+        for (name, obj) in self.objects.items():
+            try:
+                result[name] = getattr(obj, attr)
+            except Exception, e:
+                print e
+        return MultipleObjects(result)
+
+    def __setitem__(self, key, value):
+        for (name, obj) in self.objects.items():
+            try:
+                obj[key] = value
+            except Exception, e:
+                print e
+
+    def __getitem__(self, key):
+        result = {}
+        for (name, obj) in self.objects.items():
+            try:
+                result[name] = obj[key]
+            except Exception, e:
+                print e
+        return MultipleObjects(result)
+
+    def __call__(self, *args, **kwargs):
+        result = {}
+        for (name, obj) in self.objects.items():
+            try:
+                result[name] = obj(*args, **kwargs)
+            except Exception, e:
+                print e
+        return MultipleObjects(result)
+
+
 class Category(object):
     '''This completely handles a category'''
     def __init__(self, name, system_default, interfaces, single_instance=False):
         '''Constructor: creates a new category
         @param name: The name of the new category.
-        @param interface: The interface every extension is required to match.
+        @param interfaces: The interfaces every extension is required to match.
         If it's None, no interface is required
         '''
         self.name = name
@@ -178,6 +256,9 @@ class Category(object):
                 'extension')
         else:
             self.default = self.classes[id_]
+
+    def use(self):
+        return MultipleObjects(self.get_extensions())
 
 _categories = {} #'CategoryName': Category('ClassName')
 
