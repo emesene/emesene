@@ -258,6 +258,8 @@ class Category(object):
             self.default = self.classes[id_]
 
     def use(self):
+        if self.is_single:
+            return MultipleObjects({self.default_id: self.default})
         return MultipleObjects(self.get_extensions())
 
 _categories = {} #'CategoryName': Category('ClassName')
