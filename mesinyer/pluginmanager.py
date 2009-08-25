@@ -6,7 +6,57 @@ from debugger import warning, info
 from copy import copy
 
 
-class PluginHandler:
+class BaseHandler(object):
+    def __init__(self):
+        self.name = ''
+        self._instance = None
+
+    def get_instance(self):
+        '''get the instance, if active. None otherwise'''
+        return self._instance
+    
+    def is_active(self):
+        '''@return True if an instance exist and is started. False otherwise'''
+        if not self._instance:
+            return False
+        return self._instance.is_active()
+
+    def get_info(self):
+        return {'description': self.module.Plugin._description,
+                'name': self.name,
+                'authors': self.module.Plugin._authors
+                }
+
+    def start(self):
+        '''instantiate (if necessary) and starts the plugin.
+        @return False if something goes wrong, else True.
+        '''
+        inst = self.instantiate()
+        if not inst:
+            return False
+        try:
+            inst.category_register()
+            inst.start()
+            inst.extension_register()
+            inst._started = True
+            try:
+                inst._configure = inst.configure_dialog()
+            except AttributeError:
+                pass
+        except Exception, reason:
+            warning('error starting "%s": %s' % (self.name, reason))
+            return False
+        return True
+
+    def stop(self):
+        '''Stop the plugin, of course'''
+        if self._instance and self.is_active():
+            self.do_stop()
+            self._instance._started = False
+    
+            
+
+class PluginHandler(BaseHandler):
     '''Abstraction over a plugin.
     
     Given a filename, will import it and allows to control it.
@@ -14,6 +64,7 @@ class PluginHandler:
     '''
     def __init__(self, filename):
         '''constructor'''
+        BaseHandler.__init__(self)
         self.name = filename.split('.')[0] #TODO basename
         self.module = None
         self._instance = None
@@ -40,44 +91,17 @@ class PluginHandler:
             return self._instance
         try:
             self._instance = self.module.Plugin()
-        except Exception:
+        except Exception, reason:
+            warning('error starting "%s": %s' % (self.name, reason))
             self._instance = None
 
         return self._instance
 
-    def start(self):
-        '''Instantiate (if necessary) and starts the plugin.
-        @return False if something goes wrong, else True.
-        '''
-        self.instantiate()
-        if not self._instance:
-            return False
-        try:
-            self._instance.start()
-            self._instance._started = True
-        except Exception, reason:
-            warning('error starting "%s": %s' % (self.name, reason))
-            return False
-        return True
-            
-    def stop(self):
-        '''Stop the plugin, of course'''
-        if self._instance and self.is_active():
-            self._instance.stop()
-            self._instance._started = False
-
-    def is_active(self):
-        '''@return True if an instance exist and is started. False otherwise'''
-        if not self._instance:
-            return False
-        return self._instance.is_active()
+    def do_stop(self):
+        '''It's a "submethod" of stop()'''
+        self._instance.stop()
+        self._instance._started = False
     
-    def get_info(self):
-        return {'description': self.module.Plugin._description,
-                'name': self.name,
-                'authors': self.module.Plugin._authors
-                }
-
 
 class PackageResource:
     '''Handle various files that could be put in tha package'''
@@ -145,7 +169,7 @@ class PackageResource:
             resource.close()
             
 
-class PackageHandler:
+class PackageHandler(BaseHandler):
     '''Abstraction over a plugin.
     
     Given a directory, will import the plugin.py file inside it and allows to control it.
@@ -153,7 +177,8 @@ class PackageHandler:
 
     '''
     def __init__(self, base_dir, directory):
-        '''@param directory The directory containing the package'''
+        '''@param directory The di rectory containing the package'''
+        BaseHandler.__init__(self)
         self.name = directory
         self.directory = directory
         self.base_dir = base_dir
@@ -174,8 +199,8 @@ class PackageHandler:
         finally:
             sys.path = old_syspath
 
-    def instanciate(self):
-        '''Instanciate (if not already done). 
+    def instantiate(self):
+        '''instantiate (if not already done). 
         You shouldn't need this, but you can use it for performance tweak.
         '''
         if self._instance is not None:
@@ -188,42 +213,10 @@ class PackageHandler:
             self._instance.resource = PackageResource(self.base_dir, self.directory)
         return self._instance
 
-    def start(self):
-        '''Instanciate (if necessary) and starts the plugin.
-        @return False if something goes wrong, else True.
-        '''
-        inst = self.instanciate()
-        if not inst:
-            return False
-        try:
-            inst.category_register()
-            inst.start()
-            inst.extension_register()
-            inst._started = True
-        except Exception, reason:
-            warning('error starting "%s": %s' % (self.name, reason))
-            return False
-        return True
-            
-    def stop(self):
-        '''If active, stop the plugin'''
-        if self.is_active():
-            self._instance.stop()
-            self._instance.resource.close()
-            self._instance._started = False
-
-    def is_active(self):
-        '''@return True if an instance exist and is started. False otherwise'''
-        if not self._instance:
-            return False
-        return self._instance.is_active()
-
-    def get_info(self):
-        return {'description': self.module.Plugin._description,
-                'name': self.name,
-                'authors': self.module.Plugin._authors
-                }
-
+    def do_stop(self):
+        '''It's a "submethod" of stop()'''
+        self._instance.stop()
+        self._instance.resource.close()
 
 class PluginManager:
     '''Scan directories and manage plugins loading/unloading/control'''
@@ -285,6 +278,9 @@ class PluginManager:
     def get_plugins(self):
         '''return the list of plugin names'''
         return self._plugins.keys()
+
+    def get_plugin(self, name):
+        return self._plugins[name]
 
 _instance = None
 def get_pluginmanager():

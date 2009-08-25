@@ -10,7 +10,8 @@ class PluginBase(object):
     _authors = {}
     def __init__(self):
         self._started = False
-        pass
+        self._configure = None
+
     def start(self):
         raise NotImplementedError
 
