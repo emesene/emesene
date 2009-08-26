@@ -15,7 +15,7 @@ COLOR_MAP = (
     '000047','06502F','1C5300','544D05')
 
 
-open_tag_re = re.compile('''(.*?)\[(/?)(\w)(\=(\d+))?\]''')
+open_tag_re = re.compile('''(.*?)\[(/?)(\w)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
 message_stack = [{'tag':'', 'childs':[]}]
 def _msnplus_to_dict(msnplus):
     '''convert it into a dict, as the one used by XmlParser'''
@@ -122,6 +122,8 @@ def _hex_colors(msgdict):
             else: #normal color
                 if len(param) <= 2: #is not already hex
                     msgdict[tag] = COLOR_MAP[int(param)]
+                elif param.startswith('#'):
+                    msgdict[tag] = param[1:]
     for child in msgdict['childs']:
         if child and type(child) != str:
             _hex_colors(child)
@@ -199,7 +201,7 @@ def msnplus_strip(msnplus):
     return tag_re.sub('', msnplus)
 
 if __name__ == '__main__':
-    nick = '''[a=5]foo[b]bar[/b] rulez, [i]ain't it?[/i][/a=3] we say'''
+    nick = '''[a=#f0Ff00]foo[b]bar[/b] rulez, [i]ain't it?[/i][/A] we say'''
     nick = '''Implement[i]ing[/i] [c=2]MSN[/c] [c=3]PLUS[/c]'''
 
     print 'NICK', nick
