@@ -8,13 +8,13 @@ class MessageFormatter(object):
     '''a class that holds the state of a conversation and
     format the messages according to the state and the
     format provided
-    
+
     tag list:
 
     %NICK%: the nick of the account
     %ALIAS%: the alias of the account
     %ACCOUNT%: the account identifier
-    %DISPLAYNAME%: the alias if exist otherwise the nick if exist 
+    %DISPLAYNAME%: the alias if exist otherwise the nick if exist
         otherwise the account
     %TIME%: the time of the message
     %MESSAGE%: the message with format
@@ -33,7 +33,7 @@ class MessageFormatter(object):
     def __init__(self, contact, new_line='<br/>'):
         '''constructor'''
 
-        # the contact who sends the messages 
+        # the contact who sends the messages
         self.contact = contact
         self.last_message_sender = None
         self.last_message_time = None
@@ -55,6 +55,9 @@ class MessageFormatter(object):
             '<span style="color: #A52A2A;"><b>%MESSAGE%</b></span>%NL%'
         self.nudge = \
             '<i>%DISPLAYNAME% sent you a nudge!</i>%NL%'
+        self.history = '<div class="message-history">'\
+            '<b>%TIME% %NICK%</b>: %MESSAGE%%NL%</div>'
+
 
     def format_message(self, template, message):
         '''format a message from the template, include new line
@@ -76,6 +79,15 @@ class MessageFormatter(object):
         self.last_message_sender = None
         return self.format_message(self.information, message)
 
+    def format_history(self, timestamp, nick, message):
+        '''format a history message from the templage'''
+        template = self.history
+        template = template.replace('%NL%', self.new_line)
+        template = template.replace('%NICK%', nick)
+        template = template.replace('%TIME%', timestamp)
+        template = template.replace('%MESSAGE%', message)
+        return template
+
     def format(self, contact, message_type=protocol.Message.TYPE_MESSAGE):
         '''format the message according to the template'''
         outgoing = False
@@ -91,7 +103,7 @@ class MessageFormatter(object):
         timestamp = time.time()
         self.last_message_sender = contact
         self.last_message_time = timestamp
-        
+
         if message_type == protocol.Message.TYPE_MESSAGE:
             if consecutive:
                 if outgoing:
@@ -107,21 +119,21 @@ class MessageFormatter(object):
             template = self.nudge
             self.last_message_sender = None
 
-        formated_time = time.strftime('%c', time.gmtime(timestamp)) 
+        formated_time = time.strftime('%c', time.gmtime(timestamp))
 
-        template = template.replace('%NICK%', 
+        template = template.replace('%NICK%',
             MarkupParser.escape(contact.nick))
-        template = template.replace('%ALIAS%', 
+        template = template.replace('%ALIAS%',
             MarkupParser.escape(contact.alias))
-        template = template.replace('%ACCOUNT%', 
+        template = template.replace('%ACCOUNT%',
             MarkupParser.escape(contact.account))
-        template = template.replace('%DISPLAYNAME%', 
+        template = template.replace('%DISPLAYNAME%',
             MarkupParser.escape(contact.display_name))
-        template = template.replace('%TIME%', 
+        template = template.replace('%TIME%',
             MarkupParser.escape(formated_time))
-        template = template.replace('%STATUS%', 
+        template = template.replace('%STATUS%',
             MarkupParser.escape(protocol.status.STATUS[contact.status]))
-        template = template.replace('%PERSONALMESSAGE%', 
+        template = template.replace('%PERSONALMESSAGE%',
             MarkupParser.escape(contact.message))
         template = template.replace('%NL%', self.new_line)
 
@@ -135,6 +147,6 @@ class MessageFormatter(object):
         else:
             first = template
             last = ''
-                
-        return (is_raw, consecutive, outgoing, first, last) 
+
+        return (is_raw, consecutive, outgoing, first, last)
 

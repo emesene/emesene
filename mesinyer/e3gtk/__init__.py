@@ -29,6 +29,8 @@ def main(Controller):
     import WebKitTextBox
     import ConversationManager
     import ConversationToolbar
+    import DebugWindow
+    import PluginWindow
 
     setup()
     gobject.threads_init()
@@ -46,14 +48,20 @@ def setup():
     """
     define all the components for a gtk environment
     """
+    import gtk
+
     extension.category_register('dialog', Dialog.Dialog)
     extension.category_register('preferences', Preferences.Preferences)
     extension.category_register('login window', Login.Login)
     extension.category_register('window frame', Window.Window)
     extension.category_register('main window', MainWindow.MainWindow)
     extension.category_register('contact list', ContactList.ContactList)
+    extension.category_register('nick renderer', ContactList.CellRendererPlus)
+    extension.register('nick renderer', gtk.CellRendererText)
+    extension.register('nick renderer', ContactList.CellRendererNoPlus)
     extension.category_register('user panel', UserPanel.UserPanel)
     extension.category_register('tray icon', TrayIcon.TrayIcon)
+    extension.category_register('debug window', DebugWindow.DebugWindow)
 
     extension.category_register('main menu', MainMenu.MainMenu)
     extension.category_register('menu file', MainMenu.FileMenu)
@@ -74,6 +82,8 @@ def setup():
     extension.category_register('conversation input', TextBox.InputText)
     extension.category_register('conversation toolbar', \
         ConversationToolbar.ConversationToolbar)
+    extension.category_register('plugin window', \
+        PluginWindow.PluginWindow)
 
     if not WebKitTextBox.ERROR:
         extension.category_register('conversation output', WebKitTextBox.OutputText)

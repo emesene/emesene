@@ -1,6 +1,6 @@
 '''
 This provides extensions functionality.
-You should use both if you want to provide or to use them.
+You should use this if you want to provide or to use them.
 
 Extensions in your code
 =======================
@@ -51,20 +51,99 @@ Providing extensions
 
 import os
 import sys
-import traceback
+import weakref
 
 from debugger import dbg
 
+class MultipleObjects(object):
+    '''
+    Provides a simple way to do operations to a group of objects.
+
+    You could use it as if it was just one of those object, and the action you'll say will be executed on all of it.
+
+    Example
+    =======
+        Calling methods
+        ---------------
+            Suppose you want to call the method "func" of the member "x" of some objects:
+
+            C{multiple_object.x.func(some, args)}
+
+            and you're done. 
+
+        Getting return values
+        ---------------------
+            If you even want to know the result of this:
+
+            C{multiple_object.x.func(some, args).get_result()}
+
+            This return a list of results.
+
+    It will automatically handle exceptions, discarding that results.
+    B{TODO}: knowing what reported errors.
+    '''
+    def __init__(self, dict_of_objs):
+        self.objects = dict_of_objs
+
+    def get_result(self):
+        '''
+        @return: the object/return value you want
+        '''
+        return self.objects
+
+    def __str__(self):
+        return str(self.objects)
+
+    def __iter__(self):
+        for obj in self.objects:
+            yield obj
+
+    def __getattr__(self, attr):
+        result = {}
+        for (name, obj) in self.objects.items():
+            try:
+                result[name] = getattr(obj, attr)
+            except Exception, e:
+                print e
+        return MultipleObjects(result)
+
+    def __setitem__(self, key, value):
+        for (name, obj) in self.objects.items():
+            try:
+                obj[key] = value
+            except Exception, e:
+                print e
+
+    def __getitem__(self, key):
+        result = {}
+        for (name, obj) in self.objects.items():
+            try:
+                result[name] = obj[key]
+            except Exception, e:
+                print e
+        return MultipleObjects(result)
+
+    def __call__(self, *args, **kwargs):
+        result = {}
+        for (name, obj) in self.objects.items():
+            try:
+                result[name] = obj(*args, **kwargs)
+            except Exception, e:
+                print e
+        return MultipleObjects(result)
+
+
 class Category(object):
     '''This completely handles a category'''
-    def __init__(self, name, system_default, interfaces):
+    def __init__(self, name, system_default, interfaces, single_instance=False):
         '''Constructor: creates a new category
         @param name: The name of the new category.
-        @param interface: The interface every extension is required to match.
+        @param interfaces: The interfaces every extension is required to match.
         If it's None, no interface is required
         '''
         self.name = name
-        self.system_default = system_default
+        if system_default:
+            self.system_default = system_default
 
         if interfaces is None:
             self.interfaces = ()
@@ -73,10 +152,13 @@ class Category(object):
 
         # id: class
         self.classes = {}
-        self.instances = {}
         # class: id
         self.ids = {}
 
+        self.is_single = single_instance
+        self.instance = None #a weakref to the saved (single)instance
+
+        self.default_id = None
         self.default = system_default
 
     def register(self, cls):
@@ -93,6 +175,27 @@ class Category(object):
         self.classes[class_name] = cls
         self.ids[cls] = class_name
 
+    def set_interface(self, interfaces):
+        '''
+        If this category doesn't have an interface, just add it and delete
+        all extensions that doesn't match our interface and return True.
+        If an interface is already set, return False.
+        '''
+        to_remove = []
+        if not self.interfaces:
+            self.interfaces = tuple(interfaces)
+            for cls in self.classes.values():
+                for interface in self.interfaces:
+                    if not is_implementation(cls, interface):
+                        to_remove.append(cls)
+            for cls in to_remove:
+                del self.classes[cls]
+
+            return True
+        else:
+            return False
+
+
     def get_extensions(self):
         '''return a dict of the available extensions id:class'''
         return self.classes
@@ -103,7 +206,10 @@ class Category(object):
         if cls not in self.ids:
             self.register(cls)
 
-        self.default_id = _get_class_name(cls)
+        id = _get_class_name(cls)
+        if self.default_id != id:
+            self.default_id = id
+            self.instance = None
 
     def _get_default(self):
         '''return the default extension for this category'''
@@ -111,24 +217,63 @@ class Category(object):
 
     default = property(fget=_get_default, fset=_set_default)
 
+    def get_instance(self):
+        '''
+        If the category is a "single interface" one, and we have an instance,
+        return it.
+        Otherwise None
+        '''
+        if self.instance:
+            return self.instance() #it could even be None (it's a weakref!)
+        return None
+
+    def get_and_instantiate(self, *args, **kwargs):
+        '''
+        Get an instance of the default extension. 
+        If this category is a "single interface" one, it will also save
+        a reference to that instance.
+        If this method is called when a reference is already saved, it will
+        return that one, NOT a new one.
+        '''
+        #check if we have a ref, and if is still valid (remember: it's a weakref!)
+        if self.get_instance():
+            return self.get_instance()
+        cls = self.default
+        inst = cls(*args, **kwargs)
+        if self.is_single:
+            self.instance = weakref.ref(inst)
+            return inst
+        return inst
+
+
     def set_default_by_id(self, id_):
         '''set the default extension through its id (generated
         by _get_class_name method), if the id is not available it will raise
         ValueError'''
 
         if id_ not in self.classes:
-            traceback.print_stack()
             dbg('extension id %s not registered on %s' % (id_, self.name,),
                 'extension')
         else:
             self.default = self.classes[id_]
 
+    def use(self):
+        if self.is_single:
+            return MultipleObjects({self.default_id: self.default})
+        return MultipleObjects(self.get_extensions())
+
 _categories = {} #'CategoryName': Category('ClassName')
 
-def category_register(category, system_default, *interfaces):
+def category_register(category, system_default, interfaces=(), single_instance=False):
     '''Add a category'''
-    if category not in _categories:
-        _categories[category] = Category(category, system_default, interfaces)
+    try:
+        iter(interfaces)
+    except TypeError:
+        interfaces = (interfaces,)
+    if category not in _categories: #doesn't exist
+        _categories[category] = Category(category, system_default, interfaces, single_instance)
+    else: #already exist
+        _categories[category].set_interface(interfaces)
 
 def register(category_name, cls):
     '''Register cls as an Extension for category.
@@ -137,7 +282,9 @@ def register(category_name, cls):
     If exists register the cls and return True
     '''
     category = get_category(category_name)
-    if category is not None:
+    if category is None: #doesn't exist
+        return category_register(category_name, cls)
+    else: #already exists
         category.register(cls)
         return True
 
@@ -166,6 +313,30 @@ def get_default(category_name):
     if category is not None:
         return category.default
 
+    return None
+
+def get_instance(category_name):
+    '''
+    If the category is a "single interface" one, and we have an instance,
+    return it.
+    Otherwise None
+    '''
+    category = get_category(category_name)
+    if category is not None:
+        return category.get_instance()
+    return None
+
+def get_and_instantiate(category_name, *args, **kwargs):
+    '''
+    Get an instance of the default extension. 
+    If this category is a "single interface" one, it will also save
+    a reference to that instance.
+    If this method is called when a reference is already saved, it will
+    return that one, NOT a new one.
+    '''
+    category = get_category(category_name)
+    if category is not None:
+        return category.get_and_instantiate(*args, **kwargs)
     return None
 
 def set_default(category_name, cls):
@@ -225,4 +396,12 @@ def _get_class_name(cls):
     path += ':' + cls.__name__
 
     return path
+
+
+def implements(*interfaces):
+    '''decorator to nicely show which interfaces we are implementing'''
+    def _impl(typ):
+        typ.implements = interfaces
+        return typ
+    return _impl
 

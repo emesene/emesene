@@ -8,8 +8,8 @@ class IFoo:
         raise NotImplementedError
 
 
+@extension.implements(IBar)
 class Bar:
-    implements = (IBar)
     print 'bar is parsed'
     def __init__(self):
         assert extension.is_implementation(Bar, IBar)

@@ -152,6 +152,8 @@ class OptionsMenu(gtk.Menu):
         self.plugins = gtk.ImageMenuItem('Plug_ins')
         self.plugins.set_image(gtk.image_new_from_stock(gtk.STOCK_CONNECT,
             gtk.ICON_SIZE_MENU))
+        self.plugins.connect('activate',
+            lambda *args: self.handler.on_plugins_selected())
 
         self.by_status.connect('toggled', 
             lambda *args: self.handler.on_order_by_status_toggled(
@@ -202,5 +204,10 @@ class HelpMenu(gtk.Menu):
         self.about.connect('activate',
             lambda *args: self.handler.on_about_selected())
 
+        self.debug = gtk.MenuItem('Debug')
+        self.debug.connect('activate',
+                lambda *args: self.handler.on_debug_selected())
+
         self.append(self.website)
         self.append(self.about)
+        self.append(self.debug)

@@ -95,6 +95,17 @@ class Dialog(object):
         window.hide()
 
     @classmethod
+    def chooser_cb(cls, widget, window, response_cb, response):
+        '''callback user for dialogs that contain a chooser, return the
+        status and the selected file'''
+        filename = window.chooser.get_filename()
+
+        if response_cb:
+            response_cb(response, filename)
+
+        window.hide()
+
+    @classmethod
     def entry_cb(cls, widget, window, response_cb, *args):
         '''callback called when the entry is activated, it call the response
         callback with the stock.ACCEPT and append the value of the entry
@@ -215,6 +226,24 @@ class Dialog(object):
         vbox.show_all()
 
         return window
+
+    @classmethod
+    def save_as(cls, current_path, response_cb, title=_("Save as")):
+        '''show a save as dialog with the current directory set to path.
+        the buttons should display a cancel and save buttons.
+         the posible reasons are stock.CANCEL, stock.SAVE and stock.CLOSE'''
+        window = cls.new_window(title, response_cb)
+        window.set_default_size(640, 480)
+        chooser = gtk.FileChooserWidget(gtk.FILE_CHOOSER_ACTION_SAVE)
+        chooser.set_current_folder(current_path)
+        setattr(window, 'chooser', chooser)
+        window.hbox.pack_start(chooser)
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
+            cls.chooser_cb)
+        cls.add_button(window, gtk.STOCK_SAVE, stock.SAVE, response_cb,
+            cls.chooser_cb)
+
+        window.show_all()
 
     @classmethod
     def error(cls, message, response_cb=None, title=_("Error!")):

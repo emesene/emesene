@@ -43,6 +43,7 @@ import e3common
 import papylib
 import protocol
 
+from pluginmanager import get_pluginmanager
 import extension
 import e3gtk
 
@@ -70,12 +71,14 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', e3.Session)
+        extension.category_register('session', e3.Session, single_instance=True)
         extension.register('session', papylib.Session)
         extension.register('session', yaber.Session)
         extension.register('session', dummy.Session)
         extension.category_register('sound', e3common.play_sound.play)
         extension.category_register('notification', e3common.notification.notify)
+        extension.category_register('history exporter',
+                protocol.Logger.save_logs_as_txt)
 
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
@@ -84,6 +87,7 @@ class Controller(object):
             default_id = self.config.session
 
         extension.set_default_by_id('session', default_id)
+        get_pluginmanager().scan_directory('plugins')
 
     def _new_session(self):
         '''create a new session object'''
@@ -91,8 +95,7 @@ class Controller(object):
         if self.session is not None:
             self.session.quit()
 
-        Session = extension.get_default('session')
-        self.session = Session()
+        self.session = extension.get_and_instantiate('session')
         self.session.signals = gui.Signals(protocol.EVENTS,
             self.session.events)
         self.session.signals.login_succeed.subscribe(self.on_login_succeed)
