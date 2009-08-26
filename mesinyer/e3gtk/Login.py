@@ -19,7 +19,7 @@ class Login(gtk.Alignment):
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
 
-        account = account or protocol.Account("", "", protocol.status.ONLINE)
+        account = account or protocol.Account('', '', protocol.status.ONLINE)
         self.callback = callback
         self.on_preferences_changed = on_preferences_changed
         self.accounts = accounts or {}
@@ -36,8 +36,8 @@ class Login(gtk.Alignment):
         else:
             self.proxy = proxy
 
-        completion = gtk.EntryCompletion()
         liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
+        completion = gtk.EntryCompletion()
         completion.set_model(liststore)
         pixbufcell = gtk.CellRendererPixbuf()
         completion.pack_start(pixbufcell)
@@ -48,18 +48,17 @@ class Login(gtk.Alignment):
         pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
 
         for mail in sorted(self.accounts):
-            liststore.append([mail, pixbuf])
+            liststore.append([mail, utils.scale_nicely(pixbuf)])
 
-        self.txt_account = gtk.Entry()
-
-        if account:
-            self.txt_account.set_text(account.account)
-
-        self.txt_account.set_completion(completion)
-        self.txt_account.connect('key-press-event',
+        self.cmb_account = gtk.ComboBoxEntry(liststore, 0)
+        self.cmb_account.get_children()[0].set_completion(completion)
+        self.cmb_account.connect('key-press-event',
             self._on_account_key_press)
-        self.txt_account.connect('changed',
+        self.cmb_account.connect('changed',
             self._on_account_changed)
+        
+        if account:
+            self.cmb_account.prepend_text(account.account)
 
         self.btn_status = StatusButton.StatusButton()
 
@@ -76,8 +75,8 @@ class Login(gtk.Alignment):
             self._on_password_key_press)
         
 
-        self.remember_account = gtk.CheckButton("Remember account")
-        self.remember_password = gtk.CheckButton("Remember password")
+        self.remember_account = gtk.CheckButton(_('Remember account'))
+        self.remember_password = gtk.CheckButton(_('Remember password'))
 
         self.remember_account.connect('toggled',
             self._on_remember_account_toggled)
@@ -90,22 +89,26 @@ class Login(gtk.Alignment):
         vbox_remember.pack_start(self.remember_password)
         
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
-        self.b_connect.connect("clicked", self._on_connect_clicked)
+        self.b_connect.connect('clicked', self._on_connect_clicked)
         self.b_connect.set_border_width(8)
 
-        img_account = utils.safe_gtk_image_load(gui.theme.user)
-        img_password = utils.safe_gtk_image_load(gui.theme.password)
+        pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
+        pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
         img_logo = utils.safe_gtk_image_load(gui.theme.logo)
 
         vbox = gtk.VBox()
         vbox.set_border_width(2)
 
         hbox_account = gtk.HBox(spacing=6)
+        img_account = gtk.Image()
+        img_account.set_from_pixbuf(utils.scale_nicely(pix_account))
         hbox_account.pack_start(img_account, False)
-        hbox_account.pack_start(self.txt_account, True, True)
+        hbox_account.pack_start(self.cmb_account, True, True)
         hbox_account.pack_start(status_padding, False)
 
         hbox_password = gtk.HBox(spacing=6)
+        img_password = gtk.Image()
+        img_password.set_from_pixbuf(utils.scale_nicely(pix_password))
         hbox_password.pack_start(img_password, False)
         hbox_password.pack_start(self.txt_password, True, True)
         hbox_password.pack_start(self.btn_status, False)
@@ -133,7 +136,7 @@ class Login(gtk.Alignment):
         al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2, 
             yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
-            yscale=0.1)
+            yscale=0.0)
         al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
@@ -154,7 +157,7 @@ class Login(gtk.Alignment):
         vbox.show_all()
 
     def set_sensitive(self, sensitive):
-        self.txt_account.set_sensitive(sensitive)
+        self.cmb_account.set_sensitive(sensitive)
         self.txt_password.set_sensitive(sensitive)
         self.btn_status.set_sensitive(sensitive)
         self.b_connect.set_sensitive(sensitive)
@@ -167,7 +170,7 @@ class Login(gtk.Alignment):
 
     def do_connect(self):
         '''do all the staff needed to connect'''
-        user = self.txt_account.get_text()
+        user = self.cmb_account.get_active_text()
         password = self.txt_password.get_text()
         account = protocol.Account(user, password, self.btn_status.status)
         remember_password = self.remember_password.get_active()
@@ -199,7 +202,7 @@ class Login(gtk.Alignment):
 
     def _on_account_changed(self, entry):
         '''called when the content of the account entry changes'''
-        self._update_fields(self.txt_account.get_text()) 
+        self._update_fields(self.cmb_account.get_active_text()) 
 
     def _update_fields(self, account):
         '''update the different fields according to the account that is

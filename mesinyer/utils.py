@@ -32,6 +32,9 @@ def safe_gtk_pixbuf_load(path, size=None):
             return pixbuf
     else:
         return None
+        
+def scale_nicely(pixbuf):
+    return pixbuf.scale_simple(20, 20, gtk.gdk.INTERP_BILINEAR)
 
 def file_readable(path):
     return os.access(path, os.R_OK) and os.path.isfile(path)
