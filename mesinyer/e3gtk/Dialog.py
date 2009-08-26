@@ -18,6 +18,8 @@
 
 '''a module that defines the api of objects that display dialogs'''
 
+import traceback
+
 import gtk
 import pango
 import gobject
@@ -253,6 +255,41 @@ class Dialog(object):
         but it can happen, so return stock.CLOSE to the callback if its set'''
         cls.message_window(message, gtk.STOCK_DIALOG_ERROR, response_cb,
             title).show()
+
+    @classmethod
+    def exc_error(cls, message, response_cb=None, title=_("Error!")):
+        '''show an error dialog displaying the message and the traceback;
+        this dialog should have only the option to close and the response 
+        callback is optional since in few cases one want to know when the error
+        dialog was closed, but it can happen, so return stock.CLOSE to the 
+        callback if its set'''
+        #cls.message_window('%s\n\n%s' % (message, traceback.format_exc()),
+        #        gtk.STOCK_DIALOG_ERROR, response_cb, title).show()
+        window = gtk.Window()
+        vbox = gtk.VBox()
+        text = gtk.Label(message)
+        vbox.pack_start(text)
+        hide_button = gtk.ToggleButton('Show details')
+        trace = gtk.Label(traceback.format_exc())
+        def on_hide(*args):
+            if hide_button.get_active(): #show
+                hide_button.set_label('Hide details')
+                trace.show()
+            else:
+                hide_button.set_label('Show details')
+                trace.hide()
+        hide_button.connect('toggled', on_hide)
+
+        close_button = gtk.Button(stock=gtk.STOCK_OK)
+        def on_ok(*args):
+            window.destroy()
+        close_button.connect('clicked', on_ok)
+        vbox.pack_start(hide_button, False, False)
+        vbox.pack_start(trace)
+        vbox.pack_start(close_button, False, False)
+        window.add(vbox)
+        window.show_all()
+        on_hide()
 
     @classmethod
     def warning(cls, message, response_cb=None, title=_("Warning")):

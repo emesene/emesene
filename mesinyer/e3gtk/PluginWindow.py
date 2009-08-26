@@ -71,7 +71,7 @@ class PluginWindow(gtk.Window):
         name = model.get_value(iter, 1)
         pluginmanager = get_pluginmanager()
         if not pluginmanager.plugin_start(name): #errors
-            extension.get_default('dialog').error('Error when starting plugin %s' % name)
+            extension.get_default('dialog').exc_error('Error when starting plugin %s' % name)
         model.set_value(iter,0,bool(pluginmanager.plugin_is_active(name)))
 
         self.on_row_selected()
@@ -84,7 +84,7 @@ class PluginWindow(gtk.Window):
         pluginmanager = get_pluginmanager()
         pluginmanager.plugin_stop(name)
         model.set_value(iter,0,pluginmanager.plugin_is_active(name))
-        extension.get_default('dialog').error('Error when stopping plugin %s' % name)
+        extension.get_default('dialog').exc_error('Error when stopping plugin %s' % name)
 
         self.on_row_selected()
     
@@ -126,7 +126,7 @@ class PluginWindow(gtk.Window):
             window = extension.get_default('preferences dialog')(plugin._configure)
             window.show()
         except Exception, reason:
-            extension.get_default('dialog').error('Error showing preferences window\n\n%s' %  traceback.format_exc())
+            extension.get_default('dialog').exc_error('Error showing preferences window')
             warning('problems showing plugin pref window: %s' % reason)
 
 
