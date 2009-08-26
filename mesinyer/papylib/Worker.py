@@ -574,10 +574,10 @@ class Worker(protocol.Worker, papyon.Client):
         
         papyconversation.send_text_message(msg)
         
-        msgobj = protocol.Message(protocol.Message.TYPE_MESSAGE, \
-            message.body, message.account, message.style)
+        #msgobj = protocol.Message(protocol.Message.TYPE_MESSAGE, \
+        #    message.body, message.account, message.style)
             
-        self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, message.account, msgobj)
+        #self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, message.account, msgobj)
         
     # p2p handlers
 
