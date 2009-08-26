@@ -1,8 +1,36 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#   This file is part of emesene.
+#
+#    Emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+import os
 import sys
 import gtk
 import time
 import base64
 import gobject
+import gettext
+
+if os.path.exists('default.mo'):
+    gettext.GNUTranslations(open('default.mo')).install()
+elif os.path.exists('po/'):
+    gettext.install('emesene', 'po/')
+else:
+    gettext.install('emesene')
 
 import debugger
 
@@ -12,6 +40,7 @@ import yaber
 import utils
 import dummy
 import e3common
+import papylib
 import protocol
 
 import extension
@@ -42,6 +71,7 @@ class Controller(object):
     def _setup(self):
         '''register core extensions'''
         extension.category_register('session', e3.Session)
+        extension.register('session', papylib.Session)
         extension.register('session', yaber.Session)
         extension.register('session', dummy.Session)
         extension.category_register('sound', e3common.play_sound.play)
@@ -192,8 +222,8 @@ class Controller(object):
         self.draw_main_screen()
 
     def draw_main_screen(self):
-        """create and populate the main screen
-        """
+        '''create and populate the main screen
+        '''
         # clear image cache
         utils.pixbufs = {}
         self.window.clear()
@@ -414,19 +444,19 @@ class Controller(object):
         self.window.show()
 
     def on_disconnect(self):
-        """
+        '''
         method called when the user selects disconnect
-        """
+        '''
         self.close_session(False)
         self.start()
 
 
 def main():
-    """
+    '''
     the main method of emesene
-    """
+    '''
     main_method = extension.get_default('gtk main')
     main_method(Controller)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
