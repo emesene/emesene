@@ -56,7 +56,7 @@ class Controller(object):
         else:
             default_id = self.config.session
 
-        extension.set_default_by_id('session', default_id)
+        extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
 
     def _new_session(self):
