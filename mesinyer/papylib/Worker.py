@@ -271,21 +271,21 @@ class Worker(protocol.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_CONTACT_LIST_READY)
 
     def _add_contact(self, mail, nick, status_, pm, blocked, alias=''):
-        ''' helper method to add a contact to the contact list '''
+        ''' helper method to add a contact to the (gui) contact list '''
         # wtf, why 2 mails?
         self.session.contacts.contacts[mail] = protocol.Contact(mail, mail,
             nick, pm, status_, alias, blocked)
 
     def _add_group(self, name):
-        ''' method to add a group to the contact list '''
+        ''' method to add a group to the (gui) contact list '''
         self.session.groups[name] = protocol.Group(name, name)
 
     def _add_contact_to_group(self, account, group):
-        ''' method to add a contact to a group '''
+        ''' method to add a contact to a (gui) group '''
         self.session.groups[group].contacts.append(account)
         self.session.contacts.contacts[account].groups.append(group)
     
-    # invite handler
+    # invite handlers
     def _on_conversation_invite(self, papyconversation):
         ''' create a cid and append the event handler to papyconv dict '''
         cid = time.time()
@@ -314,16 +314,36 @@ class Worker(protocol.Worker, papyon.Client):
             self.papyconv[cid] = pyconvevent.conversation # add papy conv
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
-                
+        
         msgobj = protocol.Message(protocol.Message.TYPE_MESSAGE, \
             papymessage.content, account, \
             formatting_papy_to_e3(papymessage.formatting))
                 
         self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
        
-    def _on_conversation_nudge_received(self, papycontact, papyconvevent):
-        print papycontact, "sent a nudge"
-        
+    def _on_conversation_nudge_received(self, papycontact, pyconvevent):
+        ''' handle received nudges '''
+        account = papycontact.account
+        if account in self.conversations:
+            #print "conversation is alive"
+            # emesene conversation already exists
+            cid = self.conversations[account]
+        else:
+            # emesene must create another conversation
+            #print "must create another conversation"
+            cid = time.time()
+            self.conversations[account] = cid # add to account:cid
+            self.rconversations[cid] = account
+            self._conversation_handler[cid] = pyconvevent # add conv handler
+            self.papyconv[cid] = pyconvevent.conversation # add papy conv
+            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
+                [account])
+                
+        msgobj = protocol.Message(protocol.Message.TYPE_NUDGE, None, \
+            account, None)
+                
+        self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
+       
     # contact changes handlers
     def _on_contact_status_changed(self, papycontact):
         status_ = STATUS_PAPY_TO_E3[papycontact.presence]    
@@ -565,20 +585,43 @@ class Worker(protocol.Worker, papyon.Client):
     def _handle_action_send_message(self, cid, message):
         ''' handle Action.ACTION_SEND_MESSAGE '''
         #print "you're guin to send %(msg)s in %(ci)s" % { 'msg' : message, 'ci' : cid }
+        print "type:", message
         # find papyon conversation by cid
         papyconversation = self.papyconv[cid]
-        # format the text for papy
-        formatting = formatting_e3_to_papy(message.style)
-        # create papymessage
-        msg = papyon.ConversationMessage(message.body, formatting)
-        
-        papyconversation.send_text_message(msg)
-        
-        #msgobj = protocol.Message(protocol.Message.TYPE_MESSAGE, \
-        #    message.body, message.account, message.style)
+        if message.type == protocol.Message.TYPE_NUDGE:
+            papyconversation.send_nudge()
             
-        #self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, message.account, msgobj)
+        elif message.type == protocol.Message.TYPE_MESSAGE:
+            # format the text for papy
+            formatting = formatting_e3_to_papy(message.style)
+            # create papymessage
+            msg = papyon.ConversationMessage(message.body, formatting)
+            # send through the network
+            papyconversation.send_text_message(msg)
         
+        # log the message
+        contact = self.session.contacts.me
+        src =  Logger.Account(contact.attrs.get('CID', None), None, \
+            contact.account, contact.status, contact.nick, contact.message, \
+            contact.picture)
+
+        '''if error: # isn't there a conversation event like msgid ok or fail?
+            event = 'message-error'
+        else:
+            event = 'message'
+
+        for dst_account in papyconversation.accounts:
+            dst = self.session.contacts.get(dst_account)
+
+            if dst is None:
+                dst = protocol.Contact(message.account)
+
+                dest =  Logger.Account(dst.attrs.get('CID', None), None, \
+                    dst.account, dst.status, dst.nick, dst.message, dst.picture)
+
+                self.session.logger.log(event, contact.status, msgstr, 
+                    src, dest)
+        '''
     # p2p handlers
 
     def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
