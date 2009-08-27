@@ -170,6 +170,61 @@ class ContactEvent(papyon.event.ContactEventInterface):
     def on_contact_msn_object_changed(self, contact):
         self._client._on_contact_msnobject_changed(contact)
 
+class AddressBookEvent(papyon.event.AddressBookEventInterface):
+    def __init__(self, client):
+        BaseEventInterface.__init__(self, client)
+
+    def on_addressbook_messenger_contact_added(self, contact):
+        pass
+
+    def on_addressbook_contact_deleted(self, contact):
+        pass
+
+    def on_addressbook_contact_blocked(self, contact):
+        pass
+
+    def on_addressbook_contact_unblocked(self, contact):
+        pass
+
+    def on_addressbook_group_added(self, group):
+        pass
+
+    def on_addressbook_group_deleted(self, group):
+        pass
+
+    def on_addressbook_group_renamed(self, group):
+        pass
+
+    def on_addressbook_group_contact_added(self, group, contact):
+        pass
+
+    def on_addressbook_group_contact_deleted(self, group, contact):
+        pass
+        
+class ProfileEvent(papyon.event.ProfileEventInterface):
+    def __init__(self, client):
+        BaseEventInterface.__init__(self, client)
+
+    def on_profile_presence_changed(self):
+        """Called when the presence changes."""
+        pass
+
+    def on_profile_display_name_changed(self):
+        """Called when the display name changes."""
+        pass
+
+    def on_profile_personal_message_changed(self):
+        """Called when the personal message changes."""
+        pass
+
+    def on_profile_current_media_changed(self):
+        """Called when the current media changes."""
+        pass
+
+    def on_profile_msn_object_changed(self):
+        """Called when the MSNObject changes."""
+        pass
+        
 class Worker(protocol.Worker, papyon.Client):
     '''dummy Worker implementation to make it easy to test emesene'''
 
@@ -188,6 +243,8 @@ class Worker(protocol.Worker, papyon.Client):
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
         self._invite_handler = InviteEvent(self)
+        self._abook_handler = AddressBookEvent(self)
+        self._profile_handler = ProfileEvent(self)
         
         # this stores account : cid
         self.conversations = {}
@@ -423,42 +480,42 @@ class Worker(protocol.Worker, papyon.Client):
         
     # action handlers
     def _handle_action_add_contact(self, account):
-        '''handle Action.ACTION_ADD_CONTACT
-        '''
+        ''' handle Action.ACTION_ADD_CONTACT '''
+        papycontact = self.address_book.contacts.search_by('account', account)
+        
+        # TODO: move succeed to papyon callbacks
         self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED,
             account)
 
     def _handle_action_add_group(self, name):
         '''handle Action.ACTION_ADD_GROUP
         '''
+        self.address_book.add_group(name)
+        
+        # TODO: move succeed to papyon callbacks
         self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED,
             name)
 
     def _handle_action_add_to_group(self, account, gid):
-        '''handle Action.ACTION_ADD_TO_GROUP
-        '''
+        ''' handle Action.ACTION_ADD_TO_GROUP '''
         self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
             gid, account)
 
     def _handle_action_block_contact(self, account):
-        '''handle Action.ACTION_BLOCK_CONTACT
-        '''
+        ''' handle Action.ACTION_BLOCK_CONTACT '''
         self.session.add_event(Event.EVENT_CONTACT_BLOCK_SUCCEED, account)
 
     def _handle_action_unblock_contact(self, account):
-        '''handle Action.ACTION_UNBLOCK_CONTACT
-        '''
+        '''handle Action.ACTION_UNBLOCK_CONTACT '''
         self.session.add_event(Event.EVENT_CONTACT_UNBLOCK_SUCCEED,
             account)
 
     def _handle_action_change_status(self, status_):
-        '''handle Action.ACTION_CHANGE_STATUS
-        '''
+        '''handle Action.ACTION_CHANGE_STATUS '''
         self._set_status(status_)
         
     def _handle_action_login(self, account, password, status_):
-        '''handle Action.ACTION_LOGIN
-        '''
+        '''handle Action.ACTION_LOGIN '''
         self.session.account.account = account
         self.session.account.password = password
         self.session.account.status = status_
@@ -467,51 +524,51 @@ class Worker(protocol.Worker, papyon.Client):
         self.login(account, password)
         
     def _handle_action_logout(self):
-        '''handle Action.ACTION_LOGOUT
-        '''
+        ''' handle Action.ACTION_LOGOUT '''
         self.quit()
         
     def _handle_action_move_to_group(self, account, src_gid, dest_gid):
-        '''handle Action.ACTION_MOVE_TO_GROUP
-        '''
+        '''handle Action.ACTION_MOVE_TO_GROUP '''
         self.session.add_event(Event.EVENT_CONTACT_MOVE_SUCCEED,
             account, src_gid, dest_gid)
 
     def _handle_action_remove_contact(self, account):
-        '''handle Action.ACTION_REMOVE_CONTACT
-        '''
+        '''handle Action.ACTION_REMOVE_CONTACT '''
+        papycontact = self.address_book.contacts.search_by('account', account)
+        self.address_book.delete_contact(papycontact)
+        # TODO: move to ab callback
         self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED, account)
 
     def _handle_action_reject_contact(self, account):
-        '''handle Action.ACTION_REJECT_CONTACT
-        '''
+        '''handle Action.ACTION_REJECT_CONTACT '''
+        papycontact = self.address_book.contacts.search_by('account', account)
+        self.address_book.decline_contact_invitation(papycontact)
+        
+        # TODO: move to ab callback
         self.session.add_event(Event.EVENT_CONTACT_REJECT_SUCCEED, account)
 
     def _handle_action_remove_from_group(self, account, gid):
-        '''handle Action.ACTION_REMOVE_FROM_GROUP
-        '''
+        ''' handle Action.ACTION_REMOVE_FROM_GROUP '''
         self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED,
             gid, account)
 
     def _handle_action_remove_group(self, gid):
-        '''handle Action.ACTION_REMOVE_GROUP
-        '''
+        ''' handle Action.ACTION_REMOVE_GROUP '''
         self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, gid)
 
     def _handle_action_rename_group(self, gid, name):
-        '''handle Action.ACTION_RENAME_GROUP
-        '''
+        ''' handle Action.ACTION_RENAME_GROUP '''
+        self.address_book.rename_group(name, newname = 'todo')
+        
         self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED,
             gid, name)
 
     def _handle_action_set_contact_alias(self, account, alias):
-        '''handle Action.ACTION_SET_CONTACT_ALIAS
-        '''
+        ''' handle Action.ACTION_SET_CONTACT_ALIAS '''
         self.session.add_event(Event.EVENT_CONTACT_ALIAS_SUCCEED, account)
 
     def _handle_action_set_message(self, message):
-        '''handle Action.ACTION_SET_MESSAGE
-        '''
+        ''' handle Action.ACTION_SET_MESSAGE '''
         # set the message in papyon
         self.profile.personal_message = message
         # set the message in emesene
@@ -522,13 +579,15 @@ class Worker(protocol.Worker, papyon.Client):
             contact.account, contact.status, contact.nick, message,
             contact.picture)
 
+        # TODO: move to profile callbacks
         self.session.logger.log('message change', contact.status, message, account)
         self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
 
     def _handle_action_set_nick(self, nick):
-        '''handle Action.ACTION_SET_NICK
-        '''
+        '''handle Action.ACTION_SET_NICK '''
         self.profile.display_name = nick
+        
+        # TODO: move to profile callbacks
         contact = self.session.contacts.me
         account =  Logger.Account(contact.attrs.get('CID', None), None,
             contact.account, contact.status, nick, contact.message,
