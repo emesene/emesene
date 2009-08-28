@@ -46,7 +46,7 @@ try:
 except:
     print "You need python-papyon(>=0.4.1) to be installed in order to use this extension"    
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.DEBUG)
 
 STATUS_PAPY_TO_E3 = { \
     papyon.Presence.ONLINE : status.ONLINE,
@@ -198,7 +198,7 @@ class ContactEvent(papyon.event.ContactEventInterface):
 
 class AddressBookEvent(papyon.event.AddressBookEventInterface):
     def __init__(self, client):
-        BaseEventInterface.__init__(self, client)
+        papyon.event.BaseEventInterface.__init__(self, client)
 
     def on_addressbook_messenger_contact_added(self, contact):
         pass
@@ -229,7 +229,7 @@ class AddressBookEvent(papyon.event.AddressBookEventInterface):
         
 class ProfileEvent(papyon.event.ProfileEventInterface):
     def __init__(self, client):
-        BaseEventInterface.__init__(self, client)
+        papyon.event.BaseEventInterface.__init__(self, client)
 
     def on_profile_presence_changed(self):
         """Called when the presence changes."""
@@ -314,6 +314,7 @@ class Worker(protocol.Worker, papyon.Client):
         
     def set_initial_infos(self):
         '''this is called on login'''
+        # TODO: content roaming, etc.
         nick = 'Horny Porny'
         message = "Testing emesene with papyon, and porn!"
             
