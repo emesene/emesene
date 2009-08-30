@@ -73,9 +73,6 @@ class Controller(object):
         signals.login_failed.subscribe(self.on_login_failed)
         signals.contact_list_ready.subscribe(self.on_contact_list_ready)
         signals.conv_first_action.subscribe(self.on_new_conversation)
-        signals.nick_change_succeed.subscribe(self.on_nick_change_succeed)
-        signals.message_change_succeed.subscribe(self.on_message_change_succeed)
-        signals.status_change_succeed.subscribe(self.on_status_change_succeed)
         signals.disconnected.subscribe(self.on_disconnected)
 
     def save_extensions_config(self):
@@ -222,7 +219,6 @@ class Controller(object):
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
         self.window.content.contact_list.fill()
-        self.window.content.panel.enabled = True
 
         def on_contact_added_you(responses):
             '''
@@ -243,18 +239,6 @@ class Controller(object):
             dialog.contact_added_you(accounts, on_contact_added_you)
 
         gobject.timeout_add(500, self.session.logger.check)
-
-    def on_nick_change_succeed(self, nick):
-        '''callback called when the nick has been changed successfully'''
-        self.window.content.panel.nick.text = nick
-
-    def on_status_change_succeed(self, stat):
-        '''callback called when the status has been changed successfully'''
-        self.window.content.panel.status.set_status(stat)
-
-    def on_message_change_succeed(self, message):
-        '''callback called when the message has been changed successfully'''
-        self.window.content.panel.message.text = message
 
     def on_preferences_changed(self, use_http, proxy, session_id):
         '''called when the preferences on login change'''

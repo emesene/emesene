@@ -8,7 +8,7 @@ from copy import copy
 
 class PluginHandler:
     '''Abstraction over a plugin.
-    
+
     Given a filename, will import it and allows to control it.
 
     '''
@@ -31,7 +31,7 @@ class PluginHandler:
             sys.path = old_syspath
 
     def instantiate(self):
-        '''Instantiate (if not already done). 
+        '''Instantiate (if not already done).
 
         You shouldn't need this, but you can use it for performance tweak.
 
@@ -59,7 +59,7 @@ class PluginHandler:
             warning('error starting "%s": %s' % (self.name, reason))
             return False
         return True
-            
+
     def stop(self):
         '''Stop the plugin, of course'''
         if self._instance and self.is_active():
@@ -101,8 +101,8 @@ class PackageResource:
             yield buffer
         finally:
             self.close_resource(relative_path)
-        
-    
+
+
     def get_resource(self, relative_path):
         '''Opens a file.
         @param relative_path A path starting from the package dir
@@ -118,11 +118,11 @@ class PackageResource:
         else:
             self._resources.append(f)
             return f
-    
+
     def close_resource(self, resource):
         '''Close a file.
         @param resource A resource returned by get_resource
-        @return 
+        @return
         '''
         try:
             self._resources.remove(resource)
@@ -137,11 +137,11 @@ class PackageResource:
         for resource in self._resources:
             self._resources.remove(resource) #TODO: check if this is buggy
             resource.close()
-            
+
 
 class PackageHandler:
     '''Abstraction over a plugin.
-    
+
     Given a directory, will import the plugin.py file inside it and allows to control it.
     It will provide the plugin several utilities to work on the package
 
@@ -170,7 +170,7 @@ class PackageHandler:
             sys.path = old_syspath
 
     def instanciate(self):
-        '''Instanciate (if not already done). 
+        '''Instanciate (if not already done).
         You shouldn't need this, but you can use it for performance tweak.
         '''
         if self._instance is not None:
@@ -199,7 +199,7 @@ class PackageHandler:
             warning('error starting "%s": %s' % (self.name, reason))
             return False
         return True
-            
+
     def stop(self):
         '''If active, stop the plugin'''
         if self.is_active():
@@ -218,7 +218,7 @@ class PluginManager:
     '''Scan directories and manage plugins loading/unloading/control'''
     def __init__(self):
         self._plugins = {} #'name': Plugin/Package
-    
+
     def scan_directory(self, dir_):
         '''Find plugins and packages inside dir_'''
         dirs = files = []
@@ -226,21 +226,21 @@ class PluginManager:
             dirs = directories
             files = files
             break #sooo ugly
-        
+
         for directory in [x for x in dirs if not x.startswith('.')]:
             try:
                 mod = PackageHandler(dir_, directory)
                 self._plugins[mod.name] = mod
             except Exception, reason:
                 warning('Exception while importing %s:\n%s' % (directory, reason))
-        
+
         for filename in [x for x in files if x.endswith('.py')]:
             try:
                 mod = PluginHandler(filename)
                 self._plugins[mod.name] = mod
             except Exception, reason:
                 warning('Exception while importing %s:\n%s' % (filename, reason))
-    
+
     def plugin_start(self, name):
         '''Starts a plugin.
         @param name The name of the plugin. See plugin_base.PluginBase.name.
@@ -250,7 +250,7 @@ class PluginManager:
         info('starting plugin "%s"' % name)
         self._plugins[name].start()
         return True
-    
+
     def plugin_stop(self, name):
         '''Stops a plugin.
         @param name The name of the plugin. See plugin_base.PluginBase.name.
@@ -268,7 +268,7 @@ class PluginManager:
         if not name in self._plugins:
             return False
         return self._plugins[name].is_active()
-    
+
     def get_plugins(self):
         '''return the list of plugin names'''
         return self._plugins.keys()

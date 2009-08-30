@@ -22,6 +22,8 @@ class MainWindow(gtk.VBox):
                 on_disconnect_cb):
         '''class constructor'''
         gtk.VBox.__init__(self)
+        self.session = session
+
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
         BelowMenu = extension.get_default('below menu')
@@ -37,7 +39,6 @@ class MainWindow(gtk.VBox):
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
         scroll.set_border_width(1)
-        self.session = session
         self.on_new_conversation = on_new_conversation
         self.on_close = on_close
         self.on_disconnect_cb = on_disconnect_cb
@@ -122,6 +123,9 @@ class MainWindow(gtk.VBox):
         self.menu.show_all()
         self.panel.show()
         self.contact_list.show()
+        self.below_menu.show()
+        self.below_panel.show()
+        self.below_userlist.show()
 
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
@@ -213,5 +217,4 @@ class MainWindow(gtk.VBox):
         else:
             self.entry.set_text('')
             self.entry.hide()
-
 
