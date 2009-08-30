@@ -72,7 +72,6 @@ class Controller(object):
     def _setup(self):
         '''register core extensions'''
         extension.category_register('session', e3.Session, single_instance=True)
-        extension.register('session', papylib.Session)
         extension.register('session', yaber.Session)
         extension.register('session', dummy.Session)
         extension.category_register('sound', e3common.play_sound.play)
