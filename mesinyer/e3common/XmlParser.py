@@ -64,8 +64,31 @@ class DictObj(dict):
                 return ListObj(obj)
 
             return obj
-        else:
+        try:
+            return object.__getattribute__(self, name)
+        except:
             return None
+
+
+    def to_xml(self):
+        xml = ''
+        if self.tag:
+            xml = '<%s' % self.tag
+            attrs = [attr for attr in self.keys() if attr not in ['tag', 'childs']]
+            for attr in attrs:
+                if self[attr]:
+                    xml += ' %s="%s"' % (attr, self[attr])
+            xml += '>'
+        for child in self.childs:
+            if type(child) == str:
+                xml+=child
+            else:
+                xml+=child.to_xml()
+
+        if self.tag:
+            xml += '</%s>' % self.tag
+        return xml
+
 
 class ListObj(list):
     '''a class that allows to access dicts inside a list as objects

@@ -14,6 +14,7 @@ import dummy
 import e3common
 import protocol
 
+from pluginmanager import get_pluginmanager
 import extension
 import e3gtk
 import e3dummy
@@ -42,7 +43,7 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', e3.Session)
+        extension.category_register('session', e3.Session, single_instance=True)
         extension.register('session', yaber.Session)
         extension.register('session', dummy.Session)
         extension.category_register('sound', e3common.play_sound.play)
@@ -57,6 +58,7 @@ class Controller(object):
             default_id = self.config.session
 
         extension.set_default_by_id('session', default_id)
+        get_pluginmanager().scan_directory('plugins')
 
     def _new_session(self):
         '''create a new session object'''
@@ -64,8 +66,7 @@ class Controller(object):
         if self.session is not None:
             self.session.quit()
 
-        Session = extension.get_default('session')
-        self.session = Session()
+        self.session = extension.get_and_instantiate('session')
 
         signals = self.session.signals
         signals.login_succeed.subscribe(self.on_login_succeed)

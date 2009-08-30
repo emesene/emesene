@@ -1,4 +1,5 @@
-'''Plugin base class.
+'''
+Plugin base class.
 
 It will be inherited by every plugin.
 
@@ -6,12 +7,13 @@ It will be inherited by every plugin.
 
 class PluginBase:
     def __init__(self):
+        self._started = False
         pass
     def start(self):
         raise NotImplementedError()
 
     def is_active(self):
-        return False
+        return self._started
 
     def stop(self):
         raise NotImplementedError()
