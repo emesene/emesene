@@ -16,6 +16,7 @@ class StatusCombo(gtk.ComboBox):
 
         gtk.ComboBox.__init__(self, self.model)
         self.main_window = main_window
+        self.status = None
 
         status_pixbuf_cell = gtk.CellRendererPixbuf()
         status_text_cell = gtk.CellRendererText()
@@ -57,19 +58,16 @@ class StatusCombo(gtk.ComboBox):
 
     def on_status_changed(self , *args):
         """called when a status is selected"""
-        current_status = self.main_window.session.account.status
         stat = self.model.get(self.get_active_iter(), 1)[0]
-        self.status = stat
 
-        if self.status != current_status:
-            print stat
+        if self.status != stat:
+            self.status = stat
             self.main_window.session.set_status(stat)
-
-        print 'after'
 
     def on_status_change_succeed(self, stat):
         """called when the status was changed on another place"""
         if stat in protocol.status.ORDERED:
+            self.status = stat
             index = protocol.status.ORDERED.index(stat)
             self.set_active(index)
 
