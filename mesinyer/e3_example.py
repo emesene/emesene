@@ -18,18 +18,13 @@ class Example(object):
         '''class constructor'''
         self.session = e3.Session()
         #self.session = yaber.Session()
-        self.session.signals = gui.Signals(protocol.EVENTS,
-            self.session.events)
-        self.session.signals.login_succeed.subscribe(self.on_login_succeed)
-        self.session.signals.login_failed.subscribe(self.on_login_failed)
-        self.session.signals.contact_list_ready.subscribe(
-            self.on_contact_list_ready)
-        self.session.signals.conv_first_action.subscribe(
-            self.on_conv_first_action)
-        self.session.signals.conv_started.subscribe(
-            self.on_conv_started)
-        self.session.signals.conv_message.subscribe(
-            self.on_conv_message)
+        signals = self.session.signals
+        signals.login_succeed.subscribe(self.on_login_succeed)
+        signals.login_failed.subscribe(self.on_login_failed)
+        signals.contact_list_ready.subscribe( self.on_contact_list_ready)
+        signals.conv_first_action.subscribe( self.on_conv_first_action)
+        signals.conv_started.subscribe( self.on_conv_started)
+        signals.conv_message.subscribe( self.on_conv_message)
 
         self.session.login(account, password, status,
             proxy, use_http_method)

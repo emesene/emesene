@@ -19,7 +19,7 @@
 import protocol.Contact
 import protocol.status as status
 
-import Signal
+import e3common.Signal as Signal
 
 class ContactList(object):
     '''an abstract class that defines the api that the contact list should

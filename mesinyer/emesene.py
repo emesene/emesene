@@ -16,6 +16,7 @@ import protocol
 
 import extension
 import e3gtk
+import e3dummy
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -65,22 +66,16 @@ class Controller(object):
 
         Session = extension.get_default('session')
         self.session = Session()
-        self.session.signals = gui.Signals(protocol.EVENTS,
-            self.session.events)
-        self.session.signals.login_succeed.subscribe(self.on_login_succeed)
-        self.session.signals.login_failed.subscribe(self.on_login_failed)
-        self.session.signals.contact_list_ready.subscribe(
-            self.on_contact_list_ready)
-        self.session.signals.conv_first_action.subscribe(
-            self.on_new_conversation)
-        self.session.signals.nick_change_succeed.subscribe(
-            self.on_nick_change_succeed)
-        self.session.signals.message_change_succeed.subscribe(
-            self.on_message_change_succeed)
-        self.session.signals.status_change_succeed.subscribe(
-            self.on_status_change_succeed)
-        self.session.signals.disconnected.subscribe(
-            self.on_disconnected)
+
+        signals = self.session.signals
+        signals.login_succeed.subscribe(self.on_login_succeed)
+        signals.login_failed.subscribe(self.on_login_failed)
+        signals.contact_list_ready.subscribe(self.on_contact_list_ready)
+        signals.conv_first_action.subscribe(self.on_new_conversation)
+        signals.nick_change_succeed.subscribe(self.on_nick_change_succeed)
+        signals.message_change_succeed.subscribe(self.on_message_change_succeed)
+        signals.status_change_succeed.subscribe(self.on_status_change_succeed)
+        signals.disconnected.subscribe(self.on_disconnected)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -427,7 +422,7 @@ def main():
     """
     the main method of emesene
     """
-    main_method = extension.get_default('gtk main')
+    main_method = extension.get_default('main')
     main_method(Controller)
 
 if __name__ == "__main__":

@@ -1,9 +1,8 @@
 
 import extension
 
-def main(Controller):
-    """
-    main method for gtk frontend
+def gtk_main(Controller):
+    """ main method for gtk frontend
     """
     import gtk
     import gobject
@@ -40,7 +39,12 @@ def main(Controller):
     gtk.main()
     gtk.gdk.threads_leave()
 
-extension.category_register('gtk main', main)
+gtk_main.NAME = "Gtk main function"
+gtk_main.DESCRIPTION  = "This extensions uses Gtk to build the GUI"
+gtk_main.AUTHOR = "marianoguerra"
+gtk_main.WEBSITE = "emesene.org"
+
+extension.register('main', gtk_main)
 
 def setup():
     """
