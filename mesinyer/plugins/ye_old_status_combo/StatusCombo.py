@@ -8,6 +8,10 @@ import protocol
 
 class StatusCombo(gtk.ComboBox):
     """a widget to select the status like the one in emesene 1.0"""
+    NAME = 'Status Combo'
+    DESCRIPTION = 'A combo to select the status like emesene 1.0'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, main_window):
         """constructor"""
@@ -55,6 +59,7 @@ class StatusCombo(gtk.ComboBox):
         self.connect('changed', self.on_status_changed)
         main_window.session.signals.status_change_succeed.subscribe(
                 self.on_status_change_succeed)
+        print 'constructor'
 
     def on_status_changed(self , *args):
         """called when a status is selected"""

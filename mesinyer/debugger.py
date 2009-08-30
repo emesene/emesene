@@ -25,7 +25,7 @@ def dbg(text, caller=None, level=1):
         caller = _build_caller()
 
     #old_dbg(text, module, level)
-    _logger.log(level*10, text, extra={'caller':caller})
+    #_logger.log(level*10, text, extra={'caller':caller})
 
 def log(text, caller=None):
     '''

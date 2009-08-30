@@ -20,17 +20,19 @@ class StatusButton(gtk.Button):
         # our status
         self.cache_imgs = {}
 
+        self.set_relief(gtk.RELIEF_NONE)
+        self.set_border_width(0)
+        StatusMenu = extension.get_default('menu status')
+        self.menu = StatusMenu(self.set_status)
+
         if self.session:
             current_status = self.session.account.status
             self.status = current_status
         else:
             self.status = status.OFFLINE
-            self.set_status(status.OFFLINE)
 
-        self.set_relief(gtk.RELIEF_NONE)
-        self.set_border_width(0)
-        StatusMenu = extension.get_default('menu status')
-        self.menu = StatusMenu(self.set_status)
+        self.set_status(self.status)
+
         self.menu.show_all()
         self.connect('clicked', self._on_clicked)
 
@@ -54,6 +56,7 @@ class StatusButton(gtk.Button):
             gtk_img = self.cache_imgs[stat]
 
         self.set_image(gtk_img)
+        self.show_all()
 
         if stat not in status.ALL or stat == current_status:
             return

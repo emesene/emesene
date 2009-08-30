@@ -26,13 +26,10 @@ class MainWindow(gtk.VBox):
 
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
-        BelowMenu = extension.get_default('below menu')
-        BelowPanel = extension.get_default('below panel')
-        BelowUserList = extension.get_default('below userlist')
 
-        self.below_menu = BelowMenu(self)
-        self.below_panel = BelowPanel(self)
-        self.below_userlist = BelowUserList(self)
+        self.below_menu = extension.get_and_instantiate('below menu', self)
+        self.below_panel = extension.get_and_instantiate('below panel', self)
+        self.below_userlist = extension.get_and_instantiate('below userlist', self)
 
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
