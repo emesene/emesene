@@ -8,13 +8,13 @@ class PluginBase:
     def __init__(self):
         pass
     def start(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def is_active(self):
         return False
 
     def stop(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def category_register(self):
         #It's a placeholder. Can be safely called even if not implemented

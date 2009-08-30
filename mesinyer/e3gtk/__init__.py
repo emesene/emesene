@@ -19,6 +19,7 @@ def gtk_main(Controller):
     import GroupMenu
     import StatusMenu
     import MainWindow
+    import EmptyWidget
     import AccountMenu
     import ContactMenu
     import ContactList
@@ -44,7 +45,7 @@ gtk_main.DESCRIPTION  = "This extensions uses Gtk to build the GUI"
 gtk_main.AUTHOR = "marianoguerra"
 gtk_main.WEBSITE = "emesene.org"
 
-extension.register('main', gtk_main)
+extension.category_register('main', gtk_main)
 
 def setup():
     """
@@ -68,6 +69,10 @@ def setup():
     extension.category_register('menu account', AccountMenu.AccountMenu)
     extension.category_register('menu help', MainMenu.HelpMenu)
     extension.category_register('menu status', StatusMenu.StatusMenu)
+
+    extension.category_register('below menu', EmptyWidget.EmptyWidget)
+    extension.category_register('below panel', EmptyWidget.EmptyWidget)
+    extension.category_register('below userlist', EmptyWidget.EmptyWidget)
 
     extension.category_register('conversation window', \
         ConversationManager.ConversationManager)

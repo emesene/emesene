@@ -17,6 +17,8 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from Worker import EVENTS
+
 from Proxy import Proxy
 from Group import Group
 from Event import Event
@@ -29,7 +31,6 @@ from Contact import Contact
 from Session import Session
 from Account import Account
 
-from Worker import EVENTS
 from ContactManager import ContactManager
 
 import status

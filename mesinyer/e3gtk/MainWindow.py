@@ -24,6 +24,13 @@ class MainWindow(gtk.VBox):
         gtk.VBox.__init__(self)
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
+        BelowMenu = extension.get_default('below menu')
+        BelowPanel = extension.get_default('below panel')
+        BelowUserList = extension.get_default('below userlist')
+
+        self.below_menu = BelowMenu(self)
+        self.below_panel = BelowPanel(self)
+        self.below_userlist = BelowUserList(self)
 
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
@@ -56,8 +63,11 @@ class MainWindow(gtk.VBox):
         self.entry.connect('key-press-event', self._on_entry_key_press)
 
         self.pack_start(self.menu, False)
+        self.pack_start(self.below_menu, False)
         self.pack_start(self.panel, False)
+        self.pack_start(self.below_panel, False)
         self.pack_start(scroll, True, True)
+        self.pack_start(self.below_userlist, False)
         self.pack_start(self.entry, False)
 
         self.contact_list.contact_selected.subscribe(self._on_contact_selected)
