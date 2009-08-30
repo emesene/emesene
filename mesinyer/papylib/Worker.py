@@ -385,12 +385,10 @@ class Worker(protocol.Worker, papyon.Client):
         ''' handle the reception of a message '''
         account = papycontact.account
         if account in self.conversations:
-            #print "conversation is alive"
             # emesene conversation already exists
             cid = self.conversations[account]
         else:
             # emesene must create another conversation
-            #print "must create another conversation"
             cid = time.time()
             self.conversations[account] = cid # add to account:cid
             self.rconversations[cid] = account
@@ -409,11 +407,9 @@ class Worker(protocol.Worker, papyon.Client):
         ''' handle received nudges '''
         account = papycontact.account
         if account in self.conversations:
-            #print "conversation is alive"
             # emesene conversation already exists
             cid = self.conversations[account]
         else:
-            # emesene must create another conversation
             #print "must create another conversation"
             cid = time.time()
             self.conversations[account] = cid # add to account:cid
