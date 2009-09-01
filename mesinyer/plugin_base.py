@@ -13,13 +13,13 @@ class PluginBase(object):
         self._configure = None
 
     def start(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def is_active(self):
         return self._started
 
     def stop(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def category_register(self):
         #It's a placeholder. Can be safely called even if not implemented

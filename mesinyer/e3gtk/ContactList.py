@@ -201,7 +201,7 @@ class ContactList(gui.ContactList.ContactList, gtk.TreeView):
 
         self.set_model(self.model)
 
-        crt = extension.get_default('nick renderer')()
+        crt = extension.get_and_instantiate('nick renderer')
         #crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr_status = gtk.CellRendererPixbuf()
 

@@ -48,6 +48,7 @@ import extension
 import interfaces
 
 import e3gtk
+import e3dummy
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -98,22 +99,13 @@ class Controller(object):
             self.session.quit()
 
         self.session = extension.get_and_instantiate('session')
-        self.session.signals = gui.Signals(protocol.EVENTS,
-            self.session.events)
-        self.session.signals.login_succeed.subscribe(self.on_login_succeed)
-        self.session.signals.login_failed.subscribe(self.on_login_failed)
-        self.session.signals.contact_list_ready.subscribe(
-            self.on_contact_list_ready)
-        self.session.signals.conv_first_action.subscribe(
-            self.on_new_conversation)
-        self.session.signals.nick_change_succeed.subscribe(
-            self.on_nick_change_succeed)
-        self.session.signals.message_change_succeed.subscribe(
-            self.on_message_change_succeed)
-        self.session.signals.status_change_succeed.subscribe(
-            self.on_status_change_succeed)
-        self.session.signals.disconnected.subscribe(
-            self.on_disconnected)
+
+        signals = self.session.signals
+        signals.login_succeed.subscribe(self.on_login_succeed)
+        signals.login_failed.subscribe(self.on_login_failed)
+        signals.contact_list_ready.subscribe(self.on_contact_list_ready)
+        signals.conv_first_action.subscribe(self.on_new_conversation)
+        signals.disconnected.subscribe(self.on_disconnected)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -259,7 +251,6 @@ class Controller(object):
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
         self.window.content.contact_list.fill()
-        self.window.content.panel.enabled = True
 
         def on_contact_added_you(responses):
             '''
@@ -280,18 +271,6 @@ class Controller(object):
             dialog.contact_added_you(accounts, on_contact_added_you)
 
         gobject.timeout_add(500, self.session.logger.check)
-
-    def on_nick_change_succeed(self, nick):
-        '''callback called when the nick has been changed successfully'''
-        self.window.content.panel.nick.text = nick
-
-    def on_status_change_succeed(self, stat):
-        '''callback called when the status has been changed successfully'''
-        self.window.content.panel.status.set_status(stat)
-
-    def on_message_change_succeed(self, message):
-        '''callback called when the message has been changed successfully'''
-        self.window.content.panel.message.text = message
 
     def on_preferences_changed(self, use_http, proxy, session_id):
         '''called when the preferences on login change'''
@@ -467,11 +446,12 @@ class Controller(object):
 
 
 def main():
-    '''
+    """
     the main method of emesene
-    '''
-    main_method = extension.get_default('gtk main')
+    """
+    main_method = extension.get_default('main')
     main_method(Controller)
-
-if __name__ == '__main__':
+ 
+if __name__ == "__main__":
     main()
+ 

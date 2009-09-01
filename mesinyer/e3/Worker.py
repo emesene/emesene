@@ -308,6 +308,9 @@ class Worker(protocol.Worker):
 
     def _set_status(self, stat):
         '''set our status'''
+        if stat not in STATUS_MAP:
+            return
+
         self.session.account.status = stat
         self.session.contacts.me.status = stat
         self.socket.send_command('CHG', (STATUS_MAP[stat], str(CLIENT_ID), '0'))

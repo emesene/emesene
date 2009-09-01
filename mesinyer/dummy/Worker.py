@@ -148,6 +148,8 @@ class Worker(protocol.Worker):
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS
         '''
+        self.session.account.status = status_
+        self.session.contacts.me.status = status_
         self.session.add_event(Event.EVENT_STATUS_CHANGE_SUCCEED, status_)
 
     def _handle_action_login(self, account, password, status_):

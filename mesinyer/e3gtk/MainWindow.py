@@ -22,15 +22,20 @@ class MainWindow(gtk.VBox):
                 on_disconnect_cb):
         '''class constructor'''
         gtk.VBox.__init__(self)
+        self.session = session
+
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
+
+        self.below_menu = extension.get_and_instantiate('below menu', self)
+        self.below_panel = extension.get_and_instantiate('below panel', self)
+        self.below_userlist = extension.get_and_instantiate('below userlist', self)
 
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
         scroll.set_border_width(1)
-        self.session = session
         self.on_new_conversation = on_new_conversation
         self.on_close = on_close
         self.on_disconnect_cb = on_disconnect_cb
@@ -56,8 +61,11 @@ class MainWindow(gtk.VBox):
         self.entry.connect('key-press-event', self._on_entry_key_press)
 
         self.pack_start(self.menu, False)
+        self.pack_start(self.below_menu, False)
         self.pack_start(self.panel, False)
+        self.pack_start(self.below_panel, False)
         self.pack_start(scroll, True, True)
+        self.pack_start(self.below_userlist, False)
         self.pack_start(self.entry, False)
 
         self.contact_list.contact_selected.subscribe(self._on_contact_selected)
@@ -112,6 +120,9 @@ class MainWindow(gtk.VBox):
         self.menu.show_all()
         self.panel.show()
         self.contact_list.show()
+        self.below_menu.show()
+        self.below_panel.show()
+        self.below_userlist.show()
 
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
@@ -203,5 +214,4 @@ class MainWindow(gtk.VBox):
         else:
             self.entry.set_text('')
             self.entry.hide()
-
 

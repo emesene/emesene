@@ -21,11 +21,14 @@ import os
 import time
 import Queue
 
+from protocol import EVENTS
 from protocol.Event import Event
 from protocol.Action import Action
+
 import protocol.Logger
 import e3common.Config
 import e3common.ConfigDir
+import e3common.Signal
 import protocol.ContactManager
 
 class Session(object):
@@ -57,6 +60,7 @@ class Session(object):
         self.config = e3common.Config.Config()
         self.config_dir = e3common.ConfigDir.ConfigDir('emesene2')
         # set the base dir of the config to the base dir plus the account
+        self.signals = e3common.Signals(EVENTS, self.events)
 
     def _set_account(self, account):
         '''set the value of account'''
