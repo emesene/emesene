@@ -75,6 +75,12 @@ class Login(gtk.Alignment):
             self._on_password_key_press)
         
 
+        pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
+        pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
+        img_logo = utils.safe_gtk_image_load(gui.theme.logo)
+        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None, animated=True)
+        self.throbber = gtk.image_new_from_animation(th_pix)
+
         self.remember_account = gtk.CheckButton(_('Remember account'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
 
@@ -85,16 +91,13 @@ class Login(gtk.Alignment):
 
         vbox_remember = gtk.VBox(spacing=4)
         vbox_remember.set_border_width(8)
+        vbox_remember.pack_start(self.throbber)
         vbox_remember.pack_start(self.remember_account)
         vbox_remember.pack_start(self.remember_password)
         
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
         self.b_connect.set_border_width(8)
-
-        pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
-        pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
-        img_logo = utils.safe_gtk_image_load(gui.theme.logo)
 
         vbox = gtk.VBox()
         vbox.set_border_width(2)
@@ -155,6 +158,8 @@ class Login(gtk.Alignment):
 
         self.add(vbox)
         vbox.show_all()
+        
+        self.throbber.hide()
 
     def set_sensitive(self, sensitive):
         self.cmb_account.set_sensitive(sensitive)
@@ -170,6 +175,8 @@ class Login(gtk.Alignment):
 
     def do_connect(self):
         '''do all the staff needed to connect'''
+        self.throbber.show()
+        
         user = self.cmb_account.get_active_text()
         password = self.txt_password.get_text()
         account = protocol.Account(user, password, self.btn_status.status)
