@@ -48,7 +48,7 @@ import extension
 import interfaces
 
 import e3gtk
-import e3dummy
+import dummy
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
