@@ -28,8 +28,8 @@ import protocol.Worker
 import protocol.Message
 import protocol.Contact
 import protocol.Group
-from  protocol.Event import Event
-from  protocol.Action import Action
+from protocol.Event import Event
+from protocol.Action import Action
 from protocol import status
 
 import protocol.Logger as Logger
@@ -147,10 +147,7 @@ class ConversationEvent(papyon.event.ConversationEventInterface):
         print contact, "left a conversation"
 
     def on_conversation_user_typing(self, contact):
-        """Called when an user is typing.
-            @param contact: the contact whose presence changed
-            @type contact: L{Contact<papyon.profile.Contact>}"""
-        print contact, "is typing"
+        self._client._on_conversation_user_typing(contact, self)
 
     def on_conversation_message_received(self, sender, message):
         self._client._on_conversation_message_received(sender, message, self)
@@ -380,6 +377,19 @@ class Worker(protocol.Worker, papyon.Client):
         raise NotImplementedError
         
     # conversation handlers
+    def _on_conversation_user_typing(self, papycontact, pyconvevent):
+        ''' handle user typing event '''
+        account = papycontact.account
+        if account in self.conversations:
+            # emesene conversation already exists
+            cid = self.conversations[account]
+        else:
+            # we don't care about users typing if no conversation is opened
+            return
+        
+        # TODO: find how to do this    
+        #self.session.add_event(Event.EVENT_USER_TYPING, cid, account, msgobj)
+        
     def _on_conversation_message_received(self, papycontact, papymessage, \
         pyconvevent):
         ''' handle the reception of a message '''
