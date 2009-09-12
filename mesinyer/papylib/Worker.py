@@ -311,10 +311,11 @@ class Worker(protocol.Worker, papyon.Client):
         
     def set_initial_infos(self):
         '''this is called on login'''
-        # TODO: content roaming, etc.
-        nick = 'Horny Porny'
-        message = "Testing emesene with papyon, and porn!"
-            
+        # try content roaming
+        nick = self.profile.display_name
+        message = self.profile.personal_message
+        # dp = wtf?
+        
         self.set_nick(nick)
         self.set_pm(message)
         self.set_status(self.session.account.status)
