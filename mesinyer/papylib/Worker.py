@@ -46,7 +46,7 @@ try:
 except:
     print "You need python-papyon(>=0.4.1) to be installed in order to use this extension"    
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 STATUS_PAPY_TO_E3 = { \
     papyon.Presence.ONLINE : status.ONLINE,
@@ -111,7 +111,8 @@ def get_proxies():
 class ClientEvents(papyon.event.ClientEventInterface):
     def on_client_state_changed(self, state):
         if state == papyon.event.ClientState.CLOSED:
-            self._client.quit()
+            #self._client.quit()
+            pass
         elif state == papyon.event.ClientState.OPEN:
             self._client.session.add_event(Event.EVENT_LOGIN_SUCCEED)
             self._client._fill_contact_list(self._client.address_book)
@@ -227,18 +228,19 @@ class AddressBookEvent(papyon.event.AddressBookEventInterface):
 class ProfileEvent(papyon.event.ProfileEventInterface):
     def __init__(self, client):
         papyon.event.BaseEventInterface.__init__(self, client)
-
+        self.client = client
+        
     def on_profile_presence_changed(self):
         """Called when the presence changes."""
-        pass
-
+        print "presence changed"
+        
     def on_profile_display_name_changed(self):
         """Called when the display name changes."""
-        pass
-
+        print "displayname changed"
+        
     def on_profile_personal_message_changed(self):
         """Called when the personal message changes."""
-        pass
+        print "pm changed"
 
     def on_profile_current_media_changed(self):
         """Called when the current media changes."""
@@ -246,7 +248,7 @@ class ProfileEvent(papyon.event.ProfileEventInterface):
 
     def on_profile_msn_object_changed(self):
         """Called when the MSNObject changes."""
-        pass
+        print "dp changed"
         
 class Worker(protocol.Worker, papyon.Client):
     '''dummy Worker implementation to make it easy to test emesene'''
@@ -256,7 +258,6 @@ class Worker(protocol.Worker, papyon.Client):
         protocol.Worker.__init__(self, app_name, session)
         self.session = session
         server = ('messenger.hotmail.com', 1863)
-        self.quit = quit
         if use_http:
             from papyon.transport import HTTPPollConnection
             self.client = papyon.Client.__init__(self, server, get_proxies(), HTTPPollConnection)
@@ -281,8 +282,6 @@ class Worker(protocol.Worker, papyon.Client):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        data = None
-
         self._mainloop = gobject.MainLoop(is_running=True)
         while self._mainloop.is_running():    
             try:
@@ -290,34 +289,37 @@ class Worker(protocol.Worker, papyon.Client):
 
                 if action.id_ == Action.ACTION_QUIT:
                     dbg('closing thread', 'dworker', 1)
+                    self.logout()
                     self.session.logger.quit()
-                    
                     break
 
                 self._process_action(action)
             except Queue.Empty:
                 pass
-            #self._mainloop.run()
             
     # some useful methods
-    def set_nick(self, nick):
+    def set_nick(self, nick, updatepapy=True):
         self._handle_action_set_nick(nick)
         
     def set_status(self, status):
         self._handle_action_change_status(status)
         
-    def set_pm(self, pm):
+    def set_pm(self, pm, updatepapy=True):
         self._handle_action_set_message(pm)
+        
+    def set_msnobj(self, msnobj, updatepapy=True):
+        pass
         
     def set_initial_infos(self):
         '''this is called on login'''
         # try content roaming
         nick = self.profile.display_name
         message = self.profile.personal_message
-        # dp = wtf?
+        dp = self.profile.msn_object
         
-        self.set_nick(nick)
-        self.set_pm(message)
+        self.set_nick(nick, updatepapy=False)
+        self.set_pm(message, updatepapy=False)
+        self.set_msnobj(dp, updatepapy=False)
         self.set_status(self.session.account.status)
         
     def _set_status(self, stat):
