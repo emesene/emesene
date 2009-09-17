@@ -44,6 +44,12 @@ class ConversationToolbar(gtk.Toolbar):
         self.clean.connect('clicked', 
             lambda *args: self.handler.on_clean_selected())
 
+        self.invite_file_transfer = gtk.ToolButton(gtk.STOCK_GO_UP)
+        self.invite_file_transfer.set_label(_('Send File'))
+        self.invite_file_transfer.connect('clicked', 
+            lambda *args: self.handler.on_invite_file_trasnfer_selected())
+
+
         self.add(self.font)
         self.add(self.color)
         self.add(gtk.SeparatorToolItem())
@@ -54,5 +60,7 @@ class ConversationToolbar(gtk.Toolbar):
 
         self.add(self.invite)
         self.add(self.clean)
+        
+        self.add(self.invite_file_transfer)
 
 
