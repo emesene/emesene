@@ -413,10 +413,13 @@ class Worker(protocol.Worker, papyon.Client):
         msgobj = protocol.Message(protocol.Message.TYPE_MESSAGE, \
             papymessage.content, account, \
             formatting_papy_to_e3(papymessage.formatting))
-        # convert papyon msnobjects to a simple dict {shortcut:data}
+        # convert papyon msnobjects to a simple dict {shortcut:identifier}
         cedict = {}
         for msnobj in papymessage.msn_objects:
-            cedict[msnobj] = papymessage.msn_objects[msnobj]._data
+        # which identifier do we want? shac? 
+        # then we must request the data if not available in our 
+        # (not implemented) cache
+            cedict[msnobj] = papymessage.msn_objects[msnobj]._checksum_sha
         
         self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj, cedict)
        
