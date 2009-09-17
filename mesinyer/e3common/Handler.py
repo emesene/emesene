@@ -370,6 +370,11 @@ class ConversationToolbarHandler(object):
         '''called when the nudge button is selected'''
         self.conversation.on_notify_atention()
 
+    def on_invite_file_trasnfer_selected(self):
+        '''called when the client requestes to a remote user to
+        start a file transfer'''
+        raise NotImplementedError
+
 class TrayIconHandler(FileHandler):
     """
     this handler contains all the methods to handle a tray icon
