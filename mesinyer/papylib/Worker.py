@@ -413,8 +413,12 @@ class Worker(protocol.Worker, papyon.Client):
         msgobj = protocol.Message(protocol.Message.TYPE_MESSAGE, \
             papymessage.content, account, \
             formatting_papy_to_e3(papymessage.formatting))
-                
-        self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
+        # convert papyon msnobjects to a simple dict {shortcut:data}
+        cedict = {}
+        for msnobj in papymessage.msn_objects:
+            cedict[msnobj] = papymessage.msn_objects[msnobj]._data
+        
+        self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj, cedict)
        
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):
         ''' handle received nudges '''

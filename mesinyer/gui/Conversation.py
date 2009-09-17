@@ -194,7 +194,7 @@ class Conversation(object):
 
     group_chat = property(fget=_get_group_chat)
 
-    def _on_send_message(self, text):
+    def _on_send_message(self, text, cedict=None):
         '''method called when the user press enter on the input text'''
         self.session.send_message(self.cid, text, self.cstyle)
         nick = self.session.contacts.me.display_name
@@ -209,7 +209,7 @@ class Conversation(object):
             middle = e3common.add_style_to_message(middle, self.cstyle, False)
 
         all = first + middle + last
-        self.output.append(all)
+        self.output.append(all, cedict)
         self.play_type()
 
     def _get_icon(self):

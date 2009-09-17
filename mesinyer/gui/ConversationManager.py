@@ -34,7 +34,7 @@ class ConversationManager(object):
         """
         raise NotImplementedError("This method is not implemented")
 
-    def _on_message(self, cid, account, message):
+    def _on_message(self, cid, account, message, cedict=None):
         '''called when a message is received'''
         conversation = self.conversations.get(float(cid), None)
 
@@ -55,7 +55,7 @@ class ConversationManager(object):
             if not is_raw:
                 middle = self.format_from_message(message)
 
-            conversation.output.append(first + middle + last)
+            conversation.output.append(first + middle + last, cedict)
             conversation.play_send()
 
         elif message.type == Message.TYPE_NUDGE:
