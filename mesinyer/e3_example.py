@@ -90,7 +90,8 @@ class Example(object):
 
 if __name__ == '__main__':
     gobject.threads_init()
-    example = Example('dude@hotmail.com', 'secret',
+    example = Example('xmxsxn@hotmail.com',
+            file('/home/mariano/secret.txt').read(),
         protocol.status.ONLINE, None, False)
 
     gobject.MainLoop().run()

@@ -25,7 +25,7 @@ def dbg(text, caller=None, level=1):
         caller = _build_caller()
 
     #old_dbg(text, module, level)
-    #_logger.log(level*10, text, extra={'caller':caller})
+    _logger.log(level*10, text, extra={'caller':caller})
 
 def log(text, caller=None):
     '''
@@ -106,7 +106,7 @@ _console_handler = logging.StreamHandler()
 _formatter = logging.Formatter('[%(asctime)s %(caller)s] %(message)s', '%H:%M:%S')
 _console_handler.setFormatter(_formatter)
 _console_handler.setLevel(logging.INFO)
-_logger.addHandler(_console_handler)
+#_logger.addHandler(_console_handler)
 
 queue_handler = QueueHandler()
 queue_handler.setLevel(logging.DEBUG)

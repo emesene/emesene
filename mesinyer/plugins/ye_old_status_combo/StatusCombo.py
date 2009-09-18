@@ -59,7 +59,6 @@ class StatusCombo(gtk.ComboBox):
         self.connect('changed', self.on_status_changed)
         main_window.session.signals.status_change_succeed.subscribe(
                 self.on_status_change_succeed)
-        print 'constructor'
 
     def on_status_changed(self , *args):
         """called when a status is selected"""
