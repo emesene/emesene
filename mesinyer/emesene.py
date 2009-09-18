@@ -17,7 +17,6 @@ import protocol
 from pluginmanager import get_pluginmanager
 import extension
 import e3gtk
-import e3dummy
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
