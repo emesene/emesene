@@ -89,7 +89,7 @@ class Example(object):
 
 if __name__ == '__main__':
     gobject.threads_init()
-    example = Example('xmxsxn@hotmail.com', 'contrasena',
+    example = Example('xmxsxn@hotmail.com', 'secret',
         e3.status.ONLINE, None, False)
 
     gobject.MainLoop().run()
