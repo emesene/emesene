@@ -19,7 +19,6 @@ class ContactInfo(gtk.VBox):
     def _set_first(self, first):
         '''set the first element and add it to the widget (remove the
         previous if not None'''
-
         if self._first_alig is not None:
             self.remove(self._first_alig)
 
@@ -28,6 +27,7 @@ class ContactInfo(gtk.VBox):
             yscale=0.1)
         self._first_alig.add(self._first)
         self.pack_start(self._first_alig)
+        self._first_alig.show_all()
 
     def _get_first(self):
         '''return the first widget'''
@@ -38,7 +38,6 @@ class ContactInfo(gtk.VBox):
     def _set_last(self, last):
         '''set the last element and add it to the widget (remove the
         previous if not None'''
-
         if self._last_alig is not None:
             self.remove(self._last_alig)
 
@@ -47,6 +46,7 @@ class ContactInfo(gtk.VBox):
             yscale=0.1)
         self._last_alig.add(self._last)
         self.pack_start(self._last_alig)
+        self._last_alig.show_all()
 
     def _get_last(self):
         '''return the last widget'''

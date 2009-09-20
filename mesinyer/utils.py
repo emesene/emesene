@@ -6,10 +6,11 @@ import e3
 
 pixbufs = {}
 
-def safe_gtk_image_load(path):
+def safe_gtk_image_load(path, size=None):
     '''try to return a gtk image from path, if fails, return a broken image'''
     if file_readable(path):
-        return gtk.image_new_from_file(path)
+        pixbuf = safe_gtk_pixbuf_load(path, size)
+        return gtk.image_new_from_pixbuf(pixbuf)
     else:
         return gtk.image_new_from_stock(gtk.STOCK_MISSING_IMAGE,
             gtk.ICON_SIZE_DIALOG)

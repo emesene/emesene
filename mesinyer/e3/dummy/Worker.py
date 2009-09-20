@@ -209,7 +209,9 @@ class Worker(e3.Worker):
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE
         '''
-        pass
+        self.session.contacts.me.picture = picture_name
+        self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
+                self.session.account.account, picture_name)
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES

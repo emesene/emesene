@@ -65,6 +65,8 @@ class UserPanel(gtk.VBox):
             self.on_status_change_succeed)
         session.signals.contact_list_ready.subscribe(
             self.on_contact_list_ready)
+        session.signals.picture_change_succeed.subscribe(
+            self.on_picture_change_succeed)
 
     def show(self):
         '''override show'''
@@ -111,3 +113,10 @@ class UserPanel(gtk.VBox):
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
         self.enabled = True
+
+    def on_picture_change_succeed(self, account, path):
+        '''callback called when the picture of an account is changed'''
+        # out account
+        if account == self.session.account.account:
+            pixbuf = utils.safe_gtk_pixbuf_load(path, (32, 32))
+            self.image.set_from_pixbuf(pixbuf)

@@ -325,7 +325,12 @@ class MyAccountHandler(object):
 
     def on_set_picture_selected(self):
         '''called when set picture is selected'''
-        pass
+        def set_picture_cb(response, filename):
+            '''callback for the avatar chooser'''
+            if response == gui.stock.ACCEPT:
+                self.session.set_picture(filename)
+
+        extension.get_default('avatar chooser')(set_picture_cb).show()
 
 class ConversationToolbarHandler(object):
     '''this handler contains all the methods to handle a conversation toolbar

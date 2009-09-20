@@ -67,8 +67,14 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.header.information = ('connecting', 'creating conversation')
 
         self.header.set_image(gui.theme.user)
-        self.info.first = utils.safe_gtk_image_load(gui.theme.logo)
-        self.info.last = utils.safe_gtk_image_load(gui.theme.logo)
+
+        if self.session.contacts.me.picture:
+            my_picture = self.session.contacts.me.picture
+        else:
+            my_picture = gui.theme.logo
+
+        self.info.first = utils.safe_gtk_image_load(gui.theme.logo, (64, 64))
+        self.info.last = utils.safe_gtk_image_load(my_picture, (64, 64))
 
         self._load_style()
 
@@ -78,6 +84,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             'b_show_header')
         self.session.config.subscribe(self._on_show_info_changed,
             'b_show_info')
+        self.session.signals.picture_change_succeed.subscribe(
+            self.on_picture_change_succeed)
 
         self.tab_index=-1 # used to select an existing conversation
 
@@ -214,3 +222,14 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''called when an emoticon is selected'''
         self.input.append(gobject.markup_escape_text(emote))
         self.input.grab_focus()
+
+    def on_picture_change_succeed(self, account, path):
+        '''callback called when the picture of an account is changed'''
+        image = utils.safe_gtk_image_load(path, (64, 64))
+
+        # out account?
+        if account == self.session.account.account:
+            self.info.last = image
+        else:
+            self.info.first = image
+

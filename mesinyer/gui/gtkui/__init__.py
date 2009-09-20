@@ -26,7 +26,9 @@ def gtk_main(Controller):
     import ContactInfo
     import Preferences
     import Conversation
+    import ImageChooser
     import WebKitTextBox
+    import AvatarChooser
     import ConversationManager
     import ConversationToolbar
     import DebugWindow
@@ -56,6 +58,9 @@ def setup():
     import gtk
 
     extension.category_register('dialog', Dialog.Dialog)
+    extension.category_register('image chooser', ImageChooser.ImageChooser)
+    extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
+
     extension.category_register('preferences', Preferences.Preferences)
     extension.category_register('login window', Login.Login)
     extension.category_register('window frame', Window.Window)
