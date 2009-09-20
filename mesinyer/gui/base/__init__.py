@@ -5,6 +5,7 @@ from ConversationManager import ConversationManager
 
 theme = Theme()
 
+import stock
 import extension
 import e3
 
