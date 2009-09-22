@@ -394,6 +394,7 @@ class Worker(e3.base.Worker, papyon.Client):
         contact = self.session.contacts.contacts.get(msn_object._creator, None)
         contact.picture = image.name
         print "Used " + image.name + " as " + contact.nick +"'s image"
+        self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED, contact.account, image.name)
         #TODO fix cache
         #self._avatar_cache.insert(msn_object._data.getvalue())
 
