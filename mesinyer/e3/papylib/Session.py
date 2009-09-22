@@ -18,13 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import papylib.Worker
-import e3.base.Account
-import e3.base.Message
-import e3.base.Session
-from e3.base.Action import Action
+from Worker import Worker
+import e3
 
-class Session(e3.base.Session):
+class Session(e3.Session):
     '''a specialization of e3.base.Session'''
     NAME = 'Papyon session'
     DESCRIPTION = 'MSN session with papyon library'
@@ -33,25 +30,25 @@ class Session(e3.base.Session):
 
     def __init__(self, id_=None, account=None):
         '''constructor'''
-        e3.base.Session.__init__(self, id_, account)
+        e3.Session.__init__(self, id_, account)
 
     def login(self, account, password, status, proxy, use_http=False):
         '''start the login process'''
-        self.account = e3.base.Account(account, password, status)
-        worker = papylib.Worker('emesene2', self, proxy, use_http)
+        self.account = e3.Account(account, password, status)
+        worker = Worker('emesene2', self, proxy, use_http)
         worker.start()
 
-        self.add_action(Action.ACTION_LOGIN, (account, password, status))
+        self.add_action(e3.Action.ACTION_LOGIN, (account, password, status))
 
     def send_message(self, cid, text, style=None):
         '''send a common message'''
         account = self.account.account
-        message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, text, account,
+        message = e3.Message(e3.Message.TYPE_MESSAGE, text, account,
             style)
-        self.add_action(Action.ACTION_SEND_MESSAGE, (cid, message))
+        self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
 
     def request_attention(self, cid):
         '''request the attention of the contact'''
         account = self.account.account
-        message = e3.base.Message(e3.base.Message.TYPE_NUDGE, None, account)
-        self.add_action(Action.ACTION_SEND_MESSAGE, (cid, message))
+        message = e3.Message(e3.Message.TYPE_NUDGE, None, account)
+        self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))

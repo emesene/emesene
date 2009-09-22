@@ -208,7 +208,7 @@ class Login(gtk.Alignment):
 
     def _on_account_changed(self, entry):
         '''called when the content of the account entry changes'''
-        self._update_fields(self.txt_account.get_text())
+        self._update_fields(self.cmb_account.get_active_text())
 
     def _update_fields(self, account):
         '''update the different fields according to the account that is

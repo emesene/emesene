@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2005-2006 Ali Sabil <ali.sabil@gmail.com>
+# papylib - an emesene extension for papyon
+#
+# Copyright (C) 2009 Riccardo (C10uD) <c10ud.dev@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,29 +21,3 @@
 from Session import Session
 from Worker import Worker
 
-"""An implementation of the MSN Messenger Protocol
-
-papyon is a library, written in Python, for accessing the MSN
-instant messaging service.
-
-    @group High Level Interface: client, profile, conversation, event
-    @group Low Level Interface: msnp, msnp2p, service
-    @group Network Layer: gnet
-
-
-version = (0, 4, 1)
-
-__version__ = ".".join(str(x) for x in version)
-__author__ = "Youness Alaoui <kakaroto@users.sourceforge.net>"
-__url__ = "http://telepathy.freedesktop.org/wiki/Papyon"
-__license__ = "GNU GPL"
-
-from client import *
-from conversation import *
-from profile import NetworkID, Presence, Privacy, Membership, Contact, Group
-import event
-
-import gnet.proxy
-Proxy = gnet.proxy.ProxyFactory
-ProxyInfos = gnet.proxy.ProxyInfos
-"""
