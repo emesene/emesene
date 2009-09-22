@@ -407,14 +407,14 @@ class Controller(object):
             self.on_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler, self.window)
 
-        self.external_api = []
-        for ext in extension.get_extensions('external api').values():
-            try:
-                inst = ext()
-            except Exception, description: #on error, just discard it
-                warning("errors occured when instancing %s: '%s'" % (str(ext), str(description)))
-            else:
-                self.external_api.append(inst)
+        #self.external_api = []
+        #for ext in extension.get_extensions('external api').values():
+        #    try:
+        #        inst = ext()
+        #    except Exception, description: #on error, just discard it
+        #        warning("errors occured when instancing %s: '%s'" % (str(ext), str(description)))
+        #    else:
+        #        self.external_api.append(inst)
 
 
         proxy = self._get_proxy_settings()

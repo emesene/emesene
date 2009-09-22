@@ -24,15 +24,15 @@ import Queue
 import random
 import gobject
 
-import protocol.Worker
-import protocol.Message
-import protocol.Contact
-import protocol.Group
-from protocol.Event import Event
-from protocol.Action import Action
-from protocol import status
+import e3.base.Worker
+import e3.base.Message
+import e3.base.Contact
+import e3.base.Group
+from e3.base.Event import Event
+from e3.base.Action import Action
+from e3.base import status
 
-import protocol.Logger as Logger
+import e3.base.Logger as Logger
 from debugger import dbg
 
 try:
@@ -68,16 +68,16 @@ STATUS_E3_TO_PAPY = { \
     
 def formatting_papy_to_e3(format = papyon.TextFormat()):
     font = format.font
-    color = protocol.Color.from_hex('#' + str(format.color))
+    color = e3.base.Color.from_hex('#' + str(format.color))
     bold = format.style & papyon.TextFormat.BOLD == papyon.TextFormat.BOLD
     italic = format.style & papyon.TextFormat.ITALIC == papyon.TextFormat.ITALIC
     underline = format.style & papyon.TextFormat.UNDERLINE == papyon.TextFormat.UNDERLINE
     strike = format.style & papyon.TextFormat.STRIKETHROUGH == papyon.TextFormat.STRIKETHROUGH
     size_ = format.pitch # wtf?
     
-    return protocol.Style(font, color, bold, italic, underline, strike, size_)
+    return e3.base.Style(font, color, bold, italic, underline, strike, size_)
     
-def formatting_e3_to_papy(format = protocol.Style()):
+def formatting_e3_to_papy(format = e3.base.Style()):
     font = format.font
     style = 0
     if format.bold: style |= papyon.TextFormat.BOLD
@@ -183,6 +183,8 @@ class ContactEvent(papyon.event.ContactEventInterface):
         """Called when the infos of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
+        print contact
+        print infos
         pass
 
     def on_contact_client_capabilities_changed(self, contact):
@@ -250,12 +252,12 @@ class ProfileEvent(papyon.event.ProfileEventInterface):
         """Called when the MSNObject changes."""
         print "dp changed"
         
-class Worker(protocol.Worker, papyon.Client):
+class Worker(e3.base.Worker, papyon.Client):
     '''dummy Worker implementation to make it easy to test emesene'''
 
     def __init__(self, app_name, session, proxy, use_http=False):
         '''class constructor'''
-        protocol.Worker.__init__(self, app_name, session)
+        e3.base.Worker.__init__(self, app_name, session)
         self.session = session
         server = ('messenger.hotmail.com', 1863)
         if use_http:
@@ -357,12 +359,12 @@ class Worker(protocol.Worker, papyon.Client):
     def _add_contact(self, mail, nick, status_, pm, blocked, alias=''):
         ''' helper method to add a contact to the (gui) contact list '''
         # wtf, why 2 mails?
-        self.session.contacts.contacts[mail] = protocol.Contact(mail, mail,
+        self.session.contacts.contacts[mail] = e3.base.Contact(mail, mail,
             nick, pm, status_, alias, blocked)
 
     def _add_group(self, name):
         ''' method to add a group to the (gui) contact list '''
-        self.session.groups[name] = protocol.Group(name, name)
+        self.session.groups[name] = e3.base.Group(name, name)
 
     def _add_contact_to_group(self, account, group):
         ''' method to add a contact to a (gui) group '''
@@ -410,7 +412,7 @@ class Worker(protocol.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
         
-        msgobj = protocol.Message(protocol.Message.TYPE_MESSAGE, \
+        msgobj = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             papymessage.content, account, \
             formatting_papy_to_e3(papymessage.formatting))
         # convert papyon msnobjects to a simple dict {shortcut:identifier}
@@ -439,7 +441,7 @@ class Worker(protocol.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
                 
-        msgobj = protocol.Message(protocol.Message.TYPE_NUDGE, None, \
+        msgobj = e3.base.Message(e3.base.Message.TYPE_NUDGE, None, \
             account, None)
                 
         self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
@@ -690,10 +692,10 @@ class Worker(protocol.Worker, papyon.Client):
         print "type:", message
         # find papyon conversation by cid
         papyconversation = self.papyconv[cid]
-        if message.type == protocol.Message.TYPE_NUDGE:
+        if message.type == e3.base.Message.TYPE_NUDGE:
             papyconversation.send_nudge()
             
-        elif message.type == protocol.Message.TYPE_MESSAGE:
+        elif message.type == e3.base.Message.TYPE_MESSAGE:
             # format the text for papy
             formatting = formatting_e3_to_papy(message.style)
             # create papymessage
@@ -716,7 +718,7 @@ class Worker(protocol.Worker, papyon.Client):
             dst = self.session.contacts.get(dst_account)
 
             if dst is None:
-                dst = protocol.Contact(message.account)
+                dst = e3.base.Contact(message.account)
 
                 dest =  Logger.Account(dst.attrs.get('CID', None), None, \
                     dst.account, dst.status, dst.nick, dst.message, dst.picture)
@@ -733,7 +735,7 @@ class Worker(protocol.Worker, papyon.Client):
             conversation and the session respectively, time.time() is 
             recommended to be used.
          dest is the destination account
-         type_ is one of the protocol.Transfer.TYPE_* constants
+         type_ is one of the e3.base.Transfer.TYPE_* constants
          identifier is the data that is needed to be sent for the invitation
         '''
         pass
