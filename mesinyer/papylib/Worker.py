@@ -23,16 +23,19 @@ import time
 import Queue
 import random
 import gobject
+import shutil
+import os
 
-import protocol.Worker
-import protocol.Message
-import protocol.Contact
-import protocol.Group
-from protocol.Event import Event
-from protocol.Action import Action
-from protocol import status
-
-import protocol.Logger as Logger
+import e3.base.Worker
+import e3.base.Message
+import e3.base.Contact
+import e3.base.Group
+from e3.base.Event import Event
+from e3.base.Action import Action
+from e3.base import status
+from e3.cache import *
+from e3.common import ConfigDir
+import e3.base.Logger as Logger
 from debugger import dbg
 
 try:
@@ -68,16 +71,16 @@ STATUS_E3_TO_PAPY = { \
     
 def formatting_papy_to_e3(format = papyon.TextFormat()):
     font = format.font
-    color = protocol.Color.from_hex('#' + str(format.color))
+    color = e3.base.Color.from_hex('#' + str(format.color))
     bold = format.style & papyon.TextFormat.BOLD == papyon.TextFormat.BOLD
     italic = format.style & papyon.TextFormat.ITALIC == papyon.TextFormat.ITALIC
     underline = format.style & papyon.TextFormat.UNDERLINE == papyon.TextFormat.UNDERLINE
     strike = format.style & papyon.TextFormat.STRIKETHROUGH == papyon.TextFormat.STRIKETHROUGH
     size_ = format.pitch # wtf?
     
-    return protocol.Style(font, color, bold, italic, underline, strike, size_)
+    return e3.base.Style(font, color, bold, italic, underline, strike, size_)
     
-def formatting_e3_to_papy(format = protocol.Style()):
+def formatting_e3_to_papy(format = e3.base.Style()):
     font = format.font
     style = 0
     if format.bold: style |= papyon.TextFormat.BOLD
@@ -250,26 +253,30 @@ class ProfileEvent(papyon.event.ProfileEventInterface):
         """Called when the MSNObject changes."""
         print "dp changed"
         
-class Worker(protocol.Worker, papyon.Client):
+class Worker(e3.base.Worker, papyon.Client):
     '''dummy Worker implementation to make it easy to test emesene'''
 
     def __init__(self, app_name, session, proxy, use_http=False):
         '''class constructor'''
-        protocol.Worker.__init__(self, app_name, session)
+        e3.base.Worker.__init__(self, app_name, session)
         self.session = session
         server = ('messenger.hotmail.com', 1863)
+
         if use_http:
             from papyon.transport import HTTPPollConnection
             self.client = papyon.Client.__init__(self, server, get_proxies(), HTTPPollConnection)
         else:
             self.client = papyon.Client.__init__(self, server, proxies = get_proxies())
-            
+        
+        
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
         self._invite_handler = InviteEvent(self)
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
-        
+        #TODO fix cache
+        #self._avatar_cache = None
+
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
@@ -357,18 +364,36 @@ class Worker(protocol.Worker, papyon.Client):
     def _add_contact(self, mail, nick, status_, pm, blocked, alias=''):
         ''' helper method to add a contact to the (gui) contact list '''
         # wtf, why 2 mails?
-        self.session.contacts.contacts[mail] = protocol.Contact(mail, mail,
+        self.session.contacts.contacts[mail] = e3.base.Contact(mail, mail,
             nick, pm, status_, alias, blocked)
 
     def _add_group(self, name):
         ''' method to add a group to the (gui) contact list '''
-        self.session.groups[name] = protocol.Group(name, name)
+        self.session.groups[name] = e3.base.Group(name, name)
 
     def _add_contact_to_group(self, account, group):
         ''' method to add a contact to a (gui) group '''
         self.session.groups[group].contacts.append(account)
         self.session.contacts.contacts[account].groups.append(group)
     
+    def _request_avatar(self, contact):
+        '''method to fetch a display picture'''
+        #TODO why 2 callbacks and not 1?Let's investigate!
+        self.cbs = (self._download_avatar, self._download_avatar)
+        self.msn_object_store.request(contact.msn_object, self.cbs)
+        
+    def _download_avatar(self, msn_object, _msn_object_content):
+        '''this callback saves the avatar, _msn_object_content is a callback
+        maybe the second invoked by _request_avatar with method "request"??'''
+        #A Little workaround before caching implementation
+        image = open( os.path.expanduser(os.path.join('~', '.config', 
+            'emesene2', self.session.account.account,
+            msn_object._checksum_sha + ".png")), "w") 
+        image.write(msn_object._data.getvalue())
+        image.close()
+        #TODO fix cache
+        #self._avatar_cache.insert(msn_object._data.getvalue())
+
     # invite handlers
     def _on_conversation_invite(self, papyconversation):
         ''' create a cid and append the event handler to papyconv dict '''
@@ -410,7 +435,7 @@ class Worker(protocol.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
         
-        msgobj = protocol.Message(protocol.Message.TYPE_MESSAGE, \
+        msgobj = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             papymessage.content, account, \
             formatting_papy_to_e3(papymessage.formatting))
         # convert papyon msnobjects to a simple dict {shortcut:identifier}
@@ -439,7 +464,7 @@ class Worker(protocol.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
                 
-        msgobj = protocol.Message(protocol.Message.TYPE_NUDGE, None, \
+        msgobj = e3.base.Message(e3.base.Message.TYPE_NUDGE, None, \
             account, None)
                 
         self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
@@ -519,7 +544,12 @@ class Worker(protocol.Worker, papyon.Client):
             # TODO: log the media change
     
     def _on_contact_msnobject_changed(self, contact):
-        print "_on_contact_msnobject_changed NotImplementedError"
+        if contact.msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
+            self._request_avatar(contact)
+        elif contact.msn_object._type == papyon.p2p.MSNObjectType.BACKGROUND_PICTURE:
+            print contact.display_name + " has changed his/her Background Picture"
+        elif contact.msn_object._type == papyon.p2p.MSNObjectType.DYNAMIC_DISPLAY_PICTURE:
+            print contact.display_name + " has changed his/her dynamic display picture"
         
     # action handlers
     def _handle_action_add_contact(self, account):
@@ -562,9 +592,11 @@ class Worker(protocol.Worker, papyon.Client):
         self.session.account.account = account
         self.session.account.password = password
         self.session.account.status = status_
-        
         self.session.add_event(Event.EVENT_LOGIN_STARTED)
         self.login(account, password)
+        #TODO Fix Cache
+        #self._avatar_cache = AvatarCache(os.path.expanduser(os.path.join('~', '.config',
+        #        'emesene2')),self.session.account.account)
         
     def _handle_action_logout(self):
         ''' handle Action.ACTION_LOGOUT '''
@@ -638,8 +670,7 @@ class Worker(protocol.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, nick)            
 
     def _handle_action_set_picture(self, picture_name):
-        '''handle Action.ACTION_SET_PICTURE
-        '''
+        '''handle Action.ACTION_SET_PICTURE'''
         pass
 
     def _handle_action_set_preferences(self, preferences):
@@ -690,10 +721,10 @@ class Worker(protocol.Worker, papyon.Client):
         print "type:", message
         # find papyon conversation by cid
         papyconversation = self.papyconv[cid]
-        if message.type == protocol.Message.TYPE_NUDGE:
+        if message.type == e3.base.Message.TYPE_NUDGE:
             papyconversation.send_nudge()
             
-        elif message.type == protocol.Message.TYPE_MESSAGE:
+        elif message.type == e3.base.Message.TYPE_MESSAGE:
             # format the text for papy
             formatting = formatting_e3_to_papy(message.style)
             # create papymessage
@@ -716,7 +747,7 @@ class Worker(protocol.Worker, papyon.Client):
             dst = self.session.contacts.get(dst_account)
 
             if dst is None:
-                dst = protocol.Contact(message.account)
+                dst = e3.base.Contact(message.account)
 
                 dest =  Logger.Account(dst.attrs.get('CID', None), None, \
                     dst.account, dst.status, dst.nick, dst.message, dst.picture)
@@ -733,7 +764,7 @@ class Worker(protocol.Worker, papyon.Client):
             conversation and the session respectively, time.time() is 
             recommended to be used.
          dest is the destination account
-         type_ is one of the protocol.Transfer.TYPE_* constants
+         type_ is one of the e3.base.Transfer.TYPE_* constants
          identifier is the data that is needed to be sent for the invitation
         '''
         pass
