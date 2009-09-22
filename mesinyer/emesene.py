@@ -41,6 +41,7 @@ import e3
 from e3 import msn
 from e3 import jabber
 from e3 import dummy
+from e3 import papylib
 
 from pluginmanager import get_pluginmanager
 import extension
@@ -71,6 +72,7 @@ class Controller(object):
     def _setup(self):
         '''register core extensions'''
         extension.category_register('session', msn.Session, single_instance=True)
+        extension.register('session', papylib.Session)
         extension.register('session', jabber.Session)
         extension.register('session', dummy.Session)
         extension.category_register('sound', e3.common.play_sound.play)
