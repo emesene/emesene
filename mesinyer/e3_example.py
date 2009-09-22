@@ -4,10 +4,9 @@ import Queue
 import gobject
 
 import e3
-import yaber
-import gui
+from e3 import msn
+from e3 import jabber 
 
-import protocol
 import debugger
 debugger.max_level = 0
 
@@ -16,8 +15,8 @@ class Example(object):
 
     def __init__(self, account, password, status, proxy, use_http_method=False):
         '''class constructor'''
-        self.session = e3.Session()
-        #self.session = yaber.Session()
+        self.session = msn.Session()
+        #self.session = jabber.Session()
         signals = self.session.signals
         signals.login_succeed.subscribe(self.on_login_succeed)
         signals.login_failed.subscribe(self.on_login_failed)
@@ -90,7 +89,7 @@ class Example(object):
 
 if __name__ == '__main__':
     gobject.threads_init()
-    example = Example('dude@hotmail.com', 'secret',
-        protocol.status.ONLINE, None, False)
+    example = Example('xmxsxn@hotmail.com', 'secret',
+        e3.status.ONLINE, None, False)
 
     gobject.MainLoop().run()

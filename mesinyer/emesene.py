@@ -34,21 +34,17 @@ else:
 
 from debugger import warning
 
-import e3
 import gui
-import yaber
 import utils
-import dummy
-import e3common
-import papylib
-import protocol
+
+import e3
+from e3 import msn
+from e3 import jabber
+from e3 import dummy
 
 from pluginmanager import get_pluginmanager
 import extension
-import interfaces
-
-import e3gtk
-import dummy
+from gui import gtkui
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -58,8 +54,8 @@ class Controller(object):
         self.window = None
         self.tray_icon = None
         self.conversations = None
-        self.config = e3common.Config.Config()
-        self.config_dir = e3common.ConfigDir.ConfigDir('emesene2')
+        self.config = e3.common.Config()
+        self.config_dir = e3.common.ConfigDir('emesene2')
         self.config_path = self.config_dir.join('config')
         self.config.load(self.config_path)
 
@@ -74,16 +70,14 @@ class Controller(object):
     
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', e3.Session, single_instance=True)
-        extension.register('session', papylib.Session)
-        extension.register('session', yaber.Session)
+        extension.category_register('session', msn.Session, single_instance=True)
+        extension.register('session', jabber.Session)
         extension.register('session', dummy.Session)
-        extension.category_register('sound', e3common.play_sound.play)
-        extension.category_register('notification', e3common.notification.notify)
+        extension.category_register('sound', e3.common.play_sound.play)
+        extension.category_register('notification', e3.common.notification.notify)
         extension.category_register('history exporter',
-                protocol.Logger.save_logs_as_txt)
-        extension.category_register('external api', None, interfaces.IExternalAPI)
-        
+                e3.Logger.save_logs_as_txt)
+
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
             self.config.session = default_id
@@ -129,7 +123,7 @@ class Controller(object):
                 extension.set_default_by_id(cat_name, ext_id)
 
     def _get_proxy_settings(self):
-        '''return the values of the proxy settings as a protocol.Proxy object
+        '''return the values of the proxy settings as a e3.Proxy object
         initialize the values on config if not exist'''
 
         use_proxy = self.config.get_or_set('b_use_proxy', False)
@@ -141,7 +135,7 @@ class Controller(object):
 
         use_http = self.config.get_or_set('b_use_http', False)
 
-        return protocol.Proxy(use_proxy, host, port, use_proxy_auth, user,
+        return e3.Proxy(use_proxy, host, port, use_proxy_auth, user,
             passwd)
 
     def _save_proxy_settings(self, proxy):
@@ -381,7 +375,7 @@ class Controller(object):
 
         play = extension.get_default('sound')
         if other_started and \
-            self.session.contacts.me.status != protocol.status.BUSY and \
+            self.session.contacts.me.status != e3.status.BUSY and \
             self.session.config.b_play_first_send:
 
             play(gui.theme.sound_send)
@@ -407,7 +401,7 @@ class Controller(object):
             self.tray_icon.set_visible(False)
 
         TrayIcon = extension.get_default('tray icon')
-        handler = e3common.TrayIconHandler(self.session, gui.theme,
+        handler = e3.common.TrayIconHandler(self.session, gui.theme,
             self.on_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler, self.window)
 
