@@ -1,6 +1,6 @@
 import gtk
 
-import gui.config as config
+import gui.base.config as config
 
 SPACING = 2
 BORDER = 2

@@ -23,6 +23,8 @@ import time
 import Queue
 import random
 import gobject
+import shutil
+import os
 
 import e3.base.Worker
 import e3.base.Message
@@ -31,7 +33,8 @@ import e3.base.Group
 from e3.base.Event import Event
 from e3.base.Action import Action
 from e3.base import status
-
+from e3.cache import *
+from e3.common import ConfigDir
 import e3.base.Logger as Logger
 from debugger import dbg
 
@@ -183,8 +186,6 @@ class ContactEvent(papyon.event.ContactEventInterface):
         """Called when the infos of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
-        print contact
-        print infos
         pass
 
     def on_contact_client_capabilities_changed(self, contact):
@@ -260,18 +261,22 @@ class Worker(e3.base.Worker, papyon.Client):
         e3.base.Worker.__init__(self, app_name, session)
         self.session = session
         server = ('messenger.hotmail.com', 1863)
+
         if use_http:
             from papyon.transport import HTTPPollConnection
             self.client = papyon.Client.__init__(self, server, get_proxies(), HTTPPollConnection)
         else:
             self.client = papyon.Client.__init__(self, server, proxies = get_proxies())
-            
+        
+        
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
         self._invite_handler = InviteEvent(self)
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
-        
+        #TODO fix cache
+        #self._avatar_cache = None
+
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
@@ -371,6 +376,24 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.groups[group].contacts.append(account)
         self.session.contacts.contacts[account].groups.append(group)
     
+    def _request_avatar(self, contact):
+        '''method to fetch a display picture'''
+        #TODO why 2 callbacks and not 1?Let's investigate!
+        self.cbs = (self._download_avatar, self._download_avatar)
+        self.msn_object_store.request(contact.msn_object, self.cbs)
+        
+    def _download_avatar(self, msn_object, _msn_object_content):
+        '''this callback saves the avatar, _msn_object_content is a callback
+        maybe the second invoked by _request_avatar with method "request"??'''
+        #A Little workaround before caching implementation
+        image = open( os.path.expanduser(os.path.join('~', '.config', 
+            'emesene2', self.session.account.account,
+            msn_object._checksum_sha + ".png")), "w") 
+        image.write(msn_object._data.getvalue())
+        image.close()
+        #TODO fix cache
+        #self._avatar_cache.insert(msn_object._data.getvalue())
+
     # invite handlers
     def _on_conversation_invite(self, papyconversation):
         ''' create a cid and append the event handler to papyconv dict '''
@@ -521,7 +544,12 @@ class Worker(e3.base.Worker, papyon.Client):
             # TODO: log the media change
     
     def _on_contact_msnobject_changed(self, contact):
-        print "_on_contact_msnobject_changed NotImplementedError"
+        if contact.msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
+            self._request_avatar(contact)
+        elif contact.msn_object._type == papyon.p2p.MSNObjectType.BACKGROUND_PICTURE:
+            print contact.display_name + " has changed his/her Background Picture"
+        elif contact.msn_object._type == papyon.p2p.MSNObjectType.DYNAMIC_DISPLAY_PICTURE:
+            print contact.display_name + " has changed his/her dynamic display picture"
         
     # action handlers
     def _handle_action_add_contact(self, account):
@@ -564,9 +592,11 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.account.account = account
         self.session.account.password = password
         self.session.account.status = status_
-        
         self.session.add_event(Event.EVENT_LOGIN_STARTED)
         self.login(account, password)
+        #TODO Fix Cache
+        #self._avatar_cache = AvatarCache(os.path.expanduser(os.path.join('~', '.config',
+        #        'emesene2')),self.session.account.account)
         
     def _handle_action_logout(self):
         ''' handle Action.ACTION_LOGOUT '''
@@ -640,8 +670,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, nick)            
 
     def _handle_action_set_picture(self, picture_name):
-        '''handle Action.ACTION_SET_PICTURE
-        '''
+        '''handle Action.ACTION_SET_PICTURE'''
         pass
 
     def _handle_action_set_preferences(self, preferences):
