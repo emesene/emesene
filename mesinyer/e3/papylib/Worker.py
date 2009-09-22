@@ -391,7 +391,7 @@ class Worker(e3.base.Worker, papyon.Client):
             msn_object._checksum_sha + ".png")), "w") 
         image.write(msn_object._data.getvalue())
         image.close()
-        contact = self.session.contacts.contacts.get(msn_object._creator.account, None)
+        contact = self.session.contacts.contacts.get(msn_object._creator, None)
         contact.picture = image.name
         print "Used " + image.name + " as " + contact.nick +"'s image"
         #TODO fix cache
