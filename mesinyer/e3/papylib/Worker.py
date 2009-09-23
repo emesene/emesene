@@ -443,7 +443,7 @@ class Worker(e3.base.Worker, papyon.Client):
         contact.picture = image.name
         print "Used " + image.name + " as " + contact.account +"'s image"
         #TODO check this one: why doesn't update the contact's image?
-        self.session.add_event( Event.EVENT_CONTACT_ATTR_CHANGED , contact.account, 'picture' , image.name)
+        self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED, contact.account, image.name)
         #TODO fix cache
         #self._avatar_cache.insert(msn_object._data.getvalue())
 
