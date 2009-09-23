@@ -40,14 +40,15 @@ from debugger import dbg
 
 try:
     # papyon imports
+    # get the deb from http://launchpadlibrarian.net/31746931/python-papyon_0.4.2-1%7Eppa9.04%2B1_all.deb
     import logging
     import papyon
     import papyon.event
     ver = papyon.version    
-    if ver[1] < 4 or ver[2] < 1:
+    if ver[1] < 4 or ver[2] < 2:
         raise PapyError
 except:
-    print "You need python-papyon(>=0.4.1) to be installed in order to use this extension"    
+    print "You need python-papyon(>=0.4.2) to be installed in order to use this extension"    
 
 #logging.basicConfig(level=logging.DEBUG)
 
