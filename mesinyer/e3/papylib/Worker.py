@@ -26,6 +26,7 @@ import gobject
 import shutil
 import os
 
+from PapyCache import PapyCache
 import e3.base.Worker
 import e3.base.Message
 import e3.base.Contact
@@ -33,7 +34,6 @@ import e3.base.Group
 from e3.base.Event import Event
 from e3.base.Action import Action
 from e3.base import status
-from e3.cache import *
 from e3.common import ConfigDir
 import e3.base.Logger as Logger
 from debugger import dbg
@@ -269,15 +269,13 @@ class Worker(e3.base.Worker, papyon.Client):
         else:
             self.client = papyon.Client.__init__(self, server, proxies = get_proxies())
         
-        
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
         self._invite_handler = InviteEvent(self)
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
-        #TODO fix cache
-        #self._avatar_cache = None
-
+        #Let's start caching System
+        self._cache = PapyCache(self, self.session)
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
@@ -376,101 +374,6 @@ class Worker(e3.base.Worker, papyon.Client):
         ''' method to add a contact to a (gui) group '''
         self.session.groups[group].contacts.append(account)
         self.session.contacts.contacts[account].groups.append(group)
-    
-    def _get_msn_object_path(self, msn_object):
-        '''method to get an MSNObject path'''
-
-        #TODO why 2 callbacks and not 1?Let's investigate!
-        if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE or \
-            msn_object._type == papyon.p2p.MSNObjectType.DYNAMIC_DISPLAY_PICTURE:
-            try:
-                #TODO Search in AVATAR CACHE
-                path = open( os.path.expanduser(os.path.join('~', '.config', 
-                'emesene2', self.session.account.account,
-                msn_object._checksum_sha + ".png")), "r").name
-            except:
-                #Download the content
-                self.cbs = (self._download_avatar, self._download_avatar)
-                self.msn_object_store.request(msn_object, self.cbs)
-                #TODO now the content MUST be in cache! (got to handle transfer error)
-                path = os.path.expanduser(os.path.join('~', '.config', 
-                'emesene2', self.session.account.account,
-                msn_object._checksum_sha + ".png"))
-        elif msn_object._type == papyon.p2p.MSNObjectType.BACKGROUND_PICTURE:
-            try:
-                #TODO Search in BACKGROUND CACHE
-                path = open( os.path.expanduser(os.path.join('~', '.config', 
-                'emesene2', self.session.account.account,
-                msn_object._checksum_sha + ".jpg")), "r").name
-            except:
-                #Download the content
-                self.cbs = (self._download_background, self._download_background)
-                self.msn_object_store.request(msn_object, self.cbs)
-                #TODO now the content MUST be in cache! (got to handle transfer error)
-                path = os.path.expanduser(os.path.join('~', '.config', 
-                'emesene2', self.session.account.account,
-                msn_object._checksum_sha + ".jpg"))
-
-        elif msn_object._type == papyon.p2p.MSNObjectType.CUSTOM_EMOTICON:
-            try:
-                #TODO Search in EMOTICON CACHE
-                path = open( os.path.expanduser(os.path.join('~', '.config', 
-                'emesene2', self.session.account.account,
-                msn_object._checksum_sha + ".gif")), "r").name
-            except:
-                #Download the content
-                self.cbs = (self._download_custom_emoticon, self._download_custom_emoticon)
-                self.msn_object_store.request(msn_object, self.cbs)
-                #TODO now the content MUST be in cache! (got to handle transfer error)
-                path = os.path.expanduser(os.path.join('~', '.config', 
-                'emesene2', self.session.account.account,
-                msn_object._checksum_sha + ".gif"))
-        
-        return path
-        
-        
-    def _download_avatar(self, msn_object, _msn_object_content):
-        '''this callback saves the avatar, _msn_object_content is a callback
-        maybe the second invoked by _request_avatar with method "request"??'''
-        #A Little workaround before caching implementation
-        image = open( os.path.expanduser(os.path.join('~', '.config', 
-            'emesene2', self.session.account.account,
-            msn_object._checksum_sha + ".png")), "w") 
-        image.write(msn_object._data.getvalue())
-        image.close()
-        #TODO this should be moved in a better method
-        contact = self.session.contacts.contacts.get(msn_object._creator, None)
-        contact.picture = image.name
-        print "Used " + image.name + " as " + contact.account +"'s image"
-        #TODO check this one: why doesn't update the contact's image?
-        self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED, contact.account, image.name)
-        #TODO fix cache
-        #self._avatar_cache.insert(msn_object._data.getvalue())
-
-    def _download_custom_emoticon(self, msn_object, _msn_object_content):
-        '''this callback saves the avatar, _msn_object_content is a callback
-        maybe the second invoked by _request_avatar with method "request"??'''
-        #A Little workaround before caching implementation
-        image = open( os.path.expanduser(os.path.join('~', '.config', 
-            'emesene2', self.session.account.account,
-            msn_object._checksum_sha + ".gif")), "w") 
-        image.write(msn_object._data.getvalue())
-        image.close()
-        #TODO fix cache
-        #self._emoticon_cache.insert(msn_object._data.getvalue())
-
-    def _download_background(self, msn_object, _msn_object_content):
-        '''this callback saves the avatar, _msn_object_content is a callback
-        maybe the second invoked by _request_avatar with method "request"??'''
-        #A Little workaround before caching implementation
-        image = open( os.path.expanduser(os.path.join('~', '.config', 
-            'emesene2', self.session.account.account,
-            msn_object._checksum_sha + ".jpg")), "w") 
-        image.write(msn_object._data.getvalue())
-        image.close()
-        print "Used " + image.name + " as " + contact.account +"'s Background Image"
-        #TODO fix cache
-        #self._background_cache.insert(msn_object._data.getvalue())
 
     # invite handlers
     def _on_conversation_invite(self, papyconversation):
@@ -622,8 +525,12 @@ class Worker(e3.base.Worker, papyon.Client):
             # TODO: log the media change
     
     def _on_contact_msnobject_changed(self, contact):
-        resource_path = self._get_msn_object_path(contact.msn_object)
-        print resource_path
+        if contact.msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
+            image_path = self._cache.get(contact.msn_object)
+            print contact.account +" has set a new DP: ( " + image_path + " )"
+            # TODO Enable changing DP
+            #self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED, contact.account, image_path)
+            
         
     # action handlers
     def _handle_action_add_contact(self, account):
@@ -668,9 +575,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.account.status = status_
         self.session.add_event(Event.EVENT_LOGIN_STARTED)
         self.login(account, password)
-        #TODO Fix Cache
-        #self._avatar_cache = AvatarCache(os.path.expanduser(os.path.join('~', '.config',
-        #        'emesene2')),self.session.account.account)
         
     def _handle_action_logout(self):
         ''' handle Action.ACTION_LOGOUT '''

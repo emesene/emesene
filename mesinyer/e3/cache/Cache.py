@@ -19,12 +19,11 @@ def get_file_hash(file_path):
     handle = file(file_path)
     sha = hashlib.sha1()
 
-    chunk = handle.read(512)
+    chunk = handle.read(1024)
     while chunk:
         sha.update(chunk)
-        chunk = handle.read(512)
-
-    return sha.hexdigest()
+        chunk = handle.read(1024)
+    return sha.digest()
 
 
 class Cache(object):
