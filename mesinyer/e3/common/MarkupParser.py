@@ -70,8 +70,7 @@ def parse_custom_emotes(message, cedict):
  
             if len(parts) > 1:
                 path = cedict[shortcut]
-                tag = '<img src="%s" alt="%s"/>' % (path+".gif", shortcut)
-                print tag
+                tag = '<img src="%s" alt="%s"/>' % (path, shortcut)
                 for part in parts:
                     temp.append(part)
                     temp.append(tag)
