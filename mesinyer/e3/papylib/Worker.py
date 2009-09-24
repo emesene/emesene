@@ -222,10 +222,10 @@ class Worker(e3.base.Worker, papyon.Client):
             formatting_papy_to_e3(papymessage.formatting))
         # convert papyon msnobjects to a simple dict {shortcut:identifier}
         cedict = {}
-        print papymessage.msn_objects
-        for msnobj in papymessage.msn_objects:
-            cedict[papymessage.msn_objects[msnobj]._friendly] = self._cache.get(papymessage.msn_objects[msnobj])
         
+        for shortcut in papymessage.msn_objects:
+            cedict[shortcut] = self._cache.get(papymessage.msn_objects[shortcut])
+            
         self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj, cedict)
        
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):

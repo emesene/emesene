@@ -87,7 +87,7 @@ class PapyCache:
             if base64.b16encode(msn_object._data_sha) not in self._emoticon_cache:
                 cbcks = (self._emoticon_downloaded, self._download_failed)
                 self.msn_object_store.request(msn_object, cbcks)
-            path = os.path.join(self._avatar_cache.path, base64.b16encode(msn_object._data_sha))
+            path = os.path.join(self._emoticon_cache.path, base64.b16encode(msn_object._data_sha))
             return path
         else:
             return None
@@ -111,7 +111,8 @@ class PapyCache:
         image.write(msn_object._data.getvalue())
         image.flush()
         image.close()
-        self._emoticon_cache.insert((msn_object._friendly,image.name))
+        
+        self._emoticon_cache.insert((msn_object._friendly, image.name))
 
     def _download_failed(self, reason):
         '''callback to handle failing of a download'''

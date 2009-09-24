@@ -55,7 +55,8 @@ def parse_emotes(message):
 
 def parse_custom_emotes(message, cedict):
     '''parser the custom emotes in a message, return a string with img tags
-for the emotes'''
+       for the emotes
+    '''
  
     chunks = [message]
     shortcuts = cedict.keys()
@@ -64,14 +65,13 @@ for the emotes'''
     while len(shortcuts) > 0:
         shortcut = shortcuts.pop()
         temp = []
- 
         for chunk in chunks:
             parts = chunk.split(shortcut)
  
             if len(parts) > 1:
                 path = cedict[shortcut]
-                tag = '<img src="%s" alt="%s"/>' % (path, shortcut)
-                
+                tag = '<img src="%s" alt="%s"/>' % (path+".gif", shortcut)
+                print tag
                 for part in parts:
                     temp.append(part)
                     temp.append(tag)
