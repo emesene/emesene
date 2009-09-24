@@ -21,11 +21,13 @@
 from Worker import Worker
 import e3
 
+AUTHOR_LIST = ['Riccardo (C10uD)', 'Orfeo (Otacon)']
+
 class Session(e3.Session):
     '''a specialization of e3.base.Session'''
     NAME = 'Papyon session'
     DESCRIPTION = 'MSN session with papyon library'
-    AUTHOR = 'Riccardo (C10uD)'
+    AUTHOR = ", ".join(AUTHOR_LIST)
     WEBSITE = 'www.emesene.org'
 
     def __init__(self, id_=None, account=None):
