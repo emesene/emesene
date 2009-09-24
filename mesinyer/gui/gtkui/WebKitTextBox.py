@@ -43,18 +43,15 @@ class OutputText(gtk.ScrolledWindow):
         self.loaded = False
         self.text = HTML_BODY
 
-    def append(self, text, cedict=None, scroll=True):#scroll=True):
+    def append(self, text, cedict=None, scroll=True):
         '''append formatted text to the widget'''
         if not self.loaded:
             self._texts.append(text)
             return
 
         if not self.config or self.config.b_show_emoticons:
-            text = e3.common.MarkupParser.parse_emotes(text)
+            text = e3.common.MarkupParser.parse_emotes(text, cedict)
     
-        if cedict is not None:    
-            text = e3.common.MarkupParser.parse_custom_emotes(text,cedict)
-        
         text = text.replace('\r\n', '<br/>').replace('\n', '<br/>')
         text = self.parse_url(text)
         text = text.replace('"', '\\"')
