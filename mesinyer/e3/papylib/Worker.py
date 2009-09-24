@@ -328,7 +328,8 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_contact_msnobject_changed(self, contact):
         if contact.msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             image_path = self._cache.get(contact.msn_object)
-            print contact.account +" has set a new DP: ( " + image_path + " )"
+            if image_path is not None:
+                print contact.account +" has set a new DP: ( " + image_path + " )"
             # TODO Enable changing DP
             #self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED, contact.account, image_path)
             

@@ -1,6 +1,7 @@
 '''a base module to manage cache subdirectories'''
 import os
 import abc
+import base64
 import hashlib
 
 def directory_exists(path):
@@ -23,7 +24,7 @@ def get_file_hash(file_path):
     while chunk:
         sha.update(chunk)
         chunk = handle.read(1024)
-    return sha.digest()
+    return base64.b16encode(sha.digest())
 
 
 class Cache(object):

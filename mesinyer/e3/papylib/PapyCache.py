@@ -18,20 +18,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from e3.cache import *
 import os
-try:
-    # papyon imports
-    # get the deb from http://launchpadlibrarian.net/31746931/python-papyon_0.4.2-1%7Eppa9.04%2B1_all.deb
-    import logging
-    import papyon
-    import papyon.event
-    ver = papyon.version    
-    if ver[1] < 4 or ver[2] < 2:
-        raise PapyError
-except:
-    print "You need python-papyon(>=0.4.2) to be installed in order to use this extension"
+import base64
 
+from e3.cache import *
+import papyon
+
+# TODO: this sucks, currently :)
 CONFIG_PATH = os.path.expanduser(os.path.join('~', '.config', 'emesene2'))
 
 class PapyCache:
@@ -77,26 +70,26 @@ class PapyCache:
         '''
         #Actually saves it in avatar cache...
         if msn_object._type == papyon.p2p.MSNObjectType.DYNAMIC_DISPLAY_PICTURE:
-            if msn_object._data_sha not in self._avatar_cache:
+            if base64.b16encode(msn_object._data_sha) not in self._avatar_cache:
                 cbcks = (self._avatar_downloaded, self._download_failed)
                 self.msn_object_store.request(msn_object, cbcks)
             else:
-                path = os.path.join(self._avatar_cache.path, msn_object._data_sha)
+                path = os.path.join(self._avatar_cache.path, base64.b16encode(msn_object._data_sha))
                 return path
 
         elif msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
-            if msn_object._data_sha not in self._avatar_cache:
+            if base64.b16encode(msn_object._data_sha) not in self._avatar_cache:
                 cbcks = (self._avatar_downloaded, self._download_failed)
                 self.msn_object_store.request(msn_object, cbcks)
             else:
-                path = os.path.join(self._avatar_cache.path, msn_object._data_sha)
+                path = os.path.join(self._avatar_cache.path, base64.b16encode(msn_object._data_sha))
                 return path
             
         elif msn_object._type == papyon.p2p.MSNObjectType.CUSTOM_EMOTICON:
-            if msn_object._data_sha not in self._emoticon_cache:
+            if base64.b16encode(msn_object._data_sha) not in self._emoticon_cache:
                 cbcks = (self._emoticon_downloaded, self._download_failed)
                 self.msn_object_store.request(msn_object, cbcks)
-                path = os.path.join(self._avatar_cache.path, msn_object._data_sha)
+                path = os.path.join(self._avatar_cache.path, base64.b16encode(msn_object._data_sha))
             else:
                 return path
         else:
@@ -107,7 +100,7 @@ class PapyCache:
         '''this callback saves the avatar in /tmp folder
         then gives it to the caching system.
         '''
-        image = open( "/tmp/" + msn_object._data_sha,'w')
+        image = open( "/tmp/" + base64.b16encode(msn_object._data_sha), 'w')
         image.write(msn_object._data.getvalue())
         image.flush()
         image.close()
@@ -117,7 +110,7 @@ class PapyCache:
         '''this callback saves the custom emoticon 
         in /tmp folder then gives it to the caching system
         '''
-        image = open( "/tmp/"+msn_object._data_sha,'w')
+        image = open( "/tmp/" + base64.b16encode(msn_object._data_sha), 'w')
         image.write(msn_object._data.getvalue())
         image.flush()
         image.close()
