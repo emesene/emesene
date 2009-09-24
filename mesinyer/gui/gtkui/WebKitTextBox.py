@@ -50,7 +50,8 @@ class OutputText(gtk.ScrolledWindow):
             return
 
         if not self.config or self.config.b_show_emoticons:
-            text = e3.common.MarkupParser.parse_emotes(text)
+            text = e3.common.MarkupParser.parse_custom_emotes(text,cedict)
+            #text = e3.common.MarkupParser.parse_emotes(text)
 
         text = text.replace('\r\n', '<br/>').replace('\n', '<br/>')
         text = self.parse_url(text)
