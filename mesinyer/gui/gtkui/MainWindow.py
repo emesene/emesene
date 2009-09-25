@@ -175,8 +175,6 @@ class MainWindow(gtk.VBox):
             if self.session.config.b_play_contact_offline:
                 gui.play(self.session, gui.theme.sound_offline)
 
-        self.contact_list.update_contact(contact)
-
     def _on_nick_changed(self, textfield, old_text, new_text):
         '''method called when the nick is changed on the panel'''
         self.session.set_nick(new_text)

@@ -1,4 +1,7 @@
+rm -rf tmp/*
 echo "testing e3.cache.AvatarCache.py"
-rm -rf tmp/*;python test/test_avatar_cache.py
+python test/test_avatar_cache.py
 echo "testing e3.cache.EmoticonCache.py"
-rm -rf tmp/*;python test/test_emoticon_cache.py
+python test/test_emoticon_cache.py
+echo "testing e3.cache.CacheManager.py"
+python test/test_cache_manager.py

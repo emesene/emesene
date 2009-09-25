@@ -74,6 +74,20 @@ class ContactList(object):
         # + TOTAL_COUNT
         self.group_template = '%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)'
 
+        self.session.signals.contact_attr_changed.subscribe(
+            self._on_contact_attr_changed)
+        self.session.signals.picture_change_succeed.subscribe(
+            self._on_contact_attr_changed)
+
+    def _on_contact_attr_changed(self, account, *args):
+        '''called when an attribute of the contact changes
+        '''
+        contact = self.session.contacts.get(account)
+        if not contact:
+            return
+
+        self.update_contact(contact)
+
     def _get_order_by_status(self):
         '''return the value of order by status'''
         return not self.order_by_group

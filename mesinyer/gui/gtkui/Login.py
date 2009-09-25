@@ -51,11 +51,11 @@ class Login(gtk.Alignment):
 
         self.cmb_account = gtk.ComboBoxEntry(liststore, 0)
         self.cmb_account.get_children()[0].set_completion(completion)
-        self.cmb_account.connect('key-press-event',
+        self.cmb_account.get_children()[0].connect('key-press-event',
             self._on_account_key_press)
         self.cmb_account.connect('changed',
             self._on_account_changed)
-        
+
         if account:
             self.cmb_account.prepend_text(account.account)
 

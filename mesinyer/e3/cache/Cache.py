@@ -9,7 +9,7 @@ def directory_exists(path):
     '''
     return os.path.exists(path) and os.path.isdir(path)
 
-def get_file_hash(file_path):
+def get_file_path_hash(file_path):
     '''return the hash of a file content located at file_path
     returns None if can't read from file
     '''
@@ -18,21 +18,30 @@ def get_file_hash(file_path):
         return None
 
     handle = file(file_path)
+    return get_file_hash(handle)
+
+def get_file_hash(file_like_obj):
+    '''return the hash (base64) of a file like object
+    '''
+    return base64.b16encode(get_file_digest(file_like_obj))
+
+def get_file_digest(file_like_obj):
+    '''return a sha digest of a file like object
+    '''
     sha = hashlib.sha1()
 
-    chunk = handle.read(1024)
+    chunk = file_like_obj.read(1024)
     while chunk:
         sha.update(chunk)
-        chunk = handle.read(1024)
-    return base64.b16encode(sha.digest())
-
+        chunk = file_like_obj.read(1024)
+    return sha.digest()
 
 class Cache(object):
     '''a base class to manage cache subdirectories
     '''
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, base_path, name='cache', init=False):
+    def __init__(self, base_path, name='cache', init=True):
         '''constructor
         base_path -- the base path where the cache dir will be located
         name -- the name of the cache directory

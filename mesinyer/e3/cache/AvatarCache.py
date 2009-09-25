@@ -41,13 +41,39 @@ class AvatarCache(Cache.Cache):
         return the information (stamp, hash) on success None otherwise
         item -- a path to an image
         '''
+        hash_ = Cache.get_file_path_hash(item)
+
+        if hash_ is None:
+            return None
+
+        path = os.path.join(self.path, hash_)
+        last_path = os.path.join(self.path, 'last')
+        shutil.copy2(item, path)
+        shutil.copy2(item, last_path)
+        return self.__add_entry(hash_)
+
+    def insert_raw(self, item):
+        '''insert a new item into the cache
+        return the information (stamp, hash) on success None otherwise
+        item -- a file like object containing an image
+        '''
+        position = item.tell()
+        item.seek(0)
         hash_ = Cache.get_file_hash(item)
 
         if hash_ is None:
             return None
 
         path = os.path.join(self.path, hash_)
-        shutil.copy2(item, path)
+        last_path = os.path.join(self.path, 'last')
+        item.seek(0)
+        handle = file(path, 'w')
+        handle.write(item.read())
+        handle.close()
+
+        shutil.copy2(path, last_path)
+
+        item.seek(position)
         return self.__add_entry(hash_)
 
     def __add_entry(self, hash_):

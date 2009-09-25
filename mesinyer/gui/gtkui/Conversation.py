@@ -73,8 +73,20 @@ class Conversation(gtk.VBox, gui.Conversation):
         else:
             my_picture = gui.theme.logo
 
-        self.info.first = utils.safe_gtk_image_load(gui.theme.logo, (64, 64))
-        self.info.last = utils.safe_gtk_image_load(my_picture, (64, 64))
+        his_picture = gui.theme.logo
+        if members:
+            account = members[0]
+            contact = self.session.contacts.get(account)
+
+            if contact:
+                his_picture = contact.picture
+
+        avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
+
+        self.info.first = utils.safe_gtk_image_load(his_picture,
+                (avatar_size, avatar_size))
+        self.info.last = utils.safe_gtk_image_load(my_picture,
+                (avatar_size, avatar_size))
 
         self._load_style()
 
@@ -87,7 +99,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
 
-        self.tab_index=-1 # used to select an existing conversation
+        self.tab_index = -1 # used to select an existing conversation
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
@@ -225,11 +237,12 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_picture_change_succeed(self, account, path):
         '''callback called when the picture of an account is changed'''
-        image = utils.safe_gtk_image_load(path, (64, 64))
+        avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
+        image = utils.safe_gtk_image_load(path, (avatar_size, avatar_size))
 
         # out account?
         if account == self.session.account.account:
             self.info.last = image
-        else:
+        elif account in self.members:
             self.info.first = image
 

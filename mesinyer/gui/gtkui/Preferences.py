@@ -159,6 +159,9 @@ class BaseTable(gtk.Table):
         label.set_alignment(0.0, 0.5)
         default = self.get_attr(property_name)
 
+        if default is None:
+            default = min_val
+
         scale = gtk.HScale()
         scale.set_range(min_val, max_val)
         scale.set_value(default)
@@ -278,6 +281,8 @@ class Interface(BaseTable):
             'session.config.b_avatar_on_left')
         self.append_range('Contact list avatar size',
             'session.config.i_avatar_size', 18, 64)
+        self.append_range('Conversation avatar size',
+            'session.config.i_conv_avatar_size', 18, 128)
         self.show_all()
 
 class Sound(BaseTable):

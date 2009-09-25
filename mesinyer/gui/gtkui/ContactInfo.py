@@ -10,6 +10,7 @@ class ContactInfo(gtk.VBox):
 
     def __init__(self, first=None, last=None):
         gtk.VBox.__init__(self)
+        self.set_border_width(2)
         self._first = first
         self._last = last
 
@@ -45,7 +46,7 @@ class ContactInfo(gtk.VBox):
         self._last_alig = gtk.Alignment(xalign=0.5, yalign=1.0, xscale=1.0,
             yscale=0.1)
         self._last_alig.add(self._last)
-        self.pack_start(self._last_alig)
+        self.pack_end(self._last_alig)
         self._last_alig.show_all()
 
     def _get_last(self):

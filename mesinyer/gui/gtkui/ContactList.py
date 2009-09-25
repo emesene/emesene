@@ -57,7 +57,7 @@ class CellRendererFunction(gtk.GenericCellRenderer):
              return self.get_property(name)
          except TypeError:
              raise AttributeError, name
-     
+
     def __setattr__(self, name, value):
          try:
              self.set_property(name, value)
@@ -245,6 +245,19 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.group_template = session.config.get_or_set('group_template',
                 ContactList.GROUP_TPL)
 
+    def _get_contact_pixbuf_or_default(self, contact):
+        '''try to return a pixbuf of the user picture or the default
+        picture
+        '''
+        if contact.picture:
+            picture = utils.safe_gtk_pixbuf_load(contact.picture,
+                    (self.avatar_size, self.avatar_size))
+        else:
+            picture = utils.safe_gtk_pixbuf_load(gui.theme.user,
+                    (self.avatar_size, self.avatar_size))
+
+        return picture
+
     def _visible_func(self, model, _iter):
         '''return True if the row should be displayed according to the
         value of the config'''
@@ -429,8 +442,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.session.config.d_weights[contact.account] = weight
 
-        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user,
-            (self.avatar_size, self.avatar_size)), contact,
+        contact_data = (self._get_contact_pixbuf_or_default(contact), contact,
             self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
             weight)
@@ -529,8 +541,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.session.config.d_weights[contact.account] = weight
 
-        contact_data = (utils.safe_gtk_pixbuf_load(gui.theme.user,
-            (self.avatar_size, self.avatar_size)), contact,
+        contact_data = (self._get_contact_pixbuf_or_default(contact), contact,
             self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
             weight)
