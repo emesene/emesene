@@ -234,8 +234,8 @@ class Worker(e3.base.Worker, papyon.Client):
         def download_failed(reason):
             print reason
 
-        def download_ok(msnobj):
-            emotes.insert_raw(msnobj._data)
+        def download_ok(msnobj, download_failed_func):
+            emotes.insert_raw((msnobj._friendly, msnobj._data))
             self.session.add_event(Event.EVENT_P2P_FINISHED,
                     account, 'emoticon', emoticon_path)
 
@@ -352,7 +352,6 @@ class Worker(e3.base.Worker, papyon.Client):
         msn_object = contact.msn_object
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)
-            emotes = self.caches.get_emoticon_cache(contact.account)
             avatar_hash = base64.b16encode(msn_object._data_sha)
             avatar_path = os.path.join(avatars.path, avatar_hash)
 
