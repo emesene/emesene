@@ -3,6 +3,8 @@ sys.path.append('..')
 import play_sound
 import notification
 
+import XmlParser
+
 from utils import *
 from Handler import *
 from Config import Config

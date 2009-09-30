@@ -6,7 +6,7 @@ import pango
 import RichWidget
 
 class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
-    '''a buffer that makes it easy to manipulate a gtk textview with 
+    '''a buffer that makes it easy to manipulate a gtk textview with
     rich text'''
 
     def __init__(self):
@@ -20,17 +20,17 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         self.bg_tags = {}
         self.font_tags = {}
         self.size_tags = {}
-        self.bold_tag = self.create_tag("bold", weight=pango.WEIGHT_BOLD) 
-        self.italic_tag = self.create_tag("italic", style=pango.STYLE_ITALIC) 
-        self.underline_tag = self.create_tag("underline", 
-            underline=pango.UNDERLINE_SINGLE) 
-        self.strike_tag = self.create_tag("strike", strikethrough=True) 
+        self.bold_tag = self.create_tag("bold", weight=pango.WEIGHT_BOLD)
+        self.italic_tag = self.create_tag("italic", style=pango.STYLE_ITALIC)
+        self.underline_tag = self.create_tag("underline",
+            underline=pango.UNDERLINE_SINGLE)
+        self.strike_tag = self.create_tag("strike", strikethrough=True)
 
         self.widgets = []
 
     def put_text(self, text, fg_color=None, bg_color=None, font=None, size=None,
         bold=False, italic=False, underline=False, strike=False):
-        '''insert text at the current position with the style defined by the 
+        '''insert text at the current position with the style defined by the
         optional parameters'''
         tags = self._parse_tags(fg_color, bg_color, font, size, bold, italic,
             underline, strike)
@@ -71,7 +71,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         self._insert(iterator, '\n')
 
     def _insert(self, iterator, text, tags=None):
-        '''insert text at the current position with the style defined by the 
+        '''insert text at the current position with the style defined by the
         optional parameters'''
         if tags is not None:
             self.insert_with_tags(iterator, text, *tags)
@@ -80,7 +80,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
 
     def _parse_tags(self, fg_color=None, bg_color=None, font=None, size=None,
         bold=False, italic=False, underline=False, strike=False):
-        '''parse the parameters and return a list of tags to apply that 
+        '''parse the parameters and return a list of tags to apply that
         format
         '''
         tags = []
@@ -156,10 +156,10 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         if value in self.font_tags:
             return self.font_tags[value]
 
-        font_tag = self.create_tag('font_' + value.replace(' ', '_'), 
+        font_tag = self.create_tag('font_' + value.replace(' ', '_'),
             font=value)
         self.font_tags[value] = font_tag
-        
+
         return font_tag
 
     def _parse_size(self, value):
@@ -188,9 +188,9 @@ def test():
     window.show_all()
     '''buff.put_text('buenas, como va? ', '#CCCCCC', '#000000', 'Arial', 12)
     buff.put_text('esto es una prueba\n', '#CC0000', '#AAAAAA', 'Purisa', 14)
-    buff.put_text('un poco de formato\n', '#00CC00', '#FFFFFF', 'Andale Mono', 
+    buff.put_text('un poco de formato\n', '#00CC00', '#FFFFFF', 'Andale Mono',
         8, True, True, True, True)
-    buff.put_text('un poco mas\n', '#CCCCCC', '#0000CC', 'Andale Mono', 16, 
+    buff.put_text('un poco mas\n', '#CCCCCC', '#0000CC', 'Andale Mono', 16,
         False, True, False, True)'''
     text = '''<i>ital<b>i</b>c</i><br/>
 <u>under<s>lin<b>ed</b></s></u><br/>
@@ -198,7 +198,7 @@ def test():
 <span style="font-size: 14;">size <span style="font-family: Arial;">test</span></span>
 <img src="themes/emotes/default/face-sad.png" alt=":("/> &lt;-- see that? it is an image! <b>asd</b>'''
     buff.put_formatted(text)
-    
+
     # we have to insert every widget in the textview
     while buff.widgets:
         textview.add_child_at_anchor(*buff.widgets.pop())

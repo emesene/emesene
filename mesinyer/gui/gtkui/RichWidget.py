@@ -8,7 +8,7 @@ class RichWidget(object):
 
     def put_text(self, text, fg_color=None, bg_color=None, font=None, size=None,
         bold=False, italic=False, underline=False, strike=False):
-        '''insert text at the current position with the style defined by the 
+        '''insert text at the current position with the style defined by the
         optional parameters'''
         raise NotImplementedError('Not implemented')
 
@@ -19,7 +19,7 @@ class RichWidget(object):
         result = e3.common.XmlParser.XmlParser(
             '<span>' + text.replace('\n', '') + '</span>').result
         dct = e3.common.XmlParser.DictObj(result)
-        self._put_formatted(dct, fg_color, bg_color, font, size, 
+        self._put_formatted(dct, fg_color, bg_color, font, size,
             bold, italic, underline, strike)
 
     def _put_formatted(self, dct, fg_color=None, bg_color=None, font=None, size=None,
@@ -52,14 +52,14 @@ class RichWidget(object):
 
         for child in dct.childs:
             if type(child) == str or type(child) == unicode:
-                self.put_text(child, fg_color, bg_color, font, size, 
+                self.put_text(child, fg_color, bg_color, font, size,
                     bold, italic, underline, strike)
             elif child.tag == 'img':
                 self.put_image(child.src, child.alt)
             elif child.tag == 'br':
                 self.new_line()
             else:
-                self._put_formatted(child, fg_color, bg_color, font, size, 
+                self._put_formatted(child, fg_color, bg_color, font, size,
                     bold, italic, underline, strike)
 
     def put_image(self, path, tip=None):

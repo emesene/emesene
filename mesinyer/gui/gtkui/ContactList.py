@@ -124,8 +124,7 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
         widget.style.paint_layout(
             window, state, True, cell_area, widget, 'foo',
-            cell_area.x + x_offset, cell_area.y + y_offset, layout
-        )
+            cell_area.x + x_offset, cell_area.y + y_offset, layout)
 
     def get_layout(self, widget):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
