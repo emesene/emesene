@@ -49,7 +49,7 @@ try:
     if ver[1] < 4 or ver[2] < 2:
         raise PapyError
 except:
-    print "You need python-papyon(>=0.4.2) to be installed in order to use this extension"
+    print "You need python-papyon(>=0.4.2) to be installed in order to use papylib extension"
 
 from PapyEvents import *
 from PapyConvert import *
