@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import time
 import Queue
@@ -68,11 +69,27 @@ class Worker(e3.Worker):
         self._add_contact('you@emesene.org', 'I\'m on emesene code!',
                 e3.status.OFFLINE, '', True)
 
+        self._add_contact('one@hotmail.com', '- [b][c=48]Pαrκ¡[/c=30][/b]', e3.status.BUSY,
+                '', False)
+        self._add_contact('two@hotmail.com', '[c=46]-๑๑test_test๑๑-[/c=2]', e3.status.BUSY,
+                '', False)
+        self._add_contact('three@hotmail.com', '[c=29]•°o.Orandom εïз stuff O.o°•[/c=36]·$28', e3.status.BUSY,
+                '', False)
+        self._add_contact('four@hotmail.com', '[c=48][b]hy[/b][/c=11] ·#·$3,3\'_·$#fcfcfc,#fcfcfc\'_·$4,4\'_·0·$28', e3.status.BUSY,
+                '', False)
+        self._add_contact('five@hotmail.com', '·&·#·$9X.|̲̅·$10X·$9̲̅·$10x·$9̲̅·$10x·$9̲̅·$10x·$9̲̅·$10x·$9̲̅|·$10·#', e3.status.BUSY,
+                '', False)
+        self._add_contact('six@hotmail.com', '[c=46][u][b]xafd! [/b][/u][/c]', e3.status.BUSY,
+                '', False)
+        self._add_contact('seven@hotmail.com', '[c=5]((_...sdsdf..._))..)_<(_))(°.°)(...][/c=48][u][/u]', e3.status.BUSY,
+                '', False)
+
         self._add_group('ninjas')
         self._add_group('pirates')
         self._add_group('lulz')
         self._add_group('code quiz ninjas')
         self._add_group('empty')
+        self._add_group('strange nicks')
 
         self._add_contact_to_group('you@emesene.org', 'pirates')
         self._add_contact_to_group('boyska@emesene.org', 'pirates')
@@ -87,6 +104,14 @@ class Worker(e3.Worker):
         self._add_contact_to_group('c0n0@emesene.org', 'ninjas')
         self._add_contact_to_group('boyska@emesene.org', 'ninjas')
         self._add_contact_to_group('Faith_Nahn@emesene.org', 'code quiz ninjas')
+
+        self._add_contact_to_group('one@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('two@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('three@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('four@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('five@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('six@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('seven@hotmail.com', 'strange nicks')
 
     def _add_contact(self, mail, nick, status_, alias, blocked):
         """

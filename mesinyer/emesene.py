@@ -41,7 +41,11 @@ import e3
 from e3 import msn
 from e3 import jabber
 from e3 import dummy
-from e3 import papylib
+try:
+    from e3 import papylib
+except ImportError:
+    papylib = None
+    print 'papyon lib not available, extension disabled'
 
 from pluginmanager import get_pluginmanager
 import extension
@@ -49,7 +53,7 @@ from gui import gtkui
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
-    
+
     def __init__(self):
         '''class constructor'''
         self.window = None
@@ -68,11 +72,12 @@ class Controller(object):
 
         self.session = None
         self._setup()
-    
+
     def _setup(self):
         '''register core extensions'''
         extension.category_register('session', msn.Session, single_instance=True)
-        extension.register('session', papylib.Session)
+        if papylib is not None:
+            extension.register('session', papylib.Session)
         extension.register('session', jabber.Session)
         extension.register('session', dummy.Session)
         extension.category_register('sound', e3.common.play_sound.play)
