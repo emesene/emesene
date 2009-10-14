@@ -58,7 +58,7 @@ except:
 from PapyEvents import *
 from PapyConvert import *
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 class Worker(e3.base.Worker, papyon.Client):
     '''dummy Worker implementation to make it easy to test emesene'''
@@ -110,18 +110,6 @@ class Worker(e3.base.Worker, papyon.Client):
                 pass
 
     # some useful methods
-    def set_nick(self, nick, updatepapy=True):
-        self._handle_action_set_nick(nick)
-
-    def set_status(self, status):
-        self._handle_action_change_status(status)
-
-    def set_pm(self, pm, updatepapy=True):
-        self._handle_action_set_message(pm)
-
-    def set_msnobj(self, msnobj, updatepapy=True):
-        pass
-
     def set_initial_infos(self):
         '''this is called on login'''
         self.session.load_config()
@@ -130,15 +118,19 @@ class Worker(e3.base.Worker, papyon.Client):
         nick = self.profile.display_name
         message = self.profile.personal_message
         dp = self.profile.msn_object
+        status = self.session.account.status
 
-        self.set_nick(nick, updatepapy=False)
-        self.set_pm(message, updatepapy=False)
-        self.set_msnobj(dp, updatepapy=False)
-        self.set_status(self.session.account.status)
+        print "Initial infos:", nick, message, dp, status
 
+        self._handle_action_set_nick(nick)
+        self._set_status(status)
+        
+        #self._handle_action_set_message(message)
+        #self._handle_action_set_picture(dp)
+        
     def _set_status(self, stat):
         '''why is this particular function needed?
-           and btw, the button for changing status doesn't work
+           and btw, the button for changing status doesn't work apparently
         '''
         self.session.account.status = stat
         self.session.contacts.me.status = stat
@@ -426,6 +418,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.account.account = account
         self.session.account.password = password
         self.session.account.status = status_
+
         self.session.add_event(Event.EVENT_LOGIN_STARTED)
         self.login(account, password)
 
@@ -502,6 +495,17 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE'''
+        if isinstance(picture_name, papyon.p2p.MSNObject):
+            # this is/can be used for initial avatar changing and caching
+            # like dp roaming and stuff like that
+            # now it doesn't work, btw
+            self.profile.msn_object = msn_object
+            self._on_contact_msnobject_changed(self.session.contacts.me)
+            #self.session.contacts.me.picture = picture_name
+            #self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
+            #    self.session.account.account, picture_name)
+            return
+
         try:
             f = open(picture_name, 'r')
             avatar = f.read()

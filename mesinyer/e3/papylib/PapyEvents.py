@@ -52,13 +52,13 @@ class ConversationEvent(papyon.event.ConversationEventInterface):
         """Called when an user joins the conversation.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
-        print contact, "joined a conversation"
+        print "[papyon]", contact, "joined a conversation"
 
     def on_conversation_user_left(self, contact):
         """Called when an user leaved the conversation.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
-        print contact, "left a conversation"
+        print "[papyon]", contact, "left a conversation"
 
     def on_conversation_user_typing(self, contact):
         self._client._on_conversation_user_typing(contact, self)
@@ -141,25 +141,25 @@ class AddressBookEvent(papyon.event.AddressBookEventInterface):
 class ProfileEvent(papyon.event.ProfileEventInterface):
     def __init__(self, client):
         papyon.event.BaseEventInterface.__init__(self, client)
-        self.client = client
+        self._client = client
         
     def on_profile_presence_changed(self):
         """Called when the presence changes."""
-        print "presence changed"
+        print "[papyon] profile presence changed"
         
     def on_profile_display_name_changed(self):
         """Called when the display name changes."""
-        print "displayname changed"
+        print "[papyon] profile nick changed"
         
     def on_profile_personal_message_changed(self):
         """Called when the personal message changes."""
-        print "pm changed"
+        print "[papyon] profile pm changed"
 
     def on_profile_current_media_changed(self):
         """Called when the current media changes."""
-        pass
+        print "[papyon] profile media changed"
 
     def on_profile_msn_object_changed(self):
         """Called when the MSNObject changes."""
-        print "dp changed"
+        print "[papyon] profile dp changed"
         
