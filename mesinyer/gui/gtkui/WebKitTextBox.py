@@ -103,7 +103,7 @@ class OutputText(gtk.ScrolledWindow):
 
     def _set_text(self, text):
         '''set the text on the widget'''
-        self._textbox.load_string(text, "text/html", "utf-8", "file://")
+        self._textbox.load_string(text, "text/html", "utf-8", "")
 
     def _get_text(self):
         '''return the text of the widget'''
