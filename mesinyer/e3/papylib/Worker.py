@@ -18,43 +18,47 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import base64
+import gobject
+import hashlib
+import os
+import Queue
+import random
+import shutil
 import sys
 import time
-import Queue
-import base64
-import random
-import gobject
-import shutil
-import os
 
-import e3.base.Worker
-import e3.base.Message
+from e3 import cache
 import e3.base.Contact
 import e3.base.Group
-from e3.base.Event import Event
-from e3.base.Action import Action
+import e3.base.Message
+import e3.base.Worker
 from e3.base import status
-from e3.common import ConfigDir
-from e3 import cache
+from e3.base.Action import Action
+from e3.base.Event import Event
 import e3.base.Logger as Logger
+from e3.common import ConfigDir
+
 from debugger import dbg
 
 try:
+    REQ_VER = (0, 4, 2)
     # papyon imports
     # get the deb from http://launchpadlibrarian.net/31746931/python-papyon_0.4.2-1%7Eppa9.04%2B1_all.deb
     import logging
     import papyon
     import papyon.event
+    import papyon.util.string_io as StringIO
     ver = papyon.version
-    if ver[1] < 4 or ver[2] < 2:
+    if ver[1] < REQ_VER[1] or ver[2] < REQ_VER[2]:
         raise PapyError
 except:
-    print "You need python-papyon(>=0.4.2) to be installed in order to use this extension"
+    print "You need python-papyon(>=%s.%s.%s) to be installed in order to use this extension" % REQ_VER
 
 from PapyEvents import *
 from PapyConvert import *
 
-#logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 class Worker(e3.base.Worker, papyon.Client):
     '''dummy Worker implementation to make it easy to test emesene'''
@@ -498,6 +502,23 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE'''
+        try:
+            f = open(picture_name, 'r')
+            avatar = f.read()
+            f.close()
+        except:
+            return
+
+        if not isinstance(avatar, str):
+            avatar = "".join([chr(b) for b in avatar])
+        msn_object = papyon.p2p.MSNObject(self.profile,
+                         len(avatar),
+                         papyon.p2p.MSNObjectType.DISPLAY_PICTURE,
+                         hashlib.sha1(avatar).hexdigest() + '.tmp',
+                         "",
+                         data=StringIO.StringIO(avatar))
+        self.profile.msn_object = msn_object
+
         self.session.contacts.me.picture = picture_name
         self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
                 self.session.account.account, picture_name)
