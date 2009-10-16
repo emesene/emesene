@@ -36,10 +36,11 @@ class Session(e3.Session):
 
     def login(self, account, password, status, proxy, use_http=False):
         '''start the login process'''
-        self.account = e3.Account(account, password, status)
         worker = Worker('emesene2', self, proxy, use_http)
         worker.start()
 
+        self.account = e3.Account(account, password, status)
+        
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status))
 
     def send_message(self, cid, text, style=None):
