@@ -1,6 +1,6 @@
 import time
+import xml.sax.saxutils
 
-import MarkupParser
 import e3
 
 class MessageFormatter(object):
@@ -124,19 +124,19 @@ class MessageFormatter(object):
         formated_time = time.strftime('%c', time.gmtime(timestamp))
 
         template = template.replace('%NICK%',
-            MarkupParser.escape(contact.nick))
+            escape(contact.nick))
         template = template.replace('%ALIAS%',
-            MarkupParser.escape(contact.alias))
+            escape(contact.alias))
         template = template.replace('%ACCOUNT%',
-            MarkupParser.escape(contact.account))
+            escape(contact.account))
         template = template.replace('%DISPLAYNAME%',
-            MarkupParser.escape(contact.display_name))
+            escape(contact.display_name))
         template = template.replace('%TIME%',
-            MarkupParser.escape(formated_time))
+            escape(formated_time))
         template = template.replace('%STATUS%',
-            MarkupParser.escape(e3.status.STATUS[contact.status]))
+            escape(e3.status.STATUS[contact.status]))
         template = template.replace('%PERSONALMESSAGE%',
-            MarkupParser.escape(contact.message))
+            escape(contact.message))
         template = template.replace('%NL%', self.new_line)
 
         is_raw = False
@@ -151,4 +151,22 @@ class MessageFormatter(object):
             last = ''
 
         return (is_raw, consecutive, outgoing, first, last)
+
+dic = {
+    '\"'    :    '&quot;',
+    '\''    :    '&apos;'
+}
+
+dic_inv = {
+    '&quot;'    :'\"',
+    '&apos;'    :'\''
+}
+
+def escape(string_):
+    '''replace the values on dic keys with the values'''
+    return xml.sax.saxutils.escape(string_, dic)
+
+def unescape(string_):
+    '''replace the values on dic_inv keys with the values'''
+    return xml.sax.saxutils.unescape(string_, dic_inv)
 
