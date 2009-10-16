@@ -1,40 +1,70 @@
 import gtk
+
+import gui
+import utils
+
 from pluginmanager import get_pluginmanager
 
 class PluginListView(gtk.TreeView):
     def __init__(self, store):
         gtk.TreeView.__init__(self, store)
-        self.append_column(gtk.TreeViewColumn('status', gtk.CellRendererToggle(), active=0))
-        self.append_column(gtk.TreeViewColumn('name', gtk.CellRendererText(), text=1))
+        self.append_column(gtk.TreeViewColumn('Status', gtk.CellRendererToggle(), active=0))
+        self.append_column(gtk.TreeViewColumn('Name', gtk.CellRendererText(), text=1))
+        self.set_rules_hint(True)
 
 class PluginListStore(gtk.ListStore):
     def __init__(self):
-        gtk.ListStore.__init__(self, bool, str)
+        gtk.ListStore.__init__(self, bool, str, str)
 
     def update_list(self):
         pluginmanager = get_pluginmanager()
-        print pluginmanager.get_plugins()
         self.clear()
+
         for name in pluginmanager.get_plugins():
-            self.append((pluginmanager.plugin_is_active(name), name))
+            self.append((pluginmanager.plugin_is_active(name),
+                self.prettify_name(name), name))
+
+    def prettify_name(self, name):
+        '''return a prettier name for the plugin'''
+        name = name.replace('_', ' ')
+        return name[0].upper() + name[1:]
 
 class PluginWindow(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
-        self.set_default_size(300, 200)
+        self.set_default_size(500, 300)
+        self.set_title('Plugins')
+        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+
+        if utils.file_readable(gui.theme.logo):
+            self.set_icon(
+                utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
 
         main_vbox = gtk.VBox()
         main_vbox.set_border_width(2)
+
         self.plugin_list_store = PluginListStore()
         self.plugin_list_store.update_list()
         self.plugin_list_view = PluginListView(self.plugin_list_store)
-        main_vbox.pack_start(self.plugin_list_view)
-        button_hbox = gtk.HBox()
+
+        scroll = gtk.ScrolledWindow()
+        scroll.add(self.plugin_list_view)
+        scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        scroll.set_shadow_type(gtk.SHADOW_IN)
+        scroll.set_border_width(1)
+
+
+        button_hbox = gtk.HButtonBox()
+        button_hbox.set_layout(gtk.BUTTONBOX_END)
         button_hbox.set_border_width(2)
+
         button_start = gtk.Button(stock=gtk.STOCK_EXECUTE)
         button_start.connect('clicked', self.on_start)
+
         button_stop = gtk.Button(stock=gtk.STOCK_STOP)
         button_stop.connect('clicked', self.on_stop)
+
+        main_vbox.pack_start(scroll)
         button_hbox.pack_start(button_start, fill=False)
         button_hbox.pack_start(button_stop, fill=False)
         main_vbox.pack_start(button_hbox, False)
@@ -46,7 +76,7 @@ class PluginWindow(gtk.Window):
         '''start the selected plugin'''
         sel = self.plugin_list_view.get_selection()
         model, iter = sel.get_selected()
-        name = model.get_value(iter, 1)
+        name = model.get_value(iter, 2)
         pluginmanager = get_pluginmanager()
         pluginmanager.plugin_start(name)
         print pluginmanager.plugin_is_active(name), 'after start'

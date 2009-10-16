@@ -2,9 +2,9 @@
 import gtk
 import gobject
 
+import e3
 import gui
 import utils
-import protocol
 
 class StatusCombo(gtk.ComboBox):
     """a widget to select the status like the one in emesene 1.0"""
@@ -41,8 +41,8 @@ class StatusCombo(gtk.ComboBox):
         active = 0
         count = 0
 
-        for stat in protocol.status.ORDERED:
-            status_name = protocol.status.STATUS[stat]
+        for stat in e3.status.ORDERED:
+            status_name = e3.status.STATUS[stat]
 
             if stat == current_status:
                 active = count
@@ -70,9 +70,9 @@ class StatusCombo(gtk.ComboBox):
 
     def on_status_change_succeed(self, stat):
         """called when the status was changed on another place"""
-        if stat in protocol.status.ORDERED:
+        if stat in e3.status.ORDERED:
             self.status = stat
-            index = protocol.status.ORDERED.index(stat)
+            index = e3.status.ORDERED.index(stat)
             self.set_active(index)
 
     def on_scroll_event(self, button, event):
