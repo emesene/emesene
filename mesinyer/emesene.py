@@ -408,7 +408,7 @@ class Controller(object):
             self.tray_icon.set_visible(False)
 
         TrayIcon = extension.get_default('tray icon')
-        handler = e3.common.TrayIconHandler(self.session, gui.theme,
+        handler = gui.base.TrayIconHandler(self.session, gui.theme,
             self.on_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler, self.window)
 

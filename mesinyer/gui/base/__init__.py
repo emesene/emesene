@@ -1,4 +1,5 @@
 from Theme import Theme
+from Handler import *
 from ContactList import ContactList
 from Conversation import Conversation
 from ConversationManager import ConversationManager

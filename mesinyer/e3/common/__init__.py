@@ -6,7 +6,6 @@ import notification
 import XmlParser
 
 from utils import *
-from Handler import *
 from Config import Config
 from Signal import Signal
 from Signals import Signals
