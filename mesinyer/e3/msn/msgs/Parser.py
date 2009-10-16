@@ -22,10 +22,9 @@ import email
 import xml.parsers.expat
 from datetime import datetime
 
-import e3.common
-        
-        
-months_names = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+import e3.msn.common
+
+months_names = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
 months_name_number = dict(zip(months_names,range(1,13)))
 
@@ -34,7 +33,7 @@ def string2datetime(datestring):
     datestring = datestring.replace('.', ' ').replace(':', ' ')
     (day, month, year, hours,
      minutes, seconds, microseconds) = datestring.split(' ')[:7]
-    
+
     return datetime(int(year), months_name_number[month], int(day),
                  int(hours), int(minutes), int(seconds), int(microseconds))
 
@@ -108,7 +107,7 @@ class MailDataParser(object):
 class OimParser(object):
     def __init__(self, response):
         '''handle the response'''
-        body = e3.common.get_value_between(response,
+        body = e3.msn.common.get_value_between(response,
                                  '<GetMessageResult>',
                                  '</GetMessageResult>')
 
@@ -119,7 +118,7 @@ class OimParser(object):
 
         #sent_date = email.Utils.parsedate_tz(oim.get('Date'))
         #sent_date = time.localtime(email.Utils.mktime_tz(sent_date))
-        
+
         # datetime UTC with microseconds
         sent_date = string2datetime(oim.get('X-OriginalArrivalTime'))
 

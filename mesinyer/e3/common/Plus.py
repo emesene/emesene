@@ -31,18 +31,24 @@ def _msnplus_to_dict(msnplus):
     tag = match.group(3)
     arg = match.group(5)
     if open_:
-        if text_before: #just to avoid useless items (we could put it anyway, if we like)
+        if text_before.strip(): #just to avoid useless items (we could put it anyway, if we like)
             message_stack[-1]['childs'].append(text_before)
+
         msgdict = {'tag': tag, tag:arg, 'childs':[]}
         message_stack.append(msgdict)
     else: #closing tags
         if arg:
             start_tag = message_stack[-1][tag]
             message_stack[-1][tag] = (start_tag, arg)
-        if text_before: #just to avoid useless items (we could put it anyway, if we like)
+        if text_before.strip(): #just to avoid useless items (we could put it anyway, if we like)
             message_stack[-1]['childs'].append(text_before)
         tag_we_re_closing = message_stack.pop() #-1
-        message_stack[-1]['childs'].append(tag_we_re_closing)
+
+        if type(message_stack[-1]) == dict:
+            message_stack[-1]['childs'].append(tag_we_re_closing)
+        else:
+            message_stack.append(tag_we_re_closing)
+
     #go recursive!
     _msnplus_to_dict(msnplus[len(match.group(0)):])
 
@@ -52,7 +58,7 @@ def _nchars_dict(msgdict):
     '''count how many character are there'''
     nchars = 0
     for child in msgdict['childs']:
-        if type(child) == str:
+        if type(child) in (str, unicode):
             nchars += len(child)
         else:
             nchars += _nchars_dict(child)
@@ -62,6 +68,9 @@ def _nchars_dict(msgdict):
 #stolen from mohrtutchy: ty!
 def _color_gradient(col1, col2, length):
     '''returns a list of colors. Its length is length'''
+    col1 = col1.strip()
+    col2 = col2.strip()
+
     def dec2hex(n):
         """return the hexadecimal string representation of integer n"""
         if n<16:
@@ -71,13 +80,24 @@ def _color_gradient(col1, col2, length):
 
     def hex2dec(s):
         """return the integer value of a hexadecimal string s"""
+        if s == '':
+            print 'colores:', col1, col2, s
         return int('0x' + s, 16)
+
+    hex3tohex6 = lambda col: col[0] * 2 + col[1] * 2 + col[2] * 2
+
 
     if col1.startswith('#'):
         col1 = col1[1:]
 
+    if len(col1) == 3:
+        col1 = hex3tohex6(col1)
+
     if col2.startswith('#'):
         col2 = col2[1:]
+
+    if len(col2) == 3:
+        col2 = hex3tohex6(col2)
 
     R1hex=col1[:2]
     G1hex=col1[2:4]
@@ -112,6 +132,7 @@ def _color_gradient(col1, col2, length):
     colors = [0] * length
     for i in range(0,length):
        colors[i] = R[i] + G[i] + B[i]
+
     return colors
 
 def _hex_colors(msgdict):
@@ -136,7 +157,7 @@ def _hex_colors(msgdict):
                     msgdict[tag] = param[1:]
 
     for child in msgdict['childs']:
-        if child and type(child) != str:
+        if child and type(child) not in (str, unicode):
             _hex_colors(child)
 
 def _gradientify_string(msg, attr, colors):
@@ -166,7 +187,7 @@ def _gradientify(msgdict, attr=None, colors=None):
     while colors and i < len(msgdict['childs']):
         this_child = msgdict['childs'][i]
 
-        if type(this_child) == str:
+        if type(this_child) in (str, unicode):
             msgdict['childs'][i] = _gradientify_string(this_child, attr, colors) #will consumate some items from colors!
         else:
             _gradientify(this_child, attr, colors)

@@ -137,7 +137,23 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         layout = pango.Layout(widget.get_pango_context())
         layout.set_width(-1)    # Do not wrap text.
         if self.markup:
-            decorated_markup = self.function(self.markup)
+            #try:
+            decorated_markup = self.function(unicode(self.markup, 'utf-8')).encode('utf-8')
+            #except Exception, error:
+            '''    raise error
+                print "this nick: '%s' made the parser go crazy, striping" % (self.markup,)
+                print error
+                log_strange_nick(self.markup, 'msnplus parser')
+
+                decorated_markup = Plus.msnplus_strip(self.markup)'''
+
+            try:
+                pango.parse_markup(decorated_markup)
+            except gobject.GError:
+                print "invalid pango markup:", decorated_markup
+                log_strange_nick(decorated_markup, 'pango parser')
+                decorated_markup = Plus.msnplus_strip(self.markup)
+
             layout.set_markup(decorated_markup)
         else:
             layout.set_text('')
@@ -650,3 +666,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
         """
         self.avatar_size = size
         self.pbr.set_fixed_size(size, size)
+
+def log_strange_nick(string, reason):
+    '''write to a file the nicks that make the parsers go crazy so we can
+    analyze them
+    '''
+    handle = file('strange-nicks.txt', 'a')
+    handle.write(reason + ': ' + string + '\n')
+    handle.close()
