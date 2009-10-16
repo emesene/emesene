@@ -2,13 +2,14 @@ import gtk
 import webbrowser
 import re
 
+from gui.base import MarkupParser
+
 try:
     import webkit
     ERROR = False
 except ImportError:
     ERROR = True
 
-import e3
 from debugger import dbg
 
 class OutputText(gtk.ScrolledWindow):
@@ -50,8 +51,8 @@ class OutputText(gtk.ScrolledWindow):
             return
 
         if not self.config or self.config.b_show_emoticons:
-            text = e3.common.MarkupParser.parse_emotes(text, cedict)
-    
+            text = MarkupParser.parse_emotes(text, cedict)
+
         text = text.replace('\r\n', '<br/>').replace('\n', '<br/>')
         text = self.parse_url(text)
         text = text.replace('"', '\\"')

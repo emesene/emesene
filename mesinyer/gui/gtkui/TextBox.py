@@ -1,10 +1,11 @@
 import gtk
 import gobject
 
-import e3
 import gui
 import utils
 import RichBuffer
+
+from gui.base import MarkupParser
 
 class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
@@ -209,6 +210,6 @@ class OutputText(TextBox):
     def append(self, text, scroll=True):
         '''append formatted text to the widget'''
         if self.config.b_show_emoticons:
-            text = e3.common.MarkupParser.parse_emotes(text)
+            text = gui.base.MarkupParser.parse_emotes(text)
 
         TextBox.append(self, text, scroll)

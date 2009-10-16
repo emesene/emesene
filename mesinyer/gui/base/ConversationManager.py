@@ -1,4 +1,5 @@
 import e3
+import MarkupParser
 from debugger import dbg
 
 class ConversationManager(object):
@@ -49,7 +50,7 @@ class ConversationManager(object):
             (is_raw, consecutive, outgoing, first, last) = \
                 conversation.formatter.format(contact)
 
-            middle = e3.common.MarkupParser.escape(message.body)
+            middle = MarkupParser.escape(message.body)
             if not is_raw:
                 middle = self.format_from_message(message)
 
