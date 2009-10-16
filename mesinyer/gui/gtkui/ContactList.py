@@ -26,7 +26,7 @@ import utils
 import extension
 from debugger import dbg
 
-from e3.common import Plus
+from gui.base import Plus
 import RichBuffer
 
 @extension.implements('nick renderer')
@@ -137,7 +137,21 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         layout = pango.Layout(widget.get_pango_context())
         layout.set_width(-1)    # Do not wrap text.
         if self.markup:
-            decorated_markup = self.function(self.markup)
+            try:
+                decorated_markup = self.function(unicode(self.markup, 'utf-8')).encode('utf-8')
+            except Exception, error:
+                print "this nick: '%s' made the parser go crazy, striping" % (self.markup,)
+                print error
+
+                decorated_markup = Plus.msnplus_strip(self.markup)
+
+            try:
+                pango.parse_markup(decorated_markup)
+            except gobject.GError:
+                print "invalid pango markup:", decorated_markup
+                log_strange_nick(decorated_markup, 'pango parser')
+                decorated_markup = Plus.msnplus_strip(self.markup)
+
             layout.set_markup(decorated_markup)
         else:
             layout.set_text('')
@@ -650,3 +664,4 @@ class ContactList(gui.ContactList, gtk.TreeView):
         """
         self.avatar_size = size
         self.pbr.set_fixed_size(size, size)
+

@@ -80,7 +80,7 @@ class DictObj(dict):
                     xml += ' %s="%s"' % (attr, self[attr])
             xml += '>'
         for child in self.childs:
-            if type(child) == str:
+            if type(child) in (str, unicode):
                 xml+=child
             else:
                 xml+=child.to_xml()

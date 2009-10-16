@@ -6,6 +6,8 @@ import threading
 import e3
 from e3.msn import Requester
 
+import e3.base.Event
+
 from Parser import MailDataParser
 from debugger import dbg
 
@@ -58,10 +60,10 @@ class Manager(threading.Thread):
 
         elif action == Manager.ACTION_OIM_REQUEST:
             self._on_oim_request(*args)
-        
+
         elif action == Manager.ACTION_OIM_RECEIVED:
             self._on_oim_receive(*args)
-       
+
         elif action == Manager.ACTION_OIM_SEND:
             self._on_oim_send(*args)
 
@@ -149,6 +151,6 @@ class Manager(threading.Thread):
                 dbg('[OIM] ' + oim.nick + ' ' + oim.mail + ' ' + str(oim.date) + \
                     ' ' + oim.message, 'oim', 1)
                 #self.put(Manager.ACTION_OIM_DELETE, oim.id)
-                self.session.add_event(Event.EVENT_OIM_RECEIVED, oim)
+                self.session.add_event(e3.base.Event.EVENT_OIM_RECEIVED, oim)
             self.waiting_requests = 0
             self.requested = []

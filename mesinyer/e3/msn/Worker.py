@@ -325,7 +325,9 @@ class Worker(e3.Worker):
         if len(logger.accounts) < 2:
             return False
 
-        for (account, contact) in logger.accounts.iteritems():
+        # thread madness I should be careful to not modify accounts while
+        # iterating
+        for (account, contact) in logger.accounts.items():
             new_contact = e3.Contact(account, contact.cid,
                 contact.nick, contact.message)
             new_contact.groups = contact.groups[:]
@@ -336,7 +338,7 @@ class Worker(e3.Worker):
             new_group.contacts = group.accounts[:]
             self.session.groups[gid] = new_group
 
-        my_account = self.session.account.account
+        nick = my_account = self.session.account.account
         account_info = logger.accounts.get(my_account, None)
 
         if account_info:

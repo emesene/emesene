@@ -213,8 +213,8 @@ class ChatWidget(gtk.VBox):
         all = gtk.HBox()
         all.set_border_width(2)
 
-        calendars = gtk.VBox()
-        calendars.set_border_width(2)
+        self.calendars = gtk.VBox()
+        self.calendars.set_border_width(2)
 
         chat_box = gtk.VBox()
         chat_box.set_border_width(2)
@@ -234,6 +234,10 @@ class ChatWidget(gtk.VBox):
         buttons.set_layout(gtk.BUTTONBOX_END)
         save = gtk.Button(stock=gtk.STOCK_SAVE)
         refresh = gtk.Button(stock=gtk.STOCK_REFRESH)
+
+        toggle_calendars = gtk.Button("Hide calendars")
+
+        buttons.pack_start(toggle_calendars)
         buttons.pack_start(refresh)
         buttons.pack_start(save)
 
@@ -251,20 +255,31 @@ class ChatWidget(gtk.VBox):
 
         save.connect('clicked', self._on_save_clicked)
         refresh.connect('clicked', self._on_refresh_clicked)
+        toggle_calendars.connect('clicked', self._on_toggle_calendars)
 
-        calendars.pack_start(gtk.Label('Chats from:'), False)
-        calendars.pack_start(self.from_calendar, True, True)
-        calendars.pack_start(gtk.Label('Chats to:'), False)
-        calendars.pack_start(self.to_calendar, True, True)
+        self.calendars.pack_start(gtk.Label('Chats from:'), False)
+        self.calendars.pack_start(self.from_calendar, True, True)
+        self.calendars.pack_start(gtk.Label('Chats to:'), False)
+        self.calendars.pack_start(self.to_calendar, True, True)
 
         chat_box.pack_start(self.text, True, True)
 
-        all.pack_start(calendars, False)
+        all.pack_start(self.calendars, False)
         all.pack_start(chat_box, True, True)
 
         self.pack_start(all, True, True)
         self.pack_start(buttons, False)
         self.refresh_history()
+
+    def _on_toggle_calendars(self, button):
+        '''called when the toogle_calendars button is clicked
+        '''
+        if self.calendars.get_property('visible'):
+            button.set_label('Show calendars')
+            self.calendars.hide()
+        else:
+            button.set_label('Hide calendars')
+            self.calendars.show()
 
     def _on_save_clicked(self, button):
         '''called when the save button is clicked'''
@@ -293,8 +308,8 @@ class ChatWidget(gtk.VBox):
             from_day).timetuple())
 
         to_year, to_month, to_day = self.to_calendar.get_date()
-        to_t = time.mktime(datetime.date(to_year, to_month + 1,
-            to_day).timetuple())
+        to_t = time.mktime((datetime.date(to_year, to_month + 1,
+            to_day) + datetime.timedelta(1)).timetuple())
 
         self.session.logger.get_chats_between(self.account,
             self.session.account.account, from_t, to_t, limit, callback)

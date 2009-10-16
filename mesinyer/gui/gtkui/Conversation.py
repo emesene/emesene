@@ -36,7 +36,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         dialog = extension.get_default('dialog')
         self.header = Header()
-        toolbar_handler = e3.common.ConversationToolbarHandler(self.session,
+        toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
             dialog, gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
         self.output = OutputText(self.session.config)

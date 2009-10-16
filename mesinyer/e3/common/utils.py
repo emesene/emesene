@@ -1,4 +1,4 @@
-import MarkupParser
+import MessageFormatter
 
 def add_style_to_message(text, stl, escape=True):
     '''add the style in a xhtml like syntax to text'''
@@ -29,7 +29,7 @@ def add_style_to_message(text, stl, escape=True):
     style_end = '</span>' + style_end
 
     if escape:
-        text = MarkupParser.escape(text)
+        text = MessageFormatter.escape(text)
 
     return style_start + text + style_end
 

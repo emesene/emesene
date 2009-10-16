@@ -1,7 +1,8 @@
+import e3
 import gui
-import e3
-import e3
 import extension
+import MarkupParser
+
 from debugger import dbg
 
 class Conversation(object):
@@ -203,9 +204,9 @@ class Conversation(object):
             self.formatter.format(self.session.contacts.me)
 
         if is_raw:
-            middle = e3.common.MarkupParser.escape(text)
+            middle = MarkupParser.escape(text)
         else:
-            middle = e3.common.MarkupParser.escape(text)
+            middle = MarkupParser.escape(text)
             middle = e3.common.add_style_to_message(middle, self.cstyle, False)
 
         all = first + middle + last
@@ -294,8 +295,8 @@ class Conversation(object):
         contact = self.session.contacts.get(account)
 
         if contact:
-            message = e3.common.MarkupParser.escape(contact.message)
-            nick = e3.common.MarkupParser.escape(contact.display_name)
+            message = MarkupParser.escape(contact.message)
+            nick = MarkupParser.escape(contact.display_name)
         else:
             message = ''
             nick = account
