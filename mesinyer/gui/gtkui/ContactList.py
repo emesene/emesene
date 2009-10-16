@@ -26,7 +26,7 @@ import utils
 import extension
 from debugger import dbg
 
-from e3.common import Plus
+from gui.base import Plus
 import RichBuffer
 
 @extension.implements('nick renderer')

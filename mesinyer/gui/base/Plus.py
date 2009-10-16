@@ -1,7 +1,7 @@
 import re
 import pprint
 
-from XmlParser import DictObj
+from e3.common.XmlParser import DictObj
 
 COLOR_MAP = (
     'ffffff','000000','00007F','009300','FF0000','7F0000','9C009C','FC7F00',
