@@ -36,11 +36,29 @@ class ClientEvents(papyon.event.ClientEventInterface):
         print "ERROR :", error_type, " ->", error    
 
 class InviteEvent(papyon.event.InviteEventInterface):
+    def __init__(self, client):
+        """Initializer
+            @param client: the client we want to be notified for its events
+            @type client: L{Client<papyon.Client>}"""
+        papyon.event.BaseEventInterface.__init__(self, client)
+
     def on_invite_conversation(self, conversation):
+        """Called when we get invited into a conversation
+            @param conversation: the conversation
+            @type conversation: L{Conversation<papyon.conversation.ConversationInterface>}"""
         self._client._on_conversation_invite(conversation)
-        
+
     def on_invite_webcam(self, session, producer):
+        """Called when we get invited into a webcam conversation
+            @param session: the session
+            @type session: L{WebcamSession<papyon.msnp2p.webcam.WebcamSession>}"""
         self._client._on_webcam_invite(session, producer)
+
+    def on_invite_conference(self, call):
+        """Called when we get invited into a conference
+            @param call: the call
+            @type call: L{SIPCall<papyon.sip.sip.SIPCall>}"""
+        self._client._on_conference_invite(session, producer)
         
 class ConversationEvent(papyon.event.ConversationEventInterface):
     def __init__(self, conversation, _client):
@@ -209,12 +227,12 @@ class CallEvent(papyon.event.CallEventInterface):
         """Called when the call is ended."""
         pass
 
-class WebcamEventInterface(BaseEventInterface):
+class WebcamEvent(papyon.event.WebcamEventInterface):
     def __init__(self, session):
         """Initializer
             @param session: the session we want to be notified for its events
             @type session: L{WebcamSession<papyon.msnp2p.webcam.WebcamSession>}"""
-        BaseEventInterface.__init__(self, client)
+        BaseEventInterface.__init__(self, session)
 
     def on_webcam_viewer_data_received(self):
         """Called when we received viewer data"""

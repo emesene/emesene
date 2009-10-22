@@ -187,6 +187,9 @@ class Worker(e3.base.Worker, papyon.Client):
         self._conversation_handler[cid] = newconversationevent
 
     def _on_webcam_invite(self, session, producer):
+        raise NotImplementedError    
+
+    def _on_conference_invite(self, session, producer):
         raise NotImplementedError
 
     # conversation handlers
