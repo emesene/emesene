@@ -42,9 +42,9 @@ from e3.common import ConfigDir
 from debugger import dbg
 
 try:
-    REQ_VER = (0, 4, 2)
+    REQ_VER = (0, 4, 3)
     # papyon imports
-    # get the deb from http://launchpadlibrarian.net/31746931/python-papyon_0.4.2-1%7Eppa9.04%2B1_all.deb
+    # get the deb from http://packages.debian.org/sid/python-papyon
     import logging
     import papyon
     import papyon.event
@@ -187,10 +187,10 @@ class Worker(e3.base.Worker, papyon.Client):
         self._conversation_handler[cid] = newconversationevent
 
     def _on_webcam_invite(self, session, producer):
-        raise NotImplementedError    
+        print "New webcam invite", session, producer
 
     def _on_conference_invite(self, session, producer):
-        raise NotImplementedError
+        print "New conference invite", session, producer
 
     # conversation handlers
     def _on_conversation_user_typing(self, papycontact, pyconvevent):

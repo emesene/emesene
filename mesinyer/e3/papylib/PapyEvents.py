@@ -189,7 +189,7 @@ class CallEvent(papyon.event.CallEventInterface):
         """Initializer
             @param call: the call we want to be notified for its events
             @type call: L{MediaCall<papyon.media.MediaCall>}"""
-        BaseEventInterface.__init__(self, call)
+        papyon.event.BaseEventInterface.__init__(self, call)
 
     def on_call_incoming(self):
         """Called once the incoming call is ready."""
@@ -232,7 +232,7 @@ class WebcamEvent(papyon.event.WebcamEventInterface):
         """Initializer
             @param session: the session we want to be notified for its events
             @type session: L{WebcamSession<papyon.msnp2p.webcam.WebcamSession>}"""
-        BaseEventInterface.__init__(self, session)
+        papyon.event.BaseEventInterface.__init__(self, session)
 
     def on_webcam_viewer_data_received(self):
         """Called when we received viewer data"""
@@ -258,7 +258,7 @@ class MediaSessionEvent(papyon.event.MediaSessionEventInterface):
         """Initializer
             @param session: the media session we want to be notified for its events
             @type session: L{MediaSession<papyon.media.MediaSession>}"""
-        BaseEventInterface.__init__(self, session)
+        papyon.event.BaseEventInterface.__init__(self, session)
         self._session = weakref.proxy(session)
 
     def on_stream_added(self, stream):
@@ -288,7 +288,7 @@ class MediaStreamEvent(papyon.event.MediaStreamEventInterface):
         """Initializer
             @param stream: the media stream we want to be notified for its events
             @type stream: L{MediaStream<papyon.media.MediaStream>}"""
-        BaseEventInterface.__init__(self, stream)
+        papyon.event.BaseEventInterface.__init__(self, stream)
         self._stream = weakref.proxy(stream)
 
     def on_stream_closed(self):
