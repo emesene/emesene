@@ -18,7 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import base64
 import gobject
 import hashlib
 import os
@@ -241,7 +240,7 @@ class Worker(e3.base.Worker, papyon.Client):
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
             cedict[shortcut] = None
 
-            emoticon_hash = base64.b16encode(msn_object._data_sha)
+            emoticon_hash = msn_object._data_sha.encode("hex")
             emoticon_path = os.path.join(emotes.path, emoticon_hash)
 
             if emoticon_hash in emotes:
@@ -351,7 +350,7 @@ class Worker(e3.base.Worker, papyon.Client):
         msn_object = contact.msn_object
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)
-            avatar_hash = base64.b16encode(msn_object._data_sha)
+            avatar_hash = msn_object._data_sha.encode("hex")
             avatar_path = os.path.join(avatars.path, avatar_hash)
 
             if avatar_hash in avatars:
