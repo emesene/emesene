@@ -48,6 +48,7 @@ try:
     import papyon
     import papyon.event
     import papyon.util.string_io as StringIO
+    import papyon.media.conference as papyconference
     ver = papyon.version
     if ver[1] < REQ_VER[1] or ver[2] < REQ_VER[2]:
         raise PapyError
@@ -56,6 +57,11 @@ except:
 
 from PapyEvents import *
 from PapyConvert import *
+
+# webcam test haxes
+import pygst
+pygst.require('0.10')
+import farsight, gst
 
 #logging.basicConfig(level=logging.DEBUG)
 
@@ -187,9 +193,16 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_webcam_invite(self, session, producer):
         print "New webcam invite", session, producer
+        # forced for now, NSFW :D    
+        websess = papyconference.MediaSessionHandler(session)
+        webhandler = WebcamEvent(session)    
+        session.accept()
 
-    def _on_conference_invite(self, session, producer):
-        print "New conference invite", session, producer
+    def _on_conference_invite(self, call):
+        print "New conference invite", call
+        callhandler = CallEvent(call)
+        callsess = papyconference.MediaSessionHandler(call.media_session)
+        #call.accept()
 
     # conversation handlers
     def _on_conversation_user_typing(self, papycontact, pyconvevent):

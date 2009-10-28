@@ -27,10 +27,10 @@ class ClientEvents(papyon.event.ClientEventInterface):
             #self._client.quit()
             pass
         elif state == papyon.event.ClientState.OPEN:
+            self._client.set_initial_infos()
+            
             self._client.session.add_event(Event.EVENT_LOGIN_SUCCEED)
             self._client._fill_contact_list(self._client.address_book)
-            
-            self._client.set_initial_infos()
             
     def on_client_error(self, error_type, error):
         print "ERROR :", error_type, " ->", error    
@@ -58,7 +58,7 @@ class InviteEvent(papyon.event.InviteEventInterface):
         """Called when we get invited into a conference
             @param call: the call
             @type call: L{SIPCall<papyon.sip.sip.SIPCall>}"""
-        self._client._on_conference_invite(session, producer)
+        self._client._on_conference_invite(call)
         
 class ConversationEvent(papyon.event.ConversationEventInterface):
     def __init__(self, conversation, _client):
@@ -236,73 +236,63 @@ class WebcamEvent(papyon.event.WebcamEventInterface):
 
     def on_webcam_viewer_data_received(self):
         """Called when we received viewer data"""
-        pass
+        print "[webcam] viewer data received"
 
     def on_webcam_accepted(self):
         """Called when our invitation got accepted"""
-        pass
+        print "[webcam] accepted"
 
     def on_webcam_rejected(self):
         """Called when our invitation got rejected"""
-        pass
+        print "[webcam] rejected"
 
     def on_webcam_paused(self):
         """Called when the webcam is paused"""
-        pass
+        print "[webcam] paused"
 
-class MediaSessionEvent(papyon.event.MediaSessionEventInterface):
+class CallEvent(papyon.event.CallEventInterface):
     """interfaces allowing the user to get notified about events
-    from a L{MediaSession<papyon.media.MediaSession>}  object."""
+    from a L{MediaCall<papyon.media.MediaCall>} object."""
 
-    def __init__(self, session):
+    def __init__(self, call):
         """Initializer
-            @param session: the media session we want to be notified for its events
-            @type session: L{MediaSession<papyon.media.MediaSession>}"""
-        papyon.event.BaseEventInterface.__init__(self, session)
-        self._session = weakref.proxy(session)
+            @param call: the call we want to be notified for its events
+            @type call: L{MediaCall<papyon.media.MediaCall>}"""
+        papyon.event.BaseEventInterface.__init__(self, call)
+        print "dude"
 
-    def on_stream_added(self, stream):
-        """Called when a new stream is added to the session
-            @param stream: the media stream added
-            @type stream: L{MediaStream<papyon.media.MediaStream>}"""
-        pass
+    def on_call_incoming(self):
+        """Called once the incoming call is ready."""
+        print "[call] ready"
 
-    def on_stream_created(self, stream):
-        """Called when a stream is created upon a peer request
-            @param stream: the new media stream
-            @type stream: L{MediaStream<papyon.media.MediaStream>}"""
-        pass
+    def on_call_ringing(self):
+        """Called when we received a ringing response from the callee."""
+        print "[call] ringing"
 
-    def on_stream_removed(self, stream):
-        """Called when a new stream is removed from the session
-            @param stream: the new media stream
-            @type stream: L{MediaStream<papyon.media.MediaStream>}"""
-        pass
+    def on_call_accepted(self):
+        """Called when the callee accepted the call."""
+        print "[call] accepted"
 
+    def on_call_rejected(self, response):
+        """Called when the callee rejected the call.
+            @param response: response associated with the rejection
+            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
+        print "[call] rejected"
 
-class MediaStreamEvent(papyon.event.MediaStreamEventInterface):
-    """interfaces allowing the user to get notified about events
-    from a L{MediaSession<papyon.media.MediaSession>}  object."""
+    def on_call_error(self, response):
+        """Called when an error is sent by the other party.
+            @param response: response associated with the error
+            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
+        print "[call] err"
 
-    def __init__(self, stream):
-        """Initializer
-            @param stream: the media stream we want to be notified for its events
-            @type stream: L{MediaStream<papyon.media.MediaStream>}"""
-        papyon.event.BaseEventInterface.__init__(self, stream)
-        self._stream = weakref.proxy(stream)
+    def on_call_missed(self):
+        """Called when the call is missed."""
+        print "[call] missd"
 
-    def on_stream_closed(self):
-        """Called when the stream is closing"""
-        pass
+    def on_call_connected(self):
+        """Called once the call is connected."""
+        print "[call] connected"
 
-    def on_remote_codecs_received(self, codecs):
-        """Called when the remote codecs for this stream are received
-            @param codecs: the remote codecs
-            @type codecs: L{SDPCodec<papyon.sip.sdp.SDPCodec>}"""
-        pass
-
-    def on_remote_candidates_received(self, candidates):
-        """Called when the remote candidates for this stream are received
-            @param candidates: the remote candidates
-            @type candidates: L{ICECandidate<papyon.sip.ice.ICECandidate>}"""
-        pass
+    def on_call_ended(self):
+        """Called when the call is ended."""
+        print "[call] ended"
