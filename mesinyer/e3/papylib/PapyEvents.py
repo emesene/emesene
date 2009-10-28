@@ -180,52 +180,6 @@ class ProfileEvent(papyon.event.ProfileEventInterface):
     def on_profile_msn_object_changed(self):
         """Called when the MSNObject changes."""
         print "[papyon] profile dp changed"
-        
-class CallEvent(papyon.event.CallEventInterface):
-    """interfaces allowing the user to get notified about events
-    from a L{MediaCall<papyon.media.MediaCall>} object."""
-
-    def __init__(self, call):
-        """Initializer
-            @param call: the call we want to be notified for its events
-            @type call: L{MediaCall<papyon.media.MediaCall>}"""
-        papyon.event.BaseEventInterface.__init__(self, call)
-
-    def on_call_incoming(self):
-        """Called once the incoming call is ready."""
-        pass
-
-    def on_call_ringing(self):
-        """Called when we received a ringing response from the callee."""
-        pass
-
-    def on_call_accepted(self):
-        """Called when the callee accepted the call."""
-        pass
-
-    def on_call_rejected(self, response):
-        """Called when the callee rejected the call.
-            @param response: response associated with the rejection
-            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
-        pass
-
-    def on_call_error(self, response):
-        """Called when an error is sent by the other party.
-            @param response: response associated with the error
-            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
-        pass
-
-    def on_call_missed(self):
-        """Called when the call is missed."""
-        pass
-
-    def on_call_connected(self):
-        """Called once the call is connected."""
-        pass
-
-    def on_call_ended(self):
-        """Called when the call is ended."""
-        pass
 
 class WebcamEvent(papyon.event.WebcamEventInterface):
     def __init__(self, session):
