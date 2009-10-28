@@ -187,6 +187,7 @@ class WebcamEvent(papyon.event.WebcamEventInterface):
             @param session: the session we want to be notified for its events
             @type session: L{WebcamSession<papyon.msnp2p.webcam.WebcamSession>}"""
         papyon.event.BaseEventInterface.__init__(self, session)
+        self._session = session
 
     def on_webcam_viewer_data_received(self):
         """Called when we received viewer data"""

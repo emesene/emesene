@@ -58,12 +58,32 @@ except:
 from PapyEvents import *
 from PapyConvert import *
 
-# webcam test haxes
+# TEMP VIDEO SINK #
 import pygst
 pygst.require('0.10')
-import farsight, gst
+import gst
+MY_TEMP_XID=0
+def make_video_sink(async=True):
+    "Make a bin with a video sink in it, that will be displayed on xid."
+    bin = gst.Bin("videosink")
+    sink = gst.element_factory_make("ximagesink", "imagesink")
+    sink.set_property("sync", async)
+    sink.set_property("async", async)
+    bin.add(sink)
+    colorspace = gst.element_factory_make("ffmpegcolorspace")
+    bin.add(colorspace)
+    videoscale = gst.element_factory_make("videoscale")
+    bin.add(videoscale)
+    videoscale.link(colorspace)
+    colorspace.link(sink)
+    bin.add_pad(gst.GhostPad("sink", videoscale.get_pad("sink")))
+    sink.set_data("xid", MY_TEMP_XID)
+    return bin #.get_pad("sink")
+# This hax is needed because papyon doesn't handle anything else than a default sink for now.
+papyconference.make_video_sink = make_video_sink
+# END OF VIDEO SINK #
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 class Worker(e3.base.Worker, papyon.Client):
     '''dummy Worker implementation to make it easy to test emesene'''
@@ -193,49 +213,28 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_webcam_invite(self, session, producer):
         print "New webcam invite", session, producer
-        # TEMP VIDEO SINK #
-        import gst
-        def make_video_sink(xid, async=False):
-            "Make a bin with a video sink in it, that will be displayed on xid."
-            #sink = gst.element_factory_make("filesink", "filesink")
-            #sink.set_property("location", "/tmp/videosink.log")
-            #return sink
-            bin = gst.Bin("videosink")
-            sink = gst.element_factory_make("ximagesink", "imagesink")
-            sink.set_property("sync", async)
-            sink.set_property("async", async)
-            bin.add(sink)
-            colorspace = gst.element_factory_make("ffmpegcolorspace")
-            bin.add(colorspace)
-            videoscale = gst.element_factory_make("videoscale")
-            bin.add(videoscale)
-            videoscale.link(colorspace)
-            colorspace.link(sink)
-            bin.add_pad(gst.GhostPad("sink", videoscale.get_pad("sink")))
-            sink.set_data("xid", xid)
-            return bin #.get_pad("sink")
-        # END OF VIDEO SINK #
         # TEMP UI #
         import gtk
-        darea = gtk.DrawingArea()
-        darea.set_colormap(gtk.gdk.colormap_get_system())
+        daarea = gtk.DrawingArea()
+        daarea.set_colormap(gtk.gdk.colormap_get_system())
         win_send = gtk.Window()
         win_send.set_double_buffered(False)
         win_send.set_app_paintable(True)
         win_send.set_title(_("Receiving Webcam"));
-        win_send.add(darea)
+        win_send.add(daarea)
         win_send.show_all()
         win_send.resize(320, 240)
         # END OF TEMP UI # 
+        # TEMPORARY HAX BECAUSE papyon/media/conference.py doesn't support xid
+        global MY_TEMP_XID
+        MY_TEMP_XID = daarea.window.xid
         # forced for now, NSFW :D    
-        webhandler = WebcamEvent(session)    
+        webhandler = WebcamEvent(session)  
         websess = papyconference.MediaSessionHandler(session.media_session)
         if 0:
             session.reject()
         else:
             session.accept()
-
-        websess._pipeline.add(make_video_sink(darea.window.xid))
                 
     def _on_conference_invite(self, call):
         print "New conference invite", call
