@@ -351,9 +351,14 @@ def make_video_sink(async=False, xid=None):
     "Make a bin with a video sink in it, that will be displayed on xid."
     print "this is my xid", xid
     if not xid:
+        # Hello, if you want to view this output, follow KaKaRoTo's advice:
+        #> gst-launch-0.10 filesrc location=videosink.log blocksize=230400 ! 
+        #video/x-raw-rgb,depth=24,bpp=24,endianness=4321,framerate=15/1,width=320,
+        #height=240,red_mask=16711680,green_mask=65280,blue_mask=255 ! ffmpegcolorspace ! videorate ! xvimagesink
         sink = gst.element_factory_make("filesink", "filesink")
         sink.set_property("location", "/tmp/videosink.log")
     else:
+        # doesn't work, find out why
         bin = gst.Bin("videosink_%d" % xid)
         sink = gst.element_factory_make("xvimagesink", "imagesink")
         #sink.set_property("sync", async)
