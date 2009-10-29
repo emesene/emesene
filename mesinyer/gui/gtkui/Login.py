@@ -175,7 +175,7 @@ class Login(gtk.Alignment):
     def do_connect(self):
         '''do all the staff needed to connect'''
         self.throbber.show()
-        
+
         user = self.cmb_account.get_active_text()
         password = self.txt_password.get_text()
         account = e3.Account(user, password, self.btn_status.status)

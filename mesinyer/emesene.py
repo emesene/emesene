@@ -17,6 +17,8 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+erase_me = 0
+
 import os
 import sys
 import gtk
@@ -108,6 +110,16 @@ class Controller(object):
         signals.contact_list_ready.subscribe(self.on_contact_list_ready)
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
+
+    def _remove_subscriptons(self):
+        '''remove the subscriptions to signals
+        '''
+        signals = self.session.signals
+        signals.login_succeed.unsubscribe(self.on_login_succeed)
+        signals.login_failed.unsubscribe(self.on_login_failed)
+        signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
+        signals.conv_first_action.unsubscribe(self.on_new_conversation)
+        signals.disconnected.unsubscribe(self.on_disconnected)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -245,6 +257,7 @@ class Controller(object):
 
     def on_login_failed(self, reason):
         '''callback called on login failed'''
+        self._remove_subscriptons()
         self._new_session()
         dialog = extension.get_default('dialog')
         dialog.error(reason)
