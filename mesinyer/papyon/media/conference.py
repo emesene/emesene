@@ -126,7 +126,6 @@ class MediaSessionHandler(MediaSessionEventInterface):
         win_send.show_all()
         win_send.resize(320, 240)
         self._xid = daarea.window.xid
-        sink = make_video_sink(self._xid)
         
         handler = MediaStreamHandler(stream, self._xid)
         handler.setup(self._conference, self._pipeline, self._participant,
