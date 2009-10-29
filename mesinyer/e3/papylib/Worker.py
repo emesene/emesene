@@ -50,38 +50,14 @@ try:
     import papyon.util.string_io as StringIO
     import papyon.media.conference as papyconference
     ver = papyon.version
+    print papyon.version
     if ver[1] < REQ_VER[1] or ver[2] < REQ_VER[2]:
         raise PapyError
-except:
+except Exception, e:
     print "You need python-papyon(>=%s.%s.%s) to be installed in order to use this extension" % REQ_VER
-
+    print e
 from PapyEvents import *
 from PapyConvert import *
-
-# TEMP VIDEO SINK #
-import pygst
-pygst.require('0.10')
-import gst
-MY_TEMP_XID=0
-def make_video_sink(async=True):
-    "Make a bin with a video sink in it, that will be displayed on xid."
-    bin = gst.Bin("videosink")
-    sink = gst.element_factory_make("ximagesink", "imagesink")
-    sink.set_property("sync", async)
-    sink.set_property("async", async)
-    bin.add(sink)
-    colorspace = gst.element_factory_make("ffmpegcolorspace")
-    bin.add(colorspace)
-    videoscale = gst.element_factory_make("videoscale")
-    bin.add(videoscale)
-    videoscale.link(colorspace)
-    colorspace.link(sink)
-    bin.add_pad(gst.GhostPad("sink", videoscale.get_pad("sink")))
-    sink.set_data("xid", MY_TEMP_XID)
-    return bin #.get_pad("sink")
-# This hax is needed because papyon doesn't handle anything else than a default sink for now.
-papyconference.make_video_sink = make_video_sink
-# END OF VIDEO SINK #
 
 #logging.basicConfig(level=logging.DEBUG)
 
@@ -213,23 +189,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_webcam_invite(self, session, producer):
         print "New webcam invite", session, producer
-        # TEMP UI #
-        import gtk
-        daarea = gtk.DrawingArea()
-        daarea.set_colormap(gtk.gdk.colormap_get_system())
-        win_send = gtk.Window()
-        win_send.set_double_buffered(False)
-        win_send.set_app_paintable(True)
-        win_send.set_title(_("Receiving Webcam"));
-        win_send.add(daarea)
-        win_send.show_all()
-        win_send.resize(320, 240)
-        # END OF TEMP UI # 
-        # TEMPORARY HAX BECAUSE papyon/media/conference.py doesn't support xid
-        global MY_TEMP_XID
-        MY_TEMP_XID = daarea.window.xid
-        # forced for now, NSFW :D    
-        webhandler = WebcamEvent(session)  
+        
         websess = papyconference.MediaSessionHandler(session.media_session)
         if 0:
             session.reject()
