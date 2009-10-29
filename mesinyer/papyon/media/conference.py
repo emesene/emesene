@@ -95,6 +95,7 @@ class MediaSessionHandler(MediaSessionEventInterface):
         #That's the pipeline
         self._pipeline = gst.Pipeline()
         bus = self._pipeline.get_bus()
+        bus.enable_sync_message_emission()
         bus.add_signal_watch()
         bus.connect("message", self.on_bus_message)
         #Check for session type
@@ -361,8 +362,8 @@ def make_video_sink(async=False, xid=None):
         # doesn't work, find out why
         bin = gst.Bin("videosink_%d" % xid)
         sink = gst.element_factory_make("xvimagesink", "imagesink")
-        #sink.set_property("sync", async)
-        #sink.set_property("async", async)
+        sink.set_property("sync", not async)
+        sink.set_property("async", async)
         bin.add(sink)
         colorspace = gst.element_factory_make("ffmpegcolorspace")
         bin.add(colorspace)
