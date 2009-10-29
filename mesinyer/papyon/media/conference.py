@@ -95,9 +95,10 @@ class MediaSessionHandler(MediaSessionEventInterface):
         #That's the pipeline
         self._pipeline = gst.Pipeline()
         bus = self._pipeline.get_bus()
-        bus.enable_sync_message_emission()
         bus.add_signal_watch()
+        bus.enable_sync_message_emission()
         bus.connect("message", self.on_bus_message)
+        bus.connect("sync-message::element", self.on_sync_message)
         #Check for session type
         if self._session.type is MediaSessionType.WEBCAM_RECV:
             name = "fsmsncamrecvconference"
@@ -139,7 +140,6 @@ class MediaSessionHandler(MediaSessionEventInterface):
 
     def on_bus_message(self, bus, msg):
         ret = gst.BUS_PASS
-        print msg
         if msg.type == gst.MESSAGE_ELEMENT:
             s = msg.structure
             if s.has_name("farsight-error"):
@@ -176,13 +176,16 @@ class MediaSessionHandler(MediaSessionEventInterface):
                 local = s["local-candidate"]
                 remote = s["remote-candidate"]
                 stream.new_active_candidate_pair(local.foundation, remote.foundation)
-            if s.has_name("prepare-xwindow-id"):
-                logger.debug("prepare-xwindow-id")
-                msg.src.set_property('force-aspect-ratio', True)
-                print "setting xwindow id"
-                msg.src.set_xwindow_id(self._xid)
         return ret
 
+    def on_sync_message(self, bus, message):
+        if message.structure is None: return
+        message_name = message.structure.get_name()
+        if message_name == "prepare-xwindow-id":
+            imagesink = message.src
+            imagesink.set_property("force-aspect-ratio", True)
+            imagesink.set_xwindow_id(self._xid)
+            print "sync message", imagesink
 
 class MediaStreamHandler(MediaStreamEventInterface):
 

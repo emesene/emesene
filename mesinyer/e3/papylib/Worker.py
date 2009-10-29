@@ -189,7 +189,6 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_webcam_invite(self, session, producer):
         print "New webcam invite", session, producer
-        
         websess = papyconference.MediaSessionHandler(session.media_session)
         if 0:
             session.reject()
