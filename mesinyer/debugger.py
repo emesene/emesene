@@ -1,3 +1,22 @@
+'''
+Provides logging/debugging feature
+
+How to use
+==========
+    You just need to import this module, and you can use our easy methods::
+
+        import debugger
+        debugger.debug('Some text')
+
+    Levels
+    ------
+        Not every debug text is equally important.  That's why we have logging
+        levels: info, debug, warning, error, critical The functions follows the
+        same name of the levels, and all behave the same way.  Thanks to
+        levels, you can put lot of debug info without having your console full
+        of unimportant messages.
+'''
+
 import time
 import logging
 from collections import deque
