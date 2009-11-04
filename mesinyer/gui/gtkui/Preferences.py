@@ -397,7 +397,7 @@ class Extension(BaseTable):
     def _add_extensions_combo(self):
         """add the widgets to display the extensions
         """
-        categories = extension.get_categories().keys()
+        categories = [ctg for ctg in extension.get_categories().keys() if len(extension.get_extensions(ctg)) > 1]
         categories.sort()
 
         for item in categories:
