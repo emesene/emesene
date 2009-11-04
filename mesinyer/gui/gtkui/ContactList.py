@@ -162,11 +162,13 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
+    NAME = 'Plus'
     def __init__(self):
         CellRendererFunction.__init__(self, lambda txt: Plus.msnplus(txt).to_xml())
 
 @extension.implements('nick renderer')
 class CellRendererNoPlus(CellRendererFunction):
+    NAME = 'AntiPlus'
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
     but improving the readability'''
     def __init__(self):
