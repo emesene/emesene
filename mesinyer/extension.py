@@ -135,10 +135,12 @@ class MultipleObjects(object):
 
 class Category(object):
     '''This completely handles a category'''
-    def __init__(self, name, system_default, interfaces, single_instance=False):
+    def __init__(self, name, system_default, 
+                 interfaces, single_instance=False):
         '''Constructor: creates a new category
         @param name: The name of the new category.
         @param interfaces: The interfaces every extension is required to match.
+        @param single_instance: if True, the instance will be kept and reused
         If it's None, no interface is required
         '''
         self.name = name
@@ -159,8 +161,10 @@ class Category(object):
         self.instance = None #a weakref to the saved (single)instance
 
         self.default_id = None
+        self.active = set() #list of ids of active extensions
         self.default = system_default
 
+    #Methods about the extensions
     def register(self, cls):
         '''This will "add" a class to the possible extension.
         @param cls: A Class, NOT an instance
@@ -174,31 +178,31 @@ class Category(object):
         class_name = _get_class_name(cls)
         self.classes[class_name] = cls
         self.ids[cls] = class_name
-
-    def set_interface(self, interfaces):
-        '''
-        If this category doesn't have an interface, just add it and delete
-        all extensions that doesn't match our interface and return True.
-        If an interface is already set, return False.
-        '''
-        to_remove = []
-        if not self.interfaces:
-            self.interfaces = tuple(interfaces)
-            for cls in self.classes.values():
-                for interface in self.interfaces:
-                    if not is_implementation(cls, interface):
-                        to_remove.append(cls)
-            for cls in to_remove:
-                del self.classes[cls]
-
-            return True
-        else:
-            return False
-
-
+    
+    def activate(self,  cls):
+        '''This will make an extension "active", that means you can use it
+        for your multi-extension'''
+        if cls not in self.ids:
+                self.register(cls)
+    
+        id = _get_class_name(cls)
+        self.active.add(id)
+    def deactivate(self,  cls):
+        if cls not in self.ids:
+                self.register(cls)
+    
+        id = _get_class_name(cls)
+        self.active.discard(id)
     def get_extensions(self):
-        '''return a dict of the available extensions id:class'''
+        '''@return an id:class dict of the available extensions id:class'''
         return self.classes
+    def get_active(self):
+        '''@return an id:class dict of the active extensions'''
+        #TODO: implement it!
+        active = {}
+        for id in self.active:
+            active[id] = self.classes[id]
+        return active
 
     def _set_default(self, cls):
         '''register the default extension for this category, if it's not
@@ -207,6 +211,7 @@ class Category(object):
             self.register(cls)
 
         id = _get_class_name(cls)
+        print 'id of', cls, 'is', id
         if self.default_id != id:
             self.default_id = id
             self.instance = None
@@ -219,7 +224,7 @@ class Category(object):
 
     def get_instance(self):
         '''
-        If the category is a "single interface" one, and we have an instance,
+        If the category is a "single instance" one, and we have an instance,
         return it.
         Otherwise None
         '''
@@ -260,8 +265,32 @@ class Category(object):
     def use(self):
         if self.is_single:
             return MultipleObjects({self.default_id: self.default})
-        return MultipleObjects(self.get_extensions())
+        return MultipleObjects(self.get_active())
+    
 
+    #Methods about the properties of the category itself
+    def set_interface(self, interfaces):
+        '''
+        If this category doesn't have an interface, just add it and delete
+        all extensions that doesn't match our interface and return True.
+        If an interface is already set, return False.
+        '''
+        to_remove = []
+        if not self.interfaces:
+            self.interfaces = tuple(interfaces)
+            for cls in self.classes.values():
+                for interface in self.interfaces:
+                    if not is_implementation(cls, interface):
+                        to_remove.append(cls)
+            for cls in to_remove:
+                del self.classes[cls]
+
+            return True
+        else:
+            return False
+
+
+    
 _categories = {} #'CategoryName': Category('ClassName')
 
 def category_register(category, system_default, interfaces=(), single_instance=False):
