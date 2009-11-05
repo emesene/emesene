@@ -158,6 +158,7 @@ class Category(object):
         self.ids = {}
 
         self.is_single = single_instance
+        self.multi_extension = False
         self.instance = None #a weakref to the saved (single)instance
 
         self.default_id = None
@@ -211,7 +212,6 @@ class Category(object):
             self.register(cls)
 
         id = _get_class_name(cls)
-        print 'id of', cls, 'is', id
         if self.default_id != id:
             self.default_id = id
             self.instance = None
@@ -263,7 +263,7 @@ class Category(object):
             self.default = self.classes[id_]
 
     def use(self):
-        if self.is_single:
+        if not self.multi_extension:
             return MultipleObjects({self.default_id: self.default})
         return MultipleObjects(self.get_active())
     
@@ -278,13 +278,22 @@ class Category(object):
         to_remove = []
         if not self.interfaces:
             self.interfaces = tuple(interfaces)
+            #check if the current extensions satisfy the new interface
             for cls in self.classes.values():
                 for interface in self.interfaces:
                     if not is_implementation(cls, interface):
+                        debugger.warning("Extension %s of category %s\
+                            doesn't match the new interface: %s" %\
+                            (str(cls),  self.name,  self.interfaces))
                         to_remove.append(cls)
             for cls in to_remove:
                 del self.classes[cls]
-
+            #read properties
+            for interface in self.interfaces:
+                if hasattr(interface,  'multi'):
+                    self.multi_extension = interface.multi
+                if hasattr(interface,  'single_instance'):
+                    self.is_single = interface.single_instance
             return True
         else:
             return False
