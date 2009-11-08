@@ -53,7 +53,7 @@ import os
 import sys
 import weakref
 
-from debugger import dbg
+from debugger import dbg, warning
 
 class MultipleObjects(object):
     '''
@@ -135,7 +135,7 @@ class MultipleObjects(object):
 
 class Category(object):
     '''This completely handles a category'''
-    def __init__(self, name, system_default, 
+    def __init__(self, name, system_default,
                  interfaces, single_instance=False):
         '''Constructor: creates a new category
         @param name: The name of the new category.
@@ -173,12 +173,14 @@ class Category(object):
         '''
         for interface in self.interfaces:
             if not is_implementation(cls, interface):
-                raise ValueError("cls doesn't agree to the interface: %s" % \
-                 (str(interface)))
+                warning("cls doesn't agree to the interface: %s" %\
+                 str(interface))
+                return False
 
         class_name = _get_class_name(cls)
         self.classes[class_name] = cls
         self.ids[cls] = class_name
+        return True
     
     def activate(self,  cls):
         '''This will make an extension "active", that means you can use it
@@ -323,8 +325,7 @@ def register(category_name, cls):
     if category is None: #doesn't exist
         return category_register(category_name, cls)
     else: #already exists
-        category.register(cls)
-        return True
+        return category.register(cls)
 
     return False
 
