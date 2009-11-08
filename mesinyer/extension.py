@@ -253,6 +253,15 @@ class Category(object):
         return inst
 
 
+    def set_default_by_name(self, name):
+        '''set the default extension throught its name'''
+        for cls in self.classes.values():
+			if hasattr(cls, 'NAME'):
+				if cls.NAME == name:
+					self.default = cls
+					return True
+        return False
+     
     def set_default_by_id(self, id_):
         '''set the default extension through its id (generated
         by _get_class_name method), if the id is not available it will raise
