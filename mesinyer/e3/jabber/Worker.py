@@ -10,12 +10,14 @@ from debugger import dbg
 class Worker(e3.Worker):
     '''wrapper of xmpppy to make it work like e3.Worker'''
 
+    NOTIFICATION_DELAY = 60
+
     def __init__(self, app_name, session, proxy, use_http=False):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
         self.jid = xmpp.protocol.JID(session.account.account)
-        self.client = xmpp.Client(self.jid.getDomain(), debug=[])
-        #self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
+        #self.client = xmpp.Client(self.jid.getDomain(), debug=[])
+        self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
 
         self.proxy = proxy
         self.proxy_data = None
@@ -32,6 +34,7 @@ class Worker(e3.Worker):
         self.conversations = {}
         self.rconversations = {}
         self.roster = None
+        self.start_time = None
 
     def run(self):
         '''main method, block waiting for data, process it, and send data back
@@ -94,8 +97,11 @@ class Worker(e3.Worker):
             if stat == e3.status.OFFLINE:
                 change_type = 'offline'
 
+            do_notify = (self.start_time + Worker.NOTIFICATION_DELAY) < \
+                    time.time()
+
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
-                change_type, old_status)
+                change_type, old_status, do_notify)
             self.session.logger.log('status change', stat, str(stat),
                 log_account)
 
@@ -174,6 +180,7 @@ class Worker(e3.Worker):
             return
 
         self.session.add_event(e3.Event.EVENT_LOGIN_SUCCEED)
+        self.start_time = time.time()
 
         self.client.RegisterHandler('message', self._on_message)
 
