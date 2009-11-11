@@ -70,6 +70,7 @@ def setup():
     extension.category_register('nick renderer', ContactList.CellRendererPlus)
     extension.register('nick renderer', gtk.CellRendererText)
     extension.register('nick renderer', ContactList.CellRendererNoPlus)
+    extension.register('nick renderer', ContactList.GtkCellRenderer)
     extension.category_register('user panel', UserPanel.UserPanel)
     extension.category_register('tray icon', TrayIcon.TrayIcon)
     extension.category_register('debug window', DebugWindow.DebugWindow)
