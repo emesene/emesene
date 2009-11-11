@@ -157,7 +157,7 @@ class Login(gtk.Alignment):
 
         self.add(vbox)
         vbox.show_all()
-        
+
         self.throbber.hide()
 
     def set_sensitive(self, sensitive):
@@ -168,6 +168,11 @@ class Login(gtk.Alignment):
         self.remember_account.set_sensitive(sensitive)
         self.remember_password.set_sensitive(sensitive)
         self.b_preferences.set_sensitive(sensitive)
+
+        if sensitive:
+            self.throbber.hide()
+        else:
+            self.throbber.show()
 
     def _on_connect_clicked(self, button):
         self.do_connect()

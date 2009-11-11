@@ -1,6 +1,7 @@
+import os
+import re
 import gtk
 import webbrowser
-import re
 
 from gui.base import MarkupParser
 
@@ -33,7 +34,7 @@ class OutputText(gtk.ScrolledWindow):
         self._textbox = webkit.WebView()
         self._textbox.connect('load-finished', self._loading_stop_cb)
         self._textbox.connect('console-message', self._error_cb)
-        self._textbox.connect('navigation-requested', self._navigation_requested_cb)
+        #self._textbox.connect('navigation-requested', self._navigation_requested_cb)
         self.clear()
         self._textbox.show()
         self.add(self._textbox)
@@ -42,7 +43,12 @@ class OutputText(gtk.ScrolledWindow):
         '''clear the content'''
         self._texts = []
         self.loaded = False
-        self.text = HTML_BODY
+
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join("file://", dir_path , "conversation.html")
+
+        print path
+        self._textbox.open(path)
 
     def append(self, text, cedict=None, scroll=True):
         '''append formatted text to the widget'''
@@ -86,6 +92,7 @@ class OutputText(gtk.ScrolledWindow):
 
         self._texts = []
 
+    # XXX: not used
     def _navigation_requested_cb(self, view, frame, networkRequest):
         uri = networkRequest.get_uri()
         uri = uri.replace('file://', '')
@@ -114,70 +121,4 @@ class OutputText(gtk.ScrolledWindow):
         return html
 
     text = property(fget=_get_text, fset=_set_text)
-
-HTML_BODY = '''
-<html>
- <head>
-  <title>lol</title>
-  <style type="text/css">
-    .message-outgoing, .message-incomming, .consecutive-incomming, .consecutive-outgoing, .message-history
-    {
-        -webkit-border-radius: 1em;
-        margin: 2px;
-        width: 100%;
-        display: table;
-    }
-
-    .message-outgoing
-    {
-        -webkit-border-bottom-left-radius: 0px;
-        border: 2px solid #cccccc; background-color: #eeeeee; padding: 5px;
-    }
-
-    .message-history
-    {
-        border: 2px solid #cccccc; background-color: #f3f3f3; padding: 5px;
-    }
-
-    .message-incomming
-    {
-        -webkit-border-bottom-right-radius: 0px;
-        border: 2px solid #cccccc; background-color: #ffff99; padding: 5px;
-        text-align: right;
-    }
-
-    .consecutive-incomming
-    {
-        -webkit-border-bottom-right-radius: 0px;
-        border: background-color: #ddf8d0; padding: 5px;
-        text-align: right;
-        width: 97%;
-        margin-right: 2%;
-    }
-
-    .consecutive-outgoing
-    {
-        -webkit-border-bottom-left-radius: 0px;
-        border: background-color: #f0f8ff; padding: 5px;
-        width: 97%;
-        margin-left: 2%;
-    }
-  </style>
- </head>
-
- <body>
-  <div id="wrapper">
-  </div>
-  <script type="text/javascript">
-    function add_message(message)
-    {
-        var container = document.getElementById("wrapper");
-        var content = document.createElement("div");
-        content.innerHTML = message;
-        container.appendChild(content);
-    }
-  </script>
- </body>
-</html>
-'''
 

@@ -30,6 +30,11 @@ from gui.base import Plus
 import RichBuffer
 
 @extension.implements('nick renderer')
+class GtkCellRenderer(gtk.CellRendererText):
+    def __init__(self):
+        gtk.CellRendererText.__init__(self)
+
+@extension.implements('nick renderer')
 class CellRendererFunction(gtk.GenericCellRenderer):
     '''
     CellRenderer that behaves like a label, but apply a function to "markup"
@@ -41,6 +46,11 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 "text",
                 "text we'll display (even with plus markup!)",
                 '', #default value
+                gobject.PARAM_READWRITE),
+            'ellipsize': (gobject.TYPE_BOOLEAN,
+                "",
+                "",
+                False, #default value
                 gobject.PARAM_READWRITE)
             }
 
@@ -212,7 +222,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.set_model(self.model)
 
         crt = extension.get_and_instantiate('nick renderer')
-        #crt.set_property('ellipsize', pango.ELLIPSIZE_END)
+        crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr_status = gtk.CellRendererPixbuf()
 
         column = gtk.TreeViewColumn()
