@@ -50,7 +50,6 @@ try:
     import papyon.util.string_io as StringIO
     import papyon.media.conference as papyconference
     ver = papyon.version
-    print papyon.version
     if ver[1] < REQ_VER[1] or ver[2] < REQ_VER[2]:
         raise PapyError
 except Exception, e:
@@ -81,6 +80,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self._invite_handler = InviteEvent(self)
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
+        self._oim_handler = OfflineEvent(self)
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
@@ -584,7 +584,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_send_message(self, cid, message):
         ''' handle Action.ACTION_SEND_MESSAGE '''
         #print "you're guin to send %(msg)s in %(ci)s" % { 'msg' : message, 'ci' : cid }
-        print "type:", message
+        #print "type:", message
         # find papyon conversation by cid
         papyconversation = self.papyconv[cid]
         if message.type == e3.base.Message.TYPE_NUDGE:

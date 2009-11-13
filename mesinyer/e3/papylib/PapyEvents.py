@@ -96,7 +96,7 @@ class ContactEvent(papyon.event.ContactEventInterface):
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}
             @see: L{Memberships<papyon.profile.Membership>}"""
-        pass
+        print "on_contact_memberships_changed", contact
 
     def on_contact_presence_changed(self, contact):
         self._client._on_contact_status_changed(contact)
@@ -114,13 +114,13 @@ class ContactEvent(papyon.event.ContactEventInterface):
         """Called when the infos of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
-        pass
+        print "[papyon]", "on_contact_infos_changed", contact, infos
 
     def on_contact_client_capabilities_changed(self, contact):
         """Called when the client capabilities of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
-        pass
+        print "[papyon]", "on_contact_client_capabilities_changed", contact
 
     def on_contact_msn_object_changed(self, contact):
         self._client._on_contact_msnobject_changed(contact)
@@ -130,31 +130,31 @@ class AddressBookEvent(papyon.event.AddressBookEventInterface):
         papyon.event.BaseEventInterface.__init__(self, client)
 
     def on_addressbook_messenger_contact_added(self, contact):
-        pass
+        print "[papyon]", "on_addressbook_messenger_contact_added", contact
 
     def on_addressbook_contact_deleted(self, contact):
-        pass
+        print "[papyon]", "on_addressbook_contact_deleted", contact
 
     def on_addressbook_contact_blocked(self, contact):
-        pass
+        print "[papyon]", "on_addressbook_contact_blocked", contact
 
     def on_addressbook_contact_unblocked(self, contact):
-        pass
+        print "[papyon]", "on_addressbook_contact_unblocked", contact
 
     def on_addressbook_group_added(self, group):
-        pass
+        print "[papyon]", "on_addressbook_group_added", group
 
     def on_addressbook_group_deleted(self, group):
-        pass
+        print "[papyon]", "on_addressbook_group_deleted", group
 
     def on_addressbook_group_renamed(self, group):
-        pass
+        print "[papyon]", "on_addressbook_group_renamed", group
 
     def on_addressbook_group_contact_added(self, group, contact):
-        pass
+        print "[papyon]", "on_addressbook_group_contact_added", group, contact
 
     def on_addressbook_group_contact_deleted(self, group, contact):
-        pass
+        print "[papyon]", "on_addressbook_group_contact_deleted", group, contact
         
 class ProfileEvent(papyon.event.ProfileEventInterface):
     def __init__(self, client):
@@ -163,23 +163,23 @@ class ProfileEvent(papyon.event.ProfileEventInterface):
         
     def on_profile_presence_changed(self):
         """Called when the presence changes."""
-        print "[papyon] profile presence changed"
+        print "[papyon]", "profile presence changed"
         
     def on_profile_display_name_changed(self):
         """Called when the display name changes."""
-        print "[papyon] profile nick changed"
+        print "[papyon]", "profile nick changed"
         
     def on_profile_personal_message_changed(self):
         """Called when the personal message changes."""
-        print "[papyon] profile pm changed"
+        print "[papyon]", "profile pm changed"
 
     def on_profile_current_media_changed(self):
         """Called when the current media changes."""
-        print "[papyon] profile media changed"
+        print "[papyon]", "profile media changed"
 
     def on_profile_msn_object_changed(self):
         """Called when the MSNObject changes."""
-        print "[papyon] profile dp changed"
+        print "[papyon]", "profile dp changed"
 
 class WebcamEvent(papyon.event.WebcamEventInterface):
     def __init__(self, session):
@@ -191,19 +191,19 @@ class WebcamEvent(papyon.event.WebcamEventInterface):
 
     def on_webcam_viewer_data_received(self):
         """Called when we received viewer data"""
-        print "[webcam] viewer data received"
+        print "[papyon]", "[webcam]", "viewer data received"
 
     def on_webcam_accepted(self):
         """Called when our invitation got accepted"""
-        print "[webcam] accepted"
+        print "[papyon]", "[webcam]", "accepted"
 
     def on_webcam_rejected(self):
         """Called when our invitation got rejected"""
-        print "[webcam] rejected"
+        print "[papyon]", "[webcam]", "rejected"
 
     def on_webcam_paused(self):
         """Called when the webcam is paused"""
-        print "[webcam] paused"
+        print "[papyon]", "[webcam]", "paused"
 
 class CallEvent(papyon.event.CallEventInterface):
     """interfaces allowing the user to get notified about events
@@ -214,40 +214,77 @@ class CallEvent(papyon.event.CallEventInterface):
             @param call: the call we want to be notified for its events
             @type call: L{MediaCall<papyon.media.MediaCall>}"""
         papyon.event.BaseEventInterface.__init__(self, call)
-        print "dude"
-
+        
     def on_call_incoming(self):
         """Called once the incoming call is ready."""
-        print "[call] ready"
+        print "[papyon]", "[call] ready"
 
     def on_call_ringing(self):
         """Called when we received a ringing response from the callee."""
-        print "[call] ringing"
+        print "[papyon]", "[call] ringing"
 
     def on_call_accepted(self):
         """Called when the callee accepted the call."""
-        print "[call] accepted"
+        print "[papyon]", "[call] accepted"
 
     def on_call_rejected(self, response):
         """Called when the callee rejected the call.
             @param response: response associated with the rejection
             @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
-        print "[call] rejected"
+        print "[papyon]", "[call] rejected"
 
     def on_call_error(self, response):
         """Called when an error is sent by the other party.
             @param response: response associated with the error
             @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
-        print "[call] err"
+        print "[papyon]", "[call] err"
 
     def on_call_missed(self):
         """Called when the call is missed."""
-        print "[call] missd"
+        print "[papyon]", "[call] missd"
 
     def on_call_connected(self):
         """Called once the call is connected."""
-        print "[call] connected"
+        print "[papyon]", "[call] connected"
 
     def on_call_ended(self):
         """Called when the call is ended."""
-        print "[call] ended"
+        print "[papyon]", "[call] ended"
+
+class OfflineEvent(papyon.event.OfflineEventInterface):
+    """interfaces allowing the user to get notified about events from the
+    Offline IM box."""
+
+    def __init__(self, client):
+        papyon.event.BaseEventInterface.__init__(self, client)
+
+    def on_oim_state_changed(self, state):
+        print "[papyon]", "oim state changed", state
+
+    def on_oim_messages_received(self, messages):
+        print "[papyon]", "oims received", messages
+
+    def on_oim_messages_fetched(self, messages):
+        print "[papyon]", "oim fetched", messages
+
+    def on_oim_messages_deleted(self):
+        print "[papyon]", "oim deleted"
+
+    def on_oim_message_sent(self, recipient, message):
+        print "[papyon]", "oim sent to", recipient, message
+
+class MailboxEvent(papyon.event.MailboxEventInterface):
+    """interfaces allowing the user to get notified about events from the Inbox.
+    """
+
+    def __init__(self, client):
+        papyon.event.BaseEventInterface.__init__(self, client)
+
+    def on_mailbox_unread_mail_count_changed(self, unread_mail_count, 
+                                                   initial=False):
+        """The number of unread mail messages"""
+        print "[papyon]", "mailbox number changed", unread_mail_count, initial
+
+    def on_mailbox_new_mail_received(self, mail_message):
+        """New mail message notification"""
+        print "[papyon]", "mailbox mail received", mail_message
