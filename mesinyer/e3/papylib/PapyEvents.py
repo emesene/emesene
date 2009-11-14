@@ -251,7 +251,7 @@ class CallEvent(papyon.event.CallEventInterface):
         """Called when the call is ended."""
         print "[papyon]", "[call] ended"
 
-class OfflineEvent(papyon.event.OfflineEventInterface):
+class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
     """interfaces allowing the user to get notified about events from the
     Offline IM box."""
 
