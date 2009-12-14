@@ -17,8 +17,6 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-erase_me = 0
-
 import os
 import sys
 import gtk
@@ -26,6 +24,9 @@ import time
 import base64
 import gobject
 import gettext
+import optparse
+
+import string
 
 if os.path.exists('default.mo'):
     gettext.GNUTranslations(open('default.mo')).install()
@@ -48,9 +49,13 @@ try:
 except ImportError:
     papylib = None
     print 'papyon lib not available, extension disabled'
+except Exception, exc:
+    papylib = None
+    warning('Errors occurred on papyon importing: %s' % str(exc))
 
 from pluginmanager import get_pluginmanager
 import extension
+import interfaces
 from gui import gtkui
 
 class Controller(object):
@@ -77,11 +82,6 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', msn.Session, single_instance=True)
-        if papylib is not None:
-            extension.register('session', papylib.Session)
-        extension.register('session', jabber.Session)
-        extension.register('session', dummy.Session)
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification', e3.common.notification.notify)
         extension.category_register('history exporter',
@@ -93,7 +93,7 @@ class Controller(object):
         else:
             default_id = self.config.session
 
-        extension.set_default('session', dummy.Session)
+        #extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
 
     def _new_session(self):
@@ -459,11 +459,46 @@ class Controller(object):
         self.close_session(False)
         self.start()
 
+@extension.implements('option provider')
+class ExtensionDefault:
+    def __init__(self):
+        pass
+    def option_register(self):
+        option = optparse.Option('--ext-default', '-e')
+        option.type='string' #well, it's a extName:defaultValue string
+        option.action = 'callback'
+        option.callback = self.set_default
+        option.help = 'Set the default extension by name'
+        option.nargs = 1
+        return option
+    def set_default(self, option, opt, value, parser):
+        for couple in value.split(';'):
+            (category_name, ext_name) = map(string.strip, couple.split(':', 2))
+            if not extension.get_category(category_name).set_default_by_name(ext_name):
+                print 'Error when setting extension "%s" default session to "%s"' % (category_name, ext_name)
+
+class PluggableOptionParser(object):
+    def __init__(self):
+        self.parser = optparse.OptionParser(conflict_handler="resolve")
+        custom_options = extension.get_category('option provider').use()().option_register().get_result()
+        for opt in custom_options.values():
+            self.parser.add_option(opt)
+
+        
+
+    def read_options(self):
+        (options, args) = self.parser.parse_args()
 
 def main():
     """
     the main method of emesene
     """
+    extension.category_register('session', msn.Session, single_instance=True)
+    extension.category_register('option provider', None, interfaces=interfaces.IOptionProvider)
+    extension.get_category('option provider').multi_extension = True
+    extension.get_category('option provider').activate(ExtensionDefault)
+    options = PluggableOptionParser()
+    options.read_options()
     main_method = extension.get_default('main')
     main_method(Controller)
  

@@ -26,7 +26,7 @@ import os.path
 
 def _build_caller():
     #Get class.method_name. Not used now, but could be useful
-    caller_obj = inspect.stack()[1]
+    caller_obj = inspect.stack()[2]
     #try:
     #    parent_class = '%s.' % caller_obj.f_locals['self'].__class__.__name__
     #except:
@@ -125,7 +125,7 @@ _console_handler = logging.StreamHandler()
 _formatter = logging.Formatter('[%(asctime)s %(caller)s] %(message)s', '%H:%M:%S')
 _console_handler.setFormatter(_formatter)
 _console_handler.setLevel(logging.INFO)
-#_logger.addHandler(_console_handler)
+_logger.addHandler(_console_handler)
 
 queue_handler = QueueHandler()
 queue_handler.setLevel(logging.DEBUG)

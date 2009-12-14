@@ -53,7 +53,7 @@ import os
 import sys
 import weakref
 
-from debugger import dbg, warning
+from debugger import dbg, info, warning
 
 class MultipleObjects(object):
     '''
@@ -139,6 +139,7 @@ class Category(object):
                  interfaces, single_instance=False):
         '''Constructor: creates a new category
         @param name: The name of the new category.
+        @param system_default: An extension to be added as default, or None
         @param interfaces: The interfaces every extension is required to match.
         @param single_instance: if True, the instance will be kept and reused
         If it's None, no interface is required
@@ -210,6 +211,10 @@ class Category(object):
     def _set_default(self, cls):
         '''register the default extension for this category, if it's not
         registered then register it and set it as default'''
+        if cls is None:
+            self.default_id = None
+            self.instance = None
+            return
         if cls not in self.ids:
             self.register(cls)
 
@@ -220,6 +225,12 @@ class Category(object):
 
     def _get_default(self):
         '''return the default extension for this category'''
+        if not self.default_id:
+            if not self.get_extensions():
+                return None
+            self.default = self.get_extensions().values()[0]
+            warning('Choosing a default extension for %s RANDOMLY! --> %s' % (self.name, self.default))
+            
         return self.classes[self.default_id]
 
     default = property(fget=_get_default, fset=_set_default)
@@ -246,6 +257,8 @@ class Category(object):
         if self.get_instance():
             return self.get_instance()
         cls = self.default
+        if not cls:
+            return cls
         inst = cls(*args, **kwargs)
         if self.is_single:
             self.instance = weakref.ref(inst)
@@ -256,10 +269,13 @@ class Category(object):
     def set_default_by_name(self, name):
         '''set the default extension throught its name'''
         for cls in self.classes.values():
-			if hasattr(cls, 'NAME'):
-				if cls.NAME == name:
-					self.default = cls
-					return True
+            if hasattr(cls, 'NAME'):
+                if cls.NAME == name:
+                    self.default = cls
+                    info('Default for "%s" is "%s"' % (self.name, name))
+                    return True
+        info('Cannot save default for "%s" as "%s"' % (self.name, name))
+        print self.classes.values()
         return False
      
     def set_default_by_id(self, id_):
@@ -446,10 +462,15 @@ def _get_class_name(cls):
     return path
 
 
-def implements(*interfaces):
+def implements(*categories):
     '''decorator to nicely show which interfaces we are implementing'''
-    def _impl(typ):
-        typ.implements = interfaces
-        return typ
+    def _impl(ext):
+        ext.implements = categories
+        for ctg in categories:
+            if not get_category(ctg):
+                category_register(ctg, None)
+            get_category(ctg).register(ext)
+        return ext
+        
     return _impl
 

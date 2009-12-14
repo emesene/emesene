@@ -45,6 +45,7 @@ def gtk_main(Controller):
     gtk.main()
     gtk.gdk.threads_leave()
 
+
 gtk_main.NAME = "Gtk main function"
 gtk_main.DESCRIPTION  = "This extensions uses Gtk to build the GUI"
 gtk_main.AUTHOR = "marianoguerra"
