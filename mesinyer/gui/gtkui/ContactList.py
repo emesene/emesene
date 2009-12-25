@@ -29,12 +29,12 @@ from debugger import dbg
 from gui.base import Plus
 import RichBuffer
 
-@extension.implements('nick renderer')
 class GtkCellRenderer(gtk.CellRendererText):
     def __init__(self):
         gtk.CellRendererText.__init__(self)
 
-@extension.implements('nick renderer')
+extension.implements(GtkCellRenderer, 'nick renderer')
+
 class CellRendererFunction(gtk.GenericCellRenderer):
     '''
     CellRenderer that behaves like a label, but apply a function to "markup"
@@ -168,20 +168,23 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
         return layout
 
-@extension.implements('nick renderer')
+extension.implements(CellRendererFunction, 'nick renderer')
+
 class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
     def __init__(self):
         CellRendererFunction.__init__(self, lambda txt: Plus.msnplus(txt).to_xml())
 
-@extension.implements('nick renderer')
+extension.implements(CellRendererPlus, 'nick renderer')
+
 class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
     but improving the readability'''
     def __init__(self):
         CellRendererFunction.__init__(self, Plus.msnplus_strip)
 
+extension.implements(CellRendererNoPlus, 'nick renderer')
 
 gobject.type_register(CellRendererPlus)
 
