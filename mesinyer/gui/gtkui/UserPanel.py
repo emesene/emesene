@@ -18,20 +18,18 @@ class UserPanel(gtk.VBox):
         gtk.VBox.__init__(self)
 
         self.session = session
-        account = self.session.account.account
         self._enabled = True
 
         self.image = utils.safe_gtk_image_load(gui.theme.user)
-        self.nick = TextField.TextField(account, '', False)
+        self.nick = TextField.TextField(session.contacts.me.display_name, '', False)
         self.status = StatusButton.StatusButton(session)
-        print "status", session.contacts.me.status
         self.status.set_status(session.contacts.me.status)
         self.search = gtk.ToggleButton()
         self.search.set_image(gtk.image_new_from_stock(gtk.STOCK_FIND,
             gtk.ICON_SIZE_MENU))
         self.search.set_relief(gtk.RELIEF_NONE)
 
-        self.message = TextField.TextField('',
+        self.message = TextField.TextField(session.contacts.me.message,
             '<span style="italic">&lt;Click here to set message&gt;</span>',
             True)
         self.toolbar = gtk.HBox()

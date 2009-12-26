@@ -931,6 +931,9 @@ class GetProfile(Requester):
             self.session.extras["CacheKey"] = cache_key
             self.session.extras["ResourceID"] = rid
 
+            self.session.contacts.me.nick = nick
+            self.session.contacts.me.message = message
+
             self.session.add_event(e3.Event.EVENT_PROFILE_GET_SUCCEED,
                 self.cid, nick, message)
         else:
