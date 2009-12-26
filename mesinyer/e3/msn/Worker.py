@@ -512,7 +512,6 @@ class Worker(e3.Worker):
             old_media == contact.media:
             return
 
-
         if old_message != contact.message:
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 'message', old_message)
