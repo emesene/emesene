@@ -1,7 +1,6 @@
 '''a base module to manage cache subdirectories'''
 import os
 import abc
-import base64
 import hashlib
 
 def directory_exists(path):
@@ -23,7 +22,7 @@ def get_file_path_hash(file_path):
 def get_file_hash(file_like_obj):
     '''return the hash (base64) of a file like object
     '''
-    return base64.b16encode(get_file_digest(file_like_obj))
+    return get_file_digest(file_like_obj).encode("hex")
 
 def get_file_digest(file_like_obj):
     '''return a sha digest of a file like object

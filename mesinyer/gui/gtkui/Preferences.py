@@ -6,6 +6,14 @@ import extension
 
 from debugger import dbg
 
+LIST = [ 
+    {'stock_id' : gtk.STOCK_FULLSCREEN,'text' : _('Interface')},
+    {'stock_id' : gtk.STOCK_MEDIA_NEXT,'text' : _('Sounds')},
+    {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
+    {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
+    {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Extensions')},
+]
+
 class Preferences(gtk.Window):
     """A window to display/modify the preferences
     """
@@ -17,17 +25,55 @@ class Preferences(gtk.Window):
         self.set_title("Preferences")
         self.session = session
 
-        self.set_default_size(320, 260)
-        self.set_role("preferences")
+        self.set_default_size(600, 400)
+        self.set_role("New preferences Window")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
         if utils.file_readable(gui.theme.logo):
             self.set_icon(
                 utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
 
-        self.box = gtk.VBox()
-        self.box.set_border_width(4)
-        self.tabs = gtk.Notebook()
+        ''' TREE VIEW STUFF '''
+        # Create the list store model for the treeview.
+        listStore = gtk.ListStore(gtk.gdk.Pixbuf, str)
+
+        for i in LIST:
+            #we should use always the same icon size, we can remove that field in LIST
+            listStore.append([self.render_icon(i['stock_id'], gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
+
+        # Create the TreeView
+        treeView = gtk.TreeView(listStore)
+
+        # Create the renders
+        cellText = gtk.CellRendererText()
+        cellPix = gtk.CellRendererPixbuf()
+
+        # Create the single Tree Column
+        treeViewColumn = gtk.TreeViewColumn('Categories')
+
+        treeViewColumn.pack_start(cellPix, expand=False)
+        treeViewColumn.add_attribute(cellPix, 'pixbuf',0)
+        treeViewColumn.pack_start(cellText, expand=True)
+        treeViewColumn.set_attributes(cellText, text=1)
+
+        treeView.append_column(treeViewColumn)
+        treeView.set_headers_visible(False)
+        treeView.connect('cursor-changed', self._on_row_activated)
+        self.treeview = treeView
+
+        self.notebook = gtk.Notebook()
+        self.notebook.set_show_tabs(False)
+        self.notebook.set_resize_mode(gtk.RESIZE_QUEUE)
+        self.notebook.set_scrollable(True)
+
+        ''' PACK TREEVIEW, FRAME AND HBOX '''
+        vbox = gtk.VBox()
+        vbox.set_spacing(4)
+        hbox = gtk.HBox(homogeneous=False, spacing=5)
+        hbox.pack_start(treeView, True,True) # False, True
+        hbox.pack_start(self.notebook, True, True)
+        vbox.pack_start(hbox, True,True) # hbox, True, True
+
 
         self.interface = Interface(session)
         self.sound = Sound(session)
@@ -42,17 +88,38 @@ class Preferences(gtk.Window):
         self.close.connect('clicked', lambda *args: self.hide())
         self.buttons.pack_start(self.close)
 
-        self.tabs.append_page(self.interface, gtk.Label('Interface'))
-        self.tabs.append_page(self.sound, gtk.Label('Sounds'))
-        self.tabs.append_page(self.notification, gtk.Label('Notifications'))
-        self.tabs.append_page(self.theme, gtk.Label('Themes'))
-        self.tabs.append_page(self.extension, gtk.Label('Extensions'))
+        # Create a dict that stores each page
+        self.page_dict = []
 
-        self.box.pack_start(self.tabs, True, True)
-        self.box.pack_start(self.buttons, False)
+        # Keep local copies of the objects
+        self.interface_page = self.interface
+        self.sound_page = self.sound
+        self.notifications_page = self.notification
+        self.theme_page = self.theme
+        self.extensions_page = self.extension
 
-        self.add(self.box)
-        self.box.show_all()
+        # Whack the pages into a dict for future reference
+
+        self.page_dict.append(self.interface_page)
+        self.page_dict.append(self.sound_page)
+        self.page_dict.append(self.notifications_page)
+        self.page_dict.append(self.theme_page)
+        self.page_dict.append(self.extensions_page)
+
+        for i in range(len(self.page_dict)):
+           self.notebook.append_page(self.page_dict[i])
+
+        self.add(vbox)
+        vbox.show_all()
+
+    def _on_row_activated(self,treeview):
+        # Get information about the row that has been selected
+        cursor, obj = treeview.get_cursor()
+        self.showPage(cursor[0])
+
+    def showPage(self, index):
+        self.notebook.set_current_page(index)
+        self.current_page = index
 
 class BaseTable(gtk.Table):
     """a base table to display preferences
