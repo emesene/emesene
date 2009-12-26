@@ -69,7 +69,7 @@ class MultipleObjects(object):
 
             C{multiple_object.x.func(some, args)}
 
-            and you're done. 
+            and you're done.
 
         Getting return values
         ---------------------
