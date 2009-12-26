@@ -825,17 +825,20 @@ class Worker(e3.Worker):
 
         self.session.logger.log('message change', contact.status, message,
             account)
+        Requester.SetProfile(self.session, contact.nick, message).start()
 
     def _handle_action_set_nick(self, nick):
         '''handle e3.Action.ACTION_SET_NICK
         '''
         contact = self.session.contacts.me
-        account =  e3.Logger.Account(contact.attrs.get('CID', None), None,
+        message = contact.message
+        account = e3.Logger.Account(contact.attrs.get('CID', None), None,
             contact.account, contact.status, nick, contact.message,
             contact.picture)
 
         Requester.ChangeNick(self.session, nick, account,
             self.command_queue).start()
+        Requester.SetProfile(self.session, nick, message).start()
 
     def _handle_action_set_picture(self, picture_name):
         '''handle e3.Action.ACTION_SET_PICTURE

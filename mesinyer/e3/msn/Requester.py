@@ -17,6 +17,15 @@ import challenge
 from debugger import dbg
 from Command import Command
 
+def safe_split(text, start, stop, default=""):
+    '''try to get the content on text between start and stop,
+    if fauls return default
+    '''
+    try:
+        return text.split(start)[1].split(stop)[0]
+    except IndexError:
+        return default
+
 def build_role(account, role, key, add=True):
     '''build a request to add account to the role if add is True, if False
     build the request to remove account from the role'''
@@ -30,9 +39,14 @@ def build_role(account, role, key, add=True):
     return Request(action, 'omega.contacts.msn.com', 443,
         '/abservice/SharingService.asmx', body)
 
-def get_key(session):
+def get_key(session, host='contacts.msn.com', escape=True):
     '''return the key to call the web services from the session'''
-    return session.extras['contacts.msn.com']['security'].replace('&', '&amp;')
+    key = session.extras[host]['security']
+
+    if escape:
+        return key.replace('&', '&amp;')
+
+    return key
 
 class Request(object):
     '''a class that represents a request'''
@@ -53,6 +67,9 @@ class Response(object):
         self.body = body
         self.status = status
         self.reason = reason
+
+    def __str__(self):
+        return "%s - %s\n%s" % (self.status, self.reason, self.body)
 
 class BaseRequester(threading.Thread):
     '''the base class to build requester threads'''
@@ -323,6 +340,10 @@ class DynamicItems(Requester):
 
             dbg('dynamic finished', 'req', 1)
 
+            self.session.contacts.me.identifier = \
+                response.body.split('<contactType>Me</contactType>')\
+                [1].split('</CID>')[0].split('<CID>')[1].strip()
+
             # get our nick
             try:
                 nick = response.body.split('<contactType>Me</contactType>')\
@@ -360,6 +381,8 @@ class DynamicItems(Requester):
             if not self.started_from_cache:
                 for adl in self.session.contacts.get_adls():
                     self.command_queue.put(Command('ADL', payload=adl))
+
+            GetProfile(self.session, self.session.contacts.me.identifier).start()
 
         else:
             dbg('error requestion dynamic items', 'req', 1)
@@ -883,3 +906,56 @@ class DeleteOIM(Requester):
         if response.status != 200:
             self.session.add_event(e3.Event.EVENT_ERROR,
                              'Can\'t delete oim %s' % self.id)
+
+class GetProfile(Requester):
+    '''make a request to get the nick and personal message'''
+    def __init__(self, session, cid):
+        '''constructor'''
+        key = get_key(session, 'storage.msn.com', False)
+        Requester.__init__(self, session,
+            'http://www.msn.com/webservices/storage/w10/GetProfile',
+            'storage.msn.com', 443, '/storageservice/SchematizedStore.asmx',
+            XmlManager.get('getprofile', key, cid))
+
+        self.session = session
+        self.cid = cid
+
+    def handle_response(self, request, response):
+        '''handle the response'''
+        if response.status == 200:
+            nick = safe_split(response.body, '<DisplayName>', '</DisplayName>')
+            message = safe_split(response.body, '<PersonalStatus>', '</PersonalStatus>')
+            cache_key = safe_split(response.body, '<CacheKey>', '</CacheKey>')
+            rid = safe_split(response.body, '<ResourceID>', '</ResourceID>')
+
+            self.session.extras["CacheKey"] = cache_key
+            self.session.extras["ResourceID"] = rid
+
+            self.session.add_event(e3.Event.EVENT_PROFILE_GET_SUCCEED,
+                self.cid, nick, message)
+        else:
+            self.session.add_event(e3.Event.EVENT_PROFILE_GET_FAILED,
+                 'Can\'t get profile for %s' % self.cid)
+
+class SetProfile(Requester):
+    '''make a request to set the nick and personal message'''
+    def __init__(self, session, nick, message):
+        '''constructor'''
+        key = get_key(session, 'storage.msn.com', False)
+        cache_key = session.extras["CacheKey"]
+        rid = session.extras["ResourceID"]
+        Requester.__init__(self, session,
+            'http://www.msn.com/webservices/storage/w10/UpdateProfile',
+            'storage.msn.com', 443, '/storageservice/SchematizedStore.asmx',
+            XmlManager.get('updateprofile', cache_key, key, rid, nick, message))
+
+        self.session = session
+
+    def handle_response(self, request, response):
+        '''handle the response'''
+        if response.status == 200:
+            self.session.add_event(e3.Event.EVENT_PROFILE_SET_SUCCEED)
+        else:
+            self.session.add_event(e3.Event.EVENT_PROFILE_SET_FAILED,
+                 'Can\'t set profile')
+

@@ -57,8 +57,6 @@ class UserPanel(gtk.VBox):
         message_hbox.show()
         vbox.show()
 
-        session.signals.nick_change_succeed.subscribe(
-            self.on_nick_change_succeed)
         session.signals.message_change_succeed.subscribe(
             self.on_message_change_succeed)
         session.signals.status_change_succeed.subscribe(
@@ -67,6 +65,8 @@ class UserPanel(gtk.VBox):
             self.on_contact_list_ready)
         session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
+        session.signals.profile_get_succeed.subscribe(
+                self.on_profile_get_succeed)
 
     def show(self):
         '''override show'''
@@ -98,10 +98,6 @@ class UserPanel(gtk.VBox):
 
     enabled = property(fget=_get_enabled, fset=_set_enabled)
 
-    def on_nick_change_succeed(self, nick):
-        '''callback called when the nick has been changed successfully'''
-        self.nick.text = nick
-
     def on_status_change_succeed(self, stat):
         '''callback called when the status has been changed successfully'''
         self.status.set_status(stat)
@@ -120,3 +116,10 @@ class UserPanel(gtk.VBox):
         if account == self.session.account.account:
             pixbuf = utils.safe_gtk_pixbuf_load(path, (32, 32))
             self.image.set_from_pixbuf(pixbuf)
+
+    def on_profile_get_succeed(self, cid, nick, message):
+        '''method called when information about our profile is obtained
+        '''
+        self.nick.text = nick
+        self.message.text = message
+

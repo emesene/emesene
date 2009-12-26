@@ -104,6 +104,7 @@ class Controller(object):
 
         self.session = extension.get_and_instantiate('session')
 
+        # if you add a signal here, add it on _remove_subscriptions
         signals = self.session.signals
         signals.login_succeed.subscribe(self.on_login_succeed)
         signals.login_failed.subscribe(self.on_login_failed)
@@ -459,14 +460,13 @@ class Controller(object):
         self.close_session(False)
         self.start()
 
-
 def main():
     """
     the main method of emesene
     """
     main_method = extension.get_default('main')
     main_method(Controller)
- 
+
 if __name__ == "__main__":
     main()
- 
+
