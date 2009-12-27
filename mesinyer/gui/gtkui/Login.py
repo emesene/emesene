@@ -93,6 +93,14 @@ class Login(gtk.Alignment):
         vbox_remember.pack_start(self.throbber)
         vbox_remember.pack_start(self.remember_account)
         vbox_remember.pack_start(self.remember_password)
+        try:
+            import locale
+            link = "http://status.messenger.msn.com/Status.aspx?mkt="
+            link += locale.getlocale()[0].replace('_','-')
+            serverStatus = gtk.LinkButton(link,_('Service Status'))
+            vbox_remember.pack_start(serverStatus)
+        except:
+            pass
 
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
@@ -179,7 +187,6 @@ class Login(gtk.Alignment):
 
     def do_connect(self):
         '''do all the staff needed to connect'''
-        self.throbber.show()
 
         user = self.cmb_account.get_active_text()
         password = self.txt_password.get_text()
@@ -195,6 +202,7 @@ class Login(gtk.Alignment):
             extension.get_default('dialog').error('Empty password')
             return
 
+        self.throbber.show()
         self.set_sensitive(False)
         self.callback(account, remember_account, remember_password,
             self.session_id, self.proxy, self.use_http)
