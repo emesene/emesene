@@ -6,7 +6,7 @@ import extension
 
 from debugger import dbg
 
-LIST = [ 
+LIST = [
     {'stock_id' : gtk.STOCK_FULLSCREEN,'text' : _('Interface')},
     {'stock_id' : gtk.STOCK_MEDIA_NEXT,'text' : _('Sounds')},
     {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
@@ -22,6 +22,7 @@ class Preferences(gtk.Window):
         """constructor
         """
         gtk.Window.__init__(self)
+        self.set_border_width(2)
         self.set_title("Preferences")
         self.session = session
 
@@ -152,12 +153,13 @@ class BaseTable(gtk.Table):
         label.set_line_wrap(line_wrap)
         self.attach(label, column, column + 1, row, row + 1)
 
-    def add_button(self, text, column, row, on_click):
+    def add_button(self, text, column, row, on_click, xoptions=gtk.EXPAND|gtk.FILL, yoptions=gtk.EXPAND|gtk.FILL):
         """add a button with text to the row and column, connect the clicked
         event to on_click"""
         button = gtk.Button(text)
         button.connect('clicked', on_click)
-        self.attach(button, column, column + 1, row, row + 1)
+        self.attach(button, column, column + 1, row, row + 1, xoptions,
+                yoptions)
 
     def append_row(self, widget, row=None):
         """append a row to the table
@@ -452,7 +454,8 @@ class Extension(BaseTable):
         self.add_label(self.author_info, 1, 5, True)
         self.add_label(self.website_info, 1, 6, True)
 
-        self.add_button('Redraw main screen', 1, 7, self._on_redraw_main_screen)
+        self.add_button('Redraw main screen', 1, 7,
+                self._on_redraw_main_screen, 0, 0)
 
     def _on_redraw_main_screen(self, button):
         """called when the Redraw main screen button is clicked

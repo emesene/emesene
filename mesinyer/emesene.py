@@ -185,7 +185,6 @@ class Controller(object):
         self.save_extensions_config()
 
         if self.session is not None:
-            self._save_main_dimensions()
             self.session.save_config()
             self.session = None
         else:
@@ -217,16 +216,6 @@ class Controller(object):
         self.config.i_login_width = width
         self.config.i_login_height = height
 
-    def _save_main_dimensions(self):
-        '''save the dimensions of the main window
-        '''
-        width, height, posx, posy = self.window.get_dimensions()
-
-        self.session.config.i_main_width = width
-        self.session.config.i_main_height = height
-        self.session.config.i_main_posx = posx
-        self.session.config.i_main_posy = posy
-
     def on_login_succeed(self):
         '''callback called on login succeed'''
         self._save_login_dimensions()
@@ -247,14 +236,8 @@ class Controller(object):
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
 
-        posx = self.session.config.get_or_set('i_main_posx', 100)
-        posy = self.session.config.get_or_set('i_main_posy', 100)
-        width = self.session.config.get_or_set('i_main_width', 250)
-        height = self.session.config.get_or_set('i_main_height', 410)
-
         self.window.go_main(self.session,
                 self.on_new_conversation, self.on_close, self.on_disconnect)
-        self.window.set_location(width, height, posx, posy)
 
     def on_login_failed(self, reason):
         '''callback called on login failed'''

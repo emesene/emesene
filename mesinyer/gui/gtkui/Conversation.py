@@ -17,7 +17,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''constructor'''
         gtk.VBox.__init__(self)
         gui.Conversation.__init__(self, session, cid, members)
-        self.set_border_width(1)
+        self.set_border_width(2)
 
         self.tab_label = tab_label
 
