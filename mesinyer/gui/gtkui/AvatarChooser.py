@@ -158,7 +158,7 @@ class AvatarChooser(gtk.Window):
         if os.path.exists(path) and os.access(path, os.R_OK)\
                 and not self.is_in_view(path):
             try:
-                pixbuf = gtk.gdk.pixbuf_new_from_file(path)
+                pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,64,64)
                 self.model.append([pixbuf, path])
             except gobject.GError:
                 print 'image at %s could not be loaded' % (path, )
