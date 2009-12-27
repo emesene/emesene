@@ -4,6 +4,7 @@ import gtk
 import gobject
 
 import gui
+import utils
 import extension
 
 class AvatarChooser(gtk.Window):
@@ -16,6 +17,7 @@ class AvatarChooser(gtk.Window):
         picture_path is the path of the current display picture,
         '''
         gtk.Window.__init__(self)
+        self.set_icon(gui.theme.logo)
 
         self.response_cb = response_cb
         self.cache_path = cache_path
@@ -96,6 +98,12 @@ class AvatarChooser(gtk.Window):
 
         self.fill()
         self.set_current_picture(picture_path)
+
+    def set_icon(self, icon):
+        '''set the icon of the window'''
+        if utils.file_readable(icon):
+            gtk.Window.set_icon(self,
+                utils.safe_gtk_image_load(icon).get_pixbuf())
 
     def set_current_picture(self, path):
         '''set the current picture on the frame'''

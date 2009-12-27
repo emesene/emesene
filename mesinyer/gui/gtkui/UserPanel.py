@@ -66,7 +66,9 @@ class UserPanel(gtk.VBox):
         session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
         session.signals.profile_get_succeed.subscribe(
-                self.on_profile_get_succeed)
+                self.on_profile_update_succeed)
+        session.signals.profile_set_succeed.subscribe(
+                self.on_profile_update_succeed)
 
     def show(self):
         '''override show'''
@@ -117,7 +119,7 @@ class UserPanel(gtk.VBox):
             pixbuf = utils.safe_gtk_pixbuf_load(path, (32, 32))
             self.image.set_from_pixbuf(pixbuf)
 
-    def on_profile_get_succeed(self, cid, nick, message):
+    def on_profile_update_succeed(self, nick, message):
         '''method called when information about our profile is obtained
         '''
         self.nick.text = nick

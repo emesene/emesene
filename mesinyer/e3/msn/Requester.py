@@ -935,7 +935,7 @@ class GetProfile(Requester):
             self.session.contacts.me.message = message
 
             self.session.add_event(e3.Event.EVENT_PROFILE_GET_SUCCEED,
-                self.cid, nick, message)
+                nick, message)
         else:
             self.session.add_event(e3.Event.EVENT_PROFILE_GET_FAILED,
                  'Can\'t get profile for %s' % self.cid)
@@ -947,6 +947,8 @@ class SetProfile(Requester):
         key = get_key(session, 'storage.msn.com', False)
         cache_key = session.extras["CacheKey"]
         rid = session.extras["ResourceID"]
+        self.nick = nick
+        self.message = message
         Requester.__init__(self, session,
             'http://www.msn.com/webservices/storage/w10/UpdateProfile',
             'storage.msn.com', 443, '/storageservice/SchematizedStore.asmx',
@@ -957,7 +959,8 @@ class SetProfile(Requester):
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
-            self.session.add_event(e3.Event.EVENT_PROFILE_SET_SUCCEED)
+            self.session.add_event(e3.Event.EVENT_PROFILE_SET_SUCCEED,
+                    self.nick, self.message)
         else:
             self.session.add_event(e3.Event.EVENT_PROFILE_SET_FAILED,
                  'Can\'t set profile')
