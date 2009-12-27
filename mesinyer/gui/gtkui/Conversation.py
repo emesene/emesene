@@ -78,7 +78,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             account = members[0]
             contact = self.session.contacts.get(account)
 
-            if contact:
+            if contact and contact.picture:
                 his_picture = contact.picture
 
         avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
