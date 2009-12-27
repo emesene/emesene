@@ -239,8 +239,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.set_expander_column(self.exp_column)
 
         column.pack_start(self.pbr, False)
-        column.pack_start(crt, True)
         column.pack_start(pbr_status, False)
+        column.pack_start(crt, True)
 
         column.add_attribute(self.pbr, 'pixbuf', 0)
         column.add_attribute(crt, 'markup', 2)
