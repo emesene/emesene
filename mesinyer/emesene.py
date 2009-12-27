@@ -1,3 +1,4 @@
+'''main module of emesene, does the startup and related stuff'''
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -33,8 +34,6 @@ elif os.path.exists('po/'):
     gettext.install('emesene', 'po/')
 else:
     gettext.install('emesene')
-
-from debugger import warning
 
 import gui
 import utils
@@ -77,13 +76,15 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', msn.Session, single_instance=True)
+        extension.category_register('session', msn.Session,
+                single_instance=True)
         if papylib is not None:
             extension.register('session', papylib.Session)
         extension.register('session', jabber.Session)
         extension.register('session', dummy.Session)
         extension.category_register('sound', e3.common.play_sound.play)
-        extension.category_register('notification', e3.common.notification.notify)
+        extension.category_register('notification',
+                e3.common.notification.notify)
         extension.category_register('history exporter',
                 e3.Logger.save_logs_as_txt)
 
@@ -139,7 +140,8 @@ class Controller(object):
         and set them as default on the extensions module'''
 
         if self.session.config.d_extensions is not None:
-            for cat_name, ext_id in self.session.config.d_extensions.iteritems():
+            for cat_name, ext_id in self.session.config\
+                    .d_extensions.iteritems():
                 extension.set_default_by_id(cat_name, ext_id)
 
     def _get_proxy_settings(self):
@@ -178,7 +180,8 @@ class Controller(object):
         self.close_session(False)
         self.start()
 
-    def close_session(self, exit=True):
+    def close_session(self, do_exit=True):
+        '''close session'''
         if self.session is not None:
             self.session.quit()
 
@@ -199,7 +202,7 @@ class Controller(object):
         self.window.hide()
         self.window = None
 
-        if exit:
+        if do_exit:
             while gtk.events_pending():
                 gtk.main_iteration(False)
 
@@ -388,7 +391,8 @@ class Controller(object):
 
     def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''
-        width, height, posx, posy = self.conversations.get_parent().get_dimensions()
+        width, height, posx, posy = \
+                self.conversations.get_parent().get_dimensions()
         self.session.config.i_conv_width = width
         self.session.config.i_conv_height = height
         self.session.config.i_conv_posx = posx
@@ -398,6 +402,7 @@ class Controller(object):
         self.conversations = None
 
     def start(self, account=None, accounts=None):
+        '''the entry point to the class'''
         Window = extension.get_default('window frame')
         self.window = Window(None) # main window
 
@@ -408,16 +413,6 @@ class Controller(object):
         handler = gui.base.TrayIconHandler(self.session, gui.theme,
             self.on_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler, self.window)
-
-        #self.external_api = []
-        #for ext in extension.get_extensions('external api').values():
-        #    try:
-        #        inst = ext()
-        #    except Exception, description: #on error, just discard it
-        #        warning("errors occured when instancing %s: '%s'" % (str(ext), str(description)))
-        #    else:
-        #        self.external_api.append(inst)
-
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
