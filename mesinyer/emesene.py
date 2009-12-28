@@ -18,8 +18,6 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-erase_me = 0
-
 import os
 import sys
 import gtk
