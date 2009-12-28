@@ -18,7 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import base64
 import gobject
 import hashlib
 import os
@@ -42,19 +41,20 @@ from e3.common import ConfigDir
 from debugger import dbg
 
 try:
-    REQ_VER = (0, 4, 2)
+    REQ_VER = (0, 4, 3)
     # papyon imports
-    # get the deb from http://launchpadlibrarian.net/31746931/python-papyon_0.4.2-1%7Eppa9.04%2B1_all.deb
+    # get the deb from http://packages.debian.org/sid/python-papyon
     import logging
     import papyon
     import papyon.event
     import papyon.util.string_io as StringIO
+    import papyon.media.conference as papyconference
     ver = papyon.version
     if ver[1] < REQ_VER[1] or ver[2] < REQ_VER[2]:
         raise PapyError
-except:
+except Exception, e:
     print "You need python-papyon(>=%s.%s.%s) to be installed in order to use this extension" % REQ_VER
-
+    print e
 from PapyEvents import *
 from PapyConvert import *
 
@@ -73,13 +73,14 @@ class Worker(e3.base.Worker, papyon.Client):
             from papyon.transport import HTTPPollConnection
             self.client = papyon.Client.__init__(self, server, get_proxies(), HTTPPollConnection)
         else:
-            self.client = papyon.Client.__init__(self, server, proxies = get_proxies(proxy))
+            self.client = papyon.Client.__init__(self, server, proxies = get_proxies())
 
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
         self._invite_handler = InviteEvent(self)
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
+        self._oim_handler = OfflineEvent(self)
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
@@ -187,7 +188,18 @@ class Worker(e3.base.Worker, papyon.Client):
         self._conversation_handler[cid] = newconversationevent
 
     def _on_webcam_invite(self, session, producer):
-        raise NotImplementedError
+        print "New webcam invite", session, producer
+        websess = papyconference.MediaSessionHandler(session.media_session)
+        if 0:
+            session.reject()
+        else:
+            session.accept()
+                
+    def _on_conference_invite(self, call):
+        print "New conference invite", call
+        callhandler = CallEvent(call)
+        callsess = papyconference.MediaSessionHandler(call.media_session)
+        #call.accept()
 
     # conversation handlers
     def _on_conversation_user_typing(self, papycontact, pyconvevent):
@@ -238,7 +250,7 @@ class Worker(e3.base.Worker, papyon.Client):
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
             cedict[shortcut] = None
 
-            emoticon_hash = base64.b16encode(msn_object._data_sha)
+            emoticon_hash = msn_object._data_sha.encode("hex")
             emoticon_path = os.path.join(emotes.path, emoticon_hash)
 
             if emoticon_hash in emotes:
@@ -348,7 +360,7 @@ class Worker(e3.base.Worker, papyon.Client):
         msn_object = contact.msn_object
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)
-            avatar_hash = base64.b16encode(msn_object._data_sha)
+            avatar_hash = msn_object._data_sha.encode("hex")
             avatar_path = os.path.join(avatars.path, avatar_hash)
 
             if avatar_hash in avatars:
@@ -572,7 +584,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_send_message(self, cid, message):
         ''' handle Action.ACTION_SEND_MESSAGE '''
         #print "you're guin to send %(msg)s in %(ci)s" % { 'msg' : message, 'ci' : cid }
-        print "type:", message
+        #print "type:", message
         # find papyon conversation by cid
         papyconversation = self.papyconv[cid]
         if message.type == e3.base.Message.TYPE_NUDGE:

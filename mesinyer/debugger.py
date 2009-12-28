@@ -46,10 +46,14 @@ class QueueHandler(logging.Handler):
     '''
     def __init__(self, maxlen=50):
         logging.Handler.__init__(self)
-        self.queue = deque(maxlen=maxlen)
+        self.maxlen = maxlen
+        self.queue = deque()
 
     def emit(self, record):
         self.queue.append(record)
+
+        if len(self.queue) > self.maxlen:
+            self.queue.popleft()
 
     def get_all(self):
         l = len(self.queue)

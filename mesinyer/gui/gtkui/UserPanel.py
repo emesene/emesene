@@ -18,18 +18,18 @@ class UserPanel(gtk.VBox):
         gtk.VBox.__init__(self)
 
         self.session = session
-        account = self.session.account.account
         self._enabled = True
 
         self.image = utils.safe_gtk_image_load(gui.theme.user)
-        self.nick = TextField.TextField(account, '', False)
+        self.nick = TextField.TextField(session.contacts.me.display_name, '', False)
         self.status = StatusButton.StatusButton(session)
+        self.status.set_status(session.contacts.me.status)
         self.search = gtk.ToggleButton()
         self.search.set_image(gtk.image_new_from_stock(gtk.STOCK_FIND,
             gtk.ICON_SIZE_MENU))
         self.search.set_relief(gtk.RELIEF_NONE)
 
-        self.message = TextField.TextField('',
+        self.message = TextField.TextField(session.contacts.me.message,
             '<span style="italic">&lt;Click here to set message&gt;</span>',
             True)
         self.toolbar = gtk.HBox()
@@ -57,8 +57,6 @@ class UserPanel(gtk.VBox):
         message_hbox.show()
         vbox.show()
 
-        session.signals.nick_change_succeed.subscribe(
-            self.on_nick_change_succeed)
         session.signals.message_change_succeed.subscribe(
             self.on_message_change_succeed)
         session.signals.status_change_succeed.subscribe(
@@ -67,6 +65,10 @@ class UserPanel(gtk.VBox):
             self.on_contact_list_ready)
         session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
+        session.signals.profile_get_succeed.subscribe(
+                self.on_profile_update_succeed)
+        session.signals.profile_set_succeed.subscribe(
+                self.on_profile_update_succeed)
 
     def show(self):
         '''override show'''
@@ -98,10 +100,6 @@ class UserPanel(gtk.VBox):
 
     enabled = property(fget=_get_enabled, fset=_set_enabled)
 
-    def on_nick_change_succeed(self, nick):
-        '''callback called when the nick has been changed successfully'''
-        self.nick.text = nick
-
     def on_status_change_succeed(self, stat):
         '''callback called when the status has been changed successfully'''
         self.status.set_status(stat)
@@ -120,3 +118,10 @@ class UserPanel(gtk.VBox):
         if account == self.session.account.account:
             pixbuf = utils.safe_gtk_pixbuf_load(path, (32, 32))
             self.image.set_from_pixbuf(pixbuf)
+
+    def on_profile_update_succeed(self, nick, message):
+        '''method called when information about our profile is obtained
+        '''
+        self.nick.text = nick
+        self.message.text = message
+

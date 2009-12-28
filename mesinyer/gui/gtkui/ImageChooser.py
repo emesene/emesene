@@ -4,6 +4,7 @@ import gtk
 import gobject
 
 import gui
+import utils
 import extension
 
 class ImageChooser(gtk.Window):
@@ -13,6 +14,7 @@ class ImageChooser(gtk.Window):
         '''class constructor, path is the directory where the
         dialog opens'''
         gtk.Window.__init__(self)
+        self.set_icon(gui.theme.logo)
 
         self.response_cb = response_cb
 
@@ -53,6 +55,12 @@ class ImageChooser(gtk.Window):
 
         self._add_filters()
         self._add_preview()
+
+    def set_icon(self, icon):
+        '''set the icon of the window'''
+        if utils.file_readable(icon):
+            gtk.Window.set_icon(self,
+                utils.safe_gtk_image_load(icon).get_pixbuf())
 
     def _add_filters(self):
         '''

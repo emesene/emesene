@@ -1,3 +1,4 @@
+'''utility module'''
 import os
 import gtk
 import pango
@@ -18,12 +19,12 @@ def safe_gtk_image_load(path, size=None):
 def safe_gtk_pixbuf_load(path, size=None, animated=False):
     '''try to return a gtk pixbuf from path, if fails, return None'''
     path = os.path.abspath(path)
-    
+
     if animated:
         creator = gtk.gdk.PixbufAnimation
     else:
         creator = gtk.gdk.pixbuf_new_from_file
-    
+
     if file_readable(path):
         if (path, size) in pixbufs:
             return pixbufs[(path, size)]
@@ -32,17 +33,20 @@ def safe_gtk_pixbuf_load(path, size=None, animated=False):
 
             if size is not None:
                 width, height = size
-                pixbuf = pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+                pixbuf = pixbuf.scale_simple(width, height,
+                        gtk.gdk.INTERP_BILINEAR)
 
             pixbufs[(path, size)] = pixbuf
             return pixbuf
     else:
         return None
-        
+
 def scale_nicely(pixbuf):
+    '''scale a pixbuf'''
     return pixbuf.scale_simple(20, 20, gtk.gdk.INTERP_BILINEAR)
 
 def file_readable(path):
+    '''return True if the file is readable'''
     return os.access(path, os.R_OK) and os.path.isfile(path)
 
 def style_to_pango_font_description(style):
