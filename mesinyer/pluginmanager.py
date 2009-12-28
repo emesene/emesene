@@ -219,11 +219,7 @@ class PluginManager:
 
     def scan_directory(self, dir_):
         '''Find plugins and packages inside dir_'''
-        dirs = files = []
-        for root, directories, files in os.walk(dir_):
-            dirs = directories
-            files = files
-            break #sooo ugly
+        root, dirs, files = os.walk(dir_).next()
 
         for directory in [x for x in dirs if not x.startswith('.')]:
             try:
