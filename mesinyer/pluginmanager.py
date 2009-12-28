@@ -3,8 +3,6 @@ import os
 import sys
 
 from debugger import warning, info
-from copy import copy
-
 
 class PluginHandler:
     '''Abstraction over a plugin.
@@ -21,7 +19,7 @@ class PluginHandler:
 
     def _do_import(self):
         '''Does the dirty stuff with __import__'''
-        old_syspath = copy(sys.path)
+        old_syspath = sys.path[:]
         try:
             sys.path += [os.curdir, 'plugins']
             self.module = __import__(self.name, globals(), locals(), ['plugin'])
