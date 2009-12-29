@@ -14,8 +14,10 @@ import e3
 import common
 import challenge
 
-from debugger import dbg
 from Command import Command
+
+import logging
+log = logging.getLogger('msn.Worker')
 
 def safe_split(text, start, stop, default=""):
     '''try to get the content on text between start and stop,
@@ -121,10 +123,10 @@ class Requester(BaseRequester):
     def run(self):
         '''main method of the thread, make the request and handle the response
         '''
-        dbg('running request ' + self.request.action, 'req', 1)
+        log.debug('running request ' + self.request.action)
         response = self.make_request(self.request)
         self.handle_response(self.request, response)
-        dbg('request finished', 'req', 1)
+        log.debug('request finished')
 
     def handle_response(self, request, response):
         '''override this to do something with the response'''
@@ -147,29 +149,29 @@ class TwoStageRequester(BaseRequester):
 
     def run(self):
         '''the main method on the class'''
-        dbg('running first request ' + self.first_req.action, 'req', 1)
+        log.debug('running first request ' + self.first_req.action)
         response = self.make_request(self.first_req)
         if response.status != 200:
-            dbg('first request ' + self.first_req.action + ' failed, cleanning up', 'req', 1)
+            log.debug('first request %s failed, cleanning up' % self.first_req.action)
             self._on_first_failed(response)
-            dbg(response.body, 'req', 4)
+            log.debug(response.body)
             return
         else:
             self._on_first_succeed(response)
 
-        dbg('running second request ' + self.second_req.action, 'req', 1)
+        log.debug('running second request ' + self.second_req.action)
         response = self.make_request(self.second_req)
         if response.status != 200:
-            dbg('second request ' + self.second_req.action + ' failed, cleanning up', 'req', 1)
-            dbg(response.body, 'req', 4)
+            log.debug('second request %s failed, cleanning up' % self.second_req.action)
+            log.debug(response.body)
             self._on_second_failed(response)
             if self.fallback_req is not None:
-                dbg('running fallback request ' + self.fallback_req.action, 'req', 1)
+                log.debug('running fallback request ' + self.fallback_req.action)
                 self.make_request(self.fallback_req)
         else:
             self._on_second_succeed(response)
 
-        dbg('request finished', 'req', 1)
+        log.debug('request finished')
 
     def _on_first_succeed(self, response):
         '''handle the first request if succeeded'''
@@ -262,8 +264,8 @@ class Membership(Requester):
             DynamicItems(self.session, self.command_queue,
                 self.on_login, self.started_from_cache).start()
         else:
-            dbg('error requesting membership ' + response.status, 'req', 1)
-            dbg(response.body, 'req', 4)
+            log.debug('error requesting membership ' + response.status)
+            log.debug(response.body)
 
 
 class DynamicItems(Requester):
@@ -338,7 +340,7 @@ class DynamicItems(Requester):
                 contact.attrs['space'] = \
                     contact_dict.get('hasSpace', None) == 'true'
 
-            dbg('dynamic finished', 'req', 1)
+            log.debug('dynamic finished')
 
             self.session.contacts.me.identifier = \
                 response.body.split('<contactType>Me</contactType>')\
@@ -385,7 +387,7 @@ class DynamicItems(Requester):
             GetProfile(self.session, self.session.contacts.me.identifier).start()
 
         else:
-            dbg('error requestion dynamic items', 'req', 1)
+            log.debug('error requestion dynamic items')
 
 class AddContact(Requester):
     '''make the request to add a contact to the contact list'''
@@ -439,7 +441,7 @@ class RemoveContact(Requester):
             self.session.add_event(e3.Event.EVENT_CONTACT_REMOVE_SUCCEED,
                 self.account)
         else:
-            dbg(response.body + '\n' + request.body, 'req', 4)
+            log.debug(response.body + '\n' + request.body)
             self.session.add_event(e3.Event.EVENT_CONTACT_REMOVE_FAILED,
                 self.account)
 
@@ -464,7 +466,7 @@ class RemovePendingContact(Requester):
             self.session.add_event(e3.Event.EVENT_CONTACT_REJECT_SUCCEED,
                 self.account)
         else:
-            dbg(response.body + '\n' + request.body, 'req', 4)
+            log.debug(response.body + '\n' + request.body)
             self.session.add_event(e3.Event.EVENT_CONTACT_REJECT_FAILED,
                 self.account)
 
@@ -494,7 +496,7 @@ class ChangeNick(Requester):
             self.session.logger.log('nick change', self.account.status,
                 self.nick, self.account)
         else:
-            dbg(response.body + '\n' + request.body, 'req', 4)
+            log.debug(response.body + '\n' + request.body)
             self.session.add_event(e3.Event.EVENT_NICK_CHANGE_FAILED, self.nick)
 
 class ChangeAlias(Requester):
@@ -519,7 +521,7 @@ class ChangeAlias(Requester):
             self.session.add_event(e3.Event.EVENT_CONTACT_ALIAS_SUCCEED,
                 self.account)
         else:
-            dbg(response.body + '\n' + request.body, 'req', 4)
+            log.debug(response.body + '\n' + request.body)
             self.session.add_event(e3.Event.EVENT_CONTACT_ALIAS_FAILED,
                 self.account)
 
@@ -546,7 +548,7 @@ class AddGroup(Requester):
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_SUCCEED,
                 self.name, gid)
         else:
-            dbg(response.body + '\n' + request.body, 'req', 4)
+            log.debug(response.body + '\n' + request.body)
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_FAILED, self.name)
 
 class RemoveGroup(Requester):
@@ -571,7 +573,7 @@ class RemoveGroup(Requester):
 
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_SUCCEED, self.gid)
         else:
-            dbg(response.body + '\n' + request.body, 'req', 4)
+            log.debug(response.body + '\n' + request.body)
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_FAILED, self.gid)
 
 class RenameGroup(Requester):
@@ -597,7 +599,7 @@ class RenameGroup(Requester):
             self.session.add_event(e3.Event.EVENT_GROUP_RENAME_SUCCEED,
                 self.gid, self.name)
         else:
-            dbg(response.body + '\n' + request.body, 'req', 4)
+            log.debug(response.body + '\n' + request.body)
             self.session.add_event(e3.Event.EVENT_GROUP_RENAME_FAILED,
                 self.gid, self.name)
 
@@ -626,7 +628,7 @@ class AddToGroup(Requester):
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
                 self.gid, self.cid)
         else:
-            dbg(response.body + '\n' + request.body, 'req', 4)
+            log.debug(response.body + '\n' + request.body)
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_FAILED,
                 self.gid, self.cid)
 
@@ -659,7 +661,7 @@ class RemoveFromGroup(Requester):
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED,
                 self.gid, self.cid)
         else:
-            dbg(response.body + '\n' + request.body, 'req', 4)
+            log.debug(response.body + '\n' + request.body)
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_FAILED,
                 self.gid, self.cid)
 
@@ -815,13 +817,13 @@ class SendOIM(Requester):
         self.first = first
         self.msg_queue = msg_queue
 
-        dbg('FROM:%s TO:%s' % (me.display_name, contact), 'req', 1)
+        log.debug('FROM:%s TO:%s' % (me.display_name, contact))
 
     def handle_response(self, request, response):
         '''handle the response'''
         if response.status == 200:
             #self.msg_queue.add_event(e3.Event.EVENT_OIM_SEND_SUCCEED, self.oid)
-            dbg('OIM sent ' + self.contact, 'req', 1)
+            log.debug('OIM sent ' + self.contact)
         else:
             start = '<LockKeyChallenge xmlns="http://messenger.msn.com/'\
                     'ws/2004/09/oim/">'
@@ -833,11 +835,11 @@ class SendOIM(Requester):
                 SendOIM(self.session, self.msg_queue, self.contact,
                         self.message, lockkey, self.seq+1, False).start()
             else:
-                dbg('Can\'t send OIM, fail', 'req', 1)
-                dbg(response.body, 'req', 4)
+                log.debug('Can\'t send OIM, fail')
+                log.debug(response.body)
                 self.session.add_event(e3.Event.EVENT_ERROR,
                              'to many retries sending oims')
-                dbg('to many retries sending oim', 'req', 1)
+                log.debug('to many retries sending oim')
 
 class RetriveOIM(Requester):
     '''make the request to retrive an oim'''

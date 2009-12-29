@@ -23,7 +23,8 @@ from MsnHttpSocket import MsnHttpSocket
 from XmlParser import SSoParser
 from UbxParser import UbxParser
 
-from debugger import dbg
+import logging
+log = logging.getLogger('msn.Worker')
 
 STATUS_MAP = {}
 STATUS_MAP[e3.status.BUSY] = 'BSY'
@@ -154,7 +155,7 @@ class Worker(e3.Worker):
                 if type(data) == int and data == 0:
                     self.session.add_event(e3.Event.EVENT_ERROR,
                         'Connection closed')
-                    dbg('Worker connection closed', 'worker')
+                    log.debug('Worker connection closed')
                     break
 
                 self._process(data)
@@ -175,7 +176,7 @@ class Worker(e3.Worker):
                 action = self.session.actions.get(True, 0.1)
 
                 if action.id_ == e3.Action.ACTION_QUIT:
-                    dbg('closing thread', 'worker')
+                    log.debug('closing thread')
                     self.socket.input.put('quit')
                     self.session.logger.quit()
                     self.msg_manager.quit()
@@ -194,7 +195,7 @@ class Worker(e3.Worker):
 
     def _process(self, message):
         '''process the data'''
-        dbg('<<< ' + str(message), 'worker', 2)
+        log.debug('<<< ' + str(message))
 
         if self.in_login:
             self._process_login(message)
@@ -260,7 +261,7 @@ class Worker(e3.Worker):
 
             if response:
                 data = response.read()
-                dbg(data, 'worker', 3)
+                log.debug(data)
             else:
                 self.session.add_event(e3.Event.EVENT_LOGIN_FAILED,
                  'Can\'t connect to HTTPS server: ' + str(exception))
@@ -587,7 +588,7 @@ class Worker(e3.Worker):
         contact = self.session.contacts.contacts.get(account, None)
 
         if not contact:
-            dbg('account: ' + account + 'not found on contact list', 'worker', 4)
+            log.warning('account: %s not found on contact list' % account)
             return
 
         old_status = contact.status
@@ -657,7 +658,7 @@ class Worker(e3.Worker):
 
     def _on_notification(self, message):
         '''handle a notification message'''
-        dbg('server notification: ' + message.payload, 'worker', 2)
+        log.debug('server notification: ' + message.payload)
 
     def _on_server_disconnection(self, message):
         '''handle the message that inform us that we were disconnected from
@@ -689,7 +690,7 @@ class Worker(e3.Worker):
     def _on_unknown_command(self, message):
         '''handle the unknown commands'''
         if message.command not in KNOWN_UNHANDLED_RESPONSES:
-            dbg('unknown command: ' + str(message), 'worker', 4)
+            log.warning('unknown command: ' + str(message))
 
     # action handlers
     def _handle_action_add_contact(self, account):
@@ -867,7 +868,7 @@ class Worker(e3.Worker):
             self.conversations[cid].command_queue.put('quit')
             del self.conversations[cid]
         else:
-            dbg('conversation ' + cid + ' not found', 'worker', 4)
+            log.warning('conversation %s not found' % cid)
 
     def _handle_action_conv_invite(self, cid, account):
         '''handle e3.Action.ACTION_CONV_INVITE
@@ -875,7 +876,7 @@ class Worker(e3.Worker):
         if cid in self.conversations:
             self.conversations[cid].invite(account)
         else:
-            dbg('conversation ' + cid + ' not found', 'worker', 4)
+            log.warning('conversation %s not found' % cid)
 
     def _handle_action_send_message(self, cid, message):
         '''handle e3.Action.ACTION_SEND_MESSAGE

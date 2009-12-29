@@ -9,7 +9,9 @@ from e3.msn import Requester
 import e3.base.Event
 
 from Parser import MailDataParser
-from debugger import dbg
+
+import logging
+log = logging.getLogger('msn.msgs.Manager')
 
 class Manager(threading.Thread):
     '''Offline Messages Manager'''
@@ -130,7 +132,7 @@ class Manager(threading.Thread):
             for oim in oim_list:
                 Requester.RetriveOIM(self.session, oim, self.input).start()
         else:
-            dbg('[Too Large] retriving oims from a SOAP request', 'oim', 1)
+            log.debug('[Too Large] retriving oims from a SOAP request')
             Requester.RetriveTooLarge(self.session, self.input).start()
 
     def _on_oim_request(self, oim):
@@ -142,14 +144,14 @@ class Manager(threading.Thread):
 
     def _on_unknown_msg(self, payload):
         '''handle the unknown MSG'''
-        dbg('unknown MSG: ' + str(payload['Content-Type']), 'oim', 1)
+        log.debug('unknown MSG: ' + str(payload['Content-Type']))
 
     def oims_notify(self):
         if self.waiting_requests == len(self.requested):
             self.requested.sort(key=lambda oim:oim.date)
             for oim in self.requested:
-                dbg('[OIM] ' + oim.nick + ' ' + oim.mail + ' ' + str(oim.date) + \
-                    ' ' + oim.message, 'oim', 1)
+                log.debug('[OIM] %s %s %s %s' %
+                    (oim.nick, oim.mail, oim.date, oim.message))
                 #self.put(Manager.ACTION_OIM_DELETE, oim.id)
                 self.session.add_event(e3.base.Event.EVENT_OIM_RECEIVED, oim)
             self.waiting_requests = 0

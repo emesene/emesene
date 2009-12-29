@@ -7,7 +7,8 @@ import e3
 import common
 import Command
 
-from debugger import dbg
+import logging
+log = logging.getLogger('msn.MsnHttpSocket')
 
 class MsnHttpSocket(threading.Thread):
     '''a socket that runs on a thread, it reads the data and put it on the
@@ -99,7 +100,7 @@ class MsnHttpSocket(threading.Thread):
                         command = self.input.get(True, 1.0)
 
                         if command == 'quit':
-                            dbg('closing socket thread', 'hsock', 1)
+                            log.debug('closing socket thread')
                             break
                         else:
                             input_.append(command)
@@ -108,7 +109,7 @@ class MsnHttpSocket(threading.Thread):
                     pass
 
             if input_:
-                dbg('>>> ' + '\n'.join(input_), 'hsock', 2)
+                log.debug('>>> ' + '\n'.join(input_))
                 self.send_req(''.join(input_))
                 input_ = None
                 self.timestamp = time.time()
@@ -146,11 +147,10 @@ class MsnHttpSocket(threading.Thread):
             self.parse_response_header(response.info())
             self.parse_response_body(response.read())
         except Exception, ex:
-            dbg('exception on http request', 'hsock', 1)
-            dbg(str(ex), 'hsock', 2)
+            log.exception('exception on http request')
             # retry once
             if not is_retry:
-                dbg('retrying http request', 'hsock', 1)
+                log.debug('retrying http request')
                 self.send_req(data, path, True)
 
 
