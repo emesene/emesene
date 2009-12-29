@@ -25,6 +25,7 @@ import time
 import base64
 import gobject
 import gettext
+import optparse
 
 if os.path.exists('default.mo'):
     gettext.GNUTranslations(open('default.mo')).install()
@@ -35,6 +36,7 @@ else:
 
 import gui
 import utils
+import debugger
 
 import e3
 from e3 import msn
@@ -94,6 +96,19 @@ class Controller(object):
 
         extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
+        
+        self._parse_commandline()
+    
+    def _parse_commandline(self):
+        parser = optparse.OptionParser()
+        parser.add_option("-v", "--verbose",
+                          action="store_true", dest="verbose", default=False,
+                          help="Enable debug in console")
+        options, args = parser.parse_args()
+        if options.verbose:
+            debugger.init(console=True)
+        else:
+            debugger.init()
 
     def _new_session(self):
         '''create a new session object'''
