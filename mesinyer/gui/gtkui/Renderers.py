@@ -119,6 +119,7 @@ class CellRendererFunction(gtk.GenericCellRenderer):
     def get_layout(self, widget):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
         layout = SmileyLayout(widget.create_pango_context(), self.markup)
+
         if self.markup:
             try:
                 decorated_markup = self.function(unicode(self.markup,
@@ -150,12 +151,57 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
 extension.implements(CellRendererFunction, 'nick renderer')
 
+def msnplus_to_list(txt):
+    '''parte text to a DictObj and return a list of strings and
+    gtk.gdk.Pixbufs'''
+    dct = Plus.msnplus(txt)
+    return dct.to_xml()
+    # TODO: finish this
+    #return flatten_tree(dct, [], [])
+
+def flatten_tree(dct, accum, parents):
+    '''convert the tree of markup into a list of string that contain pango
+    markup and pixbufs, if an img tag is found all the parent tags should be
+    closed before the pixbuf and reopened after.
+    example:
+        <b>hi! :D lol</b>
+        should be
+        ["<b>hi! </b>", pixbuf, "<b> lol</b>"]
+    '''
+    def open_tag(tag):
+        attrs = " ".join(attr for attr in tag.keys() if
+            attr not in ['tag', 'childs'] and tag[attr])
+
+        if attrs:
+            return '<%s %s>' % (tag.tag, attrs)
+        else:
+            return '<%s>' % (tag.tag, )
+
+    if dct.tag:
+        if dct.tag == "img":
+            closed = "".join("</%s>" % (parent.tag, ) for parent in parents[::-1])
+            opened = "".join(open_tag(parent) for parent in parents)
+            return [closed, gtk.gdk.pixbuf_new_from_file(dct.src), opened]
+        else:
+            accum += [open_tag(dct)]
+
+    for child in dct.childs:
+        if type(child) in (str, unicode):
+            accum += [child]
+        else:
+            accum += flatten_tree(child, accum, parents + [dct])
+
+    if dct.tag:
+        accum += ['</%s>' % dct.tag]
+
+    return accum
+
 class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
     def __init__(self):
         CellRendererFunction.__init__(self,
-                lambda txt: Plus.msnplus(txt).to_xml())
+                msnplus_to_list)
 
 extension.implements(CellRendererPlus, 'nick renderer')
 
@@ -174,8 +220,8 @@ class SmileyLayout(pango.Layout):
 
     def __init__(self, context,
                  parsed_elements_list = None,
-                 color = gtk.gdk.Color(),
-                 override_color = gtk.gdk.Color(),
+                 color = None,
+                 override_color = None,
                  scaling=1.0):
         pango.Layout.__init__(self, context)
 
@@ -192,8 +238,17 @@ class SmileyLayout(pango.Layout):
         self._base_attrlist = None # no color
         self._attrlist = None # with color
         self._override_attrlist = None # with override color
-        self._color = color
-        self._override_color = override_color
+
+        if color is None:
+            self._color = gtk.gdk.Color()
+        else:
+            self._color = color
+
+        if override_color is None:
+            self._override_color = gtk.gdk.Color()
+        else:
+            self._override_color = override_color
+
         self._smilies_scaled = {} # key: (index_pos), value(pixbuf)
         self._scaling = scaling # relative to ascent + desent, -1 for natural
         self._is_rtl = False
