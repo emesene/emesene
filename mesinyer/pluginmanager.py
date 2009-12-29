@@ -221,25 +221,18 @@ class PluginManager:
 
     def scan_directory(self, dir_):
         '''Find plugins and packages inside dir_'''
-        dirs = files = []
-        for root, directories, files in os.walk(dir_):
-            dirs = directories
-            files = files
-            break #sooo ugly
-
-        for directory in [x for x in dirs if not x.startswith('.')]:
+        for file in os.listdir(dir_):
+            if file.startswith("."):
+                continue
             try:
-                mod = PackageHandler(dir_, directory)
-                self._plugins[mod.name] = mod
+                if os.path.isdir(file):
+                    mod = PackageHandler(dir_, directory)
+                    self._plugins[mod.name] = mod
+                elif file.endswith(".py"):
+                    mod = PluginHandler(filename)
+                    self._plugins[mod.name] = mod
             except Exception, reason:
                 warning('Exception while importing %s:\n%s' % (directory, reason))
-
-        for filename in [x for x in files if x.endswith('.py')]:
-            try:
-                mod = PluginHandler(filename)
-                self._plugins[mod.name] = mod
-            except Exception, reason:
-                warning('Exception while importing %s:\n%s' % (filename, reason))
 
     def plugin_start(self, name):
         '''Starts a plugin.
