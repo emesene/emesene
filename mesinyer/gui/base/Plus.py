@@ -31,15 +31,17 @@ def parse_emotes(markup):
 
     return accum
 
-def _msnplus_to_dict(msnplus, message_stack):
+def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
     '''convert it into a dict, as the one used by XmlParser'''
     #STATUS: seems to work! (with gradients too)
     match = open_tag_re.match(msnplus)
 
     if not match: #only text
-        # TODO: finish this
-        #parsed_markup = parse_emotes(msnplus)
-        parsed_markup = [msnplus]
+        if do_parse_emotes:
+            parsed_markup = parse_emotes(msnplus)
+        else:
+            parsed_markup = [msnplus]
+
         message_stack.append(msnplus)
         return {'tag': 'span', 'childs': parsed_markup}
 
@@ -54,12 +56,16 @@ def _msnplus_to_dict(msnplus, message_stack):
         msgdict = {'tag': tag, tag: arg, 'childs':[]}
         message_stack.append(msgdict)
     else: #closing tags
-        # TODO parse emotes on text_before
         if arg:
             start_tag = message_stack[-1][tag]
             message_stack[-1][tag] = (start_tag, arg)
         if text_before.strip(): #just to avoid useless items (we could put it anyway, if we like)
-            message_stack[-1]['childs'].append(text_before)
+            if do_parse_emotes:
+                text_before = parse_emotes(text_before)
+                message_stack[-1]['childs'] += text_before
+            else:
+                message_stack[-1]['childs'].append(text_before)
+
         tag_we_re_closing = message_stack.pop() #-1
 
         if type(message_stack[-1]) == dict:
@@ -247,11 +253,11 @@ def _dict_translate_tags(msgdict):
         if type(child) == dict:
             _dict_translate_tags(child)
 
-def msnplus(msnplus):
+def msnplus(msnplus, do_parse_emotes=True):
     '''given a string with msn+ formatting, give a DictObj
     representing its formatting.'''
     message_stack = [{'tag':'', 'childs':[]}]
-    dictlike = _msnplus_to_dict(msnplus, message_stack)
+    dictlike = _msnplus_to_dict(msnplus, message_stack, do_parse_emotes)
     _hex_colors(dictlike)
     _dict_gradients(dictlike)
     _dict_translate_tags(dictlike)

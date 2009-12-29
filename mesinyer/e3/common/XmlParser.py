@@ -72,8 +72,8 @@ class DictObj(dict):
     def to_xml(self):
         xml = ''
         if self.tag:
-            attrs = " ".join(attr for attr in self.keys() if
-                attr not in ['tag', 'childs'] and self[attr])
+            attrs = " ".join("%s=\"%s\"" % (attr, value) for attr, value in
+                    self.iteritems() if attr not in ['tag', 'childs'] and value)
 
             if attrs:
                 xml = '<%s %s>' % (self.tag, attrs)
