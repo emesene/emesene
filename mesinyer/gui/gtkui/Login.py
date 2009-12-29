@@ -7,7 +7,9 @@ import gui
 import utils
 import extension
 import StatusButton
-from debugger import dbg
+
+import logging
+log = logging.getLogger('gtkui.Login')
 
 class Login(gtk.Alignment):
 
@@ -234,7 +236,7 @@ class Login(gtk.Alignment):
             try:
                 self.btn_status.set_status(int(self.statuses[account]))
             except ValueError:
-                dbg('invalid status', 'login', 1)
+                log.debug('invalid status')
         else:
             self.btn_status.set_status(e3.status.ONLINE)
 

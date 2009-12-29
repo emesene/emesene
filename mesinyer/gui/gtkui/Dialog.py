@@ -31,7 +31,9 @@ import stock
 import extension
 
 import ContactInformation
-from debugger import dbg
+
+import logging
+log = logging.getLogger('gtkui.Dialog')
 
 # TODO: remove this
 _ = lambda x: x
@@ -820,7 +822,7 @@ class EmotesWindow(gtk.Window):
             path = gui.theme.emote_to_path(shortcut, True)
 
             if path is None:
-                dbg(shortcut + ' has no path', 'dialog', 1)
+                log.debug(shortcut + ' has no path')
                 continue
 
             button.set_image(utils.safe_gtk_image_load(path))

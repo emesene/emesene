@@ -24,7 +24,8 @@ import e3
 import gui
 import utils
 import extension
-from debugger import dbg
+import logging
+log = logging.getLogger('gtkui.ContactList')
 
 import Renderers
 
@@ -327,7 +328,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         elif contact:
             self.contact_selected.emit(contact)
         else:
-            dbg('nothing selected?', 'contactlist', 1)
+            log.debug('nothing selected?')
 
     def _on_button_press_event(self, treeview, event):
         '''callback called when the user press a button over a row
@@ -336,7 +337,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             paths = self.get_path_at_pos(int(event.x), int(event.y))
 
             if paths is None:
-                dbg('invalid path', 'contactlist', 1)
+                log.debug('invalid path')
             elif len(paths) > 0:
                 iterator = self.model.get_iter(paths[0])
                 child_iter = self.model.convert_iter_to_child_iter(iterator)
@@ -347,7 +348,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 elif type(obj) == e3.Contact:
                     self.contact_menu_selected.emit(obj)
             else:
-                dbg('empty paths?', 'contactlist', 1)
+                log.debug('empty paths?')
 
     # overrided methods
     def refilter(self):
@@ -417,8 +418,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             obj = row[1]
             if type(obj) == e3.Group:
                 if obj.name == group.name:
-                    dbg('Trying to add an existing group! ' + obj.name,
-                        'contactlist', 1)
+                    log.debug('Trying to add an existing group! ' + obj.name)
                     return row.iter
 
         return self._model.append(None, group_data)

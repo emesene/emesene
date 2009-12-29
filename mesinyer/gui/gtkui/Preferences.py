@@ -4,7 +4,8 @@ import gui
 import utils
 import extension
 
-from debugger import dbg
+import logging
+log = logging.getLogger('gtkui.Preferences')
 
 LIST = [
     {'stock_id' : gtk.STOCK_FULLSCREEN,'text' : _('Interface')},
@@ -514,8 +515,8 @@ class Extension(BaseTable):
         ext, identifier = self.extension_list[extension_index]
         if not extension.set_default_by_id(category, identifier):
             # TODO: revert the selection to the previous selected extension
-            dbg('Could not set %s as default extension for %s' % (extension_id,
-                category), 'gtk-preferences')
+            log.warning('Could not set %s as default extension for %s' % \
+                (extension_id, category))
             return
 
         ext = extension.get_default(category)
