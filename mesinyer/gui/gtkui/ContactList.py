@@ -152,7 +152,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 pango.parse_markup(decorated_markup)
             except gobject.GError:
                 print "invalid pango markup:", decorated_markup
-                log_strange_nick(decorated_markup, 'pango parser')
                 decorated_markup = Plus.msnplus_strip(self.markup)
 
             layout.set_markup(decorated_markup)
@@ -212,8 +211,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.set_expander_column(self.exp_column)
 
         column.pack_start(self.pbr, False)
-        column.pack_start(pbr_status, False)
         column.pack_start(crt, True)
+        column.pack_start(pbr_status, False)
 
         column.add_attribute(self.pbr, 'pixbuf', 0)
         column.add_attribute(crt, 'markup', 2)
