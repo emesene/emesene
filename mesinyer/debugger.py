@@ -24,7 +24,7 @@ def dbg(text, caller=None, level=1):
     if not caller:
         caller = _build_caller()
 
-    logging.getLogger('debugger').log(level*10, text, extra={'caller':caller})
+    logging.getLogger('debugger.' + caller).log(level*10, text)
 
 
 def _log_function(level):
@@ -67,7 +67,7 @@ def init(console=False):
     root = logging.getLogger()
     if console:
         console_handler = logging.StreamHandler()
-        formatter = logging.Formatter('[%(asctime)s %(caller)s] %(message)s', '%H:%M:%S')
+        formatter = logging.Formatter('[%(asctime)s %(name)s] %(message)s', '%H:%M:%S')
         console_handler.setFormatter(formatter)
         console_handler.setLevel(logging.INFO)
         root.addHandler(console_handler)
