@@ -3,7 +3,8 @@ import gui
 import extension
 import MarkupParser
 
-from debugger import dbg
+import logging
+log = logging.getLogger('gui.base.Conversation')
 
 class Conversation(object):
     '''a widget that contains all the components inside'''
@@ -234,7 +235,7 @@ class Conversation(object):
 
             icon = gui.theme.status_icons.get(stat, e3.status.OFFLINE)
         else:
-            dbg('unknown state on Conversation._get_icon', 'conversation', 1)
+            log.debug('unknown state on Conversation._get_icon')
             return gui.theme.connect
 
         return icon
@@ -255,7 +256,7 @@ class Conversation(object):
             else:
                 text = self.members[0]
         else:
-            dbg('unknown state on Conversation._get_text', 'conversation', 1)
+            log.debug('unknown state on Conversation._get_text')
             text = '(?)'
 
         return text
