@@ -38,7 +38,8 @@ from e3.base.Event import Event
 import e3.base.Logger as Logger
 from e3.common import ConfigDir
 
-from debugger import dbg
+import logging
+log = logging.getLogger('papylib.Worker')
 
 try:
     REQ_VER = (0, 4, 3)
@@ -53,8 +54,7 @@ try:
     if ver[1] < REQ_VER[1] or ver[2] < REQ_VER[2]:
         raise PapyError
 except Exception, e:
-    print "You need python-papyon(>=%s.%s.%s) to be installed in order to use this extension" % REQ_VER
-    print e
+    log.exception("You need python-papyon(>=%s.%s.%s) to be installed in order to use this extension" % REQ_VER)
 from PapyEvents import *
 from PapyConvert import *
 
@@ -101,7 +101,7 @@ class Worker(e3.base.Worker, papyon.Client):
                 action = self.session.actions.get(True, 0.1)
 
                 if action.id_ == Action.ACTION_QUIT:
-                    dbg('closing thread', 'dworker', 1)
+                    log.debug('closing thread')
                     self.logout()
                     self.session.logger.quit()
                     break
