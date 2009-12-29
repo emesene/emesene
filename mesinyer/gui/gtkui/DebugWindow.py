@@ -4,10 +4,9 @@ import time
 import gtk
 import pango
 
-from debugger import warning,debug
-from debugger import _logger
 from debugger import queue_handler
 import logging
+_root_logger = logging.getLogger()
 
 class DebugWindow():
     '''The window containing the debug info'''
@@ -17,7 +16,7 @@ class DebugWindow():
         self.window.connect("delete_event", self.on_delete)
         self.store = DebugStore()
         self.view = DebugView(self.store)
-        _logger.addHandler(self.store)
+        _root_logger.addHandler(self.store)
         self.scroll_view = gtk.ScrolledWindow()
         self.scroll_view.add(self.view)
 
@@ -71,7 +70,7 @@ class DebugWindow():
 
     def safely_close(self):
         self.window.hide()
-        _logger.removeHandler(self.store)
+        _root_logger.removeHandler(self.store)
     def on_add(self, button, data=None):
         caller = self.test_entry.get_text()
         #self.store.append([caller, "just a test"])

@@ -24,8 +24,7 @@ def dbg(text, caller=None, level=1):
     if not caller:
         caller = _build_caller()
 
-    #old_dbg(text, module, level)
-    _logger.log(level*10, text, extra={'caller':caller})
+    logging.getLogger('debugger').log(level*10, text, extra={'caller':caller})
 
 
 def _log_function(level):
@@ -62,17 +61,21 @@ class QueueHandler(logging.Handler):
             self.queue.appendleft(record)
             yield record
 
-_logger = logging.getLogger('emesene')
-_console_handler = logging.StreamHandler()
-_formatter = logging.Formatter('[%(asctime)s %(caller)s] %(message)s', '%H:%M:%S')
-_console_handler.setFormatter(_formatter)
-_console_handler.setLevel(logging.INFO)
-#_logger.addHandler(_console_handler)
+queue_handler = None
 
-queue_handler = QueueHandler()
-queue_handler.setLevel(logging.DEBUG)
-_logger.addHandler(queue_handler)
-
-_logger.setLevel(logging.DEBUG)
+def init(console=False):
+    root = logging.getLogger()
+    if console:
+        console_handler = logging.StreamHandler()
+        formatter = logging.Formatter('[%(asctime)s %(caller)s] %(message)s', '%H:%M:%S')
+        console_handler.setFormatter(formatter)
+        console_handler.setLevel(logging.INFO)
+        root.addHandler(console_handler)
+    
+    global queue_handler
+    queue_handler = QueueHandler()
+    queue_handler.setLevel(logging.DEBUG)
+    root.addHandler(queue_handler)
+    root.setLevel(logging.DEBUG)
 
 
