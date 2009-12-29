@@ -16,8 +16,7 @@ COLOR_MAP = (
 
 
 open_tag_re = re.compile('''(.*?)\[(/?)(\w)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
-message_stack = [{'tag':'', 'childs':[]}]
-def _msnplus_to_dict(msnplus):
+def _msnplus_to_dict(msnplus, message_stack):
     '''convert it into a dict, as the one used by XmlParser'''
     #STATUS: seems to work! (with gradients too)
     match = open_tag_re.match(msnplus)
@@ -50,7 +49,7 @@ def _msnplus_to_dict(msnplus):
             message_stack.append(tag_we_re_closing)
 
     #go recursive!
-    _msnplus_to_dict(msnplus[len(match.group(0)):])
+    _msnplus_to_dict(msnplus[len(match.group(0)):], message_stack)
 
     return {'tag': 'span', 'childs': message_stack}
 
@@ -230,12 +229,11 @@ def _dict_translate_tags(msgdict):
 def msnplus(msnplus):
     '''given a string with msn+ formatting, give a DictObj
     representing its formatting.'''
-    global message_stack
-    dictlike = _msnplus_to_dict(msnplus)
+    message_stack = [{'tag':'', 'childs':[]}]
+    dictlike = _msnplus_to_dict(msnplus, message_stack)
     _hex_colors(dictlike)
     _dict_gradients(dictlike)
     _dict_translate_tags(dictlike)
-    message_stack = [{'tag':'', 'childs':[]}]
     return DictObj(dictlike)
 
 def msnplus_strip(msnplus):

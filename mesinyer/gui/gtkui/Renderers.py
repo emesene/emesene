@@ -174,8 +174,8 @@ class SmileyLayout(pango.Layout):
 
     def __init__(self, context,
                  parsed_elements_list = None,
-                 color = gtk.gdk.Color(),
-                 override_color = gtk.gdk.Color(),
+                 color = None,
+                 override_color = None,
                  scaling=1.0):
         pango.Layout.__init__(self, context)
 
@@ -192,8 +192,17 @@ class SmileyLayout(pango.Layout):
         self._base_attrlist = None # no color
         self._attrlist = None # with color
         self._override_attrlist = None # with override color
-        self._color = color
-        self._override_color = override_color
+
+        if color is None:
+            self._color = gtk.gdk.Color()
+        else:
+            self._color = color
+
+        if override_color is None:
+            self._override_color = gtk.gdk.Color()
+        else:
+            self._override_color = override_color
+
         self._smilies_scaled = {} # key: (index_pos), value(pixbuf)
         self._scaling = scaling # relative to ascent + desent, -1 for natural
         self._is_rtl = False
