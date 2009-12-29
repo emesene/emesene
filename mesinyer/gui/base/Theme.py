@@ -1,4 +1,5 @@
 import os
+import re
 
 from e3 import status
 
@@ -89,6 +90,9 @@ class Theme(object):
     EMOTES[':-['] = 'bat'
     EMOTES['(w)'] = 'rose-dead'
     EMOTES['(xx)'] = 'console'
+
+    EMOTE_REGEX_STR = "|".join("(%s)" % (re.escape(key), ) for key in EMOTES)
+    EMOTE_REGEX = re.compile(EMOTE_REGEX_STR)
 
     SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
             'send.wav', 'type.wav']
@@ -234,3 +238,14 @@ class Theme(object):
             return os.walk(dir_path).next()[1]
         except StopIteration:
             return ()
+
+    def split_smilies(self, text):
+        '''split text in smilies, return a list of tuples that contain
+        a boolean as first item indicating if the text is an emote or not
+        and the text as second item.
+        example : [(False, "hi! "), (True, ":)")]
+        '''
+        keys = Theme.EMOTES.keys()
+        return [(item in keys, item) for item in Theme.EMOTE_REGEX.split(text)
+                if item is not None]
+
