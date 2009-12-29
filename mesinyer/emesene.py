@@ -27,6 +27,11 @@ import gobject
 import gettext
 import optparse
 
+# fix for gstreamer --help
+argv = sys.argv
+sys.argv = [argv[0]]
+
+# load translations
 if os.path.exists('default.mo'):
     gettext.GNUTranslations(open('default.mo')).install()
 elif os.path.exists('po/'):
@@ -72,6 +77,7 @@ class Controller(object):
             self.config.d_accounts = {}
 
         self.session = None
+        self._parse_commandline()
         self._setup()
 
     def _setup(self):
@@ -96,15 +102,13 @@ class Controller(object):
 
         extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
-        
-        self._parse_commandline()
     
     def _parse_commandline(self):
         parser = optparse.OptionParser()
         parser.add_option("-v", "--verbose",
                           action="store_true", dest="verbose", default=False,
                           help="Enable debug in console")
-        options, args = parser.parse_args()
+        options, args = parser.parse_args(argv)
         if options.verbose:
             debugger.init(console=True)
         else:
