@@ -1,6 +1,7 @@
 import gtk
 import base64
 import gobject
+import locale
 
 import e3
 import gui
@@ -93,14 +94,11 @@ class Login(gtk.Alignment):
         vbox_remember.pack_start(self.throbber)
         vbox_remember.pack_start(self.remember_account)
         vbox_remember.pack_start(self.remember_password)
-        try:
-            import locale
-            link = "http://status.messenger.msn.com/Status.aspx?mkt="
-            link += locale.getlocale()[0].replace('_','-')
-            serverStatus = gtk.LinkButton(link,_('Service Status'))
-            vbox_remember.pack_start(serverStatus)
-        except:
-            pass
+        import locale
+        link = "http://status.messenger.msn.com/Status.aspx?mkt="
+        link += locale.getlocale()[0].replace('_','-')
+        serverStatus = gtk.LinkButton(link,_('Service Status'))
+        vbox_remember.pack_start(serverStatus)
 
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
