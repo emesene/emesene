@@ -33,8 +33,7 @@ class MainWindow(gtk.VBox):
 
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
-        # TODO: until someone adds ellipsize to the renderers
-        scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
         scroll.set_border_width(1)
         self.on_new_conversation = on_new_conversation

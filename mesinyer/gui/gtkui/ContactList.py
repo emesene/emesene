@@ -26,14 +26,7 @@ import utils
 import extension
 from debugger import dbg
 
-from gui.base import Plus
-import RichBuffer
-
-class GtkCellRenderer(gtk.CellRendererText):
-    def __init__(self):
-        gtk.CellRendererText.__init__(self)
-
-extension.implements(GtkCellRenderer, 'nick renderer')
+import Renderers
 
 class CellRendererFunction(gtk.GenericCellRenderer):
     '''
@@ -159,7 +152,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 pango.parse_markup(decorated_markup)
             except gobject.GError:
                 print "invalid pango markup:", decorated_markup
-                log_strange_nick(decorated_markup, 'pango parser')
                 decorated_markup = Plus.msnplus_strip(self.markup)
 
             layout.set_markup(decorated_markup)
@@ -167,26 +159,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
             layout.set_text('')
 
         return layout
-
-extension.implements(CellRendererFunction, 'nick renderer')
-
-class CellRendererPlus(CellRendererFunction):
-    '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
-    effects'''
-    def __init__(self):
-        CellRendererFunction.__init__(self, lambda txt: Plus.msnplus(txt).to_xml())
-
-extension.implements(CellRendererPlus, 'nick renderer')
-
-class CellRendererNoPlus(CellRendererFunction):
-    '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
-    but improving the readability'''
-    def __init__(self):
-        CellRendererFunction.__init__(self, Plus.msnplus_strip)
-
-extension.implements(CellRendererNoPlus, 'nick renderer')
-
-gobject.type_register(CellRendererPlus)
 
 class ContactList(gui.ContactList, gtk.TreeView):
     '''a gtk implementation of gui.ContactList'''
@@ -239,8 +211,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.set_expander_column(self.exp_column)
 
         column.pack_start(self.pbr, False)
-        column.pack_start(pbr_status, False)
         column.pack_start(crt, True)
+        column.pack_start(pbr_status, False)
 
         column.add_attribute(self.pbr, 'pixbuf', 0)
         column.add_attribute(crt, 'markup', 2)
