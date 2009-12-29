@@ -4,79 +4,12 @@ import sys
 
 from debugger import warning, info
 
-class PluginHandler:
-    '''Abstraction over a plugin.
-
-    Given a filename, will import it and allows to control it.
-
-    '''
-    def __init__(self, filename):
-        '''constructor'''
-        self.name = filename.split('.')[0] #TODO basename
-        self.module = None
-        self._instance = None
-        self._do_import()
-
-    def _do_import(self):
-        '''Does the dirty stuff with __import__'''
-        old_syspath = sys.path[:]
-        try:
-            sys.path += [os.curdir, 'plugins']
-            self.module = __import__(self.name, globals(), locals(), ['plugin'])
-        except ImportError, reason:
-            warning('error loading "%s": %s' % (self.name, reason))
-        finally:
-            sys.path = old_syspath
-
-    def instantiate(self):
-        '''Instantiate (if not already done).
-
-        You shouldn't need this, but you can use it for performance tweak.
-
-        '''
-        if self._instance:
-            return self._instance
-        try:
-            self._instance = self.module.Plugin()
-        except Exception:
-            self._instance = None
-
-        return self._instance
-
-    def start(self):
-        '''Instantiate (if necessary) and starts the plugin.
-        @return False if something goes wrong, else True.
-        '''
-        self.instantiate()
-        if not self._instance:
-            return False
-        try:
-            self._instance.start()
-            self._instance.started = True
-        except Exception, reason:
-            warning('error starting "%s": %s' % (self.name, reason))
-            return False
-        return True
-
-    def stop(self):
-        '''Stop the plugin, of course'''
-        if self._instance and self.is_active():
-            self._instance.stop()
-            self._instance.started = False
-
-    def is_active(self):
-        '''@return True if an instance exist and is started. False otherwise'''
-        if not self._instance:
-            return False
-        return self._instance.is_active()
-
-
 class PackageResource:
     '''Handle various files that could be put in tha package'''
     def __init__(self, base_dir, directory):
-        self.path = directory #'''Path to the package'''
+        self.path = directory  # Path to the package
         self.base_path = base_dir
-        self._resources = [] #Ope ned resources
+        self._resources = [] # Opened resources
 
     def get_resource_path(self, relative_path):
         '''get the path to the required resource.
@@ -132,35 +65,39 @@ class PackageResource:
 
     def close(self):
         '''everything. to be called when the plugin is stopped'''
-        for resource in self._resources:
-            self._resources.remove(resource) #TODO: check if this is buggy
-            resource.close()
+        while self._resources:
+            self._resources.pop().close()
 
 
-class PackageHandler:
+class PluginHandler:
     '''Abstraction over a plugin.
 
     Given a directory, will import the plugin.py file inside it and allows to control it.
     It will provide the plugin several utilities to work on the package
 
     '''
-    def __init__(self, base_dir, directory):
+    def __init__(self, base_dir, name, is_package=False):
         '''@param directory The directory containing the package'''
-        self.name = directory
-        self.directory = directory
+        self.name = os.path.basename(name.rstrip("/"))
+        if not is_package:
+            self.name = self.name.split(".")[0]
+        
         self.base_dir = base_dir
-        self._instance = None #we are not instancing it
+        self._instance = None
+
+        self.has_resources = is_package
 
         self.module = None
         self._do_import()
 
     def _do_import(self):
         '''Does the dirty stuff with __import__'''
-        old_syspath = sys.path
+        old_syspath = sys.path[:]
         try:
             sys.path += ['.', self.base_dir]
-            self.module = __import__(self.directory, globals(), None, ['plugin'])
-            self.module = self.module.plugin
+            self.module = __import__(self.name, globals(), None, ['plugin'])
+            if hasattr(self.module, 'plugin'):
+                self.module = self.module.plugin
         except Exception, reason:
             warning('error importing "%s": %s' % (self.name, reason))
             self.module = None
@@ -168,9 +105,7 @@ class PackageHandler:
             sys.path = old_syspath
 
     def instanciate(self):
-        '''Instanciate (if not already done).
-        You shouldn't need this, but you can use it for performance tweak.
-        '''
+        '''Instanciate (if not already done).'''
         if self._instance is not None:
             return self._instance
         try:
@@ -178,7 +113,9 @@ class PackageHandler:
         except Exception:
             self._instance = None
         else:
-            self._instance.resource = PackageResource(self.base_dir, self.directory)
+            if self.has_resources:
+                self._instance.resource = \
+                    PackageResource(self.base_dir, self.name)
         return self._instance
 
     def start(self):
@@ -202,7 +139,8 @@ class PackageHandler:
         '''If active, stop the plugin'''
         if self.is_active():
             self._instance.stop()
-            self._instance.resource.close()
+            if self.has_resources:
+                self._instance.resource.close()
             self._instance._started = False
 
     def is_active(self):
@@ -220,17 +158,16 @@ class PluginManager:
     def scan_directory(self, dir_):
         '''Find plugins and packages inside dir_'''
         for file in os.listdir(dir_):
-            if file.startswith("."):
+            path = os.path.join(dir_, file)
+            if file.startswith(".") or \
+               not (os.path.isdir(path) or file.endswith('.py')):
                 continue
+
             try:
-                if os.path.isdir(file):
-                    mod = PackageHandler(dir_, directory)
-                    self._plugins[mod.name] = mod
-                elif file.endswith(".py"):
-                    mod = PluginHandler(filename)
-                    self._plugins[mod.name] = mod
+                mod = PluginHandler(dir_, file, os.path.isdir(file))
+                self._plugins[mod.name] = mod
             except Exception, reason:
-                warning('Exception while importing %s:\n%s' % (directory, reason))
+                warning('Exception while importing %s:\n%s' % (file, reason))
 
     def plugin_start(self, name):
         '''Starts a plugin.
