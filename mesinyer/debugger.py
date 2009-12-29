@@ -43,8 +43,12 @@ class QueueHandler(logging.Handler):
     This is useful when you want to know (i.e. in case of errors) the last
     debug messages.
     '''
+    
+    instance = None
+
     def __init__(self, maxlen=50):
         logging.Handler.__init__(self)
+        self.setLevel(logging.DEBUG)
         self.maxlen = maxlen
         self.queue = deque()
 
@@ -61,7 +65,11 @@ class QueueHandler(logging.Handler):
             self.queue.appendleft(record)
             yield record
 
-queue_handler = None
+    @classmethod
+    def get(cls):
+        if cls.instance is None:
+            cls.instance = cls()
+        return cls.instance 
 
 def init(console=False):
     root = logging.getLogger()
@@ -72,10 +80,7 @@ def init(console=False):
         console_handler.setLevel(logging.INFO)
         root.addHandler(console_handler)
     
-    global queue_handler
-    queue_handler = QueueHandler()
-    queue_handler.setLevel(logging.DEBUG)
-    root.addHandler(queue_handler)
+    root.addHandler(QueueHandler.get())
     root.setLevel(logging.DEBUG)
 
 

@@ -4,7 +4,7 @@ import time
 import gtk
 import pango
 
-from debugger import queue_handler
+import debugger
 import logging
 _root_logger = logging.getLogger()
 
@@ -140,6 +140,7 @@ class DebugStore( gtk.ListStore, logging.Handler ):
         logging.Handler.__init__(self)
         self.custom_filter = self.filter_new()
         
+        queue_handler = debug.QueueHandler.get()
         for message in queue_handler.get_all():
             self.on_message_added(message)
         #for message in _logger.get_all():
