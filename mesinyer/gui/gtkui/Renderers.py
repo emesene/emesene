@@ -118,12 +118,14 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
     def get_layout(self, widget):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
-        layout = SmileyLayout(widget.create_pango_context(), self.markup)
+        layout = SmileyLayout(widget.create_pango_context(),
+                self.function(unicode(self.markup,
+                    'utf-8')))
 
         if self.markup:
             try:
                 decorated_markup = self.function(unicode(self.markup,
-                    'utf-8')).encode('utf-8')
+                    'utf-8'))
             except Exception, error:
                 print "this nick: '%s' made the parser go crazy, striping" % \
                         (self.markup,)
@@ -132,7 +134,8 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 decorated_markup = Plus.msnplus_strip(self.markup)
 
             try:
-                pango.parse_markup(decorated_markup)
+                pango.parse_markup(self.function(unicode(self.markup,
+                    'utf-8'), False))
             except gobject.GError:
                 print "invalid pango markup:", decorated_markup
                 decorated_markup = Plus.msnplus_strip(self.markup)
@@ -151,13 +154,47 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
 extension.implements(CellRendererFunction, 'nick renderer')
 
-def msnplus_to_list(txt):
+def balance_spans(text):
+        ''' balance the spans in the chunks of text between images
+         this can happen when the template for the text shown on
+         the contact list (the one you can edit on preferences)
+         gets splited by an image
+        '''
+        opens = text.count("<span")
+        closes = text.count("</span")
+        difference = abs(opens - closes)
+
+        if opens > closes:
+            text += "</span>" * difference
+        elif opens < closes:
+            text = ("<span>" * difference) + text
+
+        return text
+
+def msnplus_to_list(txt, do_parse_emotes=True):
     '''parte text to a DictObj and return a list of strings and
     gtk.gdk.Pixbufs'''
-    dct = Plus.msnplus(txt)
-    return dct.to_xml()
-    # TODO: finish this
-    #return flatten_tree(dct, [], [])
+    dct = Plus.msnplus(txt, do_parse_emotes)
+
+    if not do_parse_emotes:
+        return dct.to_xml()
+
+    items = flatten_tree(dct, [], [])
+
+    temp = []
+    accum = []
+    for item in items:
+        if type(item) in (str, unicode):
+            temp.append(item)
+        else:
+            text = balance_spans("".join(temp))
+            accum.append(text)
+            accum.append(item)
+            temp = []
+
+    accum.append(balance_spans("".join(temp)))
+
+    return accum
 
 def flatten_tree(dct, accum, parents):
     '''convert the tree of markup into a list of string that contain pango
@@ -169,8 +206,8 @@ def flatten_tree(dct, accum, parents):
         ["<b>hi! </b>", pixbuf, "<b> lol</b>"]
     '''
     def open_tag(tag):
-        attrs = " ".join(attr for attr in tag.keys() if
-            attr not in ['tag', 'childs'] and tag[attr])
+        attrs = " ".join("%s=\"%s\"" % (attr, value) for attr, value in
+                tag.iteritems() if attr not in ['tag', 'childs'] and value)
 
         if attrs:
             return '<%s %s>' % (tag.tag, attrs)
@@ -180,16 +217,19 @@ def flatten_tree(dct, accum, parents):
     if dct.tag:
         if dct.tag == "img":
             closed = "".join("</%s>" % (parent.tag, ) for parent in parents[::-1])
-            opened = "".join(open_tag(parent) for parent in parents)
-            return [closed, gtk.gdk.pixbuf_new_from_file(dct.src), opened]
+            opened = "".join(open_tag(parent) for parent in parents if parent)
+            accum += [closed, gtk.gdk.pixbuf_new_from_file(dct.src), opened]
+            return accum
         else:
             accum += [open_tag(dct)]
 
     for child in dct.childs:
         if type(child) in (str, unicode):
             accum += [child]
+        elif dct.tag:
+            flatten_tree(child, accum, parents + [dct])
         else:
-            accum += flatten_tree(child, accum, parents + [dct])
+            flatten_tree(child, accum, parents)
 
     if dct.tag:
         accum += ['</%s>' % dct.tag]
@@ -327,9 +367,9 @@ class SmileyLayout(pango.Layout):
         for element in elements_list:
             if type(element) in (str, unicode):
                 try:
-                    attrl, ptxt, unused = pango.parse_markup(str(element), u'\x00')
+                    attrl, ptxt, unused = pango.parse_markup(element, u'\x00')
                 except:
-                    attrl, ptxt = pango.AttrList(), str(element)
+                    attrl, ptxt = pango.AttrList(), element
 
                 #append attribute list
                 shift = len(text)
@@ -345,8 +385,6 @@ class SmileyLayout(pango.Layout):
                         break
 
                 text += ptxt
-            # TODO: here if was "== Smiley" wich is not defined
-            # should be fixed
             elif type(element) == gtk.gdk.Pixbuf:
                 self._smilies[len(text)] = element
                 text += '_'
@@ -532,5 +570,6 @@ class SmileyLayout(pango.Layout):
                 ty = pxls(y) + (pxls(height)/2) - (pixbuf.get_height()/2)
                 ctx.set_source_pixbuf(pixbuf, tx, ty)
                 ctx.paint()
-            except:
-                pass
+            except Exception, error:
+                print error
+
