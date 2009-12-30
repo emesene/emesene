@@ -121,7 +121,7 @@ class MediaSessionHandler(MediaSessionEventInterface):
         win_send = gtk.Window()
         win_send.set_double_buffered(False)
         win_send.set_app_paintable(True)
-        win_send.set_title(_("webcaam"));
+        win_send.set_title("webcaam");
         win_send.add(daarea)
         win_send.show_all()
         win_send.resize(320, 240)
