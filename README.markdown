@@ -6,6 +6,6 @@ Status: alpha. Works, but doesn't do everything you'd expect. No API stability a
 
 ## Useful links
 
-* Central repo: http://github.com/emesene/emesene
-* Wiki: http://wiki.github.com/emesene/emesene
-* Tracker: http://github.com/emesene/emesene/issues
+* [Central repo](http://github.com/emesene/emesene) (fork this one)
+* [Wiki](http://wiki.github.com/emesene/emesene)
+* [Tracker](http://github.com/emesene/emesene/issues)
