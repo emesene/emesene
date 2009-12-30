@@ -69,24 +69,29 @@ class DictObj(dict):
         except:
             return None
 
-
     def to_xml(self):
         xml = ''
         if self.tag:
-            xml = '<%s' % self.tag
-            attrs = [attr for attr in self.keys() if attr not in ['tag', 'childs']]
-            for attr in attrs:
-                if self[attr]:
-                    xml += ' %s="%s"' % (attr, self[attr])
-            xml += '>'
+            attrs = " ".join("%s=\"%s\"" % (attr, value) for attr, value in
+                    self.iteritems() if attr not in ['tag', 'childs'] and value)
+
+            if attrs:
+                xml = '<%s %s>' % (self.tag, attrs)
+            else:
+                xml = '<%s>' % (self.tag, )
+
+        childs = []
         for child in self.childs:
             if type(child) in (str, unicode):
-                xml+=child
+                childs.append(child)
             else:
-                xml+=child.to_xml()
+                childs.append(child.to_xml())
+
+        xml += "".join(childs)
 
         if self.tag:
             xml += '</%s>' % self.tag
+
         return xml
 
 

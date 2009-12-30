@@ -1,3 +1,4 @@
+'''main module of emesene, does the startup and related stuff'''
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -35,8 +36,6 @@ elif os.path.exists('po/'):
 else:
     gettext.install('emesene')
 
-from debugger import warning
-
 import gui
 import utils
 
@@ -46,7 +45,7 @@ from e3 import jabber
 from e3 import dummy
 try:
     from e3 import papylib
-except ImportError:
+except (ImportError, AttributeError):
     papylib = None
     print 'papyon lib not available, extension disabled'
 except Exception, exc:
@@ -83,7 +82,8 @@ class Controller(object):
     def _setup(self):
         '''register core extensions'''
         extension.category_register('sound', e3.common.play_sound.play)
-        extension.category_register('notification', e3.common.notification.notify)
+        extension.category_register('notification',
+                e3.common.notification.notify)
         extension.category_register('history exporter',
                 e3.Logger.save_logs_as_txt)
 
@@ -93,7 +93,7 @@ class Controller(object):
         else:
             default_id = self.config.session
 
-        #extension.set_default('session', dummy.Session)
+        extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
 
     def _new_session(self):
@@ -104,6 +104,7 @@ class Controller(object):
 
         self.session = extension.get_and_instantiate('session')
 
+        # if you add a signal here, add it on _remove_subscriptions
         signals = self.session.signals
         signals.login_succeed.subscribe(self.on_login_succeed)
         signals.login_failed.subscribe(self.on_login_failed)
@@ -138,7 +139,8 @@ class Controller(object):
         and set them as default on the extensions module'''
 
         if self.session.config.d_extensions is not None:
-            for cat_name, ext_id in self.session.config.d_extensions.iteritems():
+            for cat_name, ext_id in self.session.config\
+                    .d_extensions.iteritems():
                 extension.set_default_by_id(cat_name, ext_id)
 
     def _get_proxy_settings(self):
@@ -177,14 +179,14 @@ class Controller(object):
         self.close_session(False)
         self.start()
 
-    def close_session(self, exit=True):
+    def close_session(self, do_exit=True):
+        '''close session'''
         if self.session is not None:
             self.session.quit()
 
         self.save_extensions_config()
 
         if self.session is not None:
-            self._save_main_dimensions()
             self.session.save_config()
             self.session = None
         else:
@@ -199,7 +201,7 @@ class Controller(object):
         self.window.hide()
         self.window = None
 
-        if exit:
+        if do_exit:
             while gtk.events_pending():
                 gtk.main_iteration(False)
 
@@ -215,16 +217,6 @@ class Controller(object):
         self.config.i_login_posy = posy
         self.config.i_login_width = width
         self.config.i_login_height = height
-
-    def _save_main_dimensions(self):
-        '''save the dimensions of the main window
-        '''
-        width, height, posx, posy = self.window.get_dimensions()
-
-        self.session.config.i_main_width = width
-        self.session.config.i_main_height = height
-        self.session.config.i_main_posx = posx
-        self.session.config.i_main_posy = posy
 
     def on_login_succeed(self):
         '''callback called on login succeed'''
@@ -246,14 +238,8 @@ class Controller(object):
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
 
-        posx = self.session.config.get_or_set('i_main_posx', 100)
-        posy = self.session.config.get_or_set('i_main_posy', 100)
-        width = self.session.config.get_or_set('i_main_width', 250)
-        height = self.session.config.get_or_set('i_main_height', 410)
-
         self.window.go_main(self.session,
                 self.on_new_conversation, self.on_close, self.on_disconnect)
-        self.window.set_location(width, height, posx, posy)
 
     def on_login_failed(self, reason):
         '''callback called on login failed'''
@@ -404,7 +390,8 @@ class Controller(object):
 
     def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''
-        width, height, posx, posy = self.conversations.get_parent().get_dimensions()
+        width, height, posx, posy = \
+                self.conversations.get_parent().get_dimensions()
         self.session.config.i_conv_width = width
         self.session.config.i_conv_height = height
         self.session.config.i_conv_posx = posx
@@ -414,6 +401,7 @@ class Controller(object):
         self.conversations = None
 
     def start(self, account=None, accounts=None):
+        '''the entry point to the class'''
         Window = extension.get_default('window frame')
         self.window = Window(None) # main window
 
@@ -424,16 +412,6 @@ class Controller(object):
         handler = gui.base.TrayIconHandler(self.session, gui.theme,
             self.on_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler, self.window)
-
-        #self.external_api = []
-        #for ext in extension.get_extensions('external api').values():
-        #    try:
-        #        inst = ext()
-        #    except Exception, description: #on error, just discard it
-        #        warning("errors occured when instancing %s: '%s'" % (str(ext), str(description)))
-        #    else:
-        #        self.external_api.append(inst)
-
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
@@ -488,7 +466,6 @@ class PluggableOptionParser(object):
 
     def read_options(self):
         (options, args) = self.parser.parse_args()
-
 def main():
     """
     the main method of emesene
@@ -501,7 +478,7 @@ def main():
     options.read_options()
     main_method = extension.get_default('main')
     main_method(Controller)
- 
+
 if __name__ == "__main__":
     main()
- 
+

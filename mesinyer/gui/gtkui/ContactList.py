@@ -26,10 +26,8 @@ import utils
 import extension
 from debugger import dbg
 
-from gui.base import Plus
-import RichBuffer
+import Renderers
 
-@extension.implements('nick renderer')
 class CellRendererFunction(gtk.GenericCellRenderer):
     '''
     CellRenderer that behaves like a label, but apply a function to "markup"
@@ -41,6 +39,11 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 "text",
                 "text we'll display (even with plus markup!)",
                 '', #default value
+                gobject.PARAM_READWRITE),
+            'ellipsize': (gobject.TYPE_BOOLEAN,
+                "",
+                "",
+                False, #default value
                 gobject.PARAM_READWRITE)
             }
 
@@ -149,7 +152,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 pango.parse_markup(decorated_markup)
             except gobject.GError:
                 print "invalid pango markup:", decorated_markup
-                log_strange_nick(decorated_markup, 'pango parser')
                 decorated_markup = Plus.msnplus_strip(self.markup)
 
             layout.set_markup(decorated_markup)
@@ -158,25 +160,8 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
         return layout
 
-@extension.implements('nick renderer')
-class CellRendererPlus(CellRendererFunction):
-    '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
-    effects'''
     NAME = 'Plus'
-    def __init__(self):
-        CellRendererFunction.__init__(self, lambda txt: Plus.msnplus(txt).to_xml())
-
-@extension.implements('nick renderer')
-class CellRendererNoPlus(CellRendererFunction):
     NAME = 'AntiPlus'
-    '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
-    but improving the readability'''
-    def __init__(self):
-        CellRendererFunction.__init__(self, Plus.msnplus_strip)
-
-
-gobject.type_register(CellRendererPlus)
-
 class ContactList(gui.ContactList, gtk.TreeView):
     '''a gtk implementation of gui.ContactList'''
     NAME = 'Contact List'
@@ -214,7 +199,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.set_model(self.model)
 
         crt = extension.get_and_instantiate('nick renderer')
-        #crt.set_property('ellipsize', pango.ELLIPSIZE_END)
+        crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr_status = gtk.CellRendererPixbuf()
 
         column = gtk.TreeViewColumn()

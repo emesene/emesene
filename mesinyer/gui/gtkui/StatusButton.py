@@ -36,7 +36,6 @@ class StatusButton(gtk.Button):
         self.menu.show_all()
         self.connect('clicked', self._on_clicked)
 
-
     def _on_clicked(self, button):
         '''callback called when the button is clicked'''
         self.menu.popup(None, None, None, 0, 0)
@@ -61,7 +60,7 @@ class StatusButton(gtk.Button):
         if stat not in e3.status.ALL or stat == current_status:
             return
 
+        self.status = stat
         if self.session:
-            self.status = stat
             self.session.set_status(stat)
 

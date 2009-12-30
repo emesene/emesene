@@ -46,59 +46,16 @@ def dbg(text, caller=None, level=1):
     #old_dbg(text, module, level)
     _logger.log(level*10, text, extra={'caller':caller})
 
-def log(text, caller=None):
-    '''
-    log something through our mighty debugger
-    '''
-    if not caller:
-        caller = _build_caller()
-    _logger.log(level, text, extra={'caller':caller})
 
+def _log_function(level):
+    '''Returns a function that calls dbg with a specific level'''
+    return lambda text, caller=None: dbg(text, caller, level / 10)
 
-def debug(text, caller=None):
-    '''
-    log something through our mighty debugger
-    '''
-    if not caller:
-        caller = _build_caller()
-    _logger.debug(text, extra={'caller':caller})
-
-
-def info(text, caller=None):
-    '''
-    log something through our mighty debugger
-    '''
-    if not caller:
-        caller = _build_caller()
-    _logger.info(text, extra={'caller':caller})
-
-
-def warning(text, caller=None):
-    '''
-    log something through our mighty debugger
-    '''
-    if not caller:
-        caller = _build_caller()
-    _logger.warning(text, extra={'caller':caller})
-
-
-def error(text, caller=None):
-    '''
-    log something through our mighty debugger
-    '''
-    if not caller:
-        caller = _build_caller()
-    _logger.error(text, extra={'caller':caller})
-
-
-def critical(text, caller):
-    '''
-    log something through our mighty debugger
-    '''
-    if not caller:
-        caller = _build_caller()
-    _logger.critical(text, extra={'caller':caller})
-
+log = debug = _log_function(logging.DEBUG)
+info = _log_function(logging.INFO)
+warning = _log_function(logging.WARNING)
+error = _log_function(logging.ERROR)
+critical = _log_function(logging.CRITICAL)
 
 class QueueHandler(logging.Handler):
     '''
@@ -108,10 +65,14 @@ class QueueHandler(logging.Handler):
     '''
     def __init__(self, maxlen=50):
         logging.Handler.__init__(self)
-        self.queue = deque(maxlen=maxlen)
+        self.maxlen = maxlen
+        self.queue = deque()
 
     def emit(self, record):
         self.queue.append(record)
+
+        if len(self.queue) > self.maxlen:
+            self.queue.popleft()
 
     def get_all(self):
         l = len(self.queue)

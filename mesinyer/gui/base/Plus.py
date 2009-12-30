@@ -3,6 +3,8 @@ import pprint
 
 from e3.common.XmlParser import DictObj
 
+import gui
+
 COLOR_MAP = (
     'ffffff','000000','00007F','009300','FF0000','7F0000','9C009C','FC7F00',
     'FFFF00','00FC00','009393','00FFFF','0000FC','FF00FF','7F7F7F','D2D2D2',
@@ -14,17 +16,34 @@ COLOR_MAP = (
     '980299','01038C','01885F','389600','9A9E15','473400','4D0000','5F0162',
     '000047','06502F','1C5300','544D05')
 
-
 open_tag_re = re.compile('''(.*?)\[(/?)(\w)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
-message_stack = [{'tag':'', 'childs':[]}]
-def _msnplus_to_dict(msnplus):
+
+def parse_emotes(markup):
+    '''search for emotes on markup and return a list of items with chunks of
+    test and Emote instances'''
+    accum = []
+    for is_emote, text in gui.theme.split_smilies(markup):
+        if is_emote:
+            accum.append({'tag': 'img', 'src':
+                gui.theme.emote_to_path(text, True), 'alt': text, 'childs': []})
+        else:
+            accum.append(text)
+
+    return accum
+
+def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
     '''convert it into a dict, as the one used by XmlParser'''
     #STATUS: seems to work! (with gradients too)
     match = open_tag_re.match(msnplus)
 
     if not match: #only text
+        if do_parse_emotes:
+            parsed_markup = parse_emotes(msnplus)
+        else:
+            parsed_markup = [msnplus]
+
         message_stack.append(msnplus)
-        return {'tag':'span', 'childs':[msnplus]}
+        return {'tag': 'span', 'childs': parsed_markup}
 
     text_before = match.group(1)
     open_ = (match.group(2) == '') #and not '/'
@@ -34,14 +53,19 @@ def _msnplus_to_dict(msnplus):
         if text_before.strip(): #just to avoid useless items (we could put it anyway, if we like)
             message_stack[-1]['childs'].append(text_before)
 
-        msgdict = {'tag': tag, tag:arg, 'childs':[]}
+        msgdict = {'tag': tag, tag: arg, 'childs':[]}
         message_stack.append(msgdict)
     else: #closing tags
         if arg:
             start_tag = message_stack[-1][tag]
             message_stack[-1][tag] = (start_tag, arg)
         if text_before.strip(): #just to avoid useless items (we could put it anyway, if we like)
-            message_stack[-1]['childs'].append(text_before)
+            if do_parse_emotes:
+                text_before = parse_emotes(text_before)
+                message_stack[-1]['childs'] += text_before
+            else:
+                message_stack[-1]['childs'].append(text_before)
+
         tag_we_re_closing = message_stack.pop() #-1
 
         if type(message_stack[-1]) == dict:
@@ -50,7 +74,7 @@ def _msnplus_to_dict(msnplus):
             message_stack.append(tag_we_re_closing)
 
     #go recursive!
-    _msnplus_to_dict(msnplus[len(match.group(0)):])
+    _msnplus_to_dict(msnplus[len(match.group(0)):], message_stack)
 
     return {'tag': 'span', 'childs': message_stack}
 
@@ -217,6 +241,8 @@ def _dict_translate_tags(msgdict):
         msgdict['tag'] = 'span'
         msgdict['color'] = '#%s' % msgdict['c'].upper()
         del msgdict['c']
+    elif tag == 'img':
+        pass
     elif tag not in ('span', '', 'i', 'b'):
         del msgdict[tag]
         msgdict['tag'] = ''
@@ -227,15 +253,14 @@ def _dict_translate_tags(msgdict):
         if type(child) == dict:
             _dict_translate_tags(child)
 
-def msnplus(msnplus):
+def msnplus(msnplus, do_parse_emotes=True):
     '''given a string with msn+ formatting, give a DictObj
     representing its formatting.'''
-    global message_stack
-    dictlike = _msnplus_to_dict(msnplus)
+    message_stack = [{'tag':'', 'childs':[]}]
+    dictlike = _msnplus_to_dict(msnplus, message_stack, do_parse_emotes)
     _hex_colors(dictlike)
     _dict_gradients(dictlike)
     _dict_translate_tags(dictlike)
-    message_stack = [{'tag':'', 'childs':[]}]
     return DictObj(dictlike)
 
 def msnplus_strip(msnplus):

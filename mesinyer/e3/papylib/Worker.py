@@ -1,3 +1,4 @@
+''' papylib's worker - an emesene extension for papyon library '''
 # -*- coding: utf-8 -*-
 #
 # papylib - an emesene extension for papyon
@@ -49,12 +50,12 @@ try:
     import papyon.event
     import papyon.util.string_io as StringIO
     import papyon.media.conference as papyconference
-    ver = papyon.version
-    print papyon.version
-    if ver[1] < REQ_VER[1] or ver[2] < REQ_VER[2]:
-        raise PapyError
+    papyver = papyon.version
+    if papyver[1] < REQ_VER[1] or papyver[2] < REQ_VER[2]:
+        raise Exception
 except Exception, e:
-    print "You need python-papyon(>=%s.%s.%s) to be installed in order to use this extension" % REQ_VER
+    print "You need python-papyon(>=%s.%s.%s) \
+           in order to use this extension" % REQ_VER
     print e
 from PapyEvents import *
 from PapyConvert import *
@@ -62,7 +63,7 @@ from PapyConvert import *
 #logging.basicConfig(level=logging.DEBUG)
 
 class Worker(e3.base.Worker, papyon.Client):
-    '''dummy Worker implementation to make it easy to test emesene'''
+    ''' papylib's worker - an emesene extension for papyon library '''
 
     def __init__(self, app_name, session, proxy, use_http=False):
         '''class constructor'''
@@ -72,15 +73,18 @@ class Worker(e3.base.Worker, papyon.Client):
 
         if use_http:
             from papyon.transport import HTTPPollConnection
-            self.client = papyon.Client.__init__(self, server, get_proxies(), HTTPPollConnection)
+            self.client = papyon.Client.__init__( \
+               self, server, get_proxies(), HTTPPollConnection)
         else:
-            self.client = papyon.Client.__init__(self, server, proxies = get_proxies())
+            self.client = papyon.Client.__init__( \
+               self, server, proxies = get_proxies())
 
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
         self._invite_handler = InviteEvent(self)
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
+        self._oim_handler = OfflineEvent(self)
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
@@ -118,13 +122,13 @@ class Worker(e3.base.Worker, papyon.Client):
         # try content roaming
         nick = self.profile.display_name
         message = self.profile.personal_message
-        dp = self.profile.msn_object
-        status = self.session.account.status
+        displaypic = self.profile.msn_object
+        presence = self.session.account.status
 
-        print "Initial infos:", nick, message, dp, status
+        print "Initial infos:", nick, message, displaypic, presence
 
         self._handle_action_set_nick(nick)
-        self._set_status(status)
+        self._set_status(presence)
         
         #self._handle_action_set_message(message)
         #self._handle_action_set_picture(dp)
@@ -145,12 +149,12 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.logger.log('status change', stat, str(stat), account)
 
-    def _fill_contact_list(self, ab):
+    def _fill_contact_list(self, abook):
         ''' fill the contact list with papy contacts '''
-        for group in ab.groups:
+        for group in abook.groups:
             self._add_group(group.name)
 
-        for contact in ab.contacts:
+        for contact in abook.contacts:
             self._add_contact(contact.account, contact.display_name, \
                 STATUS_PAPY_TO_E3[contact.presence], contact.personal_message, \
                 False)
@@ -161,10 +165,11 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.add_event(Event.EVENT_CONTACT_LIST_READY)
 
-    def _add_contact(self, mail, nick, status_, pm, blocked, alias=''):
+    def _add_contact(self, mail, nick, status_, message, blocked, alias=''):
         ''' helper method to add a contact to the (gui) contact list '''
         # wtf, why 2 mails?
-        contact = e3.base.Contact(mail, mail, nick, pm, status_, alias, blocked)
+        contact = e3.base.Contact(\
+            mail, mail, nick, message, status_, alias, blocked)
         self.session.contacts.contacts[mail] = contact
 
         avatars = self.caches.get_avatar_cache(mail)
@@ -244,8 +249,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
         def download_ok(msnobj, download_failed_func):
             emotes.insert_raw((msnobj._friendly, msnobj._data))
-            self.session.add_event(Event.EVENT_P2P_FINISHED,
-                    account, 'emoticon', emoticon_path)
+            self.session.add_event(Event.EVENT_P2P_FINISHED, \
+                account, 'emoticon', emoticon_path)
 
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
             cedict[shortcut] = None
@@ -256,10 +261,11 @@ class Worker(e3.base.Worker, papyon.Client):
             if emoticon_hash in emotes:
                 cedict[shortcut] = emoticon_path
             else:
-                self.msn_object_store.request(msn_object,
-                        (download_ok, download_failed))
+                self.msn_object_store.request(msn_object, \
+                    (download_ok, download_failed))
 
-        self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj, cedict)
+        self.session.add_event(\
+            Event.EVENT_CONV_MESSAGE, cid, account, msgobj, cedict)
 
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):
         ''' handle received nudges '''
@@ -336,7 +342,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account, \
                 'message', old_message)
             self.session.logger.log('message change', contact.status, \
-                contact.message, Logger.Account(contact.attrs.get('CID', None), \
+                contact.message, Logger.Account(contact.attrs.get('CID', None),\
                     None, contact.account, contact.status, contact.nick, \
                     contact.message, contact.picture))
 
@@ -387,7 +393,8 @@ class Worker(e3.base.Worker, papyon.Client):
                 return
 
             if avatar_hash not in avatars:
-                self.msn_object_store.request(msn_object, (download_ok, download_failed))
+                self.msn_object_store.request(msn_object, \
+                    (download_ok, download_failed))
 
     # action handlers
     def _handle_action_add_contact(self, account):
@@ -491,7 +498,8 @@ class Worker(e3.base.Worker, papyon.Client):
             contact.picture)
 
         # TODO: move to profile callbacks
-        self.session.logger.log('message change', contact.status, message, account)
+        self.session.logger.log(\
+            'message change', contact.status, message, account)
         self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
 
     def _handle_action_set_nick(self, nick):
@@ -546,7 +554,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_new_conversation(self, account, cid):
         ''' handle Action.ACTION_NEW_CONVERSATION '''
-        #print "you opened conversation %(ci)s with %(acco)s, are you happy?" % { 'ci' : cid, 'acco' : account }
+        #print "you opened conversation %(ci)s with %(acco)s, are you happy?" \
+        # % { 'ci' : cid, 'acco' : account }
         # append cid to emesene conversations
         if account in self.conversations:
             #print "there's already a conversation with this user wtf"
@@ -583,8 +592,9 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_send_message(self, cid, message):
         ''' handle Action.ACTION_SEND_MESSAGE '''
-        #print "you're guin to send %(msg)s in %(ci)s" % { 'msg' : message, 'ci' : cid }
-        print "type:", message
+        #print "you're guin to send %(msg)s in %(ci)s" % \
+        #{ 'msg' : message, 'ci' : cid }
+        #print "type:", message
         # find papyon conversation by cid
         papyconversation = self.papyconv[cid]
         if message.type == e3.base.Message.TYPE_NUDGE:

@@ -112,7 +112,7 @@ class HelpHandler(object):
         '''called when the about item is selected'''
         self.dialog.about_dialog('emesene', '2.0', 'marianoguerra',
             'A simple yet powerful MSN & Gtalk client', 'GPL v3',
-            'http://www.emesene.org', ['marianoguerra'], '',
+            'http://www.emesene.org', ['marianoguerra', 'boyska', 'C10uD'], '',
             gui.theme.logo)
 
     def on_website_selected(self):
@@ -292,7 +292,7 @@ class MyAccountHandler(object):
 
     def on_set_nick_selected(self):
         '''called when set nick is selected'''
-        def set_nick_cb(response, old_nick, new_nick):
+        def set_nick_cb(response, old_nick=None, new_nick=None):
             '''callback for the set_nick method'''
 
             if response == gui.stock.ACCEPT:
@@ -309,7 +309,7 @@ class MyAccountHandler(object):
 
     def on_set_message_selected(self):
         '''called when set message is selected'''
-        def set_message_cb(response, old_pm, new_pm):
+        def set_message_cb(response, old_pm=None, new_pm=None):
             '''callback for the set_message method'''
 
             if response == gui.stock.ACCEPT:
