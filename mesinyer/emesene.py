@@ -44,7 +44,7 @@ from e3 import jabber
 from e3 import dummy
 try:
     from e3 import papylib
-except ImportError:
+except (ImportError, AttributeError):
     papylib = None
     print 'papyon lib not available, extension disabled'
 
