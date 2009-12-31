@@ -51,8 +51,8 @@ try:
     import papyon.util.string_io as StringIO
     import papyon.media.conference as papyconference
     papyver = papyon.version
-    if papyver[1] < REQ_VER[1] or papyver[2] < REQ_VER[2]:
-        raise Exception
+    if ver[1] < REQ_VER[1] or ver[2] < REQ_VER[2]:
+        raise PapyError
 except Exception, e:
     print "You need python-papyon(>=%s.%s.%s) \
            in order to use this extension" % REQ_VER

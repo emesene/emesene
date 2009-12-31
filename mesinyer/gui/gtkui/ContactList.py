@@ -160,8 +160,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
         return layout
 
-    NAME = 'Plus'
-    NAME = 'AntiPlus'
 class ContactList(gui.ContactList, gtk.TreeView):
     '''a gtk implementation of gui.ContactList'''
     NAME = 'Contact List'

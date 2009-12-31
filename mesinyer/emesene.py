@@ -81,6 +81,8 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
+        extension.category_register('session', msn.Session,
+                single_instance=True)
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
                 e3.common.notification.notify)
@@ -462,7 +464,7 @@ class PluggableOptionParser(object):
         for opt in custom_options.values():
             self.parser.add_option(opt)
 
-        
+
 
     def read_options(self):
         (options, args) = self.parser.parse_args()
