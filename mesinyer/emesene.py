@@ -106,13 +106,11 @@ class Controller(object):
     def _parse_commandline(self):
         parser = optparse.OptionParser()
         parser.add_option("-v", "--verbose",
-                          action="store_true", dest="verbose", default=False,
-                          help="Enable debug in console")
+            action="count", dest="debuglevel", default=0,
+            help="Enable debug in console (add another -v to show debug)")
         options, args = parser.parse_args(argv)
-        if options.verbose:
-            debugger.init(console=True)
-        else:
-            debugger.init()
+        
+        debugger.init(debuglevel=options.debuglevel)
 
     def _new_session(self):
         '''create a new session object'''

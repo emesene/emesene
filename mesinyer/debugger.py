@@ -54,14 +54,21 @@ class QueueHandler(logging.Handler):
             cls.instance = cls()
         return cls.instance 
 
-def init(console=False):
+def init(debuglevel=0):
     root = logging.getLogger()
-    if console:
-        console_handler = logging.StreamHandler()
-        formatter = logging.Formatter('[%(asctime)s %(name)s] %(message)s', '%H:%M:%S')
-        console_handler.setFormatter(formatter)
-        console_handler.setLevel(logging.INFO)
-        root.addHandler(console_handler)
+    
+    console_handler = logging.StreamHandler()
+    formatter = logging.Formatter('[%(asctime)s %(levelname)s %(name)s] %(message)s', '%H:%M:%S')
+    console_handler.setFormatter(formatter)
+
+    levels = {
+        0: logging.WARNING,
+        1: logging.INFO,
+        2: logging.DEBUG,
+    }
+    
+    console_handler.setLevel(levels[min(debuglevel, 2)])
+    root.addHandler(console_handler)
     
     root.addHandler(QueueHandler.get())
     root.setLevel(logging.DEBUG)
