@@ -7,7 +7,8 @@ import select
 import StringIO
 import threading
 
-from debugger import dbg
+import logging
+log = logging.getLogger('msn.Socket')
 
 class Socket(threading.Thread):
     '''a socket that runs on a thread, it reads the data and put it on the 
@@ -66,12 +67,12 @@ class Socket(threading.Thread):
                 # try to get something to send, wait 0.3 seconds
                 try:
                     self.socket.send(input_)
-                    dbg('>>> ' + str(input_), 'sock', 2)
+                    log.debug('>>> ' + str(input_))
                 except socket.error:
                     self._on_socket_error()
                     break
 
-        dbg('closing socket thread', 'sock', 1)
+        log.debug('closing socket thread')
         self.socket.close()
 
     def fileno(self):
@@ -83,7 +84,7 @@ class Socket(threading.Thread):
         data = self._readline()
         # if we got something add it to the output queue
         if data:
-            dbg('<<< ' + data, 'sock', 3)
+            log.debug('<<< ' + data)
             self.output.put(data)
             return True
         return False

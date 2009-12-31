@@ -6,7 +6,8 @@ import random
 
 import e3
 
-from debugger import dbg
+import logging
+log = logging.getLogger('dummy.Worker')
 
 class Worker(e3.Worker):
     '''dummy Worker implementation to make it easy to test emesene'''
@@ -26,7 +27,7 @@ class Worker(e3.Worker):
                 action = self.session.actions.get(True, 0.1)
 
                 if action.id_ == e3.Action.ACTION_QUIT:
-                    dbg('closing thread', 'dworker', 1)
+                    log.debug('closing thread')
                     self.session.logger.quit()
                     break
 

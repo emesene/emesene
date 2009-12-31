@@ -52,8 +52,8 @@ Providing extensions
 import os
 import sys
 import weakref
-
-from debugger import dbg
+import logging
+log = logging.getLogger('extension')
 
 class MultipleObjects(object):
     '''
@@ -252,8 +252,7 @@ class Category(object):
         ValueError'''
 
         if id_ not in self.classes:
-            dbg('extension id %s not registered on %s' % (id_, self.name,),
-                'extension')
+            log.info('extension id %s not registered on %s' % (id_, self.name,))
         else:
             self.default = self.classes[id_]
 

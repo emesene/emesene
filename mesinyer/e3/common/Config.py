@@ -20,7 +20,8 @@ import urllib
 
 import ConfigParser
 
-from debugger import dbg
+import logging
+log = logging.getLogger('e3.common.Config')
 
 class Config(object):
     '''a class that contains all the configurations of the user,
@@ -132,7 +133,7 @@ class Config(object):
 
                 setattr(self, name, value)
             except ValueError:
-                dbg('invalid config value ' + name + ' ' + value, 'config', 1)
+                log.error('invalid config value %s:%s' % (name, value))
 
     def save(self, path, section='DEFAULT'):
         '''save to a config file'''
@@ -152,8 +153,8 @@ class Config(object):
                 else:
                     parser.set(section, key, str(value).replace('%', '§'))
             except Exception, ex:
-                dbg('couldn\'t save %s:%s invalid type (%s)' % (key, value,
-                    str(ex)), 'config', 1)
+                log.error("couldn't save %s:%s invalid type (%s)" %
+                    (key, value, ex))
 
         parser.write(file(path, 'w'))
 

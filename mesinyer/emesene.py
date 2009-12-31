@@ -25,7 +25,13 @@ import time
 import base64
 import gobject
 import gettext
+import optparse
 
+# fix for gstreamer --help
+argv = sys.argv
+sys.argv = [argv[0]]
+
+# load translations
 if os.path.exists('default.mo'):
     gettext.GNUTranslations(open('default.mo')).install()
 elif os.path.exists('po/'):
@@ -35,6 +41,7 @@ else:
 
 import gui
 import utils
+import debugger
 
 import e3
 from e3 import msn
@@ -70,6 +77,7 @@ class Controller(object):
             self.config.d_accounts = {}
 
         self.session = None
+        self._parse_commandline()
         self._setup()
 
     def _setup(self):
@@ -94,6 +102,15 @@ class Controller(object):
 
         extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
+    
+    def _parse_commandline(self):
+        parser = optparse.OptionParser()
+        parser.add_option("-v", "--verbose",
+            action="count", dest="debuglevel", default=0,
+            help="Enable debug in console (add another -v to show debug)")
+        options, args = parser.parse_args(argv)
+        
+        debugger.init(debuglevel=options.debuglevel)
 
     def _new_session(self):
         '''create a new session object'''

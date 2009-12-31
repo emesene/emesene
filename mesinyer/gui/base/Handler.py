@@ -3,7 +3,8 @@ import webbrowser
 import gui
 import extension
 
-from debugger import dbg
+import logging
+log = logging.getLogger('gui.base.Handler')
 
 class MenuHandler(object):
     '''this handler contains all the handlers needed to handle all the
@@ -195,7 +196,7 @@ class ContactHandler(object):
 
             if response == gui.stock.ACCEPT:
                 if old_alias == new_alias:
-                    dbg('old alias and new alias are the same', 'handler', 1)
+                    log.debug('old alias and new alias are the same')
                     return
 
                 self.session.set_alias(account, new_alias)
@@ -267,11 +268,11 @@ class GroupHandler(object):
 
             if response == gui.stock.ACCEPT:
                 if group.name == new_name:
-                    dbg("old and new name are the same", 'handler', 1)
+                    log.debug("old and new name are the same")
                 elif new_name:
                     self.session.rename_group(group.identifier, new_name)
                 else:
-                    dbg("new name not valid", 'handler', 1)
+                    log.debug("new name not valid")
 
         group = self.contact_list.get_group_selected()
 
@@ -297,10 +298,10 @@ class MyAccountHandler(object):
 
             if response == gui.stock.ACCEPT:
                 if old_nick == new_nick:
-                    dbg('old nick and new nick are the same', 'handler', 1)
+                    log.debug('old nick and new nick are the same')
                     return
                 elif new_nick == '':
-                    dbg('empty new nick', 'handler', 1)
+                    log.debug('empty new nick')
                     return
 
                 self.session.set_nick(new_nick)
@@ -314,8 +315,7 @@ class MyAccountHandler(object):
 
             if response == gui.stock.ACCEPT:
                 if old_pm == new_pm:
-                    dbg('old and new personal messages are the same',
-                        'handler', 1)
+                    log.debug('old and new personal messages are the same')
                     return
 
                 self.session.set_message(new_pm)

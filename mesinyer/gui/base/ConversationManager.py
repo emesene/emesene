@@ -1,6 +1,8 @@
 import e3
 import MarkupParser
-from debugger import dbg
+
+import logging
+log = logging.getLogger('gui.base.ConversationManager')
 
 class ConversationManager(object):
     '''the main conversation, it only contains other conversations'''
@@ -91,7 +93,7 @@ class ConversationManager(object):
             conversation.output.append(
                 self.format_from_message(message))
         else:
-            dbg('conversation ' + cid + ' not found', 'convmanager', 1)
+            log.debug('conversation %s not found' % cid)
 
     def _on_contact_joined(self, cid, account):
         '''called when a contact join the conversation'''
@@ -100,7 +102,7 @@ class ConversationManager(object):
         if conversation:
             conversation.on_contact_joined(account)
         else:
-            dbg('on_contact_joined: conversation is None', 'convmanager', 1)
+            log.debug('on_contact_joined: conversation is None')
 
     def _on_contact_left(self, cid, account):
         '''called when a contact leaves the conversation'''
@@ -109,7 +111,7 @@ class ConversationManager(object):
         if conversation:
             conversation.on_contact_left(account)
         else:
-            dbg('on_contact_left: conversation is None', 'convmanager', 1)
+            log.debug('on_contact_left: conversation is None')
 
     def _on_group_started(self, cid):
         '''called when a group conversation starts'''

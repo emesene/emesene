@@ -7,7 +7,8 @@ import p2p.Manager
 from MsnSocket import MsnSocket
 from MsnHttpSocket import MsnHttpSocket
 
-from debugger import dbg
+import logging
+log = logging.getLogger('msn.Conversation')
 
 class Conversation(threading.Thread):
     '''a thread that handles a conversation'''
@@ -77,7 +78,7 @@ class Conversation(threading.Thread):
 
     def _process(self, message):
         '''process a command and call the respective handler'''
-        dbg('<c< ' + str(message), 'conv', 2)
+        log.debug('<c< ' + str(message))
         handler = self._handlers.get(message.command, None)
 
         if handler:
@@ -116,7 +117,7 @@ class Conversation(threading.Thread):
     def _close(self):
         '''set all the attributes to reflect a closed conversation
         caution: it doesn't stop the main thread'''
-        dbg('closing conversation', 'conv', 1)
+        log.debug('closing conversation')
         self.status = Conversation.STATUS_CLOSED
         self.started = False
         self.socket.quit()
@@ -256,7 +257,7 @@ class Conversation(threading.Thread):
 
     def _on_unknown_command(self, message):
         '''handle the unknown commands'''
-        dbg('unknown command: ' + str(message), 'conv', 4)
+        log.warning('unknown command: ' + str(message))
 
     def _check_if_started(self):
         '''check if the conversation has already been started, if not,
@@ -292,7 +293,7 @@ class Conversation(threading.Thread):
             self.invite(self.last_member)
             self.last_member = None
         else:
-            dbg('reinviting members ' + str(self.members), 'conv', 3)
+            log.info('reinviting members ' + str(self.members))
             members = self.members
             self.members = []
             while len(self.members):
@@ -306,7 +307,7 @@ class Conversation(threading.Thread):
         if self.status != Conversation.STATUS_ESTABLISHED:
             self.pending_invites.append(account)
         else:
-            dbg('sending CAL ' + account, 'conv', 3)
+            log.debug('sending CAL ' + account)
             self.socket.send_command('CAL', (account,))
 
     def answer(self):

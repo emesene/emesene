@@ -9,7 +9,8 @@ import gui
 import utils
 import extension
 
-from debugger import dbg
+import logging
+log = logging.getLogger('gtkui.ContactInformation')
 
 class ContactInformation(gtk.Window):
     '''a window that displays information about a contact'''
@@ -340,8 +341,7 @@ class ChatWidget(gtk.VBox):
                     self.text.append(self.formatter.format_history(
                         date_text, nick, text))
                 except ValueError:
-                    dbg('Invalid number of tokens' + str(tokens),
-                            'contactinfo', 1)
+                    log.debug('Invalid number of tokens' + str(tokens))
             else:
-                dbg('unknown message type on ContactInfo', 'contactinfo', 1)
+                log.debug('unknown message type on ContactInfo')
 
