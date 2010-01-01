@@ -6,34 +6,18 @@ import logging
 log = logging.getLogger('pluginmanager')
 
 class PackageResource:
-    '''Handle various files that could be put in tha package'''
+    '''Handle various files that could be put in the package'''
     def __init__(self, base_dir, directory):
-        self.path = directory  # Path to the package
-        self.base_path = base_dir
-        self._resources = [] # Opened resources
+        self.path = os.path.join(base_dir, directory)
 
     def get_resource_path(self, relative_path):
         '''get the path to the required resource.
         If you can, use get_resource.
         @return the path if it exists or an empty string otherwise'''
-        abs_path = os.path.join(self.base_path, self.path, relative_path)
+        abs_path = os.path.join(self.path, relative_path)
         if os.path.exists(abs_path):
             return abs_path
         return ''
-
-    def use_resource(self, relative_path):
-        '''A ContextManager that opens a file.
-        If you can use it, you're reccomended to.
-        See self.get_resource for more info.
-        '''
-        buffer = self.get_resource(relative_path)
-        if not buffer:
-            return
-        try:
-            yield buffer
-        finally:
-            self.close_resource(relative_path)
-
 
     def get_resource(self, relative_path):
         '''Opens a file.
@@ -41,34 +25,11 @@ class PackageResource:
         @return a file object opening relative_path if it is possible, or None
         '''
         file_path = self.get_resource_path(relative_path)
-        if not file_path:
-            return None
-        try:
-            f = open(file_path)
-        except IOError:
-            return None
-        else:
-            self._resources.append(f)
-            return f
-
-    def close_resource(self, resource):
-        '''Close a file.
-        @param resource A resource returned by get_resource
-        @return
-        '''
-        try:
-            self._resources.remove(resource)
-            resource.close()
-        except IOError:
-            return False
-
-        return True
-
-    def close(self):
-        '''everything. to be called when the plugin is stopped'''
-        while self._resources:
-            self._resources.pop().close()
-
+        if file_path:
+            try:
+                return open(file_path)
+            except IOError:
+                return
 
 class PluginHandler:
     '''Abstraction over a plugin.
@@ -141,8 +102,6 @@ class PluginHandler:
         '''If active, stop the plugin'''
         if self.is_active():
             self._instance.stop()
-            if self.is_package:
-                self._instance.resource.close()
             self._instance._started = False
 
     def is_active(self):
