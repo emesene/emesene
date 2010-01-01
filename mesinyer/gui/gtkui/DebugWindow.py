@@ -4,9 +4,7 @@ import time
 import gtk
 import pango
 
-from debugger import warning,debug
-from debugger import _logger
-from debugger import queue_handler
+import debugger
 import logging
 
 class DebugWindow():
@@ -17,7 +15,9 @@ class DebugWindow():
         self.window.connect("delete_event", self.on_delete)
         self.store = DebugStore()
         self.view = DebugView(self.store)
-        _logger.addHandler(self.store)
+        
+        logging.getLogger().addHandler(self.store)
+        
         self.scroll_view = gtk.ScrolledWindow()
         self.scroll_view.add(self.view)
 
@@ -37,7 +37,7 @@ class DebugWindow():
         self.filter_level.set_active(0)
         self.filter_btn = gtk.Button("Filter")
         self.filter_box.pack_start(self.filter_entry)
-        self.filter_box.pack_start(self.filter_level,False)
+        self.filter_box.pack_start(self.filter_level, False)
         self.filter_box.pack_start(self.filter_btn, False)
         self.vbox.pack_start(self.filter_box, False)
 
@@ -71,7 +71,7 @@ class DebugWindow():
 
     def safely_close(self):
         self.window.hide()
-        _logger.removeHandler(self.store)
+        logging.getLogger().removeHandler(self.store)
     def on_add(self, button, data=None):
         caller = self.test_entry.get_text()
         #self.store.append([caller, "just a test"])
@@ -122,7 +122,7 @@ class DebugBuffer( gtk.TextBuffer ):
         message =  model.get_value(iter, 1)
         level =  model.get_value(iter, 2)
         date = model.get_value(iter, 3)
-        self.add_line(caller,message,level, date)
+        self.add_line(caller, message, level, date)
 
     def add_line(self, caller, message, level, date):
         if caller and message and level and date:
@@ -141,6 +141,7 @@ class DebugStore( gtk.ListStore, logging.Handler ):
         logging.Handler.__init__(self)
         self.custom_filter = self.filter_new()
         
+        queue_handler = debugger.QueueHandler.get()
         for message in queue_handler.get_all():
             self.on_message_added(message)
         #for message in _logger.get_all():
@@ -151,7 +152,7 @@ class DebugStore( gtk.ListStore, logging.Handler ):
         self.on_message_added(record)
     
     def on_message_added(self, message):
-        self.append([message.caller, message.msg.strip(), message.levelno, message.created])
+        self.append([message.name, message.msg.strip(), message.levelno, message.created])
 
     def filter_caller( self, name, level ):
         '''

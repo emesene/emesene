@@ -7,9 +7,6 @@ import e3
 from e3 import msn
 from e3 import jabber 
 
-import debugger
-debugger.max_level = 0
-
 class Example(object):
     '''a example object, you can do it on another way..'''
 

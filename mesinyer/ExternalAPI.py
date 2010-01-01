@@ -1,5 +1,6 @@
 import extension
-from debugger import warning, debug
+import logging
+log = logging.getLogger('ExternalAPI')
 
 ERROR = False
 try:
@@ -7,7 +8,7 @@ try:
     import dbus.service
     from dbus.mainloop.glib import DBusGMainLoop
 except ImportError, description:
-    warning('failed some import on dbus: %s' % str(description))
+    log.warning('failed some import on dbus: %s' % str(description))
     ERROR = True
 
 if not ERROR:
@@ -92,7 +93,7 @@ if not ERROR:
     @extension.implements('external api')
     class DBus(object):
         def __init__(self):
-            debug('instancing dbus') 
+            log.debug('instancing dbus') 
             self.loop = DBusGMainLoop(set_as_default=True)
             self.session_bus = dbus.SessionBus()
             self.bus_name = dbus.service.BusName(BUS_NAME, bus=self.session_bus)

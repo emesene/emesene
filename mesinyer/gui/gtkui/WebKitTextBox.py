@@ -11,7 +11,8 @@ try:
 except ImportError:
     ERROR = True
 
-from debugger import dbg
+import logging
+log = logging.getLogger('gtkui.WebKitTextBox')
 
 class OutputText(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
@@ -82,7 +83,7 @@ class OutputText(gtk.ScrolledWindow):
         '''called when a message is sent to the console'''
         message = "Webkit message: %s %s %s" % (message, line, source_id)
         self.append(message)
-        dbg(message, 'webkittb', 1)
+        log.debug(message)
 
     def _loading_stop_cb(self, view, frame):
         '''method called when the page finish loading'''

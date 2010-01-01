@@ -5,7 +5,8 @@ import Queue
 
 import e3
 
-from debugger import dbg
+import logging
+log = logging.getLogger('jabber.Worker')
 
 class Worker(e3.Worker):
     '''wrapper of xmpppy to make it work like e3.Worker'''
@@ -49,7 +50,7 @@ class Worker(e3.Worker):
                 action = self.session.actions.get(True, 0.1)
 
                 if action.id_ == e3.Action.ACTION_QUIT:
-                    dbg('closing thread', 'yworker', 1)
+                    log.debug('closing thread')
                     self.session.logger.quit()
                     break
 

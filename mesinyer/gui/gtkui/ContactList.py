@@ -24,141 +24,8 @@ import e3
 import gui
 import utils
 import extension
-from debugger import dbg
-
-import Renderers
-
-class CellRendererFunction(gtk.GenericCellRenderer):
-    '''
-    CellRenderer that behaves like a label, but apply a function to "markup"
-    to show a modified nick. Its a base class, and it is intended to be
-    inherited by extensions.
-    '''
-    __gproperties__ = {
-            'markup': (gobject.TYPE_STRING,
-                "text",
-                "text we'll display (even with plus markup!)",
-                '', #default value
-                gobject.PARAM_READWRITE),
-            'ellipsize': (gobject.TYPE_BOOLEAN,
-                "",
-                "",
-                False, #default value
-                gobject.PARAM_READWRITE)
-            }
-
-    property_names = __gproperties__.keys()
-
-    def __init__(self, function):
-        self.__gobject_init__()
-        #gtk.CellRenderer.__init__(self)
-        self.__dict__['markup'] = ''
-        self.function = function
-
-    def __getattr__(self, name):
-         try:
-             return self.get_property(name)
-         except TypeError:
-             raise AttributeError, name
-
-    def __setattr__(self, name, value):
-         try:
-             self.set_property(name, value)
-         except TypeError:
-             self.__dict__[name] = value
-
-    def on_get_size(self, widget, cell_area):
-
-        # The following size calculations have tested so that the TextView
-        # will fully fit in the cell when editing and it will be the same
-        # size as a CellRendererText cell with same amount or rows.
-
-        xpad = 2
-        ypad = 2
-
-        xalign = 0
-        yalign = 0.5
-
-        layout = self.get_layout(widget)
-        width, height = layout.get_pixel_size()
-
-        x_offset = xpad
-        y_offset = ypad
-
-        if cell_area:
-
-            x_offset = xalign * (cell_area.width - width)
-            x_offset = max(x_offset, xpad)
-            x_offset = int(round(x_offset, 0))
-
-            y_offset = yalign * (cell_area.height - height)
-            y_offset = max(y_offset, ypad)
-            y_offset = int(round(y_offset, 0))
-
-        width  = width  + (xpad * 2)
-        height = height + (ypad * 2)
-
-        return x_offset, y_offset, width, height
-
-    def do_get_property(self, property):
-         if property.name not in self.property_names:
-             raise TypeError('No property named %s' % (property.name,))
-         return self.__dict__[property.name]
-
-    def do_set_property(self, property, value):
-        if property.name not in self.property_names:
-            raise TypeError('No property named %s' % (property.name,))
-        if property == 'markup': #plus formatting
-            value = Plus.msnplus_to_dict
-        self.__dict__[property.name] = value
-
-    def on_render(self, window, widget, bg_area, cell_area, exp_area, flags):
-        x_offset, y_offset, width, height = self.on_get_size(widget, cell_area)
-        layout = self.get_layout(widget)
-
-        # Determine state to get text color right.
-        if flags & gtk.CELL_RENDERER_SELECTED:
-            if widget.get_property('has-focus'):
-                state = gtk.STATE_SELECTED
-            else:
-                state = gtk.STATE_ACTIVE
-        else:
-            state = gtk.STATE_NORMAL
-
-        widget.style.paint_layout(
-            window, state, True, cell_area, widget, 'foo',
-            cell_area.x + x_offset, cell_area.y + y_offset, layout)
-
-    def get_layout(self, widget):
-        '''Gets the Pango layout used in the cell in a TreeView widget.'''
-        '''buf = RichBuffer.RichBuffer()
-        plused_markup = Plus.msnplus(self.markup)
-        view = gtk.TextView()
-        view.set_buffer(buf)
-        buf._put_formatted(plused_markup)
-        return view'''
-        layout = pango.Layout(widget.get_pango_context())
-        layout.set_width(-1)    # Do not wrap text.
-        if self.markup:
-            try:
-                decorated_markup = self.function(unicode(self.markup, 'utf-8')).encode('utf-8')
-            except Exception, error:
-                print "this nick: '%s' made the parser go crazy, striping" % (self.markup,)
-                print error
-
-                decorated_markup = Plus.msnplus_strip(self.markup)
-
-            try:
-                pango.parse_markup(decorated_markup)
-            except gobject.GError:
-                print "invalid pango markup:", decorated_markup
-                decorated_markup = Plus.msnplus_strip(self.markup)
-
-            layout.set_markup(decorated_markup)
-        else:
-            layout.set_text('')
-
-        return layout
+import logging
+log = logging.getLogger('gtkui.ContactList')
 
 class ContactList(gui.ContactList, gtk.TreeView):
     '''a gtk implementation of gui.ContactList'''
@@ -327,7 +194,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         elif contact:
             self.contact_selected.emit(contact)
         else:
-            dbg('nothing selected?', 'contactlist', 1)
+            log.debug('nothing selected?')
 
     def _on_button_press_event(self, treeview, event):
         '''callback called when the user press a button over a row
@@ -336,7 +203,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             paths = self.get_path_at_pos(int(event.x), int(event.y))
 
             if paths is None:
-                dbg('invalid path', 'contactlist', 1)
+                log.debug('invalid path')
             elif len(paths) > 0:
                 iterator = self.model.get_iter(paths[0])
                 child_iter = self.model.convert_iter_to_child_iter(iterator)
@@ -347,7 +214,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 elif type(obj) == e3.Contact:
                     self.contact_menu_selected.emit(obj)
             else:
-                dbg('empty paths?', 'contactlist', 1)
+                log.debug('empty paths?')
 
     # overrided methods
     def refilter(self):
@@ -417,8 +284,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             obj = row[1]
             if type(obj) == e3.Group:
                 if obj.name == group.name:
-                    dbg('Trying to add an existing group! ' + obj.name,
-                        'contactlist', 1)
+                    log.debug('Trying to add an existing group! ' + obj.name)
                     return row.iter
 
         return self._model.append(None, group_data)

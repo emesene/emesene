@@ -88,7 +88,7 @@ class ConversationEvent(papyon.event.ConversationEventInterface):
         self._client._on_conversation_nudge_received(sender, self)
         
     def on_conversation_error(self, error_type, error):
-        print "ERROR :", error_type, " ->", error
+        self._client._on_conversation_message_error(error_type, error, self)
 
 class ContactEvent(papyon.event.ContactEventInterface):
     def on_contact_memberships_changed(self, contact):
@@ -120,7 +120,7 @@ class ContactEvent(papyon.event.ContactEventInterface):
         """Called when the client capabilities of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
-        print "[papyon]", "on_contact_client_capabilities_changed", contact
+        #print "[papyon]", "on_contact_client_capabilities_changed", contact
 
     def on_contact_msn_object_changed(self, contact):
         self._client._on_contact_msnobject_changed(contact)
@@ -163,23 +163,23 @@ class ProfileEvent(papyon.event.ProfileEventInterface):
         
     def on_profile_presence_changed(self):
         """Called when the presence changes."""
-        print "[papyon]", "profile presence changed"
+        self._client._on_profile_presence_changed()
         
     def on_profile_display_name_changed(self):
         """Called when the display name changes."""
-        print "[papyon]", "profile nick changed"
+        self._client._on_profile_display_name_changed()
         
     def on_profile_personal_message_changed(self):
         """Called when the personal message changes."""
-        print "[papyon]", "profile pm changed"
+        self._client._on_profile_personal_message_changed()
 
     def on_profile_current_media_changed(self):
         """Called when the current media changes."""
-        print "[papyon]", "profile media changed"
+        self._client._on_profile_current_media_changed()
 
     def on_profile_msn_object_changed(self):
         """Called when the MSNObject changes."""
-        print "[papyon]", "profile dp changed"
+        self._client._on_profile_msn_object_changed()
 
 class WebcamEvent(papyon.event.WebcamEventInterface):
     def __init__(self, session):
@@ -260,6 +260,7 @@ class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
 
     def on_oim_state_changed(self, state):
         print "[papyon]", "oim state changed", state
+        ''' NOT_SYNCHRONIZED = 0 SYNCHRONIZING = 1 SYNCHRONIZED = 2 '''
 
     def on_oim_messages_received(self, messages):
         print "[papyon]", "oims received", messages
@@ -288,3 +289,13 @@ class MailboxEvent(papyon.event.MailboxEventInterface):
     def on_mailbox_new_mail_received(self, mail_message):
         """New mail message notification"""
         print "[papyon]", "mailbox mail received", mail_message
+        ''' MAIL MESSAGE:
+        def name(self):
+        """The name of the person who sent the email"""
+        def address(self):
+        """Email address of the person who sent the email"""
+        def post_url(self):
+        """post url"""
+        def form_data(self):
+        """form url"""
+        return self._form_data '''

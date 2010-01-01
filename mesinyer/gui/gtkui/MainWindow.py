@@ -8,7 +8,8 @@ import gui
 import utils
 import extension
 
-from debugger import dbg
+import logging
+log = logging.getLogger('gtkui.MainWindow')
 
 class MainWindow(gtk.VBox):
     '''this class represents the widget that is shown when the user is logged
@@ -159,8 +160,7 @@ class MainWindow(gtk.VBox):
         '''callback called when an attribute of a contact changed'''
         contact = self.session.contacts.get(account)
         if not contact:
-            dbg('account ' + account + ' not found on contacts',
-                'mainwindow', 1)
+            log.debug('account %s not found on contacts' % account)
 
         if change_type == 'online' and do_notify:
             if self.session.config.b_notify_contact_online:

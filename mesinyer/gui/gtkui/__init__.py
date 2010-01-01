@@ -33,6 +33,7 @@ def gtk_main(Controller):
     import ConversationToolbar
     import DebugWindow
     import PluginWindow
+    import Renderers
     import config_gtk
 
     setup()

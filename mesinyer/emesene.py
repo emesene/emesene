@@ -28,7 +28,11 @@ import gettext
 import optparse
 
 import string
+# fix for gstreamer --help
+argv = sys.argv
+sys.argv = [argv[0]]
 
+# load translations
 if os.path.exists('default.mo'):
     gettext.GNUTranslations(open('default.mo')).install()
 elif os.path.exists('po/'):
@@ -38,6 +42,7 @@ else:
 
 import gui
 import utils
+import debugger
 
 import e3
 from e3 import msn
@@ -77,6 +82,7 @@ class Controller(object):
             self.config.d_accounts = {}
 
         self.session = None
+        self._parse_commandline()
         self._setup()
 
     def _setup(self):
@@ -97,6 +103,15 @@ class Controller(object):
 
         extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
+    
+    def _parse_commandline(self):
+        parser = optparse.OptionParser()
+        parser.add_option("-v", "--verbose",
+            action="count", dest="debuglevel", default=0,
+            help="Enable debug in console (add another -v to show debug)")
+        options, args = parser.parse_args(argv)
+        
+        debugger.init(debuglevel=options.debuglevel)
 
     def _new_session(self):
         '''create a new session object'''
@@ -458,8 +473,9 @@ class ExtensionDefault:
                 print 'Error when setting extension "%s" default session to "%s"' % (category_name, ext_name)
 
 class PluggableOptionParser(object):
-    def __init__(self):
+    def __init__(self, args):
         self.parser = optparse.OptionParser(conflict_handler="resolve")
+        self.args = args
         custom_options = extension.get_category('option provider').use()().option_register().get_result()
         for opt in custom_options.values():
             self.parser.add_option(opt)
@@ -467,8 +483,9 @@ class PluggableOptionParser(object):
 
 
     def read_options(self):
-        (options, args) = self.parser.parse_args()
+        (options, args) = self.parser.parse_args(self.args)
 def main():
+    global argv
     """
     the main method of emesene
     """
@@ -476,7 +493,7 @@ def main():
     extension.category_register('option provider', None, interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
     extension.get_category('option provider').activate(ExtensionDefault)
-    options = PluggableOptionParser()
+    options = PluggableOptionParser(argv)
     options.read_options()
     main_method = extension.get_default('main')
     main_method(Controller)

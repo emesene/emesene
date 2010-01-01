@@ -4,7 +4,9 @@ import threading
 import sqlite3.dbapi2 as sqlite
 
 import status as pstatus
-from debugger import dbg
+
+import logging
+log = logging.getLogger('e3.base.Logger') # oh snap!
 
 class Account(object):
     '''a class to store account data'''
@@ -321,13 +323,13 @@ class Logger(object):
             if gid in self.groups:
                 self.groups[gid].accounts.append(account)
             else:
-                dbg(gid + ' not in self.groups', 'logger', 1)
+                log.debug(gid + ' not in self.groups')
 
             if account in self.accounts:
                 self.accounts[account].groups.append(gid)
                 self.accounts[account].cid = cid
             else:
-                dbg(account + ' not in self.accounts', 'logger', 1)
+                log.debug(account + ' not in self.accounts')
 
     def _load_groups(self):
         '''load the groups from the d_event table and store them in a dict'''
@@ -477,7 +479,7 @@ class Logger(object):
         try:
             self.execute(Logger.INSERT_ACCOUNT_BY_GROUP, (id_account, id_group))
         except sqlite.IntegrityError, e:
-            dbg(str(e), 'logger', 1)
+            log.error(str(e))
 
         self._stat()
 
@@ -494,14 +496,14 @@ class Logger(object):
         if self._count >= Logger.COMMIT_LIMIT:
             t1 = time.time()
             self.connection.commit()
-            dbg('commit ' + str(time.time() - t1), 'logger', 4)
+            log.info('commit ' + str(time.time() - t1))
             self._count = 0
 
         self._count += 1
 
     def execute(self, query, args=()):
         '''execute the query with optional args'''
-        dbg(query + str(args), 'logger', 5)
+        log.debug(query + str(args))
         self.cursor.execute(query, args)
 
     # utility methods
@@ -671,8 +673,7 @@ class Logger(object):
             local_account = self.accounts.get(account.account, None)
 
             if local_account is None:
-                dbg(account.account + ' not found in self.accounts',
-                    'logger', 1)
+                log.debug(account.account + ' not found in self.accounts')
                 continue
 
             existing = set(local_account.groups)
@@ -730,7 +731,7 @@ class LoggerProcess(threading.Thread):
 
                 if quit:
                     self.logger.close()
-                    dbg('closing logger thread', 'logger', 1)
+                    log.debug('closing logger thread')
                     break
 
             except Queue.Empty:
@@ -754,9 +755,8 @@ class LoggerProcess(threading.Thread):
                 if callback:
                     self.output.put((action, result, callback))
             except Exception, e:
-                dbg('error calling action ' + action + ' on LoggerProcess',
-                    'logger', 1)
-                dbg(str(e), 'logger', 1)
+                log.error('error calling action %s on LoggerProcess: %s' %
+                    (action, e))
 
         return False
 
@@ -854,9 +854,8 @@ def save_logs_as_txt(results, path):
                 handle.write("%s %s: %s\n" % \
                     (date_text, nick, text))
             except ValueError:
-                dbg('Invalid number of tokens' + str(tokens),
-                        'contactinfo', 1)
+                log.debug('Invalid number of tokens' + str(tokens))
         else:
-            dbg('unknown message type on ContactInfo', 'contactinfo', 1)
+            log.debug('unknown message type on ContactInfo')
 
     handle.close()

@@ -1,8 +1,9 @@
 '''Handles plugin importing'''
 import os
 import sys
+import logging
 
-from debugger import warning, info
+log = logging.getLogger('pluginmanager')
 
 class PackageResource:
     '''Handle various files that could be put in tha package'''
@@ -99,7 +100,7 @@ class PluginHandler:
             if hasattr(self.module, 'plugin'):
                 self.module = self.module.plugin
         except Exception, reason:
-            warning('error importing "%s": %s' % (self.name, reason))
+            log.warning('error importing "%s": %s' % (self.name, reason))
             self.module = None
         finally:
             sys.path = old_syspath
@@ -131,7 +132,7 @@ class PluginHandler:
             inst.extension_register()
             inst._started = True
         except Exception, reason:
-            warning('error starting "%s": %s' % (self.name, reason))
+            log.warning('error starting "%s": %s' % (self.name, reason))
             return False
         return True
 
@@ -167,7 +168,7 @@ class PluginManager:
                 mod = PluginHandler(dir_, file, os.path.isdir(file))
                 self._plugins[mod.name] = mod
             except Exception, reason:
-                warning('Exception while importing %s:\n%s' % (file, reason))
+                log.warning('Exception while importing %s:\n%s' % (file, reason))
 
     def plugin_start(self, name):
         '''Starts a plugin.
@@ -175,7 +176,7 @@ class PluginManager:
         '''
         if not name in self._plugins:
             return False
-        info('starting plugin "%s"' % name)
+        log.info('starting plugin "%s"' % name)
         self._plugins[name].start()
         return True
 

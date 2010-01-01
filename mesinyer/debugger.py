@@ -17,34 +17,26 @@ How to use
         of unimportant messages.
 '''
 
-import time
 import logging
-from collections import deque
+import warnings
+import collections
 
 import inspect
 import os.path
 
 def _build_caller():
-    #Get class.method_name. Not used now, but could be useful
     caller_obj = inspect.stack()[2]
-    #try:
-    #    parent_class = '%s.' % caller_obj.f_locals['self'].__class__.__name__
-    #except:
-    #    parent_class = ''
-    #class_method = '%s%s' % (parent_class, caller_obj[3])
     filename = caller_obj[0].f_code.co_filename
     caller = '%s' % (os.path.basename(filename).split('.py')[0])
     return caller
 
 def dbg(text, caller=None, level=1):
-    '''
-    DEPRECATED! debug the code through our mighty debugger: compatibility function
-    '''
+    warnings.warn("Use logging.getLogger(name).log instead", DeprecationWarning, stacklevel=3)
+
     if not caller:
         caller = _build_caller()
 
-    #old_dbg(text, module, level)
-    _logger.log(level*10, text, extra={'caller':caller})
+    logging.getLogger('debugger.' + caller).log(level*10, text)
 
 
 def _log_function(level):
@@ -58,40 +50,44 @@ error = _log_function(logging.ERROR)
 critical = _log_function(logging.CRITICAL)
 
 class QueueHandler(logging.Handler):
-    '''
-    An Handler that just keeps the last messages in memory, using a queue.
+    '''A Handler that just keeps the last messages in memory, using a queue.
     This is useful when you want to know (i.e. in case of errors) the last
-    debug messages.
-    '''
+    debug messages.'''
+    
+    instance = None
+
     def __init__(self, maxlen=50):
         logging.Handler.__init__(self)
-        self.maxlen = maxlen
-        self.queue = deque()
+        self.setLevel(logging.DEBUG)
+        self.queue = collections.deque(maxlen=maxlen)
 
     def emit(self, record):
         self.queue.append(record)
 
-        if len(self.queue) > self.maxlen:
-            self.queue.popleft()
-
     def get_all(self):
-        l = len(self.queue)
-        for i in range(l):
-            record = self.queue.pop()
-            self.queue.appendleft(record)
-            yield record
+        return self.queue.__iter__()
 
-_logger = logging.getLogger('emesene')
-_console_handler = logging.StreamHandler()
-_formatter = logging.Formatter('[%(asctime)s %(caller)s] %(message)s', '%H:%M:%S')
-_console_handler.setFormatter(_formatter)
-_console_handler.setLevel(logging.INFO)
-_logger.addHandler(_console_handler)
+    @classmethod
+    def get(cls):
+        if cls.instance is None:
+            cls.instance = cls()
+        return cls.instance 
 
-queue_handler = QueueHandler()
-queue_handler.setLevel(logging.DEBUG)
-_logger.addHandler(queue_handler)
+def init(debuglevel=0):
+    root = logging.getLogger()
+    
+    console_handler = logging.StreamHandler()
+    formatter = logging.Formatter('[%(asctime)s %(levelname)s %(name)s] %(message)s', '%H:%M:%S')
+    console_handler.setFormatter(formatter)
 
-_logger.setLevel(logging.DEBUG)
-
-
+    levels = {
+        0: logging.WARNING,
+        1: logging.INFO,
+        2: logging.DEBUG,
+    }
+    
+    console_handler.setLevel(levels[min(debuglevel, 2)])
+    root.addHandler(console_handler)
+    
+    root.addHandler(QueueHandler.get())
+    root.setLevel(logging.DEBUG)

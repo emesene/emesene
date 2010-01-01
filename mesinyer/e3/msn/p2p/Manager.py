@@ -3,7 +3,8 @@ import threading
 
 import e3
 
-from debugger import dbg
+import logging
+log = logging.getLogger('msn.p2p.Manager')
 
 class Manager(threading.Thread):
     '''P2P manager, a single thread for everything'''
@@ -48,7 +49,7 @@ class Manager(threading.Thread):
 
     def receive(self, payload):
         # tlp.receive?
-        dbg("p2p manager receive payload size " + len(payload), 'p2p', 3)
+        log.debug("p2p manager receive payload size " + len(payload))
 
 
 class SwitchboardTransport(object):
