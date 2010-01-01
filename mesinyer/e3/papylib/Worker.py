@@ -50,7 +50,6 @@ try:
     import papyon
     import papyon.event
     import papyon.util.string_io as StringIO
-    import papyon.media.conference as papyconference
     papyver = papyon.version
     if papyver[1] < REQ_VER[1] or papyver[2] < REQ_VER[2]:
         raise Exception
@@ -59,7 +58,8 @@ except Exception, e:
                   "in order to use this extension" % REQ_VER)
 from PapyEvents import *
 from PapyConvert import *
-
+from PapyConference import *
+    
 #logging.basicConfig(level=logging.DEBUG)
 
 class Worker(e3.base.Worker, papyon.Client):
@@ -117,26 +117,20 @@ class Worker(e3.base.Worker, papyon.Client):
     # some useful methods
     def set_initial_infos(self):
         '''this is called on login'''
+        # loads or create a config for this session
         self.session.load_config()
         self.session.create_config()
-        # try content roaming
-        nick = self.profile.display_name
+        # sets the login-chosen presence in papyon
+        presence = self.session.account.status
+        self._set_status(presence)
+
+        return
         message = self.profile.personal_message
         displaypic = self.profile.msn_object
-        presence = self.session.account.status
-
         print "Initial infos:", nick, message, displaypic, presence
-
-        self._handle_action_set_nick(nick)
-        self._set_status(presence)
-        
-        #self._handle_action_set_message(message)
-        #self._handle_action_set_picture(dp)
         
     def _set_status(self, stat):
-        '''why is this particular function needed?
-           and btw, the button for changing status doesn't work apparently
-        '''
+        ''' changes the presence in papyon given an e3 status '''
         self.session.account.status = stat
         self.session.contacts.me.status = stat
         self.profile.presence = STATUS_E3_TO_PAPY[stat]
@@ -194,7 +188,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_webcam_invite(self, session, producer):
         print "New webcam invite", session, producer
-        websess = papyconference.MediaSessionHandler(session.media_session)
+        websess = MediaSessionHandler(session.media_session)
         if 0:
             session.reject()
         else:
@@ -203,8 +197,12 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_conference_invite(self, call):
         print "New conference invite", call
         callhandler = CallEvent(call)
-        callsess = papyconference.MediaSessionHandler(call.media_session)
-        #call.accept()
+        callsess = MediaSessionHandler(call.media_session)
+        print "new call session", callsess
+        if 0:
+            call.reject()            
+        else:
+            call.accept()
 
     # conversation handlers
     def _on_conversation_user_typing(self, papycontact, pyconvevent):
@@ -288,6 +286,9 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
 
+    def _on_conversation_message_error(self, err_type, error, papyconversation):
+        print "error sending message because", err_type, error
+        
     # contact changes handlers
     def _on_contact_status_changed(self, papycontact):
         status_ = STATUS_PAPY_TO_E3[papycontact.presence]
@@ -396,6 +397,33 @@ class Worker(e3.base.Worker, papyon.Client):
                 self.msn_object_store.request(msn_object, \
                     (download_ok, download_failed))
 
+    # address book events
+
+    # profile events
+    def _on_profile_presence_changed(self):
+        """Called when the presence changes."""
+        pass
+        
+    def _on_profile_display_name_changed(self):
+        """Called when the display name changes."""
+        self.session.display_name = "asd"
+        self._handle_action_set_nick(self.profile.display_name)
+
+    def _on_profile_personal_message_changed(self):
+        """Called when the personal message changes."""
+        print "pm", self.profile.personal_message
+
+    def _on_profile_current_media_changed(self):
+        """Called when the current media changes."""
+        print "currentmedia", self.profile.personal_message
+
+    def _on_profile_msn_object_changed(self):
+        """Called when the MSNObject changes."""
+        print "on profile msn obj changed"
+        msn_object = self.profile.msn_object
+        if msn_object is not None:
+            self._handle_action_set_picture(msn_object)
+    
     # action handlers
     def _handle_action_add_contact(self, account):
         ''' handle Action.ACTION_ADD_CONTACT '''
@@ -519,7 +547,7 @@ class Worker(e3.base.Worker, papyon.Client):
             # this is/can be used for initial avatar changing and caching
             # like dp roaming and stuff like that
             # now it doesn't work, btw
-            self.profile.msn_object = msn_object
+            self.profile.msn_object = picture_name
             self._on_contact_msnobject_changed(self.session.contacts.me)
             #self.session.contacts.me.picture = picture_name
             #self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,

@@ -21,8 +21,11 @@
 import e3
 from Worker import Worker
 
+import extension
+
 AUTHOR_LIST = ['Riccardo (C10uD)', 'Orfeo (Otacon)']
 
+@extension.implements('session')
 class Session(e3.Session):
     '''a specialization of e3.base.Session'''
     NAME = 'Papyon session'

@@ -1,3 +1,22 @@
+'''
+Provides logging/debugging feature
+
+How to use
+==========
+    You just need to import this module, and you can use our easy methods::
+
+        import debugger
+        debugger.debug('Some text')
+
+    Levels
+    ------
+        Not every debug text is equally important.  That's why we have logging
+        levels: info, debug, warning, error, critical The functions follows the
+        same name of the levels, and all behave the same way.  Thanks to
+        levels, you can put lot of debug info without having your console full
+        of unimportant messages.
+'''
+
 import logging
 import warnings
 import collections
@@ -6,7 +25,7 @@ import inspect
 import os.path
 
 def _build_caller():
-    caller_obj = inspect.stack()[1]
+    caller_obj = inspect.stack()[2]
     filename = caller_obj[0].f_code.co_filename
     caller = '%s' % (os.path.basename(filename).split('.py')[0])
     return caller

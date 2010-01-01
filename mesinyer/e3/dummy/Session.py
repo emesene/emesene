@@ -1,6 +1,8 @@
 import Worker
 import e3
+import extension
 
+@extension.implements('session')
 class Session(e3.Session):
     '''a specialization of e3.Session'''
     NAME = 'Dummy session'
@@ -33,3 +35,4 @@ class Session(e3.Session):
         message = e3.Message(e3.Message.TYPE_MESSAGE,
             '%s requests your attention' % (account, ), account)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
+

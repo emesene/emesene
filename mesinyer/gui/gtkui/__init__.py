@@ -33,6 +33,7 @@ def gtk_main(Controller):
     import ConversationToolbar
     import DebugWindow
     import PluginWindow
+    import Renderers
     import config_gtk
 
     setup()
@@ -44,6 +45,7 @@ def gtk_main(Controller):
     gtk.quit_add(0, controller.on_close)
     gtk.main()
     gtk.gdk.threads_leave()
+
 
 gtk_main.NAME = "Gtk main function"
 gtk_main.DESCRIPTION  = "This extensions uses Gtk to build the GUI"
