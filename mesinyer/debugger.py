@@ -40,10 +40,16 @@ class QueueHandler(logging.Handler):
     def __init__(self, maxlen=50):
         logging.Handler.__init__(self)
         self.setLevel(logging.DEBUG)
-        self.queue = collections.deque(maxlen=maxlen)
+        
+        self.queue = collections.deque()
+        self.maxlen = maxlen # see below
 
     def emit(self, record):
         self.queue.append(record)
+
+        # python 2.5 doesn't include the maxlen parameter of deques
+        if len(self.queue) > self.maxlen:
+            self.queue.popleft()
 
     def get_all(self):
         return self.queue.__iter__()
