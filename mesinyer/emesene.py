@@ -62,6 +62,17 @@ import extension
 import interfaces
 from gui import gtkui
 
+@extension.implements('option provider')
+class VerboseOption:
+    def __init__(self):
+        pass
+    def option_register(self):
+        option = optparse.Option("-v", "--verbose",
+            action="count", dest="debuglevel", default=0,
+            help="Enable debug in console (add another -v to show debug)")
+        return option
+extension.get_category('option provider').activate(VerboseOption)
+
 class Controller(object):
     '''class that handle the transition between states of the windows'''
 
@@ -105,11 +116,7 @@ class Controller(object):
         get_pluginmanager().scan_directory('plugins')
     
     def _parse_commandline(self):
-        parser = optparse.OptionParser()
-        parser.add_option("-v", "--verbose",
-            action="count", dest="debuglevel", default=0,
-            help="Enable debug in console (add another -v to show debug)")
-        options, args = parser.parse_args(argv)
+        options, args = PluggableOptionParser.get_parsing()
         
         debugger.init(debuglevel=options.debuglevel)
 
@@ -471,8 +478,10 @@ class ExtensionDefault:
             (category_name, ext_name) = map(string.strip, couple.split(':', 2))
             if not extension.get_category(category_name).set_default_by_name(ext_name):
                 print 'Error when setting extension "%s" default session to "%s"' % (category_name, ext_name)
+extension.get_category('option provider').activate(ExtensionDefault)
 
 class PluggableOptionParser(object):
+    results = ()
     def __init__(self, args):
         self.parser = optparse.OptionParser(conflict_handler="resolve")
         self.args = args
@@ -480,10 +489,13 @@ class PluggableOptionParser(object):
         for opt in custom_options.values():
             self.parser.add_option(opt)
 
-
-
     def read_options(self):
-        (options, args) = self.parser.parse_args(self.args)
+        if not self.__class__.results:
+            self.__class__.results = self.parser.parse_args(self.args)
+        return self.__class__.results
+    @classmethod
+    def get_parsing(cls):
+        return cls.results
 def main():
     global argv
     """
