@@ -86,7 +86,7 @@ class PluginHandler:
         self.base_dir = base_dir
         self._instance = None
 
-        self.has_resources = is_package
+        self.is_package = is_package
 
         self.module = None
         self._do_import()
@@ -100,7 +100,7 @@ class PluginHandler:
             if hasattr(self.module, 'plugin'):
                 self.module = self.module.plugin
         except Exception, reason:
-            log.warning('error importing "%s": %s' % (self.name, reason))
+            log.warning('error importing "%s": %s', self.name, reason)
             self.module = None
         finally:
             sys.path = old_syspath
@@ -111,10 +111,11 @@ class PluginHandler:
             return self._instance
         try:
             self._instance = self.module.Plugin()
-        except Exception:
+        except Exception, reason:
             self._instance = None
+            log.warning('error creating instance for "%s": %s', self.name, reason)
         else:
-            if self.has_resources:
+            if self.is_package:
                 self._instance.resource = \
                     PackageResource(self.base_dir, self.name)
         return self._instance
@@ -132,7 +133,7 @@ class PluginHandler:
             inst.extension_register()
             inst._started = True
         except Exception, reason:
-            log.warning('error starting "%s": %s' % (self.name, reason))
+            log.warning('error starting "%s": %s', (self.name, reason))
             return False
         return True
 
@@ -140,7 +141,7 @@ class PluginHandler:
         '''If active, stop the plugin'''
         if self.is_active():
             self._instance.stop()
-            if self.has_resources:
+            if self.is_package:
                 self._instance.resource.close()
             self._instance._started = False
 
@@ -168,15 +169,18 @@ class PluginManager:
                 mod = PluginHandler(dir_, file, os.path.isdir(file))
                 self._plugins[mod.name] = mod
             except Exception, reason:
-                log.warning('Exception while importing %s:\n%s' % (file, reason))
+                log.warning('Exception while importing %s:\n%s', (file, reason))
+        
+        log.debug('Imported plugins: %s', ', '.join(self._plugins.keys()))
 
     def plugin_start(self, name):
         '''Starts a plugin.
         @param name The name of the plugin. See plugin_base.PluginBase.name.
         '''
-        if not name in self._plugins:
+        if name not in self._plugins:
             return False
-        log.info('starting plugin "%s"' % name)
+        
+        log.info('starting plugin "%s"', name)
         self._plugins[name].start()
         return True
 
@@ -184,8 +188,10 @@ class PluginManager:
         '''Stops a plugin.
         @param name The name of the plugin. See plugin_base.PluginBase.name.
         '''
-        if not name in self._plugins:
+        if name not in self._plugins:
             return False
+        
+        log.info('stopping plugin "%s"', name)
         self._plugins[name].stop()
         return True
 
