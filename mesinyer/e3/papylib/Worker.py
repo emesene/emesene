@@ -50,7 +50,6 @@ try:
     import papyon
     import papyon.event
     import papyon.util.string_io as StringIO
-    import papyon.media.conference as papyconference
     papyver = papyon.version
     if papyver[1] < REQ_VER[1] or papyver[2] < REQ_VER[2]:
         raise Exception
@@ -59,7 +58,8 @@ except Exception, e:
                   "in order to use this extension" % REQ_VER)
 from PapyEvents import *
 from PapyConvert import *
-
+from PapyConference import *
+    
 #logging.basicConfig(level=logging.DEBUG)
 
 class Worker(e3.base.Worker, papyon.Client):
@@ -194,7 +194,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_webcam_invite(self, session, producer):
         print "New webcam invite", session, producer
-        websess = papyconference.MediaSessionHandler(session.media_session)
+        websess = PapyConference.MediaSessionHandler(session.media_session)
         if 0:
             session.reject()
         else:
@@ -203,7 +203,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_conference_invite(self, call):
         print "New conference invite", call
         callhandler = CallEvent(call)
-        callsess = papyconference.MediaSessionHandler(call.media_session)
+        callsess = PapyConference.MediaSessionHandler(call.media_session)
         #call.accept()
 
     # conversation handlers
