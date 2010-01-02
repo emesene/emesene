@@ -364,6 +364,7 @@ class Controller(object):
         self.session.config.get_or_set('b_show_header', True)
         self.session.config.get_or_set('b_show_info', True)
         self.session.config.get_or_set('b_show_toolbar', True)
+        self.session.config.get_or_set('b_allow_auto_scroll', True)
         self.session.login(account.account, account.password, account.status,
             proxy, use_http)
         gobject.timeout_add(500, self.session.signals._handle_events)
