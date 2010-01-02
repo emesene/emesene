@@ -55,6 +55,7 @@ import weakref
 import logging
 log = logging.getLogger('extension')
 
+
 class MultipleObjects(object):
     '''
     Provides a simple way to do operations to a group of objects.
@@ -82,6 +83,7 @@ class MultipleObjects(object):
     It will automatically handle exceptions, discarding that results.
     B{TODO}: knowing what reported errors.
     '''
+
     def __init__(self, dict_of_objs):
         self.objects = dict_of_objs
 
@@ -135,6 +137,7 @@ class MultipleObjects(object):
 
 class Category(object):
     '''This completely handles a category'''
+
     def __init__(self, name, system_default,
                  interfaces, single_instance=False):
         '''Constructor: creates a new category
@@ -182,24 +185,27 @@ class Category(object):
         self.classes[class_name] = cls
         self.ids[cls] = class_name
         return True
-    
-    def activate(self,  cls):
+
+    def activate(self, cls):
         '''This will make an extension "active", that means you can use it
         for your multi-extension'''
         if cls not in self.ids:
                 self.register(cls)
-    
+
         id = _get_class_name(cls)
         self.active.add(id)
-    def deactivate(self,  cls):
+
+    def deactivate(self, cls):
         if cls not in self.ids:
                 self.register(cls)
-    
+
         id = _get_class_name(cls)
         self.active.discard(id)
+
     def get_extensions(self):
         '''@return an id:class dict of the available extensions id:class'''
         return self.classes
+
     def get_active(self):
         '''@return an id:class dict of the active extensions'''
         #TODO: implement it!
@@ -230,7 +236,7 @@ class Category(object):
                 return None
             self.default = self.get_extensions().values()[0]
             warning('Choosing a default extension for %s RANDOMLY! --> %s' % (self.name, self.default))
-            
+
         return self.classes[self.default_id]
 
     default = property(fget=_get_default, fset=_set_default)
@@ -247,7 +253,7 @@ class Category(object):
 
     def get_and_instantiate(self, *args, **kwargs):
         '''
-        Get an instance of the default extension. 
+        Get an instance of the default extension.
         If this category is a "single interface" one, it will also save
         a reference to that instance.
         If this method is called when a reference is already saved, it will
@@ -265,7 +271,6 @@ class Category(object):
             return inst
         return inst
 
-
     def set_default_by_name(self, name):
         '''set the default extension throught its name'''
         for cls in self.classes.values():
@@ -277,7 +282,7 @@ class Category(object):
         info('Cannot save default for "%s" as "%s"' % (self.name, name))
         print self.classes.values()
         return False
-     
+
     def set_default_by_id(self, id_):
         '''set the default extension through its id (generated
         by _get_class_name method), if the id is not available it will raise
@@ -292,9 +297,9 @@ class Category(object):
         if not self.multi_extension:
             return MultipleObjects({self.default_id: self.default})
         return MultipleObjects(self.get_active())
-    
 
     #Methods about the properties of the category itself
+
     def set_interface(self, interfaces):
         '''
         If this category doesn't have an interface, just add it and delete
@@ -310,23 +315,23 @@ class Category(object):
                     if not is_implementation(cls, interface):
                         debugger.warning("Extension %s of category %s\
                             doesn't match the new interface: %s" %\
-                            (str(cls),  self.name,  self.interfaces))
+                            (str(cls), self.name, self.interfaces))
                         to_remove.append(cls)
             for cls in to_remove:
                 del self.classes[cls]
             #read properties
             for interface in self.interfaces:
-                if hasattr(interface,  'multi'):
+                if hasattr(interface, 'multi'):
                     self.multi_extension = interface.multi
-                if hasattr(interface,  'single_instance'):
+                if hasattr(interface, 'single_instance'):
                     self.is_single = interface.single_instance
             return True
         else:
             return False
 
 
-    
 _categories = {} #'CategoryName': Category('ClassName')
+
 
 def category_register(category, system_default, interfaces=(), single_instance=False):
     '''Add a category'''
@@ -338,6 +343,7 @@ def category_register(category, system_default, interfaces=(), single_instance=F
         _categories[category] = Category(category, system_default, interfaces, single_instance)
     else: #already exist
         _categories[category].set_interface(interfaces)
+
 
 def register(category_name, cls):
     '''Register cls as an Extension for category.
@@ -353,13 +359,16 @@ def register(category_name, cls):
 
     return False
 
+
 def get_category(category_name):
     '''Get a Category object, return the category if exists, None otherwise'''
     return _categories.get(category_name, None)
 
+
 def get_categories():
     '''return a dict with all the categories'''
     return _categories
+
 
 def get_extensions(category_name):
     '''return a dict of the available extensions id:class'''
@@ -369,6 +378,7 @@ def get_extensions(category_name):
 
     return None
 
+
 def get_default(category_name):
     '''This will return a "default" extension if the category is registered
     if not, return None'''
@@ -377,6 +387,7 @@ def get_default(category_name):
         return category.default
 
     return None
+
 
 def get_instance(category_name):
     '''
@@ -389,9 +400,10 @@ def get_instance(category_name):
         return category.get_instance()
     return None
 
+
 def get_and_instantiate(category_name, *args, **kwargs):
     '''
-    Get an instance of the default extension. 
+    Get an instance of the default extension.
     If this category is a "single interface" one, it will also save
     a reference to that instance.
     If this method is called when a reference is already saved, it will
@@ -401,6 +413,7 @@ def get_and_instantiate(category_name, *args, **kwargs):
     if category is not None:
         return category.get_and_instantiate(*args, **kwargs)
     return None
+
 
 def set_default(category_name, cls):
     '''set the cls as default for the category category_name, if cls is not
@@ -413,6 +426,7 @@ def set_default(category_name, cls):
         return True
 
     return False
+
 
 def set_default_by_id(category_name, id_):
     '''set the default extension of a category through its id (generated
@@ -427,6 +441,7 @@ def set_default_by_id(category_name, id_):
 
     return False
 
+
 def get_system_default(category_name):
     '''return the default category registered by core, it can be used as
     fallback if the default extension on the category raises
@@ -438,6 +453,7 @@ def get_system_default(category_name):
 
     return None
 
+
 def is_implementation(cls, interface_cls):
     '''Check if cls implements all the methods provided by interface_cls.
     Note: every cls implements None.
@@ -447,6 +463,7 @@ def is_implementation(cls, interface_cls):
         if not hasattr(cls, method):
             return False
     return True
+
 
 def _get_class_name(cls):
     '''Returns the full path of a class
@@ -463,6 +480,7 @@ def _get_class_name(cls):
 
 def implements(*categories):
     '''decorator to nicely show which interfaces we are implementing'''
+
     def _impl(ext):
         ext.implements = categories
         for ctg in categories:
@@ -470,6 +488,5 @@ def implements(*categories):
                 category_register(ctg, None)
             get_category(ctg).register(ext)
         return ext
-        
-    return _impl
 
+    return _impl
