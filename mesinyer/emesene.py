@@ -120,10 +120,9 @@ class Controller(object):
         get_pluginmanager().scan_directory('plugins')
 
     def _parse_commandline(self):
-        if len(PluggableOptionParser.get_parsing()) > 1:
-            options, args = PluggableOptionParser.get_parsing()
+        options, args = PluggableOptionParser.get_parsing()
 
-            debugger.init(debuglevel=options.debuglevel)
+        debugger.init(debuglevel=options.debuglevel)
 
     def _new_session(self):
         '''create a new session object'''
