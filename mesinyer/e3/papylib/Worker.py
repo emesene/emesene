@@ -406,8 +406,10 @@ class Worker(e3.base.Worker, papyon.Client):
         print "contact blocked", contact
     def _on_addressbook_contact_unblocked(self, contact):
         print "contact unblocked", contact
+
     def _on_addressbook_group_added(self, group):
-        print "group added", group
+        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, name)
+
     def _on_addressbook_group_deleted(self, group):
         print "group deleted", group
     def _on_addressbook_group_renamed(self, group):
@@ -442,7 +444,7 @@ class Worker(e3.base.Worker, papyon.Client):
         if msn_object is not None:
             self._handle_action_set_picture(msn_object)
     
-    # action handlers
+    # e3 action handlers
     def _handle_action_add_contact(self, account):
         ''' handle Action.ACTION_ADD_CONTACT '''
         papycontact = self.address_book.contacts.search_by('account', account)
@@ -455,10 +457,6 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_ADD_GROUP
         '''
         self.address_book.add_group(name)
-
-        # TODO: move succeed to papyon callbacks
-        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED,
-            name)
 
     def _handle_action_add_to_group(self, account, gid):
         ''' handle Action.ACTION_ADD_TO_GROUP '''
