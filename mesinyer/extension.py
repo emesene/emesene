@@ -177,7 +177,7 @@ class Category(object):
         '''
         for interface in self.interfaces:
             if not is_implementation(cls, interface):
-                warning("cls doesn't agree to the interface: %s" %\
+                log.warning("cls doesn't agree to the interface: %s" %\
                  str(interface))
                 return False
 
@@ -190,17 +190,19 @@ class Category(object):
         '''This will make an extension "active", that means you can use it
         for your multi-extension'''
         if cls not in self.ids:
-                self.register(cls)
+            self.register(cls)
 
-        id = _get_class_name(cls)
-        self.active.add(id)
+        _id = _get_class_name(cls)
+        self.active.add(_id)
 
     def deactivate(self, cls):
+        '''This will make an extension "active", that means you can use it
+        for your multi-extension. See activate()'''
         if cls not in self.ids:
-                self.register(cls)
+            self.register(cls)
 
-        id = _get_class_name(cls)
-        self.active.discard(id)
+        _id = _get_class_name(cls)
+        self.active.discard(_id)
 
     def get_extensions(self):
         '''@return an id:class dict of the available extensions id:class'''
@@ -208,10 +210,9 @@ class Category(object):
 
     def get_active(self):
         '''@return an id:class dict of the active extensions'''
-        #TODO: implement it!
         active = {}
-        for id in self.active:
-            active[id] = self.classes[id]
+        for _id in self.active:
+            active[_id] = self.classes[_id]
         return active
 
     def _set_default(self, cls):
@@ -224,9 +225,9 @@ class Category(object):
         if cls not in self.ids:
             self.register(cls)
 
-        id = _get_class_name(cls)
-        if self.default_id != id:
-            self.default_id = id
+        _id = _get_class_name(cls)
+        if self.default_id != _id:
+            self.default_id = _id
             self.instance = None
 
     def _get_default(self):
@@ -235,7 +236,8 @@ class Category(object):
             if not self.get_extensions():
                 return None
             self.default = self.get_extensions().values()[0]
-            warning('Choosing a default extension for %s RANDOMLY! --> %s' % (self.name, self.default))
+            log.warning('Choosing a default extension for %s RANDOMLY! --> %s'\
+                    % (self.name, self.default))
 
         return self.classes[self.default_id]
 
@@ -259,7 +261,8 @@ class Category(object):
         If this method is called when a reference is already saved, it will
         return that one, NOT a new one.
         '''
-        #check if we have a ref, and if is still valid (remember: it's a weakref!)
+        #check if we have a ref, and if is still valid
+        #(remember: it's a weakref!)
         if self.get_instance():
             return self.get_instance()
         cls = self.default
@@ -277,9 +280,9 @@ class Category(object):
             if hasattr(cls, 'NAME'):
                 if cls.NAME == name:
                     self.default = cls
-                    info('Default for "%s" is "%s"' % (self.name, name))
+                    log.info('Default for "%s" is "%s"' % (self.name, name))
                     return True
-        info('Cannot save default for "%s" as "%s"' % (self.name, name))
+        log.info('Cannot save default for "%s" as "%s"' % (self.name, name))
         print self.classes.values()
         return False
 
@@ -294,6 +297,11 @@ class Category(object):
             self.default = self.classes[id_]
 
     def use(self):
+        '''
+        Allows to call all the "active" extensions as if they were just one.
+        This is done through MultipleObjects.
+        '''
+
         if not self.multi_extension:
             return MultipleObjects({self.default_id: self.default})
         return MultipleObjects(self.get_active())
@@ -313,7 +321,7 @@ class Category(object):
             for cls in self.classes.values():
                 for interface in self.interfaces:
                     if not is_implementation(cls, interface):
-                        debugger.warning("Extension %s of category %s\
+                        log.warning("Extension %s of category %s\
                             doesn't match the new interface: %s" %\
                             (str(cls), self.name, self.interfaces))
                         to_remove.append(cls)
@@ -333,14 +341,16 @@ class Category(object):
 _categories = {} #'CategoryName': Category('ClassName')
 
 
-def category_register(category, system_default, interfaces=(), single_instance=False):
+def category_register(category, system_default, interfaces=(), \
+        single_instance=False):
     '''Add a category'''
     try:
         iter(interfaces)
     except TypeError:
         interfaces = (interfaces,)
     if category not in _categories: #doesn't exist
-        _categories[category] = Category(category, system_default, interfaces, single_instance)
+        _categories[category] = Category(category, system_default, \
+                interfaces, single_instance)
     else: #already exist
         _categories[category].set_interface(interfaces)
 
@@ -482,6 +492,7 @@ def implements(*categories):
     '''decorator to nicely show which interfaces we are implementing'''
 
     def _impl(ext):
+        '''decorating function'''
         ext.implements = categories
         for ctg in categories:
             if not get_category(ctg):
