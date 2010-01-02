@@ -43,6 +43,9 @@ else:
 import gui
 import utils
 import debugger
+import logging
+log = logging.getLogger('emesene')
+
 
 import e3
 from e3 import msn
@@ -55,7 +58,7 @@ except (ImportError, AttributeError):
     print 'papyon lib not available, extension disabled'
 except Exception, exc:
     papylib = None
-    warning('Errors occurred on papyon importing: %s' % str(exc))
+    log.warning('Errors occurred on papyon importing: %s' % str(exc))
 
 from pluginmanager import get_pluginmanager
 import extension
