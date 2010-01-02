@@ -53,16 +53,19 @@ class QueueHandler(logging.Handler):
     '''A Handler that just keeps the last messages in memory, using a queue.
     This is useful when you want to know (i.e. in case of errors) the last
     debug messages.'''
-    
+
     instance = None
 
     def __init__(self, maxlen=50):
         logging.Handler.__init__(self)
         self.setLevel(logging.DEBUG)
-        self.queue = collections.deque(maxlen=maxlen)
+        self.maxlen = maxlen
+        self.queue = collections.deque()
 
     def emit(self, record):
         self.queue.append(record)
+        if len(self.queue) > self.maxlen:
+            self.queue.popleft()
 
     def get_all(self):
         return self.queue.__iter__()
@@ -71,11 +74,11 @@ class QueueHandler(logging.Handler):
     def get(cls):
         if cls.instance is None:
             cls.instance = cls()
-        return cls.instance 
+        return cls.instance
 
 def init(debuglevel=0):
     root = logging.getLogger()
-    
+
     console_handler = logging.StreamHandler()
     formatter = logging.Formatter('[%(asctime)s %(levelname)s %(name)s] %(message)s', '%H:%M:%S')
     console_handler.setFormatter(formatter)
@@ -85,9 +88,9 @@ def init(debuglevel=0):
         1: logging.INFO,
         2: logging.DEBUG,
     }
-    
+
     console_handler.setLevel(levels[min(debuglevel, 2)])
     root.addHandler(console_handler)
-    
+
     root.addHandler(QueueHandler.get())
     root.setLevel(logging.DEBUG)

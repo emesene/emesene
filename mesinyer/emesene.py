@@ -63,8 +63,7 @@ import interfaces
 from gui import gtkui
 
 
-@extension.implements('option provider')
-class VerboseOption:
+class VerboseOption(object):
 
     def __init__(self):
         pass
@@ -74,8 +73,9 @@ class VerboseOption:
             action="count", dest="debuglevel", default=0,
             help="Enable debug in console (add another -v to show debug)")
         return option
-extension.get_category('option provider').activate(VerboseOption)
 
+extension.implements('option provider')(VerboseOption)
+extension.get_category('option provider').activate(VerboseOption)
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -466,8 +466,7 @@ class Controller(object):
         self.start()
 
 
-@extension.implements('option provider')
-class ExtensionDefault:
+class ExtensionDefault(object):
 
     def __init__(self):
         pass
@@ -489,6 +488,7 @@ class ExtensionDefault:
                 print 'Error setting extension "%s" default session to "%s"'\
                         % (category_name, ext_name)
 
+extension.implements('option provider')(ExtensionDefault)
 extension.get_category('option provider').activate(ExtensionDefault)
 
 
@@ -520,8 +520,8 @@ def main():
     the main method of emesene
     """
     extension.category_register('session', msn.Session, single_instance=True)
-    extension.category_register('option provider', None,\
-            interfaces=interfaces.IOptionProvider)
+    extension.category_register('option provider', None)
+            #interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
     extension.get_category('option provider').activate(ExtensionDefault)
     options = PluggableOptionParser(argv)
