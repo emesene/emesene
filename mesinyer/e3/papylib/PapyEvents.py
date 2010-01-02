@@ -36,28 +36,13 @@ class ClientEvents(papyon.event.ClientEventInterface):
         print "ERROR :", error_type, " ->", error    
 
 class InviteEvent(papyon.event.InviteEventInterface):
-    def __init__(self, client):
-        """Initializer
-            @param client: the client we want to be notified for its events
-            @type client: L{Client<papyon.Client>}"""
-        papyon.event.BaseEventInterface.__init__(self, client)
-
     def on_invite_conversation(self, conversation):
-        """Called when we get invited into a conversation
-            @param conversation: the conversation
-            @type conversation: L{Conversation<papyon.conversation.ConversationInterface>}"""
         self._client._on_conversation_invite(conversation)
 
     def on_invite_webcam(self, session, producer):
-        """Called when we get invited into a webcam conversation
-            @param session: the session
-            @type session: L{WebcamSession<papyon.msnp2p.webcam.WebcamSession>}"""
         self._client._on_webcam_invite(session, producer)
 
     def on_invite_conference(self, call):
-        """Called when we get invited into a conference
-            @param call: the call
-            @type call: L{SIPCall<papyon.sip.sip.SIPCall>}"""
         self._client._on_conference_invite(call)
         
 class ConversationEvent(papyon.event.ConversationEventInterface):
@@ -67,15 +52,11 @@ class ConversationEvent(papyon.event.ConversationEventInterface):
         self.conversation = conversation
 
     def on_conversation_user_joined(self, contact):
-        """Called when an user joins the conversation.
-            @param contact: the contact whose presence changed
-            @type contact: L{Contact<papyon.profile.Contact>}"""
+        # TODO: handle this
         print "[papyon]", contact, "joined a conversation"
 
     def on_conversation_user_left(self, contact):
-        """Called when an user leaved the conversation.
-            @param contact: the contact whose presence changed
-            @type contact: L{Contact<papyon.profile.Contact>}"""
+        # TODO: handle this
         print "[papyon]", contact, "left a conversation"
 
     def on_conversation_user_typing(self, contact):
@@ -92,6 +73,7 @@ class ConversationEvent(papyon.event.ConversationEventInterface):
 
 class ContactEvent(papyon.event.ContactEventInterface):
     def on_contact_memberships_changed(self, contact):
+        # TODO: handle this
         """Called when the memberships of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}
@@ -111,6 +93,7 @@ class ContactEvent(papyon.event.ContactEventInterface):
         self._client._on_contact_media_changed(contact)
 
     def on_contact_infos_changed(self, contact, infos):
+        # TODO: handle this
         """Called when the infos of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
@@ -120,65 +103,53 @@ class ContactEvent(papyon.event.ContactEventInterface):
         """Called when the client capabilities of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
-        #print "[papyon]", "on_contact_client_capabilities_changed", contact
+        # TODO: handle this
 
     def on_contact_msn_object_changed(self, contact):
         self._client._on_contact_msnobject_changed(contact)
 
 class AddressBookEvent(papyon.event.AddressBookEventInterface):
-    def __init__(self, client):
-        papyon.event.BaseEventInterface.__init__(self, client)
-
     def on_addressbook_messenger_contact_added(self, contact):
-        print "[papyon]", "on_addressbook_messenger_contact_added", contact
+        self._client._on_addressbook_messenger_contact_added(contact)
 
     def on_addressbook_contact_deleted(self, contact):
-        print "[papyon]", "on_addressbook_contact_deleted", contact
+        self._client._on_addressbook_contact_deleted(self, contact)
 
     def on_addressbook_contact_blocked(self, contact):
-        print "[papyon]", "on_addressbook_contact_blocked", contact
+        self._client._on_addressbook_contact_blocked(self, contact)
 
     def on_addressbook_contact_unblocked(self, contact):
-        print "[papyon]", "on_addressbook_contact_unblocked", contact
+        self._client._on_addressbook_contact_unblocked(self, contact)
 
     def on_addressbook_group_added(self, group):
-        print "[papyon]", "on_addressbook_group_added", group
+        self._client._on_addressbook_group_added(self, group)
 
     def on_addressbook_group_deleted(self, group):
-        print "[papyon]", "on_addressbook_group_deleted", group
+        self._client._on_addressbook_group_deleted(self, group)
 
     def on_addressbook_group_renamed(self, group):
-        print "[papyon]", "on_addressbook_group_renamed", group
+        self._client._on_addressbook_group_renamed(self, group)
 
     def on_addressbook_group_contact_added(self, group, contact):
-        print "[papyon]", "on_addressbook_group_contact_added", group, contact
+        self._client._on_addressbook_group_contact_added(self, group, contact)
 
     def on_addressbook_group_contact_deleted(self, group, contact):
-        print "[papyon]", "on_addressbook_group_contact_deleted", group, contact
+        self._client._on_addressbook_group_contact_deleted(self, group, contact)
         
 class ProfileEvent(papyon.event.ProfileEventInterface):
-    def __init__(self, client):
-        papyon.event.BaseEventInterface.__init__(self, client)
-        self._client = client
-        
     def on_profile_presence_changed(self):
-        """Called when the presence changes."""
         self._client._on_profile_presence_changed()
         
     def on_profile_display_name_changed(self):
-        """Called when the display name changes."""
         self._client._on_profile_display_name_changed()
         
     def on_profile_personal_message_changed(self):
-        """Called when the personal message changes."""
         self._client._on_profile_personal_message_changed()
 
     def on_profile_current_media_changed(self):
-        """Called when the current media changes."""
         self._client._on_profile_current_media_changed()
 
     def on_profile_msn_object_changed(self):
-        """Called when the MSNObject changes."""
         self._client._on_profile_msn_object_changed()
 
 class WebcamEvent(papyon.event.WebcamEventInterface):

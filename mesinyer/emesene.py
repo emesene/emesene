@@ -50,12 +50,9 @@ from e3 import jabber
 from e3 import dummy
 try:
     from e3 import papylib
-except (ImportError, AttributeError):
-    papylib = None
-    print 'papyon lib not available, extension disabled'
 except Exception, exc:
     papylib = None
-    warning('Errors occurred on papyon importing: %s' % str(exc))
+    debugger.warning('Errors occurred on papyon importing: %s' % str(exc))
 
 from pluginmanager import get_pluginmanager
 import extension
@@ -120,9 +117,10 @@ class Controller(object):
         get_pluginmanager().scan_directory('plugins')
 
     def _parse_commandline(self):
-        options, args = PluggableOptionParser.get_parsing()
+        if len(PluggableOptionParser.get_parsing()) > 1:
+            options, args = PluggableOptionParser.get_parsing()
 
-        debugger.init(debuglevel=options.debuglevel)
+            debugger.init(debuglevel=options.debuglevel)
 
     def _new_session(self):
         '''create a new session object'''

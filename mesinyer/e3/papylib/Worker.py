@@ -398,6 +398,24 @@ class Worker(e3.base.Worker, papyon.Client):
                     (download_ok, download_failed))
 
     # address book events
+    def _on_addressbook_messenger_contact_added(contact):
+        print "contact added", contact
+    def _on_addressbook_contact_deleted(self, contact):
+        print "contact deleted", contact
+    def _on_addressbook_contact_blocked(self, contact):
+        print "contact blocked", contact
+    def _on_addressbook_contact_unblocked(self, contact):
+        print "contact unblocked", contact
+    def _on_addressbook_group_added(self, group):
+        print "group added", group
+    def _on_addressbook_group_deleted(self, group):
+        print "group deleted", group
+    def _on_addressbook_group_renamed(self, group):
+        print "group renamed", group
+    def _on_addressbook_group_contact_added(self, group, contact):
+        print "group contact added", group, contact
+    def _on_addressbook_group_contact_deleted(self, group, contact):
+        print "group contact deleted", group, contact
 
     # profile events
     def _on_profile_presence_changed(self):
