@@ -62,16 +62,20 @@ import extension
 import interfaces
 from gui import gtkui
 
+
 @extension.implements('option provider')
 class VerboseOption:
+
     def __init__(self):
         pass
+
     def option_register(self):
         option = optparse.Option("-v", "--verbose",
             action="count", dest="debuglevel", default=0,
             help="Enable debug in console (add another -v to show debug)")
         return option
 extension.get_category('option provider').activate(VerboseOption)
+
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -114,10 +118,10 @@ class Controller(object):
 
         extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
-    
+
     def _parse_commandline(self):
         options, args = PluggableOptionParser.get_parsing()
-        
+
         debugger.init(debuglevel=options.debuglevel)
 
     def _new_session(self):
@@ -461,31 +465,42 @@ class Controller(object):
         self.close_session(False)
         self.start()
 
+
 @extension.implements('option provider')
 class ExtensionDefault:
+
     def __init__(self):
         pass
+
     def option_register(self):
         option = optparse.Option('--ext-default', '-e')
-        option.type='string' #well, it's a extName:defaultValue string
+        option.type = 'string' #well, it's a extName:defaultValue string
         option.action = 'callback'
         option.callback = self.set_default
         option.help = 'Set the default extension by name'
         option.nargs = 1
         return option
+
     def set_default(self, option, opt, value, parser):
         for couple in value.split(';'):
             (category_name, ext_name) = map(string.strip, couple.split(':', 2))
-            if not extension.get_category(category_name).set_default_by_name(ext_name):
-                print 'Error when setting extension "%s" default session to "%s"' % (category_name, ext_name)
+            if not extension.get_category(category_name)\
+                    .set_default_by_name(ext_name):
+                print 'Error setting extension "%s" default session to "%s"'\
+                        % (category_name, ext_name)
+
 extension.get_category('option provider').activate(ExtensionDefault)
 
+
 class PluggableOptionParser(object):
+
     results = ()
+
     def __init__(self, args):
         self.parser = optparse.OptionParser(conflict_handler="resolve")
         self.args = args
-        custom_options = extension.get_category('option provider').use()().option_register().get_result()
+        custom_options = extension.get_category('option provider').use()()\
+                .option_register().get_result()
         for opt in custom_options.values():
             self.parser.add_option(opt)
 
@@ -493,16 +508,20 @@ class PluggableOptionParser(object):
         if not self.__class__.results:
             self.__class__.results = self.parser.parse_args(self.args)
         return self.__class__.results
+
     @classmethod
     def get_parsing(cls):
         return cls.results
+
+
 def main():
     global argv
     """
     the main method of emesene
     """
     extension.category_register('session', msn.Session, single_instance=True)
-    extension.category_register('option provider', None, interfaces=interfaces.IOptionProvider)
+    extension.category_register('option provider', None,\
+            interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
     extension.get_category('option provider').activate(ExtensionDefault)
     options = PluggableOptionParser(argv)
@@ -512,4 +531,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
