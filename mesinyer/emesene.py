@@ -43,6 +43,9 @@ else:
 import gui
 import utils
 import debugger
+import logging
+log = logging.getLogger('emesene')
+
 
 import e3
 from e3 import msn
@@ -52,7 +55,7 @@ try:
     from e3 import papylib
 except Exception, exc:
     papylib = None
-    debugger.warning('Errors occurred on papyon importing: %s' % str(exc))
+    log.warning('Errors occurred on papyon importing: %s' % str(exc))
 
 from pluginmanager import get_pluginmanager
 import extension
