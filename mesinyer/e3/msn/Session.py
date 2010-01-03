@@ -3,7 +3,6 @@ from Worker import Worker
 from MsnMessage import Message
 import extension
 
-@extension.implements('session')
 class Session(e3.Session):
     '''a specialization of e3.Session'''
     NAME = 'MSN session'
@@ -36,3 +35,4 @@ class Session(e3.Session):
         message = e3.Message(Message.TYPE_NUDGE, None, account)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
 
+extension.implements(Session, 'session')
