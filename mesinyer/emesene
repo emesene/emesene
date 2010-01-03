@@ -27,10 +27,7 @@ except:
 
 try:
     from mesinyer import emesene
-    from mesinyer import extension
 except ImportError:
     import emesene
-    import extension
 
-main_method = extension.get_default('main')
-main_method(emesene.Controller)
+emesene.main()
