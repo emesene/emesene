@@ -521,8 +521,8 @@ def main():
     the main method of emesene
     """
     extension.category_register('session', msn.Session, single_instance=True)
-    extension.category_register('option provider', None)
-            #interfaces=interfaces.IOptionProvider)
+    extension.category_register('option provider', None,
+            interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
     extension.get_category('option provider').activate(ExtensionDefault)
     options = PluggableOptionParser(argv)
