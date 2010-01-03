@@ -24,25 +24,26 @@ class Signal(object):
 
     def __init__(self):
         '''constructor'''
-        self._subscribers = []
+        self._subscribers = {}
 
     def subscribe(self, callback, *args, **kwargs):
         '''subscribe to the signal, when the signal is emited, callback will be
         called
         '''
-        self._subscribers.append((callback, args, kwargs))
+        self._subscribers[callback] = (args, kwargs)
 
     def unsubscribe(self, callback):
-        '''remove the callback from the subscribers list, raise ValueError if
-        the callback is not registeres (made this way to avoid abuse of the api)
+        '''remove the callback from the subscribers dict, raise KeyError if
+        the callback is not registered (made this way to avoid abuse of the api)
         '''
-        self._subscribers.remove(callback)
+        del(self._subscribers[callback])
 
     def emit(self, *args, **kwargs):
         '''emit the signal with args and kwargs, if a callback returns False
         then the remaining callbacks are not called
         '''
-        for callback, cargs, ckwargs in self._subscribers:
+        for callback, cargs in self._subscribers.iteritems():
+            cargs, ckwargs = cargs
             args += cargs
             kwargs.update(ckwargs)
 
