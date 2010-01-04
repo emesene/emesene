@@ -313,9 +313,8 @@ class Worker(e3.Worker):
 
         # log the status
         contact = self.session.contacts.me
-        account =  e3.Logger.Account(contact.attrs.get('CID', None), None,
-            contact.account, stat, contact.nick, contact.message,
-            contact.picture)
+        account = e3.Logger.Account.from_contact(contact)
+        account.status = stat
 
         self.session.logger.log('status change', stat, str(stat), account)
 
@@ -475,9 +474,9 @@ class Worker(e3.Worker):
         contact.status = status_
         contact.nick = nick
         contact.attrs['msnobj'] = msnobj
-        log_account = e3.Logger.Account(contact.attrs.get('CID', None), None,
-                contact.account, contact.status, contact.nick, contact.message,
-                contact.picture)
+        contact.attrs['CID'] = cid
+
+        log_account = e3.Logger.Account.from_contact(contact)
 
         if old_status != status_:
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
@@ -517,9 +516,7 @@ class Worker(e3.Worker):
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 'message', old_message)
             self.session.logger.log('message change', contact.status,
-                contact.message, e3.Logger.Account(contact.attrs.get('CID', None),
-                    None, contact.account, contact.status, contact.nick,
-                    contact.message, contact.picture))
+                contact.message, e3.Logger.Account.from_contact(contact))
 
         if old_media == contact.media:
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
@@ -555,9 +552,7 @@ class Worker(e3.Worker):
             msnobj = urllib.unquote(message.params[3])
             contact.attrs['CID'] = int(message.params[2])
 
-        log_account =  e3.Logger.Account(contact.attrs.get('CID', None), None,
-            contact.account, contact.status, contact.nick, contact.message,
-            contact.picture)
+        log_account = e3.Logger.Account.from_contact(contact)
 
         if old_status != status_:
             change_type = 'status'
@@ -599,9 +594,7 @@ class Worker(e3.Worker):
                 'offline', old_status)
             self.session.logger.log('status change', e3.status.OFFLINE,
                 str(e3.status.OFFLINE),
-                e3.Logger.Account(contact.attrs.get('CID', None), None,
-                    contact.account, contact.status, contact.nick, contact.message,
-                    contact.picture))
+                e3.Logger.Account.from_contact(contact))
 
     def _on_conversation_invitation(self, message):
         '''handle the invitation to start a conversation'''
@@ -819,9 +812,7 @@ class Worker(e3.Worker):
 
         # log the change
         contact = self.session.contacts.me
-        account =  e3.Logger.Account(contact.attrs.get('CID', None), None,
-            contact.account, contact.status, contact.nick, message,
-            contact.picture)
+        account = e3.Logger.Account.from_contact(contact)
 
         self.session.logger.log('message change', contact.status, message,
             account)
@@ -832,9 +823,8 @@ class Worker(e3.Worker):
         '''
         contact = self.session.contacts.me
         message = contact.message
-        account = e3.Logger.Account(contact.attrs.get('CID', None), None,
-            contact.account, contact.status, nick, contact.message,
-            contact.picture)
+        account = e3.Logger.Account.from_contact(contact)
+        account.nick = nick
 
         Requester.ChangeNick(self.session, nick, account,
             self.command_queue).start()
