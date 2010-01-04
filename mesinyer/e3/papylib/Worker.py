@@ -159,37 +159,55 @@ class Worker(e3.base.Worker, papyon.Client):
             papycontact.display_name, papycontact.personal_message, \
                                                    # alias isn't in papyon yet?            
             STATUS_PAPY_TO_E3[papycontact.presence], '', \
-            (papyon.profile.Membership.BLOCK in papycontact.memberships))
+            (papyon.profile.Membership.BLOCK & papycontact.memberships))
 
-        self.session.contacts.contacts[mail] = contact
+        self.session.contacts.contacts[papycontact.account] = contact
 
-        avatars = self.caches.get_avatar_cache(mail)
+        avatars = self.caches.get_avatar_cache(papycontact.account)
         if 'last' in avatars:
             contact.picture = os.path.join(avatars.path, 'last')
 
+    def _remove_contact(self, papycontact):
+        ''' removes a contact from the list (gui) '''
+        if papycontact.account in self.session.contacts.contacts:
+                del self.session.contacts.contacts[papycontact.account]
+   
     def _add_group(self, papygroup):
         ''' method to add a group to the (gui) contact list '''
         gid = papygroup.id
         self.session.groups[gid] = e3.base.Group(papygroup.name, gid)
+
+    def _remove_group(self, papygroup):
+        ''' removes a group from the list (gui) '''
+        if papygroup.id in self.session.groups:
+            del self.session.groups[papygroup.id]
 
     def _add_contact_to_group(self, papycontact, papygroup):
         ''' method to add a contact to a (gui) group '''
         self.session.groups[papygroup.id].contacts.append(papycontact.account)
         self.session.contacts.contacts[papycontact.account].groups.append(papygroup.id)
 
-    def _remove_contact(self, mail):
-        ''' removes a contact from the list (gui) '''
-        if mail in self.session.contacts.contacts:
-            self.session.contacts.contacts.remove(mail)
-   
-    def _remove_group(self, name):
-        ''' removes a group from the list (gui) '''
-        if name in self.session.groups:
-            del self.session.groups[name]
-
-    def _remove_contact_from_group(self, mail, gname):
+    def _remove_contact_from_group(self, papycontact, papygroup):
         ''' removes a contact from a group (gui) '''
+        if papycontact.account in self.session.groups[papygroup.id].contacts:
+            self.session.groups[papygroup.id].contacts.remove(papycontact.account)
 
+        if papygroup.id in self.session.contacts.contacts[papycontact.account].groups:
+                self.session.contacts.contacts[papycontact.account].groups\
+                    .remove(papygroup.id)
+    
+    def _rename_group(self, papygroup):
+        ''' renames a group (gui) '''
+        self.session.groups[papygroup.id] = e3.Group(papygroup.name, papygroup.id)
+
+    def _block_contact(self, papycontact):
+        ''' blocks a contact (gui) '''
+        self.session.contacts.contacts[papycontact.account].blocked = True
+
+    def _unblock_contact(self, papycontact):
+        ''' unblocks a contact (gui) '''
+        self.session.contacts.contacts[papycontact.account].blocked = False
+    
     # invite handlers
     def _on_conversation_invite(self, papyconversation):
         ''' create a cid and append the event handler to papyconv dict '''
@@ -418,32 +436,40 @@ class Worker(e3.base.Worker, papyon.Client):
 
     # address book events
     def _on_addressbook_messenger_contact_added(contact):
-        self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, contact.email)
+        self._add_contact(contact)
+        self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, contact.account)
 
     def _on_addressbook_contact_deleted(self, contact):
-        self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED, contact.email)
+        self._remove_contact(contact)
+        self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED, contact.account)
 
     def _on_addressbook_contact_blocked(self, contact):
-        self.session.add_event(Event.EVENT_CONTACT_BLOCK_SUCCEED, contact.email)
+        self._block_contact(contact)
+        self.session.add_event(Event.EVENT_CONTACT_BLOCK_SUCCEED, contact.account)
 
     def _on_addressbook_contact_unblocked(self, contact):
-        self.session.add_event(Event.EVENT_CONTACT_UNBLOCK_SUCCEED, contact.email)
+        self._unblock_contact(contact)
+        self.session.add_event(Event.EVENT_CONTACT_UNBLOCK_SUCCEED, contact.account)
 
     def _on_addressbook_group_added(self, group):
-        self._add_group(group.name)
-        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, group.name, group.name)
+        self._add_group(group)
+        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, group.id, group.name)
 
     def _on_addressbook_group_deleted(self, group):
-        self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, group.name)
+        self._remove_group(group)
+        self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, group.id, group.name)
 
     def _on_addressbook_group_renamed(self, group):
-        self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED, group.name)
+        self._rename_group(group)        
+        self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED, group.id, group.name)
 
     def _on_addressbook_group_contact_added(self, group, contact):
-        self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, contact.email)
+        self._add_contact_to_group(contact, group)
+        self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, group.id, contact.id)
 
     def _on_addressbook_group_contact_deleted(self, group, contact):
-        self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, contact.email)
+        self._remove_contact_from_group(contact, group)        
+        self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, group.id, contact.id)
 
     # profile events
     def _on_profile_presence_changed(self):
@@ -470,32 +496,10 @@ class Worker(e3.base.Worker, papyon.Client):
         if msn_object is not None:
             self._handle_action_set_picture(msn_object)
     
+################################################################################
+# BELOW THIS LINE, ONLY e3 HANDLERS
+################################################################################
     # e3 action handlers
-    def _handle_action_add_contact(self, account):
-        ''' handle Action.ACTION_ADD_CONTACT '''
-        self.address_book.add_contact
-        papycontact = self.address_book.contacts.search_by('account', account)
-
-        
-    def _handle_action_add_group(self, name):
-        '''handle Action.ACTION_ADD_GROUP
-        '''
-        self.address_book.add_group(name)
-
-    def _handle_action_add_to_group(self, account, gid):
-        ''' handle Action.ACTION_ADD_TO_GROUP '''
-        self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
-            gid, account)
-
-    def _handle_action_block_contact(self, account):
-        ''' handle Action.ACTION_BLOCK_CONTACT '''
-        self.session.add_event(Event.EVENT_CONTACT_BLOCK_SUCCEED, account)
-
-    def _handle_action_unblock_contact(self, account):
-        '''handle Action.ACTION_UNBLOCK_CONTACT '''
-        self.session.add_event(Event.EVENT_CONTACT_UNBLOCK_SUCCEED,
-            account)
-
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS '''
         self._set_status(status_)
@@ -513,44 +517,89 @@ class Worker(e3.base.Worker, papyon.Client):
         ''' handle Action.ACTION_LOGOUT '''
         self.quit()
 
-    def _handle_action_move_to_group(self, account, src_gid, dest_gid):
+    # e3 action handlers - address book
+    def _handle_action_add_contact(self, account):
+        ''' handle Action.ACTION_ADD_CONTACT '''
+        def add_contact_fail(*args):
+            print "add contact fail", args
+            self.session.add_event(e3.Event.EVENT_CONTACT_ADD_FAILED, '') #account
+        self.address_book.add_messenger_contact(account, failed_cb=add_contact_fail)
+
+    def _handle_action_add_group(self, name):
+        '''handle Action.ACTION_ADD_GROUP '''
+        def add_group_fail(*args):
+            print "add group fail", args
+            self.session.add_event(e3.Event.EVENT_GROUP_ADD_FAILED, '') #group name
+        self.address_book.add_group(name, failed_cb=add_group_fail)
+
+    def _handle_action_add_to_group(self, account, gid):
+        ''' handle Action.ACTION_ADD_TO_GROUP '''
+        def add_to_group_fail(*args):
+            print "add group fail", args
+            self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_FAILED, 0, 0) #gid, cid
+        self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
+            gid, account)
+
+    def _handle_action_block_contact(self, account):
+        ''' handle Action.ACTION_BLOCK_CONTACT '''
+        def block_fail(*args):
+            print "block fail", args
+            self.session.add_event(e3.Event.EVENT_CONTACT_BLOCK_FAILED, '') #account
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
+        self.address_book.block_contact(papycontact, failed_cb=block_fail)
+
+    def _handle_action_unblock_contact(self, account):
+        '''handle Action.ACTION_UNBLOCK_CONTACT '''
+        def unblock_fail(*args):
+            print "unblock fail", args
+            self.session.add_event(e3.Event.EVENT_CONTACT_UNBLOCK_FAILED, '') #account
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
+        self.address_book.unblock_contact(papycontact, failed_cb=block_fail)
+
+    def _handle_action_move_to_group(self, account, src_gid, dest_gid): #TODO: finish this
         '''handle Action.ACTION_MOVE_TO_GROUP '''
         self.session.add_event(Event.EVENT_CONTACT_MOVE_SUCCEED,
             account, src_gid, dest_gid)
 
     def _handle_action_remove_contact(self, account):
         '''handle Action.ACTION_REMOVE_CONTACT '''
-        papycontact = self.address_book.contacts.search_by('account', account)
-        self.address_book.delete_contact(papycontact)
+        def remove_contact_fail(*args):
+            print "remove contact fail"
+            self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_FAILED, self.gid)
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
+        print "account, ",papycontact
+        self.address_book.delete_contact(papycontact, failed_cb=remove_contact_fail)
         
-    def _handle_action_reject_contact(self, account):
+    def _handle_action_reject_contact(self, account): #TODO: finish this
         '''handle Action.ACTION_REJECT_CONTACT '''
-        papycontact = self.address_book.contacts.search_by('account', account)
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
         self.address_book.decline_contact_invitation(papycontact)
 
         # TODO: move to ab callback
         self.session.add_event(Event.EVENT_CONTACT_REJECT_SUCCEED, account)
 
-    def _handle_action_remove_from_group(self, account, gid):
+    def _handle_action_remove_from_group(self, account, gid): #TODO: finish this
         ''' handle Action.ACTION_REMOVE_FROM_GROUP '''
         self.session.add_event(Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED,
             gid, account)
 
-    def _handle_action_remove_group(self, gid):
+    def _handle_action_remove_group(self, gid): #TODO: finish this
         ''' handle Action.ACTION_REMOVE_GROUP '''
-        self.address_book.delete_group('') #TODO
-        
-        self._remove_group(gid)
-        self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, gid)
+        def remove_group_fail(*args):
+            print "remove group fail"
+            self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_FAILED, 0) #gid        
+        papygroup = self.address_book.groups.search_by('name', self.session.groups[gid].name)
+        self.address_book.delete_group(papygroup)
 
-    def _handle_action_rename_group(self, gid, name):
+    def _handle_action_rename_group(self, gid, name): #TODO: finish this
         ''' handle Action.ACTION_RENAME_GROUP '''
+        def rename_group_fail(*args):
+            print "rename group fail"
+            self.session.add_event(e3.Event.EVENT_GROUP_RENAME_FAILED, 0, '') # gid, name        
+        
         self.address_book.rename_group(name, newname = 'todo')
 
-        self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED,
-            gid, name)
-
-    def _handle_action_set_contact_alias(self, account, alias):
+    def _handle_action_set_contact_alias(self, account, alias): #TODO: finish this
         ''' handle Action.ACTION_SET_CONTACT_ALIAS '''
         self.session.add_event(Event.EVENT_CONTACT_ALIAS_SUCCEED, account)
 
@@ -633,7 +682,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.conversations[account] = cid
             self.rconversations[cid] = account
             # create a papyon conversation
-            contact = self.address_book.contacts.search_by('account', account)
+            contact = self.address_book.contacts.search_by('account', account)[0]
             conv = papyon.Conversation(self, contact)
             self.papyconv[cid] = conv
             # attach the conversation event handler
@@ -645,7 +694,7 @@ class Worker(e3.base.Worker, papyon.Client):
             # new emesene conversation
             self.conversations[account] = cid
             self.rconversations[cid] = account
-            contact = self.address_book.contacts.search_by('account', account)
+            contact = self.address_book.contacts.search_by('account', account)[0]
             # create a papyon conversation
             conv = papyon.Conversation(self, contact)
             self.papyconv[cid] = conv
