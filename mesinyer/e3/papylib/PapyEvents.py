@@ -44,6 +44,9 @@ class InviteEvent(papyon.event.InviteEventInterface):
 
     def on_invite_conference(self, call):
         self._client._on_conference_invite(call)
+
+    def on_invite_file_transfer(self, session):
+        self._client._on_invite_file_transfer(session)
         
 class ConversationEvent(papyon.event.ConversationEventInterface):
     def __init__(self, conversation, _client):

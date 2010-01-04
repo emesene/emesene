@@ -59,8 +59,6 @@ except Exception, e:
 from PapyEvents import *
 from PapyConvert import *
 from PapyConference import *
-    
-#logging.basicConfig(level=logging.DEBUG)
 
 class Worker(e3.base.Worker, papyon.Client):
     ''' papylib's worker - an emesene extension for papyon library '''
@@ -203,6 +201,14 @@ class Worker(e3.base.Worker, papyon.Client):
             call.reject()            
         else:
             call.accept()
+
+    def _on_invite_file_transfer(self, papysession):
+        print "new ft invite", papysession
+        print papysession.filename, papysession.size, papysession.preview 
+        if 0:
+            papysession.reject()
+        else:
+            papysession.accept()
 
     # conversation handlers
     def _on_conversation_user_typing(self, papycontact, pyconvevent):

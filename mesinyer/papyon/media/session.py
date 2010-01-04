@@ -136,6 +136,8 @@ class MediaSession(gobject.GObject, EventsDispatcher):
            @param stream: Stream to add
            @type stream: L{papyon.media.stream.MediaStream}"""
 
+        # TODO: Make sure a stream with the same name doesn't already
+        # exist in the session (check for 'stream.name in self._signals')
         sp = stream.connect("prepared", self.on_stream_prepared)
         sr = stream.connect("ready", self.on_stream_ready)
         self._streams.append(stream)
@@ -163,10 +165,11 @@ class MediaSession(gobject.GObject, EventsDispatcher):
            @type stream: L{papyon.media.stream.MediaStream}"""
 
         name = stream.name
-        for handler_id in self._signals[name]:
-            stream.disconnect(handler_id)
-        del self._signals[name]
-        stream.close()
+        if name in self._signals:
+            for handler_id in self._signals[name]:
+                stream.disconnect(handler_id)
+            del self._signals[name]
+            stream.close()
         self._streams.remove(stream)
         self._dispatch("on_stream_removed", stream)
 

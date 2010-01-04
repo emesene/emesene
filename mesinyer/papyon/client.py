@@ -92,7 +92,7 @@ from papyon.util.decorator import rw_property
 from papyon.transport import *
 from papyon.switchboard_manager import SwitchboardManager
 from papyon.msnp2p import P2PSessionManager
-from papyon.p2p import MSNObjectStore, WebcamHandler
+from papyon.p2p import MSNObjectStore, FileTransferManager, WebcamHandler
 from papyon.sip import SIPConnectionManager
 from papyon.conversation import SwitchboardConversation, \
     ExternalNetworkConversation
@@ -150,6 +150,9 @@ class Client(EventsDispatcher):
         self._msn_object_store = MSNObjectStore(self)
         self._p2p_session_manager.register_handler(self._msn_object_store)
 
+        self._ft_manager = FileTransferManager(self)
+        self._p2p_session_manager.register_handler(self._ft_manager)
+
         self._external_conversations = {}
 
         self._sso = None
@@ -164,6 +167,7 @@ class Client(EventsDispatcher):
         self.__connect_switchboard_manager_signals()
         self.__connect_webcam_handler_signals()
         self.__connect_call_manager_signals()
+        self.__connect_ft_manager_signals()
 
     ### public:
     @property
@@ -193,6 +197,12 @@ class Client(EventsDispatcher):
         """The SIP connection manager
             @type: L{SIPConnectionManager<papyon.sip.SIPConnectionManager>}"""
         return self._call_manager
+
+    @property
+    def ft_manager(self):
+        """The files transfer manager
+            @type: L{FileTransferManager<papyon.p2p.FileTransferManager>}"""
+        return self._ft_manager
 
     @property
     def oim_box(self):
@@ -497,3 +507,10 @@ class Client(EventsDispatcher):
             self._dispatch("on_invite_conference", call)
 
         self._call_manager.connect("invite-received", invite_received)
+
+    def __connect_ft_manager_signals(self):
+        """Connect File Transfer Manager signals"""
+        def invite_received(ft_manager, session):
+            self._dispatch("on_invite_file_transfer", session)
+
+        self._ft_manager.connect("transfer-requested", invite_received)

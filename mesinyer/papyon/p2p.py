@@ -25,6 +25,7 @@ This module contains the classes needed to engage in a peer to peer transfer
 with a contact.
     @group MSNObject: MSNObjectStore, MSNObject, MSNObjectType
     @sort: MSNObjectStore, MSNObject, MSNObjectType"""
+from msnp2p.filetransfer import FileTransferSession
 from msnp2p.msnobject import MSNObjectSession
 from msnp2p.webcam import WebcamSession
 from msnp2p import EufGuid, ApplicationID
@@ -41,7 +42,8 @@ import base64
 import hashlib
 import logging
 
-__all__ = ['MSNObjectType', 'MSNObject', 'MSNObjectStore', 'WebcamHandler']
+__all__ = ['MSNObjectType', 'MSNObject', 'MSNObjectStore',
+           'FileTransferManager', 'WebcamHandler']
 
 logger = logging.getLogger('papyon.p2p')
 
@@ -159,7 +161,10 @@ class MSNObject(object):
             shad = base64.b64decode(shad)
         shac = element.get("SHA1C", None)
         if shac is not None:
-            shac = base64.b64decode(shac)
+            try:
+                shac = base64.b64decode(shac)
+            except TypeError:
+                logger.warning("Invalid SHA1C in MSNObject")
 
         result = MSNObject(creator, size, type, location, friendly, shad, shac)
         result._repr = xml_data
@@ -272,6 +277,48 @@ class MSNObjectStore(object):
         handle_id = self._incoming_sessions[session]
         session.disconnect(handle_id)
         del self._incoming_sessions[session]
+
+
+class FileTransferManager(gobject.GObject):
+
+    __gsignals__ = {
+            "transfer-requested" : (gobject.SIGNAL_RUN_FIRST,
+                gobject.TYPE_NONE,
+                (object,))
+    }
+
+    def __init__(self, client):
+        gobject.GObject.__init__(self)
+        self._client = client
+        self._sessions = {}
+
+    def _can_handle_message(self, message):
+        euf_guid = message.body.euf_guid
+        return (euf_guid == EufGuid.FILE_TRANSFER)
+
+    def _handle_message(self, peer, message):
+        session = FileTransferSession(self._client._p2p_session_manager,
+                peer, message.body.application_id, message)
+        self._connect_session(session)
+        self.emit("transfer-requested", session)
+        return session
+
+    def send(self, peer, filename, size):
+        session = FileTransferSession(self._client._p2p_session_manager,
+                peer, ApplicationID.FILE_TRANSFER)
+        session.invite(filename, size)
+        self._connect_session(session)
+        return session
+
+    def _connect_session(self, session):
+        handle_id = session.connect("completed", self._transfer_completed)
+        self._sessions[session] = handle_id
+
+    def _transfer_completed(self, session, data):
+        handle_id = self._sessions[session]
+        session.disconnect(handle_id)
+        del self._sessions[session]
+
 
 class WebcamHandler(gobject.GObject):
 
