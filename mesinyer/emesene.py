@@ -28,24 +28,13 @@ import gettext
 import optparse
 
 import string
-# fix for gstreamer --help
-argv = sys.argv
-sys.argv = [argv[0]]
-
-# load translations
-if os.path.exists('default.mo'):
-    gettext.GNUTranslations(open('default.mo')).install()
-elif os.path.exists('po/'):
-    gettext.install('emesene', 'po/')
-else:
-    gettext.install('emesene')
 
 import gui
 import utils
 import debugger
 import logging
+#logging.basicConfig()
 log = logging.getLogger('emesene')
-
 
 import e3
 from e3 import msn
@@ -61,6 +50,18 @@ from pluginmanager import get_pluginmanager
 import extension
 import interfaces
 from gui import gtkui
+
+# fix for gstreamer --help
+argv = sys.argv
+sys.argv = [argv[0]]
+
+# load translations
+if os.path.exists('default.mo'):
+    gettext.GNUTranslations(open('default.mo')).install()
+elif os.path.exists('po/'):
+    gettext.install('emesene', 'po/')
+else:
+    gettext.install('emesene')
 
 
 class VerboseOption(object):
@@ -104,6 +105,9 @@ class Controller(object):
         '''register core extensions'''
         extension.category_register('session', msn.Session,
                 single_instance=True)
+        extension.register('session', jabber.Session)
+        if papylib is not None:
+            extension.register('session', papylib.Session)
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
                 e3.common.notification.notify)

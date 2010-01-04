@@ -157,7 +157,8 @@ class Worker(e3.base.Worker, papyon.Client):
         ''' helper method to add a contact to the (gui) contact list '''
         contact = e3.base.Contact(papycontact.account, papycontact.id, \
             papycontact.display_name, papycontact.personal_message, \
-            STATUS_PAPY_TO_E3[papycontact.presence], '', \ # alias isn't in papyon yet?
+                                                   # alias isn't in papyon yet?            
+            STATUS_PAPY_TO_E3[papycontact.presence], '', \
             (papyon.profile.Membership.BLOCK in papycontact.memberships))
 
         self.session.contacts.contacts[mail] = contact
@@ -537,7 +538,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_remove_group(self, gid):
         ''' handle Action.ACTION_REMOVE_GROUP '''
-        self.address_book.
+        self.address_book.delete_group('') #TODO
         
         self._remove_group(gid)
         self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, gid)
