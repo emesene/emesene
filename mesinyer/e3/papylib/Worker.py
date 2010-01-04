@@ -478,12 +478,29 @@ class Worker(e3.base.Worker, papyon.Client):
         
     def _on_profile_display_name_changed(self):
         """Called when the display name changes."""
-        self.session.display_name = "asd"
-        self._handle_action_set_nick(self.profile.display_name)
+        display_name = self.profile.display_name
+        
+        contact = self.session.contacts.me
+        account =  Logger.Account(contact.attrs.get('CID', None), None,
+            contact.account, contact.status, display_name, contact.message,
+            contact.picture)
+        self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, display_name)
 
     def _on_profile_personal_message_changed(self):
         """Called when the personal message changes."""
-        print "pm", self.profile.personal_message
+        # set the message in emesene
+        self.session.contacts.me.message = message
+        message = self.profile.personal_message
+        # log the change
+        contact = self.session.contacts.me
+        account = Logger.Account(contact.attrs.get('CID', None), None,
+            contact.account, contact.status, contact.nick, contact.message,
+            contact.picture)
+
+        self.session.logger.log(\
+            'message change', contact.status, message, account)
+        self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
+
 
     def _on_profile_current_media_changed(self):
         """Called when the current media changes."""
@@ -605,31 +622,11 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_set_message(self, message):
         ''' handle Action.ACTION_SET_MESSAGE '''
-        # set the message in papyon
         self.profile.personal_message = message
-        # set the message in emesene
-        self.session.contacts.me.message = message
-        # log the change
-        contact = self.session.contacts.me
-        account =  Logger.Account(contact.attrs.get('CID', None), None,
-            contact.account, contact.status, contact.nick, message,
-            contact.picture)
-
-        # TODO: move to profile callbacks
-        self.session.logger.log(\
-            'message change', contact.status, message, account)
-        self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK '''
-        self.profile.display_name = nick
-
-        # TODO: move to profile callbacks
-        contact = self.session.contacts.me
-        account =  Logger.Account(contact.attrs.get('CID', None), None,
-            contact.account, contact.status, nick, contact.message,
-            contact.picture)
-        self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, nick)
+        self.profile.display_name = nick        
 
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE'''
