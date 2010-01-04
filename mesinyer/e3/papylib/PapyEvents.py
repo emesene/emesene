@@ -27,9 +27,8 @@ class ClientEvents(papyon.event.ClientEventInterface):
             #self._client.quit()
             pass
         elif state == papyon.event.ClientState.OPEN:
-            self._client.set_initial_infos()
-            
             self._client.session.add_event(Event.EVENT_LOGIN_SUCCEED)
+            self._client.set_initial_infos()
             self._client._fill_contact_list(self._client.address_book)
             
     def on_client_error(self, error_type, error):
@@ -76,7 +75,7 @@ class ConversationEvent(papyon.event.ConversationEventInterface):
 
 class ContactEvent(papyon.event.ContactEventInterface):
     def on_contact_memberships_changed(self, contact):
-        # TODO: handle this
+        # TODO: handle this, maybe instead of BLOCK events
         """Called when the memberships of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}
@@ -106,7 +105,7 @@ class ContactEvent(papyon.event.ContactEventInterface):
         """Called when the client capabilities of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
-        # TODO: handle this
+        # TODO: handle this -- capabilities? wtf?
 
     def on_contact_msn_object_changed(self, contact):
         self._client._on_contact_msnobject_changed(contact)

@@ -56,6 +56,7 @@ try:
 except Exception, e:
     log.exception("You need python-papyon(>=%s.%s.%s) to be installed " \
                   "in order to use this extension" % REQ_VER)
+
 from PapyEvents import *
 from PapyConvert import *
 from PapyConference import *
@@ -112,7 +113,7 @@ class Worker(e3.base.Worker, papyon.Client):
             except Queue.Empty:
                 pass
 
-    # some useful methods
+    # some useful methods (mostly, gui only)
     def set_initial_infos(self):
         '''this is called on login'''
         # loads or create a config for this session
@@ -120,16 +121,13 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.create_config()
         # sets the login-chosen presence in papyon
         presence = self.session.account.status
+        nick = self.profile.display_name
         self._set_status(presence)
+        # temporary hax?
+        self.profile.display_name = nick
 
-        return
-        message = self.profile.personal_message
-        displaypic = self.profile.msn_object
-        print "Initial infos:", nick, message, displaypic, presence
-        
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
-        self.session.account.status = stat
         self.session.contacts.me.status = stat
         self.profile.presence = STATUS_E3_TO_PAPY[stat]
 
@@ -479,7 +477,8 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_profile_display_name_changed(self):
         """Called when the display name changes."""
         display_name = self.profile.display_name
-        
+        self.session.contacts.me.nick = display_name
+
         contact = self.session.contacts.me
         account = Logger.Account(contact.attrs.get('CID', None), None,
             contact.account, contact.status, display_name, contact.message,
@@ -638,7 +637,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK '''
-        self.profile.display_name = nick        
+        self.profile.display_name = nick
 
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE'''
@@ -671,7 +670,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.profile.msn_object = msn_object
         self.session.contacts.me.picture = picture_name
         self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
-                self.session.account.account, picture_name)
+            self.session.account.account, picture_name)
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES

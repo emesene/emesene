@@ -29,11 +29,9 @@ import optparse
 
 import string
 
-import gui
 import utils
 import debugger
 import logging
-#logging.basicConfig()
 log = logging.getLogger('emesene')
 
 import e3
@@ -49,6 +47,8 @@ except Exception, exc:
 from pluginmanager import get_pluginmanager
 import extension
 import interfaces
+
+import gui
 from gui import gtkui
 
 # fix for gstreamer --help
