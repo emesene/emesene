@@ -132,14 +132,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.account.status = stat
         self.session.contacts.me.status = stat
         self.profile.presence = STATUS_E3_TO_PAPY[stat]
-        self.session.add_event(Event.EVENT_STATUS_CHANGE_SUCCEED, stat)
-        # log the status
-        contact = self.session.contacts.me
-        account =  Logger.Account(contact.attrs.get('CID', None), None,
-            contact.account, stat, contact.nick, contact.message,
-            contact.picture)
-
-        self.session.logger.log('status change', stat, str(stat), account)
 
     def _fill_contact_list(self, abook):
         ''' fill the contact list with papy contacts '''
@@ -474,23 +466,32 @@ class Worker(e3.base.Worker, papyon.Client):
     # profile events
     def _on_profile_presence_changed(self):
         """Called when the presence changes."""
-        pass
+        stat = STATUS_PAPY_TO_E3[self.profile.presence]
+        # log the status
+        contact = self.session.contacts.me
+        account = Logger.Account(contact.attrs.get('CID', None), None,
+            contact.account, stat, contact.nick, contact.message,
+            contact.picture)
+
+        self.session.logger.log('status change', stat, str(stat), account)
+        self.session.add_event(Event.EVENT_STATUS_CHANGE_SUCCEED, stat)
         
     def _on_profile_display_name_changed(self):
         """Called when the display name changes."""
         display_name = self.profile.display_name
         
         contact = self.session.contacts.me
-        account =  Logger.Account(contact.attrs.get('CID', None), None,
+        account = Logger.Account(contact.attrs.get('CID', None), None,
             contact.account, contact.status, display_name, contact.message,
             contact.picture)
+
         self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, display_name)
 
     def _on_profile_personal_message_changed(self):
         """Called when the personal message changes."""
+        message = self.profile.personal_message
         # set the message in emesene
         self.session.contacts.me.message = message
-        message = self.profile.personal_message
         # log the change
         contact = self.session.contacts.me
         account = Logger.Account(contact.attrs.get('CID', None), None,
@@ -501,10 +502,20 @@ class Worker(e3.base.Worker, papyon.Client):
             'message change', contact.status, message, account)
         self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
 
-
     def _on_profile_current_media_changed(self):
         """Called when the current media changes."""
-        print "currentmedia", self.profile.personal_message
+        message = self.profile.current_media
+        # set the message in emesene
+        self.session.contacts.me.message = message
+        # log the change
+        contact = self.session.contacts.me
+        account = Logger.Account(contact.attrs.get('CID', None), None,
+            contact.account, contact.status, contact.nick, contact.message,
+            contact.picture)
+
+        self.session.logger.log(\
+            'message change', contact.status, message, account)
+        self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
 
     def _on_profile_msn_object_changed(self):
         """Called when the MSNObject changes."""
@@ -517,10 +528,6 @@ class Worker(e3.base.Worker, papyon.Client):
 # BELOW THIS LINE, ONLY e3 HANDLERS
 ################################################################################
     # e3 action handlers
-    def _handle_action_change_status(self, status_):
-        '''handle Action.ACTION_CHANGE_STATUS '''
-        self._set_status(status_)
-
     def _handle_action_login(self, account, password, status_):
         '''handle Action.ACTION_LOGIN '''
         self.session.account.account = account
@@ -620,6 +627,11 @@ class Worker(e3.base.Worker, papyon.Client):
         ''' handle Action.ACTION_SET_CONTACT_ALIAS '''
         self.session.add_event(Event.EVENT_CONTACT_ALIAS_SUCCEED, account)
 
+    # e3 action handlers - profile
+    def _handle_action_change_status(self, status_):
+        '''handle Action.ACTION_CHANGE_STATUS '''
+        self._set_status(status_)
+
     def _handle_action_set_message(self, message):
         ''' handle Action.ACTION_SET_MESSAGE '''
         self.profile.personal_message = message
@@ -657,7 +669,6 @@ class Worker(e3.base.Worker, papyon.Client):
                          "",
                          data=StringIO.StringIO(avatar))
         self.profile.msn_object = msn_object
-
         self.session.contacts.me.picture = picture_name
         self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
                 self.session.account.account, picture_name)
