@@ -116,28 +116,28 @@ class AddressBookEvent(papyon.event.AddressBookEventInterface):
         self._client._on_addressbook_messenger_contact_added(contact)
 
     def on_addressbook_contact_deleted(self, contact):
-        self._client._on_addressbook_contact_deleted(self, contact)
+        self._client._on_addressbook_contact_deleted(contact)
 
     def on_addressbook_contact_blocked(self, contact):
-        self._client._on_addressbook_contact_blocked(self, contact)
+        self._client._on_addressbook_contact_blocked(contact)
 
     def on_addressbook_contact_unblocked(self, contact):
-        self._client._on_addressbook_contact_unblocked(self, contact)
+        self._client._on_addressbook_contact_unblocked(contact)
 
     def on_addressbook_group_added(self, group):
-        self._client._on_addressbook_group_added(self, group)
+        self._client._on_addressbook_group_added(group)
 
     def on_addressbook_group_deleted(self, group):
-        self._client._on_addressbook_group_deleted(self, group)
+        self._client._on_addressbook_group_deleted(group)
 
     def on_addressbook_group_renamed(self, group):
-        self._client._on_addressbook_group_renamed(self, group)
+        self._client._on_addressbook_group_renamed(group)
 
     def on_addressbook_group_contact_added(self, group, contact):
-        self._client._on_addressbook_group_contact_added(self, group, contact)
+        self._client._on_addressbook_group_contact_added(group, contact)
 
     def on_addressbook_group_contact_deleted(self, group, contact):
-        self._client._on_addressbook_group_contact_deleted(self, group, contact)
+        self._client._on_addressbook_group_contact_deleted(group, contact)
         
 class ProfileEvent(papyon.event.ProfileEventInterface):
     def on_profile_presence_changed(self):
