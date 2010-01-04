@@ -56,13 +56,13 @@ class ConversationManager(object):
             if not is_raw:
                 middle = self.format_from_message(message)
 
-            conversation.output.append(first + middle + last, cedict)
+            conversation.output.append(first + middle + last, cedict,self.session.config.b_allow_auto_scroll)
             conversation.play_send()
 
         elif message.type == e3.Message.TYPE_NUDGE:
             conversation.output.append(
                 conversation.formatter.format_information(
-                    '%s just sent you a nudge!' % (nick,)))
+                    '%s just sent you a nudge!' % (nick,)),self.session.config.b_allow_auto_scroll)
             conversation.play_nudge()
 
         if message.type != e3.Message.TYPE_TYPING:
@@ -89,9 +89,9 @@ class ConversationManager(object):
         if conversation is not None:
             error = conversation.formatter.format_error(
                 'message couldn\'t be sent: ')
-            conversation.output.append(error)
+            conversation.output.append(error,self.session.config.b_allow_auto_scroll)
             conversation.output.append(
-                self.format_from_message(message))
+                self.format_from_message(message),self.session.config.b_allow_auto_scroll)
         else:
             log.debug('conversation %s not found' % cid)
 

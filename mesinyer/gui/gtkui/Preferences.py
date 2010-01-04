@@ -347,6 +347,8 @@ class Interface(BaseTable):
             'session.config.b_show_toolbar')
         self.append_check('Show user panel',
             'session.config.b_show_userpanel')
+        self.append_check('Allow auto scroll in conversation',
+            'session.config.b_allow_auto_scroll')
         self.append_check('Avatar on conversation left side',
             'session.config.b_avatar_on_left')
         self.append_range('Contact list avatar size',
