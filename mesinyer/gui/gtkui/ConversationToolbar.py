@@ -19,34 +19,35 @@ class ConversationToolbar(gtk.Toolbar):
         handler -- an instance of e3common.Handler.ConversationToolbarHandler
         """
         gtk.Toolbar.__init__(self)
+        self.set_style(gtk.TOOLBAR_ICONS)
         self.handler = handler
 
         self.font = gtk.ToolButton(gtk.STOCK_SELECT_FONT)
-        self.font.connect('clicked', 
+        self.font.connect('clicked',
             lambda *args: self.handler.on_font_selected())
         self.color = gtk.ToolButton(gtk.STOCK_SELECT_COLOR)
-        self.color.connect('clicked', 
+        self.color.connect('clicked',
             lambda *args: self.handler.on_color_selected())
 
-        self.emotes = gtk.ToolButton( 
+        self.emotes = gtk.ToolButton(
             utils.safe_gtk_image_load(gui.theme.emote_to_path(':D', True)), 'Emotes')
-        self.emotes.connect('clicked', 
+        self.emotes.connect('clicked',
             lambda *args: self.handler.on_emotes_selected())
-        self.nudge = gtk.ToolButton( 
+        self.nudge = gtk.ToolButton(
             utils.safe_gtk_image_load(gui.theme.emote_to_path(':S', True)), 'Nudge')
-        self.nudge.connect('clicked', 
+        self.nudge.connect('clicked',
             lambda *args: self.handler.on_notify_atention_selected())
 
         self.invite = gtk.ToolButton(gtk.STOCK_ADD)
-        self.invite.connect('clicked', 
+        self.invite.connect('clicked',
             lambda *args: self.handler.on_invite_selected())
         self.clean = gtk.ToolButton(gtk.STOCK_CLEAR)
-        self.clean.connect('clicked', 
+        self.clean.connect('clicked',
             lambda *args: self.handler.on_clean_selected())
 
         self.invite_file_transfer = gtk.ToolButton(gtk.STOCK_GO_UP)
         self.invite_file_transfer.set_label(_('Send File'))
-        self.invite_file_transfer.connect('clicked', 
+        self.invite_file_transfer.connect('clicked',
             lambda *args: self.handler.on_invite_file_trasnfer_selected())
 
 
@@ -60,7 +61,7 @@ class ConversationToolbar(gtk.Toolbar):
 
         self.add(self.invite)
         self.add(self.clean)
-        
+
         self.add(self.invite_file_transfer)
 
 
