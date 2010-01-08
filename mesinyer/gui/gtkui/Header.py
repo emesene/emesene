@@ -16,7 +16,7 @@ class Header(gtk.HBox):
     def __init__(self):
         '''constructor'''
         gtk.HBox.__init__(self)
-        self.set_border_width(4)
+        self.set_border_width(2)
         self._information = gtk.Label('info')
         self._information.set_ellipsize(pango.ELLIPSIZE_END)
         self._information.set_alignment(0.0, 0.5)
