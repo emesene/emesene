@@ -6,6 +6,8 @@ import utils
 import TextField
 import StatusButton
 
+import extension
+
 class UserPanel(gtk.VBox):
     '''a panel to display and manipulate the user information'''
     NAME = 'User Panel'
@@ -21,6 +23,12 @@ class UserPanel(gtk.VBox):
         self._enabled = True
 
         self.image = utils.safe_gtk_image_load(gui.theme.user)
+        self.avatarBox = gtk.EventBox()
+        self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
+        self.avatarBox.connect('button-press-event', self.on_avatar_click)
+        self.avatarBox.add(self.image)
+        self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
+
         self.nick = TextField.TextField(session.contacts.me.display_name, '', False)
         self.status = StatusButton.StatusButton(session)
         self.status.set_status(session.contacts.me.status)
@@ -35,7 +43,7 @@ class UserPanel(gtk.VBox):
         self.toolbar = gtk.HBox()
 
         hbox = gtk.HBox()
-        hbox.pack_start(self.image, False)
+        hbox.pack_start(self.avatarBox, False)
 
         vbox = gtk.VBox()
         nick_hbox = gtk.HBox()
@@ -51,7 +59,7 @@ class UserPanel(gtk.VBox):
 
         self.pack_start(hbox, True, True)
         self.pack_start(self.toolbar, False)
-
+        
         hbox.show()
         nick_hbox.show()
         message_hbox.show()
@@ -74,6 +82,7 @@ class UserPanel(gtk.VBox):
         '''override show'''
         gtk.VBox.show(self)
         self.image.show()
+        self.avatarBox.show()
         self.nick.show()
         self.message.show()
         self.status.show()
@@ -124,4 +133,14 @@ class UserPanel(gtk.VBox):
         '''
         self.nick.text = nick
         self.message.text = message
+
+    def on_avatar_click(self,widget,data):
+        '''method called when user click on his avatar 
+        '''
+        def set_picture_cb(response, filename):
+            '''callback for the avatar chooser'''
+            if response == gui.stock.ACCEPT:
+                self.session.set_picture(filename)
+
+        extension.get_default('avatar chooser')(set_picture_cb).show()
 

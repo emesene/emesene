@@ -1,6 +1,7 @@
 import gtk
 
 import extension
+from e3 import status
 
 class TrayIcon(gtk.StatusIcon):
     """
@@ -37,6 +38,7 @@ class TrayIcon(gtk.StatusIcon):
         method called to set the state to the main window
         """
         self.handler.session = session
+        self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
         self.menu = MainMenu(self.handler)
         self.menu.show_all()
 
@@ -51,6 +53,14 @@ class TrayIcon(gtk.StatusIcon):
                 self.main_window.hide()
             else:
                 self.main_window.show()
+
+    def _on_change_status(self,stat):
+        """
+        change the icon in the tray according to user's state
+        """
+        if stat not in status.ALL or stat == -1:
+            return
+        self.set_from_file(self.handler.theme.status_icons[stat])
 
     def _on_popup(self, trayicon, button, activate_time):
         """
