@@ -747,6 +747,7 @@ class Dialog(object):
             response_cb(response)
 
         window = cls.new_window('Preferences', response_cb)
+        window.set_modal(True)
         window.hbox.pack_start(content, True, True)
         content.pack_start(box, True, True)
 

@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-'''a module that defines a session object'''
-
 #   This file is part of emesene.
 #
 #    Emesene is free software; you can redistribute it and/or modify

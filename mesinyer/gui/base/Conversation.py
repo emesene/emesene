@@ -116,7 +116,7 @@ class Conversation(object):
         '''called when a emote is selected on the emote window'''
         self.input.append(emote)
 
-    def on_notify_atention(self):
+    def on_notify_attention(self):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
         self.output.append(
