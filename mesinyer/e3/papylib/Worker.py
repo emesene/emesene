@@ -596,7 +596,7 @@ class Worker(e3.base.Worker, papyon.Client):
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papygroupsrc = self.address_book.groups.search_by('name', self.session.groups[src_gid].name)
         papygroupdest = self.address_book.groups.search_by('name', self.session.groups[dest_gid].name)
-        self.address_book.add_contact_to_group(papygroupdest, papycontact,done_cb=add_to_group_succeed 
+        self.address_book.add_contact_to_group(papygroupdest, papycontact,done_cb=add_to_group_succeed, 
                                                  failed_cb=move_to_group_fail)
 
     def _handle_action_remove_contact(self, account):
