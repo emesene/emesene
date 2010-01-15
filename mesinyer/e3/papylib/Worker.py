@@ -232,8 +232,13 @@ class Worker(e3.base.Worker, papyon.Client):
     # call handlers
     def _on_call_incoming(self, papycallevent):
         """Called once the incoming call is ready."""
-        print "[papyon]", "[call] ready"
-        papycallevent._call.accept()
+        print "[papyon]", "[call] ready", papycallevent._call.media_session.prepared, papycallevent._call.media_session.ready
+        if papycallevent._call.media_session.prepared:
+            papycallevent._call.accept()
+            print "wut"
+        else:
+            papycallevent._call.ring()
+            print "ring"
 
     def _on_call_ringing(self, papycallevent):
         """Called when we received a ringing response from the callee."""

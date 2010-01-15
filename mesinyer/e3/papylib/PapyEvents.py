@@ -221,9 +221,12 @@ class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
 
     def on_oim_messages_received(self, messages):
         print "[papyon]", "oims received", messages
+        #self._client.oim_box.fetch_messages(messages)
 
     def on_oim_messages_fetched(self, messages):
         print "[papyon]", "oim fetched", messages
+        #for message in messages:
+            #sender = message.sender
 
     def on_oim_messages_deleted(self):
         print "[papyon]", "oim deleted"
