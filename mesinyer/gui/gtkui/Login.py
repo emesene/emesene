@@ -2,12 +2,15 @@ import gtk
 import base64
 import gobject
 import locale
+from shutil import rmtree
 
 import e3
 import gui
 import utils
 import extension
 import StatusButton
+import Dialog
+import stock
 
 import logging
 log = logging.getLogger('gtkui.Login')
@@ -20,6 +23,11 @@ class Login(gtk.Alignment):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
+        
+        self.config = e3.common.Config()
+        self.config_dir = e3.common.ConfigDir('emesene2')
+        self.config_path = self.config_dir.join('config')
+        self.config.load(self.config_path)
 
         account = account or None
         self.callback = callback
@@ -38,21 +46,20 @@ class Login(gtk.Alignment):
         else:
             self.proxy = proxy
 
-        liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
+        self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
-        completion.set_model(liststore)
+        completion.set_model(self.liststore)
         pixbufcell = gtk.CellRendererPixbuf()
         completion.pack_start(pixbufcell)
         completion.add_attribute(pixbufcell, 'pixbuf', 1)
         completion.set_text_column(0)
         completion.set_inline_selection(True)
 
-        pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
+        self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
         
-        for mail in sorted(self.accounts):
-            liststore.append([mail, utils.scale_nicely(pixbuf)])
+        self._reload_account_list()
    
-        self.cmb_account = gtk.ComboBoxEntry(liststore, 0)
+        self.cmb_account = gtk.ComboBoxEntry(self.liststore, 0)
         self.cmb_account.get_children()[0].set_completion(completion)
         self.cmb_account.get_children()[0].connect('key-press-event',
             self._on_account_key_press)
@@ -78,17 +85,36 @@ class Login(gtk.Alignment):
 
         self.remember_account = gtk.CheckButton(_('Remember account'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
+        self.auto_login = gtk.CheckButton(_('Auto-login'))
+
+        self.forgetMe = gtk.EventBox()
+        self.forgetMe.set_events(gtk.gdk.BUTTON_PRESS_MASK)
+        self.forgetMeLabel = gtk.Label('<span foreground="#0000AA">(' + \
+                                            _('Forget me') + ')</span>')
+        self.forgetMeLabel.set_use_markup(True)
+        self.forgetMe.add(self.forgetMeLabel)
+        self.forgetMe.connect('button_press_event', self._on_forgetMe_clicked)
+        if account:
+            self.forgetMe.set_child_visible(True)
+            self.remember_account.set_sensitive(False)
+        else:
+            self.forgetMe.set_child_visible(False)
 
         self.remember_account.connect('toggled',
             self._on_remember_account_toggled)
         self.remember_password.connect('toggled',
             self._on_remember_password_toggled)
+        
+        hboxremember = gtk.HBox(spacing=2)
+        hboxremember.pack_start(self.remember_account, False, False)
+        hboxremember.pack_start(self.forgetMe, False, False)
 
         vbox_remember = gtk.VBox(spacing=4)
         vbox_remember.set_border_width(8)
         vbox_remember.pack_start(self.throbber)
-        vbox_remember.pack_start(self.remember_account)
+        vbox_remember.pack_start(hboxremember)
         vbox_remember.pack_start(self.remember_password)
+        vbox_remember.pack_start(self.auto_login)
         import locale
         link = "http://status.messenger.msn.com/Status.aspx?mkt="
         link += locale.getlocale()[0].replace('_','-')
@@ -136,7 +162,7 @@ class Login(gtk.Alignment):
 
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
-        al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
+        al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
@@ -185,7 +211,7 @@ class Login(gtk.Alignment):
 
     def _on_connect_clicked(self, button):
         self.do_connect()
-
+ 
     def do_connect(self):
         '''do all the staff needed to connect'''
 
@@ -237,8 +263,12 @@ class Login(gtk.Alignment):
 
         if account in self.accounts:
             self.txt_password.set_text(base64.b64decode(self.accounts[account]))
+            self.forgetMe.set_child_visible(True)
+            self.remember_account.set_sensitive(False)
         else:
             self.txt_password.set_text('')
+            self.forgetMe.set_child_visible(False)
+            self.remember_account.set_sensitive(True)
 
         if account in self.statuses:
             try:
@@ -248,6 +278,56 @@ class Login(gtk.Alignment):
         else:
             self.btn_status.set_status(e3.status.ONLINE)
 
+    def _reload_account_list(self,*args):
+       '''reload the account list in the combobox'''
+       self.liststore.clear()
+       for mail in sorted(self.accounts):
+           self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
+
+    def _on_forgetMe_clicked(self, *args):
+       '''called when the forget me label is clicked'''
+       def _yes_no_cb(response):
+            '''callback from the confirmation dialog'''
+            user = self.cmb_account.get_active_text()
+            if response == stock.YES:
+                try: # Delete user's folder
+                    rmtree(self.config_dir.join(user))
+                    rmtree(self.config_dir.join(user.replace('@','-at-')))
+                except: 
+                    extension.get_default('dialog').error(_('Error while deleting user'))
+
+            self.remember_password.set_active(False)
+            self.remember_account.set_active(False)
+            self.cmb_account.get_children()[0].set_text('')
+            self.txt_password.set_text('')
+            
+            if user in self.config.l_remember_account:
+                self.config.l_remember_account.remove(user)
+
+            if user in self.config.l_remember_password:
+                self.config.l_remember_password.remove(user)
+
+            if user in self.config.l_last_logged_account:
+                self.config.l_last_logged_account[0] = ''
+
+            if user in self.config.d_accounts:
+                del self.config.d_accounts[user]
+
+            if user in self.config.d_status:
+                del self.config.d_status[user]
+
+            self.config.save(self.config_path)
+            del self.accounts[user]
+            self.l_remember_password.remove(user)
+            self.l_remember_account.remove(user)
+            del self.statuses[user]
+            self. _reload_account_list()
+            self.forgetMe.set_child_visible(False)
+            self.remember_account.set_sensitive(True)
+             
+       dialog = extension.get_default('dialog')
+       dialog.yes_no(_('Are you sure you want to delete the account %s ?') % \
+                      self.cmb_account.get_active_text(), _yes_no_cb)
 
     def _on_remember_account_toggled(self, button):
         '''called when the remember account check button is toggled'''

@@ -343,6 +343,10 @@ class Controller(object):
             if account.account not in self.config.l_remember_account:
                 self.config.l_remember_account.append(account.account)
 
+            #in the case i want remember account but not password
+            if account.account in self.config.l_remember_password:
+                self.config.l_remember_password.remove(account.account)
+
         else:
             if account.account in self.config.l_remember_account:
                 self.config.l_remember_account.remove(account.account)
