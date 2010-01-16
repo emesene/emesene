@@ -179,50 +179,34 @@ class WebcamEvent(papyon.event.WebcamEventInterface):
         print "[papyon]", "[webcam]", "paused"
 
 class CallEvent(papyon.event.CallEventInterface):
-    """interfaces allowing the user to get notified about events
-    from a L{MediaCall<papyon.media.MediaCall>} object."""
-
-    def __init__(self, call):
-        """Initializer
-            @param call: the call we want to be notified for its events
-            @type call: L{MediaCall<papyon.media.MediaCall>}"""
+    def __init__(self, call, client):
         papyon.event.BaseEventInterface.__init__(self, call)
-        
+        self._client = client
+        self._call = call
+
     def on_call_incoming(self):
-        """Called once the incoming call is ready."""
-        print "[papyon]", "[call] ready"
+        self._client._on_call_incoming(self)
 
     def on_call_ringing(self):
-        """Called when we received a ringing response from the callee."""
-        print "[papyon]", "[call] ringing"
+        self._client._on_call_ringing(self)
 
     def on_call_accepted(self):
-        """Called when the callee accepted the call."""
-        print "[papyon]", "[call] accepted"
+        self._client._on_call_accepted(self)
 
     def on_call_rejected(self, response):
-        """Called when the callee rejected the call.
-            @param response: response associated with the rejection
-            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
-        print "[papyon]", "[call] rejected"
+        self._client._on_call_rejected(self, response)
 
     def on_call_error(self, response):
-        """Called when an error is sent by the other party.
-            @param response: response associated with the error
-            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
-        print "[papyon]", "[call] err"
+        self._client._on_call_error(self, response)
 
     def on_call_missed(self):
-        """Called when the call is missed."""
-        print "[papyon]", "[call] missd"
+        self._client._on_call_missed(self)
 
     def on_call_connected(self):
-        """Called once the call is connected."""
-        print "[papyon]", "[call] connected"
+        self._client._on_call_connected(self)
 
     def on_call_ended(self):
-        """Called when the call is ended."""
-        print "[papyon]", "[call] ended"
+        self._client._on_call_ended(self)
 
 class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
     """interfaces allowing the user to get notified about events from the
@@ -237,9 +221,12 @@ class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
 
     def on_oim_messages_received(self, messages):
         print "[papyon]", "oims received", messages
+        #self._client.oim_box.fetch_messages(messages)
 
     def on_oim_messages_fetched(self, messages):
         print "[papyon]", "oim fetched", messages
+        #for message in messages:
+            #sender = message.sender
 
     def on_oim_messages_deleted(self):
         print "[papyon]", "oim deleted"

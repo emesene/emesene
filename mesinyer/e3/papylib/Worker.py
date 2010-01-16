@@ -212,16 +212,14 @@ class Worker(e3.base.Worker, papyon.Client):
             session.reject()
         else:
             session.accept()
-                
+
     def _on_conference_invite(self, call):
         print "New conference invite", call
-        callhandler = CallEvent(call)
         callsess = MediaSessionHandler(call.media_session)
-        print "new call session", callsess
-        if 0:
-            call.reject()            
-        else:
-            call.accept()
+        callhandler = CallEvent(call, self)
+        call.ring()
+        # leave the accept stuff to the call event handler
+        # because codecs aren't ready yet        
 
     def _on_invite_file_transfer(self, papysession):
         print "new ft invite", papysession
@@ -230,6 +228,49 @@ class Worker(e3.base.Worker, papyon.Client):
             papysession.reject()
         else:
             papysession.accept()
+
+    # call handlers
+    def _on_call_incoming(self, papycallevent):
+        """Called once the incoming call is ready."""
+        print "[papyon]", "[call] ready", papycallevent._call.media_session.prepared, papycallevent._call.media_session.ready
+        if papycallevent._call.media_session.prepared:
+            papycallevent._call.accept()
+            print "wut"
+        else:
+            papycallevent._call.ring()
+            print "ring"
+
+    def _on_call_ringing(self, papycallevent):
+        """Called when we received a ringing response from the callee."""
+        print "[papyon]", "[call] ringing"
+
+    def _on_call_accepted(self, papycallevent):
+        """Called when the callee accepted the call."""
+        print "[papyon]", "[call] accepted"
+
+    def _on_call_rejected(self, papycallevent, response):
+        """Called when the callee rejected the call.
+            @param response: response associated with the rejection
+            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
+        print "[papyon]", "[call] rejected", response
+
+    def _on_call_error(self, papycallevent, response):
+        """Called when an error is sent by the other party.
+            @param response: response associated with the error
+            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
+        print "[papyon]", "[call] err", response
+
+    def _on_call_missed(self, papycallevent):
+        """Called when the call is missed."""
+        print "[papyon]", "[call] missd"
+
+    def _on_call_connected(self, papycallevent):
+        """Called once the call is connected."""
+        print "[papyon]", "[call] connected"
+
+    def _on_call_ended(self, papycallevent):
+        """Called when the call is ended."""
+        print "[papyon]", "[call] ended"
 
     # conversation handlers
     def _on_conversation_user_typing(self, papycontact, pyconvevent):

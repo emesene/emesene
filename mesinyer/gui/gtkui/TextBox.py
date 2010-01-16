@@ -18,10 +18,9 @@ class TextBox(gtk.ScrolledWindow):
         self.config = config
 
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.set_shadow_type(gtk.SHADOW_IN)
         self._textbox = gtk.TextView()
-        self._textbox.set_left_margin(6)
-        self._textbox.set_right_margin(6)
+        self._textbox.set_left_margin(2)
+        self._textbox.set_right_margin(2)
         self._textbox.set_wrap_mode(gtk.WRAP_WORD_CHAR)
         self._textbox.show()
         self._buffer = RichBuffer.RichBuffer()
@@ -204,6 +203,7 @@ class OutputText(TextBox):
     def __init__(self, config):
         '''constructor'''
         TextBox.__init__(self, config)
+        self.set_shadow_type(gtk.SHADOW_IN)
         self._textbox.set_editable(False)
         self._textbox.set_cursor_visible(False)
 

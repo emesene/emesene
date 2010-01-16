@@ -25,6 +25,7 @@ class TabWidget(gtk.HBox):
 
         self.label.set_max_width_chars(20)
         self.label.set_use_markup(True)
+        self.label.set_alignment(0.0, 0.5)
 
         self.pack_start(self.image, False, False, 0)
         self.pack_start(self.label, True, True, 0)

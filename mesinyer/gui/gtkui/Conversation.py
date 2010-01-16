@@ -43,12 +43,17 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.input = InputText(self.session.config, self._on_send_message)
         self.info = ContactInfo()
 
+        frame_input = gtk.Frame()
+        frame_input.set_shadow_type(gtk.SHADOW_IN)
+
         input_box = gtk.VBox()
         input_box.pack_start(self.toolbar, False)
         input_box.pack_start(self.input, True, True)
 
+        frame_input.add(input_box)
+
         self.panel.pack1(self.output, True, True)
-        self.panel.pack2(input_box, True, True)
+        self.panel.pack2(frame_input, True, True)
         self.panel_signal_id = self.panel.connect_after('expose-event',
                 self.update_panel_position)
 
@@ -65,8 +70,6 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if len(self.members) == 0:
             self.header.information = ('connecting', 'creating conversation')
-
-        self.header.set_image(gui.theme.user)
 
         if self.session.contacts.me.picture:
             my_picture = self.session.contacts.me.picture
@@ -189,7 +192,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         update the information for a conversation with multiple users
         """
-        self.header.set_image(gui.theme.users)
         text = 'Group chat'
 
         self.header.information = \

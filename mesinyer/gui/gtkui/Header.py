@@ -16,24 +16,15 @@ class Header(gtk.HBox):
     def __init__(self):
         '''constructor'''
         gtk.HBox.__init__(self)
-        self.set_border_width(4)
+        self.set_border_width(2)
         self._information = gtk.Label('info')
         self._information.set_ellipsize(pango.ELLIPSIZE_END)
         self._information.set_alignment(0.0, 0.5)
-        self.image = gtk.Image()
 
         self.pack_start(self._information, True, True)
-        self.pack_start(self.image, False)
-
-    def set_image(self, path):
-        '''set the image from path'''
-        self.remove(self.image)
-        self.image = utils.safe_gtk_image_load(path)
-        self.pack_start(self.image, False)
-        self.image.show()
 
     def _set_information(self, lines):
-        '''set the text on the information, lines is a tuple of size 3 with 3 
+        '''set the text on the information, lines is a tuple of size 3 with 3
         strings that will be replaced on the template'''
         self._information.set_markup(Header.INFO_TPL % lines)
 
