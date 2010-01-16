@@ -338,7 +338,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         # if group_offline is set and the contact is offline then put it on the
         # special offline group
-        if self.group_offline and contact.status == e3.status.OFFLINE:
+        if not self.order_by_status and self.group_offline\
+                and contact.status == e3.status.OFFLINE:
             if self.offline_group:
                 self.offline_group.contacts.append(contact.account)
                 self.update_offline_group()
