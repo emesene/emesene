@@ -48,10 +48,10 @@ class Login(gtk.Alignment):
         completion.set_inline_selection(True)
 
         pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
-
+        
         for mail in sorted(self.accounts):
             liststore.append([mail, utils.scale_nicely(pixbuf)])
-
+   
         self.cmb_account = gtk.ComboBoxEntry(liststore, 0)
         self.cmb_account.get_children()[0].set_completion(completion)
         self.cmb_account.get_children()[0].connect('key-press-event',
@@ -157,8 +157,7 @@ class Login(gtk.Alignment):
         vbox.pack_start(al_preferences, False)
         
         if account:
-            index = sorted(self.accounts.keys()).index(account)
-            self.cmb_account.set_active(index)
+            self.cmb_account.get_children()[0].set_text(account)
             self._update_fields(account)
         else:
             account = e3.Account("", "", e3.status.ONLINE)
@@ -232,6 +231,7 @@ class Login(gtk.Alignment):
             self.remember_password.set_active(True)
         elif account in self.l_remember_account:
             self.remember_account.set_active(True)
+            self.remember_password.set_active(False)
         else:
             self.remember_account.set_active(False)
 
