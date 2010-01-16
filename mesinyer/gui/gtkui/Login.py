@@ -21,7 +21,7 @@ class Login(gtk.Alignment):
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
 
-        account = account or e3.Account("", "", e3.status.ONLINE)
+        account = account or None
         self.callback = callback
         self.on_preferences_changed = on_preferences_changed
         self.accounts = accounts or {}
@@ -59,9 +59,6 @@ class Login(gtk.Alignment):
         self.cmb_account.connect('changed',
             self._on_account_changed)
 
-        if account:
-            self.cmb_account.prepend_text(account.account)
-
         self.btn_status = StatusButton.StatusButton()
 
         status_padding = gtk.Label()
@@ -69,10 +66,6 @@ class Login(gtk.Alignment):
 
         self.txt_password = gtk.Entry()
         self.txt_password.set_visibility(False)
-
-        if account:
-            self.txt_password.set_text(account.password)
-
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
 
@@ -162,6 +155,15 @@ class Login(gtk.Alignment):
         vbox.pack_start(al_vbox_remember, True, True)
         vbox.pack_start(al_button, True, True)
         vbox.pack_start(al_preferences, False)
+        
+        if account:
+            index = sorted(self.accounts.keys()).index(account)
+            self.cmb_account.set_active(index)
+            self._update_fields(account)
+        else:
+            account = e3.Account("", "", e3.status.ONLINE)
+            self.cmb_account.prepend_text(account.account)
+            self.txt_password.set_text(account.password)
 
         self.add(vbox)
         vbox.show_all()

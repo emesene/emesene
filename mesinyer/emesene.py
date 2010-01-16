@@ -327,6 +327,7 @@ class Controller(object):
             self.config.d_accounts[account.account] = base64.b64encode(
                 account.password)
             self.config.d_status[account.account] = account.status
+            self.config.l_last_account[0] = account.account
 
             if account.account not in self.config.l_remember_account:
                 self.config.l_remember_account.append(account.account)
@@ -337,6 +338,7 @@ class Controller(object):
         elif remember_account:
             self.config.d_accounts[account.account] = ''
             self.config.d_status[account.account] = account.status
+            self.config.l_last_account[0] = account.account
 
             if account.account not in self.config.l_remember_account:
                 self.config.l_remember_account.append(account.account)
@@ -347,6 +349,9 @@ class Controller(object):
 
             if account.account in self.config.l_remember_password:
                 self.config.l_remember_password.remove(account.account)
+
+            if account.account in self.config.l_last_account:
+                self.config.l_last_account[0] = ''
 
             if account.account in self.config.d_accounts:
                 del self.config.d_accounts[account.account]
@@ -453,6 +458,7 @@ class Controller(object):
         posy = self.config.get_or_set('i_login_posy', 100)
         width = self.config.get_or_set('i_login_width', 250)
         height = self.config.get_or_set('i_login_height', 410)
+        account = self.config.get_or_set('l_last_account', [''])[0]
 
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed, account,
