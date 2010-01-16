@@ -6,34 +6,18 @@ import logging
 log = logging.getLogger('pluginmanager')
 
 class PackageResource:
-    '''Handle various files that could be put in tha package'''
+    '''Handle various files that could be put in the package'''
     def __init__(self, base_dir, directory):
-        self.path = directory  # Path to the package
-        self.base_path = base_dir
-        self._resources = [] # Opened resources
+        self.path = os.path.join(base_dir, directory)
 
     def get_resource_path(self, relative_path):
         '''get the path to the required resource.
         If you can, use get_resource.
         @return the path if it exists or an empty string otherwise'''
-        abs_path = os.path.join(self.base_path, self.path, relative_path)
+        abs_path = os.path.join(self.path, relative_path)
         if os.path.exists(abs_path):
             return abs_path
         return ''
-
-    def use_resource(self, relative_path):
-        '''A ContextManager that opens a file.
-        If you can use it, you're reccomended to.
-        See self.get_resource for more info.
-        '''
-        buffer = self.get_resource(relative_path)
-        if not buffer:
-            return
-        try:
-            yield buffer
-        finally:
-            self.close_resource(relative_path)
-
 
     def get_resource(self, relative_path):
         '''Opens a file.
@@ -41,34 +25,11 @@ class PackageResource:
         @return a file object opening relative_path if it is possible, or None
         '''
         file_path = self.get_resource_path(relative_path)
-        if not file_path:
-            return None
-        try:
-            f = open(file_path)
-        except IOError:
-            return None
-        else:
-            self._resources.append(f)
-            return f
-
-    def close_resource(self, resource):
-        '''Close a file.
-        @param resource A resource returned by get_resource
-        @return
-        '''
-        try:
-            self._resources.remove(resource)
-            resource.close()
-        except IOError:
-            return False
-
-        return True
-
-    def close(self):
-        '''everything. to be called when the plugin is stopped'''
-        while self._resources:
-            self._resources.pop().close()
-
+        if file_path:
+            try:
+                return open(file_path)
+            except IOError:
+                return
 
 class PluginHandler:
     '''Abstraction over a plugin.
@@ -86,7 +47,7 @@ class PluginHandler:
         self.base_dir = base_dir
         self._instance = None
 
-        self.has_resources = is_package
+        self.is_package = is_package
 
         self.module = None
         self._do_import()
@@ -100,7 +61,7 @@ class PluginHandler:
             if hasattr(self.module, 'plugin'):
                 self.module = self.module.plugin
         except Exception, reason:
-            log.warning('error importing "%s": %s' % (self.name, reason))
+            log.warning('error importing "%s": %s', self.name, reason)
             self.module = None
         finally:
             sys.path = old_syspath
@@ -111,10 +72,11 @@ class PluginHandler:
             return self._instance
         try:
             self._instance = self.module.Plugin()
-        except Exception:
+        except Exception, reason:
             self._instance = None
+            log.warning('error creating instance for "%s": %s', self.name, reason)
         else:
-            if self.has_resources:
+            if self.is_package:
                 self._instance.resource = \
                     PackageResource(self.base_dir, self.name)
         return self._instance
@@ -132,7 +94,7 @@ class PluginHandler:
             inst.extension_register()
             inst._started = True
         except Exception, reason:
-            log.warning('error starting "%s": %s' % (self.name, reason))
+            log.warning('error starting "%s": %s', (self.name, reason))
             return False
         return True
 
@@ -140,8 +102,6 @@ class PluginHandler:
         '''If active, stop the plugin'''
         if self.is_active():
             self._instance.stop()
-            if self.has_resources:
-                self._instance.resource.close()
             self._instance._started = False
 
     def is_active(self):
@@ -168,15 +128,18 @@ class PluginManager:
                 mod = PluginHandler(dir_, file, os.path.isdir(file))
                 self._plugins[mod.name] = mod
             except Exception, reason:
-                log.warning('Exception while importing %s:\n%s' % (file, reason))
+                log.warning('Exception while importing %s:\n%s', (file, reason))
+        
+        log.debug('Imported plugins: %s', ', '.join(self._plugins.keys()))
 
     def plugin_start(self, name):
         '''Starts a plugin.
         @param name The name of the plugin. See plugin_base.PluginBase.name.
         '''
-        if not name in self._plugins:
+        if name not in self._plugins:
             return False
-        log.info('starting plugin "%s"' % name)
+        
+        log.info('starting plugin "%s"', name)
         self._plugins[name].start()
         return True
 
@@ -184,8 +147,10 @@ class PluginManager:
         '''Stops a plugin.
         @param name The name of the plugin. See plugin_base.PluginBase.name.
         '''
-        if not name in self._plugins:
+        if name not in self._plugins:
             return False
+        
+        log.info('stopping plugin "%s"', name)
         self._plugins[name].stop()
         return True
 
