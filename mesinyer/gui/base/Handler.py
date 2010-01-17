@@ -6,6 +6,18 @@ import extension
 import logging
 log = logging.getLogger('gui.base.Handler')
 
+class LoginHandler(object):
+    '''this handler contains all the handlers needed to handle all the
+    menu items in login window
+    '''
+
+    def __init__(self, dialog,on_preferences=None,
+            on_quit=None):
+        '''constructor'''
+        self.account_login_handler = AccountLoginHandler(on_quit)
+        self.preferences_login_handler = PreferencesLoginHandler(on_preferences)
+        self.help_handler = HelpHandler(dialog)
+
 class MenuHandler(object):
     '''this handler contains all the handlers needed to handle all the
     menu items
@@ -394,3 +406,38 @@ class TrayIconHandler(FileHandler):
         """
         FileHandler.__init__(self, session, on_disconnect, on_quit)
         self.theme = theme
+
+class AccountLoginHandler(object):
+    """
+    this handler contains all the methods to handle the account menu on login
+    """
+
+    def __init__(self,on_quit=None):
+        """
+        constructor
+
+        session -- a e3.Session implementation
+     
+        """
+        self.on_quit = on_quit
+
+    def on_new_account_selected(self):
+       webbrowser.open('https://accountservices.passport.net/reg.srf?sl=1')
+
+    def on_quit_selected(self):
+        '''called when quit is clicked'''
+        if self.on_quit:
+            self.on_quit()
+
+
+class PreferencesLoginHandler(object):
+    """
+    this handler contains all the methods to handle the preferences menu on login
+    """
+
+    def __init__(self,on_preferences=None):
+        self.on_preferences = on_preferences
+
+    def on_preferences_selected(self):
+        if self.on_preferences:
+            self.on_preferences()

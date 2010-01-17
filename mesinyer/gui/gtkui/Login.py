@@ -2,6 +2,8 @@ import gtk
 import base64
 import gobject
 import locale
+import time
+import sys
 from shutil import rmtree
 
 import e3
@@ -10,6 +12,7 @@ import utils
 import extension
 import StatusButton
 import Dialog
+import MainMenu
 import stock
 
 import logging
@@ -28,7 +31,6 @@ class Login(gtk.Alignment):
         self.config_dir = e3.common.ConfigDir('emesene2')
         self.config_path = self.config_dir.join('config')
         self.config.load(self.config_path)
-
         account = account or None
         self.callback = callback
         self.on_preferences_changed = on_preferences_changed
@@ -45,6 +47,9 @@ class Login(gtk.Alignment):
             self.proxy = e3.Proxy()
         else:
             self.proxy = proxy
+        
+        self.menu = None
+        self._build_menu()
 
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
@@ -56,7 +61,7 @@ class Login(gtk.Alignment):
         completion.set_inline_selection(True)
 
         self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
-        
+         
         self._reload_account_list()
    
         self.cmb_account = gtk.ComboBoxEntry(self.liststore, 0)
@@ -65,7 +70,7 @@ class Login(gtk.Alignment):
             self._on_account_key_press)
         self.cmb_account.connect('changed',
             self._on_account_changed)
-
+ 
         self.btn_status = StatusButton.StatusButton()
 
         status_padding = gtk.Label()
@@ -83,8 +88,9 @@ class Login(gtk.Alignment):
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None, animated=True)
         self.throbber = gtk.image_new_from_animation(th_pix)
 
-        self.remember_account = gtk.CheckButton(_('Remember account'))
+        self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
+        #placeholder for auto_login
         self.auto_login = gtk.CheckButton(_('Auto-login'))
 
         self.forgetMe = gtk.EventBox()
@@ -126,7 +132,6 @@ class Login(gtk.Alignment):
         self.b_connect.set_border_width(8)
 
         vbox = gtk.VBox()
-        vbox.set_border_width(2)
 
         hbox_account = gtk.HBox(spacing=6)
         img_account = gtk.Image()
@@ -169,16 +174,17 @@ class Login(gtk.Alignment):
         al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
-
+        
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
         al_logo.add(img_logo)
         al_preferences.add(self.b_preferences)
-
+        
+        vbox.pack_start(self.menu,False)
         vbox.pack_start(al_logo, True, True, 10)
         vbox.pack_start(al_vbox_entries, True, True)
-        vbox.pack_start(al_vbox_remember, True, True)
+        vbox.pack_start(al_vbox_remember, True, False)
         vbox.pack_start(al_button, True, True)
         vbox.pack_start(al_preferences, False)
         
@@ -187,13 +193,22 @@ class Login(gtk.Alignment):
             self._update_fields(account)
         else:
             account = e3.Account("", "", e3.status.ONLINE)
-            self.cmb_account.prepend_text(account.account)
-            self.txt_password.set_text(account.password)
 
         self.add(vbox)
         vbox.show_all()
 
         self.throbber.hide()
+    
+    def _build_menu(self):
+        '''buildall the menus used on the client'''
+        dialog = extension.get_default('dialog')
+
+        handler = gui.base.LoginHandler(dialog,
+            self._on_preferences, self._on_quit)
+
+        LoginMenu = extension.get_default('login menu')
+        self.menu = LoginMenu(handler, self.config)
+        self.menu.show_all()
 
     def set_sensitive(self, sensitive):
         self.cmb_account.set_sensitive(sensitive)
@@ -253,6 +268,9 @@ class Login(gtk.Alignment):
     def _update_fields(self, account):
         '''update the different fields according to the account that is
         on the account entry'''
+        if account == '':
+            return
+
         if account in self.l_remember_password:
             self.remember_password.set_active(True)
         elif account in self.l_remember_account:
@@ -280,9 +298,13 @@ class Login(gtk.Alignment):
 
     def _reload_account_list(self,*args):
        '''reload the account list in the combobox'''
-       self.liststore.clear()
+       self.liststore.clear() 
        for mail in sorted(self.accounts):
            self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
+           return
+
+       #i'm here if self.accounts is empty
+       self.liststore = None
 
     def _on_forgetMe_clicked(self, *args):
        '''called when the forget me label is clicked'''
@@ -292,9 +314,9 @@ class Login(gtk.Alignment):
             if response == stock.YES:
                 try: # Delete user's folder
                     rmtree(self.config_dir.join(user))
-                    rmtree(self.config_dir.join(user.replace('@','-at-')))
+                    rmtree(self.config_dir.join(user.replace('@','-at-')),True)
                 except: 
-                    extension.get_default('dialog').error(_('Error while deleting user'))
+                   dialog.error(_('Error while deleting user'))
 
             self.remember_password.set_active(False)
             self.remember_account.set_active(False)
@@ -303,24 +325,24 @@ class Login(gtk.Alignment):
             
             if user in self.config.l_remember_account:
                 self.config.l_remember_account.remove(user)
+                self.l_remember_account.remove(user)
 
             if user in self.config.l_remember_password:
                 self.config.l_remember_password.remove(user)
+                self.l_remember_password.remove(user)
 
             if user in self.config.l_last_logged_account:
                 self.config.l_last_logged_account[0] = ''
 
             if user in self.config.d_accounts:
                 del self.config.d_accounts[user]
+                del self.accounts[user]
 
             if user in self.config.d_status:
                 del self.config.d_status[user]
+                del self.statuses[user]
 
             self.config.save(self.config_path)
-            del self.accounts[user]
-            self.l_remember_password.remove(user)
-            self.l_remember_account.remove(user)
-            del self.statuses[user]
             self. _reload_account_list()
             self.forgetMe.set_child_visible(False)
             self.remember_account.set_sensitive(True)
@@ -328,6 +350,18 @@ class Login(gtk.Alignment):
        dialog = extension.get_default('dialog')
        dialog.yes_no(_('Are you sure you want to delete the account %s ?') % \
                       self.cmb_account.get_active_text(), _yes_no_cb)
+
+    def _on_quit(self):
+        '''close emesene'''
+        while gtk.events_pending():
+            gtk.main_iteration(False)
+
+        time.sleep(2)
+        sys.exit(0)
+
+    def _on_preferences(self):
+        '''called when button preferences on option menu is clicked'''
+        self._on_preferences_selected(None)
 
     def _on_remember_account_toggled(self, button):
         '''called when the remember account check button is toggled'''
