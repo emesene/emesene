@@ -32,15 +32,6 @@ class Group(object):
           identifier = self.identifier,
           contacts = self.contacts)
 
-    def _on_contact_added(self, account):
-        '''callback called when a contact is added to this group'''
-        self.contacts.append(account)
-
-    def _on_contact_removed(self, account):
-        '''callback called when a contact is removed from this group'''
-        if account in self.contacts:
-            del self.contacts[account]
-
     def __repr__(self):
         '''return a string representation of the object'''
         return "<group name='%s'>" % (self.name,)

@@ -45,6 +45,7 @@ class ContactList(object):
         self.session.config.get_or_set('b_show_empty_groups', False)
         self.session.config.get_or_set('b_show_offline', False)
         self.session.config.get_or_set('b_show_blocked', False)
+        self.session.config.get_or_set('b_group_offline', False)
 
         self.avatar_size = self.session.config.get_or_set('i_avatar_size', 32)
         self.set_avatar_size(self.avatar_size)
@@ -57,6 +58,7 @@ class ContactList(object):
         self._show_empty_groups = self.session.config.b_show_empty_groups
         self._show_offline = self.session.config.b_show_offline
         self._show_blocked = self.session.config.b_show_blocked
+        self._group_offline = self.session.config.b_group_offline
 
         self._filter_text = ''
 
@@ -107,6 +109,7 @@ class ContactList(object):
         '''set the value of order by group'''
         self._order_by_group = value
         self.session.config.b_order_by_group = value
+        self.fill()
 
     order_by_group = property(fget=_get_order_by_group,
         fset=_set_order_by_group)
@@ -123,6 +126,19 @@ class ContactList(object):
         self.refilter()
 
     show_offline = property(fget=_get_show_offline, fset=_set_show_offline)
+
+    def _get_group_offline(self):
+        '''return the value of self._group_offline'''
+        return self._group_offline
+
+    def _set_group_offline(self, value):
+        '''set the value of self._group_offline to value and call to
+        self.refilter()'''
+        self._group_offline = value
+        self.session.config.b_group_offline = self._group_offline
+        self.fill()
+
+    group_offline = property(fget=_get_group_offline, fset=_set_group_offline)
 
     def _get_show_blocked(self):
         '''return the value of self._show_blocked'''
@@ -254,7 +270,8 @@ class ContactList(object):
         '''fill the contact list with the contacts and groups from
         self.contacts and self.groups'''
         if clear:
-            self.clear()
+            if not self.clear():
+                return
 
         for group in self.groups.values():
             # get a list of contact objects from a list of accounts
@@ -267,7 +284,9 @@ class ContactList(object):
             self.add_contact(contact)
 
     def clear(self):
-        '''clear the contact list'''
+        '''clear the contact list, return True if the list was cleared
+        False otherwise (normally returns false when clear is called before
+        the contact list is in a coherent state)'''
         raise NotImplementedError()
 
     def update_contact(self, contact):
