@@ -195,7 +195,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         text = 'Group chat'
 
         self.header.information = \
-            (text, '%d members' % (len(self.members) + 1,))
+            (text, '%d members (%s)' % (len(self.members) + 1,
+                ", ".join(self.members)))
 
         self.update_tab()
 
