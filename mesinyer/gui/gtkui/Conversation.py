@@ -193,8 +193,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         update the information for a conversation with multiple users
         """
         self.header.information = \
-            ('', '%d members (%s)' % (len(self.members) + 1,
-                ", ".join(self.members)))
+            ('%d members' % (len(self.members) + 1, ),
+                    ", ".join(self.members))
 
         self.update_tab()
 
