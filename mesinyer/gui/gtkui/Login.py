@@ -125,12 +125,7 @@ class Login(gtk.Alignment):
         vbox_remember.pack_start(hboxremember)
         vbox_remember.pack_start(self.remember_password)
         vbox_remember.pack_start(self.auto_login)
-        import locale
-        link = "http://status.messenger.msn.com/Status.aspx?mkt="
-        link += locale.getlocale()[0].replace('_','-')
-        serverStatus = gtk.LinkButton(link,_('Service Status'))
-        vbox_remember.pack_start(serverStatus)
-
+        
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
         self.b_connect.set_border_width(8)
@@ -187,7 +182,7 @@ class Login(gtk.Alignment):
 
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
-        al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+        al_vbox_remember = gtk.Alignment(xalign=0.55, yalign=0.5,xscale=0.05,
             yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
