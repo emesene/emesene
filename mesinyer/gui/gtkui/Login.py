@@ -169,7 +169,6 @@ class Login(gtk.Alignment):
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
-        #TODO find how to center the label
         self.eventBox = gtk.EventBox()
         nicebarBox = gtk.HBox(False)
         self.eventBox.add(nicebarBox)
@@ -187,10 +186,8 @@ class Login(gtk.Alignment):
             yscale=0.2)
         al_vbox_throbber = gtk.Alignment(xalign=0.5, yalign=0.5,xscale=0.2,
             yscale=0.2)
-        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
-            yscale=0.0)
-        al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
-            yscale=0.0)
+        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
+        al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
         al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
@@ -267,12 +264,8 @@ class Login(gtk.Alignment):
         remember_password = self.remember_password.get_active()
         remember_account = self.remember_account.get_active()
 
-        if user == '':
-            self.show_nice_bar('Empty user')
-            return
-
-        if password == '':
-            self.show_nice_bar('Empty password')
+        if user == '' or password == '':
+            self.show_nice_bar('user or password fields are empty')
             return
 
         self._config_account(account, remember_account, remember_password)
@@ -343,15 +336,20 @@ class Login(gtk.Alignment):
         #update password and account checkbox
         if account in self.l_remember_password:
             self.remember_password.set_active(True)
+            self.txt_password.set_sensitive(False)
         elif account in self.l_remember_account:
             self.remember_account.set_active(True)
             self.remember_password.set_active(False)
         else:
             self.remember_account.set_active(False)
+            self.txt_password.set_sensitive(True)
 
         #update autologin checkbox
         if account in self.l_auto_login:
             self.auto_login.set_active(True)
+            self.remember_password.set_active(True)
+            self.remember_account.set_sensitive(False)
+            self.remember_password.set_sensitive(False)
         else:
              self.auto_login.set_active(False)
 
@@ -361,7 +359,7 @@ class Login(gtk.Alignment):
             self.forgetMe.set_child_visible(True)
             self.remember_account.set_sensitive(False)
         else:
-            self.txt_password.set_text('')
+            self.txt_password.set_text('')          
             self.forgetMe.set_child_visible(False)
             self.remember_account.set_sensitive(True)
 
@@ -453,7 +451,7 @@ class Login(gtk.Alignment):
     def _on_cancel_clicked(self, button):
         # call the controller on_disconnect
         self.callback_disconnect()
-        self._on_auto_login_toggled(None)
+        self._update_fields(self.cmb_account.get_active_text())
 
     def _on_nice_bar_clicked(self, widget, event):
         self.eventBox.hide_all()
@@ -486,7 +484,6 @@ class Login(gtk.Alignment):
         if self.auto_login.get_active():
             if user != '' and user not in self.l_auto_login:
                 self.config.l_auto_login.append(user)
-
             self.remember_password.set_active(True)
             self.remember_account.set_sensitive(False)
             self.remember_password.set_sensitive(False)
