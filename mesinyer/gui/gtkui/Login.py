@@ -20,7 +20,9 @@ import logging
 log = logging.getLogger('gtkui.Login')
 
 class Login(gtk.Alignment):
-    #TODO automatic reconnection??countdown???
+    #TODO automatic REconnection??countdown???
+    #TODO i don't like the gui "jumps" when i pass from connecting to reconnecting or 
+    #when there is the nicebar for example
 
     def __init__(self, callback,callback_disconnect, on_preferences_changed, config,
                  config_dir,config_path, proxy=None, use_http=False, 
@@ -118,10 +120,9 @@ class Login(gtk.Alignment):
         hboxremember.pack_start(self.remember_account, False, False)
         hboxremember.pack_start(self.forgetMe, False, False)
         
-        #TODO find how to center this vbox
         vbox_remember = gtk.VBox(spacing=4)
         vbox_remember.set_border_width(8)
-        vbox_remember.pack_start(self.throbber)
+        #vbox_remember.pack_start(self.throbber)
         vbox_remember.pack_start(hboxremember)
         vbox_remember.pack_start(self.remember_password)
         vbox_remember.pack_start(self.auto_login)
@@ -184,6 +185,8 @@ class Login(gtk.Alignment):
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.55, yalign=0.5,xscale=0.05,
             yscale=0.2)
+        al_vbox_throbber = gtk.Alignment(xalign=0.5, yalign=0.5,xscale=0.2,
+            yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
         al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
@@ -194,6 +197,7 @@ class Login(gtk.Alignment):
         
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
+        al_vbox_throbber.add(self.throbber)
         al_button.add(self.b_connect)
         al_button_cancel.add(self.b_cancel)
         al_logo.add(img_logo)
@@ -204,6 +208,7 @@ class Login(gtk.Alignment):
         vbox.pack_start(al_logo, True, True, 10)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
+        vbox.pack_start(al_vbox_throbber, False, False)
         vbox.pack_start(al_button, True, True)
         vbox.pack_start(al_button_cancel, True, True)
         vbox.pack_start(al_preferences, False)
@@ -239,6 +244,7 @@ class Login(gtk.Alignment):
         self.b_connect.set_sensitive(sensitive)
         self.remember_account.set_sensitive(sensitive)
         self.remember_password.set_sensitive(sensitive)
+        self.forgetMe.set_child_visible(sensitive)
         self.auto_login.set_sensitive(sensitive)
         self.b_preferences.set_sensitive(sensitive)
         self.menu.set_sensitive(sensitive)
@@ -359,7 +365,7 @@ class Login(gtk.Alignment):
             self.forgetMe.set_child_visible(False)
             self.remember_account.set_sensitive(True)
 
-        #update status
+        #update status box
         if account in self.statuses:
             try:
                 self.btn_status.set_status(int(self.statuses[account]))
@@ -389,12 +395,14 @@ class Login(gtk.Alignment):
 
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
+        self.eventBox.hide_all()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
 
     def _on_account_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
+        self.eventBox.hide_all()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.txt_password.grab_focus()
@@ -445,6 +453,7 @@ class Login(gtk.Alignment):
     def _on_cancel_clicked(self, button):
         # call the controller on_disconnect
         self.callback_disconnect()
+        self._on_auto_login_toggled(None)
 
     def _on_nice_bar_clicked(self, widget, event):
         self.eventBox.hide_all()
