@@ -81,17 +81,19 @@ class OptionsHandler(object):
         '''called when the order by group radio button is toggled'''
         if active:
             self.contact_list.order_by_group = active
-            self.contact_list.fill()
 
     def on_order_by_status_toggled(self, active):
         '''called when the order by status radio button is toggled'''
         if active:
             self.contact_list.order_by_status = active
-            self.contact_list.fill()
 
     def on_show_offline_toggled(self, active):
         '''called when the show offline item is toggled'''
         self.contact_list.show_offline = active
+
+    def on_group_offline_toggled(self, active):
+        '''called when the show offline item is toggled'''
+        self.contact_list.group_offline = active
 
     def on_show_empty_groups_toggled(self, active):
         '''called when the show empty groups item is toggled'''
