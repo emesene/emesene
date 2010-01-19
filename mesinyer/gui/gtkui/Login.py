@@ -122,7 +122,6 @@ class Login(gtk.Alignment):
         
         vbox_remember = gtk.VBox(spacing=4)
         vbox_remember.set_border_width(8)
-        #vbox_remember.pack_start(self.throbber)
         vbox_remember.pack_start(hboxremember)
         vbox_remember.pack_start(self.remember_password)
         vbox_remember.pack_start(self.auto_login)
@@ -301,22 +300,6 @@ class Login(gtk.Alignment):
             if account.account in self.config.l_remember_password:
                 self.config.l_remember_password.remove(account.account)
 
-        else:
-            if account.account in self.config.l_remember_account:
-                self.config.l_remember_account.remove(account.account)
-
-            if account.account in self.config.l_remember_password:
-                self.config.l_remember_password.remove(account.account)
-
-            if account.account in self.config.last_logged_account:
-                self.config.last_logged_account = ''
-
-            if account.account in self.config.d_accounts:
-                del self.config.d_accounts[account.account]
-
-            if account.account in self.config.d_status:
-                del self.config.d_status[account.account]
-
         self.config.save(self.config_path)
 
     def _on_account_changed(self, entry):
@@ -331,6 +314,9 @@ class Login(gtk.Alignment):
             self.remember_password.set_active(False)
             self.auto_login.set_active(False)
             self.forgetMe.set_child_visible(False)
+            self.remember_account.set_sensitive(True)
+            self.txt_password.set_text('')
+            self.txt_password.set_sensitive(True)
             return
         
         #update password and account checkbox
