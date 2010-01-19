@@ -2,8 +2,6 @@
 import gtk
 import base64
 import gobject
-import locale
-import time
 import sys
 from shutil import rmtree
 
@@ -12,25 +10,23 @@ import gui
 import utils
 import extension
 import StatusButton
-import Dialog
-import MainMenu
 import stock
 
 import logging
 log = logging.getLogger('gtkui.Login')
 
 class Login(gtk.Alignment):
-    #TODO automatic REconnection??countdown???
-    #TODO i don't like the gui "jumps" when i pass from connecting to reconnecting or 
-    #when there is the nicebar for example
+    # TODO automatic REconnection??countdown???
+    # TODO i don't like the gui "jumps" when i pass from connecting to
+    # reconnecting or when there is the nicebar for example
 
-    def __init__(self, callback,callback_disconnect, on_preferences_changed, config,
-                 config_dir,config_path, proxy=None, use_http=False, 
-                 session_id=None, on_disconnect=False, interface='login'):
+    def __init__(self, callback, callback_disconnect, on_preferences_changed,
+                config, config_dir, config_path, proxy=None, use_http=False,
+                session_id=None, on_disconnect=False, interface='login'):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
-        
+
         self.config = config
         self.config_dir = config_dir
         self.config_path = config_path
@@ -44,8 +40,10 @@ class Login(gtk.Alignment):
 
         account = self.config.get_or_set('last_logged_account', '')
         self.l_auto_login = self.config.get_or_set('l_auto_login', [])
-        self.l_remember_account = self.config.get_or_set('l_remember_account', [])
-        self.l_remember_password = self.config.get_or_set('l_remember_password', [])
+        self.l_remember_account = self.config.get_or_set('l_remember_account',
+                [])
+        self.l_remember_password = self.config.get_or_set(
+                'l_remember_password', [])
         self.accounts = self.config.get_or_set('d_accounts', {})
         self.statuses = self.config.get_or_set('d_status', {})
 
@@ -53,7 +51,7 @@ class Login(gtk.Alignment):
             self.proxy = e3.Proxy()
         else:
             self.proxy = proxy
-        
+
         self.dialog = extension.get_default('dialog')
 
         self.menu = None
@@ -69,16 +67,16 @@ class Login(gtk.Alignment):
         completion.set_inline_selection(True)
 
         self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
-         
+
         self._reload_account_list()
-   
+
         self.cmb_account = gtk.ComboBoxEntry(self.liststore, 0)
         self.cmb_account.get_children()[0].set_completion(completion)
         self.cmb_account.get_children()[0].connect('key-press-event',
             self._on_account_key_press)
         self.cmb_account.connect('changed',
             self._on_account_changed)
- 
+
         self.btn_status = StatusButton.StatusButton()
 
         status_padding = gtk.Label()
@@ -93,13 +91,14 @@ class Login(gtk.Alignment):
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
         img_logo = utils.safe_gtk_image_load(gui.theme.logo)
-        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None, animated=True)
+        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
+                animated=True)
         self.throbber = gtk.image_new_from_animation(th_pix)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
         self.auto_login = gtk.CheckButton(_('Auto-login'))
-        
+
         self.remember_account.connect('toggled',
             self._on_remember_account_toggled)
         self.remember_password.connect('toggled',
@@ -107,30 +106,30 @@ class Login(gtk.Alignment):
         self.auto_login.connect('toggled',
             self._on_auto_login_toggled)
 
-        self.forgetMe = gtk.EventBox()
-        self.forgetMe.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.forgetMeLabel = gtk.Label('<span foreground="#0000AA">(' + \
+        self.forget_me = gtk.EventBox()
+        self.forget_me.set_events(gtk.gdk.BUTTON_PRESS_MASK)
+        self.forget_me_label = gtk.Label('<span foreground="#0000AA">(' + \
                                             _('Forget me') + ')</span>')
-        self.forgetMeLabel.set_use_markup(True)
-        self.forgetMe.add(self.forgetMeLabel)
-        self.forgetMe.connect('button_press_event', self._on_forgetMe_clicked)
-        self.forgetMe.set_child_visible(False)
+        self.forget_me_label.set_use_markup(True)
+        self.forget_me.add(self.forget_me_label)
+        self.forget_me.connect('button_press_event', self._on_forget_me_clicked)
+        self.forget_me.set_child_visible(False)
 
         hboxremember = gtk.HBox(spacing=2)
         hboxremember.pack_start(self.remember_account, False, False)
-        hboxremember.pack_start(self.forgetMe, False, False)
-        
+        hboxremember.pack_start(self.forget_me, False, False)
+
         vbox_remember = gtk.VBox(spacing=4)
         vbox_remember.set_border_width(8)
         #vbox_remember.pack_start(self.throbber)
         vbox_remember.pack_start(hboxremember)
         vbox_remember.pack_start(self.remember_password)
         vbox_remember.pack_start(self.auto_login)
-        
+
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
         self.b_connect.set_border_width(8)
-        
+
         self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
         self.b_cancel.connect('clicked', self._on_cancel_clicked)
         self.b_cancel.set_border_width(8)
@@ -169,29 +168,30 @@ class Login(gtk.Alignment):
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
-        self.eventBox = gtk.EventBox()
-        nicebarBox = gtk.HBox(False)
-        self.eventBox.add(nicebarBox)
+        self.eventbox = gtk.EventBox()
+        nicebar_box = gtk.HBox(False)
+        self.eventbox.add(nicebar_box)
         self.label = gtk.Label()
         self.label.set_line_wrap(True)
         self.image = gtk.Image()
-        self.image.set_from_stock(gtk.STOCK_DIALOG_ERROR, gtk.ICON_SIZE_LARGE_TOOLBAR)
-        nicebarBox.pack_start(self.image, False, False)
-        nicebarBox.pack_start(self.label, True, False)
-        self.eventBox.connect("button-press-event", self._on_nice_bar_clicked)
+        self.image.set_from_stock(gtk.STOCK_DIALOG_ERROR,
+                gtk.ICON_SIZE_LARGE_TOOLBAR)
+        nicebar_box.pack_start(self.image, False, False)
+        nicebar_box.pack_start(self.label, True, False)
+        self.eventbox.connect("button-press-event", self._on_nice_bar_clicked)
 
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
-        al_vbox_remember = gtk.Alignment(xalign=0.55, yalign=0.5,xscale=0.05,
+        al_vbox_remember = gtk.Alignment(xalign=0.55, yalign=0.5, xscale=0.05,
             yscale=0.2)
-        al_vbox_throbber = gtk.Alignment(xalign=0.5, yalign=0.5,xscale=0.2,
+        al_vbox_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
         al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
         al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
-        
+
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_vbox_throbber.add(self.throbber)
@@ -199,9 +199,9 @@ class Login(gtk.Alignment):
         al_button_cancel.add(self.b_cancel)
         al_logo.add(img_logo)
         al_preferences.add(self.b_preferences)
-        
-        vbox.pack_start(self.menu,False)
-        vbox.pack_start(self.eventBox,False)
+
+        vbox.pack_start(self.menu, False)
+        vbox.pack_start(self.eventbox, False)
         vbox.pack_start(al_logo, True, True, 10)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
@@ -215,11 +215,11 @@ class Login(gtk.Alignment):
 
         self.throbber.hide()
         self.b_cancel.hide()
-        self.eventBox.hide_all()
-        
+        self.eventbox.hide_all()
+
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
-            self.forgetMe.set_child_visible(True)
+            self.forget_me.set_child_visible(True)
             self.remember_account.set_sensitive(False)
             #autologin
             if account in self.l_auto_login and not on_disconnect:
@@ -241,7 +241,7 @@ class Login(gtk.Alignment):
         self.b_connect.set_sensitive(sensitive)
         self.remember_account.set_sensitive(sensitive)
         self.remember_password.set_sensitive(sensitive)
-        self.forgetMe.set_child_visible(sensitive)
+        self.forget_me.set_child_visible(sensitive)
         self.auto_login.set_sensitive(sensitive)
         self.b_preferences.set_sensitive(sensitive)
         self.menu.set_sensitive(sensitive)
@@ -272,9 +272,9 @@ class Login(gtk.Alignment):
 
         self.throbber.show()
         self.set_sensitive(False)
-        self.callback(account,self.session_id, self.proxy, self.use_http)
+        self.callback(account, self.session_id, self.proxy, self.use_http)
 
-    def _config_account(self,account, remember_account,remember_password):
+    def _config_account(self, account, remember_account, remember_password):
         '''modify the config for the current account before login'''
 
         if remember_password:
@@ -330,9 +330,9 @@ class Login(gtk.Alignment):
             self.remember_account.set_active(False)
             self.remember_password.set_active(False)
             self.auto_login.set_active(False)
-            self.forgetMe.set_child_visible(False)
+            self.forget_me.set_child_visible(False)
             return
-        
+
         #update password and account checkbox
         if account in self.l_remember_password:
             self.remember_password.set_active(True)
@@ -351,16 +351,16 @@ class Login(gtk.Alignment):
             self.remember_account.set_sensitive(False)
             self.remember_password.set_sensitive(False)
         else:
-             self.auto_login.set_active(False)
+            self.auto_login.set_active(False)
 
-        #update password and forgetme label
+        #update password and forget_me label
         if account in self.accounts:
             self.txt_password.set_text(base64.b64decode(self.accounts[account]))
-            self.forgetMe.set_child_visible(True)
+            self.forget_me.set_child_visible(True)
             self.remember_account.set_sensitive(False)
         else:
-            self.txt_password.set_text('')          
-            self.forgetMe.set_child_visible(False)
+            self.txt_password.set_text('')
+            self.forget_me.set_child_visible(False)
             self.remember_account.set_sensitive(True)
 
         #update status box
@@ -372,59 +372,61 @@ class Login(gtk.Alignment):
         else:
             self.btn_status.set_status(e3.status.ONLINE)
 
-    def _reload_account_list(self,*args):
-       '''reload the account list in the combobox'''
-       self.liststore.clear() 
-       for mail in sorted(self.accounts):
-           self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
-       return
+    def _reload_account_list(self, *args):
+        '''reload the account list in the combobox'''
+        self.liststore.clear()
+        for mail in sorted(self.accounts):
+            self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
+        return
 
-       #i'm here if self.accounts is empty
-       self.liststore = None
+        #i'm here if self.accounts is empty
+        self.liststore = None
 
-    def show_nice_bar(self,message,color=gtk.gdk.Color(57600,23040,19712),image=gtk.STOCK_DIALOG_ERROR):
+    def show_nice_bar(self, message, color=gtk.gdk.Color(57600, 23040, 19712),
+            image=gtk.STOCK_DIALOG_ERROR):
         if message != None:
-            self.eventBox.modify_bg(gtk.STATE_NORMAL, color)
+            self.eventbox.modify_bg(gtk.STATE_NORMAL, color)
             self.image.set_from_stock(image, gtk.ICON_SIZE_LARGE_TOOLBAR)
             self.label.set_text(message)
-            self.eventBox.show_all()
+            self.eventbox.show_all()
         else:
-            self.eventBox.hide_all()
+            self.eventbox.hide_all()
 
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
-        self.eventBox.hide_all()
+        self.eventbox.hide_all()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
 
     def _on_account_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
-        self.eventBox.hide_all()
+        self.eventbox.hide_all()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.txt_password.grab_focus()
 
-    def _on_forgetMe_clicked(self, *args):
-       '''called when the forget me label is clicked'''
-       def _yes_no_cb(response):
+    def _on_forget_me_clicked(self, *args):
+        '''called when the forget me label is clicked'''
+        def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
             user = self.cmb_account.get_active_text()
             if response == stock.YES:
                 try: # Delete user's folder
                     rmtree(self.config_dir.join(user))
-                    dirAt = self.config_dir.join(user.replace('@','-at-'))
-                    if self.config_dir.dir_exists(dirAt):
-                        rmtree(dirAt)
-                except: 
-                   self.show_nice_bar(_('Error while deleting user'))
+                    dir_at = self.config_dir.join(user.replace('@','-at-'))
+
+                    if self.config_dir.dir_exists(dir_at):
+                        rmtree(dir_at)
+                except:
+                    self.show_nice_bar(_('Error while deleting user'))
 
                 if user in self.config.l_remember_account:
                     self.config.l_remember_account.remove(user)
 
                 if user in self.config.l_remember_password:
                     self.config.l_remember_password.remove(user)
-                
+
                 if user in self.config.l_auto_login:
                     self.config.l_auto_login.remove(user)
 
@@ -442,19 +444,20 @@ class Login(gtk.Alignment):
                 self.cmb_account.get_children()[0].set_text('')
                 self.remember_account.set_sensitive(True)
 
-       self.dialog.yes_no(_('Are you sure you want to delete the account %s ?') % \
+        self.dialog.yes_no(
+               _('Are you sure you want to delete the account %s ?') % \
                       self.cmb_account.get_active_text(), _yes_no_cb)
 
     def _on_connect_clicked(self, button):
         self.do_connect()
-    
+
     def _on_cancel_clicked(self, button):
         # call the controller on_disconnect
         self.callback_disconnect()
         self._update_fields(self.cmb_account.get_active_text())
 
     def _on_nice_bar_clicked(self, widget, event):
-        self.eventBox.hide_all()
+        self.eventbox.hide_all()
 
     def _on_quit(self):
         '''close emesene'''
