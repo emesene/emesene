@@ -74,11 +74,11 @@ class LoginMenu(gtk.MenuBar):
         HelpMenu = extension.get_default('menu help')
 
         self.account = gtk.MenuItem('_Account')
-        self.account_menu = AccountLoginMenu(self.handlers.account_login_handler)
+        self.account_menu = LoginAccountMenu(self.handlers.account_login_handler)
         self.account.set_submenu(self.account_menu)
 
         self.options = gtk.MenuItem('_Options')
-        self.options_menu = PreferencesLoginMenu(self.handlers.preferences_login_handler)
+        self.options_menu = LoginPreferencesMenu(self.handlers.preferences_login_handler)
         self.options.set_submenu(self.options_menu)
 
         self.help = gtk.MenuItem('_Help')
@@ -250,7 +250,7 @@ class HelpMenu(gtk.Menu):
         self.append(self.about)
         self.append(self.debug)
 
-class AccountLoginMenu(gtk.Menu):
+class LoginAccountMenu(gtk.Menu):
     """
     A widget that represents the Account menu located on the login window
     """
@@ -277,7 +277,7 @@ class AccountLoginMenu(gtk.Menu):
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)
 
-class PreferencesLoginMenu(gtk.Menu):
+class LoginPreferencesMenu(gtk.Menu):
     """
     A widget that represents the Preferences menu located on login window
     """
