@@ -43,16 +43,14 @@ class Window(gtk.Window):
             self.remove(self.get_child())
             self.content = None
 
-    def go_login(self, callback, on_preferences_changed,
-            account=None, accounts=None,
-            remember_account=None, remember_password=None, statuses=None,
-            session=None, proxy=None, use_http=False, session_id=None):
+    def go_login(self, callback,callback_disconnect, on_preferences_changed,
+           config=None, config_dir=None, config_path=None, proxy=None, 
+           use_http=False, session_id=None,on_disconnect=False):
         '''draw the login window on the main window'''
         LoginWindow = extension.get_default('login window')
 
-        self.content = LoginWindow(callback, on_preferences_changed,
-            account, accounts, remember_account, remember_password, statuses,
-            proxy, use_http, session_id)
+        self.content = LoginWindow(callback,callback_disconnect, on_preferences_changed,
+            config, config_dir, config_path, proxy, use_http, session_id,on_disconnect)
         self.add(self.content)
         self.content.show()
         self.content_type = 'login'
