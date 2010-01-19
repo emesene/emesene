@@ -23,12 +23,14 @@ from papyon.msnp2p.constants import *
 from papyon.msnp2p.SLP import *
 from papyon.msnp2p.transport import *
 from papyon.msnp2p.exceptions import *
+from papyon.msnp2p.transport.direct import *
 import papyon.util.element_tree as ElementTree
 
 import gobject
 import base64
 import logging
 import random
+import socket
 import uuid
 
 __all__ = ['P2PSession']
@@ -166,6 +168,79 @@ class P2PSession(gobject.GObject):
         body = SLPTransferResponseBody(session_id=self._id)
         self._respond_transreq(transreq, 603, body)
 
+    def _switch_bridge(self, transreq):
+        nonce = str(uuid.uuid4())
+        local_ip = self._session_manager._client.local_ip
+        port = 6891
+        manager = self._session_manager._transport_manager
+        new_bridge = DirectP2PTransport(manager, self.peer, local_ip, port, nonce)
+        new_bridge.connect("listening", self._bridge_listening, transreq, nonce)
+        new_bridge.connect("connected", self._bridge_switched)
+        new_bridge.connect("failed", self._bridge_failed)
+        new_bridge.listen()
+
+    def _transreq_accepted(self, transresp):
+        if not transresp.listening:
+            return
+        ip, port = self._select_address(transresp)
+        nonce = transresp.nonce
+        manager = self._session_manager._transport_manager
+        new_bridge = DirectP2PTransport(manager, self.peer, ip, port, nonce)
+        new_bridge.connect("connected", self._bridge_switched)
+        new_bridge.connect("failed", self._bridge_failed)
+        new_bridge.open()
+
+    def _select_address(self, transresp):
+        client_ip = self._session_manager._client.profile.profile.get("ClientIP")
+        local_ip = self._session_manager._client.local_ip
+        local_addr = socket.inet_aton(local_ip)
+        ips = []
+
+        # try external addresses
+        port = transresp.external_port
+        for ip in transresp.external_ips:
+            try:
+                socket.inet_aton(ip)
+            except:
+                continue
+            if ip == client_ip:
+                # we are on the same NAT
+                ips = []
+                break
+            ips.append((ip, port))
+        if ips:
+            return ips[0]
+
+        # try internal addresses
+        port = transresp.internal_port
+        for ip in transresp.internal_ips:
+            try:
+                addr = socket.inet_aton(ip)
+                # same local area network
+                if addr[0:3] == local_addr[0:3]:
+                    return (ip, port)
+            except:
+                continue
+            ips.append((ip, port))
+        if ips:
+            return ips[0]
+        
+        # no valid address found
+        return (None, None)
+
+    def _bridge_listening(self, new_bridge, external_ip, external_port,
+            transreq, nonce):
+        self._accept_transreq(transreq, "TCPv1", True, nonce, local_ip,
+                new_bridge.port, external_ip, external_port)
+
+    def _bridge_switched(self, new_bridge):
+        logger.info("Bridge switched to direct connection")
+        self._on_bridge_selected()
+
+    def _bridge_failed(self, new_bridge):
+        logger.error("Bridge switching failed, using switchboard")
+        self._on_bridge_selected()
+
     def _close(self, context=None):
         body = SLPSessionCloseBody(context=context, session_id=self._id,
                 s_channel_state=0)
@@ -218,17 +293,20 @@ class P2PSession(gobject.GObject):
                 if isinstance(message.body, SLPSessionRequestBody):
                     self._on_invite_received(message)
                 elif isinstance(message.body, SLPTransferRequestBody):
-                    self._decline_transreq(message)
+                    self._switch_bridge(message)
                 elif isinstance(message.body, SLPSessionCloseBody):
                     self._on_bye_received(message)
                 else:
                     print "Unhandled signaling blob :", message
             elif isinstance(message, SLPResponseMessage):
-                if message.status is 200:
-                    self._on_session_accepted()
-                    self.emit("accepted")
-                elif message.status is 603:
-                    self._on_session_rejected(message)
+                if isinstance(message.body, SLPSessionRequestBody):
+                    if message.status is 200:
+                        self._on_session_accepted()
+                        self.emit("accepted")
+                    elif message.status is 603:
+                        self._on_session_rejected(message)
+                elif isinstance(message.body, SLPTransferResponseBody):
+                    self._transreq_accepted(message.body)
                 else:
                     print "Unhandled response blob :", message
             return
@@ -252,6 +330,7 @@ class P2PSession(gobject.GObject):
         logger.info("Session data transfer completed")
         blob.data.seek(0, 0)
         self.emit("completed", blob.data)
+        self._close()
 
     def _on_data_blob_received(self, blob):
         logger.info("Session data transfer completed")
@@ -271,6 +350,9 @@ class P2PSession(gobject.GObject):
         pass
 
     def _on_session_rejected(self, message):
+        pass
+
+    def _on_bridge_selected(self):
         pass
 
 gobject.type_register(P2PSession)

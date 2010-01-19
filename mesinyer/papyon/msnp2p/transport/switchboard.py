@@ -54,6 +54,10 @@ class SwitchboardP2PTransport(BaseP2PTransport, SwitchboardClient):
         return None
 
     @property
+    def connected(self):
+        return True
+
+    @property
     def rating(self):
         return 0
 

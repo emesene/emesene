@@ -44,4 +44,9 @@ class TCPClient(SocketClient, ProxyfiableClient):
             @type port: integer > 0 and < 65536"""
         SocketClient.__init__(self, host, port, AF_INET, SOCK_STREAM)
         ProxyfiableClient.__init__(self)
+
+    def set_socket(self, sock):
+        SocketClient._pre_open(self, sock)
+        SocketClient._post_open(self)
+
 gobject.type_register(TCPClient)

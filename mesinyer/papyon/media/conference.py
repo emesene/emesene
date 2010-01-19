@@ -83,30 +83,25 @@ class Conference(gobject.GObject):
     def set_source(self, source):
         pass
 
-import gtk
 
 class MediaSessionHandler(MediaSessionEventInterface):
 
     def __init__(self, session):
         MediaSessionEventInterface.__init__(self, session)
         self._conference = None
-        self._xid = None
         self._handlers = []
-        #That's the pipeline
+        self._setup()
+
+    def _setup(self):
         self._pipeline = gst.Pipeline()
         bus = self._pipeline.get_bus()
         bus.add_signal_watch()
-        bus.enable_sync_message_emission()
         bus.connect("message", self.on_bus_message)
-        bus.connect("sync-message::element", self.on_sync_message)
-        #Check for session type
-        if self._session.type is MediaSessionType.WEBCAM_RECV:
-            name = "fsmsncamrecvconference"
-        elif self._session.type is MediaSessionType.WEBCAM_SEND:
-            name = "fsmsncamsendconference"
+        if self._session.type is MediaSessionType.WEBCAM_RECV or\
+           self._session.type is MediaSessionType.WEBCAM_SEND:
+            name = "fsmsnconference"
         else:
             name = "fsrtpconference"
-        #make the element in the gstreamer
         self._conference = gst.element_factory_make(name)
         self._participant = self._conference.new_participant("")
         self._pipeline.add(self._conference)
@@ -115,24 +110,10 @@ class MediaSessionHandler(MediaSessionEventInterface):
 
     def on_stream_added(self, stream):
         logger.debug("Stream \"%s\" added" % stream.name)
-        #Create the mediaStreamHandler and setup it
-        daarea = gtk.DrawingArea()
-        daarea.set_colormap(gtk.gdk.colormap_get_system())
-        win_send = gtk.Window()
-        win_send.set_double_buffered(False)
-        win_send.set_app_paintable(True)
-        win_send.set_title("webcaam");
-        win_send.add(daarea)
-        win_send.show_all()
-        win_send.resize(320, 240)
-        self._xid = daarea.window.xid
-        
-        handler = MediaStreamHandler(stream, self._xid)
+        handler = MediaStreamHandler(stream)
         handler.setup(self._conference, self._pipeline, self._participant,
                 self._session.type)
-        #add to the handlers
         self._handlers.append(handler)
-        #set the available codecs
         if self._session.type is MediaSessionType.WEBCAM_RECV or\
            self._session.type is MediaSessionType.WEBCAM_SEND:
             stream.set_local_codecs([])
@@ -177,20 +158,11 @@ class MediaSessionHandler(MediaSessionEventInterface):
                 stream.new_active_candidate_pair(local.foundation, remote.foundation)
         return ret
 
-    def on_sync_message(self, bus, message):
-        if message.structure is None: return
-        message_name = message.structure.get_name()
-        if message_name == "prepare-xwindow-id":
-            imagesink = message.src
-            imagesink.set_property("force-aspect-ratio", True)
-            imagesink.set_xwindow_id(self._xid)
-            print "sync message", imagesink
 
 class MediaStreamHandler(MediaStreamEventInterface):
 
-    def __init__(self, stream, xid = None):
+    def __init__(self, stream):
         MediaStreamEventInterface.__init__(self, stream)
-        self._xid = xid
 
     def setup(self, conference, pipeline, participant, type):
         if type in (MediaSessionType.SIP, MediaSessionType.TUNNELED_SIP):
@@ -206,8 +178,7 @@ class MediaStreamHandler(MediaStreamEventInterface):
             params = {}
         media_type = media_types[self._stream.name]
         self.fssession = conference.new_session(media_type)
-        if type not in (MediaSessionType.WEBCAM_SEND, MediaSessionType.WEBCAM_RECV):
-            self.fssession.set_codec_preferences(build_codecs(self._stream.name))
+        self.fssession.set_codec_preferences(build_codecs(self._stream.name))
         self.fsstream = self.fssession.new_stream(participant,
                 self._stream.direction, "nice", params)
         self.fsstream.connect("src-pad-added", self.on_src_pad_added, pipeline)
@@ -228,13 +199,11 @@ class MediaStreamHandler(MediaStreamEventInterface):
         self.fsstream.set_remote_codecs(codecs)
 
     def on_src_pad_added(self, stream, pad, codec, pipeline):
-        if self._stream.name is "audio":
-            sink = make_audio_sink()
-        elif self._stream.name is "video":
-            sink = make_video_sink(xid = self._xid)
+        sink = make_sink(self._stream.name)
         pipeline.add(sink)
         sink.set_state(gst.STATE_PLAYING)
         pad.link(sink.get_pad("sink"))
+
 
 # Farsight utility functions
 
@@ -316,11 +285,10 @@ def convert_media_codecs(codecs, name):
 
 # GStreamer utility functions
 
-#NOT USED ANYMORE
 def make_source(media_name):
     func = globals()["make_%s_source" % media_name]
     return func()
-#NOT USED ANYMORE
+
 def make_sink(media_name):
     func = globals()["make_%s_sink" % media_name]
     return func()
@@ -350,30 +318,24 @@ def make_video_source(name="videotestsrc"):
     bin.add_pad(gst.GhostPad("src", videoscale.get_pad("src")))
     return bin
 
-def make_video_sink(async=False, xid=None):
+def make_video_sink(async=False):
     "Make a bin with a video sink in it, that will be displayed on xid."
-    print "this is my xid", xid
-    if not xid:
-        # Hello, if you want to view this output, follow KaKaRoTo's advice:
-        #> gst-launch-0.10 filesrc location=videosink.log blocksize=230400 ! 
-        #video/x-raw-rgb,depth=24,bpp=24,endianness=4321,framerate=15/1,width=320,
-        #height=240,red_mask=16711680,green_mask=65280,blue_mask=255 ! ffmpegcolorspace ! videorate ! xvimagesink
-        sink = gst.element_factory_make("filesink", "filesink")
-        sink.set_property("location", "/tmp/videosink.log")
-    else:
-        # doesn't work, find out why
-        bin = gst.Bin("videosink_%d" % xid)
-        sink = gst.element_factory_make("xvimagesink", "imagesink")
-        sink.set_property("sync", not async)
-        sink.set_property("async", async)
-        bin.add(sink)
-        colorspace = gst.element_factory_make("ffmpegcolorspace")
-        bin.add(colorspace)
-        videoscale = gst.element_factory_make("videoscale")
-        bin.add(videoscale)
-        videoscale.link(colorspace)
-        colorspace.link(sink)
-        bin.add_pad(gst.GhostPad("sink", videoscale.get_pad("sink")))
-        sink.set_data("xid", xid)
-        return bin
+    sink = gst.element_factory_make("filesink", "filesink")
+    sink.set_property("location", "/tmp/videosink.log")
     return sink
+
+    bin = gst.Bin("videosink")
+    sink = gst.element_factory_make("ximagesink", "imagesink")
+    sink.set_property("sync", async)
+    sink.set_property("async", async)
+    bin.add(sink)
+    colorspace = gst.element_factory_make("ffmpegcolorspace")
+    bin.add(colorspace)
+    videoscale = gst.element_factory_make("videoscale")
+    bin.add(videoscale)
+    videoscale.link(colorspace)
+    colorspace.link(sink)
+    bin.add_pad(gst.GhostPad("sink", videoscale.get_pad("sink")))
+    #sink.set_data("xid", xid) #Future work - proper gui place for imagesink ?
+    return bin.get_pad("sink")
+

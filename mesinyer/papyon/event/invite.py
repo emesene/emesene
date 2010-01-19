@@ -50,3 +50,9 @@ class InviteEventInterface(BaseEventInterface):
             @param call: the call
             @type call: L{SIPCall<papyon.sip.sip.SIPCall>}"""
         pass
+
+    def on_invite_file_transfer(self, session):
+        """Called when we get a file transfer request
+            @param session: the file transfer session
+            @type session: L{FileTransferSession<papyon.p2p.FileTransferSession>}"""
+        pass

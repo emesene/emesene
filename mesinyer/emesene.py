@@ -28,24 +28,11 @@ import gettext
 import optparse
 
 import string
-# fix for gstreamer --help
-argv = sys.argv
-sys.argv = [argv[0]]
 
-# load translations
-if os.path.exists('default.mo'):
-    gettext.GNUTranslations(open('default.mo')).install()
-elif os.path.exists('po/'):
-    gettext.install('emesene', 'po/')
-else:
-    gettext.install('emesene')
-
-import gui
 import utils
 import debugger
 import logging
 log = logging.getLogger('emesene')
-
 
 import e3
 from e3 import msn
@@ -60,7 +47,21 @@ except Exception, exc:
 from pluginmanager import get_pluginmanager
 import extension
 import interfaces
+
+import gui
 from gui import gtkui
+
+# fix for gstreamer --help
+argv = sys.argv
+sys.argv = [argv[0]]
+
+# load translations
+if os.path.exists('default.mo'):
+    gettext.GNUTranslations(open('default.mo')).install()
+elif os.path.exists('po/'):
+    gettext.install('emesene', 'po/')
+else:
+    gettext.install('emesene')
 
 
 class VerboseOption(object):
@@ -104,6 +105,9 @@ class Controller(object):
         '''register core extensions'''
         extension.category_register('session', msn.Session,
                 single_instance=True)
+        extension.register('session', jabber.Session)
+        if papylib is not None:
+            extension.register('session', papylib.Session)
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
                 e3.common.notification.notify)
@@ -364,6 +368,7 @@ class Controller(object):
         self.session.config.get_or_set('b_show_header', True)
         self.session.config.get_or_set('b_show_info', True)
         self.session.config.get_or_set('b_show_toolbar', True)
+        self.session.config.get_or_set('b_allow_auto_scroll', True)
         self.session.login(account.account, account.password, account.status,
             proxy, use_http)
         gobject.timeout_add(500, self.session.signals._handle_events)
@@ -520,8 +525,8 @@ def main():
     the main method of emesene
     """
     extension.category_register('session', msn.Session, single_instance=True)
-    extension.category_register('option provider', None)
-            #interfaces=interfaces.IOptionProvider)
+    extension.category_register('option provider', None,
+            interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
     extension.get_category('option provider').activate(ExtensionDefault)
     options = PluggableOptionParser(argv)

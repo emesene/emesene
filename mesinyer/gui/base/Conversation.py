@@ -116,11 +116,11 @@ class Conversation(object):
         '''called when a emote is selected on the emote window'''
         self.input.append(emote)
 
-    def on_notify_atention(self):
+    def on_notify_attention(self):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
         self.output.append(
-            self.formatter.format_information('you just sent a nudge!'))
+            self.formatter.format_information('you just sent a nudge!'),self.session.config.b_allow_auto_scroll)
         self.play_nudge()
 
     def show(self):
@@ -211,7 +211,7 @@ class Conversation(object):
             middle = e3.common.add_style_to_message(middle, self.cstyle, False)
 
         all = first + middle + last
-        self.output.append(all, cedict)
+        self.output.append(all, cedict,self.session.config.b_allow_auto_scroll)
         self.play_type()
 
     def _get_icon(self):

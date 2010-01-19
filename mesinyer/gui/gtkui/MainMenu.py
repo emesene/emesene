@@ -140,6 +140,8 @@ class OptionsMenu(gtk.Menu):
 
         self.show_offline = gtk.CheckMenuItem('Show _offline contacts')
         self.show_offline.set_active(config.b_show_offline)
+        self.group_offline = gtk.CheckMenuItem('G_roup offline contacts')
+        self.group_offline.set_active(config.b_group_offline)
         self.show_empty_groups = gtk.CheckMenuItem('Show _empty groups')
         self.show_empty_groups.set_active(config.b_show_empty_groups)
         self.show_blocked = gtk.CheckMenuItem('Show _blocked contacts')
@@ -154,19 +156,22 @@ class OptionsMenu(gtk.Menu):
         self.plugins.connect('activate',
             lambda *args: self.handler.on_plugins_selected())
 
-        self.by_status.connect('toggled', 
+        self.by_status.connect('toggled',
             lambda *args: self.handler.on_order_by_status_toggled(
                 self.by_status.get_active()))
-        self.by_group.connect('toggled', 
+        self.by_group.connect('toggled',
             lambda *args: self.handler.on_order_by_group_toggled(
                 self.by_group.get_active()))
-        self.show_empty_groups.connect('toggled', 
+        self.show_empty_groups.connect('toggled',
             lambda *args: self.handler.on_show_empty_groups_toggled(
                 self.show_empty_groups.get_active()))
-        self.show_offline.connect('toggled', 
+        self.show_offline.connect('toggled',
             lambda *args: self.handler.on_show_offline_toggled(
                 self.show_offline.get_active()))
-        self.show_blocked.connect('toggled', 
+        self.group_offline.connect('toggled',
+            lambda *args: self.handler.on_group_offline_toggled(
+                self.group_offline.get_active()))
+        self.show_blocked.connect('toggled',
             lambda *args: self.handler.on_show_blocked_toggled(
                 self.show_blocked.get_active()))
 
@@ -174,6 +179,7 @@ class OptionsMenu(gtk.Menu):
         self.append(self.by_group)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.show_offline)
+        self.append(self.group_offline)
         self.append(self.show_empty_groups)
         self.append(self.show_blocked)
         self.append(gtk.SeparatorMenuItem())

@@ -30,7 +30,7 @@ import gst
 import logging
 import sys
 
-logger = logging.getLogger("papyon.media.conference")
+logger = logging.getLogger("papylib.conference")
 
 codecs_definitions = {
     "audio" : [
@@ -141,7 +141,6 @@ class MediaSessionHandler(MediaSessionEventInterface):
         ret = gst.BUS_PASS
         if msg.type == gst.MESSAGE_ELEMENT:
             s = msg.structure
-            print "FARSYGHT", s
             if s.has_name("farsight-error"):
                 logger.error("Farsight error : %s" % s['error-msg'])
             if s.has_name("farsight-codecs-changed"):

@@ -30,6 +30,14 @@ logger = logging.getLogger('papyon.msnp2p.transport')
 
 class BaseP2PTransport(gobject.GObject):
     __gsignals__ = {
+            "connected": (gobject.SIGNAL_RUN_FIRST,
+                gobject.TYPE_NONE,
+                ()),
+
+            "failed": (gobject.SIGNAL_RUN_FIRST,
+                gobject.TYPE_NONE,
+                ()),
+
             "chunk-received": (gobject.SIGNAL_RUN_FIRST,
                 gobject.TYPE_NONE,
                 (object,)),
@@ -54,6 +62,10 @@ class BaseP2PTransport(gobject.GObject):
 
     @property
     def peer(self):
+        raise NotImplementedError
+
+    @property
+    def connected(self):
         raise NotImplementedError
 
     @property

@@ -19,6 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from papyon.msnp2p.transport.switchboard import *
+from papyon.msnp2p.transport.direct import *
 from papyon.msnp2p.transport.TLP import MessageBlob
 
 import gobject
@@ -75,9 +76,16 @@ class P2PTransportManager(gobject.GObject):
         del self._transport_signals[transport]
 
     def _get_transport(self, peer):
+        best = None
         for transport in self._transports:
-            if transport.peer == peer:
-                return transport
+            if transport.peer == peer and transport.connected:
+                if best is None:
+                    best = transport
+                elif transport.rating > best.rating:
+                    best = transport
+        if best is not None:
+            return best
+
         return self._default_transport(self, peer)
 
     def _on_chunk_received(self, transport, chunk):

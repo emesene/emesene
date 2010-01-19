@@ -41,20 +41,29 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
     def __init__(self, session):
         '''class constructor'''
+        self._model = None
         dialog = extension.get_default('dialog')
         self.pbr = gtk.CellRendererPixbuf()
         gui.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
+        self.no_group = None
+        self.no_group_iter = None
+        self.offline_group = None
+        self.offline_group_iter = None
+
         if self.session.config.d_weights is None:
             self.session.config.d_weights = {}
 
-        # the image (None for groups) the object (group or contact),
+        # the image (None for groups),
+        # the object (group or contact),
         # the string to display and a boolean indicating if the pixbuf should
         # be shown (False for groups, True for contacts), the status
         # image, and an int that is used to allow ordering specified by the user
+        # a boolean indicating special groups always False for contacts, True
+        # for special groups like "No group"
         self._model = gtk.TreeStore(gtk.gdk.Pixbuf, object, str, bool,
-            gtk.gdk.Pixbuf, int)
+            gtk.gdk.Pixbuf, int, bool)
         self.model = self._model.filter_new(root=None)
         self.model.set_visible_func(self._visible_func)
 
@@ -127,12 +136,17 @@ class ContactList(gui.ContactList, gtk.TreeView):
         '''return True if the row should be displayed according to the
         value of the config'''
         obj = self._model[_iter][1]
+        special = self._model[_iter][6]
 
         if not obj:
             return
 
         if type(obj) == e3.Group:
             if not self.show_empty_groups:
+                # TODO: check this when we start translating the app
+                if special and obj.name == "Offline":
+                    return True
+
                 # get a list of contact objects from a list of accounts
                 contacts = self.contacts.get_contacts(obj.contacts)
                 if  self.contacts.get_online_total_count(contacts)[0] == 0:
@@ -165,8 +179,14 @@ class ContactList(gui.ContactList, gtk.TreeView):
         obj2 = self._model[iter2][1]
         order1 = self._model[iter1][5]
         order2 = self._model[iter2][5]
+        special1 = self._model[iter1][6]
+        special2 = self._model[iter2][6]
 
-        if type(obj1) == e3.Group and type(obj2) == e3.Group:
+        if special2 and not special1:
+            return -1
+        elif special1 and not special2:
+            return 1
+        elif type(obj1) == e3.Group and type(obj2) == e3.Group:
             return self.compare_groups(obj1, obj2, order1, order2)
         elif type(obj1) == e3.Contact and type(obj2) == e3.Contact:
             return self.compare_contacts(obj1, obj2, order1, order2)
@@ -228,7 +248,12 @@ class ContactList(gui.ContactList, gtk.TreeView):
         if selected is None:
             return False
 
-        return type(self._model[selected][1]) == e3.Group
+        row = self._model[selected]
+
+        if row[6]:
+            return False
+
+        return type(row[1]) == e3.Group
 
     def is_contact_selected(self):
         '''return True if a contact is selected'''
@@ -265,7 +290,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         return None
 
-    def add_group(self, group):
+    def add_group(self, group, special=False):
         '''add a group to the contact list'''
         if self.order_by_status:
             return None
@@ -278,7 +303,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.session.config.d_weights[group.identifier] = weight
 
         group_data = (None, group, self.format_group(group), False, None,
-            weight)
+            weight, special)
 
         for row in self._model:
             obj = row[1]
@@ -309,7 +334,36 @@ class ContactList(gui.ContactList, gtk.TreeView):
         contact_data = (self._get_contact_pixbuf_or_default(contact), contact,
             self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
-            weight)
+            weight, False)
+
+        # if group_offline is set and the contact is offline then put it on the
+        # special offline group
+        if not self.order_by_status and self.group_offline\
+                and contact.status == e3.status.OFFLINE:
+            if self.offline_group:
+                self.offline_group.contacts.append(contact.account)
+                self.update_offline_group()
+                return self._model.append(self.offline_group_iter, contact_data)
+            else:
+                self.offline_group = e3.Group("Offline")
+                self.offline_group_iter = self.add_group(self.offline_group, True)
+                self.offline_group.contacts.append(contact.account)
+                self.update_offline_group()
+                return self._model.append(self.offline_group_iter, contact_data)
+
+        # if it has no group and we are in order by group then add it to the
+        # special group "No group"
+        if not group and not self.order_by_status:
+            if self.no_group:
+                self.no_group.contacts.append(contact.account)
+                self.update_no_group()
+                return self._model.append(self.no_group_iter, contact_data)
+            else:
+                self.no_group = e3.Group("No group")
+                self.no_group_iter = self.add_group(self.no_group, True)
+                self.no_group.contacts.append(contact.account)
+                self.update_no_group()
+                return self._model.append(self.no_group_iter, contact_data)
 
         # if no group add it to the root, but check that it's not on a group
         # or in the root already
@@ -389,12 +443,23 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         self.update_group(group)
 
     def clear(self):
-        '''clear the contact list'''
+        '''clear the contact list, return True if the list was cleared
+        False otherwise (normally returns false when clear is called before
+        the contact list is in a coherent state)'''
+        if not self._model:
+            return False
+
+        self.no_group = None
+        self.no_group_iter = None
+        self.offline_group = None
+        self.offline_group_iter = None
+
         self._model.clear()
 
         # this is the best place to put this code without putting gtk code
         # on gui.ContactList
         self.exp_column.set_visible(not self.order_by_status)
+        return True
 
     def update_contact(self, contact):
         '''update the data of contact'''
@@ -408,7 +473,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         contact_data = (self._get_contact_pixbuf_or_default(contact), contact,
             self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
-            weight)
+            weight, False)
 
         found = False
 
@@ -425,6 +490,18 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 found = True
                 self._model[row.iter] = contact_data
 
+    def update_no_group(self):
+        '''update the special "No group" group'''
+        group_data = (None, self.no_group, self.format_group(self.no_group), False, None,
+            0, True)
+        self._model[self.no_group_iter] = group_data
+
+    def update_offline_group(self):
+        '''update the special "No group" group'''
+        group_data = (None, self.offline_group, self.format_group(self.offline_group), False, None,
+            0, True)
+        self._model[self.offline_group_iter] = group_data
+
     def update_group(self, group):
         '''update the data of group'''
         try:
@@ -434,12 +511,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.session.config.d_weights[group.identifier] = weight
 
-        group_data = (None, group, self.format_group(group), False, None,
-            weight)
-
         for row in self._model:
             obj = row[1]
             if type(obj) == e3.Group and obj.name == group.name:
+                group_data = (None, group, self.format_group(group), False, None,
+                    weight, row[6])
                 self._model[row.iter] = group_data
 
     def set_group_state(self, group, state):
