@@ -50,46 +50,6 @@ class MainMenu(gtk.MenuBar):
         self.append(self.options)
         self.append(self.help)
 
-class LoginMenu(gtk.MenuBar):
-    """
-    A widget that represents the login menu of the login window
-    """
-    NAME = 'Login Menu'
-    DESCRIPTION = 'The Login Menu of the login window'
-    AUTHOR = 'Cando'
-    WEBSITE = 'www.emesene.org'
-
-    def __init__(self, handlers, config):
-        """
-        constructor
-
-        handlers is a e3common.Handler.MenuHandler
-        """
-        gtk.MenuBar.__init__(self)
-
-        self.handlers = handlers
-
-        AccountLoginMenu = extension.get_default('menu accountlogin')
-        PreferencesLoginMenu = extension.get_default('menu preferenceslogin')
-        HelpMenu = extension.get_default('menu help')
-
-        self.account = gtk.MenuItem('_Account')
-        self.account_menu = LoginAccountMenu(self.handlers.account_login_handler)
-        self.account.set_submenu(self.account_menu)
-
-        self.options = gtk.MenuItem('_Options')
-        self.options_menu = LoginPreferencesMenu(self.handlers.preferences_login_handler)
-        self.options.set_submenu(self.options_menu)
-
-        self.help = gtk.MenuItem('_Help')
-        self.help_menu = HelpMenu(self.handlers.help_handler)
-        self.help.set_submenu(self.help_menu)
-
-        self.append(self.account)
-        self.append(self.options)
-        self.append(self.help)
-
-
 class FileMenu(gtk.Menu):
     """
     A widget that represents the File popup menu located on the main menu
@@ -255,51 +215,3 @@ class HelpMenu(gtk.Menu):
         self.append(self.website)
         self.append(self.about)
         self.append(self.debug)
-
-class LoginAccountMenu(gtk.Menu):
-    """
-    A widget that represents the Account menu located on the login window
-    """
-
-    def __init__(self, handler):
-        """
-        constructor
-
-        handler -- e3common.Handler.AccountLoginHandler
-        """
-        gtk.Menu.__init__(self)
-        self.handler = handler
-
-        self.account = gtk.ImageMenuItem('_New account')
-        self.account.set_image(gtk.image_new_from_stock(gtk.STOCK_NEW,
-            gtk.ICON_SIZE_MENU))
-        self.account.connect('activate',
-            lambda *args: self.handler.on_new_account_selected())
-        self.quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
-        self.quit.connect('activate',
-            lambda *args: self.handler.on_quit_selected())
-
-        self.append(self.account)
-        self.append(gtk.SeparatorMenuItem())
-        self.append(self.quit)
-
-class LoginPreferencesMenu(gtk.Menu):
-    """
-    A widget that represents the Preferences menu located on login window
-    """
-    def __init__(self, handler):
-        """
-        constructor
-
-        handler -- e3common.Handler.PreferencesLoginHandler
-        """
-        gtk.Menu.__init__(self)
-        self.handler = handler
-
-        self.preferences = gtk.ImageMenuItem('_Preferences')
-        self.preferences.set_image(gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
-            gtk.ICON_SIZE_MENU))
-        self.preferences.connect('activate',
-            lambda *args: self.handler.on_preferences_selected())
-      
-        self.append(self.preferences)

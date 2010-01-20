@@ -17,8 +17,10 @@ log = logging.getLogger('gtkui.Login')
 
 class Login(gtk.Alignment):
     # TODO automatic REconnection??countdown???
+    # TODO add worker action for disconnect
     # TODO i don't like the gui "jumps" when i pass from connecting to
     # reconnecting or when there is the nicebar for example
+    #TODO elimina il menu dall'handler dall init e dal mainmenu'
 
     def __init__(self, callback, callback_disconnect, on_preferences_changed,
                 config, config_dir, config_path, proxy=None, use_http=False,
@@ -39,13 +41,8 @@ class Login(gtk.Alignment):
         self.session_id = session_id
 
         account = self.config.get_or_set('last_logged_account', '')
-        self.l_auto_login = self.config.get_or_set('l_auto_login', [])
-        self.l_remember_account = self.config.get_or_set('l_remember_account',
-                [])
-        self.l_remember_password = self.config.get_or_set(
-                'l_remember_password', [])
         self.accounts = self.config.get_or_set('d_accounts', {})
-        self.statuses = self.config.get_or_set('d_status', {})
+        self._parse_accounts()
 
         if proxy is None:
             self.proxy = e3.Proxy()
@@ -53,9 +50,6 @@ class Login(gtk.Alignment):
             self.proxy = proxy
 
         self.dialog = extension.get_default('dialog')
-
-        self.menu = None
-        self._build_menu()
 
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
@@ -78,6 +72,7 @@ class Login(gtk.Alignment):
             self._on_account_changed)
 
         self.btn_status = StatusButton.StatusButton()
+        self.btn_status.set_status(e3.status.ONLINE)
 
         status_padding = gtk.Label()
         status_padding.set_size_request(*self.btn_status.size_request())
@@ -86,7 +81,6 @@ class Login(gtk.Alignment):
         self.txt_password.set_visibility(False)
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
-
 
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
@@ -199,7 +193,6 @@ class Login(gtk.Alignment):
         al_logo.add(img_logo)
         al_preferences.add(self.b_preferences)
 
-        vbox.pack_start(self.menu, False)
         vbox.pack_start(self.eventbox, False)
         vbox.pack_start(al_logo, True, True, 10)
         vbox.pack_start(al_vbox_entries, True, True)
@@ -218,41 +211,39 @@ class Login(gtk.Alignment):
 
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
-            self.forget_me.set_child_visible(True)
-            self.remember_account.set_sensitive(False)
             #autologin
-            if account in self.l_auto_login and not on_disconnect:
+            if self.accounts[account][2] == 3 and not on_disconnect:
                 self.do_connect()
 
-    def _build_menu(self):
-        '''buildall the login menu'''
-        handler = gui.base.LoginHandler(self.dialog,
-            self._on_preferences, self._on_quit)
+    def _parse_accounts(self):
+        '''create a dict with list from the string config'''
+        for account in self.accounts:
+            if type(self.accounts[account]) == type("Hi!i'm a string"):
+                listFin = []
+                listTemp = self.accounts[account][1:-1].split(',')
+                listFin.append(listTemp[0][1:-1])
+                listFin.append(int(listTemp[1]))
+                listFin.append(int(listTemp[2]))
+                self.accounts[account] = listFin 
 
-        LoginMenu = extension.get_default('login menu')
-        self.menu = LoginMenu(handler, self.config)
-        self.menu.show_all()
+    def set_sensitive(self, visible):
+        self.cmb_account.set_sensitive(visible)
+        self.txt_password.set_sensitive(visible)
+        self.btn_status.set_sensitive(visible)
+        self.b_connect.set_sensitive(visible)
+        self.remember_account.set_sensitive(visible)
+        self.remember_password.set_sensitive(visible)
+        self.forget_me.set_child_visible(visible)
+        self.auto_login.set_sensitive(visible)
+        self.b_preferences.set_sensitive(visible)
 
-    def set_sensitive(self, sensitive):
-        self.cmb_account.set_sensitive(sensitive)
-        self.txt_password.set_sensitive(sensitive)
-        self.btn_status.set_sensitive(sensitive)
-        self.b_connect.set_sensitive(sensitive)
-        self.remember_account.set_sensitive(sensitive)
-        self.remember_password.set_sensitive(sensitive)
-        self.forget_me.set_child_visible(sensitive)
-        self.auto_login.set_sensitive(sensitive)
-        self.b_preferences.set_sensitive(sensitive)
-        self.menu.set_sensitive(sensitive)
-
-        if sensitive:
+        if visible:
             self.throbber.hide()
             self.b_cancel.hide()
-            self.b_connect.show()
         else:
             self.throbber.show()
-            self.b_connect.hide()
             self.b_cancel.show()
+            
 
     def do_connect(self):
         '''do all the staff needed to connect'''
@@ -262,43 +253,40 @@ class Login(gtk.Alignment):
         account = e3.Account(user, password, self.btn_status.status)
         remember_password = self.remember_password.get_active()
         remember_account = self.remember_account.get_active()
+        auto_login = self.auto_login.get_active()
 
         if user == '' or password == '':
-            self.show_nice_bar('user or password fields are empty')
+            self.show_nice_bar('User or password fields are empty')
             return
 
-        self._config_account(account, remember_account, remember_password)
+        self._config_account(account, remember_account, remember_password,
+                             auto_login)
 
         self.throbber.show()
         self.set_sensitive(False)
         self.callback(account, self.session_id, self.proxy, self.use_http)
 
-    def _config_account(self, account, remember_account, remember_password):
+    def _config_account(self, account, remember_account, remember_password,
+                         auto_login):
         '''modify the config for the current account before login'''
-
-        if remember_password:
-            self.config.d_accounts[account.account] = base64.b64encode(
-                account.password)
-            self.config.d_status[account.account] = account.status
+        
+        if auto_login:#+1 account,+1 password,+1 autologin =  3
+            self.accounts[account.account] = list([base64.b64encode(account.password),
+                account.status, 3])
+            self.config.last_logged_account = account.account
+        
+        elif remember_password:#+1 account,+1 password = 2
+            self.accounts[account.account] = list([base64.b64encode(account.password),
+                account.status, 2])
             self.config.last_logged_account = account.account
 
-            if account.account not in self.config.l_remember_account:
-                self.config.l_remember_account.append(account.account)
-
-            if account.account not in self.config.l_remember_password:
-                self.config.l_remember_password.append(account.account)
-
-        elif remember_account:
-            self.config.d_accounts[account.account] = ''
-            self.config.d_status[account.account] = account.status
+        elif remember_account:#+1 account = 1
+            self.accounts[account.account] = list([base64.b64encode(account.password),
+                account.status, 1])
             self.config.last_logged_account = account.account
 
-            if account.account not in self.config.l_remember_account:
-                self.config.l_remember_account.append(account.account)
-
-            #in the case i want remember account but not password
-            if account.account in self.config.l_remember_password:
-                self.config.l_remember_password.remove(account.account)
+        else:#means i have logged with nothing checked
+            self.config.last_logged_account = ''
 
         self.config.save(self.config_path)
 
@@ -309,61 +297,56 @@ class Login(gtk.Alignment):
     def _update_fields(self, account):
         '''update the different fields according to the account that is
         on the account entry'''
+        self._clear_all()
         if account == '':
-            self.remember_account.set_active(False)
-            self.remember_password.set_active(False)
-            self.auto_login.set_active(False)
-            self.forget_me.set_child_visible(False)
             return
 
-        #update password and account checkbox
-        if account in self.l_remember_password:
-            self.remember_password.set_active(True)
-            self.txt_password.set_sensitive(False)
-        elif account in self.l_remember_account:
-            self.remember_account.set_active(True)
-            self.remember_password.set_active(False)
-        else:
-            self.remember_account.set_active(False)
-            self.txt_password.set_sensitive(True)
+        flag = False
 
-        #update autologin checkbox
-        if account in self.l_auto_login:
-            self.auto_login.set_active(True)
-            self.remember_password.set_active(True)
-            self.remember_account.set_sensitive(False)
-            self.remember_password.set_sensitive(False)
-        else:
-            self.auto_login.set_active(False)
-
-        #update password and forget_me label
         if account in self.accounts:
-            self.txt_password.set_text(base64.b64decode(self.accounts[account]))
-            self.forget_me.set_child_visible(True)
+            attr = self.accounts[account][2]
             self.remember_account.set_sensitive(False)
-        else:
-            self.txt_password.set_text('')
-            self.forget_me.set_child_visible(False)
-            self.remember_account.set_sensitive(True)
+            self.forget_me.set_child_visible(True)
+            self.btn_status.set_status(int(self.accounts[account][1]))
 
-        #update status box
-        if account in self.statuses:
-            try:
-                self.btn_status.set_status(int(self.statuses[account]))
-            except ValueError:
-                log.debug('invalid status')
-        else:
-            self.btn_status.set_status(e3.status.ONLINE)
+            if attr == 3:#autologin,password,account checked
+                self.auto_login.set_active(True)
+                flag = True
+            elif attr == 2:#password,account checked
+                self.remember_password.set_active(True)
+                flag = True
+            elif attr == 1:#only account checked
+                self.remember_account.set_active(True)
+            else:#if i'm here i have an error
+                self.show_nice_bar(_('Error while reading user config'))
+                self._clear_all()
+            
+            #for not repeating code
+            if flag:
+                self.txt_password.set_text(base64.b64decode(self.accounts[account][0]))
+                self.txt_password.set_sensitive(False)
 
+    def _clear_all(self):
+        '''clear all login fields and checkbox'''
+        self.remember_account.set_active(False)
+        self.remember_account.set_sensitive(True)
+        self.remember_password.set_active(False)
+        self.remember_password.set_sensitive(True)
+        self.auto_login.set_active(False)
+        self.forget_me.set_child_visible(False)
+        self.btn_status.set_status(e3.status.ONLINE)
+        self.txt_password.set_text('')
+        self.txt_password.set_sensitive(True)
+       
     def _reload_account_list(self, *args):
         '''reload the account list in the combobox'''
         self.liststore.clear()
         for mail in sorted(self.accounts):
             self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
-        return
-
-        #i'm here if self.accounts is empty
-        self.liststore = None
+     
+        #this resolves a small bug
+        if not len(self.liststore):
+            self.liststore = None
 
     def show_nice_bar(self, message, color=gtk.gdk.Color(57600, 23040, 19712),
             image=gtk.STOCK_DIALOG_ERROR):
@@ -377,14 +360,12 @@ class Login(gtk.Alignment):
 
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
-        self.eventbox.hide_all()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
 
     def _on_account_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
-        self.eventbox.hide_all()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.txt_password.grab_focus()
@@ -398,34 +379,19 @@ class Login(gtk.Alignment):
                 try: # Delete user's folder
                     rmtree(self.config_dir.join(user))
                     dir_at = self.config_dir.join(user.replace('@','-at-'))
-
                     if self.config_dir.dir_exists(dir_at):
                         rmtree(dir_at)
                 except:
                     self.show_nice_bar(_('Error while deleting user'))
 
-                if user in self.config.l_remember_account:
-                    self.config.l_remember_account.remove(user)
-
-                if user in self.config.l_remember_password:
-                    self.config.l_remember_password.remove(user)
-
-                if user in self.config.l_auto_login:
-                    self.config.l_auto_login.remove(user)
-
-                if user in self.config.last_logged_account:
-                    self.config.last_logged_account = ''
-
-                if user in self.config.d_accounts:
-                    del self.config.d_accounts[user]
-
-                if user in self.config.d_status:
-                    del self.config.d_status[user]
+                if user in self.accounts:
+                     del self.accounts[user]
+                if user == self.config.last_logged_account:
+                     self.config.last_logged_account = ''
 
                 self.config.save(self.config_path)
                 self. _reload_account_list()
                 self.cmb_account.get_children()[0].set_text('')
-                self.remember_account.set_sensitive(True)
 
         self.dialog.yes_no(
                _('Are you sure you want to delete the account %s ?') % \
@@ -449,10 +415,6 @@ class Login(gtk.Alignment):
 
         sys.exit(0)
 
-    def _on_preferences(self):
-        '''called when button preferences in option menu is clicked'''
-        self._on_preferences_selected(None)
-
     def _on_remember_account_toggled(self, button):
         '''called when the remember account check button is toggled'''
         if not self.remember_account.get_active():
@@ -468,17 +430,11 @@ class Login(gtk.Alignment):
         user = self.cmb_account.get_active_text()
 
         if self.auto_login.get_active():
-            if user != '' and user not in self.l_auto_login:
-                self.config.l_auto_login.append(user)
             self.remember_password.set_active(True)
             self.remember_account.set_sensitive(False)
             self.remember_password.set_sensitive(False)
-
         else:
-            if user != '' and user in self.l_auto_login:
-                self.config.l_auto_login.remove(user)
-
-            if user not in self.config.d_accounts:
+            if user not in self.accounts:
                 self.remember_account.set_active(False)
                 self.remember_account.set_sensitive(True)
                 self.remember_password.set_sensitive(True)

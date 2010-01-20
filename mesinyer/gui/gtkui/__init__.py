@@ -86,9 +86,6 @@ def setup():
     extension.category_register('menu account', AccountMenu.AccountMenu)
     extension.category_register('menu help', MainMenu.HelpMenu)
     extension.category_register('menu status', StatusMenu.StatusMenu)
-    extension.category_register('login menu', MainMenu.LoginMenu)
-    extension.category_register('menu accountlogin', MainMenu.LoginAccountMenu)
-    extension.category_register('menu preferenceslogin', MainMenu.LoginPreferencesMenu)
 
     extension.category_register('below menu', EmptyWidget.EmptyWidget)
     extension.category_register('below panel', EmptyWidget.EmptyWidget)

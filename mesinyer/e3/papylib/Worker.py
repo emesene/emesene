@@ -506,6 +506,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_profile_presence_changed(self):
         """Called when the presence changes."""
         stat = STATUS_PAPY_TO_E3[self.profile.presence]
+        self.session.account.status = stat
         # log the status
         contact = self.session.contacts.me
         account = Logger.Account(contact.attrs.get('CID', None), None,

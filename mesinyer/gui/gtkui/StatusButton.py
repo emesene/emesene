@@ -43,7 +43,7 @@ class StatusButton(gtk.Button):
     def set_status(self, stat):
         '''load an image representing a status and store it on cache'''
         current_status = -1
-
+  
         if self.session:
             current_status = self.session.account.status
 
