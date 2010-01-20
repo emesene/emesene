@@ -1,6 +1,7 @@
 import gtk
 
 import e3
+import logging
 
 class RichWidget(object):
     '''a base widget that allows to add formatted text based on a
@@ -16,8 +17,14 @@ class RichWidget(object):
         bold=False, italic=False, underline=False, strike=False):
         '''insert text at the current position with the style defined inside
         text'''
-        result = e3.common.XmlParser.XmlParser(
-            '<span>' + text.replace('\n', '') + '</span>').result
+        try:
+            result = e3.common.XmlParser.XmlParser(
+                '<span>' + text.replace('\n', '') + '</span>').result
+        except xml.parsers.expat.ExpatError:
+            logging.getLogger("gtkui.RichWidget").debug("cant parse '%s'" % \
+                    (text, ))
+            return
+
         dct = e3.common.XmlParser.DictObj(result)
         self._put_formatted(dct, fg_color, bg_color, font, size,
             bold, italic, underline, strike)

@@ -237,7 +237,6 @@ class Controller(object):
             while gtk.events_pending():
                 gtk.main_iteration(False)
 
-            time.sleep(2)
             sys.exit(0)
 
     def _save_login_dimensions(self):
@@ -312,56 +311,9 @@ class Controller(object):
         self.config.b_use_http = use_http
         self._save_proxy_settings(proxy)
 
-    def on_login_connect(self, account, remember_account, remember_password,
-        session_id, proxy, use_http):
+    def on_login_connect(self, account, session_id, proxy, use_http):
         '''called when the user press the connect button'''
         self.on_preferences_changed(use_http, proxy, session_id)
-
-        if self.config.l_remember_account is None:
-            self.config.l_remember_account = []
-
-        if self.config.l_remember_password is None:
-            self.config.l_remember_password = []
-
-        if remember_password:
-            self.config.d_accounts[account.account] = base64.b64encode(
-                account.password)
-            self.config.d_status[account.account] = account.status
-            self.config.l_last_logged_account[0] = account.account
-
-            if account.account not in self.config.l_remember_account:
-                self.config.l_remember_account.append(account.account)
-
-            if account.account not in self.config.l_remember_password:
-                self.config.l_remember_password.append(account.account)
-
-        elif remember_account:
-            self.config.d_accounts[account.account] = ''
-            self.config.d_status[account.account] = account.status
-            self.config.l_last_logged_account[0] = account.account
-
-            if account.account not in self.config.l_remember_account:
-                self.config.l_remember_account.append(account.account)
-
-            #in the case i want remember account but not password
-            if account.account in self.config.l_remember_password:
-                self.config.l_remember_password.remove(account.account)
-
-        else:
-            if account.account in self.config.l_remember_account:
-                self.config.l_remember_account.remove(account.account)
-
-            if account.account in self.config.l_remember_password:
-                self.config.l_remember_password.remove(account.account)
-
-            if account.account in self.config.l_last_logged_account:
-                self.config.l_last_logged_account[0] = ''
-
-            if account.account in self.config.d_accounts:
-                del self.config.d_accounts[account.account]
-
-            if account.account in self.config.d_status:
-                del self.config.d_status[account.account]
 
         self._new_session()
         self.session.config.get_or_set('b_play_send', True)
@@ -442,7 +394,7 @@ class Controller(object):
         self.conversations.close_all()
         self.conversations = None
 
-    def start(self, account=None, accounts=None):
+    def start(self, account=None, accounts=None, on_disconnect=False):
         '''the entry point to the class'''
         Window = extension.get_default('window frame')
         self.window = Window(None) # main window
@@ -462,13 +414,11 @@ class Controller(object):
         posy = self.config.get_or_set('i_login_posy', 100)
         width = self.config.get_or_set('i_login_width', 250)
         height = self.config.get_or_set('i_login_height', 410)
-        account = self.config.get_or_set('l_last_logged_account', [''])[0]
 
-        self.window.go_login(self.on_login_connect,
-            self.on_preferences_changed, account,
-            self.config.d_accounts, self.config.l_remember_account,
-            self.config.l_remember_password, self.config.d_status,
-            self.config.session, proxy, use_http, self.config.session)
+        self.window.go_login(self.on_login_connect, self.on_cancel_login,
+            self.on_preferences_changed,self.config,
+            self.config_dir, self.config_path, proxy,
+            use_http, self.config.session,on_disconnect)
         self.window.set_location(width, height, posx, posy)
 
         self.window.show()
@@ -478,7 +428,15 @@ class Controller(object):
         method called when the user selects disconnect
         '''
         self.close_session(False)
-        self.start()
+        self.start(on_disconnect=True)
+
+    def on_cancel_login(self):
+        '''
+        method called when user select cancel login
+        '''
+        if self.session is not None:
+            self.session.quit()
+        self.window.content.set_sensitive(True)
 
 
 class ExtensionDefault(object):
