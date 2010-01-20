@@ -125,7 +125,7 @@ class PluginManager:
                 continue
 
             try:
-                mod = PluginHandler(dir_, file, os.path.isdir(file))
+                mod = PluginHandler(dir_, file, os.path.isdir(path))
                 self._plugins[mod.name] = mod
             except Exception, reason:
                 log.warning('Exception while importing %s:\n%s', (file, reason))
