@@ -36,6 +36,12 @@ class Account(object):
         '''return a string representation of the object'''
         return "<account '%s'>" % (self.account,)
 
+    @classmethod
+    def from_contact(cls, contact):
+        '''Creates a Account object from a Contact'''
+        return cls(contact.attrs.get('CID', None), None, contact.account,
+            contact.status, contact.nick, contact.message, contact.picture)
+
 class Group(object):
     '''a class that represents a group of contacts'''
 
