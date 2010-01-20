@@ -91,9 +91,6 @@ class Controller(object):
         self.config_path = self.config_dir.join('config')
         self.config.load(self.config_path)
 
-        if self.config.d_status is None:
-            self.config.d_status = {}
-
         if self.config.d_accounts is None:
             self.config.d_accounts = {}
 
@@ -279,6 +276,7 @@ class Controller(object):
         dialog = extension.get_default('dialog')
         dialog.error(reason)
         self.window.content.set_sensitive(True)
+        self.window.content.clear_all()
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''

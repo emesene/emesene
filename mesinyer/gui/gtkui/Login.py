@@ -20,7 +20,6 @@ class Login(gtk.Alignment):
     # TODO add worker action for disconnect
     # TODO i don't like the gui "jumps" when i pass from connecting to
     # reconnecting or when there is the nicebar for example
-    #TODO elimina il menu dall'handler dall init e dal mainmenu'
 
     def __init__(self, callback, callback_disconnect, on_preferences_changed,
                 config, config_dir, config_path, proxy=None, use_http=False,
@@ -41,7 +40,7 @@ class Login(gtk.Alignment):
         self.session_id = session_id
 
         account = self.config.get_or_set('last_logged_account', '')
-        self.accounts = self.config.get_or_set('d_accounts', {})
+        self.accounts = self.config.d_accounts
         self._parse_accounts()
 
         if proxy is None:
@@ -297,7 +296,7 @@ class Login(gtk.Alignment):
     def _update_fields(self, account):
         '''update the different fields according to the account that is
         on the account entry'''
-        self._clear_all()
+        self.clear_all()
         if account == '':
             return
 
@@ -319,14 +318,14 @@ class Login(gtk.Alignment):
                 self.remember_account.set_active(True)
             else:#if i'm here i have an error
                 self.show_nice_bar(_('Error while reading user config'))
-                self._clear_all()
+                self.clear_all()
             
             #for not repeating code
             if flag:
                 self.txt_password.set_text(base64.b64decode(self.accounts[account][0]))
                 self.txt_password.set_sensitive(False)
 
-    def _clear_all(self):
+    def clear_all(self):
         '''clear all login fields and checkbox'''
         self.remember_account.set_active(False)
         self.remember_account.set_sensitive(True)
