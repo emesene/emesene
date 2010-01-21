@@ -220,7 +220,8 @@ class Login(gtk.Alignment):
         if account != '':
             path = self.config_dir.join(account.replace('@','-at-'),'avatars','last')
             if self.config_dir.file_readable(path):
-                self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(path))
+                im = utils.safe_gtk_image_load(path)
+                self.img_account.set_from_pixbuf(utils.scale_image(im.get_pixbuf(),128,128))
             else:
                 self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
         else:
@@ -476,13 +477,14 @@ class ConnectingWindow(gtk.Alignment):
         self.label = gtk.Label()
         self.label.set_markup('<b>Connecting... </b>')
 
+        img_account = gtk.Image()
         path = self.config_dir.join(account.replace('@','-at-'),'avatars','last')
         if self.config_dir.file_readable(path):
-            img_account = utils.safe_gtk_image_load(self.config_dir.join(
-                          account.replace('@','-at-'),'avatars','last'))
+            im = utils.safe_gtk_image_load(path)
+            img_account.set_from_pixbuf(utils.scale_image(im.get_pixbuf(),256,256))
         else:
-            img_account = utils.safe_gtk_image_load(gui.theme.logo)
-
+            img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
+ 
         vbox = gtk.VBox()
    
         al_vbox_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,

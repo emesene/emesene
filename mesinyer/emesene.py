@@ -414,12 +414,12 @@ class Controller(object):
         posx = self.config.get_or_set('i_login_posx', 100)
         posy = self.config.get_or_set('i_login_posy', 100)
         width = self.config.get_or_set('i_login_width', 250)
-        height = self.config.get_or_set('i_login_height', 410)
+        height = self.config.get_or_set('i_login_height', 41)
 
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed,self.config,
             self.config_dir, self.config_path, proxy,
-            use_http, self.config.session,on_disconnect)
+            use_http, self.config.session,on_disconnect)      
         self.window.set_location(width, height, posx, posy)
 
         self.window.show()

@@ -45,6 +45,23 @@ def scale_nicely(pixbuf):
     '''scale a pixbuf'''
     return pixbuf.scale_simple(20, 20, gtk.gdk.INTERP_BILINEAR)
 
+def scale_image(image, width, height):
+    '''scale an image'''
+    #taken from emesene 1.X
+    h,w = image.get_height(), image.get_width()
+    width_max, height_max = width, height
+    width=float( image.get_width() )
+    height=float( image.get_height() )
+    if ( width/width_max ) > ( height/height_max ):
+        height=int( ( height/width )*width_max )
+        width=width_max
+    else:
+        width=int( ( width/height )*height_max )
+        height=height_max
+
+    image = image.scale_simple( width, height, gtk.gdk.INTERP_BILINEAR )
+    return image
+
 def file_readable(path):
     '''return True if the file is readable'''
     return os.access(path, os.R_OK) and os.path.isfile(path)
