@@ -16,7 +16,6 @@ class TrayIcon(gtk.StatusIcon):
         """
         gtk.StatusIcon.__init__(self)
         self.handler = handler
-        self.set_from_file(self.handler.theme.logo)
 
         self.main_window = main_window
 
@@ -32,6 +31,7 @@ class TrayIcon(gtk.StatusIcon):
         """
         self.menu = LoginMenu(self.handler)
         self.menu.show_all()
+        self.set_from_file(self.handler.theme.logo)
 
     def set_main(self, session):
         """

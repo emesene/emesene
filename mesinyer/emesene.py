@@ -440,6 +440,8 @@ class Controller(object):
             self.config_dir, self.config_path, proxy,
             use_http, self.config.session,True)
         self.window.show()
+        self.tray_icon.set_login()
+        
 
 class ExtensionDefault(object):
 

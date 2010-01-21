@@ -17,8 +17,7 @@ log = logging.getLogger('gtkui.Login')
 
 class Login(gtk.Alignment):
     # TODO automatic REconnection??countdown???
-    # TODO add worker action for disconnect
-    # TODO sistema la trayicon quando disconnetti
+    # TODO tell mariano the the problem of disconnection is only for dummy..maybe a problem of dummy?
     # TODO delete the set_sensitive method
 
     def __init__(self, callback, on_preferences_changed,
