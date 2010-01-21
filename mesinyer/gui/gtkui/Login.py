@@ -19,8 +19,9 @@ class Login(gtk.Alignment):
     # TODO automatic REconnection??countdown???
     # TODO add worker action for disconnect
     # TODO rimpicciolisci immagine
-    # TODO aggiungi metodo getAVatar e fai in modo di ricordare gli avatar già aggiunti
+    # TODO aggiungi metodo getAVatar
     # TODO errore quando aggiungo un avatar?chiedi a c10ud
+    # TODO finish reload_image_accotun it still don't work...scopri dove cambia il last
     # TODO i don't like the gui "jumps" when i pass from connecting to
     # reconnecting or when there is the nicebar for example
 
@@ -86,15 +87,8 @@ class Login(gtk.Alignment):
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
         
-        if account != '':
-            path = self.config_dir.join(account.replace('@','-at-'),'avatars','last')
-            if self.config_dir.file_readable(path):
-                img_account = utils.safe_gtk_image_load(self.config_dir.join(
-                             account.replace('@','-at-'),'avatars','last'))
-            else:
-                img_account = utils.safe_gtk_image_load(gui.theme.logo)
-        else:
-            img_account = utils.safe_gtk_image_load(gui.theme.logo)
+        self.img_account = gtk.Image()
+        self._reload_image_account(account)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
@@ -188,7 +182,7 @@ class Login(gtk.Alignment):
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
-        al_account.add(img_account)
+        al_account.add(self.img_account)
         al_preferences.add(self.b_preferences)
 
         vbox.pack_start(self.eventbox, False)
@@ -219,6 +213,18 @@ class Login(gtk.Alignment):
                 listFin.append(int(listTemp[1]))
                 listFin.append(int(listTemp[2]))
                 self.accounts[account] = listFin 
+
+    def _reload_image_account(self,account):
+        '''change account image basing on actual user'''
+
+        if account != '':
+            path = self.config_dir.join(account.replace('@','-at-'),'avatars','last')
+            if self.config_dir.file_readable(path):
+                self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(path))
+            else:
+                self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
+        else:
+            self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
 
     def set_sensitive(self, visible):
         self.cmb_account.set_sensitive(visible)
@@ -282,6 +288,7 @@ class Login(gtk.Alignment):
         '''update the different fields according to the account that is
         on the account entry'''
         self.clear_all()
+        self._reload_image_account(account)
         if account == '':
             return
 
@@ -450,7 +457,7 @@ class ConnectingWindow(gtk.Alignment):
 
    #cazzo trova il modo di fare gli avatar grandi nel connecting...magari un'animazione per farlo ingrandire
    #guarda come fa a sfumarlo!
-    def __init__(self,callback,config_dir,account):
+    def __init__(self, callback, config_dir, account):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)

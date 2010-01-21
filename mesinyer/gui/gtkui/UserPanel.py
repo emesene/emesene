@@ -1,4 +1,5 @@
 import gtk
+import os
 
 import gui
 import utils
@@ -20,6 +21,7 @@ class UserPanel(gtk.VBox):
         gtk.VBox.__init__(self)
 
         self.session = session
+        self.config_dir = session.config_dir
         self._enabled = True
 
         self.image = utils.safe_gtk_image_load(gui.theme.user)
@@ -141,6 +143,13 @@ class UserPanel(gtk.VBox):
             '''callback for the avatar chooser'''
             if response == gui.stock.ACCEPT:
                 self.session.set_picture(filename)
+        #TODO better way to do this???
+        path_dir = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
+                   self.session.contacts.me.account.replace('@','-at-'),'avatars')
 
-        extension.get_default('avatar chooser')(set_picture_cb).show()
+        path_last = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
+                    self.session.contacts.me.account.replace('@','-at-'),'avatars','last')
+
+        extension.get_default('avatar chooser')(set_picture_cb, 
+                                                path_last, path_dir).show()
 
