@@ -428,8 +428,18 @@ class Controller(object):
         '''
         method called when the user selects disconnect
         '''
-        self.close_session(False)
-        self.start(on_disconnect=True)
+        if self.session is not None:
+            self.session.quit()
+
+        proxy = self._get_proxy_settings()
+        use_http = self.config.get_or_set('b_use_http', False)
+
+        self.window.clear()
+        self.window.go_login(self.on_login_connect,
+            self.on_preferences_changed,self.config,
+            self.config_dir, self.config_path, proxy,
+            use_http, self.config.session,True)
+        self.window.show()
 
 class ExtensionDefault(object):
 
