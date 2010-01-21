@@ -713,7 +713,7 @@ class Worker(e3.base.Worker, papyon.Client):
             # like dp roaming and stuff like that
             # now it doesn't work, btw
             self.profile.msn_object = picture_name
-            self._on_contact_msnobject_changed(self.session.contacts.me)
+            self._on_contact_msnobject_changed(self.profile)
             #self.session.contacts.me.picture = picture_name
             #self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
             #    self.session.account.account, picture_name)

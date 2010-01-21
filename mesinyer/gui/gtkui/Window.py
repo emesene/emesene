@@ -43,17 +43,26 @@ class Window(gtk.Window):
             self.remove(self.get_child())
             self.content = None
 
-    def go_login(self, callback,callback_disconnect, on_preferences_changed,
+    def go_login(self, callback,on_preferences_changed,
            config=None, config_dir=None, config_path=None, proxy=None, 
            use_http=False, session_id=None,on_disconnect=False):
         '''draw the login window on the main window'''
         LoginWindow = extension.get_default('login window')
 
-        self.content = LoginWindow(callback,callback_disconnect, on_preferences_changed,
+        self.content = LoginWindow(callback, on_preferences_changed,
             config, config_dir, config_path, proxy, use_http, session_id,on_disconnect)
         self.add(self.content)
         self.content.show()
         self.content_type = 'login'
+
+    def go_connect(self,callback,config_dir,account):
+        '''draw the login window on the main window'''
+        ConnectingWindow = extension.get_default('connecting window')
+
+        self.content = ConnectingWindow(callback,config_dir,account)
+        self.add(self.content)
+        self.content.show()
+        self.content_type = 'connecting'
 
     def go_main(self, session, on_new_conversation,
             on_close, on_disconnect):

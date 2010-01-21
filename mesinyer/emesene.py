@@ -313,6 +313,9 @@ class Controller(object):
         '''called when the user press the connect button'''
         self.on_preferences_changed(use_http, proxy, session_id)
 
+        self.window.clear()
+        self.window.go_connect(self.on_disconnect,self.config_dir,account.account)
+
         self._new_session()
         self.session.config.get_or_set('b_play_send', True)
         self.session.config.get_or_set('b_play_nudge', True)
@@ -413,7 +416,7 @@ class Controller(object):
         width = self.config.get_or_set('i_login_width', 250)
         height = self.config.get_or_set('i_login_height', 410)
 
-        self.window.go_login(self.on_login_connect, self.on_cancel_login,
+        self.window.go_login(self.on_login_connect,
             self.on_preferences_changed,self.config,
             self.config_dir, self.config_path, proxy,
             use_http, self.config.session,on_disconnect)
@@ -427,15 +430,6 @@ class Controller(object):
         '''
         self.close_session(False)
         self.start(on_disconnect=True)
-
-    def on_cancel_login(self):
-        '''
-        method called when user select cancel login
-        '''
-        if self.session is not None:
-            self.session.quit()
-        self.window.content.set_sensitive(True)
-
 
 class ExtensionDefault(object):
 

@@ -18,12 +18,15 @@ log = logging.getLogger('gtkui.Login')
 class Login(gtk.Alignment):
     # TODO automatic REconnection??countdown???
     # TODO add worker action for disconnect
+    # TODO rimpicciolisci immagine
+    # TODO aggiungi metodo getAVatar e fai in modo di ricordare gli avatar già aggiunti
+    # TODO errore quando aggiungo un avatar?chiedi a c10ud
     # TODO i don't like the gui "jumps" when i pass from connecting to
     # reconnecting or when there is the nicebar for example
 
-    def __init__(self, callback, callback_disconnect, on_preferences_changed,
-                config, config_dir, config_path, proxy=None, use_http=False,
-                session_id=None, on_disconnect=False, interface='login'):
+    def __init__(self, callback, on_preferences_changed,
+                config, config_dir, config_path, proxy=None,
+                use_http=False, session_id=None, on_disconnect=False,):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
@@ -32,7 +35,6 @@ class Login(gtk.Alignment):
         self.config_dir = config_dir
         self.config_path = config_path
         self.callback = callback
-        self.callback_disconnect = callback_disconnect
         self.on_preferences_changed = on_preferences_changed
         # the id of the default extension that handles the session
         # used to select the default session on the preference dialog
@@ -83,10 +85,16 @@ class Login(gtk.Alignment):
 
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
-        img_logo = utils.safe_gtk_image_load(gui.theme.logo)
-        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
-                animated=True)
-        self.throbber = gtk.image_new_from_animation(th_pix)
+        
+        if account != '':
+            path = self.config_dir.join(account.replace('@','-at-'),'avatars','last')
+            if self.config_dir.file_readable(path):
+                img_account = utils.safe_gtk_image_load(self.config_dir.join(
+                             account.replace('@','-at-'),'avatars','last'))
+            else:
+                img_account = utils.safe_gtk_image_load(gui.theme.logo)
+        else:
+            img_account = utils.safe_gtk_image_load(gui.theme.logo)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
@@ -122,16 +130,12 @@ class Login(gtk.Alignment):
         self.b_connect.connect('clicked', self._on_connect_clicked)
         self.b_connect.set_border_width(8)
 
-        self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
-        self.b_cancel.connect('clicked', self._on_cancel_clicked)
-        self.b_cancel.set_border_width(8)
-
         vbox = gtk.VBox()
 
         hbox_account = gtk.HBox(spacing=6)
-        img_account = gtk.Image()
-        img_account.set_from_pixbuf(utils.scale_nicely(pix_account))
-        hbox_account.pack_start(img_account, False)
+        img_accountpix = gtk.Image()
+        img_accountpix.set_from_pixbuf(utils.scale_nicely(pix_account))
+        hbox_account.pack_start(img_accountpix, False)
         hbox_account.pack_start(self.cmb_account, True, True)
         hbox_account.pack_start(status_padding, False)
 
@@ -176,36 +180,27 @@ class Login(gtk.Alignment):
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.55, yalign=0.5, xscale=0.05,
             yscale=0.2)
-        al_vbox_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
-            yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
-        al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
-        al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+        al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
 
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
-        al_vbox_throbber.add(self.throbber)
         al_button.add(self.b_connect)
-        al_button_cancel.add(self.b_cancel)
-        al_logo.add(img_logo)
+        al_account.add(img_account)
         al_preferences.add(self.b_preferences)
 
         vbox.pack_start(self.eventbox, False)
-        vbox.pack_start(al_logo, True, True, 10)
+        vbox.pack_start(al_account, True, True, 10)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
-        vbox.pack_start(al_vbox_throbber, False, False)
         vbox.pack_start(al_button, True, True)
-        vbox.pack_start(al_button_cancel, True, True)
         vbox.pack_start(al_preferences, False)
 
         self.add(vbox)
         vbox.show_all()
 
-        self.throbber.hide()
-        self.b_cancel.hide()
         self.eventbox.hide_all()
 
         if account != '':
@@ -236,14 +231,6 @@ class Login(gtk.Alignment):
         self.auto_login.set_sensitive(visible)
         self.b_preferences.set_sensitive(visible)
 
-        if visible:
-            self.throbber.hide()
-            self.b_cancel.hide()
-        else:
-            self.throbber.show()
-            self.b_cancel.show()
-            
-
     def do_connect(self):
         '''do all the staff needed to connect'''
 
@@ -261,8 +248,6 @@ class Login(gtk.Alignment):
         self._config_account(account, remember_account, remember_password,
                              auto_login)
 
-        self.throbber.show()
-        self.set_sensitive(False)
         self.callback(account, self.session_id, self.proxy, self.use_http)
 
     def _config_account(self, account, remember_account, remember_password,
@@ -460,3 +445,61 @@ class Login(gtk.Alignment):
         self.session_id = session_id
         self.use_http = use_http
         self.on_preferences_changed(self.use_http, self.proxy, self.session_id)
+
+class ConnectingWindow(gtk.Alignment):
+
+   #cazzo trova il modo di fare gli avatar grandi nel connecting...magari un'animazione per farlo ingrandire
+   #guarda come fa a sfumarlo!
+    def __init__(self,callback,config_dir,account):
+
+        gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
+            yscale=1.0)
+
+        self.callback = callback
+        self.config_dir = config_dir
+
+        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
+                animated=True)
+        self.throbber = gtk.image_new_from_animation(th_pix)
+
+        self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
+        self.b_cancel.connect('clicked', self._on_cancel_clicked)
+        self.b_cancel.set_border_width(8)
+        
+        self.label = gtk.Label()
+        self.label.set_markup('<b>Connecting... </b>')
+
+        path = self.config_dir.join(account.replace('@','-at-'),'avatars','last')
+        if self.config_dir.file_readable(path):
+            img_account = utils.safe_gtk_image_load(self.config_dir.join(
+                          account.replace('@','-at-'),'avatars','last'))
+        else:
+            img_account = utils.safe_gtk_image_load(gui.theme.logo)
+
+        vbox = gtk.VBox()
+   
+        al_vbox_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
+            yscale=0.2)
+        al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
+        al_label = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+            yscale=0.0)
+        al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+            yscale=0.0)
+        
+        al_vbox_throbber.add(self.throbber)
+        al_button_cancel.add(self.b_cancel)
+        al_label.add(self.label)
+        al_logo.add(img_account)
+        
+        vbox.pack_start(al_logo, True, False)
+        vbox.pack_start(al_label, True, False)
+        vbox.pack_start(al_vbox_throbber, True, False)
+        vbox.pack_start(al_button_cancel, True, True)
+      
+        self.add(vbox)
+        vbox.show_all()
+    
+    def _on_cancel_clicked(self,button):
+        self.callback()
+  
+
