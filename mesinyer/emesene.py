@@ -314,7 +314,7 @@ class Controller(object):
         self.on_preferences_changed(use_http, proxy, session_id)
 
         self.window.clear()
-        self.window.go_connect(self.on_disconnect,self.config_dir,account.account)
+        self.window.go_connect(self.on_disconnect)
 
         self._new_session()
         self.session.config.get_or_set('b_play_send', True)
@@ -414,7 +414,7 @@ class Controller(object):
         posx = self.config.get_or_set('i_login_posx', 100)
         posy = self.config.get_or_set('i_login_posy', 100)
         width = self.config.get_or_set('i_login_width', 250)
-        height = self.config.get_or_set('i_login_height', 41)
+        height = self.config.get_or_set('i_login_height', 410)
 
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed,self.config,

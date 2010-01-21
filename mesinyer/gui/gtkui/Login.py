@@ -18,12 +18,8 @@ log = logging.getLogger('gtkui.Login')
 class Login(gtk.Alignment):
     # TODO automatic REconnection??countdown???
     # TODO add worker action for disconnect
-    # TODO rimpicciolisci immagine
-    # TODO aggiungi metodo getAVatar
-    # TODO errore quando aggiungo un avatar?chiedi a c10ud
-    # TODO finish reload_image_accotun it still don't work...scopri dove cambia il last
-    # TODO i don't like the gui "jumps" when i pass from connecting to
-    # reconnecting or when there is the nicebar for example
+    # TODO sistema la trayicon quando disconnetti
+    # TODO delete the set_sensitive method
 
     def __init__(self, callback, on_preferences_changed,
                 config, config_dir, config_path, proxy=None,
@@ -88,7 +84,7 @@ class Login(gtk.Alignment):
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
         
         self.img_account = gtk.Image()
-        self._reload_image_account(account)
+        self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
@@ -214,19 +210,6 @@ class Login(gtk.Alignment):
                 listFin.append(int(listTemp[2]))
                 self.accounts[account] = listFin 
 
-    def _reload_image_account(self,account):
-        '''change account image basing on actual user'''
-
-        if account != '':
-            path = self.config_dir.join(account.replace('@','-at-'),'avatars','last')
-            if self.config_dir.file_readable(path):
-                im = utils.safe_gtk_image_load(path)
-                self.img_account.set_from_pixbuf(utils.scale_image(im.get_pixbuf(),128,128))
-            else:
-                self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
-        else:
-            self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
-
     def set_sensitive(self, visible):
         self.cmb_account.set_sensitive(visible)
         self.txt_password.set_sensitive(visible)
@@ -289,7 +272,6 @@ class Login(gtk.Alignment):
         '''update the different fields according to the account that is
         on the account entry'''
         self.clear_all()
-        self._reload_image_account(account)
         if account == '':
             return
 
@@ -456,15 +438,12 @@ class Login(gtk.Alignment):
 
 class ConnectingWindow(gtk.Alignment):
 
-   #cazzo trova il modo di fare gli avatar grandi nel connecting...magari un'animazione per farlo ingrandire
-   #guarda come fa a sfumarlo!
-    def __init__(self, callback, config_dir, account):
+    def __init__(self, callback):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
 
         self.callback = callback
-        self.config_dir = config_dir
 
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
                 animated=True)
@@ -478,12 +457,7 @@ class ConnectingWindow(gtk.Alignment):
         self.label.set_markup('<b>Connecting... </b>')
 
         img_account = gtk.Image()
-        path = self.config_dir.join(account.replace('@','-at-'),'avatars','last')
-        if self.config_dir.file_readable(path):
-            im = utils.safe_gtk_image_load(path)
-            img_account.set_from_pixbuf(utils.scale_image(im.get_pixbuf(),256,256))
-        else:
-            img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
+        img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
  
         vbox = gtk.VBox()
    
