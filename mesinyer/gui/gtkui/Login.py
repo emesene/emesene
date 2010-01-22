@@ -201,13 +201,13 @@ class Login(gtk.Alignment):
     def _parse_accounts(self):
         '''create a dict with list from the string config'''
         for account in self.accounts:
-            if type(self.accounts[account]) == type("Hi!i'm a string"):
+            if type(self.accounts[account]) == str:
                 list_fin = []
                 list_temp = self.accounts[account][1:-1].split(',')
                 list_fin.append(list_temp[0][1:-1])
                 list_fin.append(int(list_temp[1]))
                 list_fin.append(int(list_temp[2]))
-                self.accounts[account] = list_fin 
+                self.accounts[account] = list_fin
 
     def do_connect(self):
         '''do all the staff needed to connect'''
