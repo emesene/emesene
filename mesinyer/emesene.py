@@ -214,12 +214,11 @@ class Controller(object):
             self.session.quit()
 
         self.save_extensions_config()
+        self._save_login_dimensions()
 
         if self.session is not None:
             self.session.save_config()
             self.session = None
-        else:
-            self._save_login_dimensions()
 
         self.config.save(self.config_path)
 
@@ -271,11 +270,12 @@ class Controller(object):
 
     def on_login_failed(self, reason):
         '''callback called on login failed'''
+        self._save_login_dimensions()
         self._remove_subscriptons()
         self._new_session()
         dialog = extension.get_default('dialog')
         dialog.error(reason)
-        self.window.content.set_sensitive(True)
+        self.go_login(True)
         self.window.content.clear_all()
 
     def on_contact_list_ready(self):
@@ -314,7 +314,7 @@ class Controller(object):
         self.on_preferences_changed(use_http, proxy, session_id)
 
         self.window.clear()
-        self.window.go_connect(self.on_disconnect)
+        self.window.go_connect(self.on_cancel_login)
 
         self._new_session()
         self.session.config.get_or_set('b_play_send', True)
@@ -408,41 +408,43 @@ class Controller(object):
             self.on_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler, self.window)
 
-        proxy = self._get_proxy_settings()
-        use_http = self.config.get_or_set('b_use_http', False)
+        self.go_login(on_disconnect)
 
+    def go_login(self, on_disconnect=False):
+        '''start the login GUI'''
+        proxy = self._get_proxy_settings()
         posx = self.config.get_or_set('i_login_posx', 100)
         posy = self.config.get_or_set('i_login_posy', 100)
         width = self.config.get_or_set('i_login_width', 250)
         height = self.config.get_or_set('i_login_height', 410)
 
+        if self.window.content_type != 'empty':
+            self.window.clear()
+
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed,self.config,
             self.config_dir, self.config_path, proxy,
-            use_http, self.config.session,on_disconnect)      
+            self.config.session, on_disconnect)
+        self.tray_icon.set_login()
         self.window.set_location(width, height, posx, posy)
-
         self.window.show()
 
     def on_disconnect(self):
         '''
         method called when the user selects disconnect
         '''
+        self.close_session(False)
+        self.start(on_disconnect=True)
+    
+    def on_cancel_login(self):
+        '''
+        method called when user select cancel login
+        '''
         if self.session is not None:
             self.session.quit()
-
-        proxy = self._get_proxy_settings()
-        use_http = self.config.get_or_set('b_use_http', False)
-
-        self.window.clear()
-        self.window.go_login(self.on_login_connect,
-            self.on_preferences_changed,self.config,
-            self.config_dir, self.config_path, proxy,
-            use_http, self.config.session,True)
-        self.window.show()
-        self.tray_icon.set_login()
+        self._save_login_dimensions()
+        self.go_login(True)
         
-
 class ExtensionDefault(object):
 
     def __init__(self):
