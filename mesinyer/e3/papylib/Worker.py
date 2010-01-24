@@ -59,7 +59,10 @@ except Exception, e:
 
 from PapyEvents import *
 from PapyConvert import *
-from PapyConference import *
+try:
+    from PapyConference import *
+except Exception, e:
+    log.exception("You need gstreamer to use the webcam support")
 
 class Worker(e3.base.Worker, papyon.Client):
     ''' papylib's worker - an emesene extension for papyon library '''

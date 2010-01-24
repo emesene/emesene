@@ -11,6 +11,7 @@ import utils
 import extension
 import StatusButton
 import stock
+import NiceBar
 
 import logging
 log = logging.getLogger('gtkui.Login')
@@ -167,18 +168,8 @@ class Login(gtk.Alignment):
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
-        self.eventbox = gtk.EventBox()
-        nicebar_box = gtk.HBox(False)
-        self.eventbox.add(nicebar_box)
-        self.label = gtk.Label()
-        self.label.set_line_wrap(True)
-        self.image = gtk.Image()
-        self.image.set_from_stock(gtk.STOCK_DIALOG_ERROR,
-                gtk.ICON_SIZE_LARGE_TOOLBAR)
-        nicebar_box.pack_start(self.image, False, False)
-        nicebar_box.pack_start(self.label, True, False)
-        self.eventbox.connect("button-press-event", self._on_nice_bar_clicked)
-
+        self.nicebar = NiceBar.NiceBar(default_background= \
+                                       NiceBar.ALERTBACKGROUND)
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.55, yalign=0.5, xscale=0.05,
@@ -200,7 +191,7 @@ class Login(gtk.Alignment):
         al_preferences.add(self.b_preferences)
 
         vbox.pack_start(self.menu, False)
-        vbox.pack_start(self.eventbox, False)
+        vbox.pack_start(self.nicebar, False)
         vbox.pack_start(al_logo, True, True, 10)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
@@ -214,7 +205,7 @@ class Login(gtk.Alignment):
 
         self.throbber.hide()
         self.b_cancel.hide()
-        self.eventbox.hide_all()
+        self.nicebar.hide()
 
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
@@ -257,6 +248,7 @@ class Login(gtk.Alignment):
     def do_connect(self):
         '''do all the staff needed to connect'''
 
+        self.nicebar.empty_queue()
         user = self.cmb_account.get_active_text()
         password = self.txt_password.get_text()
         account = e3.Account(user, password, self.btn_status.status)
@@ -264,7 +256,8 @@ class Login(gtk.Alignment):
         remember_account = self.remember_account.get_active()
 
         if user == '' or password == '':
-            self.show_nice_bar('user or password fields are empty')
+            self.nicebar.new_message('user or password fields are empty',
+                                      gtk.STOCK_DIALOG_ERROR)
             return
 
         self._config_account(account, remember_account, remember_password)
@@ -365,26 +358,16 @@ class Login(gtk.Alignment):
         #i'm here if self.accounts is empty
         self.liststore = None
 
-    def show_nice_bar(self, message, color=gtk.gdk.Color(57600, 23040, 19712),
-            image=gtk.STOCK_DIALOG_ERROR):
-        if message != None:
-            self.eventbox.modify_bg(gtk.STATE_NORMAL, color)
-            self.image.set_from_stock(image, gtk.ICON_SIZE_LARGE_TOOLBAR)
-            self.label.set_text(message)
-            self.eventbox.show_all()
-        else:
-            self.eventbox.hide_all()
-
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
-        self.eventbox.hide_all()
+        self.nicebar.empty_queue()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
 
     def _on_account_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
-        self.eventbox.hide_all()
+        self.nicebar.empty_queue()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.txt_password.grab_focus()
@@ -402,7 +385,7 @@ class Login(gtk.Alignment):
                     if self.config_dir.dir_exists(dir_at):
                         rmtree(dir_at)
                 except:
-                    self.show_nice_bar(_('Error while deleting user'))
+                    self.nicebar.new_message(_('Error while deleting user'))
 
                 if user in self.config.l_remember_account:
                     self.config.l_remember_account.remove(user)
@@ -438,9 +421,6 @@ class Login(gtk.Alignment):
         # call the controller on_disconnect
         self.callback_disconnect()
         self._update_fields(self.cmb_account.get_active_text())
-
-    def _on_nice_bar_clicked(self, widget, event):
-        self.eventbox.hide_all()
 
     def _on_quit(self):
         '''close emesene'''
