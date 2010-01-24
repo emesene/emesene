@@ -80,10 +80,13 @@ class NiceBar(gtk.EventBox):
             self.message_hbox.pack_start(self.message_image)
 
         self.modify_bg(gtk.STATE_NORMAL, self.actual_background)
-        self.message_label.set_markup(self.markup % (self.actual_foreground, self.actual_message))
+        self.message_label.set_markup(self.markup % (self.actual_foreground,
+                                                       self.actual_message))
         self.show_all()
-        
+
     def empty_queue(self):
+        ''' Delets all messages and hide the bar '''
+
         self.messages_queue = list()
         self.actual_message = ''
         self.actual_image = None
