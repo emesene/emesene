@@ -37,8 +37,9 @@ class Login(gtk.Alignment):
         self.session_id = session_id
 
         account = self.config.get_or_set('last_logged_account', '')
+        self.remembers = self.config.get_or_set('d_remembers', {})
+        self.status = self.config.get_or_set('d_status',{})
         self.accounts = self.config.d_accounts
-        self._parse_accounts()
 
         if proxy is None:
             self.proxy = e3.Proxy()
@@ -195,24 +196,14 @@ class Login(gtk.Alignment):
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
             #autologin
-            if self.accounts[account][2] == 3 and not on_disconnect:
-                self.do_connect()
-
-    def _parse_accounts(self):
-        '''create a dict with list from the string config'''
-        for account in self.accounts:
-            if type(self.accounts[account]) == type("Hi!i'm a string"):
-                list_fin = []
-                list_temp = self.accounts[account][1:-1].split(',')
-                list_fin.append(list_temp[0][1:-1])
-                list_fin.append(int(list_temp[1]))
-                list_fin.append(int(list_temp[2]))
-                self.accounts[account] = list_fin 
+            if int(self.remembers[account]) == 3 and not on_disconnect:
+                #this resolves a gtkWarning..hack..
+                gobject.timeout_add(100, self.do_connect)
 
     def do_connect(self):
         '''do all the staff needed to connect'''
 
-        user = self.cmb_account.get_active_text()
+        user = self.cmb_account.get_active_text().strip() 
         password = self.txt_password.get_text()
         account = e3.Account(user, password, self.btn_status.status)
         remember_password = self.remember_password.get_active()
@@ -233,18 +224,21 @@ class Login(gtk.Alignment):
         '''modify the config for the current account before login'''
         
         if auto_login:#+1 account,+1 password,+1 autologin =  3
-            self.accounts[account.account] = [base64.b64encode(account.password),
-                account.status, 3]
+            self.accounts[account.account] = base64.b64encode(account.password)
+            self.remembers[account.account] = 3
+            self.status[account.account] = account.status
             self.config.last_logged_account = account.account
         
         elif remember_password:#+1 account,+1 password = 2
-            self.accounts[account.account] = [base64.b64encode(account.password),
-                account.status, 2]
+            self.accounts[account.account] = base64.b64encode(account.password)
+            self.remembers[account.account] = 2
+            self.status[account.account] = account.status
             self.config.last_logged_account = account.account
 
         elif remember_account:#+1 account = 1
-            self.accounts[account.account] = [base64.b64encode(account.password),
-                account.status, 1]
+            self.accounts[account.account] = ''
+            self.remembers[account.account] = 1
+            self.status[account.account] = account.status
             self.config.last_logged_account = account.account
 
         else:#means i have logged with nothing checked
@@ -266,10 +260,10 @@ class Login(gtk.Alignment):
         flag = False
 
         if account in self.accounts:
-            attr = self.accounts[account][2]
+            attr = int(self.remembers[account])
             self.remember_account.set_sensitive(False)
             self.forget_me.set_child_visible(True)
-            self.btn_status.set_status(int(self.accounts[account][1]))
+            self.btn_status.set_status(int(self.status[account]))
 
             if attr == 3:#autologin,password,account checked
                 self.auto_login.set_active(True)
@@ -286,7 +280,7 @@ class Login(gtk.Alignment):
             
             #for not repeating code
             if flag:
-                passw = self.accounts[account][0]
+                passw = self.accounts[account]
                 self.txt_password.set_text(base64.b64decode(passw))
                 self.txt_password.set_sensitive(False)
 
@@ -346,19 +340,23 @@ class Login(gtk.Alignment):
         '''called when the forget me label is clicked'''
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
-            user = self.cmb_account.get_active_text()
+            account = self.cmb_account.get_active_text()
             if response == stock.YES:
                 try: # Delete user's folder
-                    rmtree(self.config_dir.join(user))
-                    dir_at = self.config_dir.join(user.replace('@','-at-'))
+                    rmtree(self.config_dir.join(account))
+                    dir_at = self.config_dir.join(account.replace('@','-at-'))
                     if self.config_dir.dir_exists(dir_at):
                         rmtree(dir_at)
                 except:
                     self.show_nice_bar(_('Error while deleting user'))
 
-                if user in self.accounts:
-                    del self.accounts[user]
-                if user == self.config.last_logged_account:
+                if account in self.accounts:
+                    del self.accounts[account]
+                if account in self.remembers:
+                    del self.remembers[account]
+                if account in self.status:
+                    del self.status[account]
+                if account == self.config.last_logged_account:
                     self.config.last_logged_account = ''
 
                 self.config.save(self.config_path)
