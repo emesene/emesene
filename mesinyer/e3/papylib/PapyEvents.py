@@ -32,7 +32,18 @@ class ClientEvents(papyon.event.ClientEventInterface):
             self._client._fill_contact_list(self._client.address_book)
             
     def on_client_error(self, error_type, error):
-        print "ERROR :", error_type, " ->", error    
+        if error_type == papyon.event.ClientErrorType.AUTHENTICATION:
+            self._client.session.add_event(Event.EVENT_LOGIN_FAILED,'Authentication error')      
+        elif error_type == papyon.event.ClientErrorType.NETWORK:
+            self._client.session.add_event(Event.EVENT_LOGIN_FAILED,'Network error')
+        elif error_type == papyon.event.ClientErrorType.PROTOCOL:#TODO
+            pass
+        elif error_type == papyon.event.ClientErrorType.ADDRESSBOOK:#TODO
+            pass
+        elif error_type == papyon.event.ClientErrorType.OFFLINE_MESSAGGES:#TODO
+            pass
+        else:
+            print "ERROR :", error_type, " ->", error    
 
 class InviteEvent(papyon.event.InviteEventInterface):
     def on_invite_conversation(self, conversation):
