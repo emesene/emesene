@@ -155,7 +155,8 @@ class Login(gtk.Alignment):
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
-        self.error_bar = NiceBar.NiceBar()
+        self.nicebar = NiceBar.NiceBar(default_background= \
+                                       NiceBar.ALERTBACKGROUND)
 
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
@@ -172,8 +173,9 @@ class Login(gtk.Alignment):
         al_account.add(self.img_account)
         al_preferences.add(self.b_preferences)
 
-        vbox.pack_start(self.error_bar, False)
-        vbox.pack_start(al_account, True, True, 10)
+        vbox.pack_start(self.menu, False)
+        vbox.pack_start(self.nicebar, False)
+        vbox.pack_start(al_logo, True, True, 10)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
         vbox.pack_start(al_button, True, True)
@@ -182,15 +184,17 @@ class Login(gtk.Alignment):
         self.add(vbox)
         vbox.show_all()
 
-        self.error_bar.hide_all()
-        
+        self.throbber.hide()
+        self.b_cancel.hide()
+        self.nicebar.hide()
+
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
 
     def do_connect(self):
         '''do all the staff needed to connect'''
-
-        user = self.cmb_account.get_active_text().strip() 
+        self.nicebar.empty_queue()
+        user = self.cmb_account.get_active_text()
         password = self.txt_password.get_text()
         account = e3.Account(user, password, self.btn_status.status)
         remember_password = self.remember_password.get_active()
@@ -198,7 +202,8 @@ class Login(gtk.Alignment):
         auto_login = self.auto_login.get_active()
 
         if user == '' or password == '':
-            self.show_error('User or password fields are empty')
+            self.nicebar.new_message('user or password fields are empty',
+                                      gtk.STOCK_DIALOG_ERROR)
             return
 
         self._config_account(account, remember_account, remember_password,
@@ -293,23 +298,21 @@ class Login(gtk.Alignment):
         self.liststore.clear()
         for mail in sorted(self.accounts):
             self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
-     
-        #this resolves a small bug
-        if not len(self.liststore):
-            self.liststore = None
+        return
 
-    def show_error(self, message):
-        '''show an error in the top of the window using the nicebar'''
-        self.error_bar.show_error(message)
+        #i'm here if self.accounts is empty
+        self.liststore = None
 
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
+        self.nicebar.empty_queue()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
 
     def _on_account_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
+        self.nicebar.empty_queue()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.txt_password.grab_focus()
@@ -328,15 +331,18 @@ class Login(gtk.Alignment):
                     if self.config_dir.dir_exists(dir_at):
                         rmtree(dir_at)
                 except:
-                    self.show_error(_('Error while deleting user'))
+                    self.nicebar.new_message(_('Error while deleting user'))
 
-                if account in self.accounts:
-                    del self.accounts[account]
-                if account in self.remembers:
-                    del self.remembers[account]
-                if account in self.status:
-                    del self.status[account]
-                if account == self.config.last_logged_account:
+                if user in self.config.l_remember_account:
+                    self.config.l_remember_account.remove(user)
+
+                if user in self.config.l_remember_password:
+                    self.config.l_remember_password.remove(user)
+
+                if user in self.config.l_auto_login:
+                    self.config.l_auto_login.remove(user)
+
+                if user in self.config.last_logged_account:
                     self.config.last_logged_account = ''
 
                 self.config.save(self.config_path)

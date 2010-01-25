@@ -59,7 +59,10 @@ except Exception, e:
 
 from PapyEvents import *
 from PapyConvert import *
-from PapyConference import *
+try:
+    from PapyConference import *
+except Exception, e:
+    log.exception("You need gstreamer to use the webcam support")
 
 class Worker(e3.base.Worker, papyon.Client):
     ''' papylib's worker - an emesene extension for papyon library '''
@@ -160,7 +163,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _remove_contact(self, papycontact):
         ''' removes a contact from the list (gui) '''
         if papycontact.account in self.session.contacts.contacts:
-                del self.session.contacts.contacts[papycontact.account]
+            del self.session.contacts.contacts[papycontact.account]
    
     def _add_group(self, papygroup):
         ''' method to add a group to the (gui) contact list '''
@@ -183,7 +186,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.groups[papygroup.id].contacts.remove(papycontact.account)
 
         if papygroup.id in self.session.contacts.contacts[papycontact.account].groups:
-                self.session.contacts.contacts[papycontact.account].groups\
+            self.session.contacts.contacts[papycontact.account].groups\
                     .remove(papygroup.id)
     
     def _rename_group(self, papygroup):

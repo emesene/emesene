@@ -1,0 +1,43 @@
+emesene2's todo:
+
+e3:
+- decide how preferences should work (program and protocol-related tabs?)
+- consider adopting PIL (python image library) or strip some parts and adapt
+  to emesene (so we can properly use gifs), or ctypes with libgif, or whatever
+  (we need only resizing, so..)
+- consider libisf for isf processing, or the good ol' python module 
+  by mr. campbell we shipped with emesene1 (untested)
+
+e3.xmpp:
+- ?
+
+e3.msn:
+- p2p
+- decide if it's worth developing it, really
+
+e3.papylib:
+- find out what's wrong with creating a new conversation 
+  (cid = time.time() is an epic fail)
+- implement multichats
+
+e3.papylib->upstream (eventually):
+- push papyon/gstreamer developers to fix the mimic decoder upstream so webcam 
+  works (it does receive already, but the gstreamer decoder is broken)
+- roaming is unimplemented/doesn't work
+- file transfer event interface (?)
+- find out what's wrong with papyon's sip calls module
+
+gui:
+- sanitize menues (emesene1 could be a good example)
+- support for libappindicator (where available)
+- move to group, copy to group, etc.
+- custom emoticon handling support (add, remove, save, use, etc.)
+- audio/video settings and testing through gstreamer (with gtk gui?)
+
+gui.gtk:
+- move the nicebar to a widget class
+- investigate gedit's bars, they're nicer than our nicebar
+  (but i don't know if it's already in pygtk)
+- port emesene1 preferences to emesene2 
+  (and merge back plugins window in preferences)
+- merge marianoguerra's pyadium in emesene2 
