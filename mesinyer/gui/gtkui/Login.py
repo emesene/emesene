@@ -11,6 +11,7 @@ import utils
 import extension
 import StatusButton
 import stock
+import NiceBar
 
 import logging
 log = logging.getLogger('gtkui.Login')
@@ -154,17 +155,7 @@ class Login(gtk.Alignment):
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
-        self.eventbox = gtk.EventBox()
-        nicebar_box = gtk.HBox(False)
-        self.eventbox.add(nicebar_box)
-        self.label = gtk.Label()
-        self.label.set_line_wrap(True)
-        self.image = gtk.Image()
-        self.image.set_from_stock(gtk.STOCK_DIALOG_ERROR,
-                gtk.ICON_SIZE_LARGE_TOOLBAR)
-        nicebar_box.pack_start(self.image, False, False)
-        nicebar_box.pack_start(self.label, True, False)
-        self.eventbox.connect("button-press-event", self._on_nice_bar_clicked)
+        self.error_bar = NiceBar.NiceBar()
 
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
@@ -181,7 +172,7 @@ class Login(gtk.Alignment):
         al_account.add(self.img_account)
         al_preferences.add(self.b_preferences)
 
-        vbox.pack_start(self.eventbox, False)
+        vbox.pack_start(self.error_bar, False)
         vbox.pack_start(al_account, True, True, 10)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
@@ -191,7 +182,7 @@ class Login(gtk.Alignment):
         self.add(vbox)
         vbox.show_all()
 
-        self.eventbox.hide_all()
+        self.error_bar.hide_all()
         
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
@@ -207,7 +198,7 @@ class Login(gtk.Alignment):
         auto_login = self.auto_login.get_active()
 
         if user == '' or password == '':
-            self.show_nice_bar('User or password fields are empty')
+            self.show_error('User or password fields are empty')
             return
 
         self._config_account(account, remember_account, remember_password,
@@ -270,7 +261,7 @@ class Login(gtk.Alignment):
             elif attr == 1:#only account checked
                 self.remember_account.set_active(True)
             else:#if i'm here i have an error
-                self.show_nice_bar(_(
+                self.show_error(_(
                           'Error while reading user config'))
                 self._clear_all()
             
@@ -307,16 +298,9 @@ class Login(gtk.Alignment):
         if not len(self.liststore):
             self.liststore = None
 
-    def show_nice_bar(self, message, color=gtk.gdk.Color(57600, 23040, 19712),
-            image=gtk.STOCK_DIALOG_ERROR):
-        '''show a nice bar that displays error on the top of the window'''
-        if message != None:
-            self.eventbox.modify_bg(gtk.STATE_NORMAL, color)
-            self.image.set_from_stock(image, gtk.ICON_SIZE_LARGE_TOOLBAR)
-            self.label.set_text(message)
-            self.eventbox.show_all()
-        else:
-            self.eventbox.hide_all()
+    def show_error(self, message):
+        '''show an error in the top of the window using the nicebar'''
+        self.error_bar.show_error(message)
 
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
@@ -344,7 +328,7 @@ class Login(gtk.Alignment):
                     if self.config_dir.dir_exists(dir_at):
                         rmtree(dir_at)
                 except:
-                    self.show_nice_bar(_('Error while deleting user'))
+                    self.show_error(_('Error while deleting user'))
 
                 if account in self.accounts:
                     del self.accounts[account]
@@ -372,10 +356,6 @@ class Login(gtk.Alignment):
         # call the controller on_cancel_login
         self.callback_disconnect()
         self._update_fields(self.cmb_account.get_active_text())
-
-    def _on_nice_bar_clicked(self, widget, event):
-        '''called when the nice bar is clicked'''
-        self.eventbox.hide_all()
 
     def _on_quit(self):
         '''close emesene'''

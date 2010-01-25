@@ -273,10 +273,9 @@ class Controller(object):
         self._save_login_dimensions()
         self._remove_subscriptons()
         self._new_session()
-        dialog = extension.get_default('dialog')
-        dialog.error(reason)
         self.go_login(True)
         self.window.content.clear_all()
+        self.window.content.show_error(reason)
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
