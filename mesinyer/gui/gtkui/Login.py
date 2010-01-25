@@ -158,6 +158,8 @@ class Login(gtk.Alignment):
         self.nicebar = NiceBar.NiceBar(default_background= \
                                        NiceBar.ALERTBACKGROUND)
 
+        al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+            yscale=0.0)
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.55, yalign=0.5, xscale=0.05,
@@ -166,16 +168,16 @@ class Login(gtk.Alignment):
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
-
+        
+        al_logo.add(self.img_account)
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
         al_account.add(self.img_account)
         al_preferences.add(self.b_preferences)
 
-        vbox.pack_start(self.menu, False)
         vbox.pack_start(self.nicebar, False)
-        vbox.pack_start(al_logo, True, True, 10)
+        vbox.pack_start(al_logo, True, False)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
         vbox.pack_start(al_button, True, True)
@@ -184,8 +186,6 @@ class Login(gtk.Alignment):
         self.add(vbox)
         vbox.show_all()
 
-        self.throbber.hide()
-        self.b_cancel.hide()
         self.nicebar.hide()
 
         if account != '':
@@ -292,6 +292,10 @@ class Login(gtk.Alignment):
         '''call clear_all and clean also the account combobox'''
         self._clear_all()
         self.cmb_account.get_children()[0].set_text('')
+
+    def show_error(self, reason):
+        '''show an error on the top of the window using nicebar'''
+        self.nicebar.new_message(_(reason), gtk.STOCK_DIALOG_ERROR)
        
     def _reload_account_list(self, *args):
         '''reload the account list in the combobox'''

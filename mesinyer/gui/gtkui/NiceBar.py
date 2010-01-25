@@ -77,7 +77,7 @@ class NiceBar(gtk.EventBox):
         if stock is not None:
             self.message_image = gtk.image_new_from_stock(stock, \
                                              gtk.ICON_SIZE_LARGE_TOOLBAR)
-            self.message_hbox.pack_start(self.message_image)
+            self.message_hbox.pack_start(self.message_image, False, False)
 
         self.modify_bg(gtk.STATE_NORMAL, self.actual_background)
         self.message_label.set_markup(self.markup % (self.actual_foreground,
