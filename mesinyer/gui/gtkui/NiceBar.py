@@ -16,27 +16,26 @@ class NiceBar(gtk.EventBox):
 
         gtk.EventBox.__init__(self)
 
-        self.messages_queue = list()
         self.message_label = gtk.Label()
         self.message_label.set_line_wrap(True)
         self.message_image = gtk.Image()
         self.message_hbox = gtk.HBox()
+        self.message_hbox.set_border_width(2)
 
         if default_background is None:
             default_background = NORMALBACKGROUND
         if default_foreground is None:
             default_foreground = NORMALFOREGROUND
 
-        self.actual_message = ''
-        self.actual_image = None
-        self.actual_background = self.default_back = default_background
-        self.actual_foreground = self.default_fore = default_foreground
+        self.default_back = default_background
+        self.default_fore = default_foreground
+        self.empty_queue()
         self.markup = '<span foreground="%s">%s</span>'
         self.modify_bg(gtk.STATE_NORMAL, default_background)
 
-        self.message_hbox.pack_end(self.message_label, True, True)
+        self.message_hbox.pack_end(self.message_label)
         self.add(self.message_hbox)
-        
+
         self.connect('button-release-event', self.remove_message)
 
     def new_message(self, message, stock=None, background=None, \
@@ -77,7 +76,7 @@ class NiceBar(gtk.EventBox):
         if stock is not None:
             self.message_image = gtk.image_new_from_stock(stock, \
                                              gtk.ICON_SIZE_LARGE_TOOLBAR)
-            self.message_hbox.pack_start(self.message_image)
+            self.message_hbox.pack_start(self.message_image, False, False)
 
         self.modify_bg(gtk.STATE_NORMAL, self.actual_background)
         self.message_label.set_markup(self.markup % (self.actual_foreground,
