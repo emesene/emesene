@@ -412,7 +412,8 @@ class Controller(object):
         #autologin
         if account != '' and int(self.config.d_remembers[account]) == 3 \
             and not on_disconnect:
-            user = e3.Account(account, self.config.d_accounts[account],
+            password = base64.b64decode(self.config.d_accounts[account])
+            user = e3.Account(account, password,
                               int(self.config.d_status[account]))
             self.on_login_connect(user, self.config.session, proxy, use_http)
         else:

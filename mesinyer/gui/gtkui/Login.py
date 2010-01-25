@@ -169,7 +169,6 @@ class Login(gtk.Alignment):
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
         
-        al_logo.add(self.img_account)
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
@@ -177,7 +176,7 @@ class Login(gtk.Alignment):
         al_preferences.add(self.b_preferences)
 
         vbox.pack_start(self.nicebar, False)
-        vbox.pack_start(al_logo, True, False)
+        vbox.pack_start(al_account, True, False)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
         vbox.pack_start(al_button, True, True)

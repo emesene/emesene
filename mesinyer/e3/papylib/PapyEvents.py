@@ -33,7 +33,7 @@ class ClientEvents(papyon.event.ClientEventInterface):
             
     def on_client_error(self, error_type, error):
         if error_type == papyon.event.ClientErrorType.AUTHENTICATION:
-            self._client.session.add_event(Event.EVENT_LOGIN_FAILED,'Authentication error')      
+            self._client.session.add_event(Event.EVENT_LOGIN_FAILED,'Authentication failure')      
         elif error_type == papyon.event.ClientErrorType.NETWORK:
             self._client.session.add_event(Event.EVENT_LOGIN_FAILED,'Network error')
         elif error_type == papyon.event.ClientErrorType.PROTOCOL:#TODO
