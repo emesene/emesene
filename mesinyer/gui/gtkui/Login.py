@@ -194,7 +194,7 @@ class Login(gtk.Alignment):
     def do_connect(self):
         '''do all the staff needed to connect'''
         self.nicebar.empty_queue()
-        user = self.cmb_account.get_active_text()
+        user = self.cmb_account.get_active_text().strip()
         password = self.txt_password.get_text()
         account = e3.Account(user, password, self.btn_status.status)
         remember_password = self.remember_password.get_active()
@@ -302,10 +302,10 @@ class Login(gtk.Alignment):
         self.liststore.clear()
         for mail in sorted(self.accounts):
             self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
-        return
 
-        #i'm here if self.accounts is empty
-        self.liststore = None
+        #this resolves a small bug
+        if not len(self.liststore):
+            self.liststore = None
 
     def _on_password_key_press(self, widget, event):
         '''called when a key is pressed on the password field'''
@@ -335,18 +335,16 @@ class Login(gtk.Alignment):
                     if self.config_dir.dir_exists(dir_at):
                         rmtree(dir_at)
                 except:
-                    self.nicebar.new_message(_('Error while deleting user'))
+                    self.nicebar.new_message(_('Error while deleting user'),
+                                             gtk.STOCK_DIALOG_ERROR)
 
-                if user in self.config.l_remember_account:
-                    self.config.l_remember_account.remove(user)
-
-                if user in self.config.l_remember_password:
-                    self.config.l_remember_password.remove(user)
-
-                if user in self.config.l_auto_login:
-                    self.config.l_auto_login.remove(user)
-
-                if user in self.config.last_logged_account:
+                if account in self.accounts:
+                    del self.accounts[account]
+                if account in self.remembers:
+                    del self.remembers[account]
+                if account in self.status:
+                    del self.status[account]
+                if account == self.config.last_logged_account:
                     self.config.last_logged_account = ''
 
                 self.config.save(self.config_path)
