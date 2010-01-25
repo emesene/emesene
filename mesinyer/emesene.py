@@ -312,9 +312,12 @@ class Controller(object):
     def on_login_connect(self, account, session_id, proxy, use_http):
         '''called when the user press the connect button'''
         self.on_preferences_changed(use_http, proxy, session_id)
+        self._save_login_dimensions()
 
         self.window.clear()
         self.window.go_connect(self.on_cancel_login)
+        self._set_location(self.window)
+        self.window.show()
 
         self._new_session()
         self.session.config.get_or_set('b_play_send', True)
@@ -342,13 +345,8 @@ class Controller(object):
             Window = extension.get_default('window frame')
             window = Window(self._on_conversation_window_close)
 
-            posx = self.session.config.get_or_set('i_conv_posx', 100)
-            posy = self.session.config.get_or_set('i_conv_posy', 100)
-            width = self.session.config.get_or_set('i_conv_width', 600)
-            height = self.session.config.get_or_set('i_conv_height', 400)
-
             window.go_conversation(self.session)
-            window.set_location(width, height, posx, posy)
+            self._set_location(window, True)
             self.conversations = window.content
             window.show()
 
@@ -408,15 +406,25 @@ class Controller(object):
             self.on_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler, self.window)
 
-        self.go_login(on_disconnect)
-
-    def go_login(self, on_disconnect=False):
-        '''start the login GUI'''
         proxy = self._get_proxy_settings()
-        posx = self.config.get_or_set('i_login_posx', 100)
-        posy = self.config.get_or_set('i_login_posy', 100)
-        width = self.config.get_or_set('i_login_width', 250)
-        height = self.config.get_or_set('i_login_height', 410)
+        use_http = self.config.get_or_set('b_use_http', False)
+        account = self.config.get_or_set('last_logged_account', '')
+        
+        #autologin
+        if account != '' and int(self.config.d_remembers[account]) == 3 \
+            and not on_disconnect:
+            user = e3.Account(account, self.config.d_accounts[account],
+                              int(self.config.d_status[account]))
+            self.on_login_connect(user, self.config.session, proxy, use_http)
+        else:
+            self.go_login(on_disconnect, proxy, use_http)
+
+    def go_login(self, on_disconnect=False, proxy=None, use_http=None):
+        '''start the login GUI'''
+        if proxy is None:
+            proxy = self._get_proxy_settings()
+        if use_http is None:
+            use_http = self.config.get_or_set('b_use_http', False)
 
         if self.window.content_type != 'empty':
             self.window.clear()
@@ -424,9 +432,9 @@ class Controller(object):
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed,self.config,
             self.config_dir, self.config_path, proxy,
-            self.config.session, on_disconnect)
+            use_http, self.config.session, on_disconnect)
         self.tray_icon.set_login()
-        self.window.set_location(width, height, posx, posy)
+        self._set_location(self.window)
         self.window.show()
 
     def on_disconnect(self):
@@ -444,6 +452,21 @@ class Controller(object):
             self.session.quit()
         self._save_login_dimensions()
         self.go_login(True)
+
+    def _set_location(self, window, is_conv=False):
+        '''get and set the location of the window'''
+        if is_conv:
+            posx = self.session.config.get_or_set('i_conv_posx', 100)
+            posy = self.session.config.get_or_set('i_conv_posy', 100)
+            width = self.session.config.get_or_set('i_conv_width', 600)
+            height = self.session.config.get_or_set('i_conv_height', 400)
+        else:
+            posx = self.config.get_or_set('i_login_posx', 100)
+            posy = self.config.get_or_set('i_login_posy', 100)
+            width = self.config.get_or_set('i_login_width', 250)
+            height = self.config.get_or_set('i_login_height', 410)
+
+        window.set_location(width, height, posx, posy)
         
 class ExtensionDefault(object):
 

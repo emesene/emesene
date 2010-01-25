@@ -21,7 +21,7 @@ class Login(gtk.Alignment):
 
     def __init__(self, callback, on_preferences_changed,
                 config, config_dir, config_path, proxy=None,
-                session_id=None, on_disconnect=False,):
+                use_http=None, session_id=None, on_disconnect=False):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
@@ -33,7 +33,7 @@ class Login(gtk.Alignment):
         self.on_preferences_changed = on_preferences_changed
         # the id of the default extension that handles the session
         # used to select the default session on the preference dialog
-        self.use_http = self.config.get_or_set('b_use_http', False)
+        self.use_http = use_http
         self.session_id = session_id
 
         account = self.config.get_or_set('last_logged_account', '')
@@ -192,13 +192,9 @@ class Login(gtk.Alignment):
         vbox.show_all()
 
         self.eventbox.hide_all()
-
+        
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
-            #autologin
-            if int(self.remembers[account]) == 3 and not on_disconnect:
-                #this resolves a gtkWarning..hack..
-                gobject.timeout_add(100, self.do_connect)
 
     def do_connect(self):
         '''do all the staff needed to connect'''
