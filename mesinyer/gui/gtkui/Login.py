@@ -189,6 +189,20 @@ class Login(gtk.Alignment):
 
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
+            #autologin
+            if self.accounts[account][2] == 3 and not on_disconnect:
+                self.do_connect()
+
+    def _parse_accounts(self):
+        '''create a dict with list from the string config'''
+        for account in self.accounts:
+            if isinstance(self.accounts[account], basestring):
+                list_fin = []
+                list_temp = self.accounts[account][1:-1].split(',')
+                list_fin.append(list_temp[0][1:-1])
+                list_fin.append(int(list_temp[1]))
+                list_fin.append(int(list_temp[2]))
+                self.accounts[account] = list_fin
 
     def do_connect(self):
         '''do all the staff needed to connect'''
