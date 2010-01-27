@@ -312,10 +312,10 @@ class Controller(object):
         '''called when the user press the connect button'''
         self.on_preferences_changed(use_http, proxy, session_id)
         self._save_login_dimensions()
+        self._set_location(self.window)
 
         self.window.clear()
         self.window.go_connect(self.on_cancel_login)
-        self._set_location(self.window)
         self.window.show()
 
         self._new_session()
@@ -396,6 +396,7 @@ class Controller(object):
         '''the entry point to the class'''
         Window = extension.get_default('window frame')
         self.window = Window(None) # main window
+        self._set_location(self.window)
 
         if self.tray_icon is not None:
             self.tray_icon.set_visible(False)
@@ -429,12 +430,14 @@ class Controller(object):
         if self.window.content_type != 'empty':
             self.window.clear()
 
+        self._save_login_dimensions()
+        self._set_location(self.window)
+
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed,self.config,
             self.config_dir, self.config_path, proxy,
             use_http, self.config.session, on_disconnect)
         self.tray_icon.set_login()
-        self._set_location(self.window)
         self.window.show()
 
     def on_disconnect(self):
@@ -450,7 +453,6 @@ class Controller(object):
         '''
         if self.session is not None:
             self.session.quit()
-        self._save_login_dimensions()
         self.go_login(True)
 
     def _set_location(self, window, is_conv=False):
