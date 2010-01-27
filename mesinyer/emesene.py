@@ -436,7 +436,7 @@ class Controller(object):
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed,self.config,
             self.config_dir, self.config_path, proxy,
-            use_http, self.config.session, on_disconnect)
+            use_http, self.config.session)
         self.tray_icon.set_login()
         self.window.show()
 

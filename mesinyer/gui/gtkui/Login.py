@@ -22,7 +22,7 @@ class Login(gtk.Alignment):
 
     def __init__(self, callback, on_preferences_changed,
                 config, config_dir, config_path, proxy=None,
-                use_http=None, session_id=None, on_disconnect=False):
+                use_http=None, session_id=None):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
