@@ -93,6 +93,8 @@ class Controller(object):
 
         if self.config.d_accounts is None:
             self.config.d_accounts = {}
+        if self.config.d_remembers is None:
+            self.config.d_remembers = {}
 
         self.session = None
         self._parse_commandline()
