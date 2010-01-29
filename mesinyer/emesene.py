@@ -205,10 +205,10 @@ class Controller(object):
 
     def on_disconnected(self, reason):
         '''called when the server disconnect us'''
-        dialog = extension.get_default('dialog')
-        dialog.error('Session disconnected by server')
         self.close_session(False)
-        self.start()
+        self.start(on_disconnect=True)
+        self.window.content.clear_all()
+        self.window.content.show_error(reason)
 
     def close_session(self, do_exit=True):
         '''close session'''
