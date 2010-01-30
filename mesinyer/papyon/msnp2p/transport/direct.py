@@ -63,6 +63,9 @@ class DirectP2PTransport(BaseP2PTransport):
         self.__nonce_sent = False
         self.__nonce_received = False
 
+        # Fixme move this to manager
+        self._connect_timeout_src = None
+
     def close(self):
         BaseP2PTransport.close(self)
 
@@ -73,6 +76,10 @@ class DirectP2PTransport(BaseP2PTransport):
     @property
     def connected(self):
         return self._connected
+
+    @property
+    def ip(self):
+        return self._ip
 
     @property
     def port(self):
@@ -97,7 +104,7 @@ class DirectP2PTransport(BaseP2PTransport):
         self._transport.open()
 
     def listen(self):
-        self._listening = True
+        #self._listening = True
         self._socket = self._open_listener()
         self._socket.setblocking(False)
         self._channel = gobject.IOChannel(self._socket.fileno())
@@ -250,6 +257,7 @@ class DirectP2PTransport(BaseP2PTransport):
         self.emit("connected")
 
     def _on_data_received(self, transport, chunk, length):
+        logger.debug("Received data %s", repr(chunk))
         self.__pending_chunk += chunk
 
         while self.__pending_chunk:
@@ -267,11 +275,14 @@ class DirectP2PTransport(BaseP2PTransport):
 
             if not self.__foo_received:
                 self._receive_foo(body)
-                return
+                # Don't return otherwhise we seem to miss the nonce and don't reply
+                #return
 
             chunk = MessageChunk.parse(body)
             if not self.__nonce_received:
                 self._receive_nonce(chunk)
+            elif chunk.body == "\x00" *4:
+                print "Received 0000 chunk, ignoring it"
             else:
                 logger.debug("<< Chunk of %i bytes" % chunk.header.chunk_size)
                 self._on_chunk_received(chunk)

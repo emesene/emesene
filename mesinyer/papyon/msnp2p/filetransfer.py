@@ -18,12 +18,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from papyon.msnp2p.constants import *
+from papyon.msnp2p.constants import EufGuid
 from papyon.msnp2p.session import P2PSession
 
 import struct
+import logging
 
 __all__ = ['FileTransferSession']
+
+logger = logging.getLogger('papyon.msnp2p.filetransfersession')
 
 class FileTransferSession(P2PSession):
 
@@ -34,6 +37,8 @@ class FileTransferSession(P2PSession):
         self._size = 0
         self._has_preview = False
         self._preview = None
+        # data to be send if sending
+        self._data = None
 
         if message is not None:
             self.parse_context(message.body.context)
@@ -67,6 +72,7 @@ class FileTransferSession(P2PSession):
         self._respond(603)
 
     def send(self, data):
+        logger.debug("FileTransferSession.send()")
         self._data = data
         self._transreq()
 
@@ -84,6 +90,7 @@ class FileTransferSession(P2PSession):
         return context
 
     def _on_bridge_selected(self):
+        logger.debug("On bridge selected %s" % (self._data != None))
         if self._data is not None:
             self._send_p2p_data("\x00" * 4)
             self._send_p2p_data(self._data, True)

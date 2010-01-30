@@ -160,6 +160,7 @@ class P2PSession(gobject.GObject):
 
     def _accept_transreq(self, transreq, bridge, listening, nonce, local_ip,
             local_port, extern_ip, extern_port):
+        logger.debug('accept_transreq')
         body = SLPTransferResponseBody(bridge, listening, nonce, [local_ip],
                 local_port, [extern_ip], extern_port, self._id, 0, 1)
         self._respond_transreq(transreq, 200, body)
@@ -169,6 +170,8 @@ class P2PSession(gobject.GObject):
         self._respond_transreq(transreq, 603, body)
 
     def _switch_bridge(self, transreq):
+        # Other client requested a Transfer
+        logger.debug('switch_bridge')
         nonce = str(uuid.uuid4())
         local_ip = self._session_manager._client.local_ip
         port = 6891
@@ -180,6 +183,7 @@ class P2PSession(gobject.GObject):
         new_bridge.listen()
 
     def _transreq_accepted(self, transresp):
+        logger.debug('transreq_accepted')
         if not transresp.listening:
             return
         ip, port = self._select_address(transresp)
@@ -230,7 +234,8 @@ class P2PSession(gobject.GObject):
 
     def _bridge_listening(self, new_bridge, external_ip, external_port,
             transreq, nonce):
-        self._accept_transreq(transreq, "TCPv1", True, nonce, local_ip,
+        logger.debug("Bridge listening %s %s" % (external_ip, external_port))
+        self._accept_transreq(transreq, "TCPv1", True, nonce, new_bridge.ip,
                 new_bridge.port, external_ip, external_port)
 
     def _bridge_switched(self, new_bridge):
