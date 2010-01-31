@@ -435,7 +435,7 @@ class ConnectingWindow(gtk.Alignment):
         self.b_cancel.set_border_width(8)
         
         self.label = gtk.Label()
-        self.label.set_markup('<b>Connecting... </b>')
+        self.label.set_markup('<b>Connecting...</b>')
 
         img_account = gtk.Image()
         img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
@@ -444,7 +444,7 @@ class ConnectingWindow(gtk.Alignment):
             yscale=0.2)
         al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
         al_label = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.0)
+            yscale=0.2)
         al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         
@@ -465,3 +465,11 @@ class ConnectingWindow(gtk.Alignment):
     def _on_cancel_clicked(self, button):
         '''cause the return to login window'''
         self.callback()
+
+    def on_connecting(self, message):
+       '''
+       Show messages while connecting..
+       '''
+       #taken from amsn2..but i like a lot!
+       #this hack resolve a problem of visualization..XD FIXME
+       gobject.timeout_add(500, lambda: self.label.set_markup('<b>%s</b>'% message))

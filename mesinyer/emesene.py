@@ -139,6 +139,7 @@ class Controller(object):
         signals = self.session.signals
         signals.login_succeed.subscribe(self.on_login_succeed)
         signals.login_failed.subscribe(self.on_login_failed)
+        signals.login_info.subscribe(self.on_login_info)
         signals.contact_list_ready.subscribe(self.on_contact_list_ready)
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
@@ -149,6 +150,7 @@ class Controller(object):
         signals = self.session.signals
         signals.login_succeed.unsubscribe(self.on_login_succeed)
         signals.login_failed.unsubscribe(self.on_login_failed)
+        signals.login_info.unsubscribe(self.on_login_info)
         signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
         signals.conv_first_action.unsubscribe(self.on_new_conversation)
         signals.disconnected.unsubscribe(self.on_disconnected)
@@ -203,12 +205,21 @@ class Controller(object):
         '''called on close'''
         self.close_session()
 
-    def on_disconnected(self, reason):
+    def on_disconnected(self, reason, reconnect=False):
         '''called when the server disconnect us'''
         self.close_session(False)
-        self.start(on_disconnect=True)
-        self.window.content.clear_all()
-        self.window.content.show_error(reason)
+        if reconnect:
+            self.on_reconnect()
+        else:
+            self.start(on_disconnect=True)
+            self.window.content.clear_all()
+            self.window.content.show_error(reason)
+
+    def on_reconnect(self):
+        #TODO
+        '''make the reconnect after 20 seconds'''
+        pass
+        
 
     def close_session(self, do_exit=True):
         '''close session'''
@@ -246,6 +257,12 @@ class Controller(object):
         self.config.i_login_posy = posy
         self.config.i_login_width = width
         self.config.i_login_height = height
+
+    def on_login_info(self, message):
+        '''show messages while connecting'''
+        if self.window is not None and \
+           self.window.content_type == 'connecting':
+            self.window.content.on_connecting(message)
 
     def on_login_succeed(self):
         '''callback called on login succeed'''
