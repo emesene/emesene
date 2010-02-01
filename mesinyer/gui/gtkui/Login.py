@@ -18,8 +18,6 @@ log = logging.getLogger('gtkui.Login')
 
 class Login(gtk.Alignment):
     '''widget that represents the login window'''
-    # TODO automatic reconnection??countdown???
-
     def __init__(self, callback, on_preferences_changed,
                 config, config_dir, config_path, proxy=None,
                 use_http=None, session_id=None):
@@ -502,7 +500,7 @@ class ConnectingWindow(gtk.Alignment):
         self.label.set_markup('<b>Connection error!\n </b>')
         self.label_timer.show()
         self.throbber.hide()
-        self.reconnect_after = 10
+        self.reconnect_after = 30
         if self.reconnect_timer_id is None:
             self.reconnect_timer_id = gobject.timeout_add(1000, \
                 self.update_reconnect_timer, callback, account)
@@ -520,7 +518,7 @@ class ConnectingWindow(gtk.Alignment):
             gobject.source_remove(self.reconnect_timer_id)
             self.reconnect_timer_id = None
             #do login
-            callback(account, on_reconnect=True)
+            callback(account, None, None, None, on_reconnect=True)
             return False
         else:
             return True

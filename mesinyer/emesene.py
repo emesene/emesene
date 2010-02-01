@@ -329,8 +329,8 @@ class Controller(object):
         self.config.b_use_http = use_http
         self._save_proxy_settings(proxy)
 
-    def on_login_connect(self, account, session_id=None, proxy=None,
-                         use_http=None, on_reconnect=False):
+    def on_login_connect(self, account, session_id, proxy,
+                         use_http, on_reconnect=False):
         '''called when the user press the connect button'''
         self._save_login_dimensions()
         self._set_location(self.window)
