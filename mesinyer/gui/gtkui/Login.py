@@ -425,6 +425,8 @@ class ConnectingWindow(gtk.Alignment):
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
         self.callback = callback
+        #for reconnecting
+        self.reconnect_timer_id = None
 
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
                 animated=True)
@@ -436,6 +438,8 @@ class ConnectingWindow(gtk.Alignment):
         
         self.label = gtk.Label()
         self.label.set_markup('<b>Connecting...</b>')
+        self.label_timer = gtk.Label()
+        self.label_timer.set_markup('<b>Connection error!\n </b>')
 
         img_account = gtk.Image()
         img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
@@ -444,26 +448,34 @@ class ConnectingWindow(gtk.Alignment):
             yscale=0.2)
         al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
         al_label = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.2)
+            yscale=0.0)
+        al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+            yscale=0.0)
         al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         
         al_throbber.add(self.throbber)
         al_button_cancel.add(self.b_cancel)
         al_label.add(self.label)
+        al_label_timer.add(self.label_timer)
         al_logo.add(img_account)
         
         vbox = gtk.VBox()
         vbox.pack_start(al_logo, True, False)
         vbox.pack_start(al_label, True, False)
+        vbox.pack_start(al_label_timer, True, False)
         vbox.pack_start(al_throbber, True, False)
         vbox.pack_start(al_button_cancel, True, True)
       
         self.add(vbox)
         vbox.show_all()
+
+        self.label_timer.hide()
     
     def _on_cancel_clicked(self, button):
-        '''cause the return to login window'''
+        '''
+        cause the return to login window
+        '''
         self.callback()
 
     def on_connecting(self, message):
@@ -472,4 +484,44 @@ class ConnectingWindow(gtk.Alignment):
        '''
        #taken from amsn2..but i like a lot!
        #this hack resolve a problem of visualization..XD FIXME
-       gobject.timeout_add(500, lambda: self.label.set_markup('<b>%s</b>'% message))
+       gobject.timeout_add(1000, lambda: self.label.set_markup('<b>%s</b>'% message))
+
+    def clear_connect(self):
+        '''
+        clean the connect interface after the reconnect phase
+        '''
+        print 'here'
+        self.label_timer.hide()
+        self.throbber.show()
+        self.label.set_markup('<b>Connecting...</b>')
+
+    def on_reconnect(self, callback, account):
+        '''
+        show the reconnect countdown
+        '''
+        self.label.set_markup('<b>Connection error!\n </b>')
+        self.label_timer.show()
+        self.throbber.hide()
+        self.reconnect_after = 10
+        if self.reconnect_timer_id is None:
+            self.reconnect_timer_id = gobject.timeout_add(1000, \
+                self.update_reconnect_timer, callback, account)
+
+        self.update_reconnect_timer(callback, account)
+
+    def update_reconnect_timer(self, callback, account):
+        '''
+        updates reconnect label and launches login if counter is 0 
+        '''
+        self.reconnect_after -= 1
+        self.label_timer.set_markup('<b>Reconnecting in %d seconds</b>'\
+                                             % self.reconnect_after )      
+        if self.reconnect_after <= 0:
+            gobject.source_remove(self.reconnect_timer_id)
+            self.reconnect_timer_id = None
+            #do login
+            callback(account, on_reconnect=True)
+            return False
+        else:
+            return True
+   

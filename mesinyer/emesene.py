@@ -207,19 +207,21 @@ class Controller(object):
 
     def on_disconnected(self, reason, reconnect=False):
         '''called when the server disconnect us'''
+        account = self.session.account
         self.close_session(False)
         if reconnect:
-            self.on_reconnect()
+            self.on_reconnect(account)
         else:
-            self.start(on_disconnect=True)
+            self.go_login()
             self.window.content.clear_all()
             self.window.content.show_error(reason)
+        return False
 
-    def on_reconnect(self):
-        #TODO
-        '''make the reconnect after 20 seconds'''
-        pass
-        
+    def on_reconnect(self, account):
+        '''make the reconnect after 30 seconds'''
+        self.window.clear()
+        self.window.go_connect(self.on_cancel_login)
+        self.window.content.on_reconnect(self.on_login_connect, account)
 
     def close_session(self, do_exit=True):
         '''close session'''
@@ -239,10 +241,10 @@ class Controller(object):
             self.conversations.get_parent().hide()
             self.conversations = None
 
-        self.window.hide()
-        self.window = None
-
         if do_exit:
+            self.window.hide()
+            self.window = None
+
             while gtk.events_pending():
                 gtk.main_iteration(False)
 
@@ -292,7 +294,7 @@ class Controller(object):
         self._save_login_dimensions()
         self._remove_subscriptons()
         self._new_session()
-        self.go_login(True)
+        self.go_login()
         self.window.content.clear_all()
         self.window.content.show_error(reason)
 
@@ -327,15 +329,19 @@ class Controller(object):
         self.config.b_use_http = use_http
         self._save_proxy_settings(proxy)
 
-    def on_login_connect(self, account, session_id, proxy, use_http):
+    def on_login_connect(self, account, session_id=None, proxy=None,
+                         use_http=None, on_reconnect=False):
         '''called when the user press the connect button'''
-        self.on_preferences_changed(use_http, proxy, session_id)
         self._save_login_dimensions()
         self._set_location(self.window)
 
-        self.window.clear()
-        self.window.go_connect(self.on_cancel_login)
-        self.window.show()
+        if not on_reconnect:
+            self.on_preferences_changed(use_http, proxy, session_id)
+            self.window.clear()
+            self.window.go_connect(self.on_cancel_login)
+            self.window.show()
+        else:
+            self.window.content.clear_connect()
 
         self._new_session()
         self.session.config.get_or_set('b_play_send', True)
@@ -411,7 +417,7 @@ class Controller(object):
         self.conversations.close_all()
         self.conversations = None
 
-    def start(self, account=None, accounts=None, on_disconnect=False):
+    def start(self, account=None, accounts=None):
         '''the entry point to the class'''
         Window = extension.get_default('window frame')
         self.window = Window(None) # main window
@@ -430,16 +436,15 @@ class Controller(object):
         account = self.config.get_or_set('last_logged_account', '')
         
         #autologin
-        if account != '' and int(self.config.d_remembers[account]) == 3 \
-            and not on_disconnect:
+        if account != '' and int(self.config.d_remembers[account]) == 3:
             password = base64.b64decode(self.config.d_accounts[account])
             user = e3.Account(account, password,
                               int(self.config.d_status[account]))
             self.on_login_connect(user, self.config.session, proxy, use_http)
         else:
-            self.go_login(on_disconnect, proxy, use_http)
+            self.go_login(proxy, use_http)
 
-    def go_login(self, on_disconnect=False, proxy=None, use_http=None):
+    def go_login(self, proxy=None, use_http=None):
         '''start the login GUI'''
         if proxy is None:
             proxy = self._get_proxy_settings()
@@ -464,7 +469,7 @@ class Controller(object):
         method called when the user selects disconnect
         '''
         self.close_session(False)
-        self.start(on_disconnect=True)
+        self.go_login()
     
     def on_cancel_login(self):
         '''
@@ -472,7 +477,7 @@ class Controller(object):
         '''
         if self.session is not None:
             self.session.quit()
-        self.go_login(True)
+        self.go_login()
 
     def _set_location(self, window, is_conv=False):
         '''get and set the location of the window'''

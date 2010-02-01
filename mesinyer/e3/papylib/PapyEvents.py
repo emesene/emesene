@@ -36,11 +36,12 @@ class ClientEvents(papyon.event.ClientEventInterface):
             #elif state == papyon.event.ClientState.CONNECTED:
                 #message = 'Connected'
             if state == papyon.event.ClientState.AUTHENTICATING:
-                message = 'Authenticating'
+                message = 'Authenticating...'
             #elif state == papyon.event.ClientState.AUTHENTICATED:
                 #message = 'Authenticated'
             elif state == papyon.event.ClientState.SYNCHRONIZING:
-                message = 'Downloading your contact list,\nplease wait...'
+                message = 'Downloading your contact list,\n'+\
+                          '             please wait...'
             #elif state == papyon.event.ClientState.SYNCHRONIZED:
                 #message = 'Contact list downloaded successfully.\nHappy Chatting'
             else:
