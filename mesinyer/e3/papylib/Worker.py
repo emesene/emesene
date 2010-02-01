@@ -715,6 +715,7 @@ class Worker(e3.base.Worker, papyon.Client):
             # this is/can be used for initial avatar changing and caching
             # like dp roaming and stuff like that
             # now it doesn't work, btw
+            #FIXME
             self.profile.msn_object = picture_name
             picture_name = self._on_contact_msnobject_changed(self.profile)
             self.session.contacts.me.picture = picture_name
@@ -742,6 +743,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.contacts.me.picture = picture_name
         self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
             self.session.account.account, picture_name)
+        self.session.config.avatar_path = picture_name
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES
