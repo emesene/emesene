@@ -17,7 +17,9 @@ import logging
 log = logging.getLogger('gtkui.Login')
 
 class Login(gtk.Alignment):
-    '''widget that represents the login window'''
+    '''
+    widget that represents the login window
+    '''
     def __init__(self, callback, on_preferences_changed,
                 config, config_dir, config_path, proxy=None,
                 use_http=None, session_id=None):
@@ -189,7 +191,9 @@ class Login(gtk.Alignment):
             self.cmb_account.get_children()[0].set_text(account)
 
     def do_connect(self):
-        '''do all the staff needed to connect'''
+        '''
+        do all the stuffs needed to connect
+        '''
         self.nicebar.empty_queue()
         user = self.cmb_account.get_active_text().strip()
         password = self.txt_password.get_text()
@@ -210,8 +214,9 @@ class Login(gtk.Alignment):
 
     def _config_account(self, account, remember_account, remember_password,
                          auto_login):
-        '''modify the config for the current account before login'''
-        
+        '''
+        modify the config for the current account before login
+        '''       
         if auto_login:#+1 account,+1 password,+1 autologin =  3
             self.accounts[account.account] = base64.b64encode(account.password)
             self.remembers[account.account] = 3
@@ -236,12 +241,16 @@ class Login(gtk.Alignment):
         self.config.save(self.config_path)
 
     def _on_account_changed(self, entry):
-        '''called when the content of the account entry changes'''
+        '''
+        called when the content of the account entry changes
+        '''
         self._update_fields(self.cmb_account.get_active_text())
 
     def _update_fields(self, account):
-        '''update the different fields according to the account that is
-        on the account entry'''
+        '''
+        update the different fields according to the account that is
+        on the account entry
+        '''
         self._clear_all()
         if account == '':
             return
@@ -274,7 +283,9 @@ class Login(gtk.Alignment):
                 self.txt_password.set_sensitive(False)
 
     def _clear_all(self):
-        '''clear all login fields and checkbox'''
+        '''
+        clear all login fields and checkbox
+        '''
         self.remember_account.set_active(False)
         self.remember_account.set_sensitive(True)
         self.remember_password.set_active(False)
@@ -286,16 +297,22 @@ class Login(gtk.Alignment):
         self.txt_password.set_sensitive(True)
 
     def clear_all(self):
-        '''call clear_all and clean also the account combobox'''
+        '''
+        call clear_all and clean also the account combobox
+        '''
         self._clear_all()
         self.cmb_account.get_children()[0].set_text('')
 
     def show_error(self, reason):
-        '''show an error on the top of the window using nicebar'''
+        '''
+        show an error on the top of the window using nicebar
+        '''
         self.nicebar.new_message(_(reason), gtk.STOCK_DIALOG_ERROR)
        
     def _reload_account_list(self, *args):
-        '''reload the account list in the combobox'''
+        '''
+        reload the account list in the combobox
+        '''
         self.liststore.clear()
         for mail in sorted(self.accounts):
             self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
@@ -305,14 +322,18 @@ class Login(gtk.Alignment):
             self.liststore = None
 
     def _on_password_key_press(self, widget, event):
-        '''called when a key is pressed on the password field'''
+        '''
+        called when a key is pressed on the password field
+        '''
         self.nicebar.empty_queue()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
 
     def _on_account_key_press(self, widget, event):
-        '''called when a key is pressed on the password field'''
+        '''
+        called when a key is pressed on the password field
+        '''
         self.nicebar.empty_queue()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
@@ -321,7 +342,9 @@ class Login(gtk.Alignment):
                 self.do_connect()
 
     def _on_forget_me_clicked(self, *args):
-        '''called when the forget me label is clicked'''
+        '''
+        called when the forget me label is clicked
+        '''
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
             account = self.cmb_account.get_active_text()
@@ -353,34 +376,46 @@ class Login(gtk.Alignment):
                       self.cmb_account.get_active_text(), _yes_no_cb)
 
     def _on_connect_clicked(self, button):
-        '''called when connect button is clicked'''
+        '''
+        called when connect button is clicked
+        '''
         self.do_connect()
 
     def _on_cancel_clicked(self, button):
-        '''called when cancel button is clicked'''
+        '''
+        called when cancel button is clicked
+        '''
         # call the controller on_cancel_login
         self.callback_disconnect()
         self._update_fields(self.cmb_account.get_active_text())
 
     def _on_quit(self):
-        '''close emesene'''
+        '''
+        close emesene
+        '''
         while gtk.events_pending():
             gtk.main_iteration(False)
 
         sys.exit(0)
 
     def _on_remember_account_toggled(self, button):
-        '''called when the remember account check button is toggled'''
+        '''
+        called when the remember account check button is toggled
+        '''
         if not self.remember_account.get_active():
             self.remember_password.set_active(False)
 
     def _on_remember_password_toggled(self, button):
-        '''called when the remember password check button is toggled'''
+        '''
+        called when the remember password check button is toggled
+        '''
         if self.remember_password.get_active():
             self.remember_account.set_active(True)
 
     def _on_auto_login_toggled(self, button):
-        '''called when the auto-login check button is toggled'''
+        '''
+        called when the auto-login check button is toggled
+        '''
         user = self.cmb_account.get_active_text()
 
         if self.auto_login.get_active():
@@ -396,28 +431,38 @@ class Login(gtk.Alignment):
                 self.remember_password.set_sensitive(True)
 
     def _on_preferences_enter(self, button, event):
-        '''called when the mouse enters the preferences button'''
+        '''
+        called when the mouse enters the preferences button
+        '''
         self.img_preferences.set_sensitive(True)
 
     def _on_preferences_leave(self, button, event):
-        '''called when the mouse leaves the preferences button'''
+        '''
+        called when the mouse leaves the preferences button
+        '''
         self.img_preferences.set_sensitive(False)
 
     def _on_preferences_selected(self, button):
-        '''called when the user clicks the preference button'''
+        '''
+        called when the user clicks the preference button
+        '''
         extension.get_default('dialog').login_preferences(self.session_id,
             self._on_new_preferences, self.use_http, self.proxy)
 
     def _on_new_preferences(self, use_http, use_proxy, host, port,
         use_auth, user, passwd, session_id):
-        '''called when the user press accept on the preferences dialog'''
+        '''
+        called when the user press accept on the preferences dialog
+        '''
         self.proxy = e3.Proxy(use_proxy, host, port, use_auth, user, passwd)
         self.session_id = session_id
         self.use_http = use_http
         self.on_preferences_changed(self.use_http, self.proxy, self.session_id)
 
 class ConnectingWindow(gtk.Alignment):
-    '''represent the GUI interface showed when connecting'''
+    '''
+    widget that represents the GUI interface showed when connecting
+    '''
     def __init__(self, callback):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
@@ -488,7 +533,6 @@ class ConnectingWindow(gtk.Alignment):
         '''
         clean the connect interface after the reconnect phase
         '''
-        print 'here'
         self.label_timer.hide()
         self.throbber.show()
         self.label.set_markup('<b>Connecting...</b>')
