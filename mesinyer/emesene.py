@@ -138,7 +138,7 @@ class Controller(object):
 
         TrayIcon = extension.get_default('tray icon')
         handler = gui.base.TrayIconHandler(self.session, gui.theme,
-            self.on_disconnect, self.on_close)
+            self.on_user_disconnect, self.on_close)
         self.tray_icon = TrayIcon(handler, self.window)
 
         proxy = self._get_proxy_settings()
@@ -300,7 +300,7 @@ class Controller(object):
         self.set_default_extensions_from_config()
 
         self.window.go_main(self.session,
-                self.on_new_conversation, self.on_close, self.on_disconnect)
+                self.on_new_conversation, self.on_close, self.on_user_disconnect)
 
     def _set_location(self, window, is_conv=False):
         '''get and set the location of the window'''
@@ -465,7 +465,7 @@ class Controller(object):
         self.conversations.close_all()
         self.conversations = None
 
-    def on_disconnect(self):
+    def on_user_disconnect(self):
         '''
         method called when the user selects disconnect
         '''
