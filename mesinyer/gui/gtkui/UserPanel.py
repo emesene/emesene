@@ -23,8 +23,10 @@ class UserPanel(gtk.VBox):
         self.session = session
         self.config_dir = session.config_dir
         self._enabled = True
-
-        self.image = utils.safe_gtk_image_load(gui.theme.user)
+        if self.session.config.avatar_path is not None:
+            self.image = utils.safe_gtk_image_load(self.session.config.avatar_path, (32,32))
+        else:
+            self.image = utils.safe_gtk_image_load(gui.theme.user)
         self.avatarBox = gtk.EventBox()
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.avatarBox.connect('button-press-event', self.on_avatar_click)

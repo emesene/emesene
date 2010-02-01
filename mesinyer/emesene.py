@@ -486,7 +486,6 @@ class Controller(object):
             self.go_login()
             self.window.content.clear_all()
             self.window.content.show_error(reason)
-        return False
 
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''

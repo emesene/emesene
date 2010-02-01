@@ -57,7 +57,7 @@ class Login(gtk.Alignment):
         completion.add_attribute(pixbufcell, 'pixbuf', 1)
         completion.set_text_column(0)
         completion.set_inline_selection(True)
-
+        
         self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
 
         self._reload_account_list()
@@ -84,7 +84,8 @@ class Login(gtk.Alignment):
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
         
         self.img_account = gtk.Image()
-        pix = utils.safe_gtk_pixbuf_load(gui.theme.logo)
+        path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
+        pix = utils.safe_gtk_pixbuf_load(path, (96,96))
         self.img_account.set_from_pixbuf(pix)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
@@ -541,7 +542,7 @@ class ConnectingWindow(gtk.Alignment):
         '''
         show the reconnect countdown
         '''
-        self.label.set_markup('<b>Connection error!\n </b>')
+        self.label.set_markup('<b>Connection error\n </b>')
         self.label_timer.show()
         self.throbber.hide()
         self.reconnect_after = 30
@@ -556,7 +557,7 @@ class ConnectingWindow(gtk.Alignment):
         updates reconnect label and launches login if counter is 0 
         '''
         self.reconnect_after -= 1
-        self.label_timer.set_markup('<b>Reconnecting in %d seconds</b>'\
+        self.label_timer.set_text('Reconnecting in %d seconds'\
                                              % self.reconnect_after )      
         if self.reconnect_after <= 0:
             gobject.source_remove(self.reconnect_timer_id)
