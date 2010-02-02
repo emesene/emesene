@@ -354,7 +354,11 @@ class Controller(object):
         if not on_reconnect:
             self.on_preferences_changed(use_http, proxy, session_id)
             self.window.clear()
-            self.window.go_connect(self.on_cancel_login)
+            path = self.config_dir.join(account.account.replace('@','-at-'),
+                                       'avatars', 'last')
+            if not self.config_dir.file_readable(path):
+                path = ''
+            self.window.go_connect(self.on_cancel_login, path)
             self.window.show()
         else:
             self.window.content.clear_connect()

@@ -1,5 +1,6 @@
 import gtk
 import os
+import shutil
 
 import gui
 import utils
@@ -23,15 +24,20 @@ class UserPanel(gtk.VBox):
         self.session = session
         self.config_dir = session.config_dir
         self._enabled = True
-        if self.session.config.avatar_path is not None:
-            self.image = utils.safe_gtk_image_load(self.session.config.avatar_path, (32,32))
-        else:
-            self.image = utils.safe_gtk_image_load(gui.theme.user)
+        
+        self.image = gtk.Image()
         self.avatarBox = gtk.EventBox()
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.avatarBox.connect('button-press-event', self.on_avatar_click)
         self.avatarBox.add(self.image)
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
+        self.avatar_path = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
+                      self.session.contacts.me.account.replace('@','-at-'),'avatars','last')
+        if self.session.config_dir.file_readable(self.avatar_path):
+            pix = utils.safe_gtk_pixbuf_load(self.avatar_path, (32,32))
+        else:
+            pix = utils.safe_gtk_pixbuf_load(gui.theme.user)
+        self.image.set_from_pixbuf(pix)
 
         self.nick = TextField.TextField(session.contacts.me.display_name, '', False)
         self.status = StatusButton.StatusButton(session)
@@ -145,13 +151,15 @@ class UserPanel(gtk.VBox):
             '''callback for the avatar chooser'''
             if response == gui.stock.ACCEPT:
                 self.session.set_picture(filename)
+                try:
+                    os.remove(self.avatar_path)
+                    shutil.copy2(filename, self.avatar_path)
+                except OSError, shutil.Error:
+                   print 'error while setting picture'
         #TODO better way to do this???
         path_dir = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
                    self.session.contacts.me.account.replace('@','-at-'),'avatars')
 
-        path_last = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
-                    self.session.contacts.me.account.replace('@','-at-'),'avatars','last')
-
         extension.get_default('avatar chooser')(set_picture_cb, 
-                                                path_last, path_dir).show()
+                                                self.avatar_path, path_dir).show()
 
