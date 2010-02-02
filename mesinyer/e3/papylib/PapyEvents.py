@@ -30,14 +30,41 @@ class ClientEvents(papyon.event.ClientEventInterface):
             self._client.session.add_event(Event.EVENT_LOGIN_SUCCEED)
             self._client.set_initial_infos()
             self._client._fill_contact_list(self._client.address_book)
+        else:
+            #if state == papyon.event.ClientState.CONNECTING:
+                #message = 'Connecting...'
+            #elif state == papyon.event.ClientState.CONNECTED:
+                #message = 'Connected'
+            if state == papyon.event.ClientState.AUTHENTICATING:
+                message = 'Authenticating...'
+            #elif state == papyon.event.ClientState.AUTHENTICATED:
+                #message = 'Authenticated'
+            elif state == papyon.event.ClientState.SYNCHRONIZING:
+                message = 'Downloading your contact list,\n'+\
+                          '             please wait...'
+            #elif state == papyon.event.ClientState.SYNCHRONIZED:
+                #message = 'Contact list downloaded successfully.\nHappy Chatting'
+            else:
+                return
+            self._client.session.add_event(Event.EVENT_LOGIN_INFO, message)
             
     def on_client_error(self, error_type, error):
         if error_type == papyon.event.ClientErrorType.AUTHENTICATION:
-            self._client.session.add_event(Event.EVENT_LOGIN_FAILED,'Authentication failure')      
+            self._client.session.add_event(Event.EVENT_LOGIN_FAILED,
+                                           'Authentication failure')      
         elif error_type == papyon.event.ClientErrorType.NETWORK:
-            self._client.session.add_event(Event.EVENT_LOGIN_FAILED,'Network error')
-        elif error_type == papyon.event.ClientErrorType.PROTOCOL:#TODO
-            pass
+            self._client.session.add_event(Event.EVENT_LOGIN_FAILED,
+                                           'Network error')
+        elif error_type == papyon.event.ClientErrorType.PROTOCOL:
+            if error == papyon.event.ProtocolError.OTHER_CLIENT:
+                self._client.session.add_event(Event.EVENT_DISCONNECTED,
+                              'Logged in from another location')
+            elif error == papyon.event.ProtocolError.SERVER_DOWN:
+                self._client.session.add_event(Event.EVENT_DISCONNECTED,
+                                               'Server down',True)#for reconnecting
+            else:
+                self._client.session.add_event(Event.EVENT_DISCONNECTED,
+                                               'Protocol error')
         elif error_type == papyon.event.ClientErrorType.ADDRESSBOOK:#TODO
             pass
         elif error_type == papyon.event.ClientErrorType.OFFLINE_MESSAGGES:#TODO

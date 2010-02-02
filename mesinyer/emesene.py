@@ -93,6 +93,8 @@ class Controller(object):
 
         if self.config.d_accounts is None:
             self.config.d_accounts = {}
+        if self.config.d_remembers is None:
+            self.config.d_remembers = {}
 
         self.session = None
         self._parse_commandline()
@@ -125,6 +127,53 @@ class Controller(object):
 
         debugger.init(debuglevel=options.debuglevel)
 
+    def start(self, account=None, accounts=None):
+        '''the entry point to the class'''
+        Window = extension.get_default('window frame')
+        self.window = Window(None) # main window
+        self._set_location(self.window)
+
+        if self.tray_icon is not None:
+            self.tray_icon.set_visible(False)
+
+        TrayIcon = extension.get_default('tray icon')
+        handler = gui.base.TrayIconHandler(self.session, gui.theme,
+            self.on_user_disconnect, self.on_close)
+        self.tray_icon = TrayIcon(handler, self.window)
+
+        proxy = self._get_proxy_settings()
+        use_http = self.config.get_or_set('b_use_http', False)
+        account = self.config.get_or_set('last_logged_account', '')
+        
+        #autologin
+        if account != '' and int(self.config.d_remembers[account]) == 3:
+            password = base64.b64decode(self.config.d_accounts[account])
+            user = e3.Account(account, password,
+                              int(self.config.d_status[account]))
+            self.on_login_connect(user, self.config.session, proxy, use_http)
+        else:
+            self.go_login(proxy, use_http)
+
+    def go_login(self, proxy=None, use_http=None):
+        '''shows the login GUI'''
+        if proxy is None:
+            proxy = self._get_proxy_settings()
+        if use_http is None:
+            use_http = self.config.get_or_set('b_use_http', False)
+
+        if self.window.content_type != 'empty':
+            self.window.clear()
+
+        self._save_login_dimensions()
+        self._set_location(self.window)
+
+        self.window.go_login(self.on_login_connect,
+            self.on_preferences_changed,self.config,
+            self.config_dir, self.config_path, proxy,
+            use_http, self.config.session)
+        self.tray_icon.set_login()
+        self.window.show()
+
     def _new_session(self):
         '''create a new session object'''
 
@@ -137,9 +186,37 @@ class Controller(object):
         signals = self.session.signals
         signals.login_succeed.subscribe(self.on_login_succeed)
         signals.login_failed.subscribe(self.on_login_failed)
+        signals.login_info.subscribe(self.on_login_info)
         signals.contact_list_ready.subscribe(self.on_contact_list_ready)
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
+
+    def close_session(self, do_exit=True):
+        '''close session'''
+        if self.session is not None:
+            self.session.quit()
+
+        self.save_extensions_config()
+        self._save_login_dimensions()
+
+        if self.session is not None:
+            self.session.save_config()
+            self.session = None
+
+        self.config.save(self.config_path)
+
+        if self.conversations:
+            self.conversations.get_parent().hide()
+            self.conversations = None
+
+        if do_exit:
+            self.window.hide()
+            self.window = None
+
+            while gtk.events_pending():
+                gtk.main_iteration(False)
+
+            sys.exit(0)
 
     def _remove_subscriptons(self):
         '''remove the subscriptions to signals
@@ -147,6 +224,7 @@ class Controller(object):
         signals = self.session.signals
         signals.login_succeed.unsubscribe(self.on_login_succeed)
         signals.login_failed.unsubscribe(self.on_login_failed)
+        signals.login_info.unsubscribe(self.on_login_info)
         signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
         signals.conv_first_action.unsubscribe(self.on_new_conversation)
         signals.disconnected.unsubscribe(self.on_disconnected)
@@ -197,44 +275,6 @@ class Controller(object):
         self.config.proxy_user = proxy.user
         self.config.proxy_passwd = proxy.passwd
 
-    def on_close(self):
-        '''called on close'''
-        self.close_session()
-
-    def on_disconnected(self, reason):
-        '''called when the server disconnect us'''
-        dialog = extension.get_default('dialog')
-        dialog.error('Session disconnected by server')
-        self.close_session(False)
-        self.start()
-
-    def close_session(self, do_exit=True):
-        '''close session'''
-        if self.session is not None:
-            self.session.quit()
-
-        self.save_extensions_config()
-        self._save_login_dimensions()
-
-        if self.session is not None:
-            self.session.save_config()
-            self.session = None
-
-        self.config.save(self.config_path)
-
-        if self.conversations:
-            self.conversations.get_parent().hide()
-            self.conversations = None
-
-        self.window.hide()
-        self.window = None
-
-        if do_exit:
-            while gtk.events_pending():
-                gtk.main_iteration(False)
-
-            sys.exit(0)
-
     def _save_login_dimensions(self):
         '''save the dimensions of the login window
         '''
@@ -244,12 +284,6 @@ class Controller(object):
         self.config.i_login_posy = posy
         self.config.i_login_width = width
         self.config.i_login_height = height
-
-    def on_login_succeed(self):
-        '''callback called on login succeed'''
-        self._save_login_dimensions()
-        self.config.save(self.config_path)
-        self.draw_main_screen()
 
     def draw_main_screen(self):
         '''create and populate the main screen
@@ -266,16 +300,91 @@ class Controller(object):
         self.set_default_extensions_from_config()
 
         self.window.go_main(self.session,
-                self.on_new_conversation, self.on_close, self.on_disconnect)
+                self.on_new_conversation, self.on_close, self.on_user_disconnect)
+
+    def _set_location(self, window, is_conv=False):
+        '''get and set the location of the window'''
+        if is_conv:
+            posx = self.session.config.get_or_set('i_conv_posx', 100)
+            posy = self.session.config.get_or_set('i_conv_posy', 100)
+            width = self.session.config.get_or_set('i_conv_width', 600)
+            height = self.session.config.get_or_set('i_conv_height', 400)
+        else:
+            posx = self.config.get_or_set('i_login_posx', 100)
+            posy = self.config.get_or_set('i_login_posy', 100)
+            width = self.config.get_or_set('i_login_width', 250)
+            height = self.config.get_or_set('i_login_height', 410)
+
+        window.set_location(width, height, posx, posy)
+
+    def on_preferences_changed(self, use_http, proxy, session_id):
+        '''called when the preferences on login change'''
+        self.config.session = session_id
+        extension.set_default_by_id('session', session_id)
+        self.config.b_use_http = use_http
+        self._save_proxy_settings(proxy)
+
+    def on_login_info(self, message):
+        '''show login info messages while connecting'''
+        if self.window is not None and \
+           self.window.content_type == 'connecting':
+            self.window.content.on_connecting(message)
 
     def on_login_failed(self, reason):
-        '''callback called on login failed'''
+        '''callback called when login fails'''
         self._save_login_dimensions()
         self._remove_subscriptons()
         self._new_session()
-        self.go_login(True)
+        self.go_login()
         self.window.content.clear_all()
         self.window.content.show_error(reason)
+
+    def on_login_succeed(self):
+        '''callback called on login succeed'''
+        self._save_login_dimensions()
+        self.config.save(self.config_path)
+        self.draw_main_screen()
+
+    def on_login_connect(self, account, session_id, proxy,
+                         use_http, on_reconnect=False):
+        '''called when the user press the connect button'''
+        self._save_login_dimensions()
+        self._set_location(self.window)
+
+        if not on_reconnect:
+            self.on_preferences_changed(use_http, proxy, session_id)
+            self.window.clear()
+            self.window.go_connect(self.on_cancel_login)
+            self.window.show()
+        else:
+            self.window.content.clear_connect()
+
+        self._new_session()
+        self.session.config.get_or_set('b_play_send', True)
+        self.session.config.get_or_set('b_play_nudge', True)
+        self.session.config.get_or_set('b_play_first_send', True)
+        self.session.config.get_or_set('b_play_type', True)
+        self.session.config.get_or_set('b_play_contact_online', True)
+        self.session.config.get_or_set('b_play_contact_offline', True)
+        self.session.config.get_or_set('b_notify_contact_online', True)
+        self.session.config.get_or_set('b_notify_contact_offline', True)
+        self.session.config.get_or_set('b_show_userpanel', True)
+        self.session.config.get_or_set('b_show_emoticons', True)
+        self.session.config.get_or_set('b_show_header', True)
+        self.session.config.get_or_set('b_show_info', True)
+        self.session.config.get_or_set('b_show_toolbar', True)
+        self.session.config.get_or_set('b_allow_auto_scroll', True)
+        self.session.login(account.account, account.password, account.status,
+            proxy, use_http)
+        gobject.timeout_add(500, self.session.signals._handle_events)
+
+    def on_cancel_login(self):
+        '''
+        method called when user select cancel login
+        '''
+        if self.session is not None:
+            self.session.quit()
+        self.go_login()
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
@@ -300,42 +409,6 @@ class Controller(object):
             dialog.contact_added_you(accounts, on_contact_added_you)
 
         gobject.timeout_add(500, self.session.logger.check)
-
-    def on_preferences_changed(self, use_http, proxy, session_id):
-        '''called when the preferences on login change'''
-        self.config.session = session_id
-        extension.set_default_by_id('session', session_id)
-        self.config.b_use_http = use_http
-        self._save_proxy_settings(proxy)
-
-    def on_login_connect(self, account, session_id, proxy, use_http):
-        '''called when the user press the connect button'''
-        self.on_preferences_changed(use_http, proxy, session_id)
-        self._save_login_dimensions()
-        self._set_location(self.window)
-
-        self.window.clear()
-        self.window.go_connect(self.on_cancel_login)
-        self.window.show()
-
-        self._new_session()
-        self.session.config.get_or_set('b_play_send', True)
-        self.session.config.get_or_set('b_play_nudge', True)
-        self.session.config.get_or_set('b_play_first_send', True)
-        self.session.config.get_or_set('b_play_type', True)
-        self.session.config.get_or_set('b_play_contact_online', True)
-        self.session.config.get_or_set('b_play_contact_offline', True)
-        self.session.config.get_or_set('b_notify_contact_online', True)
-        self.session.config.get_or_set('b_notify_contact_offline', True)
-        self.session.config.get_or_set('b_show_userpanel', True)
-        self.session.config.get_or_set('b_show_emoticons', True)
-        self.session.config.get_or_set('b_show_header', True)
-        self.session.config.get_or_set('b_show_info', True)
-        self.session.config.get_or_set('b_show_toolbar', True)
-        self.session.config.get_or_set('b_allow_auto_scroll', True)
-        self.session.login(account.account, account.password, account.status,
-            proxy, use_http)
-        gobject.timeout_add(500, self.session.signals._handle_events)
 
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
@@ -392,84 +465,34 @@ class Controller(object):
         self.conversations.close_all()
         self.conversations = None
 
-    def start(self, account=None, accounts=None, on_disconnect=False):
-        '''the entry point to the class'''
-        Window = extension.get_default('window frame')
-        self.window = Window(None) # main window
-        self._set_location(self.window)
-
-        if self.tray_icon is not None:
-            self.tray_icon.set_visible(False)
-
-        TrayIcon = extension.get_default('tray icon')
-        handler = gui.base.TrayIconHandler(self.session, gui.theme,
-            self.on_disconnect, self.on_close)
-        self.tray_icon = TrayIcon(handler, self.window)
-
-        proxy = self._get_proxy_settings()
-        use_http = self.config.get_or_set('b_use_http', False)
-        account = self.config.get_or_set('last_logged_account', '')
-        
-        #autologin
-        if account != '' and int(self.config.d_remembers[account]) == 3 \
-            and not on_disconnect:
-            password = base64.b64decode(self.config.d_accounts[account])
-            user = e3.Account(account, password,
-                              int(self.config.d_status[account]))
-            self.on_login_connect(user, self.config.session, proxy, use_http)
-        else:
-            self.go_login(on_disconnect, proxy, use_http)
-
-    def go_login(self, on_disconnect=False, proxy=None, use_http=None):
-        '''start the login GUI'''
-        if proxy is None:
-            proxy = self._get_proxy_settings()
-        if use_http is None:
-            use_http = self.config.get_or_set('b_use_http', False)
-
-        if self.window.content_type != 'empty':
-            self.window.clear()
-
-        self._save_login_dimensions()
-        self._set_location(self.window)
-
-        self.window.go_login(self.on_login_connect,
-            self.on_preferences_changed,self.config,
-            self.config_dir, self.config_path, proxy,
-            use_http, self.config.session, on_disconnect)
-        self.tray_icon.set_login()
-        self.window.show()
-
-    def on_disconnect(self):
+    def on_user_disconnect(self):
         '''
         method called when the user selects disconnect
         '''
         self.close_session(False)
-        self.start(on_disconnect=True)
-    
-    def on_cancel_login(self):
-        '''
-        method called when user select cancel login
-        '''
-        if self.session is not None:
-            self.session.quit()
-        self.go_login(True)
+        self.go_login()
 
-    def _set_location(self, window, is_conv=False):
-        '''get and set the location of the window'''
-        if is_conv:
-            posx = self.session.config.get_or_set('i_conv_posx', 100)
-            posy = self.session.config.get_or_set('i_conv_posy', 100)
-            width = self.session.config.get_or_set('i_conv_width', 600)
-            height = self.session.config.get_or_set('i_conv_height', 400)
+    def on_close(self):
+        '''called on close'''
+        self.close_session()
+
+    def on_disconnected(self, reason, reconnect=False):
+        '''called when the server disconnect us'''
+        account = self.session.account
+        self.close_session(False)
+        if reconnect:
+            self.on_reconnect(account)
         else:
-            posx = self.config.get_or_set('i_login_posx', 100)
-            posy = self.config.get_or_set('i_login_posy', 100)
-            width = self.config.get_or_set('i_login_width', 250)
-            height = self.config.get_or_set('i_login_height', 410)
+            self.go_login()
+            self.window.content.clear_all()
+            self.window.content.show_error(reason)
 
-        window.set_location(width, height, posx, posy)
-        
+    def on_reconnect(self, account):
+        '''makes the reconnect after 30 seconds'''
+        self.window.clear()
+        self.window.go_connect(self.on_cancel_login)
+        self.window.content.on_reconnect(self.on_login_connect, account)
+
 class ExtensionDefault(object):
 
     def __init__(self):

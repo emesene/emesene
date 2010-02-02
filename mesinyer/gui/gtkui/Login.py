@@ -17,12 +17,12 @@ import logging
 log = logging.getLogger('gtkui.Login')
 
 class Login(gtk.Alignment):
-    '''widget that represents the login window'''
-    # TODO automatic reconnection??countdown???
-
+    '''
+    widget that represents the login window
+    '''
     def __init__(self, callback, on_preferences_changed,
                 config, config_dir, config_path, proxy=None,
-                use_http=None, session_id=None, on_disconnect=False):
+                use_http=None, session_id=None):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
@@ -57,7 +57,7 @@ class Login(gtk.Alignment):
         completion.add_attribute(pixbufcell, 'pixbuf', 1)
         completion.set_text_column(0)
         completion.set_inline_selection(True)
-
+        
         self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
 
         self._reload_account_list()
@@ -84,7 +84,8 @@ class Login(gtk.Alignment):
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
         
         self.img_account = gtk.Image()
-        pix = utils.safe_gtk_pixbuf_load(gui.theme.logo)
+        path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
+        pix = utils.safe_gtk_pixbuf_load(path, (96,96))
         self.img_account.set_from_pixbuf(pix)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
@@ -205,7 +206,9 @@ class Login(gtk.Alignment):
                 self.accounts[account] = list_fin
 
     def do_connect(self):
-        '''do all the staff needed to connect'''
+        '''
+        do all the stuffs needed to connect
+        '''
         self.nicebar.empty_queue()
         user = self.cmb_account.get_active_text().strip()
         password = self.txt_password.get_text()
@@ -226,8 +229,9 @@ class Login(gtk.Alignment):
 
     def _config_account(self, account, remember_account, remember_password,
                          auto_login):
-        '''modify the config for the current account before login'''
-        
+        '''
+        modify the config for the current account before login
+        '''       
         if auto_login:#+1 account,+1 password,+1 autologin =  3
             self.accounts[account.account] = base64.b64encode(account.password)
             self.remembers[account.account] = 3
@@ -252,12 +256,16 @@ class Login(gtk.Alignment):
         self.config.save(self.config_path)
 
     def _on_account_changed(self, entry):
-        '''called when the content of the account entry changes'''
+        '''
+        called when the content of the account entry changes
+        '''
         self._update_fields(self.cmb_account.get_active_text())
 
     def _update_fields(self, account):
-        '''update the different fields according to the account that is
-        on the account entry'''
+        '''
+        update the different fields according to the account that is
+        on the account entry
+        '''
         self._clear_all()
         if account == '':
             return
@@ -290,7 +298,9 @@ class Login(gtk.Alignment):
                 self.txt_password.set_sensitive(False)
 
     def _clear_all(self):
-        '''clear all login fields and checkbox'''
+        '''
+        clear all login fields and checkbox
+        '''
         self.remember_account.set_active(False)
         self.remember_account.set_sensitive(True)
         self.remember_password.set_active(False)
@@ -302,16 +312,22 @@ class Login(gtk.Alignment):
         self.txt_password.set_sensitive(True)
 
     def clear_all(self):
-        '''call clear_all and clean also the account combobox'''
+        '''
+        call clear_all and clean also the account combobox
+        '''
         self._clear_all()
         self.cmb_account.get_children()[0].set_text('')
 
     def show_error(self, reason):
-        '''show an error on the top of the window using nicebar'''
+        '''
+        show an error on the top of the window using nicebar
+        '''
         self.nicebar.new_message(_(reason), gtk.STOCK_DIALOG_ERROR)
        
     def _reload_account_list(self, *args):
-        '''reload the account list in the combobox'''
+        '''
+        reload the account list in the combobox
+        '''
         self.liststore.clear()
         for mail in sorted(self.accounts):
             self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
@@ -321,14 +337,18 @@ class Login(gtk.Alignment):
             self.liststore = None
 
     def _on_password_key_press(self, widget, event):
-        '''called when a key is pressed on the password field'''
+        '''
+        called when a key is pressed on the password field
+        '''
         self.nicebar.empty_queue()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
 
     def _on_account_key_press(self, widget, event):
-        '''called when a key is pressed on the password field'''
+        '''
+        called when a key is pressed on the password field
+        '''
         self.nicebar.empty_queue()
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
@@ -337,7 +357,9 @@ class Login(gtk.Alignment):
                 self.do_connect()
 
     def _on_forget_me_clicked(self, *args):
-        '''called when the forget me label is clicked'''
+        '''
+        called when the forget me label is clicked
+        '''
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
             account = self.cmb_account.get_active_text()
@@ -369,34 +391,46 @@ class Login(gtk.Alignment):
                       self.cmb_account.get_active_text(), _yes_no_cb)
 
     def _on_connect_clicked(self, button):
-        '''called when connect button is clicked'''
+        '''
+        called when connect button is clicked
+        '''
         self.do_connect()
 
     def _on_cancel_clicked(self, button):
-        '''called when cancel button is clicked'''
+        '''
+        called when cancel button is clicked
+        '''
         # call the controller on_cancel_login
         self.callback_disconnect()
         self._update_fields(self.cmb_account.get_active_text())
 
     def _on_quit(self):
-        '''close emesene'''
+        '''
+        close emesene
+        '''
         while gtk.events_pending():
             gtk.main_iteration(False)
 
         sys.exit(0)
 
     def _on_remember_account_toggled(self, button):
-        '''called when the remember account check button is toggled'''
+        '''
+        called when the remember account check button is toggled
+        '''
         if not self.remember_account.get_active():
             self.remember_password.set_active(False)
 
     def _on_remember_password_toggled(self, button):
-        '''called when the remember password check button is toggled'''
+        '''
+        called when the remember password check button is toggled
+        '''
         if self.remember_password.get_active():
             self.remember_account.set_active(True)
 
     def _on_auto_login_toggled(self, button):
-        '''called when the auto-login check button is toggled'''
+        '''
+        called when the auto-login check button is toggled
+        '''
         user = self.cmb_account.get_active_text()
 
         if self.auto_login.get_active():
@@ -412,33 +446,45 @@ class Login(gtk.Alignment):
                 self.remember_password.set_sensitive(True)
 
     def _on_preferences_enter(self, button, event):
-        '''called when the mouse enters the preferences button'''
+        '''
+        called when the mouse enters the preferences button
+        '''
         self.img_preferences.set_sensitive(True)
 
     def _on_preferences_leave(self, button, event):
-        '''called when the mouse leaves the preferences button'''
+        '''
+        called when the mouse leaves the preferences button
+        '''
         self.img_preferences.set_sensitive(False)
 
     def _on_preferences_selected(self, button):
-        '''called when the user clicks the preference button'''
+        '''
+        called when the user clicks the preference button
+        '''
         extension.get_default('dialog').login_preferences(self.session_id,
             self._on_new_preferences, self.use_http, self.proxy)
 
     def _on_new_preferences(self, use_http, use_proxy, host, port,
         use_auth, user, passwd, session_id):
-        '''called when the user press accept on the preferences dialog'''
+        '''
+        called when the user press accept on the preferences dialog
+        '''
         self.proxy = e3.Proxy(use_proxy, host, port, use_auth, user, passwd)
         self.session_id = session_id
         self.use_http = use_http
         self.on_preferences_changed(self.use_http, self.proxy, self.session_id)
 
 class ConnectingWindow(gtk.Alignment):
-    '''represent the GUI interface showed when connecting'''
+    '''
+    widget that represents the GUI interface showed when connecting
+    '''
     def __init__(self, callback):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
         self.callback = callback
+        #for reconnecting
+        self.reconnect_timer_id = None
 
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
                 animated=True)
@@ -449,7 +495,9 @@ class ConnectingWindow(gtk.Alignment):
         self.b_cancel.set_border_width(8)
         
         self.label = gtk.Label()
-        self.label.set_markup('<b>Connecting... </b>')
+        self.label.set_markup('<b>Connecting...</b>')
+        self.label_timer = gtk.Label()
+        self.label_timer.set_markup('<b>Connection error!\n </b>')
 
         img_account = gtk.Image()
         img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
@@ -459,23 +507,78 @@ class ConnectingWindow(gtk.Alignment):
         al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
         al_label = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
+        al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+            yscale=0.0)
         al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         
         al_throbber.add(self.throbber)
         al_button_cancel.add(self.b_cancel)
         al_label.add(self.label)
+        al_label_timer.add(self.label_timer)
         al_logo.add(img_account)
         
         vbox = gtk.VBox()
         vbox.pack_start(al_logo, True, False)
         vbox.pack_start(al_label, True, False)
+        vbox.pack_start(al_label_timer, True, False)
         vbox.pack_start(al_throbber, True, False)
         vbox.pack_start(al_button_cancel, True, True)
       
         self.add(vbox)
         vbox.show_all()
+
+        self.label_timer.hide()
     
     def _on_cancel_clicked(self, button):
-        '''cause the return to login window'''
+        '''
+        cause the return to login window
+        '''
         self.callback()
+
+    def on_connecting(self, message):
+       '''
+       Show messages while connecting..
+       '''
+       #taken from amsn2..but i like a lot!
+       #this hack resolve a problem of visualization..XD FIXME
+       gobject.timeout_add(1000, lambda: self.label.set_markup('<b>%s</b>'% message))
+
+    def clear_connect(self):
+        '''
+        clean the connect interface after the reconnect phase
+        '''
+        self.label_timer.hide()
+        self.throbber.show()
+        self.label.set_markup('<b>Connecting...</b>')
+
+    def on_reconnect(self, callback, account):
+        '''
+        show the reconnect countdown
+        '''
+        self.label.set_markup('<b>Connection error\n </b>')
+        self.label_timer.show()
+        self.throbber.hide()
+        self.reconnect_after = 30
+        if self.reconnect_timer_id is None:
+            self.reconnect_timer_id = gobject.timeout_add(1000, \
+                self.update_reconnect_timer, callback, account)
+
+        self.update_reconnect_timer(callback, account)
+
+    def update_reconnect_timer(self, callback, account):
+        '''
+        updates reconnect label and launches login if counter is 0 
+        '''
+        self.reconnect_after -= 1
+        self.label_timer.set_text('Reconnecting in %d seconds'\
+                                             % self.reconnect_after )      
+        if self.reconnect_after <= 0:
+            gobject.source_remove(self.reconnect_timer_id)
+            self.reconnect_timer_id = None
+            #do login
+            callback(account, None, None, None, on_reconnect=True)
+            return False
+        else:
+            return True
+   

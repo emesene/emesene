@@ -45,13 +45,12 @@ class Window(gtk.Window):
 
     def go_login(self, callback,on_preferences_changed,
            config=None, config_dir=None, config_path=None, 
-           proxy=None, use_http=None, session_id=None, on_disconnect=False):
+           proxy=None, use_http=None, session_id=None):
         '''draw the login window on the main window'''
         LoginWindow = extension.get_default('login window')
 
         self.content = LoginWindow(callback, on_preferences_changed,
-            config, config_dir, config_path, proxy, use_http,
-            session_id, on_disconnect)
+            config, config_dir, config_path, proxy, use_http, session_id)
         self.add(self.content)
         self.content.show()
         self.content_type = 'login'

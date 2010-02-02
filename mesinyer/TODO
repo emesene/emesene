@@ -35,7 +35,6 @@ gui:
 - audio/video settings and testing through gstreamer (with gtk gui?)
 
 gui.gtk:
-- move the nicebar to a widget class
 - investigate gedit's bars, they're nicer than our nicebar
   (but i don't know if it's already in pygtk)
 - port emesene1 preferences to emesene2 
