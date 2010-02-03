@@ -55,11 +55,11 @@ class Window(gtk.Window):
         self.content.show()
         self.content_type = 'login'
 
-    def go_connect(self, callback):
+    def go_connect(self, callback, avatar_path):
         '''draw the login window on the main window'''
         ConnectingWindow = extension.get_default('connecting window')
 
-        self.content = ConnectingWindow(callback)
+        self.content = ConnectingWindow(callback, avatar_path)
         self.add(self.content)
         self.content.show()
         self.content_type = 'connecting'

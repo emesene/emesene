@@ -85,7 +85,10 @@ class Login(gtk.Alignment):
         
         self.img_account = gtk.Image()
         path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
-        pix = utils.safe_gtk_pixbuf_load(path, (96,96))
+        if self.config_dir.file_readable(path):
+            pix = utils.safe_gtk_pixbuf_load(path, (96,96))
+        else:
+            pix = utils.safe_gtk_pixbuf_load(gui.theme.logo)
         self.img_account.set_from_pixbuf(pix)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
@@ -478,13 +481,17 @@ class ConnectingWindow(gtk.Alignment):
     '''
     widget that represents the GUI interface showed when connecting
     '''
-    def __init__(self, callback):
+    def __init__(self, callback, avatar_path):
 
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
         self.callback = callback
         #for reconnecting
         self.reconnect_timer_id = None
+        if avatar_path == '':
+            self.avatar_path = gui.theme.logo
+        else:
+            self.avatar_path = avatar_path
 
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
                 animated=True)
@@ -499,8 +506,8 @@ class ConnectingWindow(gtk.Alignment):
         self.label_timer = gtk.Label()
         self.label_timer.set_markup('<b>Connection error!\n </b>')
 
-        img_account = gtk.Image()
-        img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(gui.theme.logo))
+        self.img_account = gtk.Image()
+        self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(self.avatar_path,(96,96)))
 
         al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.2)
@@ -516,7 +523,7 @@ class ConnectingWindow(gtk.Alignment):
         al_button_cancel.add(self.b_cancel)
         al_label.add(self.label)
         al_label_timer.add(self.label_timer)
-        al_logo.add(img_account)
+        al_logo.add(self.img_account)
         
         vbox = gtk.VBox()
         vbox.pack_start(al_logo, True, False)
@@ -528,7 +535,24 @@ class ConnectingWindow(gtk.Alignment):
         self.add(vbox)
         vbox.show_all()
 
+        self.dim = 96
+        gobject.timeout_add(20, self.do_animation)
+        
+        self.label.hide()
+        self.throbber.hide()
         self.label_timer.hide()
+
+    def do_animation(self):
+       '''do the avatar's animation on login'''
+       if self.dim <= 128:
+           self.dim += 4
+           self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(
+                                       self.avatar_path,(self.dim,self.dim)))
+           return True
+       else:
+           self.label.show()
+           self.clear_connect()
+           return False     
     
     def _on_cancel_clicked(self, button):
         '''
@@ -556,6 +580,7 @@ class ConnectingWindow(gtk.Alignment):
         '''
         show the reconnect countdown
         '''
+        self.label.show()
         self.label.set_markup('<b>Connection error\n </b>')
         self.label_timer.show()
         self.throbber.hide()

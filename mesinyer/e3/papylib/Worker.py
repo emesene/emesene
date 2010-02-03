@@ -27,6 +27,7 @@ import random
 import shutil
 import sys
 import time
+import utils
 
 from e3 import cache
 import e3.base.Contact
@@ -715,20 +716,20 @@ class Worker(e3.base.Worker, papyon.Client):
             # this is/can be used for initial avatar changing and caching
             # like dp roaming and stuff like that
             # now it doesn't work, btw
+            #FIXME
             self.profile.msn_object = picture_name
-            picture_name = self._on_contact_msnobject_changed(self.profile)
-            self.session.contacts.me.picture = picture_name
-            self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
-                self.session.account.account, picture_name)
-            self.session.config.avatar_path = picture_name
+            self._on_contact_msnobject_changed(self.profile)
+            #self.session.contacts.me.picture = picture_name
+            #self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
+                #self.session.account.account, picture_name)
             return
 
         try:
             f = open(picture_name, 'r')
             avatar = f.read()
-            f.close()
-        except:
-            return
+            f.close()  
+        except Exception as e:
+            print e
 
         if not isinstance(avatar, str):
             avatar = "".join([chr(b) for b in avatar])
