@@ -27,6 +27,7 @@ import random
 import shutil
 import sys
 import time
+import utils
 
 from e3 import cache
 import e3.base.Contact
@@ -726,9 +727,9 @@ class Worker(e3.base.Worker, papyon.Client):
         try:
             f = open(picture_name, 'r')
             avatar = f.read()
-            f.close()
-        except:
-            return
+            f.close()  
+        except Exception as e:
+            print e
 
         if not isinstance(avatar, str):
             avatar = "".join([chr(b) for b in avatar])

@@ -138,12 +138,12 @@ class AvatarChooser(gtk.Window):
 
         return None
 
-
     def fill(self):
         '''fill the IconView with avatars from the list of pictures'''
         for path in os.listdir(self.cache_path):
             if not (os.path.splitext(path)[0].endswith('_thumb') or \
-                    os.path.splitext(path)[0].endswith('last')):
+                    os.path.splitext(path)[0].endswith('last') or \
+                    os.path.splitext(path)[0].endswith('avatars')):
                 self.add_picture(os.path.join(self.cache_path, path))
 
     def is_in_view(self, filename):

@@ -150,12 +150,22 @@ class UserPanel(gtk.VBox):
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
             if response == gui.stock.ACCEPT:
-                self.session.set_picture(filename)
-                try:
+                if self.config_dir.base_dir.replace('@', '-at-') == \
+                   os.path.dirname(os.path.dirname(filename)):
+                    self.session.set_picture(filename)
                     os.remove(self.avatar_path)
                     shutil.copy2(filename, self.avatar_path)
-                except OSError, shutil.Error:
-                   print 'error while setting picture'
+                    return
+                #i save in 128*128 for the animation on connect..if somebody like it...:)
+                try:
+                    pix_128 = utils.safe_gtk_pixbuf_load(filename, (128,128))
+                    pix_128.save(path_dir + '_temp', 'png')
+                    self.session.set_picture(path_dir + '_temp')
+                    if os.path.exists(self.avatar_path):  
+                        os.remove(self.avatar_path)   
+                    pix_128.save(self.avatar_path, 'png')
+                except OSError as e:
+                   print e
         #TODO better way to do this???
         path_dir = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
                    self.session.contacts.me.account.replace('@','-at-'),'avatars')

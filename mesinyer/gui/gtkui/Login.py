@@ -475,7 +475,7 @@ class ConnectingWindow(gtk.Alignment):
         #for reconnecting
         self.reconnect_timer_id = None
         if avatar_path == '':
-            self.avatar_path = gui.theme.user
+            self.avatar_path = gui.theme.logo
         else:
             self.avatar_path = avatar_path
 
@@ -522,15 +522,16 @@ class ConnectingWindow(gtk.Alignment):
         vbox.show_all()
 
         self.dim = 96
-        gobject.timeout_add(50, self.do_animation)
+        gobject.timeout_add(20, self.do_animation)
         
         self.label.hide()
         self.throbber.hide()
         self.label_timer.hide()
 
     def do_animation(self):
-       if self.dim <= 160:
-           self.dim += 10
+       '''do the avatar's animation on login'''
+       if self.dim <= 128:
+           self.dim += 4
            self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(
                                        self.avatar_path,(self.dim,self.dim)))
            return True
