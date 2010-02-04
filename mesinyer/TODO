@@ -16,8 +16,6 @@ e3.msn:
 - decide if it's worth developing it, really
 
 e3.papylib:
-- find out what's wrong with creating a new conversation 
-  (cid = time.time() is an epic fail)
 - implement multichats
 
 e3.papylib->upstream (eventually):
