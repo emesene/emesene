@@ -775,7 +775,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.rconversations[cid] = account
             contact = self.address_book.contacts.search_by('account', account)[0]
             # create a papyon conversation
-            conv = papyon.Conversation(self, contact)
+            conv = papyon.Conversation(self, [contact,])
             self.papyconv[cid] = conv
             # attach the conversation event handler
             convhandler = ConversationEvent(conv, self)
