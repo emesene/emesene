@@ -267,6 +267,11 @@ class Login(gtk.Alignment):
             self.forget_me.set_child_visible(True)
             self.btn_status.set_status(int(self.status[account]))
 
+            path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
+            if self.config_dir.file_readable(path):
+                pix = utils.safe_gtk_pixbuf_load(path, (96,96))
+                self.img_account.set_from_pixbuf(pix) 
+
             if attr == 3:#autologin,password,account checked
                 self.auto_login.set_active(True)
                 flag = True
@@ -299,6 +304,8 @@ class Login(gtk.Alignment):
         self.btn_status.set_status(e3.status.ONLINE)
         self.txt_password.set_text('')
         self.txt_password.set_sensitive(True)
+        self.img_account.set_from_pixbuf(
+             utils.safe_gtk_pixbuf_load(gui.theme.logo))
 
     def clear_all(self):
         '''

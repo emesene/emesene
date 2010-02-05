@@ -95,7 +95,7 @@ class Worker(e3.base.Worker, papyon.Client):
         # this stores papyon conversations as cid : conversation
         self.papyconv = {}
         # this stores conversation handlers
-        self._conversation_handler = {}
+        self._conversation_handler = {}    
 
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
 
@@ -581,7 +581,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.add_event(Event.EVENT_LOGIN_STARTED)
         self.login(account, password)
-
+    
     def _handle_action_logout(self):
         ''' handle Action.ACTION_LOGOUT '''
         self.quit()
