@@ -474,7 +474,7 @@ class Worker(e3.Worker):
         contact.status = status_
         contact.nick = nick
         contact.attrs['msnobj'] = msnobj
-        contact.attrs['CID'] = cid
+        contact.attrs['CID'] = time.time()
 
         log_account = e3.Logger.Account.from_contact(contact)
 
