@@ -63,15 +63,13 @@ class Worker(e3.Worker):
 
         self.host = None
         self.port = None
+        self.socket = None
 
         if proxy is None:
             self.proxy = e3.Proxy()
         else:
             self.proxy = proxy
         self.use_http = use_http
-
-        self.socket = self._get_socket()
-        self.socket.start()
 
         self.in_login = False
         # the class used to create the conversation sockets, since sockets
@@ -158,6 +156,10 @@ class Worker(e3.Worker):
         data = None
 
         while True:
+            if self.socket is None:
+                time.sleep(0.2)
+                continue
+
             try:
                 data = self.socket.output.get(True, 0.1)
 
@@ -741,7 +743,10 @@ class Worker(e3.Worker):
         self.session.account.status = status_
 
         self.host = host
-        self.port = port
+        self.port = int(port)
+
+        self.socket = self._get_socket()
+        self.socket.start()
 
         self.socket.send_command('VER', ('MSNP15', 'CVR0'))
         self.session.add_event(e3.Event.EVENT_LOGIN_STARTED)
