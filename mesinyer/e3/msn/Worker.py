@@ -61,6 +61,9 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
 
+        self.host = None
+        self.port = None
+
         if proxy is None:
             self.proxy = e3.Proxy()
         else:
@@ -98,8 +101,14 @@ class Worker(e3.Worker):
         self.msg_manager = msgs.Manager(session) # msg manager
         self.msg_manager.start()
 
-    def _get_socket(self, host='messenger.hotmail.com', port=1863):
+    def _get_socket(self, host=None, port=None):
         '''return a socket according to the proxy settings'''
+        if host is None:
+            host = self.host
+
+        if port is None:
+            port = self.port
+
         if self.proxy.use_proxy or self.use_http:
             socket = MsnHttpSocket(host, port, dest_type='NS', proxy=self.proxy)
         else:
@@ -724,12 +733,15 @@ class Worker(e3.Worker):
         '''
         self._set_status(status_)
 
-    def _handle_action_login(self, account, password, status_):
+    def _handle_action_login(self, account, password, status_, host, port):
         '''handle e3.Action.ACTION_LOGIN
         '''
         self.session.account.account = account
         self.session.account.password = password
         self.session.account.status = status_
+
+        self.host = host
+        self.port = port
 
         self.socket.send_command('VER', ('MSNP15', 'CVR0'))
         self.session.add_event(e3.Event.EVENT_LOGIN_STARTED)
