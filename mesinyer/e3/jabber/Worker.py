@@ -17,8 +17,8 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
         self.jid = xmpp.protocol.JID(session.account.account)
-        self.client = xmpp.Client(self.jid.getDomain(), debug=[])
-        #self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
+        #self.client = xmpp.Client(self.jid.getDomain(), debug=[])
+        self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
 
         self.proxy = proxy
         self.proxy_data = None
@@ -165,10 +165,10 @@ class Worker(e3.Worker):
         '''
         pass
 
-    def _handle_action_login(self, account, password, status_):
+    def _handle_action_login(self, account, password, status_, host, port):
         '''handle Action.ACTION_LOGIN
         '''
-        if self.client.connect(('talk.google.com', 5223),
+        if self.client.connect((host, port),
                 proxy=self.proxy_data) == "":
             self.session.add_event(e3.Event.EVENT_LOGIN_FAILED,
                 'Connection error')

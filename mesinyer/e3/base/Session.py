@@ -117,7 +117,7 @@ class Session(object):
         '''close the worker and socket threads'''
         self.add_action(Action.ACTION_QUIT, ())
 
-    def login(self, account, password, status, proxy, use_http=False):
+    def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
         raise NotImplementedError('Not implemented')
 

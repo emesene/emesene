@@ -49,6 +49,9 @@ class Login(gtk.Alignment):
 
         self.dialog = extension.get_default('dialog')
 
+        self.server_host = extension.get_default('session').DEFAULT_HOST
+        self.server_port = extension.get_default('session').DEFAULT_PORT
+
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
         completion.set_model(self.liststore)
@@ -57,7 +60,7 @@ class Login(gtk.Alignment):
         completion.add_attribute(pixbufcell, 'pixbuf', 1)
         completion.set_text_column(0)
         completion.set_inline_selection(True)
-        
+
         self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
 
         self._reload_account_list()
@@ -82,7 +85,7 @@ class Login(gtk.Alignment):
 
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
-        
+
         self.img_account = gtk.Image()
         path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
         if self.config_dir.file_readable(path):
@@ -172,7 +175,7 @@ class Login(gtk.Alignment):
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
-        
+
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
@@ -214,19 +217,20 @@ class Login(gtk.Alignment):
         self._config_account(account, remember_account, remember_password,
                              auto_login)
 
-        self.callback(account, self.session_id, self.proxy, self.use_http)
+        self.callback(account, self.session_id, self.proxy, self.use_http,
+                self.server_host, self.server_port)
 
     def _config_account(self, account, remember_account, remember_password,
                          auto_login):
         '''
         modify the config for the current account before login
-        '''       
+        '''
         if auto_login:#+1 account,+1 password,+1 autologin =  3
             self.accounts[account.account] = base64.b64encode(account.password)
             self.remembers[account.account] = 3
             self.status[account.account] = account.status
             self.config.last_logged_account = account.account
-        
+
         elif remember_password:#+1 account,+1 password = 2
             self.accounts[account.account] = base64.b64encode(account.password)
             self.remembers[account.account] = 2
@@ -284,7 +288,7 @@ class Login(gtk.Alignment):
                 self.show_error(_(
                           'Error while reading user config'))
                 self._clear_all()
-            
+
             #for not repeating code
             if flag:
                 passw = self.accounts[account]
@@ -319,7 +323,7 @@ class Login(gtk.Alignment):
         show an error on the top of the window using nicebar
         '''
         self.nicebar.new_message(_(reason), gtk.STOCK_DIALOG_ERROR)
-       
+
     def _reload_account_list(self, *args):
         '''
         reload the account list in the combobox
@@ -460,14 +464,16 @@ class Login(gtk.Alignment):
         extension.get_default('dialog').login_preferences(self.session_id,
             self._on_new_preferences, self.use_http, self.proxy)
 
-    def _on_new_preferences(self, use_http, use_proxy, host, port,
-        use_auth, user, passwd, session_id):
+    def _on_new_preferences(self, use_http, use_proxy, proxy_host, proxy_port,
+        use_auth, user, passwd, session_id, server_host, server_port):
         '''
         called when the user press accept on the preferences dialog
         '''
-        self.proxy = e3.Proxy(use_proxy, host, port, use_auth, user, passwd)
+        self.proxy = e3.Proxy(use_proxy, proxy_host, proxy_port, use_auth, user, passwd)
         self.session_id = session_id
         self.use_http = use_http
+        self.server_host = server_host
+        self.server_port = server_port
         self.on_preferences_changed(self.use_http, self.proxy, self.session_id)
 
 class ConnectingWindow(gtk.Alignment):
@@ -493,7 +499,7 @@ class ConnectingWindow(gtk.Alignment):
         self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
         self.b_cancel.connect('clicked', self._on_cancel_clicked)
         self.b_cancel.set_border_width(8)
-        
+
         self.label = gtk.Label()
         self.label.set_markup('<b>Connecting...</b>')
         self.label_timer = gtk.Label()
@@ -511,26 +517,26 @@ class ConnectingWindow(gtk.Alignment):
             yscale=0.0)
         al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
-        
+
         al_throbber.add(self.throbber)
         al_button_cancel.add(self.b_cancel)
         al_label.add(self.label)
         al_label_timer.add(self.label_timer)
         al_logo.add(self.img_account)
-        
+
         vbox = gtk.VBox()
         vbox.pack_start(al_logo, True, False)
         vbox.pack_start(al_label, True, False)
         vbox.pack_start(al_label_timer, True, False)
         vbox.pack_start(al_throbber, True, False)
         vbox.pack_start(al_button_cancel, True, True)
-      
+
         self.add(vbox)
         vbox.show_all()
 
         self.dim = 96
         gobject.timeout_add(20, self.do_animation)
-        
+
         self.label.hide()
         self.throbber.hide()
         self.label_timer.hide()
@@ -545,8 +551,8 @@ class ConnectingWindow(gtk.Alignment):
        else:
            self.label.show()
            self.clear_connect()
-           return False     
-    
+           return False
+
     def _on_cancel_clicked(self, button):
         '''
         cause the return to login window
@@ -586,11 +592,11 @@ class ConnectingWindow(gtk.Alignment):
 
     def update_reconnect_timer(self, callback, account):
         '''
-        updates reconnect label and launches login if counter is 0 
+        updates reconnect label and launches login if counter is 0
         '''
         self.reconnect_after -= 1
         self.label_timer.set_text('Reconnecting in %d seconds'\
-                                             % self.reconnect_after )      
+                                             % self.reconnect_after )
         if self.reconnect_after <= 0:
             gobject.source_remove(self.reconnect_timer_id)
             self.reconnect_timer_id = None
@@ -599,4 +605,4 @@ class ConnectingWindow(gtk.Alignment):
             return False
         else:
             return True
-   
+

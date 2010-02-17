@@ -3,22 +3,26 @@ import e3
 
 class Session(e3.Session):
     '''a specialization of e3.Session'''
-    NAME = 'Gtalk session'
-    DESCRIPTION = 'Session to connect to the Jabber network (Gtalk servers)'
+    NAME = 'Jabber session'
+    DESCRIPTION = 'Session to connect to the Jabber network'
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
+
+    DEFAULT_HOST = "talk.google.com"
+    DEFAULT_PORT = "5223"
 
     def __init__(self, id_=None, account=None):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
 
-    def login(self, account, password, status, proxy, use_http=False):
+    def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
         self.account = e3.Account(account, password, status)
         worker = Worker('emesene2', self, proxy, use_http)
         worker.start()
 
-        self.add_action(e3.Action.ACTION_LOGIN, (account, password, status))
+        self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
+            host, port))
 
     def send_message(self, cid, text, style=None):
         '''send a common message'''
