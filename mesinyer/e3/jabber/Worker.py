@@ -77,8 +77,8 @@ class Worker(e3.Worker):
         contact = self.session.contacts.me
         stat = STATUS_MAP[status_]
 
-        pres = xmpp.protocol.Presence(priority=5, show=stat, status=contact.message)
-        self.client.send(xmpp.protocol.Presence(priority=5,
+        pres = xmpp.protocol.Presence(priority=24, show=stat, status=contact.message)
+        self.client.send(xmpp.protocol.Presence(priority=24,
             show=stat,status=contact.message))
         e3.base.Worker._handle_action_change_status(self, status_)
 
@@ -279,7 +279,7 @@ class Worker(e3.Worker):
         contact = self.session.contacts.me
         stat = STATUS_MAP[contact.status]
 
-        self.client.send(xmpp.protocol.Presence(priority=5, show=stat,
+        self.client.send(xmpp.protocol.Presence(priority=24, show=stat,
             status=message))
 
         e3.base.Worker._handle_action_set_message(self, message)
@@ -290,7 +290,7 @@ class Worker(e3.Worker):
         contact = self.session.contacts.me
         stat = STATUS_MAP[contact.status]
 
-        self.client.send(xmpp.protocol.Presence(priority=5, show=stat,
+        self.client.send(xmpp.protocol.Presence(priority=24, show=stat,
             status=message))
 
         e3.base.Worker._handle_action_set_media(self, message)

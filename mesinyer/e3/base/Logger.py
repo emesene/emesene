@@ -502,14 +502,14 @@ class Logger(object):
         if self._count >= Logger.COMMIT_LIMIT:
             t1 = time.time()
             self.connection.commit()
-            log.info('commit ' + str(time.time() - t1))
+            #log.info('commit ' + str(time.time() - t1))
             self._count = 0
 
         self._count += 1
 
     def execute(self, query, args=()):
         '''execute the query with optional args'''
-        log.debug(query + str(args))
+        #log.debug(query + str(args))
         self.cursor.execute(query, args)
 
     # utility methods

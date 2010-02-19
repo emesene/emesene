@@ -61,9 +61,8 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
 
-        self.host = None
-        self.port = None
-        self.socket = None
+        self.host = session.DEFAULT_HOST
+        self.port = session.DEFAULT_PORT
 
         if proxy is None:
             self.proxy = e3.Proxy()
@@ -71,6 +70,7 @@ class Worker(e3.Worker):
             self.proxy = proxy
         self.use_http = use_http
 
+        self.socket = self._get_socket()
         self.in_login = False
         # the class used to create the conversation sockets, since sockets
         # or http method can be used
@@ -156,10 +156,6 @@ class Worker(e3.Worker):
         data = None
 
         while True:
-            if self.socket is None:
-                time.sleep(0.2)
-                continue
-
             try:
                 data = self.socket.output.get(True, 0.1)
 
@@ -476,7 +472,6 @@ class Worker(e3.Worker):
         contact.status = status_
         contact.nick = nick
         contact.attrs['msnobj'] = msnobj
-        contact.attrs['CID'] = cid
 
         log_account = e3.Logger.Account.from_contact(contact)
 
