@@ -811,6 +811,7 @@ class Dialog(object):
                 button_cb)
 
         window.show_all()
+
         for widget in proxy_settings:
             widget.hide()
 

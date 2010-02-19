@@ -17,8 +17,8 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
         self.jid = xmpp.protocol.JID(session.account.account)
-        #self.client = xmpp.Client(self.jid.getDomain(), debug=[])
-        self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
+        self.client = xmpp.Client(self.jid.getDomain(), debug=[])
+        #self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
 
         self.proxy = proxy
         self.proxy_data = None
@@ -168,7 +168,7 @@ class Worker(e3.Worker):
     def _handle_action_login(self, account, password, status_, host, port):
         '''handle Action.ACTION_LOGIN
         '''
-        if self.client.connect((host, port),
+        if self.client.connect((host, int(port)),
                 proxy=self.proxy_data) == "":
             self.session.add_event(e3.Event.EVENT_LOGIN_FAILED,
                 'Connection error')
@@ -258,7 +258,14 @@ class Worker(e3.Worker):
     def _handle_action_set_message(self, message):
         '''handle Action.ACTION_SET_MESSAGE
         '''
-        pass
+        print "actually set the message on jabber"
+        e3.base.Worker._handle_action_set_message(self, message)
+
+    def _handle_action_set_media(self, message):
+        '''handle Action.ACTION_SET_MEDIA
+        '''
+        print "actually set the media on jabber"
+        e3.base.Worker._handle_action_set_media(self, message)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK

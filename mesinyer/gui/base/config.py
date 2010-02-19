@@ -81,7 +81,7 @@ class Item(Base):
         '''return the new value from the gui, you must overload this method
         on your gui implementations'''
         return self.value
-        
+
 class Text(Item):
     '''a config item that contains text'''
 

@@ -824,16 +824,19 @@ class Worker(e3.Worker):
         self.socket.send_command('UUX', payload='<Data><PSM>' + \
             common.escape(message) + '</PSM><CurrentMedia></CurrentMedia>' + \
             '<MachineGuid></MachineGuid></Data>')
-        self.session.add_event(e3.Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
-        self.session.contacts.me.message = message
-
-        # log the change
-        contact = self.session.contacts.me
-        account = e3.Logger.Account.from_contact(contact)
-
-        self.session.logger.log('message change', contact.status, message,
-            account)
+        e3.base.Worker._handle_action_set_message(self, message)
         Requester.SetProfile(self.session, contact.nick, message).start()
+
+    def _handle_action_set_media(self, message):
+        '''handle Action.ACTION_SET_MEDIA
+        '''
+        me = self.session.contacts.me
+        self.socket.send_command('UUX', payload='<Data><PSM>' + \
+            '</PSM><CurrentMedia>' + \
+            common.escape(message) + '</CurrentMedia>' + \
+            '<MachineGuid></MachineGuid></Data>')
+
+        e3.base.Worker._handle_action_set_media(self, message)
 
     def _handle_action_set_nick(self, nick):
         '''handle e3.Action.ACTION_SET_NICK

@@ -22,7 +22,7 @@ class Session(e3.Session):
         worker = Worker('emesene2', self, proxy, use_http)
         worker.start()
 
-        self.account = e3.Account(account, password, status)
+        self.account = e3.Account(account, password, status, host)
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
             host, port))

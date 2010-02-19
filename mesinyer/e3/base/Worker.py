@@ -3,6 +3,7 @@
 import Queue
 import threading
 
+import Logger
 from Event import Event
 from Action import Action
 
@@ -27,6 +28,7 @@ EVENTS = (\
  'status change succeed' , 'status change failed' ,
  'nick change succeed'   , 'nick change failed'   ,
  'message change succeed', 'message change failed',
+ 'media change succeed', 'media change failed',
  'picture change succeed', 'error'                ,
  'conv contact joined'   , 'conv contact left'  ,
  'conv started'          , 'conv ended'           ,
@@ -51,6 +53,7 @@ ACTIONS = (\
  'move to group'    , 'rename group'     ,
  'add group'        , 'remove group'     ,
  'set nick'         , 'set message'      ,
+ 'set media' ,
  'set picture'      , 'set preferences'  ,
  'new conversation' , 'close conversation',
  'send message'     , 'conv invite',
@@ -105,6 +108,7 @@ class Worker(threading.Thread):
         dah[Action.ACTION_SET_MESSAGE] = self._handle_action_set_message
         dah[Action.ACTION_SET_NICK] = self._handle_action_set_nick
         dah[Action.ACTION_SET_PICTURE] = self._handle_action_set_picture
+        dah[Action.ACTION_SET_MEDIA] = self._handle_action_set_media
         dah[Action.ACTION_SET_PREFERENCES] = self._handle_action_set_preferences
         dah[Action.ACTION_NEW_CONVERSATION] = \
             self._handle_action_new_conversation
@@ -216,7 +220,15 @@ class Worker(threading.Thread):
     def _handle_action_set_message(self, message):
         '''handle Action.ACTION_SET_MESSAGE
         '''
-        pass
+        self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
+        self.session.contacts.me.message = message
+
+        # log the change
+        contact = self.session.contacts.me
+        account = Logger.Account.from_contact(contact)
+
+        self.session.logger.log('message change', contact.status, message,
+            account)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK
@@ -227,6 +239,19 @@ class Worker(threading.Thread):
         '''handle Action.ACTION_SET_PICTURE
         '''
         pass
+
+    def _handle_action_set_media(self, message):
+        '''handle Action.ACTION_SET_MEDIA
+        '''
+        contact = self.session.contacts.me
+        self.session.add_event(Event.EVENT_MEDIA_CHANGE_SUCCEED, message)
+        self.session.contacts.me.media = message
+
+        # log the change
+        account = Logger.Account.from_contact(contact)
+
+        self.session.logger.log('media change', contact.status, message,
+            account)
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES
