@@ -317,17 +317,8 @@ class Worker(e3.Worker):
         if stat not in STATUS_MAP:
             return
 
-        self.session.account.status = stat
-        self.session.contacts.me.status = stat
         self.socket.send_command('CHG', (STATUS_MAP[stat], str(CLIENT_ID), '0'))
-        self.session.add_event(e3.Event.EVENT_STATUS_CHANGE_SUCCEED, stat)
-
-        # log the status
-        contact = self.session.contacts.me
-        account = e3.Logger.Account.from_contact(contact)
-        account.status = stat
-
-        self.session.logger.log('status change', stat, str(stat), account)
+        e3.base.Worker._handle_action_change_status(self, stat)
 
     def _start_from_cache(self):
         '''try to send the adl with the data from cache'''

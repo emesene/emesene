@@ -170,7 +170,16 @@ class Worker(threading.Thread):
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS
         '''
-        pass
+        self.session.account.status = status_
+        self.session.contacts.me.status = status_
+        self.session.add_event(Event.EVENT_STATUS_CHANGE_SUCCEED, status_)
+
+        # log the status
+        contact = self.session.contacts.me
+        account = Logger.Account.from_contact(contact)
+        account.status = status_
+
+        self.session.logger.log('status change', status_, str(status_), account)
 
     def _handle_action_login(self, account, password, status_):
         '''handle Action.ACTION_LOGIN
