@@ -24,7 +24,7 @@ class UserPanel(gtk.VBox):
         self.session = session
         self.config_dir = session.config_dir
         self._enabled = True
-        
+
         self.image = gtk.Image()
         self.avatarBox = gtk.EventBox()
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
@@ -69,7 +69,7 @@ class UserPanel(gtk.VBox):
 
         self.pack_start(hbox, True, True)
         self.pack_start(self.toolbar, False)
-        
+
         hbox.show()
         nick_hbox.show()
         message_hbox.show()
@@ -77,6 +77,8 @@ class UserPanel(gtk.VBox):
 
         session.signals.message_change_succeed.subscribe(
             self.on_message_change_succeed)
+        session.signals.media_change_succeed.subscribe(
+            self.on_media_change_succeed)
         session.signals.status_change_succeed.subscribe(
             self.on_status_change_succeed)
         session.signals.contact_list_ready.subscribe(
@@ -127,6 +129,10 @@ class UserPanel(gtk.VBox):
         '''callback called when the message has been changed successfully'''
         self.message.text = message
 
+    def on_media_change_succeed(self, message):
+        '''callback called when the message has been changed successfully'''
+        self.message.text = message
+
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
         self.enabled = True
@@ -145,7 +151,7 @@ class UserPanel(gtk.VBox):
         self.message.text = message
 
     def on_avatar_click(self,widget,data):
-        '''method called when user click on his avatar 
+        '''method called when user click on his avatar
         '''
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
@@ -162,8 +168,8 @@ class UserPanel(gtk.VBox):
                     pix_128 = utils.safe_gtk_pixbuf_load(filename, (128,128))
                     pix_128.save(path_dir + '_temp', 'png')
                     self.session.set_picture(path_dir + '_temp')
-                    if os.path.exists(self.avatar_path):  
-                        os.remove(self.avatar_path)   
+                    if os.path.exists(self.avatar_path):
+                        os.remove(self.avatar_path)
                     pix_128.save(self.avatar_path, 'png')
                 except OSError as e:
                    print e
@@ -171,6 +177,6 @@ class UserPanel(gtk.VBox):
         path_dir = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
                    self.session.contacts.me.account.replace('@','-at-'),'avatars')
 
-        extension.get_default('avatar chooser')(set_picture_cb, 
+        extension.get_default('avatar chooser')(set_picture_cb,
                                                 self.avatar_path, path_dir).show()
 

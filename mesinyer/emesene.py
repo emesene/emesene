@@ -147,12 +147,14 @@ class Controller(object):
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
         account = self.config.get_or_set('last_logged_account', '')
-        
+
         #autologin
+        default_session = extension.get_default('session')
         if account != '' and int(self.config.d_remembers[account]) == 3:
             password = base64.b64decode(self.config.d_accounts[account])
             user = e3.Account(account, password,
-                              int(self.config.d_status[account]))
+                              int(self.config.d_status[account]),
+                              default_session.DEFAULT_HOST)
             self.on_login_connect(user, self.config.session, proxy, use_http)
         else:
             self.go_login(proxy, use_http)

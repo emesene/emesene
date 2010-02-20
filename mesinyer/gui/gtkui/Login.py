@@ -204,7 +204,8 @@ class Login(gtk.Alignment):
         self.nicebar.empty_queue()
         user = self.cmb_account.get_active_text().strip()
         password = self.txt_password.get_text()
-        account = e3.Account(user, password, self.btn_status.status)
+        account = e3.Account(user, password, self.btn_status.status,
+                self.server_host)
         remember_password = self.remember_password.get_active()
         remember_account = self.remember_account.get_active()
         auto_login = self.auto_login.get_active()

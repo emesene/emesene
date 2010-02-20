@@ -61,9 +61,8 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
 
-        self.host = None
-        self.port = None
-        self.socket = None
+        self.host = session.DEFAULT_HOST
+        self.port = session.DEFAULT_PORT
 
         if proxy is None:
             self.proxy = e3.Proxy()
@@ -71,6 +70,7 @@ class Worker(e3.Worker):
             self.proxy = proxy
         self.use_http = use_http
 
+        self.socket = self._get_socket()
         self.in_login = False
         # the class used to create the conversation sockets, since sockets
         # or http method can be used
@@ -156,10 +156,6 @@ class Worker(e3.Worker):
         data = None
 
         while True:
-            if self.socket is None:
-                time.sleep(0.2)
-                continue
-
             try:
                 data = self.socket.output.get(True, 0.1)
 
@@ -317,17 +313,8 @@ class Worker(e3.Worker):
         if stat not in STATUS_MAP:
             return
 
-        self.session.account.status = stat
-        self.session.contacts.me.status = stat
         self.socket.send_command('CHG', (STATUS_MAP[stat], str(CLIENT_ID), '0'))
-        self.session.add_event(e3.Event.EVENT_STATUS_CHANGE_SUCCEED, stat)
-
-        # log the status
-        contact = self.session.contacts.me
-        account = e3.Logger.Account.from_contact(contact)
-        account.status = stat
-
-        self.session.logger.log('status change', stat, str(stat), account)
+        e3.base.Worker._handle_action_change_status(self, stat)
 
     def _start_from_cache(self):
         '''try to send the adl with the data from cache'''
@@ -485,7 +472,6 @@ class Worker(e3.Worker):
         contact.status = status_
         contact.nick = nick
         contact.attrs['msnobj'] = msnobj
-        contact.attrs['CID'] = cid
 
         log_account = e3.Logger.Account.from_contact(contact)
 
@@ -824,16 +810,19 @@ class Worker(e3.Worker):
         self.socket.send_command('UUX', payload='<Data><PSM>' + \
             common.escape(message) + '</PSM><CurrentMedia></CurrentMedia>' + \
             '<MachineGuid></MachineGuid></Data>')
-        self.session.add_event(e3.Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
-        self.session.contacts.me.message = message
-
-        # log the change
-        contact = self.session.contacts.me
-        account = e3.Logger.Account.from_contact(contact)
-
-        self.session.logger.log('message change', contact.status, message,
-            account)
+        e3.base.Worker._handle_action_set_message(self, message)
         Requester.SetProfile(self.session, contact.nick, message).start()
+
+    def _handle_action_set_media(self, message):
+        '''handle Action.ACTION_SET_MEDIA
+        '''
+        me = self.session.contacts.me
+        self.socket.send_command('UUX', payload='<Data><PSM>' + \
+            '</PSM><CurrentMedia>' + \
+            common.escape(message) + '</CurrentMedia>' + \
+            '<MachineGuid></MachineGuid></Data>')
+
+        e3.base.Worker._handle_action_set_media(self, message)
 
     def _handle_action_set_nick(self, nick):
         '''handle e3.Action.ACTION_SET_NICK

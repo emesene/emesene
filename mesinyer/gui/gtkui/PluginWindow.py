@@ -30,11 +30,13 @@ class PluginListStore(gtk.ListStore):
         return name[0].upper() + name[1:]
 
 class PluginWindow(gtk.Window):
-    def __init__(self):
+    def __init__(self, session):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
         self.set_default_size(500, 300)
         self.set_title('Plugins')
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+
+        self.session = session
 
         if utils.file_readable(gui.theme.logo):
             self.set_icon(
@@ -78,7 +80,7 @@ class PluginWindow(gtk.Window):
         model, iter = sel.get_selected()
         name = model.get_value(iter, 2)
         pluginmanager = get_pluginmanager()
-        pluginmanager.plugin_start(name)
+        pluginmanager.plugin_start(name, self.session)
         print pluginmanager.plugin_is_active(name), 'after start'
         model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
 

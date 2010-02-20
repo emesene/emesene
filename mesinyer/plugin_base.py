@@ -12,7 +12,7 @@ class PluginBase(object):
         self._started = False
         self._configure = None
 
-    def start(self):
+    def start(self, session):
         raise NotImplementedError()
 
     def is_active(self):

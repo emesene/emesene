@@ -66,7 +66,7 @@ class Session(object):
         self.contacts = ContactManager(self._account.account)
 
         self.config_dir.base_dir = os.path.join(
-            self.config_dir.base_dir, self._account.account)
+            self.config_dir.base_dir, self._account.service, self._account.account)
         self.create_config()
         self.logger = Logger.LoggerProcess(self.config_dir.join('log'))
         self.logger.start()
@@ -99,7 +99,8 @@ class Session(object):
 
     def create_config(self):
         '''create all the dirs and files for configuration'''
-        self.config_dir.create('')
+        if not os.path.isdir(self.config_dir.base_dir):
+            os.makedirs(self.config_dir.base_dir)
 
     def new_conversation(self, account, cid):
         '''start a new conversation with account'''
@@ -188,6 +189,10 @@ class Session(object):
     def set_message(self, message):
         '''set the message of the session'''
         self.add_action(Action.ACTION_SET_MESSAGE, (message,))
+
+    def set_media(self, message):
+        '''set the message of the session'''
+        self.add_action(Action.ACTION_SET_MEDIA, (message,))
 
     def set_picture(self, picture_name):
         '''set the picture of the session to the picture with picture_name as
