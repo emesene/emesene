@@ -648,15 +648,21 @@ class Dialog(object):
         proxy -- a e3.Proxy object
         """
 
-        content = gtk.VBox()
-        box = gtk.Table(9, 2)
+        content = gtk.VBox(spacing=4)
+        advanced = gtk.Expander("Advanced")
+        box = gtk.Table(10, 2)
+        box.set_property('row-spacing', 4)
+        box.set_property('column-spacing', 4)
 
         combo = gtk.combo_box_new_text()
 
-        t_host = gtk.Entry()
-        t_port = gtk.Entry()
+        t_proxy_host = gtk.Entry()
+        t_proxy_port = gtk.Entry()
         t_user = gtk.Entry()
         t_passwd = gtk.Entry()
+
+        t_server_host = gtk.Entry()
+        t_server_port = gtk.Entry()
 
         def on_toggled(check_button, *entries):
             '''called when a check button is toggled, receive a set
@@ -667,12 +673,12 @@ class Dialog(object):
 
         c_use_http = gtk.CheckButton('Use HTTP method')
         c_use_proxy = gtk.CheckButton('Use proxy')
-        c_use_proxy.connect('toggled', on_toggled, t_host, t_port)
+        c_use_proxy.connect('toggled', on_toggled, t_proxy_host, t_proxy_port)
         c_use_auth = gtk.CheckButton('Use authentication')
         c_use_auth.connect('toggled', on_toggled, t_user, t_passwd)
 
-        t_host.set_text(proxy.host or '')
-        t_port.set_text(proxy.port or '')
+        t_proxy_host.set_text(proxy.host or '')
+        t_proxy_port.set_text(proxy.port or '')
         t_user.set_text(proxy.user or '')
         t_passwd.set_text(proxy.passwd or '')
         t_passwd.set_visibility(False)
@@ -686,6 +692,10 @@ class Dialog(object):
 
         l_session = gtk.Label('Session')
         l_session.set_alignment(0.0, 0.5)
+        l_server_host = gtk.Label('Server')
+        l_server_host.set_alignment(0.0, 0.5)
+        l_server_port = gtk.Label('Port')
+        l_server_port.set_alignment(0.0, 0.5)
         l_host = gtk.Label('Host')
         l_host.set_alignment(0.0, 0.5)
         l_port = gtk.Label('Port')
@@ -695,32 +705,67 @@ class Dialog(object):
         l_passwd = gtk.Label('Password')
         l_passwd.set_alignment(0.0, 0.5)
 
-        box.attach(l_session, 0, 1, 0, 1)
-        box.attach(combo, 1, 2, 0, 1)
-        box.attach(c_use_http, 0, 2, 1, 2)
-        box.attach(c_use_proxy, 0, 2, 2, 3)
-        box.attach(l_host, 0, 1, 3, 4)
-        box.attach(t_host, 1, 2, 3, 4)
-        box.attach(l_port, 0, 1, 4, 5)
-        box.attach(t_port, 1, 2, 4, 5)
-        box.attach(c_use_auth, 0, 2, 5, 6)
-        box.attach(l_user, 0, 1, 6, 7)
-        box.attach(t_user, 1, 2, 6, 7)
-        box.attach(l_passwd, 0, 1, 7, 8)
-        box.attach(t_passwd, 1, 2, 7, 8)
+        proxy_settings = (l_host, l_port, l_user, l_passwd, t_proxy_host,
+                t_proxy_port, t_user, t_passwd, c_use_auth)
+
+        def on_use_proxy_toggled(*args):
+            for widget in proxy_settings:
+                if c_use_proxy.get_active():
+                    widget.show()
+                else:
+                    widget.hide()
+
+        c_use_proxy.connect('toggled', on_use_proxy_toggled)
+
+        box.attach(l_server_host, 0, 1, 0, 1)
+        box.attach(t_server_host, 1, 2, 0, 1)
+        box.attach(l_server_port, 0, 1, 1, 2)
+        box.attach(t_server_port, 1, 2, 1, 2)
+        box.attach(c_use_http, 0, 2, 2, 3)
+        box.attach(c_use_proxy, 0, 2, 3, 4)
+        box.attach(l_host, 0, 1, 4, 5)
+        box.attach(t_proxy_host, 1, 2, 4, 5)
+        box.attach(l_port, 0, 1, 5, 6)
+        box.attach(t_proxy_port, 1, 2, 5, 6)
+        box.attach(c_use_auth, 0, 2, 6, 7)
+        box.attach(l_user, 0, 1, 7, 8)
+        box.attach(t_user, 1, 2, 7, 8)
+        box.attach(l_passwd, 0, 1, 8, 9)
+        box.attach(t_passwd, 1, 2, 8, 9)
 
         index = 0
         count = 0
-        name_to_id = {}
+        name_to_ext = {}
+        session_found = False
+        default_session_index = 0
+        default_session = extension.get_default('session')
+
         for ext_id, ext in extension.get_extensions('session').iteritems():
             if session == ext_id:
                 index = count
+                t_server_host.set_text(ext.DEFAULT_HOST)
+                t_server_port.set_text(ext.DEFAULT_PORT)
+                session_found = True
+                print session
+
+            if default_session.NAME == ext.NAME:
+                default_session_index = count
 
             combo.append_text(ext.NAME)
-            name_to_id[ext.NAME] = ext_id
+            name_to_ext[ext.NAME] = (ext_id, ext)
             count += 1
 
-        combo.set_active(index)
+        if session_found:
+            combo.set_active(index)
+        else:
+            combo.set_active(default_session_index)
+
+        def on_session_changed(*args):
+            session_id, ext = name_to_ext[combo.get_active_text()]
+            t_server_host.set_text(ext.DEFAULT_HOST)
+            t_server_port.set_text(ext.DEFAULT_PORT)
+
+        combo.connect('changed', on_session_changed)
 
         def response_cb(response):
             '''called on any response (close, accept, cancel) if accept
@@ -729,14 +774,16 @@ class Dialog(object):
                 use_http = c_use_http.get_active()
                 use_proxy = c_use_proxy.get_active()
                 use_auth = c_use_auth.get_active()
-                host = t_host.get_text()
-                port = t_port.get_text()
+                proxy_host = t_proxy_host.get_text()
+                proxy_port = t_proxy_port.get_text()
+                server_host = t_server_host.get_text()
+                server_port = t_server_port.get_text()
                 user = t_user.get_text()
                 passwd = t_passwd.get_text()
 
-                session_id = name_to_id[combo.get_active_text()]
-                callback(use_http, use_proxy, host, port, use_auth, user, passwd,
-                    session_id)
+                session_id, ext = name_to_ext[combo.get_active_text()]
+                callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
+                        user, passwd, session_id, server_host, server_port)
 
             window.hide()
 
@@ -749,13 +796,25 @@ class Dialog(object):
         window = cls.new_window('Preferences', response_cb)
         window.set_modal(True)
         window.hbox.pack_start(content, True, True)
-        content.pack_start(box, True, True)
+
+        session_box = gtk.HBox(spacing=4)
+        session_box.pack_start(l_session, True, True)
+        session_box.pack_start(combo, True, True)
+
+        advanced.add(box)
+        content.pack_start(session_box, False)
+        content.pack_start(advanced, True, True)
 
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
                 button_cb)
         cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
                 button_cb)
+
         window.show_all()
+
+        for widget in proxy_settings:
+            widget.hide()
+
 
 class EmotesWindow(gtk.Window):
     """

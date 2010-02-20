@@ -42,11 +42,11 @@ class ConfigDir(object):
         we take care of joining them'''
         path = self.join(*paths)
 
-        return os.path.isfile(path) and os.access(path, os.R_OK) 
+        return os.path.isfile(path) and os.access(path, os.R_OK)
 
     def create(self, *dirs):
         '''create all the dirs to the path starting from the base config path'''
-        
+
         current = self.base_dir
         for directory in dirs:
             current = os.path.join(current, directory)

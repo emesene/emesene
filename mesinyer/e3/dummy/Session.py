@@ -9,13 +9,16 @@ class Session(e3.Session):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
+    DEFAULT_HOST = "dummy.server.com"
+    DEFAULT_PORT = "1337"
+
     def __init__(self, id_=None, account=None):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
 
-    def login(self, account, password, status, proxy, use_http=False):
+    def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
-        self.account = e3.Account(account, password, status)
+        self.account = e3.Account(account, password, status, host)
         worker = Worker.Worker('emesene2', self, proxy, use_http)
         worker.start()
 

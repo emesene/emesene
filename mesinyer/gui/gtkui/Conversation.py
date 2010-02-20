@@ -155,7 +155,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         height = self.panel.get_position()
         if height > 0:
-            self.panel.set_position(int(height * 1.5))
+            self.panel.set_position(int(height * 1.8))
             self.panel.disconnect(self.panel_signal_id)
             del self.panel_signal_id
 

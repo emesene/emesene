@@ -43,7 +43,7 @@ class PluginHandler:
         self.name = os.path.basename(name.rstrip("/"))
         if not is_package:
             self.name = self.name.split(".")[0]
-        
+
         self.base_dir = base_dir
         self._instance = None
 
@@ -81,7 +81,7 @@ class PluginHandler:
                     PackageResource(self.base_dir, self.name)
         return self._instance
 
-    def start(self):
+    def start(self, session):
         '''Instanciate (if necessary) and starts the plugin.
         @return False if something goes wrong, else True.
         '''
@@ -90,11 +90,12 @@ class PluginHandler:
             return False
         try:
             inst.category_register()
-            inst.start()
+            inst.start(session)
             inst.extension_register()
             inst._started = True
         except Exception, reason:
             log.warning('error starting "%s": %s', (self.name, reason))
+            print 'error starting "%s": %s', (self.name, reason)
             return False
         return True
 
@@ -129,18 +130,18 @@ class PluginManager:
                 self._plugins[mod.name] = mod
             except Exception, reason:
                 log.warning('Exception while importing %s:\n%s', (file, reason))
-        
+
         log.debug('Imported plugins: %s', ', '.join(self._plugins.keys()))
 
-    def plugin_start(self, name):
+    def plugin_start(self, name, session):
         '''Starts a plugin.
         @param name The name of the plugin. See plugin_base.PluginBase.name.
         '''
         if name not in self._plugins:
             return False
-        
+
         log.info('starting plugin "%s"', name)
-        self._plugins[name].start()
+        self._plugins[name].start(session)
         return True
 
     def plugin_stop(self, name):
@@ -149,7 +150,7 @@ class PluginManager:
         '''
         if name not in self._plugins:
             return False
-        
+
         log.info('stopping plugin "%s"', name)
         self._plugins[name].stop()
         return True

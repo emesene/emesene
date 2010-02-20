@@ -8,6 +8,20 @@ import e3
 import logging
 log = logging.getLogger('jabber.Worker')
 
+STATUS_MAP = {}
+STATUS_MAP[e3.status.BUSY] = 'dnd'
+STATUS_MAP[e3.status.AWAY] = 'away'
+STATUS_MAP[e3.status.IDLE] = 'xa'
+STATUS_MAP[e3.status.ONLINE] = 'chat'
+STATUS_MAP[e3.status.OFFLINE] = 'unavailable'
+
+STATUS_MAP_REVERSE = {}
+STATUS_MAP_REVERSE['dnd'] = e3.status.BUSY
+STATUS_MAP_REVERSE['away'] = e3.status.AWAY
+STATUS_MAP_REVERSE['xa'] = e3.status.IDLE
+STATUS_MAP_REVERSE['chat'] = e3.status.ONLINE
+STATUS_MAP_REVERSE['unavailable'] = e3.status.OFFLINE
+
 class Worker(e3.Worker):
     '''wrapper of xmpppy to make it work like e3.Worker'''
 
@@ -17,8 +31,8 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
         self.jid = xmpp.protocol.JID(session.account.account)
-        self.client = xmpp.Client(self.jid.getDomain(), debug=[])
-        #self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
+        #self.client = xmpp.Client(self.jid.getDomain(), debug=[])
+        self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
 
         self.proxy = proxy
         self.proxy_data = None
@@ -58,6 +72,16 @@ class Worker(e3.Worker):
             except Queue.Empty:
                 pass
 
+    def _change_status(self, status_):
+        '''change the user status'''
+        contact = self.session.contacts.me
+        stat = STATUS_MAP[status_]
+
+        pres = xmpp.protocol.Presence(priority=24, show=stat, status=contact.message)
+        self.client.send(xmpp.protocol.Presence(priority=24,
+            show=stat,status=contact.message))
+        e3.base.Worker._handle_action_change_status(self, status_)
+
     def _on_presence(self, client, presence):
         '''handle the reception of a presence message'''
         message = presence.getStatus() or ''
@@ -65,14 +89,7 @@ class Worker(e3.Worker):
         type_ = presence.getType()
         account = presence.getFrom().getStripped()
 
-        if type_ == 'unavailable':
-            stat = e3.status.OFFLINE
-        elif show == 'away':
-            stat = e3.status.AWAY
-        elif show == 'dnd':
-            stat = e3.status.BUSY
-        else:
-            stat = e3.status.ONLINE
+        stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
 
         contact = self.session.contacts.contacts.get(account, None)
 
@@ -163,12 +180,12 @@ class Worker(e3.Worker):
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS
         '''
-        pass
+        self._change_status(status_)
 
-    def _handle_action_login(self, account, password, status_):
+    def _handle_action_login(self, account, password, status_, host, port):
         '''handle Action.ACTION_LOGIN
         '''
-        if self.client.connect(('talk.google.com', 5223),
+        if self.client.connect((host, int(port)),
                 proxy=self.proxy_data) == "":
             self.session.add_event(e3.Event.EVENT_LOGIN_FAILED,
                 'Connection error')
@@ -184,6 +201,7 @@ class Worker(e3.Worker):
         self.start_time = time.time()
 
         self.client.RegisterHandler('message', self._on_message)
+        self.client.RegisterHandler('presence', self._on_presence)
 
         self.client.sendInitPresence()
 
@@ -213,7 +231,7 @@ class Worker(e3.Worker):
                 contact.nick = name
 
         self.session.add_event(e3.Event.EVENT_CONTACT_LIST_READY)
-        self.client.RegisterHandler('presence', self._on_presence)
+        self._change_status(status_)
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT
@@ -258,7 +276,24 @@ class Worker(e3.Worker):
     def _handle_action_set_message(self, message):
         '''handle Action.ACTION_SET_MESSAGE
         '''
-        pass
+        contact = self.session.contacts.me
+        stat = STATUS_MAP[contact.status]
+
+        self.client.send(xmpp.protocol.Presence(priority=24, show=stat,
+            status=message))
+
+        e3.base.Worker._handle_action_set_message(self, message)
+
+    def _handle_action_set_media(self, message):
+        '''handle Action.ACTION_SET_MEDIA
+        '''
+        contact = self.session.contacts.me
+        stat = STATUS_MAP[contact.status]
+
+        self.client.send(xmpp.protocol.Presence(priority=24, show=stat,
+            status=message))
+
+        e3.base.Worker._handle_action_set_media(self, message)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK

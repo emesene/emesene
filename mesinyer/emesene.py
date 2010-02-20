@@ -105,8 +105,11 @@ class Controller(object):
         extension.category_register('session', msn.Session,
                 single_instance=True)
         extension.register('session', jabber.Session)
+        extension.register('session', dummy.Session)
+
         if papylib is not None:
             extension.register('session', papylib.Session)
+
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
                 e3.common.notification.notify)
@@ -119,7 +122,7 @@ class Controller(object):
         else:
             default_id = self.config.session
 
-        extension.set_default('session', dummy.Session)
+        #extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
 
     def _parse_commandline(self):
@@ -144,12 +147,14 @@ class Controller(object):
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
         account = self.config.get_or_set('last_logged_account', '')
-        
+
         #autologin
+        default_session = extension.get_default('session')
         if account != '' and int(self.config.d_remembers[account]) == 3:
             password = base64.b64decode(self.config.d_accounts[account])
             user = e3.Account(account, password,
-                              int(self.config.d_status[account]))
+                              int(self.config.d_status[account]),
+                              default_session.DEFAULT_HOST)
             self.on_login_connect(user, self.config.session, proxy, use_http)
         else:
             self.go_login(proxy, use_http)
@@ -350,7 +355,7 @@ class Controller(object):
         self.draw_main_screen()
 
     def on_login_connect(self, account, session_id, proxy,
-                         use_http, on_reconnect=False):
+                         use_http, host, port, on_reconnect=False):
         '''called when the user press the connect button'''
         self._save_login_dimensions()
         self._set_location(self.window)
@@ -368,6 +373,8 @@ class Controller(object):
             self.window.content.clear_connect()
 
         self._new_session()
+
+        # set default values if not already set
         self.session.config.get_or_set('b_play_send', True)
         self.session.config.get_or_set('b_play_nudge', True)
         self.session.config.get_or_set('b_play_first_send', True)
@@ -382,8 +389,9 @@ class Controller(object):
         self.session.config.get_or_set('b_show_info', True)
         self.session.config.get_or_set('b_show_toolbar', True)
         self.session.config.get_or_set('b_allow_auto_scroll', True)
+
         self.session.login(account.account, account.password, account.status,
-            proxy, use_http)
+            proxy, host, port, use_http)
         gobject.timeout_add(500, self.session.signals._handle_events)
 
     def on_cancel_login(self):

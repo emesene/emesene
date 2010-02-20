@@ -29,22 +29,26 @@ AUTHOR_LIST = ['Riccardo (C10uD)', 'Orfeo (Otacon)']
 class Session(e3.Session):
     '''a specialization of e3.base.Session'''
     NAME = 'Papyon session'
-    DESCRIPTION = 'MSN session with papyon library'
+    DESCRIPTION = 'MSN session (papyon)'
     AUTHOR = ", ".join(AUTHOR_LIST)
     WEBSITE = 'www.emesene.org'
+
+    DEFAULT_HOST = "messenger.hotmail.com"
+    DEFAULT_PORT = "1863"
 
     def __init__(self, id_=None, account=None):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
 
-    def login(self, account, password, status, proxy, use_http=False):
+    def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
         worker = Worker('emesene2', self, proxy, use_http)
         worker.start()
 
-        self.account = e3.Account(account, password, status)
-        
-        self.add_action(e3.Action.ACTION_LOGIN, (account, password, status))
+        self.account = e3.Account(account, password, status, host)
+
+        self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
+            host, port))
 
     def send_message(self, cid, text, style=None):
         '''send a common message'''
