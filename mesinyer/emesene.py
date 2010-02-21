@@ -37,6 +37,8 @@ from e3 import msn
 from e3 import jabber
 from e3 import dummy
 
+from gui import gtkui
+
 try:
     from e3 import papylib
 except Exception, exc:
