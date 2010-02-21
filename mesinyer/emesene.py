@@ -21,7 +21,6 @@
 import os
 import sys
 import gtk
-import time
 import base64
 import gobject
 import gettext
@@ -49,7 +48,6 @@ import extension
 import interfaces
 
 import gui
-from gui import gtkui
 
 # fix for gstreamer --help
 argv = sys.argv
@@ -65,11 +63,10 @@ else:
 
 
 class VerboseOption(object):
-
-    def __init__(self):
-        pass
+    '''option parser'''
 
     def option_register(self):
+        '''register the options to parse by the command line option parser'''
         option = optparse.Option("-v", "--verbose",
             action="count", dest="debuglevel", default=0,
             help="Enable debug in console (add another -v to show debug)")
@@ -122,27 +119,27 @@ class Controller(object):
         else:
             default_id = self.config.session
 
-        #extension.set_default('session', dummy.Session)
         get_pluginmanager().scan_directory('plugins')
 
     def _parse_commandline(self):
-        options, args = PluggableOptionParser.get_parsing()
+        '''parse command line options'''
+        options = PluggableOptionParser.get_parsing()[0]
 
         debugger.init(debuglevel=options.debuglevel)
 
-    def start(self, account=None, accounts=None):
+    def start(self, account=None):
         '''the entry point to the class'''
-        Window = extension.get_default('window frame')
-        self.window = Window(None) # main window
+        windowcls = extension.get_default('window frame')
+        self.window = windowcls(None) # main window
         self._set_location(self.window)
 
         if self.tray_icon is not None:
             self.tray_icon.set_visible(False)
 
-        TrayIcon = extension.get_default('tray icon')
+        trayiconcls = extension.get_default('tray icon')
         handler = gui.base.TrayIconHandler(self.session, gui.theme,
             self.on_user_disconnect, self.on_close)
-        self.tray_icon = TrayIcon(handler, self.window)
+        self.tray_icon = trayiconcls(handler, self.window)
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
@@ -155,7 +152,10 @@ class Controller(object):
             user = e3.Account(account, password,
                               int(self.config.d_status[account]),
                               default_session.DEFAULT_HOST)
-            self.on_login_connect(user, self.config.session, proxy, use_http)
+            host = default_session.DEFAULT_HOST
+            port = default_session.DEFAULT_PORT
+            self.on_login_connect(user, self.config.session, proxy, use_http,
+                    host, int(port))
         else:
             self.go_login(proxy, use_http)
 
@@ -266,7 +266,7 @@ class Controller(object):
         user = self.config.get_or_set('proxy_user', '')
         passwd = self.config.get_or_set('proxy_passwd', '')
 
-        use_http = self.config.get_or_set('b_use_http', False)
+        self.config.get_or_set('b_use_http', False)
 
         return e3.Proxy(use_proxy, host, port, use_proxy_auth, user,
             passwd)
@@ -303,7 +303,7 @@ class Controller(object):
         self.set_default_extensions_from_config()
 
         self.window.go_main(self.session,
-                self.on_new_conversation, self.on_close, self.on_user_disconnect)
+            self.on_new_conversation, self.on_close, self.on_user_disconnect)
 
     def _set_location(self, window, is_conv=False):
         '''get and set the location of the window'''
@@ -424,15 +424,15 @@ class Controller(object):
         '''callback called when the other user does an action that justify
         opening a conversation'''
         if self.conversations is None:
-            Window = extension.get_default('window frame')
-            window = Window(self._on_conversation_window_close)
+            windowcls = extension.get_default('window frame')
+            window = windowcls(self._on_conversation_window_close)
 
             window.go_conversation(self.session)
             self._set_location(window, True)
             self.conversations = window.content
             window.show()
 
-        (exists, conversation) = self.conversations.new_conversation(cid,
+        exists, conversation = self.conversations.new_conversation(cid,
             members)
 
         conversation.update_data()
@@ -504,11 +504,10 @@ class Controller(object):
         self.window.content.on_reconnect(self.on_login_connect, account)
 
 class ExtensionDefault(object):
-
-    def __init__(self):
-        pass
+    '''extension to register options for extensions'''
 
     def option_register(self):
+        '''register options'''
         option = optparse.Option('--ext-default', '-e')
         option.type = 'string' #well, it's a extName:defaultValue string
         option.action = 'callback'
@@ -518,8 +517,10 @@ class ExtensionDefault(object):
         return option
 
     def set_default(self, option, opt, value, parser):
+        '''set default extensions'''
         for couple in value.split(';'):
-            (category_name, ext_name) = map(string.strip, couple.split(':', 2))
+            category_name, ext_name = map(string.strip, couple.split(':', 2))
+
             if not extension.get_category(category_name)\
                     .set_default_by_name(ext_name):
                 print 'Error setting extension "%s" default session to "%s"'\
@@ -552,7 +553,6 @@ class PluggableOptionParser(object):
 
 
 def main():
-    global argv
     """
     the main method of emesene
     """
