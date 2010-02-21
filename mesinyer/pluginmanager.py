@@ -74,7 +74,8 @@ class PluginHandler:
             self._instance = self.module.Plugin()
         except Exception, reason:
             self._instance = None
-            log.warning('error creating instance for "%s": %s', self.name, reason)
+            log.warning('error creating instance for "%s": %s',
+                    self.name, reason)
         else:
             if self.is_package:
                 self._instance.resource = \
@@ -119,17 +120,18 @@ class PluginManager:
 
     def scan_directory(self, dir_):
         '''Find plugins and packages inside dir_'''
-        for file in os.listdir(dir_):
-            path = os.path.join(dir_, file)
-            if file.startswith(".") or \
-               not (os.path.isdir(path) or file.endswith('.py')):
+        for filename in os.listdir(dir_):
+            path = os.path.join(dir_, filename)
+            if filename.startswith(".") or \
+               not (os.path.isdir(path) or filename.endswith('.py')):
                 continue
 
             try:
-                mod = PluginHandler(dir_, file, os.path.isdir(path))
+                mod = PluginHandler(dir_, filename, os.path.isdir(path))
                 self._plugins[mod.name] = mod
             except Exception, reason:
-                log.warning('Exception while importing %s:\n%s', (file, reason))
+                log.warning('Exception while importing %s:\n%s',
+                        (filename, reason))
 
         log.debug('Imported plugins: %s', ', '.join(self._plugins.keys()))
 
