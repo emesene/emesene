@@ -29,7 +29,6 @@ import optparse
 
 import string
 
-import utils
 import debugger
 import logging
 log = logging.getLogger('emesene')
@@ -38,6 +37,7 @@ import e3
 from e3 import msn
 from e3 import jabber
 from e3 import dummy
+
 try:
     from e3 import papylib
 except Exception, exc:
@@ -293,8 +293,6 @@ class Controller(object):
     def draw_main_screen(self):
         '''create and populate the main screen
         '''
-        # clear image cache
-        utils.pixbufs = {}
         self.window.clear()
         self.tray_icon.set_main(self.session)
         image_name = self.session.config.get_or_set('image_theme', 'default')
