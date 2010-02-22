@@ -43,6 +43,9 @@ def register(handler_name, handler):
 
     __handlers[handler_name] = handler
 
+def get_handler_names():
+    return sorted(__handlers.keys())
+
 ## below are the methods that a handler should implement
 
 def is_running(name):

@@ -95,6 +95,7 @@ class PluginHandler:
             inst.extension_register()
             inst._started = True
         except Exception, reason:
+            raise reason
             log.warning('error starting "%s": %s', (self.name, reason))
             print 'error starting "%s": %s', (self.name, reason)
             return False
@@ -105,6 +106,13 @@ class PluginHandler:
         if self.is_active():
             self._instance.stop()
             self._instance._started = False
+
+    def config(self, session):
+        if self.is_active():
+            self._instance.config(session)
+            return True
+
+        return False
 
     def is_active(self):
         '''@return True if an instance exist and is started. False otherwise'''
@@ -156,6 +164,16 @@ class PluginManager:
         log.info('stopping plugin "%s"', name)
         self._plugins[name].stop()
         return True
+
+    def plugin_config(self, name, session):
+        '''Config a plugin.
+        @param name The name of the plugin. See plugin_base.PluginBase.name.
+        '''
+        if name not in self._plugins:
+            return False
+
+        log.info('configuring plugin "%s"', name)
+        return self._plugins[name].config(session)
 
     def plugin_is_active(self, name):
         '''Check if a plugin is active.

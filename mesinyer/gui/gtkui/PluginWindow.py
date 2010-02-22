@@ -55,7 +55,6 @@ class PluginWindow(gtk.Window):
         scroll.set_shadow_type(gtk.SHADOW_IN)
         scroll.set_border_width(1)
 
-
         button_hbox = gtk.HButtonBox()
         button_hbox.set_layout(gtk.BUTTONBOX_END)
         button_hbox.set_border_width(2)
@@ -66,7 +65,11 @@ class PluginWindow(gtk.Window):
         button_stop = gtk.Button(stock=gtk.STOCK_STOP)
         button_stop.connect('clicked', self.on_stop)
 
+        button_config = gtk.Button(stock=gtk.STOCK_PREFERENCES)
+        button_config.connect('clicked', self.on_config)
+
         main_vbox.pack_start(scroll)
+        button_hbox.pack_start(button_config, fill=False)
         button_hbox.pack_start(button_start, fill=False)
         button_hbox.pack_start(button_stop, fill=False)
         main_vbox.pack_start(button_hbox, False)
@@ -88,9 +91,19 @@ class PluginWindow(gtk.Window):
         '''stop the selected plugin'''
         sel = self.plugin_list_view.get_selection()
         model, iter = sel.get_selected()
-        name = model.get_value(iter, 1)
+        name = model.get_value(iter, 2)
         pluginmanager = get_pluginmanager()
         pluginmanager.plugin_stop(name)
         print pluginmanager.plugin_is_active(name), 'after stop'
         model.set_value(iter, 0, pluginmanager.plugin_is_active(name))
+
+    def on_config(self, *args):
+        '''stop the selected plugin'''
+        sel = self.plugin_list_view.get_selection()
+        model, iter = sel.get_selected()
+        name = model.get_value(iter, 2)
+        pluginmanager = get_pluginmanager()
+
+        if pluginmanager.plugin_is_active(name):
+            pluginmanager.plugin_config(name, self.session)
 

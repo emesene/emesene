@@ -25,6 +25,10 @@ class PluginBase(object):
         '''method to stop the plugin'''
         raise NotImplementedError()
 
+    def config(self, session):
+        '''method to config the plugin'''
+        raise NotImplementedError()
+
     def category_register(self):
         '''It's a placeholder. Can be safely called even if not implemented
         (that means the plugin is old-style)'''
