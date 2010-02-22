@@ -81,4 +81,4 @@ def test():
         print
 
 import handler_mpd
-
+import handler_amarok2
