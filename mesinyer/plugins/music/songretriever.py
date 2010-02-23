@@ -87,3 +87,4 @@ import handler_mpd
 import handler_amarok2
 import handler_gmusicbrowser
 import handler_moc
+import handler_banshee
