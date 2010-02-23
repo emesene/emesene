@@ -85,4 +85,5 @@ def test():
 
 import handler_mpd
 import handler_amarok2
+import handler_rhythmbox
 import handler_gmusicbrowser

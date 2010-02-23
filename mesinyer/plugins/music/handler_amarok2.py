@@ -9,14 +9,6 @@ class AmarokHandler(DBusBase.DBusBase):
                  iface_path='/TrackList'):
         DBusBase.DBusBase.__init__(self, iface_name, iface_path)
 
-    def is_running(self):
-        '''Returns a True if the player is running'''
-        try:
-            is_running_iface = self.bus.get_object(self.iface_name, '/Player')
-            return bool(is_running_iface)
-        except:
-            return self.reconnect()
-
     def is_playing(self):
         '''Returns True if a song is being played'''
         if self.is_running():
@@ -37,4 +29,4 @@ class AmarokHandler(DBusBase.DBusBase):
                                       song['title'],
                                       song['location'])
 
-songretriever.register('Amarok2', AmarokHandler())
+songretriever.register('amarok2', AmarokHandler())
