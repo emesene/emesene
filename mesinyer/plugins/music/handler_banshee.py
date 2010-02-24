@@ -3,18 +3,11 @@ import songretriever
 import DBusBase
 
 class BansheeHandler(DBusBase.DBusBase):
-    '''Handler for Amarok2'''
+    '''Handler for Banshee'''
 
     def __init__(self, iface_name = 'org.bansheeproject.Banshee',
                  iface_path='/org/bansheeproject/Banshee/PlayerEngine'):
         DBusBase.DBusBase.__init__(self, iface_name, iface_path)
-
-    def is_running(self):
-        '''Returns a True if the player is running'''
-        try:
-            return bool(self.iface)
-        except:
-            return self.reconnect()
 
     def is_playing(self):
         '''Returns True if a song is being played'''
