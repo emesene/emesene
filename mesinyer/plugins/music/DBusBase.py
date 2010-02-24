@@ -48,7 +48,13 @@ class DBusBase(object):
 
     def is_running(self):
         '''Returns a True if the player is running'''
-        return False
+        if self.is_name_active(self.iface_name):
+            if self.iface is None:
+                self.reconnect()
+            return True
+        else:
+            self.iface = None
+            return False
 
     def is_playing(self):
         '''Returns True if a song is being played'''
