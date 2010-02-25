@@ -71,8 +71,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         if len(self.members) == 0:
             self.header.information = ('connecting', 'creating conversation')
 
-        if self.session.contacts.me.picture:
-            my_picture = self.session.contacts.me.picture
+        last_avatar = self.session.config.last_avatar
+        if self.session.config_dir.file_readable(last_avatar):
+            my_picture = last_avatar
         else:
             my_picture = gui.theme.logo
 
