@@ -4,7 +4,7 @@ import gobject
 
 import e3
 import gui
-import utils
+from gui.gtkui import utils
 
 class StatusCombo(gtk.ComboBox):
     """a widget to select the status like the one in emesene 1.0"""

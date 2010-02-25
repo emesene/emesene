@@ -7,7 +7,7 @@ class Plugin(PluginBase):
     def __init__(self):
         PluginBase.__init__(self)
 
-    def start(self):
+    def start(self, session):
         self.extensions_register()
 
     def extensions_register(self):

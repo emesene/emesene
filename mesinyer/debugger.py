@@ -18,36 +18,7 @@ How to use
 '''
 
 import logging
-import warnings
 import collections
-
-import inspect
-import os.path
-
-def _build_caller():
-    caller_obj = inspect.stack()[2]
-    filename = caller_obj[0].f_code.co_filename
-    caller = '%s' % (os.path.basename(filename).split('.py')[0])
-    return caller
-
-def dbg(text, caller=None, level=1):
-    warnings.warn("Use logging.getLogger(name).log instead", DeprecationWarning, stacklevel=3)
-
-    if not caller:
-        caller = _build_caller()
-
-    logging.getLogger('debugger.' + caller).log(level*10, text)
-
-
-def _log_function(level):
-    '''Returns a function that calls dbg with a specific level'''
-    return lambda text, caller=None: dbg(text, caller, level / 10)
-
-log = debug = _log_function(logging.DEBUG)
-info = _log_function(logging.INFO)
-warning = _log_function(logging.WARNING)
-error = _log_function(logging.ERROR)
-critical = _log_function(logging.CRITICAL)
 
 class QueueHandler(logging.Handler):
     '''A Handler that just keeps the last messages in memory, using a queue.
@@ -80,7 +51,8 @@ def init(debuglevel=0):
     root = logging.getLogger()
 
     console_handler = logging.StreamHandler()
-    formatter = logging.Formatter('[%(asctime)s %(levelname)s %(name)s] %(message)s', '%H:%M:%S')
+    formatter = logging.Formatter(
+            '[%(asctime)s %(levelname)s %(name)s] %(message)s', '%H:%M:%S')
     console_handler.setFormatter(formatter)
 
     levels = {

@@ -149,7 +149,6 @@ class Worker(e3.Worker):
 
         self._common_handlers = common_handlers
 
-
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         to the socket or add a new event to the socket depending on the data'''
@@ -892,3 +891,4 @@ class Worker(e3.Worker):
                 self._handle_action_new_conversation(None, conversation.cid)
 
             conversation.send_message(message)
+
