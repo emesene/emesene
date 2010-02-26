@@ -39,4 +39,4 @@ class RhythmboxHandler(DBusBase.DBusBase):
                                       song['album'],
                                       song['title'])
 
-songretriever.register('rhythmbox', RhythmboxHandler())
+songretriever.register('rhythmbox', RhythmboxHandler)
