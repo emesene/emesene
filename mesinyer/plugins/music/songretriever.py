@@ -5,6 +5,7 @@ and will look for the handler of that music player and call the apropiate
 function there'''
 
 __handlers = {}
+__active_handlers = {}
 
 # look at the bottom for the imports!
 
@@ -50,7 +51,7 @@ def get_handler_names():
 
 def is_running(name):
     '''returns True if the player is running'''
-    handler = __handlers.get(name, None)
+    handler = get_handler(name)
 
     if handler is None:
         return False
@@ -59,16 +60,32 @@ def is_running(name):
 
 def is_playing(name):
     '''returns True if the player is playing a song'''
-    handler = __handlers.get(name, None)
+    handler = get_handler(name)
 
     if handler is None:
         return False
 
     return handler.is_playing()
 
+def get_handler(name):
+    '''try to get the handler from the active handlers, if not active
+    create an instance'''
+    instance = __active_handlers.get(name, None)
+
+    if instance is None:
+        handler = __handlers.get(name, None)
+
+        if handler is None:
+            return None
+
+        instance = handler()
+
+    __active_handlers[name] = instance
+    return instance
+
 def get_current_song(name):
     '''returns the current song or None if no song is playing'''
-    handler = __handlers.get(name, None)
+    handler = get_handler(name)
 
     if handler is None:
         return None

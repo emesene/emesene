@@ -29,4 +29,4 @@ class AmarokHandler(DBusBase.DBusBase):
                                       song['title'],
                                       song['location'])
 
-songretriever.register('amarok2', AmarokHandler())
+songretriever.register('amarok2', AmarokHandler)

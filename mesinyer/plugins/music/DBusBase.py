@@ -33,7 +33,6 @@ class DBusBase(object):
         self.iface = None
         self.module = dbus
         self.root = dbus.SessionBus().get_object(ROOT_NAME, ROOT_PATH)
-        self.reconnect()
 
     def reconnect(self):
         '''method to attemp a reconnection, via dbus, this is only
