@@ -213,8 +213,7 @@ class Login(gtk.Alignment):
         auto_login = self.auto_login.get_active()
 
         if user == '' or password == '':
-            self.nicebar.new_message('user or password fields are empty',
-                                      gtk.STOCK_DIALOG_ERROR)
+            self.show_error(_('user or password fields are empty'))
             return
 
         self._config_account(account, remember_account, remember_password,
@@ -326,7 +325,7 @@ class Login(gtk.Alignment):
         '''
         show an error on the top of the window using nicebar
         '''
-        self.nicebar.new_message(_(reason), gtk.STOCK_DIALOG_ERROR)
+        self.nicebar.new_message(reason, gtk.STOCK_DIALOG_ERROR)
 
     def _reload_account_list(self, *args):
         '''
@@ -378,8 +377,7 @@ class Login(gtk.Alignment):
                     if self.config_dir.dir_exists(dir_at):
                         rmtree(dir_at)
                 except:
-                    self.nicebar.new_message(_('Error while deleting user'),
-                                             gtk.STOCK_DIALOG_ERROR)
+                    self.show_error(_('Error while deleting user'))
 
                 if account in self.accounts:
                     del self.accounts[account]
