@@ -49,8 +49,14 @@ class Login(gtk.Alignment):
 
         self.dialog = extension.get_default('dialog')
 
-        self.server_host = extension.get_default('session').DEFAULT_HOST
-        self.server_port = extension.get_default('session').DEFAULT_PORT
+        if session_id is not None:
+            for ext_id, ext in extension.get_extensions('session').iteritems():
+                if session_id == ext_id:
+                    self.server_host = ext.DEFAULT_HOST
+                    self.server_port = ext.DEFAULT_PORT
+        else:
+            self.server_host = extension.get_default('session').DEFAULT_HOST
+            self.server_port = extension.get_default('session').DEFAULT_PORT
 
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
