@@ -82,12 +82,14 @@ class Login(gtk.Alignment):
         self.txt_password.set_visibility(False)
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
+        self.txt_password.connect('changed', self._on_password_changed)
 
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
         self.img_account = gtk.Image()
-        path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
+        path = self.config_dir.join(account.replace('@','-at-'), \
+                                                 'avatars', 'last')
         if self.config_dir.file_readable(path):
             pix = utils.safe_gtk_pixbuf_load(path, (96,96))
         else:
@@ -285,6 +287,7 @@ class Login(gtk.Alignment):
                 flag = True
             elif attr == 1:#only account checked
                 self.remember_account.set_active(True)
+                self.remember_password.set_sensitive(False)
             else:#if i'm here i have an error
                 self.show_error(_(
                           'Error while reading user config'))
@@ -345,6 +348,10 @@ class Login(gtk.Alignment):
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
+
+    def _on_password_changed(self, widget):
+        state = (self.txt_password.get_text() != "")
+        self.remember_password.set_sensitive(state)
 
     def _on_account_key_press(self, widget, event):
         '''
@@ -427,6 +434,10 @@ class Login(gtk.Alignment):
         '''
         if self.remember_password.get_active():
             self.remember_account.set_active(True)
+            self.txt_password.set_sensitive(False)
+        else:
+            self.txt_password.set_sensitive(True)
+            self.txt_password.set_text("")
 
     def _on_auto_login_toggled(self, button):
         '''
