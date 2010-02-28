@@ -25,6 +25,9 @@ class TextBox(gtk.ScrolledWindow):
         self._textbox.show()
         self._buffer = RichBuffer.RichBuffer()
         self._textbox.set_buffer(self._buffer)
+        self._textbox.connect('copy-clipboard', self._on_copy_clipboard)
+        self.clipboard = gtk.Clipboard(selection=gtk.gdk.atom_intern("CLIPBOARD"))
+        self._buffer.add_selection_clipboard(self.clipboard)
         self.add(self._textbox)
 
     def clear(self):
@@ -60,6 +63,14 @@ class TextBox(gtk.ScrolledWindow):
     def _set_text(self, text):
         '''set the text on the widget'''
         self._buffer.set_text(text)
+
+    def _on_copy_clipboard(self, textview):
+        ''' replaces the copied text with a new text with the
+        alt text of the images selected at copying '''
+        start, end = self._buffer.get_selection_bounds()
+        selection = self._buffer.get_text(start, end, True)
+        self.clipboard.set_text(selection, len(selection))
+        self.clipboard.store()
 
     def _get_text(self):
         '''return the text of the widget'''
