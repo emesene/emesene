@@ -69,7 +69,7 @@ class AvatarCache(Cache.Cache):
         path = os.path.join(self.path, hash_)
         last_path = os.path.join(self.path, 'last')
         item.seek(0)
-        handle = file(path, 'w')
+        handle = file(path, 'w+b', 0700)
         handle.write(item.read())
         handle.close()
 

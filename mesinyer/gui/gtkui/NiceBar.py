@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import gtk
+import pango
 
 import logging
 log = logging.getLogger('gtkui.NiceBar')
@@ -18,6 +19,7 @@ class NiceBar(gtk.EventBox):
 
         self.message_label = gtk.Label()
         self.message_label.set_line_wrap(True)
+        self.message_label.set_ellipsize(pango.ELLIPSIZE_END)
         self.message_image = gtk.Image()
         self.message_hbox = gtk.HBox()
         self.message_hbox.set_border_width(2)
