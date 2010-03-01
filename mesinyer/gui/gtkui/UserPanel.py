@@ -171,7 +171,7 @@ class UserPanel(gtk.VBox):
                     if os.path.exists(self.avatar_path):
                         os.remove(self.avatar_path)
                     pix_128.save(self.avatar_path, 'png')
-                except OSError as e:
+                except OSError, e:
                    print e
         #TODO better way to do this???
         path_dir = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
