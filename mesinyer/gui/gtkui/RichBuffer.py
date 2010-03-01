@@ -25,9 +25,8 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         self.underline_tag = self.create_tag("underline",
             underline=pango.UNDERLINE_SINGLE)
         self.strike_tag = self.create_tag("strike", strikethrough=True)
-        self.invisible_tag = self.create_tag("invisible", invisible=True)
 
-        self.widgets = []
+        self.widgets = {}
 
     def put_text(self, text, fg_color=None, bg_color=None, font=None, size=None,
         bold=False, italic=False, underline=False, strike=False):
@@ -38,17 +37,12 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         iterator = self.get_end_iter()
         self._insert(iterator, text, tags)
 
-    def put_widget(self, widget, alt=None):
+    def put_widget(self, widget):
         '''insert a widget at the current position'''
 
         iterator = self.get_end_iter()
         anchor = self.create_child_anchor(iterator)
-
-        if alt is not None:
-            print "alt:", alt
-            self._insert(iterator, alt, [self.invisible_tag])
-
-        self.widgets.append((widget, anchor))
+        self.widgets[anchor] = widget
 
     def put_image(self, path, tip=None):
         '''insert an image at the current position
@@ -63,7 +57,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         if tip is not None:
             img.set_tooltip_text(tip)
 
-        self.put_widget(img, tip)
+        self.put_widget(img)
 
     def new_line(self):
         '''insert a new_line on the text'''
