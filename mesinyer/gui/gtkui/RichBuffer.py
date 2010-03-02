@@ -26,7 +26,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
             underline=pango.UNDERLINE_SINGLE)
         self.strike_tag = self.create_tag("strike", strikethrough=True)
 
-        self.widgets = []
+        self.widgets = {}
 
     def put_text(self, text, fg_color=None, bg_color=None, font=None, size=None,
         bold=False, italic=False, underline=False, strike=False):
@@ -39,29 +39,23 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
 
     def put_widget(self, widget):
         '''insert a widget at the current position'''
+
         iterator = self.get_end_iter()
         anchor = self.create_child_anchor(iterator)
-
-        self.widgets.append((widget, anchor))
+        self.widgets[anchor] = widget
 
     def put_image(self, path, tip=None):
         '''insert an image at the current position
-        tip it's the alt text on mouse over'''
-        img_fd = open(path[7:]) # to remove file://
-
-        loader = gtk.gdk.PixbufLoader()
-        loader.write(img_fd.read())
-        loader.close()
-
-        img_fd.close()
+        tip it's the alt text on mouse over
+        and the text copied to the clipboard'''
+        pixbuf = gtk.gdk.PixbufAnimation(path[7:])
 
         img = gtk.Image()
-        img.set_from_animation(loader.get_animation())
+        img.set_from_animation(pixbuf)
         img.show()
 
-        if tip:
-            tooltip = gtk.Tooltips()
-            tooltip.set_tip(img, tip)
+        if tip is not None:
+            img.set_tooltip_text(tip)
 
         self.put_widget(img)
 
