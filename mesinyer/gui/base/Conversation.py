@@ -14,6 +14,7 @@ class Conversation(object):
         self.session = session
         self.cid = float(cid)
         self.formatter = e3.common.MessageFormatter(session.contacts.me)
+        self.first = True
 
         self._header_visible = True
         self._image_visible = True
@@ -210,9 +211,40 @@ class Conversation(object):
             middle = MarkupParser.escape(text)
             middle = e3.common.add_style_to_message(middle, self.cstyle, False)
 
-        all = first + middle + last
-        self.output.append(all, cedict,self.session.config.b_allow_auto_scroll)
+        all_ = first + middle + last
+        self.output.append(all_, cedict, self.session.config.b_allow_auto_scroll)
         self.play_type()
+        self.first = False
+
+    def on_receive_message(self, message, account, cedict):
+        '''method called when a message arrives to the conversation'''
+        contact = self.session.contacts.get(account)
+
+        if contact:
+            nick = contact.display_name
+        else:
+            nick = account
+            contact = e3.Contact(account)
+
+        msg = gui.Message.from_contact(contact, message.body, self.first, True)
+        self.first = False
+
+        if message.type == e3.Message.TYPE_MESSAGE:
+            (is_raw, consecutive, outgoing, first, last) = \
+                self.formatter.format(contact)
+
+            middle = MarkupParser.escape(message.body)
+            if not is_raw:
+                middle = self.format_from_message(message)
+
+            self.output.append(first + middle + last, cedict, self.session.config.b_allow_auto_scroll)
+            self.play_send()
+
+        elif message.type == e3.Message.TYPE_NUDGE:
+            self.output.append(
+                self.formatter.format_information(
+                    '%s just sent you a nudge!' % (nick,)), self.session.config.b_allow_auto_scroll)
+            self.play_nudge()
 
     def _get_icon(self):
         '''return the icon that represent the current status of the
@@ -363,4 +395,7 @@ class Conversation(object):
         """
         gui.play(self.session, gui.theme.sound_type)
 
+    def format_from_message(self, message):
+        '''return a markup text representing the format on the message'''
+        return e3.common.add_style_to_message(message.body, message.style)
 
