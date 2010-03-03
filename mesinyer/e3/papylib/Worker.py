@@ -233,6 +233,24 @@ class Worker(e3.base.Worker, papyon.Client):
         else:
             papysession.accept()
 
+        # define new stuff
+        papysession.RECEIVED_CHUNKS = 0
+        # temp methods to show whats possible
+        papysession.connect("accepted", self.ft_accepted)
+        papysession.connect("progressed", self.ft_progressed)
+        papysession.connect("completed", self.ft_completed)
+
+
+    def ft_accepted(self):
+        print "accepted"
+
+    def ft_progressed(self, ftsession, len_chunk):
+        print "progress..", ftsession.RECEIVED_CHUNKS*len_chunk, "/", ftsession.size
+        ftsession.RECEIVED_CHUNKS += 1
+
+    def ft_completed(self, ftsession, data):
+        print "data:", len(data.getvalue())
+
     # call handlers
     def _on_call_incoming(self, papycallevent):
         """Called once the incoming call is ready."""
