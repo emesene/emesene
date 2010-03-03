@@ -27,6 +27,7 @@ def gtk_main(Controller):
     import Preferences
     import Conversation
     import ImageChooser
+    import AdiumTextBox
     import WebKitTextBox
     import AvatarChooser
     import ConversationManager
@@ -108,6 +109,7 @@ def setup():
     if not WebKitTextBox.ERROR:
         extension.category_register('conversation output', WebKitTextBox.OutputText)
         extension.register('conversation output', TextBox.OutputText)
+        extension.register('conversation output', AdiumTextBox.OutputText)
     else:
         extension.category_register('conversation output', TextBox.OutputText)
 

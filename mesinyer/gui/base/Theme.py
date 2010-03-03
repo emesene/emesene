@@ -1,6 +1,7 @@
 import os
 import re
 
+import AdiumThemes
 from e3 import status
 
 class Theme(object):
@@ -130,6 +131,13 @@ class Theme(object):
         self.sound_name = sound_name
 
         self.theme_path = os.path.join("themes", "images", self.image_name)
+        self.conv_themes_path = os.path.join(os.getcwd(), "themes/conversations")
+        self.conv_themes = AdiumThemes.get_instance()
+        self.conv_themes.add_themes_path(self.conv_themes_path)
+
+        # TODO: get the theme from config
+        self.conv_theme = self.conv_themes.get(self.conv_themes.list()[0])[1]
+
         self.sound_theme_path = os.path.join("themes", "sounds",
                 self.sound_name)
 

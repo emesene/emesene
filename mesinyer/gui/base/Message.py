@@ -1,5 +1,6 @@
 '''a module that contains a class that represents a message
 '''
+import os
 import e3
 import gui
 
@@ -29,8 +30,13 @@ class Message(object):
 
     @classmethod
     def from_contact(cls, contact, message, first, incomming):
+        picture = contact.picture
+
+        if not picture:
+            picture = os.path.abspath(gui.theme.user)
+
         return gui.base.Message(incomming, first, contact.account,
-                contact.display_name, contact.alias, contact.picture,
+                contact.display_name, contact.alias, picture,
                 gui.theme.status_icons[contact.status], message,
                 e3.status.STATUS[contact.status])
 
