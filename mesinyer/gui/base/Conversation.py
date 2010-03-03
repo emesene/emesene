@@ -121,7 +121,8 @@ class Conversation(object):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
         self.output.append(
-            self.formatter.format_information('you just sent a nudge!'),self.session.config.b_allow_auto_scroll)
+            self.formatter.format_information('you just sent a nudge!'), None,
+            self.session.config.b_allow_auto_scroll)
         self.play_nudge()
 
     def show(self):
@@ -220,30 +221,18 @@ class Conversation(object):
         '''method called when a message arrives to the conversation'''
         contact = self.session.contacts.get(account)
 
-        if contact:
-            nick = contact.display_name
-        else:
-            nick = account
+        if contact is None:
             contact = e3.Contact(account)
 
         msg = gui.Message.from_contact(contact, message.body, self.first, True)
         self.first = False
 
         if message.type == e3.Message.TYPE_MESSAGE:
-            (is_raw, consecutive, outgoing, first, last) = \
-                self.formatter.format(contact)
-
-            middle = MarkupParser.escape(message.body)
-            if not is_raw:
-                middle = self.format_from_message(message)
-
-            self.output.append(first + middle + last, cedict, self.session.config.b_allow_auto_scroll)
+            self.output.message(self.formatter, contact, message, cedict)
             self.play_send()
 
         elif message.type == e3.Message.TYPE_NUDGE:
-            self.output.append(
-                self.formatter.format_information(
-                    '%s just sent you a nudge!' % (nick,)), self.session.config.b_allow_auto_scroll)
+            self.output.information(self.formatter, contact, message)
             self.play_nudge()
 
     def _get_icon(self):
@@ -394,8 +383,4 @@ class Conversation(object):
         play the send sound
         """
         gui.play(self.session, gui.theme.sound_type)
-
-    def format_from_message(self, message):
-        '''return a markup text representing the format on the message'''
-        return e3.common.add_style_to_message(message.body, message.style)
 

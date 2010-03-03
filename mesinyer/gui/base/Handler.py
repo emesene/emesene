@@ -375,7 +375,7 @@ class ConversationToolbarHandler(object):
 
     def on_notify_atention_selected(self):
         '''called when the nudge button is selected'''
-        self.conversation.on_notify_atention()
+        self.conversation.on_notify_attention()
 
     def on_invite_file_trasnfer_selected(self):
         '''called when the client requestes to a remote user to
