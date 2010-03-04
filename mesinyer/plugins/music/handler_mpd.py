@@ -52,4 +52,4 @@ class Handler(object):
                 info.get('title', '?'),
                 info.get('file', '?'))
 
-songretriever.register('mpd', Handler())
+songretriever.register('mpd', Handler)

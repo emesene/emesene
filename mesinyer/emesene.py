@@ -217,6 +217,8 @@ class Controller(object):
             self.conversations = None
 
         if do_exit:
+            if self.tray_icon is not None:
+                self.tray_icon.set_visible(False)
             self.window.hide()
             self.window = None
 
@@ -301,6 +303,10 @@ class Controller(object):
         emote_name = self.session.config.get_or_set('emote_theme', 'default')
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
         gui.theme.set_theme(image_name, emote_name, sound_name)
+        
+        path = self.config_dir.join(self.session.contacts.me.account.replace(
+                                    '@','-at-'), 'avatars', 'last')
+        last_avatar = self.session.config.get_or_set('last_avatar', path)
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
 
@@ -351,7 +357,7 @@ class Controller(object):
         self.draw_main_screen()
 
     def on_login_connect(self, account, session_id, proxy,
-                         use_http, host, port, on_reconnect=False):
+                         use_http, host=None, port=None, on_reconnect=False):
         '''called when the user press the connect button'''
         self._save_login_dimensions()
         self._set_location(self.window)

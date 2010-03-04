@@ -31,8 +31,8 @@ class UserPanel(gtk.VBox):
         self.avatarBox.connect('button-press-event', self.on_avatar_click)
         self.avatarBox.add(self.image)
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
-        self.avatar_path = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
-                      self.session.contacts.me.account.replace('@','-at-'),'avatars','last')
+
+        self.avatar_path = self.session.config.last_avatar
         if self.session.config_dir.file_readable(self.avatar_path):
             pix = utils.safe_gtk_pixbuf_load(self.avatar_path, (32,32))
         else:
@@ -156,6 +156,7 @@ class UserPanel(gtk.VBox):
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
             if response == gui.stock.ACCEPT:
+                #i control if the filename is a already in cache
                 if self.config_dir.base_dir.replace('@', '-at-') == \
                    os.path.dirname(os.path.dirname(filename)):
                     self.session.set_picture(filename)
@@ -170,7 +171,7 @@ class UserPanel(gtk.VBox):
                     if os.path.exists(self.avatar_path):
                         os.remove(self.avatar_path)
                     pix_128.save(self.avatar_path, 'png')
-                except OSError as e:
+                except OSError, e:
                    print e
         #TODO better way to do this???
         path_dir = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),

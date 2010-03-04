@@ -49,8 +49,14 @@ class Login(gtk.Alignment):
 
         self.dialog = extension.get_default('dialog')
 
-        self.server_host = extension.get_default('session').DEFAULT_HOST
-        self.server_port = extension.get_default('session').DEFAULT_PORT
+        if session_id is not None:
+            for ext_id, ext in extension.get_extensions('session').iteritems():
+                if session_id == ext_id:
+                    self.server_host = ext.DEFAULT_HOST
+                    self.server_port = ext.DEFAULT_PORT
+        else:
+            self.server_host = extension.get_default('session').DEFAULT_HOST
+            self.server_port = extension.get_default('session').DEFAULT_PORT
 
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
@@ -82,12 +88,14 @@ class Login(gtk.Alignment):
         self.txt_password.set_visibility(False)
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
+        self.txt_password.connect('changed', self._on_password_changed)
 
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
         self.img_account = gtk.Image()
-        path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
+        path = self.config_dir.join(account.replace('@','-at-'), \
+                                                 'avatars', 'last')
         if self.config_dir.file_readable(path):
             pix = utils.safe_gtk_pixbuf_load(path, (96,96))
         else:
@@ -211,8 +219,7 @@ class Login(gtk.Alignment):
         auto_login = self.auto_login.get_active()
 
         if user == '' or password == '':
-            self.nicebar.new_message('user or password fields are empty',
-                                      gtk.STOCK_DIALOG_ERROR)
+            self.show_error(_('user or password fields are empty'))
             return
 
         self._config_account(account, remember_account, remember_password,
@@ -272,6 +279,11 @@ class Login(gtk.Alignment):
             self.forget_me.set_child_visible(True)
             self.btn_status.set_status(int(self.status[account]))
 
+            path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
+            if self.config_dir.file_readable(path):
+                pix = utils.safe_gtk_pixbuf_load(path, (96,96))
+                self.img_account.set_from_pixbuf(pix) 
+
             if attr == 3:#autologin,password,account checked
                 self.auto_login.set_active(True)
                 flag = True
@@ -280,6 +292,7 @@ class Login(gtk.Alignment):
                 flag = True
             elif attr == 1:#only account checked
                 self.remember_account.set_active(True)
+                self.remember_password.set_sensitive(False)
             else:#if i'm here i have an error
                 self.show_error(_(
                           'Error while reading user config'))
@@ -304,6 +317,8 @@ class Login(gtk.Alignment):
         self.btn_status.set_status(e3.status.ONLINE)
         self.txt_password.set_text('')
         self.txt_password.set_sensitive(True)
+        self.img_account.set_from_pixbuf(
+             utils.safe_gtk_pixbuf_load(gui.theme.logo))
 
     def clear_all(self):
         '''
@@ -316,7 +331,7 @@ class Login(gtk.Alignment):
         '''
         show an error on the top of the window using nicebar
         '''
-        self.nicebar.new_message(_(reason), gtk.STOCK_DIALOG_ERROR)
+        self.nicebar.new_message(reason, gtk.STOCK_DIALOG_ERROR)
 
     def _reload_account_list(self, *args):
         '''
@@ -338,6 +353,10 @@ class Login(gtk.Alignment):
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
+
+    def _on_password_changed(self, widget):
+        state = (self.txt_password.get_text() != "")
+        self.remember_password.set_sensitive(state)
 
     def _on_account_key_press(self, widget, event):
         '''
@@ -364,8 +383,7 @@ class Login(gtk.Alignment):
                     if self.config_dir.dir_exists(dir_at):
                         rmtree(dir_at)
                 except:
-                    self.nicebar.new_message(_('Error while deleting user'),
-                                             gtk.STOCK_DIALOG_ERROR)
+                    self.show_error(_('Error while deleting user'))
 
                 if account in self.accounts:
                     del self.accounts[account]
@@ -420,6 +438,10 @@ class Login(gtk.Alignment):
         '''
         if self.remember_password.get_active():
             self.remember_account.set_active(True)
+            self.txt_password.set_sensitive(False)
+        else:
+            self.txt_password.set_sensitive(True)
+            self.txt_password.set_text("")
 
     def _on_auto_login_toggled(self, button):
         '''

@@ -1,0 +1,27 @@
+@import url("../main.css");
+
+/* @group Incoming */
+
+.in {
+	border-top: 1px solid #945cb0;
+	background: -webkit-gradient(linear, left top, left bottom, from(#6c3f82), color-stop(0.8, #3f254c));
+}
+
+.in .time {
+	color: #945cb0;
+}
+
+/* @end */
+
+/* @group Outgoing */
+
+.out {
+	border-top: 1px solid #797979;
+	background: -webkit-gradient(linear, left top, left bottom, from(#3e3e3e), color-stop(0.8, #2c2c2c));
+}
+
+.out .time {
+	color: #797979;
+}
+
+/* @end */

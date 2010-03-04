@@ -28,4 +28,4 @@ class GMusicBrowserkHandler(DBusBase.DBusBase):
                                       song['album'],
                                       song['title'])
 
-songretriever.register('gmusicbrowser', GMusicBrowserkHandler())
+songretriever.register('gmusicbrowser', GMusicBrowserkHandler)

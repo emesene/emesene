@@ -1,0 +1,252 @@
+/**
+ * Ravenant Adium theme
+ *
+ * Based on Dark Adium theme V0.1b by Pritthish Chakraborty
+ *     http://twitter.com/pritthish
+ * Ported from Light v1.7 for Bluebird by NaWong
+ *     http://nadesign.net
+ *
+ * @author Collin Henderson
+ * @copyright 2010
+ * @link http://adiumxtras.com/index.php?a=xtras&xtra_id=6766
+ * @version 2.2
+ */
+
+/* @group Common */
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+}
+
+:focus {
+	outline: 0;
+}
+
+body {
+	background: url(img/bg.jpg);
+	background-attachment: fixed;
+	margin: 0;
+	padding: 0;
+}
+
+a:link, a:visited {
+	color: #fff;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+a:hover {
+	color: #fff;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.clear {
+	float: none;
+	clear: both;
+	width: 0;
+	background: transparent;
+}
+
+/* @end */
+
+/* @group Messages */
+
+.message {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	color: #FFF;
+	padding: 8px 12px;
+	min-height: 22px;
+	-webkit-border-radius: 6px;
+	-webkit-box-shadow: 0px 1px 3px #111;
+	-webkit-transition-duration: 0.5s;
+}
+
+.message.fade {
+	opacity: .50;
+}
+
+.message .wrapper {
+	padding: 1px 0;
+}
+
+.message .inner {
+	position: relative;
+	margin: .6em 0 .6em;
+	padding: .01em 0 .01em;
+}
+
+.message .text,
+.status .text {
+	margin: 0 40px 0 6px;
+	padding: 0;
+	border: 0;
+}
+
+.message .time,
+.status .time {
+	width: 62px;
+	margin: 0;
+	padding: 0 0 0 4px;
+	background: transparent;
+	position: absolute;
+	right: -20px;
+}
+
+.time.name {
+	width: auto !important;
+	margin-right: -16px;
+	padding-right: 0 !important;
+	text-align: right;
+	position: relative !important;
+	float: right;
+}
+
+.message .time {
+	width: 56px;
+}
+
+.time {
+	opacity: .8;
+	right: -10px;
+	text-shadow: none;
+}
+
+.time .dim {
+	display: none;
+}
+
+.message .text:hover .time .dim {
+	display: inline;
+}
+
+/* @group Incoming */
+
+.in {
+	z-index: 300;
+	border-top: 1px solid #92b1b6;
+	text-shadow: 0px 1px 0px #2f484d;
+	background: -webkit-gradient(linear, left top, left bottom, from(#3d6166), color-stop(0.8, #2f484d));
+	margin: 12px 12px 12px 54px;
+}
+
+.in .time {
+	color: #ccc;
+}
+
+/* Fix margin if there is not a custom buddy icon */
+
+.in[icon-check="Incoming/buddy_icon.png"],
+.in[icon-check="Outgoing/buddy_icon.png"] {
+	margin-left: 12px !important;
+}
+
+/* @end */
+
+/* @group Outgoing */
+
+.out {
+	z-index: 100;
+	border-top: 1px solid #797979;
+	text-shadow: 0px 1px 0px #484848;
+	background: -webkit-gradient(linear, left top, left bottom, from(#3e3e3e), color-stop(0.8, #2c2c2c));
+	margin: 12px 54px 12px 12px;
+}
+
+.out .time {
+	color: #aaa;
+}
+
+.out[icon-check="Incoming/buddy_icon.png"],
+.out[icon-check="Outgoing/buddy_icon.png"] {
+	margin-right: 12px !important;
+}
+
+/* @end */
+
+/* @group Avatars */
+
+.avatar {
+	width: 32px;
+	height: 32px;
+	margin-top: 1px;
+	-webkit-box-reflect: below 0px url('mask_reflection.png');
+}
+
+.avatar img {
+	width: 32px;
+	border-style: none;
+	z-index: 300;
+	-webkit-mask-image: url('mask_avatar.png');
+}
+
+.avatar.left {
+	margin-left: 12px;
+	float: left;
+}
+
+.avatar.right {
+	margin-right: 12px;
+	float: right;
+}
+
+/* Hide if there is not a custom buddy icon */
+
+.avatar[icon-check="Incoming/buddy_icon.png"],
+.avatar[icon-check="Outgoing/buddy_icon.png"] {
+	display: none;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Status */
+
+.status {
+	position: relative;
+	margin: 6px 12px 12px 12px;
+	padding: 4px 0;
+	z-index: 200;
+	border: none;
+	background: #932d2d url(img/status.png) 0 0 repeat-x;
+	color: #fff;
+	font: bold 11px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	-webkit-border-radius: 6px;
+	-webkit-box-shadow: 0px 1px 3px #111;
+}
+
+.status a:link, .status a:visited, .status a:hover {
+	color: #FFF;
+	text-shadow: none;
+}
+
+.status h2 {
+	color: #e7e7e7;
+}
+
+.status .time {
+	top: 4px;
+	right: -10px;
+	padding-right: 0;
+	color: #fafafa;
+}
+
+/* @end */

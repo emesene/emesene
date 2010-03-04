@@ -1,6 +1,7 @@
 import gtk
 import gobject
 
+import e3
 import gui
 import utils
 import RichBuffer
@@ -25,11 +26,16 @@ class TextBox(gtk.ScrolledWindow):
         self._textbox.show()
         self._buffer = RichBuffer.RichBuffer()
         self._textbox.set_buffer(self._buffer)
+        self._textbox.connect('copy-clipboard', self._on_copy_clipboard)
+        self.clipboard = gtk.Clipboard(selection=gtk.gdk.atom_intern("CLIPBOARD"))
+        self._buffer.add_selection_clipboard(self.clipboard)
         self.add(self._textbox)
+        self.widgets = {}
 
     def clear(self):
         '''clear the content'''
         self._buffer.set_text('')
+        self.widgets = {}
 
     def _append(self, text, scroll=True, fg_color=None, bg_color=None,
         font=None, size=None, bold=False, italic=False, underline=False,
@@ -44,10 +50,12 @@ class TextBox(gtk.ScrolledWindow):
     def append(self, text, scroll=True):
         '''append formatted text to the widget'''
         self._buffer.put_formatted(text)
-        [self._textbox.add_child_at_anchor(*item)
-            for item in self._buffer.widgets]
+        for anchor in self._buffer.widgets.keys():
+            widget = self._buffer.widgets[anchor]
+            self._textbox.add_child_at_anchor(widget, anchor)
+            self.widgets[anchor] = widget
 
-        self._buffer.widgets = []
+        self._buffer.widgets = {}
 
         if scroll:
             self.scroll_to_end()
@@ -61,11 +69,52 @@ class TextBox(gtk.ScrolledWindow):
         '''set the text on the widget'''
         self._buffer.set_text(text)
 
+    def _replace_emo_with_shortcut(self):
+        if not self._buffer.get_has_selection():
+            bounds = self._buffer.get_bounds()
+            self._buffer.select_range(bounds[0],bounds[1])
+
+        try:
+            start, end = self._buffer.get_selection_bounds()
+        except ValueError:
+            return ""
+
+        if start.get_offset() > end.get_offset():
+            start = end #set the right begining
+
+        selection = self._buffer.get_slice(start,end)
+        char = u"\uFFFC" #it means "widget or pixbuf here"
+
+        return_string = ""
+        for part in unicode(selection):
+            if part == char:
+                anchor = start.get_child_anchor()
+                if anchor is not None:
+                    alt = self.widgets[anchor].get_property("tooltip-text")
+                    part = alt
+            return_string += part #new string with replacements
+            start.forward_char()
+        return return_string
+
+    def _on_copy_clipboard(self, textview):
+        ''' replaces the copied text with a new text with the
+        alt text of the images selected at copying '''
+        buffer = self._buffer
+        if buffer.get_has_selection():
+            text = self._replace_emo_with_shortcut()
+
+            # replace clipboard content
+            self.clipboard.set_text(text, len(text))
+            self.clipboard.store()
+
     def _get_text(self):
         '''return the text of the widget'''
-        start_iter = self._buffer.get_start_iter()
-        end_iter = self._buffer.get_end_iter()
-        return self._buffer.get_text(start_iter, end_iter, True)
+        bounds = self._buffer.get_bounds()
+        self._buffer.select_range(bounds[0],bounds[1])
+        text = self._replace_emo_with_shortcut()
+        end = self._buffer.get_end_iter()
+        self._buffer.select_range(end, end)
+        return text
 
     text = property(fget=_get_text, fset=_set_text)
 
@@ -103,18 +152,12 @@ class InputText(TextBox):
         if (event.keyval == gtk.keysyms.Return or \
                 event.keyval == gtk.keysyms.KP_Enter) and \
                 not event.state == gtk.gdk.SHIFT_MASK:
-            if not self.text:
+            if self.text == "":
                 return True
 
             self.on_send_message(self.text)
             self.text = ''
             return True
-        elif event.keyval == gtk.keysyms.BackSpace:
-            # do backspace while we are at an invisible tag
-            iter_ = self._buffer.get_iter_at_mark(self._buffer.get_mark('insert'))
-            while iter_.ends_tag(self.invisible_tag) or \
-                    iter_.begins_tag(self.invisible_tag):
-                self._buffer.backspace(iter_, True, True)
 
     def parse_emotes(self):
         """
@@ -125,7 +168,6 @@ class InputText(TextBox):
             return True
 
         self.changed = False
-        emos = []
 
         for code in gui.Theme.EMOTES:
             start = self._buffer.get_start_iter()
@@ -136,24 +178,26 @@ class InputText(TextBox):
             if result is None:
                 continue
 
-            while result:
+            while result is not None:
                 position, end = result
+                mark_begin = self._buffer.create_mark(None, start, False)
+                mark_end = self._buffer.create_mark(None, end, False)
                 image = utils.safe_gtk_image_load(path)
+                image.set_tooltip_text(code)
                 image.show()
 
-                self._buffer.apply_tag(self.invisible_tag, position, end)
+                self._buffer.delete(position, end)
+                pos = self._buffer.get_iter_at_mark(mark_end)
+                anchor = self._buffer.create_child_anchor(pos)
+                self._textbox.add_child_at_anchor(image, anchor)
 
-                mark_position = self._buffer.create_mark(None, position)
-                mark_end = self._buffer.create_mark(None, end)
+                self.widgets[anchor] = image
 
-                emos.append((image, position))
-                start = end
+                start = self._buffer.get_iter_at_mark(mark_end)
                 result = start.forward_search(code,
                         gtk.TEXT_SEARCH_VISIBLE_ONLY)
-
-        for image, position in emos:
-                anchor = self._buffer.create_child_anchor(position)
-                self._textbox.add_child_at_anchor(image, anchor)
+                self._buffer.delete_mark(mark_begin)
+                self._buffer.delete_mark(mark_end)
 
         return True
 
@@ -213,3 +257,35 @@ class OutputText(TextBox):
             text = MarkupParser.parse_emotes(text)
 
         TextBox.append(self, text, scroll)
+
+    def send_message(self, formatter, contact, text, cedict, style, is_first):
+        '''add a message to the widget'''
+        nick = contact.display_name
+
+        is_raw, consecutive, outgoing, first, last = \
+            formatter.format(contact)
+
+        if is_raw:
+            middle = MarkupParser.escape(text)
+        else:
+            middle = MarkupParser.escape(text)
+            middle = e3.common.add_style_to_message(middle, style, False)
+
+        all_ = first + middle + last
+        self.append(all_, cedict, self.config.b_allow_auto_scroll)
+
+    def receive_message(self, formatter, contact, message, cedict, is_first):
+        '''add a message to the widget'''
+        is_raw, consecutive, outgoing, first, last = formatter.format(contact)
+
+        middle = MarkupParser.escape(message.body)
+        if not is_raw:
+            middle = e3.common.add_style_to_message(message.body, message.style)
+
+        self.append(first + middle + last, cedict, self.config.b_allow_auto_scroll)
+
+    def information(self, formatter, contact, message):
+        '''add an information message to the widget'''
+        self.append(formatter.format_information(message), None,
+                self.config.b_allow_auto_scroll)
+

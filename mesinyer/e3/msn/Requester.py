@@ -929,6 +929,7 @@ class GetProfile(Requester):
             message = safe_split(response.body, '<PersonalStatus>', '</PersonalStatus>')
             cache_key = safe_split(response.body, '<CacheKey>', '</CacheKey>')
             rid = safe_split(response.body, '<ResourceID>', '</ResourceID>')
+            pre_auth_url = safe_split(response.body, '<PreAuthURL>', '</PreAuthURL>')
 
             self.session.extras["CacheKey"] = cache_key
             self.session.extras["ResourceID"] = rid

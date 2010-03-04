@@ -19,7 +19,8 @@ class RichWidget(object):
         text'''
         try:
             result = e3.common.XmlParser.XmlParser(
-                '<span>' + text.replace('\n', '') + '</span>').result
+                #'<span>' + text.replace('\n', '') + '</span>').result
+                '<span>' + text + '</span>').result
         except xml.parsers.expat.ExpatError:
             logging.getLogger("gtkui.RichWidget").debug("cant parse '%s'" % \
                     (text, ))
