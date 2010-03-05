@@ -104,3 +104,4 @@ import handler_mpd
 import handler_amarok2
 import handler_rhythmbox
 import handler_gmusicbrowser
+import handler_audacious2
