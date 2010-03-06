@@ -3,6 +3,7 @@ import re
 import gtk
 import webbrowser
 
+import e3
 from gui.base import MarkupParser
 
 try:
@@ -48,7 +49,6 @@ class OutputText(gtk.ScrolledWindow):
         dir_path = os.path.dirname(os.path.abspath(__file__))
         path = os.path.join("file://", dir_path , "conversation.html")
 
-        print path
         self._textbox.open(path)
 
     def append(self, text, cedict=None, scroll=True):
@@ -122,4 +122,35 @@ class OutputText(gtk.ScrolledWindow):
         return html
 
     text = property(fget=_get_text, fset=_set_text)
+
+    def send_message(self, formatter, contact, text, cedict, style, is_first):
+        '''add a message to the widget'''
+        nick = contact.display_name
+
+        is_raw, consecutive, outgoing, first, last = \
+            formatter.format(contact)
+
+        if is_raw:
+            middle = MarkupParser.escape(text)
+        else:
+            middle = MarkupParser.escape(text)
+            middle = e3.common.add_style_to_message(middle, style, False)
+
+        all_ = first + middle + last
+        self.append(all_, cedict, self.config.b_allow_auto_scroll)
+
+    def receive_message(self, formatter, contact, message, cedict, is_first):
+        '''add a message to the widget'''
+        is_raw, consecutive, outgoing, first, last = formatter.format(contact)
+
+        middle = MarkupParser.escape(message.body)
+        if not is_raw:
+            middle = e3.common.add_style_to_message(message.body, message.style)
+
+        self.append(first + middle + last, cedict, self.config.b_allow_auto_scroll)
+
+    def information(self, formatter, contact, message):
+        '''add an information message to the widget'''
+        self.append(formatter.format_information(message), None,
+                self.config.b_allow_auto_scroll)
 

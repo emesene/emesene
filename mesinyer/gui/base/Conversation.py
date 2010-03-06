@@ -14,6 +14,7 @@ class Conversation(object):
         self.session = session
         self.cid = float(cid)
         self.formatter = e3.common.MessageFormatter(session.contacts.me)
+        self.first = True
 
         self._header_visible = True
         self._image_visible = True
@@ -119,8 +120,8 @@ class Conversation(object):
     def on_notify_attention(self):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
-        self.output.append(
-            self.formatter.format_information('you just sent a nudge!'),self.session.config.b_allow_auto_scroll)
+        self.output.information(self.formatter, self.session.contacts.me,
+                'you just sent a nudge!')
         self.play_nudge()
 
     def show(self):
@@ -199,20 +200,29 @@ class Conversation(object):
     def _on_send_message(self, text, cedict=None):
         '''method called when the user press enter on the input text'''
         self.session.send_message(self.cid, text, self.cstyle)
-        nick = self.session.contacts.me.display_name
-
-        (is_raw, consecutive, outgoing, first, last) = \
-            self.formatter.format(self.session.contacts.me)
-
-        if is_raw:
-            middle = MarkupParser.escape(text)
-        else:
-            middle = MarkupParser.escape(text)
-            middle = e3.common.add_style_to_message(middle, self.cstyle, False)
-
-        all = first + middle + last
-        self.output.append(all, cedict,self.session.config.b_allow_auto_scroll)
+        self.output.send_message(self.formatter, self.session.contacts.me,
+                text, cedict, self.cstyle, self.first)
         self.play_type()
+        self.first = False
+
+    def on_receive_message(self, message, account, cedict):
+        '''method called when a message arrives to the conversation'''
+        contact = self.session.contacts.get(account)
+
+        if contact is None:
+            contact = e3.Contact(account)
+
+        if message.type == e3.Message.TYPE_MESSAGE:
+            self.output.receive_message(self.formatter, contact, message,
+                    cedict, self.first)
+            self.play_send()
+
+        elif message.type == e3.Message.TYPE_NUDGE:
+            self.output.information(self.formatter, contact,
+                    '%s just sent you a nudge!' % (contact.display_name,))
+            self.play_nudge()
+
+        self.first = False
 
     def _get_icon(self):
         '''return the icon that represent the current status of the
@@ -362,5 +372,4 @@ class Conversation(object):
         play the send sound
         """
         gui.play(self.session, gui.theme.sound_type)
-
 

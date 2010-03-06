@@ -217,6 +217,8 @@ class Controller(object):
             self.conversations = None
 
         if do_exit:
+            if self.tray_icon is not None:
+                self.tray_icon.set_visible(False)
             self.window.hide()
             self.window = None
 
