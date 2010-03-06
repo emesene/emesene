@@ -106,3 +106,4 @@ import handler_rhythmbox
 import handler_gmusicbrowser
 import handler_audacious2
 import handler_banshee
+import handler_xmms2
