@@ -433,8 +433,10 @@ class Login(gtk.Alignment):
         if self.remember_password.get_active():
             self.remember_account.set_active(True)
             self.remember_account.set_sensitive(False)
+            self.txt_password.set_sensitive(False)
         else:
             self.remember_account.set_sensitive(True)
+            self.txt_password.set_sensitive(True)
 
     def _on_auto_login_toggled(self, button):
         '''
