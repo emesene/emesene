@@ -7,6 +7,7 @@ import utils
 
 import TextField
 import StatusButton
+from AvatarManager import AvatarManager
 
 import extension
 
@@ -33,6 +34,8 @@ class UserPanel(gtk.VBox):
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
 
         self.avatar_path = self.session.config.last_avatar
+	self.avatarman = AvatarManager(self.session)
+
         if self.session.config_dir.file_readable(self.avatar_path):
             pix = utils.safe_gtk_pixbuf_load(self.avatar_path, (32,32))
         else:
@@ -156,27 +159,18 @@ class UserPanel(gtk.VBox):
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
             if response == gui.stock.ACCEPT:
-                #i control if the filename is a already in cache
-                if self.config_dir.base_dir.replace('@', '-at-') == \
-                   os.path.dirname(os.path.dirname(filename)):
-                    self.session.set_picture(filename)
-                    os.remove(self.avatar_path)
-                    shutil.copy2(filename, self.avatar_path)
-                    return
-                #i save in 128*128 for the animation on connect..if somebody like it...:)
-                try:
-                    pix_128 = utils.safe_gtk_pixbuf_load(filename, (128,128))
-                    pix_128.save(path_dir + '_temp', 'png')
-                    self.session.set_picture(path_dir + '_temp')
-                    if os.path.exists(self.avatar_path):
-                        os.remove(self.avatar_path)
-                    pix_128.save(self.avatar_path, 'png')
-                except OSError, e:
-                   print e
-        #TODO better way to do this???
-        path_dir = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
-                   self.session.contacts.me.account.replace('@','-at-'),'avatars')
+		print 'set as avatar: ' + filename
+		self.avatarman.set_as_avatar(filename)
+
+        #Directory for user's avatars
+        path_dir = self.avatarman.get_avatars_dir()                   
+
+	#Directory for contact's cached avatars
+        cached_avatar_dir = self.avatarman.get_cached_avatars_dir()
+                   
+	#Directories for System Avatars
+        faces_paths = self.avatarman.get_system_avatars_dirs()
 
         extension.get_default('avatar chooser')(set_picture_cb,
-                                                self.avatar_path, path_dir).show()
+                                                self.avatar_path, path_dir, cached_avatar_dir, faces_paths).show()
 
