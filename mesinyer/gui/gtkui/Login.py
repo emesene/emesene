@@ -89,6 +89,7 @@ class Login(gtk.Alignment):
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
         self.txt_password.connect('changed', self._on_password_changed)
+        self.txt_password.set_sensitive(False)
 
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
@@ -280,6 +281,7 @@ class Login(gtk.Alignment):
         if account == '':
             self.remember_account.set_sensitive(False)
             self.txt_password.set_text('')
+            self.txt_password.set_sensitive(False)
             return
 
         self.remember_account.set_sensitive(True)
