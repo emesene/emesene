@@ -179,7 +179,7 @@ class Login(gtk.Alignment):
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.2)
-        al_button = gtk.Alignment(xalign=0.45, yalign=0.5, xscale=0.20)
+        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.20)
         al_account = gtk.Alignment(xalign=0.45, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
@@ -468,11 +468,7 @@ class Login(gtk.Alignment):
             self.remember_account.set_sensitive(False)
             self.remember_password.set_sensitive(False)
         else:
-            if user not in self.accounts:
-                self.remember_account.set_active(False)
-                self.remember_account.set_sensitive(True)          
-            else:
-                self.remember_password.set_sensitive(True)
+            self.remember_password.set_sensitive(True)
 
     def _on_preferences_enter(self, button, event):
         '''
@@ -569,6 +565,7 @@ class ConnectingWindow(gtk.Alignment):
         self.label.hide()
         self.throbber.hide()
         self.label_timer.hide()
+        self.b_cancel.hide()
 
     def do_animation(self):
        '''do the avatar's animation on login'''
@@ -579,6 +576,7 @@ class ConnectingWindow(gtk.Alignment):
            return True
        else:
            self.label.show()
+           self.b_cancel.show()
            self.clear_connect()
            return False
 
