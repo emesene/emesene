@@ -21,107 +21,11 @@ import gtk
 import pango
 import gobject
 
-class FtBarWidget(gtk.HBox):
-    '''bar which represents active file transfers'''
-    def __init__(self):
-        gtk.HBox.__init__(self)
+import e3.base
 
-        self.set_spacing(3)
-
-        self.hbox = gtk.HBox()
-        self.hbox.set_spacing(3)
-
-        self.layout = gtk.Layout()
-        self.layout.put(self.hbox, 0, 0)
-        self.layout.set_size(self.hbox.get_allocation().width, \
-                               self.hbox.get_allocation().height + 100)
-
-        self.current = 0
-        self.speed = 5
-        self.page = 0
-        self.twidth = 150
-        self.num_transfers = 0
-        self.dest = 0
-        self.div = 0
-        self.new_transfer_bar = None
-
-        arrow_left = gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
-        arrow_right = gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
-        self.b_go_left = gtk.Button()
-        self.b_go_left.add(arrow_left)
-        self.b_go_left.set_sensitive(False)
-        self.b_go_left.set_relief(gtk.RELIEF_NONE)
-        self.b_go_left.connect('clicked', self._on_left_button_clicked)
-
-        self.b_go_right = gtk.Button()
-        self.b_go_right.add(arrow_right)
-        self.b_go_right.set_sensitive(False)
-        self.b_go_right.set_relief(gtk.RELIEF_NONE)
-        self.b_go_right.connect('clicked', self._on_right_button_clicked)
-
-        self.pack_start(self.b_go_left, False, False)
-        self.pack_start(self.layout)
-        self.pack_start(self.b_go_right, False, False)
-
-
-    def add(self, transfer):
-        ''' add a new transfer to the widget '''
-        self.new_transfer_bar = FtWidget(self, transfer)
-        self.hbox.pack_start(self.new_transfer_bar, False, False)
-        self.num_transfers += 1
-        if self.num_transfers > 1:
-            self.b_go_right.set_sensitive(True)
-        else:
-            self.b_go_right.set_sensitive(False)
-        self.set_no_show_all(False)
-        self.show_all()
-
-    def _on_left_button_clicked(self, widget):
-        ''' when the user click on the go-left button '''
-        self.twidth = self.new_transfer_bar.get_allocation().width
-        self.page -= 1
-        self.dest = -self.twidth * self.page
-        gobject.timeout_add(5, self._move_to_left)
-
-    def _on_right_button_clicked(self, widget):
-        ''' when the user click on the go-right button '''
-        if self.num_transfers == 1: 
-            self.b_go_right.set_sensitive(False)
-            return False
-        self.twidth = self.new_transfer_bar.get_allocation().width
-        self.b_go_left.set_sensitive(True)
-        self.page += 1
-        self.dest = -self.twidth * self.page
-        gobject.timeout_add(5, self._move_to_right)
-
-    def _move_to_right(self, *args):
-        ''' moves the widgets on the right smoothly '''
-        self.div = self.num_transfers - 1
-
-        if self.dest == (self.dest * self.page) / self.div:
-            self.b_go_right.set_sensitive(False)
-
-        if self.current > self.dest:
-            self.current -= self.speed
-            self.layout.move(self.hbox, self.current, 0)
-            return True
-        return False
-
-    def _move_to_left(self, *args):
-        ''' moves the widgets on the left smoothly '''
-        if self.dest == 0: 
-            self.b_go_left.set_sensitive(False)
-        if self.dest >= 0:
-            self.b_go_right.set_sensitive(True)
-                
-        if self.current < self.dest:
-            self.current += self.speed
-            self.layout.move(self.hbox, self.current, 0)
-            return True
-        return False
-
-class FtWidget(gtk.HBox):
+class FileTransferWidget(gtk.HBox):
     '''this class represents the ui widget for one filetransfer'''
+
     def __init__(self, main_transfer_bar, transfer):
         gtk.HBox.__init__(self)
 
@@ -188,8 +92,8 @@ class FtWidget(gtk.HBox):
         if self.transfer.state == self.transfer.RECEIVED:
             self.progress.set_fraction(1)  # 100%
         else:
-            self.progress.set_fraction(self.transfer.getFraction())
-        self.progress.set_text(self.transfer.getFilename())
+            self.progress.set_fraction(self.transfer.fraction)
+        self.progress.set_text(str(self.transfer.fraction))
         self.tooltip.update()
 
     def on_transfer_state_changed(self):
@@ -324,7 +228,7 @@ class FileTransferTooltip(gtk.Window):
         if not self.pointer_is_over_widget:
             return
 
-        pixbuf = self.transfer.getPreviewImage()
+        pixbuf = None # TODO: self.transfer.getPreviewImage()
 
         #amsn sends a big. black preview? :S
         if pixbuf and pixbuf.get_height() <= 96 and pixbuf.get_width() <= 96:
@@ -338,7 +242,7 @@ class FileTransferTooltip(gtk.Window):
         return False
 
     def update(self):
-        ''' updates the tooltip '''
+        ''' updates the tooltip TODO: Update
         self.details.set_markup('<b>' + self.transfer.getFilename() + '</b>')
         time_left = self.transfer.getEstimatedTimeLeft()
         bps = self.transfer.getAverageSpeed()
@@ -353,7 +257,7 @@ class FileTransferTooltip(gtk.Window):
         self.speed.set_text('%.2f KiB/s' % (float(bps) / 1024.0))
         self.etl.set_text('%.2d:%.2d' % (int(time_left / 60), \
             int(time_left % 60)))
-
+        '''
     def on_leave(self, view, event):
         ''' called when the pointer leaves the widget '''
         self.pointer_is_over_widget = False

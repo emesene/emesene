@@ -33,6 +33,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         ContactInfo = extension.get_default('conversation info')
         ConversationToolbar = extension.get_default(
             'conversation toolbar')
+        TransfersBar = extension.get_default('filetransfer pool')
 
         dialog = extension.get_default('dialog')
         self.header = Header()
@@ -42,6 +43,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.output = OutputText(self.session.config)
         self.input = InputText(self.session.config, self._on_send_message)
         self.info = ContactInfo()
+        self.transfers_bar = TransfersBar()
 
         frame_input = gtk.Frame()
         frame_input.set_shadow_type(gtk.SHADOW_IN)
@@ -54,6 +56,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel.pack1(self.output, True, True)
         self.panel.pack2(frame_input, True, True)
+        
         self.panel_signal_id = self.panel.connect_after('expose-event',
                 self.update_panel_position)
 
@@ -67,6 +70,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.pack_start(self.header, False)
         self.pack_start(self.hbox, True, True)
+        self.pack_start(self.transfers_bar, False)
 
         if len(self.members) == 0:
             self.header.information = ('connecting', 'creating conversation')
@@ -102,6 +106,9 @@ class Conversation(gtk.VBox, gui.Conversation):
             'b_show_info')
         self.session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
+
+        self.session.signals.filetransfer_invitation.subscribe(
+                self.on_filetransfer_invitation)
 
         self.tab_index = -1 # used to select an existing conversation
 
@@ -248,3 +255,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         elif account in self.members:
             self.info.first = image
 
+    def on_filetransfer_invitation(self, transfer):
+        self.transfers_bar.add(transfer)
+        self.transfers_bar.show_all()
+        print "hy"

@@ -227,28 +227,31 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_invite_file_transfer(self, papysession):
         print "new ft invite", papysession
-        print papysession.filename, papysession.size, papysession.preview
-        if 0:
-            papysession.reject()
-        else:
-            papysession.accept()
+
+        tr = e3.base.FileTransfer(papysession, papysession.filename, papysession.size, papysession.preview, sender=papysession.peer)
+
+        #if 0:
+        #    papysession.reject()
+        #else:
+        #    papysession.accept()
 
         # define new stuff
         papysession.RECEIVED_CHUNKS = 0
         # temp methods to show whats possible
-        papysession.connect("accepted", self.ft_accepted)
-        papysession.connect("progressed", self.ft_progressed)
-        papysession.connect("completed", self.ft_completed)
+        papysession.connect("accepted", self.papy_ft_accepted)
+        papysession.connect("progressed", self.papy_ft_progressed)
+        papysession.connect("completed", self.papy_ft_completed)
 
+        self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr)
 
-    def ft_accepted(self):
+    def papy_ft_accepted(self):
         print "accepted"
 
-    def ft_progressed(self, ftsession, len_chunk):
+    def papy_ft_progressed(self, ftsession, len_chunk):
         print "progress..", ftsession.RECEIVED_CHUNKS*len_chunk, "/", ftsession.size
         ftsession.RECEIVED_CHUNKS += 1
 
-    def ft_completed(self, ftsession, data):
+    def papy_ft_completed(self, ftsession, data):
         print "data:", len(data.getvalue())
 
     # call handlers
@@ -867,4 +870,14 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_p2p_cancel(self, pid):
         '''handle Action.ACTION_P2P_CANCEL'''
+        pass
+
+    # ft handlers
+    def _handle_action_ft_invite(self, tid):
+        pass    
+    
+    def _handle_action_ft_accept(self, tid):
+        pass
+
+    def _handle_action_ft_cancel(self, tid):
         pass

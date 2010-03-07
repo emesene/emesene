@@ -36,6 +36,9 @@ EVENTS = (\
  'conv message'          , 'conv first action'    ,
  'conv message send succeed'  , 'conv message send failed',
  'oim received',       'oims data received',
+ 'filetransfer invitation', 'filetransfer finished',
+ 'filetransfer error', 'filetransfer canceled',
+ 'filetransfer accepted', 'filetransfer progress',
  'p2p invitation',      'p2p finished',
  'p2p error',           'p2p canceled',
  'p2p accepted',        'p2p progress',
@@ -57,6 +60,8 @@ ACTIONS = (\
  'set picture'      , 'set preferences'  ,
  'new conversation' , 'close conversation',
  'send message'     , 'conv invite',
+ 'ft invite', 'ft accept',
+ 'ft cancel',
  'p2p invite'       , 'p2p accept',
  'p2p cancel'       , 'media send', # media send if got Wink and audio clips
  'send oim')
@@ -123,6 +128,10 @@ class Worker(threading.Thread):
         dah[Action.ACTION_P2P_INVITE] = self._handle_action_p2p_invite
         dah[Action.ACTION_P2P_ACCEPT] = self._handle_action_p2p_accept
         dah[Action.ACTION_P2P_CANCEL] = self._handle_action_p2p_cancel
+        # ft actions
+        dah[Action.ACTION_FT_INVITE] = self._handle_action_ft_invite
+        dah[Action.ACTION_FT_ACCEPT] = self._handle_action_ft_accept
+        dah[Action.ACTION_FT_CANCEL] = self._handle_action_ft_cancel
 
         self.action_handlers = dah
 
@@ -316,3 +325,14 @@ class Worker(threading.Thread):
     def _handle_action_p2p_cancel(self, pid):
         '''handle Action.ACTION_P2P_CANCEL'''
         pass
+
+    # ft handlers
+    def _handle_action_ft_invite(self, tid):
+        pass    
+    
+    def _handle_action_ft_accept(self, tid):
+        pass
+
+    def _handle_action_ft_cancel(self, tid):
+        pass
+
