@@ -12,14 +12,16 @@ class GuayadequeHandler(DBusBase.DBusBase):
     def is_playing(self):
         '''Returns True if a song is being played'''
         if self.is_running():
-            status = self.iface.get_dbus_method("GetStatus", dbus_interface='org.freedesktop.MediaPlayer')()
+            status = self.iface.get_dbus_method("GetStatus", 
+                dbus_interface='org.freedesktop.MediaPlayer')()
             return status[0] == 0
         return False
 
     def get_current_song(self):
         '''Returns the current song in the correct format'''
         if self.is_playing():
-            song = self.iface.get_dbus_method("GetMetadata", dbus_interface='org.freedesktop.MediaPlayer')()
+            song = self.iface.get_dbus_method("GetMetadata",
+                dbus_interface='org.freedesktop.MediaPlayer')()
             return songretriever.Song(song['artist'],
                                       song['album'],
                                       song['title'])
