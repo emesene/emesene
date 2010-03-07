@@ -1,6 +1,8 @@
+import time
+
 class FileTransfer(object):
     '''a class that represent a file transfer'''
-    (WAITING, TRANSFERING, RECEIVED, FAILED) = range(4)
+    (WAITING, TRANSFERRING, RECEIVED, FAILED) = range(4)
 
     def __init__(self, obj, filename, size, preview, sender='Me'):
         self.filename = filename
@@ -30,8 +32,10 @@ class FileTransfer(object):
 
     def get_eta(self):
         ''' returns the estimated time left to finish the transfer '''
-        return ((self.size - self.received_data) / self.get_speed())
-    
+        if self.received_data:
+            return ((self.size - self.received_data) / self.get_speed())
+        return 0    
+
     def get_speed(self):
         ''' returns the average speed of the transfer '''
         return (self.received_data / self.get_time())

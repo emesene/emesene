@@ -43,7 +43,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.output = OutputText(self.session.config)
         self.input = InputText(self.session.config, self._on_send_message)
         self.info = ContactInfo()
-        self.transfers_bar = TransfersBar()
+        self.transfers_bar = TransfersBar(self.session)
 
         frame_input = gtk.Frame()
         frame_input.set_shadow_type(gtk.SHADOW_IN)

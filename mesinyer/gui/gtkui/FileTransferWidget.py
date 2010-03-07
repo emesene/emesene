@@ -22,12 +22,15 @@ import pango
 import gobject
 
 import e3.base
+import gui
 
 class FileTransferWidget(gtk.HBox):
     '''this class represents the ui widget for one filetransfer'''
 
     def __init__(self, main_transfer_bar, transfer):
         gtk.HBox.__init__(self)
+
+        self.handler = gui.base.FileTransferHandler(main_transfer_bar.session, transfer)
 
         self.main_transfer_bar = main_transfer_bar
         self.transfer = transfer
@@ -73,7 +76,7 @@ class FileTransferWidget(gtk.HBox):
     def _on_dbl_click_transfer(self, widget, event):
         if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
             if self.transfer.state == self.transfer.RECEIVED:
-                self.transfer.open()
+                self.handler.open()
 
     def _on_progressbar_event(self, widget, event):
         if event.type == gtk.gdk.BUTTON_PRESS:
@@ -82,18 +85,18 @@ class FileTransferWidget(gtk.HBox):
                     self.menu.popup(None, None, None, event.button, event.time)
 
     def _on_menu_file_clicked(self, widget):
-        self.transfer.open()
+        self.handler.open()
 
     def _on_menu_folder_clicked(self, widget):
-        self.transfer.opendir()
+        self.handler.opendir()
         
     def do_update_progress(self):
         ''' updates the progress bar status '''
         if self.transfer.state == self.transfer.RECEIVED:
             self.progress.set_fraction(1)  # 100%
         else:
-            self.progress.set_fraction(self.transfer.received_chunks/self.transfer.size)
-        self.progress.set_text(str(self.transfer.received_chunks/self.transfer.size))
+            self.progress.set_fraction(self.transfer.get_fraction())
+        self.progress.set_text(str(self.transfer.get_fraction()))
         self.tooltip.update()
 
     def on_transfer_state_changed(self):
@@ -137,17 +140,17 @@ class FileTransferWidget(gtk.HBox):
         return img
 
     def _on_cancel_clicked(self, widget):
-        self.transfer.cancel()
+        self.handler.cancel()
         self.main_transfer_bar.hbox.remove(self)
         self.main_transfer_bar.num_transfers -= 1
         if self.main_transfer_bar.num_transfers == 0:
             self.main_transfer_bar.hide()
 
     def _on_accept_clicked(self, widget):
-        self.transfer.accept()
+        self.handler.accept()
 
     def _on_close_clicked(self, widget):
-        self.transfer.remove()
+        self.handler.remove()
         self.main_transfer_bar.hbox.remove(self)
         self.main_transfer_bar.num_transfers -= 1
         if self.main_transfer_bar.num_transfers == 0:
@@ -228,8 +231,10 @@ class FileTransferTooltip(gtk.Window):
         if not self.pointer_is_over_widget:
             return
 
-        pixbuf = gtk.gdk.pixbuf_new_from_data(self.transfer.preview)
-
+        if self.transfer.preview is not None:
+            pixbuf = gtk.gdk.pixbuf_new_from_data(self.transfer.preview)
+        else:
+            pixbuf = None
         #amsn sends a big. black preview? :S
         if pixbuf and pixbuf.get_height() <= 96 and pixbuf.get_width() <= 96:
             self.image.set_from_pixbuf(pixbuf)

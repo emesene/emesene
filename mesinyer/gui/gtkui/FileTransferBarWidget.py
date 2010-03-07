@@ -25,9 +25,10 @@ import extension
 
 class FileTransferBarWidget(gtk.HBox):
     '''bar which represents active file transfers'''
-    def __init__(self):
+    def __init__(self, session):
         gtk.HBox.__init__(self)
 
+        self.session = session
         self.ft = extension.get_default('filetransfer widget')
 
         self.set_spacing(3)
@@ -83,7 +84,7 @@ class FileTransferBarWidget(gtk.HBox):
         self.set_no_show_all(False)
         self.show_all()
 
-    def do_update_progress(self, transfer):
+    def update(self, transfer):
         tr = self.transfers[transfer]
         tr.do_update_progress()
 

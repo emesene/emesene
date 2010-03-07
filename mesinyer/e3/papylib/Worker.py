@@ -97,7 +97,8 @@ class Worker(e3.base.Worker, papyon.Client):
         # this stores conversation handlers
         self._conversation_handler = {}
         # store ongoing filetransfers
-        self.filetransfers = {}  
+        self.filetransfers = {}
+        self.rfiletransfers = {} 
 
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
 
@@ -230,14 +231,9 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_invite_file_transfer(self, papysession):
         tr = e3.base.FileTransfer(papysession, papysession.filename, \
             papysession.size, papysession.preview, sender=papysession.peer)
-        self.filetransfers[papysession] = ft
-
-        #if 0:
-        #    papysession.reject()
-        #else:
-        #    papysession.accept()
-
-        # temp methods to show whats possible
+        self.filetransfers[papysession] = tr
+        self.rfiletransfers[tr] = papysession
+        
         papysession.connect("accepted", self.papy_ft_accepted)
         papysession.connect("progressed", self.papy_ft_progressed)
         papysession.connect("completed", self.papy_ft_completed)
@@ -248,7 +244,7 @@ class Worker(e3.base.Worker, papyon.Client):
         print "accepted"
 
     def papy_ft_progressed(self, ftsession, len_chunk):
-        tr = self.filetransfers[papysession]
+        tr = self.filetransfers[ftsession]
         tr.received_data += len_chunk
 
         self.session.add_event(Event.EVENT_FILETRANSFER_PROGRESS, tr)
@@ -878,11 +874,18 @@ class Worker(e3.base.Worker, papyon.Client):
         pass
 
     # ft handlers
-    def _handle_action_ft_invite(self, tid):
+    def _handle_action_ft_invite(self, t):
+        # TODO        
         pass    
     
-    def _handle_action_ft_accept(self, tid):
+    def _handle_action_ft_accept(self, t):
+        self.rfiletransfers[t].accept()
+        t.state = 1 # TRANSFERRING
+
+    def _handle_action_ft_reject(self, t):
+        self.rfiletransfers[t].reject()
+
+    def _handle_action_ft_cancel(self, t):
+        # TODO
         pass
 
-    def _handle_action_ft_cancel(self, tid):
-        pass

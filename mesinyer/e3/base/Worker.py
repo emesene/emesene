@@ -61,7 +61,7 @@ ACTIONS = (\
  'new conversation' , 'close conversation',
  'send message'     , 'conv invite',
  'ft invite', 'ft accept',
- 'ft cancel',
+ 'ft cancel', 'ft reject',
  'p2p invite'       , 'p2p accept',
  'p2p cancel'       , 'media send', # media send if got Wink and audio clips
  'send oim')
@@ -131,6 +131,7 @@ class Worker(threading.Thread):
         # ft actions
         dah[Action.ACTION_FT_INVITE] = self._handle_action_ft_invite
         dah[Action.ACTION_FT_ACCEPT] = self._handle_action_ft_accept
+        dah[Action.ACTION_FT_REJECT] = self._handle_action_ft_reject
         dah[Action.ACTION_FT_CANCEL] = self._handle_action_ft_cancel
 
         self.action_handlers = dah
@@ -327,12 +328,15 @@ class Worker(threading.Thread):
         pass
 
     # ft handlers
-    def _handle_action_ft_invite(self, tid):
+    def _handle_action_ft_invite(self, t):
         pass    
     
-    def _handle_action_ft_accept(self, tid):
+    def _handle_action_ft_accept(self, t):
         pass
 
-    def _handle_action_ft_cancel(self, tid):
+    def _handle_action_ft_reject(self, t):
+        pass
+
+    def _handle_action_ft_cancel(self, t):
         pass
 
