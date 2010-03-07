@@ -24,7 +24,7 @@ class Login(gtk.Alignment):
                 config, config_dir, config_path, proxy=None,
                 use_http=None, session_id=None):
 
-        gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
+        gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=1.0)
 
         self.config = config
@@ -116,7 +116,7 @@ class Login(gtk.Alignment):
         self.auto_login.set_sensitive(False)
 
         self.forget_me = gtk.Button()
-        self.set_tooltip_text(_('Delete user'))
+        self.forget_me.set_tooltip_text(_('Delete user'))
         forget_img = gtk.image_new_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
         self.forget_me.set_image(forget_img)
         self.forget_me.set_relief(gtk.RELIEF_NONE)
@@ -175,17 +175,15 @@ class Login(gtk.Alignment):
         self.nicebar = NiceBar.NiceBar(default_background= \
                                        NiceBar.ALERTBACKGROUND)
 
-        al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.0)
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
-        al_vbox_remember = gtk.Alignment(xalign=0.55, yalign=0.5, xscale=0.05,
+        al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.2)
-        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
-        al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+        al_button = gtk.Alignment(xalign=0.45, yalign=0.5, xscale=0.20)
+        al_account = gtk.Alignment(xalign=0.45, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
-
+        
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
