@@ -88,6 +88,7 @@ class Login(gtk.Alignment):
         self.txt_password.set_visibility(False)
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
+        self.txt_password.connect('changed', self._on_password_changed)
 
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
@@ -111,6 +112,10 @@ class Login(gtk.Alignment):
             self._on_remember_password_toggled)
         self.auto_login.connect('toggled',
             self._on_auto_login_toggled)
+        
+        self.remember_account.set_sensitive(False)
+        self.remember_password.set_sensitive(False)
+        self.auto_login.set_sensitive(False)
 
         self.forget_me = gtk.EventBox()
         self.forget_me.set_events(gtk.gdk.BUTTON_PRESS_MASK)
@@ -267,40 +272,47 @@ class Login(gtk.Alignment):
         on the account entry
         '''
         self._clear_all()
+
+        if self.txt_password.get_text() == '':
+                self.remember_password.set_sensitive(False)
+                self.auto_login.set_sensitive(False)
+
         if account == '':
+            self.remember_account.set_sensitive(False)
+            self.txt_password.set_text('')
             return
 
-        flag = False
+        self.remember_account.set_sensitive(True)
 
         if account in self.accounts:
             attr = int(self.remembers[account])
             self.remember_account.set_sensitive(False)
             self.forget_me.set_child_visible(True)
             self.btn_status.set_status(int(self.status[account]))
-
+            
+            passw = self.accounts[account]
+            
             path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
             if self.config_dir.file_readable(path):
                 pix = utils.safe_gtk_pixbuf_load(path, (96,96))
                 self.img_account.set_from_pixbuf(pix) 
 
             if attr == 3:#autologin,password,account checked
+                self.txt_password.set_text(base64.b64decode(passw))
+                self.txt_password.set_sensitive(False)
                 self.auto_login.set_active(True)
-                flag = True
             elif attr == 2:#password,account checked
+                self.txt_password.set_text(base64.b64decode(passw))
+                self.txt_password.set_sensitive(False)
                 self.remember_password.set_active(True)
-                flag = True
             elif attr == 1:#only account checked
                 self.remember_account.set_active(True)
+                self.remember_password.set_sensitive(False)
+                self.auto_login.set_sensitive(False)
             else:#if i'm here i have an error
                 self.show_error(_(
                           'Error while reading user config'))
                 self._clear_all()
-
-            #for not repeating code
-            if flag:
-                passw = self.accounts[account]
-                self.txt_password.set_text(base64.b64decode(passw))
-                self.txt_password.set_sensitive(False)
 
     def _clear_all(self):
         '''
@@ -313,7 +325,6 @@ class Login(gtk.Alignment):
         self.auto_login.set_active(False)
         self.forget_me.set_child_visible(False)
         self.btn_status.set_status(e3.status.ONLINE)
-        self.txt_password.set_text('')
         self.txt_password.set_sensitive(True)
         self.img_account.set_from_pixbuf(
              utils.safe_gtk_pixbuf_load(gui.theme.logo))
@@ -351,6 +362,15 @@ class Login(gtk.Alignment):
         if event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter:
             self.do_connect()
+
+    def _on_password_changed(self, widget):
+        '''
+        called when the password in the combobox changes
+        '''
+        state = (self.txt_password.get_text() != "")
+
+        self.remember_password.set_sensitive(state)
+        self.auto_login.set_sensitive(state)
 
     def _on_account_key_press(self, widget, event):
         '''
@@ -437,6 +457,7 @@ class Login(gtk.Alignment):
         else:
             self.remember_account.set_sensitive(True)
             self.txt_password.set_sensitive(True)
+            self.txt_password.set_text('')
 
     def _on_auto_login_toggled(self, button):
         '''
@@ -451,8 +472,7 @@ class Login(gtk.Alignment):
         else:
             if user not in self.accounts:
                 self.remember_account.set_active(False)
-                self.remember_account.set_sensitive(True)
-                self.remember_password.set_sensitive(True)
+                self.remember_account.set_sensitive(True)          
             else:
                 self.remember_password.set_sensitive(True)
 
