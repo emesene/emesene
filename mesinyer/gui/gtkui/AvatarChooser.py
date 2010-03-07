@@ -221,10 +221,23 @@ class AvatarChooser(gtk.Window):
         def _on_image_selected(response, path):
             '''method called when an image is selected'''
             if response == gui.stock.ACCEPT:
-                self.add_picture(path)
+                self._on_image_area_selector(path)
 
         class_ = extension.get_default('image chooser')
         class_(os.path.expanduser('~'), _on_image_selected).show()
+
+    def _on_image_area_selector(self, path):
+        '''called when the user must resize the added image'''
+        def _on_image_resized(response, pix):
+            '''method called when an image is selected'''
+            if response == gtk.RESPONSE_OK:
+                #TODO change this when the "new" directory way is ready
+                pix.save('/tmp/resized', 'png')              
+                self.add_picture('/tmp/resized')
+
+        class_ = extension.get_default('image area selector')
+        class_(_on_image_resized, gtk.gdk.pixbuf_new_from_file(path),
+               parent=self).run()
 
     def _on_remove(self, event):
         '''Removes the selected avatar'''
