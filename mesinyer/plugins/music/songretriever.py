@@ -100,10 +100,12 @@ def test():
         print "current song:", get_current_song(name)
         print
 
-import handler_mpd
 import handler_amarok2
-import handler_rhythmbox
-import handler_gmusicbrowser
 import handler_audacious2
 import handler_banshee
+import handler_gmusicbrowser
+import handler_guayadeque
+import handler_mpd
+import handler_rhythmbox
 import handler_xmms2
+
