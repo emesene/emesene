@@ -140,6 +140,7 @@ class Login(gtk.Alignment):
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
         self.b_connect.set_border_width(8)
+        self.b_connect.set_sensitive(False)
 
         vbox = gtk.VBox()
 
@@ -373,6 +374,7 @@ class Login(gtk.Alignment):
 
         self.remember_password.set_sensitive(state)
         self.auto_login.set_sensitive(state)
+        self.b_connect.set_sensitive(state)
 
     def _on_account_key_press(self, widget, event):
         '''
