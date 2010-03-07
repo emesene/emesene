@@ -50,9 +50,16 @@ class Plugin(PluginBase):
                 if current_title != self.last_title:
                     self.session.set_media(current_title)
                     self.last_title = current_title
+                    self.set_cover_as_avatar()
             elif self.last_title is not None:
                 self.last_title = None
                 self.session.set_media("not playing")
 
         return self.running
+
+    def set_cover_as_avatar(self):
+        image_path = songretriever.get_cover_path(self.player)
+        if image_path is not None:
+            # set avatar image
+            pass
 
