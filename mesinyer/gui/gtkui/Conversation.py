@@ -109,6 +109,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.session.signals.filetransfer_invitation.subscribe(
                 self.on_filetransfer_invitation)
+        self.session.signals.filetransfer_progress.subscribe(
+                self.on_filetransfer_progress)
 
         self.tab_index = -1 # used to select an existing conversation
 
@@ -257,5 +259,6 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_filetransfer_invitation(self, transfer):
         self.transfers_bar.add(transfer)
-        self.transfers_bar.show_all()
-        print "hy"
+
+    def on_filetransfer_progress(self, transfer):
+        self.transfers_bar.update(transfer)

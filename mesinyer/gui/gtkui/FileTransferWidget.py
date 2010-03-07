@@ -92,8 +92,8 @@ class FileTransferWidget(gtk.HBox):
         if self.transfer.state == self.transfer.RECEIVED:
             self.progress.set_fraction(1)  # 100%
         else:
-            self.progress.set_fraction(self.transfer.fraction)
-        self.progress.set_text(str(self.transfer.fraction))
+            self.progress.set_fraction(self.transfer.received_chunks/self.transfer.size)
+        self.progress.set_text(str(self.transfer.received_chunks/self.transfer.size))
         self.tooltip.update()
 
     def on_transfer_state_changed(self):
@@ -228,7 +228,7 @@ class FileTransferTooltip(gtk.Window):
         if not self.pointer_is_over_widget:
             return
 
-        pixbuf = None # TODO: self.transfer.getPreviewImage()
+        pixbuf = gtk.gdk.pixbuf_new_from_data(self.transfer.preview)
 
         #amsn sends a big. black preview? :S
         if pixbuf and pixbuf.get_height() <= 96 and pixbuf.get_width() <= 96:
@@ -242,22 +242,21 @@ class FileTransferTooltip(gtk.Window):
         return False
 
     def update(self):
-        ''' updates the tooltip TODO: Update
-        self.details.set_markup('<b>' + self.transfer.getFilename() + '</b>')
-        time_left = self.transfer.getEstimatedTimeLeft()
-        bps = self.transfer.getAverageSpeed()
-        seconds = self.transfer.getElapsedTime()
-        received, total = self.transfer.getBytes()
-
-        percentage = int(self.transfer.getFraction() * 100)
+        ''' updates the tooltip '''
+        self.details.set_markup('<b>' + self.transfer.filename + '</b>')
+        time_left = self.transfer.get_eta()
+        bps = self.transfer.get_speed()
+        seconds = self.transfer.get_time()
+        
+        percentage = int(self.transfer.get_fraction() * 100)
         self.status.set_text('%d%% (%d/%d KB)' % (percentage, \
-            int(received)/1024, int(total) / 1024))
+            int(self.transfer.received_data)/1024, int(self.transfer.size) / 1024))
         self.elapsed.set_text('%.2d:%.2d' % (int(seconds / 60), \
             int(seconds % 60)))
         self.speed.set_text('%.2f KiB/s' % (float(bps) / 1024.0))
         self.etl.set_text('%.2d:%.2d' % (int(time_left / 60), \
             int(time_left % 60)))
-        '''
+
     def on_leave(self, view, event):
         ''' called when the pointer leaves the widget '''
         self.pointer_is_over_widget = False

@@ -95,7 +95,9 @@ class Worker(e3.base.Worker, papyon.Client):
         # this stores papyon conversations as cid : conversation
         self.papyconv = {}
         # this stores conversation handlers
-        self._conversation_handler = {}    
+        self._conversation_handler = {}
+        # store ongoing filetransfers
+        self.filetransfers = {}  
 
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
 
@@ -226,17 +228,15 @@ class Worker(e3.base.Worker, papyon.Client):
         # because codecs aren't ready yet
 
     def _on_invite_file_transfer(self, papysession):
-        print "new ft invite", papysession
-
-        tr = e3.base.FileTransfer(papysession, papysession.filename, papysession.size, papysession.preview, sender=papysession.peer)
+        tr = e3.base.FileTransfer(papysession, papysession.filename, \
+            papysession.size, papysession.preview, sender=papysession.peer)
+        self.filetransfers[papysession] = ft
 
         #if 0:
         #    papysession.reject()
         #else:
         #    papysession.accept()
 
-        # define new stuff
-        papysession.RECEIVED_CHUNKS = 0
         # temp methods to show whats possible
         papysession.connect("accepted", self.papy_ft_accepted)
         papysession.connect("progressed", self.papy_ft_progressed)
@@ -248,11 +248,16 @@ class Worker(e3.base.Worker, papyon.Client):
         print "accepted"
 
     def papy_ft_progressed(self, ftsession, len_chunk):
-        print "progress..", ftsession.RECEIVED_CHUNKS*len_chunk, "/", ftsession.size
-        ftsession.RECEIVED_CHUNKS += 1
+        tr = self.filetransfers[papysession]
+        tr.received_data += len_chunk
+
+        self.session.add_event(Event.EVENT_FILETRANSFER_PROGRESS, tr)
 
     def papy_ft_completed(self, ftsession, data):
-        print "data:", len(data.getvalue())
+        print "data:", len(data.getvalue())        
+        # TODO: save the file somewhere
+
+        self.session.add_event(Event.EVENT_FILETRANSFER_COMPLETED, tr)
 
     # call handlers
     def _on_call_incoming(self, papycallevent):

@@ -36,7 +36,7 @@ EVENTS = (\
  'conv message'          , 'conv first action'    ,
  'conv message send succeed'  , 'conv message send failed',
  'oim received',       'oims data received',
- 'filetransfer invitation', 'filetransfer finished',
+ 'filetransfer invitation', 'filetransfer completed',
  'filetransfer error', 'filetransfer canceled',
  'filetransfer accepted', 'filetransfer progress',
  'p2p invitation',      'p2p finished',
