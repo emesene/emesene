@@ -81,9 +81,6 @@ class Login(gtk.Alignment):
         self.btn_status = StatusButton.StatusButton()
         self.btn_status.set_status(e3.status.ONLINE)
 
-        status_padding = gtk.Label()
-        status_padding.set_size_request(*self.btn_status.size_request())
-
         self.txt_password = gtk.Entry()
         self.txt_password.set_visibility(False)
         self.txt_password.connect('key-press-event',
@@ -118,18 +115,17 @@ class Login(gtk.Alignment):
         self.remember_password.set_sensitive(False)
         self.auto_login.set_sensitive(False)
 
-        self.forget_me = gtk.EventBox()
-        self.forget_me.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.forget_me_label = gtk.Label('<span foreground="#0000AA">(' + \
-                                            _('Forget me') + ')</span>')
-        self.forget_me_label.set_use_markup(True)
-        self.forget_me.add(self.forget_me_label)
-        self.forget_me.connect('button_press_event', self._on_forget_me_clicked)
-        self.forget_me.set_child_visible(False)
+        self.forget_me = gtk.Button()
+        self.set_tooltip_text(_('Delete user'))
+        forget_img = gtk.image_new_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
+        self.forget_me.set_image(forget_img)
+        self.forget_me.set_relief(gtk.RELIEF_NONE)
+        self.forget_me.set_border_width(0)
+        self.forget_me.connect('clicked', self._on_forget_me_clicked)
+        self.forget_me.set_sensitive(False)
 
         hboxremember = gtk.HBox(spacing=2)
         hboxremember.pack_start(self.remember_account, False, False)
-        hboxremember.pack_start(self.forget_me, False, False)
 
         vbox_remember = gtk.VBox(spacing=4)
         vbox_remember.set_border_width(8)
@@ -149,7 +145,7 @@ class Login(gtk.Alignment):
         img_accountpix.set_from_pixbuf(utils.scale_nicely(pix_account))
         hbox_account.pack_start(img_accountpix, False)
         hbox_account.pack_start(self.cmb_account, True, True)
-        hbox_account.pack_start(status_padding, False)
+        hbox_account.pack_start(self.forget_me, False)
 
         hbox_password = gtk.HBox(spacing=6)
         img_password = gtk.Image()
@@ -290,7 +286,7 @@ class Login(gtk.Alignment):
         if account in self.accounts:
             attr = int(self.remembers[account])
             self.remember_account.set_sensitive(False)
-            self.forget_me.set_child_visible(True)
+            self.forget_me.set_sensitive(True)
             self.btn_status.set_status(int(self.status[account]))
             
             passw = self.accounts[account]
@@ -326,7 +322,7 @@ class Login(gtk.Alignment):
         self.remember_password.set_active(False)
         self.remember_password.set_sensitive(True)
         self.auto_login.set_active(False)
-        self.forget_me.set_child_visible(False)
+        self.forget_me.set_sensitive(False)
         self.btn_status.set_status(e3.status.ONLINE)
         self.txt_password.set_sensitive(True)
         self.img_account.set_from_pixbuf(
