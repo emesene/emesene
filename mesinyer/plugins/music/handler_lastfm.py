@@ -4,7 +4,7 @@ import songretriever
 import xml.dom.minidom
 import urllib
 
-class Handler(object):
+class LastfmHandler(object):
     '''a simple handler for lastfm web service'''
 
     def __init__(self, login="Diftool80", update_interval=60):
@@ -55,5 +55,5 @@ class Handler(object):
 
         return songretriever.Song(artist, album, title)
 
-songretriever.register('lastfm', Handler)
+songretriever.register('lastfm', LastfmHandler)
 

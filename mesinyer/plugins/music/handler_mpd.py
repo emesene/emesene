@@ -3,7 +3,7 @@ import socket
 import songretriever
 from thirdparty import mpd
 
-class Handler(object):
+class MpdHandler(object):
     '''a simple handler for mpd music player'''
 
     def __init__(self, host="localhost", port=6600):
@@ -52,4 +52,4 @@ class Handler(object):
                 info.get('title', '?'),
                 info.get('file', '?'))
 
-songretriever.register('mpd', Handler)
+songretriever.register('mpd', MpdHandler)

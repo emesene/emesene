@@ -2,7 +2,7 @@ import songretriever
 
 import DBusBase
 
-class AmarokHandler(DBusBase.DBusBase):
+class Amarok2Handler(DBusBase.DBusBase):
     '''Handler for Amarok2'''
 
     def __init__(self, iface_name = 'org.mpris.amarok',
@@ -29,4 +29,4 @@ class AmarokHandler(DBusBase.DBusBase):
                                       song['title'],
                                       song['location'])
 
-songretriever.register('amarok2', AmarokHandler)
+songretriever.register('amarok2', Amarok2Handler)
