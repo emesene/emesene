@@ -5,7 +5,6 @@ and will look for the handler of that music player and call the apropiate
 function there'''
 
 import os
-import paths
 import urllib
 
 __handlers = {}
@@ -61,16 +60,33 @@ def get_base_cover_path(song):
     artist = song.artist.encode('utf8')
     album = song.album.encode('utf8')
 
+    if artist == "?":
+        artist = ""
+
+    if album == "?":
+        album = ""
+
     if len(artist) == 0 and len(album) == 0:
         return None
 
-    cover_art_path = os.path.join(paths.HOME_DIR, '.covers', '')
+    if (os.name != 'nt'):
+        home_dir = os.path.expanduser('~')
+    else:
+        home_dir = os.path.expanduser("~").decode(sys.getfilesystemencoding())
+
+    cover_art_path = os.path.join(home_dir, '.covers', '')
+
+    # print "Searching for covers in " + cover_art_path
 
     image_path = cover_art_path + artist + '-' + album + '.jpg'
 
+    # print "Checking if " + image_path + " exists"
+
     if os.path.exists(image_path):
+        # print image_path + " found!"
         return image_path
 
+    # print "Not found locally, let's try albumart.org"
     # Not found locally, let's try albumart.org
 
     url = "http://www.albumart.org/index.php?srchkey=" + \

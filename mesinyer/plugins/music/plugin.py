@@ -6,6 +6,8 @@ import Preferences
 
 from plugin_base import PluginBase
 
+from gui.gtkui.AvatarManager import AvatarManager
+
 class Plugin(PluginBase):
     def __init__(self):
         PluginBase.__init__(self)
@@ -14,11 +16,13 @@ class Plugin(PluginBase):
         self.format = "%ARTIST% - %ALBUM% - %TITLE%"
         self.running = False
         self.last_title = None
+        self.avatar = None
 
     def start(self, session):
         '''start the plugin'''
         self.session = session
         self.running = True
+        self.avatar = AvatarManager(session)
         gobject.timeout_add(500, self.check_song)
         return True
 
@@ -59,7 +63,7 @@ class Plugin(PluginBase):
 
     def set_cover_as_avatar(self):
         image_path = songretriever.get_cover_path(self.player)
-        if image_path is not None:
-            # set avatar image
-            pass
+        if image_path is not None and self.avatar is not None:
+            # print "Setting " + image_path + " as avatar image"
+            self.avatar.set_as_avatar(image_path)
 
