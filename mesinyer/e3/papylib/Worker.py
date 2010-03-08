@@ -369,20 +369,34 @@ class Worker(e3.base.Worker, papyon.Client):
             return
         else:
             #it's a multichat
-            first_partecipant = conv.total_partecipants[0].account
-            #that cid must be exists
-            #TODO catch exception!
-            cid = self.conversations[account]
+            first_partecipant = list(conv.total_participants)[0].account
+            try:
+                #that cid must be exists
+                cid = self.conversations[account]
+            except KeyError:
+                print 'Keyerror:multichat with %s as first user doesn\'t exists' % account
+                return
+
             self.session.add_event(e3.Event.EVENT_CONV_CONTACT_JOINED,
                                    account, cid)
-            print "[papyon]", contact, "joined a conversation"
+            print "[papyon]", account, "joined a conversation"
 
     def _on_conversation_user_left(self, papycontact, pyconvevent):
         '''handle user left event'''
         account = papycontact.account
         conv = pyconvevent.conversation
-        #TODO fai come sopra ma con event contact left
-        print "[papyon]", contact, "left a conversation"
+
+        first_partecipant = list(conv.total_participants)[0].account
+        try:
+            #that cid must be exists
+            cid = self.conversations[account]
+        except KeyError:
+            print 'Keyerror:multichat with %s as first user doesn\'t exists' % account
+            return
+
+        self.session.add_event(e3.Event.EVENT_CONV_CONTACT_LEFT,
+                                   cid, account)
+        print "[papyon]", account, "left a conversation"
 
     # contact changes handlers
     def _on_contact_status_changed(self, papycontact):
@@ -806,8 +820,9 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_CONV_INVITE
         '''
         print "have invited %s in this conversation: %s..are you happy?" % (account,cid)
-        self.session.add_event(e3.Event.EVENT_CONV_CONTACT_JOINED, account, cid)
-        #del self.conversations[self.rconversations[cid]]
+        conv = self.papyconv[cid]
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
+        conv._invite_user(papycontact)
 
     def _handle_action_send_message(self, cid, message):
         ''' handle Action.ACTION_SEND_MESSAGE '''
