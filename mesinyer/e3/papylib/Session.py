@@ -62,3 +62,7 @@ class Session(e3.Session):
         account = self.account.account
         message = e3.Message(e3.Message.TYPE_NUDGE, None, account)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
+
+    def conversation_invite(self, cid, account):
+        '''invite a contact to a conversation'''
+        self.add_action(e3.Action.ACTION_CONV_INVITE, (cid, account))

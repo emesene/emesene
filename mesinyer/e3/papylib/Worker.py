@@ -361,6 +361,29 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_conversation_message_error(self, err_type, error, papyconversation):
         print "error sending message because", err_type, error
 
+    def _on_conversation_user_joined(self, papycontact, pyconvevent):
+        '''handle user joined event'''
+        account = papycontact.account
+        conv = pyconvevent.conversation
+        if len(conv.total_participants) == 1:
+            return
+        else:
+            #it's a multichat
+            first_partecipant = conv.total_partecipants[0].account
+            #that cid must be exists
+            #TODO catch exception!
+            cid = self.conversations[account]
+            self.session.add_event(e3.Event.EVENT_CONV_CONTACT_JOINED,
+                                   account, cid)
+            print "[papyon]", contact, "joined a conversation"
+
+    def _on_conversation_user_left(self, papycontact, pyconvevent):
+        '''handle user left event'''
+        account = papycontact.account
+        conv = pyconvevent.conversation
+        #TODO fai come sopra ma con event contact left
+        print "[papyon]", contact, "left a conversation"
+
     # contact changes handlers
     def _on_contact_status_changed(self, papycontact):
         status_ = STATUS_PAPY_TO_E3[papycontact.presence]
@@ -370,15 +393,6 @@ class Worker(e3.base.Worker, papyon.Client):
         account = contact.account
         old_status = contact.status
         contact.status = status_
-
-        log_account = Logger.Account(contact.attrs.get('CID', None), None, \
-            contact.account, contact.status, contact.nick, contact.message, \
-            contact.picture)
-        if old_status != status_:
-            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account, \
-                'status', old_status)
-            self.session.logger.log('status change', status_, str(status_), \
-                log_account)
 
     def _on_contact_nick_changed(self, papycontact):
         contact = self.session.contacts.contacts.get(papycontact.account, None)
@@ -787,6 +801,13 @@ class Worker(e3.base.Worker, papyon.Client):
         '''
         #print "you close conversation %s, are you happy?" % cid
         del self.conversations[self.rconversations[cid]]
+
+    def _handle_action_conv_invite(self, cid, account):
+        '''handle Action.ACTION_CONV_INVITE
+        '''
+        print "have invited %s in this conversation: %s..are you happy?" % (account,cid)
+        self.session.add_event(e3.Event.EVENT_CONV_CONTACT_JOINED, account, cid)
+        #del self.conversations[self.rconversations[cid]]
 
     def _handle_action_send_message(self, cid, message):
         ''' handle Action.ACTION_SEND_MESSAGE '''
