@@ -12,7 +12,9 @@ class ConfigDir(object):
             self.base_dir = self.default_base_dir
         else:
             self.base_dir = base_dir
-
+        if not os.path.exists(self.base_dir):
+            os.makedirs(self.base_dir)
+            
         self.create_if_not_exists('')
 
     def _get_default_base_dir(self):

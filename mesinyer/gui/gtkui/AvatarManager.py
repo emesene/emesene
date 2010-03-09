@@ -104,18 +104,18 @@ class AvatarManager(object):
         if self.is_cached(filename):
             self.session.set_picture(filename)
             if os.path.exists(self.avatar_path):
-            os.remove(self.avatar_path)
+                os.remove(self.avatar_path)
             else:
                 os.makedirs(os.path.dirname(self.avatar_path))
             shutil.copy2(filename, self.avatar_path)
         else:
-        try:
+            try:
                 pix_128, fpath = self.add_new_avatar(filename)
-            self.session.set_picture(fpath)
-            if os.path.exists(self.avatar_path):
-                os.remove(self.avatar_path)
-            pix_128.save(self.avatar_path, 'png')
-        except OSError, e:
-            print e
+                self.session.set_picture(fpath)
+                if os.path.exists(self.avatar_path):
+                    os.remove(self.avatar_path)
+                pix_128.save(self.avatar_path, 'png')
+            except OSError, e:
+                print e
 
 

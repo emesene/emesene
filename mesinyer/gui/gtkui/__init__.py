@@ -27,8 +27,11 @@ def gtk_main(Controller):
     import Preferences
     import Conversation
     import ImageChooser
-    import AdiumTextBox
-    import WebKitTextBox
+    try:
+        import AdiumTextBox
+    except:
+        pass
+    import WebKitTextBox    
     import AvatarChooser
     import ConversationManager
     import ConversationToolbar
