@@ -3,7 +3,7 @@ import songretriever
 ROOT_NAME = 'org.freedesktop.DBus'
 ROOT_PATH = '/org/freedesktop/DBus'
 
-class DBusBase(object):
+class DBusBase(MusicHandler):
     '''Handler for music players that use DBus'''
 
     def __init__(self, iface_name,

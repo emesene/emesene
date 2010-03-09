@@ -34,7 +34,7 @@ class UserPanel(gtk.VBox):
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
 
         self.avatar_path = self.session.config.last_avatar
-	self.avatarman = AvatarManager(self.session)
+        self.avatarman = AvatarManager(self.session)
 
         if self.session.config_dir.file_readable(self.avatar_path):
             pix = utils.safe_gtk_pixbuf_load(self.avatar_path, (32,32))
