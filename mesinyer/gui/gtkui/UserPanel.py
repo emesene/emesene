@@ -1,6 +1,4 @@
 import gtk
-import os
-import shutil
 
 import gui
 import utils
@@ -158,8 +156,9 @@ class UserPanel(gtk.VBox):
         '''
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
+            if _av_chooser is not None:
+		        _av_chooser.stop_and_clear()
             if response == gui.stock.ACCEPT:
-		print 'set as avatar: ' + filename
 		self.avatarman.set_as_avatar(filename)
 
         #Directory for user's avatars
@@ -171,6 +170,10 @@ class UserPanel(gtk.VBox):
 	#Directories for System Avatars
         faces_paths = self.avatarman.get_system_avatars_dirs()
 
-        extension.get_default('avatar chooser')(set_picture_cb,
-                                                self.avatar_path, path_dir, cached_avatar_dir, faces_paths).show()
+        _av_chooser = extension.get_default('avatar chooser')(set_picture_cb,
+                                                self.avatar_path, path_dir,
+                                                cached_avatar_dir, faces_paths,
+                                                self.avatarman)
+        _av_chooser.show()
+
 

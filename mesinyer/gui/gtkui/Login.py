@@ -24,7 +24,7 @@ class Login(gtk.Alignment):
                 config, config_dir, config_path, proxy=None,
                 use_http=None, session_id=None):
 
-        gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
+        gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=1.0)
 
         self.config = config
@@ -81,14 +81,12 @@ class Login(gtk.Alignment):
         self.btn_status = StatusButton.StatusButton()
         self.btn_status.set_status(e3.status.ONLINE)
 
-        status_padding = gtk.Label()
-        status_padding.set_size_request(*self.btn_status.size_request())
-
         self.txt_password = gtk.Entry()
         self.txt_password.set_visibility(False)
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
         self.txt_password.connect('changed', self._on_password_changed)
+        self.txt_password.set_sensitive(False)
 
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
@@ -112,19 +110,22 @@ class Login(gtk.Alignment):
             self._on_remember_password_toggled)
         self.auto_login.connect('toggled',
             self._on_auto_login_toggled)
+        
+        self.remember_account.set_sensitive(False)
+        self.remember_password.set_sensitive(False)
+        self.auto_login.set_sensitive(False)
 
-        self.forget_me = gtk.EventBox()
-        self.forget_me.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.forget_me_label = gtk.Label('<span foreground="#0000AA">(' + \
-                                            _('Forget me') + ')</span>')
-        self.forget_me_label.set_use_markup(True)
-        self.forget_me.add(self.forget_me_label)
-        self.forget_me.connect('button_press_event', self._on_forget_me_clicked)
-        self.forget_me.set_child_visible(False)
+        self.forget_me = gtk.Button()
+        self.forget_me.set_tooltip_text(_('Delete user'))
+        forget_img = gtk.image_new_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
+        self.forget_me.set_image(forget_img)
+        self.forget_me.set_relief(gtk.RELIEF_NONE)
+        self.forget_me.set_border_width(0)
+        self.forget_me.connect('clicked', self._on_forget_me_clicked)
+        self.forget_me.set_sensitive(False)
 
         hboxremember = gtk.HBox(spacing=2)
         hboxremember.pack_start(self.remember_account, False, False)
-        hboxremember.pack_start(self.forget_me, False, False)
 
         vbox_remember = gtk.VBox(spacing=4)
         vbox_remember.set_border_width(8)
@@ -135,6 +136,7 @@ class Login(gtk.Alignment):
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
         self.b_connect.set_border_width(8)
+        self.b_connect.set_sensitive(False)
 
         vbox = gtk.VBox()
 
@@ -143,7 +145,7 @@ class Login(gtk.Alignment):
         img_accountpix.set_from_pixbuf(utils.scale_nicely(pix_account))
         hbox_account.pack_start(img_accountpix, False)
         hbox_account.pack_start(self.cmb_account, True, True)
-        hbox_account.pack_start(status_padding, False)
+        hbox_account.pack_start(self.forget_me, False)
 
         hbox_password = gtk.HBox(spacing=6)
         img_password = gtk.Image()
@@ -173,17 +175,15 @@ class Login(gtk.Alignment):
         self.nicebar = NiceBar.NiceBar(default_background= \
                                        NiceBar.ALERTBACKGROUND)
 
-        al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.0)
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
-        al_vbox_remember = gtk.Alignment(xalign=0.55, yalign=0.5, xscale=0.05,
+        al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.2)
-        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
-        al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.20)
+        al_account = gtk.Alignment(xalign=0.45, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
-
+        
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
@@ -268,41 +268,48 @@ class Login(gtk.Alignment):
         on the account entry
         '''
         self._clear_all()
+
+        if self.txt_password.get_text() == '':
+                self.remember_password.set_sensitive(False)
+                self.auto_login.set_sensitive(False)
+
         if account == '':
+            self.remember_account.set_sensitive(False)
+            self.txt_password.set_text('')
+            self.txt_password.set_sensitive(False)
             return
 
-        flag = False
+        self.remember_account.set_sensitive(True)
 
         if account in self.accounts:
             attr = int(self.remembers[account])
             self.remember_account.set_sensitive(False)
-            self.forget_me.set_child_visible(True)
+            self.forget_me.set_sensitive(True)
             self.btn_status.set_status(int(self.status[account]))
-
+            
+            passw = self.accounts[account]
+            
             path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
             if self.config_dir.file_readable(path):
                 pix = utils.safe_gtk_pixbuf_load(path, (96,96))
                 self.img_account.set_from_pixbuf(pix) 
 
             if attr == 3:#autologin,password,account checked
+                self.txt_password.set_text(base64.b64decode(passw))
+                self.txt_password.set_sensitive(False)
                 self.auto_login.set_active(True)
-                flag = True
             elif attr == 2:#password,account checked
+                self.txt_password.set_text(base64.b64decode(passw))
+                self.txt_password.set_sensitive(False)
                 self.remember_password.set_active(True)
-                flag = True
             elif attr == 1:#only account checked
                 self.remember_account.set_active(True)
                 self.remember_password.set_sensitive(False)
+                self.auto_login.set_sensitive(False)
             else:#if i'm here i have an error
                 self.show_error(_(
                           'Error while reading user config'))
                 self._clear_all()
-
-            #for not repeating code
-            if flag:
-                passw = self.accounts[account]
-                self.txt_password.set_text(base64.b64decode(passw))
-                self.txt_password.set_sensitive(False)
 
     def _clear_all(self):
         '''
@@ -313,9 +320,8 @@ class Login(gtk.Alignment):
         self.remember_password.set_active(False)
         self.remember_password.set_sensitive(True)
         self.auto_login.set_active(False)
-        self.forget_me.set_child_visible(False)
+        self.forget_me.set_sensitive(False)
         self.btn_status.set_status(e3.status.ONLINE)
-        self.txt_password.set_text('')
         self.txt_password.set_sensitive(True)
         self.img_account.set_from_pixbuf(
              utils.safe_gtk_pixbuf_load(gui.theme.logo))
@@ -355,8 +361,14 @@ class Login(gtk.Alignment):
             self.do_connect()
 
     def _on_password_changed(self, widget):
+        '''
+        called when the password in the combobox changes
+        '''
         state = (self.txt_password.get_text() != "")
+
         self.remember_password.set_sensitive(state)
+        self.auto_login.set_sensitive(state)
+        self.b_connect.set_sensitive(state)
 
     def _on_account_key_press(self, widget, event):
         '''
@@ -438,10 +450,12 @@ class Login(gtk.Alignment):
         '''
         if self.remember_password.get_active():
             self.remember_account.set_active(True)
+            self.remember_account.set_sensitive(False)
             self.txt_password.set_sensitive(False)
         else:
+            self.remember_account.set_sensitive(True)
             self.txt_password.set_sensitive(True)
-            self.txt_password.set_text("")
+            self.txt_password.set_text('')
 
     def _on_auto_login_toggled(self, button):
         '''
@@ -454,12 +468,7 @@ class Login(gtk.Alignment):
             self.remember_account.set_sensitive(False)
             self.remember_password.set_sensitive(False)
         else:
-            if user not in self.accounts:
-                self.remember_account.set_active(False)
-                self.remember_account.set_sensitive(True)
-                self.remember_password.set_sensitive(True)
-            else:
-                self.remember_password.set_sensitive(True)
+            self.remember_password.set_sensitive(True)
 
     def _on_preferences_enter(self, button, event):
         '''
@@ -556,6 +565,7 @@ class ConnectingWindow(gtk.Alignment):
         self.label.hide()
         self.throbber.hide()
         self.label_timer.hide()
+        self.b_cancel.hide()
 
     def do_animation(self):
        '''do the avatar's animation on login'''
@@ -566,6 +576,7 @@ class ConnectingWindow(gtk.Alignment):
            return True
        else:
            self.label.show()
+           self.b_cancel.show()
            self.clear_connect()
            return False
 

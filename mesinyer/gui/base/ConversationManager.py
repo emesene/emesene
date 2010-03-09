@@ -42,28 +42,7 @@ class ConversationManager(object):
         if conversation is None:
             (exists, conversation) = self.new_conversation(cid, [account])
 
-        contact = self.session.contacts.get(account)
-        if contact:
-            nick = contact.display_name
-        else:
-            nick = account
-
-        if message.type == e3.Message.TYPE_MESSAGE:
-            (is_raw, consecutive, outgoing, first, last) = \
-                conversation.formatter.format(contact)
-
-            middle = MarkupParser.escape(message.body)
-            if not is_raw:
-                middle = self.format_from_message(message)
-
-            conversation.output.append(first + middle + last, cedict,self.session.config.b_allow_auto_scroll)
-            conversation.play_send()
-
-        elif message.type == e3.Message.TYPE_NUDGE:
-            conversation.output.append(
-                conversation.formatter.format_information(
-                    '%s just sent you a nudge!' % (nick,)),self.session.config.b_allow_auto_scroll)
-            conversation.play_nudge()
+        conversation.on_receive_message(message, account, cedict)
 
         if message.type != e3.Message.TYPE_TYPING:
             self.set_message_waiting(conversation, True)

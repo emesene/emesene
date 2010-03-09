@@ -1,6 +1,7 @@
 import gtk
 import gobject
 
+import e3
 import gui
 import utils
 import RichBuffer
@@ -94,7 +95,7 @@ class TextBox(gtk.ScrolledWindow):
             return_string += part #new string with replacements
             start.forward_char()
         return return_string
-                
+
     def _on_copy_clipboard(self, textview):
         ''' replaces the copied text with a new text with the
         alt text of the images selected at copying '''
@@ -189,7 +190,7 @@ class InputText(TextBox):
                 pos = self._buffer.get_iter_at_mark(mark_end)
                 anchor = self._buffer.create_child_anchor(pos)
                 self._textbox.add_child_at_anchor(image, anchor)
-                
+
                 self.widgets[anchor] = image
 
                 start = self._buffer.get_iter_at_mark(mark_end)
@@ -256,3 +257,35 @@ class OutputText(TextBox):
             text = MarkupParser.parse_emotes(text)
 
         TextBox.append(self, text, scroll)
+
+    def send_message(self, formatter, contact, text, cedict, style, is_first):
+        '''add a message to the widget'''
+        nick = contact.display_name
+
+        is_raw, consecutive, outgoing, first, last = \
+            formatter.format(contact)
+
+        if is_raw:
+            middle = MarkupParser.escape(text)
+        else:
+            middle = MarkupParser.escape(text)
+            middle = e3.common.add_style_to_message(middle, style, False)
+
+        all_ = first + middle + last
+        self.append(all_, cedict, self.config.b_allow_auto_scroll)
+
+    def receive_message(self, formatter, contact, message, cedict, is_first):
+        '''add a message to the widget'''
+        is_raw, consecutive, outgoing, first, last = formatter.format(contact)
+
+        middle = MarkupParser.escape(message.body)
+        if not is_raw:
+            middle = e3.common.add_style_to_message(message.body, message.style)
+
+        self.append(first + middle + last, cedict, self.config.b_allow_auto_scroll)
+
+    def information(self, formatter, contact, message):
+        '''add an information message to the widget'''
+        self.append(formatter.format_information(message), None,
+                self.config.b_allow_auto_scroll)
+
