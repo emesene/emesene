@@ -235,9 +235,6 @@ class Worker(e3.Worker):
         if '@msn.com' not in self.session.account.account:
             server = "login.live.com"
             url = "/RST.srf"
-        else:
-            server = "msnia.login.live.com"
-            url = "/pp550/RST.srf"
 
         #create the headers
         headers = { \
