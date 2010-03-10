@@ -439,9 +439,8 @@ class Controller(object):
             self._set_location(window, True)
             self.conversations = window.content
             window.show()
-
-        exists, conversation = self.conversations.new_conversation(cid,
-            members)
+        
+        conversation = self.conversations.new_conversation(cid, members)
 
         conversation.update_data()
 
@@ -468,8 +467,6 @@ class Controller(object):
             self.session.config.b_play_first_send:
 
             play(gui.theme.sound_send)
-
-        return (exists, conversation)
 
     def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''

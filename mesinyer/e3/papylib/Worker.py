@@ -206,10 +206,20 @@ class Worker(e3.base.Worker, papyon.Client):
 
     # invite handlers
     def _on_conversation_invite(self, papyconversation):
-        ''' create a cid and append the event handler to papyconv dict '''
+        ''' called when we are invited in a conversation '''
         cid = time.time()
+        partecipants = list(papyconversation.participants)
+        members = [account.account for account in partecipants]
+        
+        id_multichat = 'GroupChat'+str(cid)
+        self.conversations[id_multichat] = cid 
+        self.rconversations[cid] = id_multichat
         newconversationevent = ConversationEvent(papyconversation, self)
         self._conversation_handler[cid] = newconversationevent
+        self.papyconv[cid] = papyconversation
+        self.rpapyconv[papyconversation] = cid
+        self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
+            members)
 
     def _on_webcam_invite(self, session, producer):
         print "New webcam invite", session, producer
@@ -282,9 +292,11 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_conversation_user_typing(self, papycontact, pyconvevent):
         ''' handle user typing event '''
         account = papycontact.account
-        if account in self.conversations:
+        conv = pyconvevent.conversation
+
+        if conv in self.papyconv:
             # emesene conversation already exists
-            cid = self.conversations[account]
+            cid = self.self.rpapyconv[conv]
         else:
             # we don't care about users typing if no conversation is opened
             return
@@ -376,29 +388,24 @@ class Worker(e3.base.Worker, papyon.Client):
             return
         else:
             #it's a multichat
-            try:
-                #that cid must be exists
+            #that cid must be exists
+            if conv in self.rpapyconv:
                 cid = self.rpapyconv[conv]
-            except KeyError:
-                print 'Keyerror:multichat started by %s doesn\'t exists' % first_partecipant
-                return
-
-            self.session.add_event(e3.Event.EVENT_CONV_CONTACT_JOINED,
-                                   cid, account)
+                self.session.add_event(e3.Event.EVENT_CONV_CONTACT_JOINED,
+                                       cid, account)
+            else:
+                #TODO dialog error????
+                print 'error while inviting user....'
 
     def _on_conversation_user_left(self, papycontact, pyconvevent):
         '''handle user left event'''
         account = papycontact.account
         conv = pyconvevent.conversation
 
-        try:
-            #that cid must be exists
+        #that cid must be exists
+        if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
-        except KeyError:
-            print 'Keyerror:multichat started by %s doesn\'t exists' % first_partecipant
-            return
-
-        self.session.add_event(e3.Event.EVENT_CONV_CONTACT_LEFT,
+            self.session.add_event(e3.Event.EVENT_CONV_CONTACT_LEFT,
                                    cid, account)
 
     # contact changes handlers
@@ -786,6 +793,7 @@ class Worker(e3.base.Worker, papyon.Client):
         #print "you opened conversation %(ci)s with %(acco)s, are you happy?" \
         # % { 'ci' : cid, 'acco' : account }
         # append cid to emesene conversations
+
         if account in self.conversations:
             #print "there's already a conversation with this user wtf"
             # update cid
@@ -794,8 +802,9 @@ class Worker(e3.base.Worker, papyon.Client):
             self.rconversations[cid] = account
             # create a papyon conversation
             contact = self.address_book.contacts.search_by('account', account)[0]
-            conv = papyon.Conversation(self, contact)
+            conv = papyon.Conversation(self, [contact,])
             self.papyconv[cid] = conv
+            self.rpapyconv[conv] = cid
             # attach the conversation event handler
             convhandler = ConversationEvent(conv, self)
             self._conversation_handler[cid] = convhandler
@@ -818,7 +827,13 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_CLOSE_CONVERSATION
         '''
         #print "you close conversation %s, are you happy?" % cid
-        del self.conversations[self.rconversations[cid]]
+        account = self.rconversations[cid]
+        conv = self.papyconv[cid]
+        conv.leave()
+        del self.conversations[account]
+        del self.rconversations[cid]
+        del self.papyconv[cid]
+        del self.rpapyconv[conv]
 
     def _handle_action_conv_invite(self, cid, account):
         '''handle Action.ACTION_CONV_INVITE
