@@ -33,6 +33,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         ContactInfo = extension.get_default('conversation info')
         ConversationToolbar = extension.get_default(
             'conversation toolbar')
+        clist = extension.get_default('contact list')
 
         dialog = extension.get_default('dialog')
         self.header = Header()
@@ -42,6 +43,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.output = OutputText(self.session.config)
         self.input = InputText(self.session.config, self._on_send_message)
         self.info = ContactInfo()
+        self.list = clist(self.session)
 
         frame_input = gtk.Frame()
         frame_input.set_shadow_type(gtk.SHADOW_IN)
@@ -86,9 +88,15 @@ class Conversation(gtk.VBox, gui.Conversation):
                 his_picture = contact.picture
 
         avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
-
-        self.info.first = utils.safe_gtk_image_load(his_picture,
-                (avatar_size, avatar_size))
+        
+        if self.group_chat:
+            #TODO list of multichat users
+            #TODO modify update group information to support that list 
+            self.info.first = self.list
+            self.list.fill()
+        else:
+            self.info.first = utils.safe_gtk_image_load(his_picture,
+                    (avatar_size, avatar_size))
         self.info.last = utils.safe_gtk_image_load(my_picture,
                 (avatar_size, avatar_size))
 

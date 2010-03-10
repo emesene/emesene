@@ -15,8 +15,6 @@ e3.msn:
 - p2p
 - decide if it's worth developing it, really
 
-e3.papylib:
-- implement multichats
 
 e3.papylib->upstream (eventually):
 - push papyon/gstreamer developers to fix the mimic decoder upstream so webcam 
@@ -37,4 +35,5 @@ gui.gtk:
   (but i don't know if it's already in pygtk)
 - port emesene1 preferences to emesene2 
   (and merge back plugins window in preferences)
-- merge marianoguerra's pyadium in emesene2 
+- merge marianoguerra's pyadium in emesene2
+- multichat userlist instead of personal avatar
