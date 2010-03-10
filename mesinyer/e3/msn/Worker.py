@@ -232,9 +232,8 @@ class Worker(e3.Worker):
         template = XmlManager.get('passport',
             self.session.account.account, self.session.account.password)
 
-        if '@msn.com' not in self.session.account.account:
-            server = "login.live.com"
-            url = "/RST.srf"
+        server = "login.live.com"
+        url = "/RST.srf"
 
         #create the headers
         headers = { \
