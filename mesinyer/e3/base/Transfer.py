@@ -28,7 +28,7 @@ class FileTransfer(object):
 
     def get_fraction(self):
         ''' received the percentage, which is < 0 and > 1 '''
-        return (self.received_data / self.size)
+        return (float(self.received_data) / self.size)
 
     def get_eta(self):
         ''' returns the estimated time left to finish the transfer '''

@@ -1,6 +1,7 @@
 import time
 import webbrowser
 
+import e3.base
 import gui
 import extension
 
@@ -417,13 +418,16 @@ class FileTransferHandler(object):
 
     def accept(self):
         ''' accepts a file transfer '''
-        self.transfer.time_start = time.time()
+        self.transfer.time_start = time.time()        
+        self.transfer.state = e3.base.FileTransfer.TRANSFERRING
         self.session.accept_filetransfer(self.transfer)
 
     def reject(self):
         ''' cancels a file transfer '''
+        self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.reject_filetransfer(self.transfer)
 
     def cancel(self):
         ''' cancels a file transfer '''
+        self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.cancel_filetransfer(self.transfer)

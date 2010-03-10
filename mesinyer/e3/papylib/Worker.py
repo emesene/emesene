@@ -30,13 +30,7 @@ import gobject
 import hashlib
 
 from e3 import cache
-import e3.base.Contact
-import e3.base.Group
-import e3.base.Message
-import e3.base.Worker
-from e3.base import status
-from e3.base.Action import Action
-from e3.base.Event import Event
+from e3.base import *
 import e3.base.Logger as Logger
 from e3.common import ConfigDir
 
@@ -880,12 +874,12 @@ class Worker(e3.base.Worker, papyon.Client):
     
     def _handle_action_ft_accept(self, t):
         self.rfiletransfers[t].accept()
-        t.state = 1 # TRANSFERRING
 
     def _handle_action_ft_reject(self, t):
         self.rfiletransfers[t].reject()
+        print "FT REJECTED"
 
     def _handle_action_ft_cancel(self, t):
-        # TODO
-        pass
+        self.rfiletransfers[t].cancel()
+        print "FT CANCELED"
 

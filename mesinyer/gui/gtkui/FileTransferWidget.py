@@ -96,8 +96,10 @@ class FileTransferWidget(gtk.HBox):
             self.progress.set_fraction(1)  # 100%
         else:
             self.progress.set_fraction(self.transfer.get_fraction())
-        self.progress.set_text(str(self.transfer.get_fraction()))
+        self.progress.set_text(self.transfer.filename)
         self.tooltip.update()
+    
+        self.on_transfer_state_changed()
 
     def on_transfer_state_changed(self):
         ''' when the transfer changes its state '''
@@ -121,7 +123,7 @@ class FileTransferWidget(gtk.HBox):
             button.connect('clicked', self._on_close_clicked)
             self.buttons.append(button)
 
-        if state == self.transfer.WAITING or state == self.transfer.TRANSFERING:
+        if state == self.transfer.WAITING or state == self.transfer.TRANSFERRING:
             b_cancel = gtk.Button(None, None)
             b_cancel.connect('clicked', self._on_cancel_clicked)
             b_cancel.set_image(self.__get_button_img(gtk.STOCK_CANCEL))
@@ -131,7 +133,7 @@ class FileTransferWidget(gtk.HBox):
             self.pack_start(button, False, False)
 
         self.show_all()
-        self.do_update_progress()
+        #self.do_update_progress()
 
     def __get_button_img(self, stock_img):
         ''' returns a gtk image '''
