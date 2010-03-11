@@ -5,9 +5,9 @@ import DBusBase
 class Amarok2Handler(DBusBase.DBusBase):
     '''Handler for Amarok2'''
 
-    def __init__(self, iface_name = 'org.mpris.amarok',
+    def __init__(self, main_window, iface_name = 'org.mpris.amarok',
                  iface_path='/TrackList'):
-        DBusBase.DBusBase.__init__(self, iface_name, iface_path)
+        DBusBase.DBusBase.__init__(self, main_window, iface_name, iface_path)
 
     def is_playing(self):
         '''Returns True if a song is being played'''
@@ -29,4 +29,3 @@ class Amarok2Handler(DBusBase.DBusBase):
                                       song['title'],
                                       song['location'])
 
-songretriever.register('amarok2', Amarok2Handler)
