@@ -27,11 +27,15 @@ def gtk_main(Controller):
     import Preferences
     import Conversation
     import ImageChooser
-    import AdiumTextBox
-    import WebKitTextBox
+    try:
+        import AdiumTextBox
+    except:
+        pass
+    import WebKitTextBox    
     import AvatarChooser
     import ConversationManager
     import ConversationToolbar
+    import ImageAreaSelector
     import DebugWindow
     import PluginWindow
     import Renderers
@@ -105,6 +109,7 @@ def setup():
     extension.category_register('plugin window', \
         PluginWindow.PluginWindow)
     extension.category_register('preferences dialog', config_gtk.build_window)
+    extension.category_register('image area selector', ImageAreaSelector.ImageAreaSelectorDialog)
 
     if not WebKitTextBox.ERROR:
         extension.category_register('conversation output', WebKitTextBox.OutputText)

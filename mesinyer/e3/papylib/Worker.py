@@ -94,6 +94,8 @@ class Worker(e3.base.Worker, papyon.Client):
         self.rconversations = {}
         # this stores papyon conversations as cid : conversation
         self.papyconv = {}
+        # this stores papyon conversations as conversation : cid
+        self.rpapyconv = {}
         # this stores conversation handlers
         self._conversation_handler = {}    
 
@@ -294,9 +296,10 @@ class Worker(e3.base.Worker, papyon.Client):
         pyconvevent):
         ''' handle the reception of a message '''
         account = papycontact.account
-        if account in self.conversations:
-            # emesene conversation already exists
-            cid = self.conversations[account]
+        conv = pyconvevent.conversation
+
+        if conv in self.rpapyconv:
+            cid = self.rpapyconv[conv]
         else:
             # emesene must create another conversation
             cid = time.time()
@@ -304,6 +307,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.rconversations[cid] = account
             self._conversation_handler[cid] = pyconvevent # add conv handler
             self.papyconv[cid] = pyconvevent.conversation # add papy conv
+            self.rpapyconv[pyconvevent.conversation] = cid
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
 
@@ -340,9 +344,10 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):
         ''' handle received nudges '''
         account = papycontact.account
-        if account in self.conversations:
-            # emesene conversation already exists
-            cid = self.conversations[account]
+        conv = pyconvevent.conversation
+
+        if conv in self.rpapyconv:
+            cid = self.rpapyconv[conv]
         else:
             #print "must create another conversation"
             cid = time.time()
@@ -350,6 +355,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.rconversations[cid] = account
             self._conversation_handler[cid] = pyconvevent # add conv handler
             self.papyconv[cid] = pyconvevent.conversation # add papy conv
+            self.rpapyconv[pyconvevent.conversation] = cid
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
 
@@ -361,6 +367,40 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_conversation_message_error(self, err_type, error, papyconversation):
         print "error sending message because", err_type, error
 
+    def _on_conversation_user_joined(self, papycontact, pyconvevent):
+        '''handle user joined event'''
+        account = papycontact.account
+        conv = pyconvevent.conversation
+
+        if len(conv.total_participants) == 1:
+            return
+        else:
+            #it's a multichat
+            try:
+                #that cid must be exists
+                cid = self.rpapyconv[conv]
+            except KeyError:
+                print 'Keyerror:multichat started by %s doesn\'t exists' % first_partecipant
+                return
+
+            self.session.add_event(e3.Event.EVENT_CONV_CONTACT_JOINED,
+                                   cid, account)
+
+    def _on_conversation_user_left(self, papycontact, pyconvevent):
+        '''handle user left event'''
+        account = papycontact.account
+        conv = pyconvevent.conversation
+
+        try:
+            #that cid must be exists
+            cid = self.rpapyconv[conv]
+        except KeyError:
+            print 'Keyerror:multichat started by %s doesn\'t exists' % first_partecipant
+            return
+
+        self.session.add_event(e3.Event.EVENT_CONV_CONTACT_LEFT,
+                                   cid, account)
+
     # contact changes handlers
     def _on_contact_status_changed(self, papycontact):
         status_ = STATUS_PAPY_TO_E3[papycontact.presence]
@@ -370,15 +410,6 @@ class Worker(e3.base.Worker, papyon.Client):
         account = contact.account
         old_status = contact.status
         contact.status = status_
-
-        log_account = Logger.Account(contact.attrs.get('CID', None), None, \
-            contact.account, contact.status, contact.nick, contact.message, \
-            contact.picture)
-        if old_status != status_:
-            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account, \
-                'status', old_status)
-            self.session.logger.log('status change', status_, str(status_), \
-                log_account)
 
     def _on_contact_nick_changed(self, papycontact):
         contact = self.session.contacts.contacts.get(papycontact.account, None)
@@ -778,6 +809,7 @@ class Worker(e3.base.Worker, papyon.Client):
             # create a papyon conversation
             conv = papyon.Conversation(self, [contact,])
             self.papyconv[cid] = conv
+            self.rpapyconv[conv] = cid
             # attach the conversation event handler
             convhandler = ConversationEvent(conv, self)
             self._conversation_handler[cid] = convhandler
@@ -787,6 +819,13 @@ class Worker(e3.base.Worker, papyon.Client):
         '''
         #print "you close conversation %s, are you happy?" % cid
         del self.conversations[self.rconversations[cid]]
+
+    def _handle_action_conv_invite(self, cid, account):
+        '''handle Action.ACTION_CONV_INVITE
+        '''
+        conv = self.papyconv[cid]
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
+        conv._invite_user(papycontact)
 
     def _handle_action_send_message(self, cid, message):
         ''' handle Action.ACTION_SEND_MESSAGE '''

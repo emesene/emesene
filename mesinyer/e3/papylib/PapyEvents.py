@@ -92,12 +92,10 @@ class ConversationEvent(papyon.event.ConversationEventInterface):
         self.conversation = conversation
 
     def on_conversation_user_joined(self, contact):
-        # TODO: handle this
-        print "[papyon]", contact, "joined a conversation"
+        self._client._on_conversation_user_joined(contact, self)
 
     def on_conversation_user_left(self, contact):
-        # TODO: handle this
-        print "[papyon]", contact, "left a conversation"
+        self._client._on_conversation_user_left(contact, self)
 
     def on_conversation_user_typing(self, contact):
         self._client._on_conversation_user_typing(contact, self)

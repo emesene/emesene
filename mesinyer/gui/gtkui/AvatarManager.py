@@ -22,6 +22,7 @@ import os
 import hashlib
 import utils
 import shutil
+import gtk
 
 class AvatarManager(object):
     '''an utility class to manage avatars and their paths'''
@@ -64,9 +65,8 @@ class AvatarManager(object):
             bdir == self.get_cached_avatars_dir() or \
             bdir in self.get_system_avatars_dirs()
     
-    def set_as_avatar(self, filename):
-        ''' set a picture as the current avatar and make a copy in the cache '''
-        print 'setting ' + filename + ' as avatar'
+    def add_new_avatar(self, filename):
+        ''' add a new picture from filename into the avatar cache '''
         def gen_filename(source):
             ''' generate a unique (?) filename for the new avatar in cache, implemented as sha224 digest '''
             infile = open(source, 'rb')
@@ -74,22 +74,48 @@ class AvatarManager(object):
             infile.close()
             return hashlib.sha224(data).hexdigest()
 
+        #i save in 128*128 for the animation on connect..if somebody like it...:)
+        fpath = os.path.join(self.get_avatars_dir(), gen_filename(filename))
+        if not os.path.exists(self.get_avatars_dir()):
+            os.makedirs(self.get_avatars_dir())
+        pix_128 = utils.safe_gtk_pixbuf_load(filename, (128, 128))
+        pix_128.save(fpath, 'png')
+        return pix_128, fpath
+
+    def add_new_avatar_from_pix(self, pix):
+        ''' add a new picture into the avatar cache '''
+        def gen_filename(source):
+            ''' generate a unique (?) filename for the new avatar in cache, implemented as sha224 digest '''
+            return hashlib.sha224(source.get_pixels()).hexdigest()
+
+        fpath = os.path.join(self.get_avatars_dir(), gen_filename(pix))
+        if not os.path.exists(self.get_avatars_dir()):
+            os.makedirs(self.get_avatars_dir())
+
+        # resize to 128x128
+        pix = pix.scale_simple(128, 128, gtk.gdk.INTERP_BILINEAR)
+        pix.save(fpath, 'png')
+        return pix, fpath
+
+
+    def set_as_avatar(self, filename):
+        ''' set a picture as the current avatar and make a copy in the cache '''
         #i control if the filename is a already in cache
         if self.is_cached(filename):
             self.session.set_picture(filename)
-            os.remove(self.avatar_path)
-            shutil.copy2(filename, self.avatar_path)
-            return
-        #i save in 128*128 for the animation on connect..if somebody like it...:)
-        try:
-            fpath = os.path.join(self.get_avatars_dir(), gen_filename(filename))
-            pix_128 = utils.safe_gtk_pixbuf_load(filename, (128, 128))
-            pix_128.save(fpath, 'png')
-            self.session.set_picture(fpath)
             if os.path.exists(self.avatar_path):
                 os.remove(self.avatar_path)
-            pix_128.save(self.avatar_path, 'png')
-        except OSError, e:
-            print e
+            else:
+                os.makedirs(os.path.dirname(self.avatar_path))
+            shutil.copy2(filename, self.avatar_path)
+        else:
+            try:
+                pix_128, fpath = self.add_new_avatar(filename)
+                self.session.set_picture(fpath)
+                if os.path.exists(self.avatar_path):
+                    os.remove(self.avatar_path)
+                pix_128.save(self.avatar_path, 'png')
+            except OSError, e:
+                print e
 
 
