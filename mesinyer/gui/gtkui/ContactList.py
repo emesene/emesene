@@ -591,3 +591,4 @@ class ContactList(gui.ContactList, gtk.TreeView):
         """
         self.avatar_size = size
         self.pbr.set_fixed_size(size, size)
+
