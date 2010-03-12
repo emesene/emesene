@@ -74,6 +74,7 @@ def setup():
     extension.category_register('window frame', Window.Window)
     extension.category_register('main window', MainWindow.MainWindow)
     extension.category_register('contact list', ContactList.ContactList)
+    extension.category_register('multichat list', ContactList.MultichatList)
     extension.category_register('nick renderer', Renderers.CellRendererPlus)
     extension.register('nick renderer', gtk.CellRendererText)
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
