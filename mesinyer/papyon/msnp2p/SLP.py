@@ -329,7 +329,7 @@ class SLPTransferResponseBody(SLPMessageBody):
         self.add_header("Conn-Type", conn_type)
         self.add_header("TCP-Conn-Type", conn_type)
         self.add_header("Nat-Trav-Msg-Type", "WLX-Nat-Trav-Msg-Direct-Connect-Req")
-        self.add_header("IPv6-global", ipv6)
+        self.add_header("IPv6-global", "")
 
     @property
     def bridge(self):

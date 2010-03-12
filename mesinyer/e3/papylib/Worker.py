@@ -258,7 +258,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def papy_ft_completed(self, ftsession, data):
         print "data:", len(data.getvalue())        
         # TODO: save the file somewhere
-
+        tr = self.filetransfers[ftsession]
         self.session.add_event(Event.EVENT_FILETRANSFER_COMPLETED, tr)
 
     # call handlers
