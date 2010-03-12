@@ -45,7 +45,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.input = InputText(self.session.config, self._on_send_message)
         self.info = ContactInfo()
         self.transfers_bar = TransfersBar(self.session)
-        self.list = ContactList(self.session)
+
+        self.contact_list = ContactList(session)
+        self.contact_list.nick_template = '%DISPLAY_NAME%'
+        self.contact_list.order_by_group = False
 
         frame_input = gtk.Frame()
         frame_input.set_shadow_type(gtk.SHADOW_IN)
@@ -62,13 +65,13 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.panel_signal_id = self.panel.connect_after('expose-event',
                 self.update_panel_position)
 
-        self.hbox = gtk.HBox()
+        self.hbox = gtk.HPaned()
         if self.session.config.get_or_set('b_avatar_on_left', False):
-            self.hbox.pack_start(self.info, False)
-            self.hbox.pack_start(self.panel, True, True)
+            self.hbox.pack1(self.info, False)
+            self.hbox.pack2(self.panel, True, True)
         else:
-            self.hbox.pack_start(self.panel, True, True)
-            self.hbox.pack_start(self.info, False)
+            self.hbox.pack1(self.panel, True, True)
+            self.hbox.pack2(self.info, False)
 
         self.pack_start(self.header, False)
         self.pack_start(self.hbox, True, True)
@@ -94,13 +97,11 @@ class Conversation(gtk.VBox, gui.Conversation):
         avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
         
         if self.group_chat:
-            #TODO list of multichat users
-            #TODO modify update group information to support that list 
-            self.info.first = self.list
-            self.list.fill()
+            self.info.first = self.contact_list
         else:
             self.info.first = utils.safe_gtk_image_load(his_picture,
                     (avatar_size, avatar_size))
+
         self.info.last = utils.safe_gtk_image_load(my_picture,
                 (avatar_size, avatar_size))
 
