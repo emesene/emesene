@@ -812,8 +812,10 @@ class Worker(e3.base.Worker, papyon.Client):
 
         if account in self.conversations:
             #print "there's already a conversation with this user wtf"
-            # update cid
+            # update cid and close the old conversation
             oldcid = self.conversations[account]
+            self._handle_action_close_conversation(oldcid)
+
             self.conversations[account] = cid
             self.rconversations[cid] = account
             # create a papyon conversation
@@ -850,6 +852,7 @@ class Worker(e3.base.Worker, papyon.Client):
         del self.rconversations[cid]
         del self.papyconv[cid]
         del self.rpapyconv[conv]
+        del self._conversation_handler[cid]
 
     def _handle_action_conv_invite(self, cid, account):
         '''handle Action.ACTION_CONV_INVITE
