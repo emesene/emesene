@@ -26,9 +26,11 @@ def gtk_main(Controller):
     import Header
     import ImageAreaSelector
     import ImageChooser
+    import Login
+    import LoginAvatar
     import MainMenu
     import MainWindow
-    import Login
+    import NiceBar
     import PluginWindow
     import Preferences
     import Renderers
@@ -67,6 +69,7 @@ def setup():
     extension.category_register('dialog', Dialog.Dialog)
     extension.category_register('image chooser', ImageChooser.ImageChooser)
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
+    extension.category_register('login avatar', LoginAvatar.LoginAvatar)
 
     extension.category_register('preferences', Preferences.Preferences)
     extension.category_register('login window', Login.Login)
@@ -81,6 +84,7 @@ def setup():
     extension.category_register('user panel', UserPanel.UserPanel)
     extension.category_register('tray icon', TrayIcon.TrayIcon)
     extension.category_register('debug window', DebugWindow.DebugWindow)
+    extension.category_register('nice bar', NiceBar.NiceBar)
 
     extension.category_register('main menu', MainMenu.MainMenu)
     extension.category_register('menu file', MainMenu.FileMenu)

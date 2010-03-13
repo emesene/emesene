@@ -35,4 +35,3 @@ gui.gtk:
   (but i don't know if it's already in pygtk)
 - port emesene1 preferences to emesene2 
   (and merge back plugins window in preferences)
-- multichat userlist instead of personal avatar
