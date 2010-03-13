@@ -34,7 +34,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         ConversationToolbar = extension.get_default(
             'conversation toolbar')
         TransfersBar = extension.get_default('filetransfer pool')
-        ContactList = extension.get_default('contact list')
         dialog = extension.get_default('dialog')
 
         self.header = Header()
@@ -45,10 +44,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.input = InputText(self.session.config, self._on_send_message)
         self.info = ContactInfo()
         self.transfers_bar = TransfersBar(self.session)
-
-        self.contact_list = ContactList(session)
-        self.contact_list.nick_template = '%DISPLAY_NAME%'
-        self.contact_list.order_by_group = False
 
         frame_input = gtk.Frame()
         frame_input.set_shadow_type(gtk.SHADOW_IN)
@@ -65,13 +60,13 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.panel_signal_id = self.panel.connect_after('expose-event',
                 self.update_panel_position)
 
-        self.hbox = gtk.HPaned()
+        self.hbox = gtk.HBox()
         if self.session.config.get_or_set('b_avatar_on_left', False):
-            self.hbox.pack1(self.info, False)
-            self.hbox.pack2(self.panel, True, True)
+            self.hbox.pack_start(self.info, False)
+            self.hbox.pack_start(self.panel, True, True)
         else:
-            self.hbox.pack1(self.panel, True, True)
-            self.hbox.pack2(self.info, False)
+            self.hbox.pack_start(self.panel, True, True)
+            self.hbox.pack_start(self.info, False)
 
         self.pack_start(self.header, False)
         self.pack_start(self.hbox, True, True)
@@ -95,12 +90,9 @@ class Conversation(gtk.VBox, gui.Conversation):
                 his_picture = contact.picture
 
         avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
-        
-        if self.group_chat:
-            self.info.first = self.contact_list
-        else:
-            self.info.first = utils.safe_gtk_image_load(his_picture,
-                    (avatar_size, avatar_size))
+
+        self.info.first = utils.safe_gtk_image_load(his_picture,
+                (avatar_size, avatar_size))
 
         self.info.last = utils.safe_gtk_image_load(my_picture,
                 (avatar_size, avatar_size))
@@ -122,6 +114,12 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.on_filetransfer_progress)
 
         self.tab_index = -1 # used to select an existing conversation
+        self.index = 0 # used for the rotate picture function
+        self.rotate_started = False
+
+        if self.group_chat:
+            self.rotate_started = True #to prevents more than one timeout_add
+            gobject.timeout_add(5000, self.rotate_picture)
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
@@ -211,10 +209,29 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         update the information for a conversation with multiple users
         """
+        if not self.rotate_started:
+            self.rotate_started = True
+            gobject.timeout_add(5000, self.rotate_picture)
+
+        #TODO add plus support for nick to the tab label!
+        members_nick = []
+        i = 0
+        for account in self.members:
+            i += 1
+            contact = self.session.contacts.get(account)
+
+            if contact is None or contact.nick is None:
+                nick = account
+            elif len(contact.nick) > 20 and i != len(self.members):
+                nick = contact.nick[:20] + '...'
+            else:
+                nick = contact.nick
+
+            members_nick.append(nick)
+
         self.header.information = \
             ('%d members' % (len(self.members) + 1, ),
-                    ", ".join(self.members))
-
+                    ", ".join(members_nick))
         self.update_tab()
 
     def set_image_visible(self, is_visible):
@@ -249,6 +266,35 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.toolbar.show()
         else:
             self.toolbar.hide()
+
+    def rotate_picture(self):
+        '''change the account picture in a multichat 
+           conversation every 5 seconds'''
+        def increment():
+            if self.index < len(self.members) - 1 :
+                self.index += 1
+            else:
+                self.index = 0
+
+        #maybe with an image transaction like the one on 
+        #emesene1 it will become nicer!
+        #TODO add image transaction
+        account = self.members[self.index]
+        contact = self.session.contacts.get(account)
+        if contact is None:
+            increment()
+            return True
+
+        path = contact.picture
+
+        if path != '':
+            avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
+            image = utils.safe_gtk_image_load(path, (avatar_size, avatar_size))
+            self.info.first = image
+        else:
+            increment()
+
+        return True
 
     def on_emote(self, emote):
         '''called when an emoticon is selected'''
