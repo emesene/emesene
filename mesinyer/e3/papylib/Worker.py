@@ -490,6 +490,11 @@ class Worker(e3.base.Worker, papyon.Client):
             # TODO: log the media change
 
     def _on_contact_msnobject_changed(self, contact):
+
+        #to prevent a double Event.EVENT_PICTURE_CHANGE_SUCCEED
+        if contact.account == self.session.account.account:
+            return
+
         msn_object = contact.msn_object
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)

@@ -3,17 +3,20 @@ import gtk
 import gtk.gdk
 import cairo
 import gobject
-
-class LoginAvatar( gtk.Widget ):
-    """LoginAvatarWidget """
+ 
+class Avatar( gtk.Widget ):
+    """AvatarWidget """
     #TODO move in an avatarManager class?????
-
+    #TODO class for resize gif!
+ 
     #note: i should think up a better name than avatarHolder
     #cellKeyPosition, is a Anchor Type constant
     #refer to http://www.pygtk.org/docs/pygtk/gtk-constants.html#gtk-anchor-type-constants
     __gproperties__ = {
         'pixbuf': (gtk.gdk.Pixbuf, 'Pixbuf',
         'Pixbuf',gobject.PARAM_READWRITE),
+        'pixbuf_animation': (gtk.gdk.Pixbuf, 'Pixbuf',
+        'Pixbuf from animation',gobject.PARAM_READWRITE),
         'crossFade' : (bool,'animate by crossfade if true','',True, gobject.PARAM_READWRITE),
         'dimention' : (gobject.TYPE_FLOAT,'cell dimensions',
         'height width of cell',0.0, 128.0,32.0, gobject.PARAM_READWRITE),
@@ -22,31 +25,36 @@ class LoginAvatar( gtk.Widget ):
         'keyPositin' : (object,'position of avatar',
         'corresponds to position of key in numpad', gobject.PARAM_READWRITE),
         }
-
+ 
     __gsignals__ = { 'size_request' : 'override', 'expose-event' : 'override' }
-
-    def __init__(self, cellDimention = 96, crossFade = True, cellRadius = 0.05, cellKeyPosition = gtk.ANCHOR_CENTER):
+ 
+    def __init__(self, cellDimention = 96, crossFade = True, cellRadius = 0.05,
+                 cellKeyPosition = gtk.ANCHOR_CENTER):
         gobject.GObject.__init__(self)
         gtk.Widget.__init__(self)
         self.set_flags(self.flags() | gtk.NO_WINDOW )
-
+ 
         self._pixbuf = None
         self._dimention = cellDimention
         self._radius_factor = cellRadius
         self._keyPosition = cellKeyPosition
-
-
+ 
+ 
         # variables related to animation
         self._crossFade = crossFade
         self.inAnimation = False
-        self.duration = 1500    # milliseconds
-        self.fps = 24           # frames per second
+        self.duration = 1500 # milliseconds
+        self.fps = 24 # frames per second
         self.totalFrames = 0
         self.currentFrame = 0
         self.transitionPixbuf = None
-
+        self.anim_source = None
+        self.current_animation = None
+ 
     def do_get_property(self, property):
         if property.name == 'pixbuf':
+            return self._pixbuf
+        if property.name == 'pixbuf-animation':
             return self._pixbuf
         elif property.name == 'dimention':
             return self._dimention
@@ -58,7 +66,7 @@ class LoginAvatar( gtk.Widget ):
             return self._crossFade
         else:
             raise AttributeError, 'unknown property %s' % property.name
-
+ 
     def do_set_property(self, property, value):
         if property.name == 'pixbuf':
             if self.__shouldReplace(value):
@@ -72,55 +80,74 @@ class LoginAvatar( gtk.Widget ):
                     self.inAnimation = True
                 else:
                     self._pixbuf = value
+        elif property.name == 'pixbuf-animation':
+            self._pixbuf = value
         elif property.name == 'dimention':
             self._dimention = value
         elif property.name == 'radius-factor':
             self._radius_factor = value
         elif property.name == 'keyPosition':
-            self._keyPosition  = value
+            self._keyPosition = value
         elif property.name == 'crossFade':
             self._crossFade = value
         else:
             raise AttributeError, 'unknown property %s' % property.name
-
+ 
     def animate_callback(self):
         if self.currentFrame > self.totalFrames :
             self.inAnimation = False
             self._pixbuf = self.transitionPixbuf
+            if self.current_animation:
+                self._start_animation(self.current_animation)
             return False
         else:
+            if self.anim_source is not None:
+                gobject.source_remove(self.anim_source)
+                self.anim_source = None
             self.currentFrame += 1
             self.queue_draw()
             return True
 
-
-    def set_from_pixbuf(self, pixbuf ):
+    def __set_from_pixbuf(self, pixbuf ):
         self.set_property('pixbuf', pixbuf)
         self.queue_draw()
 
-    def set_from_file(self,filename):
-        inputimage = open(filename)
-        imagebuf = inputimage.read()
-        try:
-            pixbufloader = gtk.gdk.PixbufLoader()
-            pixbufloader.write(imagebuf)
-            pixbufloader.close()
-        except:
+    def __set_from_pixbuf_animation(self, pixbuf):
+        self.set_property('pixbuf-animation', pixbuf)
+        self.queue_draw()
+    
+    #public method
+    def set_from_file(self, filename):
+        animation = gtk.gdk.PixbufAnimation(filename)
+        if animation.is_static_image():
+            self.__set_from_pixbuf(animation.get_static_image())
+            self.current_animation = None
             return
-        pixbuf = pixbufloader.get_pixbuf()
-        self.set_property('pixbuf', pixbuf)
-        self.queue_draw()
+        self.current_animation = animation
+        self._start_animation(animation)
+
+    def _start_animation(self, animation):
+        iteran = animation.get_iter()
+        #we don't need to resize here!The resize must be done in another class
+        self.__set_from_pixbuf(iteran.get_pixbuf())
+        if self.anim_source is None:
+            self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
+
+    def _advance(self, iteran):
+        self.__set_from_pixbuf_animation(iteran.get_pixbuf())
+        iteran.advance()
+        return True
 
     def do_size_request(self,requisition):
         requisition.width = self._dimention
         requisition.height = self._dimention
-
+ 
     def do_expose_event(self, evnt):
         if not self._pixbuf: return
-
-        ctx =  evnt.window.cairo_create()
+ 
+        ctx = evnt.window.cairo_create()
         cell_area = self.get_allocation()
-
+ 
         if self.inAnimation :
             self.__draw( ctx , cell_area , self._pixbuf, 1 - \
                 (float(self.currentFrame) / self.totalFrames))
@@ -128,7 +155,7 @@ class LoginAvatar( gtk.Widget ):
                 (float(self.currentFrame) / self.totalFrames))
         else:
             self.__draw( ctx , cell_area , self._pixbuf, 1)
-
+ 
     def __shouldReplace(self,pixbuf):
         #checkEquivalence
         if self._pixbuf and pixbuf and \
@@ -144,51 +171,51 @@ class LoginAvatar( gtk.Widget ):
         pix_width = pixbuf.get_width()
         pix_height = pixbuf.get_height()
         ctx.translate(cell_x, cell_y)
-
+ 
         if (pix_width > self._dimention) or (pix_height > self._dimention):
             scale_factor = float(self._dimention) / max (pix_width,pix_height)
         else:
             scale_factor = 1
-
+ 
         scale_width = pix_width* scale_factor
         scale_height = pix_height* scale_factor
-
+ 
         self.__translate_keyPostion( ctx, self._keyPosition,cell_width,cell_height,scale_width,scale_height)
-
+ 
         scale_radius = self._dimention * self._radius_factor
         self.__roundedrecMoonlight(ctx,0,0,scale_width,scale_height, scale_radius)
-
+ 
         ctx.clip()
         ctx.scale(scale_factor,scale_factor)
         ctx.set_source_pixbuf(pixbuf,0,0)
-
+ 
         ctx.paint_with_alpha (alpha)
-
+ 
         ctx.restore()
-
+ 
     def __translate_keyPostion(self,cr, key, w, h ,sw, sh):
         if key in [gtk.ANCHOR_NORTH_WEST,gtk.ANCHOR_WEST,gtk.ANCHOR_SOUTH_WEST] : x = 0
         elif key in [gtk.ANCHOR_NORTH,gtk.ANCHOR_CENTER,gtk.ANCHOR_SOUTH] : x = (w/2) - (sw/2)
         else: x = w - sw
-
+ 
         if key in [gtk.ANCHOR_NORTH_WEST,gtk.ANCHOR_NORTH,gtk.ANCHOR_NORTH_EAST] : y = 0
         elif key in [gtk.ANCHOR_EAST,gtk.ANCHOR_CENTER,gtk.ANCHOR_WEST] : y = (h/2) - (sh/2)
         else: y = h - sh
-
+ 
         cr.translate( x, y)
-
+ 
     def __roundedrecMoonlight(self, cr,x,y,w,h,radius=5):
         # http://cairographics.org/cookbook/roundedrectangles/
         # modified from mono moonlight aka mono silverlight
         # test limits (without using multiplications)
         # http://graphics.stanford.edu/courses/cs248-98-fall/Final/q1.html
-
+ 
         ARC_TO_BEZIER = 0.55228475
         if radius > (min(w,h)/2):
             radius = (min(w,h)/2)
         #approximate (quite close) the arc using a bezier curve
         c = ARC_TO_BEZIER * radius
-
+ 
         cr.new_path();
         cr.move_to ( x + radius, y)
         cr.rel_line_to ( w - 2 * radius, 0.0)
@@ -200,5 +227,5 @@ class LoginAvatar( gtk.Widget ):
         cr.rel_line_to (0, -h + 2 * radius)
         cr.rel_curve_to (0.0, -c, radius - c, -radius, radius, -radius)
         cr.close_path ()
-
-gobject.type_register( LoginAvatar )
+ 
+gobject.type_register( Avatar )

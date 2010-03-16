@@ -159,7 +159,13 @@ class AvatarChooser(gtk.Window):
         if os.path.exists(path) and os.access(path, os.R_OK)\
                 and not self.is_in_view(path):
             try:
-                pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,64,64)
+                animation = gtk.gdk.PixbufAnimation(path)
+                if animation.is_static_image():
+                    pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,64,64)
+                else:
+                    pixbuf = animation.get_static_image().scale_simple(64,64,gtk.gdk.INTERP_BILINEAR)
+                #pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,64,64)
+                print path
                 self.model.append([pixbuf, path])
             except gobject.GError:
                 print 'image at %s could not be loaded' % (path, )
@@ -221,6 +227,10 @@ class AvatarChooser(gtk.Window):
         def _on_image_selected(response, path):
             '''method called when an image is selected'''
             if response == gui.stock.ACCEPT:
+                animation = gtk.gdk.PixbufAnimation(path)
+                if not animation.is_static_image():
+                    self.add_picture(path)
+                    return
                 self._on_image_area_selector(path)
 
         class_ = extension.get_default('image chooser')
@@ -262,6 +272,7 @@ class AvatarChooser(gtk.Window):
             filename = selected[1]
 
             self.hide()
+            print filename
             self.response_cb(gui.stock.ACCEPT, filename)
         else:
             extension.get_default('dialog').error("No picture selected")

@@ -35,6 +35,10 @@ class Conversation(gtk.VBox, gui.Conversation):
             'conversation toolbar')
         TransfersBar = extension.get_default('filetransfer pool')
         dialog = extension.get_default('dialog')
+        Avatar = extension.get_default('avatar')
+        
+        self.avatar = Avatar(cellDimention=64)
+        self.his_avatar = Avatar(cellDimention=64)
 
         self.header = Header()
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
@@ -91,11 +95,15 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
 
-        self.info.first = utils.safe_gtk_image_load(his_picture,
-                (avatar_size, avatar_size))
+        #self.info.first = utils.safe_gtk_image_load(his_picture,
+                #(avatar_size, avatar_size))
+        self.info.first = self.his_avatar
+        self.his_avatar.set_from_file(his_picture)
 
-        self.info.last = utils.safe_gtk_image_load(my_picture,
-                (avatar_size, avatar_size))
+        #self.info.last = utils.safe_gtk_image_load(my_picture,
+                #(avatar_size, avatar_size))
+        self.info.last = self.avatar
+        self.avatar.set_from_file(my_picture)
 
         self._load_style()
 
@@ -276,11 +284,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             else:
                 self.index = 0
 
-        #maybe with an image transaction like the one on 
-        #emesene1 it will become nicer!
-        #TODO add image transaction
-        account = self.members[self.index]
-        contact = self.session.contacts.get(account)
+        contact = self.session.contacts.get(self.members[self.index])
         if contact is None:
             increment()
             return True
@@ -288,12 +292,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         path = contact.picture
 
         if path != '':
-            avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
-            image = utils.safe_gtk_image_load(path, (avatar_size, avatar_size))
-            self.info.first = image
-        else:
-            increment()
+            self.his_avatar.set_from_file(path)
 
+        increment()
         return True
 
     def on_emote(self, emote):
@@ -303,14 +304,11 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_picture_change_succeed(self, account, path):
         '''callback called when the picture of an account is changed'''
-        avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
-        image = utils.safe_gtk_image_load(path, (avatar_size, avatar_size))
-
         # out account?
         if account == self.session.account.account:
-            self.info.last = image
+            self.avatar.set_from_file(path)
         elif account in self.members:
-            self.info.first = image
+            self.his_avatar.set_from_file(path)
 
     def on_filetransfer_invitation(self, transfer):
         self.transfers_bar.add(transfer)

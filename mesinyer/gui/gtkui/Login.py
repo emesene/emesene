@@ -47,7 +47,7 @@ class Login(gtk.Alignment):
             self.proxy = proxy
 
         self.dialog = extension.get_default('dialog')
-        LoginAvatar = extension.get_default('login avatar')
+        Avatar = extension.get_default('avatar')
         NiceBar = extension.get_default('nice bar')
 
         if session_id is not None:
@@ -92,14 +92,13 @@ class Login(gtk.Alignment):
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
-        self.avatar = LoginAvatar()
+        self.avatar = Avatar()
         path = self.config_dir.join(account.replace('@','-at-'), \
                                                  'avatars', 'last')
-        if self.config_dir.file_readable(path):
-            pix = utils.safe_gtk_pixbuf_load(path, (96,96))
-        else:
-            pix = utils.safe_gtk_pixbuf_load(gui.theme.logo)
-        self.avatar.set_from_pixbuf(pix)
+        if not self.config_dir.file_readable(path):
+            path = gui.theme.logo
+
+        self.avatar.set_from_file(path)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
@@ -292,7 +291,8 @@ class Login(gtk.Alignment):
             path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
             if self.config_dir.file_readable(path):
                 pix = utils.safe_gtk_pixbuf_load(path, (96,96))
-                self.avatar.set_from_pixbuf(pix)
+                #self.avatar.set_from_pixbuf(pix)
+                self.avatar.set_from_file(path)
 
             if attr == 3:#autologin,password,account checked
                 self.txt_password.set_text(base64.b64decode(passw))
@@ -312,8 +312,9 @@ class Login(gtk.Alignment):
                 self._clear_all()
 
         else:
-            self.avatar.set_from_pixbuf(
-             utils.safe_gtk_pixbuf_load(gui.theme.logo))
+            #self.avatar.set_from_pixbuf(
+             #utils.safe_gtk_pixbuf_load(gui.theme.logo))
+           self.avatar.set_from_file(gui.theme.logo)
 
     def _clear_all(self):
         '''
@@ -520,7 +521,7 @@ class ConnectingWindow(gtk.Alignment):
         else:
             self.avatar_path = avatar_path
 
-        LoginAvatar = extension.get_default('login avatar')
+        Avatar = extension.get_default('avatar')
 
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
                 animated=True)
@@ -535,8 +536,8 @@ class ConnectingWindow(gtk.Alignment):
         self.label_timer = gtk.Label()
         self.label_timer.set_markup('<b>Connection error!\n </b>')
 
-        self.avatar = LoginAvatar(cellDimention=128)
-        self.avatar.set_from_pixbuf(utils.safe_gtk_pixbuf_load(self.avatar_path,(128,128)))
+        self.avatar = Avatar(cellDimention=96)
+        self.avatar.set_from_file(self.avatar_path)
 
         al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.2)

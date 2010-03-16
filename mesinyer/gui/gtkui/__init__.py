@@ -9,6 +9,7 @@ def gtk_main(Controller):
 
     import AccountMenu
     import AdiumTextBox
+    import Avatar
     import AvatarChooser
     import config_gtk
     import ContactMenu
@@ -27,7 +28,6 @@ def gtk_main(Controller):
     import ImageAreaSelector
     import ImageChooser
     import Login
-    import LoginAvatar
     import MainMenu
     import MainWindow
     import NiceBar
@@ -69,7 +69,7 @@ def setup():
     extension.category_register('dialog', Dialog.Dialog)
     extension.category_register('image chooser', ImageChooser.ImageChooser)
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
-    extension.category_register('login avatar', LoginAvatar.LoginAvatar)
+    extension.category_register('avatar', Avatar.Avatar)
 
     extension.category_register('preferences', Preferences.Preferences)
     extension.category_register('login window', Login.Login)
