@@ -96,8 +96,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.filetransfers = {}
         self.rfiletransfers = {} 
 
-        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
-
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
@@ -128,6 +126,9 @@ class Worker(e3.base.Worker, papyon.Client):
         self._set_status(presence)
         # temporary hax?
         self.profile.display_name = nick
+        
+        #this must be putted here!not in the constructor...!
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
 
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
@@ -490,11 +491,6 @@ class Worker(e3.base.Worker, papyon.Client):
             # TODO: log the media change
 
     def _on_contact_msnobject_changed(self, contact):
-
-        #to prevent a double Event.EVENT_PICTURE_CHANGE_SUCCEED
-        if contact.account == self.session.account.account:
-            return
-
         msn_object = contact.msn_object
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)
@@ -801,8 +797,10 @@ class Worker(e3.base.Worker, papyon.Client):
                          data=StringIO.StringIO(avatar))
         self.profile.msn_object = msn_object
         self.session.contacts.me.picture = picture_name
-        self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
-            self.session.account.account, picture_name)
+
+        #comment this to prevent a double Event.EVENT_PICTURE_CHANGE_SUCCEED
+        #self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
+            #self.session.account.account, picture_name)
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES

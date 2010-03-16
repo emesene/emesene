@@ -157,6 +157,7 @@ class UserPanel(gtk.VBox):
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
             if response == gui.stock.ACCEPT:
+                #TODO ripara qui!
                 #i control if the filename is a already in cache
                 if self.config_dir.base_dir.replace('@', '-at-') == \
                    os.path.dirname(os.path.dirname(filename)):
@@ -174,8 +175,9 @@ class UserPanel(gtk.VBox):
                 except OSError, e:
                    print e
         #TODO better way to do this???
-        path_dir = self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
-                   self.session.contacts.me.account.replace('@','-at-'),'avatars')
+        path_dir = self.config_dir.join(os.path.dirname(self.session.config_dir.base_dir),
+                   self.session.contacts.me.account,
+                   self.session.contacts.me.account.replace('@','-at-'), 'avatars')
 
         extension.get_default('avatar chooser')(set_picture_cb,
                                                 self.avatar_path, path_dir).show()
