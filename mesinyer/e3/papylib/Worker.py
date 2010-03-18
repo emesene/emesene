@@ -44,6 +44,7 @@ try:
     import logging
     import papyon
     import papyon.event
+    import papyon.service.ContentRoaming as CR
     import papyon.util.string_io as StringIO
     papyver = papyon.version
     if papyver[1] < REQ_VER[1] or papyver[2] < REQ_VER[2]:
@@ -120,7 +121,7 @@ class Worker(e3.base.Worker, papyon.Client):
     # some useful methods (mostly, gui only)
     def set_initial_infos(self):
         '''this is called on login'''
-        self._roaming_handler = papyon.service.ContentRoaming.ContentRoaming(self._sso, self.address_book)
+        self._roaming_handler = CR.ContentRoaming(self._sso, self.address_book)
         self._roaming_handler.connect("notify::state", \
                                         self._content_roaming_state_changed)
         self._roaming_handler.sync()
@@ -131,24 +132,30 @@ class Worker(e3.base.Worker, papyon.Client):
         presence = self.session.account.status
         nick = self.profile.display_name
         self._set_status(presence)
-        # temporary hax?
-        self.profile.display_name = nick
 
     def _content_roaming_state_changed(self, cr, pspec):
-        print "content roaming state changed"
-        if cr.state == papyon.service.ContentRoaming.constants.ContentRoamingState.SYNCHRONIZED:
-            print "Content roaming service is now synchronized"
-                     
-            print cr.display_picture, cr.display_name, cr.personal_message
+        if cr.state == CR.constants.ContentRoamingState.SYNCHRONIZED:
+            # TODO: check for duplicates, put in cache,
+            # update msn_object, update gui (?)
             type, data = cr.display_picture
             path = '/tmp/argh.%s' % type.split('/')[1]
             f = open(path, 'w')
             f.write(data)
 
-#                      this code stores your stuff, wow m3n
+            # update roaming stuff in papyon's session
+            # changing display_name doesn't seem to update its value istantly, wtf?
+            # however, other clients see this correctly, wow m3n
+            self.profile.display_name = str(cr.display_name)
+            self.profile.personal_message = str(cr.personal_message)
+
+            self.session.add_event(Event.EVENT_PROFILE_GET_SUCCEED, \
+                       str(cr.display_name), self.profile.personal_message)
+            #self.profile.display_picture = "" :TODO
+
+#                      TODO: this code stores your stuff, wow m3n
 #                      path = '/tmp/test.jpeg'
 #                      f = open(path, 'r')
-#                      cr.store("asdasd", "LOLOLOLOL", f.read())
+#                      cr.store("nick", "message", f.read())
 
 
     def _set_status(self, stat):
