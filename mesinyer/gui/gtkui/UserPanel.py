@@ -157,28 +157,25 @@ class UserPanel(gtk.VBox):
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
             if response == gui.stock.ACCEPT:
-                #TODO ripara qui!
-                #i control if the filename is a already in cache
-                if self.config_dir.base_dir.replace('@', '-at-') == \
-                   os.path.dirname(os.path.dirname(filename)):
-                    self.session.set_picture(filename)
-                    os.remove(self.avatar_path)
-                    shutil.copy2(filename, self.avatar_path)
-                    return
                 try:
-                    pix_96 = utils.safe_gtk_pixbuf_load(filename, (96,96))
-                    pix_96.save(path_dir + '_temp', 'png')
-                    self.session.set_picture(path_dir + '_temp')
-                    if os.path.exists(self.avatar_path):
-                        os.remove(self.avatar_path)
-                    pix_96.save(self.avatar_path, 'png')
+                    import shutil
+                    #FIXME temporaney hack for animations
+                    animation = gtk.gdk.PixbufAnimation(filename)
+                    if not animation.is_static_image():
+                        self.session.set_picture(filename)
+                        if os.path.exists(self.avatar_path):
+                            os.remove(self.avatar_path)
+                        shutil.copy2(filename, self.avatar_path)
+                    else:
+                        pix_96 = utils.safe_gtk_pixbuf_load(filename, (96,96))
+                        pix_96.save(path_dir + '_temp', 'png')
+                        self.session.set_picture(path_dir + '_temp')
+                        if os.path.exists(self.avatar_path):
+                            os.remove(self.avatar_path)
+                        pix_96.save(self.avatar_path, 'png')
                 except OSError, e:
                    print e
-        #TODO better way to do this???
-        path_dir = self.config_dir.join(os.path.dirname(self.session.config_dir.base_dir),
-                   self.session.contacts.me.account,
-                   self.session.contacts.me.account.replace('@','-at-'), 'avatars')
 
-        extension.get_default('avatar chooser')(set_picture_cb,
-                                                self.avatar_path, path_dir).show()
+        extension.get_default('avatar chooser')(set_picture_cb, 
+                                                self.avatar_path).show()
 

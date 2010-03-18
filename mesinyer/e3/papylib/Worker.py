@@ -129,6 +129,7 @@ class Worker(e3.base.Worker, papyon.Client):
         
         #this must be putted here!not in the constructor...!
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        self.my_avatars = self.caches.get_avatar_cache(self.session.account.account)
 
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
@@ -491,6 +492,7 @@ class Worker(e3.base.Worker, papyon.Client):
             # TODO: log the media change
 
     def _on_contact_msnobject_changed(self, contact):
+
         msn_object = contact.msn_object
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)
@@ -523,6 +525,9 @@ class Worker(e3.base.Worker, papyon.Client):
             if avatar_hash not in avatars:
                 self.msn_object_store.request(msn_object, \
                     (download_ok, download_failed))
+        #TODO
+        if msn_object._type == papyon.p2p.MSNObjectType.DYNAMIC_DISPLAY_PICTURE:
+            pass 
 
     # address book events
     def _on_addressbook_messenger_contact_added(contact):
@@ -769,12 +774,12 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE'''
         if isinstance(picture_name, papyon.p2p.MSNObject):
+            #TODO
             # this is/can be used for initial avatar changing and caching
             # like dp roaming and stuff like that
             # now it doesn't work, btw
-            #FIXME
-            self.profile.msn_object = picture_name
-            self._on_contact_msnobject_changed(self.profile)
+            #self.profile.msn_object = picture_name
+            #self._on_contact_msnobject_changed(self.profile)
             #self.session.contacts.me.picture = picture_name
             #self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
                 #self.session.account.account, picture_name)
@@ -796,11 +801,19 @@ class Worker(e3.base.Worker, papyon.Client):
                          "",
                          data=StringIO.StringIO(avatar))
         self.profile.msn_object = msn_object
-        self.session.contacts.me.picture = picture_name
+        avatar_hash = msn_object._data_sha.encode("hex")
+        avatar_path = os.path.join(self.my_avatars.path, avatar_hash)
 
-        #comment this to prevent a double Event.EVENT_PICTURE_CHANGE_SUCCEED
-        #self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
-            #self.session.account.account, picture_name)
+        if avatar_hash in self.my_avatars:
+            self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED,
+                    self.session.account.account, avatar_path)
+
+        else:
+            self.my_avatars.insert_raw(msn_object._data)
+            self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
+            self.session.account.account, avatar_path)
+
+        self.session.contacts.me.picture = avatar_path
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES

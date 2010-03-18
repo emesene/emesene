@@ -93,8 +93,8 @@ class Login(gtk.Alignment):
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
         self.avatar = Avatar()
-        path = self.config_dir.join(account.replace('@','-at-'), \
-                                                 'avatars', 'last')
+        path = self.config_dir.join(self.server_host, account, \
+                                    account.replace('@','-at-'), 'avatars', 'last')
         if not self.config_dir.file_readable(path):
             path = gui.theme.logo
 

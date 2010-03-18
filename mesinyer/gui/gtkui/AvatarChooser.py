@@ -10,8 +10,7 @@ import extension
 class AvatarChooser(gtk.Window):
     '''A dialog to choose an avatar'''
 
-    def __init__(self, response_cb, picture_path='',
-            cache_path='.'):
+    def __init__(self, response_cb, picture_path=''):
         '''Constructor, response_cb receive the response number, the new file
         selected and a list of the paths on the icon view.
         picture_path is the path of the current display picture,
@@ -20,7 +19,10 @@ class AvatarChooser(gtk.Window):
         self.set_icon(gui.theme.logo)
 
         self.response_cb = response_cb
-        self.cache_path = cache_path
+        if picture_path == '':
+            self.cache_path = '.'
+        else:
+            self.cache_path = os.path.dirname(picture_path)
 
         self.set_title("Avatar chooser")
         self.set_default_size(602, 400)
@@ -161,11 +163,11 @@ class AvatarChooser(gtk.Window):
             try:
                 animation = gtk.gdk.PixbufAnimation(path)
                 if animation.is_static_image():
-                    pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,64,64)
+                    pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 64, 64)
                 else:
-                    pixbuf = animation.get_static_image().scale_simple(64,64,gtk.gdk.INTERP_BILINEAR)
-                #pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,64,64)
-                print path
+                    pixbuf = animation.get_static_image().scale_simple(64, 64, \
+                                                          gtk.gdk.INTERP_BILINEAR)
+
                 self.model.append([pixbuf, path])
             except gobject.GError:
                 print 'image at %s could not be loaded' % (path, )
@@ -228,6 +230,7 @@ class AvatarChooser(gtk.Window):
             '''method called when an image is selected'''
             if response == gui.stock.ACCEPT:
                 animation = gtk.gdk.PixbufAnimation(path)
+                #we don't need to resize animation here
                 if not animation.is_static_image():
                     self.add_picture(path)
                     return
@@ -241,9 +244,8 @@ class AvatarChooser(gtk.Window):
         def _on_image_resized(response, pix):
             '''method called when an image is selected'''
             if response == gtk.RESPONSE_OK:
-                #TODO change this when the "new" directory way is ready
-                pix.save('/tmp/resized', 'png')              
-                self.add_picture('/tmp/resized')
+                pix.save(self.cache_path + '_temp', 'png')              
+                self.add_picture(self.cache_path + '_temp')
 
         class_ = extension.get_default('image area selector')
         class_(_on_image_resized, gtk.gdk.pixbuf_new_from_file(path),

@@ -304,8 +304,10 @@ class Controller(object):
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
         gui.theme.set_theme(image_name, emote_name, sound_name)
         
-        path = self.config_dir.join(self.session.contacts.me.account.replace(
-                                    '@','-at-'), 'avatars', 'last')
+        path = self.config_dir.join(os.path.dirname(self.session.config_dir.base_dir),
+                   self.session.contacts.me.account,
+                   self.session.contacts.me.account.replace('@','-at-'), 'avatars','last')
+        
         last_avatar = self.session.config.get_or_set('last_avatar', path)
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
@@ -365,10 +367,10 @@ class Controller(object):
         if not on_reconnect:
             self.on_preferences_changed(use_http, proxy, session_id)
             self.window.clear()
-            path = self.config_dir.join(account.account.replace('@','-at-'),
-                                       'avatars', 'last')
+            path = self.config_dir.join(host, account.account, \
+                   account.account.replace('@','-at-'), 'avatars', 'last')
             if not self.config_dir.file_readable(path):
-                path = ''
+                path = ''  
             self.window.go_connect(self.on_cancel_login, path)
             self.window.show()
         else:
