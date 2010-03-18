@@ -435,6 +435,8 @@ class Worker(e3.base.Worker, papyon.Client):
         account = contact.account
         old_status = contact.status
         contact.status = status_
+        self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED,
+                                   account, 'status', old_status)
 
     def _on_contact_nick_changed(self, papycontact):
         contact = self.session.contacts.contacts.get(papycontact.account, None)

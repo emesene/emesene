@@ -139,7 +139,6 @@ class Avatar( gtk.Widget ):
             self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
 
     def _advance(self, iteran):
-        print 'qui'
         iteran.advance()
         self.__set_from_pixbuf_animation(iteran.get_pixbuf())
         self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
