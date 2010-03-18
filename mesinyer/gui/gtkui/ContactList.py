@@ -23,7 +23,6 @@ import gobject
 import e3
 import gui
 import utils
-import Renderers
 import extension
 import logging
 log = logging.getLogger('gtkui.ContactList')
@@ -44,8 +43,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         '''class constructor'''
         self._model = None
         dialog = extension.get_default('dialog')
-        #self.pbr = gtk.CellRendererPixbuf()
-        self.pbr = Renderers.AvatarRenderer()
+        self.pbr = gtk.CellRendererPixbuf()
         gui.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
