@@ -82,6 +82,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
         self._oim_handler = OfflineEvent(self)
+        self._roaming_handler = None
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
@@ -119,6 +120,10 @@ class Worker(e3.base.Worker, papyon.Client):
     # some useful methods (mostly, gui only)
     def set_initial_infos(self):
         '''this is called on login'''
+        self._roaming_handler = papyon.service.ContentRoaming.ContentRoaming(self._sso, self.address_book)
+        self._roaming_handler.connect("notify::state", \
+                                        self._content_roaming_state_changed)
+        self._roaming_handler.sync()
         # loads or create a config for this session
         self.session.load_config()
         self.session.create_config()
@@ -128,6 +133,23 @@ class Worker(e3.base.Worker, papyon.Client):
         self._set_status(presence)
         # temporary hax?
         self.profile.display_name = nick
+
+    def _content_roaming_state_changed(self, cr, pspec):
+        print "content roaming state changed"
+        if cr.state == papyon.service.ContentRoaming.constants.ContentRoamingState.SYNCHRONIZED:
+            print "Content roaming service is now synchronized"
+                     
+            print cr.display_picture, cr.display_name, cr.personal_message
+            type, data = cr.display_picture
+            path = '/tmp/argh.%s' % type.split('/')[1]
+            f = open(path, 'w')
+            f.write(data)
+
+#                      this code stores your stuff, wow m3n
+#                      path = '/tmp/test.jpeg'
+#                      f = open(path, 'r')
+#                      cr.store("asdasd", "LOLOLOLOL", f.read())
+
 
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
@@ -393,6 +415,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
 
     def _on_conversation_message_error(self, err_type, error, papyconversation):
+        #TODO: tell the user the sending failed, and the reason (err_type)
         print "error sending message because", err_type, error
 
     def _on_conversation_user_joined(self, papycontact, pyconvevent):

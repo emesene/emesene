@@ -23,7 +23,7 @@ from Worker import Worker
 
 import extension
 
-AUTHOR_LIST = ['Riccardo (C10uD)', 'Orfeo (Otacon)']
+AUTHOR_LIST = ['Riccardo (C10uD)', 'Orfeo (Otacon)', 'Stefano (cando)']
 
 @extension.implements('session')
 class Session(e3.Session):
