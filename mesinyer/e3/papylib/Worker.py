@@ -525,9 +525,6 @@ class Worker(e3.base.Worker, papyon.Client):
             if avatar_hash not in avatars:
                 self.msn_object_store.request(msn_object, \
                     (download_ok, download_failed))
-        #TODO
-        if msn_object._type == papyon.p2p.MSNObjectType.DYNAMIC_DISPLAY_PICTURE:
-            pass 
 
     # address book events
     def _on_addressbook_messenger_contact_added(contact):

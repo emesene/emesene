@@ -8,8 +8,7 @@ class Avatar( gtk.Widget ):
     """AvatarWidget """
     #TODO move in an avatarManager class?????
     #TODO class for resize gif!
- 
-    #note: i should think up a better name than avatarHolder
+
     #cellKeyPosition, is a Anchor Type constant
     #refer to http://www.pygtk.org/docs/pygtk/gtk-constants.html#gtk-anchor-type-constants
     __gproperties__ = {
@@ -116,7 +115,7 @@ class Avatar( gtk.Widget ):
         self.set_property('pixbuf-animation', pixbuf)
         self.queue_draw()
     
-    #public method
+    #public methods
     def set_from_file(self, filename):
         animation = gtk.gdk.PixbufAnimation(filename)
         if animation.is_static_image():
@@ -126,6 +125,12 @@ class Avatar( gtk.Widget ):
         self.current_animation = animation
         self._start_animation(animation)
 
+    def stop(self):
+        '''stop the animation'''
+        if self.anim_source is not None:
+            gobject.source_remove(self.anim_source)
+            self.anim_source = None
+
     def _start_animation(self, animation):
         iteran = animation.get_iter()
         #we don't need to resize here!The resize must be done in another class
@@ -134,9 +139,11 @@ class Avatar( gtk.Widget ):
             self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
 
     def _advance(self, iteran):
-        self.__set_from_pixbuf_animation(iteran.get_pixbuf())
+        print 'qui'
         iteran.advance()
-        return True
+        self.__set_from_pixbuf_animation(iteran.get_pixbuf())
+        self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
+        return False
 
     def do_size_request(self,requisition):
         requisition.width = self._dimention

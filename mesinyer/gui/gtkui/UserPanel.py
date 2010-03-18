@@ -168,8 +168,9 @@ class UserPanel(gtk.VBox):
                         shutil.copy2(filename, self.avatar_path)
                     else:
                         pix_96 = utils.safe_gtk_pixbuf_load(filename, (96,96))
-                        pix_96.save(path_dir + '_temp', 'png')
-                        self.session.set_picture(path_dir + '_temp')
+                        path = os.path.dirname(self.avatar_path) + '_temp'
+                        pix_96.save(path, 'png')
+                        self.session.set_picture(path)
                         if os.path.exists(self.avatar_path):
                             os.remove(self.avatar_path)
                         pix_96.save(self.avatar_path, 'png')

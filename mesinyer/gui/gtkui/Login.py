@@ -93,12 +93,12 @@ class Login(gtk.Alignment):
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
         self.avatar = Avatar()
-        path = self.config_dir.join(self.server_host, account, \
+        self.avatar_path = self.config_dir.join(self.server_host, account, \
                                     account.replace('@','-at-'), 'avatars', 'last')
-        if not self.config_dir.file_readable(path):
+        if not self.config_dir.file_readable(self.avatar_path):
             path = gui.theme.logo
 
-        self.avatar.set_from_file(path)
+        self.avatar.set_from_file(self.avatar_path)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
@@ -287,12 +287,9 @@ class Login(gtk.Alignment):
             self.btn_status.set_status(int(self.status[account]))
             
             passw = self.accounts[account]
-            
-            path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
-            if self.config_dir.file_readable(path):
-                pix = utils.safe_gtk_pixbuf_load(path, (96,96))
-                #self.avatar.set_from_pixbuf(pix)
-                self.avatar.set_from_file(path)
+
+            if self.config_dir.file_readable(self.avatar_path):
+                self.avatar.set_from_file(self.avatar_path)
 
             if attr == 3:#autologin,password,account checked
                 self.txt_password.set_text(base64.b64decode(passw))
@@ -312,8 +309,6 @@ class Login(gtk.Alignment):
                 self._clear_all()
 
         else:
-            #self.avatar.set_from_pixbuf(
-             #utils.safe_gtk_pixbuf_load(gui.theme.logo))
            self.avatar.set_from_file(gui.theme.logo)
 
     def _clear_all(self):
@@ -421,6 +416,7 @@ class Login(gtk.Alignment):
         '''
         called when connect button is clicked
         '''
+        self.avatar.stop()
         self.do_connect()
 
     def _on_cancel_clicked(self, button):
@@ -571,6 +567,7 @@ class ConnectingWindow(gtk.Alignment):
         '''
         cause the return to login window
         '''
+        self.avatar.stop()
         self.callback()
 
     def on_connecting(self, message):

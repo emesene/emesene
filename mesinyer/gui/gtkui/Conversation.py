@@ -154,6 +154,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''called when the conversation is closed'''
         self.session.config.unsubscribe(self._on_show_toolbar_changed,
             'b_show_toolbar')
+        #stop the avatars animation...if any..
+        self.avatar.stop()
+        self.his_avatar.stop()
 
     def show(self):
         '''override the show method'''
