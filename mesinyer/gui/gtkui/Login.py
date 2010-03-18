@@ -11,7 +11,6 @@ import utils
 import extension
 import StatusButton
 import stock
-import NiceBar
 
 import logging
 log = logging.getLogger('gtkui.Login')
@@ -48,6 +47,8 @@ class Login(gtk.Alignment):
             self.proxy = proxy
 
         self.dialog = extension.get_default('dialog')
+        Avatar = extension.get_default('avatar')
+        NiceBar = extension.get_default('nice bar')
 
         if session_id is not None:
             for ext_id, ext in extension.get_extensions('session').iteritems():
@@ -91,14 +92,13 @@ class Login(gtk.Alignment):
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
-        self.img_account = gtk.Image()
-        path = self.config_dir.join(account.replace('@','-at-'), \
-                                                 'avatars', 'last')
-        if self.config_dir.file_readable(path):
-            pix = utils.safe_gtk_pixbuf_load(path, (96,96))
-        else:
-            pix = utils.safe_gtk_pixbuf_load(gui.theme.logo)
-        self.img_account.set_from_pixbuf(pix)
+        self.avatar = Avatar()
+        self.avatar_path = self.config_dir.join(self.server_host, account, \
+                                    account.replace('@','-at-'), 'avatars', 'last')
+        if not self.config_dir.file_readable(self.avatar_path):
+            path = gui.theme.logo
+
+        self.avatar.set_from_file(self.avatar_path)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
@@ -172,22 +172,21 @@ class Login(gtk.Alignment):
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
-        self.nicebar = NiceBar.NiceBar(default_background= \
-                                       NiceBar.ALERTBACKGROUND)
+        self.nicebar = NiceBar()
 
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.20)
-        al_account = gtk.Alignment(xalign=0.45, yalign=0.5, xscale=0.0,
+        al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
         
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
-        al_account.add(self.img_account)
+        al_account.add(self.avatar)
         al_preferences.add(self.b_preferences)
 
         vbox.pack_start(self.nicebar, False)
@@ -288,11 +287,9 @@ class Login(gtk.Alignment):
             self.btn_status.set_status(int(self.status[account]))
             
             passw = self.accounts[account]
-            
-            path = self.config_dir.join(account.replace('@','-at-'), 'avatars', 'last')
-            if self.config_dir.file_readable(path):
-                pix = utils.safe_gtk_pixbuf_load(path, (96,96))
-                self.img_account.set_from_pixbuf(pix) 
+
+            if self.config_dir.file_readable(self.avatar_path):
+                self.avatar.set_from_file(self.avatar_path)
 
             if attr == 3:#autologin,password,account checked
                 self.txt_password.set_text(base64.b64decode(passw))
@@ -311,6 +308,9 @@ class Login(gtk.Alignment):
                           'Error while reading user config'))
                 self._clear_all()
 
+        else:
+           self.avatar.set_from_file(gui.theme.logo)
+
     def _clear_all(self):
         '''
         clear all login fields and checkbox
@@ -323,8 +323,6 @@ class Login(gtk.Alignment):
         self.forget_me.set_sensitive(False)
         self.btn_status.set_status(e3.status.ONLINE)
         self.txt_password.set_sensitive(True)
-        self.img_account.set_from_pixbuf(
-             utils.safe_gtk_pixbuf_load(gui.theme.logo))
 
     def clear_all(self):
         '''
@@ -418,6 +416,7 @@ class Login(gtk.Alignment):
         '''
         called when connect button is clicked
         '''
+        self.avatar.stop()
         self.do_connect()
 
     def _on_cancel_clicked(self, button):
@@ -510,12 +509,15 @@ class ConnectingWindow(gtk.Alignment):
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
             yscale=1.0)
         self.callback = callback
+
         #for reconnecting
         self.reconnect_timer_id = None
         if avatar_path == '':
             self.avatar_path = gui.theme.logo
         else:
             self.avatar_path = avatar_path
+
+        Avatar = extension.get_default('avatar')
 
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
                 animated=True)
@@ -530,8 +532,8 @@ class ConnectingWindow(gtk.Alignment):
         self.label_timer = gtk.Label()
         self.label_timer.set_markup('<b>Connection error!\n </b>')
 
-        self.img_account = gtk.Image()
-        self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(self.avatar_path,(96,96)))
+        self.avatar = Avatar(cellDimention=96)
+        self.avatar.set_from_file(self.avatar_path)
 
         al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.2)
@@ -547,7 +549,7 @@ class ConnectingWindow(gtk.Alignment):
         al_button_cancel.add(self.b_cancel)
         al_label.add(self.label)
         al_label_timer.add(self.label_timer)
-        al_logo.add(self.img_account)
+        al_logo.add(self.avatar)
 
         vbox = gtk.VBox()
         vbox.pack_start(al_logo, True, False)
@@ -559,31 +561,13 @@ class ConnectingWindow(gtk.Alignment):
         self.add(vbox)
         vbox.show_all()
 
-        self.dim = 96
-        gobject.timeout_add(20, self.do_animation)
-
-        self.label.hide()
-        self.throbber.hide()
         self.label_timer.hide()
-        self.b_cancel.hide()
-
-    def do_animation(self):
-       '''do the avatar's animation on login'''
-       if self.dim <= 128:
-           self.dim += 4
-           self.img_account.set_from_pixbuf(utils.safe_gtk_pixbuf_load(
-                                       self.avatar_path,(self.dim,self.dim)))
-           return True
-       else:
-           self.label.show()
-           self.b_cancel.show()
-           self.clear_connect()
-           return False
 
     def _on_cancel_clicked(self, button):
         '''
         cause the return to login window
         '''
+        self.avatar.stop()
         self.callback()
 
     def on_connecting(self, message):
@@ -592,7 +576,7 @@ class ConnectingWindow(gtk.Alignment):
        '''
        #taken from amsn2..but i like a lot!
        #this hack resolve a problem of visualization..XD FIXME
-       gobject.timeout_add(1000, lambda: self.label.set_markup('<b>%s</b>'% message))
+       gobject.timeout_add(1200, lambda: self.label.set_markup('<b>%s</b>'% message))
 
     def clear_connect(self):
         '''
