@@ -15,7 +15,8 @@ class AvatarChooser(gtk.Window):
     '''A dialog to choose an avatar'''
 
     def __init__(self, response_cb, picture_path='',
-            cache_path='.', contact_cache_path='.', faces_paths=[], avatar_manager = None):
+            cache_path='.', contact_cache_path='.',
+            faces_paths=[], avatar_manager = None):
         '''Constructor, response_cb receive the response number, the new file
         selected and a list of the paths on the icon view.
         picture_path is the path of the current display picture,
@@ -33,9 +34,9 @@ class AvatarChooser(gtk.Window):
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
         self.views = []
-        self.views.append( IconView(_('Used'), [cache_path], self) )
-        self.views.append( IconView(_('System pictures'), faces_paths, self) )
-        self.views.append( IconView(_('Contact pictures'),[contact_cache_path], self) )
+        self.views.append(IconView(_('Used'), [cache_path], self))
+        self.views.append(IconView(_('System pictures'), faces_paths, self))
+        self.views.append(IconView(_('Contact pictures'), [contact_cache_path], self))
 
         vbox = gtk.VBox(spacing=4)
         side_vbox = gtk.VBox(spacing=4)
@@ -58,9 +59,9 @@ class AvatarChooser(gtk.Window):
 
         b_clear.connect('clicked', self._on_clear)
         self.b_add.connect('clicked', self._on_add)
-        self.b_remove.connect('clicked', self._on_remove)
+        self.b_remove.connect('clicked', self.on_remove)
         self.b_remove_all.connect('clicked', self._on_remove_all)
-        b_accept.connect('clicked', self._on_accept)
+        b_accept.connect('clicked', self.on_accept)
         b_cancel.connect('clicked', self._on_cancel)
         self.connect('delete-event', self._on_close)
         self.connect("key-press-event", self.on_key_press)
@@ -185,7 +186,7 @@ class AvatarChooser(gtk.Window):
 
     def _on_icon_activated(self, *args):
         '''method called when a picture is double clicked'''
-        self._on_accept(None)
+        self.on_accept(None)
 
     def _on_add(self, button):
         '''called when the user select the add button'''
@@ -217,7 +218,7 @@ class AvatarChooser(gtk.Window):
         class_(_on_image_resized, gtk.gdk.pixbuf_new_from_file(path),
                parent=self).run()
 
-    def _on_remove(self, event):
+    def on_remove(self, event):
         '''Removes the selected avatar'''
         self.remove_selected()
 
@@ -231,7 +232,7 @@ class AvatarChooser(gtk.Window):
         extension.get_default('dialog').yes_no(
             "Are you sure you want to remove all items?", on_response_cb)
 
-    def _on_accept(self, button):
+    def on_accept(self, button):
         '''method called when the user clicks the button'''
         selected = self.get_selected()
         filename = ''

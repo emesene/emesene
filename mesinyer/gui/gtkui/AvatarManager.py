@@ -16,7 +16,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-''' this file contains the AvatarManager class, used to manage Avatars ( really? :D ) '''
+''' this file contains the AvatarManager class, used to manage Avatars '''
 
 import os
 import hashlib
@@ -35,27 +35,31 @@ class AvatarManager(object):
 
     def get_avatars_dir(self):
         ''' gets the user's avatar directory '''
-        return self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
-                self.session.contacts.me.account.replace('@','-at-'),'avatars')        
+        base_dir = os.path.dirname(self.config_dir.base_dir)
+        user_dir = self.session.contacts.me.account.replace('@','-at-')
+        return self.config_dir.join(base_dir, user_dir, 'avatars')        
     
     def get_cached_avatars_dir(self):
         ''' gets the contacts' cached avatar directory '''
-        return self.config_dir.join(os.path.dirname(self.config_dir.base_dir),
-                self.session.contacts.me.account.replace('@','-at-'),'cached_avatars')
+        base_dir = os.path.dirname(self.config_dir.base_dir)
+        user_dir = self.session.contacts.me.account.replace('@','-at-')
+        return self.config_dir.join(base_dir, user_dir, 'cached_avatars')
     
     def get_system_avatars_dirs(self):
-        ''' gets the directories where avatars are availables ( depending on the system ) '''
+        ''' gets the directories where avatars are availables '''
         faces_paths = []
         if os.name == 'nt':
             app_data_folder = os.path.split(os.environ['APPDATA'])[1]
-            faces_path = os.path.join(os.environ['ALLUSERSPROFILE'], app_data_folder, \
-                         "Microsoft", "User Account Pictures", "Default Pictures")
-            #little hack to fix problems with encoding
+            faces_path = os.path.join(os.environ['ALLUSERSPROFILE'], \
+                            app_data_folder, "Microsoft", \
+                            "User Account Pictures", "Default Pictures")
+            # little hack to fix problems with encoding
             unicodepath = u"%s" % faces_path
             faces_paths = [unicodepath]
         else:
-            faces_paths = ['/usr/share/kde/apps/faces', '/usr/share/kde4/apps/kdm/pics/users', \
-                           '/usr/share/pixmaps/faces']
+            faces_paths = [ '/usr/share/kde/apps/faces', \
+                            '/usr/share/kde4/apps/kdm/pics/users', \
+                            '/usr/share/pixmaps/faces' ]
         return faces_paths
 
     def is_cached(self, filename):
@@ -68,7 +72,8 @@ class AvatarManager(object):
     def add_new_avatar(self, filename):
         ''' add a new picture from filename into the avatar cache '''
         def gen_filename(source):
-            ''' generate a unique (?) filename for the new avatar in cache, implemented as sha224 digest '''
+            # generate a unique (?) filename for the new avatar in cache
+            # implemented as sha224 digest
             infile = open(source, 'rb')
             data = infile.read()
             infile.close()
@@ -93,14 +98,15 @@ class AvatarManager(object):
                 pix_96.save(fpath, 'png')
                 return pix_96, fpath
 
-        except OSError, e:
-            print e
+        except OSError, error:
+            print error
             return None, fpath
 
     def add_new_avatar_from_pix(self, pix):
         ''' add a new picture into the avatar cache '''
         def gen_filename(source):
-            ''' generate a unique (?) filename for the new avatar in cache, implemented as sha224 digest '''
+            # Generate a unique (?) filename for the new avatar in cache
+            # implemented as sha224 digest
             return hashlib.sha224(source.get_pixels()).hexdigest()
 
         fpath = os.path.join(self.get_avatars_dir(), gen_filename(pix))
@@ -135,6 +141,6 @@ class AvatarManager(object):
                 else:
                     #FIXME temporaney hack for animations
                     shutil.copy2(filename, self.avatar_path)
-            except OSError, e:
-                print e
+            except OSError, error:
+                print error
 

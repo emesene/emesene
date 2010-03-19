@@ -34,7 +34,7 @@ class IconView(gtk.HBox):
 
         self.stop = False
         # Start a new thread to fill the iconview with images from path_list
-        thread.start_new_thread(self.fill,(path_list,))
+        thread.start_new_thread(self.fill, (path_list,))
 
     def stop_and_clear(self):
         ''' stop the threads and clean the model '''
@@ -49,9 +49,12 @@ class IconView(gtk.HBox):
                     name = os.path.splitext(path)[0]
                     if self.stop:
                         return False
-                    if not name.endswith('_thumb') and not path.endswith('tmp') \
-                        and not path.endswith('xml') and not path.endswith('db') \
-                        and not path.endswith('last') and not path.endswith('avatars'):
+                    if not name.endswith('_thumb') and \
+                        not path.endswith('tmp') and   \
+                        not path.endswith('xml') and   \
+                        not path.endswith('db') and    \
+                        not path.endswith('last') and  \
+                        not path.endswith('avatars'):
                         gtk.gdk.threads_enter()
                         self.add_picture(os.path.join(search_path, path))
                         # make update the iconview
@@ -74,7 +77,7 @@ class IconView(gtk.HBox):
                 remove_item = gtk.ImageMenuItem('Delete')
                 remove_item.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
                                       gtk.ICON_SIZE_MENU))
-                remove_item.connect('activate', self.chooser._on_remove)
+                remove_item.connect('activate', self.chooser.on_remove)
                 remove_menu.append(remove_item)
                 remove_menu.popup(None, None, None, event.button, event.time)
                 remove_menu.show_all()
@@ -94,8 +97,8 @@ class IconView(gtk.HBox):
             try:
                 if os.path.exists(path):
                     self.add_picture(path)
-            except TypeError, e:
-                print "Could not add picture:\n %s" % (str(e),)
+            except TypeError, error:
+                print "Could not add picture:\n %s" % (str(error),)
 
     def add_picture(self, path):
         '''Adds an avatar into the IconView'''
@@ -107,8 +110,8 @@ class IconView(gtk.HBox):
                     if animation.is_static_image():
                         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
                     else:
-                        pixbuf = animation.get_static_image().scale_simple(64, 64, \
-                                                          gtk.gdk.INTERP_BILINEAR)
+                        pixbuf = animation.get_static_image().scale_simple( \
+                                    64, 64, gtk.gdk.INTERP_BILINEAR)
                 except gobject.GError:
                     print 'image at %s could not be loaded' % (path, )
                     print gobject.GError                      
@@ -123,7 +126,6 @@ class IconView(gtk.HBox):
                 if self.model != None and not self.stop:
                     self.model.append([pixbuf, path])
                     # Esplicitely delete gtkpixbuf
-                    # see http://faq.pygtk.org/index.py?req=show&file=faq08.004.htp
                     del pixbuf
             else:
                 print path, 'not readable'
@@ -146,7 +148,7 @@ class IconView(gtk.HBox):
 
     def _on_icon_activated(self, *args):
         '''method called when a picture is double clicked'''
-        self.chooser._on_accept(None)
+        self.chooser.on_accept(None)
     
     def get_selected_items(self):
         ''' gets the selected pictures '''

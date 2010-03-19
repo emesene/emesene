@@ -158,7 +158,7 @@ class UserPanel(gtk.VBox):
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
             if _av_chooser is not None:
-		        _av_chooser.stop_and_clear()
+                _av_chooser.stop_and_clear()
             if response == gui.stock.ACCEPT:
                 self.avatar_manager.set_as_avatar(filename)
 
