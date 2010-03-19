@@ -15,7 +15,7 @@ class AvatarChooser(gtk.Window):
     '''A dialog to choose an avatar'''
 
     def __init__(self, response_cb, picture_path='',
-            cache_path='.', contact_cache_path='.', faces_paths=[], av_man = None):
+            cache_path='.', contact_cache_path='.', faces_paths=[], avatar_manager = None):
         '''Constructor, response_cb receive the response number, the new file
         selected and a list of the paths on the icon view.
         picture_path is the path of the current display picture,
@@ -24,7 +24,7 @@ class AvatarChooser(gtk.Window):
         self.set_icon(gui.theme.logo)
 
         self.response_cb = response_cb
-        self.av_man = av_man
+        self.avatar_manager = avatar_manager
 
         self.set_title("Avatar chooser")
         self.set_default_size(620, 400)
@@ -208,9 +208,9 @@ class AvatarChooser(gtk.Window):
         def _on_image_resized(response, pix):
             '''method called when an image is selected'''
             if response == gtk.RESPONSE_OK:
-                if self.av_man is not None:
+                if self.avatar_manager is not None:
                     view = self.views[self.notebook.get_current_page()]
-                    pix, avpath = self.av_man.add_new_avatar_from_pix(pix)
+                    pix, avpath = self.avatar_manager.add_new_avatar_from_pix(pix)
                     view.add_picture(avpath)
 
         class_ = extension.get_default('image area selector')

@@ -89,10 +89,10 @@ class AvatarManager(object):
         else:
             if not os.path.exists(self.get_avatars_dir()):
                 os.makedirs(self.get_avatars_dir())
-            # Save in 128x128 for the animation on connect... if somebody likes it...
-            pix_128 = utils.safe_gtk_pixbuf_load(filename, (128, 128))
-            pix_128.save(fpath, 'png')
-            return pix_128, fpath
+            # Save in 96x96
+            pix_96 = utils.safe_gtk_pixbuf_load(filename, (96, 96))
+            pix_96.save(fpath, 'png')
+            return pix_96, fpath
 
         except OSError, e:
             print e
@@ -108,8 +108,8 @@ class AvatarManager(object):
         if not os.path.exists(self.get_avatars_dir()):
             os.makedirs(self.get_avatars_dir())
 
-        # Resize to 128x128
-        pix = pix.scale_simple(128, 128, gtk.gdk.INTERP_BILINEAR)
+        # Resize to 96x96
+        pix = pix.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
         pix.save(fpath, 'png')
         return pix, fpath
 
@@ -126,13 +126,13 @@ class AvatarManager(object):
             shutil.copy2(filename, self.avatar_path)
         else:
             try:
-                pix_128, fpath = self.add_new_avatar(filename)
+                pix_96, fpath = self.add_new_avatar(filename)
 
                 self.session.set_picture(fpath)
                 if os.path.exists(self.avatar_path):
                     os.remove(self.avatar_path)
-                if pix_128 != None:
-                    pix_128.save(self.avatar_path, 'png')
+                if pix_96 != None:
+                    pix_96.save(self.avatar_path, 'png')
                 else:
                     #FIXME temporaney hack for animations
                     shutil.copy2(filename, self.avatar_path)
