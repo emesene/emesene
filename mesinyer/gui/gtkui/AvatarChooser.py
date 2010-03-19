@@ -7,14 +7,15 @@ import gui
 import utils
 import extension
 
+import gc
+
 from IconView import IconView
 
 class AvatarChooser(gtk.Window):
     '''A dialog to choose an avatar'''
 
-<<<<<<< HEAD:mesinyer/gui/gtkui/AvatarChooser.py
     def __init__(self, response_cb, picture_path='',
-            cache_path='.', contact_cache_path='.', faces_paths=[]):
+            cache_path='.', contact_cache_path='.', faces_paths=[], av_man = None):
         '''Constructor, response_cb receive the response number, the new file
         selected and a list of the paths on the icon view.
         picture_path is the path of the current display picture,
@@ -23,10 +24,7 @@ class AvatarChooser(gtk.Window):
         self.set_icon(gui.theme.logo)
 
         self.response_cb = response_cb
-        if picture_path == '':
-            self.cache_path = '.'
-        else:
-            self.cache_path = os.path.dirname(picture_path)
+        self.av_man = av_man
 
         self.set_title("Avatar chooser")
         self.set_default_size(620, 400)
@@ -210,9 +208,10 @@ class AvatarChooser(gtk.Window):
         def _on_image_resized(response, pix):
             '''method called when an image is selected'''
             if response == gtk.RESPONSE_OK:
-                pix.save(self.cache_path + '_temp', 'png')              
-                view = self.views[self.notebook.get_current_page()]
-                view.add_pictureself.cache_path + '_temp')
+                if self.av_man is not None:
+                    view = self.views[self.notebook.get_current_page()]
+                    pix, avpath = self.av_man.add_new_avatar_from_pix(pix)
+                    view.add_picture(avpath)
 
         class_ = extension.get_default('image area selector')
         class_(_on_image_resized, gtk.gdk.pixbuf_new_from_file(path),
@@ -265,6 +264,13 @@ class AvatarChooser(gtk.Window):
         '''called when the user press a key'''
         if event.keyval == gtk.keysyms.Delete:
             self.remove_selected()
+
+    def stop_and_clear(self):
+        for view in self.views:
+            view.stop_and_clear()
+        # Force Garbage Collector to tidy objects
+        # see http://faq.pygtk.org/index.py?req=show&file=faq08.004.htp
+        gc.collect()
 
 def samefile(path1, path2):
     '''return True if the files are the same file

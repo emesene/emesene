@@ -3,23 +3,22 @@ import os
 import gtk
 import gobject
 
-import gui
-import utils
-import extension
-
 import thread
 import time
 import gc
 
 # Class that holds the iconview from the avatar chooser dialog
 class IconView(gtk.HBox):
+    ''' class representing a listview in icon mode
+        (using gtk.IconView + gtk.ListStore)        '''
     def __init__(self, label, path_list, avatar_chooser):
         gtk.HBox.__init__(self)
         self.set_spacing(4)
         self.chooser = avatar_chooser
         self.model = gtk.ListStore(gtk.gdk.Pixbuf, str)   
         self.iconview = gtk.IconView(self.model)
-        self.iconview.enable_model_drag_dest([('text/uri-list', 0, 0)], gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_COPY)
+        self.iconview.enable_model_drag_dest([('text/uri-list', 0, 0)],
+                                gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_COPY)
         self.iconview.connect("drag-data-received", self._drag_data_received)
         self.iconview.set_pixbuf_column(0)
         self.iconview.connect("item-activated", self._on_icon_activated)
@@ -33,23 +32,22 @@ class IconView(gtk.HBox):
         self.scroll.add(self.iconview)
         self.pack_start(self.scroll, True, True)
 
-        self.STOP = False
+        self.stop = False
         # Start a new thread to fill the iconview with images from path_list
         thread.start_new_thread(self.fill,(path_list,))
 
     def stop_and_clear(self):
-        self.STOP = True
+        ''' stop the threads and clean the model '''
+        self.stop = True
         self.model.clear()
 
     def fill(self, path_list):
         '''fill the IconView with avatars from the list of pictures'''
-        # print " ********* Thread "+ self.label.get_text() +" started *********"
         for search_path in path_list:
             if os.path.exists(search_path):
                 for path in os.listdir(search_path):
                     name = os.path.splitext(path)[0]
-                    if self.STOP:
-                        # print " ********* Thread "+ self.label.get_text() +" stopped *********"
+                    if self.stop:
                         return False
                     if not name.endswith('_thumb') and not path.endswith('tmp') \
                         and not path.endswith('xml') and not path.endswith('db') \
@@ -65,22 +63,24 @@ class IconView(gtk.HBox):
         # Force Garbage Collector to tidy objects
         # see http://faq.pygtk.org/index.py?req=show&file=faq08.004.htp
         gc.collect()
-        # print " ********* Thread "+ self.label.get_text() +" finished *********"
     
     def pop_up(self, iconview, event):
-        if event.button == 3 and self.label.get_text() != _('System pictures'):
+        ''' manage the context menu (?) '''
+        if event.button == 3 and self.label.get_text() != 'System pictures':
             path = self.iconview.get_path_at_pos(event.x, event.y)
             if path != None:
                 self.iconview.select_path(path)
                 remove_menu = gtk.Menu()
-                remove_item = gtk.ImageMenuItem(_('Delete'))
-                remove_item.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE, gtk.ICON_SIZE_MENU))
+                remove_item = gtk.ImageMenuItem('Delete')
+                remove_item.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
+                                      gtk.ICON_SIZE_MENU))
                 remove_item.connect('activate', self.chooser._on_remove)
                 remove_menu.append(remove_item)
                 remove_menu.popup(None, None, None, event.button, event.time)
                 remove_menu.show_all()
 
-    def _drag_data_received(self, treeview, context, x, y, selection, info, timestamp):
+    def _drag_data_received(self, treeview, context, posx, posy, \
+                            selection, info, timestamp):
         '''method called on an image dragged to the view'''
         urls = selection.data.split('\n')
         for url in urls:
@@ -95,7 +95,7 @@ class IconView(gtk.HBox):
                 if os.path.exists(path):
                     self.add_picture(path)
             except TypeError, e:
-                error(_("Could not add picture:\n %s") % (str(e),))
+                print "Could not add picture:\n %s" % (str(e),)
 
     def add_picture(self, path):
         '''Adds an avatar into the IconView'''
@@ -115,12 +115,12 @@ class IconView(gtk.HBox):
  
                 # On nt images are 128x128 (48x48 on xp)
                 # On kde, images are 64x64
-                if (self.label.get_text() == _('System pictures') or \
-                 self.label.get_text() == _('Contact pictures')) and \
+                if (self.label.get_text() == 'System pictures' or \
+                 self.label.get_text() == 'Contact pictures') and \
                  (pixbuf.get_width() != 96 or pixbuf.get_height() != 96):
                     pixbuf = pixbuf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
 
-                if self.model != None and not self.STOP:
+                if self.model != None and not self.stop:
                     self.model.append([pixbuf, path])
                     # Esplicitely delete gtkpixbuf
                     # see http://faq.pygtk.org/index.py?req=show&file=faq08.004.htp
@@ -132,7 +132,6 @@ class IconView(gtk.HBox):
 
     def is_in_view(self, filename):
         '''return True if filename already on the iconview'''
-
         if os.name == 'nt':
             # nt doesn't include os.path.samefile
             return False
@@ -140,7 +139,7 @@ class IconView(gtk.HBox):
         for (pixbuf, path) in self.model:
             if os.path.samefile(filename, path):
                 return True
-            if self.STOP:
+            if self.stop:
                 return False
 
         return False
@@ -150,4 +149,5 @@ class IconView(gtk.HBox):
         self.chooser._on_accept(None)
     
     def get_selected_items(self):
+        ''' gets the selected pictures '''
         return self.iconview.get_selected_items()

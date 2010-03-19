@@ -3,11 +3,16 @@ import songretriever
 ROOT_NAME = 'org.freedesktop.DBus'
 ROOT_PATH = '/org/freedesktop/DBus'
 
-class DBusBase(object):
+class DBusBase(songretriever.MusicHandler):
     '''Handler for music players that use DBus'''
+    NAME = 'D-Bus players'
+    DESCRIPTION = 'blah blah'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, iface_name,
-                 iface_path):
+    def __init__(self, main_window, iface_name, iface_path):
+        songretriever.MusicHandler.__init__(self, main_window)
+        
         self.iface_name = iface_name
         self.iface_path = iface_path
 

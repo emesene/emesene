@@ -1,6 +1,4 @@
 import gtk
-import os
-import shutil
 
 import gui
 import utils
@@ -37,6 +35,7 @@ class UserPanel(gtk.VBox):
 
         self.avatar_path = self.session.config.last_avatar
         self.avatar_manager = AvatarManager(self.session)
+
         if not self.session.config_dir.file_readable(self.avatar_path):
             path = gui.theme.user
         else:
@@ -153,40 +152,28 @@ class UserPanel(gtk.VBox):
         self.nick.text = nick
         self.message.text = message
 
-    def on_avatar_click(self,widget,data):
+    def on_avatar_click(self, widget, data):
         '''method called when user click on his avatar
         '''
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
+            if _av_chooser is not None:
+		        _av_chooser.stop_and_clear()
             if response == gui.stock.ACCEPT:
-                try:
-                    import shutil
-                    #FIXME temporaney hack for animations
-                    animation = gtk.gdk.PixbufAnimation(filename)
-                    if not animation.is_static_image():
-                        self.session.set_picture(filename)
-                        if os.path.exists(self.avatar_path):
-                            os.remove(self.avatar_path)
-                        shutil.copy2(filename, self.avatar_path)
-                    else:
-                        pix_96 = utils.safe_gtk_pixbuf_load(filename, (96,96))
-                        path = os.path.dirname(self.avatar_path) + '_temp'
-                        pix_96.save(path, 'png')
-                        self.session.set_picture(path)
-                        if os.path.exists(self.avatar_path):
-                            os.remove(self.avatar_path)
-                        pix_96.save(self.avatar_path, 'png')
-                except OSError, e:
-                   print e
+                self.avatar_manager.set_as_avatar(filename)
 
         # Directory for user's avatars
         path_dir = self.avatar_manager.get_avatars_dir()                   
 
-	    # Directory for contact's cached avatars
+        # Directory for contact's cached avatars
         cached_avatar_dir = self.avatar_manager.get_cached_avatars_dir()
                    
-	    # Directories for System Avatars
+        # Directories for System Avatars
         faces_paths = self.avatar_manager.get_system_avatars_dirs()
 
-        extension.get_default('avatar chooser')(set_picture_cb,
-                                                self.avatar_path, path_dir, cached_avatar_dir, faces_paths).show()
+        _av_chooser = extension.get_default('avatar chooser')(set_picture_cb,
+                                                self.avatar_path, path_dir,
+                                                cached_avatar_dir, faces_paths,
+                                                self.avatar_manager)
+        _av_chooser.show()
+
