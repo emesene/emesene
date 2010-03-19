@@ -95,10 +95,11 @@ class Login(gtk.Alignment):
         self.avatar = Avatar()
         self.avatar_path = self.config_dir.join(self.server_host, account, \
                                     account.replace('@','-at-'), 'avatars', 'last')
+        path = self.avatar_path
         if not self.config_dir.file_readable(self.avatar_path):
             path = gui.theme.logo
 
-        self.avatar.set_from_file(self.avatar_path)
+        self.avatar.set_from_file(path)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
