@@ -47,18 +47,21 @@ class BaseP2PTransport(gobject.GObject):
                 (object,)),
             }
 
-    def __init__(self, transport_manager, name):
+    def __init__(self, transport_manager):
         gobject.GObject.__init__(self)
         self._transport_manager = weakref.proxy(transport_manager)
         self._client = transport_manager._client
-        self._name = name
 
         self._transport_manager._register_transport(self)
         self._reset()
 
     @property
     def name(self):
-        return self._name
+        raise NotImplementedError
+
+    @property
+    def protocol(self):
+        raise NotImplementedError
 
     @property
     def peer(self):

@@ -52,13 +52,17 @@ class P2PTransportManager(gobject.GObject):
         self._client = client
         switchboard_manager = self._client._switchboard_manager
         switchboard_manager.register_handler(SwitchboardP2PTransport, self)
-        self._default_transport = \
-                lambda transport_mgr, peer : \
-                        SwitchboardP2PTransport(client, (peer,), transport_mgr)
+        self._default_transport = "SBBridge"
+        self._supported_transports = {"SBBridge" : SwitchboardP2PTransport,
+                                      "TCPv1"    : DirectP2PTransport}
         self._transports = set()
         self._transport_signals = {}
         self._signaling_blobs = {} # blob_id => blob
         self._data_blobs = {} # session_id => blob
+
+    @property
+    def supported_transports(self):
+        return self._supported_transports.keys()
 
     def _register_transport(self, transport):
         assert transport not in self._transports, "Trying to register transport twice"
@@ -69,13 +73,34 @@ class P2PTransportManager(gobject.GObject):
         self._transport_signals[transport] = signals
 
     def _unregister_transport(self, transport):
+        assert transport in self._transports, "Trying to unregister transport twice"
         self._transports.discard(transport)
         signals = self._transport_signals[transport]
         for signal in signals:
             transport.disconnect(signal)
         del self._transport_signals[transport]
 
-    def _get_transport(self, peer):
+    def get_supported_transport(self, choices):
+        for choice in choices:
+            if choice in self._supported_transports:
+                return choice
+        return None
+
+    def create_transport(self, peer, proto, **kwargs):
+        if not proto or proto not in self._supported_transports:
+            return None
+        constructor = self._supported_transports[proto]
+        transport = constructor(self._client, (peer,), self, **kwargs)
+        return transport
+
+    def close_transport(self, peer):
+        transports = set(self._transports)
+        for transport in transports:
+            if transport.peer == peer:
+                transport.close()
+
+    def find_transport(self, peer):
+        # find the best transport bridge available
         best = None
         for transport in self._transports:
             if transport.peer == peer and transport.connected:
@@ -83,10 +108,13 @@ class P2PTransportManager(gobject.GObject):
                     best = transport
                 elif transport.rating > best.rating:
                     best = transport
+        return best
+
+    def _get_transport(self, peer):
+        best = self.find_transport(peer)
         if best is not None:
             return best
-
-        return self._default_transport(self, peer)
+        return self.create_transport(peer, self._default_transport)
 
     def _on_chunk_received(self, transport, chunk):
         self.emit("chunk-transferred", chunk)

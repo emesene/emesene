@@ -59,6 +59,9 @@ class AvatarCache(Cache.Cache):
         return the information (stamp, hash) on success None otherwise
         item -- a file like object containing an image
         '''
+        if item is None:
+            return None
+
         position = item.tell()
         item.seek(0)
         hash_ = Cache.get_file_hash(item)

@@ -12,6 +12,7 @@ from IconView import IconView
 class AvatarChooser(gtk.Window):
     '''A dialog to choose an avatar'''
 
+<<<<<<< HEAD:mesinyer/gui/gtkui/AvatarChooser.py
     def __init__(self, response_cb, picture_path='',
             cache_path='.', contact_cache_path='.', faces_paths=[]):
         '''Constructor, response_cb receive the response number, the new file
@@ -22,7 +23,10 @@ class AvatarChooser(gtk.Window):
         self.set_icon(gui.theme.logo)
 
         self.response_cb = response_cb
-        #self.cache_path = cache_path
+        if picture_path == '':
+            self.cache_path = '.'
+        else:
+            self.cache_path = os.path.dirname(picture_path)
 
         self.set_title("Avatar chooser")
         self.set_default_size(620, 400)
@@ -30,19 +34,6 @@ class AvatarChooser(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
-        '''
-        faces_paths = []
-        if os.name == 'nt':
-            appDataFolder = os.path.split(os.environ['APPDATA'])[1]
-            faces_path = os.path.join(os.environ['ALLUSERSPROFILE'], appDataFolder, \
-                         "Microsoft", "User Account Pictures", "Default Pictures")
-            #little hack to fix problems with encoding
-            unicodepath=u"%s" % faces_path
-            faces_paths = [unicodepath]
-        else:
-            faces_paths = ['/usr/share/kde/apps/faces', '/usr/share/kde4/apps/kdm/pics/users', \
-                           '/usr/share/pixmaps/faces']
-        '''
         self.views = []
         self.views.append( IconView(_('Used'), [cache_path], self) )
         self.views.append( IconView(_('System pictures'), faces_paths, self) )
@@ -108,7 +99,6 @@ class AvatarChooser(gtk.Window):
         vbox.show_all()
         self.add(vbox)
 
-        #self.fill()
         self.set_current_picture(picture_path)
 
     def _on_tab_changed(self, notebook, page, page_num):
@@ -204,11 +194,29 @@ class AvatarChooser(gtk.Window):
         def _on_image_selected(response, path):
             '''method called when an image is selected'''
             if response == gui.stock.ACCEPT:
-                view = self.views[self.notebook.get_current_page()]
-                view.add_picture(path)
+                animation = gtk.gdk.PixbufAnimation(path)
+                #we don't need to resize animation here
+                if not animation.is_static_image():
+                    view = self.views[self.notebook.get_current_page()]
+                    view.add_picture(path)
+                    return
+                self._on_image_area_selector(path)
 
         class_ = extension.get_default('image chooser')
         class_(os.path.expanduser('~'), _on_image_selected).show()
+
+    def _on_image_area_selector(self, path):
+        '''called when the user must resize the added image'''
+        def _on_image_resized(response, pix):
+            '''method called when an image is selected'''
+            if response == gtk.RESPONSE_OK:
+                pix.save(self.cache_path + '_temp', 'png')              
+                view = self.views[self.notebook.get_current_page()]
+                view.add_pictureself.cache_path + '_temp')
+
+        class_ = extension.get_default('image area selector')
+        class_(_on_image_resized, gtk.gdk.pixbuf_new_from_file(path),
+               parent=self).run()
 
     def _on_remove(self, event):
         '''Removes the selected avatar'''
@@ -233,6 +241,7 @@ class AvatarChooser(gtk.Window):
             filename = selected[1]
 
             self.hide()
+            print filename
             self.response_cb(gui.stock.ACCEPT, filename)
         else:
             extension.get_default('dialog').error("No picture selected")

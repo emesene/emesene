@@ -30,13 +30,7 @@ import gobject
 import hashlib
 
 from e3 import cache
-import e3.base.Contact
-import e3.base.Group
-import e3.base.Message
-import e3.base.Worker
-from e3.base import status
-from e3.base.Action import Action
-from e3.base.Event import Event
+from e3.base import *
 import e3.base.Logger as Logger
 from e3.common import ConfigDir
 
@@ -50,6 +44,7 @@ try:
     import logging
     import papyon
     import papyon.event
+    import papyon.service.ContentRoaming as CR
     import papyon.util.string_io as StringIO
     papyver = papyon.version
     if papyver[1] < REQ_VER[1] or papyver[2] < REQ_VER[2]:
@@ -88,16 +83,20 @@ class Worker(e3.base.Worker, papyon.Client):
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
         self._oim_handler = OfflineEvent(self)
+        self._roaming_handler = None
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
         self.rconversations = {}
         # this stores papyon conversations as cid : conversation
         self.papyconv = {}
+        # this stores papyon conversations as conversation : cid
+        self.rpapyconv = {}
         # this stores conversation handlers
-        self._conversation_handler = {}    
-
-        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        self._conversation_handler = {}
+        # store ongoing filetransfers
+        self.filetransfers = {}
+        self.rfiletransfers = {} 
 
     def run(self):
         '''main method, block waiting for data, process it, and send data back
@@ -120,6 +119,10 @@ class Worker(e3.base.Worker, papyon.Client):
     # some useful methods (mostly, gui only)
     def set_initial_infos(self):
         '''this is called on login'''
+        self._roaming_handler = CR.ContentRoaming(self._sso, self.address_book)
+        self._roaming_handler.connect("notify::state", \
+                                        self._content_roaming_state_changed)
+        self._roaming_handler.sync()
         # loads or create a config for this session
         self.session.load_config()
         self.session.create_config()
@@ -127,8 +130,34 @@ class Worker(e3.base.Worker, papyon.Client):
         presence = self.session.account.status
         nick = self.profile.display_name
         self._set_status(presence)
-        # temporary hax?
-        self.profile.display_name = nick
+
+    def _content_roaming_state_changed(self, cr, pspec):
+        if cr.state == CR.constants.ContentRoamingState.SYNCHRONIZED:
+            # TODO: check for duplicates, put in cache,
+            # update msn_object, update gui (?)
+            type, data = cr.display_picture
+            path = '/tmp/argh.%s' % type.split('/')[1]
+            f = open(path, 'w')
+            f.write(data)
+
+            # update roaming stuff in papyon's session
+            # changing display_name doesn't seem to update its value istantly, wtf?
+            # however, other clients see this correctly, wow m3n
+            self.profile.display_name = str(cr.display_name)
+            self.profile.personal_message = str(cr.personal_message)
+
+            self.session.add_event(Event.EVENT_PROFILE_GET_SUCCEED, \
+                       str(cr.display_name), self.profile.personal_message)
+            #self.profile.display_picture = "" :TODO
+
+#                      TODO: this code stores your stuff, wow m3n
+#                      path = '/tmp/test.jpeg'
+#                      f = open(path, 'r')
+#                      cr.store("nick", "message", f.read())
+
+        #this must be putted here!not in the constructor...!
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        self.my_avatars = self.caches.get_avatar_cache(self.session.account.account)
 
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
@@ -204,10 +233,20 @@ class Worker(e3.base.Worker, papyon.Client):
 
     # invite handlers
     def _on_conversation_invite(self, papyconversation):
-        ''' create a cid and append the event handler to papyconv dict '''
+        ''' called when we are invited in a conversation '''
         cid = time.time()
+        partecipants = list(papyconversation.participants)
+        members = [account.account for account in partecipants]
+        
+        id_multichat = 'GroupChat'+str(cid)
+        self.conversations[id_multichat] = cid 
+        self.rconversations[cid] = id_multichat
         newconversationevent = ConversationEvent(papyconversation, self)
         self._conversation_handler[cid] = newconversationevent
+        self.papyconv[cid] = papyconversation
+        self.rpapyconv[papyconversation] = cid
+        self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
+            members)
 
     def _on_webcam_invite(self, session, producer):
         print "New webcam invite", session, producer
@@ -226,12 +265,31 @@ class Worker(e3.base.Worker, papyon.Client):
         # because codecs aren't ready yet
 
     def _on_invite_file_transfer(self, papysession):
-        print "new ft invite", papysession
-        print papysession.filename, papysession.size, papysession.preview
-        if 0:
-            papysession.reject()
-        else:
-            papysession.accept()
+        tr = e3.base.FileTransfer(papysession, papysession.filename, \
+            papysession.size, papysession.preview, sender=papysession.peer)
+        self.filetransfers[papysession] = tr
+        self.rfiletransfers[tr] = papysession
+        
+        papysession.connect("accepted", self.papy_ft_accepted)
+        papysession.connect("progressed", self.papy_ft_progressed)
+        papysession.connect("completed", self.papy_ft_completed)
+
+        self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr)
+
+    def papy_ft_accepted(self):
+        print "accepted"
+
+    def papy_ft_progressed(self, ftsession, len_chunk):
+        tr = self.filetransfers[ftsession]
+        tr.received_data += len_chunk
+
+        self.session.add_event(Event.EVENT_FILETRANSFER_PROGRESS, tr)
+
+    def papy_ft_completed(self, ftsession, data):
+        print "data:", len(data.getvalue())        
+        # TODO: save the file somewhere
+        tr = self.filetransfers[ftsession]
+        self.session.add_event(Event.EVENT_FILETRANSFER_COMPLETED, tr)
 
     # call handlers
     def _on_call_incoming(self, papycallevent):
@@ -280,9 +338,11 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_conversation_user_typing(self, papycontact, pyconvevent):
         ''' handle user typing event '''
         account = papycontact.account
-        if account in self.conversations:
+        conv = pyconvevent.conversation
+
+        if conv in self.papyconv:
             # emesene conversation already exists
-            cid = self.conversations[account]
+            cid = self.self.rpapyconv[conv]
         else:
             # we don't care about users typing if no conversation is opened
             return
@@ -294,9 +354,10 @@ class Worker(e3.base.Worker, papyon.Client):
         pyconvevent):
         ''' handle the reception of a message '''
         account = papycontact.account
-        if account in self.conversations:
-            # emesene conversation already exists
-            cid = self.conversations[account]
+        conv = pyconvevent.conversation
+
+        if conv in self.rpapyconv:
+            cid = self.rpapyconv[conv]
         else:
             # emesene must create another conversation
             cid = time.time()
@@ -304,6 +365,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.rconversations[cid] = account
             self._conversation_handler[cid] = pyconvevent # add conv handler
             self.papyconv[cid] = pyconvevent.conversation # add papy conv
+            self.rpapyconv[pyconvevent.conversation] = cid
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
 
@@ -340,9 +402,10 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):
         ''' handle received nudges '''
         account = papycontact.account
-        if account in self.conversations:
-            # emesene conversation already exists
-            cid = self.conversations[account]
+        conv = pyconvevent.conversation
+
+        if conv in self.rpapyconv:
+            cid = self.rpapyconv[conv]
         else:
             #print "must create another conversation"
             cid = time.time()
@@ -350,6 +413,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.rconversations[cid] = account
             self._conversation_handler[cid] = pyconvevent # add conv handler
             self.papyconv[cid] = pyconvevent.conversation # add papy conv
+            self.rpapyconv[pyconvevent.conversation] = cid
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
 
@@ -359,7 +423,37 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
 
     def _on_conversation_message_error(self, err_type, error, papyconversation):
+        #TODO: tell the user the sending failed, and the reason (err_type)
         print "error sending message because", err_type, error
+
+    def _on_conversation_user_joined(self, papycontact, pyconvevent):
+        '''handle user joined event'''
+        account = papycontact.account
+        conv = pyconvevent.conversation
+
+        if len(conv.total_participants) == 1:
+            return
+        else:
+            #it's a multichat
+            #that cid must be exists
+            if conv in self.rpapyconv:
+                cid = self.rpapyconv[conv]
+                self.session.add_event(e3.Event.EVENT_CONV_CONTACT_JOINED,
+                                       cid, account)
+            else:
+                #TODO dialog error????
+                print 'error while inviting user....'
+
+    def _on_conversation_user_left(self, papycontact, pyconvevent):
+        '''handle user left event'''
+        account = papycontact.account
+        conv = pyconvevent.conversation
+
+        #that cid must be exists
+        if conv in self.rpapyconv:
+            cid = self.rpapyconv[conv]
+            self.session.add_event(e3.Event.EVENT_CONV_CONTACT_LEFT,
+                                   cid, account)
 
     # contact changes handlers
     def _on_contact_status_changed(self, papycontact):
@@ -370,15 +464,8 @@ class Worker(e3.base.Worker, papyon.Client):
         account = contact.account
         old_status = contact.status
         contact.status = status_
-
-        log_account = Logger.Account(contact.attrs.get('CID', None), None, \
-            contact.account, contact.status, contact.nick, contact.message, \
-            contact.picture)
-        if old_status != status_:
-            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account, \
-                'status', old_status)
-            self.session.logger.log('status change', status_, str(status_), \
-                log_account)
+        self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED,
+                                   account, 'status', old_status)
 
     def _on_contact_nick_changed(self, papycontact):
         contact = self.session.contacts.contacts.get(papycontact.account, None)
@@ -436,6 +523,7 @@ class Worker(e3.base.Worker, papyon.Client):
             # TODO: log the media change
 
     def _on_contact_msnobject_changed(self, contact):
+
         msn_object = contact.msn_object
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)
@@ -714,12 +802,12 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE'''
         if isinstance(picture_name, papyon.p2p.MSNObject):
+            #TODO
             # this is/can be used for initial avatar changing and caching
             # like dp roaming and stuff like that
             # now it doesn't work, btw
-            #FIXME
-            self.profile.msn_object = picture_name
-            self._on_contact_msnobject_changed(self.profile)
+            #self.profile.msn_object = picture_name
+            #self._on_contact_msnobject_changed(self.profile)
             #self.session.contacts.me.picture = picture_name
             #self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
                 #self.session.account.account, picture_name)
@@ -741,9 +829,19 @@ class Worker(e3.base.Worker, papyon.Client):
                          "",
                          data=StringIO.StringIO(avatar))
         self.profile.msn_object = msn_object
-        self.session.contacts.me.picture = picture_name
-        self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
-            self.session.account.account, picture_name)
+        avatar_hash = msn_object._data_sha.encode("hex")
+        avatar_path = os.path.join(self.my_avatars.path, avatar_hash)
+
+        if avatar_hash in self.my_avatars:
+            self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED,
+                    self.session.account.account, avatar_path)
+
+        else:
+            self.my_avatars.insert_raw(msn_object._data)
+            self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
+            self.session.account.account, avatar_path)
+
+        self.session.contacts.me.picture = avatar_path
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES
@@ -755,16 +853,20 @@ class Worker(e3.base.Worker, papyon.Client):
         #print "you opened conversation %(ci)s with %(acco)s, are you happy?" \
         # % { 'ci' : cid, 'acco' : account }
         # append cid to emesene conversations
+
         if account in self.conversations:
             #print "there's already a conversation with this user wtf"
-            # update cid
+            # update cid and close the old conversation
             oldcid = self.conversations[account]
+            self._handle_action_close_conversation(oldcid)
+
             self.conversations[account] = cid
             self.rconversations[cid] = account
             # create a papyon conversation
             contact = self.address_book.contacts.search_by('account', account)[0]
-            conv = papyon.Conversation(self, contact)
+            conv = papyon.Conversation(self, [contact,])
             self.papyconv[cid] = conv
+            self.rpapyconv[conv] = cid
             # attach the conversation event handler
             convhandler = ConversationEvent(conv, self)
             self._conversation_handler[cid] = convhandler
@@ -778,6 +880,7 @@ class Worker(e3.base.Worker, papyon.Client):
             # create a papyon conversation
             conv = papyon.Conversation(self, [contact,])
             self.papyconv[cid] = conv
+            self.rpapyconv[conv] = cid
             # attach the conversation event handler
             convhandler = ConversationEvent(conv, self)
             self._conversation_handler[cid] = convhandler
@@ -786,7 +889,21 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_CLOSE_CONVERSATION
         '''
         #print "you close conversation %s, are you happy?" % cid
-        del self.conversations[self.rconversations[cid]]
+        account = self.rconversations[cid]
+        conv = self.papyconv[cid]
+        conv.leave()
+        del self.conversations[account]
+        del self.rconversations[cid]
+        del self.papyconv[cid]
+        del self.rpapyconv[conv]
+        del self._conversation_handler[cid]
+
+    def _handle_action_conv_invite(self, cid, account):
+        '''handle Action.ACTION_CONV_INVITE
+        '''
+        conv = self.papyconv[cid]
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
+        conv._invite_user(papycontact)
 
     def _handle_action_send_message(self, cid, message):
         ''' handle Action.ACTION_SEND_MESSAGE '''
@@ -850,3 +967,20 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_p2p_cancel(self, pid):
         '''handle Action.ACTION_P2P_CANCEL'''
         pass
+
+    # ft handlers
+    def _handle_action_ft_invite(self, t):
+        # TODO        
+        pass    
+    
+    def _handle_action_ft_accept(self, t):
+        self.rfiletransfers[t].accept()
+
+    def _handle_action_ft_reject(self, t):
+        self.rfiletransfers[t].reject()
+        print "FT REJECTED"
+
+    def _handle_action_ft_cancel(self, t):
+        self.rfiletransfers[t].cancel()
+        print "FT CANCELED"
+

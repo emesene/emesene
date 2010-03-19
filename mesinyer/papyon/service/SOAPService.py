@@ -4,6 +4,7 @@
 #
 # Copyright (C) 2005-2007 Ali Sabil <ali.sabil@gmail.com>
 # Copyright (C) 2007 Johann Prieur <johann.prieur@gmail.com>
+# Copyright (C) 2010 Collabora Ltd.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -158,6 +159,9 @@ class SOAPService(object):
         self._active_transports = {}
         self._proxies = proxies or {}
 
+        # Regex to find password
+        self.password_regex = re.compile("<wsse:Password>.*?</wsse:Password>", re.S)
+
     def _send_request(self, name, url, soap_header, soap_body, soap_action,
             callback, errback=None, transport_headers={}, user_data=None):
 
@@ -223,7 +227,10 @@ class SOAPService(object):
                                       user_data)
 
     def _request_handler(self, transport, http_request):
-        logger.debug(">>> " + unicode(http_request))
+        #hide password from logs
+        cleaned = self.password_regex.sub("<wsse:Password>*****</wsse:Password>", unicode(http_request))
+
+        logger.debug(">>> " + unicode(cleaned))
 
     def _error_handler(self, transport, error):
         logger.warning("Transport Error :" + str(error))

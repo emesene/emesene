@@ -273,7 +273,7 @@ class MessageBlob(object):
         header.chunk_size = len(data)
         header.dw1 = _chunk_id()
         if self.session_id != 0 and self.total_size != 4 and data != '\x00' * 4:
-            header.flags = TLPFlag.EACH
+            header.flags = TLPFlag.UNKNOWN | TLPFlag.EACH
             if self.is_file:
                 header.flags |= TLPFlag.FILE
 

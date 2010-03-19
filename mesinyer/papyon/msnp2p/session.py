@@ -59,6 +59,7 @@ class P2PSession(gobject.GObject):
             message=None):
         gobject.GObject.__init__(self)
         self._session_manager = session_manager
+        self._transport_manager = session_manager._transport_manager
         self._peer = peer
 
         self._euf_guid = euf_guid
@@ -106,7 +107,7 @@ class P2PSession(gobject.GObject):
 
     def set_receive_data_buffer(self, buffer, total_size):
         blob = MessageBlob(self._application_id, buffer, total_size, self.id)
-        self._session_manager._transport_manager.register_writable_blob(blob)
+        self._transport_manager.register_writable_blob(blob)
 
     def _invite(self, context):
         body = SLPSessionRequestBody(self._euf_guid, self._application_id,
@@ -123,7 +124,9 @@ class P2PSession(gobject.GObject):
 
     def _transreq(self):
         self._cseq = 0
-        body = SLPTransferRequestBody(self._id, 0, 1)
+        body = SLPTransferRequestBody(self._id, 0, 1,
+                self._transport_manager.supported_transports,
+                self._session_manager._client.conn_type)
         message = SLPRequestMessage(SLPRequestMethod.INVITE,
                 "MSNMSGR:" + self._peer.account,
                 to=self._peer.account,
@@ -160,42 +163,54 @@ class P2PSession(gobject.GObject):
 
     def _accept_transreq(self, transreq, bridge, listening, nonce, local_ip,
             local_port, extern_ip, extern_port):
-        logger.debug('accept_transreq')
+        conn_type = self._session_manager._client.conn_type
         body = SLPTransferResponseBody(bridge, listening, nonce, [local_ip],
-                local_port, [extern_ip], extern_port, self._id, 0, 1)
+                local_port, [extern_ip], extern_port, conn_type, self._id, 0, 1)
         self._respond_transreq(transreq, 200, body)
 
     def _decline_transreq(self, transreq):
         body = SLPTransferResponseBody(session_id=self._id)
         self._respond_transreq(transreq, 603, body)
 
+    def _request_bridge(self):
+        # use active bridge if any
+        bridge = self._transport_manager.find_transport(self._peer)
+        if bridge is not None and bridge.rating > 0:
+            logger.info("Use already active %s connection" % bridge.name)
+            self._on_bridge_selected()
+        else:
+            self._transreq()
+
     def _switch_bridge(self, transreq):
-        # Other client requested a Transfer
-        logger.debug('switch_bridge')
-        nonce = str(uuid.uuid4())
-        local_ip = self._session_manager._client.local_ip
-        port = 6891
-        manager = self._session_manager._transport_manager
-        new_bridge = DirectP2PTransport(manager, self.peer, local_ip, port, nonce)
-        new_bridge.connect("listening", self._bridge_listening, transreq, nonce)
-        new_bridge.connect("connected", self._bridge_switched)
-        new_bridge.connect("failed", self._bridge_failed)
-        new_bridge.listen()
+        choices = transreq.body.bridges
+        proto = self._transport_manager.get_supported_transport(choices)
+        new_bridge = self._transport_manager.create_transport(self.peer, proto)
+        if new_bridge is None or new_bridge.connected:
+            self._bridge_selected()
+        else:
+            new_bridge.connect("listening", self._bridge_listening, transreq)
+            new_bridge.connect("connected", self._bridge_switched)
+            new_bridge.connect("failed", self._bridge_failed)
+            new_bridge.listen()
 
     def _transreq_accepted(self, transresp):
-        logger.debug('transreq_accepted')
         if not transresp.listening:
+            # TODO offer to be the server
+            self._bridge_failed(None)
             return
+
         ip, port = self._select_address(transresp)
-        nonce = transresp.nonce
-        manager = self._session_manager._transport_manager
-        new_bridge = DirectP2PTransport(manager, self.peer, ip, port, nonce)
-        new_bridge.connect("connected", self._bridge_switched)
-        new_bridge.connect("failed", self._bridge_failed)
-        new_bridge.open()
+        new_bridge = self._transport_manager.create_transport(self.peer,
+                transresp.bridge, ip=ip, port=port, nonce=transresp.nonce)
+        if new_bridge is None or new_bridge.connected:
+            self._bridge_selected()
+        else:
+            new_bridge.connect("connected", self._bridge_switched)
+            new_bridge.connect("failed", self._bridge_failed)
+            new_bridge.open()
 
     def _select_address(self, transresp):
-        client_ip = self._session_manager._client.profile.profile.get("ClientIP")
+        client_ip = self._session_manager._client.client_ip
         local_ip = self._session_manager._client.local_ip
         local_addr = socket.inet_aton(local_ip)
         ips = []
@@ -233,17 +248,18 @@ class P2PSession(gobject.GObject):
         return (None, None)
 
     def _bridge_listening(self, new_bridge, external_ip, external_port,
-            transreq, nonce):
+            transreq):
         logger.debug("Bridge listening %s %s" % (external_ip, external_port))
-        self._accept_transreq(transreq, "TCPv1", True, nonce, new_bridge.ip,
-                new_bridge.port, external_ip, external_port)
+        self._accept_transreq(transreq, new_bridge.protocol, True,
+                new_bridge.nonce, new_bridge.ip, new_bridge.port,
+                external_ip, external_port)
 
     def _bridge_switched(self, new_bridge):
-        logger.info("Bridge switched to direct connection")
+        logger.info("Bridge switched to %s connection" % new_bridge.name)
         self._on_bridge_selected()
 
     def _bridge_failed(self, new_bridge):
-        logger.error("Bridge switching failed, using switchboard")
+        logger.error("Bridge switching failed, using default one (switchboard)")
         self._on_bridge_selected()
 
     def _close(self, context=None):
@@ -277,7 +293,7 @@ class P2PSession(gobject.GObject):
 
         blob = MessageBlob(self._application_id,
                 data, total_size, session_id, None, is_file)
-        self._session_manager._transport_manager.send(self.peer, blob)
+        self._transport_manager.send(self.peer, blob)
 
     def _on_blob_sent(self, blob):
         if blob.session_id == 0:
