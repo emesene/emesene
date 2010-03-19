@@ -297,7 +297,9 @@ class Controller(object):
     def draw_main_screen(self):
         '''create and populate the main screen
         '''
-        self.window.content.avatar.stop() #stop the avatar amimation...if any..
+        # I comment this to avoid AttributeError:
+        # 'MainWindow' object has no attribute 'avatar' error
+        # self.window.content.avatar.stop() #stop the avatar amimation...if any..
         self.window.clear()
         self.tray_icon.set_main(self.session)
         image_name = self.session.config.get_or_set('image_theme', 'default')

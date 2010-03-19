@@ -27,7 +27,7 @@ class Plugin(PluginBase):
         return True
 
     def extensions_register(self):
-        extension.category_register('music', songretriever.MusicHandler)
-        extension.register('music', handler_mpd.MpdHandler)
+        extension.category_register('listening to', songretriever.MusicHandler)
+        extension.register('listening to', handler_mpd.MpdHandler)
 
 

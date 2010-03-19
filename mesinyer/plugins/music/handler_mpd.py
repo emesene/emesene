@@ -6,7 +6,7 @@ from thirdparty import mpd
 class MpdHandler(songretriever.MusicHandler):
     '''a simple handler for mpd music player'''
     NAME = 'MPD Music Handler'
-    DESCRIPTION = 'blah blah'
+    DESCRIPTION = 'Handler for mpd music player'
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
@@ -53,6 +53,7 @@ class MpdHandler(songretriever.MusicHandler):
             return None
 
         info = self.client.currentsong()
+
         return songretriever.Song(info.get('artist', '?'),
                 info.get('album', '?'),
                 info.get('title', '?'),

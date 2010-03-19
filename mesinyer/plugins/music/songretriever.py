@@ -32,7 +32,7 @@ class Song(object):
 
 class MusicHandler(object):
     NAME = 'Generic Music Handler'
-    DESCRIPTION = 'blah blah'
+    DESCRIPTION = 'Basic class for all music handlers'
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
