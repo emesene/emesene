@@ -26,6 +26,7 @@ class LiveService(object):
     MESSENGER_CLEAR = ("messengerclear.live.com", "MBI_KEY_OLD")
     MESSENGER_SECURE = ("messengersecure.live.com", "MBI_SSL")
     SPACES = ("spaces.live.com", "MBI")
+    STORAGE = ("storage.msn.com", "MBI")
     TB = ("http://Passport.NET/tb", None)
     VOICE = ("voice.messenger.msn.com", "?id=69264")
 

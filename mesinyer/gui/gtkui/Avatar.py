@@ -3,7 +3,9 @@ import gtk
 import gtk.gdk
 import cairo
 import gobject
- 
+
+import gui
+
 class Avatar( gtk.Widget ):
     """AvatarWidget """
     #TODO move in an avatarManager class?????
@@ -117,6 +119,8 @@ class Avatar( gtk.Widget ):
     
     #public methods
     def set_from_file(self, filename):
+        if not gui.gtkui.utils.file_readable(filename):
+            return
         animation = gtk.gdk.PixbufAnimation(filename)
         if animation.is_static_image():
             self.__set_from_pixbuf(animation.get_static_image())
