@@ -74,13 +74,29 @@ class AvatarManager(object):
             infile.close()
             return hashlib.sha224(data).hexdigest()
 
-        # Save in 128*128 for the animation on connect..if somebody like it...:)
         fpath = os.path.join(self.get_avatars_dir(), gen_filename(filename))
-        if not os.path.exists(self.get_avatars_dir()):
-            os.makedirs(self.get_avatars_dir())
-        pix_128 = utils.safe_gtk_pixbuf_load(filename, (128, 128))
-        pix_128.save(fpath, 'png')
-        return pix_128, fpath
+
+        try:
+
+        #FIXME temporaney hack for animations
+        animation = gtk.gdk.PixbufAnimation(filename)
+        if not animation.is_static_image():
+            self.session.set_picture(filename)
+            if os.path.exists(self.avatar_path):
+                os.remove(self.avatar_path)
+            shutil.copy2(filename, self.avatar_path)
+            return None, fpath
+        else:
+            if not os.path.exists(self.get_avatars_dir()):
+                os.makedirs(self.get_avatars_dir())
+            # Save in 128x128 for the animation on connect... if somebody likes it...
+            pix_128 = utils.safe_gtk_pixbuf_load(filename, (128, 128))
+            pix_128.save(fpath, 'png')
+            return pix_128, fpath
+
+        except OSError, e:
+            print e
+            return None, fpath
 
     def add_new_avatar_from_pix(self, pix):
         ''' add a new picture into the avatar cache '''
@@ -115,30 +131,11 @@ class AvatarManager(object):
                 self.session.set_picture(fpath)
                 if os.path.exists(self.avatar_path):
                     os.remove(self.avatar_path)
-                pix_128.save(self.avatar_path, 'png')
+                if pix_128 != None:
+                    pix_128.save(self.avatar_path, 'png')
+                else:
+                    #FIXME temporaney hack for animations
+                    shutil.copy2(filename, self.avatar_path)
             except OSError, e:
                 print e
 
-
-'''
-                try:
-                    import shutil
-                    #FIXME temporaney hack for animations
-                    animation = gtk.gdk.PixbufAnimation(filename)
-                    if not animation.is_static_image():
-                        self.session.set_picture(filename)
-                        if os.path.exists(self.avatar_path):
-                            os.remove(self.avatar_path)
-                        shutil.copy2(filename, self.avatar_path)
-
-                    if animation.is_static_image():
-                        pix_96 = utils.safe_gtk_pixbuf_load(filename, (96,96))
-                        path = os.path.dirname(self.avatar_path) + '_temp'
-                        pix_96.save(path, 'png')
-                        self.session.set_picture(path)
-                        if os.path.exists(self.avatar_path):
-                            os.remove(self.avatar_path)
-                        pix_96.save(self.avatar_path, 'png')
-                except OSError, e:
-                   print e
-'''

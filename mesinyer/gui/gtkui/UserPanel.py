@@ -35,7 +35,7 @@ class UserPanel(gtk.VBox):
 
 
         self.avatar_path = self.session.config.last_avatar
-        self.avatarman = AvatarManager(self.session)
+        self.avatar_manager = AvatarManager(self.session)
 
         if not self.session.config_dir.file_readable(self.avatar_path):
             path = gui.theme.user
@@ -161,20 +161,20 @@ class UserPanel(gtk.VBox):
             if _av_chooser is not None:
 		        _av_chooser.stop_and_clear()
             if response == gui.stock.ACCEPT:
-                self.avatarman.set_as_avatar(filename)
+                self.avatar_manager.set_as_avatar(filename)
 
         # Directory for user's avatars
-        path_dir = self.avatarman.get_avatars_dir()                   
+        path_dir = self.avatar_manager.get_avatars_dir()                   
 
         # Directory for contact's cached avatars
-        cached_avatar_dir = self.avatarman.get_cached_avatars_dir()
+        cached_avatar_dir = self.avatar_manager.get_cached_avatars_dir()
                    
         # Directories for System Avatars
-        faces_paths = self.avatarman.get_system_avatars_dirs()
+        faces_paths = self.avatar_manager.get_system_avatars_dirs()
 
         _av_chooser = extension.get_default('avatar chooser')(set_picture_cb,
                                                 self.avatar_path, path_dir,
                                                 cached_avatar_dir, faces_paths,
-                                                self.avatarman)
+                                                self.avatar_manager)
         _av_chooser.show()
 
