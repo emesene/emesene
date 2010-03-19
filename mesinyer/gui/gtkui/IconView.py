@@ -52,7 +52,8 @@ class IconView(gtk.HBox):
                         # print " ********* Thread "+ self.label.get_text() +" stopped *********"
                         return False
                     if not name.endswith('_thumb') and not path.endswith('tmp') \
-                        and not path.endswith('xml') and not path.endswith('db'):
+                        and not path.endswith('xml') and not path.endswith('db') \
+                        and not path.endswith('last') and not path.endswith('avatars'):
                         gtk.gdk.threads_enter()
                         self.add_picture(os.path.join(search_path, path))
                         # make update the iconview
@@ -101,7 +102,16 @@ class IconView(gtk.HBox):
         try:
             if os.path.exists(path) and os.access(path, os.R_OK)\
                     and not self.is_in_view(path):
-                pixbuf = gtk.gdk.pixbuf_new_from_file(path)
+                try:
+                    animation = gtk.gdk.PixbufAnimation(path)
+                    if animation.is_static_image():
+                        pixbuf = gtk.gdk.pixbuf_new_from_file(path)
+                    else:
+                        pixbuf = animation.get_static_image().scale_simple(64, 64, \
+                                                          gtk.gdk.INTERP_BILINEAR)
+                except gobject.GError:
+                    print 'image at %s could not be loaded' % (path, )
+                    print gobject.GError                      
  
                 # On nt images are 128x128 (48x48 on xp)
                 # On kde, images are 64x64
