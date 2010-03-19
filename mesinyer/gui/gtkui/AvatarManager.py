@@ -74,7 +74,7 @@ class AvatarManager(object):
             infile.close()
             return hashlib.sha224(data).hexdigest()
 
-        #i save in 128*128 for the animation on connect..if somebody like it...:)
+        # Save in 128*128 for the animation on connect..if somebody like it...:)
         fpath = os.path.join(self.get_avatars_dir(), gen_filename(filename))
         if not os.path.exists(self.get_avatars_dir()):
             os.makedirs(self.get_avatars_dir())
@@ -92,7 +92,7 @@ class AvatarManager(object):
         if not os.path.exists(self.get_avatars_dir()):
             os.makedirs(self.get_avatars_dir())
 
-        # resize to 128x128
+        # Resize to 128x128
         pix = pix.scale_simple(128, 128, gtk.gdk.INTERP_BILINEAR)
         pix.save(fpath, 'png')
         return pix, fpath
@@ -100,7 +100,7 @@ class AvatarManager(object):
 
     def set_as_avatar(self, filename):
         ''' set a picture as the current avatar and make a copy in the cache '''
-        #i control if the filename is a already in cache
+        # Control if the filename is a already in cache
         if self.is_cached(filename):
             self.session.set_picture(filename)
             if os.path.exists(self.avatar_path):
@@ -111,6 +111,7 @@ class AvatarManager(object):
         else:
             try:
                 pix_128, fpath = self.add_new_avatar(filename)
+
                 self.session.set_picture(fpath)
                 if os.path.exists(self.avatar_path):
                     os.remove(self.avatar_path)
@@ -119,3 +120,25 @@ class AvatarManager(object):
                 print e
 
 
+'''
+                try:
+                    import shutil
+                    #FIXME temporaney hack for animations
+                    animation = gtk.gdk.PixbufAnimation(filename)
+                    if not animation.is_static_image():
+                        self.session.set_picture(filename)
+                        if os.path.exists(self.avatar_path):
+                            os.remove(self.avatar_path)
+                        shutil.copy2(filename, self.avatar_path)
+
+                    if animation.is_static_image():
+                        pix_96 = utils.safe_gtk_pixbuf_load(filename, (96,96))
+                        path = os.path.dirname(self.avatar_path) + '_temp'
+                        pix_96.save(path, 'png')
+                        self.session.set_picture(path)
+                        if os.path.exists(self.avatar_path):
+                            os.remove(self.avatar_path)
+                        pix_96.save(self.avatar_path, 'png')
+                except OSError, e:
+                   print e
+'''
