@@ -577,6 +577,7 @@ import cairo
 import gui
 from e3 import status
 
+#from emesene1 by mariano guerra adapted by cando
 class AvatarRenderer(gtk.GenericCellRenderer):
     """Renderer for avatar """
     
