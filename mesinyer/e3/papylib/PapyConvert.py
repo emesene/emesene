@@ -66,7 +66,7 @@ def formatting_e3_to_papy(format = e3.base.Style()):
     
     return papyon.TextFormat(font, style, color, charset, family, pitch, \
         right_alignment)
-    
+
 def get_proxies():
     import urllib
     proxies = urllib.getproxies()

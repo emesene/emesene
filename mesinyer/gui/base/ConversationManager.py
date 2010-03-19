@@ -40,7 +40,7 @@ class ConversationManager(object):
         conversation = self.conversations.get(float(cid), None)
 
         if conversation is None:
-            (exists, conversation) = self.new_conversation(cid, [account])
+            conversation = self.new_conversation(cid, [account])
 
         conversation.on_receive_message(message, account, cedict)
 
@@ -119,7 +119,7 @@ class ConversationManager(object):
         value'''
         cid = float(cid)
         if cid in self.conversations:
-            return (True, self.conversations[cid])
+            return self.conversations[cid]
         elif members is not None:
             for (key, conversation) in self.conversations.iteritems():
                 if conversation.members == members:
@@ -130,12 +130,12 @@ class ConversationManager(object):
 
                     conversation.cid = cid
                     self.conversations[cid] = conversation
-                    return (True, conversation)
+                    return conversation
 
         conversation = self.add_new_conversation(self.session, cid, members)
         self.conversations[cid] = conversation
 
-        return (False, conversation)
+        return conversation
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):

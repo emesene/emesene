@@ -158,7 +158,11 @@ class MSNObject(object):
         friendly = base64.b64decode(xml.unescape(element["Friendly"]))
         shad = element.get("SHA1D", None)
         if shad is not None:
-            shad = base64.b64decode(shad)
+            try:
+                shad = base64.b64decode(shad)
+            except TypeError:
+                logger.warning("Invalid SHA1D in MSNObject")
+
         shac = element.get("SHA1C", None)
         if shac is not None:
             try:

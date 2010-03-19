@@ -193,6 +193,11 @@ class AvatarChooser(gtk.Window):
         def _on_image_selected(response, path):
             '''method called when an image is selected'''
             if response == gui.stock.ACCEPT:
+                animation = gtk.gdk.PixbufAnimation(path)
+                #we don't need to resize animation here
+                if not animation.is_static_image():
+                    self.add_picture(path)
+                    return
                 self._on_image_area_selector(path)
 
         class_ = extension.get_default('image chooser')
@@ -235,6 +240,7 @@ class AvatarChooser(gtk.Window):
             filename = selected[1]
 
             self.hide()
+            print filename
             self.response_cb(gui.stock.ACCEPT, filename)
         else:
             extension.get_default('dialog').error("No picture selected")

@@ -7,39 +7,40 @@ def gtk_main(Controller):
     import gtk
     import gobject
 
-    import Login
-    import Dialog
-    import Header
-    import Window
-    import TextBox
-    import MainMenu
-    import TrayIcon
-    import UserPanel
-    import TabWidget
-    import GroupMenu
-    import StatusMenu
-    import MainWindow
-    import EmptyWidget
     import AccountMenu
+    import AdiumTextBox
+    import Avatar
+    import AvatarChooser
+    import config_gtk
     import ContactMenu
     import ContactList
     import ContactInfo
-    import Preferences
     import Conversation
-    import ImageChooser
-    try:
-        import AdiumTextBox
-    except:
-        pass
-    import WebKitTextBox    
-    import AvatarChooser
     import ConversationManager
     import ConversationToolbar
-    import ImageAreaSelector
     import DebugWindow
+    import Dialog
+    import EmptyWidget
+    import FileTransferBarWidget
+    import FileTransferWidget
+    import GroupMenu
+    import Header
+    import ImageAreaSelector
+    import ImageChooser
+    import Login
+    import MainMenu
+    import MainWindow
+    import NiceBar
     import PluginWindow
+    import Preferences
     import Renderers
-    import config_gtk
+    import StatusMenu
+    import TabWidget
+    import TextBox
+    import TrayIcon
+    import UserPanel
+    import Window
+    import WebKitTextBox
 
     setup()
     gobject.threads_init()
@@ -68,6 +69,7 @@ def setup():
     extension.category_register('dialog', Dialog.Dialog)
     extension.category_register('image chooser', ImageChooser.ImageChooser)
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
+    extension.category_register('avatar', Avatar.Avatar)
 
     extension.category_register('preferences', Preferences.Preferences)
     extension.category_register('login window', Login.Login)
@@ -82,6 +84,7 @@ def setup():
     extension.category_register('user panel', UserPanel.UserPanel)
     extension.category_register('tray icon', TrayIcon.TrayIcon)
     extension.category_register('debug window', DebugWindow.DebugWindow)
+    extension.category_register('nice bar', NiceBar.NiceBar)
 
     extension.category_register('main menu', MainMenu.MainMenu)
     extension.category_register('menu file', MainMenu.FileMenu)
@@ -110,6 +113,8 @@ def setup():
         PluginWindow.PluginWindow)
     extension.category_register('preferences dialog', config_gtk.build_window)
     extension.category_register('image area selector', ImageAreaSelector.ImageAreaSelectorDialog)
+    extension.category_register('filetransfer pool', FileTransferBarWidget.FileTransferBarWidget)
+    extension.category_register('filetransfer widget', FileTransferWidget.FileTransferWidget)
 
     if not WebKitTextBox.ERROR:
         extension.category_register('conversation output', WebKitTextBox.OutputText)

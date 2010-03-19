@@ -23,22 +23,25 @@ class UserPanel(gtk.VBox):
         self.session = session
         self.config_dir = session.config_dir
         self._enabled = True
+        
+        Avatar = extension.get_default('avatar')
+        self.avatar = Avatar(cellDimention=32)
 
-        self.image = gtk.Image()
         self.avatarBox = gtk.EventBox()
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.avatarBox.connect('button-press-event', self.on_avatar_click)
-        self.avatarBox.add(self.image)
+        self.avatarBox.add(self.avatar)
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
+
 
         self.avatar_path = self.session.config.last_avatar
         self.avatarman = AvatarManager(self.session)
 
-        if self.session.config_dir.file_readable(self.avatar_path):
-            pix = utils.safe_gtk_pixbuf_load(self.avatar_path, (32,32))
+        if not self.session.config_dir.file_readable(self.avatar_path):
+            path = gui.theme.user
         else:
-            pix = utils.safe_gtk_pixbuf_load(gui.theme.user)
-        self.image.set_from_pixbuf(pix)
+            path = self.avatar_path
+        self.avatar.set_from_file(path)
 
         self.nick = TextField.TextField(session.contacts.me.display_name, '', False)
         self.status = StatusButton.StatusButton(session)
@@ -94,7 +97,7 @@ class UserPanel(gtk.VBox):
     def show(self):
         '''override show'''
         gtk.VBox.show(self)
-        self.image.show()
+        self.avatar.show()
         self.avatarBox.show()
         self.nick.show()
         self.message.show()
@@ -142,8 +145,7 @@ class UserPanel(gtk.VBox):
         '''callback called when the picture of an account is changed'''
         # out account
         if account == self.session.account.account:
-            pixbuf = utils.safe_gtk_pixbuf_load(path, (32, 32))
-            self.image.set_from_pixbuf(pixbuf)
+            self.avatar.set_from_file(path)
 
     def on_profile_update_succeed(self, nick, message):
         '''method called when information about our profile is obtained
@@ -151,7 +153,7 @@ class UserPanel(gtk.VBox):
         self.nick.text = nick
         self.message.text = message
 
-    def on_avatar_click(self,widget,data):
+    def on_avatar_click(self, widget, data):
         '''method called when user click on his avatar
         '''
         def set_picture_cb(response, filename):
@@ -159,15 +161,15 @@ class UserPanel(gtk.VBox):
             if _av_chooser is not None:
 		        _av_chooser.stop_and_clear()
             if response == gui.stock.ACCEPT:
-		self.avatarman.set_as_avatar(filename)
+                self.avatarman.set_as_avatar(filename)
 
-        #Directory for user's avatars
+        # Directory for user's avatars
         path_dir = self.avatarman.get_avatars_dir()                   
 
-	#Directory for contact's cached avatars
+        # Directory for contact's cached avatars
         cached_avatar_dir = self.avatarman.get_cached_avatars_dir()
                    
-	#Directories for System Avatars
+        # Directories for System Avatars
         faces_paths = self.avatarman.get_system_avatars_dirs()
 
         _av_chooser = extension.get_default('avatar chooser')(set_picture_cb,
@@ -175,5 +177,4 @@ class UserPanel(gtk.VBox):
                                                 cached_avatar_dir, faces_paths,
                                                 self.avatarman)
         _av_chooser.show()
-
 

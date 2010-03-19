@@ -21,6 +21,7 @@
 from papyon.gnet.constants import *
 from papyon.gnet.io import *
 from papyon.msnp.message import MessageAcknowledgement
+from papyon.msnp2p.constants import *
 from papyon.msnp2p.transport.TLP import MessageChunk
 from papyon.msnp2p.transport.base import BaseP2PTransport
 from papyon.switchboard_manager import SwitchboardClient
@@ -31,6 +32,7 @@ import random
 import struct
 import logging
 import socket
+import uuid
 
 __all__ = ['DirectP2PTransport']
 
@@ -45,16 +47,28 @@ class DirectP2PTransport(BaseP2PTransport):
                 (object, object))
     }
 
-    def __init__(self, transport_manager, peer, ip, port, nonce):
-        BaseP2PTransport.__init__(self, transport_manager, "direct")
-        self._peer = peer
+    def __init__(self, client, peers, transport_manager, ip=None, port=None,
+            nonce=None, **kwargs):
+        BaseP2PTransport.__init__(self, transport_manager)
+
+        if ip is None:
+            ip = client.local_ip
+        if port is None:
+            port = DEFAULT_DIRECT_PORT
+        if nonce is None:
+            nonce = str(uuid.uuid4())
+
+        self._client = client
+        self._peer = peers[0]
         self._nonce = nonce
         self._ip = ip
         self._port = port
+        self._server = False
         self._listening = False
         self._connected = False
+        self._extern_port = None
         self._mapping_timeout_src = None
-        self._open_timeout_src = None
+        self._connect_timeout_src = None
 
         self.__pending_size = None
         self.__pending_chunk = ""
@@ -63,11 +77,13 @@ class DirectP2PTransport(BaseP2PTransport):
         self.__nonce_sent = False
         self.__nonce_received = False
 
-        # Fixme move this to manager
-        self._connect_timeout_src = None
+    @property
+    def name(self):
+        return "direct"
 
-    def close(self):
-        BaseP2PTransport.close(self)
+    @property
+    def protocol(self):
+        return "TCPv1"
 
     @property
     def peer(self):
@@ -86,6 +102,10 @@ class DirectP2PTransport(BaseP2PTransport):
         return self._port
 
     @property
+    def nonce(self):
+        return self._nonce
+
+    @property
     def rating(self):
         return 1
 
@@ -94,6 +114,7 @@ class DirectP2PTransport(BaseP2PTransport):
         return 1350
 
     def open(self):
+        self._server = False
         self._listening = False
         self._transport = TCPClient(self._ip, self._port)
         self._transport.connect("notify::status", self._on_status_changed)
@@ -104,12 +125,21 @@ class DirectP2PTransport(BaseP2PTransport):
         self._transport.open()
 
     def listen(self):
-        #self._listening = True
+        self._server = True
+        self._listening = False
         self._socket = self._open_listener()
         self._socket.setblocking(False)
         self._channel = gobject.IOChannel(self._socket.fileno())
         self._channel.set_flags(self._channel.get_flags() | gobject.IO_FLAG_NONBLOCK)
         self._channel.add_watch(gobject.IO_IN, self._on_listener_connected)
+
+    def close(self):
+        if hasattr(self, '_transport'):
+            self._transport.close()
+        self._remove_connect_timeout()
+        self._remove_mapping_timeout()
+        self._unmap_external_port()
+        BaseP2PTransport.close(self)
 
     def _open_listener(self):
         s = socket.socket()
@@ -118,7 +148,6 @@ class DirectP2PTransport(BaseP2PTransport):
                 s.bind(("", self._port))
                 s.listen(1)
             except Exception, err:
-                print err
                 self._port += 1
                 continue
             else:
@@ -132,8 +161,8 @@ class DirectP2PTransport(BaseP2PTransport):
             from gupnp.igd import Simple
         except ImportError:
             logger.error("Module gupnp.idg was not found")
-            logger.error("Please install gupnp-igd to get NAT traversal functionnality")
-            self._set_listening(local_ip, local_port)
+            logger.error("Please install gupnp-igd >= 0.1.6 to get NAT traversal functionnality")
+            self._set_listening(None, None)
             return
 
         self._mapping_timeout_src = gobject.timeout_add(timeout * 1000,
@@ -142,28 +171,44 @@ class DirectP2PTransport(BaseP2PTransport):
         self.simple = Simple()
         self.simple.connect("error-mapping-port", self._on_error_mapping_port)
         self.simple.connect("mapped-external-port", self._on_external_port_mapped)
-        self.simple.add_port("TCP", 0, local_ip, local_port, 60, "MSN P2P Direct Connection")
+        self.simple.add_port("TCP", 0, local_ip, local_port, 6000, "MSN P2P Direct Connection")
+        logger.info("Trying to map external port using UPnP")
+
+    def _unmap_external_port(self):
+        if not self._extern_port:
+            return
+        self.simple.remove_port("TCP", self._extern_port)
+        self._extern_port = None
+
+    def _remove_mapping_timeout(self):
+        if self._mapping_timeout_src is not None:
+            gobject.source_remove(self._mapping_timeout_src)
+            self._mapping_timeout_src = None
 
     def _on_error_mapping_port(self, simple, error, proto, extern_port,
         local_ip, local_port, description):
         logger.warning("Error mapping port %u (%s)" % (local_port, error))
         print extern_port, local_ip, local_port, description
-        self._set_listening(local_ip, local_port)
+        self._set_listening(None, None)
 
     def _on_external_port_mapped(self, simple, proto, extern_ip, replaces,
         extern_port, local_ip, local_port, description):
         logger.info("External port %u mapped to local port %u" % (extern_port, local_port))
+        self._extern_port = extern_port
         self._set_listening(extern_ip, extern_port)
 
     def _on_mapping_timeout(self):
+        logger.warning("Error mapping port %u (timeout)" % self._port)
         self._mapping_timeout_src = None
-        self._set_listening(self._ip, self._port)
+        self._set_listening(None, None)
         return False
 
     def _set_listening(self, ip, port):
-        if self._mapping_timeout_src is not None:
-            gobject.source_remove(self._mapping_timeout_src)
-            self._mapping_timeout_src = None
+        if not ip or ip == "0.0.0.0":
+            ip = self._client.client_ip
+        if not port:
+            port = self._port
+        self._remove_mapping_timeout()
         if not self._listening:
             self._listening = True
             self.emit("listening", ip, port)
@@ -180,18 +225,21 @@ class DirectP2PTransport(BaseP2PTransport):
         body = struct.pack('<L', len(data)) + data
         self._transport.send(body, callback, *cb_args)
 
+    def _remove_connect_timeout(self):
+        if self._connect_timeout_src is not None:
+            gobject.source_remove(self._connect_timeout_src)
+            self._connect_timeout_src = None
+
     def _on_status_changed(self, transport, param):
         status = transport.get_property("status")
         if status == IoStatus.OPENING:
             return
 
-        if self._connect_timeout_src is not None:
-            gobject.source_remove(self._connect_timeout_src)
-            self._connect_timeout_src = None
+        self._remove_connect_timeout()
 
         if status == IoStatus.OPEN:
             logger.info("Socket connection opened")
-            if not self._listening:
+            if not self._server:
                 self._handshake()
         elif status == IoStatus.CLOSED:
             logger.info("Socket connection closed")
@@ -208,17 +256,18 @@ class DirectP2PTransport(BaseP2PTransport):
         self._on_failed()
 
     def _on_failed(self):
-        self._connected = False
-        self._transport.close()
         self.emit("failed")
+        self.close()
 
     def _on_listener_connected(self, channel, condition):
         logger.debug("Peer connected to %s(%i)" % (self._ip, self._port))
-        self._socket = self._socket.accept()[0]
+        socket = self._socket.accept()[0]
+        self._socket.close()
+        self._socket = None
         self._transport = TCPClient(self._ip, self._port)
         self._transport.connect("notify::status", self._on_status_changed)
         self._transport.connect("received", self._on_data_received)
-        self._transport.set_socket(self._socket)
+        self._transport.set_socket(socket)
 
     def _handshake(self):
         self._send_foo()
@@ -257,7 +306,6 @@ class DirectP2PTransport(BaseP2PTransport):
         self.emit("connected")
 
     def _on_data_received(self, transport, chunk, length):
-        logger.debug("Received data %s", repr(chunk))
         self.__pending_chunk += chunk
 
         while self.__pending_chunk:
@@ -273,10 +321,9 @@ class DirectP2PTransport(BaseP2PTransport):
             self.__pending_chunk = self.__pending_chunk[self.__pending_size:]
             self.__pending_size = None
 
-            if not self.__foo_received:
+            if self._server and not self.__foo_received:
                 self._receive_foo(body)
-                # Don't return otherwhise we seem to miss the nonce and don't reply
-                #return
+                return
 
             chunk = MessageChunk.parse(body)
             if not self.__nonce_received:
