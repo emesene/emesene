@@ -77,22 +77,21 @@ class AvatarManager(object):
         fpath = os.path.join(self.get_avatars_dir(), gen_filename(filename))
 
         try:
-
-        #FIXME temporaney hack for animations
-        animation = gtk.gdk.PixbufAnimation(filename)
-        if not animation.is_static_image():
-            self.session.set_picture(filename)
-            if os.path.exists(self.avatar_path):
-                os.remove(self.avatar_path)
-            shutil.copy2(filename, self.avatar_path)
-            return None, fpath
-        else:
-            if not os.path.exists(self.get_avatars_dir()):
-                os.makedirs(self.get_avatars_dir())
-            # Save in 96x96
-            pix_96 = utils.safe_gtk_pixbuf_load(filename, (96, 96))
-            pix_96.save(fpath, 'png')
-            return pix_96, fpath
+            #FIXME temporaney hack for animations
+            animation = gtk.gdk.PixbufAnimation(filename)
+            if not animation.is_static_image():
+                self.session.set_picture(filename)
+                if os.path.exists(self.avatar_path):
+                    os.remove(self.avatar_path)
+                shutil.copy2(filename, self.avatar_path)
+                return None, fpath
+            else:
+                if not os.path.exists(self.get_avatars_dir()):
+                    os.makedirs(self.get_avatars_dir())
+                # Save in 96x96
+                pix_96 = utils.safe_gtk_pixbuf_load(filename, (96, 96))
+                pix_96.save(fpath, 'png')
+                return pix_96, fpath
 
         except OSError, e:
             print e
