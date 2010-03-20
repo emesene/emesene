@@ -24,17 +24,21 @@ class LastfmHandler(songretriever.MusicHandler):
         self.reconnect()
 
     def reconnect(self):
-        '''reconnect, only call if disconnected.
-        return True if connected'''
+        '''reconnect, return True if connected'''
+        # Discard previous track info
+        self.track = None
         try:
             page = urllib.urlopen(self.url)
             doc = xml.dom.minidom.parse(page)
             self.track = doc.getElementsByTagName('track')[0]
-            return True
+        except IndexError:
+            return False
         except IOError:
             return False
         except socket.error:
             return False
+
+        return True
 
     def is_running(self):
         '''returns True if the player is running'''

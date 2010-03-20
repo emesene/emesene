@@ -7,6 +7,10 @@ SHELL_PATH = '/org/gnome/Rhythmbox/Shell'
 
 class RhythmboxHandler(DBusBase.DBusBase):
     '''Handler for rhythmbox'''
+    NAME = 'Rhythmbox'
+    DESCRIPTION = 'Music handler for rhythmbox'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
     def __init__(self, main_window = None,
                  iface_name = 'org.gnome.Rhythmbox',
