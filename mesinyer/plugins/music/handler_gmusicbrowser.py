@@ -1,7 +1,7 @@
 import songretriever
 import DBusBase
 
-class GMusicBrowserkHandler(DBusBase.DBusBase):
+class GMusicBrowserHandler(DBusBase.DBusBase):
     '''Handler for gmusicbrowser'''
     NAME = 'GMusicBrowser'
     DESCRIPTION = 'Music handler for gmusicbrowser'

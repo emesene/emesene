@@ -1,8 +1,5 @@
-'''this module contains the logic to obtain the status and song of a music
-player, you should register a new music player here.
- All the functions receive as first argument the name of the music player
-and will look for the handler of that music player and call the apropiate
-function there'''
+'''this module contains the logic to obtain
+the status and song of a music player.'''
 
 import os
 import urllib
@@ -59,7 +56,7 @@ class MusicHandler(object):
                     self.set_cover_as_avatar(song)
             elif self.last_title is not None:
                 self.last_title = None
-                self.session.set_media("not playing")
+                self.session.set_media(_("not playing"))
 
         return True
 
