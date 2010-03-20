@@ -55,6 +55,9 @@ class Login(gtk.Alignment):
                 if session_id == ext_id:
                     self.server_host = ext.DEFAULT_HOST
                     self.server_port = ext.DEFAULT_PORT
+                else:
+                    self.server_host = extension.get_default('session').DEFAULT_HOST
+                    self.server_port = extension.get_default('session').DEFAULT_PORT
         else:
             self.server_host = extension.get_default('session').DEFAULT_HOST
             self.server_port = extension.get_default('session').DEFAULT_PORT
@@ -93,13 +96,9 @@ class Login(gtk.Alignment):
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
         self.avatar = Avatar()
-        self.avatar_path = self.config_dir.join(self.server_host, account, \
+        avatar_path = self.config_dir.join(self.server_host, account, \
                                     account.replace('@','-at-'), 'avatars', 'last')
-        path = self.avatar_path
-        if not self.config_dir.file_readable(self.avatar_path):
-            path = gui.theme.logo
-
-        self.avatar.set_from_file(path)
+        self.avatar.set_from_file(avatar_path)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
@@ -288,9 +287,9 @@ class Login(gtk.Alignment):
             self.btn_status.set_status(int(self.status[account]))
             
             passw = self.accounts[account]
-
-            if self.config_dir.file_readable(self.avatar_path):
-                self.avatar.set_from_file(self.avatar_path)
+            avatar_path = self.config_dir.join(self.server_host, account, \
+                                    account.replace('@','-at-'), 'avatars', 'last')
+            self.avatar.set_from_file(avatar_path)
 
             if attr == 3:#autologin,password,account checked
                 self.txt_password.set_text(base64.b64decode(passw))
@@ -302,6 +301,7 @@ class Login(gtk.Alignment):
                 self.remember_password.set_active(True)
             elif attr == 1:#only account checked
                 self.remember_account.set_active(True)
+                self.remember_account.set_sensitive(True)
                 self.remember_password.set_sensitive(False)
                 self.auto_login.set_sensitive(False)
             else:#if i'm here i have an error
@@ -513,10 +513,6 @@ class ConnectingWindow(gtk.Alignment):
 
         #for reconnecting
         self.reconnect_timer_id = None
-        if avatar_path == '':
-            self.avatar_path = gui.theme.logo
-        else:
-            self.avatar_path = avatar_path
 
         Avatar = extension.get_default('avatar')
 
@@ -534,7 +530,7 @@ class ConnectingWindow(gtk.Alignment):
         self.label_timer.set_markup('<b>Connection error!\n </b>')
 
         self.avatar = Avatar(cellDimention=96)
-        self.avatar.set_from_file(self.avatar_path)
+        self.avatar.set_from_file(avatar_path)
 
         al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.2)
