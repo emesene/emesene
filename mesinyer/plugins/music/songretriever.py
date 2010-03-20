@@ -4,6 +4,7 @@ the status and song of a music player.'''
 import os
 import urllib
 import gobject
+import Preferences
 
 from gui.gtkui.AvatarManager import AvatarManager
 
@@ -26,24 +27,39 @@ class Song(object):
                         self.filename)
 
 class MusicHandler(object):
-    '''Basic class for all music handlers'''
+    '''Base class for all music handlers'''
+    NAME = 'MusicHandler'
+    DESCRIPTION = 'Base Music handler'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, main_window):
-        self.player = "mpd"
+    def __init__(self, main_window = None):
         self.format = "%ARTIST% - %ALBUM% - %TITLE%"
         self.last_title = None
+        self.session = None
+        self.avatar_manager = None
 
-        self.session = main_window.session
-        self.avatar = AvatarManager(self.session)
+        if main_window != None:
+            self.session = main_window.session
+            self.avatar_manager = AvatarManager(self.session)
 
         gobject.timeout_add(500, self.check_song)
 
+    def preferences(self):
+        Preferences.Preferences(self._on_config, self.NAME, self.format).show()
+ 
+    def _on_config(self, status, format):
+        '''callback for the config dialog'''
+        if status:
+            self.format = format
+            print self.format
 
     def check_song(self):
         '''get the current song and set it if different than the last one'''
         if self.session:
             song = self.get_current_song()
             if song:
+                print self.format
                 current_title = song.format(self.format)
                 if current_title != self.last_title:
                     self.session.set_media(current_title)
@@ -57,9 +73,9 @@ class MusicHandler(object):
 
     def set_cover_as_avatar(self, song):
         image_path = self.get_cover_path(song)
-        if image_path is not None and self.avatar is not None:
+        if image_path != None and self.avatar_manager != None:
             # print "Setting " + image_path + " as avatar image"
-            self.avatar.set_as_avatar(image_path)
+            self.avatar_manager.set_as_avatar(image_path)
 
     def get_cover_path(self, song):
         '''searches in the local covers cache

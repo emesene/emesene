@@ -2,7 +2,6 @@ import gobject
 
 import extension
 import songretriever
-import Preferences
 
 from plugin_base import PluginBase
 
@@ -24,35 +23,43 @@ class Plugin(PluginBase):
         PluginBase.__init__(self)
 
         self.session = None
+        self.running = False
+
         self.player = None
-        self.category = None
-        self.format = None
+
+    def stop(self):
+        '''stop the plugin'''
+        self.session = None
+        self.running = False
+        return True
 
     def start(self, session):
         '''start the plugin'''
         self.session = session
+
         self.category_register()
         self.extensions_register()
-        self.category = extension.get_category(CATEGORY)
 
-        self.get_player()
+        self.redraw_main_window()
+
+        self.running = True
 
         return True
 
-    def get_player(self):
-        print self.category.get_active()
+    def redraw_main_window(self):
+        if self.session != None:
+            self.session.save_config()
+            self.session.signals.login_succeed.emit()
+            self.session.signals.contact_list_ready.emit()
 
     def config(self, session):
         '''config the plugin'''
-        #Preferences.Preferences(self._on_config, self.player,
-        #        self.format).show()
-        pass
-
-    def _on_config(self, status, player, format):
-        '''callback for the config dialog'''
-        if status:
-            self.player = player
-            self.format = format
+        Player = extension.get_default(CATEGORY)
+        player = Player()
+        if player != None:
+            player.preferences()
+            self.redraw_main_window()
+        return True
 
     def category_register(self):
         ''' When you create the category with category_register, you can specify

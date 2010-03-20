@@ -6,9 +6,9 @@ import gui
 from gui.gtkui import utils
 
 class Preferences(gtk.Window):
-    '''the preference window of the music plugin'''
+    '''the preference basic window of the music plugin'''
 
-    def __init__(self, callback, player, format):
+    def __init__(self, callback, player_name, format):
         '''constructor, callback is a function that receives a boolean as first
         argument with the value True if ok was clicked and False otherwise,
         the rest of the arguments are the values collected during configuration
@@ -17,7 +17,7 @@ class Preferences(gtk.Window):
 
         self.callback = callback
         self.set_border_width(2)
-        self.set_title("Preferences")
+        self.set_title(player_name + " preferences")
         self.set_icon(
             utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
 
@@ -30,6 +30,7 @@ class Preferences(gtk.Window):
         table.set_row_spacings(4)
         table.set_col_spacings(4)
 
+        '''
         label = gtk.Label("player")
         label.set_alignment(0.0, 0.5)
         table.attach(label, 0, 1, 0, 1)
@@ -48,7 +49,7 @@ class Preferences(gtk.Window):
         self.combo.set_active(active)
 
         table.attach(self.combo, 1, 2, 0, 1)
-
+        '''
         label = gtk.Label("format")
         label.set_alignment(0.0, 0.5)
         table.attach(label, 0, 1, 1, 2)
@@ -78,9 +79,11 @@ class Preferences(gtk.Window):
 
     def send_values(self, status):
         '''collect the config values and send them to the callback'''
-        player = self.combo.get_active_text()
+        # player = self.combo.get_active_text()
         format = self.entry.get_text()
-        self.callback(status, player, format)
+        print status
+        print format
+        self.callback(status, format)
 
     def _on_accept(self, button):
         '''callback when accept is clicked'''
@@ -99,8 +102,8 @@ class Preferences(gtk.Window):
 
 def test():
     '''test method'''
-    def callback(status, player, format):
-        print status, player, format
+    def callback(status, format):
+        print status, format
 
     Preferences(callback, "mpd", "%ARTIST% - %ALBUM% - %TITLE%").show()
     gtk.main()
