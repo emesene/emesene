@@ -22,18 +22,31 @@ CATEGORY = 'listening to'
 class Plugin(PluginBase):
     def __init__(self):
         PluginBase.__init__(self)
+
         self.session = None
+        self.player = None
+        self.category = None
+        self.format = None
 
     def start(self, session):
         '''start the plugin'''
         self.session = session
+        self.category_register()
         self.extensions_register()
+        self.category = extension.get_category(CATEGORY)
+
+        self.get_player()
+
         return True
+
+    def get_player(self):
+        print self.category.get_active()
 
     def config(self, session):
         '''config the plugin'''
-        Preferences.Preferences(self._on_config, self.player,
-                self.format).show()
+        #Preferences.Preferences(self._on_config, self.player,
+        #        self.format).show()
+        pass
 
     def _on_config(self, status, player, format):
         '''callback for the config dialog'''
@@ -41,9 +54,13 @@ class Plugin(PluginBase):
             self.player = player
             self.format = format
 
-    def extensions_register(self):
+    def category_register(self):
+        ''' When you create the category with category_register, you can specify
+        an interface using C{extensions.category_register("category name", IFoo)}'''
         extension.category_register(CATEGORY, songretriever.MusicHandler)
+        return True
 
+    def extensions_register(self):
         extension.register(CATEGORY, handler_amarok2.Amarok2Handler)
         extension.register(CATEGORY, handler_audacious2.Audacious2Handler)
         extension.register(CATEGORY, handler_banshee.BansheeHandler)
@@ -55,6 +72,6 @@ class Plugin(PluginBase):
         extension.register(CATEGORY, handler_rhythmbox.RhythmboxHandler)
         extension.register(CATEGORY, handler_xmms2.Xmms2Handler)
 
+        #FIXME This should be configurable
         extension.set_default(CATEGORY, handler_mpd.MpdHandler)
-
 

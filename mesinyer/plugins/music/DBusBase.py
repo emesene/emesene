@@ -5,10 +5,6 @@ ROOT_PATH = '/org/freedesktop/DBus'
 
 class DBusBase(songretriever.MusicHandler):
     '''Handler for music players that use D-Bus'''
-    NAME = 'D-Bus players'
-    DESCRIPTION = 'Base handler for music players that use D-Bus'
-    AUTHOR = 'Mariano Guerra'
-    WEBSITE = 'www.emesene.org'
 
     def __init__(self, main_window, iface_name, iface_path):
         songretriever.MusicHandler.__init__(self, main_window)

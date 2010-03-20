@@ -17,7 +17,7 @@ class Song(object):
         self.filename   = filename
 
     def __repr__(self):
-        return "%s - %s - %s" % (self.artist, self.album, self. title)
+        return "%s - %s - %s" % (self.artist, self.album, self.title)
 
     def format(self, strfmt):
         '''replace vars in strfmt for the values of the song'''
@@ -25,13 +25,8 @@ class Song(object):
                 self.album).replace('%TITLE%', self.title).replace('%FILE%',
                         self.filename)
 
-# base class. All handlers must derive from this one.
-
 class MusicHandler(object):
-    NAME = 'Generic Music Handler'
-    DESCRIPTION = 'Basic class for all music handlers'
-    AUTHOR = 'Mariano Guerra'
-    WEBSITE = 'www.emesene.org'
+'''Basic class for all music handlers'''
 
     def __init__(self, main_window):
         self.player = "mpd"
@@ -101,7 +96,6 @@ class MusicHandler(object):
             return image_path
 
         # print "Not found locally, let's try albumart.org"
-        # Not found locally, let's try albumart.org
 
         url = "http://www.albumart.org/index.php?srchkey=" + \
             urllib.quote_plus(artist) + "+" + urllib.quote_plus(album) + \
