@@ -95,13 +95,9 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
 
-        #self.info.first = utils.safe_gtk_image_load(his_picture,
-                #(avatar_size, avatar_size))
         self.info.first = self.his_avatar
         self.his_avatar.set_from_file(his_picture)
 
-        #self.info.last = utils.safe_gtk_image_load(my_picture,
-                #(avatar_size, avatar_size))
         self.info.last = self.avatar
         self.avatar.set_from_file(my_picture)
 

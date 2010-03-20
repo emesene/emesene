@@ -9,7 +9,6 @@ import gui
 class Avatar( gtk.Widget ):
     """AvatarWidget """
     #TODO move in an avatarManager class?????
-    #TODO class for resize gif!
 
     #cellKeyPosition, is a Anchor Type constant
     #refer to http://www.pygtk.org/docs/pygtk/gtk-constants.html#gtk-anchor-type-constants
@@ -120,7 +119,8 @@ class Avatar( gtk.Widget ):
     #public methods
     def set_from_file(self, filename):
         if not gui.gtkui.utils.file_readable(filename):
-            return
+            filename = gui.theme.logo
+
         animation = gtk.gdk.PixbufAnimation(filename)
         if animation.is_static_image():
             self.__set_from_pixbuf(animation.get_static_image())
@@ -137,7 +137,7 @@ class Avatar( gtk.Widget ):
 
     def _start_animation(self, animation):
         iteran = animation.get_iter()
-        #we don't need to resize here!The resize must be done in another class
+        #we don't need to resize here!
         self.__set_from_pixbuf(iteran.get_pixbuf())
         if self.anim_source is None:
             self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
