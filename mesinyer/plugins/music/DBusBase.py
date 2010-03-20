@@ -29,12 +29,12 @@ class DBusBase(songretriever.MusicHandler):
             else:
                 print 'python-dbus is too old, please update'
                 raise
-        except:
-            print 'cannot start dbus, please check if dbus is installed'
+        except dbus.DBusException, error:
+            print 'Unable to use D-Bus: %s' % str(error)
 
-        #dbus session, this is set in reconnect.
+        # dbus session, this is set in reconnect.
         self.bus = None
-        #dbus interface set in reconnect.
+        # dbus interface set in reconnect.
         self.iface = None
         self.module = dbus
         self.root = dbus.SessionBus().get_object(ROOT_NAME, ROOT_PATH)
@@ -46,8 +46,9 @@ class DBusBase(songretriever.MusicHandler):
         try:
             self.iface = self.bus.get_object(self.iface_name, self.iface_path)
             return True
-        except:
+        except self.module.DBusException, error:
             self.iface = None
+            print 'D-Bus error: %s' % str(error)
             return False
 
     def is_running(self):

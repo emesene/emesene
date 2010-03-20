@@ -1,13 +1,17 @@
 import songretriever
-
 import DBusBase
 
-class GMusicBrowserkHandler(DBusBase.DBusBase):
+class GMusicBrowserHandler(DBusBase.DBusBase):
     '''Handler for gmusicbrowser'''
+    NAME = 'GMusicBrowser'
+    DESCRIPTION = 'Music handler for gmusicbrowser'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, iface_name = 'org.gmusicbrowser',
-                 iface_path='/org/gmusicbrowser'):
-        DBusBase.DBusBase.__init__(self, iface_name, iface_path)
+    def __init__(self, main_window = None,
+                 iface_name = 'org.gmusicbrowser',
+                 iface_path = '/org/gmusicbrowser'):
+        DBusBase.DBusBase.__init__(self, main_window, iface_name, iface_path)
 
     def is_running(self):
         '''Returns a True if the player is running'''
@@ -28,4 +32,4 @@ class GMusicBrowserkHandler(DBusBase.DBusBase):
                                       song['album'],
                                       song['title'])
 
-songretriever.register('gmusicbrowser', GMusicBrowserkHandler)
+

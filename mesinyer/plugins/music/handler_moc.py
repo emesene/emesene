@@ -1,12 +1,15 @@
 import songretriever
 import commands
 
-class MocHandler(object):
+class MocHandler(songretriever.MusicHandler):
     '''Handler moc (Music On Console) music player'''
+    NAME = 'Music On Console'
+    DESCRIPTION = 'Music handler for moc'
+    AUTHOR = 'Adolfo Fitoria'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self):
-        '''nothing to put here'''
-        pass
+    def __init__(self, main_window = None):
+        songretriever.MusicHandler.__init__(self, main_window)
 
     def is_running(self):
         '''returns True if the player is running'''
@@ -33,4 +36,8 @@ class MocHandler(object):
         return songretriever.Song(output[0], output[1], 
                                   output[2], output[3])
 
+<<<<<<< HEAD:mesinyer/plugins/music/handler_moc.py
 songretriever.register('moc', MocHandler())
+=======
+
+>>>>>>> e52efe2d246aa77afc440129f31b0aedcccd0659:mesinyer/plugins/music/handler_moc.py
