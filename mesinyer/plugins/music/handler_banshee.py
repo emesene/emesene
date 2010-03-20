@@ -24,6 +24,9 @@ class BansheeHandler(DBusBase.DBusBase):
         '''Returns the current song in the correct format'''
         if self.is_playing():
             info = self.iface.GetCurrentTrack()
-            return songretriever.Song(info["artist"],
-                         info["album"], info["name"])
+            return songretriever.Song(info.get('artist', '?'),
+                info.get('album', '?'),
+                info.get('name', '?'))
+
+        return None
 

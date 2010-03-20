@@ -30,6 +30,17 @@ class Plugin(PluginBase):
         self.extensions_register()
         return True
 
+    def config(self, session):
+        '''config the plugin'''
+        Preferences.Preferences(self._on_config, self.player,
+                self.format).show()
+
+    def _on_config(self, status, player, format):
+        '''callback for the config dialog'''
+        if status:
+            self.player = player
+            self.format = format
+
     def extensions_register(self):
         extension.category_register(CATEGORY, songretriever.MusicHandler)
 
@@ -45,3 +56,5 @@ class Plugin(PluginBase):
         extension.register(CATEGORY, handler_xmms2.Xmms2Handler)
 
         extension.set_default(CATEGORY, handler_mpd.MpdHandler)
+
+
