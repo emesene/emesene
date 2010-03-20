@@ -5,12 +5,7 @@ import webbrowser
 
 import e3
 from gui.base import MarkupParser
-
-try:
-    import webkit
-    ERROR = False
-except ImportError:
-    ERROR = True
+import webkit
 
 import logging
 log = logging.getLogger('gtkui.WebKitTextBox')
