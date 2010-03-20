@@ -32,6 +32,8 @@ class MainWindow(gtk.VBox):
         self.below_panel = extension.get_and_instantiate('below panel', self)
         self.below_userlist = extension.get_and_instantiate('below userlist', self)
 
+        self.music = extension.get_and_instantiate('listening to', self)
+
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
@@ -138,10 +140,10 @@ class MainWindow(gtk.VBox):
     def _on_contact_selected(self, contact):
         '''callback for the contact-selected signal'''
         cid = time.time()
-        (existed, conversation) = self.on_new_conversation(cid, [contact.account], False)
-
-        if not existed:
-            self.session.new_conversation(contact.account, cid)
+        self.on_new_conversation(cid, [contact.account], False)
+        
+        #this calls the e3 Handler
+        self.session.new_conversation(contact.account, cid)
 
     def _on_group_selected(self, group):
         '''callback for the group-selected signal'''

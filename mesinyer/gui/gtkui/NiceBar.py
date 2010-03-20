@@ -13,7 +13,7 @@ ALERTFOREGROUND = NORMALFOREGROUND
 class NiceBar(gtk.EventBox):
     '''A class used to display messages in a non-intrusive bar'''
 
-    def __init__(self, default_background=None, default_foreground=None):
+    def __init__(self, default_background=ALERTBACKGROUND, default_foreground=None):
 
         gtk.EventBox.__init__(self)
 

@@ -28,6 +28,7 @@ from Message import Color
 from Contact import Contact
 from Session import Session
 from Account import Account
+from Transfer import FileTransfer
 
 from ContactManager import ContactManager
 

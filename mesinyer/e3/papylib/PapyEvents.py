@@ -27,6 +27,7 @@ class ClientEvents(papyon.event.ClientEventInterface):
             #self._client.quit()
             pass
         elif state == papyon.event.ClientState.OPEN:
+            # move event-login-succeed after content roaming stuff is retrieved?            
             self._client.session.add_event(Event.EVENT_LOGIN_SUCCEED)
             self._client.set_initial_infos()
             self._client._fill_contact_list(self._client.address_book)
@@ -92,12 +93,10 @@ class ConversationEvent(papyon.event.ConversationEventInterface):
         self.conversation = conversation
 
     def on_conversation_user_joined(self, contact):
-        # TODO: handle this
-        print "[papyon]", contact, "joined a conversation"
+        self._client._on_conversation_user_joined(contact, self)
 
     def on_conversation_user_left(self, contact):
-        # TODO: handle this
-        print "[papyon]", contact, "left a conversation"
+        self._client._on_conversation_user_left(contact, self)
 
     def on_conversation_user_typing(self, contact):
         self._client._on_conversation_user_typing(contact, self)

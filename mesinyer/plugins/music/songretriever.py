@@ -4,12 +4,11 @@ player, you should register a new music player here.
 and will look for the handler of that music player and call the apropiate
 function there'''
 
-__handlers = {}
-__active_handlers = {}
+import os
+import urllib
+import gobject
 
-# look at the bottom for the imports!
-
-required_methods = ('is_running', 'is_playing', 'get_current_song')
+from gui.gtkui.AvatarManager import AvatarManager
 
 class Song(object):
     '''a class representing a song'''
@@ -29,80 +28,113 @@ class Song(object):
                 self.album).replace('%TITLE%', self.title).replace('%FILE%',
                         self.filename)
 
-def register(handler_name, handler):
-    '''register a new music player, the module (or object)
-    must have all the methods declared below but without receiving
-    the name argument.
-     returns False if the handler was not registered'''
+# base class. All handlers must derive from this one.
 
-    for name in required_methods:
-        if not (hasattr(handler, name) and callable(getattr(handler, name))):
-                logging.getLogger('music plugin').warning(
-                    "handler %s could not be registered, no %s function" % \
-                            (handler_name, name))
-                return False
+class MusicHandler(object):
+    NAME = 'Generic Music Handler'
+    DESCRIPTION = 'Basic class for all music handlers'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
-    __handlers[handler_name] = handler
+    def __init__(self, main_window):
+        self.player = "mpd"
+        self.format = "%ARTIST% - %ALBUM% - %TITLE%"
+        self.last_title = None
 
-def get_handler_names():
-    return sorted(__handlers.keys())
+        self.session = main_window.session
+        self.avatar = AvatarManager(self.session)
 
-## below are the methods that a handler should implement
+        gobject.timeout_add(500, self.check_song)
 
-def is_running(name):
-    '''returns True if the player is running'''
-    handler = get_handler(name)
 
-    if handler is None:
-        return False
+    def check_song(self):
+        '''get the current song and set it if different than the last one'''
+        if self.session:
+            song = self.get_current_song()
+            if song:
+                current_title = song.format(self.format)
+                if current_title != self.last_title:
+                    self.session.set_media(current_title)
+                    self.last_title = current_title
+                    self.set_cover_as_avatar(song)
+            elif self.last_title is not None:
+                self.last_title = None
+                self.session.set_media("not playing")
 
-    return handler.is_running()
+        return True
 
-def is_playing(name):
-    '''returns True if the player is playing a song'''
-    handler = get_handler(name)
+    def set_cover_as_avatar(self, song):
+        image_path = self.get_cover_path(song)
+        if image_path is not None and self.avatar is not None:
+            # print "Setting " + image_path + " as avatar image"
+            self.avatar.set_as_avatar(image_path)
 
-    if handler is None:
-        return False
+    def get_cover_path(self, song):
+        '''searches in the local covers cache
+        if not found also searches in albumart covers website
+        returns None if no image found'''
+        
+        artist = song.artist.encode('utf8')
+        album = song.album.encode('utf8')
 
-    return handler.is_playing()
+        if artist == "?":
+            artist = ""
 
-def get_handler(name):
-    '''try to get the handler from the active handlers, if not active
-    create an instance'''
-    instance = __active_handlers.get(name, None)
+        if album == "?":
+            album = ""
 
-    if instance is None:
-        handler = __handlers.get(name, None)
-
-        if handler is None:
+        if len(artist) == 0 and len(album) == 0:
             return None
 
-        instance = handler()
+        if (os.name != 'nt'):
+            home_dir = os.path.expanduser('~')
+        else:
+            home_dir = os.path.expanduser("~").decode(sys.getfilesystemencoding())
 
-    __active_handlers[name] = instance
-    return instance
+        cover_art_path = os.path.join(home_dir, '.covers', '')
 
-def get_current_song(name):
-    '''returns the current song or None if no song is playing'''
-    handler = get_handler(name)
+        # print "Searching for covers in " + cover_art_path
 
-    if handler is None:
+        image_path = cover_art_path + artist + '-' + album + '.jpg'
+
+        # print "Checking if " + image_path + " exists"
+
+        if os.path.exists(image_path):
+            # print image_path + " found!"
+            return image_path
+
+        # print "Not found locally, let's try albumart.org"
+        # Not found locally, let's try albumart.org
+
+        url = "http://www.albumart.org/index.php?srchkey=" + \
+            urllib.quote_plus(artist) + "+" + urllib.quote_plus(album) + \
+            "&itempage=1&newsearch=1&searchindex=Music"
+
+        albumart = urllib.urlopen(url).read()
+        image_url = ""
+
+        for line in albumart.split("\n"):
+
+            if "http://www.albumart.org/images/zoom-icon.jpg" in line:
+                image_url = line.partition('src="')[2].partition('"')[0]
+
+            if image_url:
+                urllib.urlretrieve(image_url, image_path)
+                break
+
+        if os.path.exists(image_path):
+            return image_path
+
         return None
 
-    return handler.get_current_song()
+    def get_current_song(self):
+        ''' returns current song info'''
+        raise NotImplementedError()
 
-def test():
-    for name in __handlers:
-        print "player", name
-        print "running?:", is_running(name)
-        print "playing?:", is_playing(name)
-        print "current song:", get_current_song(name)
-        print
+    def is_running(self):
+        '''returns True if the player is running'''
+        raise NotImplementedError()
 
-import handler_mpd
-import handler_amarok2
-import handler_rhythmbox
-import handler_gmusicbrowser
-import handler_moc
-import handler_banshee
+    def is_playing(self):
+        '''returns True if the player is playing a song'''
+        raise NotImplementedError()

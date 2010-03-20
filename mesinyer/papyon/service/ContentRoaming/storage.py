@@ -120,14 +120,14 @@ class Storage(SOAPService):
         document_name = response.findtext('./st:Name')        
         callback[0](document_rid, document_name, *callback[1:])
 
-    @RequireSecurityTokens(LiveService.CONTACTS)
+    @RequireSecurityTokens(LiveService.STORAGE)
     def __soap_request(self, method, scenario, args, callback, errback):
-        token = str(self._tokens[LiveService.CONTACTS])
+        token = str(self._tokens[LiveService.STORAGE])
         self._soap_request(method, (scenario, token), args, callback, errback)
 
-    @RequireSecurityTokens(LiveService.CONTACTS)
+    @RequireSecurityTokens(LiveService.STORAGE)
     def get_display_picture(self, pre_auth_url, callback, errback):
-        token = str(self._tokens[LiveService.CONTACTS])
+        token = str(self._tokens[LiveService.STORAGE])
 
         scheme = 'http'
         host = 'byfiles.storage.msn.com'

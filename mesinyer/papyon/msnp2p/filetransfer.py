@@ -22,11 +22,8 @@ from papyon.msnp2p.constants import EufGuid
 from papyon.msnp2p.session import P2PSession
 
 import struct
-import logging
 
 __all__ = ['FileTransferSession']
-
-logger = logging.getLogger('papyon.msnp2p.filetransfersession')
 
 class FileTransferSession(P2PSession):
 
@@ -71,10 +68,12 @@ class FileTransferSession(P2PSession):
     def reject(self):
         self._respond(603)
 
+    def cancel(self):
+        self._close()
+
     def send(self, data):
-        logger.debug("FileTransferSession.send()")
         self._data = data
-        self._transreq()
+        self._request_bridge()
 
     def parse_context(self, context):
         info = struct.unpack("<5I", context[0:20])
@@ -90,7 +89,6 @@ class FileTransferSession(P2PSession):
         return context
 
     def _on_bridge_selected(self):
-        logger.debug("On bridge selected %s" % (self._data != None))
         if self._data is not None:
             self._send_p2p_data("\x00" * 4)
             self._send_p2p_data(self._data, True)

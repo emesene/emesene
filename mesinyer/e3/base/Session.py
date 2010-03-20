@@ -212,3 +212,13 @@ class Session(object):
     def request_attention(self, cid):
         '''request the attention of the contact'''
         raise NotImplementedError('Not implemented')
+
+    def accept_filetransfer(self, transfer):
+        self.add_action(Action.ACTION_FT_ACCEPT, (transfer,))
+
+    def reject_filetransfer(self, transfer):
+        self.add_action(Action.ACTION_FT_REJECT, (transfer,))
+
+    def cancel_filetransfer(self, transfer):
+        self.add_action(Action.ACTION_FT_CANCEL, (transfer,))
+

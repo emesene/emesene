@@ -1,5 +1,7 @@
+import time
 import webbrowser
 
+import e3.base
 import gui
 import extension
 
@@ -330,9 +332,11 @@ class MyAccountHandler(object):
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
             if response == gui.stock.ACCEPT:
+                #TODO resize here???
                 self.session.set_picture(filename)
 
-        extension.get_default('avatar chooser')(set_picture_cb).show()
+        extension.get_default('avatar chooser')(set_picture_cb, 
+                        self.session.config.last_avatar).show()
 
 class ConversationToolbarHandler(object):
     '''this handler contains all the methods to handle a conversation toolbar
@@ -396,3 +400,36 @@ class TrayIconHandler(FileHandler):
         """
         FileHandler.__init__(self, session, on_disconnect, on_quit)
         self.theme = theme
+
+class FileTransferHandler(object):
+    ''' this handler handles a file transfer object '''
+    def __init__(self, session, transfer):
+        ''' session - e3.session implementation
+            transfer - e3.transfer
+        '''
+        self.session = session
+        self.transfer = transfer
+
+    def open(self):
+        ''' use desktop's open to open the file, once state is finished '''
+        raise NotImplementedError
+
+    def opendir(self):
+        ''' open the directory that contains the file, once the transfer is finished '''
+        raise NotImplementedError
+
+    def accept(self):
+        ''' accepts a file transfer '''
+        self.transfer.time_start = time.time()        
+        self.transfer.state = e3.base.FileTransfer.TRANSFERRING
+        self.session.accept_filetransfer(self.transfer)
+
+    def reject(self):
+        ''' cancels a file transfer '''
+        self.transfer.state = e3.base.FileTransfer.FAILED
+        self.session.reject_filetransfer(self.transfer)
+
+    def cancel(self):
+        ''' cancels a file transfer '''
+        self.transfer.state = e3.base.FileTransfer.FAILED
+        self.session.cancel_filetransfer(self.transfer)

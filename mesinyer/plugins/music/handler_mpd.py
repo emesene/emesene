@@ -1,14 +1,20 @@
-import socket
-
 import songretriever
+
+import socket
 from thirdparty import mpd
 
-class Handler(object):
+class MpdHandler(songretriever.MusicHandler):
     '''a simple handler for mpd music player'''
+    NAME = 'MPD Music Handler'
+    DESCRIPTION = 'Handler for mpd music player'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, host="localhost", port=6600):
-        self.host = host
-        self.port = port
+    def __init__(self, main_window):
+        songretriever.MusicHandler.__init__(self, main_window)
+
+        self.host = "localhost"
+        self.port = 6600
 
         self.reconnect()
 
@@ -47,9 +53,10 @@ class Handler(object):
             return None
 
         info = self.client.currentsong()
+
         return songretriever.Song(info.get('artist', '?'),
                 info.get('album', '?'),
                 info.get('title', '?'),
                 info.get('file', '?'))
 
-songretriever.register('mpd', Handler)
+

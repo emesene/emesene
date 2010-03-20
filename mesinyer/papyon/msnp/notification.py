@@ -448,7 +448,7 @@ class NotificationProtocol(BaseProtocol, gobject.GObject):
         msn_object = None
         icon_url = None
         if len(command.arguments) > idx:
-            if command.arguments[idx] != '0':
+            if command.arguments[idx] not in ('0', '1'):
                 msn_object = papyon.p2p.MSNObject.parse(self._client,
                                urllib.unquote(command.arguments[idx]))
         idx += 1

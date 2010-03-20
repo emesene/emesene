@@ -12,18 +12,15 @@ class BansheeHandler(DBusBase.DBusBase):
     def is_playing(self):
         '''Returns True if a song is being played'''
         if self.is_running():
-            status = self.iface.GetCurrentState()
-            if status == 'playing':
+            if self.iface.GetCurrentState() == "playing":
                 return True
         return False
 
     def get_current_song(self):
         '''Returns the current song in the correct format'''
         if self.is_playing():
-            song = self.iface.GetCurrentTrack()
-            return songretriever.Song(song['artist'],
-                                      song['album'],
-                                      song['name'],
-                                      song['local-path'])
+            info = self.iface.GetCurrentTrack()
+            return songretriever.Song(info["artist"],
+                         info["album"], info["name"])
 
-songretriever.register('Banshee', BansheeHandler())
+songretriever.register('banshee', BansheeHandler)
