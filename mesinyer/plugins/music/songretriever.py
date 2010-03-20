@@ -26,7 +26,7 @@ class Song(object):
                         self.filename)
 
 class MusicHandler(object):
-'''Basic class for all music handlers'''
+    '''Basic class for all music handlers'''
 
     def __init__(self, main_window):
         self.player = "mpd"
