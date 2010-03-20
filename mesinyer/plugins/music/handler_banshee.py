@@ -1,13 +1,17 @@
 import songretriever
-
 import DBusBase
 
 class BansheeHandler(DBusBase.DBusBase):
     '''Handler for banshee'''
+    NAME = 'Banshee'
+    DESCRIPTION = 'Music handler for banshee'
+    AUTHOR = 'Adolfo Fitoria'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, iface_name = 'org.bansheeproject.Banshee',
-                 iface_path='/org/bansheeproject/Banshee/PlayerEngine'):
-        DBusBase.DBusBase.__init__(self, iface_name, iface_path)
+    def __init__(self, main_window = None,
+                 iface_name = 'org.bansheeproject.Banshee',
+                 iface_path = '/org/bansheeproject/Banshee/PlayerEngine'):
+        DBusBase.DBusBase.__init__(self, main_window, iface_name, iface_path)
 
     def is_playing(self):
         '''Returns True if a song is being played'''
@@ -23,4 +27,3 @@ class BansheeHandler(DBusBase.DBusBase):
             return songretriever.Song(info["artist"],
                          info["album"], info["name"])
 
-songretriever.register('banshee', BansheeHandler)

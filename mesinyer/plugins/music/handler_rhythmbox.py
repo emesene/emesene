@@ -8,9 +8,11 @@ SHELL_PATH = '/org/gnome/Rhythmbox/Shell'
 class RhythmboxHandler(DBusBase.DBusBase):
     '''Handler for rhythmbox'''
 
-    def __init__(self, iface_name = 'org.gnome.Rhythmbox',
-                 iface_path='/org/gnome/Rhythmbox/Player'):
-        DBusBase.DBusBase.__init__(self, iface_name, iface_path)
+    def __init__(self, main_window = None,
+                 iface_name = 'org.gnome.Rhythmbox',
+                 iface_path = '/org/gnome/Rhythmbox/Player'):
+        DBusBase.DBusBase.__init__(self, main_window, iface_name, iface_path)
+        self.rbshell = None
 
     def reconnect(self):
         '''method to attemp a reconnection, via dbus, this is only
@@ -39,4 +41,4 @@ class RhythmboxHandler(DBusBase.DBusBase):
                                       song['album'],
                                       song['title'])
 
-songretriever.register('rhythmbox', RhythmboxHandler)
+

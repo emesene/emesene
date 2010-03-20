@@ -1,19 +1,24 @@
 import songretriever
-
 import DBusBase
 
 class ExaileHandler(DBusBase.DBusBase):
     '''Handler for exaile'''
+    NAME = 'Exaile'
+    DESCRIPTION = 'Music handler for exaile'
+    AUTHOR = 'Karasu'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, iface_name = 'org.exaile.Exaile',
-                 iface_path='/org/exaile/Exaile'):
-        DBusBase.DBusBase.__init__(self, iface_name, iface_path)
+    def __init__(self, main_window = None,
+                 iface_name = 'org.exaile.Exaile',
+                 iface_path = '/org/exaile/Exaile'):
+        DBusBase.DBusBase.__init__(self, main_window, iface_name, iface_path)
 
     def is_playing(self):
         '''Returns True if a song is being played'''
         if self.is_running():
             track_info = str(self.iface.Query())
-            if string.split(track_info, ", ")[0] == "status: playing":
+            status = track_info.split(", ")[0]
+            if status == "status: playing":
                 return True
         return False
 
@@ -31,4 +36,3 @@ class ExaileHandler(DBusBase.DBusBase):
                 title = ""
             return songretriever.Song(artist, album, title)
 
-songretriever.register('exaile', ExaileHandler)

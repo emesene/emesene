@@ -5,16 +5,17 @@ from thirdparty import mpd
 
 class MpdHandler(songretriever.MusicHandler):
     '''a simple handler for mpd music player'''
-    NAME = 'MPD Music Handler'
+    NAME = 'MPD'
     DESCRIPTION = 'Handler for mpd music player'
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, main_window):
+    def __init__(self, main_window = None):
         songretriever.MusicHandler.__init__(self, main_window)
 
         self.host = "localhost"
         self.port = 6600
+        self.client = None
 
         self.reconnect()
 

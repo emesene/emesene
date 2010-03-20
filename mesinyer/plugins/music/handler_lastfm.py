@@ -1,15 +1,21 @@
-import socket
-
 import songretriever
+
+import socket
 import xml.dom.minidom
 import urllib
 
-class LastfmHandler(object):
+class LastfmHandler(songretriever.MusicHandler):
     '''a simple handler for lastfm web service'''
+    NAME = 'LastFM'
+    DESCRIPTION = 'Handler for lastfm music player'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, login="Diftool80", update_interval=60):
-        self.login = login
-        self.update_interval = update_interval
+    def __init__(self, main_window = None):
+        songretriever.MusicHandler.__init__(self, main_window)
+
+        self.login = "Diftool80"
+        self.update_interval = 60
         self.url = "http://ws.audioscrobbler.com/2.0/?method=\
                     user.getrecenttracks&api_key=fbb6f8beb8be\
                     b065baf549d57c73ac66&user=" + self.login + "&limit=1"
@@ -54,6 +60,4 @@ class LastfmHandler(object):
         title = element[0].childNodes[0].nodeValue
 
         return songretriever.Song(artist, album, title)
-
-songretriever.register('lastfm', LastfmHandler)
 

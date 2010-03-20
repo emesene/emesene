@@ -1,12 +1,16 @@
 import songretriever
-
 import DBusBase
 
 class Amarok2Handler(DBusBase.DBusBase):
     '''Handler for Amarok2'''
+    NAME = 'Amarok2'
+    DESCRIPTION = 'Music handler for Amarok2'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, main_window, iface_name = 'org.mpris.amarok',
-                 iface_path='/TrackList'):
+    def __init__(self, main_window = None,
+                 iface_name = 'org.mpris.amarok',
+                 iface_path = '/TrackList'):
         DBusBase.DBusBase.__init__(self, main_window, iface_name, iface_path)
 
     def is_playing(self):

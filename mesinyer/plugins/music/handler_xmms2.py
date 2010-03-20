@@ -1,10 +1,17 @@
 import songretriever
+
 from thirdparty import xmmsclient
 
-class Xmms2Handler(object):
+class Xmms2Handler(songretriever.MusicHandler):
     '''a simple handler for xmms2 music player'''
+    NAME = 'Xmms2'
+    DESCRIPTION = 'Handler for xmms2 music player'
+    AUTHOR = 'Karasu'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self):
+    def __init__(self, main_window = None):
+        songretriever.MusicHandler.__init__(self, main_window)
+
         self.client = None
         self.reconnect()
 
@@ -62,5 +69,4 @@ class Xmms2Handler(object):
         return songretriever.Song(info["artist"],
                     info["album"], info["title"])
 
-songretriever.register('xmms2', Xmms2Handler)
 

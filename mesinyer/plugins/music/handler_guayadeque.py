@@ -1,13 +1,17 @@
 import songretriever
-
 import DBusBase
 
 class GuayadequeHandler(DBusBase.DBusBase):
     '''Handler for guayadeque'''
+    NAME = 'Guayadeque'
+    DESCRIPTION = 'Music handler for guayadeque'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, iface_name = 'org.mpris.guayadeque',
-                 iface_path='/Player'):
-        DBusBase.DBusBase.__init__(self, iface_name, iface_path)
+    def __init__(self, main_window = None,
+                 iface_name = 'org.mpris.guayadeque',
+                 iface_path = '/Player'):
+        DBusBase.DBusBase.__init__(self, main_window, iface_name, iface_path)
 
     def is_playing(self):
         '''Returns True if a song is being played'''
@@ -26,4 +30,4 @@ class GuayadequeHandler(DBusBase.DBusBase):
                                       song['album'],
                                       song['title'])
 
-songretriever.register('guayadeque', GuayadequeHandler)
+
