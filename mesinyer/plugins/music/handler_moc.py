@@ -35,9 +35,3 @@ class MocHandler(songretriever.MusicHandler):
 
         return songretriever.Song(output[0], output[1], 
                                   output[2], output[3])
-
-<<<<<<< HEAD:mesinyer/plugins/music/handler_moc.py
-songretriever.register('moc', MocHandler())
-=======
-
->>>>>>> e52efe2d246aa77afc440129f31b0aedcccd0659:mesinyer/plugins/music/handler_moc.py
