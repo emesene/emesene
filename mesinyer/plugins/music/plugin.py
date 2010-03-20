@@ -9,7 +9,7 @@ from plugin_base import PluginBase
 from gui.gtkui.AvatarManager import AvatarManager
 
 #import handler_amarok2
-#import handler_audacious2
+import handler_audacious2
 #import handler_banshee
 #import handler_gmusicbrowser
 #import handler_guayadeque
@@ -29,5 +29,5 @@ class Plugin(PluginBase):
     def extensions_register(self):
         extension.category_register('listening to', songretriever.MusicHandler)
         extension.register('listening to', handler_mpd.MpdHandler)
-
+        extension.register('listening to', handler_audacious2.Audacious2Handler)
 

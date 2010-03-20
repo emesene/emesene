@@ -4,9 +4,9 @@ ROOT_NAME = 'org.freedesktop.DBus'
 ROOT_PATH = '/org/freedesktop/DBus'
 
 class DBusBase(songretriever.MusicHandler):
-    '''Handler for music players that use DBus'''
+    '''Handler for music players that use D-Bus'''
     NAME = 'D-Bus players'
-    DESCRIPTION = 'blah blah'
+    DESCRIPTION = 'Base handler for music players that use D-Bus'
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 

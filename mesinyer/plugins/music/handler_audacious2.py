@@ -4,10 +4,15 @@ import DBusBase
 
 class Audacious2Handler(DBusBase.DBusBase):
     '''Handler for audacious2'''
+    NAME = 'Audacious2'
+    DESCRIPTION = 'Music handler for audacious2'
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
 
-    def __init__(self, iface_name = 'org.atheme.audacious',
-                 iface_path='/org/atheme/audacious'):
-        DBusBase.DBusBase.__init__(self, iface_name, iface_path)
+    def __init__(self, mainWindow=None, 
+                 iface_name = 'org.atheme.audacious',
+                 iface_path = '/org/atheme/audacious'):
+        DBusBase.DBusBase.__init__(self, mainWindow, iface_name, iface_path)
 
     def is_playing(self):
         '''Returns True if a song is being played'''
@@ -27,4 +32,3 @@ class Audacious2Handler(DBusBase.DBusBase):
             title = self.iface.SongTuple(song_position, "title") 
             return songretriever.Song(artist, album, title)
 
-songretriever.register('audacious2', Audacious2Handler)

@@ -1,6 +1,6 @@
-import socket
-
 import songretriever
+
+import socket
 from thirdparty import mpd
 
 class MpdHandler(songretriever.MusicHandler):
