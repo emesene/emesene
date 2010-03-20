@@ -23,7 +23,6 @@ import gobject
 import e3
 import gui
 import utils
-import Renderers
 import extension
 import logging
 log = logging.getLogger('gtkui.ContactList')
@@ -44,8 +43,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         '''class constructor'''
         self._model = None
         dialog = extension.get_default('dialog')
-        #self.pbr = gtk.CellRendererPixbuf()
-        self.pbr = Renderers.AvatarRenderer()
+        pbr = extension.get_default('avatar renderer')
+        self.pbr = pbr()
         gui.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
@@ -64,7 +63,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # image, and an int that is used to allow ordering specified by the user
         # a boolean indicating special groups always False for contacts, True
         # for special groups like "No group"
-        self._model = gtk.TreeStore(gtk.gdk.Pixbuf, object, str, bool,
+        self._model = gtk.TreeStore(gtk.Image, object, str, bool,
             gtk.gdk.Pixbuf, int, bool)
         self.model = self._model.filter_new(root=None)
         self.model.set_visible_func(self._visible_func)
@@ -92,7 +91,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         column.pack_start(crt, True)
         column.pack_start(pbr_status, False)
 
-        column.add_attribute(self.pbr, 'pixbuf', 0)
+        column.add_attribute(self.pbr, 'image', 0)
         column.add_attribute(crt, 'markup', 2)
         column.add_attribute(self.pbr, 'visible', 3)
         column.add_attribute(pbr_status, 'visible', 3)
@@ -126,11 +125,18 @@ class ContactList(gui.ContactList, gtk.TreeView):
         picture
         '''
         if contact.picture:
-            picture = utils.safe_gtk_pixbuf_load(contact.picture,
-                    (self.avatar_size, self.avatar_size))
+            animation = gtk.gdk.PixbufAnimation(contact.picture)
+            if animation.is_static_image():
+                pix = utils.safe_gtk_pixbuf_load(contact.picture,
+                        (self.avatar_size, self.avatar_size))
+                picture = gtk.image_new_from_pixbuf(pix)
+            else:
+                picture = gtk.image_new_from_animation(animation)
+                
         else:
-            picture = utils.safe_gtk_pixbuf_load(gui.theme.user,
-                    (self.avatar_size, self.avatar_size))
+            pix = utils.safe_gtk_pixbuf_load(gui.theme.user,
+                        (self.avatar_size, self.avatar_size))
+            picture = gtk.image_new_from_pixbuf(pix)
 
         return picture
 
@@ -333,8 +339,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.session.config.d_weights[contact.account] = weight
 
-        contact_data = (self._get_contact_pixbuf_or_default(contact), contact,
-            self.format_nick(contact), True,
+        contact_data = (self._get_contact_pixbuf_or_default(contact), 
+            contact, self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
             weight, False)
 
@@ -472,8 +478,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.session.config.d_weights[contact.account] = weight
 
-        contact_data = (self._get_contact_pixbuf_or_default(contact), contact,
-            self.format_nick(contact), True,
+        contact_data = (self._get_contact_pixbuf_or_default(contact),
+            contact, self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
             weight, False)
 

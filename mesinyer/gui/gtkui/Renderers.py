@@ -575,43 +575,51 @@ class SmileyLayout(pango.Layout):
 
 import cairo
 import gui
+import utils
 from e3 import status
 
 #from emesene1 by mariano guerra adapted by cando
+#animation support by cando
+#TODO add transformation field in configuration
+#TODO add mini transformation
+#TODO finish offline behaviour( grey avatars)
+#TODO signals in configuration for transformation changes????
+
 class AvatarRenderer(gtk.GenericCellRenderer):
     """Renderer for avatar """
     
     __gproperties__ = {
-        'pixbuf': (gtk.gdk.Pixbuf, 'Pixbuf', '', gobject.PARAM_READWRITE),        
+        'image': (gobject.TYPE_OBJECT, 'The contact image', '', gobject.PARAM_READWRITE),        
         'blocked': (bool, 'Contact Blocked', '', False, gobject.PARAM_READWRITE),        
         'dimention': (gobject.TYPE_INT, 'cell dimentions', 
                     'height width of cell', 0, 96, 32, gobject.PARAM_READWRITE),
-        'status': (str, 'Contact status', '', 'FLN', gobject.PARAM_READWRITE),
+        'offline': (bool, 'Contact is offline', '', False, gobject.PARAM_READWRITE),
         'radius_factor': (gobject.TYPE_FLOAT,'radius of pixbuf', 
                           '0.0 to 0.5 with 0.1 = 10% of dimention',
                           0.0, 0.5,0.11, gobject.PARAM_READWRITE),
          }
         
     def __init__(self, cellDimention = 32, cellRadius = 0.11):
-        #TODO add animation! add extension e aggiungi options se vuoi di lato o sopra l'immagine
         self.__gobject_init__()
-        self._pixbuf = None
-        self._status = status.OFFLINE
-        self._blocked = False
+        self._image = None
         self._dimention = cellDimention
         self._radius_factor = cellRadius
-        
+        self._offline = False
+
         #icon source used to render grayed out offline avatar
         self._icon_source = gtk.IconSource()
         self._icon_source.set_state(gtk.STATE_INSENSITIVE)
         
         self.set_property('xpad', 1)
-        self.set_property('ypad', 1)   
+        self.set_property('ypad', 10)
+        
+        #animation stuff
+        self.anim_source = None
+        self._current_pix = None
+        self.current_animation = None
 
         #set up information of statusTransformation
-        #TODO
-        self._set_transformation('corner|gray|pixelate')
-        #TODO
+        self._set_transformation('corner')
         #self.transId = self._config.connect('change::statusTransformation', \
             #self._transformation_callback)
         
@@ -634,30 +642,26 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         self._set_transformation(newvalue)
         
     def do_get_property(self, property):
-        if property.name == 'pixbuf':
-            return self._pixbuf
+        if property.name == 'image':
+            return self._image
         elif property.name == 'dimention':
             return self._dimention
         elif property.name == 'radius-factor':
             return self._radius_factor
-        elif property.name == 'blocked':
-            return self._blocked
-        elif property.name == 'status':
-            return self._status                        
+        elif property.name == 'offline':
+            return self._offline          
         else:
             raise AttributeError, 'unknown property %s' % property.name
   
     def do_set_property(self, property, value):
-        if property.name == 'pixbuf':
-            self._pixbuf = value
+        if property.name == 'image':
+            self._image = value
         elif property.name == 'dimention':            
             self._dimention = value
         elif property.name == 'radius-factor':
-            self._radius_factor = value         
-        elif property.name == 'blocked':
-            self._blocked = value
-        elif property.name == 'status':
-            self._status = value      
+            self._radius_factor = value
+        elif property.name == 'offline':
+            self._offline = value           
         else:
             raise AttributeError, 'unknown property %s' % property.name
 
@@ -678,18 +682,38 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         ctx = window.cairo_create()          
         ctx.translate(x, y)
         
-        avatar = self._pixbuf
-        overlay = None
+        avatar = None
         alpha = 1
         dim = self._dimention
-        
+
+        if self._image.get_storage_type() == gtk.IMAGE_ANIMATION:
+            animation = self._image.get_animation()
+            if self.anim_source is None:
+                self.current_animation = animation
+                self._start_animation(animation, widget)
+                avatar = animation.get_static_image()
+
+            elif animation != self.current_animation:
+                gobject.source_remove(self.anim_source)
+                self.anim_source = None
+                self.current_animation = animation
+                self._start_animation(animation, widget)
+                avatar = animation.get_static_image()
+
+            else:
+                avatar = self._current_pix
+
+        elif self._image.get_storage_type() == gtk.IMAGE_PIXBUF:
+            avatar = self._image.get_pixbuf()
+            if self.anim_source is not None:
+                gobject.source_remove(self.anim_source)
+                self.anim_source = None
+        else:
+            return
+
         if self._pixalated: 
-            avatar = self._get_pixalate(self._pixbuf)            
-        if self._corner: 
-            overlay = self._get_overlay()
-        if self._alpha_status and self._status in (status.IDLE, status.OFFLINE): 
-            alpha = 0.75
-        if self._gray and self._status == 'FLN' and avatar != None:
+            avatar = self._get_pixalate(avatar)
+        if self._gray and self._offline and avatar != None:
             alpha = 1
             source = self._icon_source
             source.set_pixbuf(avatar)
@@ -700,30 +724,22 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         if avatar:
             self._draw_avatar(ctx, avatar, width - dim, ypad, dim, 
                                 gtk.ANCHOR_CENTER, self._radius_factor, alpha)
-        
-        if overlay:       
-            if self._dimention >= 32 :     
-                self._draw_avatar(ctx, overlay, width - 16, 
-                                  ypad + dim - 16, 16, gtk.ANCHOR_SW)
-            elif self._mini:
-                self._draw_avatar(ctx, overlay, width - 8, 
-                                  ypad + dim - 8, 8, gtk.ANCHOR_SW)
-            else:
-                self._draw_avatar(ctx, overlay, 0, ypad, 16)
 
-    def _get_overlay(self):
-        """Return overlay pixbuf, 
-           dependant on contacts status and block state"""
-        overlay = None
-        if self._blocked:
-            #TODO add blocked image
-            #overlay = gui.theme.????
-            return None 
-        elif self._status == status.AWAY:
-            overlay = gui.theme.status_icons[status.AWAY]
-        elif self._status == status.BUSY:
-            overlay = gui.theme.status_icons[status.BUSY]
-        return overlay       
+    def _start_animation(self, animation, widget):
+        iteran = animation.get_iter()
+        self.anim_source = gobject.timeout_add(iteran.get_delay_time(),
+                                               self._advance, iteran, widget)
+
+    def _advance(self, iteran, widget):
+        iteran.advance()
+        self.__set_from_pixbuf_animation(iteran.get_pixbuf(), widget)
+        self.anim_source = gobject.timeout_add(iteran.get_delay_time(),
+                                                self._advance, iteran, widget)
+        return False
+
+    def __set_from_pixbuf_animation(self, pixbuf, widget):
+        self._current_pix = pixbuf
+        widget.queue_draw()
 
     def _get_pixalate(self, pixbuf):
         """Pixalate and saturate values based on original renderer

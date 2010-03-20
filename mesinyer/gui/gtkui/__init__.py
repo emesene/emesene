@@ -70,6 +70,7 @@ def setup():
     extension.category_register('image chooser', ImageChooser.ImageChooser)
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
     extension.category_register('avatar', Avatar.Avatar)
+    extension.category_register('avatar renderer', Renderers.AvatarRenderer)
 
     extension.category_register('preferences', Preferences.Preferences)
     extension.category_register('login window', Login.Login)
