@@ -35,11 +35,7 @@ class UserPanel(gtk.VBox):
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
 
         self.avatar_path = self.session.config.last_avatar
-        if not self.session.config_dir.file_readable(self.avatar_path):
-            path = gui.theme.user
-        else:
-            path = self.avatar_path
-        self.avatar.set_from_file(path)
+        self.avatar.set_from_file(self.avatar_path)
 
         self.nick = TextField.TextField(session.contacts.me.display_name, '', False)
         self.status = StatusButton.StatusButton(session)
