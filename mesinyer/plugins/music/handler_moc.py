@@ -35,5 +35,3 @@ class MocHandler(songretriever.MusicHandler):
 
         return songretriever.Song(output[0], output[1], 
                                   output[2], output[3])
-
-

@@ -145,4 +145,3 @@ class MusicHandler(object):
     def is_playing(self):
         '''returns True if the player is playing a song'''
         raise NotImplementedError()
-
