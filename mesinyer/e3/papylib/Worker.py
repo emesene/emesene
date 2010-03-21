@@ -136,6 +136,7 @@ class Worker(e3.base.Worker, papyon.Client):
         if cr.state == CR.constants.ContentRoamingState.SYNCHRONIZED:
             type, data = cr.display_picture
             handle, path = tempfile.mkstemp(suffix="."+type.split('/')[1], prefix='emsnpic')
+            os.close(handle)
             try:
                 f = open(path, 'wb')
                 f.write(data)
