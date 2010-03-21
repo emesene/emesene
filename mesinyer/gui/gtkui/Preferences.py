@@ -4,6 +4,8 @@ import gui
 import utils
 import extension
 
+import PluginWindow
+
 import logging
 log = logging.getLogger('gtkui.Preferences')
 
@@ -13,6 +15,7 @@ LIST = [
     {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
     {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
     {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Extensions')},
+    {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
 ]
 
 class Preferences(gtk.Window):
@@ -40,8 +43,10 @@ class Preferences(gtk.Window):
         listStore = gtk.ListStore(gtk.gdk.Pixbuf, str)
 
         for i in LIST:
-            #we should use always the same icon size, we can remove that field in LIST
-            listStore.append([self.render_icon(i['stock_id'], gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
+            # we should use always the same icon size,
+            # we can remove that field in LIST
+            listStore.append([self.render_icon(i['stock_id'],
+                             gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
 
         # Create the TreeView
         treeView = gtk.TreeView(listStore)
@@ -76,12 +81,12 @@ class Preferences(gtk.Window):
         hbox.pack_start(self.notebook, True, True)
         vbox.pack_start(hbox, True,True) # hbox, True, True
 
-
         self.interface = Interface(session)
         self.sound = Sound(session)
         self.notification = Notification(session)
         self.theme = Theme(session)
         self.extension = Extension(session)
+        self.plugins = PluginWindow.PluginMainVBox(session)
 
         self.buttons = gtk.HButtonBox()
         self.buttons.set_border_width(2)
@@ -99,6 +104,7 @@ class Preferences(gtk.Window):
         self.notifications_page = self.notification
         self.theme_page = self.theme
         self.extensions_page = self.extension
+        self.plugins_page = self.plugins
 
         # Whack the pages into a dict for future reference
 
@@ -107,6 +113,7 @@ class Preferences(gtk.Window):
         self.page_dict.append(self.notifications_page)
         self.page_dict.append(self.theme_page)
         self.page_dict.append(self.extensions_page)
+        self.page_dict.append(self.plugins_page)
 
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
@@ -122,6 +129,7 @@ class Preferences(gtk.Window):
     def showPage(self, index):
         self.notebook.set_current_page(index)
         self.current_page = index
+        self.page_dict[index].on_update()
 
 class BaseTable(gtk.Table):
     """a base table to display preferences
@@ -328,6 +336,9 @@ class BaseTable(gtk.Table):
 
         return getattr(obj, name)
 
+    def on_update(self):
+        pass
+
 class Interface(BaseTable):
     """the panel to display/modify the config related to the gui
     """
@@ -438,7 +449,7 @@ class Extension(BaseTable):
         self.extension_list = []
 
         self._add_info_widgets()
-        self._add_extensions_combo()
+        self._add_categories_and_extensions_combos()
 
     def _add_info_widgets(self):
         """add the widgets that will display the information of the extension
@@ -461,17 +472,21 @@ class Extension(BaseTable):
                 self._on_redraw_main_screen, 0, 0)
 
     def _on_redraw_main_screen(self, button):
-        """called when the Redraw main screen button is clicked
-        """
+        """called when the Redraw main screen button is clicked"""
         self.session.save_config()
         self.session.signals.login_succeed.emit()
         self.session.signals.contact_list_ready.emit()
 
-    def _add_extensions_combo(self):
-        """add the widgets to display the extensions
-        """
+    def _get_categories(self):
+        ''' get available categories'''
         categories = [ctg for ctg in extension.get_categories().keys() if len(extension.get_extensions(ctg)) > 1]
         categories.sort()
+        return categories
+
+    def _add_categories_and_extensions_combos(self):
+        """add the widgets to display the extensions"""
+
+        categories = self._get_categories()
 
         for item in categories:
             self.categories.append_text(item)
@@ -483,8 +498,7 @@ class Extension(BaseTable):
         self.categories.set_active(0)
 
     def _on_category_changed(self, combo):
-        """callback called when the category on the combo changes
-        """
+        """callback called when the category on the combo changes"""
         self.extensions.get_model().clear()
         self.extension_list = []
         category = combo.get_active_text()
@@ -505,8 +519,7 @@ class Extension(BaseTable):
         self.extensions.set_active(selected)
 
     def _on_extension_changed(self, combo):
-        """callback called when the extension on the combo changes
-        """
+        """callback called when the extension on the combo changes"""
         category = self.categories.get_active_text()
         extension_index = self.extensions.get_active()
 
@@ -525,8 +538,7 @@ class Extension(BaseTable):
         self._set_extension_info(ext)
 
     def _set_extension_info(self, ext):
-        """fill the information about the ext
-        """
+        """fill the information about the ext"""
         name = self.get_attr_or_default(ext, 'NAME', '?')
         description = self.get_attr_or_default(ext, 'DESCRIPTION', '?')
         author = self.get_attr_or_default(ext, 'AUTHOR', '?')
@@ -536,4 +548,21 @@ class Extension(BaseTable):
         self.description_info.set_text(description)
         self.author_info.set_text(author)
         self.website_info.set_text(website)
+
+    def on_update(self):
+        '''called when changed to this page'''
+        # empty categories combo
+        model = self.categories.get_model()
+        self.categories.set_model(None)
+        model.clear()
+        # fill it again with available categories
+        # this is done because a plugin may have changed them
+        categories = self._get_categories()
+        for item in categories:
+            model.append([item])
+        self.categories.set_model(model)
+        self.categories.set_active(0)
+
+
+
 

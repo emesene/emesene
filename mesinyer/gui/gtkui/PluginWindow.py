@@ -29,21 +29,13 @@ class PluginListStore(gtk.ListStore):
         name = name.replace('_', ' ')
         return name[0].upper() + name[1:]
 
-class PluginWindow(gtk.Window):
+class PluginMainVBox(gtk.VBox):
     def __init__(self, session):
-        gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
-        self.set_default_size(500, 300)
-        self.set_title('Plugins')
-        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        gtk.VBox.__init__(self)
+
+        self.set_border_width(2)
 
         self.session = session
-
-        if utils.file_readable(gui.theme.logo):
-            self.set_icon(
-                utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
-
-        main_vbox = gtk.VBox()
-        main_vbox.set_border_width(2)
 
         self.plugin_list_store = PluginListStore()
         self.plugin_list_store.update_list()
@@ -68,14 +60,11 @@ class PluginWindow(gtk.Window):
         button_config = gtk.Button(stock=gtk.STOCK_PREFERENCES)
         button_config.connect('clicked', self.on_config)
 
-        main_vbox.pack_start(scroll)
+        self.pack_start(scroll)
         button_hbox.pack_start(button_config, fill=False)
         button_hbox.pack_start(button_start, fill=False)
         button_hbox.pack_start(button_stop, fill=False)
-        main_vbox.pack_start(button_hbox, False)
-
-        self.add(main_vbox)
-        self.show_all()
+        self.pack_start(button_hbox, False)
 
     def on_start(self, *args):
         '''start the selected plugin'''
@@ -106,4 +95,26 @@ class PluginWindow(gtk.Window):
 
         if pluginmanager.plugin_is_active(name):
             pluginmanager.plugin_config(name, self.session)
+
+    def on_update(self):
+        pass
+
+class PluginWindow(gtk.Window):
+    def __init__(self, session):
+        gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
+        self.set_default_size(500, 300)
+        self.set_title('Plugins')
+        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+
+        self.session = session
+
+        if utils.file_readable(gui.theme.logo):
+            self.set_icon(
+                utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
+
+        self.main_vbox = PluginMainVBox(session)
+
+        self.add(self.main_vbox)
+        self.show_all()
+
 
