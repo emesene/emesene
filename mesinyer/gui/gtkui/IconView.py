@@ -53,6 +53,7 @@ class IconView(gtk.HBox):
                         not path.endswith('tmp') and   \
                         not path.endswith('xml') and   \
                         not path.endswith('db') and    \
+                        not path.endswith('info') and  \
                         not path.endswith('last') and  \
                         not path.endswith('avatars'):
                         gtk.gdk.threads_enter()

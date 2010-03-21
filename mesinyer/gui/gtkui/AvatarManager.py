@@ -37,7 +37,8 @@ class AvatarManager(object):
         ''' gets the user's avatar directory '''
         base_dir = os.path.dirname(self.config_dir.base_dir)
         user_dir = self.session.contacts.me.account.replace('@','-at-')
-        return self.config_dir.join(base_dir, user_dir, 'avatars')        
+        return self.config_dir.join(base_dir, self.session.contacts.me.account,
+                                    user_dir, 'avatars')        
     
     def get_cached_avatars_dir(self):
         ''' gets the contacts' cached avatar directory '''
