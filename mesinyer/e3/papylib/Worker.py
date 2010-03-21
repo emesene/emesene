@@ -135,8 +135,6 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _content_roaming_state_changed(self, cr, pspec):
         if cr.state == CR.constants.ContentRoamingState.SYNCHRONIZED:
-            # TODO: check for duplicates, put in cache,
-            # update msn_object, update gui (?)
             # TODO: maybe we can use the python's tempfile module to
             # skip this ugly hack, emesene1's screenshot plugin uses it
             type, data = cr.display_picture
@@ -163,10 +161,6 @@ class Worker(e3.base.Worker, papyon.Client):
                        str(cr.display_name), self.profile.personal_message)
 
             self._handle_action_set_picture(path)
-#                      TODO: this code stores your stuff, wow m3n
-#                      path = '/tmp/test.jpeg'
-#                      f = open(path, 'r')
-#                      cr.store("nick", "message", f.read())
 
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
@@ -795,6 +789,11 @@ class Worker(e3.base.Worker, papyon.Client):
 
 
     # e3 action handlers - profile
+#                      TODO: this code stores your stuff, wow m3n
+#                      path = '/tmp/test.jpeg'
+#                      f = open(path, 'r')
+#                      cr.store("nick", "message", f.read())
+
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS '''
         self._set_status(status_)
@@ -810,15 +809,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE'''
         if isinstance(picture_name, papyon.p2p.MSNObject):
-            #TODO
-            # this is/can be used for initial avatar changing and caching
-            # like dp roaming and stuff like that
-            # now it doesn't work, btw
-            #self.profile.msn_object = picture_name
-            #self._on_contact_msnobject_changed(self.profile)
-            #self.session.contacts.me.picture = picture_name
-            #self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
-                #self.session.account.account, picture_name)
+            #TODO: check if this can happen, and prevent it (!)
             return
 
         try:
@@ -986,9 +977,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_ft_reject(self, t):
         self.rfiletransfers[t].reject()
-        print "FT REJECTED"
 
     def _handle_action_ft_cancel(self, t):
         self.rfiletransfers[t].cancel()
-        print "FT CANCELED"
 
