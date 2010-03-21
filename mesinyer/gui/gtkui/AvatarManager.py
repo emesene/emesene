@@ -124,11 +124,12 @@ class AvatarManager(object):
         # Control if the filename is a already in cache
         if self.is_cached(filename):
             self.session.set_picture(filename)
-            if os.path.exists(self.avatar_path):
-                os.remove(self.avatar_path)
+            if os.path.exists(self.avatar_path.rsplit(os.sep)[0]):
+                if os.path.exists(self.avatar_path):
+                    os.remove(self.avatar_path)
             else:
-                os.makedirs(os.path.dirname(self.avatar_path))
-            shutil.copy2(filename, self.avatar_path)
+                os.makedirs(os.path.dirname(self.avatar_path.rsplit(os.sep)[0]))
+            shutil.copy(filename, self.avatar_path)
         else:
             try:
                 pix_96, fpath = self.add_new_avatar(filename)
@@ -140,7 +141,7 @@ class AvatarManager(object):
                     pix_96.save(self.avatar_path, 'png')
                 else:
                     #FIXME temporaney hack for animations
-                    shutil.copy2(filename, self.avatar_path)
+                    shutil.copy(filename, self.avatar_path)
             except OSError, error:
                 print error
 
