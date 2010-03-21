@@ -5,7 +5,6 @@ import utils
 
 import TextField
 import StatusButton
-from AvatarManager import AvatarManager
 
 import extension
 
@@ -25,6 +24,8 @@ class UserPanel(gtk.VBox):
         self._enabled = True
         
         Avatar = extension.get_default('avatar')
+        AvatarManager = extension.get_default('avatar manager')
+
         self.avatar = Avatar(cellDimention=32)
 
         self.avatarBox = gtk.EventBox()
