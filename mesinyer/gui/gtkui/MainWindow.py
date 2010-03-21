@@ -97,9 +97,12 @@ class MainWindow(gtk.VBox):
     def _build_menus(self):
         '''buildall the menus used on the client'''
         dialog = extension.get_default('dialog')
+        avatar_manager = extension.get_default('avatar manager')
+
+        am = avatar_manager(self.session)
 
         handler = gui.base.MenuHandler(self.session, dialog, self.contact_list,
-            self.on_disconnect, self.on_close)
+            am, self.on_disconnect, self.on_close)
 
         contact_handler = gui.base.ContactHandler(self.session, dialog,
             self.contact_list)

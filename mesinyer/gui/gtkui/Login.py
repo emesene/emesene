@@ -389,8 +389,9 @@ class Login(gtk.Alignment):
             account = self.cmb_account.get_active_text()
             if response == stock.YES:
                 try: # Delete user's folder
-                    rmtree(self.config_dir.join(account))
-                    dir_at = self.config_dir.join(account.replace('@','-at-'))
+                    rmtree(self.config_dir.join(self.server_host,account))
+                    dir_at = self.config_dir.join(self.server_host, account, 
+                                                  account.replace('@','-at-'))
                     if self.config_dir.dir_exists(dir_at):
                         rmtree(dir_at)
                 except:

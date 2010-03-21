@@ -13,11 +13,11 @@ class MenuHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, contact_list, on_disconnect=None,
+    def __init__(self, session, dialog, contact_list, avatar_manager, on_disconnect=None,
             on_quit=None):
         '''constructor'''
         self.file_handler = FileHandler(session, on_disconnect, on_quit)
-        self.actions_handler = ActionsHandler(session, dialog, contact_list)
+        self.actions_handler = ActionsHandler(session, dialog, contact_list, avatar_manager)
         self.options_handler = OptionsHandler(session, contact_list)
         self.help_handler = HelpHandler(dialog)
 
@@ -51,11 +51,11 @@ class ActionsHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, contact_list):
+    def __init__(self, session, dialog, contact_list, avatar_manager):
         '''constructor'''
         self.contact_handler = ContactHandler(session, dialog, contact_list)
         self.group_handler = GroupHandler(session, dialog, contact_list)
-        self.my_account_handler = MyAccountHandler(session, dialog)
+        self.my_account_handler = MyAccountHandler(session, dialog, avatar_manager)
 
 class OptionsHandler(object):
     '''this handler contains all the handlers needed to handle the options
@@ -290,10 +290,11 @@ class MyAccountHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog):
+    def __init__(self, session, dialog, avatar_manager):
         '''constructor'''
         self.session = session
         self.dialog = dialog
+        self.avatar_manager = avatar_manager
 
     def on_set_nick_selected(self):
         '''called when set nick is selected'''
@@ -331,12 +332,27 @@ class MyAccountHandler(object):
         '''called when set picture is selected'''
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
+            if _av_chooser is not None:
+                _av_chooser.stop_and_clear()
             if response == gui.stock.ACCEPT:
-                #TODO resize here???
-                self.session.set_picture(filename)
+                self.avatar_manager.set_as_avatar(filename)
 
-        extension.get_default('avatar chooser')(set_picture_cb, 
-                        self.session.config.last_avatar).show()
+        # Directory for user's avatars
+        path_dir = self.avatar_manager.get_avatars_dir()                   
+
+        # Directory for contact's cached avatars
+        cached_avatar_dir = self.avatar_manager.get_cached_avatars_dir()
+                   
+        # Directories for System Avatars
+        faces_paths = self.avatar_manager.get_system_avatars_dirs()
+
+        self.avatar_path = self.session.config.last_avatar
+
+        _av_chooser = extension.get_default('avatar chooser')(set_picture_cb,
+                                                self.avatar_path, path_dir,
+                                                cached_avatar_dir, faces_paths,
+                                                self.avatar_manager)
+        _av_chooser.show()
 
 class ConversationToolbarHandler(object):
     '''this handler contains all the methods to handle a conversation toolbar
