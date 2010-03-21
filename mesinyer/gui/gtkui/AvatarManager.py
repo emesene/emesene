@@ -88,7 +88,7 @@ class AvatarManager(object):
                 self.session.set_picture(filename)
                 if os.path.exists(self.avatar_path):
                     os.remove(self.avatar_path)
-                shutil.copy2(filename, self.avatar_path)
+                shutil.copy(filename, self.avatar_path)
                 return None, fpath
             else:
                 if not os.path.exists(self.get_avatars_dir()):
