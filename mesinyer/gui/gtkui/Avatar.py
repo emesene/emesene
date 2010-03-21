@@ -121,7 +121,11 @@ class Avatar( gtk.Widget ):
         if not gui.gtkui.utils.file_readable(filename):
             filename = gui.theme.logo
 
-        animation = gtk.gdk.PixbufAnimation(filename)
+        try:
+            animation = gtk.gdk.PixbufAnimation(filename)
+        except gobject.GError:
+            animation = gtk.gdk.PixbufAnimation(gui.theme.user)
+    
         if animation.is_static_image():
             self.__set_from_pixbuf(animation.get_static_image())
             self.current_animation = None

@@ -23,10 +23,9 @@ import os
 import sys
 import time
 import Queue
-import random
-import shutil
 import gobject
 import hashlib
+import tempfile
 
 from e3 import cache
 from e3.base import *
@@ -135,16 +134,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _content_roaming_state_changed(self, cr, pspec):
         if cr.state == CR.constants.ContentRoamingState.SYNCHRONIZED:
-            # TODO: maybe we can use the python's tempfile module to
-            # skip this ugly hack, emesene1's screenshot plugin uses it
             type, data = cr.display_picture
-            if os.name == "nt":
-                temp = os.environ['TEMP'] + os.sep
-                temp = unicode(temp)
-            else:
-                temp = '/tmp/'
-            image = 'argh.%s' % type.split('/')[1]
-            path = temp + image
+            handle, path = tempfile.mkstemp(suffix="."+type.split('/')[1], prefix='emsnpic')
             try:
                 f = open(path, 'wb')
                 f.write(data)
@@ -834,7 +825,6 @@ class Worker(e3.base.Worker, papyon.Client):
         if avatar_hash in self.my_avatars:
             self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED,
                     self.session.account.account, avatar_path)
-
         else:
             self.my_avatars.insert_raw(msn_object._data)
             self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,

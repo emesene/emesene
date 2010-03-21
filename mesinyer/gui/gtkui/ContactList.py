@@ -125,7 +125,14 @@ class ContactList(gui.ContactList, gtk.TreeView):
         picture
         '''
         if contact.picture:
-            animation = gtk.gdk.PixbufAnimation(contact.picture)
+            try:
+                animation = gtk.gdk.PixbufAnimation(contact.picture)
+            except gobject.GError:
+                pix = utils.safe_gtk_pixbuf_load(gui.theme.user,
+                        (self.avatar_size, self.avatar_size))
+                picture = gtk.image_new_from_pixbuf(pix)
+                return picture
+
             if animation.is_static_image():
                 pix = utils.safe_gtk_pixbuf_load(contact.picture,
                         (self.avatar_size, self.avatar_size))
