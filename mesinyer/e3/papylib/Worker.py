@@ -129,6 +129,9 @@ class Worker(e3.base.Worker, papyon.Client):
         presence = self.session.account.status
         nick = self.profile.display_name
         self._set_status(presence)
+        # initialize caches        
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        self.my_avatars = self.caches.get_avatar_cache(self.session.account.account)
 
     def _content_roaming_state_changed(self, cr, pspec):
         if cr.state == CR.constants.ContentRoamingState.SYNCHRONIZED:
@@ -144,9 +147,12 @@ class Worker(e3.base.Worker, papyon.Client):
                 temp = '/tmp/'
             image = 'argh.%s' % type.split('/')[1]
             path = temp + image
-            f = open(path, 'wb')
-            f.write(data)
-
+            try:
+                f = open(path, 'wb')
+                f.write(data)
+                f.close()
+            except Exception as e:
+                print e
             # update roaming stuff in papyon's session
             # changing display_name doesn't seem to update its value istantly, wtf?
             # however, other clients see this correctly, wow m3n
@@ -155,16 +161,12 @@ class Worker(e3.base.Worker, papyon.Client):
 
             self.session.add_event(Event.EVENT_PROFILE_GET_SUCCEED, \
                        str(cr.display_name), self.profile.personal_message)
-            #self.profile.display_picture = "" :TODO
 
+            self._handle_action_set_picture(path)
 #                      TODO: this code stores your stuff, wow m3n
 #                      path = '/tmp/test.jpeg'
 #                      f = open(path, 'r')
 #                      cr.store("nick", "message", f.read())
-
-        #this must be putted here!not in the constructor...!
-        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
-        self.my_avatars = self.caches.get_avatar_cache(self.session.account.account)
 
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
@@ -659,7 +661,6 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_profile_msn_object_changed(self):
         """Called when the MSNObject changes."""
-        print "on profile msn obj changed"
         msn_object = self.profile.msn_object
         if msn_object is not None:
             self._handle_action_set_picture(msn_object)
