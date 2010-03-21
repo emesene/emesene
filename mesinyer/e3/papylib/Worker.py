@@ -805,7 +805,7 @@ class Worker(e3.base.Worker, papyon.Client):
             return
 
         try:
-            f = open(picture_name, 'r')
+            f = open(picture_name, 'rb')
             avatar = f.read()
             f.close()
         except Exception as e:
