@@ -2,13 +2,7 @@ import os
 import gtk
 import logging
 log = logging.getLogger('gtkui.AdiumTextBox')
-
-try:
-    import webkit
-    ERROR = False
-    log.error("webkit not available")
-except ImportError:
-    ERROR = True
+import webkit
 
 import gui
 

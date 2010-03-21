@@ -1,14 +1,17 @@
 
 import extension
 
+WEBKITERROR = False
+
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
+    global WEBKITERROR
+
     import gtk
     import gobject
 
     import AccountMenu
-    import AdiumTextBox
     import Avatar
     import AvatarChooser
     import config_gtk
@@ -40,7 +43,11 @@ def gtk_main(Controller):
     import TrayIcon
     import UserPanel
     import Window
-    import WebKitTextBox
+    try:
+        import AdiumTextBox
+        import WebKitTextBox
+    except ImportError:
+        WEBKITERROR = True
 
     setup()
     gobject.threads_init()
@@ -64,6 +71,8 @@ def setup():
     """
     define all the components for a gtk environment
     """
+    global WEBKITERROR
+
     import gtk
 
     extension.category_register('dialog', Dialog.Dialog)
@@ -117,7 +126,7 @@ def setup():
     extension.category_register('filetransfer pool', FileTransferBarWidget.FileTransferBarWidget)
     extension.category_register('filetransfer widget', FileTransferWidget.FileTransferWidget)
 
-    if not WebKitTextBox.ERROR:
+    if not WEBKITERROR:
         extension.category_register('conversation output', WebKitTextBox.OutputText)
         extension.register('conversation output', TextBox.OutputText)
         extension.register('conversation output', AdiumTextBox.OutputText)

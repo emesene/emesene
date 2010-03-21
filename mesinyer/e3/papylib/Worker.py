@@ -134,9 +134,17 @@ class Worker(e3.base.Worker, papyon.Client):
         if cr.state == CR.constants.ContentRoamingState.SYNCHRONIZED:
             # TODO: check for duplicates, put in cache,
             # update msn_object, update gui (?)
+            # TODO: maybe we can use the python's tempfile module to
+            # skip this ugly hack, emesene1's screenshot plugin uses it
             type, data = cr.display_picture
-            path = '/tmp/argh.%s' % type.split('/')[1]
-            f = open(path, 'w')
+            if os.name == "nt":
+                temp = os.environ['TEMP'] + os.sep
+                temp = unicode(temp)
+            else:
+                temp = '/tmp/'
+            image = 'argh.%s' % type.split('/')[1]
+            path = temp + image
+            f = open(path, 'wb')
             f.write(data)
 
             # update roaming stuff in papyon's session
