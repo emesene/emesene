@@ -614,9 +614,9 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         self.set_property('ypad', 10)
         
         #animation stuff
-        self.anim_source = None
+        self.current_animations = {}
+        self.anim_sources = {}
         self._current_pix = None
-        self.current_animation = None
 
         #set up information of statusTransformation
         self._set_transformation('corner')
@@ -678,26 +678,37 @@ class AvatarRenderer(gtk.GenericCellRenderer):
     def on_render(self, window, widget, bg_area, cell_area, expose_area, flags):        
         """Prepare rendering setting for avatar"""
         xpad, ypad = self._get_padding()
-        x, y, width, height = cell_area 
+        x, y, width, height = cell_area
+        cell = (x, y, width, height)
         ctx = window.cairo_create()          
         ctx.translate(x, y)
         
         avatar = None
         alpha = 1
         dim = self._dimention
+        
+        #get the info for this cell_area
+        if cell not in self.current_animations and cell not in self.anim_sources:
+            self.current_animations[cell] = None
+            self.anim_sources[cell] = None
+            current_animation = None
+            anim_source = None
+        else:
+            anim_source = self.anim_sources[cell]
+            current_animation = self.current_animations[cell] 
 
         if self._image.get_storage_type() == gtk.IMAGE_ANIMATION:
             animation = self._image.get_animation()
-            if self.anim_source is None:
-                self.current_animation = animation
-                self._start_animation(animation, widget)
+            if anim_source is None:
+                current_animation = animation
+                self._start_animation(animation, widget, cell)
                 avatar = animation.get_static_image()
 
-            elif animation != self.current_animation:
-                gobject.source_remove(self.anim_source)
-                self.anim_source = None
-                self.current_animation = animation
-                self._start_animation(animation, widget)
+            elif animation != current_animation:
+                gobject.source_remove(anim_source)
+                anim_source = None
+                current_animation = animation
+                self._start_animation(animation, widget, cell)
                 avatar = animation.get_static_image()
 
             else:
@@ -705,11 +716,14 @@ class AvatarRenderer(gtk.GenericCellRenderer):
 
         elif self._image.get_storage_type() == gtk.IMAGE_PIXBUF:
             avatar = self._image.get_pixbuf()
-            if self.anim_source is not None:
-                gobject.source_remove(self.anim_source)
-                self.anim_source = None
+            if anim_source is not None:
+                gobject.source_remove(anim_source)
+                anim_source = None
         else:
             return
+
+        #save the new info in this cell area
+        self.current_animations[cell] = current_animation
 
         if self._pixalated: 
             avatar = self._get_pixalate(avatar)
@@ -725,21 +739,23 @@ class AvatarRenderer(gtk.GenericCellRenderer):
             self._draw_avatar(ctx, avatar, width - dim, ypad, dim, 
                                 gtk.ANCHOR_CENTER, self._radius_factor, alpha)
 
-    def _start_animation(self, animation, widget):
+    def _start_animation(self, animation, widget, cell_area):
         iteran = animation.get_iter()
-        self.anim_source = gobject.timeout_add(iteran.get_delay_time(),
-                                               self._advance, iteran, widget)
+        gobject.timeout_add(iteran.get_delay_time(), self._advance,
+                            iteran, widget, cell_area)
 
-    def _advance(self, iteran, widget):
+    def _advance(self, iteran, widget, cell_area):
         iteran.advance()
-        self.__set_from_pixbuf_animation(iteran.get_pixbuf(), widget)
-        self.anim_source = gobject.timeout_add(iteran.get_delay_time(),
-                                                self._advance, iteran, widget)
+        self.__set_from_pixbuf_animation(iteran.get_pixbuf(), widget, cell_area)
+        anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance,
+                                          iteran, widget, cell_area)
+        self.anim_sources[cell_area] = anim_source
         return False
 
-    def __set_from_pixbuf_animation(self, pixbuf, widget):
+    def __set_from_pixbuf_animation(self, pixbuf, widget, cell_area):
         self._current_pix = pixbuf
-        widget.queue_draw()
+        x, y, width, height = cell_area
+        widget.queue_draw_area(x, y, width, height)
 
     def _get_pixalate(self, pixbuf):
         """Pixalate and saturate values based on original renderer
