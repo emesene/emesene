@@ -54,17 +54,15 @@ class Plugin(PluginBase):
 
     def config(self, session):
         '''config the plugin'''
-        Player = extension.get_default(CATEGORY)
-        player = Player()
+        category = extension.get_category(CATEGORY)
+        player = category.get_instance()
         if player != None:
             player.preferences()
             self.redraw_main_window()
         return True
 
     def category_register(self):
-        ''' When you create the category with category_register, you can specify
-        an interface using C{extensions.category_register("category name", IFoo)}'''
-        extension.category_register(CATEGORY, songretriever.MusicHandler)
+        extension.category_register(CATEGORY, songretriever.MusicHandler, songretriever.MusicHandler, True)
         return True
 
     def extensions_register(self):
@@ -77,8 +75,5 @@ class Plugin(PluginBase):
         extension.register(CATEGORY, handler_moc.MocHandler)
         extension.register(CATEGORY, handler_mpd.MpdHandler)
         extension.register(CATEGORY, handler_rhythmbox.RhythmboxHandler)
-#        extension.register(CATEGORY, handler_xmms2.Xmms2Handler)
-
-        #FIXME This should be configurable
-        extension.set_default(CATEGORY, handler_mpd.MpdHandler)
+        # extension.register(CATEGORY, handler_xmms2.Xmms2Handler)
 

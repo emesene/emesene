@@ -28,8 +28,8 @@ class Song(object):
 
 class MusicHandler(object):
     '''Base class for all music handlers'''
-    NAME = 'MusicHandler'
-    DESCRIPTION = 'Base Music handler'
+    NAME = 'None'
+    DESCRIPTION = 'Don\'t listen to any player'
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
@@ -52,14 +52,14 @@ class MusicHandler(object):
         '''callback for the config dialog'''
         if status:
             self.format = format
-            print self.format
+            # print self.format
 
     def check_song(self):
         '''get the current song and set it if different than the last one'''
         if self.session:
             song = self.get_current_song()
             if song:
-                print self.format
+                # print self.format
                 current_title = song.format(self.format)
                 if current_title != self.last_title:
                     self.session.set_media(current_title)
@@ -136,12 +136,15 @@ class MusicHandler(object):
 
     def get_current_song(self):
         ''' returns current song info'''
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        return None
 
     def is_running(self):
         '''returns True if the player is running'''
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        return False
 
     def is_playing(self):
         '''returns True if the player is playing a song'''
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        return False

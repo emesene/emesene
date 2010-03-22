@@ -1,6 +1,6 @@
 import songretriever
 
-from thirdparty import xmmsclient
+import xmmsclient
 
 class Xmms2Handler(songretriever.MusicHandler):
     '''a simple handler for xmms2 music player'''
