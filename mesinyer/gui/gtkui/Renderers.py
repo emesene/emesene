@@ -581,8 +581,6 @@ from e3 import status
 #from emesene1 by mariano guerra adapted by cando
 #animation support by cando
 #TODO add transformation field in configuration
-#TODO add mini transformation
-#TODO finish offline behaviour( grey avatars)
 #TODO signals in configuration for transformation changes????
 
 class AvatarRenderer(gtk.GenericCellRenderer):
@@ -611,7 +609,7 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         self._icon_source.set_state(gtk.STATE_INSENSITIVE)
         
         self.set_property('xpad', 1)
-        self.set_property('ypad', 10)
+        self.set_property('ypad', 8)
         
         #animation stuff
         self.current_animations = {}
@@ -619,7 +617,7 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         self._current_pix = None
 
         #set up information of statusTransformation
-        self._set_transformation('corner')
+        self._set_transformation('corner|gray')
         #self.transId = self._config.connect('change::statusTransformation', \
             #self._transformation_callback)
         
@@ -632,10 +630,8 @@ class AvatarRenderer(gtk.GenericCellRenderer):
 
     def _set_transformation(self, setting):
         transformation = setting.split('|')
-        self._pixalated = ('pixelate' in transformation)
         self._corner = ('corner' in transformation)
-        self._alpha_status = ('alpha' in transformation)
-        self._mini = ('mini' in transformation)
+        self._alpha_status = ('alpha' in transformation) 
         self._gray = ('gray' in transformation)
 
     def _transformation_callback(self, config, newvalue, oldvalue):
@@ -669,7 +665,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         """Requisition size"""
         xpad, ypad = self._get_padding()
         if self._dimention >= 32: width = self._dimention
-        elif self._mini: width = self._dimention
         elif self._corner: width = self._dimention * 2            
         else: width = self._dimention            
         height = self._dimention + (ypad * 2)                       
@@ -725,8 +720,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         #save the new info in this cell area
         self.current_animations[cell] = current_animation
 
-        if self._pixalated: 
-            avatar = self._get_pixalate(avatar)
         if self._gray and self._offline and avatar != None:
             alpha = 1
             source = self._icon_source
@@ -757,18 +750,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         x, y, width, height = cell_area
         widget.queue_draw_area(x, y, width, height)
 
-    def _get_pixalate(self, pixbuf):
-        """Pixalate and saturate values based on original renderer
-           kept to retain compatibility"""
-        pixalate = pixbuf.copy()        
-        if not self._status == status.ONLINE:
-            if self._status == status.BUSY:
-                pixalate.saturate_and_pixelate(pixbuf, 1.0, True)
-            else:
-                pixalate.saturate_and_pixelate(pixbuf, 0.1, False)                
-        return pixalate
-        
-          
     def _draw_avatar(self, ctx, pixbuf, x, y, dimention, 
                          position = gtk.ANCHOR_CENTER, 
                          radius = 0, alpha = 1):

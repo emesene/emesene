@@ -60,11 +60,12 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # the object (group or contact),
         # the string to display and a boolean indicating if the pixbuf should
         # be shown (False for groups, True for contacts), the status
-        # image, and an int that is used to allow ordering specified by the user
+        # image, a boolean indicating if the contact is offline
+        # and an int that is used to allow ordering specified by the user
         # a boolean indicating special groups always False for contacts, True
         # for special groups like "No group"
         self._model = gtk.TreeStore(gtk.Image, object, str, bool,
-            gtk.gdk.Pixbuf, int, bool)
+            gtk.gdk.Pixbuf, bool, int, bool)
         self.model = self._model.filter_new(root=None)
         self.model.set_visible_func(self._visible_func)
 
@@ -96,6 +97,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         column.add_attribute(self.pbr, 'visible', 3)
         column.add_attribute(pbr_status, 'visible', 3)
         column.add_attribute(pbr_status, 'pixbuf', 4)
+        column.add_attribute(self.pbr, 'offline', 5)
 
         self.set_search_column(2)
         self.set_headers_visible(False)
@@ -311,7 +313,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.session.config.d_weights[group.identifier] = weight
 
         group_data = (None, group, self.format_group(group), False, None,
-            weight, special)
+            False, weight, special)
 
         for row in self._model:
             obj = row[1]
@@ -338,11 +340,12 @@ class ContactList(gui.ContactList, gtk.TreeView):
             weight = 0
 
         self.session.config.d_weights[contact.account] = weight
+        offline = contact.status == e3.status.OFFLINE
 
         contact_data = (self._get_contact_pixbuf_or_default(contact), 
             contact, self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
-            weight, False)
+            offline, weight, False)
 
         # if group_offline is set and the contact is offline then put it on the
         # special offline group
@@ -477,11 +480,12 @@ class ContactList(gui.ContactList, gtk.TreeView):
             weight = 0
 
         self.session.config.d_weights[contact.account] = weight
+        offline = contact.status == e3.status.OFFLINE
 
         contact_data = (self._get_contact_pixbuf_or_default(contact),
             contact, self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
-            weight, False)
+            offline, weight, False)
 
         found = False
 
@@ -501,13 +505,13 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def update_no_group(self):
         '''update the special "No group" group'''
         group_data = (None, self.no_group, self.format_group(self.no_group), False, None,
-            0, True)
+            False, 0, True)
         self._model[self.no_group_iter] = group_data
 
     def update_offline_group(self):
         '''update the special "No group" group'''
         group_data = (None, self.offline_group, self.format_group(self.offline_group), False, None,
-            0, True)
+            False, 0, True)
         self._model[self.offline_group_iter] = group_data
 
     def update_group(self, group):
@@ -523,7 +527,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             obj = row[1]
             if type(obj) == e3.Group and obj.name == group.name:
                 group_data = (None, group, self.format_group(group), False, None,
-                    weight, row[6])
+                    False, weight, row[6])
                 self._model[row.iter] = group_data
 
     def set_group_state(self, group, state):
