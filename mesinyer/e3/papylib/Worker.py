@@ -571,15 +571,18 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_addressbook_group_added(self, group):
         self._add_group(group)
-        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, group.id, group.name)
+        e3_group = e3.base.Group(group.name, group.id)
+        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, e3_group)
 
     def _on_addressbook_group_deleted(self, group):
         self._remove_group(group)
-        self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, group.id, group.name)
+        e3_group = e3.base.Group(group.name, group.id)
+        self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, e3_group)
 
     def _on_addressbook_group_renamed(self, group):
         self._rename_group(group)
-        self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED, group.id, group.name)
+        e3_group = e3.base.Group(group.name, group.id)
+        self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED, e3_group)
 
     def _on_addressbook_group_contact_added(self, group, contact):
         self._add_contact_to_group(contact, group)
@@ -689,8 +692,6 @@ class Worker(e3.base.Worker, papyon.Client):
         def add_to_group_fail(*args):
             print "add group fail", args
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_FAILED, 0, 0) #gid, cid
-        self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
-            gid, account)
 
     def _handle_action_block_contact(self, account):
         ''' handle Action.ACTION_BLOCK_CONTACT '''
@@ -723,8 +724,12 @@ class Worker(e3.base.Worker, papyon.Client):
            self.session.add_event(Event.EVENT_CONTACT_MOVE_SUCCEED,
            account, src_gid, dest_gid)
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        papygroupsrc = self.address_book.groups.search_by('name', self.session.groups[src_gid].name)
-        papygroupdest = self.address_book.groups.search_by('name', self.session.groups[dest_gid].name)
+        for group in self.address_book.groups:
+            if group.name == self.session.groups[src_gid].name:
+                papygroupsrc = group
+        for group in self.address_book.groups:
+            if group.name == self.session.groups[dest_gid].name:
+                papygroupdest = group
         self.address_book.add_contact_to_group(papygroupdest, papycontact,done_cb=add_to_group_succeed,
                                                  failed_cb=move_to_group_fail)
 
@@ -751,7 +756,9 @@ class Worker(e3.base.Worker, papyon.Client):
             print "remove contact from group fail",args
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_FAILED, '')
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        papygroup = self.address_book.groups.search_by('name', self.session.groups[gid].name)
+        for group in self.address_book.groups:
+            if group.name == self.session.groups[gid].name:
+                papygroup = group
         self.address_book.delete_contact_from_group(papygroup, papycontact, failed_cb=remove_from_group_fail)
 
     def _handle_action_remove_group(self, gid):
@@ -759,7 +766,9 @@ class Worker(e3.base.Worker, papyon.Client):
         def remove_group_fail(*args):
             print "remove group fail"
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_FAILED, 0) #gid
-        papygroup = self.address_book.groups.search_by('name', self.session.groups[gid].name)
+        for group in self.address_book.groups:
+            if group.name == self.session.groups[gid].name:
+                papygroup = group    
         self.address_book.delete_group(papygroup, failed_cb=remove_group_fail)
 
     def _handle_action_rename_group(self, gid, name):
@@ -767,7 +776,9 @@ class Worker(e3.base.Worker, papyon.Client):
         def rename_group_fail(*args):
             print "rename group fail"
             self.session.add_event(e3.Event.EVENT_GROUP_RENAME_FAILED, 0, '') # gid, name
-        papygroup = self.address_book.groups.search_by('name', self.session.groups[gid].name)
+        for group in self.address_book.groups:
+            if group.name == self.session.groups[gid].name:
+                papygroup = group
         self.address_book.rename_group(papygroup, name, failed_cb=rename_group_fail)
 
     def _handle_action_set_contact_alias(self, account, alias): #TODO: finish this

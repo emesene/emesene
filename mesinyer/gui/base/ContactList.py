@@ -51,7 +51,7 @@ class ContactList(object):
         self.set_avatar_size(self.avatar_size)
 
         # self.order_by_status is a property that returns the inverse
-        # value as the one of self.order_by_group, the setter, set the inverse
+        # value as the one of self.ordgroup add succeeder_by_group, the setter, set the inverse
         # value to this attribute
         self.order_by_group = self.session.config.b_order_by_group
         self.show_nick = self.session.config.b_show_nick
@@ -80,6 +80,13 @@ class ContactList(object):
             self._on_contact_attr_changed)
         self.session.signals.picture_change_succeed.subscribe(
             self._on_contact_attr_changed)
+        self.session.signals.group_add_succeed.subscribe(
+            self.add_group)
+        self.session.signals.group_remove_succeed.subscribe(
+            self.remove_group)
+        self.session.signals.group_rename_succeed.subscribe(
+            self.update_group)
+        #TODO connect contact signals
 
     def _on_contact_attr_changed(self, account, *args):
         '''called when an attribute of the contact changes
