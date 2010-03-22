@@ -524,7 +524,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         for row in self._model:
             obj = row[1]
-            if type(obj) == e3.Group and obj.name == group.name:
+            if type(obj) == e3.Group and obj.identifier == group.identifier:
                 group_data = (None, group, self.format_group(group), False, None,
                     weight, row[6], False)
                 self._model[row.iter] = group_data

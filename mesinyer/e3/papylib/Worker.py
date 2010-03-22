@@ -576,15 +576,18 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_addressbook_group_added(self, group):
         self._add_group(group)
-        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, group.id, group.name)
+        e3_group = e3.base.Group(group.name, group.id)
+        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, e3_group)
 
     def _on_addressbook_group_deleted(self, group):
         self._remove_group(group)
-        self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, group.id, group.name)
+        e3_group = e3.base.Group(group.name, group.id)
+        self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, e3_group)
 
     def _on_addressbook_group_renamed(self, group):
         self._rename_group(group)
-        self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED, group.id, group.name)
+        e3_group = e3.base.Group(group.name, group.id)
+        self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED, e3_group)
 
     def _on_addressbook_group_contact_added(self, group, contact):
         self._add_contact_to_group(contact, group)
@@ -695,8 +698,6 @@ class Worker(e3.base.Worker, papyon.Client):
         def add_to_group_fail(*args):
             print "add group fail", args
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_FAILED, 0, 0) #gid, cid
-        self.session.add_event(Event.EVENT_GROUP_ADD_CONTACT_SUCCEED,
-            gid, account)
 
     def _handle_action_block_contact(self, account):
         ''' handle Action.ACTION_BLOCK_CONTACT '''
