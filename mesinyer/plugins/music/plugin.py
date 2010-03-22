@@ -14,7 +14,7 @@ import handler_lastfm
 import handler_moc
 import handler_mpd
 import handler_rhythmbox
-import handler_xmms2
+# import handler_xmms2
 
 CATEGORY = 'listening to'
 
@@ -77,7 +77,7 @@ class Plugin(PluginBase):
         extension.register(CATEGORY, handler_moc.MocHandler)
         extension.register(CATEGORY, handler_mpd.MpdHandler)
         extension.register(CATEGORY, handler_rhythmbox.RhythmboxHandler)
-        extension.register(CATEGORY, handler_xmms2.Xmms2Handler)
+#        extension.register(CATEGORY, handler_xmms2.Xmms2Handler)
 
         #FIXME This should be configurable
         extension.set_default(CATEGORY, handler_mpd.MpdHandler)
