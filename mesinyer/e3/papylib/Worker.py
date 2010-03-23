@@ -576,18 +576,15 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_addressbook_group_added(self, group):
         self._add_group(group)
-        e3_group = e3.base.Group(group.name, group.id)
-        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, e3_group)
+        self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, group.id)
 
     def _on_addressbook_group_deleted(self, group):
         self._remove_group(group)
-        e3_group = e3.base.Group(group.name, group.id)
-        self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, e3_group)
+        self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, group.id)
 
     def _on_addressbook_group_renamed(self, group):
         self._rename_group(group)
-        e3_group = e3.base.Group(group.name, group.id)
-        self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED, e3_group)
+        self.session.add_event(Event.EVENT_GROUP_RENAME_SUCCEED, group.id)
 
     def _on_addressbook_group_contact_added(self, group, contact):
         self._add_contact_to_group(contact, group)
