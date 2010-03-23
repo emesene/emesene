@@ -736,7 +736,7 @@ class Worker(e3.base.Worker, papyon.Client):
             if group.id == self.session.groups[dest_gid].identifier:
                 papygroupdest = group
         if papygroupdest is not None and papygroupsrc is not None:
-        self.address_book.add_contact_to_group(papygroupdest, papycontact,done_cb=add_to_group_succeed,
+            self.address_book.add_contact_to_group(papygroupdest, papycontact,done_cb=add_to_group_succeed,
                                                  failed_cb=move_to_group_fail)
 
     def _handle_action_remove_contact(self, account):
@@ -767,7 +767,8 @@ class Worker(e3.base.Worker, papyon.Client):
             if group.id == self.session.groups[gid].identifier:
                 papygroup = group
         if papygroup is not None:
-            self.address_book.delete_contact_from_group(papygroup, papycontact, failed_cb=remove_from_group_fail)
+            self.address_book.delete_contact_from_group(papygroup, papycontact,
+                                                        failed_cb=remove_from_group_fail)
 
     def _handle_action_remove_group(self, gid):
         ''' handle Action.ACTION_REMOVE_GROUP '''
