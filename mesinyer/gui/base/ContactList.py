@@ -75,18 +75,32 @@ class ContactList(object):
         # + ONLINE_COUNT
         # + TOTAL_COUNT
         self.group_template = '%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)'
-
+        
+        #contact signals
         self.session.signals.contact_attr_changed.subscribe(
             self._on_contact_attr_changed)
         self.session.signals.picture_change_succeed.subscribe(
             self._on_contact_attr_changed)
+        self.session.signals.contact_add_succeed.subscribe(
+            self._on_add_contact)
+        self.session.signals.contact_remove_succeed.subscribe(
+            self._on_remove_contact)
+        self.session.signals.group_add_contact_succeed.subscribe(
+            self._on_add_contact_group)
+        self.session.signals.group_remove_contact_succeed.subscribe(
+            self._on_remove_contact_group)
+        self.session.signals.contact_block_succeed.subscribe(
+            self._on_contact_attr_changed)
+        self.session.signals.contact_unblock_succeed.subscribe(
+            self._on_contact_attr_changed)
+        #group signals
         self.session.signals.group_add_succeed.subscribe(
-            self.add_group)
+            self._on_add_group)
         self.session.signals.group_remove_succeed.subscribe(
-            self.remove_group)
+            self._on_remove_group)
         self.session.signals.group_rename_succeed.subscribe(
-            self.update_group)
-        #TODO connect contact signals
+            self._on_update_group)
+        #TODO fix offline group on connection e add fail signals
 
     def _on_contact_attr_changed(self, account, *args):
         '''called when an attribute of the contact changes
@@ -96,6 +110,80 @@ class ContactList(object):
             return
 
         self.update_contact(contact)
+   
+    def _on_add_contact(self, account, *args):
+        '''called when we add a contact 
+        '''
+        contact = self.session.contacts.get(account)
+        if not contact:
+            return
+
+        self.add_contact(contact)
+
+    def _on_remove_contact(self, account, *args):
+        '''called when we remove a contact 
+        '''
+        contact = self.session.contacts.get(account)
+        if not contact:
+            return
+
+        self.remove_contact(contact)
+
+    def _on_add_contact_group(self, group, account, *args):
+        '''called when we add a contact in a group
+        '''
+        contact = self.session.contacts.get(account)
+        group = self.session.groups[group]
+
+        if not contact:
+            return
+        elif not group:
+            self.add_contact(contact)
+        
+        self.add_contact(contact, group)
+
+    def _on_remove_contact_group(self, group, account, *args):
+        '''called when we remove a contact from a group
+        '''
+        contact = self.session.contacts.get(account)
+        group = self.session.groups[group]
+        if not contact:
+            return
+        elif not group:
+            self.remove_contact(contact)
+
+        self.remove_contact(contact, group)
+
+    def _on_add_group(self, group, *args):
+        '''called when we add a group 
+        '''
+        group = self.session.groups[group]
+
+        if not group:
+            return
+
+        self.add_group(group)
+
+    def _on_remove_group(self, group, *args):
+        '''called when we remove a group
+        '''
+        group = self.session.groups[group]
+
+        if not group:
+            return
+
+        self.remove_group(group)
+
+    def _on_update_group(self, group, *args):
+        '''called when we remove a group
+        '''
+        group = self.session.groups[group]
+
+        if not group:
+            return
+
+        self.update_group(group)
+   
 
     def _get_order_by_status(self):
         '''return the value of order by status'''
