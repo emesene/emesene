@@ -63,6 +63,18 @@ elif os.path.exists('po/'):
 else:
     gettext.install('emesene')
 
+class SingleInstanceOption(object):
+    '''option parser'''
+
+    def option_register(self):
+        '''register the options to parse by the command line option parser'''
+        option = optparse.Option("-s", "--single",
+            action="count", dest="single_instance", default=False,
+            help="Allow only one instance of emesene")
+        return option
+
+extension.implements('option provider')(SingleInstanceOption)
+extension.get_category('option provider').activate(SingleInstanceOption)
 
 class VerboseOption(object):
     '''option parser'''
@@ -85,6 +97,7 @@ class Controller(object):
         self.window = None
         self.tray_icon = None
         self.conversations = None
+        self.single_instance = None
         self.config = e3.common.Config()
         self.config_dir = e3.common.ConfigDir('emesene2')
         self.config_path = self.config_dir.join('config')
@@ -128,6 +141,18 @@ class Controller(object):
         options = PluggableOptionParser.get_parsing()[0]
 
         debugger.init(debuglevel=options.debuglevel)
+
+        if options.single_instance:
+            try:
+                import SingleInstance
+                self.single_instance = SingleInstance.SingleInstance()
+                if self.single_instance.emesene_is_running():
+                    print "Another instance of emesene is already running."
+                    # try to show the instance that's already running
+                    self.single_instance.show()
+                    sys.exit(0)
+            except ImportError:
+                pass
 
     def start(self, account=None):
         '''the entry point to the class'''
