@@ -3,6 +3,11 @@ import tempfile
 import getpass
 
 
+
+
+
+
+
 class SingleInstance:
     def __init__(self):
 
@@ -64,15 +69,38 @@ class SingleInstance:
     def show(self):
         ''' tries to bring to front the instance of emesene
         that is already running'''
-        if not self.have_dbus:
-            # Is there a no dbus way to do this?
-            return
-        try:
-            emesene_bus = self.dbus.SessionBus()
-            emesene_object = emesene_bus.get_object(self._bus_name, self._object_path)
-            emesene_object.show()
-        except self.dbus.DBusException, error:
-            print "%s" % error
+        if os.name == "posix":
+            if not self.have_dbus:
+                # Is there a no dbus way to do this?
+                return
+            try:
+                emesene_bus = self.dbus.SessionBus()
+                emesene_object = emesene_bus.get_object(self._bus_name, self._object_path)
+                emesene_object.show()
+            except self.dbus.DBusException, error:
+                print "%s" % error
+        else:
+            try:
+                # import win32api
+                import win32con
+                import win32gui
+            except ImportError:
+                print "Can't import win32"
+                return
+
+            def window_enumeration_handler(hwnd, result_list):
+                '''Pass to win32gui.EnumWindows() to generate list of window handle, window text tuples.'''
+                result_list.append((hwnd, win32gui.GetWindowText(hwnd)))
+
+            window_text = "emesene"
+            top_windows = []
+            win32gui.EnumWindows(window_enumeration_handler, top_windows)
+            print len(top_windows)
+            for window in top_windows:
+                if window[1] and window_text.lower() in window[1].lower():
+                    print window[1]
+                    win32gui.ShowWindow(window[0], win32con.SW_SHOW)
+                    win32gui.SetForegroundWindow(window[0])
 
     def __del__(self):
         '''Be sure that the file will be closed and deleted'''
