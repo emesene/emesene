@@ -11,6 +11,7 @@ class SingleInstance:
 
         self.new_dbus = False
         self.have_dbus = False
+        self.dbus = None
 
         if os.name == 'posix':
             try:
@@ -26,6 +27,7 @@ class SingleInstance:
                     import dbus.mainloop.glib
                     self.new_dbus = False
                 self.have_dbus = True
+                self.dbus = dbus
             except dbus.DBusException, error:
                 self.have_dbus = False
                 print 'Unable to use D-Bus: %s' % str(error)
@@ -62,18 +64,19 @@ class SingleInstance:
     def show(self):
         ''' tries to bring to front the instance of emesene
         that is already running'''
-        if self.have_dbus == False:
+        if not self.have_dbus:
             # Is there a no dbus way to do this?
             return
         try:
-            emesene_bus = dbus.SessionBus()
+            emesene_bus = self.dbus.SessionBus()
             emesene_object = emesene_bus.get_object(self._bus_name, self._object_path)
             emesene_object.show()
-        except dbus.DBusException, error:
-            print "Can't bring old instance of emesene to front: %s" % error
+        except self.dbus.DBusException, error:
+            print "%s" % error
 
     def __del__(self):
-        '''Be sure that the file will be closed and deleted in windows'''
+        '''Be sure that the file will be closed and deleted'''
+        '''This is a must in windows'''
         if os.name == 'nt':
             if hasattr(self, 'lock_file'):
                 os.close(self.lock_file)
