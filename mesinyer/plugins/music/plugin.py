@@ -13,8 +13,14 @@ import handler_guayadeque
 import handler_lastfm
 import handler_moc
 import handler_mpd
+import handler_mpris
 import handler_rhythmbox
-# import handler_xmms2
+
+try:
+    import handler_xmms2
+    XMMSCLIENT = True
+except ImportError:
+    XMMSCLIENT = False
 
 CATEGORY = 'listening to'
 
@@ -74,6 +80,9 @@ class Plugin(PluginBase):
         extension.register(CATEGORY, handler_lastfm.LastfmHandler)
         extension.register(CATEGORY, handler_moc.MocHandler)
         extension.register(CATEGORY, handler_mpd.MpdHandler)
+        extension.register(CATEGORY, handler_mpris.MprisHandler)
         extension.register(CATEGORY, handler_rhythmbox.RhythmboxHandler)
-        # extension.register(CATEGORY, handler_xmms2.Xmms2Handler)
+
+        if XMMSCLIENT:        
+            extension.register(CATEGORY, handler_xmms2.Xmms2Handler)
 

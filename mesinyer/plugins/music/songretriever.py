@@ -7,6 +7,7 @@ import gobject
 import Preferences
 
 from gui.gtkui.AvatarManager import AvatarManager
+from gui.gtkui.Preferences import BaseTable
 
 class Song(object):
     '''a class representing a song'''
@@ -26,6 +27,20 @@ class Song(object):
                 self.album).replace('%TITLE%', self.title).replace('%FILE%',
                         self.filename)
 
+class BaseMusicHandlerConfig(BaseTable):
+    '''the panel to display/modify the config related to
+    the 'listening to' extension'''
+
+    def __init__(self):
+        '''constructor'''
+        BaseTable.__init__(self, 4, 1)
+
+        self.format_default = "%ARTIST% - %ALBUM% - %TITLE%"
+        # This should be loaded from a config option
+        self.format = self.format_default
+        self.append_entry_default('Format', 'format', self.format_default)
+
+
 class MusicHandler(object):
     '''Base class for all music handlers'''
     NAME = 'None'
@@ -34,7 +49,6 @@ class MusicHandler(object):
     WEBSITE = 'www.emesene.org'
 
     def __init__(self, main_window = None):
-        self.format = "%ARTIST% - %ALBUM% - %TITLE%"
         self.last_title = None
         self.session = None
         self.avatar_manager = None
@@ -43,24 +57,28 @@ class MusicHandler(object):
             self.session = main_window.session
             self.avatar_manager = AvatarManager(self.session)
 
+        self.preferences_dialog = None
+        self.config = BaseMusicHandlerConfig()
+
         gobject.timeout_add(500, self.check_song)
 
     def preferences(self):
-        Preferences.Preferences(self._on_config, self.NAME, self.format).show()
+        if self.preferences_dialog == None:
+            self.preferences_dialog = Preferences.Preferences(self._on_config, self.NAME, self.config)
+        self.preferences_dialog.show()
  
-    def _on_config(self, status, format):
+    def _on_config(self, status):
         '''callback for the config dialog'''
         if status:
-            self.format = format
-            # print self.format
+            pass
 
     def check_song(self):
         '''get the current song and set it if different than the last one'''
         if self.session:
             song = self.get_current_song()
             if song:
-                # print self.format
-                current_title = song.format(self.format)
+                # print self.config.format
+                current_title = song.format(self.config.format)
                 if current_title != self.last_title:
                     self.session.set_media(current_title)
                     self.last_title = current_title
@@ -74,7 +92,6 @@ class MusicHandler(object):
     def set_cover_as_avatar(self, song):
         image_path = self.get_cover_path(song)
         if image_path != None and self.avatar_manager != None:
-            # print "Setting " + image_path + " as avatar image"
             self.avatar_manager.set_as_avatar(image_path)
 
     def get_cover_path(self, song):
@@ -136,15 +153,12 @@ class MusicHandler(object):
 
     def get_current_song(self):
         ''' returns current song info'''
-        # raise NotImplementedError()
         return None
 
     def is_running(self):
         '''returns True if the player is running'''
-        # raise NotImplementedError()
         return False
 
     def is_playing(self):
         '''returns True if the player is playing a song'''
-        # raise NotImplementedError()
         return False

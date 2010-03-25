@@ -3,6 +3,24 @@ import songretriever
 import socket
 from thirdparty import mpd
 
+class MpdMusicHandlerConfig(songretriever.BaseMusicHandlerConfig):
+    '''the panel to display/modify the config related to
+    the 'listening to' extension for the MPRIS Music Handler'''
+
+    def __init__(self):
+        '''constructor'''
+        songretriever.BaseMusicHandlerConfig.__init__(self)
+
+        self.host_default = "localhost"
+        # This should be loaded from a config option
+        self.host = self.host_default
+        self.append_entry_default('Host', 'host', self.host_default)
+
+        self.port_default = "6600"
+        # This should be loaded from a config option
+        self.port = self.port_default
+        self.append_entry_default('Port', 'port', self.port_default)
+
 class MpdHandler(songretriever.MusicHandler):
     '''a simple handler for mpd music player'''
     NAME = 'MPD'
@@ -13,8 +31,9 @@ class MpdHandler(songretriever.MusicHandler):
     def __init__(self, main_window = None):
         songretriever.MusicHandler.__init__(self, main_window)
 
-        self.host = "localhost"
-        self.port = 6600
+        # Use our specific config dialog
+        self.config = MpdMusicHandlerConfig()
+
         self.client = None
 
         self.reconnect()
@@ -24,7 +43,7 @@ class MpdHandler(songretriever.MusicHandler):
         return True if connected'''
         try:
             self.client = mpd.MPDClient()
-            self.client.connect(self.host, self.port)
+            self.client.connect(self.config.host, self.config.port)
             return True
         except mpd.ConnectionError:
             return False

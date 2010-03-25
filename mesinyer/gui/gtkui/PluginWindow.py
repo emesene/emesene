@@ -70,31 +70,34 @@ class PluginMainVBox(gtk.VBox):
         '''start the selected plugin'''
         sel = self.plugin_list_view.get_selection()
         model, iter = sel.get_selected()
-        name = model.get_value(iter, 2)
-        pluginmanager = get_pluginmanager()
-        pluginmanager.plugin_start(name, self.session)
-        print pluginmanager.plugin_is_active(name), 'after start'
-        model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
+        if iter != None:
+            name = model.get_value(iter, 2)
+            pluginmanager = get_pluginmanager()
+            pluginmanager.plugin_start(name, self.session)
+            print pluginmanager.plugin_is_active(name), 'after start'
+            model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
 
     def on_stop(self, *args):
         '''stop the selected plugin'''
         sel = self.plugin_list_view.get_selection()
         model, iter = sel.get_selected()
-        name = model.get_value(iter, 2)
-        pluginmanager = get_pluginmanager()
-        pluginmanager.plugin_stop(name)
-        print pluginmanager.plugin_is_active(name), 'after stop'
-        model.set_value(iter, 0, pluginmanager.plugin_is_active(name))
+        if iter != None:
+            name = model.get_value(iter, 2)
+            pluginmanager = get_pluginmanager()
+            pluginmanager.plugin_stop(name)
+            print pluginmanager.plugin_is_active(name), 'after stop'
+            model.set_value(iter, 0, pluginmanager.plugin_is_active(name))
 
     def on_config(self, *args):
         '''stop the selected plugin'''
         sel = self.plugin_list_view.get_selection()
         model, iter = sel.get_selected()
-        name = model.get_value(iter, 2)
-        pluginmanager = get_pluginmanager()
+        if iter != None:
+            name = model.get_value(iter, 2)
+            pluginmanager = get_pluginmanager()
 
-        if pluginmanager.plugin_is_active(name):
-            pluginmanager.plugin_config(name, self.session)
+            if pluginmanager.plugin_is_active(name):
+                pluginmanager.plugin_config(name, self.session)
 
     def on_update(self):
         pass
