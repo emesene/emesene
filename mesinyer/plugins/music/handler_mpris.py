@@ -6,7 +6,7 @@ import DBusBase
 
 class MprisMusicHandlerConfig(songretriever.BaseMusicHandlerConfig):
     '''the panel to display/modify the config related to
-    the 'listening to' extension for the MPRIS Music Handler'''
+    the 'listening to' extension for the MPRIS music handler'''
 
     def __init__(self):
         '''constructor'''

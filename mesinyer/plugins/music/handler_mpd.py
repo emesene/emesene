@@ -5,7 +5,7 @@ from thirdparty import mpd
 
 class MpdMusicHandlerConfig(songretriever.BaseMusicHandlerConfig):
     '''the panel to display/modify the config related to
-    the 'listening to' extension for the MPRIS Music Handler'''
+    the 'listening to' extension for the mpd music handler'''
 
     def __init__(self):
         '''constructor'''
