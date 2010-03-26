@@ -38,8 +38,12 @@ class BaseMusicHandlerConfig(BaseTable):
         self.format_default = "%ARTIST% - %ALBUM% - %TITLE%"
         # This should be loaded from a config option
         self.format = self.format_default
-        self.append_entry_default('Format', 'format', self.format_default)
+        BaseTable.append_entry_default(self,
+            'Format', 'format', self.format_default)
 
+        self.change_avatar = True
+        BaseTable.append_check(self,
+            _('Set song cover as avatar'), 'change_avatar')
 
 class MusicHandler(object):
     '''Base class for all music handlers'''
@@ -64,7 +68,8 @@ class MusicHandler(object):
 
     def preferences(self):
         if self.preferences_dialog == None:
-            self.preferences_dialog = Preferences.Preferences(self._on_config, self.NAME, self.config)
+            self.preferences_dialog = Preferences.Preferences(
+                self._on_config, self.NAME, self.config)
         self.preferences_dialog.show()
  
     def _on_config(self, status):
@@ -114,7 +119,8 @@ class MusicHandler(object):
         if (os.name != 'nt'):
             home_dir = os.path.expanduser('~')
         else:
-            home_dir = os.path.expanduser("~").decode(sys.getfilesystemencoding())
+            home_dir = os.path.expanduser("~").decode(
+                sys.getfilesystemencoding())
 
         cover_art_path = os.path.join(home_dir, '.covers', '')
 

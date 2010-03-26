@@ -4,7 +4,6 @@ import songretriever
 
 import gui
 from gui.gtkui import utils
-# from gui.gtkui.Preferences import BaseTable
 
 class Preferences(gtk.Window):
     '''the preference basic window of the 'listening to' extension'''
@@ -43,6 +42,10 @@ class Preferences(gtk.Window):
         self.connect('delete_event', self._on_close)
 
         vbox.pack_start(self.config_table, True, False)
+
+        separator = gtk.HSeparator()
+
+        vbox.pack_start(separator, False, True, 5)
         vbox.pack_start(buttons, True)
 
         vbox.show_all()
