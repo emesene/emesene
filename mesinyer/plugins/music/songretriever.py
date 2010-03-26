@@ -35,12 +35,13 @@ class BaseMusicHandlerConfig(BaseTable):
         '''constructor'''
         BaseTable.__init__(self, 4, 1)
 
-        self.format_default = "%ARTIST% - %ALBUM% - %TITLE%"
         # This should be loaded from a config option
+        self.format_default = "%ARTIST% - %ALBUM% - %TITLE%"
         self.format = self.format_default
         BaseTable.append_entry_default(self,
             'Format', 'format', self.format_default)
 
+        # This should be loaded from a config option
         self.change_avatar = True
         BaseTable.append_check(self,
             _('Set song cover as avatar'), 'change_avatar')
@@ -67,6 +68,8 @@ class MusicHandler(object):
         gobject.timeout_add(500, self.check_song)
 
     def preferences(self):
+        ''' Shows the extension preferences dialog'''
+        ''' You don't need to override this'''
         if self.preferences_dialog == None:
             self.preferences_dialog = Preferences.Preferences(
                 self._on_config, self.NAME, self.config)
@@ -79,6 +82,7 @@ class MusicHandler(object):
 
     def check_song(self):
         '''get the current song and set it if different than the last one'''
+        ''' You don't need to override this'''
         if self.session:
             song = self.get_current_song()
             if song:
@@ -91,10 +95,11 @@ class MusicHandler(object):
             elif self.last_title is not None:
                 self.last_title = None
                 self.session.set_media(_("not playing"))
-
         return True
 
     def set_cover_as_avatar(self, song):
+        ''' Sets song cover as avatar '''
+        ''' You don't need to override this'''
         image_path = self.get_cover_path(song)
         if image_path != None and self.avatar_manager != None:
             self.avatar_manager.set_as_avatar(image_path)
@@ -103,6 +108,7 @@ class MusicHandler(object):
         '''searches in the local covers cache
         if not found also searches in albumart covers website
         returns None if no image found'''
+        ''' You don't need to override this'''
         
         artist = song.artist.encode('utf8')
         album = song.album.encode('utf8')
@@ -159,12 +165,15 @@ class MusicHandler(object):
 
     def get_current_song(self):
         ''' returns current song info'''
+        ''' This MUST be overriden'''
         return None
 
     def is_running(self):
         '''returns True if the player is running'''
+        ''' This MUST be overriden'''
         return False
 
     def is_playing(self):
         '''returns True if the player is playing a song'''
+        ''' This MUST be overriden'''
         return False

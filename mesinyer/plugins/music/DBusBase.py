@@ -38,6 +38,7 @@ class DBusBase(songretriever.MusicHandler):
     def reconnect(self):
         '''method to attemp a reconnection, via dbus, this is only
         called if the bus object is not initialized'''
+        ''' You don't need to override this'''
         self.bus = self.module.SessionBus()
         try:
             self.iface = self.bus.get_object(self.iface_name, self.iface_path)
@@ -49,6 +50,7 @@ class DBusBase(songretriever.MusicHandler):
 
     def is_running(self):
         '''Returns a True if the player is running'''
+        ''' You don't need to override this'''
         if self.is_name_active(self.iface_name):
             if self.iface is None:
                 self.reconnect()
@@ -59,13 +61,16 @@ class DBusBase(songretriever.MusicHandler):
 
     def is_playing(self):
         '''Returns True if a song is being played'''
+        ''' This MUST be overriden'''
         return False
 
     def get_current_song(self):
         '''Returns the current song in the correct format'''
+        ''' This MUST be overriden'''
         return False
 
     def is_name_active(self, name):
         '''return True if the name is active on dbus'''
+        ''' You don't need to override this'''
         return bool(self.root.NameHasOwner(name))
 
