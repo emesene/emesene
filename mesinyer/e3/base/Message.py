@@ -100,6 +100,9 @@ class Color(object):
         #rrggbb, rrggbb, #rgb, rgb'''
 
         if hex_str.startswith('#'):
+	    if hex_str == '#0': #some MSN clients define black as simply '#0'
+		hex_str = '#000000'
+
             if len(hex_str) not in (4, 7):
                 raise ValueError('Invalid color format', hex_str)
             else:
