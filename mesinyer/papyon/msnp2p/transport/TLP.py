@@ -47,14 +47,6 @@ def _chunk_id():
         _previous_chunk_id = 1
     return _previous_chunk_id
 
-_previous_blob_id = _generate_id(MAX_INT32 - 1)
-def _blob_id():
-    global _previous_blob_id
-    _previous_blob_id += 1
-    if _previous_blob_id == MAX_INT32:
-        _previous_blob_id = 1
-    return _previous_blob_id
-
 class TLPHeader(object):
     SIZE = 48
 
@@ -211,7 +203,7 @@ class MessageBlob(object):
         if session_id is None:
             session_id = _generate_id()
         self.session_id = session_id
-        self.id = blob_id or _blob_id()
+        self.id = blob_id or _generate_id()
         self.is_file = is_file
 
     def __del__(self):
@@ -273,7 +265,7 @@ class MessageBlob(object):
         header.chunk_size = len(data)
         header.dw1 = _chunk_id()
         if self.session_id != 0 and self.total_size != 4 and data != '\x00' * 4:
-            header.flags = TLPFlag.UNKNOWN | TLPFlag.EACH
+            header.flags = TLPFlag.EACH
             if self.is_file:
                 header.flags |= TLPFlag.FILE
 

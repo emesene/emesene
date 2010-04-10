@@ -37,7 +37,6 @@ class MSNObjectSession(P2PSession):
         P2PSession.__init__(self, session_manager, peer,
                 EufGuid.MSN_OBJECT, application_id, message)
 
-        self._data = None
         if message is not None:
             self._application_id = message.body.application_id
             try:
@@ -46,9 +45,9 @@ class MSNObjectSession(P2PSession):
                 raise SLPError("Incoming INVITE without context")
 
     def accept(self, data_file):
-        self._data = data_file
         self._respond(200)
-        self._request_bridge()
+        self._send_p2p_data("\x00" * 4)
+        self._send_p2p_data(data_file)
 
     def reject(self):
         self._respond(603)
@@ -56,11 +55,3 @@ class MSNObjectSession(P2PSession):
     def invite(self, context):
         self._invite(context)
         return False
-
-    def send(self):
-        self._send_p2p_data("\x00" * 4)
-        self._send_p2p_data(self._data)
-
-    def _on_bridge_selected(self):
-        if self._data is not None:
-            self.send()

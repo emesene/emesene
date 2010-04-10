@@ -68,6 +68,12 @@ class HTTP(gobject.GObject):
         self._outgoing_queue = []
         self._waiting_response = False
 
+        self._errored = False
+        self.connect("error", self._on_self_error)
+
+    def _on_self_error(self, *args):
+        self._errored = True
+
     def _setup_transport(self):
         if self._transport is None:
             if self.__proxy is not None:
@@ -87,7 +93,8 @@ class HTTP(gobject.GObject):
         if transport.get_property("status") == IoStatus.OPEN:
             self._process_queue()
         elif transport.get_property("status") == IoStatus.CLOSED and\
-                (self._waiting_response or len(self._outgoing_queue) > 0):
+                (self._waiting_response or len(self._outgoing_queue) > 0) and\
+                not self._errored:
             self._waiting_response = False
             self._setup_transport()
 

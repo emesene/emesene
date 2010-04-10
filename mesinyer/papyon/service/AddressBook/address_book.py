@@ -345,8 +345,8 @@ class AddressBook(gobject.GObject):
     def delete_contact(self, contact, done_cb=None, failed_cb=None):
         def callback():
             contact._remove_membership(Membership.FORWARD)
-            contact._reset()
             self.__common_callback('contact-deleted', done_cb, contact)
+            contact._reset()
             if contact.memberships == Membership.NONE:
                 self.contacts.discard(contact)
 

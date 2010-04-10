@@ -64,8 +64,6 @@ class P2PSessionManager(gobject.GObject):
 
     def _unregister_session(self, session):
         del self._sessions[session.id]
-        if not self._search_session_by_peer(session.peer):
-            self._transport_manager.close_transport(session.peer)
 
     def _on_chunk_transferred(self, chunk):
         session_id = chunk.header.session_id
@@ -85,12 +83,6 @@ class P2PSessionManager(gobject.GObject):
     def _search_session_by_call(self, call_id):
         for session in self._sessions.itervalues():
             if session.call_id == call_id:
-                return session
-        return None
-
-    def _search_session_by_peer(self, peer):
-        for session in self._sessions.itervalues():
-            if session.peer == peer:
                 return session
         return None
 

@@ -33,9 +33,10 @@ logger = logging.getLogger('papyon.msnp2p.transport')
 
 
 class SwitchboardP2PTransport(BaseP2PTransport, SwitchboardClient):
-    def __init__(self, client, contacts, transport_manager, *args):
+    def __init__(self, client, contacts, transport_manager):
         SwitchboardClient.__init__(self, client, contacts)
-        BaseP2PTransport.__init__(self, transport_manager)
+        BaseP2PTransport.__init__(self, transport_manager, "switchboard")
+
 
     def close(self):
         BaseP2PTransport.close(self)
@@ -47,22 +48,10 @@ class SwitchboardP2PTransport(BaseP2PTransport, SwitchboardClient):
         return content_type == 'application/x-msnmsgrp2p'
 
     @property
-    def name(self):
-        return "switchboard"
-
-    @property
-    def protocol(self):
-        return "SBBridge"
-
-    @property
     def peer(self):
         for peer in self.total_participants:
             return peer
         return None
-
-    @property
-    def connected(self):
-        return True
 
     @property
     def rating(self):
@@ -89,3 +78,4 @@ class SwitchboardP2PTransport(BaseP2PTransport, SwitchboardClient):
 
     def _on_contact_left(self, contact):
         self.close()
+

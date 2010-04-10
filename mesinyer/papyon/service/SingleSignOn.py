@@ -20,16 +20,15 @@
 
 from SOAPService import *
 from description.SingleSignOn.RequestMultipleSecurityTokens import LiveService
-from papyon.util import pyDes
 
 import base64
 import struct
 import time
 import datetime
 import sys
-import random
-import hmac
-from hashlib import sha1
+import Crypto.Util.randpool as randpool
+from Crypto.Hash import HMAC, SHA
+from Crypto.Cipher import DES3
 
 __all__ = ['SingleSignOn', 'LiveService', 'RequireSecurityTokens']
 
@@ -57,15 +56,15 @@ class SecurityToken(object):
         key3 = self._derive_key(key1, "WS-SecureConversationSESSION KEY ENCRYPTION")
 
         # Create a HMAC-SHA-1 hash of nonce using key2
-        hash = hmac.new(key2, nonce, sha1).digest()
+        hash = HMAC.new(key2, nonce, SHA).digest()
 
         #
         # Encrypt nonce with DES3 using key3
         #
 
         # IV (Initialization Vector): 8 bytes of random data
-        iv = struct.pack("Q", random.getrandbits(8 * 8))
-        obj = pyDes.triple_des(key3, pyDes.CBC, iv)
+        iv = randpool.RandomPool().get_bytes(8)
+        obj = DES3.new(key3, DES3.MODE_CBC, iv)
 
         # XXX: win32's Crypt API seems to pad the input with 0x08 bytes
         # to align on 72/36/18/9 boundary
@@ -78,11 +77,11 @@ class SecurityToken(object):
         return base64.b64encode(blob)
 
     def _derive_key(self, key, magic):
-        hash1 = hmac.new(key, magic, sha1).digest()
-        hash2 = hmac.new(key, hash1 + magic, sha1).digest()
+        hash1 = HMAC.new(key, magic, SHA).digest()
+        hash2 = HMAC.new(key, hash1 + magic, SHA).digest()
 
-        hash3 = hmac.new(key, hash1, sha1).digest()            
-        hash4 = hmac.new(key, hash3 + magic, sha1).digest()
+        hash3 = HMAC.new(key, hash1, SHA).digest()
+        hash4 = HMAC.new(key, hash3 + magic, SHA).digest()
         return hash2 + hash4[0:4]
 
     def __str__(self):
