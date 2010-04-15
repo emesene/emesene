@@ -20,6 +20,7 @@
 
 import e3
 from e3.base import status
+
 import papyon
 
 STATUS_PAPY_TO_E3 = { \

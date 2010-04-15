@@ -39,11 +39,11 @@ from e3 import dummy
 
 from gui import gtkui
 
-#try:
-from e3 import papylib
-#except Exception, exc:
-#    papylib = None
-#    log.warning('Errors occurred on papyon importing: %s' % str(exc))
+try:
+    from e3 import papylib
+except Exception, exc:
+    papylib = None
+    log.warning('Errors occurred on papyon importing: %s' % str(exc))
 
 from pluginmanager import get_pluginmanager
 import extension

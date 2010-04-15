@@ -35,8 +35,11 @@ from e3.common import ConfigDir
 import logging
 log = logging.getLogger('papylib.Worker')
 
-#try:
-if 1:
+papypath = os.path.abspath("e3" + os.sep + "papylib" + os.sep + "papyon")
+if os.path.exists(papypath):
+    sys.path.append(papypath)
+
+try:
     REQ_VER = (0, 4, 6)
 
     import papyon
@@ -49,9 +52,9 @@ if 1:
             raise Exception
     elif papyver[1] < REQ_VER[1]:
         raise Exception
-#except Exception, e:
-#    log.exception("You need at least python-papyon(>=%s.%s.%s) to be installed " \
-#                  "in order to use this extension" % REQ_VER)
+except Exception, e:
+    log.exception("You need at least python-papyon(>=%s.%s.%s) to be installed " \
+                  "in order to use this extension" % REQ_VER)
 
 from PapyEvents import *
 from PapyConvert import *
