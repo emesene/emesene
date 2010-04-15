@@ -1,0 +1,3 @@
+[submodule "mesinyer/papyon"]
+	path = mesinyer/papyon
+	url = git://git.collabora.co.uk/git/papyon.git
