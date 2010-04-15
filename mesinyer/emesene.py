@@ -121,6 +121,7 @@ class Controller(object):
 
         if papylib is not None:
             extension.register('session', papylib.Session)
+            extension.set_default('session', papylib.Session)
 
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
