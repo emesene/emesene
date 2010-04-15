@@ -1,3 +1,6 @@
 [submodule "mesinyer/papyon"]
 	path = mesinyer/papyon
 	url = git://git.collabora.co.uk/git/papyon.git
+[submodule "mesinyer/e3/papylib/papyon"]
+	path = mesinyer/e3/papylib/papyon
+	url = git://git.collabora.co.uk/git/papyon.git

@@ -36,19 +36,21 @@ import logging
 log = logging.getLogger('papylib.Worker')
 
 try:
-    REQ_VER = (0, 4, 3)
-    # papyon imports
-    # get the deb from http://packages.debian.org/sid/python-papyon
+    REQ_VER = (0, 4, 6)
+
     import logging
-    import papyon
+    import papyon.papyon as papyon
     import papyon.event
     import papyon.service.ContentRoaming as CR
     import papyon.util.string_io as StringIO
     papyver = papyon.version
-    if papyver[1] < REQ_VER[1] or papyver[2] < REQ_VER[2]:
+    if papyver[1] == REQ_VER[1]:
+        if papyver[2] < REQ_VER[2]:
+            raise Exception
+    elif papyver[1] < REQ_VER[1]:
         raise Exception
 except Exception, e:
-    log.exception("You need python-papyon(>=%s.%s.%s) to be installed " \
+    log.exception("You need at least python-papyon(>=%s.%s.%s) to be installed " \
                   "in order to use this extension" % REQ_VER)
 
 from PapyEvents import *
