@@ -137,6 +137,9 @@ class OptionsMenu(gtk.Menu):
         self.by_group.set_active(config.b_order_by_group)
         self.by_status.set_active(not config.b_order_by_group)
 
+        self.show_menu = gtk.ImageMenuItem('Show...')
+        self.show_submenu = gtk.Menu()
+
         self.show_offline = gtk.CheckMenuItem('Show _offline contacts')
         self.show_offline.set_active(config.b_show_offline)
         self.group_offline = gtk.CheckMenuItem('G_roup offline contacts')
@@ -174,13 +177,16 @@ class OptionsMenu(gtk.Menu):
             lambda *args: self.handler.on_show_blocked_toggled(
                 self.show_blocked.get_active()))
 
+        self.show_menu.set_submenu(self.show_submenu)
+        self.show_submenu.append(self.show_offline)
+
         self.append(self.by_status)
         self.append(self.by_group)
         self.append(gtk.SeparatorMenuItem())
-        self.append(self.show_offline)
+        self.append(self.show_menu)
+        self.show_submenu.append(self.show_empty_groups)
+        self.show_submenu.append(self.show_blocked)
         self.append(self.group_offline)
-        self.append(self.show_empty_groups)
-        self.append(self.show_blocked)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.preferences)
         self.append(self.plugins)
