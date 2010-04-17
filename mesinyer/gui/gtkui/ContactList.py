@@ -25,6 +25,7 @@ import gui
 import utils
 import extension
 import logging
+import Renderers
 log = logging.getLogger('gtkui.ContactList')
 
 class ContactList(gui.ContactList, gtk.TreeView):
