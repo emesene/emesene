@@ -137,7 +137,7 @@ class OptionsMenu(gtk.Menu):
         self.by_group.set_active(config.b_order_by_group)
         self.by_status.set_active(not config.b_order_by_group)
 
-        self.show_menu = gtk.ImageMenuItem('Show...')
+        self.show_menu = gtk.MenuItem('Show...')
         self.show_submenu = gtk.Menu()
 
         self.show_offline = gtk.CheckMenuItem('Show _offline contacts')
