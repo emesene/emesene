@@ -63,7 +63,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
         self._cached_markup = None
         self._cached_layout = None
-        self.alpha = 1
 
     def __getattr__(self, name):
         try:
@@ -138,7 +137,7 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 pango.parse_markup(self.function(unicode(self.markup,
                     'utf-8'), False))
             except gobject.GError:
-                #print "invalid pango markup:", decorated_markup
+                print "invalid pango markup:", decorated_markup
                 decorated_markup = Plus.msnplus_strip(self.markup)
 
             layout.set_text(decorated_markup)
@@ -577,7 +576,6 @@ class SmileyLayout(pango.Layout):
 import cairo
 import gui
 import utils
-from e3 import status
 
 #from emesene1 by mariano guerra adapted by cando
 #animation support by cando
@@ -611,12 +609,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         
         self.set_property('xpad', 1)
         self.set_property('ypad', 8)
-        
-        #animation stuff
-        self.index = 0
-        self.current_animations = {}
-        self.anim_sources = {}
-        self._current_pix = None
 
         #set up information of statusTransformation
         self._set_transformation('corner|gray')
@@ -728,25 +720,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         if avatar:
             self._draw_avatar(ctx, avatar, width - dim, ypad, dim, 
                                 gtk.ANCHOR_CENTER, self._radius_factor, alpha)
-
-    def _start_animation(self, animation, widget, cell_area):
-        iteran = animation.get_iter()
-        gobject.timeout_add(iteran.get_delay_time(), self._advance,
-                            iteran, widget, cell_area)
-
-    def _advance(self, iteran, widget, cell_area):
-        iteran.advance()
-        self.__set_from_pixbuf_animation(iteran.get_pixbuf(), widget, cell_area)
-        anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance,
-                                          iteran, widget, cell_area)
-        self.index += 1
-        self.anim_sources[cell_area] = (anim_source, self.index)
-        return False
-
-    def __set_from_pixbuf_animation(self, pixbuf, widget, cell_area):
-        self._current_pix = pixbuf
-        x, y, width, height = cell_area
-        widget.queue_draw_area(x, y, width, height)
 
     def _draw_avatar(self, ctx, pixbuf, x, y, dimention, 
                          position = gtk.ANCHOR_CENTER, 
