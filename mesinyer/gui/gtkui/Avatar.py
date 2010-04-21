@@ -115,8 +115,9 @@ class Avatar( gtk.Widget ):
     def __set_from_pixbuf_animation(self, pixbuf):
         self.set_property('pixbuf-animation', pixbuf)
         self.queue_draw()
-    
+    #
     #public methods
+    #
     def set_from_file(self, filename):
         if not gui.gtkui.utils.file_readable(filename):
             filename = gui.theme.logo
@@ -133,11 +134,23 @@ class Avatar( gtk.Widget ):
         self.current_animation = animation
         self._start_animation(animation)
 
+    def set_from_image(self, image):
+        if image.get_storage_type() == gtk.IMAGE_PIXBUF:
+            self.__set_from_pixbuf(image.get_pixbuf())
+            self.current_animation = None
+            return
+        elif image.get_storage_type() == gtk.IMAGE_ANIMATION:
+            self.current_animation = image.get_animation()
+            self._start_animation(image.get_animation())
+
     def stop(self):
         '''stop the animation'''
         if self.anim_source is not None:
             gobject.source_remove(self.anim_source)
             self.anim_source = None
+    #
+    #end of public methods
+    #
 
     def _start_animation(self, animation):
         iteran = animation.get_iter()

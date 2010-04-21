@@ -576,7 +576,6 @@ class SmileyLayout(pango.Layout):
 import cairo
 import gui
 import utils
-from e3 import status
 
 #from emesene1 by mariano guerra adapted by cando
 #animation support by cando
@@ -610,11 +609,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         
         self.set_property('xpad', 1)
         self.set_property('ypad', 8)
-        
-        #animation stuff
-        self.current_animations = {}
-        self.anim_sources = {}
-        self._current_pix = None
 
         #set up information of statusTransformation
         self._set_transformation('corner|gray')
@@ -669,6 +663,26 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         else: width = self._dimention            
         height = self._dimention + (ypad * 2)                       
         return (0, 0,  width, height)
+
+    def func(self, model, path, iter, (image, tree)):
+      if model.get_value(iter, 0) == image:
+         self.redraw = 1
+         cell_area = tree.get_cell_area(path, tree.get_column(1))
+         tree.queue_draw_area(cell_area.x, cell_area.y, cell_area.width, \
+            cell_area.height)
+
+    def animation_timeout(self, tree, image):
+       if image.get_storage_type() == gtk.IMAGE_ANIMATION:
+          self.redraw = 0
+          image.get_data('iter').advance()
+          model = tree.get_model()
+          model.foreach(self.func, (image, tree))
+          if self.redraw:
+             gobject.timeout_add(image.get_data('iter').get_delay_time(), \
+                self.animation_timeout, tree, image)
+          else:
+             image.set_data('iter', None)
+
         
     def on_render(self, window, widget, bg_area, cell_area, expose_area, flags):        
         """Prepare rendering setting for avatar"""
@@ -677,48 +691,23 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         cell = (x, y, width, height)
         ctx = window.cairo_create()          
         ctx.translate(x, y)
-        
+
         avatar = None
         alpha = 1
         dim = self._dimention
-        
-        #get the info for this cell_area
-        if cell not in self.current_animations and cell not in self.anim_sources:
-            self.current_animations[cell] = None
-            self.anim_sources[cell] = None
-            current_animation = None
-            anim_source = None
-        else:
-            anim_source = self.anim_sources[cell]
-            current_animation = self.current_animations[cell] 
 
         if self._image.get_storage_type() == gtk.IMAGE_ANIMATION:
-            animation = self._image.get_animation()
-            if anim_source is None:
-                current_animation = animation
-                self._start_animation(animation, widget, cell)
-                avatar = animation.get_static_image()
+            if not self._image.get_data('iter'):
+                animation = self._image.get_animation()
+                self._image.set_data('iter', animation.get_iter())
+                gobject.timeout_add(self._image.get_data('iter').get_delay_time(), \
+                   self.animation_timeout, widget, self._image)
 
-            elif animation != current_animation:
-                gobject.source_remove(anim_source)
-                anim_source = None
-                current_animation = animation
-                self._start_animation(animation, widget, cell)
-                avatar = animation.get_static_image()
-
-            else:
-                avatar = self._current_pix
-
+            avatar = self._image.get_data('iter').get_pixbuf()
         elif self._image.get_storage_type() == gtk.IMAGE_PIXBUF:
             avatar = self._image.get_pixbuf()
-            if anim_source is not None:
-                gobject.source_remove(anim_source)
-                anim_source = None
         else:
-            return
-
-        #save the new info in this cell area
-        self.current_animations[cell] = current_animation
+           return
 
         if self._gray and self._offline and avatar != None:
             alpha = 1
@@ -731,24 +720,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         if avatar:
             self._draw_avatar(ctx, avatar, width - dim, ypad, dim, 
                                 gtk.ANCHOR_CENTER, self._radius_factor, alpha)
-
-    def _start_animation(self, animation, widget, cell_area):
-        iteran = animation.get_iter()
-        gobject.timeout_add(iteran.get_delay_time(), self._advance,
-                            iteran, widget, cell_area)
-
-    def _advance(self, iteran, widget, cell_area):
-        iteran.advance()
-        self.__set_from_pixbuf_animation(iteran.get_pixbuf(), widget, cell_area)
-        anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance,
-                                          iteran, widget, cell_area)
-        self.anim_sources[cell_area] = anim_source
-        return False
-
-    def __set_from_pixbuf_animation(self, pixbuf, widget, cell_area):
-        self._current_pix = pixbuf
-        x, y, width, height = cell_area
-        widget.queue_draw_area(x, y, width, height)
 
     def _draw_avatar(self, ctx, pixbuf, x, y, dimention, 
                          position = gtk.ANCHOR_CENTER, 
@@ -817,4 +788,3 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         cr.close_path ()
                         
 gobject.type_register(AvatarRenderer)
-
