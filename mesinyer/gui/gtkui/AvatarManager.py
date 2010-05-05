@@ -122,11 +122,14 @@ class AvatarManager(object):
         # Control if the filename is a already in cache
         if self.is_cached(filename):
             self.session.set_picture(filename)
-            if os.path.exists(self.avatar_path.rpartition(os.sep)[0]):
+            path = os.path.dirname(self.avatar_path)
+
+            if os.path.exists(path):
                 if os.path.exists(self.avatar_path):
                     os.remove(self.avatar_path)
             else:
-                os.makedirs(os.path.dirname(self.avatar_path.rpartition(os.sep)[0]))
+                os.makedirs(path)
+
             shutil.copy(filename, self.avatar_path)
         else:
             try:
