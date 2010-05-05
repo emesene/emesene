@@ -138,9 +138,9 @@ def setup():
     extension.category_register('filetransfer widget', FileTransferWidget.FileTransferWidget)
 
     if not WEBKITERROR:
-        extension.category_register('conversation output', WebKitTextBox.OutputText)
+        extension.category_register('conversation output', AdiumTextBox.OutputText)
+        extension.register('conversation output', WebKitTextBox.OutputText)
         extension.register('conversation output', TextBox.OutputText)
-        extension.register('conversation output', AdiumTextBox.OutputText)
     else:
         extension.category_register('conversation output', TextBox.OutputText)
 
