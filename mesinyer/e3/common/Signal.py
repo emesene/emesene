@@ -18,7 +18,7 @@
 import functools
 
 class Signal(object):
-    '''an object that represents a signalm a callback can subscribe
+    '''an object that represents a signal a callback can subscribe
     to the signal, when emited all the callbacks are called until the end or
     until one callback returns False'''
 
@@ -42,7 +42,7 @@ class Signal(object):
         '''emit the signal with args and kwargs, if a callback returns False
         then the remaining callbacks are not called
         '''
-        for callback, cargs in self._subscribers.iteritems():
+        for callback, cargs in self._subscribers.items():
             cargs, ckwargs = cargs
             args += cargs
             kwargs.update(ckwargs)

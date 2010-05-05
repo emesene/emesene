@@ -70,7 +70,7 @@ class Item(Base):
         self.value = new_value
         return (True, 'OK')
 
-    def add_validator(validator):
+    def add_validator(self, validator):
         '''add a method that receives the value as paramenter and returns a
         tuple with a boolean as first element that is True if the validation
         passed and false if not. the second is a string representing a message

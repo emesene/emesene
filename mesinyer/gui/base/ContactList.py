@@ -41,6 +41,7 @@ class ContactList(object):
         self.group_state = {}
 
         self.session.config.get_or_set('b_order_by_group', True)
+        print "order_by_group", self.session.config.b_order_by_group
         self.session.config.get_or_set('b_show_nick', True)
         self.session.config.get_or_set('b_show_empty_groups', False)
         self.session.config.get_or_set('b_show_offline', False)

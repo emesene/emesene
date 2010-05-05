@@ -31,8 +31,8 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
         self.jid = xmpp.protocol.JID(session.account.account)
-        #self.client = xmpp.Client(self.jid.getDomain(), debug=[])
-        self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
+        self.client = xmpp.Client(self.jid.getDomain(), debug=[])
+        #self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
 
         self.proxy = proxy
         self.proxy_data = None

@@ -253,7 +253,7 @@ class Controller(object):
 
             sys.exit(0)
 
-    def _remove_subscriptons(self):
+    def _remove_subscriptions(self):
         '''remove the subscriptions to signals
         '''
         signals = self.session.signals
@@ -328,15 +328,17 @@ class Controller(object):
         # self.window.content.avatar.stop() #stop the avatar amimation...if any..
         self.window.clear()
         self.tray_icon.set_main(self.session)
+        config_path = os.path.join(self.session.config_dir.base_dir, "config")
+        self.session.config.load(config_path)
         image_name = self.session.config.get_or_set('image_theme', 'default')
         emote_name = self.session.config.get_or_set('emote_theme', 'default')
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
         gui.theme.set_theme(image_name, emote_name, sound_name)
-        
+
         path = self.config_dir.join(os.path.dirname(self.session.config_dir.base_dir),
                    self.session.contacts.me.account,
                    self.session.contacts.me.account.replace('@','-at-'), 'avatars','last')
-        
+
         last_avatar = self.session.config.get_or_set('last_avatar', path)
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
@@ -375,7 +377,7 @@ class Controller(object):
     def on_login_failed(self, reason):
         '''callback called when login fails'''
         self._save_login_dimensions()
-        self._remove_subscriptons()
+        self._remove_subscriptions()
         self._new_session()
         self.go_login()
         self.window.content.clear_all()
@@ -399,7 +401,7 @@ class Controller(object):
             path = self.config_dir.join(host, account.account, \
                    account.account.replace('@','-at-'), 'avatars', 'last')
             if not self.config_dir.file_readable(path):
-                path = ''  
+                path = ''
             self.window.go_connect(self.on_cancel_login, path)
             self.window.show()
         else:
