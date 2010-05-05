@@ -15,8 +15,20 @@ class OutputView(webkit.WebView):
         webkit.WebView.__init__(self)
         self.theme = theme
         self.last_incoming = None
-        self.clear(source, target, target_display, source_img,
-                target_img)
+        self.ready = False
+        self.pending = []
+        self.connect('load-finished', self._loading_finished_cb)
+
+    def _loading_finished_cb(self, *args):
+        '''callback called when the content finished loading
+        '''
+        self.ready = True
+
+        for function in self.pending:
+            self.execute_script(function)
+
+        self.execute_script("scrollToBottom()")
+        self.pending = []
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
@@ -25,6 +37,8 @@ class OutputView(webkit.WebView):
                 target_img)
         self.load_string(body,
                 "text/html", "utf-8", "file://" + self.theme.path)
+        self.pending = []
+        self.ready = False
 
     def add_message(self, msg):
         '''add a message to the conversation'''
@@ -49,12 +63,23 @@ class OutputView(webkit.WebView):
         else:
             function = "appendNextMessage('" + html + "')"
 
-        self.execute_script(function)
-        self.execute_script("scrollToBottom()")
+        self.append(function)
+
+    def append(self, function):
+        '''append a message if the renderer finished loading, append it to
+        pending if still loading
+        '''
+        if self.ready:
+            self.execute_script(function)
+            self.execute_script("scrollToBottom()")
+        else:
+            self.pending.append(function)
 
     def _set_text(self, text):
         '''set the text on the widget'''
         self._textbox.load_string(text, "text/html", "utf-8", "")
+        self.pending = []
+        self.ready = False
 
     def _get_text(self):
         '''return the text of the widget'''
