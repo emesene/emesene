@@ -32,7 +32,7 @@ def gtk_main(Controller):
     import Header
     import ImageAreaSelector
     import ImageChooser
-    try:    
+    try:
         import Indicator
     except ImportError:
         INDICATORERROR = True
@@ -51,7 +51,6 @@ def gtk_main(Controller):
     import Window
     try:
         import AdiumTextBox
-        import WebKitTextBox
     except ImportError:
         WEBKITERROR = True
 
@@ -139,7 +138,6 @@ def setup():
 
     if not WEBKITERROR:
         extension.category_register('conversation output', AdiumTextBox.OutputText)
-        extension.register('conversation output', WebKitTextBox.OutputText)
         extension.register('conversation output', TextBox.OutputText)
     else:
         extension.category_register('conversation output', TextBox.OutputText)
