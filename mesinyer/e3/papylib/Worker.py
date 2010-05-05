@@ -126,14 +126,11 @@ class Worker(e3.base.Worker, papyon.Client):
         self._roaming_handler.connect("notify::state", \
                                         self._content_roaming_state_changed)
         self._roaming_handler.sync()
-        # loads or create a config for this session
-        self.session.load_config()
-        self.session.create_config()
         # sets the login-chosen presence in papyon
         presence = self.session.account.status
         nick = self.profile.display_name
         self._set_status(presence)
-        # initialize caches        
+        # initialize caches
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         self.my_avatars = self.caches.get_avatar_cache(self.session.account.account)
 

@@ -18,7 +18,7 @@ class AvatarCache(Cache.Cache):
         user -- the user account or identifier
         '''
         Cache.Cache.__init__(self, os.path.join(config_path,
-            user.strip().replace('@', '-at-')), 'avatars', True)
+            user.strip()), 'avatars', True)
 
     def parse(self):
         '''parse the file that contains the dir information

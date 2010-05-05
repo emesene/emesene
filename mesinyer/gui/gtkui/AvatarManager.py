@@ -29,23 +29,20 @@ class AvatarManager(object):
     def __init__(self, session):
         '''constructor'''
         self.session = session
-        self.config_dir = session.config_dir        
+        self.config_dir = session.config_dir
         self.config = session.config
         self.avatar_path = self.session.config.last_avatar
 
     def get_avatars_dir(self):
         ''' gets the user's avatar directory '''
-        base_dir = os.path.dirname(self.config_dir.base_dir)
-        user_dir = self.session.contacts.me.account.replace('@','-at-')
-        return self.config_dir.join(base_dir, self.session.contacts.me.account,
-                                    user_dir, 'avatars')        
-    
+        # this path should be set while loging in
+        return self.config_dir.get_path('avatars')
+
     def get_cached_avatars_dir(self):
         ''' gets the contacts' cached avatar directory '''
-        base_dir = os.path.dirname(self.config_dir.base_dir)
-        user_dir = self.session.contacts.me.account.replace('@','-at-')
-        return self.config_dir.join(base_dir, user_dir, 'cached_avatars')
-    
+        # this path should be set while loging in
+        return self.config_dir.get_path('cached_avatars')
+
     def get_system_avatars_dirs(self):
         ''' gets the directories where avatars are availables '''
         faces_paths = []
@@ -69,7 +66,7 @@ class AvatarManager(object):
         return bdir == self.get_avatars_dir() or \
             bdir == self.get_cached_avatars_dir() or \
             bdir in self.get_system_avatars_dirs()
-    
+
     def add_new_avatar(self, filename):
         ''' add a new picture from filename into the avatar cache '''
         def gen_filename(source):

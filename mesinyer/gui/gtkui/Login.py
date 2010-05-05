@@ -96,8 +96,7 @@ class Login(gtk.Alignment):
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
         self.avatar = Avatar()
-        avatar_path = self.config_dir.join(self.server_host, account, \
-                                    account.replace('@','-at-'), 'avatars', 'last')
+        avatar_path = self.config_dir.join(self.server_host, account, 'avatars', 'last')
         self.avatar.set_from_file(avatar_path)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
@@ -110,7 +109,7 @@ class Login(gtk.Alignment):
             self._on_remember_password_toggled)
         self.auto_login.connect('toggled',
             self._on_auto_login_toggled)
-        
+
         self.remember_account.set_sensitive(False)
         self.remember_password.set_sensitive(False)
         self.auto_login.set_sensitive(False)
@@ -182,7 +181,7 @@ class Login(gtk.Alignment):
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
-        
+
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
         al_button.add(self.b_connect)
@@ -232,23 +231,22 @@ class Login(gtk.Alignment):
         '''
         modify the config for the current account before login
         '''
+
+        if auto_login or remember_account or remember_password:
+            self.status[account.account] = account.status
+            self.config.last_logged_account = account.account
+
         if auto_login:#+1 account,+1 password,+1 autologin =  3
             self.accounts[account.account] = base64.b64encode(account.password)
             self.remembers[account.account] = 3
-            self.status[account.account] = account.status
-            self.config.last_logged_account = account.account
 
         elif remember_password:#+1 account,+1 password = 2
             self.accounts[account.account] = base64.b64encode(account.password)
             self.remembers[account.account] = 2
-            self.status[account.account] = account.status
-            self.config.last_logged_account = account.account
 
         elif remember_account:#+1 account = 1
             self.accounts[account.account] = ''
             self.remembers[account.account] = 1
-            self.status[account.account] = account.status
-            self.config.last_logged_account = account.account
 
         else:#means i have logged with nothing checked
             self.config.last_logged_account = ''
@@ -285,10 +283,9 @@ class Login(gtk.Alignment):
             self.remember_account.set_sensitive(False)
             self.forget_me.set_sensitive(True)
             self.btn_status.set_status(int(self.status[account]))
-            
+
             passw = self.accounts[account]
-            avatar_path = self.config_dir.join(self.server_host, account, \
-                                    account.replace('@','-at-'), 'avatars', 'last')
+            avatar_path = self.config_dir.join(self.server_host, account, 'avatars', 'last')
             self.avatar.set_from_file(avatar_path)
 
             if attr == 3:#autologin,password,account checked
@@ -389,11 +386,7 @@ class Login(gtk.Alignment):
             account = self.cmb_account.get_active_text()
             if response == stock.YES:
                 try: # Delete user's folder
-                    rmtree(self.config_dir.join(self.server_host,account))
-                    dir_at = self.config_dir.join(self.server_host, account, 
-                                                  account.replace('@','-at-'))
-                    if self.config_dir.dir_exists(dir_at):
-                        rmtree(dir_at)
+                    rmtree(self.config_dir.join(self.server_host, account))
                 except:
                     self.show_error(_('Error while deleting user'))
 
@@ -407,7 +400,7 @@ class Login(gtk.Alignment):
                     self.config.last_logged_account = ''
 
                 self.config.save(self.config_path)
-                self. _reload_account_list()
+                self._reload_account_list()
                 self.cmb_account.get_children()[0].set_text('')
 
         self.dialog.yes_no(

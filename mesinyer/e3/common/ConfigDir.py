@@ -8,6 +8,8 @@ class ConfigDir(object):
 
         self.app_name = app_name
 
+        self.paths = {}
+
         if base_dir is None:
             self.base_dir = self.default_base_dir
         else:
@@ -16,6 +18,26 @@ class ConfigDir(object):
             os.makedirs(self.base_dir)
 
         self.create_if_not_exists('')
+
+    def add_path(self, name, path, create_if_not_exists=True):
+        '''add a path with a name to the registered paths, if
+        the path is relative to base_dir
+        create_if_not_exists is True, do that ;)
+
+        returns: the full path
+        '''
+        path = self.join(path)
+        self.paths[name] = self.join(path)
+
+        if create_if_not_exists and not os.path.exists(path):
+            os.makedirs(path)
+
+        return path
+
+    def get_path(self, name, default=None):
+        '''return the path identified by name, if not available return default
+        '''
+        return self.paths.get(name, default)
 
     def _get_default_base_dir(self):
         '''return the default base dir for configuration according to the OS'''

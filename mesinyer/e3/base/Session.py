@@ -67,8 +67,12 @@ class Session(object):
 
         self.config_dir.base_dir = os.path.join(
             self.config_dir.base_dir, self._account.service, self._account.account)
-        self.create_config()
-        self.logger = Logger.LoggerProcess(self.config_dir.join('log'))
+        self.config_dir.add_path("config", "config", False)
+        self.config_dir.add_path("avatars", "avatars")
+        self.config_dir.add_path("cached_avatars", "cached_avatars")
+        self.config_dir.add_path("last_avatar", os.path.join("avatars", "last"), False)
+        self.config_dir.add_path("log", "log")
+        self.logger = Logger.LoggerProcess(self.config_dir.get_path('log'))
         self.logger.start()
 
     def _get_account(self):
@@ -87,7 +91,7 @@ class Session(object):
 
     def save_config(self):
         '''save the config of the session'''
-        self.config.save(self.config_dir.join('config'))
+        self.config.save(self.config_dir.get_path('config'))
 
     def load_config(self):
         '''load the config of the session'''
@@ -95,12 +99,7 @@ class Session(object):
         self.config.load(os.path.join(self.config_dir.default_base_dir,
             'config'))
         # load the account configuration
-        self.config.load(self.config_dir.join('config'))
-
-    def create_config(self):
-        '''create all the dirs and files for configuration'''
-        if not os.path.isdir(self.config_dir.base_dir):
-            os.makedirs(self.config_dir.base_dir)
+        self.config.load(self.config_dir.get_path('config'))
 
     def new_conversation(self, account, cid):
         '''start a new conversation with account'''
