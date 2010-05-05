@@ -2,11 +2,12 @@
 import extension
 
 WEBKITERROR = False
+INDICATORERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR
+    global WEBKITERROR, INDICATORERROR
 
     import gtk
     import gobject
@@ -31,6 +32,10 @@ def gtk_main(Controller):
     import Header
     import ImageAreaSelector
     import ImageChooser
+    try:    
+        import Indicator
+    except ImportError:
+        INDICATORERROR = True
     import Login
     import MainMenu
     import MainWindow
@@ -72,7 +77,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR
+    global WEBKITERROR, INDICATORERROR
 
     import gtk
 
@@ -94,7 +99,11 @@ def setup():
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
     extension.register('nick renderer', Renderers.GtkCellRenderer)
     extension.category_register('user panel', UserPanel.UserPanel)
-    extension.category_register('tray icon', TrayIcon.TrayIcon)
+    if not INDICATORERROR:    
+        extension.category_register('tray icon', Indicator.Indicator)
+        extension.register('tray icon', TrayIcon.TrayIcon)
+    else:
+        extension.category_register('tray icon', TrayIcon.TrayIcon)        
     extension.category_register('debug window', DebugWindow.DebugWindow)
     extension.category_register('nice bar', NiceBar.NiceBar)
 
@@ -129,9 +138,9 @@ def setup():
     extension.category_register('filetransfer widget', FileTransferWidget.FileTransferWidget)
 
     if not WEBKITERROR:
-        extension.category_register('conversation output', WebKitTextBox.OutputText)
+        extension.category_register('conversation output', AdiumTextBox.OutputText)
+        extension.register('conversation output', WebKitTextBox.OutputText)
         extension.register('conversation output', TextBox.OutputText)
-        extension.register('conversation output', AdiumTextBox.OutputText)
     else:
         extension.category_register('conversation output', TextBox.OutputText)
 
