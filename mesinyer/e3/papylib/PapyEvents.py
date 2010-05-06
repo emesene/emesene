@@ -55,18 +55,18 @@ class ClientEvents(papyon.event.ClientEventInterface):
             self._client.session.add_event(Event.EVENT_LOGIN_FAILED,
                                            'Authentication failure')      
         elif error_type == papyon.event.ClientErrorType.NETWORK:
-            self._client.session.add_event(Event.EVENT_LOGIN_FAILED,
-                                           'Network error')
+            self._client.session.add_event(Event.EVENT_DISCONNECTED,
+                                           'Network error', 1)#for reconnecting
         elif error_type == papyon.event.ClientErrorType.PROTOCOL:
             if error == papyon.event.ProtocolError.OTHER_CLIENT:
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
-                              'Logged in from another location')
+                              'Logged in from another location', 0)
             elif error == papyon.event.ProtocolError.SERVER_DOWN:
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
-                                               'Server down',True)#for reconnecting
+                                               'Server down', 1)#for reconnecting
             else:
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
-                                               'Protocol error')
+                                               'Protocol error', 0)
         elif error_type == papyon.event.ClientErrorType.ADDRESSBOOK:#TODO
             pass
         elif error_type == papyon.event.ClientErrorType.OFFLINE_MESSAGGES:#TODO

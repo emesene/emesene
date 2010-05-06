@@ -403,15 +403,14 @@ class Controller(object):
         '''called when the user press the connect button'''
         self._save_login_dimensions()
         self._set_location(self.window)
-
         if not on_reconnect:
             self.on_preferences_changed(use_http, proxy, session_id)
             self.window.clear()
-            path = self.config_dir.join(host, account.account,\
+            self.avatar_path = self.config_dir.join(host, account.account,\
                         account.account.replace('@','-at-'), 'avatars', 'last')
-            if not self.config_dir.file_readable(path):
+            if not self.config_dir.file_readable(self.avatar_path):
                 path = ''
-            self.window.go_connect(self.on_cancel_login, path)
+            self.window.go_connect(self.on_cancel_login, self.avatar_path)
             self.window.show()
         else:
             self.window.content.clear_connect()
@@ -533,7 +532,7 @@ class Controller(object):
         '''called on close'''
         self.close_session()
 
-    def on_disconnected(self, reason, reconnect=False):
+    def on_disconnected(self, reason, reconnect=0):
         '''called when the server disconnect us'''
         account = self.session.account
         self.close_session(False)
@@ -547,7 +546,7 @@ class Controller(object):
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''
         self.window.clear()
-        self.window.go_connect(self.on_cancel_login)
+        self.window.go_connect(self.on_cancel_login, self.avatar_path)
         self.window.content.on_reconnect(self.on_login_connect, account)
 
 class ExtensionDefault(object):
