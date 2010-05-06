@@ -94,7 +94,7 @@ class Session(object):
         config_path = self.config_dir.get_path('config')
 
         if config_path:
-            self.config.save()
+            self.config.save(config_path)
 
     def load_config(self):
         '''load the config of the session'''
