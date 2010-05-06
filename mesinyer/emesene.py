@@ -19,6 +19,9 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+
+os.chdir(os.path.dirname(__file__))
+
 import sys
 import gtk
 import base64
