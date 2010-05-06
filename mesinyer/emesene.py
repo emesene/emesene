@@ -376,7 +376,12 @@ class Controller(object):
         '''show login info messages while connecting'''
         if self.window is not None and \
            self.window.content_type == 'connecting':
-            self.window.content.on_connecting(message)
+            #this resolves the "truncation" of the messages
+            try:
+                import thread
+                thread.start_new_thread(self.window.content.on_connecting, (message,))
+            except Exception:
+                self.window.content.on_connecting(message);
 
     def on_login_failed(self, reason):
         '''callback called when login fails'''

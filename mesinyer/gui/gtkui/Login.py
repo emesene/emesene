@@ -568,8 +568,7 @@ class ConnectingWindow(gtk.Alignment):
        Show messages while connecting..
        '''
        #taken from amsn2..but i like a lot!
-       #this hack resolve a problem of visualization..XD FIXME
-       gobject.timeout_add(1200, lambda: self.label.set_markup('<b>%s</b>'% message))
+       self.label.set_markup('<b>%s</b>'% message)
 
     def clear_connect(self):
         '''
