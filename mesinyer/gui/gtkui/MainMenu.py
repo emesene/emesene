@@ -111,12 +111,15 @@ class ActionsMenu(gtk.Menu):
         self.group.set_submenu(self.group_menu)
         self.account = gtk.ImageMenuItem('_Account')
         self.account.set_image(utils.safe_gtk_image_load(gui.theme.chat))
+
         self.account_menu = AccountMenu(self.handler.my_account_handler)
-        self.account.set_submenu(self.account_menu)
+        self.myaccount = gtk.ImageMenuItem('_Profile')
+        self.myaccount.set_image(utils.safe_gtk_image_load(gui.theme.chat))
+        self.myaccount.set_submenu(self.account_menu)
 
         self.append(self.contact)
         self.append(self.group)
-        self.append(self.account)
+        self.append(self.myaccount)
 
 class OptionsMenu(gtk.Menu):
     """
