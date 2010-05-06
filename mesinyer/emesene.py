@@ -402,7 +402,8 @@ class Controller(object):
         if not on_reconnect:
             self.on_preferences_changed(use_http, proxy, session_id)
             self.window.clear()
-            path = self.config_dir.join(host, account.account, 'avatars', 'last')
+            path = self.config_dir.join(host, account.account,\
+                        account.account.replace('@','-at-'), 'avatars', 'last')
             if not self.config_dir.file_readable(path):
                 path = ''
             self.window.go_connect(self.on_cancel_login, path)

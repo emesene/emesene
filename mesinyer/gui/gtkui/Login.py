@@ -96,7 +96,8 @@ class Login(gtk.Alignment):
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
         self.avatar = Avatar()
-        avatar_path = self.config_dir.join(self.server_host, account, 'avatars', 'last')
+        avatar_path = self.config_dir.join(self.server_host, account, \
+                           account.replace('@','-at-'), 'avatars', 'last')
         self.avatar.set_from_file(avatar_path)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
@@ -285,7 +286,8 @@ class Login(gtk.Alignment):
             self.btn_status.set_status(int(self.status[account]))
 
             passw = self.accounts[account]
-            avatar_path = self.config_dir.join(self.server_host, account, 'avatars', 'last')
+            avatar_path = self.config_dir.join(self.server_host, account,\
+                               account.replace('@','-at-'),'avatars', 'last')
             self.avatar.set_from_file(avatar_path)
 
             if attr == 3:#autologin,password,account checked
