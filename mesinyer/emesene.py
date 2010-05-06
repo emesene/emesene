@@ -112,6 +112,7 @@ class Controller(object):
             self.config.d_remembers = {}
 
         self.session = None
+        self.timeout_id = None
         self._parse_commandline()
         self._setup()
 
@@ -138,6 +139,7 @@ class Controller(object):
         else:
             default_id = self.config.session
 
+        extension.set_default_by_id('session', default_id)
         get_pluginmanager().scan_directory('plugins')
 
     def _parse_commandline(self):
@@ -204,7 +206,7 @@ class Controller(object):
         self._set_location(self.window)
 
         self.window.go_login(self.on_login_connect,
-            self.on_preferences_changed,self.config,
+            self.on_preferences_changed, self.config,
             self.config_dir, self.config_path, proxy,
             use_http, self.config.session)
         self.tray_icon.set_login()
@@ -229,6 +231,11 @@ class Controller(object):
 
     def close_session(self, do_exit=True):
         '''close session'''
+
+        if self.timeout_id:
+            gobject.source_remove(self.timeout_id)
+            self.timeout_id = None
+
         if self.session is not None:
             self.session.quit()
 
@@ -403,8 +410,10 @@ class Controller(object):
             self.on_preferences_changed(use_http, proxy, session_id)
             self.window.clear()
             path = self.config_dir.join(host, account.account, 'avatars', 'last')
+
             if not self.config_dir.file_readable(path):
                 path = ''
+
             self.window.go_connect(self.on_cancel_login, path)
             self.window.show()
         else:
@@ -428,9 +437,9 @@ class Controller(object):
         self.session.config.get_or_set('b_show_toolbar', True)
         self.session.config.get_or_set('b_allow_auto_scroll', True)
 
+        self.timeout_id = gobject.timeout_add(500, self.session.signals._handle_events)
         self.session.login(account.account, account.password, account.status,
             proxy, host, port, use_http)
-        gobject.timeout_add(500, self.session.signals._handle_events)
 
     def on_cancel_login(self):
         '''
