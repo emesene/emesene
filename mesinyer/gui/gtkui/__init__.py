@@ -109,7 +109,7 @@ def setup():
         extension.register('tray icon', TrayIcon.TrayIcon) 
     if not INDICATORERROR:    
         extension.register('tray icon', Indicator.Indicator)
-    if not INDICATORERROR and not INDICATERROR:
+    if INDICATORERROR and INDICATERROR:
         extension.category_register('tray icon', TrayIcon.TrayIcon)        
     extension.category_register('debug window', DebugWindow.DebugWindow)
     extension.category_register('nice bar', NiceBar.NiceBar)

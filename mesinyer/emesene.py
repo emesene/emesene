@@ -473,6 +473,7 @@ class Controller(object):
             window.go_conversation(self.session)
             self._set_location(window, True)
             self.conversations = window.content
+            self.tray_icon.set_conversations(self.conversations)
             window.show()
         
         conversation = self.conversations.new_conversation(cid, members)

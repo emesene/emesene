@@ -18,6 +18,7 @@ class TrayIcon(gtk.StatusIcon):
         self.handler = handler
 
         self.main_window = main_window
+        self.conversations = None
 
         self.connect('activate', self._on_activate)
         self.connect('popup-menu', self._on_popup)
@@ -41,6 +42,12 @@ class TrayIcon(gtk.StatusIcon):
         self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
         self.menu = MainMenu(self.handler)
         self.menu.show_all()
+
+    def set_conversations(self, convs):
+        """
+        Sets the conversations manager
+        """
+        self.conversations = convs
 
     def _on_activate(self, trayicon):
         """

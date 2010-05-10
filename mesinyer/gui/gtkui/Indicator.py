@@ -23,6 +23,7 @@ class Indicator(appindicator.Indicator):
         self.handler = handler
 
         self.main_window = main_window
+        self.conversations = None
 
         self.set_login()
         self.set_status(appindicator.STATUS_ACTIVE)
@@ -48,6 +49,12 @@ class Indicator(appindicator.Indicator):
         self.menu = MainMenu(self.handler)
         self.menu.show_all()
         self.set_menu(self.menu)
+
+    def set_conversations(self, convs):
+        """
+        Sets the conversations manager
+        """
+        self.conversations = convs
 
     def _on_change_status(self,stat):
         """
