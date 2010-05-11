@@ -1,5 +1,6 @@
 import time
 import webbrowser
+import gtk
 
 import e3.base
 import gui
@@ -296,39 +297,92 @@ class MyAccountHandler(object):
         self.dialog = dialog
         self.avatar_manager = avatar_manager
 
-    def on_set_nick_selected(self):
-        '''called when set nick is selected'''
-        def set_nick_cb(response, old_nick=None, new_nick=None):
-            '''callback for the set_nick method'''
+        self.old_nick = self.session.contacts.me.nick
+        self.old_pm = self.session.contacts.me.message
 
-            if response == gui.stock.ACCEPT:
-                if old_nick == new_nick:
-                    log.debug('old nick and new nick are the same')
-                    return
-                elif new_nick == '':
-                    log.debug('empty new nick')
-                    return
+    def set_nick_cb(self, old_nick=None, new_nick=None):
+        '''callback for the set_nick method'''
+        if old_nick == new_nick:
+            log.debug('old nick and new nick are the same')
+            return
+        elif new_nick == '':
+            log.debug('empty new nick')
+            return
+        print "adesso setto il nick"
+        self.session.set_nick(new_nick)
+        print "settato"
 
-                self.session.set_nick(new_nick)
+    def set_message_cb(self, old_pm=None, new_pm=None):
+        '''callback for the set_message method'''
+        if old_pm == new_pm:
+            log.debug('old and new personal messages are the same')
+            return
 
-        self.dialog.set_nick(self.session.contacts.me.nick, set_nick_cb)
+        self.session.set_message(new_pm)
 
-    def on_set_message_selected(self):
-        '''called when set message is selected'''
-        def set_message_cb(response, old_pm=None, new_pm=None):
-            '''callback for the set_message method'''
+    def save_profile(self, widget, data=None):
+        '''save the new profile'''
+        new_nick = self.nick.get_text()
+        new_pm = self.pm.get_text()
 
-            if response == gui.stock.ACCEPT:
-                if old_pm == new_pm:
-                    log.debug('old and new personal messages are the same')
-                    return
+        self.set_nick_cb(self.old_nick, new_nick)
+        self.set_message_cb(self.old_pm, new_pm)
 
-                self.session.set_message(new_pm)
+    def change_profile(self):
+        self.windows = gtk.Window()
+        self.windows.set_border_width(5)
+        self.windows.set_title('Change profile')
+        self.windows.set_position(gtk.WIN_POS_CENTER)
+        self.windows.set_resizable(False)
 
-        self.dialog.set_message(self.session.contacts.me.message,
-            set_message_cb)
+        self.hbox = gtk.HBox(spacing=5)
+        self.vbox = gtk.VBox()
 
-    def on_set_picture_selected(self):
+        self.frame = gtk.Frame('Picture')
+
+        self.avatar = gtk.Image()
+        self.avatar.set_size_request(96, 96)
+        self.frame.add(self.avatar)
+        pixbuf = gtk.gdk.pixbuf_new_from_file(self.session.config.last_avatar)
+        self.avatar.set_from_pixbuf(pixbuf)
+        self.avatarEventBox = gtk.EventBox()
+        self.avatarEventBox.add(self.frame)
+
+        self.hbox.pack_start(self.avatarEventBox)
+        self.hbox.pack_start(self.vbox)
+
+        self.nick_label = gtk.Label('Nick:')
+        self.nick_label.set_alignment(0.0,0.5)
+
+        self.nick = gtk.Entry()
+        self.nick.set_text(self.session.contacts.me.nick)
+
+        self.pm_label = gtk.Label('PM:')
+        self.pm_label.set_alignment(0.0,0.5)
+
+        self.pm = gtk.Entry()
+        self.pm.set_text(self.session.contacts.me.message)
+
+        self.savebutt = gtk.Button('Save')
+
+        self.savebutt.connect('clicked', self.save_profile)
+        self.avatarEventBox.connect("button-press-event", self.on_set_picture_selected)
+
+        #PACK
+        self.vbox0 = gtk.VBox()
+
+        self.vbox0.pack_start(self.nick_label)
+        self.vbox0.pack_start(self.nick)
+        self.vbox0.pack_start(self.pm_label)
+        self.vbox0.pack_start(self.pm)
+
+        self.vbox.pack_start(self.vbox0)
+        self.vbox.pack_start(self.savebutt)
+
+        self.windows.add(self.hbox)
+        self.windows.show_all()
+
+    def on_set_picture_selected(self, widget, data=None):
         '''called when set picture is selected'''
         def set_picture_cb(response, filename):
             '''callback for the avatar chooser'''
@@ -338,11 +392,11 @@ class MyAccountHandler(object):
                 self.avatar_manager.set_as_avatar(filename)
 
         # Directory for user's avatars
-        path_dir = self.avatar_manager.get_avatars_dir()                   
+        path_dir = self.avatar_manager.get_avatars_dir()
 
         # Directory for contact's cached avatars
         cached_avatar_dir = self.avatar_manager.get_cached_avatars_dir()
-                   
+
         # Directories for System Avatars
         faces_paths = self.avatar_manager.get_system_avatars_dirs()
 
@@ -436,7 +490,7 @@ class FileTransferHandler(object):
 
     def accept(self):
         ''' accepts a file transfer '''
-        self.transfer.time_start = time.time()        
+        self.transfer.time_start = time.time()
         self.transfer.state = e3.base.FileTransfer.TRANSFERRING
         self.session.accept_filetransfer(self.transfer)
 
