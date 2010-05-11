@@ -36,6 +36,7 @@ class Indicator(appindicator.Indicator):
         method called to set the state to the login window
         """
         self.menu = LoginMenu(self.handler)
+        self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
         self.menu.show_all()
         self.set_menu(self.menu)
 
@@ -46,6 +47,7 @@ class Indicator(appindicator.Indicator):
         self.handler.session = session
         self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
         self.menu = MainMenu(self.handler)
+        self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
         self.menu.show_all()
         self.set_menu(self.menu)
 
@@ -56,6 +58,18 @@ class Indicator(appindicator.Indicator):
         if stat not in status.ALL or stat == -1:
             return
         self.set_icon(self.handler.theme.status_icons[stat].split("/")[-1])
+        
+    def _on_activate(self, trayicon):
+	"""
+        callback called when the menu entry 'hide/show emesene'
+        is clicked
+        """
+
+        if(self.main_window != None):
+            if(self.main_window.get_property("visible")):
+                self.main_window.hide()
+            else:
+                self.main_window.show()
 
 class LoginMenu(gtk.Menu):
     """
@@ -71,10 +85,12 @@ class LoginMenu(gtk.Menu):
         """
         gtk.Menu.__init__(self)
         self.handler = handler
+        self.hide_show_mainwindow = gtk.MenuItem('Hide/Show emesene')
         self.quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit.connect('activate',
             lambda *args: self.handler.on_quit_selected())
-
+            
+        self.append(self.hide_show_mainwindow)
         self.append(self.quit)
 
 class MainMenu(gtk.Menu):
@@ -98,6 +114,8 @@ class MainMenu(gtk.Menu):
             gtk.ICON_SIZE_MENU))
         self.status_menu = StatusMenu(handler.on_status_selected)
         self.status.set_submenu(self.status_menu)
+        
+        self.hide_show_mainwindow = gtk.MenuItem('Hide/Show emesene')
 
         self.disconnect = gtk.ImageMenuItem(gtk.STOCK_DISCONNECT)
         self.disconnect.connect('activate',
@@ -107,6 +125,7 @@ class MainMenu(gtk.Menu):
             lambda *args: self.handler.on_quit_selected())
 
         self.append(self.status)
+        self.append(self.hide_show_mainwindow)
         self.append(self.disconnect)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)
