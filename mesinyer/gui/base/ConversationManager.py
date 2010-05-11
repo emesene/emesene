@@ -134,7 +134,6 @@ class ConversationManager(object):
 
         conversation = self.add_new_conversation(self.session, cid, members)
         self.conversations[cid] = conversation
-
         return conversation
 
     def _on_contact_attr_changed(self, account, change_type, old_value,

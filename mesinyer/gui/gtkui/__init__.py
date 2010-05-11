@@ -3,11 +3,12 @@ import extension
 
 WEBKITERROR = False
 INDICATORERROR = False
+INDICATERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR, INDICATORERROR
+    global WEBKITERROR, INDICATORERROR, INDICATERROR
 
     import gtk
     import gobject
@@ -36,9 +37,14 @@ def gtk_main(Controller):
         import Indicator
     except ImportError:
         INDICATORERROR = True
+    try:
+        import indicate
+    except ImportError:
+        INDICATERROR = True
     import Login
     import MainMenu
     import MainWindow
+    import MessagingMenu
     import NiceBar
     import PluginWindow
     import Preferences
@@ -76,7 +82,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR, INDICATORERROR
+    global WEBKITERROR, INDICATORERROR, INDICATERROR
 
     import gtk
 
@@ -98,10 +104,12 @@ def setup():
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
     extension.register('nick renderer', Renderers.GtkCellRenderer)
     extension.category_register('user panel', UserPanel.UserPanel)
+    if not INDICATERROR:
+        extension.category_register('tray icon', MessagingMenu.MessagingMenu)
+        extension.register('tray icon', TrayIcon.TrayIcon) 
     if not INDICATORERROR:    
-        extension.category_register('tray icon', Indicator.Indicator)
-        extension.register('tray icon', TrayIcon.TrayIcon)
-    else:
+        extension.register('tray icon', Indicator.Indicator)
+    if INDICATORERROR and INDICATERROR:
         extension.category_register('tray icon', TrayIcon.TrayIcon)        
     extension.category_register('debug window', DebugWindow.DebugWindow)
     extension.category_register('nice bar', NiceBar.NiceBar)
