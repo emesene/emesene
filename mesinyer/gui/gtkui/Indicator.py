@@ -55,9 +55,11 @@ class Indicator(appindicator.Indicator):
         """
         change the icon in the tray according to user's state
         """
-        if stat not in status.ALL or stat == -1:
-            return
-        self.set_icon(self.handler.theme.status_icons[stat].split("/")[-1])
+        #the appindicator takes a 'name' of an icon and NOT a filename. 
+        #that means that we have to strip the file extension
+        icon_name = self.handler.theme.status_icons[stat].split("/")[-1]
+        icon_name = icon_name[:icon_name.rfind(".")]
+        self.set_icon(icon_name)        
         
     def _on_activate(self, trayicon):
 	"""
