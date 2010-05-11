@@ -24,12 +24,5 @@ class AccountMenu(gtk.Menu):
         self.change_profile.connect('activate',
             lambda *args: self.handler.change_profile())
 
-
         self.append(self.change_profile)
-
-
-
-
-
-
 

@@ -308,9 +308,7 @@ class MyAccountHandler(object):
         elif new_nick == '':
             log.debug('empty new nick')
             return
-        print "adesso setto il nick"
         self.session.set_nick(new_nick)
-        print "settato"
 
     def set_message_cb(self, old_pm=None, new_pm=None):
         '''callback for the set_message method'''
@@ -368,7 +366,6 @@ class MyAccountHandler(object):
         self.savebutt.connect('clicked', self.save_profile)
         self.avatarEventBox.connect("button-press-event", self.on_set_picture_selected)
 
-        #PACK
         self.vbox0 = gtk.VBox()
 
         self.vbox0.pack_start(self.nick_label)
