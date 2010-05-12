@@ -178,7 +178,7 @@ class BaseTable(gtk.Table):
             row = self.current_row
             increment_current_row = True
 
-        self.attach(widget, 0, self.columns, row, row + 1, yoptions=gtk.EXPAND)
+        self.attach(widget, 0, self.columns, row, row + 1, yoptions=gtk.SHRINK)
 
         if increment_current_row:
             self.current_row += 1
