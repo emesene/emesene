@@ -32,6 +32,13 @@ def gtk_main(Controller):
     import Header
     import ImageAreaSelector
     import ImageChooser
+<<<<<<< HEAD
+=======
+    try:
+        import Indicator
+    except ImportError:
+        INDICATORERROR = True
+>>>>>>> e12473c6ae508f3a38c3c4ef2fa0674915c2cc21
     import Login
     import MainMenu
     import MainWindow
@@ -99,9 +106,9 @@ def setup():
     extension.register('nick renderer', Renderers.GtkCellRenderer)
     extension.category_register('user panel', UserPanel.UserPanel)
     if not INDICATORERROR:
-        extension.category_register('tray icon', UbuntuMessagingIndicator.UbuntuMessagingIndicator)
-        extension.register('tray icon', TrayIcon.TrayIcon) 
-    if INDICATORERROR:
+        extension.category_register('tray icon', Indicator.Indicator)
+        extension.register('tray icon', TrayIcon.TrayIcon)
+    else:    
         extension.category_register('tray icon', TrayIcon.TrayIcon)        
     extension.category_register('debug window', DebugWindow.DebugWindow)
     extension.category_register('nice bar', NiceBar.NiceBar)

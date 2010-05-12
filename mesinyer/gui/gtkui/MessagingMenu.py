@@ -1,19 +1,10 @@
-#adapted for emesene2 by cando from emesene1.x IndicateMessage plugin of Tom Cowell
-
 import os
 import gobject
 import time
 import utils
 from e3 import status
 
-import logging
-log = logging.getLogger('gui.gtkui.MessagingMenu')
-
-try:
-    import indicate
-except ImportError:
-    log.exception(_('Could not import python-indicate: please install via your package manager.'))
-
+import indicate
 #TODO don't notify when emesene is on focus
 #TODO exit from emesene when we are in login window.
 #TODO mark the message as read without clicking in the messagin menu???or when i close the conversation
@@ -26,12 +17,20 @@ class MessagingMenu():
 
     def __init__ (self, handler, main_window=None):
         '''constructor'''
+        NAME = 'Messaging Menu'
+        DESCRIPTION = 'The Ayatana Messaging Menu extension'
+        AUTHOR = 'Cando, Tom Cowell'
+        WEBSITE = 'www.emesene.org'
         self.handler = handler
         self.main_window = main_window
         self.conversations = None
-
-        #TODO if this file is not present???
-        self.desktop_file = os.path.join("/usr/share/applications/emesene.desktop")
+        self.signals_have_been_connected = False
+        # if system-wide desktop file is not present
+        # fallback to a custom .desktop file to be placed in /mesinyer/
+        self.desktop_file = os.path.join("/usr/share/applications/", "emesene.desktop")
+        if not utils.file_readable(self.desktop_file):
+            self.desktop_file = os.path.join(os.getcwd(), "emesene.desktop")
+            
         self.indicator_dict = {}
 
         self.server = indicate.indicate_server_ref_default()
@@ -56,6 +55,8 @@ class MessagingMenu():
         self.handler.session.signals.conv_message.subscribe(
             self._on_message)
 
+        self.signals_have_been_connected = True
+
     def set_conversations(self, convs):
         """
         Sets the conversations manager
@@ -66,11 +67,12 @@ class MessagingMenu():
         """ we are exiting from emesene: disconnect all signals """
         if arg:
             return
-       
-        self.handler.session.signals.contact_attr_changed.unsubscribe(
-            self._on_contact_attr_changed)
-        self.handler.session.signals.conv_message.unsubscribe(
-            self._on_message)
+
+        if self.signals_have_been_connected:
+            self.handler.session.signals.contact_attr_changed.unsubscribe(
+                self._on_contact_attr_changed)
+            self.handler.session.signals.conv_message.unsubscribe(
+                self._on_message)
 
         self.server.disconnect(self.sid)
         self.server.hide()

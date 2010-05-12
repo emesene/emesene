@@ -49,6 +49,11 @@ class TrayIcon(gtk.StatusIcon):
         """
         self.conversations = convs
 
+    def set_contacts(self, contacts):
+        """
+        sets the contacts
+        """
+
     def _on_activate(self, trayicon):
         """
         callback called when the status icon is activated
