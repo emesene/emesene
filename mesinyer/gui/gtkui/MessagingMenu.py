@@ -1,5 +1,3 @@
-#adapted for emesene2 by cando from emesene1.x IndicateMessage plugin of Tom Cowell
-
 import os
 import gobject
 import time
@@ -19,6 +17,10 @@ class MessagingMenu():
 
     def __init__ (self, handler, main_window=None):
         '''constructor'''
+        NAME = 'Messaging Menu'
+        DESCRIPTION = 'The Ayatana Messaging Menu extension'
+        AUTHOR = 'Cando, Tom Cowell'
+        WEBSITE = 'www.emesene.org'
         self.handler = handler
         self.main_window = main_window
         self.conversations = None

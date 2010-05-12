@@ -26,6 +26,10 @@ class Indicator(appindicator.Indicator):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
+        NAME = 'Indicator'
+        DESCRIPTION = 'The Ayatana Indicator applet extension'
+        AUTHOR = 'Riccardo (C10ud)'
+        WEBSITE = 'www.emesene.org'
         appindicator.Indicator.__init__(self, "emesene", "logo", \
             appindicator.CATEGORY_APPLICATION_STATUS, \
             os.path.join(os.getcwd(), handler.theme.theme_path))
@@ -78,6 +82,11 @@ class Indicator(appindicator.Indicator):
 
         if self.messaging_menu:
             self.messaging_menu.set_conversations(convs)
+
+    def set_contacts(self, contacts):
+        """
+        sets the contacts
+        """
 
     def _on_change_status(self,stat):
         """
@@ -144,7 +153,11 @@ class MainMenu(gtk.Menu):
             gtk.ICON_SIZE_MENU))
         self.status_menu = StatusMenu(handler.on_status_selected)
         self.status.set_submenu(self.status_menu)
-        
+
+        self.list = gtk.MenuItem('Contacts')
+        self.list_contacts = ContactsMenu(handler)
+        self.list.set_submenu(self.list_contacts)
+
         self.hide_show_mainwindow = gtk.MenuItem('Hide/Show emesene')
 
         self.disconnect = gtk.ImageMenuItem(gtk.STOCK_DISCONNECT)
@@ -154,8 +167,40 @@ class MainMenu(gtk.Menu):
         self.quit.connect('activate',
             lambda *args: self.handler.on_quit_selected())
 
-        self.append(self.status)
         self.append(self.hide_show_mainwindow)
+        self.append(self.status)
+        self.append(self.list)        
         self.append(self.disconnect)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)
+
+class ContactsMenu(gtk.Menu):
+    """
+    a gtk menu that contains session's contacts
+    """
+    NAME = 'Contacts Menu'
+    DESCRIPTION = 'A menu with sessions\' contacts'
+    AUTHOR = 'Riccardo (C10uD)'
+    WEBSITE = 'www.emesene.org'
+    def __init__(self, handler):
+        """
+        constructor
+        """
+        gtk.Menu.__init__(self)
+        self.handler = handler
+
+        contactmanager = self.handler.session.contacts
+        for contact in contactmanager.contacts:
+            label = gtk.MenuItem(contact) 
+            label.connect('activate', self._on_contact_clicked)    
+            self.append(label)
+
+        # TODO: update the list while running
+        # TODO: show [pixbuf] [nick] instead of mail
+        # TODO: open active (or new) conversation on click
+
+    def _on_contact_clicked(self, menu_item):
+        """
+        called when contacts are clicked
+        """
+        print "indicator-list clicked!", menu_item
