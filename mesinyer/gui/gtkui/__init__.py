@@ -32,13 +32,10 @@ def gtk_main(Controller):
     import Header
     import ImageAreaSelector
     import ImageChooser
-<<<<<<< HEAD
-=======
     try:
         import Indicator
     except ImportError:
         INDICATORERROR = True
->>>>>>> e12473c6ae508f3a38c3c4ef2fa0674915c2cc21
     import Login
     import MainMenu
     import MainWindow
@@ -50,10 +47,6 @@ def gtk_main(Controller):
     import TabWidget
     import TextBox
     import TrayIcon
-    try:
-        import UbuntuMessagingIndicator
-    except ImportError:
-        INDICATORERROR = True
     import UserPanel
     import Window
     try:
