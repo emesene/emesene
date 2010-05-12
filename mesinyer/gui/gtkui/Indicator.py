@@ -188,19 +188,55 @@ class ContactsMenu(gtk.Menu):
         """
         gtk.Menu.__init__(self)
         self.handler = handler
+        self.item_to_contacts = {}
+        self.contacts_to_item = {}
 
-        contactmanager = self.handler.session.contacts
-        for contact in contactmanager.contacts:
-            label = gtk.MenuItem(contact) 
-            label.connect('activate', self._on_contact_clicked)    
-            self.append(label)
+        self.contactmanager = self.handler.session.contacts
+        self.handler.session.signals.contact_attr_changed.subscribe(self._on_contact_change_something)
 
-        # TODO: update the list while running
+        for contact in self.contactmanager.get_online_list():
+            print contact
+            self.__append_contact(contact)
+
         # TODO: show [pixbuf] [nick] instead of mail
         # TODO: open active (or new) conversation on click
+
+    def __append_contact(self, contact):
+        """
+        appends a contact to our submenu
+        """   
+        item = gtk.MenuItem(label=contact.nick)
+        #item.set_image(contact.picture)
+        item.connect('activate', self._on_contact_clicked)    
+        self.item_to_contacts[item] = contact
+        self.contacts_to_item[contact.account] = item
+
+        self.append(item)
+
+    def _on_contact_change_something(self, *args):
+        """
+        update the menu when contacts change something
+        """
+        return
+        account, type_change, value_change = args
+
+        if type_change == 'status':
+            if value_change > 0:
+                if account in self.contacts_to_item:
+                    return
+                self.__append_contact(self.contactmanager.get(account))
+            else: # offline
+                if account in self.contacts_to_item:
+                    self.remove(self.contacts_to_item[account])
+                    del self.item_to_contacts[self.contacts_to_item[account]]
+                    del self.contacts_to_item[account]
+
+        if type_change == 'nick':
+            if account in self.contacts_to_item:
+                self.contacts_to_item[account].set_label(value_change)
 
     def _on_contact_clicked(self, menu_item):
         """
         called when contacts are clicked
         """
-        print "indicator-list clicked!", menu_item
+        print "indicator-list clicked!", menu_item, self.item_to_contacts[menu_item]
