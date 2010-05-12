@@ -5,6 +5,16 @@ import appindicator
 import extension
 from e3 import status
 
+import logging
+log = logging.getLogger('gui.gtkui.Indicator')
+
+HASMESSAGINGMENU = True
+try:
+    import MessagingMenu
+except ImportError:
+    HASMESSAGINGMENU = False
+    log.exception(_('Could not import python-indicate: please install via your package manager.'))
+
 class Indicator(appindicator.Indicator):
     """
     A widget that implements the tray icon of emesene for gtk
@@ -28,9 +38,14 @@ class Indicator(appindicator.Indicator):
         self.set_login()
         self.set_status(appindicator.STATUS_ACTIVE)
 
+        self.messaging_menu = None
+        if HASMESSAGINGMENU:
+            self.messaging_menu = MessagingMenu.MessagingMenu(handler, main_window)
+
     def set_visible(self, arg):
         """ dummy, indicators remove themselves automagically """
-        return
+        if self.messaging_menu:
+            self.messaging_menu.set_visible(arg)
 
     def set_login(self):
         """
@@ -52,11 +67,17 @@ class Indicator(appindicator.Indicator):
         self.menu.show_all()
         self.set_menu(self.menu)
 
+        if self.messaging_menu:
+            self.messaging_menu.set_main(session)
+
     def set_conversations(self, convs):
         """
         Sets the conversations manager
         """
         self.conversations = convs
+
+        if self.messaging_menu:
+            self.messaging_menu.set_conversations(convs)
 
     def _on_change_status(self,stat):
         """
