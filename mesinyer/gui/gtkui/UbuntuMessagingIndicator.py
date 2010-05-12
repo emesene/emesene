@@ -1,5 +1,6 @@
 import os
 import gtk
+import time
 try:
     import appindicator
 except ImportError:
@@ -16,6 +17,7 @@ except ImportError:
 if appindicator is None and indicate is None:
     raise ImportError
 
+import utils
 import extension
 from e3 import status
 
@@ -31,10 +33,15 @@ class UbuntuMessagingIndicator():
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
+        self.handler = handler
+        self.main_window = main_window
+        self.conversations = None
+
         if appindicator:
             self.trayicon = appindicator.Indicator("emesene", "logo", \
                 appindicator.CATEGORY_APPLICATION_STATUS, \
                 os.path.join(os.getcwd(), handler.theme.theme_path))
+            self.set_login()
             self.trayicon.set_status(appindicator.STATUS_ACTIVE)
 
         if indicate:
@@ -45,11 +52,6 @@ class UbuntuMessagingIndicator():
             self.server.set_desktop_file(self.desktop_file)
             self.sid = self.server.connect("server-display", self._server_display)
             self.server.show()
-
-        self.handler = handler
-
-        self.main_window = main_window
-        self.conversations = None
 
     def set_visible(self, arg):
         """ dummy for indicators remove themselves automagically;
@@ -78,7 +80,7 @@ class UbuntuMessagingIndicator():
             self.menu = LoginMenu(self.handler)
             self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
             self.menu.show_all()
-            self.set_menu(self.menu)
+            self.trayicon.set_menu(self.menu)
 
     def set_main(self, session):
         """
@@ -90,7 +92,7 @@ class UbuntuMessagingIndicator():
             self.menu = MainMenu(self.handler)
             self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
             self.menu.show_all()
-            self.set_menu(self.menu)
+            self.trayicon.set_menu(self.menu)
         if indicate:
             self.handler.session.signals.contact_attr_changed.subscribe(
                 self._on_contact_attr_changed)
@@ -111,7 +113,7 @@ class UbuntuMessagingIndicator():
         #that means that we have to strip the file extension
         icon_name = self.handler.theme.status_icons[stat].split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
-        self.set_icon(icon_name)        
+        self.trayicon.set_icon(icon_name)        
         
     def _on_activate(self, trayicon):
 	"""

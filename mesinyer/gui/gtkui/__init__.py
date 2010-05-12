@@ -3,12 +3,11 @@ import extension
 
 WEBKITERROR = False
 INDICATORERROR = False
-INDICATERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR, INDICATORERROR, INDICATERROR
+    global WEBKITERROR, INDICATORERROR
 
     import gtk
     import gobject
@@ -33,18 +32,9 @@ def gtk_main(Controller):
     import Header
     import ImageAreaSelector
     import ImageChooser
-    try:
-        import Indicator
-    except ImportError:
-        INDICATORERROR = True
-    try:
-        import indicate
-    except ImportError:
-        INDICATERROR = True
     import Login
     import MainMenu
     import MainWindow
-    import MessagingMenu
     import NiceBar
     import PluginWindow
     import Preferences
@@ -53,6 +43,10 @@ def gtk_main(Controller):
     import TabWidget
     import TextBox
     import TrayIcon
+    try:
+        import UbuntuMessagingIndicator
+    except ImportError:
+        INDICATORERROR = True
     import UserPanel
     import Window
     try:
@@ -82,7 +76,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR, INDICATORERROR, INDICATERROR
+    global WEBKITERROR, INDICATORERROR
 
     import gtk
 
@@ -104,12 +98,10 @@ def setup():
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
     extension.register('nick renderer', Renderers.GtkCellRenderer)
     extension.category_register('user panel', UserPanel.UserPanel)
-    if not INDICATERROR:
-        extension.category_register('tray icon', MessagingMenu.MessagingMenu)
+    if not INDICATORERROR:
+        extension.category_register('tray icon', UbuntuMessagingIndicator.UbuntuMessagingIndicator)
         extension.register('tray icon', TrayIcon.TrayIcon) 
-    if not INDICATORERROR:    
-        extension.register('tray icon', Indicator.Indicator)
-    if INDICATORERROR and INDICATERROR:
+    if INDICATORERROR:
         extension.category_register('tray icon', TrayIcon.TrayIcon)        
     extension.category_register('debug window', DebugWindow.DebugWindow)
     extension.category_register('nice bar', NiceBar.NiceBar)
