@@ -3,7 +3,6 @@ import extension
 
 WEBKITERROR = False
 INDICATORERROR = False
-INDICATERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
@@ -40,7 +39,6 @@ def gtk_main(Controller):
     import Login
     import MainMenu
     import MainWindow
-    import MessagingMenu
     import NiceBar
     import PluginWindow
     import Preferences

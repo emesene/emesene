@@ -129,6 +129,7 @@ class Worker(e3.base.Worker, papyon.Client):
         # sets the login-chosen presence in papyon
         presence = self.session.account.status
         nick = self.profile.display_name
+        self.session.contacts.me.picture = self.session.config_dir.get_path("last_avatar")
         self._set_status(presence)
         # initialize caches
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
@@ -907,6 +908,7 @@ class Worker(e3.base.Worker, papyon.Client):
         del self.papyconv[cid]
         del self.rpapyconv[conv]
         del self._conversation_handler[cid]
+        self.session.add_event(e3.Event.EVENT_CONV_ENDED, cid)
 
     def _handle_action_conv_invite(self, cid, account):
         '''handle Action.ACTION_CONV_INVITE

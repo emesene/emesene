@@ -31,6 +31,7 @@ class Message(object):
     @classmethod
     def from_contact(cls, contact, message, first, incomming):
         picture = contact.picture
+        print contact.picture
 
         if not picture:
             picture = os.path.abspath(gui.theme.user)
