@@ -44,7 +44,7 @@ EVENTS = (\
  'p2p accepted',        'p2p progress',
  'profile get succeed'  , 'profile get failed',
  'profile set succeed'  , 'profile set failed',
- 'media received')
+ 'media received' , 'message read')
 
 ACTIONS = (\
  'login'            , 'logout'           ,
