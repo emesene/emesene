@@ -129,7 +129,7 @@ class Controller(object):
 
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
-                e3.common.notification.notify)
+                e3.common.notification.Notification)
         extension.category_register('history exporter',
                 e3.Logger.save_logs_as_txt)
 
@@ -467,6 +467,14 @@ class Controller(object):
             dialog.contact_added_you(accounts, on_contact_added_you)
 
         gobject.timeout_add(500, self.session.logger.check)
+
+        #we instantiate this here to prevent the whole contact list
+        #online notification
+        def instantiate_notification():
+            notificationcls = extension.get_default('notification')
+            self.notification = notificationcls(self.session)
+
+        gobject.timeout_add(10000, instantiate_notification)
 
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
