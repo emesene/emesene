@@ -263,9 +263,14 @@ def msnplus(msnplus, do_parse_emotes=True):
     _dict_translate_tags(dictlike)
     return DictObj(dictlike)
 
-def msnplus_strip(msnplus):
-    '''given a string with msn+ formatting, give a string with same text but
-    without MSN+ markup'''
+def msnplus_strip(msnplus, useless_arg=None):
+    '''
+    given a string with msn+ formatting, give a string with same text but
+    without MSN+ markup
+    @param msnplus The original string
+    @param useless_arg This is actually useless, and is mantained just for
+    compatibility with msnplus
+    '''
     tag_re = re.compile('\[/?\w(=\d+)?\]')
     return tag_re.sub('', msnplus)
 
