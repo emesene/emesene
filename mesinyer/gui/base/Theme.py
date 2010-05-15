@@ -240,6 +240,19 @@ class Theme(object):
 
         return themes
 
+    def get_adium_themes(self):
+        '''return a list of validated adium themes'''
+        themes = []
+        AdiumThemesM = AdiumThemes.AdiumThemes()
+        path_conv = os.path.join('themes', 'conversations')
+
+        for theme in self.get_child_dirs(path_conv):
+            if AdiumThemesM.validate(
+                                os.path.join(os.path.abspath(path_conv), theme))[0]:
+                themes.append(theme)
+
+        return themes
+
     def get_child_dirs(self, dir_path):
         '''return a list of dirs inside a given path'''
         try:
