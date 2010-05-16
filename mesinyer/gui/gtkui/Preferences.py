@@ -419,6 +419,8 @@ class Theme(BaseTable):
 
         ContactList = extension.get_default('contact list')
 
+        adium_theme = self.session.config.get_or_set('adium_theme', 'renkoo.AdiumMessageStyle')
+
         self.append_combo('Image theme', gui.theme.get_image_themes,
             'session.config.image_theme')
         self.append_combo('Sound theme', gui.theme.get_sound_themes,
