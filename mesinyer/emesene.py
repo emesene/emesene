@@ -346,7 +346,8 @@ class Controller(object):
         image_name = self.session.config.get_or_set('image_theme', 'default')
         emote_name = self.session.config.get_or_set('emote_theme', 'default')
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
-        gui.theme.set_theme(image_name, emote_name, sound_name)
+        conv_name = self.session.config.get_or_set('adium_theme', 'default')
+        gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
 
         last_avatar = self.session.config.get_or_set('last_avatar',
             last_avatar_path)
@@ -488,7 +489,7 @@ class Controller(object):
             self.conversations = window.content
             self.tray_icon.set_conversations(self.conversations)
             window.show()
-        
+
         conversation = self.conversations.new_conversation(cid, members)
 
         conversation.update_data()

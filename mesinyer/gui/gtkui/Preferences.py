@@ -75,6 +75,7 @@ class Preferences(gtk.Window):
 
         ''' PACK TREEVIEW, FRAME AND HBOX '''
         vbox = gtk.VBox()
+
         vbox.set_spacing(4)
         hbox = gtk.HBox(homogeneous=False, spacing=5)
         hbox.pack_start(treeView, True,True) # False, True
@@ -418,12 +419,16 @@ class Theme(BaseTable):
 
         ContactList = extension.get_default('contact list')
 
+        adium_theme = self.session.config.get_or_set('adium_theme', 'renkoo.AdiumMessageStyle')
+
         self.append_combo('Image theme', gui.theme.get_image_themes,
             'session.config.image_theme')
         self.append_combo('Sound theme', gui.theme.get_sound_themes,
             'session.config.sound_theme')
         self.append_combo('Emote theme', gui.theme.get_emote_themes,
             'session.config.emote_theme')
+        self.append_combo('Adium theme', gui.theme.get_adium_themes,
+            'session.config.adium_theme')
         self.append_entry_default('Nick format',
                 'session.config.nick_template', ContactList.NICK_TPL)
         self.append_entry_default('Group format',
