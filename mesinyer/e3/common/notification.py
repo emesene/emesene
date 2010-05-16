@@ -51,7 +51,7 @@ class Notification():
         if contact.status == status.ONLINE:
             text = _('is online')
             self._notify(contact, contact.nick , text)
-        if contact.status == status.OFFLINE:
+        if contact.status == status.OFFLINE:      
             text = _('is offline')
             self._notify(contact, contact.nick , text)
 

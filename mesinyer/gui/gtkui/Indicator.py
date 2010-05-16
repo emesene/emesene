@@ -28,7 +28,7 @@ class Indicator(appindicator.Indicator):
         """
         NAME = 'Indicator'
         DESCRIPTION = 'The Ayatana Indicator applet extension'
-        AUTHOR = 'Riccardo (C10ud)'
+        AUTHOR = 'Riccardo (C10ud), Stefano(Cando)'
         WEBSITE = 'www.emesene.org'
         appindicator.Indicator.__init__(self, "emesene", "logo", \
             appindicator.CATEGORY_APPLICATION_STATUS, \
