@@ -98,10 +98,10 @@ def setup():
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
     extension.register('nick renderer', Renderers.GtkCellRenderer)
     extension.category_register('user panel', UserPanel.UserPanel)
-    if not INDICATORERROR:    
+    if not INDICATORERROR:
         extension.category_register('tray icon', Indicator.Indicator)
         extension.register('tray icon', TrayIcon.TrayIcon)
-    else:
+    else:    
         extension.category_register('tray icon', TrayIcon.TrayIcon)        
     extension.category_register('debug window', DebugWindow.DebugWindow)
     extension.category_register('nice bar', NiceBar.NiceBar)

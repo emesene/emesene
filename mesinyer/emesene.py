@@ -129,7 +129,7 @@ class Controller(object):
 
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
-                e3.common.notification.notify)
+                e3.common.notification.Notification)
         extension.category_register('history exporter',
                 e3.Logger.save_logs_as_txt)
 
@@ -346,7 +346,8 @@ class Controller(object):
         image_name = self.session.config.get_or_set('image_theme', 'default')
         emote_name = self.session.config.get_or_set('emote_theme', 'default')
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
-        gui.theme.set_theme(image_name, emote_name, sound_name)
+        conv_name = self.session.config.get_or_set('adium_theme', 'default')
+        gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
 
         last_avatar = self.session.config.get_or_set('last_avatar',
             last_avatar_path)
@@ -383,7 +384,7 @@ class Controller(object):
         '''show login info messages while connecting'''
         if self.window is not None and \
            self.window.content_type == 'connecting':
-            self.window.content.on_connecting(message)
+           self.window.content.on_connecting(message);
 
     def on_login_failed(self, reason):
         '''callback called when login fails'''
@@ -405,16 +406,11 @@ class Controller(object):
         '''called when the user press the connect button'''
         self._save_login_dimensions()
         self._set_location(self.window)
-
         if not on_reconnect:
             self.on_preferences_changed(use_http, proxy, session_id)
             self.window.clear()
-            path = self.config_dir.join(host, account.account, 'avatars', 'last')
-
-            if not self.config_dir.file_readable(path):
-                path = ''
-
-            self.window.go_connect(self.on_cancel_login, path)
+            self.avatar_path = self.config_dir.join(host, account.account, 'avatars', 'last')
+            self.window.go_connect(self.on_cancel_login, self.avatar_path)
             self.window.show()
         else:
             self.window.content.clear_connect()
@@ -473,6 +469,14 @@ class Controller(object):
 
         gobject.timeout_add(500, self.session.logger.check)
 
+        #we instantiate this here to prevent the whole contact list
+        #online notification
+        def instantiate_notification():
+            notificationcls = extension.get_default('notification')
+            self.notification = notificationcls(self.session)
+
+        gobject.timeout_add(10000, instantiate_notification)
+
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
         opening a conversation'''
@@ -483,8 +487,9 @@ class Controller(object):
             window.go_conversation(self.session)
             self._set_location(window, True)
             self.conversations = window.content
+            self.tray_icon.set_conversations(self.conversations)
             window.show()
-        
+
         conversation = self.conversations.new_conversation(cid, members)
 
         conversation.update_data()
@@ -536,7 +541,7 @@ class Controller(object):
         '''called on close'''
         self.close_session()
 
-    def on_disconnected(self, reason, reconnect=False):
+    def on_disconnected(self, reason, reconnect=0):
         '''called when the server disconnect us'''
         account = self.session.account
         self.close_session(False)
@@ -550,7 +555,7 @@ class Controller(object):
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''
         self.window.clear()
-        self.window.go_connect(self.on_cancel_login)
+        self.window.go_connect(self.on_cancel_login, self.avatar_path)
         self.window.content.on_reconnect(self.on_login_connect, account)
 
 class ExtensionDefault(object):

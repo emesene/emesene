@@ -36,9 +36,11 @@ class Conversation(gtk.VBox, gui.Conversation):
         TransfersBar = extension.get_default('filetransfer pool')
         dialog = extension.get_default('dialog')
         Avatar = extension.get_default('avatar')
-        
-        self.avatar = Avatar(cellDimention=64)
-        self.his_avatar = Avatar(cellDimention=64)
+
+        avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
+
+        self.avatar = Avatar(cellDimention=avatar_size)
+        self.his_avatar = Avatar(cellDimention=avatar_size)
 
         self.header = Header()
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
@@ -60,7 +62,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel.pack1(self.output, True, True)
         self.panel.pack2(frame_input, True, True)
-        
+
         self.panel_signal_id = self.panel.connect_after('expose-event',
                 self.update_panel_position)
 
@@ -92,8 +94,6 @@ class Conversation(gtk.VBox, gui.Conversation):
 
             if contact and contact.picture:
                 his_picture = contact.picture
-
-        avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
 
         self.info.first = self.his_avatar
         self.his_avatar.set_from_file(his_picture)
@@ -275,7 +275,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.toolbar.hide()
 
     def rotate_picture(self):
-        '''change the account picture in a multichat 
+        '''change the account picture in a multichat
            conversation every 5 seconds'''
         def increment():
             if self.index < len(self.members) - 1 :

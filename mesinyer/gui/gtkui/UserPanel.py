@@ -34,7 +34,7 @@ class UserPanel(gtk.VBox):
         self.avatarBox.add(self.avatar)
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
 
-        self.avatar_path = self.session.config.last_avatar
+        self.avatar_path = self.config_dir.get_path("last_avatar")
         self.avatar_manager = AvatarManager(self.session)
 
         if not self.session.config_dir.file_readable(self.avatar_path):

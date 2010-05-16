@@ -1,25 +1,72 @@
-try:
-    import gobject
-    import pynotify
+'''emesene's notification system'''
+from e3 import status
 
-    if not pynotify.init("emesene 2"):
-        raise ImportError()
+import pynotify
+if not pynotify.init("emesene"):
+    raise ImportError
 
-    def notify(title, text, image_path=None):
+import logging
+log = logging.getLogger('gui.gtkui.Notification')
 
-        notification = pynotify.Notification(title, text)
+#TODO add config
+#TODO update multiple message on notification
+class Notification():
+    '''emesene's notification system'''
+    NAME = 'Notification'
+    DESCRIPTION = 'Emesene\'s notification system'
+    AUTHOR = 'Cando'
+    WEBSITE = 'www.emesene.org'
 
-        if image_path:
-            notification.set_icon_from_file(image_path)
+    def __init__(self, session):
+        """
+        Class Constructor
+        """
+        self.session = session
 
-        try:
-            notification.show()
-        except gobject.GError:
+        if self.session:
+            self.session.signals.conv_message.subscribe(
+                self._on_message)
+            self.session.signals.contact_attr_changed.subscribe(
+                self._on_contact_attr_changed)
+
+    def _on_message(self, cid, account, msgobj, cedict):
+        """ 
+        This is called when a new message arrives to a user.
+        """
+        #TODO don't notify if the conversation is on focus
+        contact = self.session.contacts.get(account)
+        self._notify(contact, contact.nick , msgobj.body)
+
+    def _on_contact_attr_changed(self, account, change_type, old_value,
+            do_notify=True):
+        """
+        This is called when an attribute of a contact changes
+        """
+        if change_type != 'status':
             return
-except ImportError:
-    def notify(title, message, image_path):
+
+        contact = self.session.contacts.get(account)
+        if not contact:
+            return
+        if contact.status == status.ONLINE:
+            text = _('is online')
+            self._notify(contact, contact.nick , text)
+        if contact.status == status.OFFLINE:
+            text = _('is offline')
+            self._notify(contact, contact.nick , text)
+
+
+    def _notify(self, contact, title, text):
         """
-        notify message to the user
+        This creates and shows the nofification
         """
-        print title
-        print '  ', message
+        if contact.picture is not None:
+            uri = "file://" + contact.picture
+        else:
+            uri = "notification-message-IM"
+
+        n = pynotify.Notification(title, text, uri)
+
+        if not n.show():
+            log.exception(_("Failed to send notification"))
+        

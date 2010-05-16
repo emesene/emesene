@@ -68,14 +68,18 @@ class ContactList(object):
         # + DISPLAY_NAME (alias if available, or nick if available or mail)
         # + STATUS
         # + MESSAGE
-        self.nick_template = \
+        self.nick_template_default = \
             '%DISPLAY_NAME%\n%ACCOUNT%\n(%STATUS%) - %MESSAGE%'
+        self.nick_template = self.session.config.get_or_set('nick_template',
+            self.nick_template_default)
         # valid values:
         # + NAME
         # + ONLINE_COUNT
         # + TOTAL_COUNT
-        self.group_template = '%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)'
-        
+        self.group_template_default = '%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)'
+        self.nick_template = self.session.config.get_or_set('group_template',
+            self.group_template_default)
+
         #contact signals
         self.session.signals.contact_attr_changed.subscribe(
             self._on_contact_attr_changed)
@@ -110,9 +114,9 @@ class ContactList(object):
             return
 
         self.update_contact(contact)
-   
+
     def _on_add_contact(self, account, *args):
-        '''called when we add a contact 
+        '''called when we add a contact
         '''
         contact = self.session.contacts.get(account)
         if not contact:
@@ -121,7 +125,7 @@ class ContactList(object):
         self.add_contact(contact)
 
     def _on_remove_contact(self, account, *args):
-        '''called when we remove a contact 
+        '''called when we remove a contact
         '''
         contact = self.session.contacts.get(account)
         if not contact:
@@ -139,7 +143,7 @@ class ContactList(object):
             return
         elif not group:
             self.add_contact(contact)
-        
+
         self.add_contact(contact, group)
 
     def _on_remove_contact_group(self, group, account, *args):
@@ -155,7 +159,7 @@ class ContactList(object):
         self.remove_contact(contact, group)
 
     def _on_add_group(self, group, *args):
-        '''called when we add a group 
+        '''called when we add a group
         '''
         group = self.session.groups[group]
 
@@ -183,7 +187,7 @@ class ContactList(object):
             return
 
         self.update_group(group)
-   
+
 
     def _get_order_by_status(self):
         '''return the value of order by status'''

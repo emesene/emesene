@@ -1,6 +1,7 @@
 '''a module that define classes to build the conversation widget'''
 import gtk
 
+import e3
 import gui
 import extension
 
@@ -114,10 +115,12 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         if page_num != -1:
             page = self.get_nth_page(page_num)
             self.set_message_waiting(page, False)
+            self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
 
     def _on_switch_page(self, notebook, page, page_num):
         '''called when the user changes the tab'''
         page = self.get_nth_page(page_num)
+        self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
         self.set_message_waiting(page, False)
         parent = self.get_parent()
         parent.set_title(page.text)
