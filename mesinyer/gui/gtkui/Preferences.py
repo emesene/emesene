@@ -283,6 +283,20 @@ class BaseTable(gtk.Table):
         combo.connect('changed', self.on_combo_changed, property_name)
         self.append_row(hbox, None)
 
+    def append_markup(self, text):
+        """append a row with a check box with text as label and
+        set the check state with default
+        """
+        hbox = gtk.HBox()
+        hbox.set_homogeneous(True)
+        label = gtk.Label()
+        label.set_alignment(0.0, 0.5)
+        label.set_markup(text)
+
+        hbox.pack_start(label, True, True)
+
+        self.append_row(hbox, None)
+
     def on_combo_changed(self, combo, property_name):
         """callback called when the selection of the combo changed
         """
@@ -349,6 +363,10 @@ class Interface(BaseTable):
         """
         BaseTable.__init__(self, 4, 1)
         self.session = session
+        self.append_markup('<b>Main window:</b>')
+        self.append_check('Show user panel',
+            'session.config.b_show_userpanel')
+        self.append_markup('<b>Conversation window:</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.append_check('Show emoticons', 'session.config.b_show_emoticons')
         self.append_check('Show conversation header',
@@ -357,12 +375,11 @@ class Interface(BaseTable):
             'session.config.b_show_info')
         self.append_check('Show conversation toolbar',
             'session.config.b_show_toolbar')
-        self.append_check('Show user panel',
-            'session.config.b_show_userpanel')
-        self.append_check('Allow auto scroll in conversation',
-            'session.config.b_allow_auto_scroll')
         self.append_check('Avatar on conversation left side',
             'session.config.b_avatar_on_left')
+        self.append_check('Allow auto scroll in conversation',
+            'session.config.b_allow_auto_scroll')
+
         self.append_range('Contact list avatar size',
             'session.config.i_avatar_size', 18, 64)
         self.append_range('Conversation avatar size',
@@ -378,6 +395,7 @@ class Sound(BaseTable):
         """
         BaseTable.__init__(self, 6, 1)
         self.session = session
+        self.append_markup('<b>Messages events:</b>')
         self.append_check('Play sound on first sent message',
             'session.config.b_play_first_send')
         self.append_check('Play sound on sent message',
@@ -386,6 +404,8 @@ class Sound(BaseTable):
             'session.config.b_play_type')
         self.append_check('Play sound on nudge',
             'session.config.b_play_nudge')
+
+        self.append_markup('<b>Users events:</b>')
         self.append_check('Play sound on contact online',
             'session.config.b_play_contact_online')
         self.append_check('Play sound on contact offline',
