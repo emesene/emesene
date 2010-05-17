@@ -1,3 +1,4 @@
+import os
 import time
 import Queue
 import threading
@@ -276,7 +277,7 @@ class Logger(object):
         self.groups = {}
         self.accounts = {}
 
-        self.connection = sqlite.connect(path)
+        self.connection = sqlite.connect(os.path.join(path, "base.db"))
         self.cursor = self.connection.cursor()
 
         self._count = 0
