@@ -10,7 +10,7 @@ class Header(gtk.HBox):
 
     NAME = 'Header'
     DESCRIPTION = 'The widget that displays information about the conversation'
-    AUTHOR = 'Mariano Guerra, Ivan (Ivan25)'
+    AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
     def __init__(self, session, members):
