@@ -42,7 +42,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.avatar = Avatar(cellDimention=avatar_size)
         self.his_avatar = Avatar(cellDimention=avatar_size)
 
-        self.header = Header()
+        self.header = Header(session, members)
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
             dialog, gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
