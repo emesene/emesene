@@ -206,7 +206,6 @@ class ContactsMenu(gtk.Menu):
         """
         appends a contact to our submenu
         """
-        print "appending", contact
         item = gtk.MenuItem(label=contact.nick)
         #item.set_image(contact.picture)
         item.connect('activate', self._on_contact_clicked)    

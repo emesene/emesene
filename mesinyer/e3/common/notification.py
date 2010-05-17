@@ -49,11 +49,13 @@ class Notification():
         if not contact:
             return
         if contact.status == status.ONLINE:
-            text = _('is online')
-            self._notify(contact, contact.nick , text)
+            if self.session.config.get_or_set('b_notify_contact_online', True):
+                text = _('is online')
+                self._notify(contact, contact.nick, text)
         if contact.status == status.OFFLINE:
-            text = _('is offline')
-            self._notify(contact, contact.nick , text)
+            if self.session.config.get_or_set('b_notify_contact_offline', True):
+                text = _('is offline')
+                self._notify(contact, contact.nick, text)
 
 
     def _notify(self, contact, title, text):
