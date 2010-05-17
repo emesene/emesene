@@ -57,7 +57,6 @@ class Notification():
                 text = _('is offline')
                 self._notify(contact, contact.nick, text)
 
-
     def _notify(self, contact, title, text):
         """
         This creates and shows the nofification

@@ -14,6 +14,11 @@ class TrayIcon(gtk.StatusIcon):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
+        NAME = 'Tray Icon'
+        DESCRIPTION = 'The gtk tray icon'
+        AUTHOR = 'Mariano Guerra'
+        WEBSITE = 'www.emesene.org'
+
         gtk.StatusIcon.__init__(self)
         self.handler = handler
 
