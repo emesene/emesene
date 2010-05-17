@@ -284,8 +284,7 @@ class BaseTable(gtk.Table):
         self.append_row(hbox, None)
 
     def append_markup(self, text):
-        """append a row with a check box with text as label and
-        set the check state with default
+        """append a label
         """
         hbox = gtk.HBox()
         hbox.set_homogeneous(True)
