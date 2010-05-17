@@ -110,7 +110,6 @@ class OutputText(gtk.ScrolledWindow):
         self._texts = []
         self.loaded = False
         picture = os.path.abspath(gui.theme.user)
-        print picture
         self.view = OutputView(gui.theme.conv_theme, "", "", "", picture,
                 picture)
         self.view.connect('load-finished', self._loading_stop_cb)

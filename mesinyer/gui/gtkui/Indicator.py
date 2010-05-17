@@ -1,5 +1,6 @@
 import os
 import gtk
+import time
 import appindicator
 
 import extension
@@ -39,6 +40,7 @@ class Indicator(appindicator.Indicator):
         self.main_window = main_window
         self.conversations = None
 
+        self.menu = None
         self.set_login()
         self.set_status(appindicator.STATUS_ACTIVE)
 
@@ -66,7 +68,7 @@ class Indicator(appindicator.Indicator):
         """
         self.handler.session = session
         self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
-        self.menu = MainMenu(self.handler)
+        self.menu = MainMenu(self.handler, self.main_window)
         self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
         self.menu.show_all()
         self.set_menu(self.menu)
@@ -138,7 +140,7 @@ class MainMenu(gtk.Menu):
     main window
     """
 
-    def __init__(self, handler):
+    def __init__(self, handler, main_window=None):
         """
         constructor
 
@@ -155,7 +157,7 @@ class MainMenu(gtk.Menu):
         self.status.set_submenu(self.status_menu)
 
         self.list = gtk.MenuItem('Contacts')
-        self.list_contacts = ContactsMenu(handler)
+        self.list_contacts = ContactsMenu(handler, main_window)
         self.list.set_submenu(self.list_contacts)
 
         self.hide_show_mainwindow = gtk.MenuItem('Hide/Show emesene')
@@ -182,12 +184,13 @@ class ContactsMenu(gtk.Menu):
     DESCRIPTION = 'A menu with sessions\' contacts'
     AUTHOR = 'Riccardo (C10uD)'
     WEBSITE = 'www.emesene.org'
-    def __init__(self, handler):
+    def __init__(self, handler, main_window=None):
         """
         constructor
         """
         gtk.Menu.__init__(self)
         self.handler = handler
+        self.main_window = main_window
         self.item_to_contacts = {}
         self.contacts_to_item = {}
 
@@ -195,16 +198,15 @@ class ContactsMenu(gtk.Menu):
         self.handler.session.signals.contact_attr_changed.subscribe(self._on_contact_change_something)
 
         for contact in self.contactmanager.get_online_list():
-            print contact
             self.__append_contact(contact)
 
         # TODO: show [pixbuf] [nick] instead of mail
-        # TODO: open active (or new) conversation on click
 
     def __append_contact(self, contact):
         """
         appends a contact to our submenu
-        """   
+        """
+        print "appending", contact
         item = gtk.MenuItem(label=contact.nick)
         #item.set_image(contact.picture)
         item.connect('activate', self._on_contact_clicked)    
@@ -217,7 +219,6 @@ class ContactsMenu(gtk.Menu):
         """
         update the menu when contacts change something
         """
-        return
         account, type_change, value_change = args
 
         if type_change == 'status':
@@ -239,4 +240,8 @@ class ContactsMenu(gtk.Menu):
         """
         called when contacts are clicked
         """
-        print "indicator-list clicked!", menu_item, self.item_to_contacts[menu_item]
+        acc = self.item_to_contacts[menu_item].account
+        cid = time.time()
+        self.main_window.content.on_new_conversation(cid, [acc], other_started=False)
+        self.handler.session.new_conversation(acc, cid)
+
