@@ -130,6 +130,9 @@ class MusicHandler(object):
 
         cover_art_path = os.path.join(home_dir, '.covers', '')
 
+        if not os.path.exists(cover_art_path):
+            os.makedirs(cover_art_path)
+
         # print "Searching for covers in " + cover_art_path
 
         image_path = cover_art_path + artist + '-' + album + '.jpg'

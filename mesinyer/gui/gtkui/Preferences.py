@@ -425,6 +425,8 @@ class Notification(BaseTable):
             'session.config.b_notify_contact_online')
         self.append_check('Notify on contact offline',
             'session.config.b_notify_contact_offline')
+        self.append_check('Notify on received message',
+            'session.config.b_notify_receive_message')
         self.show_all()
 
 class Theme(BaseTable):
