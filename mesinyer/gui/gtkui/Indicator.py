@@ -184,6 +184,7 @@ class ContactsMenu(gtk.Menu):
     DESCRIPTION = 'A menu with sessions\' contacts'
     AUTHOR = 'Riccardo (C10uD)'
     WEBSITE = 'www.emesene.org'
+
     def __init__(self, handler, main_window=None):
         """
         constructor
@@ -218,7 +219,10 @@ class ContactsMenu(gtk.Menu):
         """
         update the menu when contacts change something
         """
-        account, type_change, value_change = args
+        if len(args) == 3:
+            account, type_change, value_change = args
+        elif len(args) == 4:
+            account, type_change, value_change, do_notify = args
 
         if type_change == 'status':
             if value_change > 0:
