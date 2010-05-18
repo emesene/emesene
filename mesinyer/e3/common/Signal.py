@@ -19,6 +19,8 @@ import functools
 import logging
 log = logging.getLogger('e3.common.Signal')
 
+import traceback
+
 class Signal(object):
     '''an object that represents a signal a callback can subscribe
     to the signal, when emited all the callbacks are called until the end or
@@ -55,6 +57,7 @@ class Signal(object):
             except Exception, error:
                 log.warning('Signal handler (%s) error: %s' %
                         (format_callback_name(callback), str(error)))
+                traceback.print_exc()
 
 def format_callback_name(func):
     '''return a pretty representation for a function name

@@ -18,8 +18,3 @@ def play(session, sound):
             session.config.b_play_nudge:
         play(sound)
 
-def notify(title, message, image_path=None):
-    """notify the user with message"""
-    notification = extension.get_default('notification')
-    if notification is not None:
-        notification(title, message, image_path)
