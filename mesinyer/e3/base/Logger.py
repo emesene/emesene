@@ -277,7 +277,8 @@ class Logger(object):
         self.groups = {}
         self.accounts = {}
 
-        self.connection = sqlite.connect(os.path.join(path, "base.db"))
+        full_path = os.path.join(path, "base.db")
+        self.connection = sqlite.connect(full_path)
         self.cursor = self.connection.cursor()
 
         self._count = 0
