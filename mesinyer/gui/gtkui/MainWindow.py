@@ -168,15 +168,9 @@ class MainWindow(gtk.VBox):
             log.debug('account %s not found on contacts' % account)
 
         if change_type == 'online' and do_notify:
-            if self.session.config.b_notify_contact_online:
-                gui.notify(contact.display_name, "is now online")
-
             if self.session.config.b_play_contact_online:
                 gui.play(self.session, gui.theme.sound_online)
         elif change_type == 'offline':
-            if self.session.config.b_notify_contact_offline:
-                gui.notify(contact.display_name, "is now offline")
-
             if self.session.config.b_play_contact_offline:
                 gui.play(self.session, gui.theme.sound_offline)
 

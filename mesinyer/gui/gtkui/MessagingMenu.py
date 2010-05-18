@@ -78,7 +78,7 @@ class MessagingMenu():
         self.server = None
         self.sid = None
 
-    def _on_message(self, cid, account, msgobj, cedict):
+    def _on_message(self, cid, account, msgobj, cedict=None):
         """ 
         This is fired when a new message arrives to a user.
         """

@@ -29,7 +29,7 @@ class Notification():
             self.session.signals.contact_attr_changed.subscribe(
                 self._on_contact_attr_changed)
 
-    def _on_message(self, cid, account, msgobj, cedict):
+    def _on_message(self, cid, account, msgobj, cedict=None):
         """ 
         This is called when a new message arrives to a user.
         """

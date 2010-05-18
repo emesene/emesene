@@ -31,8 +31,8 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
         self.jid = xmpp.protocol.JID(session.account.account)
-        #self.client = xmpp.Client(self.jid.getDomain(), debug=[])
-        self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
+        self.client = xmpp.Client(self.jid.getDomain(), debug=[])
+        #self.client = xmpp.Client(self.jid.getDomain(), debug=['always'])
 
         self.proxy = proxy
         self.proxy_data = None
@@ -319,7 +319,12 @@ class Worker(e3.Worker):
     def _handle_action_close_conversation(self, cid):
         '''handle Action.ACTION_CLOSE_CONVERSATION
         '''
-        pass
+        if cid in self.rconversations:
+            account = self.rconversations[cid][0]
+            del self.conversations[account]
+            del self.rconversations[cid]
+        else:
+            log.warning('conversation %s not found' % cid)
 
     def _handle_action_send_message(self, cid, message):
         '''handle Action.ACTION_SEND_MESSAGE

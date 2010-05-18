@@ -16,6 +16,10 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import functools
+import logging
+log = logging.getLogger('e3.common.Signal')
+
+import traceback
 
 class Signal(object):
     '''an object that represents a signal a callback can subscribe
@@ -47,8 +51,18 @@ class Signal(object):
             args += cargs
             kwargs.update(ckwargs)
 
-            if callback(*args, **kwargs) == False:
-                break
+            try:
+                if callback(*args, **kwargs) == False:
+                    break
+            except Exception, error:
+                log.warning('Signal handler (%s) error: %s' %
+                        (format_callback_name(callback), str(error)))
+                traceback.print_exc()
+
+def format_callback_name(func):
+    '''return a pretty representation for a function name
+    '''
+    return func.im_class.__name__ + "." + func.__name__
 
 def extend(func):
     '''allow the extention of a method'''
