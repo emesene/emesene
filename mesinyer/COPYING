@@ -1,31 +1,13 @@
-- For desktop.py and htmltextview.py, GNU LGPL v2.1 applies, see "./LGPL" for
- the full license text
- 
-- All files in libmimic except py_libmimic.c, py_libmimic.h and glib_header.h
- are part of libmimic and released under the LGPL license, see "./LGPL" for 
- the full license text
-
-- libmimic/glib_header.h contains definitions taken from GLib under the 
- GNU LGPL v2.1 license, see "./LGPL" for the full license text
-
-- For emesenelib/uuid.py, the python software foundation license
- version 2 applies, see "./PSF". This module is included for compatibility
- with python versions which don't include it.
-
 - The default sounds (sound_theme/default/*) are taken from Pidgin under the GNU GPL v2.0
  (or any later version).
 
-- The translations (po/*) are released under the same license as emesene (GPL2+) and the
+- The translations (po/*) are released under the same license as emesene (GPL3+) and the
  copyright owners are their respective translators.
 
-- For themes/inthemargins/*, GNU GPL2+ applies, see ./GPL for the entire license.
-  More info at http://gnome-look.org/content/show.php?content=76762
+- for code inside e3 except xmpppy, GNU LGPL v3 applies, see "./LGPL"
 
-- For everything else, including scripts and data files, GNU GPL v2.0
+- xmpppy is released under GPL v2
+
+- For everything else, including scripts and data files, GNU GPL v3
  applies, see "./GPL"
 
-- The theme "In The Margins 2.0"
- (themes/inthemargins) [http://gnome-look.org/content/show.php?content=76762]
- is licensed under the GNU GPL v2.0 (see "./GPL")
-
-- Webcam icon from the gnome default theme and is licensed under the GNU GPL v2.0 (see "./GPL")
