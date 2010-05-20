@@ -561,13 +561,6 @@ class ConnectingWindow(gtk.Alignment):
         self.avatar.stop()
         self.callback()
 
-    def on_connecting(self, message):
-       '''
-       Show messages while connecting..
-       '''
-       #taken from amsn2..but i like a lot!
-       gobject.timeout_add(1200, lambda: self.label.set_markup('<b>%s</b>'% message))
-
     def clear_connect(self):
         '''
         clean the connect interface after the reconnect phase

@@ -225,7 +225,6 @@ class Controller(object):
         signals = self.session.signals
         signals.login_succeed.subscribe(self.on_login_succeed)
         signals.login_failed.subscribe(self.on_login_failed)
-        signals.login_info.subscribe(self.on_login_info)
         signals.contact_list_ready.subscribe(self.on_contact_list_ready)
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
@@ -380,12 +379,6 @@ class Controller(object):
         extension.set_default_by_id('session', session_id)
         self.config.b_use_http = use_http
         self._save_proxy_settings(proxy)
-
-    def on_login_info(self, message):
-        '''show login info messages while connecting'''
-        if self.window is not None and \
-           self.window.content_type == 'connecting':
-           self.window.content.on_connecting(message);
 
     def on_login_failed(self, reason):
         '''callback called when login fails'''
