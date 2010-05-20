@@ -57,6 +57,9 @@ class Indicator(appindicator.Indicator):
         """
         method called to set the state to the login window
         """
+        icon_name = self.handler.theme.logo.split("/")[-1]
+        icon_name = icon_name[:icon_name.rfind(".")]
+        self.set_icon(icon_name)
         self.menu = LoginMenu(self.handler)
         self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
         self.menu.show_all()
