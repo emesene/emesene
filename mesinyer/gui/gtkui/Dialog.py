@@ -815,6 +815,73 @@ class Dialog(object):
         for widget in proxy_settings:
             widget.hide()
 
+    @classmethod
+    def edit_profile(cls, handler, user_nick, user_message, last_avatar):
+
+        windows = gtk.Window()
+        windows.set_border_width(5)
+        windows.set_title('Change profile')
+        windows.set_position(gtk.WIN_POS_CENTER)
+        windows.set_resizable(False)
+
+        hbox = gtk.HBox(spacing=5)
+        vbox = gtk.VBox()
+
+        frame = gtk.Frame('Picture')
+
+        avatar = gtk.Image()
+        avatar.set_size_request(96, 96)
+        frame.add(avatar)
+
+        if utils.file_readable(last_avatar):
+            pixbuf = gtk.gdk.pixbuf_new_from_file(last_avatar)
+        else:
+            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.logo)
+
+        avatar.set_from_pixbuf(pixbuf)
+        avatarEventBox = gtk.EventBox()
+        avatarEventBox.add(frame)
+
+        hbox.pack_start(avatarEventBox)
+        hbox.pack_start(vbox)
+
+        nick_label = gtk.Label('Nick:')
+        nick_label.set_alignment(0.0,0.5)
+
+        nick = gtk.Entry()
+        nick.set_text(user_nick)
+
+        pm_label = gtk.Label('PM:')
+        pm_label.set_alignment(0.0,0.5)
+
+        pm = gtk.Entry()
+        pm.set_text(user_message)
+
+        savebutt = gtk.Button(stock=gtk.STOCK_SAVE)
+
+        def save_profile(widget, data=None):
+            '''save the new profile'''
+            new_nick = nick.get_text()
+            new_pm = pm.get_text()
+            handler.save_profile(new_nick, new_pm)
+            windows.hide()
+
+        savebutt.connect('clicked', save_profile)
+        avatarEventBox.connect("button-press-event", handler.on_set_picture_selected)
+
+        vbox0 = gtk.VBox()
+
+        vbox0.pack_start(nick_label)
+        vbox0.pack_start(nick)
+        vbox0.pack_start(pm_label)
+        vbox0.pack_start(pm)
+
+        vbox.pack_start(vbox0)
+        vbox.pack_start(savebutt)
+
+        windows.add(hbox)
+        windows.show_all()
+
 
 class EmotesWindow(gtk.Window):
     """

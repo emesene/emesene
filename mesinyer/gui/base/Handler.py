@@ -300,84 +300,19 @@ class MyAccountHandler(object):
         self.old_nick = self.session.contacts.me.nick
         self.old_pm = self.session.contacts.me.message
 
-    def set_nick_cb(self, old_nick=None, new_nick=None):
-        '''callback for the set_nick method'''
-        if old_nick == new_nick:
-            log.debug('old nick and new nick are the same')
-            return
-        elif new_nick == '':
-            log.debug('empty new nick')
-            return
-        self.session.set_nick(new_nick)
-
-    def set_message_cb(self, old_pm=None, new_pm=None):
-        '''callback for the set_message method'''
-        if old_pm == new_pm:
-            log.debug('old and new personal messages are the same')
-            return
-
-        self.session.set_message(new_pm)
-
-    def save_profile(self, widget, data=None):
-        '''save the new profile'''
-        new_nick = self.nick.get_text()
-        new_pm = self.pm.get_text()
-
-        self.set_nick_cb(self.old_nick, new_nick)
-        self.set_message_cb(self.old_pm, new_pm)
-
     def change_profile(self):
-        self.windows = gtk.Window()
-        self.windows.set_border_width(5)
-        self.windows.set_title('Change profile')
-        self.windows.set_position(gtk.WIN_POS_CENTER)
-        self.windows.set_resizable(False)
+        '''show a dialog to edit the user account information'''
+        last_avatar = self.session.config.last_avatar
+        nick = self.session.contacts.me.nick
+        message = self.session.contacts.me.message
 
-        self.hbox = gtk.HBox(spacing=5)
-        self.vbox = gtk.VBox()
+        self.dialog.edit_profile(self, nick, message, last_avatar)
 
-        self.frame = gtk.Frame('Picture')
+    def save_profile(self, nick, pm):
+        '''save the new profile'''
+        self.session.set_nick(nick)
+        self.session.set_message(pm)
 
-        self.avatar = gtk.Image()
-        self.avatar.set_size_request(96, 96)
-        self.frame.add(self.avatar)
-        pixbuf = gtk.gdk.pixbuf_new_from_file(self.session.config.last_avatar)
-        self.avatar.set_from_pixbuf(pixbuf)
-        self.avatarEventBox = gtk.EventBox()
-        self.avatarEventBox.add(self.frame)
-
-        self.hbox.pack_start(self.avatarEventBox)
-        self.hbox.pack_start(self.vbox)
-
-        self.nick_label = gtk.Label('Nick:')
-        self.nick_label.set_alignment(0.0,0.5)
-
-        self.nick = gtk.Entry()
-        self.nick.set_text(self.session.contacts.me.nick)
-
-        self.pm_label = gtk.Label('PM:')
-        self.pm_label.set_alignment(0.0,0.5)
-
-        self.pm = gtk.Entry()
-        self.pm.set_text(self.session.contacts.me.message)
-
-        self.savebutt = gtk.Button('Save')
-
-        self.savebutt.connect('clicked', self.save_profile)
-        self.avatarEventBox.connect("button-press-event", self.on_set_picture_selected)
-
-        self.vbox0 = gtk.VBox()
-
-        self.vbox0.pack_start(self.nick_label)
-        self.vbox0.pack_start(self.nick)
-        self.vbox0.pack_start(self.pm_label)
-        self.vbox0.pack_start(self.pm)
-
-        self.vbox.pack_start(self.vbox0)
-        self.vbox.pack_start(self.savebutt)
-
-        self.windows.add(self.hbox)
-        self.windows.show_all()
 
     def on_set_picture_selected(self, widget, data=None):
         '''called when set picture is selected'''
