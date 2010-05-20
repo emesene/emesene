@@ -1,6 +1,5 @@
 import time
 import webbrowser
-import gtk
 
 import e3.base
 import gui
