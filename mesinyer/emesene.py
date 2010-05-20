@@ -113,6 +113,7 @@ class Controller(object):
 
         self.session = None
         self.timeout_id = None
+        self.cur_service = None
         self._parse_commandline()
         self._setup()
 
@@ -406,6 +407,7 @@ class Controller(object):
         '''called when the user press the connect button'''
         self._save_login_dimensions()
         self._set_location(self.window)
+        self.cur_service = [host, port]
         if not on_reconnect:
             self.on_preferences_changed(use_http, proxy, session_id)
             self.window.clear()
@@ -556,7 +558,12 @@ class Controller(object):
         '''makes the reconnect after 30 seconds'''
         self.window.clear()
         self.window.go_connect(self.on_cancel_login, self.avatar_path)
-        self.window.content.on_reconnect(self.on_login_connect, account)
+        
+        proxy = self._get_proxy_settings()
+        use_http = self.config.get_or_set('b_use_http', False)
+        self.window.content.on_reconnect(self.on_login_connect, account,\
+                                         self.config.session, proxy, use_http,\
+                                         self.cur_service)
 
 class ExtensionDefault(object):
     '''extension to register options for extensions'''

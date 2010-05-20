@@ -576,7 +576,8 @@ class ConnectingWindow(gtk.Alignment):
         self.throbber.show()
         self.label.set_markup('<b>Connecting...</b>')
 
-    def on_reconnect(self, callback, account):
+    def on_reconnect(self, callback, account, session_id,
+                     proxy, use_http, service):
         '''
         show the reconnect countdown
         '''
@@ -587,11 +588,14 @@ class ConnectingWindow(gtk.Alignment):
         self.reconnect_after = 30
         if self.reconnect_timer_id is None:
             self.reconnect_timer_id = gobject.timeout_add(1000, \
-                self.update_reconnect_timer, callback, account)
+                self.update_reconnect_timer, callback, account, session_id,
+                                    proxy, use_http, service)
 
-        self.update_reconnect_timer(callback, account)
+        self.update_reconnect_timer(callback, account, session_id,
+                                    proxy, use_http, service)
 
-    def update_reconnect_timer(self, callback, account):
+    def update_reconnect_timer(self, callback, account, session_id,
+                               proxy, use_http, service):
         '''
         updates reconnect label and launches login if counter is 0
         '''
@@ -602,7 +606,8 @@ class ConnectingWindow(gtk.Alignment):
             gobject.source_remove(self.reconnect_timer_id)
             self.reconnect_timer_id = None
             #do login
-            callback(account, None, None, None, on_reconnect=True)
+            callback(account, session_id, proxy, use_http,\
+                     service[0], service[1], on_reconnect=True)
             return False
         else:
             return True
