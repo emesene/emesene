@@ -85,9 +85,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         if self.session.config_dir.file_readable(last_avatar):
             my_picture = last_avatar
         else:
-            my_picture = gui.theme.logo
+            my_picture = gui.theme.user
 
-        his_picture = gui.theme.logo
+        his_picture = gui.theme.user
         if members:
             account = members[0]
             contact = self.session.contacts.get(account)
