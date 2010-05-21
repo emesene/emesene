@@ -34,11 +34,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    NICK_TPL = '%DISPLAY_NAME%%NL%' \
-        '<span foreground="#AAAAAA" size="small">' \
-        '%BLOCKED% %ACCOUNT%%NL%%MESSAGE%</span>'
-    GROUP_TPL = '<b>%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)</b>'
-
     def __init__(self, session):
         '''class constructor'''
         self._model = None
@@ -104,23 +99,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.connect('row-activated', self._on_row_activated)
         self.connect('button-release-event' , self._on_button_press_event)
 
-        # valid values:
-        # + NICK
-        # + ACCOUNT
-        # + DISPLAY_NAME (alias if available, or nick if available or mail)
-        # + STATUS
-        # + MESSAGE
-        # + BLOCKED (show the text "(blocked)" if the account is blocked)
-        # + NL (new line)
-        self.nick_template = session.config.get_or_set('nick_template',
-                ContactList.NICK_TPL)
-        # valid values:
-        # + NAME
-        # + ONLINE_COUNT
-        # + TOTAL_COUNT
-        self.group_template = session.config.get_or_set('group_template',
-                ContactList.GROUP_TPL)
-
     def _get_contact_pixbuf_or_default(self, contact):
         '''try to return a pixbuf of the user picture or the default
         picture
@@ -140,7 +118,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 picture = gtk.image_new_from_pixbuf(pix)
             else:
                 picture = gtk.image_new_from_animation(animation)
-                
+
         else:
             pix = utils.safe_gtk_pixbuf_load(gui.theme.user,
                         (self.avatar_size, self.avatar_size))
@@ -559,28 +537,37 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # + MESSAGE
         # + NL
         '''
-        message = gobject.markup_escape_text(
-                contact.message).replace('%MESSAGE%', '% MESSAGE %')
-        nick = gobject.markup_escape_text(
-                contact.nick).replace('%NICK%', '% NICK %')
-        display_name = gobject.markup_escape_text(
-                contact.display_name).replace('%DISPLAY_NAME%', '% DISPLAY_NAME %')
-
         template = self.nick_template
-        template = template.replace('%NL%', '\n')
-        template = template.replace('%ACCOUNT%',
-            gobject.markup_escape_text(contact.account))
-        template = template.replace('%STATUS%',
-            gobject.markup_escape_text(e3.status.STATUS[contact.status]))
-        template = template.replace('%DISPLAY_NAME%', display_name)
-        template = template.replace('%MESSAGE%', message)
-        template = template.replace('%NICK%', nick)
 
         blocked_text = ''
         if contact.blocked:
             blocked_text = '(blocked)'
 
         template = template.replace('%BLOCKED%', blocked_text)
+
+        message = gobject.markup_escape_text(contact.message)
+        nick = gobject.markup_escape_text(contact.nick)
+        display_name = gobject.markup_escape_text(contact.display_name)
+
+        template = self.nick_template
+        template = template.replace('[$NL]', '\n')
+        template = template.replace('[$NICK]',
+                self.escape_tags(nick))
+        template = template.replace('[$ACCOUNT]',
+                self.escape_tags(contact.account))
+        template = template.replace('[$MESSAGE]',
+                self.escape_tags(message))
+        template = template.replace('[$STATUS]',
+                self.escape_tags(e3.status.STATUS[contact.status]))
+        template = template.replace('[$DISPLAY_NAME]',
+                self.escape_tags(display_name))
+
+        blocked_text = ''
+
+        if contact.blocked:
+            blocked_text = '(blocked)'
+
+        template = template.replace('[$BLOCKED]', blocked_text)
 
         return template
 
@@ -592,18 +579,19 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # + ONLINE_COUNT
         # + TOTAL_COUNT
         '''
-        name = gobject.markup_escape_text(group.name).replace('%NAME%',
-            '% NAME %')
+        name = gobject.markup_escape_text(group.name)
 
         contacts = self.contacts.get_contacts(group.contacts)
         (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
+
         if group == self.offline_group:
-            template = template.replace('%ONLINE_COUNT%', str(total))
+            template = template.replace('[$ONLINE_COUNT]', str(total))
         else:
-            template = template.replace('%ONLINE_COUNT%', str(online))
-        template = template.replace('%TOTAL_COUNT%', str(total))
-        template = template.replace('%NAME%', name)
+            template = template.replace('[$ONLINE_COUNT]', str(online))
+
+        template = template.replace('[$TOTAL_COUNT]', str(total))
+        template = template.replace('[$NAME]', self.escape_tags(group.name))
 
         return template
 
