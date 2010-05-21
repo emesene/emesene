@@ -22,6 +22,10 @@ import e3
 class ContactList(object):
     '''an abstract class that defines the api that the contact list should
     have'''
+    NICK_TPL = \
+        '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small][$NL][$small]([$STATUS]) - [$MESSAGE][$/small]'
+
+    GROUP_TPL = '[$b][$NAME] ([$ONLINE_COUNT]/[$TOTAL_COUNT])[$/b]'
 
     def __init__(self, session, dialog):
         '''class constructor'''
@@ -68,17 +72,30 @@ class ContactList(object):
         # + DISPLAY_NAME (alias if available, or nick if available or mail)
         # + STATUS
         # + MESSAGE
-        self.nick_template_default = \
-            '%DISPLAY_NAME%\n%ACCOUNT%\n(%STATUS%) - %MESSAGE%'
+        # + BLOCKED (show the text "(blocked)" if the account is blocked)
+        # + NL (new line)
+
+        # valid formating are
+        # [$s] [$/s] -> small
+        # [$b] [$/b]
+        # [$i] [$/i]
         self.nick_template = self.session.config.get_or_set('nick_template',
-            self.nick_template_default)
+            ContactList.NICK_TPL)
+
+        # TODO: remove this after some time
+        if "%" in self.nick_template:
+            self.nick_template = ContactList.NICK_TPL
+
         # valid values:
         # + NAME
         # + ONLINE_COUNT
         # + TOTAL_COUNT
-        self.group_template_default = '%NAME% (%ONLINE_COUNT%/%TOTAL_COUNT%)'
-        self.nick_template = self.session.config.get_or_set('group_template',
-            self.group_template_default)
+        self.group_template = self.session.config.get_or_set('group_template',
+            ContactList.GROUP_TPL)
+
+        # TODO: remove this after some time
+        if "%" in self.group_template:
+            self.group_template = ContactList.GROUP_TPL
 
         #contact signals
         self.session.signals.contact_attr_changed.subscribe(
@@ -289,19 +306,43 @@ class ContactList(object):
         # + BLOCKED
         '''
         template = self.nick_template
-        template = template.replace('%NICK%', contact.nick)
-        template = template.replace('%ACCOUNT%', contact.account)
-        template = template.replace('%MESSAGE%', contact.message)
-        template = template.replace('%STATUS%', e3.status.STATUS[contact.status])
-        template = template.replace('%DISPLAY_NAME%', contact.display_name)
+        template = template.replace('[$NICK]',
+                self.escape_tags(contact.nick))
+        template = template.replace('[$ACCOUNT]',
+                self.escape_tags(contact.account))
+        template = template.replace('[$MESSAGE]',
+                self.escape_tags(contact.message))
+        template = template.replace('[$STATUS]',
+                self.escape_tags(e3.status.STATUS[contact.status]))
+        template = template.replace('[$DISPLAY_NAME]',
+                self.escape_tags(contact.display_name))
 
         blocked_text = ''
         if contact.blocked:
             blocked_text = '(blocked)'
 
-        template = template.replace('%BLOCKED%', blocked_text)
+        template = template.replace('[$BLOCKED]', blocked_text)
+
+        return self._clean_format_tags(template)
+
+    def _clean_format_tags(self, template):
+        '''remove the formating tags like [$b] since at this level we can't
+        format them, you have to override the format_ methods to do something
+        '''
+        template = template.replace('[$b]', '')
+        template = template.replace('[$/b]', '')
+        template = template.replace('[$i]', '')
+        template = template.replace('[$/i]', '')
+        template = template.replace('[$small]', '')
+        template = template.replace('[$/small]', '')
 
         return template
+
+    def escape_tags(self, value):
+        '''break text that starts with [$ so a nick containing a format
+        won't be replaced
+        '''
+        return value.replace("[$", "[ $")
 
     def format_group(self, group):
         '''replace the appearance of the template vars using the values of
@@ -314,11 +355,11 @@ class ContactList(object):
         contacts = self.contacts.get_contacts(group.contacts)
         (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
-        template = template.replace('%NAME%', group.name)
-        template = template.replace('%ONLINE_COUNT%', str(online))
-        template = template.replace('%TOTAL_COUNT%', str(total))
+        template = template.replace('[$NAME]', self.escape_tags(group.name))
+        template = template.replace('[$ONLINE_COUNT]', str(online))
+        template = template.replace('[$TOTAL_COUNT]', str(total))
 
-        return template
+        return self._clean_format_tags(template)
 
     def refilter(self):
         '''refilter the values according to the value of self.filter_text'''
