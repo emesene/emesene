@@ -135,9 +135,9 @@ def _color_gradient(col1, col2, length):
     R2dec=hex2dec(R2hex.upper())
     G2dec=hex2dec(G2hex.upper())
     B2dec=hex2dec(B2hex.upper())
-    stepR =((float(R2dec)-float(R1dec))/(float(length)-float(1)))
-    stepG =((float(G2dec)-float(G1dec))/(float(length)-float(1)))
-    stepB =((float(B2dec)-float(B1dec))/(float(length)-float(1)))
+    stepR = (R2dec-R1dec)/(length-1.0)
+    stepG = (G2dec-G1dec)/(length-1.0)
+    stepB = (B2dec-B1dec)/(length-1.0)
     R = [0] * length
     R[0]=dec2hex(R1dec)
     R[length-1]=dec2hex(R2dec)
@@ -203,7 +203,9 @@ def _gradientify(msgdict, attr=None, colors=None):
         param_from, param_to = msgdict[attr]
         #param_from = COLOR_MAP[int(param_from)]
         #param_to = COLOR_MAP[int(param_to)]
-        colors = _color_gradient(param_from, param_to, _nchars_dict(msgdict))
+        lenght = _nchars_dict(msgdict)
+        if (lenght != 1):
+            colors = _color_gradient(param_from, param_to, lenght)
         msgdict['tag'] = ''
         del msgdict[attr]
 
