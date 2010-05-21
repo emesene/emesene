@@ -40,3 +40,15 @@ class Message(object):
                 gui.theme.status_icons[contact.status], message,
                 e3.status.STATUS[contact.status])
 
+    @classmethod
+    def from_data(cls, nick, message, first, incomming):
+        picture = contact.picture
+
+        if not picture:
+            picture = os.path.abspath(gui.theme.user)
+
+        return gui.base.Message(incomming, first, contact.account,
+                contact.display_name, contact.alias, picture,
+                gui.theme.status_icons[contact.status], message,
+                e3.status.STATUS[contact.status])
+
