@@ -16,7 +16,7 @@ COLOR_MAP = (
     '980299','01038C','01885F','389600','9A9E15','473400','4D0000','5F0162',
     '000047','06502F','1C5300','544D05')
 
-open_tag_re = re.compile('''(.*?)\[(/?)(\w)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
+open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
 
 def parse_emotes(markup):
     '''search for emotes on markup and return a list of items with chunks of
@@ -49,6 +49,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
     open_ = (match.group(2) == '') #and not '/'
     tag = match.group(3)
     arg = match.group(5)
+
     if open_:
         if text_before.strip(): #just to avoid useless items (we could put it anyway, if we like)
             message_stack[-1]['childs'].append(text_before)
@@ -104,8 +105,6 @@ def _color_gradient(col1, col2, length):
 
     def hex2dec(s):
         """return the integer value of a hexadecimal string s"""
-        if s == '':
-            print 'colores:', col1, col2, s
         return int('0x' + s, 16)
 
     hex3tohex6 = lambda col: col[0] * 2 + col[1] * 2 + col[2] * 2
@@ -245,7 +244,7 @@ def _dict_translate_tags(msgdict):
         del msgdict['c']
     elif tag == 'img':
         pass
-    elif tag not in ('span', '', 'i', 'b'):
+    elif tag not in ('span', '', 'i', 'b', 'small'):
         del msgdict[tag]
         msgdict['tag'] = ''
         msgdict['childs'].insert(0, '[%s]' % (tag, ))
