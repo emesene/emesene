@@ -25,11 +25,18 @@ import gobject
 import extension
 from gui.base import Plus
 
-class GtkCellRenderer(gtk.CellRendererText):
-    def __init__(self):
-        gtk.CellRendererText.__init__(self)
+def replace_markup(markup, arg=None):
+    '''replace the tags defined in gui.base.ContactList'''
+    markup = markup.replace("[$small]", "<small>")
+    markup = markup.replace("[$/small]", "</small>")
 
-extension.implements(GtkCellRenderer, 'nick renderer')
+    markup = markup.replace("[$i]", "<i>")
+    markup = markup.replace("[$/i]", "</i>")
+
+    markup = markup.replace("[$b]", "<b>")
+    markup = markup.replace("[$/b]", "</b>")
+
+    return markup
 
 class CellRendererFunction(gtk.GenericCellRenderer):
     '''
@@ -154,22 +161,47 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
 extension.implements(CellRendererFunction, 'nick renderer')
 
-def balance_spans(text):
+class GtkCellRenderer(CellRendererFunction):
+    '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
+    effects'''
+    def __init__(self):
+        CellRendererFunction.__init__(self,
+                replace_markup)
+
+extension.implements(GtkCellRenderer, 'nick renderer')
+
+def balance_tag(text, tag):
+    '''balance a tag'''
+    opens = text.count("<" + tag)
+    closes = text.count("</" + tag)
+    difference = abs(opens - closes)
+
+    if opens > closes:
+        text += "</" + tag + ">" * difference
+    elif opens < closes:
+        text = ("<" + tag + ">" * difference) + text
+
+    return text
+
+def balance_tags(text, tags):
+    '''balance tags'''
+
+    for tag in tags:
+        text = balance_tag(text, tag)
+
+    return text
+
+def balance(text):
         ''' balance the spans in the chunks of text between images
          this can happen when the template for the text shown on
          the contact list (the one you can edit on preferences)
          gets splited by an image
         '''
-        opens = text.count("<span")
-        closes = text.count("</span")
-        difference = abs(opens - closes)
+        return balance_tags(text, ["span", "small", "b", "i"])
 
-        if opens > closes:
-            text += "</span>" * difference
-        elif opens < closes:
-            text = ("<span>" * difference) + text
-
-        return text
+def plus(markup):
+    '''parse msnplus markup and replace the markup'''
+    return replace_markup(Plus.msnplus(markup))
 
 def msnplus_to_list(txt, do_parse_emotes=True):
     '''parte text to a DictObj and return a list of strings and
@@ -187,12 +219,12 @@ def msnplus_to_list(txt, do_parse_emotes=True):
         if type(item) in (str, unicode):
             temp.append(item)
         else:
-            text = balance_spans("".join(temp))
+            text = replace_markup("".join(temp))
             accum.append(text)
             accum.append(item)
             temp = []
 
-    accum.append(balance_spans("".join(temp)))
+    accum.append(replace_markup("".join(temp)))
 
     return accum
 
@@ -216,7 +248,7 @@ def flatten_tree(dct, accum, parents):
 
     if dct.tag:
         if dct.tag == "img":
-            closed = "".join("</%s>" % (parent.tag, ) for parent in parents[::-1])
+            closed = "".join("</%s>" % (parent.tag, ) for parent in parents[::-1] if parent)
             opened = "".join(open_tag(parent) for parent in parents if parent)
             accum += [closed, gtk.gdk.pixbuf_new_from_file(dct.src), opened]
             return accum
@@ -245,11 +277,15 @@ class CellRendererPlus(CellRendererFunction):
 
 extension.implements(CellRendererPlus, 'nick renderer')
 
+def strip_plus(markup, arg=None):
+    '''remove msnplus markup and replace the markup'''
+    return replace_markup(Plus.msnplus_strip(markup))
+
 class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
     but improving the readability'''
     def __init__(self):
-        CellRendererFunction.__init__(self, Plus.msnplus_strip)
+        CellRendererFunction.__init__(self, strip_plus)
 
 extension.implements(CellRendererNoPlus, 'nick renderer')
 
@@ -584,18 +620,18 @@ import utils
 
 class AvatarRenderer(gtk.GenericCellRenderer):
     """Renderer for avatar """
-    
+
     __gproperties__ = {
-        'image': (gobject.TYPE_OBJECT, 'The contact image', '', gobject.PARAM_READWRITE),        
-        'blocked': (bool, 'Contact Blocked', '', False, gobject.PARAM_READWRITE),        
-        'dimention': (gobject.TYPE_INT, 'cell dimentions', 
+        'image': (gobject.TYPE_OBJECT, 'The contact image', '', gobject.PARAM_READWRITE),
+        'blocked': (bool, 'Contact Blocked', '', False, gobject.PARAM_READWRITE),
+        'dimention': (gobject.TYPE_INT, 'cell dimentions',
                     'height width of cell', 0, 96, 32, gobject.PARAM_READWRITE),
         'offline': (bool, 'Contact is offline', '', False, gobject.PARAM_READWRITE),
-        'radius_factor': (gobject.TYPE_FLOAT,'radius of pixbuf', 
+        'radius_factor': (gobject.TYPE_FLOAT,'radius of pixbuf',
                           '0.0 to 0.5 with 0.1 = 10% of dimention',
                           0.0, 0.5,0.11, gobject.PARAM_READWRITE),
          }
-        
+
     def __init__(self, cellDimention = 32, cellRadius = 0.11):
         self.__gobject_init__()
         self._image = None
@@ -606,7 +642,7 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         #icon source used to render grayed out offline avatar
         self._icon_source = gtk.IconSource()
         self._icon_source.set_state(gtk.STATE_INSENSITIVE)
-        
+
         self.set_property('xpad', 1)
         self.set_property('ypad', 8)
 
@@ -614,7 +650,7 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         self._set_transformation('corner|gray')
         #self.transId = self._config.connect('change::statusTransformation', \
             #self._transformation_callback)
-        
+
     def destroy(self):
         self._config.disconnect(self.transId)
         gtk.GenericCellRenderer.destroy(self)
@@ -625,12 +661,12 @@ class AvatarRenderer(gtk.GenericCellRenderer):
     def _set_transformation(self, setting):
         transformation = setting.split('|')
         self._corner = ('corner' in transformation)
-        self._alpha_status = ('alpha' in transformation) 
+        self._alpha_status = ('alpha' in transformation)
         self._gray = ('gray' in transformation)
 
     def _transformation_callback(self, config, newvalue, oldvalue):
         self._set_transformation(newvalue)
-        
+
     def do_get_property(self, property):
         if property.name == 'image':
             return self._image
@@ -639,29 +675,29 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         elif property.name == 'radius-factor':
             return self._radius_factor
         elif property.name == 'offline':
-            return self._offline          
+            return self._offline
         else:
             raise AttributeError, 'unknown property %s' % property.name
-  
+
     def do_set_property(self, property, value):
         if property.name == 'image':
             self._image = value
-        elif property.name == 'dimention':            
+        elif property.name == 'dimention':
             self._dimention = value
         elif property.name == 'radius-factor':
             self._radius_factor = value
         elif property.name == 'offline':
-            self._offline = value           
+            self._offline = value
         else:
             raise AttributeError, 'unknown property %s' % property.name
 
-    def on_get_size(self, widget, cell_area=None):       
+    def on_get_size(self, widget, cell_area=None):
         """Requisition size"""
         xpad, ypad = self._get_padding()
         if self._dimention >= 32: width = self._dimention
-        elif self._corner: width = self._dimention * 2            
-        else: width = self._dimention            
-        height = self._dimention + (ypad * 2)                       
+        elif self._corner: width = self._dimention * 2
+        else: width = self._dimention
+        height = self._dimention + (ypad * 2)
         return (0, 0,  width, height)
 
     def func(self, model, path, iter, (image, tree)):
@@ -683,13 +719,13 @@ class AvatarRenderer(gtk.GenericCellRenderer):
           else:
              image.set_data('iter', None)
 
-        
-    def on_render(self, window, widget, bg_area, cell_area, expose_area, flags):        
+
+    def on_render(self, window, widget, bg_area, cell_area, expose_area, flags):
         """Prepare rendering setting for avatar"""
         xpad, ypad = self._get_padding()
         x, y, width, height = cell_area
         cell = (x, y, width, height)
-        ctx = window.cairo_create()          
+        ctx = window.cairo_create()
         ctx.translate(x, y)
 
         avatar = None
@@ -714,54 +750,54 @@ class AvatarRenderer(gtk.GenericCellRenderer):
             source = self._icon_source
             source.set_pixbuf(avatar)
             direction = widget.get_direction()
-            avatar = widget.style.render_icon(source, direction, 
-                                              gtk.STATE_INSENSITIVE, 
+            avatar = widget.style.render_icon(source, direction,
+                                              gtk.STATE_INSENSITIVE,
                                               -1, widget, "gtk-image")
         if avatar:
-            self._draw_avatar(ctx, avatar, width - dim, ypad, dim, 
+            self._draw_avatar(ctx, avatar, width - dim, ypad, dim,
                                 gtk.ANCHOR_CENTER, self._radius_factor, alpha)
 
-    def _draw_avatar(self, ctx, pixbuf, x, y, dimention, 
-                         position = gtk.ANCHOR_CENTER, 
+    def _draw_avatar(self, ctx, pixbuf, x, y, dimention,
+                         position = gtk.ANCHOR_CENTER,
                          radius = 0, alpha = 1):
-        """Render avatar"""        
+        """Render avatar"""
         ctx.save()
         ctx.set_antialias(cairo.ANTIALIAS_SUBPIXEL)
         ctx.translate(x, y)
-        
+
         pix_width = pixbuf.get_width()
         pix_height = pixbuf.get_height()
-        if (pix_width > dimention) or (pix_height > dimention): 
+        if (pix_width > dimention) or (pix_height > dimention):
             scale_factor = float(dimention) / max (pix_width,pix_height)
-        else: 
-            scale_factor = 1        
+        else:
+            scale_factor = 1
         scale_width = pix_width* scale_factor
-        scale_height = pix_height* scale_factor 
- 
+        scale_height = pix_height* scale_factor
+
         #tranlate position
         if position in (gtk.ANCHOR_NW, gtk.ANCHOR_W, gtk.ANCHOR_SW):
             x = 0
-        elif position in (gtk.ANCHOR_N, gtk.ANCHOR_CENTER, gtk.ANCHOR_S): 
+        elif position in (gtk.ANCHOR_N, gtk.ANCHOR_CENTER, gtk.ANCHOR_S):
             x = (dimention/2) - (scale_width/2)
-        else: 
-            x = dimention - scale_width         
+        else:
+            x = dimention - scale_width
         if position in (gtk.ANCHOR_NW, gtk.ANCHOR_N, gtk.ANCHOR_NE):
             y = 0
-        elif position in (gtk.ANCHOR_E, gtk.ANCHOR_CENTER, gtk.ANCHOR_W): 
+        elif position in (gtk.ANCHOR_E, gtk.ANCHOR_CENTER, gtk.ANCHOR_W):
             y = (dimention/2) - (scale_height/2)
         else:
-            y = dimention - scale_height         
+            y = dimention - scale_height
         ctx.translate(x, y)
-        
-        if radius > 0 : 
+
+        if radius > 0 :
             self._rounded_rectangle(ctx, 0, 0, scale_width, scale_height,
-                                      self._dimention * radius) 
+                                      self._dimention * radius)
             ctx.clip()
         ctx.scale(scale_factor,scale_factor)
         ctx.set_source_pixbuf(pixbuf, 0, 0)
         ctx.paint_with_alpha(alpha)
         ctx.restore()
-    
+
     def _rounded_rectangle(self, cr, x, y, w, h, radius=5):
         """Create rounded rectangle path"""
         # http://cairographics.org/cookbook/roundedrectangles/
@@ -786,5 +822,5 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         cr.rel_line_to (0, -h + 2 * radius)
         cr.rel_curve_to (0.0, -c, radius - c, -radius, radius, -radius)
         cr.close_path ()
-                        
+
 gobject.type_register(AvatarRenderer)

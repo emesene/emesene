@@ -16,7 +16,7 @@ COLOR_MAP = (
     '980299','01038C','01885F','389600','9A9E15','473400','4D0000','5F0162',
     '000047','06502F','1C5300','544D05')
 
-open_tag_re = re.compile('''(.*?)\[(/?)(\w)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
+open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
 
 def parse_emotes(markup):
     '''search for emotes on markup and return a list of items with chunks of
@@ -49,6 +49,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
     open_ = (match.group(2) == '') #and not '/'
     tag = match.group(3)
     arg = match.group(5)
+
     if open_:
         if text_before.strip(): #just to avoid useless items (we could put it anyway, if we like)
             message_stack[-1]['childs'].append(text_before)
@@ -104,8 +105,6 @@ def _color_gradient(col1, col2, length):
 
     def hex2dec(s):
         """return the integer value of a hexadecimal string s"""
-        if s == '':
-            print 'colores:', col1, col2, s
         return int('0x' + s, 16)
 
     hex3tohex6 = lambda col: col[0] * 2 + col[1] * 2 + col[2] * 2
@@ -135,9 +134,9 @@ def _color_gradient(col1, col2, length):
     R2dec=hex2dec(R2hex.upper())
     G2dec=hex2dec(G2hex.upper())
     B2dec=hex2dec(B2hex.upper())
-    stepR =((float(R2dec)-float(R1dec))/(float(length)-float(1)))
-    stepG =((float(G2dec)-float(G1dec))/(float(length)-float(1)))
-    stepB =((float(B2dec)-float(B1dec))/(float(length)-float(1)))
+    stepR = (R2dec-R1dec)/(length-1.0)
+    stepG = (G2dec-G1dec)/(length-1.0)
+    stepB = (B2dec-B1dec)/(length-1.0)
     R = [0] * length
     R[0]=dec2hex(R1dec)
     R[length-1]=dec2hex(R2dec)
@@ -203,7 +202,9 @@ def _gradientify(msgdict, attr=None, colors=None):
         param_from, param_to = msgdict[attr]
         #param_from = COLOR_MAP[int(param_from)]
         #param_to = COLOR_MAP[int(param_to)]
-        colors = _color_gradient(param_from, param_to, _nchars_dict(msgdict))
+        lenght = _nchars_dict(msgdict)
+        if (lenght != 1):
+            colors = _color_gradient(param_from, param_to, lenght)
         msgdict['tag'] = ''
         del msgdict[attr]
 
@@ -243,7 +244,7 @@ def _dict_translate_tags(msgdict):
         del msgdict['c']
     elif tag == 'img':
         pass
-    elif tag not in ('span', '', 'i', 'b'):
+    elif tag not in ('span', '', 'i', 'b', 'small'):
         del msgdict[tag]
         msgdict['tag'] = ''
         msgdict['childs'].insert(0, '[%s]' % (tag, ))
