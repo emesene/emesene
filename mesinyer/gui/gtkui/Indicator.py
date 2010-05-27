@@ -57,6 +57,9 @@ class Indicator(appindicator.Indicator):
         """
         method called to set the state to the login window
         """
+        icon_name = self.handler.theme.logo.split("/")[-1]
+        icon_name = icon_name[:icon_name.rfind(".")]
+        self.set_icon(icon_name)
         self.menu = LoginMenu(self.handler)
         self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
         self.menu.show_all()
@@ -202,6 +205,8 @@ class ContactsMenu(gtk.Menu):
             self.__append_contact(contact)
 
         # TODO: show [pixbuf] [nick] instead of mail
+        # TODO: some contacts send nick-changed signal 
+        #       with their mail instead of nickname (even if they have one)
 
     def __append_contact(self, contact):
         """
@@ -213,8 +218,9 @@ class ContactsMenu(gtk.Menu):
         self.item_to_contacts[item] = contact
         self.contacts_to_item[contact.account] = item
 
-        self.append(item)
-
+        item.show()
+        self.add(item)
+                
     def _on_contact_change_something(self, *args):
         """
         update the menu when contacts change something
@@ -223,7 +229,7 @@ class ContactsMenu(gtk.Menu):
             account, type_change, value_change = args
         elif len(args) == 4:
             account, type_change, value_change, do_notify = args
-
+        
         if type_change == 'status':
             if value_change > 0:
                 if account in self.contacts_to_item:

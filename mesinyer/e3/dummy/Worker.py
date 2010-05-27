@@ -84,6 +84,7 @@ class Worker(e3.Worker):
                 '', False)
         self._add_contact('seven@hotmail.com', '[c=5]((_...sdsdf..._))..)_<(_))(°.°)(...][/c=48][u][/u]', e3.status.BUSY,
                 '', False)
+        self._add_contact('eight@hotmail.com', '[i][B][c=12]☆[/c=0][c=0]☆[/c=12][c=12]☆[/c=0] (W) [c=12]Bellamezz[/c=49] (F) [c=0]☆[/c=0][c=12]☆[/c=12][c=0]☆[/c=0][/B][/i]', e3.status.BUSY, '', False)
 
         self._add_group('ninjas')
         self._add_group('pirates')
@@ -113,6 +114,7 @@ class Worker(e3.Worker):
         self._add_contact_to_group('five@hotmail.com', 'strange nicks')
         self._add_contact_to_group('six@hotmail.com', 'strange nicks')
         self._add_contact_to_group('seven@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('eight@hotmail.com', 'strange nicks')
 
     def _add_contact(self, mail, nick, status_, alias, blocked):
         """

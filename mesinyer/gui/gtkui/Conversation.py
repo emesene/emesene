@@ -42,7 +42,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.avatar = Avatar(cellDimention=avatar_size)
         self.his_avatar = Avatar(cellDimention=avatar_size)
 
-        self.header = Header()
+        self.header = Header(session, members)
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
             dialog, gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
@@ -85,9 +85,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         if self.session.config_dir.file_readable(last_avatar):
             my_picture = last_avatar
         else:
-            my_picture = gui.theme.logo
+            my_picture = gui.theme.user
 
-        his_picture = gui.theme.logo
+        his_picture = gui.theme.user
         if members:
             account = members[0]
             contact = self.session.contacts.get(account)

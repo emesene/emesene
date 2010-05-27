@@ -4,6 +4,8 @@ import gobject
 import utils
 import TinyButton
 
+from gui.gtkui import Renderers as Renderer
+
 class TabWidget(gtk.HBox):
     '''a widget that is placed on the tab on a notebook'''
     NAME = 'Tab Widget'
@@ -46,5 +48,4 @@ class TabWidget(gtk.HBox):
 
     def set_text(self, text):
         '''set the text of the label'''
-        self.label.set_markup(gobject.markup_escape_text(text))
-
+        self.label.set_markup(Renderer.msnplus_to_list(gobject.markup_escape_text(text))[0])

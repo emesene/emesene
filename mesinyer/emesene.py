@@ -114,6 +114,7 @@ class Controller(object):
 
         self.session = None
         self.timeout_id = None
+        self.cur_service = None
         self._parse_commandline()
         self._setup()
 
@@ -225,7 +226,6 @@ class Controller(object):
         signals = self.session.signals
         signals.login_succeed.subscribe(self.on_login_succeed)
         signals.login_failed.subscribe(self.on_login_failed)
-        signals.login_info.subscribe(self.on_login_info)
         signals.contact_list_ready.subscribe(self.on_contact_list_ready)
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
@@ -381,12 +381,6 @@ class Controller(object):
         self.config.b_use_http = use_http
         self._save_proxy_settings(proxy)
 
-    def on_login_info(self, message):
-        '''show login info messages while connecting'''
-        if self.window is not None and \
-           self.window.content_type == 'connecting':
-           self.window.content.on_connecting(message);
-
     def on_login_failed(self, reason):
         '''callback called when login fails'''
         self._save_login_dimensions()
@@ -407,6 +401,7 @@ class Controller(object):
         '''called when the user press the connect button'''
         self._save_login_dimensions()
         self._set_location(self.window)
+        self.cur_service = [host, port]
         if not on_reconnect:
             self.on_preferences_changed(use_http, proxy, session_id)
             self.window.clear()
@@ -434,6 +429,7 @@ class Controller(object):
         self.session.config.get_or_set('b_show_info', True)
         self.session.config.get_or_set('b_show_toolbar', True)
         self.session.config.get_or_set('b_allow_auto_scroll', True)
+        self.session.config.get_or_set('adium_theme', 'renkoo.AdiumMessageStyle')
 
         self.timeout_id = gobject.timeout_add(500, self.session.signals._handle_events)
         self.session.login(account.account, account.password, account.status,
@@ -558,7 +554,12 @@ class Controller(object):
         '''makes the reconnect after 30 seconds'''
         self.window.clear()
         self.window.go_connect(self.on_cancel_login, self.avatar_path)
-        self.window.content.on_reconnect(self.on_login_connect, account)
+        
+        proxy = self._get_proxy_settings()
+        use_http = self.config.get_or_set('b_use_http', False)
+        self.window.content.on_reconnect(self.on_login_connect, account,\
+                                         self.config.session, proxy, use_http,\
+                                         self.cur_service)
 
 class ExtensionDefault(object):
     '''extension to register options for extensions'''
