@@ -26,9 +26,7 @@ class TextBox(gtk.ScrolledWindow):
         self._textbox.show()
         self._buffer = RichBuffer.RichBuffer()
         self._textbox.set_buffer(self._buffer)
-        self._textbox.connect('copy-clipboard', self._on_copy_clipboard)
-        self.clipboard = gtk.Clipboard(selection=gtk.gdk.atom_intern("CLIPBOARD"))
-        self._buffer.add_selection_clipboard(self.clipboard)
+        self._textbox.connect_after('copy-clipboard', self._on_copy_clipboard)
         self.add(self._textbox)
         self.widgets = {}
 
@@ -104,8 +102,8 @@ class TextBox(gtk.ScrolledWindow):
             text = self._replace_emo_with_shortcut()
 
             # replace clipboard content
-            self.clipboard.set_text(text, len(text))
-            self.clipboard.store()
+            gtk.clipboard_get().set_text(text, len(text))
+            gtk.clipboard_get().store()
 
     def _get_text(self):
         '''return the text of the widget'''
