@@ -430,9 +430,6 @@ class Worker(e3.Worker):
                 (key, value) = line.split(': ')
                 self.session.extras[key] = value
 
-        self.session.load_config()
-        self.session.create_config()
-
         self.session.add_event(e3.Event.EVENT_LOGIN_SUCCEED)
         self.in_login = False
         self._set_status(self.session.account.status)
