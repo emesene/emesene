@@ -29,6 +29,7 @@ def gtk_main(Controller):
     import FileTransferBarWidget
     import FileTransferWidget
     import GroupMenu
+    import GtkNotification
     import Header
     import ImageAreaSelector
     import ImageChooser
@@ -142,3 +143,9 @@ def setup():
     else:
         extension.category_register('conversation output', TextBox.OutputText)
 
+    extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
+    try:
+        import PyNotification
+        extension.register(('notificationGUI'), PyNotification.pyNotification)
+    except:
+        pass
