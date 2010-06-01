@@ -1,9 +1,6 @@
 '''emesene's notification system'''
 from e3 import status
-
-import pynotify
-if not pynotify.init("emesene"):
-    raise ImportError
+import extension
 
 import logging
 log = logging.getLogger('gui.gtkui.Notification')
@@ -25,6 +22,8 @@ class Notification():
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
+        
+        self.notifier = extension.get_default('notificationGUI')
 
         if self.session:
             self.session.signals.conv_message.subscribe(
@@ -71,7 +70,5 @@ class Notification():
         else:
             uri = "notification-message-IM"
 
-        n = pynotify.Notification(title, text, uri)
-
-        if not n.show():
-            log.exception(_("Failed to send notification"))
+        self.notifier(title, text, uri)
+        
