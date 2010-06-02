@@ -1,0 +1,13 @@
+- The default sounds (sound_theme/default/*) are taken from Pidgin under the GNU GPL v2.0
+ (or any later version).
+
+- The translations (po/*) are released under the same license as emesene (GPL3+) and the
+ copyright owners are their respective translators.
+
+- for code inside e3 except xmpppy, GNU LGPL v3 applies, see "./LGPL"
+
+- xmpppy is released under GPL v2
+
+- For everything else, including scripts and data files, GNU GPL v3
+ applies, see "./GPL"
+

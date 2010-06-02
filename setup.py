@@ -10,18 +10,18 @@ except ImportError:
 # Data files to be installed to the system
 _data_files = [
     ('share/icons/scalable/apps', ['emesene/data/icons/scalable/apps/emesene.svg']),
-    ('share/icons/hicolor/128x128/apps', ['emesene/data/icons/hicolor/128x128/apps/emesene.png']),
     ('share/icons/hicolor/16x16/apps', ['emesene/data/icons/hicolor/16x16/apps/emesene.png']),
-    ('share/icons/hicolor/192x192/apps', ['emesene/data/icons/hicolor/192x192/apps/emesene.png']),
     ('share/icons/hicolor/22x22/apps', ['emesene/data/icons/hicolor/22x22/apps/emesene.png']),
     ('share/icons/hicolor/24x24/apps', ['emesene/data/icons/hicolor/24x24/apps/emesene.png']),
-    ('share/icons/hicolor/256x256/apps', ['emesene/data/icons/hicolor/256x256/apps/emesene.png']),
     ('share/icons/hicolor/32x32/apps', ['emesene/data/icons/hicolor/32x32/apps/emesene.png']),
     ('share/icons/hicolor/36x36/apps', ['emesene/data/icons/hicolor/36x36/apps/emesene.png']),
     ('share/icons/hicolor/48x48/apps', ['emesene/data/icons/hicolor/48x48/apps/emesene.png']),
     ('share/icons/hicolor/64x64/apps', ['emesene/data/icons/hicolor/64x64/apps/emesene.png']),
     ('share/icons/hicolor/72x72/apps', ['emesene/data/icons/hicolor/72x72/apps/emesene.png']),
     ('share/icons/hicolor/96x96/apps', ['emesene/data/icons/hicolor/96x96/apps/emesene.png']),
+    ('share/icons/hicolor/128x128/apps', ['emesene/data/icons/hicolor/128x128/apps/emesene.png']),
+    ('share/icons/hicolor/192x192/apps', ['emesene/data/icons/hicolor/192x192/apps/emesene.png']),
+    ('share/icons/hicolor/256x256/apps', ['emesene/data/icons/hicolor/256x256/apps/emesene.png']),
     ('share/applications', ['emesene/data/share/applications/emesene.desktop']),
     ('share/pixmaps', ['emesene/data/pixmaps/emesene.png', 'emesene/data/pixmaps/emesene.xpm']),
     ('share/man/man1', ['docs/man/emesene.1'])
