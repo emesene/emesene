@@ -1,9 +1,3 @@
-include COPYING
-include GPL
-include LGPL
-include emesene-logo.png
-recursive-include docs *
-recursive-include e3 *
-recursive-include themes *
-recursive-include misc *
-recursive-include po *
+recursive-include docs/man *
+recursive-include emesene *
+
