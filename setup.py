@@ -41,7 +41,7 @@ setup(
 
     name = 'emesene',
     version = '1.9.0',
-    description = 'MSN messenger client',
+    description = 'Instant Messaging Client',
     author = 'Luis Mariano Guerra',
     author_email = 'luismarianoguerra@gmail.com',
     keywords = "messenger im msn jabber gtalk live facebook",
