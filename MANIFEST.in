@@ -1,3 +1,7 @@
 recursive-include docs/man *
 recursive-include emesene *
 
+recursive-exclude emesene *.pyc
+recursive-exclude emesene *~
+recursive-exclude emesene .gitignore
+exclude test/*
