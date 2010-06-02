@@ -2,7 +2,7 @@
 
 from distutils.core import setup, Extension
 
-setup(    name         = 'emesene2',
+setup(    name         = 'emesene',
           version      = '2.0',
           description  = 'MSN messenger client',
           author       = 'Luis Mariano Guerra, dx, C10uD',
