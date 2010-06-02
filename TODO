@@ -19,13 +19,11 @@ e3.msn:
 e3.papylib->upstream (eventually):
 - push papyon/gstreamer developers to fix the mimic decoder upstream so webcam 
   works (it does receive already, but the gstreamer decoder is broken)
-- roaming is unimplemented/doesn't work
 - file transfer event interface (?)
 - find out what's wrong with papyon's sip calls module
 
 gui:
 - sanitize menues (emesene1 could be a good example)
-- support for libappindicator (where available)
 - move to group, copy to group, etc.
 - custom emoticon handling support (add, remove, save, use, etc.)
 - audio/video settings and testing through gstreamer (with gtk gui?)
