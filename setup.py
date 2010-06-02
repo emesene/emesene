@@ -1,6 +1,11 @@
 #!/usr/bin/python
 
-from distutils.core import setup, Extension
+try:
+    from setuptools import setup, find_packages, Extension
+except ImportError:
+    import ez_setup
+    ez_setup.use_setuptools()
+    from setuptools import setup, find_packages, Extension
 
 # Data files to be installed to the system
 _data_files = [
@@ -35,23 +40,25 @@ setup(
     platforms = ['any'],
     data_files = _data_files,
     ext_package = "emesene",
-    ext_modules = _ext_modules,
     include_package_data = True,
     package_data = { "emesene" : [ ]},
     packages = find_packages(exclude=["plugins", "docs", "tests"]),
 
+     )
+
+'''
     ['', 'e3', 'e3.base', 'e3.cache', 'e3.common',
 			   'e3.dummy', 'e3.jabber', 'e3.jabber.xmpp', 'e3.msn',
 			   'e3.msn.msgs', 'e3.msn.p2p', 'e3.papylib', 'gui',
 			   'gui.base', 'gui.gtkui', 'interfaces', 'plugins.music',
 			   'plugins.music.thirdparty', 'plugins.ye_old_status_combo'],
-          scripts      = ['emesene'],
-          package_data = {'': ['docs/*', 'e3/msn/xml templates/*',
-                               'e3/papylib/papyon', 'test/*', 'themes/*/*',
-                               'plugins/link.py', 'plugins/plugin.pylint.rc', 'test/test_all.sh'],
-                          'gui.base': ['template.html'],
-                          'gui.gtkui': ['conversation.html'],
-                          'plugins.music.thirdparty': ['README.txt']},
-          data_files   = [('share/pixmaps', ['emesene-logo.png']),               
-                          ('share/applications', ['emesene.desktop'])]          
-          )
+    scripts      = ['emesene'],
+    package_data = {'': ['docs/*', 'e3/msn/xml templates/*',
+                        'e3/papylib/papyon', 'test/*', 'themes/*/*',
+                        'plugins/link.py', 'plugins/plugin.pylint.rc', 'test/test_all.sh'],
+                        'gui.base': ['template.html'],
+                        'gui.gtkui': ['conversation.html'],
+                        'plugins.music.thirdparty': ['README.txt']},
+    data_files   = [('share/pixmaps', ['emesene-logo.png']),               
+                    ('share/applications', ['emesene.desktop'])]       
+'''
