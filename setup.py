@@ -59,6 +59,6 @@ setup(
     ext_package = "emesene",
     include_package_data = True,
     package_data = { "emesene" : [ ]},
-    packages = find_packages(exclude=["plugins", "docs", "tests"]),
+    packages = find_packages(exclude=["docs", "tests"]),
 
      )
