@@ -23,7 +23,8 @@ class MessagingMenu():
         self.desktop_file = os.path.join("/usr/share/applications/",
                                          "emesene.desktop")
         if not utils.file_readable(self.desktop_file):
-            self.desktop_file = os.path.join(os.getcwd(), "emesene.desktop")
+            self.desktop_file = os.path.join(os.getcwd(), 
+                                    "data/share/applications/emesene.desktop")
             
         self.indicator_dict = {}
         self.r_indicator_dict = {}

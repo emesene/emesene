@@ -7,6 +7,16 @@ except ImportError:
     ez_setup.use_setuptools()
     from setuptools import setup, find_packages, Extension
 
+import platform
+
+python_version = platform.python_version()[0:3]
+
+def windows_check():
+    return platform.system() in ('Windows', 'Microsoft')
+
+def osx_check():
+    return platform.system() == "Darwin"
+
 # Data files to be installed to the system
 _data_files = [
     ('share/icons/scalable/apps', ['emesene/data/icons/scalable/apps/emesene.svg']),
@@ -28,11 +38,18 @@ _data_files = [
 ]
 
 setup(
+
     name = 'emesene',
-    version = '2.0',
+    version = '1.9.0',
     description = 'MSN messenger client',
     author = 'Luis Mariano Guerra',
     author_email = 'luismarianoguerra@gmail.com',
+    keywords = "messenger im msn jabber gtalk live facebook",
+    long_description = """emesene is an istant messenger capable of connecting
+        to various networks and utilizing different graphical toolkits.
+        Currently msn and jabber are supported through papyon and xmppy,
+        which allows emesene to connect to various IM services such as
+        Windows Live Messenger, GTalk, Facebook Chat, etc.""",
     url = 'http://www.emesene.org/',
     license = 'GNU GPL 3',
     
@@ -45,20 +62,3 @@ setup(
     packages = find_packages(exclude=["plugins", "docs", "tests"]),
 
      )
-
-'''
-    ['', 'e3', 'e3.base', 'e3.cache', 'e3.common',
-			   'e3.dummy', 'e3.jabber', 'e3.jabber.xmpp', 'e3.msn',
-			   'e3.msn.msgs', 'e3.msn.p2p', 'e3.papylib', 'gui',
-			   'gui.base', 'gui.gtkui', 'interfaces', 'plugins.music',
-			   'plugins.music.thirdparty', 'plugins.ye_old_status_combo'],
-    scripts      = ['emesene'],
-    package_data = {'': ['docs/*', 'e3/msn/xml templates/*',
-                        'e3/papylib/papyon', 'test/*', 'themes/*/*',
-                        'plugins/link.py', 'plugins/plugin.pylint.rc', 'test/test_all.sh'],
-                        'gui.base': ['template.html'],
-                        'gui.gtkui': ['conversation.html'],
-                        'plugins.music.thirdparty': ['README.txt']},
-    data_files   = [('share/pixmaps', ['emesene-logo.png']),               
-                    ('share/applications', ['emesene.desktop'])]       
-'''
