@@ -124,10 +124,13 @@ class Controller(object):
                 single_instance=True)
         extension.register('session', jabber.Session)
         extension.register('session', dummy.Session)
+        extension.register('session', msn.Session)
 
         if papylib is not None:
             extension.register('session', papylib.Session)
             extension.set_default('session', papylib.Session)
+        else:
+            extension.set_default('session', msn.Session)
 
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',

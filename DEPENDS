@@ -1,0 +1,14 @@
+=== Core ===
+ * python >= 2.5
+
+=== Libs ===
+ * papyon >= 0.4.8
+ * xmppy
+
+=== Gtk ===
+ * python-notify (libnotify python wrapper)
+ * pygtk >= 2.12
+
+=== Indicators ===
+ * python-appindicator
+
