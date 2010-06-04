@@ -273,7 +273,6 @@ class Controller(object):
         signals = self.session.signals
         signals.login_succeed.unsubscribe(self.on_login_succeed)
         signals.login_failed.unsubscribe(self.on_login_failed)
-        signals.login_info.unsubscribe(self.on_login_info)
         signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
         signals.conv_first_action.unsubscribe(self.on_new_conversation)
         signals.disconnected.unsubscribe(self.on_disconnected)
