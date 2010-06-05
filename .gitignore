@@ -2,3 +2,5 @@ doc/
 /*.pyc
 /*~
 *.sw?
+emesene.egg-info/*
+dist/*
