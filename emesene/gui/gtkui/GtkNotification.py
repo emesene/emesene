@@ -1,7 +1,11 @@
+import gui
+import utils
+import gobject # only used to timout notifications
+
 import gtk
 import pango
+import os # only used to get the os's name, can I get this for somewhere else?
 
-import os
 import logging
 log = logging.getLogger('gui.gtkui.GtkNotification')
 
@@ -11,8 +15,7 @@ AUTHOR = 'arielj'
 WEBSITE = 'www.emesene.org'
 
 
-# This code is used only on Windows to get the location on the task bar and
-# move notifications away from the taskbar
+# This code is used only on Windows to get the location on the taskbar
 if os.name == "nt":
     import ctypes
     from ctypes.wintypes import RECT, DWORD
@@ -35,7 +38,6 @@ if os.name == "nt":
     info.dwFlags =  MONITORINFOF_PRIMARY
     user.GetMonitorInfoW(HMONITOR, ctypes.byref(info))
     if info.rcMonitor.bottom != info.rcWork.bottom:
-        taskbarSide = "bottom"
         taskbarSize = info.rcMonitor.bottom - info.rcWork.bottom
     if info.rcMonitor.top != info.rcWork.top:
         taskbarSide = "top"
@@ -56,38 +58,48 @@ class Notification(gtk.Window):
 
         gtk.Window.__init__(self)
 
+        # constants
+        FColor = "white"
+        BColor = gtk.gdk.Color()
+        avatar_size = 48;
+        width = 300;
+
+        # window attributes
         self.set_accept_focus(False)
         self.set_decorated(False)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_UTILITY)
-
-        self.callback = None
-
-        self.set_geometry_hints(None, min_width=300, min_height=60, \
-                max_width=300, max_height=60)
+        self.set_geometry_hints(None, min_width=width, min_height=60, \
+                max_width=width, max_height=200)
         self.set_border_width(10)
 
-        messageLabel = gtk.Label(text)
-#        messageLabel.set_use_markup(True)
+        # labels
+        markup1 = '<span foreground="%s" weight="ultrabold">%s</span>'
+        titleLabel = gtk.Label( markup1 % (FColor, title))
+        titleLabel.set_use_markup(True)
+        titleLabel.set_justify(gtk.JUSTIFY_CENTER)
+        titleLabel.set_ellipsize(pango.ELLIPSIZE_END)
+
+        markup2 = '<span foreground="%s">%s</span>'
+        messageLabel = gtk.Label( markup2 % (FColor, text))
+        messageLabel.set_use_markup(True)
         messageLabel.set_justify(gtk.JUSTIFY_CENTER)
         messageLabel.set_ellipsize(pango.ELLIPSIZE_END)
 
+        # image
+        avatarImage = gtk.Image()
+        try:
+            userPixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
+                                  picturePath[7:], avatar_size, avatar_size)
+        except:
+            userPixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user,
+                                                 (avatar_size, avatar_size))
+        avatarImage.set_from_pixbuf(userPixbuf)
+
+        # boxes
         hbox = gtk.HBox()
         self.messageVbox = gtk.VBox()
         lbox = gtk.HBox()
         lbox.set_spacing(10)
-        titleLabel = gtk.Label(title)
-#        titleLabel.set_use_markup(True)
-        titleLabel.set_justify(gtk.JUSTIFY_CENTER)
-        titleLabel.set_ellipsize(pango.ELLIPSIZE_END)
-
-        avatarImage = gtk.Image()
-        if picturePath != None and picturePath != "file://":
-            try:
-                userPixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
-                                                   picturePath[7:],48, 48)
-                avatarImage.set_from_pixbuf(userPixbuf)
-            except:
-                pass
 
         lboxEventBox = gtk.EventBox()
         lboxEventBox.set_visible_window(False)
@@ -96,44 +108,46 @@ class Notification(gtk.Window):
         lboxEventBox.add(lbox)
         self.connect("button_press_event", self.onClick)
 
+        # pack everything
         self.messageVbox.pack_start(titleLabel,False, False)
         self.messageVbox.pack_start(messageLabel,True, True)
-
         lbox.pack_start(avatarImage, False, False)
         lbox.pack_start(self.messageVbox, True, True)
-
         hbox.pack_start(lboxEventBox, True, True)
 
         self.add(hbox)
-        
+
+        # move notification
         width, height = self.get_size()
-        gravity = gtk.gdk.GRAVITY_SOUTH_EAST
+        gravity = gtk.gdk.GRAVITY_SOUTH_EAST # can I use some configuration?
         self.set_gravity(gravity)
 
         x = 0
         y = 0
 
-        #move notification so taskbar won't hide it on Windows!
+        # move notification so taskbar won't hide it on Windows!
         if os.name == "nt":
+            screen_w = gtk.gdk.screen_width()
+            screen_h = gtk.gdk.screen_height()
             if gravity == gtk.gdk.GRAVITY_SOUTH_EAST:
-                x = gtk.gdk.screen_width() - width - 10
-                y = gtk.gdk.screen_height() - height - 10
+                x = screen_w - width - 10
+                y = screen_h - height - 10
                 if taskbarSide == "bottom":
-                    y = gtk.gdk.screen_height() - height - taskbarSize
+                    y = screen_h - height - taskbarSize
                 elif taskbarSide == "right":
-                    x = gtk.gdk.screen_width() - width - taskbarSize
+                    x = screen_w - width - taskbarSize
             elif gravity == gtk.gdk.GRAVITY_NORTH_EAST:
-                x = gtk.gdk.screen_width() - width - 10
+                x = screen_w - width - 10
                 y = 10
                 if taskbarSide == "top":
                     y = taskbarSize
                 elif taskbarSide == "right":
-                    x = gtk.gdk.screen_width() - width - taskbarSize
+                    x = screen_w - width - taskbarSize
             elif gravity == gtk.gdk.GRAVITY_SOUTH_WEST:
                 x = 10
-                y = gtk.gdk.screen_height() - height - 10
+                y = screen_h - height - 10
                 if taskbarSide == "bottom":
-                    y = gtk.gdk.screen_height() - height - taskbarSize
+                    y = screen_h - height - taskbarSize
                 elif taskbarSide == "left":
                     x = taskbarSize
             elif gravity == gtk.gdk.GRAVITY_NORTH_WEST:
@@ -146,14 +160,22 @@ class Notification(gtk.Window):
 
         self.move(x,y)
 
-#        #don't use a rectangular form
-#        window = self.get_root_window()
+        # change background color
+        self.set_app_paintable(True)
+        self.realize()
+        self.window.set_background(BColor)
+
+#        # don't use a rectangular form, just testing some things, doesn't work
+#        window = self.get_parent_window()
 #        if window is not None:
-#            rect = gtk.gdk.Rectangle(1,10,10,10)
+#            print "entra al if"
+#            rect = gtk.gdk.Rectangle(10,10,10,10)
 #            window.shape_combine_region(gtk.gdk.region_rectangle(rect),50,10)
 
-#        # A bit of transparency to be less intrusive
-#        self.set_opacity(0.85)
+        # A bit of transparency to be less intrusive
+        self.set_opacity(0.9)
+
+        self.timerId = None
 
         hbox.show_all()
 
@@ -163,8 +185,11 @@ class Notification(gtk.Window):
     def show(self):
         ''' show it '''
         self.show_all()
+        self.timerId = gobject.timeout_add(10000, self.close)
         return True
 
     def close(self , *args):
         ''' hide the Notification '''
         self.hide()
+        if self.timerId is not None:
+            gobject.source_remove(self.timerId)
