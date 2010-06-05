@@ -307,7 +307,7 @@ class Login(gtk.Alignment):
                 self._clear_all()
 
         else:
-           self.avatar.set_from_file(gui.theme.logo)
+           self.avatar.set_from_file(gui.theme.user)
 
     def _clear_all(self):
         '''
