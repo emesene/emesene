@@ -340,13 +340,13 @@ class Worker(e3.base.Worker, papyon.Client):
 
         if conv in self.papyconv:
             # emesene conversation already exists
-            cid = self.self.rpapyconv[conv]
+            cid = self.rpapyconv[conv]
         else:
             # we don't care about users typing if no conversation is opened
             return
 
-        # TODO: find how to do this
-        #self.session.add_event(Event.EVENT_USER_TYPING, cid, account, msgobj)
+        # TODO: finish in conversation gtkui
+        #self.session.add_event(Event.EVENT_USER_TYPING, cid, account)
 
     def _on_conversation_message_received(self, papycontact, papymessage, \
         pyconvevent):
