@@ -16,6 +16,8 @@ class ConversationManager(object):
         if self.session:
             self.session.signals.conv_message.subscribe(
                 self._on_message)
+            self.session.signals.conv_message.subscribe(
+                self._on_user_typing)
             self.session.signals.conv_contact_joined.subscribe(
                 self._on_contact_joined)
             self.session.signals.conv_contact_left.subscribe(
@@ -46,6 +48,12 @@ class ConversationManager(object):
 
         if message.type != e3.Message.TYPE_TYPING:
             self.set_message_waiting(conversation, True)
+
+    def _on_user_typing(self, cid, account, *args):
+        """
+        inform that the other user has started typing
+        """
+        raise NotImplementedError("Method not implemented")
 
     def set_message_waiting(self, conversation, is_waiting):
         """

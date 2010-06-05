@@ -296,6 +296,12 @@ class Conversation(gtk.VBox, gui.Conversation):
         increment()
         return True
 
+    def _on_user_typing(self, cid, account, *args):
+        """
+        inform that the other user has started typing
+        """
+        pass
+
     def on_emote(self, emote):
         '''called when an emoticon is selected'''
         self.input.append(gobject.markup_escape_text(emote))
