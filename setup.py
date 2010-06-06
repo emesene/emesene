@@ -7,6 +7,7 @@ except ImportError:
     ez_setup.use_setuptools()
     from setuptools import setup, find_packages, Extension
 
+import os
 import platform
 
 python_version = platform.python_version()[0:3]
@@ -52,13 +53,20 @@ setup(
         Windows Live Messenger, GTalk, Facebook Chat, etc.""",
     url = 'http://www.emesene.org/',
     license = 'GNU GPL 3',
-    
-    requires = ['gtk', 'papyon'],
-    platforms = ['any'],
+
     data_files = _data_files,
     ext_package = "emesene",
     include_package_data = True,
-    package_data = { "emesene" : [ ]},
-    packages = find_packages(exclude=["docs", "tests"]),
-
+    package_data = {"emesene" : ['themes/conversations/*/*/*/*/*', 
+                                 'themes/emotes/*/*',
+                                 'themes/images/*/*',
+                                 'themes/sounds/*/*']},
+    packages = find_packages(),
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "License :: OSI Approved :: GNU General Public License (GPL)",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Topic :: Communications :: Chat",
+    ],
      )
