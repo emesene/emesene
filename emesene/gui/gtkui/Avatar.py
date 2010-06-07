@@ -120,7 +120,7 @@ class Avatar( gtk.Widget ):
     #
     def set_from_file(self, filename):
         if not gui.gtkui.utils.file_readable(filename):
-            filename = gui.theme.logo
+            filename = gui.theme.user
 
         try:
             animation = gtk.gdk.PixbufAnimation(filename)
