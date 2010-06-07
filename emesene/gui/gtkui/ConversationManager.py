@@ -131,10 +131,10 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         
     def _on_switch_page_grab_focus(self):
         '''Dirty hack. When _on_switch_page() is called the actual switch
-	    has not yet occured. We connect an idle handler to grab the focus,
-	    otherwise it won't work. Maybe this is solved if we iterate the
-	    mainloop inside of _on_switch_page() instead of connecting an
-	    idle signal.'''
+        has not yet occured. We connect an idle handler to grab the focus,
+        otherwise it won't work. Maybe this is solved if we iterate the
+        mainloop inside of _on_switch_page() instead of connecting an
+        idle signal.'''
         page_num = self.get_current_page()
         page = self.get_nth_page(page_num)
         page.input.grab_focus()
