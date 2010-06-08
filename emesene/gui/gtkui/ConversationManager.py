@@ -1,5 +1,6 @@
 '''a module that define classes to build the conversation widget'''
 import gtk
+import glib
 
 import e3
 import gui
@@ -125,6 +126,19 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         parent = self.get_parent()
         parent.set_title(page.text)
         parent.set_icon(page.icon)
+        
+        glib.idle_add(self._on_switch_page_grab_focus)
+        
+    def _on_switch_page_grab_focus(self):
+        '''Dirty hack. When _on_switch_page() is called the actual switch
+        has not yet occured. We connect an idle handler to grab the focus,
+        otherwise it won't work. Maybe this is solved if we iterate the
+        mainloop inside of _on_switch_page() instead of connecting an
+        idle signal.'''
+        page_num = self.get_current_page()
+        page = self.get_nth_page(page_num)
+        page.input.grab_focus()
+        return False
 
     def _on_tab_close(self, button, conversation):
         '''called when the user clicks the close button on a tab'''
