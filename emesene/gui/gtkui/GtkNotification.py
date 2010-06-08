@@ -1,10 +1,10 @@
 import gui
 import utils
-import gobject # only used to timout notifications
+import gobject
 
 import gtk
 import pango
-import os # only used to get the os's name, can I get this for somewhere else?
+import os
 
 import logging
 log = logging.getLogger('gui.gtkui.GtkNotification')
@@ -56,7 +56,7 @@ def gtkNotification(title, text, picturePath=None):
 class Notification(gtk.Window):
     def __init__(self, title, text, picturePath):
 
-        gtk.Window.__init__(self)
+        gtk.Window.__init__(self, type=gtk.WINDOW_POPUP)
 
         # constants
         FColor = "white"
@@ -65,12 +65,15 @@ class Notification(gtk.Window):
         width = 300;
 
         # window attributes
-        self.set_accept_focus(False)
-        self.set_decorated(False)
-        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_UTILITY)
+        #self.set_accept_focus(False)
+        #self.set_focus_on_map(True)
+        #self.set_decorated(False)
+        # self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_UTILITY)
         self.set_geometry_hints(None, min_width=width, min_height=60, \
                 max_width=width, max_height=200)
         self.set_border_width(10)
+
+        # self.set_transient_for(gtk.gdk.get_default_root_window())
 
         # labels
         markup1 = '<span foreground="%s" weight="ultrabold">%s</span>'
@@ -117,6 +120,21 @@ class Notification(gtk.Window):
 
         self.add(hbox)
 
+        # change background color
+        self.set_app_paintable(True)
+        self.realize()
+        self.window.set_background(BColor)
+
+#        # don't use a rectangular form, just testing some things, doesn't work
+#        window = self.get_parent_window()
+#        if window is not None:
+#            print "entra al if"
+#            rect = gtk.gdk.Rectangle(10,10,10,10)
+#            window.shape_combine_region(gtk.gdk.region_rectangle(rect),50,10)
+
+        # A bit of transparency to be less intrusive
+        self.set_opacity(0.9)
+
         # move notification
         width, height = self.get_size()
         gravity = gtk.gdk.GRAVITY_SOUTH_EAST # can I use some configuration?
@@ -133,7 +151,7 @@ class Notification(gtk.Window):
                 x = screen_w - width - 10
                 y = screen_h - height - 10
                 if taskbarSide == "bottom":
-                    y = screen_h - height - taskbarSize
+                    y = screen_h - height - taskbarSize - 10
                 elif taskbarSide == "right":
                     x = screen_w - width - taskbarSize
             elif gravity == gtk.gdk.GRAVITY_NORTH_EAST:
@@ -160,20 +178,10 @@ class Notification(gtk.Window):
 
         self.move(x,y)
 
-        # change background color
-        self.set_app_paintable(True)
-        self.realize()
-        self.window.set_background(BColor)
-
-#        # don't use a rectangular form, just testing some things, doesn't work
-#        window = self.get_parent_window()
-#        if window is not None:
-#            print "entra al if"
-#            rect = gtk.gdk.Rectangle(10,10,10,10)
-#            window.shape_combine_region(gtk.gdk.region_rectangle(rect),50,10)
-
-        # A bit of transparency to be less intrusive
-        self.set_opacity(0.9)
+        #self.window.set_skip_taskbar_hint(True)
+        #self.window.set_skip_pager_hint(True)
+        #self.window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_UTILITY)
+        #self.set_keep_above(True)
 
         self.timerId = None
 

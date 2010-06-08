@@ -3,6 +3,7 @@ import gtk
 import time
 import appindicator
 
+import utils
 import extension
 from e3 import status
 
@@ -197,6 +198,7 @@ class ContactsMenu(gtk.Menu):
         self.main_window = main_window
         self.item_to_contacts = {}
         self.contacts_to_item = {}
+        self.avatar_size = 32
 
         self.contactmanager = self.handler.session.contacts
         self.handler.session.signals.contact_attr_changed.subscribe(self._on_contact_change_something)
@@ -204,16 +206,16 @@ class ContactsMenu(gtk.Menu):
         for contact in self.contactmanager.get_online_list():
             self.__append_contact(contact)
 
-        # TODO: show [pixbuf] [nick] instead of mail
-        # TODO: some contacts send nick-changed signal 
-        #       with their mail instead of nickname (even if they have one)
+        # TODO: find out why gtk ImageMenuItem does not work as expected
 
     def __append_contact(self, contact):
         """
         appends a contact to our submenu
         """
-        item = gtk.MenuItem(label=contact.nick)
-        #item.set_image(contact.picture)
+        item = gtk.ImageMenuItem()
+        item.set_label(contact.nick)
+        pict = self.__get_contact_pixbuf_or_default(contact)
+        item.set_image(pict)
         item.connect('activate', self._on_contact_clicked)    
         self.item_to_contacts[item] = contact
         self.contacts_to_item[contact.account] = item
@@ -243,7 +245,14 @@ class ContactsMenu(gtk.Menu):
 
         if type_change == 'nick':
             if account in self.contacts_to_item:
-                self.contacts_to_item[account].set_label(value_change)
+                nick = self.item_to_contacts[self.contacts_to_item[account]].nick
+                self.contacts_to_item[account].set_label(nick)
+
+        if type_change == 'picture':
+            if account in self.contacts_to_item:
+                contact = self.item_to_contacts[self.contacts_to_item[account]]
+                pict = self.__get_contact_pixbuf_or_default(contact)
+                self.contacts_to_item[account].set_image(pict)
 
     def _on_contact_clicked(self, menu_item):
         """
@@ -253,4 +262,31 @@ class ContactsMenu(gtk.Menu):
         cid = time.time()
         self.main_window.content.on_new_conversation(cid, [acc], other_started=False)
         self.handler.session.new_conversation(acc, cid)
+
+    def __get_contact_pixbuf_or_default(self, contact):
+        '''try to return a pixbuf of the user picture or the default
+        picture
+        '''
+        if contact.picture:
+            try:
+                animation = gtk.gdk.PixbufAnimation(contact.picture)
+            except gobject.GError:
+                pix = utils.safe_gtk_pixbuf_load(gui.theme.user,
+                        (self.avatar_size, self.avatar_size))
+                picture = gtk.image_new_from_pixbuf(pix)
+                return picture
+
+            if animation.is_static_image():
+                pix = utils.safe_gtk_pixbuf_load(contact.picture,
+                        (self.avatar_size, self.avatar_size))
+                picture = gtk.image_new_from_pixbuf(pix)
+            else:
+                picture = gtk.image_new_from_animation(animation)
+
+        else:
+            pix = utils.safe_gtk_pixbuf_load(gui.theme.user,
+                        (self.avatar_size, self.avatar_size))
+            picture = gtk.image_new_from_pixbuf(pix)
+
+        return picture
 

@@ -531,6 +531,9 @@ class Worker(e3.base.Worker, papyon.Client):
             if avatar_hash in avatars:
                 self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED,
                         contact.account, avatar_path)
+                self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED,
+                        contact.account, 'picture', avatar_path)
+
                 return avatar_path
 
             def download_failed(reason):
