@@ -3,6 +3,7 @@ import gtk
 import time
 import appindicator
 
+import gui
 import utils
 import extension
 from e3 import status
