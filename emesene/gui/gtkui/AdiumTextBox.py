@@ -18,6 +18,7 @@ class OutputView(webkit.WebView):
         self.ready = False
         self.pending = []
         self.connect('load-finished', self._loading_finished_cb)
+        self.connect('populate-popup', self.on_populate_popup)
 
     def _loading_finished_cb(self, *args):
         '''callback called when the content finished loading
@@ -89,6 +90,11 @@ class OutputView(webkit.WebView):
         return html
 
     text = property(fget=_get_text, fset=_set_text)
+    
+    def on_populate_popup(self, view, menu):
+        '''disables the right-click menu by removing the MenuItems'''
+        for child in menu.get_children():
+            menu.remove(child)
 
 
 class OutputText(gtk.ScrolledWindow):
