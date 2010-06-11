@@ -378,14 +378,16 @@ class ConversationToolbarHandler(object):
         '''called when the emotes button is selected'''
         self.dialog.select_emote(self.theme, self.conversation.on_emote)
 
-    def on_notify_atention_selected(self):
+    def on_notify_attention_selected(self):
         '''called when the nudge button is selected'''
         self.conversation.on_notify_attention()
 
-    def on_invite_file_trasnfer_selected(self):
+    def on_invite_file_transfer_selected(self):
         '''called when the client requestes to a remote user to
         start a file transfer'''
-        raise NotImplementedError
+        # TODO: select the file, create a dialog in gui/gtkui/Dialog.py
+        # (and a stub in gui/base?) 
+        self.conversation.on_filetransfer_invite("test", "/tmp/test")
 
 class TrayIconHandler(FileHandler):
     """
@@ -425,6 +427,11 @@ class FileTransferHandler(object):
         self.transfer.state = e3.base.FileTransfer.TRANSFERRING
         self.session.accept_filetransfer(self.transfer)
 
+    def accepted(self):
+        ''' when a file transfer is accepted by the other party'''
+        self.transfer.time_start = time.time()
+        self.transfer.state = e3.base.FileTransfer.TRANSFERRING
+        
     def reject(self):
         ''' cancels a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED

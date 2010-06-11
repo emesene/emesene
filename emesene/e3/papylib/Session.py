@@ -66,3 +66,7 @@ class Session(e3.Session):
     def conversation_invite(self, cid, account):
         '''invite a contact to a conversation'''
         self.add_action(e3.Action.ACTION_CONV_INVITE, (cid, account))
+
+    def filetransfer_invite(self, cid, account, filename, completepath):
+        '''send a file to the first user of the conversation'''
+        self.add_action(e3.Action.ACTION_FT_INVITE, (cid, account, filename, completepath))

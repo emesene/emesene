@@ -124,7 +124,7 @@ class Worker(threading.Thread):
         dah[Action.ACTION_SEND_MESSAGE] = self._handle_action_send_message
         dah[Action.ACTION_SEND_OIM] = self._handle_action_send_oim
 
-        # p2p actions
+        # p2p actions (unused!)
         dah[Action.ACTION_P2P_INVITE] = self._handle_action_p2p_invite
         dah[Action.ACTION_P2P_ACCEPT] = self._handle_action_p2p_accept
         dah[Action.ACTION_P2P_CANCEL] = self._handle_action_p2p_cancel
