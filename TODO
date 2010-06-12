@@ -26,5 +26,6 @@ gui:
 gui.gtk:
 - investigate gedit's bars, they're nicer than our nicebar
   (but i don't know if it's already in pygtk)
+  HOWEVER, if we're going to use our nicebar, we need to hax the FONT color too.
 - port emesene1 preferences to emesene2 
   (and merge back plugins window in preferences)
