@@ -109,6 +109,10 @@ class Conversation(object):
         '''called when a contact is selected to be invited'''
         self.session.conversation_invite(self.cid, account)
 
+    def on_filetransfer_invite(self, filename, completepath): 
+        '''called when a filetransfer is issued'''
+        self.session.filetransfer_invite(self.cid, self.members[0], filename, completepath)
+
     def on_clean(self):
         '''called when the clean button is clicked'''
         self.output.clear()

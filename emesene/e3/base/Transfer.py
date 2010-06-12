@@ -4,8 +4,9 @@ class FileTransfer(object):
     '''a class that represent a file transfer'''
     (WAITING, TRANSFERRING, RECEIVED, FAILED) = range(4)
 
-    def __init__(self, obj, filename, size, preview, sender='Me'):
+    def __init__(self, obj, filename, size, preview, sender='Me', completepath=''):
         self.filename = filename
+        self.completepath = completepath
         self.size = size
         self.preview = preview
 

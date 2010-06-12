@@ -36,7 +36,7 @@ class ConversationToolbar(gtk.Toolbar):
         self.nudge = gtk.ToolButton(
             utils.safe_gtk_image_load(gui.theme.emote_to_path(':S', True)), 'Nudge')
         self.nudge.connect('clicked',
-            lambda *args: self.handler.on_notify_atention_selected())
+            lambda *args: self.handler.on_notify_attention_selected())
 
         self.invite = gtk.ToolButton(gtk.STOCK_ADD)
         self.invite.connect('clicked',
@@ -48,7 +48,7 @@ class ConversationToolbar(gtk.Toolbar):
         self.invite_file_transfer = gtk.ToolButton(gtk.STOCK_GO_UP)
         self.invite_file_transfer.set_label(_('Send File'))
         self.invite_file_transfer.connect('clicked',
-            lambda *args: self.handler.on_invite_file_trasnfer_selected())
+            lambda *args: self.handler.on_invite_file_transfer_selected())
 
 
         self.add(self.font)

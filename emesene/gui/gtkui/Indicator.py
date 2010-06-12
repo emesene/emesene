@@ -202,10 +202,11 @@ class ContactsMenu(gtk.Menu):
         self.avatar_size = 32
 
         self.contactmanager = self.handler.session.contacts
-        self.handler.session.signals.contact_attr_changed.subscribe(self._on_contact_change_something)
-
+        
         for contact in self.contactmanager.get_online_list():
             self.__append_contact(contact)
+
+        self.handler.session.signals.contact_attr_changed.subscribe(self._on_contact_change_something)
 
         # TODO: find out why gtk ImageMenuItem does not work as expected
 
@@ -213,10 +214,11 @@ class ContactsMenu(gtk.Menu):
         """
         appends a contact to our submenu
         """
-        item = gtk.ImageMenuItem()
+        #item = gtk.ImageMenuItem()
+        item = gtk.MenuItem()
         item.set_label(contact.nick)
-        pict = self.__get_contact_pixbuf_or_default(contact)
-        item.set_image(pict)
+        #pict = self.__get_contact_pixbuf_or_default(contact)
+        #item.set_image(pict)
         item.connect('activate', self._on_contact_clicked)    
         self.item_to_contacts[item] = contact
         self.contacts_to_item[contact.account] = item
@@ -250,6 +252,8 @@ class ContactsMenu(gtk.Menu):
                 self.contacts_to_item[account].set_label(nick)
 
         if type_change == 'picture':
+        #TODO: fixme
+            return
             if account in self.contacts_to_item:
                 contact = self.item_to_contacts[self.contacts_to_item[account]]
                 pict = self.__get_contact_pixbuf_or_default(contact)

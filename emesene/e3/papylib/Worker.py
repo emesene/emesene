@@ -274,19 +274,50 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr)
 
-    def papy_ft_accepted(self):
-        print "accepted"
+    def papy_ft_accepted(self, ftsession):
+        tr = self.filetransfers[ftsession]
+        try:
+            f = open(tr.completepath, 'rb')
+            filedata = f.read()
+            f.close()
+        except Exception as e:
+            print e
+
+        if not isinstance(filedata, str):
+            filedata = "".join([chr(b) for b in filedata])
+
+        data=StringIO.StringIO(filedata)
+        ftsession.send(data)
+
+        self.session.add_event(Event.EVENT_FILETRANSFER_ACCEPTED, tr)
 
     def papy_ft_progressed(self, ftsession, len_chunk):
         tr = self.filetransfers[ftsession]
         tr.received_data += len_chunk
-
+        
         self.session.add_event(Event.EVENT_FILETRANSFER_PROGRESS, tr)
 
     def papy_ft_completed(self, ftsession, data):
-        print "data:", len(data.getvalue())        
-        # TODO: save the file somewhere
+        #print "data:", len(data.getvalue())        
+        # TODO: save the file somewhere and kill the dicts
         tr = self.filetransfers[ftsession]
+        if tr.sender == 'Me':
+            # we sent the file, do nothing pls.
+            pass
+        else:
+            sender = tr.sender
+            # TODO: save somewhere else the data!
+            handle, path = tempfile.mkstemp(suffix=".temp", prefix='emesenefile')
+            os.close(handle)
+            try:
+                f = open(path, 'wb')
+                f.write(data)
+                f.close()
+            except Exception as e:
+                print e
+
+        #del self.rfiletransfers[tr]
+
         self.session.add_event(Event.EVENT_FILETRANSFER_COMPLETED, tr)
 
     # call handlers
@@ -849,11 +880,11 @@ class Worker(e3.base.Worker, papyon.Client):
 
         if avatar_hash in self.my_avatars:
             self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED,
-                    self.session.account.account, avatar_path)
+                                    self.session.account.account, avatar_path)
         else:
             self.my_avatars.insert_raw(msn_object._data)
             self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
-            self.session.account.account, avatar_path)
+                                    self.session.account.account, avatar_path)
 
         self.session.contacts.me.picture = avatar_path
 
@@ -961,32 +992,22 @@ class Worker(e3.base.Worker, papyon.Client):
                 self.session.logger.log(event, contact.status, msgstr,
                     src, dest)
         '''
-    # p2p handlers
-
-    def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
-        '''handle Action.ACTION_P2P_INVITE,
-         cid is the conversation id
-         pid is the p2p session id, both are numbers that identify the
-            conversation and the session respectively, time.time() is
-            recommended to be used.
-         dest is the destination account
-         type_ is one of the e3.base.Transfer.TYPE_* constants
-         identifier is the data that is needed to be sent for the invitation
-        '''
-        pass
-
-    def _handle_action_p2p_accept(self, pid):
-        '''handle Action.ACTION_P2P_ACCEPT'''
-        pass
-
-    def _handle_action_p2p_cancel(self, pid):
-        '''handle Action.ACTION_P2P_CANCEL'''
-        pass
 
     # ft handlers
-    def _handle_action_ft_invite(self, t):
-        # TODO        
-        pass    
+    def _handle_action_ft_invite(self, cid, account, filename, completepath):
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
+        papysession = self._ft_manager.send(papycontact, filename, os.path.getsize(completepath))
+ 
+        tr = e3.base.FileTransfer(papysession, papysession.filename, \
+        papysession.size, papysession.preview, sender='Me', completepath=completepath)
+        self.filetransfers[papysession] = tr
+        self.rfiletransfers[tr] = papysession
+        
+        papysession.connect("accepted", self.papy_ft_accepted)
+        papysession.connect("progressed", self.papy_ft_progressed)
+        papysession.connect("completed", self.papy_ft_completed)
+
+        self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr)
     
     def _handle_action_ft_accept(self, t):
         self.rfiletransfers[t].accept()
