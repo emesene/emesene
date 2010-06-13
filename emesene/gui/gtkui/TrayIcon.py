@@ -1,5 +1,6 @@
 import gtk
 
+import os
 import extension
 from e3 import status
 
@@ -87,7 +88,7 @@ class TrayIcon(gtk.StatusIcon):
         position = None
         if os.name == 'posix':
             position = gtk.status_icon_position_menu
-        self.menu.popup(None, None, position, button, activate_time,trayicon)
+        self.menu.popup(None, None, position, button, activate_time, trayicon)
 
 class LoginMenu(gtk.Menu):
     """
