@@ -2,6 +2,7 @@ import gtk
 import time
 import os
 
+import os
 import extension
 from e3 import status
 
