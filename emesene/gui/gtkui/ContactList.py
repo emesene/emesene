@@ -537,14 +537,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # + MESSAGE
         # + NL
         '''
-        template = self.nick_template
-
-        blocked_text = ''
-        if contact.blocked:
-            blocked_text = '(blocked)'
-
-        template = template.replace('%BLOCKED%', blocked_text)
-
         message = gobject.markup_escape_text(contact.message)
         nick = gobject.markup_escape_text(contact.nick)
         display_name = gobject.markup_escape_text(contact.display_name)
