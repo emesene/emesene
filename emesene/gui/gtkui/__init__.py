@@ -143,9 +143,10 @@ def setup():
     else:
         extension.category_register('conversation output', TextBox.OutputText)
 
-    extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
     try:
         import PyNotification
-        extension.register(('notificationGUI'), PyNotification.pyNotification)
+        extension.category_register(('notificationGUI'), PyNotification.pyNotification)
+        extension.register(('notificationGUI'), GtkNotification.gtkNotification)
     except:
-        pass
+        extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
+
