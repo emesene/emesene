@@ -169,7 +169,21 @@ class ConversationManager(object):
 
     def close_all(self):
         '''close and finish all conversations'''
-        conversations = self.conversations.values()
-        for conversation in conversations:
+        self.session.signals.conv_message.unsubscribe(
+            self._on_message)
+        self.session.signals.conv_message.unsubscribe(
+            self._on_user_typing)
+        self.session.signals.conv_contact_joined.unsubscribe(
+            self._on_contact_joined)
+        self.session.signals.conv_contact_left.unsubscribe(
+            self._on_contact_left)
+        self.session.signals.conv_group_started.unsubscribe(
+            self._on_group_started)
+        self.session.signals.conv_group_ended.unsubscribe(
+            self._on_group_ended)
+        self.session.signals.conv_message_send_failed.unsubscribe(
+            self._on_message_send_failed)
+        self.session.signals.contact_attr_changed.unsubscribe(
+            self._on_contact_attr_changed)
+        for conversation in self.conversations.values():
             self.close(conversation)
-
