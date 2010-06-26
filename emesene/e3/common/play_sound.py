@@ -21,7 +21,7 @@ if os.name == 'nt':
     import winsound
 
     def play(path):
-        winsound.PlaySound(path, winsound.SND_FILENAME)
+        winsound.PlaySound(path, winsound.SND_FILENAME | winsound.SND_ASYNC)
 elif os.name == 'posix':
     if is_on_path('play'):
         def play(path):
