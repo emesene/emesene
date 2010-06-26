@@ -644,7 +644,7 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         self._icon_source.set_state(gtk.STATE_INSENSITIVE)
 
         self.set_property('xpad', 1)
-        self.set_property('ypad', 8)
+        self.set_property('ypad', 1)
 
         #set up information of statusTransformation
         self._set_transformation('corner|gray')
