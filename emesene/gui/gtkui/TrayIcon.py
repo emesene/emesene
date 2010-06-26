@@ -1,5 +1,6 @@
 import gtk
 
+import os
 import extension
 from e3 import status
 
@@ -84,7 +85,10 @@ class TrayIcon(gtk.StatusIcon):
         callback called when the popup of the status icon is activated
         (usually through right-clicking the status icon)
         """
-        self.menu.popup(None, None, None, button, activate_time)
+        position = None
+        if os.name == 'posix':
+            position = gtk.status_icon_position_menu
+        self.menu.popup(None, None, position, button, activate_time, trayicon)
 
 class LoginMenu(gtk.Menu):
     """

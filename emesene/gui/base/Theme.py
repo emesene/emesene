@@ -257,6 +257,7 @@ class Theme(object):
         for theme in self.get_child_dirs(path_conv):
             if AdiumThemesM.validate(
                                 os.path.join(os.path.abspath(path_conv), theme))[0]:
+                theme = theme.replace('.AdiumMessageStyle', '')
                 themes.append(theme)
 
         return themes
