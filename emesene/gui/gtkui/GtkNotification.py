@@ -1,7 +1,8 @@
 import gui
+from gui.base import MarkupParser
 import utils
-import gobject
 
+import glib
 import gtk
 import pango
 import os
@@ -77,13 +78,13 @@ class Notification(gtk.Window):
 
         # labels
         markup1 = '<span foreground="%s" weight="ultrabold">%s</span>'
-        titleLabel = gtk.Label( markup1 % (FColor, title))
+        titleLabel = gtk.Label( markup1 % (FColor, MarkupParser.escape(title)))
         titleLabel.set_use_markup(True)
         titleLabel.set_justify(gtk.JUSTIFY_CENTER)
         titleLabel.set_ellipsize(pango.ELLIPSIZE_END)
 
         markup2 = '<span foreground="%s">%s</span>'
-        messageLabel = gtk.Label( markup2 % (FColor, text))
+        messageLabel = gtk.Label( markup2 % (FColor, MarkupParser.escape(text)))
         messageLabel.set_use_markup(True)
         messageLabel.set_justify(gtk.JUSTIFY_CENTER)
         messageLabel.set_ellipsize(pango.ELLIPSIZE_END)
@@ -193,11 +194,11 @@ class Notification(gtk.Window):
     def show(self):
         ''' show it '''
         self.show_all()
-        self.timerId = gobject.timeout_add(10000, self.close)
+        self.timerId = glib.timeout_add(10000, self.close)
         return True
 
     def close(self , *args):
         ''' hide the Notification '''
         self.hide()
         if self.timerId is not None:
-            gobject.source_remove(self.timerId)
+            glib.source_remove(self.timerId)
