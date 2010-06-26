@@ -206,7 +206,7 @@ class Conversation(object):
         self.session.send_message(self.cid, text, self.cstyle)
         self.output.send_message(self.formatter, self.session.contacts.me,
                 text, cedict, self.cstyle, self.first)
-        self.play_type()
+        self.play_send()
         self.first = False
 
     def on_receive_message(self, message, account, cedict):
@@ -219,7 +219,7 @@ class Conversation(object):
         if message.type == e3.Message.TYPE_MESSAGE:
             self.output.receive_message(self.formatter, contact, message,
                     cedict, self.first)
-            self.play_send()
+            self.play_type()
 
         elif message.type == e3.Message.TYPE_NUDGE:
             self.output.information(self.formatter, contact,
@@ -363,17 +363,20 @@ class Conversation(object):
         """
         play the nudge sound
         """
-        gui.play(self.session, gui.theme.sound_nudge)
+        if self.session.config.b_play_nudge:
+            gui.play(self.session, gui.theme.sound_nudge)
 
     def play_send(self):
         """
         play the send sound
         """
-        gui.play(self.session, gui.theme.sound_send)
+        if self.session.config.b_play_send:
+            gui.play(self.session, gui.theme.sound_send)
 
     def play_type(self):
         """
         play the send sound
         """
-        gui.play(self.session, gui.theme.sound_type)
+        if self.session.config.b_play_type:
+            gui.play(self.session, gui.theme.sound_type)
 

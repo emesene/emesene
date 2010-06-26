@@ -416,6 +416,7 @@ class Controller(object):
         self._new_session()
 
         # set default values if not already set
+        self.session.config.get_or_set('b_mute_sounds', False)
         self.session.config.get_or_set('b_play_send', True)
         self.session.config.get_or_set('b_play_nudge', True)
         self.session.config.get_or_set('b_play_first_send', True)
@@ -511,12 +512,12 @@ class Controller(object):
 
         conversation.show() # puts cursor in textbox
 
-        play = extension.get_default('sound')
-        if other_started and \
-            self.session.contacts.me.status != e3.status.BUSY and \
-            self.session.config.b_play_first_send:
-
-            play(gui.theme.sound_send)
+        #play = extension.get_default('sound')
+        #if other_started and \
+        #   self.session.contacts.me.status != e3.status.BUSY and \
+        #   self.session.config.b_play_first_send and not \
+        #   self.session.config.b_mute_sounds:
+        #    play(gui.theme.sound_send)
 
     def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''
