@@ -155,11 +155,6 @@ class OptionsMenu(gtk.Menu):
         self.preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
         self.preferences.connect('activate',
             lambda *args: self.handler.on_preferences_selected())
-        self.plugins = gtk.ImageMenuItem('Plug_ins')
-        self.plugins.set_image(gtk.image_new_from_stock(gtk.STOCK_CONNECT,
-            gtk.ICON_SIZE_MENU))
-        self.plugins.connect('activate',
-            lambda *args: self.handler.on_plugins_selected())
 
         self.by_status.connect('toggled',
             lambda *args: self.handler.on_order_by_status_toggled(
@@ -192,7 +187,6 @@ class OptionsMenu(gtk.Menu):
         self.append(self.group_offline)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.preferences)
-        self.append(self.plugins)
 
 class HelpMenu(gtk.Menu):
     """
