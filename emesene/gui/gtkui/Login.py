@@ -494,6 +494,7 @@ class Login(gtk.Alignment):
         self.server_host = server_host
         self.server_port = server_port
         self.on_preferences_changed(self.use_http, self.proxy, self.session_id)
+        self._on_account_changed(None)
 
 class ConnectingWindow(gtk.Alignment):
     '''
