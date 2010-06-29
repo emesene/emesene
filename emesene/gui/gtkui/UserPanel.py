@@ -169,7 +169,7 @@ class UserPanel(gtk.VBox):
 
         # Directory for contact's cached avatars
         cached_avatar_dir = self.avatar_manager.get_cached_avatars_dir()
-                   
+
         # Directories for System Avatars
         faces_paths = self.avatar_manager.get_system_avatars_dirs()
 
@@ -177,5 +177,6 @@ class UserPanel(gtk.VBox):
                                                 self.avatar_path, path_dir,
                                                 cached_avatar_dir, faces_paths,
                                                 self.avatar_manager)
+        _av_chooser.set_modal(True)
         _av_chooser.show()
 
