@@ -331,6 +331,14 @@ class Controller(object):
         '''
         width, height, posx, posy = self.window.get_dimensions()
 
+        # when login window is minimized, posx and posy are -32000 on Windows
+        if os.name == "nt":
+            # make sure that the saved dimensions are visible
+            if posx < (-width):
+                posx = 0
+            if posy < (-height):
+                posy = 0
+
         self.config.i_login_posx = posx
         self.config.i_login_posy = posy
         self.config.i_login_width = width
