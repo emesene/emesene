@@ -238,6 +238,9 @@ class Controller(object):
     def close_session(self, do_exit=True):
         '''close session'''
 
+        if self.conversations:
+            self._on_conversation_window_close()
+ 
         if self.timeout_id:
             gobject.source_remove(self.timeout_id)
             self.timeout_id = None
@@ -253,10 +256,6 @@ class Controller(object):
             self.session = None
 
         self.config.save(self.config_path)
-
-        if self.conversations:
-            self.conversations.get_parent().hide()
-            self.conversations = None
 
         if do_exit:
             if self.tray_icon is not None:
@@ -536,6 +535,15 @@ class Controller(object):
         '''method called when the conversation window is closed'''
         width, height, posx, posy = \
                 self.conversations.get_parent().get_dimensions()
+
+        # when window is minimized, posx and posy are -32000 on Windows
+        if os.name == "nt":
+            # make sure that the saved dimensions are visible
+            if posx < (-width):
+                posx = 0
+            if posy < (-height):
+                posy = 0
+
         self.session.config.i_conv_width = width
         self.session.config.i_conv_height = height
         self.session.config.i_conv_posx = posx
