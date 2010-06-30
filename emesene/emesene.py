@@ -504,6 +504,8 @@ class Controller(object):
         #    when clicking on a user icon
         # b) place cursor on text box
         # both the show() calls are needed - won't work otherwise
+        # EDIT: it works with the first show() setting the input as the first
+        #       focused widget and deniing focus to notebook's tabs
 
         conversation.show() # puts widget visible
 
@@ -513,7 +515,7 @@ class Controller(object):
         # raises the container (tabbed windows) if its minimized
         self.conversations.get_parent().present()
 
-        conversation.show() # puts cursor in textbox
+#        conversation.show() # puts cursor in textbox
 
         #play = extension.get_default('sound')
         #if other_started and \
