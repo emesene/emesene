@@ -311,7 +311,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_picture_change_succeed(self, account, path):
         '''callback called when the picture of an account is changed'''
-        # out account?
+        # our account?
         if account == self.session.account.account:
             self.avatar.set_from_file(path)
         elif account in self.members:
