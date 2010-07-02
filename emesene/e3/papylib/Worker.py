@@ -150,7 +150,8 @@ class Worker(e3.base.Worker, papyon.Client):
             # changing display_name doesn't seem to update its value istantly, wtf?
             # however, other clients see this correctly, wow m3n
             self.profile.display_name = str(cr.display_name)
-            self.profile.personal_message = str(cr.personal_message)
+            if cr.personal_message is not None:
+                self.profile.personal_message = str(cr.personal_message)
 
             self.session.add_event(Event.EVENT_PROFILE_GET_SUCCEED, \
                        str(cr.display_name), self.profile.personal_message)
@@ -554,6 +555,8 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_contact_msnobject_changed(self, contact):
 
         msn_object = contact.msn_object
+        if msn_object is None: #sometimes, happens.
+            return
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)
             avatar_hash = msn_object._data_sha.encode("hex")

@@ -22,6 +22,7 @@ class AvatarChooser(gtk.Window):
         picture_path is the path of the current display picture,
         '''
         gtk.Window.__init__(self)
+        self.set_modal(True)
         self.set_icon(gui.theme.logo)
 
         self.response_cb = response_cb

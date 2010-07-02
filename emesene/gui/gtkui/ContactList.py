@@ -98,6 +98,16 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.connect('row-activated', self._on_row_activated)
         self.connect('button-release-event' , self._on_button_press_event)
+        self.connect('row-expanded' , self._on_expand)
+        self.connect('row-collapsed' , self._on_collapse)
+
+    def _on_expand(self, treeview, iter_, path):
+        group = self.model[path][1]
+        self.on_group_expanded(group)
+
+    def _on_collapse(self, treeview, iter_, path):
+        group = self.model[path][1]
+        self.on_group_collapsed(group)
 
     def _get_contact_pixbuf_or_default(self, contact):
         '''try to return a pixbuf of the user picture or the default
@@ -306,7 +316,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     log.debug('Trying to add an existing group! ' + obj.name)
                     return row.iter
 
-        return self._model.append(None, group_data)
+        itr = self._model.append(None, group_data)
+
+        return itr
 
     def remove_group(self, group):
         '''remove a group from the contact list'''
@@ -400,7 +412,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 return return_iter
         else:
             self.add_group(group)
-            return self.add_contact(contact, group)
+            result = self.add_contact(contact, group)
+            self.update_group(group)
+            return result
 
     def remove_contact(self, contact, group=None):
         '''remove a contact from the specified group, if group is None
@@ -488,6 +502,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
     def update_no_group(self):
         '''update the special "No group" group'''
+        if self.no_group_iter is None:
+            return
+
         group_data = (None, self.no_group, self.format_group(self.no_group), False, None,
             0, True, False)
         self._model[self.no_group_iter] = group_data
@@ -510,21 +527,21 @@ class ContactList(gui.ContactList, gtk.TreeView):
         for row in self._model:
             obj = row[1]
             if type(obj) == e3.Group and obj.identifier == group.identifier:
+                if group.name in self.group_state:
+                    state = self.group_state[group.name]
+                    childpath = self._model.get_path(row.iter)
+                    path = self.model.convert_child_path_to_path(childpath)
+
+                    if path:
+                        if state:
+                            self.expand_row(path, False)
+                        else:
+                            self.collapse_row(path)
+
                 group_data = (None, group, self.format_group(group), False, None,
                     weight, row[6], False)
                 self._model[row.iter] = group_data
 
-    def set_group_state(self, group, state):
-        '''expand group id state is True, collapse it if False'''
-        for row in self._model:
-            obj = row[1]
-            if type(obj) == e3.Group and obj.name == group.name:
-                path = self._model.get_path()
-
-                if state:
-                    self.expand_row(path, False)
-                else:
-                    self.collapse_row(path)
 
     def format_nick(self, contact):
         '''replace the appearance of the template vars using the values of

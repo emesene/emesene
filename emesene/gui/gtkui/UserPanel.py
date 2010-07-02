@@ -152,7 +152,8 @@ class UserPanel(gtk.VBox):
         '''method called when information about our profile is obtained
         '''
         self.nick.text = nick
-        self.message.text = message
+        if message is not '':
+            self.message.text = message
 
     def on_avatar_click(self, widget, data):
         '''method called when user click on his avatar
@@ -165,7 +166,7 @@ class UserPanel(gtk.VBox):
                 self.avatar_manager.set_as_avatar(filename)
 
         # Directory for user's avatars
-        path_dir = self.avatar_manager.get_avatars_dir()                   
+        path_dir = self.avatar_manager.get_avatars_dir()
 
         # Directory for contact's cached avatars
         cached_avatar_dir = self.avatar_manager.get_cached_avatars_dir()

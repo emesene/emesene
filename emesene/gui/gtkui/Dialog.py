@@ -35,9 +35,6 @@ import ContactInformation
 import logging
 log = logging.getLogger('gtkui.Dialog')
 
-# TODO: remove this
-_ = lambda x: x
-
 class Dialog(object):
     '''a class full of static methods to handle dialogs, dont instantiate it'''
     NAME = 'Dialog'
@@ -245,6 +242,24 @@ class Dialog(object):
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.chooser_cb)
         cls.add_button(window, gtk.STOCK_SAVE, stock.SAVE, response_cb,
+            cls.chooser_cb)
+
+        window.show_all()
+
+    @classmethod
+    def choose_file(cls, current_path, response_cb, title=_("Choose file")):
+        '''show a choose dialog with the current directory set to path.
+        the buttons should display a cancel and save buttons.
+         the posible reasons are stock.CANCEL, stock.SAVE and stock.CLOSE'''
+        window = cls.new_window(title, response_cb)
+        window.set_default_size(640, 480)
+        chooser = gtk.FileChooserWidget(gtk.FILE_CHOOSER_ACTION_OPEN)
+        chooser.set_current_folder(current_path)
+        setattr(window, 'chooser', chooser)
+        window.hbox.pack_start(chooser)
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
+            cls.chooser_cb)
+        cls.add_button(window, gtk.STOCK_OPEN, stock.OPEN, response_cb,
             cls.chooser_cb)
 
         window.show_all()
@@ -819,6 +834,7 @@ class Dialog(object):
     def edit_profile(cls, handler, user_nick, user_message, last_avatar):
 
         windows = gtk.Window()
+        windows.set_modal(True)
         windows.set_border_width(5)
         windows.set_title('Change profile')
         windows.set_position(gtk.WIN_POS_CENTER)

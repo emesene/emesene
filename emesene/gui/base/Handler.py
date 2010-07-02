@@ -1,3 +1,4 @@
+import os
 import time
 import webbrowser
 
@@ -385,9 +386,13 @@ class ConversationToolbarHandler(object):
     def on_invite_file_transfer_selected(self):
         '''called when the client requestes to a remote user to
         start a file transfer'''
-        # TODO: select the file, create a dialog in gui/gtkui/Dialog.py
-        # (and a stub in gui/base?) 
-        self.conversation.on_filetransfer_invite("test", "/tmp/test")
+        def open_file_cb(response, filepath):
+            if response is not gui.stock.CANCEL:
+                filename = os.path.basename(filepath)
+                self.conversation.on_filetransfer_invite(filename, filepath)
+
+        self.dialog.choose_file(os.path.expanduser("~"), open_file_cb)
+        
 
 class TrayIconHandler(FileHandler):
     """
