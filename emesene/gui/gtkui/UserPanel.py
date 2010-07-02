@@ -152,7 +152,8 @@ class UserPanel(gtk.VBox):
         '''method called when information about our profile is obtained
         '''
         self.nick.text = nick
-        self.message.text = message
+        if message is not '':
+            self.message.text = message
 
     def on_avatar_click(self, widget, data):
         '''method called when user click on his avatar
