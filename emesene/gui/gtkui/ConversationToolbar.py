@@ -20,6 +20,20 @@ class ConversationToolbar(gtk.Toolbar):
         """
         gtk.Toolbar.__init__(self)
         self.set_style(gtk.TOOLBAR_ICONS)
+
+        toolbar_small = handler.session.config.get_or_set('b_toolbar_small', False)
+
+        if toolbar_small:
+            size = gtk.ICON_SIZE_MENU
+        else:
+            size = gtk.ICON_SIZE_LARGE_TOOLBAR
+
+        whsize = gtk.icon_size_lookup(size)
+
+        settings = self.get_settings()
+        settings.set_long_property('gtk-toolbar-icon-size', size, \
+            'ConversationToolbar.py:37')
+
         self.handler = handler
 
         self.font = gtk.ToolButton(gtk.STOCK_SELECT_FONT)
@@ -29,12 +43,15 @@ class ConversationToolbar(gtk.Toolbar):
         self.color.connect('clicked',
             lambda *args: self.handler.on_color_selected())
 
-        self.emotes = gtk.ToolButton(
-            utils.safe_gtk_image_load(gui.theme.emote_to_path(':D', True)), 'Emotes')
+        emotes_img = utils.safe_gtk_image_load(
+                gui.theme.emote_to_path(':D', True), whsize)
+        self.emotes = gtk.ToolButton(emotes_img, 'Emotes')
         self.emotes.connect('clicked',
             lambda *args: self.handler.on_emotes_selected())
-        self.nudge = gtk.ToolButton(
-            utils.safe_gtk_image_load(gui.theme.emote_to_path(':S', True)), 'Nudge')
+
+        nudge_img = utils.safe_gtk_image_load(
+                gui.theme.emote_to_path(':S', True), whsize)
+        self.nudge = gtk.ToolButton(nudge_img, 'Nudge')
         self.nudge.connect('clicked',
             lambda *args: self.handler.on_notify_attention_selected())
 
