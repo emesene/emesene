@@ -27,6 +27,7 @@ class Preferences(gtk.Window):
         """
         gtk.Window.__init__(self)
         self.set_border_width(2)
+        self.set_modal(True)
         self.set_title("Preferences")
         self.session = session
 

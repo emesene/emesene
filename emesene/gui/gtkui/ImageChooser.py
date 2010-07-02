@@ -14,6 +14,7 @@ class ImageChooser(gtk.Window):
         '''class constructor, path is the directory where the
         dialog opens'''
         gtk.Window.__init__(self)
+        self.set_modal(True)
         self.set_icon(gui.theme.logo)
 
         self.response_cb = response_cb
