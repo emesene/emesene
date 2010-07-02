@@ -150,7 +150,8 @@ class Worker(e3.base.Worker, papyon.Client):
             # changing display_name doesn't seem to update its value istantly, wtf?
             # however, other clients see this correctly, wow m3n
             self.profile.display_name = str(cr.display_name)
-            self.profile.personal_message = str(cr.personal_message)
+            if cr.personal_message is not None:
+                self.profile.personal_message = str(cr.personal_message)
 
             self.session.add_event(Event.EVENT_PROFILE_GET_SUCCEED, \
                        str(cr.display_name), self.profile.personal_message)
