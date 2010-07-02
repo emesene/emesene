@@ -819,6 +819,7 @@ class Dialog(object):
     def edit_profile(cls, handler, user_nick, user_message, last_avatar):
 
         windows = gtk.Window()
+        windows.set_modal(True)
         windows.set_border_width(5)
         windows.set_title('Change profile')
         windows.set_position(gtk.WIN_POS_CENTER)

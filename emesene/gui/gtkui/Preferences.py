@@ -27,6 +27,7 @@ class Preferences(gtk.Window):
         """
         gtk.Window.__init__(self)
         self.set_border_width(2)
+        self.set_modal(True)
         self.set_title("Preferences")
         self.session = session
 
@@ -374,6 +375,8 @@ class Interface(BaseTable):
             'session.config.b_show_info')
         self.append_check('Show conversation toolbar',
             'session.config.b_show_toolbar')
+        self.append_check('Small conversation toolbar',
+            'session.config.b_toolbar_small')
         self.append_check('Avatar on conversation left side',
             'session.config.b_avatar_on_left')
         self.append_check('Allow auto scroll in conversation',
