@@ -555,6 +555,8 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_contact_msnobject_changed(self, contact):
 
         msn_object = contact.msn_object
+        if msn_object is None: #sometimes, happens.
+            return
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)
             avatar_hash = msn_object._data_sha.encode("hex")
