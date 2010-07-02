@@ -29,6 +29,7 @@ import base64
 import gobject
 import gettext
 import optparse
+import shutil
 
 import string
 
@@ -232,10 +233,14 @@ class Controller(object):
         signals.contact_list_ready.subscribe(self.on_contact_list_ready)
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
+        signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
 
     def close_session(self, do_exit=True):
         '''close session'''
 
+        if self.conversations:
+            self._on_conversation_window_close()
+ 
         if self.timeout_id:
             gobject.source_remove(self.timeout_id)
             self.timeout_id = None
@@ -251,10 +256,6 @@ class Controller(object):
             self.session = None
 
         self.config.save(self.config_path)
-
-        if self.conversations:
-            self.conversations.get_parent().hide()
-            self.conversations = None
 
         if do_exit:
             if self.tray_icon is not None:
@@ -276,6 +277,7 @@ class Controller(object):
         signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
         signals.conv_first_action.unsubscribe(self.on_new_conversation)
         signals.disconnected.unsubscribe(self.on_disconnected)
+        signals.picture_change_succeed.unsubscribe(self.on_picture_change_succeed)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -327,6 +329,14 @@ class Controller(object):
         '''save the dimensions of the login window
         '''
         width, height, posx, posy = self.window.get_dimensions()
+
+        # when login window is minimized, posx and posy are -32000 on Windows
+        if os.name == "nt":
+            # make sure that the saved dimensions are visible
+            if posx < (-width):
+                posx = 0
+            if posy < (-height):
+                posy = 0
 
         self.config.i_login_posx = posx
         self.config.i_login_posy = posy
@@ -416,6 +426,7 @@ class Controller(object):
         self._new_session()
 
         # set default values if not already set
+        self.session.config.get_or_set('b_mute_sounds', False)
         self.session.config.get_or_set('b_play_send', True)
         self.session.config.get_or_set('b_play_nudge', True)
         self.session.config.get_or_set('b_play_first_send', True)
@@ -500,6 +511,8 @@ class Controller(object):
         #    when clicking on a user icon
         # b) place cursor on text box
         # both the show() calls are needed - won't work otherwise
+        # EDIT: it works with the first show() setting the input as the first
+        #       focused widget and deniing focus to notebook's tabs
 
         conversation.show() # puts widget visible
 
@@ -509,19 +522,28 @@ class Controller(object):
         # raises the container (tabbed windows) if its minimized
         self.conversations.get_parent().present()
 
-        conversation.show() # puts cursor in textbox
+#        conversation.show() # puts cursor in textbox
 
-        play = extension.get_default('sound')
-        if other_started and \
-            self.session.contacts.me.status != e3.status.BUSY and \
-            self.session.config.b_play_first_send:
-
-            play(gui.theme.sound_send)
+        #play = extension.get_default('sound')
+        #if other_started and \
+        #   self.session.contacts.me.status != e3.status.BUSY and \
+        #   self.session.config.b_play_first_send and not \
+        #   self.session.config.b_mute_sounds:
+        #    play(gui.theme.sound_send)
 
     def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''
         width, height, posx, posy = \
                 self.conversations.get_parent().get_dimensions()
+
+        # when window is minimized, posx and posy are -32000 on Windows
+        if os.name == "nt":
+            # make sure that the saved dimensions are visible
+            if posx < (-width):
+                posx = 0
+            if posy < (-height):
+                posy = 0
+
         self.session.config.i_conv_width = width
         self.session.config.i_conv_height = height
         self.session.config.i_conv_posx = posx
@@ -562,6 +584,12 @@ class Controller(object):
         self.window.content.on_reconnect(self.on_login_connect, account,\
                                          self.config.session, proxy, use_http,\
                                          self.cur_service)
+
+    def on_picture_change_succeed(self, account, path):
+        '''save the avatar change as the last avatar'''
+        if account == self.session.account.account:
+            last_avatar_path = self.session.config_dir.get_path("last_avatar")
+            shutil.copy(path, last_avatar_path)
 
 class ExtensionDefault(object):
     '''extension to register options for extensions'''

@@ -746,7 +746,7 @@ class Dialog(object):
                 t_server_host.set_text(ext.DEFAULT_HOST)
                 t_server_port.set_text(ext.DEFAULT_PORT)
                 session_found = True
-                print session
+                #print session
 
             if default_session.NAME == ext.NAME:
                 default_session_index = count

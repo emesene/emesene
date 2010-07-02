@@ -37,7 +37,7 @@ log = logging.getLogger('papylib.Worker')
 
 papypath = os.path.abspath("e3" + os.sep + "papylib" + os.sep + "papyon")
 if os.path.exists(papypath):
-    sys.path.append(papypath)
+    sys.path.insert(0, papypath)
 
 try:
     REQ_VER = (0, 4, 8)
