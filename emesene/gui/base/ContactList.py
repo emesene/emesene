@@ -42,14 +42,20 @@ class ContactList(object):
         self.session = session
         self.dialog = dialog
 
-        self.group_state = {}
-
         self.session.config.get_or_set('b_order_by_group', True)
         self.session.config.get_or_set('b_show_nick', True)
         self.session.config.get_or_set('b_show_empty_groups', False)
         self.session.config.get_or_set('b_show_offline', False)
         self.session.config.get_or_set('b_show_blocked', False)
         self.session.config.get_or_set('b_group_offline', False)
+        group_state = self.session.config.get_or_set('d_group_state', {})
+
+        self.group_state = {}
+        for (group, state) in group_state.iteritems():
+            try:
+                self.group_state[group] = bool(int(state))
+            except ValueError:
+                self.group_state[group] = False
 
         self.avatar_size = self.session.config.get_or_set('i_avatar_size', 32)
         self.set_avatar_size(self.avatar_size)
@@ -441,21 +447,17 @@ class ContactList(object):
         '''expand group id state is True, collapse it if False'''
         raise NotImplementedError()
 
-    def expand_collapse_groups(self):
-        '''expand and collapse the groups according to the state of the
-        group'''
-        for (group, state) in self.group_state.iteritems():
-            self.set_group_state(group, state)
-
     def on_group_collapsed(self, group):
         '''called when a group is collapsed, update the status of the
         groups'''
-        self.group_state.update({group.name:False})
+        self.group_state[group.name] = False
+        self.session.config.d_group_state[group.name] = "0"
 
     def on_group_expanded(self, group):
         '''called when a group is expanded, update the status of the
         groups'''
-        self.group_state.update({group.name:True})
+        self.group_state[group.name] = True
+        self.session.config.d_group_state[group.name] = "1"
 
     def compare_groups(self, group1, group2, order1=0, order2=0):
         '''compare two groups and return 1 if group1 should go first, 0
