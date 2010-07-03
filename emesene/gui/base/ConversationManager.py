@@ -53,7 +53,8 @@ class ConversationManager(object):
         """
         inform that the other user has started typing
         """
-        raise NotImplementedError("Method not implemented")
+        # TODO: implement, this seems to be cross gui so it should go here
+        log.debug('typing')
 
     def set_message_waiting(self, conversation, is_waiting):
         """

@@ -52,7 +52,7 @@ class AdiumTheme(object):
         self.outgoing_next = read_file(self.outgoing_path,
                 'NextContent.html')
 
-    def format_incoming(self, msg):
+    def format_incoming(self, msg, style=None):
         '''return a string containing the template for the incoming message
         with the vars replaced
         '''
@@ -72,7 +72,7 @@ class AdiumTheme(object):
 
         return self.replace(template, msg)
 
-    def format_outgoing(self, msg):
+    def format_outgoing(self, msg, style=None):
         '''return a string containing the template for the outgoing message
         with the vars replaced
         '''
@@ -96,11 +96,21 @@ class AdiumTheme(object):
         else:
             template = self.outgoing
 
-        return self.replace(template, msg)
+        return self.replace(template, msg, style)
 
-    def replace(self, template, msg):
+    def style_message(self, msgtext, style):
+        '''add html markupt to msgtext to format the style of the message'''
+        return '<span style="%s">%s</span>' % (style.to_css(), msgtext)
+
+    def replace(self, template, msg, style=None):
         '''replace the variables on template for the values on msg
         '''
+
+        if style is not None:
+            msgtext = self.style_message(escape(msg.message), style)
+        else:
+            msgtext = escape(msg.message)
+
         template = template.replace('%sender%', escape(msg.alias))
         template = template.replace('%senderScreenName%', escape(msg.sender))
         template = template.replace('%senderDisplayName%',
@@ -110,7 +120,7 @@ class AdiumTheme(object):
             escape(msg.status_path))
         template = template.replace('%messageDirection%',
             escape(msg.direction))
-        template = template.replace('%message%', escape(msg.message))
+        template = template.replace('%message%', msgtext)
         template = template.replace('%time%',
             escape(time.strftime(self.timefmt)))
         template = re.sub("%time{(.*?)}%", replace_time, template)
