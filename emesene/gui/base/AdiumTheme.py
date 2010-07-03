@@ -6,6 +6,7 @@ import time
 import xml.sax.saxutils
 
 import parsers
+import gui
 
 class AdiumTheme(object):
     '''a class that contains information of a adium theme
@@ -98,18 +99,14 @@ class AdiumTheme(object):
 
         return self.replace(template, msg, style)
 
-    def style_message(self, msgtext, style):
-        '''add html markupt to msgtext to format the style of the message'''
-        return '<span style="%s">%s</span>' % (style.to_css(), msgtext)
-
     def replace(self, template, msg, style=None):
         '''replace the variables on template for the values on msg
         '''
 
+        msgtext = replace_emotes(escape(msg.message))
+
         if style is not None:
-            msgtext = self.style_message(escape(msg.message), style)
-        else:
-            msgtext = escape(msg.message)
+            msgtext = style_message(msgtext, style)
 
         template = template.replace('%sender%', escape(msg.alias))
         template = template.replace('%senderScreenName%', escape(msg.sender))
@@ -220,3 +217,18 @@ def replace_time(match):
     '''replace the format of the time to it's value'''
     return time.strftime(match.groups()[0])
 
+def style_message(msgtext, style):
+    '''add html markupt to msgtext to format the style of the message'''
+    return '<span style="%s">%s</span>' % (style.to_css(), msgtext)
+
+def replace_emotes(msgtext):
+    '''replace emotes with img tags to the images'''
+    for code in gui.Theme.EMOTES.iterkeys():
+        if code in msgtext:
+            path = gui.theme.emote_to_path(code)
+
+            if path is not None:
+                imgtag = '<img src="%s" alt="%s"/>' % (path, code)
+                msgtext = msgtext.replace(code, imgtag)
+
+    return msgtext
