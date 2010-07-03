@@ -8,8 +8,16 @@ class Session(e3.Session):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    DEFAULT_HOST = "talk.google.com"
-    DEFAULT_PORT = "5223"
+    SERVICES = {
+        "gtalk": {
+            "host": "talk.google.com",
+            "port": "5223"
+        },
+        "facebook": {
+            "host": "chat.facebook.com",
+            "port": "5222"
+        }
+    }
 
     def __init__(self, id_=None, account=None):
         '''constructor'''

@@ -387,11 +387,12 @@ class Controller(object):
 
         window.set_location(width, height, posx, posy)
 
-    def on_preferences_changed(self, use_http, proxy, session_id):
+    def on_preferences_changed(self, use_http, proxy, session_id, service):
         '''called when the preferences on login change'''
         self.config.session = session_id
         extension.set_default_by_id('session', session_id)
         self.config.b_use_http = use_http
+        self.config.service = service
         self._save_proxy_settings(proxy)
 
     def on_login_failed(self, reason):

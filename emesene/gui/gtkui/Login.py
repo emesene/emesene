@@ -37,6 +37,7 @@ class Login(gtk.Alignment):
         self.session_id = session_id
 
         account = self.config.get_or_set('last_logged_account', '')
+        service = self.config.get_or_set('service', 'msn')
         self.remembers = self.config.get_or_set('d_remembers', {})
         self.status = self.config.get_or_set('d_status',{})
         self.accounts = self.config.d_accounts
@@ -50,17 +51,20 @@ class Login(gtk.Alignment):
         Avatar = extension.get_default('avatar')
         NiceBar = extension.get_default('nice bar')
 
+        default_session = extension.get_default('session')
+
         if session_id is not None:
             for ext_id, ext in extension.get_extensions('session').iteritems():
-                if session_id == ext_id:
-                    self.server_host = ext.DEFAULT_HOST
-                    self.server_port = ext.DEFAULT_PORT
-                else:
-                    self.server_host = extension.get_default('session').DEFAULT_HOST
-                    self.server_port = extension.get_default('session').DEFAULT_PORT
+                if session_id == ext_id and service in ext.SERVICES:
+                    self.server_host = ext.SERVICES[service]['host']
+                    self.server_port = ext.SERVICES[service]['port']
+                    break
+            else:
+                self.server_host = 'messenger.hotmail.com'
+                self.server_port = '1863'
         else:
-            self.server_host = extension.get_default('session').DEFAULT_HOST
-            self.server_port = extension.get_default('session').DEFAULT_PORT
+            self.server_host = default_session.SERVICES['msn']['host']
+            self.server_port = default_session.SERVICES['msn']['port']
 
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
@@ -480,11 +484,12 @@ class Login(gtk.Alignment):
         '''
         called when the user clicks the preference button
         '''
-        extension.get_default('dialog').login_preferences(self.session_id,
+        service = self.config.get_or_set('service', 'msn')
+        extension.get_default('dialog').login_preferences(service,
             self._on_new_preferences, self.use_http, self.proxy)
 
     def _on_new_preferences(self, use_http, use_proxy, proxy_host, proxy_port,
-        use_auth, user, passwd, session_id, server_host, server_port):
+        use_auth, user, passwd, session_id, service, server_host, server_port):
         '''
         called when the user press accept on the preferences dialog
         '''
@@ -493,7 +498,8 @@ class Login(gtk.Alignment):
         self.use_http = use_http
         self.server_host = server_host
         self.server_port = server_port
-        self.on_preferences_changed(self.use_http, self.proxy, self.session_id)
+        self.on_preferences_changed(self.use_http, self.proxy, self.session_id,
+                service)
         self._on_account_changed(None)
 
 class ConnectingWindow(gtk.Alignment):

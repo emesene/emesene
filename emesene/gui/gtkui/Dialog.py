@@ -650,12 +650,12 @@ class Dialog(object):
         InviteWindow(session, callback).show()
 
     @classmethod
-    def login_preferences(cls, session, callback, use_http, proxy):
+    def login_preferences(cls, service, callback, use_http, proxy):
         """
         display the preferences dialog for the login window
 
         cls -- the dialog class
-        session -- the session string identifier
+        service -- the service string identifier (for example 'gtalk')
         callback -- callback to call if the user press accept, call with the
             new values
         use_http -- boolean that indicates if the e3 should use http
@@ -756,19 +756,19 @@ class Dialog(object):
         default_session = extension.get_default('session')
 
         for ext_id, ext in extension.get_extensions('session').iteritems():
-            if session == ext_id:
-                index = count
-                t_server_host.set_text(ext.DEFAULT_HOST)
-                t_server_port.set_text(ext.DEFAULT_PORT)
-                session_found = True
-                #print session
-
             if default_session.NAME == ext.NAME:
                 default_session_index = count
 
-            combo.append_text(ext.NAME)
-            name_to_ext[ext.NAME] = (ext_id, ext)
-            count += 1
+            for service_name, service_data in ext.SERVICES.iteritems():
+                if service == service_name:
+                    index = count
+                    t_server_host.set_text(service_data['host'])
+                    t_server_port.set_text(service_data['port'])
+                    session_found = True
+
+                combo.append_text(service_name)
+                name_to_ext[service_name] = (ext_id, ext)
+                count += 1
 
         if session_found:
             combo.set_active(index)
@@ -776,9 +776,10 @@ class Dialog(object):
             combo.set_active(default_session_index)
 
         def on_session_changed(*args):
-            session_id, ext = name_to_ext[combo.get_active_text()]
-            t_server_host.set_text(ext.DEFAULT_HOST)
-            t_server_port.set_text(ext.DEFAULT_PORT)
+            service = combo.get_active_text()
+            session_id, ext = name_to_ext[service]
+            t_server_host.set_text(ext.SERVICES[service]['host'])
+            t_server_port.set_text(ext.SERVICES[service]['port'])
 
         combo.connect('changed', on_session_changed)
 
@@ -796,9 +797,10 @@ class Dialog(object):
                 user = t_user.get_text()
                 passwd = t_passwd.get_text()
 
-                session_id, ext = name_to_ext[combo.get_active_text()]
+                service = combo.get_active_text()
+                session_id, ext = name_to_ext[service]
                 callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
-                        user, passwd, session_id, server_host, server_port)
+                        user, passwd, session_id, service, server_host, server_port)
 
             window.hide()
 
