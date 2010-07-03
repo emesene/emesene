@@ -37,8 +37,9 @@ class Login(gtk.Alignment):
         self.session_id = session_id
 
         account = self.config.get_or_set('last_logged_account', '')
-        service = self.config.get_or_set('service', 'msn')
+        self.config.get_or_set('service', 'msn')
         self.remembers = self.config.get_or_set('d_remembers', {})
+        self.config.get_or_set('d_user_service', {})
         self.status = self.config.get_or_set('d_status',{})
         self.accounts = self.config.d_accounts
 
@@ -53,18 +54,25 @@ class Login(gtk.Alignment):
 
         default_session = extension.get_default('session')
 
+        self.services = {}
+
         if session_id is not None:
             for ext_id, ext in extension.get_extensions('session').iteritems():
-                if session_id == ext_id and service in ext.SERVICES:
-                    self.server_host = ext.SERVICES[service]['host']
-                    self.server_port = ext.SERVICES[service]['port']
+                for service_name, service_data in ext.SERVICES.iteritems():
+                    self.services[service_name] = service_data
+
+                if session_id == ext_id and self.config.service in ext.SERVICES:
+                    self.server_host = ext.SERVICES[self.config.service]['host']
+                    self.server_port = ext.SERVICES[self.config.service]['port']
                     break
             else:
+                self.config.service = 'msn'
                 self.server_host = 'messenger.hotmail.com'
                 self.server_port = '1863'
         else:
-            self.server_host = default_session.SERVICES['msn']['host']
-            self.server_port = default_session.SERVICES['msn']['port']
+            self.config.service = 'msn'
+            self.server_host = 'messenger.hotmail.com'
+            self.server_port = '1863'
 
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
@@ -282,6 +290,15 @@ class Login(gtk.Alignment):
 
         self.remember_account.set_sensitive(True)
 
+        if account in self.config.d_user_service:
+            service = self.config.d_user_service[account]
+
+            if service in self.services:
+                service_data = self.services[service]
+                self.server_host = service_data['host']
+                self.server_port = service_data['port']
+                self.config.service = service
+
         if account in self.accounts:
             attr = int(self.remembers[account])
             self.remember_account.set_sensitive(False)
@@ -485,6 +502,12 @@ class Login(gtk.Alignment):
         called when the user clicks the preference button
         '''
         service = self.config.get_or_set('service', 'msn')
+
+        account = self.cmb_account.get_active_text()
+
+        if account in self.accounts:
+            service = self.config.d_user_service[account]
+
         extension.get_default('dialog').login_preferences(service,
             self._on_new_preferences, self.use_http, self.proxy)
 
@@ -498,6 +521,12 @@ class Login(gtk.Alignment):
         self.use_http = use_http
         self.server_host = server_host
         self.server_port = server_port
+
+        account = self.cmb_account.get_active_text()
+
+        if account in self.accounts:
+            self.config.d_user_service[account] = service
+
         self.on_preferences_changed(self.use_http, self.proxy, self.session_id,
                 service)
         self._on_account_changed(None)

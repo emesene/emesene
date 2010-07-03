@@ -417,7 +417,8 @@ class Controller(object):
         self._set_location(self.window)
         self.cur_service = [host, port]
         if not on_reconnect:
-            self.on_preferences_changed(use_http, proxy, session_id)
+            self.on_preferences_changed(use_http, proxy, session_id,
+                    self.config.service)
             self.window.clear()
             self.avatar_path = self.config_dir.join(host, account.account, 'avatars', 'last')
             self.window.go_connect(self.on_cancel_login, self.avatar_path)
