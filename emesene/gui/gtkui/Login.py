@@ -271,8 +271,8 @@ class Login(gtk.Alignment):
         self._clear_all()
 
         if self.txt_password.get_text() == '':
-                self.remember_password.set_sensitive(False)
-                self.auto_login.set_sensitive(False)
+            self.remember_password.set_sensitive(False)
+            self.auto_login.set_sensitive(False)
 
         if account == '':
             self.remember_account.set_sensitive(False)
@@ -311,7 +311,7 @@ class Login(gtk.Alignment):
                 self._clear_all()
 
         else:
-           self.avatar.set_from_file(gui.theme.user)
+           self.avatar.set_from_file(gui.theme.logo)
 
     def _clear_all(self):
         '''
