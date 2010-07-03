@@ -197,13 +197,15 @@ def read_file(*args):
     return None
 
 __dic = {
-    '\"'    :    '&quot;',
-    '\''    :    '&apos;'
+    '\"': '&quot;',
+    '\'': '&apos;',
+    '\n': '<br>'
 }
 
 __dic_inv = {
-    '&quot;'    :'\"',
-    '&apos;'    :'\''
+    '&quot;' :'\"',
+    '&apos;' :'\'',
+    '<br>':    '\n'
 }
 
 def escape(string_):
