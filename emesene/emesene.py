@@ -239,9 +239,10 @@ class Controller(object):
     def close_session(self, do_exit=True):
         '''close session'''
 
+        self._remove_subscriptions()
         if self.conversations:
             self._on_conversation_window_close()
- 
+
         if self.timeout_id:
             gobject.source_remove(self.timeout_id)
             self.timeout_id = None
@@ -581,7 +582,7 @@ class Controller(object):
         '''makes the reconnect after 30 seconds'''
         self.window.clear()
         self.window.go_connect(self.on_cancel_login, self.avatar_path)
-        
+
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
         self.window.content.on_reconnect(self.on_login_connect, account,\

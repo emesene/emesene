@@ -22,7 +22,7 @@ class Notification():
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
-        
+
         self.notifier = extension.get_default('notificationGUI')
 
         if self.session:
@@ -32,7 +32,7 @@ class Notification():
                 self._on_contact_attr_changed)
 
     def _on_message(self, cid, account, msgobj, cedict=None):
-        """ 
+        """
         This is called when a new message arrives to a user.
         """
         #TODO don't notify if the conversation is on focus
@@ -71,4 +71,4 @@ class Notification():
             uri = "notification-message-IM"
 
         self.notifier(title, text, uri)
-        
+

@@ -19,6 +19,7 @@ import functools
 import logging
 log = logging.getLogger('e3.common.Signal')
 
+import weakref
 import traceback
 
 class Signal(object):
@@ -34,13 +35,14 @@ class Signal(object):
         '''subscribe to the signal, when the signal is emited, callback will be
         called
         '''
-        self._subscribers[callback] = (args, kwargs)
+        self._subscribers[WeakMethod(callback)] = (args, kwargs)
 
     def unsubscribe(self, callback):
         '''remove the callback from the subscribers dict, raise KeyError if
         the callback is not registered (made this way to avoid abuse of the api)
         '''
-        del(self._subscribers[callback])
+        if callback in self._subscribers:
+            del(self._subscribers[callback])
 
     def emit(self, *args, **kwargs):
         '''emit the signal with args and kwargs, if a callback returns False
@@ -50,6 +52,10 @@ class Signal(object):
             cargs, ckwargs = cargs
             args += cargs
             kwargs.update(ckwargs)
+
+            if callback is None:
+                print "callback is None in emit"
+                continue
 
             try:
                 if callback(*args, **kwargs) == False:
@@ -62,7 +68,10 @@ class Signal(object):
 def format_callback_name(func):
     '''return a pretty representation for a function name
     '''
-    return func.im_class.__name__ + "." + func.__name__
+    if type(func) == WeakMethodBound:
+        return func.f.__name__ + "." + func.f.__name__
+    else:
+        return func.im_class.__name__ + "." + func.__name__
 
 def extend(func):
     '''allow the extention of a method'''
@@ -78,4 +87,36 @@ def extend(func):
        return result
 
     return wrapper
+
+# http://code.activestate.com/recipes/81253/
+class WeakMethodBound(object):
+
+    def __init__(self, f):
+        self.f = f.im_func
+        self.c = weakref.ref(f.im_self)
+
+    def __call__(self, *arg):
+        if self.c() == None:
+            raise TypeError('Method called on dead object')
+
+        apply(self.f, (self.c(),) + arg)
+
+class WeakMethodFree(object):
+
+    def __init__(self, f):
+        self.f = weakref.ref(f)
+
+    def __call__(self, *arg):
+        if self.f() == None:
+            raise TypeError('Function no longer exist')
+
+        apply(self.f(), arg)
+
+def WeakMethod(f):
+    try:
+        f.im_func
+    except AttributeError:
+        return WeakMethodFree(f)
+
+    return WeakMethodBound(f)
 
