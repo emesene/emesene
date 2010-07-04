@@ -96,7 +96,7 @@ class MessagingMenu():
         This is called when the user read the message.
         """
         conv = self.conversations.get_nth_page(page_num)
-        if conv.cid in self.r_indicator_dict.keys():
+        if conv and conv.cid in self.r_indicator_dict.keys():
             ind = self.r_indicator_dict[conv.cid]
             if ind is not None:
                 ind.hide()
