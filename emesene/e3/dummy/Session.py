@@ -9,8 +9,12 @@ class Session(e3.Session):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    DEFAULT_HOST = "dummy.server.com"
-    DEFAULT_PORT = "1337"
+    SERVICES = {
+        "dummy": {
+            "host": "dummy.server.com",
+            "port": "1337"
+        }
+    }
 
     def __init__(self, id_=None, account=None):
         '''constructor'''

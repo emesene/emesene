@@ -37,7 +37,9 @@ class Login(gtk.Alignment):
         self.session_id = session_id
 
         account = self.config.get_or_set('last_logged_account', '')
+        self.config.get_or_set('service', 'msn')
         self.remembers = self.config.get_or_set('d_remembers', {})
+        self.config.get_or_set('d_user_service', {})
         self.status = self.config.get_or_set('d_status',{})
         self.accounts = self.config.d_accounts
 
@@ -50,17 +52,27 @@ class Login(gtk.Alignment):
         Avatar = extension.get_default('avatar')
         NiceBar = extension.get_default('nice bar')
 
+        default_session = extension.get_default('session')
+
+        self.services = {}
+
         if session_id is not None:
             for ext_id, ext in extension.get_extensions('session').iteritems():
-                if session_id == ext_id:
-                    self.server_host = ext.DEFAULT_HOST
-                    self.server_port = ext.DEFAULT_PORT
-                else:
-                    self.server_host = extension.get_default('session').DEFAULT_HOST
-                    self.server_port = extension.get_default('session').DEFAULT_PORT
+                for service_name, service_data in ext.SERVICES.iteritems():
+                    self.services[service_name] = service_data
+
+                if session_id == ext_id and self.config.service in ext.SERVICES:
+                    self.server_host = ext.SERVICES[self.config.service]['host']
+                    self.server_port = ext.SERVICES[self.config.service]['port']
+                    break
+            else:
+                self.config.service = 'msn'
+                self.server_host = 'messenger.hotmail.com'
+                self.server_port = '1863'
         else:
-            self.server_host = extension.get_default('session').DEFAULT_HOST
-            self.server_port = extension.get_default('session').DEFAULT_PORT
+            self.config.service = 'msn'
+            self.server_host = 'messenger.hotmail.com'
+            self.server_port = '1863'
 
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
@@ -267,8 +279,8 @@ class Login(gtk.Alignment):
         self._clear_all()
 
         if self.txt_password.get_text() == '':
-                self.remember_password.set_sensitive(False)
-                self.auto_login.set_sensitive(False)
+            self.remember_password.set_sensitive(False)
+            self.auto_login.set_sensitive(False)
 
         if account == '':
             self.remember_account.set_sensitive(False)
@@ -277,6 +289,15 @@ class Login(gtk.Alignment):
             return
 
         self.remember_account.set_sensitive(True)
+
+        if account in self.config.d_user_service:
+            service = self.config.d_user_service[account]
+
+            if service in self.services:
+                service_data = self.services[service]
+                self.server_host = service_data['host']
+                self.server_port = service_data['port']
+                self.config.service = service
 
         if account in self.accounts:
             attr = int(self.remembers[account])
@@ -307,7 +328,7 @@ class Login(gtk.Alignment):
                 self._clear_all()
 
         else:
-           self.avatar.set_from_file(gui.theme.user)
+           self.avatar.set_from_file(gui.theme.logo)
 
     def _clear_all(self):
         '''
@@ -480,11 +501,18 @@ class Login(gtk.Alignment):
         '''
         called when the user clicks the preference button
         '''
-        extension.get_default('dialog').login_preferences(self.session_id,
+        service = self.config.get_or_set('service', 'msn')
+
+        account = self.cmb_account.get_active_text()
+
+        if account in self.accounts:
+            service = self.config.d_user_service[account]
+
+        extension.get_default('dialog').login_preferences(service,
             self._on_new_preferences, self.use_http, self.proxy)
 
     def _on_new_preferences(self, use_http, use_proxy, proxy_host, proxy_port,
-        use_auth, user, passwd, session_id, server_host, server_port):
+        use_auth, user, passwd, session_id, service, server_host, server_port):
         '''
         called when the user press accept on the preferences dialog
         '''
@@ -493,7 +521,14 @@ class Login(gtk.Alignment):
         self.use_http = use_http
         self.server_host = server_host
         self.server_port = server_port
-        self.on_preferences_changed(self.use_http, self.proxy, self.session_id)
+
+        account = self.cmb_account.get_active_text()
+
+        if account in self.accounts:
+            self.config.d_user_service[account] = service
+
+        self.on_preferences_changed(self.use_http, self.proxy, self.session_id,
+                service)
         self._on_account_changed(None)
 
 class ConnectingWindow(gtk.Alignment):

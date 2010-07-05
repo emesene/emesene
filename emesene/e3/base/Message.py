@@ -38,8 +38,35 @@ class Style(object):
     def __str__(self):
         '''return a string representation of the object'''
         return '<style font="%s" color="%s" b="%s" i="%s" u="%s" s="%s">' \
-            % (self.font, str(self.color), self.bold, self.italic, 
+            % (self.font, str(self.color), self.bold, self.italic,
                 self.underline, self.strike)
+
+    def to_css(self):
+        '''return a string representing the current style as CSS rules'''
+        style = ''
+
+        if self.font is not None:
+            style += 'font-family: %s; ' % self.font
+
+        if self.size is not None:
+            style += 'font-size: %spt; ' % str(self.size)
+
+        if self.color is not None:
+            style += 'color: #%s; ' % self.color.to_hex()
+
+        if self.bold:
+            style += 'font-weight: bold; '
+
+        if self.italic:
+            style += 'font-style: italic; '
+
+        if self.underline:
+            style += 'text-decoration: underline; '
+
+        if self.strike:
+            style += 'text-decoration: line-through;'
+
+        return style
 
 class Color(object):
     '''a class representing a RGBA color'''
@@ -57,19 +84,19 @@ class Color(object):
 
         red = self.red
         if red > 255:
-            red /= 255
+            red /= 256
 
         green = self.green
         if green > 255:
-            green /= 255
+            green /= 256
 
         blue = self.blue
         if blue > 255:
-            blue /= 255
+            blue /= 256
 
-        red = hex(red)[2:]
-        green = hex(green)[2:]
-        blue = hex(blue)[2:]
+        red = hex(red)[2:][-2:]
+        green = hex(green)[2:][-2:]
+        blue = hex(blue)[2:][-2:]
 
         if len(red) == 1:
             red = '0' + red

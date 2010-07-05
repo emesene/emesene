@@ -21,6 +21,8 @@ log = logging.getLogger('e3.common.Config')
 
 import BaseConfig
 
+from Signal import WeakMethod
+
 class Config(object):
     '''a class that contains all the configurations of the user,
     the config keys follow a convention, all the names start with
@@ -77,6 +79,8 @@ class Config(object):
         on an attribute change, if item is None then notify on
         all item changes, it item is a string, then notify on
         the change of that item'''
+        callback = WeakMethod(callback)
+
         if self._callbacks is None:
             self._callbacks = []
 
@@ -97,13 +101,21 @@ class Config(object):
         '''remove the callback from the callback list, if item is None
         try to remove the callback from the global callback list, if it's
         a string try to remove from the callback list of that item'''
+        callbacks = []
+
         if item is None:
-            if callback in self._callbacks:
-                self._callbacks.remove(callback)
-        else:
-            if item in self._item_callbacks and\
-                    callback in self._item_callbacks[item]:
-                self._item_callbacks[item].remove(callback)
+            callbacks = self._callbacks
+        elif item in self._item_callbacks:
+            callbacks = self._item_callbacks[item]
+
+
+        to_remove = None
+        for weakmethod in callbacks:
+            if callback == weakmethod.f:
+                to_remove = weakmethod
+
+        if to_remove is not None:
+            self._callbacks.remove(to_remove)
 
     def load(self, path, clear=False):
         '''load the config file from path, clear old values if

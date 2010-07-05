@@ -41,7 +41,7 @@ class OutputView(webkit.WebView):
         self.pending = []
         self.ready = False
 
-    def add_message(self, msg):
+    def add_message(self, msg, style=None):
         '''add a message to the conversation'''
 
         if msg.incoming:
@@ -49,14 +49,14 @@ class OutputView(webkit.WebView):
                 self.last_incoming = False
 
             msg.first = not self.last_incoming
-            html = self.theme.format_incoming(msg)
+            html = self.theme.format_incoming(msg, style)
             self.last_incoming = True
         else:
             if self.last_incoming is None:
                 self.last_incoming = True
 
             msg.first = self.last_incoming
-            html = self.theme.format_outgoing(msg)
+            html = self.theme.format_outgoing(msg, style)
             self.last_incoming = False
 
         if msg.first:
@@ -90,7 +90,7 @@ class OutputView(webkit.WebView):
         return html
 
     text = property(fget=_get_text, fset=_set_text)
-    
+
     def on_populate_popup(self, view, menu):
         '''disables the right-click menu by removing the MenuItems'''
         for child in menu.get_children():
@@ -146,16 +146,16 @@ class OutputText(gtk.ScrolledWindow):
     def send_message(self, formatter, contact, text, cedict, style, is_first):
         '''add a message to the widget'''
         msg = gui.Message.from_contact(contact, text, is_first, False)
-        self.view.add_message(msg)
+        self.view.add_message(msg, style)
 
     def receive_message(self, formatter, contact, message, cedict, is_first):
         '''add a message to the widget'''
         msg = gui.Message.from_contact(contact, message.body, is_first, True)
-        self.view.add_message(msg)
+        self.view.add_message(msg, message.style)
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
         # TODO: make it with a status message
         msg = gui.Message.from_contact(contact, message, False, True)
-        self.view.add_message(msg)
+        self.view.add_message(msg, None)
 

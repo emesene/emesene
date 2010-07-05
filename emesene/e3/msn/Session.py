@@ -10,8 +10,12 @@ class Session(e3.Session):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    DEFAULT_HOST = "messenger.hotmail.com"
-    DEFAULT_PORT = "1863"
+    SERVICES = {
+        "e3.msn": {
+            "host": "messenger.hotmail.com",
+            "port": "1863"
+        }
+    }
 
     def __init__(self, id_=None, account=None):
         '''constructor'''

@@ -239,9 +239,10 @@ class Controller(object):
     def close_session(self, do_exit=True):
         '''close session'''
 
+        self._remove_subscriptions()
         if self.conversations:
             self._on_conversation_window_close()
- 
+
         if self.timeout_id:
             gobject.source_remove(self.timeout_id)
             self.timeout_id = None
@@ -387,11 +388,12 @@ class Controller(object):
 
         window.set_location(width, height, posx, posy)
 
-    def on_preferences_changed(self, use_http, proxy, session_id):
+    def on_preferences_changed(self, use_http, proxy, session_id, service):
         '''called when the preferences on login change'''
         self.config.session = session_id
         extension.set_default_by_id('session', session_id)
         self.config.b_use_http = use_http
+        self.config.service = service
         self._save_proxy_settings(proxy)
 
     def on_login_failed(self, reason):
@@ -416,7 +418,8 @@ class Controller(object):
         self._set_location(self.window)
         self.cur_service = [host, port]
         if not on_reconnect:
-            self.on_preferences_changed(use_http, proxy, session_id)
+            self.on_preferences_changed(use_http, proxy, session_id,
+                    self.config.service)
             self.window.clear()
             self.avatar_path = self.config_dir.join(host, account.account, 'avatars', 'last')
             self.window.go_connect(self.on_cancel_login, self.avatar_path)
@@ -579,7 +582,7 @@ class Controller(object):
         '''makes the reconnect after 30 seconds'''
         self.window.clear()
         self.window.go_connect(self.on_cancel_login, self.avatar_path)
-        
+
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
         self.window.content.on_reconnect(self.on_login_connect, account,\
