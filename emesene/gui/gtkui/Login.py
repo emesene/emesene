@@ -215,6 +215,22 @@ class Login(gtk.Alignment):
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
 
+        self._check_autologin()
+
+    def _check_autologin(self):
+        '''check if autologin is set and can be started'''
+        account = self.config.get_or_set('last_logged_account', '')
+
+        default_session = extension.get_default('session')
+
+        if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
+            password = base64.b64decode(self.config.d_accounts[account])
+
+            self.cmb_account.set_text(account)
+            self.txt_password.set_text(password)
+
+            self.do_connect()
+
     def do_connect(self):
         '''
         do all the stuffs needed to connect
@@ -506,7 +522,7 @@ class Login(gtk.Alignment):
         account = self.cmb_account.get_active_text()
 
         if account in self.accounts:
-            service = self.config.d_user_service[account]
+            service = self.config.d_user_service.get(account, 'msn')
 
         extension.get_default('dialog').login_preferences(service,
             self._on_new_preferences, self.use_http, self.proxy)
