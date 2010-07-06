@@ -61,8 +61,8 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
 
-        self.host = session.SERVICES['msn']['host']
-        self.port = session.SERVICES['msn']['port']
+        self.host = session.SERVICES['e3.msn']['host']
+        self.port = session.SERVICES['e3.msn']['port']
 
         if proxy is None:
             self.proxy = e3.Proxy()
