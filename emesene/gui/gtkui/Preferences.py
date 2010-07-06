@@ -368,6 +368,7 @@ class Interface(BaseTable):
             'session.config.b_show_userpanel')
         self.append_markup('<b>Conversation window:</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
+        self.session.config.get_or_set('b_toolbar_small', False)
         self.append_check('Show emoticons', 'session.config.b_show_emoticons')
         self.append_check('Show conversation header',
             'session.config.b_show_header')
