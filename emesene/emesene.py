@@ -227,6 +227,7 @@ class Controller(object):
 
         self._remove_subscriptions()
         if self.conversations:
+            self.conversations.get_parent().hide()
             self._on_conversation_window_close()
 
         if self.timeout_id:
