@@ -25,6 +25,7 @@ import logging
 
 log = logging.getLogger('pluginmanager')
 
+BLACKLIST = ["lint.py", "__init__.py"]
 class PackageResource:
     '''Handle various files that could be put in the package'''
     def __init__(self, base_dir, directory):
@@ -151,7 +152,8 @@ class PluginManager:
         for filename in os.listdir(dir_):
             path = os.path.join(dir_, filename)
             if filename.startswith(".") or \
-               not (os.path.isdir(path) or filename.endswith('.py')):
+               not (os.path.isdir(path) or filename.endswith('.py')) or \
+               filename in BLACKLIST:
                 continue
 
             try:
