@@ -568,7 +568,17 @@ class ConnectingWindow(gtk.Alignment):
 
         self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
         self.b_cancel.connect('clicked', self._on_cancel_clicked)
-        self.b_cancel.set_border_width(8)
+#        self.b_cancel.set_border_width(8)
+
+        self.b_connect = gtk.Button(label="Connect now")
+        self.b_connect.set_image(gtk.image_new_from_stock(gtk.STOCK_REFRESH, \
+                                                         gtk.ICON_SIZE_BUTTON))
+#        self.b_connect.set_border_width(8)
+
+        vbuttonbox = gtk.VButtonBox()
+        vbuttonbox.set_spacing(8)
+        vbuttonbox.pack_start(self.b_connect)
+        vbuttonbox.pack_start(self.b_cancel)
 
         self.label = gtk.Label()
         self.label.set_markup('<b>Connecting...</b>')
@@ -580,7 +590,7 @@ class ConnectingWindow(gtk.Alignment):
 
         al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.2)
-        al_button_cancel = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
+        al_buttons = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
         al_label = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
@@ -589,7 +599,7 @@ class ConnectingWindow(gtk.Alignment):
             yscale=0.0)
 
         al_throbber.add(self.throbber)
-        al_button_cancel.add(self.b_cancel)
+        al_buttons.add(vbuttonbox)
         al_label.add(self.label)
         al_label_timer.add(self.label_timer)
         al_logo.add(self.avatar)
@@ -599,12 +609,13 @@ class ConnectingWindow(gtk.Alignment):
         vbox.pack_start(al_label, True, False)
         vbox.pack_start(al_label_timer, True, False)
         vbox.pack_start(al_throbber, True, False)
-        vbox.pack_start(al_button_cancel, True, True)
+        vbox.pack_start(al_buttons, True, True)
 
         self.add(vbox)
         vbox.show_all()
 
         self.label_timer.hide()
+        self.b_connect.hide()
 
     def _on_cancel_clicked(self, button):
         '''
@@ -612,6 +623,18 @@ class ConnectingWindow(gtk.Alignment):
         '''
         self.avatar.stop()
         self.callback()
+
+    def _on_connect_now_clicked(self, button, callback, account, session_id,
+                            proxy, use_http, service):
+        '''
+        don't wait for timout to reconnect
+        '''
+        button.hide()
+        self.avatar.stop()
+        gobject.source_remove(self.reconnect_timer_id)
+        self.reconnect_timer_id = None
+        callback(account, session_id, proxy, use_http,\
+                 service[0], service[1], on_reconnect=True)
 
     def clear_connect(self):
         '''
@@ -629,6 +652,9 @@ class ConnectingWindow(gtk.Alignment):
         self.label.show()
         self.label.set_markup('<b>Connection error\n </b>')
         self.label_timer.show()
+        self.b_connect.show()
+        self.b_connect.connect('clicked', self._on_connect_now_clicked, callback, \
+                               account, session_id, proxy, use_http, service)
         self.throbber.hide()
         self.reconnect_after = 30
         if self.reconnect_timer_id is None:
@@ -650,6 +676,7 @@ class ConnectingWindow(gtk.Alignment):
         if self.reconnect_after <= 0:
             gobject.source_remove(self.reconnect_timer_id)
             self.reconnect_timer_id = None
+            self.b_connect.hide()
             #do login
             callback(account, session_id, proxy, use_http,\
                      service[0], service[1], on_reconnect=True)
