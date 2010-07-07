@@ -56,11 +56,16 @@ actual_notification = None
 def gtkNotification(title, text, picturePath=None):
     global actual_notification
 
+    # TODO: we can have an option to use a queue or show notifications
+    # like the oldNotification plugin of emesene1.6 (WLM-like)
+
     # use a notification queue, like pynotify
     if actual_notification is None:
         actual_notification = Notification(title, text, picturePath)
         actual_notification.show()
     else:
+        # TODO: check the other notifications and append the text to the
+        # corresponding one
         if actual_notification._title == title:
             actual_notification.append_text(text)
         else:
@@ -158,6 +163,7 @@ class Notification(gtk.Window):
         move notification to it's place
         '''
         width, height = self.get_size()
+        # TODO: need config files for extension!
         gravity = gtk.gdk.GRAVITY_SOUTH_EAST
         self.set_gravity(gravity)
 
@@ -203,6 +209,7 @@ class Notification(gtk.Window):
         '''
         action to be done if user click's the notification
         '''
+        # TODO: if the notification notifies a user going online, the click
         # should open a new conversation with that user
         self.close()
 
@@ -213,7 +220,7 @@ class Notification(gtk.Window):
         return True
 
     def close(self , *args):
-        ''' hide the Notification and show the next'''
+        ''' hide the Notification and show the next one'''
         global actual_notification
 
         self.hide()
