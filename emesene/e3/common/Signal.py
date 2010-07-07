@@ -62,12 +62,12 @@ class Signal(object):
             try:
                 if callback(*args, **kwargs) == False:
                     break
+            except TypeError:
+                to_remove.append(callback)
             except Exception, error:
                 log.warning('Signal handler (%s) error: %s' %
                         (format_callback_name(callback), str(error)))
                 traceback.print_exc()
-            except TypeError:
-                to_remove.append(callback)
 
         for item in to_remove:
             del self._subscribers[item]
