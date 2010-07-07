@@ -26,6 +26,7 @@ import logging
 log = logging.getLogger('pluginmanager')
 
 BLACKLIST = ["lint.py", "__init__.py"]
+
 class PackageResource:
     '''Handle various files that could be put in the package'''
     def __init__(self, base_dir, directory):
