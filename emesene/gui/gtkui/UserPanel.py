@@ -178,5 +178,6 @@ class UserPanel(gtk.VBox):
                                                 self.avatar_path, path_dir,
                                                 cached_avatar_dir, faces_paths,
                                                 self.avatar_manager)
+        _av_chooser.set_modal(True)
         _av_chooser.show()
 

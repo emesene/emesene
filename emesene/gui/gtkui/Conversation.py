@@ -24,7 +24,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self._header_visible = session.config.b_show_header
         self._image_visible = session.config.b_show_info
         self._toolbar_visible = session.config.b_show_toolbar
-
+        
         self.panel = gtk.VPaned()
 
         Header = extension.get_default('conversation header')

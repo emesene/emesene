@@ -401,10 +401,10 @@ class Sound(BaseTable):
         self.append_markup('<b>Messages events:</b>')
         self.append_check('Mute sounds',
             'session.config.b_mute_sounds')
-        self.append_check('Play sound on first sent message',
-            'session.config.b_play_first_send')
         self.append_check('Play sound on sent message',
             'session.config.b_play_send')
+        self.append_check('Play sound on first received message',
+            'session.config.b_play_first_send')
         self.append_check('Play sound on received message',
             'session.config.b_play_type')
         self.append_check('Play sound on nudge',

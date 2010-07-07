@@ -227,6 +227,7 @@ class Controller(object):
 
         self._remove_subscriptions()
         if self.conversations:
+            self.conversations.get_parent().hide()
             self._on_conversation_window_close()
 
         if self.timeout_id:
@@ -516,11 +517,11 @@ class Controller(object):
 #        conversation.show() # puts cursor in textbox
 
         #play = extension.get_default('sound')
-        #if other_started and \
-        #   self.session.contacts.me.status != e3.status.BUSY and \
-        #   self.session.config.b_play_first_send and not \
-        #   self.session.config.b_mute_sounds:
-        #    play(gui.theme.sound_send)
+        if not self.session.config.b_mute_sounds and other_started and \
+           self.session.contacts.me.status != e3.status.BUSY and \
+           self.session.config.b_play_first_send and not \
+           self.session.config.b_play_type:
+            gui.play(gui.theme.sound_send)
 
     def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''
