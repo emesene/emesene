@@ -50,9 +50,21 @@ if os.name == "nt":
         taskbarSide = "right"
         taskbarSize = info.rcMonitor.right - info.rcWork.right
 
+queue = list()
+actual_notification = None
+
 def gtkNotification(title, text, picturePath=None):
-    noti = Notification(title, text, picturePath)
-    noti.show()
+    global actual_notification
+
+    # use a notification queue, like pynotify
+    if actual_notification is None:
+        actual_notification = Notification(title, text, picturePath)
+        actual_notification.show()
+    else:
+        if actual_notification._title == title:
+            actual_notification.append_text(text)
+        else:
+            queue.append([title,text,picturePath])
 
 class Notification(gtk.Window):
     def __init__(self, title, text, picturePath):
@@ -60,34 +72,30 @@ class Notification(gtk.Window):
         gtk.Window.__init__(self, type=gtk.WINDOW_POPUP)
 
         # constants
-        FColor = "white"
+        self.FColor = "white"
         BColor = gtk.gdk.Color()
         avatar_size = 48;
-        width = 300;
+        max_width = 300;
 
         # window attributes
-        #self.set_accept_focus(False)
-        #self.set_focus_on_map(True)
-        #self.set_decorated(False)
-        # self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_UTILITY)
-        self.set_geometry_hints(None, min_width=width, min_height=60, \
-                max_width=width, max_height=200)
         self.set_border_width(10)
 
-        # self.set_transient_for(gtk.gdk.get_default_root_window())
-
         # labels
+        self._title = title
         markup1 = '<span foreground="%s" weight="ultrabold">%s</span>'
-        titleLabel = gtk.Label( markup1 % (FColor, MarkupParser.escape(title)))
+        titleLabel = gtk.Label(markup1 % (self.FColor, \
+                               MarkupParser.escape(self._title)))
         titleLabel.set_use_markup(True)
         titleLabel.set_justify(gtk.JUSTIFY_CENTER)
         titleLabel.set_ellipsize(pango.ELLIPSIZE_END)
 
-        markup2 = '<span foreground="%s">%s</span>'
-        messageLabel = gtk.Label( markup2 % (FColor, MarkupParser.escape(text)))
-        messageLabel.set_use_markup(True)
-        messageLabel.set_justify(gtk.JUSTIFY_CENTER)
-        messageLabel.set_ellipsize(pango.ELLIPSIZE_END)
+        self.text = text
+        self.markup2 = '<span foreground="%s">%s</span>'
+        self.messageLabel = gtk.Label(self.markup2 % (self.FColor, \
+                                      MarkupParser.escape(self.text)))
+        self.messageLabel.set_use_markup(True)
+        self.messageLabel.set_justify(gtk.JUSTIFY_CENTER)
+        self.messageLabel.set_ellipsize(pango.ELLIPSIZE_END)
 
         # image
         avatarImage = gtk.Image()
@@ -113,8 +121,8 @@ class Notification(gtk.Window):
         self.connect("button_press_event", self.onClick)
 
         # pack everything
-        self.messageVbox.pack_start(titleLabel,False, False)
-        self.messageVbox.pack_start(messageLabel,True, True)
+        self.messageVbox.pack_start(titleLabel, True, True)
+        self.messageVbox.pack_start(self.messageLabel, True, True)
         lbox.pack_start(avatarImage, False, False)
         lbox.pack_start(self.messageVbox, True, True)
         hbox.pack_start(lboxEventBox, True, True)
@@ -126,19 +134,31 @@ class Notification(gtk.Window):
         self.realize()
         self.window.set_background(BColor)
 
-#        # don't use a rectangular form, just testing some things, doesn't work
-#        window = self.get_parent_window()
-#        if window is not None:
-#            print "entra al if"
-#            rect = gtk.gdk.Rectangle(10,10,10,10)
-#            window.shape_combine_region(gtk.gdk.region_rectangle(rect),50,10)
-
         # A bit of transparency to be less intrusive
         self.set_opacity(0.9)
 
-        # move notification
+        self.timerId = None
+        self.set_default_size(max_width,-1)
+        self.show_all()
+        self.relocate()
+
+    def append_text(self, text):
+        '''
+        adds text at the end of the actual text
+        '''
+        self.text = self.text + "\n" + text
+        self.messageLabel.set_text(self.markup2 % (self.FColor, \
+                                   MarkupParser.escape(self.text)))
+        self.messageLabel.set_use_markup(True)
+        self.messageLabel.show()
+        self.relocate()
+
+    def relocate(self):
+        '''
+        move notification to it's place
+        '''
         width, height = self.get_size()
-        gravity = gtk.gdk.GRAVITY_SOUTH_EAST # can I use some configuration?
+        gravity = gtk.gdk.GRAVITY_SOUTH_EAST
         self.set_gravity(gravity)
 
         x = 0
@@ -149,7 +169,7 @@ class Notification(gtk.Window):
             screen_w = gtk.gdk.screen_width()
             screen_h = gtk.gdk.screen_height()
             if gravity == gtk.gdk.GRAVITY_SOUTH_EAST:
-                x = screen_w - width - 10
+                x = screen_w - width - 20
                 y = screen_h - height - 10
                 if taskbarSide == "bottom":
                     y = screen_h - height - taskbarSize - 10
@@ -179,26 +199,30 @@ class Notification(gtk.Window):
 
         self.move(x,y)
 
-        #self.window.set_skip_taskbar_hint(True)
-        #self.window.set_skip_pager_hint(True)
-        #self.window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_UTILITY)
-        #self.set_keep_above(True)
-
-        self.timerId = None
-
-        hbox.show_all()
-
     def onClick(self, widget, event):
+        '''
+        action to be done if user click's the notification
+        '''
+        # TODO: if the notification notifies a user going online, click
+        # should open a new conversation with that user
         self.close()
 
     def show(self):
-        ''' show it '''
+        ''' show it and run the timeout'''
         self.show_all()
-        self.timerId = glib.timeout_add(10000, self.close)
+        self.timerId = glib.timeout_add(100000, self.close)
         return True
 
     def close(self , *args):
-        ''' hide the Notification '''
+        ''' hide the Notification and show the next'''
+        global actual_notification
+
         self.hide()
         if self.timerId is not None:
             glib.source_remove(self.timerId)
+        if len(queue) != 0:
+            title, text, picturePath = queue.pop(0)
+            actual_notification = Notification(title, text, picturePath)
+            actual_notification.show()
+        else:
+            actual_notification = None
