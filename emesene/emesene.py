@@ -183,21 +183,7 @@ class Controller(object):
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
-        account = self.config.get_or_set('last_logged_account', '')
-
-        #autologin
-        default_session = extension.get_default('session')
-        if account != '' and int(self.config.d_remembers[account]) == 3:
-            password = base64.b64decode(self.config.d_accounts[account])
-            user = e3.Account(account, password,
-                              int(self.config.d_status[account]),
-                              default_session.DEFAULT_HOST)
-            host = default_session.DEFAULT_HOST
-            port = default_session.DEFAULT_PORT
-            self.on_login_connect(user, self.config.session, proxy, use_http,
-                    host, int(port))
-        else:
-            self.go_login(proxy, use_http)
+        self.go_login(proxy, use_http)
 
     def go_login(self, proxy=None, use_http=None):
         '''shows the login GUI'''
@@ -273,13 +259,14 @@ class Controller(object):
     def _remove_subscriptions(self):
         '''remove the subscriptions to signals
         '''
-        signals = self.session.signals
-        signals.login_succeed.unsubscribe(self.on_login_succeed)
-        signals.login_failed.unsubscribe(self.on_login_failed)
-        signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
-        signals.conv_first_action.unsubscribe(self.on_new_conversation)
-        signals.disconnected.unsubscribe(self.on_disconnected)
-        signals.picture_change_succeed.unsubscribe(self.on_picture_change_succeed)
+        if self.session is not None:
+            signals = self.session.signals
+            signals.login_succeed.unsubscribe(self.on_login_succeed)
+            signals.login_failed.unsubscribe(self.on_login_failed)
+            signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
+            signals.conv_first_action.unsubscribe(self.on_new_conversation)
+            signals.disconnected.unsubscribe(self.on_disconnected)
+            signals.picture_change_succeed.unsubscribe(self.on_picture_change_succeed)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
