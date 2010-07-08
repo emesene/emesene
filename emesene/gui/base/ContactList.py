@@ -88,20 +88,12 @@ class ContactList(object):
         self.nick_template = self.session.config.get_or_set('nick_template',
             ContactList.NICK_TPL)
 
-        # TODO: remove this after some time
-        if "%" in self.nick_template:
-            self.nick_template = ContactList.NICK_TPL
-
         # valid values:
         # + NAME
         # + ONLINE_COUNT
         # + TOTAL_COUNT
         self.group_template = self.session.config.get_or_set('group_template',
             ContactList.GROUP_TPL)
-
-        # TODO: remove this after some time
-        if "%" in self.group_template:
-            self.group_template = ContactList.GROUP_TPL
 
         #contact signals
         self.session.signals.contact_attr_changed.subscribe(
