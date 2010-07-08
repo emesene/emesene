@@ -36,6 +36,7 @@ class PluginMainVBox(gtk.VBox):
         self.set_border_width(2)
 
         self.session = session
+        self.session.config.get_or_set('l_active_plugins', [])
 
         self.plugin_list_store = PluginListStore()
         self.plugin_list_store.update_list()
@@ -74,7 +75,10 @@ class PluginMainVBox(gtk.VBox):
             name = model.get_value(iter, 2)
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_start(name, self.session)
-            print pluginmanager.plugin_is_active(name), 'after start'
+
+            if name not in self.session.config.l_active_plugins:
+                self.session.config.l_active_plugins.append(name)
+
             model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
 
     def on_stop(self, *args):
@@ -85,7 +89,10 @@ class PluginMainVBox(gtk.VBox):
             name = model.get_value(iter, 2)
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_stop(name)
-            print pluginmanager.plugin_is_active(name), 'after stop'
+
+            if name in self.session.config.l_active_plugins:
+                self.session.config.l_active_plugins.remove(name)
+
             model.set_value(iter, 0, pluginmanager.plugin_is_active(name))
 
     def on_config(self, *args):

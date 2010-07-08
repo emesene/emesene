@@ -7,7 +7,7 @@ import pango
 import debugger
 import logging
 
-class DebugWindow():
+class DebugWindow(object):
     '''The window containing the debug info'''
     def __init__(self):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)

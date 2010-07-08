@@ -226,7 +226,7 @@ class Login(gtk.Alignment):
         if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
             password = base64.b64decode(self.config.d_accounts[account])
 
-            self.cmb_account.set_text(account)
+            self.cmb_account.get_children()[0].set_text(account)
             self.txt_password.set_text(password)
 
             self.do_connect()

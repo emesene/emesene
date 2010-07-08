@@ -10,5 +10,8 @@ class Plugin(PluginBase):
     def start(self, session):
         self.extensions_register()
 
+    def stop(self):
+        pass
+
     def extensions_register(self):
         extension.register('below userlist', StatusCombo.StatusCombo)
