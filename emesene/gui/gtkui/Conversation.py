@@ -47,6 +47,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             dialog, gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
         self.output = OutputText(self.session.config)
+        self.output.set_size_request(-1,30)
         self.input = InputText(self.session.config, self._on_send_message)
         self.info = ContactInfo()
         self.transfers_bar = TransfersBar(self.session)
@@ -60,8 +61,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         frame_input.add(input_box)
 
-        self.panel.pack1(self.output, True, True)
-        self.panel.pack2(frame_input, True, True)
+        self.panel.pack1(self.output, True, False)
+        self.panel.pack2(frame_input, False, False)
 
         self.panel_signal_id = self.panel.connect_after('expose-event',
                 self.update_panel_position)
