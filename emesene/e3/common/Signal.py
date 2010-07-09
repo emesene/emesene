@@ -72,6 +72,9 @@ class Signal(object):
         for item in to_remove:
             del self._subscribers[item]
 
+        for item in to_remove:
+            del self._subscribers[item]
+
 def format_callback_name(func):
     '''return a pretty representation for a function name
     '''
