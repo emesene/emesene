@@ -204,7 +204,7 @@ class MainWindow(gtk.VBox):
         self.on_disconnect_cb()
 
     def _on_search_toggled(self, button):
-        '''called when the searhc button is toggled'''
+        '''called when the search button is toggled'''
         if button.get_active():
             self.entry.show()
             self.entry.grab_focus()
