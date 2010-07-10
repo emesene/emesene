@@ -49,6 +49,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.output = OutputText(self.session.config)
         self.output.set_size_request(-1,30)
         self.input = InputText(self.session.config, self._on_send_message)
+        self.output.set_size_request(-1,25)
+        self.input.set_size_request(-1,25)
         self.info = ContactInfo()
         self.transfers_bar = TransfersBar(self.session)
 
@@ -179,9 +181,9 @@ class Conversation(gtk.VBox, gui.Conversation):
     def update_panel_position(self, *args):
         """update the panel position to be on the 80% of the height
         """
-        height = self.panel.get_position()
+        height = self.panel.get_allocation().height
         if height > 0:
-            self.panel.set_position(int(height * 1.8))
+            self.panel.set_position(int(height * 0.8))
             self.panel.disconnect(self.panel_signal_id)
             del self.panel_signal_id
 
