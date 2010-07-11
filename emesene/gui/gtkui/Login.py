@@ -588,6 +588,14 @@ class ConnectingWindow(gtk.Alignment):
         self.avatar = Avatar(cellDimention=96)
         self.avatar.set_from_file(avatar_path)
 
+        self.b_preferences = gtk.Button()
+        self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
+            gtk.ICON_SIZE_MENU)
+        self.img_preferences.set_sensitive(False)
+        self.b_preferences.set_image(self.img_preferences)
+        self.b_preferences.set_relief(gtk.RELIEF_NONE)
+        self.b_preferences.set_sensitive(False)
+
         al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.2)
         al_buttons = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
@@ -597,12 +605,14 @@ class ConnectingWindow(gtk.Alignment):
             yscale=0.0)
         al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
+        al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
 
         al_throbber.add(self.throbber)
         al_buttons.add(vbuttonbox)
         al_label.add(self.label)
         al_label_timer.add(self.label_timer)
         al_logo.add(self.avatar)
+        al_preferences.add(self.b_preferences)
 
         vbox = gtk.VBox()
         vbox.pack_start(al_logo, True, False)
@@ -610,6 +620,7 @@ class ConnectingWindow(gtk.Alignment):
         vbox.pack_start(al_label_timer, True, False)
         vbox.pack_start(al_throbber, True, False)
         vbox.pack_start(al_buttons, True, True)
+        vbox.pack_start(al_preferences, False)
 
         self.add(vbox)
         vbox.show_all()
@@ -622,7 +633,8 @@ class ConnectingWindow(gtk.Alignment):
         cause the return to login window
         '''
         self.avatar.stop()
-        gobject.source_remove(self.reconnect_timer_id)
+        if self.reconnect_timer_id is not None:
+            gobject.source_remove(self.reconnect_timer_id)
         self.reconnect_timer_id = None
         self.callback()
 
