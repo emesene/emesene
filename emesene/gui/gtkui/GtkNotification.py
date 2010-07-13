@@ -19,13 +19,50 @@ WEBSITE = 'www.emesene.org'
 # This code is used only on Windows to get the location on the taskbar
 if os.name == "nt":
     import ctypes
+    from ctypes.wintypes import RECT
+    user = ctypes.windll.user32
+
+    # Find the window handler of the taskbar
+    className = ctypes.c_wchar_p('Shell_TrayWnd')
+    window = user.FindWindowExW(None, None, className, None)
+    rect = RECT()
+    user.GetWindowRect(window, ctypes.byref(rect))
+
+    left = rect.left
+    top = rect.top
+    taskHeight = rect.bottom - top
+    taskWidth = rect.right - left
+    horizontal = taskHeight > taskWidth
+    
+    # Set values
+    taskbarSide = "bottom"  # default windows xp values
+    taskbarSize = 30 # default windows xp values
+    if left == 0:
+        if top == 0:
+            if horizontal:
+                taskbarSide = "top"
+                taskbarSize = taskHeight
+            else:
+                taskbarSide = "left"
+                taskbatSize = taskWidth
+        else:
+            taskbarSide = "bottom"
+            taskbarSize = taskHeight
+    else:
+        taskbarSide = "right"
+        taskbatSize = taskWidth
+
+# Below, another method to get taskbar size and side
+# I need to test both methods under Windows Vista and Windows 7
+'''
+    import ctypes
     from ctypes.wintypes import RECT, DWORD
     user = ctypes.windll.user32
     MONITORINFOF_PRIMARY = 1
     HMONITOR = 1
 
     class MONITORINFO(ctypes.Structure):
-        _fields_ = [
+       _fields_ = [
             ('cbSize', DWORD),
             ('rcMonitor', RECT),
             ('rcWork', RECT),
@@ -49,7 +86,10 @@ if os.name == "nt":
     if info.rcMonitor.right != info.rcWork.right:
         taskbarSide = "right"
         taskbarSize = info.rcMonitor.right - info.rcWork.right
-
+'''
+    
+    
+    
 queue = list()
 actual_notification = None
 
@@ -151,6 +191,7 @@ class Notification(gtk.Window):
         '''
         adds text at the end of the actual text
         '''
+        # TODO: Fix position
         self.text = self.text + "\n" + text
         self.messageLabel.set_text(self.markup2 % (self.FColor, \
                                    MarkupParser.escape(self.text)))
@@ -167,37 +208,40 @@ class Notification(gtk.Window):
         gravity = gtk.gdk.GRAVITY_SOUTH_EAST
         self.set_gravity(gravity)
 
+        screen_w = gtk.gdk.screen_width()
+        screen_h = gtk.gdk.screen_height()
         x = 0
         y = 0
 
         # move notification so taskbar won't hide it on Windows!
-        if os.name == "nt":
-            screen_w = gtk.gdk.screen_width()
-            screen_h = gtk.gdk.screen_height()
-            if gravity == gtk.gdk.GRAVITY_SOUTH_EAST:
-                x = screen_w - width - 20
-                y = screen_h - height - 10
+        if gravity == gtk.gdk.GRAVITY_SOUTH_EAST:
+            x = screen_w - width - 20
+            y = screen_h - height - 10
+            if os.name == "nt":
                 if taskbarSide == "bottom":
                     y = screen_h - height - taskbarSize - 10
                 elif taskbarSide == "right":
                     x = screen_w - width - taskbarSize
-            elif gravity == gtk.gdk.GRAVITY_NORTH_EAST:
-                x = screen_w - width - 10
-                y = 10
+        elif gravity == gtk.gdk.GRAVITY_NORTH_EAST:
+            x = screen_w - width - 10
+            y = 10
+            if os.name == "nt":
                 if taskbarSide == "top":
                     y = taskbarSize
                 elif taskbarSide == "right":
                     x = screen_w - width - taskbarSize
-            elif gravity == gtk.gdk.GRAVITY_SOUTH_WEST:
-                x = 10
-                y = screen_h - height - 10
+        elif gravity == gtk.gdk.GRAVITY_SOUTH_WEST:
+            x = 10
+            y = screen_h - height - 10
+            if os.name == "nt":
                 if taskbarSide == "bottom":
                     y = screen_h - height - taskbarSize
                 elif taskbarSide == "left":
                     x = taskbarSize
-            elif gravity == gtk.gdk.GRAVITY_NORTH_WEST:
-                x = 10
-                y = 10
+        elif gravity == gtk.gdk.GRAVITY_NORTH_WEST:
+            x = 10
+            y = 10
+            if os.name == "nt":
                 if taskbarSide == "top":
                     y = taskbarSize
                 elif taskbarSide == "left":
@@ -219,7 +263,7 @@ class Notification(gtk.Window):
         self.timerId = glib.timeout_add(100000, self.close)
         return True
 
-    def close(self , *args):
+    def close(self, *args):
         ''' hide the Notification and show the next one'''
         global actual_notification
 
