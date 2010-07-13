@@ -232,3 +232,4 @@ class Notification(gtk.Window):
             actual_notification.show()
         else:
             actual_notification = None
+        self.destroy()
