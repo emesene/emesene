@@ -126,7 +126,7 @@ class Notification(gtk.Window):
         self.set_border_width(10)
 
         # labels
-        self._title = title
+        self._title = title #nick
         markup1 = '<span foreground="%s" weight="ultrabold">%s</span>'
         titleLabel = gtk.Label(markup1 % (self.FColor, \
                                MarkupParser.escape(self._title)))
@@ -134,7 +134,7 @@ class Notification(gtk.Window):
         titleLabel.set_justify(gtk.JUSTIFY_CENTER)
         titleLabel.set_ellipsize(pango.ELLIPSIZE_END)
 
-        self.text = text
+        self.text = text #status, message, etc...
         self.markup2 = '<span foreground="%s">%s</span>'
         self.messageLabel = gtk.Label(self.markup2 % (self.FColor, \
                                       MarkupParser.escape(self.text)))
@@ -153,12 +153,12 @@ class Notification(gtk.Window):
         avatarImage.set_from_pixbuf(userPixbuf)
 
         # boxes
-        hbox = gtk.HBox()
-        self.messageVbox = gtk.VBox()
-        lbox = gtk.HBox()
+        hbox = gtk.HBox() # main box
+        self.messageVbox = gtk.VBox() # title + message
+        lbox = gtk.HBox() # avatar + title/message
         lbox.set_spacing(10)
 
-        lboxEventBox = gtk.EventBox()
+        lboxEventBox = gtk.EventBox() # detects mouse events
         lboxEventBox.set_visible_window(False)
         lboxEventBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         lboxEventBox.connect("button_press_event", self.onClick)
@@ -180,29 +180,28 @@ class Notification(gtk.Window):
         self.window.set_background(BColor)
 
         # A bit of transparency to be less intrusive
-        self.set_opacity(0.9)
+        self.set_opacity(0.85)
 
         self.timerId = None
         self.set_default_size(max_width,-1)
+        self.connect("size-allocate", self.relocate)
         self.show_all()
-        self.relocate()
 
     def append_text(self, text):
         '''
         adds text at the end of the actual text
         '''
-        # TODO: Fix position
         self.text = self.text + "\n" + text
         self.messageLabel.set_text(self.markup2 % (self.FColor, \
                                    MarkupParser.escape(self.text)))
         self.messageLabel.set_use_markup(True)
         self.messageLabel.show()
-        self.relocate()
 
-    def relocate(self):
+    def relocate(self, widget=None, allocation=None):
         '''
         move notification to it's place
         '''
+
         width, height = self.get_size()
         # TODO: need config files for extension!
         gravity = gtk.gdk.GRAVITY_SOUTH_EAST
