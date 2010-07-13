@@ -622,8 +622,9 @@ class ConnectingWindow(gtk.Alignment):
         cause the return to login window
         '''
         self.avatar.stop()
-        gobject.source_remove(self.reconnect_timer_id)
-        self.reconnect_timer_id = None
+        if self.reconnect_timer_id is not None:
+            gobject.source_remove(self.reconnect_timer_id)
+            self.reconnect_timer_id = None
         self.callback()
 
     def _on_connect_now_clicked(self, button, callback, account, session_id,
