@@ -95,21 +95,34 @@ actual_notification = None
 
 def gtkNotification(title, text, picturePath=None):
     global actual_notification
+    global queue
 
     # TODO: we can have an option to use a queue or show notifications
     # like the oldNotification plugin of emesene1.6 (WLM-like)
 
-    # use a notification queue, like pynotify
     if actual_notification is None:
         actual_notification = Notification(title, text, picturePath)
         actual_notification.show()
     else:
-        # TODO: check the other notifications and append the text to the
-        # corresponding one
+        # Append text to the actual notification
         if actual_notification._title == title:
             actual_notification.append_text(text)
         else:
-            queue.append([title,text,picturePath])
+            found = False
+            auxqueue = list()
+            for _title, _text, _picturePath in queue:
+                if _title == title:
+                    _text = _text + "\n" + text
+                    found = True
+                auxqueue.append([_title,_text,_picturePath])
+
+            if found:
+                # append text to another notification
+                del queue
+                queue = auxqueue
+            else:
+                # or queue a new notification
+                queue.append([title,text,picturePath])
 
 class Notification(gtk.Window):
     def __init__(self, title, text, picturePath):
@@ -265,6 +278,7 @@ class Notification(gtk.Window):
     def close(self, *args):
         ''' hide the Notification and show the next one'''
         global actual_notification
+        global queue
 
         self.hide()
         if self.timerId is not None:
