@@ -87,13 +87,11 @@ if os.name == "nt":
         taskbarSide = "right"
         taskbarSize = info.rcMonitor.right - info.rcWork.right
 '''
-    
-    
-    
+
 queue = list()
 actual_notification = None
 
-def gtkNotification(title, text, picturePath=None):
+def gtkNotification(title, text, picturePath=None, callback=None):
     global actual_notification
     global queue
 
@@ -101,7 +99,7 @@ def gtkNotification(title, text, picturePath=None):
     # like the oldNotification plugin of emesene1.6 (WLM-like)
 
     if actual_notification is None:
-        actual_notification = Notification(title, text, picturePath)
+        actual_notification = Notification(title, text, picturePath, callback)
         actual_notification.show()
     else:
         # Append text to the actual notification
@@ -125,7 +123,7 @@ def gtkNotification(title, text, picturePath=None):
                 queue.append([title,text,picturePath])
 
 class Notification(gtk.Window):
-    def __init__(self, title, text, picturePath):
+    def __init__(self, title, text, picturePath, callback):
 
         gtk.Window.__init__(self, type=gtk.WINDOW_POPUP)
 
@@ -134,6 +132,7 @@ class Notification(gtk.Window):
         BColor = gtk.gdk.Color()
         avatar_size = 48;
         max_width = 300;
+        self.callback = callback
 
         # window attributes
         self.set_border_width(10)
@@ -179,7 +178,7 @@ class Notification(gtk.Window):
         self.connect("button_press_event", self.onClick)
 
         # pack everything
-        self.messageVbox.pack_start(titleLabel, True, True)
+        self.messageVbox.pack_start(titleLabel, False, False)
         self.messageVbox.pack_start(self.messageLabel, True, True)
         lbox.pack_start(avatarImage, False, False)
         lbox.pack_start(self.messageVbox, True, True)
@@ -265,14 +264,14 @@ class Notification(gtk.Window):
         '''
         action to be done if user click's the notification
         '''
-        # TODO: if the notification notifies a user going online, the click
-        # should open a new conversation with that user
+        if self.callback is not None:
+            self.callback()
         self.close()
 
     def show(self):
         ''' show it and run the timeout'''
         self.show_all()
-        self.timerId = glib.timeout_add(100000, self.close)
+        self.timerId = glib.timeout_add(10000, self.close)
         return True
 
     def close(self, *args):
