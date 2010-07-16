@@ -207,7 +207,7 @@ def msnplus_to_list(txt, do_parse_emotes=True):
     '''parte text to a DictObj and return a list of strings and
     gtk.gdk.Pixbufs'''
     dct = Plus.msnplus(txt, do_parse_emotes)
-
+    
     if not do_parse_emotes:
         return dct.to_xml()
 
@@ -227,7 +227,7 @@ def msnplus_to_list(txt, do_parse_emotes=True):
     accum.append(replace_markup("".join(temp)))
 
     return accum
-
+    
 def flatten_tree(dct, accum, parents):
     '''convert the tree of markup into a list of string that contain pango
     markup and pixbufs, if an img tag is found all the parent tags should be
@@ -247,9 +247,40 @@ def flatten_tree(dct, accum, parents):
             return '<%s>' % (tag.tag, )
 
     if dct.tag:
+        previous = list()
+        i = len(accum)-1
+        while i>=0 and type(accum[i]) != gtk.gdk.Pixbuf:
+            previous.append(accum[i])
+            i -= 1
         if dct.tag == "img":
-            closed = "".join("</%s>" % (parent.tag, ) for parent in parents[::-1] if parent)
-            opened = "".join(open_tag(parent) for parent in parents if parent)
+            closed = ""
+            opened = ""
+            tags = list()
+            index = 0
+            for prev in previous:
+                pos = prev.find("[$")
+                while pos != -1:
+                    index = pos+2
+                    found = prev[index]
+                    if found == "b":
+                        tags.append("b")
+                    elif found == "i":
+                        tags.append("i")
+                    elif found == "s":
+                        tags.append("small")
+                    elif found == "/":
+                        if len(tags) > 0:
+                            tags.pop()
+                    prev = prev[index+1:]
+                    pos = prev.find("[$")
+
+            while len(tags) > 0:
+                tag = tags.pop()
+                closed = closed+"[$/"+tag+"]"
+                opened = "[$"+tag+"]"+opened
+            
+            closed = closed+"".join("</%s>" % (parent.tag, ) for parent in parents[::-1] if parent)
+            opened = "".join(open_tag(parent) for parent in parents if parent)+opened
             accum += [closed, gtk.gdk.pixbuf_new_from_file(dct.src), opened]
             return accum
         else:
