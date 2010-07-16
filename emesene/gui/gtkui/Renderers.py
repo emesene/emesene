@@ -279,8 +279,10 @@ def flatten_tree(dct, accum, parents):
                 closed = closed+"[$/"+tag+"]"
                 opened = "[$"+tag+"]"+opened
             
-            closed = closed+"".join("</%s>" % (parent.tag, ) for parent in parents[::-1] if parent)
-            opened = "".join(open_tag(parent) for parent in parents if parent)+opened
+            closed = closed+"".join("</%s>" % (parent.tag, ) for parent in \
+                                                       parents[::-1] if parent)
+            opened = "".join(open_tag(parent) for parent in \
+                                                      parents if parent)+opened
             accum += [closed, gtk.gdk.pixbuf_new_from_file(dct.src), opened]
             return accum
         else:
