@@ -145,6 +145,17 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                     'utf-8'), False))
             except gobject.GError:
                 print "invalid pango markup:", decorated_markup
+                # temporary debug stuff
+                import e3.common.ConfigDir as CD
+                import time
+                cd = CD("emesene2")
+                logfile = open(cd.join(cd.default_base_dir, 'badnicks.log'), 'a')
+                logfile.write(
+                    "report this here: http://github.com/emesene/emesene/issues#issue/8\n" +
+                    time.asctime() + "\n" + self.markup + "\n" + 
+                    ",".join(["%s" % str(el) for el in decorated_markup]))
+                logfile.close()
+                # fallback
                 decorated_markup = Plus.msnplus_strip(self.markup)
 
             layout.set_text(decorated_markup)
