@@ -108,11 +108,11 @@ def gtkNotification(title, text, picturePath=None, callback=None):
         else:
             found = False
             auxqueue = list()
-            for _title, _text, _picturePath in queue:
+            for _title, _text, _picturePath, _callback in queue:
                 if _title == title:
                     _text = _text + "\n" + text
                     found = True
-                auxqueue.append([_title,_text,_picturePath])
+                auxqueue.append([_title,_text,_picturePath, _callback])
 
             if found:
                 # append text to another notification
@@ -120,7 +120,7 @@ def gtkNotification(title, text, picturePath=None, callback=None):
                 queue = auxqueue
             else:
                 # or queue a new notification
-                queue.append([title,text,picturePath])
+                queue.append([title, text, picturePath, callback])
 
 class Notification(gtk.Window):
     def __init__(self, title, text, picturePath, callback):
@@ -283,8 +283,9 @@ class Notification(gtk.Window):
         if self.timerId is not None:
             glib.source_remove(self.timerId)
         if len(queue) != 0:
-            title, text, picturePath = queue.pop(0)
-            actual_notification = Notification(title, text, picturePath)
+            title, text, picturePath, callback = queue.pop(0)
+            actual_notification = Notification(title, text, picturePath, \
+                                               callback)
             actual_notification.show()
         else:
             actual_notification = None
