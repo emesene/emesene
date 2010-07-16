@@ -3,7 +3,7 @@ the status and song of a music player.'''
 
 import os
 import urllib
-import gobject
+import glib
 import Preferences
 
 from gui.gtkui.AvatarManager import AvatarManager
@@ -65,7 +65,7 @@ class MusicHandler(object):
         self.preferences_dialog = None
         self.config = BaseMusicHandlerConfig()
 
-        gobject.timeout_add(500, self.check_song)
+        glib.timeout_add(500, self.check_song)
 
     def preferences(self):
         ''' Shows the extension preferences dialog'''

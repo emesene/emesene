@@ -26,7 +26,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 import sys
 import gtk
 import base64
-import gobject
+import glib
 import gettext
 import optparse
 import shutil
@@ -231,7 +231,7 @@ class Controller(object):
             self._on_conversation_window_close()
 
         if self.timeout_id:
-            gobject.source_remove(self.timeout_id)
+            glib.source_remove(self.timeout_id)
             self.timeout_id = None
 
         if self.session is not None:
@@ -436,7 +436,7 @@ class Controller(object):
         self.session.config.get_or_set('b_allow_auto_scroll', True)
         self.session.config.get_or_set('adium_theme', 'renkoo.AdiumMessageStyle')
 
-        self.timeout_id = gobject.timeout_add(500, self.session.signals._handle_events)
+        self.timeout_id = glib.timeout_add(500, self.session.signals._handle_events)
         self.session.login(account.account, account.password, account.status,
             proxy, host, port, use_http)
 
@@ -470,7 +470,7 @@ class Controller(object):
             dialog = extension.get_default('dialog')
             dialog.contact_added_you(accounts, on_contact_added_you)
 
-        gobject.timeout_add(500, self.session.logger.check)
+        glib.timeout_add(500, self.session.logger.check)
 
         #we instantiate this here to prevent the whole contact list
         #online notification
@@ -478,7 +478,7 @@ class Controller(object):
             notificationcls = extension.get_default('notification')
             self.notification = notificationcls(self.session)
 
-        gobject.timeout_add(10000, instantiate_notification)
+        glib.timeout_add(10000, instantiate_notification)
 
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify

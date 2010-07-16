@@ -1,4 +1,4 @@
-import gobject
+import glib
 
 import extension
 import songretriever
