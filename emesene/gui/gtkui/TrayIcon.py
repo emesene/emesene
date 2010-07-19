@@ -50,7 +50,7 @@ class TrayIcon(gtk.StatusIcon):
         self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
         self.menu = MainMenu(self.handler)
         self.menu.show_all()
-        self.set_tooltip("emesene - "+self.handler.session.account.account)
+        self.set_tooltip("emesene - " + self.handler.session.account.account)
 
     def set_conversations(self, convs):
         """

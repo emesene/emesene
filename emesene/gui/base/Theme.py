@@ -153,6 +153,7 @@ class Theme(object):
         self.users = os.path.join(self.theme_path, "users.png")
         self.password = os.path.join(self.theme_path, "password.png")
         self.logo = os.path.join(self.theme_path, "logo.png")
+        self.tray = os.path.join(self.theme_path, "tray.png")
         self.throbber = os.path.join(self.theme_path, "throbber.gif")
         self.connect = os.path.join(self.theme_path, "connect.png")
         self.chat = os.path.join(self.theme_path, "chat.png")

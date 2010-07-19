@@ -33,7 +33,7 @@ class Indicator(appindicator.Indicator):
         DESCRIPTION = 'The Ayatana Indicator applet extension'
         AUTHOR = 'Riccardo (C10ud), Stefano(Cando)'
         WEBSITE = 'www.emesene.org'
-        appindicator.Indicator.__init__(self, "emesene", "logo", \
+        appindicator.Indicator.__init__(self, "emesene", "tray", \
             appindicator.CATEGORY_APPLICATION_STATUS, \
             os.path.join(os.getcwd(), handler.theme.theme_path))
 
