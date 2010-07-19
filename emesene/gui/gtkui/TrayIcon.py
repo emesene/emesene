@@ -81,7 +81,7 @@ class TrayIcon(gtk.StatusIcon):
         """
         if stat not in status.ALL or stat == -1:
             return
-        self.set_from_file(self.handler.theme.status_icons[stat])
+        self.set_from_file(self.handler.theme.status_icons_panel[stat])
 
     def _on_popup(self, trayicon, button, activate_time):
         """

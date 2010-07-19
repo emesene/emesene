@@ -136,7 +136,7 @@ class Theme(object):
         self.conv_name = conv_name
 
         self.theme_path = os.path.join("themes", "images", self.image_name)
-        self.conv_themes_path = os.path.join(os.getcwd(), "themes/conversations")
+        self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
         self.conv_themes = AdiumThemes.get_instance()
         self.conv_themes.add_themes_path(self.conv_themes_path)
 
@@ -153,7 +153,6 @@ class Theme(object):
         self.users = os.path.join(self.theme_path, "users.png")
         self.password = os.path.join(self.theme_path, "password.png")
         self.logo = os.path.join(self.theme_path, "logo.png")
-        self.tray = os.path.join(self.theme_path, "tray.png")
         self.throbber = os.path.join(self.theme_path, "throbber.gif")
         self.connect = os.path.join(self.theme_path, "connect.png")
         self.chat = os.path.join(self.theme_path, "chat.png")
@@ -179,6 +178,15 @@ class Theme(object):
             os.path.join(self.theme_path, "away.png")
         self.status_icons[status.IDLE] = \
             os.path.join(self.theme_path, "idle.png")
+
+        self.status_icons_panel = self.status_icons
+        self.panel_path = self.theme_path
+        # allows different icons for indicators/tray icons
+        panel_path = os.path.join(self.theme_path, "panel")        
+        if os.path.exists(panel_path):
+            self.panel_path = panel_path
+            # note: a panel subdirectory requires six pics: 
+            #logo.png, online.png, offline.png, busy.png, away.png, idle.png
 
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
 

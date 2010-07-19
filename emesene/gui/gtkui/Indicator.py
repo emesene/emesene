@@ -33,10 +33,11 @@ class Indicator(appindicator.Indicator):
         DESCRIPTION = 'The Ayatana Indicator applet extension'
         AUTHOR = 'Riccardo (C10ud), Stefano(Cando)'
         WEBSITE = 'www.emesene.org'
-        appindicator.Indicator.__init__(self, "emesene", "tray", \
+        appindicator.Indicator.__init__(self, "emesene", "logo", \
             appindicator.CATEGORY_APPLICATION_STATUS, \
-            os.path.join(os.getcwd(), handler.theme.theme_path))
-
+            os.path.join(os.getcwd(), handler.theme.panel_path))
+        # TODO: this always starts up with default theme, find out how to change
+        #       icon-theme-path property in appindicator
         self.handler = handler
 
         self.main_window = main_window
@@ -101,7 +102,7 @@ class Indicator(appindicator.Indicator):
         """
         #the appindicator takes a 'name' of an icon and NOT a filename. 
         #that means that we have to strip the file extension
-        icon_name = self.handler.theme.status_icons[stat].split("/")[-1]
+        icon_name = self.handler.theme.status_icons_panel[stat].split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)        
         
