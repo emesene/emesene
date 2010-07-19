@@ -23,6 +23,8 @@ import pango
 import gobject
 
 import extension
+
+from e3.common import Parser
 from gui.base import Plus
 
 def replace_markup(markup, arg=None):
@@ -131,14 +133,18 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
         if self.markup:
             try:
-                decorated_markup = self.function(unicode(self.markup,
-                    'utf-8'))
+                #decorated_markup = self.function(unicode(self.markup,
+                #    'utf-8'))
+                decorated_markup = self.function(self.markup)
             except Exception, error:
                 print "this nick: '%s' made the parser go crazy, striping" % \
                         (self.markup,)
                 print error
 
                 decorated_markup = Plus.msnplus_strip(self.markup)
+
+            layout.set_text(decorated_markup)
+            return layout
 
             try:
                 pango.parse_markup(self.function(unicode(self.markup,
@@ -157,7 +163,7 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 logfile.close()
                 # fallback
                 decorated_markup = Plus.msnplus_strip(self.markup)
-
+            
             layout.set_text(decorated_markup)
         else:
             layout.set_text('')
@@ -208,15 +214,60 @@ def balance(text):
          the contact list (the one you can edit on preferences)
          gets splited by an image
         '''
-        return balance_tags(text, ["span", "small", "b", "i"])
+        return balance_tags(text, ["span", "small", "b", "i", "u", "s"])
 
 def plus(markup):
     '''parse msnplus markup and replace the markup'''
     return replace_markup(Plus.msnplus(markup))
 
+bigparser = Parser.UnifiedParser()
+mohrtutchy_plus_parser = Plus.MsnPlusMarkupMohrtutchy()
+
+def plus_parse(obj, parser, filterdata):
+    # get a plain string
+    format, objects = filterdata.serialize(filterdata.list)
+    # get a msnPlusMarkup instance
+        
+    if 1: #self.method == 'Plus':
+        if parser and parser.tags != Parser.TAGS_NONE:
+            # we have markup
+            mohrtutchy_plus_parser.isHtml = False
+            if parser.tags == Parser.TAGS_PANGO:
+                # and we have html, not pango, so we tell to msnplusmarkup
+                #mohrtutchy_plus_parser.isHtml = True
+                # replace msn plus markup with pango/html
+                format = mohrtutchy_plus_parser.replaceMarkup(format)
+            else:
+                # we don't have markup
+                # remove all msn plus markup
+                format = mohrtutchy_plus_parser.removeMarkup(format)
+    
+            # put back the objects
+            filterdata.list = filterdata.deserialize(format, objects)
+        else:
+            format = mohrtutchy_plus_parser.removeMarkup(format)
+            filterdata.list = filterdata.deserialize(format, objects)
+
+bigparser.connect('filter', plus_parse) 
+
 def msnplus_to_list(txt, do_parse_emotes=True):
     '''parte text to a DictObj and return a list of strings and
     gtk.gdk.Pixbufs'''
+
+    ########################################
+    # Mohrtutchy hax.
+    parser = bigparser.getParser(Parser.unescape(txt), Parser.PangoDataType)
+    parsed_stuff = parser.get(smileys=True)
+    list_stuff = []
+    for item in parsed_stuff:
+        if type(item) is Parser.Smiley:
+            list_stuff.append(item.pixbuf)
+        else:
+            list_stuff.append(replace_markup(item))
+    return list_stuff
+
+    ########################################
+    # boyska's implementation, quite incomplete.
     dct = Plus.msnplus(txt, do_parse_emotes)
     
     if not do_parse_emotes:

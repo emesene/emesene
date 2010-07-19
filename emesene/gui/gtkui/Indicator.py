@@ -102,6 +102,8 @@ class Indicator(appindicator.Indicator):
         """
         #the appindicator takes a 'name' of an icon and NOT a filename. 
         #that means that we have to strip the file extension
+        # FIXAPPINDICATOR: this does not work.        
+        #self.set_icon_path(os.path.join(os.getcwd(), self.handler.theme.panel_path))
         icon_name = self.handler.theme.status_icons_panel[stat].split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)        

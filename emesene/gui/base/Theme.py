@@ -53,6 +53,7 @@ class Theme(object):
     #EMOTES[':-#'] = ''
     EMOTES['(d)'] = 'drink'
     EMOTES['(e)'] = 'mail'
+    EMOTES['(F)'] = 'bat'
     #EMOTES['8-)'] = ''
     EMOTES['(~)'] = 'video'
     #EMOTES['(yn)'] = ''
@@ -93,6 +94,7 @@ class Theme(object):
     EMOTES['(um)'] = 'umbrella'
     EMOTES[':-['] = 'bat'
     EMOTES['(w)'] = 'rose-dead'
+    EMOTES['(W)'] = 'rose-dead'
     EMOTES['(xx)'] = 'console'
 
     EMOTE_REGEX_STR = "|".join("(%s)" % (re.escape(key), ) for key in EMOTES)
