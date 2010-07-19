@@ -271,7 +271,7 @@ class Notification(gtk.Window):
     def show(self):
         ''' show it and run the timeout'''
         self.show_all()
-        self.timerId = glib.timeout_add(10000, self.close)
+        self.timerId = glib.timeout_add_seconds(10, self.close)
         return True
 
     def close(self, *args):

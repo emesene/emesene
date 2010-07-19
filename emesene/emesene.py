@@ -478,7 +478,7 @@ class Controller(object):
             notificationcls = extension.get_default('notification')
             self.notification = notificationcls(self.session)
 
-        glib.timeout_add(10000, instantiate_notification)
+        glib.timeout_add_seconds(10, instantiate_notification)
 
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify

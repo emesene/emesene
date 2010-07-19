@@ -128,7 +128,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if self.group_chat:
             self.rotate_started = True #to prevents more than one timeout_add
-            gobject.timeout_add(5000, self.rotate_picture)
+            gobject.timeout_add_seconds(5, self.rotate_picture)
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
@@ -223,7 +223,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         if not self.rotate_started:
             self.rotate_started = True
-            gobject.timeout_add(5000, self.rotate_picture)
+            gobject.timeout_add_seconds(5, self.rotate_picture)
 
         #TODO add plus support for nick to the tab label!
         members_nick = []

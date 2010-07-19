@@ -65,7 +65,7 @@ class MusicHandler(object):
         self.preferences_dialog = None
         self.config = BaseMusicHandlerConfig()
 
-        glib.timeout_add(500, self.check_song)
+        glib.timeout_add_seconds(1, self.check_song)
 
     def preferences(self):
         ''' Shows the extension preferences dialog'''
