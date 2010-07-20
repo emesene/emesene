@@ -2,6 +2,7 @@ import gtk
 import pango
 import gobject
 
+import Renderers
 import extension
 
 class TextField(gtk.VBox):
@@ -21,8 +22,8 @@ class TextField(gtk.VBox):
         gtk.VBox.__init__(self)
 
         self.entry = gtk.Entry()
-        self.label = gtk.Label()
-        self.label.set_ellipsize(pango.ELLIPSIZE_END)
+        self.label = Renderers.SmileyLabel()
+        #self.label.set_ellipsize(pango.ELLIPSIZE_END)
         self.button = gtk.Button()
         self.button.set_alignment(0.0, 0.5)
         self.button.set_relief(gtk.RELIEF_NONE)
@@ -90,7 +91,7 @@ class TextField(gtk.VBox):
     def _set_text(self, value):
         '''set the value of text'''
         self._text = value
-        self.label.set_text(self._text)
+        self.label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(self._text)))
         self.entry.set_text(self._text)
 
     text = property(fget=_get_text, fset=_set_text)
