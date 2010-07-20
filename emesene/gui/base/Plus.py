@@ -352,8 +352,8 @@ IrcTags = re.compile("\xb7\#|\xb7&[a-zA-Z]+\d{0,3};|\xb7\@|\xb70")
 removeList = (colorTags,backColorTags,colorIrcTags,BbTags,IrcTags)
 
 getTagDict = {
-    'background': ('background="#%s" ','background-color: #%s; '),
-    'foreground': ('foreground="#%s" ','color: #%s; '),
+    'background': ('background="#%s"','background-color: #%s;'),
+    'foreground': ('foreground="#%s"','color: #%s;'),
     'b': ('weight="bold"', 'font-weight: bold'), 
     'u': ('underline="single"', 'text-decoration:underline'),
     'i': ('style="italic"', 'font-style: italic'),

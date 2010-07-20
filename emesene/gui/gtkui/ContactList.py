@@ -557,7 +557,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         message = gobject.markup_escape_text(contact.message)
         nick = gobject.markup_escape_text(contact.nick)
         display_name = gobject.markup_escape_text(contact.display_name)
-
+        
         template = self.nick_template
         template = template.replace('[$NL]', '\n')
         template = template.replace('[$NICK]',
@@ -570,7 +570,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 self.escape_tags(e3.status.STATUS[contact.status]))
         template = template.replace('[$DISPLAY_NAME]',
                 self.escape_tags(display_name))
-
+        
         blocked_text = ''
 
         if contact.blocked:

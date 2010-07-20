@@ -162,7 +162,7 @@ class UserListDataType( PangoDataType ):
         # unpack the tuple :D
         template = self.text[0]
         params = self.text[1:]
-
+        
         # pseudo format()
         template = template.split("%s")
 

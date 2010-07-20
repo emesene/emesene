@@ -228,25 +228,24 @@ def plus_parse(obj, parser, filterdata):
     format, objects = filterdata.serialize(filterdata.list)
     # get a msnPlusMarkup instance
         
-    if 1: #self.method == 'Plus':
-        if parser and parser.tags != Parser.TAGS_NONE:
-            # we have markup
-            mohrtutchy_plus_parser.isHtml = False
-            if parser.tags == Parser.TAGS_PANGO:
-                # and we have html, not pango, so we tell to msnplusmarkup
-                #mohrtutchy_plus_parser.isHtml = True
-                # replace msn plus markup with pango/html
-                format = mohrtutchy_plus_parser.replaceMarkup(format)
-            else:
-                # we don't have markup
-                # remove all msn plus markup
-                format = mohrtutchy_plus_parser.removeMarkup(format)
-    
-            # put back the objects
-            filterdata.list = filterdata.deserialize(format, objects)
+    if parser and parser.tags != Parser.TAGS_NONE:
+        # we have markup
+        mohrtutchy_plus_parser.isHtml = False
+        if parser.tags == Parser.TAGS_PANGO:
+            # and we have html, not pango, so we tell to msnplusmarkup
+            #mohrtutchy_plus_parser.isHtml = True
+            # replace msn plus markup with pango/html
+            format = mohrtutchy_plus_parser.replaceMarkup(format)
         else:
+            # we don't have markup
+            # remove all msn plus markup
             format = mohrtutchy_plus_parser.removeMarkup(format)
-            filterdata.list = filterdata.deserialize(format, objects)
+    
+        # put back the objects
+        filterdata.list = filterdata.deserialize(format, objects)
+    else:
+        format = mohrtutchy_plus_parser.removeMarkup(format)
+        filterdata.list = filterdata.deserialize(format, objects)
 
 bigparser.connect('filter', plus_parse) 
 
@@ -255,9 +254,10 @@ def msnplus_to_list(txt, do_parse_emotes=True):
     gtk.gdk.Pixbufs'''
 
     ########################################
-    # Mohrtutchy hax.
+    # Mohrtutchy hax, it works (not sure how)
     parser = bigparser.getParser(Parser.unescape(txt), Parser.PangoDataType)
     parsed_stuff = parser.get(smileys=True)
+
     list_stuff = []
     for item in parsed_stuff:
         if type(item) is Parser.Smiley:
@@ -367,8 +367,7 @@ class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
     def __init__(self):
-        CellRendererFunction.__init__(self,
-                msnplus_to_list)
+        CellRendererFunction.__init__(self, msnplus_to_list)
 
 extension.implements(CellRendererPlus, 'nick renderer')
 
@@ -380,7 +379,7 @@ class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
     but improving the readability'''
     def __init__(self):
-        CellRendererFunction.__init__(self, strip_plus)
+        CellRendererFunction.__init__(self, msnplus_to_list)
 
 extension.implements(CellRendererNoPlus, 'nick renderer')
 
@@ -703,6 +702,86 @@ class SmileyLayout(pango.Layout):
                 ctx.paint()
             except Exception, error:
                 print error
+
+class SmileyLabel(gtk.Widget):
+    '''Label with smiley support. '''
+
+    __gsignals__ = { 'size_request' : 'override',
+                     'size-allocate' : 'override', 
+                     'expose-event' : 'override'}
+            
+    def __init__(self):
+        gtk.Widget.__init__(self)
+        self._text = ['']    
+        self._ellipsize = True
+        self._wrap = True
+        self._smiley_layout = None
+        self.set_flags(self.flags() | gtk.NO_WINDOW)
+        self._smiley_layout = SmileyLayout(self.create_pango_context())
+
+    def set_ellipsize(self, ellipsize):
+        ''' Sets the ellipsize behavior '''
+        self._ellipsize = ellipsize
+        self.queue_resize()
+
+    def set_wrap(self, wrap):
+        ''' Sets the wrap behavior '''
+        self._wrap = wrap
+        self.queue_resize()
+
+    def set_markup(self, text=['']):
+        self.set_text(text)
+
+    def set_text(self, text=['']):
+        ''' Sets widget text '''
+        self._text = text
+        self.setup_smiley_layout()
+        self.queue_resize()
+
+    def set_smiley_scaling(self, smiley_scaling):
+        self._smiley_layout.set_smiley_scaling(smiley_scaling)
+        self.queue_resize()
+
+    def setup_smiley_layout(self):
+        self._smiley_layout.set_element_list(self._text)
+
+    def do_realize(self):
+        gtk.Widget.do_realize(self)
+        self.set_flags(self.flags() | gtk.REALIZED)
+        self.window = self.get_parent().window
+
+    def do_style_set(self, prev_style):
+        self._smiley_layout.set_colors(self.style.text[gtk.STATE_NORMAL])
+        self.queue_draw()
+
+    def do_size_request(self, requisition):
+        self._smiley_layout.set_width(-1)
+        width, height = self._smiley_layout.get_pixel_size()
+        requisition.height = height
+        if self._ellipsize or self._wrap:
+            requisition.width = 0
+        else: 
+            requisition.width = width
+
+    def do_size_allocate(self, allocation):
+        if not (self._ellipsize or self._wrap):
+            self._smiley_layout.set_width(-1)
+            width, height = self._smiley_layout.get_pixel_size()
+            self.set_size_request(width, height)
+        else:
+            if self._ellipsize: 
+                self._smiley_layout.set_ellipsize(pango.ELLIPSIZE_END)
+            else: 
+                self._smiley_layout.set_ellipsize(pango.ELLIPSIZE_NONE)
+            self._smiley_layout.set_width(allocation.width * pango.SCALE)
+            self.set_size_request(-1, self._smiley_layout.get_pixel_size()[1])
+        gtk.Widget.do_size_allocate(self, allocation)
+
+    def do_expose_event(self, event):
+        area = self.get_allocation()
+        ctx = event.window.cairo_create()
+        self._smiley_layout.draw(ctx, area)
+gobject.type_register(SmileyLabel)
 
 import cairo
 import gui
