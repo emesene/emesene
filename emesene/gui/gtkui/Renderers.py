@@ -290,6 +290,11 @@ def msnplus_to_list(txt, do_parse_emotes=True):
 
     return accum
     
+def msnplus_to_plain_text(txt):
+    ''' from a nasty string, returns a nice plain text string without
+    bells and whistles, just text'''
+    return bigparser.getParser(txt).get(escaped=False)
+
 def flatten_tree(dct, accum, parents):
     '''convert the tree of markup into a list of string that contain pango
     markup and pixbufs, if an img tag is found all the parent tags should be

@@ -5,6 +5,7 @@ import glib
 import e3
 import gui
 import extension
+import Renderers
 
 class ConversationManager(gtk.Notebook, gui.ConversationManager):
     '''the main conversation, it only contains other widgets'''
@@ -125,7 +126,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
         self.set_message_waiting(page, False)
         parent = self.get_parent()
-        parent.set_title(page.text)
+        parent.set_title(Renderers.msnplus_to_plain_text(page.text))
         parent.set_icon(page.icon)
 #        glib.idle_add(self._on_switch_page_grab_focus)
 
