@@ -220,27 +220,30 @@ def plus(markup):
     '''parse msnplus markup and replace the markup'''
     return replace_markup(Plus.msnplus(markup))
 
+################################################################################
+# emesene1 parsers rock the streets, here they're instanciated and used
+# if you could fix the emesene2 one, you would be very welcome.
+################################################################################
+
 bigparser = Parser.UnifiedParser()
 mohrtutchy_plus_parser = Plus.MsnPlusMarkupMohrtutchy()
+plus_or_noplus = 1 # 1 means plus, 0 means noplus
 
 def plus_parse(obj, parser, filterdata):
-    # get a plain string
+    global plus_or_noplus
+    # get a plain string with objects
     format, objects = filterdata.serialize(filterdata.list)
-    # get a msnPlusMarkup instance
         
     if parser and parser.tags != Parser.TAGS_NONE:
         # we have markup
         mohrtutchy_plus_parser.isHtml = False
-        if parser.tags == Parser.TAGS_PANGO:
-            # and we have html, not pango, so we tell to msnplusmarkup
-            #mohrtutchy_plus_parser.isHtml = True
-            # replace msn plus markup with pango/html
+        if parser.tags == Parser.TAGS_PANGO and plus_or_noplus:
+            # replace msn plus markup with pango
             format = mohrtutchy_plus_parser.replaceMarkup(format)
         else:
-            # we don't have markup
             # remove all msn plus markup
             format = mohrtutchy_plus_parser.removeMarkup(format)
-    
+
         # put back the objects
         filterdata.list = filterdata.deserialize(format, objects)
     else:
@@ -292,7 +295,7 @@ def msnplus_to_list(txt, do_parse_emotes=True):
     
 def msnplus_to_plain_text(txt):
     ''' from a nasty string, returns a nice plain text string without
-    bells and whistles, just text'''
+    bells and whistles, just text '''
     return bigparser.getParser(txt).get(escaped=False)
 
 def flatten_tree(dct, accum, parents):
@@ -372,6 +375,8 @@ class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
     def __init__(self):
+        global plus_or_noplus
+        plus_or_noplus = 1
         CellRendererFunction.__init__(self, msnplus_to_list)
 
 extension.implements(CellRendererPlus, 'nick renderer')
@@ -384,6 +389,8 @@ class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
     but improving the readability'''
     def __init__(self):
+        global plus_or_noplus
+        plus_or_noplus = 0
         CellRendererFunction.__init__(self, msnplus_to_list)
 
 extension.implements(CellRendererNoPlus, 'nick renderer')
