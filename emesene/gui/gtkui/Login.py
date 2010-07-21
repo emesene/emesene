@@ -15,64 +15,17 @@ import stock
 import logging
 log = logging.getLogger('gtkui.Login')
 
-class Login(gtk.Alignment):
-    '''
-    widget that represents the login window
-    '''
-    def __init__(self, callback, on_preferences_changed,
-                config, config_dir, config_path, proxy=None,
-                use_http=None, session_id=None):
-
+class LoginBase(gtk.Alignment):
+    ''' base widget that holds the visual stuff '''
+    def __init__(self, callback, args=None):
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=1.0)
-
-        self.config = config
-        self.config_dir = config_dir
-        self.config_path = config_path
-        self.callback = callback
-        self.on_preferences_changed = on_preferences_changed
-        # the id of the default extension that handles the session
-        # used to select the default session on the preference dialog
-        self.use_http = use_http
-        self.session_id = session_id
-
-        account = self.config.get_or_set('last_logged_account', '')
-        self.config.get_or_set('service', 'msn')
-        self.remembers = self.config.get_or_set('d_remembers', {})
-        self.config.get_or_set('d_user_service', {})
-        self.status = self.config.get_or_set('d_status',{})
-        self.accounts = self.config.d_accounts
-
-        if proxy is None:
-            self.proxy = e3.Proxy()
-        else:
-            self.proxy = proxy
 
         self.dialog = extension.get_default('dialog')
         Avatar = extension.get_default('avatar')
         NiceBar = extension.get_default('nice bar')
 
         default_session = extension.get_default('session')
-
-        self.services = {}
-
-        if session_id is not None:
-            for ext_id, ext in extension.get_extensions('session').iteritems():
-                for service_name, service_data in ext.SERVICES.iteritems():
-                    self.services[service_name] = service_data
-
-                if session_id == ext_id and self.config.service in ext.SERVICES:
-                    self.server_host = ext.SERVICES[self.config.service]['host']
-                    self.server_port = ext.SERVICES[self.config.service]['port']
-                    break
-            else:
-                self.config.service = 'msn'
-                self.server_host = 'messenger.hotmail.com'
-                self.server_port = '1863'
-        else:
-            self.config.service = 'msn'
-            self.server_host = 'messenger.hotmail.com'
-            self.server_port = '1863'
 
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
@@ -84,8 +37,6 @@ class Login(gtk.Alignment):
         completion.set_inline_selection(True)
 
         self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
-
-        self._reload_account_list()
 
         self.cmb_account = gtk.ComboBoxEntry(self.liststore, 0)
         self.cmb_account.get_children()[0].set_completion(completion)
@@ -108,8 +59,6 @@ class Login(gtk.Alignment):
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.password)
 
         self.avatar = Avatar()
-        avatar_path = self.config_dir.join(self.server_host, account, 'avatars', 'last')
-        self.avatar.set_from_file(avatar_path)
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
@@ -146,8 +95,15 @@ class Login(gtk.Alignment):
 
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
-        self.b_connect.set_border_width(8)
         self.b_connect.set_sensitive(False)
+
+        self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
+        self.b_cancel.connect('clicked', self._on_cancel_clicked)
+        
+        vbuttonbox = gtk.VButtonBox()
+        vbuttonbox.set_spacing(8)
+        vbuttonbox.pack_start(self.b_connect)
+        vbuttonbox.pack_start(self.b_cancel)
 
         vbox = gtk.VBox()
 
@@ -183,8 +139,23 @@ class Login(gtk.Alignment):
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
+        # TODO: FIXME: GtkInfoBar this.
         self.nicebar = NiceBar()
 
+        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
+                animated=True)
+        self.throbber = gtk.image_new_from_animation(th_pix)
+        self.label = gtk.Label()
+        self.label.set_markup('<b>Connecting...</b>')
+        self.label_timer = gtk.Label()
+        self.label_timer.set_markup('<b>Connection error!\n </b>')
+
+        al_label = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+            yscale=0.0)
+        al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
+            yscale=0.0)
+        al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
+            yscale=0.2)
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
@@ -194,9 +165,12 @@ class Login(gtk.Alignment):
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
 
+        al_label.add(self.label)
+        al_label_timer.add(self.label_timer)
+        al_throbber.add(self.throbber)
         al_vbox_entries.add(vbox_entries)
         al_vbox_remember.add(vbox_remember)
-        al_button.add(self.b_connect)
+        al_button.add(vbuttonbox)
         al_account.add(self.avatar)
         al_preferences.add(self.b_preferences)
 
@@ -204,13 +178,77 @@ class Login(gtk.Alignment):
         vbox.pack_start(al_account, True, False)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
+        vbox.pack_start(al_label, True, False)
+        vbox.pack_start(al_label_timer, True, False)
+        vbox.pack_start(al_throbber, True, False)
         vbox.pack_start(al_button, True, True)
         vbox.pack_start(al_preferences, False)
 
         self.add(vbox)
         vbox.show_all()
 
+class Login(LoginBase):
+    '''
+    widget that represents the login window
+    '''
+    def __init__(self, callback, on_preferences_changed,
+                config, config_dir, config_path, proxy=None,
+                use_http=None, session_id=None):
+
+        LoginBase.__init__(self, callback)
+
+        self.config = config
+        self.config_dir = config_dir
+        self.config_path = config_path
+        self.callback = callback
+        self.on_preferences_changed = on_preferences_changed
+        # the id of the default extension that handles the session
+        # used to select the default session on the preference dialog
+        self.use_http = use_http
+        self.session_id = session_id
+
+        account = self.config.get_or_set('last_logged_account', '')
+        self.config.get_or_set('service', 'msn')
+        self.remembers = self.config.get_or_set('d_remembers', {})
+        self.config.get_or_set('d_user_service', {})
+        self.status = self.config.get_or_set('d_status',{})
+        self.accounts = self.config.d_accounts
+
+        self._reload_account_list()
+        
+        if proxy is None:
+            self.proxy = e3.Proxy()
+        else:
+            self.proxy = proxy
+
+        self.services = {}
+
+        if session_id is not None:
+            for ext_id, ext in extension.get_extensions('session').iteritems():
+                for service_name, service_data in ext.SERVICES.iteritems():
+                    self.services[service_name] = service_data
+
+                if session_id == ext_id and self.config.service in ext.SERVICES:
+                    self.server_host = ext.SERVICES[self.config.service]['host']
+                    self.server_port = ext.SERVICES[self.config.service]['port']
+                    break
+            else:
+                self.config.service = 'msn'
+                self.server_host = 'messenger.hotmail.com'
+                self.server_port = '1863'
+        else:
+            self.config.service = 'msn'
+            self.server_host = 'messenger.hotmail.com'
+            self.server_port = '1863'
+
+        avatar_path = self.config_dir.join(self.server_host, account, 'avatars', 'last')
+        self.avatar.set_from_file(avatar_path)
+
         self.nicebar.hide()
+        self.throbber.hide()
+        self.label.hide()
+        self.label_timer.hide()
+        self.b_cancel.hide()
 
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
@@ -547,86 +585,55 @@ class Login(gtk.Alignment):
                 service)
         self._on_account_changed(None)
 
-class ConnectingWindow(gtk.Alignment):
+class ConnectingWindow(Login):
     '''
     widget that represents the GUI interface showed when connecting
     '''
-    def __init__(self, callback, avatar_path):
+    def __init__(self, callback, avatar_path, config):
+        LoginBase.__init__(self, callback)
 
-        gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=1.0,
-            yscale=1.0)
         self.callback = callback
+        self.avatar.set_from_file(avatar_path)
 
         #for reconnecting
         self.reconnect_timer_id = None
 
-        Avatar = extension.get_default('avatar')
+        account = config.get_or_set('last_logged_account', '')
+        remembers = config.get_or_set('d_remembers', {})
+        attr = int(remembers[account])
+        if attr == 3:#autologin,password,account checked
+            self.auto_login.set_active(True)
+        elif attr == 2:#password,account checked
+            self.remember_password.set_active(True)
+        elif attr == 1:#only account checked
+            self.remember_account.set_active(True)
+        password = base64.b64decode(config.d_accounts[account])
+        self.cmb_account.get_children()[0].set_text(account)
+        self.txt_password.set_text(password)
 
-        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
-                animated=True)
-        self.throbber = gtk.image_new_from_animation(th_pix)
-
-        self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
-        self.b_cancel.connect('clicked', self._on_cancel_clicked)
-#        self.b_cancel.set_border_width(8)
-
-        self.b_connect = gtk.Button(label="Connect now")
-        self.b_connect.set_image(gtk.image_new_from_stock(gtk.STOCK_REFRESH, \
-                                                         gtk.ICON_SIZE_BUTTON))
-#        self.b_connect.set_border_width(8)
-
-        vbuttonbox = gtk.VButtonBox()
-        vbuttonbox.set_spacing(8)
-        vbuttonbox.pack_start(self.b_connect)
-        vbuttonbox.pack_start(self.b_cancel)
-
-        self.label = gtk.Label()
-        self.label.set_markup('<b>Connecting...</b>')
-        self.label_timer = gtk.Label()
-        self.label_timer.set_markup('<b>Connection error!\n </b>')
-
-        self.avatar = Avatar(cellDimention=96)
-        self.avatar.set_from_file(avatar_path)
-
-        self.b_preferences = gtk.Button()
-        self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
-            gtk.ICON_SIZE_MENU)
-        self.img_preferences.set_sensitive(False)
-        self.b_preferences.set_image(self.img_preferences)
-        self.b_preferences.set_relief(gtk.RELIEF_NONE)
+        self.cmb_account.set_sensitive(False)
         self.b_preferences.set_sensitive(False)
-
-        al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
-            yscale=0.2)
-        al_buttons = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.15)
-        al_label = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.0)
-        al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.0)
-        al_logo = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.0)
-        al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
-
-        al_throbber.add(self.throbber)
-        al_buttons.add(vbuttonbox)
-        al_label.add(self.label)
-        al_label_timer.add(self.label_timer)
-        al_logo.add(self.avatar)
-        al_preferences.add(self.b_preferences)
-
-        vbox = gtk.VBox()
-        vbox.pack_start(al_logo, True, False)
-        vbox.pack_start(al_label, True, False)
-        vbox.pack_start(al_label_timer, True, False)
-        vbox.pack_start(al_throbber, True, False)
-        vbox.pack_start(al_buttons, True, True)
-        vbox.pack_start(al_preferences, False)
-
-        self.add(vbox)
-        vbox.show_all()
-
+        self.btn_status.set_sensitive(False)
+        self.txt_password.set_sensitive(False)        
+        self.nicebar.hide()
+        self.throbber.show()
+        self.label.show()
         self.label_timer.hide()
+
+        self.b_connect.set_label(_("Connect now"))
         self.b_connect.hide()
+
+    def _update_fields(self, *args):
+        ''' override the login method with "do nothing" '''
+        return
+
+    def _on_password_changed(self, widget):
+        ''' overload the login one '''
+        state = 0
+
+        self.remember_account.set_sensitive(state)
+        self.remember_password.set_sensitive(state)
+        self.auto_login.set_sensitive(state)
 
     def _on_cancel_clicked(self, button):
         '''

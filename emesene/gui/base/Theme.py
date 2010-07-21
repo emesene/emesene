@@ -25,6 +25,8 @@ class Theme(object):
     EMOTES['*-)'] = 'face-uncertain'
     EMOTES[':O'] = 'face-surprise'
     EMOTES[':o'] = EMOTES[':O']
+    EMOTES[':-o'] = EMOTES[':O']
+    EMOTES[':-O'] = EMOTES[':O']
     EMOTES[':$'] = 'face-embarrassed'
     EMOTES[':\'('] = 'face-crying'
     EMOTES[':@'] = 'face-angry'
@@ -36,7 +38,7 @@ class Theme(object):
     EMOTES['(au)'] = 'car'
     #EMOTES['8o|'] = ''
     EMOTES['(b)'] = 'beer'
-    EMOTES['(B)'] = 'beer'
+    EMOTES['(B)'] = EMOTES['(b)']
     EMOTES['(^)'] = 'cake'
     EMOTES['(bah)'] = 'sheep'
     EMOTES['(nah)'] = 'goat'
@@ -53,7 +55,6 @@ class Theme(object):
     #EMOTES[':-#'] = ''
     EMOTES['(d)'] = 'drink'
     EMOTES['(e)'] = 'mail'
-    EMOTES['(F)'] = 'bat'
     #EMOTES['8-)'] = ''
     EMOTES['(~)'] = 'video'
     #EMOTES['(yn)'] = ''
@@ -78,7 +79,9 @@ class Theme(object):
     EMOTES['(l)'] = 'love'
     EMOTES['(L)'] = 'love'
     EMOTES['(k)'] = 'face-kiss'
+    EMOTES['(K)'] = EMOTES['(k)']
     EMOTES['(f)'] = 'rose'
+    EMOTES['(F)'] = EMOTES['(f)']
     EMOTES['(})'] = 'hughright'
     #EMOTES['^o)'] = ''
     EMOTES[':-*'] = 'secret'
@@ -94,7 +97,7 @@ class Theme(object):
     EMOTES['(um)'] = 'umbrella'
     EMOTES[':-['] = 'bat'
     EMOTES['(w)'] = 'rose-dead'
-    EMOTES['(W)'] = 'rose-dead'
+    EMOTES['(W)'] = EMOTES['(w)']
     EMOTES['(xx)'] = 'console'
 
     EMOTE_REGEX_STR = "|".join("(%s)" % (re.escape(key), ) for key in EMOTES)

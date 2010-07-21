@@ -410,7 +410,7 @@ class Controller(object):
                     self.config.service)
             self.window.clear()
             self.avatar_path = self.config_dir.join(host, account.account, 'avatars', 'last')
-            self.window.go_connect(self.on_cancel_login, self.avatar_path)
+            self.window.go_connect(self.on_cancel_login, self.avatar_path, self.config)
             self.window.show()
         else:
             self.window.content.clear_connect()
@@ -569,7 +569,7 @@ class Controller(object):
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''
         self.window.clear()
-        self.window.go_connect(self.on_cancel_login, self.avatar_path)
+        self.window.go_connect(self.on_cancel_login, self.avatar_path, self.config)
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
