@@ -184,15 +184,27 @@ class Theme(object):
         self.status_icons[status.IDLE] = \
             os.path.join(self.theme_path, "idle.png")
 
-        self.status_icons_panel = self.status_icons
+        self.status_icons_panel = {}
         self.panel_path = self.theme_path
-        # allows different icons for indicators/tray icons
+        # allow different icons for indicators/tray icons
+        # note: a panel subdirectory requires six pics: 
+        #logo.png, online.png, offline.png, busy.png, away.png, idle.png
         panel_path = os.path.join(self.theme_path, "panel")        
         if os.path.exists(panel_path):
             self.panel_path = panel_path
-            # note: a panel subdirectory requires six pics: 
-            #logo.png, online.png, offline.png, busy.png, away.png, idle.png
-
+            self.status_icons_panel[status.ONLINE] = \
+                os.path.join(self.panel_path, "online.png")
+            self.status_icons_panel[status.OFFLINE] = \
+                os.path.join(self.panel_path, "offline.png")
+            self.status_icons_panel[status.BUSY] = \
+                os.path.join(self.panel_path, "busy.png")
+            self.status_icons_panel[status.AWAY] = \
+                os.path.join(self.panel_path, "away.png")
+            self.status_icons_panel[status.IDLE] = \
+                os.path.join(self.panel_path, "idle.png")
+        else:
+            self.status_icons_panel = self.status_icons.copy()
+            
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
 
     def emote_to_path(self, shortcut, remove_protocol=False):
