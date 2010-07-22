@@ -29,6 +29,8 @@ from gui.base import Plus
 
 def replace_markup(markup, arg=None):
     '''replace the tags defined in gui.base.ContactList'''
+    markup = markup.replace("[$nl]", "\n")
+    
     markup = markup.replace("[$small]", "<small>")
     markup = markup.replace("[$/small]", "</small>")
 
