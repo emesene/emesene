@@ -80,6 +80,7 @@ def setup():
     global WEBKITERROR, INDICATORERROR
 
     import gtk
+    gtk.settings_get_default().set_property("gtk-error-bell", False)
 
     extension.category_register('dialog', Dialog.Dialog)
     extension.category_register('image chooser', ImageChooser.ImageChooser)

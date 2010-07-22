@@ -321,7 +321,7 @@ class ContactList(object):
 
         template = template.replace('[$BLOCKED]', blocked_text)
 
-        return self._clean_format_tags(template)
+        return template
 
     def _clean_format_tags(self, template):
         '''remove the formating tags like [$b] since at this level we can't

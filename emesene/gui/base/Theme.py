@@ -25,6 +25,8 @@ class Theme(object):
     EMOTES['*-)'] = 'face-uncertain'
     EMOTES[':O'] = 'face-surprise'
     EMOTES[':o'] = EMOTES[':O']
+    EMOTES[':-o'] = EMOTES[':O']
+    EMOTES[':-O'] = EMOTES[':O']
     EMOTES[':$'] = 'face-embarrassed'
     EMOTES[':\'('] = 'face-crying'
     EMOTES[':@'] = 'face-angry'
@@ -36,7 +38,7 @@ class Theme(object):
     EMOTES['(au)'] = 'car'
     #EMOTES['8o|'] = ''
     EMOTES['(b)'] = 'beer'
-    EMOTES['(B)'] = 'beer'
+    EMOTES['(B)'] = EMOTES['(b)']
     EMOTES['(^)'] = 'cake'
     EMOTES['(bah)'] = 'sheep'
     EMOTES['(nah)'] = 'goat'
@@ -77,7 +79,9 @@ class Theme(object):
     EMOTES['(l)'] = 'love'
     EMOTES['(L)'] = 'love'
     EMOTES['(k)'] = 'face-kiss'
+    EMOTES['(K)'] = EMOTES['(k)']
     EMOTES['(f)'] = 'rose'
+    EMOTES['(F)'] = EMOTES['(f)']
     EMOTES['(})'] = 'hughright'
     #EMOTES['^o)'] = ''
     EMOTES[':-*'] = 'secret'
@@ -93,6 +97,7 @@ class Theme(object):
     EMOTES['(um)'] = 'umbrella'
     EMOTES[':-['] = 'bat'
     EMOTES['(w)'] = 'rose-dead'
+    EMOTES['(W)'] = EMOTES['(w)']
     EMOTES['(xx)'] = 'console'
 
     EMOTE_REGEX_STR = "|".join("(%s)" % (re.escape(key), ) for key in EMOTES)
@@ -136,7 +141,7 @@ class Theme(object):
         self.conv_name = conv_name
 
         self.theme_path = os.path.join("themes", "images", self.image_name)
-        self.conv_themes_path = os.path.join(os.getcwd(), "themes/conversations")
+        self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
         self.conv_themes = AdiumThemes.get_instance()
         self.conv_themes.add_themes_path(self.conv_themes_path)
 
@@ -178,6 +183,15 @@ class Theme(object):
             os.path.join(self.theme_path, "away.png")
         self.status_icons[status.IDLE] = \
             os.path.join(self.theme_path, "idle.png")
+
+        self.status_icons_panel = self.status_icons
+        self.panel_path = self.theme_path
+        # allows different icons for indicators/tray icons
+        panel_path = os.path.join(self.theme_path, "panel")        
+        if os.path.exists(panel_path):
+            self.panel_path = panel_path
+            # note: a panel subdirectory requires six pics: 
+            #logo.png, online.png, offline.png, busy.png, away.png, idle.png
 
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
 

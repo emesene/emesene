@@ -20,14 +20,11 @@ class TabWidget(gtk.HBox):
         self.set_spacing(4)
 
         self.image = gtk.Image()
-        self.label = gtk.Label(text)
+        self.label = Renderer.SmileyLabel()
+        self.label.set_text(text)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
         self.close.connect('clicked', on_close_clicked,
             conversation)
-
-        self.label.set_max_width_chars(20)
-        self.label.set_use_markup(True)
-        self.label.set_alignment(0.0, 0.5)
 
         self.pack_start(self.image, False, False, 0)
         self.pack_start(self.label, True, True, 0)
@@ -48,4 +45,4 @@ class TabWidget(gtk.HBox):
 
     def set_text(self, text):
         '''set the text of the label'''
-        self.label.set_markup(Renderer.msnplus_to_list(gobject.markup_escape_text(text))[0])
+        self.label.set_markup(Renderer.msnplus_to_list(gobject.markup_escape_text(text)))

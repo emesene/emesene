@@ -23,6 +23,8 @@ import pango
 import gobject
 
 import extension
+
+from e3.common import Parser
 from gui.base import Plus
 
 def replace_markup(markup, arg=None):
@@ -131,8 +133,9 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
         if self.markup:
             try:
-                decorated_markup = self.function(unicode(self.markup,
-                    'utf-8'))
+                #decorated_markup = self.function(unicode(self.markup,
+                #    'utf-8'))
+                decorated_markup = self.function(self.markup)
             except Exception, error:
                 print "this nick: '%s' made the parser go crazy, striping" % \
                         (self.markup,)
@@ -140,13 +143,27 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
                 decorated_markup = Plus.msnplus_strip(self.markup)
 
+            layout.set_text(decorated_markup)
+            return layout
+
             try:
                 pango.parse_markup(self.function(unicode(self.markup,
                     'utf-8'), False))
             except gobject.GError:
                 print "invalid pango markup:", decorated_markup
+                # temporary debug stuff
+                import e3.common.ConfigDir as CD
+                import time
+                cd = CD("emesene2")
+                logfile = open(cd.join(cd.default_base_dir, 'badnicks.log'), 'a')
+                logfile.write(
+                    "report this here: http://github.com/emesene/emesene/issues#issue/8\n" +
+                    time.asctime() + "\n" + self.markup + "\n" + 
+                    ",".join(["%s" % str(el) for el in decorated_markup]))
+                logfile.close()
+                # fallback
                 decorated_markup = Plus.msnplus_strip(self.markup)
-
+            
             layout.set_text(decorated_markup)
         else:
             layout.set_text('')
@@ -197,17 +214,65 @@ def balance(text):
          the contact list (the one you can edit on preferences)
          gets splited by an image
         '''
-        return balance_tags(text, ["span", "small", "b", "i"])
+        return balance_tags(text, ["span", "small", "b", "i", "u", "s"])
 
 def plus(markup):
     '''parse msnplus markup and replace the markup'''
     return replace_markup(Plus.msnplus(markup))
 
+################################################################################
+# emesene1 parsers rock the streets, here they're instanciated and used
+# if you could fix the emesene2 one, you would be very welcome.
+################################################################################
+
+bigparser = Parser.UnifiedParser()
+mohrtutchy_plus_parser = Plus.MsnPlusMarkupMohrtutchy()
+plus_or_noplus = 1 # 1 means plus, 0 means noplus
+
+def plus_parse(obj, parser, filterdata):
+    global plus_or_noplus
+    # get a plain string with objects
+    format, objects = filterdata.serialize(filterdata.list)
+        
+    if parser and parser.tags != Parser.TAGS_NONE:
+        # we have markup
+        mohrtutchy_plus_parser.isHtml = False
+        if parser.tags == Parser.TAGS_PANGO and plus_or_noplus:
+            # replace msn plus markup with pango
+            format = mohrtutchy_plus_parser.replaceMarkup(format)
+        else:
+            # remove all msn plus markup
+            format = mohrtutchy_plus_parser.removeMarkup(format)
+
+        # put back the objects
+        filterdata.list = filterdata.deserialize(format, objects)
+    else:
+        format = mohrtutchy_plus_parser.removeMarkup(format)
+        filterdata.list = filterdata.deserialize(format, objects)
+
+bigparser.connect('filter', plus_parse) 
+
 def msnplus_to_list(txt, do_parse_emotes=True):
     '''parte text to a DictObj and return a list of strings and
     gtk.gdk.Pixbufs'''
-    dct = Plus.msnplus(txt, do_parse_emotes)
 
+    ########################################
+    # Mohrtutchy hax, it works (not sure how)
+    parser = bigparser.getParser(Parser.unescape(txt), Parser.PangoDataType)
+    parsed_stuff = parser.get(smileys=True)
+
+    list_stuff = []
+    for item in parsed_stuff:
+        if type(item) is Parser.Smiley:
+            list_stuff.append(item.pixbuf)
+        else:
+            list_stuff.append(replace_markup(item))
+    return list_stuff
+
+    ########################################
+    # boyska's implementation, quite incomplete.
+    dct = Plus.msnplus(txt, do_parse_emotes)
+    
     if not do_parse_emotes:
         return dct.to_xml()
 
@@ -227,6 +292,11 @@ def msnplus_to_list(txt, do_parse_emotes=True):
     accum.append(replace_markup("".join(temp)))
 
     return accum
+    
+def msnplus_to_plain_text(txt):
+    ''' from a nasty string, returns a nice plain text string without
+    bells and whistles, just text '''
+    return bigparser.getParser(txt).get(escaped=False)
 
 def flatten_tree(dct, accum, parents):
     '''convert the tree of markup into a list of string that contain pango
@@ -247,9 +317,42 @@ def flatten_tree(dct, accum, parents):
             return '<%s>' % (tag.tag, )
 
     if dct.tag:
+        previous = list()
+        i = len(accum)-1
+        while i>=0 and type(accum[i]) != gtk.gdk.Pixbuf:
+            previous.append(accum[i])
+            i -= 1
         if dct.tag == "img":
-            closed = "".join("</%s>" % (parent.tag, ) for parent in parents[::-1] if parent)
-            opened = "".join(open_tag(parent) for parent in parents if parent)
+            closed = ""
+            opened = ""
+            tags = list()
+            index = 0
+            for prev in previous:
+                pos = prev.find("[$")
+                while pos != -1:
+                    index = pos+2
+                    found = prev[index]
+                    if found == "b":
+                        tags.append("b")
+                    elif found == "i":
+                        tags.append("i")
+                    elif found == "s":
+                        tags.append("small")
+                    elif found == "/":
+                        if len(tags) > 0:
+                            tags.pop()
+                    prev = prev[index+1:]
+                    pos = prev.find("[$")
+
+            while len(tags) > 0:
+                tag = tags.pop()
+                closed = closed+"[$/"+tag+"]"
+                opened = "[$"+tag+"]"+opened
+            
+            closed = closed+"".join("</%s>" % (parent.tag, ) for parent in \
+                                                       parents[::-1] if parent)
+            opened = "".join(open_tag(parent) for parent in \
+                                                      parents if parent)+opened
             accum += [closed, gtk.gdk.pixbuf_new_from_file(dct.src), opened]
             return accum
         else:
@@ -272,8 +375,9 @@ class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
     def __init__(self):
-        CellRendererFunction.__init__(self,
-                msnplus_to_list)
+        global plus_or_noplus
+        plus_or_noplus = 1
+        CellRendererFunction.__init__(self, msnplus_to_list)
 
 extension.implements(CellRendererPlus, 'nick renderer')
 
@@ -285,7 +389,9 @@ class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
     but improving the readability'''
     def __init__(self):
-        CellRendererFunction.__init__(self, strip_plus)
+        global plus_or_noplus
+        plus_or_noplus = 0
+        CellRendererFunction.__init__(self, msnplus_to_list)
 
 extension.implements(CellRendererNoPlus, 'nick renderer')
 
@@ -608,6 +714,86 @@ class SmileyLayout(pango.Layout):
                 ctx.paint()
             except Exception, error:
                 print error
+
+class SmileyLabel(gtk.Widget):
+    '''Label with smiley support. '''
+
+    __gsignals__ = { 'size_request' : 'override',
+                     'size-allocate' : 'override', 
+                     'expose-event' : 'override'}
+            
+    def __init__(self):
+        gtk.Widget.__init__(self)
+        self._text = ['']    
+        self._ellipsize = True
+        self._wrap = True
+        self._smiley_layout = None
+        self.set_flags(self.flags() | gtk.NO_WINDOW)
+        self._smiley_layout = SmileyLayout(self.create_pango_context())
+
+    def set_ellipsize(self, ellipsize):
+        ''' Sets the ellipsize behavior '''
+        self._ellipsize = ellipsize
+        self.queue_resize()
+
+    def set_wrap(self, wrap):
+        ''' Sets the wrap behavior '''
+        self._wrap = wrap
+        self.queue_resize()
+
+    def set_markup(self, text=['']):
+        self.set_text(text)
+
+    def set_text(self, text=['']):
+        ''' Sets widget text '''
+        self._text = text
+        self.setup_smiley_layout()
+        self.queue_resize()
+
+    def set_smiley_scaling(self, smiley_scaling):
+        self._smiley_layout.set_smiley_scaling(smiley_scaling)
+        self.queue_resize()
+
+    def setup_smiley_layout(self):
+        self._smiley_layout.set_element_list(self._text)
+
+    def do_realize(self):
+        gtk.Widget.do_realize(self)
+        self.set_flags(self.flags() | gtk.REALIZED)
+        self.window = self.get_parent().window
+
+    def do_style_set(self, prev_style):
+        self._smiley_layout.set_colors(self.style.text[gtk.STATE_NORMAL])
+        self.queue_draw()
+
+    def do_size_request(self, requisition):
+        self._smiley_layout.set_width(-1)
+        width, height = self._smiley_layout.get_pixel_size()
+        requisition.height = height
+        if self._ellipsize or self._wrap:
+            requisition.width = 0
+        else: 
+            requisition.width = width
+
+    def do_size_allocate(self, allocation):
+        if not (self._ellipsize or self._wrap):
+            self._smiley_layout.set_width(-1)
+            width, height = self._smiley_layout.get_pixel_size()
+            self.set_size_request(width, height)
+        else:
+            if self._ellipsize: 
+                self._smiley_layout.set_ellipsize(pango.ELLIPSIZE_END)
+            else: 
+                self._smiley_layout.set_ellipsize(pango.ELLIPSIZE_NONE)
+            self._smiley_layout.set_width(allocation.width * pango.SCALE)
+            self.set_size_request(-1, self._smiley_layout.get_pixel_size()[1])
+        gtk.Widget.do_size_allocate(self, allocation)
+
+    def do_expose_event(self, event):
+        area = self.get_allocation()
+        ctx = event.window.cairo_create()
+        self._smiley_layout.draw(ctx, area)
+gobject.type_register(SmileyLabel)
 
 import cairo
 import gui

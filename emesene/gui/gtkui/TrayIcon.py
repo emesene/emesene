@@ -32,6 +32,8 @@ class TrayIcon(gtk.StatusIcon):
         self.set_login()
         self.set_visible(True)
 
+        self.set_tooltip("emesene")
+
     def set_login(self):
         """
         method called to set the state to the login window
@@ -48,6 +50,7 @@ class TrayIcon(gtk.StatusIcon):
         self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
         self.menu = MainMenu(self.handler)
         self.menu.show_all()
+        self.set_tooltip("emesene - " + self.handler.session.account.account)
 
     def set_conversations(self, convs):
         """
@@ -78,7 +81,7 @@ class TrayIcon(gtk.StatusIcon):
         """
         if stat not in status.ALL or stat == -1:
             return
-        self.set_from_file(self.handler.theme.status_icons[stat])
+        self.set_from_file(self.handler.theme.status_icons_panel[stat])
 
     def _on_popup(self, trayicon, button, activate_time):
         """
