@@ -4,7 +4,17 @@ import gobject
 import utils
 import TinyButton
 
-from gui.gtkui import Renderers as Renderer
+import Renderers
+
+CLOSE_ON_LEFT = 0
+try:
+    import gconf
+    gclient = gconf.client_get_default()
+    val = gclient.get("/apps/metacity/general/button_layout")
+    if val.get_string().startswith("close"):
+        CLOSE_ON_LEFT = 1
+except:
+    pass
 
 class TabWidget(gtk.HBox):
     '''a widget that is placed on the tab on a notebook'''
@@ -20,15 +30,20 @@ class TabWidget(gtk.HBox):
         self.set_spacing(4)
 
         self.image = gtk.Image()
-        self.label = Renderer.SmileyLabel()
+        self.label = Renderers.SmileyLabel()
         self.label.set_text(text)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
         self.close.connect('clicked', on_close_clicked,
             conversation)
 
-        self.pack_start(self.image, False, False, 0)
-        self.pack_start(self.label, True, True, 0)
-        self.pack_start(self.close, False, False, 0)
+        if CLOSE_ON_LEFT:
+            self.pack_start(self.close, False, False, 0)
+            self.pack_start(self.image, False, False, 0)
+            self.pack_start(self.label, True, True, 0)
+        else:
+            self.pack_start(self.image, False, False, 0)
+            self.pack_start(self.label, True, True, 0)
+            self.pack_start(self.close, False, False, 0)
 
         self.image.show()
         self.label.show()
@@ -45,4 +60,4 @@ class TabWidget(gtk.HBox):
 
     def set_text(self, text):
         '''set the text of the label'''
-        self.label.set_markup(Renderer.msnplus_to_list(gobject.markup_escape_text(text)))
+        self.label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(text)))

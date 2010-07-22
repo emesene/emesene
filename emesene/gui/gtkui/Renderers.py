@@ -34,11 +34,17 @@ def replace_markup(markup, arg=None):
     markup = markup.replace("[$small]", "<small>")
     markup = markup.replace("[$/small]", "</small>")
 
+    markup = markup.replace("[$b]", "<b>")
+    markup = markup.replace("[$/b]", "</b>")
+
     markup = markup.replace("[$i]", "<i>")
     markup = markup.replace("[$/i]", "</i>")
 
-    markup = markup.replace("[$b]", "<b>")
-    markup = markup.replace("[$/b]", "</b>")
+    #markup = markup.replace("[$u]", "<u>")
+    #markup = markup.replace("[$/u]", "</u>")
+
+    #markup = markup.replace("[$s]", "<s>")
+    #markup = markup.replace("[$/s]", "</s>")
 
     return markup
 
@@ -129,9 +135,11 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
     def get_layout(self, widget):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
-        layout = SmileyLayout(widget.create_pango_context(),
-                self.function(unicode(self.markup,
-                    'utf-8')))
+        #layout = SmileyLayout(widget.create_pango_context(),
+        #        self.function(unicode(self.markup,
+        #            'utf-8')))
+        layout = SmileyLayout(widget.create_pango_context(), 
+                              self.function(self.markup))
 
         if self.markup:
             try:
