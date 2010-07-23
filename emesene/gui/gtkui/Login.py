@@ -145,13 +145,9 @@ class LoginBase(gtk.Alignment):
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
                 animated=True)
         self.throbber = gtk.image_new_from_animation(th_pix)
-        self.label = gtk.Label()
-        self.label.set_markup('<b>Connecting...</b>')
         self.label_timer = gtk.Label()
         self.label_timer.set_markup('<b>Connection error!\n </b>')
 
-        al_label = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.0)
         al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
@@ -160,12 +156,11 @@ class LoginBase(gtk.Alignment):
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.2)
-        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.20)
+        al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2)
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
         al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
 
-        al_label.add(self.label)
         al_label_timer.add(self.label_timer)
         al_throbber.add(self.throbber)
         al_vbox_entries.add(vbox_entries)
@@ -178,9 +173,8 @@ class LoginBase(gtk.Alignment):
         vbox.pack_start(al_account, True, False)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
-        vbox.pack_start(al_label, True, False)
         vbox.pack_start(al_label_timer, True, False)
-        vbox.pack_start(al_throbber, True, False)
+        vbox.pack_start(al_throbber, False, False)
         vbox.pack_start(al_button, True, True)
         vbox.pack_start(al_preferences, False)
 
@@ -246,7 +240,6 @@ class Login(LoginBase):
 
         self.nicebar.hide()
         self.throbber.hide()
-        self.label.hide()
         self.label_timer.hide()
         self.b_cancel.hide()
 
@@ -617,7 +610,6 @@ class ConnectingWindow(Login):
         self.txt_password.set_sensitive(False)        
         self.nicebar.hide()
         self.throbber.show()
-        self.label.show()
         self.label_timer.hide()
 
         self.b_connect.set_label(_("Connect now"))
@@ -670,8 +662,6 @@ class ConnectingWindow(Login):
         '''
         show the reconnect countdown
         '''
-        self.label.show()
-        self.label.set_markup('<b>Connection error\n </b>')
         self.label_timer.show()
         self.b_connect.show()
         self.b_connect.connect('clicked', self._on_connect_now_clicked, callback, \
