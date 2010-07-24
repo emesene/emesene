@@ -24,7 +24,7 @@ import gobject
 
 import extension
 
-from e3.common import Parser
+import Parser
 from gui.base import Plus
 
 def replace_markup(markup, arg=None):
@@ -39,12 +39,6 @@ def replace_markup(markup, arg=None):
 
     markup = markup.replace("[$i]", "<i>")
     markup = markup.replace("[$/i]", "</i>")
-
-    #markup = markup.replace("[$u]", "<u>")
-    #markup = markup.replace("[$/u]", "</u>")
-
-    #markup = markup.replace("[$s]", "<s>")
-    #markup = markup.replace("[$/s]", "</s>")
 
     return markup
 
@@ -135,16 +129,10 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
     def get_layout(self, widget):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
-        #layout = SmileyLayout(widget.create_pango_context(),
-        #        self.function(unicode(self.markup,
-        #            'utf-8')))
-        layout = SmileyLayout(widget.create_pango_context(), 
-                              self.function(self.markup))
+        layout = SmileyLayout(widget.create_pango_context())
 
         if self.markup:
             try:
-                #decorated_markup = self.function(unicode(self.markup,
-                #    'utf-8'))
                 decorated_markup = self.function(self.markup)
             except Exception, error:
                 print "this nick: '%s' made the parser go crazy, striping" % \
@@ -155,30 +143,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
             layout.set_text(decorated_markup)
             return layout
-
-            try:
-                pango.parse_markup(self.function(unicode(self.markup,
-                    'utf-8'), False))
-            except gobject.GError:
-                print "invalid pango markup:", decorated_markup
-                # temporary debug stuff
-                import e3.common.ConfigDir as CD
-                import time
-                cd = CD("emesene2")
-                logfile = open(cd.join(cd.default_base_dir, 'badnicks.log'), 'a')
-                logfile.write(
-                    "report this here: http://github.com/emesene/emesene/issues#issue/8\n" +
-                    time.asctime() + "\n" + self.markup + "\n" + 
-                    ",".join(["%s" % str(el) for el in decorated_markup]))
-                logfile.close()
-                # fallback
-                decorated_markup = Plus.msnplus_strip(self.markup)
-            
-            layout.set_text(decorated_markup)
-        else:
-            layout.set_text('')
-
-        return layout
 
     def _style_set(self, widget, previous_style):
         '''callback to the style-set signal of widget'''
