@@ -96,9 +96,7 @@ def setup():
     extension.category_register('main window', MainWindow.MainWindow)
     extension.category_register('contact list', ContactList.ContactList)
     extension.category_register('nick renderer', Renderers.CellRendererPlus)
-    extension.register('nick renderer', gtk.CellRendererText)
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
-    extension.register('nick renderer', Renderers.GtkCellRenderer)
     extension.category_register('user panel', UserPanel.UserPanel)
     if not INDICATORERROR:
         extension.category_register('tray icon', Indicator.Indicator)

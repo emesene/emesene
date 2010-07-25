@@ -24,7 +24,6 @@ import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 import sys
-import gtk
 import base64
 import glib
 import gettext
@@ -42,7 +41,11 @@ from e3 import msn
 from e3 import jabber
 from e3 import dummy
 
-from gui import gtkui
+try:
+    import gtk
+    from gui import gtkui
+except Exception, e:
+    log.error('Cannot find/load (py)gtk: %s' % str(e))
 
 try:
     from e3 import papylib
@@ -251,9 +254,6 @@ class Controller(object):
                 self.tray_icon.set_visible(False)
             self.window.hide()
             self.window = None
-
-            while gtk.events_pending():
-                gtk.main_iteration(False)
 
             sys.exit(0)
 
