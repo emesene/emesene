@@ -443,7 +443,13 @@ class MsnPlusMarkupMohrtutchy:
 
 
         if self.openSpan != None:
-            text += '</span>'
+            pos = text.find("\n")
+            if pos != -1:
+                front = text[:pos]
+                tail = text[pos:]
+                text = front + '</span>' + tail
+            else:
+                text += '</span>'
         #TODO: FIXME: Disabled for now.
         #text='&#173;'+text
 
