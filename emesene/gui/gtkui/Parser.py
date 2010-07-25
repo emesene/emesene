@@ -95,6 +95,8 @@ class PangoDataType( DefaultDataType ):
         closed = ""
         opened = ""
         for item in self.parser.parse( self, self.text ):
+            if type(item) == Url:
+                item = item.getPango()
             if type(item) in (str, unicode, Url):
                 if item != "" and item != "</span>":
                     item = opened + item
@@ -400,7 +402,7 @@ class Url(object):
         return '<a href="%s">%s</a>' % (escape(href), escape(self.url))
 
     def getPango(self):
-        return escape(self.url)
+        return '<span foreground="#0000ff"><u>'+escape(self.url)+'</u></span>'
 
     def __str__(self):
         return escape(self.url)
@@ -438,7 +440,12 @@ class UnifiedParser( gobject.GObject ):
             if group['smiley']:
                 list.append( Smiley(group['smiley'], gui.theme.theme_path) )
             elif group['url']:
-                list.append( Url( group['url'] ) )
+                pos = group['url'].find("[$")
+                if pos != -1:
+                    list.append(Url(group['url'][:pos]))
+                    list.append(group['url'][pos:])
+                else:
+                    list.append( Url( group['url'] ) )
             elif group['other']:
                 other = escape(str(group['other']))
                 if len(list)>0 and isinstance(list[-1], str):
