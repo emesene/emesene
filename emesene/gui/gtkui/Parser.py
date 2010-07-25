@@ -91,9 +91,31 @@ class PangoDataType( DefaultDataType ):
     def get( self, smileys=True, cache={} ):
         '''returns list, not a string!'''
         ret = []
+        tags = list()
+        closed = ""
+        opened = ""
         for item in self.parser.parse( self, self.text ):
             if type(item) in (str, unicode, Url):
-                ret = self.handystringhandler( ret, item )
+                if item != "" and item != "</span>":
+                    item = opened + item
+                    aux = item
+                    pos = aux.find("[$")
+                    while pos != -1:
+                        index = pos+2
+                        found = aux[index]
+                        if found == "b":
+                            tags.append("b")
+                        elif found == "i":
+                            tags.append("i")
+                        elif found == "s":
+                            tags.append("small")
+                        elif found == "/":
+                            if len(tags) > 0:
+                                tags.pop()
+                        aux = aux[index+1:]
+                        pos = aux.find("[$")
+                    opened = ""
+                    ret = self.handystringhandler( ret, item )
 
             elif type(item) == Smiley:
                 if not smileys:
@@ -103,6 +125,12 @@ class PangoDataType( DefaultDataType ):
                     item.pixbuf = cache[ item.smiley ]
                 else:
                     item.pixbuf = item.getPixbuf(False)
+                while len(tags) > 0:
+                    tag = tags.pop()
+                    closed = closed+"[$/"+tag+"]"
+                    opened = "[$"+tag+"]"+opened
+                self.addstr(ret, closed)
+                closed = ""
                 ret.append(item)
         return [self.fix(i) for i in ret]
 
@@ -127,14 +155,48 @@ class PangoDataType( DefaultDataType ):
 
     def fix(self, data):
         '''close tags before a smiley and reopen after it'''
+
         if type(data) == str:
             pre = ''.join(self.tagsopen)
             self.tagsopen = []
-            data = self.regex.sub(self.fixhandler, pre+data)
+
+            # reopen tags after our personal tags
+            personaltags = ["[$b]", "[$small]", "[$i]"]
+            aux = data
+            leave = False
+            front = ""
+            while not leave:
+                removeFront = False
+                for x in personaltags:
+                    removeFront = removeFront or aux.startswith(x)
+                if removeFront:
+                    pos = aux.find("]")+1
+                    front = front+aux[:pos]
+                    aux = aux[pos:]
+                else:
+                    leave = True
+            data = self.regex.sub(self.fixhandler, pre+aux)
+            data = front + data
+            
             closedTags = data.count('</span>')
             if closedTags > 0:
                 self.tagsopen = self.tagsopen[:-closedTags]
-            data = data + ('</span>' * len(self.tagsopen))
+
+            #close tags before our personal tags
+            personaltags = ["[$/b]", "[$/small]", "[$/i]"]
+            aux = data
+            leave = False
+            tail = ""
+            while not leave:
+                pos = aux.rfind("[$/")
+                aux2 = aux[pos:]
+                if aux2 in personaltags:
+                    aux = aux[:pos]
+                    tail = aux2 + tail
+                else:
+                    leave = True
+            data = aux + ('</span>' * len(self.tagsopen)) + tail
+
         return data
 
     def fixhandler(self, data):
