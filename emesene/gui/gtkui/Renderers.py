@@ -20,12 +20,14 @@
 import sys
 import gtk
 import pango
+import cairo
 import gobject
 
-import extension
-
-import Parser
+import gui
 from gui.base import Plus
+import extension
+import utils
+import Parser
 
 def replace_markup(markup, arg=None):
     '''replace the tags defined in gui.base.ContactList'''
@@ -149,50 +151,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         self._cached_markup = {}
         self._cached_layout = {}
         widget.queue_resize()
-
-extension.implements(CellRendererFunction, 'nick renderer')
-
-class GtkCellRenderer(CellRendererFunction):
-    '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
-    effects'''
-    def __init__(self):
-        CellRendererFunction.__init__(self,
-                replace_markup)
-
-extension.implements(GtkCellRenderer, 'nick renderer')
-
-def balance_tag(text, tag):
-    '''balance a tag'''
-    opens = text.count("<" + tag)
-    closes = text.count("</" + tag)
-    difference = abs(opens - closes)
-
-    if opens > closes:
-        text += "</" + tag + ">" * difference
-    elif opens < closes:
-        text = ("<" + tag + ">" * difference) + text
-
-    return text
-
-def balance_tags(text, tags):
-    '''balance tags'''
-
-    for tag in tags:
-        text = balance_tag(text, tag)
-
-    return text
-
-def balance(text):
-        ''' balance the spans in the chunks of text between images
-         this can happen when the template for the text shown on
-         the contact list (the one you can edit on preferences)
-         gets splited by an image
-        '''
-        return balance_tags(text, ["span", "small", "b", "i", "u", "s"])
-
-def plus(markup):
-    '''parse msnplus markup and replace the markup'''
-    return replace_markup(Plus.msnplus(markup))
 
 ################################################################################
 # emesene1 parsers rock the streets, here they're instanciated and used
@@ -355,9 +313,7 @@ class CellRendererPlus(CellRendererFunction):
 
 extension.implements(CellRendererPlus, 'nick renderer')
 
-def strip_plus(markup, arg=None):
-    '''remove msnplus markup and replace the markup'''
-    return replace_markup(Plus.msnplus_strip(markup))
+gobject.type_register(CellRendererPlus)
 
 class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
@@ -369,7 +325,7 @@ class CellRendererNoPlus(CellRendererFunction):
 
 extension.implements(CellRendererNoPlus, 'nick renderer')
 
-gobject.type_register(CellRendererPlus)
+gobject.type_register(CellRendererNoPlus)
 
 class SmileyLayout(pango.Layout):
     '''a pango layout to draw smilies'''
@@ -768,10 +724,6 @@ class SmileyLabel(gtk.Widget):
         ctx = event.window.cairo_create()
         self._smiley_layout.draw(ctx, area)
 gobject.type_register(SmileyLabel)
-
-import cairo
-import gui
-import utils
 
 #from emesene1 by mariano guerra adapted by cando
 #animation support by cando
