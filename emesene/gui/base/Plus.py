@@ -441,17 +441,13 @@ class MsnPlusMarkupMohrtutchy:
         
         text = re.sub( colorIrcHex, self.ircHexToTag, text ) 
 
-
         if self.openSpan != None:
-            pos = text.find("\n")
+            #TODO: fix this with msgplus codes, '&#173;'?
+            pos = text.find("no-more-color")
             if pos != -1:
-                front = text[:pos]
-                tail = text[pos:]
-                text = front + '</span>' + tail
+                text = text.replace("no-more-color",'</span>')
             else:
                 text += '</span>'
-        #TODO: FIXME: Disabled for now.
-        #text='&#173;'+text
 
         return text.replace('\xc2\xb7&','\xc2\xb7&amp;').replace\
             ('\xc2\xb7"','\xc2\xb7&quot;')\

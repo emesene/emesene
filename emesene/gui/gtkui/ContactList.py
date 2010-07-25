@@ -557,19 +557,29 @@ class ContactList(gui.ContactList, gtk.TreeView):
         message = gobject.markup_escape_text(contact.message)
         nick = gobject.markup_escape_text(contact.nick)
         display_name = gobject.markup_escape_text(contact.display_name)
-        
+
+        #TODO: fix those "no-more-color" with msgplus codes, '&#173;'?
         template = self.nick_template
         template = template.replace('[$NL]', '\n')
+        escaped = self.escape_tags(nick)
+        if escaped.find("\xc2\xb7") != -1:
+            escaped += 'no-more-color'
         template = template.replace('[$NICK]',
-                self.escape_tags(nick))
+                escaped)
         template = template.replace('[$ACCOUNT]',
                 self.escape_tags(contact.account))
+        escaped = self.escape_tags(message)
+        if escaped.find("\xc2\xb7") != -1:
+            escaped += 'no-more-color'
         template = template.replace('[$MESSAGE]',
-                self.escape_tags(message))
+                escaped)
         template = template.replace('[$STATUS]',
                 self.escape_tags(e3.status.STATUS[contact.status]))
+        escaped = self.escape_tags(display_name)
+        if escaped.find("\xc2\xb7") != -1:
+            escaped += 'no-more-color'
         template = template.replace('[$DISPLAY_NAME]',
-                self.escape_tags(display_name))
+                escaped)
         
         blocked_text = ''
 
