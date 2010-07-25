@@ -559,27 +559,35 @@ class ContactList(gui.ContactList, gtk.TreeView):
         display_name = gobject.markup_escape_text(contact.display_name)
 
         #TODO: fix those "no-more-color" with msgplus codes, '&#173;'?
+        def fix_plus(text):
+            escaped = self.escape_tags(text)
+            pos = escaped.find("\xc2\xb7")
+            tail = ""
+            irc = "#&@'"
+            flag = False
+            while pos != -1:
+                char = escaped[pos+2]
+                if char in irc and escaped.count("\xc2\xb7"+char)%2 != 0:
+                    tail = "\xc2\xb7" + char + tail
+                    irc = irc.replace(char,"")
+                flag = flag or char == "$"
+                pos = escaped.find("\xc2\xb7",pos+2)
+            if flag:
+                tail += "no-more-color"
+            return escaped + tail
+
         template = self.nick_template
         template = template.replace('[$NL]', '\n')
-        escaped = self.escape_tags(nick)
-        if escaped.find("\xc2\xb7") != -1:
-            escaped += 'no-more-color'
         template = template.replace('[$NICK]',
-                escaped)
+                fix_plus(nick))
         template = template.replace('[$ACCOUNT]',
                 self.escape_tags(contact.account))
-        escaped = self.escape_tags(message)
-        if escaped.find("\xc2\xb7") != -1:
-            escaped += 'no-more-color'
         template = template.replace('[$MESSAGE]',
-                escaped)
+                fix_plus(message))
         template = template.replace('[$STATUS]',
                 self.escape_tags(e3.status.STATUS[contact.status]))
-        escaped = self.escape_tags(display_name)
-        if escaped.find("\xc2\xb7") != -1:
-            escaped += 'no-more-color'
         template = template.replace('[$DISPLAY_NAME]',
-                escaped)
+                fix_plus(display_name))
         
         blocked_text = ''
 
