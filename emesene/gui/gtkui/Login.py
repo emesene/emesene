@@ -655,7 +655,6 @@ class ConnectingWindow(Login):
         '''
         self.label_timer.hide()
         self.throbber.show()
-        self.label.set_markup('<b>Connecting...</b>')
 
     def on_reconnect(self, callback, account, session_id,
                      proxy, use_http, service):
