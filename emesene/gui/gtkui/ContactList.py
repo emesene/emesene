@@ -566,11 +566,14 @@ class ContactList(gui.ContactList, gtk.TreeView):
             irc = "#&@'"
             flag = False
             while pos != -1:
-                char = escaped[pos+2]
-                if char in irc and escaped.count("\xc2\xb7"+char)%2 != 0:
-                    tail = "\xc2\xb7" + char + tail
-                    irc = irc.replace(char,"")
-                flag = flag or char == "$"
+                try:
+                    char = escaped[pos+2]
+                    if char in irc and escaped.count("\xc2\xb7"+char)%2 != 0:
+                        tail = "\xc2\xb7" + char + tail
+                        irc = irc.replace(char,"")
+                    flag = flag or char == "$"
+                except:
+                    pos = pos+1
                 pos = escaped.find("\xc2\xb7",pos+2)
             if flag:
                 tail += "no-more-color"
