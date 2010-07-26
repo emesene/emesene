@@ -95,7 +95,7 @@ class LoginBase(gtk.Alignment):
 
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
-        self.b_connect.set_sensitive(False)
+        self.b_connect.set_sensitive(True)
 
         self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
         self.b_cancel.connect('clicked', self._on_cancel_clicked)
