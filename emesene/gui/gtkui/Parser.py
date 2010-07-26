@@ -402,7 +402,7 @@ class Url(object):
         return '<a href="%s">%s</a>' % (escape(href), escape(self.url))
 
     def getPango(self):
-        return '<span foreground="#0000ff"><u>'+escape(self.url)+'</u></span>'
+        return escape(self.url)
 
     def __str__(self):
         return escape(self.url)
