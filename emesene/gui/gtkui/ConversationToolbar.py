@@ -36,34 +36,56 @@ class ConversationToolbar(gtk.Toolbar):
 
         self.handler = handler
 
-        self.font = gtk.ToolButton(gtk.STOCK_SELECT_FONT)
+        # check if we have theme-specific toolbar-icons
+        if gui.theme.toolbar_path:
+            theme_tool_font = utils.safe_gtk_image_load(gui.theme.tool_font, whsize)
+            theme_tool_font_color = utils.safe_gtk_image_load(gui.theme.tool_font_color, whsize)
+            theme_tool_emotes = utils.safe_gtk_image_load(gui.theme.tool_emotes, whsize)
+            theme_tool_nudge = utils.safe_gtk_image_load(gui.theme.tool_nudge, whsize)
+            theme_tool_invite = utils.safe_gtk_image_load(gui.theme.tool_invite, whsize)
+            theme_tool_clean = utils.safe_gtk_image_load(gui.theme.tool_clean, whsize)
+            theme_tool_file_transfer = utils.safe_gtk_image_load(gui.theme.tool_file_transfer, whsize)
+        else:
+            theme_tool_font = gtk.STOCK_SELECT_FONT
+            theme_tool_font_color = gtk.STOCK_SELECT_COLOR
+            theme_tool_emotes = utils.safe_gtk_image_load(gui.theme.emote_to_path(':D', True), whsize)
+            theme_tool_nudge = utils.safe_gtk_image_load(gui.theme.emote_to_path(':S', True), whsize)
+            theme_tool_invite = gtk.STOCK_ADD
+            theme_tool_clean = gtk.STOCK_CLEAR
+            theme_tool_file_transfer = gtk.STOCK_GO_UP
+
+        self.font = gtk.ToolButton(theme_tool_font)
+        self.font.set_label(_('Select font'))
         self.font.connect('clicked',
             lambda *args: self.handler.on_font_selected())
-        self.color = gtk.ToolButton(gtk.STOCK_SELECT_COLOR)
+
+        self.color = gtk.ToolButton(theme_tool_font_color)
+        self.color.set_label(_('Select font color'))
         self.color.connect('clicked',
             lambda *args: self.handler.on_color_selected())
 
-        emotes_img = utils.safe_gtk_image_load(
-                gui.theme.emote_to_path(':D', True), whsize)
-        self.emotes = gtk.ToolButton(emotes_img, 'Emotes')
+        self.emotes = gtk.ToolButton(theme_tool_emotes)
+        self.emotes.set_label(_('Send an emoticon'))
         self.emotes.connect('clicked',
             lambda *args: self.handler.on_emotes_selected())
 
-        nudge_img = utils.safe_gtk_image_load(
-                gui.theme.emote_to_path(':S', True), whsize)
-        self.nudge = gtk.ToolButton(nudge_img, 'Nudge')
+        self.nudge = gtk.ToolButton(theme_tool_nudge)
+        self.nudge.set_label(_('Request attention'))
         self.nudge.connect('clicked',
             lambda *args: self.handler.on_notify_attention_selected())
 
-        self.invite = gtk.ToolButton(gtk.STOCK_ADD)
+        self.invite = gtk.ToolButton(theme_tool_invite)
+        self.invite.set_label(_('Invite a buddy'))
         self.invite.connect('clicked',
             lambda *args: self.handler.on_invite_selected())
-        self.clean = gtk.ToolButton(gtk.STOCK_CLEAR)
+
+        self.clean = gtk.ToolButton(theme_tool_clean)
+        self.clean.set_label(_('Clean the conversation'))
         self.clean.connect('clicked',
             lambda *args: self.handler.on_clean_selected())
 
-        self.invite_file_transfer = gtk.ToolButton(gtk.STOCK_GO_UP)
-        self.invite_file_transfer.set_label(_('Send File'))
+        self.invite_file_transfer = gtk.ToolButton(theme_tool_file_transfer)
+        self.invite_file_transfer.set_label(_('Send a file'))
         self.invite_file_transfer.connect('clicked',
             lambda *args: self.handler.on_invite_file_transfer_selected())
 

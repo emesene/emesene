@@ -230,7 +230,28 @@ class Theme(object):
                 os.path.join(self.panel_path, "idle.png")
         else:
             self.status_icons_panel = self.status_icons.copy()
-            
+
+        # allow theme-specific toolbar icons
+        self.tool_font = None
+        self.tool_font_color = None
+        self.tool_emotes = None
+        self.tool_nudge = None
+        self.tool_invite = None
+        self.tool_clean = None
+        self.tool_file_transfer = None
+
+        self.toolbar_path = None
+        toolbar_path = os.path.join(self.theme_path, "toolbar")        
+        if os.path.exists(toolbar_path):
+            self.toolbar_path = toolbar_path
+            self.tool_font = os.path.join(self.toolbar_path, "font.png")
+            self.tool_font_color = os.path.join(self.toolbar_path, "font-color.png")
+            self.tool_emotes = os.path.join(self.toolbar_path, "emotes.png")
+            self.tool_nudge = os.path.join(self.toolbar_path, "nudge.png")
+            self.tool_invite = os.path.join(self.toolbar_path, "invite.png")
+            self.tool_clean = os.path.join(self.toolbar_path, "clean-chat.png")
+            self.tool_file_transfer = os.path.join(self.toolbar_path, "file-transfer.png")
+
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
 
     def emote_to_path(self, shortcut, remove_protocol=False):
