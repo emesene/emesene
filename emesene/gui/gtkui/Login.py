@@ -181,13 +181,19 @@ class LoginBase(gtk.Alignment):
         self.add(vbox)
         vbox.show_all()
 
+    def _on_cancel_clicked(self, button):
+        '''
+        overload this
+        '''
+        return
+
 class Login(LoginBase):
     '''
     widget that represents the login window
     '''
     def __init__(self, callback, on_preferences_changed,
                 config, config_dir, config_path, proxy=None,
-                use_http=None, session_id=None):
+                use_http=None, session_id=None, cancel_clicked=False):
 
         LoginBase.__init__(self, callback)
 
@@ -245,8 +251,8 @@ class Login(LoginBase):
 
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
-
-        self._check_autologin()
+        if not cancel_clicked:
+            self._check_autologin()
 
     def _check_autologin(self):
         '''check if autologin is set and can be started'''
@@ -481,14 +487,6 @@ class Login(LoginBase):
         '''
         self.avatar.stop()
         self.do_connect()
-
-    def _on_cancel_clicked(self, button):
-        '''
-        called when cancel button is clicked
-        '''
-        # call the controller on_cancel_login
-        self.callback_disconnect()
-        self._update_fields(self.cmb_account.get_active_text())
 
     def _on_quit(self):
         '''
