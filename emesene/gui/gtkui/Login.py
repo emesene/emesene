@@ -95,7 +95,7 @@ class LoginBase(gtk.Alignment):
 
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
-        self.b_connect.set_sensitive(True)
+        self.b_connect.set_sensitive(False)
 
         self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
         self.b_cancel.connect('clicked', self._on_cancel_clicked)
@@ -613,6 +613,7 @@ class ConnectingWindow(Login):
         self.label_timer.hide()
 
         self.b_connect.set_label(_("Connect now"))
+        self.b_connect.set_sensitive(True)
         self.b_connect.hide()
 
     def _update_fields(self, *args):
