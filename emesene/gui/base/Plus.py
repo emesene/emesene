@@ -1,5 +1,9 @@
 import re
 
+################################################################################
+# WARNING: This stuff is unused, unless you plan to write a better parser
+# you should jump to the used code somewhere down here.
+################################################################################
 from e3.common.XmlParser import DictObj
 
 import gui
@@ -390,6 +394,11 @@ class MsnPlusMarkupMohrtutchy:
             text = re.sub( i, lambda x:x.groups()[1], text)
              
         text = re.sub( colorIrcCode, '', text )
+
+        pos = text.find("no-more-color")
+        if pos != -1:
+            text = text.replace("no-more-color",'')
+        
         return text
 
     def replaceMarkup( self, text ):
@@ -441,11 +450,13 @@ class MsnPlusMarkupMohrtutchy:
         
         text = re.sub( colorIrcHex, self.ircHexToTag, text ) 
 
-
         if self.openSpan != None:
-            text += '</span>'
-        #TODO: FIXME: Disabled for now.
-        #text='&#173;'+text
+            #TODO: fix this with msgplus codes, '&#173;'?
+            pos = text.find("no-more-color")
+            if pos != -1:
+                text = text.replace("no-more-color",'</span>')
+            else:
+                text += '</span>'
 
         return text.replace('\xc2\xb7&','\xc2\xb7&amp;').replace\
             ('\xc2\xb7"','\xc2\xb7&quot;')\

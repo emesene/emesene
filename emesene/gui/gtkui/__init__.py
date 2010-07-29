@@ -2,8 +2,8 @@
 import extension
 
 WEBKITERROR = False
-INDICATORERROR = False
-
+INDICATORERROR = True # FIXME: Disabled until we can support theme changing!
+                      # see Indicator.py for the gory details
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
@@ -96,9 +96,7 @@ def setup():
     extension.category_register('main window', MainWindow.MainWindow)
     extension.category_register('contact list', ContactList.ContactList)
     extension.category_register('nick renderer', Renderers.CellRendererPlus)
-    extension.register('nick renderer', gtk.CellRendererText)
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
-    extension.register('nick renderer', Renderers.GtkCellRenderer)
     extension.category_register('user panel', UserPanel.UserPanel)
     if not INDICATORERROR:
         extension.category_register('tray icon', Indicator.Indicator)

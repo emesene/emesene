@@ -24,7 +24,6 @@ import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 import sys
-import gtk
 import base64
 import glib
 import gettext
@@ -42,7 +41,11 @@ from e3 import msn
 from e3 import jabber
 from e3 import dummy
 
-from gui import gtkui
+try:
+    import gtk
+    from gui import gtkui
+except Exception, e:
+    log.error('Cannot find/load (py)gtk: %s' % str(e))
 
 try:
     from e3 import papylib
@@ -185,7 +188,7 @@ class Controller(object):
         use_http = self.config.get_or_set('b_use_http', False)
         self.go_login(proxy, use_http)
 
-    def go_login(self, proxy=None, use_http=None):
+    def go_login(self, proxy=None, use_http=None, cancel_clicked=False):
         '''shows the login GUI'''
         if proxy is None:
             proxy = self._get_proxy_settings()
@@ -201,7 +204,7 @@ class Controller(object):
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed, self.config,
             self.config_dir, self.config_path, proxy,
-            use_http, self.config.session)
+            use_http, self.config.session, cancel_clicked)
         self.tray_icon.set_login()
         self.window.show()
 
@@ -251,9 +254,6 @@ class Controller(object):
                 self.tray_icon.set_visible(False)
             self.window.hide()
             self.window = None
-
-            while gtk.events_pending():
-                gtk.main_iteration(False)
 
             sys.exit(0)
 
@@ -446,7 +446,7 @@ class Controller(object):
         '''
         if self.session is not None:
             self.session.quit()
-        self.go_login()
+        self.go_login(cancel_clicked=True)
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''

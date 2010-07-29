@@ -2,11 +2,12 @@ import gtk
 import pango
 
 import utils
+import Renderers
 
 class Header(gtk.HBox):
     '''a widget used to display some information about the conversation'''
-    INFO_TPL = '<span>%s</span>\n'
-    INFO_TPL += '<span size="small">%s</span>'
+    INFO_TPL = '%s[$nl]'
+    INFO_TPL += '[$small]%s[$/small]'
 
     NAME = 'Header'
     DESCRIPTION = 'The widget that displays information about the conversation'
@@ -17,9 +18,7 @@ class Header(gtk.HBox):
         '''constructor'''
         gtk.HBox.__init__(self)
         self.set_border_width(2)
-        self._information = gtk.Label('info')
-        self._information.set_ellipsize(pango.ELLIPSIZE_END)
-        self._information.set_alignment(0.0, 0.5)
+        self._information = Renderers.SmileyLabel()
 
         self.eventBox = gtk.EventBox()
         self.eventBox.set_visible_window(False)
@@ -51,8 +50,8 @@ class Header(gtk.HBox):
     def _set_information(self, lines):
         '''set the text on the information, lines is a tuple of size 3 with 3
         strings that will be replaced on the template'''
-        self._information.set_markup(Header.INFO_TPL % lines)
-
+        self._information.set_markup(Renderers.msnplus_to_list(Header.INFO_TPL % lines))
+        
     def _get_information(self):
         '''return the text on the information'''
         return self._information.get_markup()

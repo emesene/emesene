@@ -1001,8 +1001,7 @@ class InviteWindow(gtk.Window):
         ContactList = extension.get_default('contact list')
         self.contact_list = ContactList(session)
         self.contact_list.nick_template = \
-            '%DISPLAY_NAME%\n<span foreground="#AAAAAA" size="small">' \
-            '%ACCOUNT%</span>'
+            '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
         self.contact_list.order_by_group = False
 
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)

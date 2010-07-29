@@ -20,23 +20,27 @@
 import sys
 import gtk
 import pango
+import cairo
 import gobject
 
-import extension
-
-from e3.common import Parser
+import gui
 from gui.base import Plus
+import extension
+import utils
+import Parser
 
 def replace_markup(markup, arg=None):
     '''replace the tags defined in gui.base.ContactList'''
+    markup = markup.replace("[$nl]", "\n")
+    
     markup = markup.replace("[$small]", "<small>")
     markup = markup.replace("[$/small]", "</small>")
 
-    markup = markup.replace("[$i]", "<i>")
-    markup = markup.replace("[$/i]", "</i>")
-
     markup = markup.replace("[$b]", "<b>")
     markup = markup.replace("[$/b]", "</b>")
+
+    markup = markup.replace("[$i]", "<i>")
+    markup = markup.replace("[$/i]", "</i>")
 
     return markup
 
@@ -127,14 +131,10 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
     def get_layout(self, widget):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
-        layout = SmileyLayout(widget.create_pango_context(),
-                self.function(unicode(self.markup,
-                    'utf-8')))
+        layout = SmileyLayout(widget.create_pango_context())
 
         if self.markup:
             try:
-                #decorated_markup = self.function(unicode(self.markup,
-                #    'utf-8'))
                 decorated_markup = self.function(self.markup)
             except Exception, error:
                 print "this nick: '%s' made the parser go crazy, striping" % \
@@ -146,79 +146,11 @@ class CellRendererFunction(gtk.GenericCellRenderer):
             layout.set_text(decorated_markup)
             return layout
 
-            try:
-                pango.parse_markup(self.function(unicode(self.markup,
-                    'utf-8'), False))
-            except gobject.GError:
-                print "invalid pango markup:", decorated_markup
-                # temporary debug stuff
-                import e3.common.ConfigDir as CD
-                import time
-                cd = CD("emesene2")
-                logfile = open(cd.join(cd.default_base_dir, 'badnicks.log'), 'a')
-                logfile.write(
-                    "report this here: http://github.com/emesene/emesene/issues#issue/8\n" +
-                    time.asctime() + "\n" + self.markup + "\n" + 
-                    ",".join(["%s" % str(el) for el in decorated_markup]))
-                logfile.close()
-                # fallback
-                decorated_markup = Plus.msnplus_strip(self.markup)
-            
-            layout.set_text(decorated_markup)
-        else:
-            layout.set_text('')
-
-        return layout
-
     def _style_set(self, widget, previous_style):
         '''callback to the style-set signal of widget'''
         self._cached_markup = {}
         self._cached_layout = {}
         widget.queue_resize()
-
-extension.implements(CellRendererFunction, 'nick renderer')
-
-class GtkCellRenderer(CellRendererFunction):
-    '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
-    effects'''
-    def __init__(self):
-        CellRendererFunction.__init__(self,
-                replace_markup)
-
-extension.implements(GtkCellRenderer, 'nick renderer')
-
-def balance_tag(text, tag):
-    '''balance a tag'''
-    opens = text.count("<" + tag)
-    closes = text.count("</" + tag)
-    difference = abs(opens - closes)
-
-    if opens > closes:
-        text += "</" + tag + ">" * difference
-    elif opens < closes:
-        text = ("<" + tag + ">" * difference) + text
-
-    return text
-
-def balance_tags(text, tags):
-    '''balance tags'''
-
-    for tag in tags:
-        text = balance_tag(text, tag)
-
-    return text
-
-def balance(text):
-        ''' balance the spans in the chunks of text between images
-         this can happen when the template for the text shown on
-         the contact list (the one you can edit on preferences)
-         gets splited by an image
-        '''
-        return balance_tags(text, ["span", "small", "b", "i", "u", "s"])
-
-def plus(markup):
-    '''parse msnplus markup and replace the markup'''
-    return replace_markup(Plus.msnplus(markup))
 
 ################################################################################
 # emesene1 parsers rock the streets, here they're instanciated and used
@@ -381,9 +313,7 @@ class CellRendererPlus(CellRendererFunction):
 
 extension.implements(CellRendererPlus, 'nick renderer')
 
-def strip_plus(markup, arg=None):
-    '''remove msnplus markup and replace the markup'''
-    return replace_markup(Plus.msnplus_strip(markup))
+gobject.type_register(CellRendererPlus)
 
 class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
@@ -395,7 +325,7 @@ class CellRendererNoPlus(CellRendererFunction):
 
 extension.implements(CellRendererNoPlus, 'nick renderer')
 
-gobject.type_register(CellRendererPlus)
+gobject.type_register(CellRendererNoPlus)
 
 class SmileyLayout(pango.Layout):
     '''a pango layout to draw smilies'''
@@ -794,10 +724,6 @@ class SmileyLabel(gtk.Widget):
         ctx = event.window.cairo_create()
         self._smiley_layout.draw(ctx, area)
 gobject.type_register(SmileyLabel)
-
-import cairo
-import gui
-import utils
 
 #from emesene1 by mariano guerra adapted by cando
 #animation support by cando

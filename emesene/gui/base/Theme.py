@@ -10,18 +10,25 @@ class Theme(object):
     # if you add a smilie key twice you will have a nice stack overflow :D
     EMOTES = {}
     EMOTES[':)'] = 'face-smile'
+    EMOTES[':-)'] = EMOTES[':)']
     EMOTES[';)'] = 'face-wink'
+    EMOTES[';-)'] = EMOTES[';)']
     EMOTES['|-)'] = 'face-tired'
     EMOTES[':D'] = 'face-laugh'
     EMOTES[':d'] = EMOTES[':D']
+    EMOTES[':-D'] = EMOTES[':D']
     EMOTES[':S'] = 'face-worried'
     EMOTES[':s'] = EMOTES[':S']
     EMOTES[':('] = 'face-sad'
+    EMOTES[':-('] = EMOTES[':(']
     EMOTES['(K)'] = 'face-kiss'
     EMOTES['(k)'] = EMOTES['(K)']
     EMOTES[':P'] = 'face-raspberry'
     EMOTES[':p'] = EMOTES[':P']
+    EMOTES[':-P'] = EMOTES[':P']
+    EMOTES[':-p'] = EMOTES[':P']
     EMOTES[':|'] = 'face-plain'
+    EMOTES[':-|'] = EMOTES[':|']
     EMOTES['*-)'] = 'face-uncertain'
     EMOTES[':O'] = 'face-surprise'
     EMOTES[':o'] = EMOTES[':O']
@@ -30,6 +37,7 @@ class Theme(object):
     EMOTES[':$'] = 'face-embarrassed'
     EMOTES[':\'('] = 'face-crying'
     EMOTES[':@'] = 'face-angry'
+    EMOTES[':-@'] = EMOTES[':@']
     EMOTES['(6)'] = 'face-devilish'
     EMOTES['(A)'] = 'face-angel'
     EMOTES['(a)'] = EMOTES['(A)']
@@ -44,40 +52,52 @@ class Theme(object):
     EMOTES['(nah)'] = 'goat'
     EMOTES['(||)'] = 'bowl'
     EMOTES['(z)'] = 'boy'
+    EMOTES['(Z)'] = EMOTES['(z)']
     EMOTES['(u)'] = 'love-over'
+    EMOTES['(U)'] = EMOTES['(u)']
     EMOTES['(p)'] = 'camera'
+    EMOTES['(P)'] = EMOTES['(p)']
     EMOTES['(@)'] = 'cat'
     EMOTES['(ci)'] = 'cigarette'
     EMOTES['(o)'] = 'clock'
-    EMOTES['(c)'] = 'coffe'
+    EMOTES['(O)'] = EMOTES['(o)']
+    EMOTES['(c)'] = 'coffee'
+    EMOTES['(C)'] = EMOTES['(c)']
     EMOTES['(co)'] = 'computer'
     EMOTES['(&)'] = 'dog'
     #EMOTES[':-#'] = ''
     EMOTES['(d)'] = 'drink'
+    EMOTES['(D)'] = EMOTES['(d)']
     EMOTES['(e)'] = 'mail'
+    EMOTES['(E)'] = EMOTES['(e)']
     #EMOTES['8-)'] = ''
     EMOTES['(~)'] = 'video'
     #EMOTES['(yn)'] = ''
     EMOTES['(g)'] = 'present'
+    EMOTES['(G)'] = EMOTES['(g)']
     EMOTES['(x)'] = 'girl'
+    EMOTES['(X)'] = EMOTES['(x)']
     EMOTES['(%)'] = 'handcuffs'
     EMOTES['(h5)'] = 'hifive'
     #EMOTES['(h)'] = ''
-    EMOTES[':^)'] = EMOTES[':o']
+    #EMOTES[':^)'] = ''
     EMOTES['(ip)'] = 'island'
     EMOTES['({)'] = 'hughleft'
     EMOTES['(i)'] = 'lamp'
+    EMOTES['(I)'] = EMOTES['(i)']
     EMOTES['(li)'] = 'c10ud'
     EMOTES['(m)'] = 'msn'
+    EMOTES['(M)'] = EMOTES['(m)']
     EMOTES['(mp)'] = 'mobile'
     EMOTES['(mo)'] = 'coins'
     EMOTES['(8)'] = 'music'
     EMOTES['(pi)'] = 'pizza'
     EMOTES['(pl)'] = 'plate'
     EMOTES['(r)'] = 'rainbow'
+    EMOTES['(R)'] = EMOTES['(r)']
     EMOTES['(st)'] = 'rain'
     EMOTES['(l)'] = 'love'
-    EMOTES['(L)'] = 'love'
+    EMOTES['(L)'] = EMOTES['(l)']
     EMOTES['(k)'] = 'face-kiss'
     EMOTES['(K)'] = EMOTES['(k)']
     EMOTES['(f)'] = 'rose'
@@ -91,16 +111,22 @@ class Theme(object):
     EMOTES['(*)'] = 'star'
     EMOTES['(#)'] = 'sun'
     EMOTES['(t)'] = 'phone'
+    EMOTES['(T)'] = EMOTES['(t)']
     EMOTES['(n)'] = 'bad'
+    EMOTES['(N)'] = EMOTES['(n)']
     EMOTES['(y)'] = 'good'
+    EMOTES['(Y)'] = EMOTES['(y)']
     EMOTES['(tu)'] = 'turtle'
     EMOTES['(um)'] = 'umbrella'
     EMOTES[':-['] = 'bat'
+    EMOTES[':['] = EMOTES[':-[']
     EMOTES['(w)'] = 'rose-dead'
     EMOTES['(W)'] = EMOTES['(w)']
     EMOTES['(xx)'] = 'console'
 
-    EMOTE_REGEX_STR = "|".join("(%s)" % (re.escape(key), ) for key in EMOTES)
+    EMOTE_REGEX_STR = ""
+    for key in EMOTES:
+        EMOTE_REGEX_STR += re.escape(key) + "|"
     EMOTE_REGEX = re.compile(EMOTE_REGEX_STR)
 
     SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
@@ -184,14 +210,47 @@ class Theme(object):
         self.status_icons[status.IDLE] = \
             os.path.join(self.theme_path, "idle.png")
 
-        self.status_icons_panel = self.status_icons
+        self.status_icons_panel = {}
         self.panel_path = self.theme_path
-        # allows different icons for indicators/tray icons
+        # allow different icons for indicators/tray icons
+        # note: a panel subdirectory requires six pics: 
+        #logo.png, online.png, offline.png, busy.png, away.png, idle.png
         panel_path = os.path.join(self.theme_path, "panel")        
         if os.path.exists(panel_path):
             self.panel_path = panel_path
-            # note: a panel subdirectory requires six pics: 
-            #logo.png, online.png, offline.png, busy.png, away.png, idle.png
+            self.status_icons_panel[status.ONLINE] = \
+                os.path.join(self.panel_path, "online.png")
+            self.status_icons_panel[status.OFFLINE] = \
+                os.path.join(self.panel_path, "offline.png")
+            self.status_icons_panel[status.BUSY] = \
+                os.path.join(self.panel_path, "busy.png")
+            self.status_icons_panel[status.AWAY] = \
+                os.path.join(self.panel_path, "away.png")
+            self.status_icons_panel[status.IDLE] = \
+                os.path.join(self.panel_path, "idle.png")
+        else:
+            self.status_icons_panel = self.status_icons.copy()
+
+        # allow theme-specific toolbar icons
+        self.tool_font = None
+        self.tool_font_color = None
+        self.tool_emotes = None
+        self.tool_nudge = None
+        self.tool_invite = None
+        self.tool_clean = None
+        self.tool_file_transfer = None
+
+        self.toolbar_path = None
+        toolbar_path = os.path.join(self.theme_path, "toolbar")        
+        if os.path.exists(toolbar_path):
+            self.toolbar_path = toolbar_path
+            self.tool_font = os.path.join(self.toolbar_path, "font.png")
+            self.tool_font_color = os.path.join(self.toolbar_path, "font-color.png")
+            self.tool_emotes = os.path.join(self.toolbar_path, "emotes.png")
+            self.tool_nudge = os.path.join(self.toolbar_path, "nudge.png")
+            self.tool_invite = os.path.join(self.toolbar_path, "invite.png")
+            self.tool_clean = os.path.join(self.toolbar_path, "clean-chat.png")
+            self.tool_file_transfer = os.path.join(self.toolbar_path, "file-transfer.png")
 
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
 
