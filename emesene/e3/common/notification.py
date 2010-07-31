@@ -2,6 +2,7 @@
 from e3 import status
 import extension
 
+import time
 import logging
 log = logging.getLogger('gui.gtkui.Notification')
 
@@ -31,6 +32,9 @@ class Notification():
             self.session.signals.contact_attr_changed.subscribe(
                 self._on_contact_attr_changed)
 
+        self.notify_online = False
+        self.last_online = None
+
     def _on_message(self, cid, account, msgobj, cedict=None):
         """
         This is called when a new message arrives to a user.
@@ -53,9 +57,19 @@ class Notification():
             return
 
         if contact.status == status.ONLINE:
-            if self.session.config.b_notify_contact_online:
-                text = _('is online')
-                self._notify(contact, contact.nick, text)
+            if not self.notify_online:
+                # detects the first notification flood and enable the
+                # online notifications after it to prevent log in flood
+                if self.last_online is not None:
+                    t = time.time()
+                    self.notify_online = (t - self.last_online > 1)
+                    self.last_online = t
+                else:
+                    self.last_online = time.time()
+            else:
+                if self.session.config.b_notify_contact_online:
+                    text = _('is online')
+                    self._notify(contact, contact.nick, text)
         elif contact.status == status.OFFLINE:
             if self.session.config.b_notify_contact_offline:
                 text = _('is offline')
