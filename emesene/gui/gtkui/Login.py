@@ -591,13 +591,15 @@ class ConnectingWindow(Login):
 
         account = config.get_or_set('last_logged_account', '')
         remembers = config.get_or_set('d_remembers', {})
-        attr = int(remembers[account])
+        attr = int(remembers.get(account, 0))
+
         if attr == 3:#autologin,password,account checked
             self.auto_login.set_active(True)
         elif attr == 2:#password,account checked
             self.remember_password.set_active(True)
         elif attr == 1:#only account checked
             self.remember_account.set_active(True)
+
         password = base64.b64decode(config.d_accounts[account])
         self.cmb_account.get_children()[0].set_text(account)
         self.txt_password.set_text(password)
@@ -605,7 +607,7 @@ class ConnectingWindow(Login):
         self.cmb_account.set_sensitive(False)
         self.b_preferences.set_sensitive(False)
         self.btn_status.set_sensitive(False)
-        self.txt_password.set_sensitive(False)        
+        self.txt_password.set_sensitive(False)
         self.nicebar.hide()
         self.throbber.show()
         self.label_timer.hide()
