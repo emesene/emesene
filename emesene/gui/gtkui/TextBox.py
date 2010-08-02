@@ -20,8 +20,10 @@ class TextBox(gtk.ScrolledWindow):
 
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self._textbox = gtk.TextView()
-        self._textbox.set_left_margin(2)
-        self._textbox.set_right_margin(2)
+        self._textbox.set_left_margin(4)
+        self._textbox.set_right_margin(4)
+        self._textbox.set_pixels_above_lines(4)
+        self._textbox.set_pixels_below_lines(4)
         self._textbox.set_wrap_mode(gtk.WRAP_WORD_CHAR)
         self._textbox.show()
         self._buffer = RichBuffer.RichBuffer()
