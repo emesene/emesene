@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   width="21"
+   height="22"
+   sodipodi:docname="busy.svg">
+  <metadata
+     id="metadata8">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs6">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       id="perspective10" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1024"
+     inkscape:window-height="557"
+     id="namedview4"
+     showgrid="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:zoom="14.227273"
+     inkscape:cx="-3.7683703"
+     inkscape:cy="10.859425"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2"
+     inkscape:snap-bbox="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3712"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <g
+     id="g2814"
+     transform="translate(-0.07734586,0.71922985)">
+    <path
+       sodipodi:nodetypes="cscccssc"
+       id="path3590"
+       d="m 20.476923,10.619231 c 0,4.649813 -4.072487,8.419231 -9.096154,8.419231 -1.4251093,0 -2.7736734,-0.303339 -3.9744369,-0.844065 C 6.6104533,17.835998 2.3268791,17.960465 0.30134713,17.971623 1.1039241,17.119521 2.6922312,15.761434 3.4290023,14.710623 2.6999652,13.499349 2.2846146,12.104185 2.2846146,10.619231 c 0,-4.6498124 4.0724869,-8.4192302 9.0961544,-8.4192302 5.023667,0 9.096154,3.7694178 9.096154,8.4192302 z"
+       style="fill:#3a3935;fill-opacity:1;stroke:#eae3d0;stroke-width:0.49042246;stroke-miterlimit:4;stroke-opacity:1"
+       transform="matrix(0.98085987,0,0,1.059723,0.38706019,-0.97267361)" />
+    <rect
+       y="9.5"
+       x="6"
+       height="2.5"
+       width="11"
+       id="rect3605"
+       style="fill:#eae3d0;fill-opacity:1;stroke:none" />
+  </g>
+</svg>
