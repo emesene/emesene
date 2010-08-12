@@ -600,7 +600,7 @@ class ConnectingWindow(Login):
         elif attr == 1:#only account checked
             self.remember_account.set_active(True)
 
-        password = base64.b64decode(config.d_accounts[account])
+        password = base64.b64decode(config.d_accounts.get(account, ""))
         self.cmb_account.get_children()[0].set_text(account)
         self.txt_password.set_text(password)
 
