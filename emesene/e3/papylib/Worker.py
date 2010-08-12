@@ -75,10 +75,10 @@ class Worker(e3.base.Worker, papyon.Client):
         if use_http:
             from papyon.transport import HTTPPollConnection
             self.client = papyon.Client.__init__( \
-               self, server, get_proxies(), HTTPPollConnection)
+               self, server, get_proxies(), HTTPPollConnection, version=18)
         else:
             self.client = papyon.Client.__init__( \
-               self, server, proxies = get_proxies())
+               self, server, proxies = get_proxies(), version=18)
 
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
