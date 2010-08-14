@@ -31,6 +31,9 @@ class RingBuffer(object):
 
     def peak(self, offset=0):
         '''return the item that is in head + offset, doesn't remove it'''
+        if len(self.items) == 0:
+            raise IndexError("peaking an empty RingBuffer")
+
         pos = self.current + offset
 
         if pos < 0 or pos > len(self.items) - 1:

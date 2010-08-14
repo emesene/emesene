@@ -50,6 +50,7 @@ class TestCreate(unittest.TestCase):
 
     def test_peak(self):
         ring = RingBuffer()
+        self.assertRaises(IndexError, ring.peak)
 
         for i in range(5):
             ring.push(i)

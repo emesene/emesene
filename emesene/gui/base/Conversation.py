@@ -6,6 +6,8 @@ import e3
 import gui
 import MarkupParser
 
+from e3.common import RingBuffer
+
 import logging
 log = logging.getLogger('gui.base.Conversation')
 
@@ -24,6 +26,10 @@ class Conversation(object):
         self._toolbar_visible = True
 
         self._message_waiting = False
+
+        buffer_size = session.config.get_or_set("i_msg_history_size", 5)
+        self.messages = RingBuffer(buffer_size)
+        self.message_offset = 0
 
         if members is None:
             self.members = []
@@ -97,7 +103,7 @@ class Conversation(object):
         '''called when a contact is selected to be invited'''
         self.session.conversation_invite(self.cid, account)
 
-    def on_filetransfer_invite(self, filename, completepath): 
+    def on_filetransfer_invite(self, filename, completepath):
         '''called when a filetransfer is issued'''
         self.session.filetransfer_invite(self.cid, self.members[0],
                 filename, completepath)
@@ -195,6 +201,7 @@ class Conversation(object):
         self.session.send_message(self.cid, text, self.cstyle)
         self.output.send_message(self.formatter, self.session.contacts.me,
                 text, cedict, self.cstyle, self.first)
+        self.messages.push(text)
         self.play_send()
         self.first = False
 
@@ -369,3 +376,22 @@ class Conversation(object):
         if self.session.config.b_play_type:
             gui.play(self.session, gui.theme.sound_type)
 
+    def cycle_history(self):
+        """
+        return one of the last N messages sent, the one returned
+        is the one pointed by message_offset, every time you call
+        this function it will go to the previous one, you can
+        reset it using reset_message_offset.
+
+        if no message in the buffer return an empty string
+        """
+        index = self.message_offset
+        self.message_offset -= 1
+
+        try:
+            self.input.text = self.messages.peak(self.message_offset)
+        except IndexError:
+            pass
+
+    def reset_message_offset(self):
+        self.message_offset = 0

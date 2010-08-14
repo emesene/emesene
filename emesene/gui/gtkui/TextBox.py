@@ -125,10 +125,11 @@ class InputText(TextBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, config, on_send_message):
+    def __init__(self, config, on_send_message, on_cycle_history):
         '''constructor'''
         TextBox.__init__(self, config)
         self.on_send_message = on_send_message
+        self.on_cycle_history = on_cycle_history
         self._tag = None
         self._textbox.connect('key-press-event', self._on_key_press_event)
         self._buffer.connect('changed', self.on_changed_event)
@@ -149,7 +150,11 @@ class InputText(TextBox):
         '''method called when a key is pressed on the input widget'''
         self.changed = True
         self.apply_tag()
-        if (event.keyval == gtk.keysyms.Return or \
+
+        if event.state == gtk.gdk.CONTROL_MASK and \
+                chr(event.keyval) == "p":
+            self.on_cycle_history()
+        elif (event.keyval == gtk.keysyms.Return or \
                 event.keyval == gtk.keysyms.KP_Enter) and \
                 not event.state == gtk.gdk.SHIFT_MASK:
             if self.text == "":
