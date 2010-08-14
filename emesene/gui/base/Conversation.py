@@ -1,6 +1,9 @@
+'''base implementation of a conversation, it should contain all the logic
+derived classes should implement the GUI to operate the conversation and
+nothing more'''
+
 import e3
 import gui
-import extension
 import MarkupParser
 
 import logging
@@ -29,6 +32,11 @@ class Conversation(object):
 
         self._style = None
 
+        # the base class should override this attributes
+        self.info = None
+        self.input = None
+        self.output = None
+
     def _get_style(self):
         '''return the value of style'''
         return self._style
@@ -49,43 +57,23 @@ class Conversation(object):
 
     def _load_style(self):
         '''load the default style from the configuration'''
-        if self.session.config.font is None:
-            self.session.config.font = 'Sans'
+        font = self.session.config.get_or_set("font", "Sans")
+        font_color = self.session.config.get_or_set("font_color", "#000000")
+        font_size = self.session.config.get_or_set("i_font_size", 10)
+        font_bold = self.session.config.get_or_set("b_font_bold", False)
+        font_italic = self.session.config.get_or_set("b_font_italic", False)
+        font_underline = self.session.config.get_or_set("b_font_underline",
+                False)
+        font_strike = self.session.config.get_or_set("b_font_strike", False)
 
-        if self.session.config.i_font_size is None:
-            self.session.config.i_font_size = 10
-        elif self.session.config.i_font_size < 6 or \
+        if self.session.config.i_font_size < 6 or \
                 self.session.config.i_font_size > 32:
-            self.session.config.i_font_size = 10
-
-        if self.session.config.b_font_bold is None:
-            self.session.config.b_font_bold = False
-
-        if self.session.config.b_font_italic is None:
-            self.session.config.b_font_italic = False
-
-        if self.session.config.b_font_underline is None:
-            self.session.config.b_font_underline = False
-
-        if self.session.config.b_font_strike is None:
-            self.session.config.b_font_strike = False
-
-        if self.session.config.font_color is None:
-            self.session.config.font_color = '#000000'
-
-        font = self.session.config.font
-        font_size = self.session.config.i_font_size
-        font_bold = self.session.config.b_font_bold
-        font_italic = self.session.config.b_font_italic
-        font_underline = self.session.config.b_font_underline
-        font_strike = self.session.config.b_font_strike
-        font_color = self.session.config.font_color
+            font_size = self.session.config.i_font_size = 10
 
         try:
             color = e3.Color.from_hex(font_color)
         except ValueError:
-            self.session.config.font_color = '#000000'
-            font_color = self.session.config.font_color
+            font_color = self.session.config.font_color = '#000000'
             color = e3.Color.from_hex(font_color)
 
         self.cstyle = e3.Style(font, color, font_bold, font_italic,
@@ -111,7 +99,8 @@ class Conversation(object):
 
     def on_filetransfer_invite(self, filename, completepath): 
         '''called when a filetransfer is issued'''
-        self.session.filetransfer_invite(self.cid, self.members[0], filename, completepath)
+        self.session.filetransfer_invite(self.cid, self.members[0],
+                filename, completepath)
 
     def on_clean(self):
         '''called when the clean button is clicked'''
