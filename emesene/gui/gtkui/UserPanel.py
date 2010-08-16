@@ -57,7 +57,7 @@ class UserPanel(gtk.VBox):
         self.toolbar = gtk.HBox()
 
         hbox = gtk.HBox()
-        hbox.set_border_width(2)
+        hbox.set_border_width(1)
         hbox.pack_start(self.avatarBox, False)
 
         vbox = gtk.VBox()
