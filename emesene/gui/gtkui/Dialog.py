@@ -20,6 +20,7 @@
 
 import traceback
 
+import os
 import gtk
 import pango
 import gobject
@@ -634,12 +635,12 @@ class Dialog(object):
         pass
 
     @classmethod
-    def select_emote(cls, theme, callback, max_width=8):
+    def select_emote(cls, session, theme, callback, max_width=16):
         '''select an emoticon, receives a gui.Theme object with the theme
         settings the callback receives the response and a string representing
         the selected emoticon
         '''
-        EmotesWindow(callback, max_width).show()
+        EmotesWindow(session, callback, max_width).show()
 
     @classmethod
     def invite_dialog(cls, session, callback):
@@ -906,12 +907,16 @@ class EmotesWindow(gtk.Window):
     This class represents a window to select an emoticon
     """
 
-    def __init__(self, emote_selected, max_width=8):
+    def __init__(self, session, emote_selected, max_width=8):
         """
         Constructor.
         max_width -- the maximum number of columns
         """
         gtk.Window.__init__(self)
+
+        self.session = session
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+
         self.set_decorated(False)
         self.set_role("emotes")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
@@ -957,6 +962,8 @@ class EmotesWindow(gtk.Window):
         emotes = []
 
         count = 0
+        column = 0
+        row = 0
         for shortcut, name in gui.theme.EMOTES.iteritems():
             if name in emotes:
                 continue
@@ -975,6 +982,27 @@ class EmotesWindow(gtk.Window):
             self.table.attach(button, column, column + 1, row, row + 1)
 
             count += 1
+
+        emcache = self.caches.get_emoticon_cache(self.session.account.account)
+        for shortcut, hash_ in emcache.list():
+            column = count % columns
+            row = count / columns
+            button = gtk.Button()
+            path = os.path.join(emcache.path, hash_)
+
+            button.set_image(utils.safe_gtk_image_load(path))
+            button.connect('clicked', self._on_emote_selected, shortcut)
+            self.table.attach(button, column, column + 1, row, row + 1)
+
+            count += 1
+
+        button = gtk.Button("Add emoticon")
+        button.connect('clicked', self._on_add_custom_emote_selected)
+        self.table.attach(button, column, column + 1, row, row + 1)
+
+    def _on_add_custom_emote_selected(self, button):
+        ''' called when the user wants to add a custom emoticon '''
+        raise NotImplementedError
 
     def _on_emote_selected(self, button, shortcut):
         '''called when an emote is selected'''
