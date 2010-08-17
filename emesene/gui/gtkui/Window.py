@@ -52,7 +52,9 @@ class Window(gtk.Window):
         self.content = LoginWindow(callback, on_preferences_changed,
             config, config_dir, config_path, proxy, use_http, session_id, 
             cancel_clicked)
-        self.add(self.content)
+        if self.get_child() == None:
+            self.add(self.content)
+
         self.content.show()
         self.content_type = 'login'
 
