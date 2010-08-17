@@ -99,7 +99,7 @@ class LoginBase(gtk.Alignment):
 
         self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
         self.b_cancel.connect('clicked', self._on_cancel_clicked)
-        
+
         vbuttonbox = gtk.VButtonBox()
         vbuttonbox.set_spacing(8)
         vbuttonbox.pack_start(self.b_connect)
@@ -169,14 +169,16 @@ class LoginBase(gtk.Alignment):
         al_account.add(self.avatar)
         al_preferences.add(self.b_preferences)
 
+        vbox_bottom = gtk.VBox(True)
         vbox.pack_start(self.nicebar, False)
         vbox.pack_start(al_account, True, False)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
-        vbox.pack_start(al_label_timer, True, False)
-        vbox.pack_start(al_throbber, False, False)
-        vbox.pack_start(al_button, True, True)
-        vbox.pack_start(al_preferences, False)
+        vbox_bottom.pack_start(al_label_timer, True, False)
+        vbox_bottom.pack_start(al_throbber, False, False)
+        vbox_bottom.pack_start(al_button, True, True)
+        vbox.pack_start(vbox_bottom, True, True)
+        vbox.pack_start(al_preferences, True, False)
 
         self.add(vbox)
         vbox.show_all()
