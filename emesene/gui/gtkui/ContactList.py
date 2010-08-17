@@ -442,12 +442,16 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         con = contact_row[1]
                         # if we find it, we remove it
                         if con.account == contact.account:
+                            # we remove it from tree and from group.
                             del self._model[contact_row.iter]
+                            group.contacts.remove(contact.account)
                             self.update_group(obj)
 
                 # if it's a contact without group (at the root)
                 elif type(obj) == e3.Contact and obj.account == contact.account:
+                    # TODO: Is removing only the tree object?
                     del self._model[row.iter]
+                    del obj # CHECK!!!!!
 
             return
 
@@ -459,9 +463,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 # go through all the contacts
                 for contact_row in row.iterchildren():
                     con = contact_row[1]
-                    # if we find it, we remove it
+                    # if we find it, we remove it, from group and model
                     if con.account == contact.account:
                         del self._model[contact_row.iter]
+                        group.contacts.remove(contact.account)
                         self.update_group(group)
 
 
@@ -655,7 +660,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
 
-        if group == self.offline_group:
+        if group == self.offline_group or group == self.online_group:
             template = template.replace('[$ONLINE_COUNT]', str(total))
         else:
             template = template.replace('[$ONLINE_COUNT]', str(online))
