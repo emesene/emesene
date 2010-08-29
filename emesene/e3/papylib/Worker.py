@@ -410,6 +410,10 @@ class Worker(e3.base.Worker, papyon.Client):
             print reason
 
         def download_ok(msnobj, download_failed_func):
+            if msnobj._data is None:
+                log.warning("[papylib] downloaded msnobj is None")
+                return
+
             emotes.insert_raw((msnobj._friendly, msnobj._data))
             self.session.add_event(Event.EVENT_P2P_FINISHED, \
                 account, 'emoticon', emoticon_path)
