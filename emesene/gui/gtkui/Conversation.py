@@ -329,3 +329,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_filetransfer_progress(self, transfer):
         self.transfers_bar.update(transfer)
+
+    def on_filetransfer_rejected(self, transfer):
+        self.transfers_bar.update(transfer)
+

@@ -40,7 +40,7 @@ if os.path.exists(papypath):
     sys.path.insert(0, papypath)
 
 try:
-    REQ_VER = (0, 4, 8)
+    REQ_VER = (0, 5, 1)
 
     import papyon
     import papyon.event
@@ -122,10 +122,9 @@ class Worker(e3.base.Worker, papyon.Client):
     # some useful methods (mostly, gui only)
     def set_initial_infos(self):
         '''this is called on login'''
-        self._roaming_handler = CR.ContentRoaming(self._sso, self.address_book)
-        self._roaming_handler.connect("notify::state", \
+        self.content_roaming.connect("notify::state", \
                                         self._content_roaming_state_changed)
-        self._roaming_handler.sync()
+        self.content_roaming.sync()
         # sets the login-chosen presence in papyon
         presence = self.session.account.status
         nick = self.profile.display_name
@@ -272,6 +271,7 @@ class Worker(e3.base.Worker, papyon.Client):
         papysession.connect("accepted", self.papy_ft_accepted)
         papysession.connect("progressed", self.papy_ft_progressed)
         papysession.connect("completed", self.papy_ft_completed)
+        papysession.connect("rejected", self.papy_ft_rejected)
 
         self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr)
 
@@ -320,6 +320,12 @@ class Worker(e3.base.Worker, papyon.Client):
         #del self.rfiletransfers[tr]
 
         self.session.add_event(Event.EVENT_FILETRANSFER_COMPLETED, tr)
+
+    def papy_ft_rejected(self, ftsession):
+        tr = self.filetransfers[ftsession]
+
+        self.session.add_event(Event.EVENT_FILETRANSFER_REJECTED, tr)
+        print "[papy file transfer] rejected!"
 
     # call handlers
     def _on_call_incoming(self, papycallevent):
