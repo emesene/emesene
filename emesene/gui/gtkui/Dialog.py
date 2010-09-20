@@ -1233,6 +1233,7 @@ class EmotesWindow(gtk.Window):
             else:
                 size = 1
 
+            #TODO: resize, etc. before inserting path, maybe use insert_raw.
             self.emcache.insert((shortcut, path))
 
         CEChooser(os.path.expanduser("~"), _on_ce_choosed, self.shortcut_list)
