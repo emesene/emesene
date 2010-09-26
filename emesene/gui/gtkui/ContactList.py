@@ -159,6 +159,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
                 # get a list of contact objects from a list of accounts
                 contacts = self.contacts.get_contacts(obj.contacts)
+                if  self.contacts.get_online_total_count(contacts)[1] != 0 and self.show_offline:
+                    return True
+
                 if  self.contacts.get_online_total_count(contacts)[0] == 0:
                     return False
 
