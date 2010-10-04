@@ -901,6 +901,220 @@ class Dialog(object):
         windows.add(hbox)
         windows.show_all()
 
+class ImageChooser(gtk.FileChooserDialog):
+    '''a class to select images'''
+
+    def __init__(self, path, response_cb):
+        '''class constructor, path is the directory where the
+        dialog opens'''
+        gtk.FileChooserDialog.__init__(self, _("Image Chooser"), \
+                    parent=None, action=gtk.FILE_CHOOSER_ACTION_OPEN)
+
+        self.response_cb = response_cb
+
+        self.set_default_size(600, 400)
+        self.set_border_width(4)
+        self.set_position(gtk.WIN_POS_CENTER)
+
+        self.vbox.set_spacing(4)
+
+        self.set_current_folder(path)
+
+        hbbox = gtk.HButtonBox()
+        hbbox.set_spacing(4)
+        hbbox.set_layout(gtk.BUTTONBOX_END)
+
+        b_accept = gtk.Button(stock=gtk.STOCK_OK)
+        b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
+
+        b_accept.connect('clicked', self._on_accept)
+        b_cancel.connect('clicked', self._on_cancel)
+        self.connect('delete-event', self._on_close)
+        self.connect("file-activated",self._on_accept)
+
+        hbbox.pack_start(b_cancel, False)
+        hbbox.pack_start(b_accept, False)
+
+        self.vbox.pack_end(hbbox, False)
+
+        self.show_all()
+
+        self._add_filters()
+        self._add_preview()
+
+    def _add_filters(self):
+        '''
+        Adds all the possible file filters to the dialog. The filters correspond
+        to the gdk available image formats
+        '''
+
+        # All files filter
+        all_files = gtk.FileFilter()
+        all_files.set_name(_('All files'))
+        all_files.add_pattern('*')
+
+        # All images filter
+        all_images = gtk.FileFilter()
+        all_images.set_name(_( 'All images'))
+
+        filters = []
+        formats = gtk.gdk.pixbuf_get_formats()
+        for format in formats:
+            filter = gtk.FileFilter()
+            name = "%s (*.%s)" % (format['description'], format['name'])
+            filter.set_name(name)
+
+            for mtype in format['mime_types']:
+                filter.add_mime_type(mtype)
+                all_images.add_mime_type(mtype)
+
+            for pattern in format['extensions']:
+                tmp = '*.' + pattern
+                filter.add_pattern(tmp)
+                all_images.add_pattern(tmp)
+
+            filters.append(filter)
+
+
+        self.add_filter(all_files)
+        self.add_filter(all_images)
+        self.set_filter(all_images)
+
+        for filter in filters:
+            self.add_filter(filter)
+
+    def _add_preview(self):
+        '''
+        Adds a preview widget to the file chooser
+        '''
+        self.image = gtk.Image()
+        self.image.set_size_request(128, 128)
+        self.image.show()
+
+        self.set_preview_widget(self.image)
+        self.set_preview_widget_active(True)
+
+        self.connect('selection-changed', self._on_update_preview)
+
+    def _on_accept(self, button):
+        '''method called when the user clicks the button'''
+        filename = self.get_filename()
+        if os.path.isfile(filename):
+            self.hide()
+            self.response_cb(gtk.RESPONSE_ACCEPT, filename)
+        else:
+            Dialog.error(_("No picture selected"))
+
+    def _on_cancel(self, button):
+        '''method called when the user clicks the button'''
+        self.hide()
+        self.response_cb(gtk.RESPONSE_CANCEL, self.get_filename())
+
+    def _on_close(self, window, event):
+        '''called when the user click on close'''
+        self.hide()
+        self.response_cb(gtk.RESPONSE_CLOSE, self.get_filename())
+
+    def _on_update_preview(self, filechooser):
+        '''
+        Updates the preview image
+        '''
+        hasPreview = False
+
+        path = self.get_filename()
+
+        if path:
+            # if the file is smaller than 1MB we
+            # load it, otherwise we dont
+            if os.path.isfile(path) and os.path.getsize(path) <= 1000000:
+                try:
+                    pixbuf = gtk.gdk.pixbuf_new_from_file(self.get_filename())
+                    if pixbuf.get_width() > 128 and pixbuf.get_height() > 128:
+                        pixbuf = pixbuf.scale_simple(128, 128, gtk.gdk.INTERP_BILINEAR)
+                    self.image.set_from_pixbuf(pixbuf)
+
+                except gobject.GError:
+                    self.image.set_from_stock(gtk.STOCK_DIALOG_ERROR,
+                        gtk.ICON_SIZE_DIALOG)
+            else:
+                self.image.set_from_stock(gtk.STOCK_DIALOG_ERROR,
+                    gtk.ICON_SIZE_DIALOG)
+
+class CEChooser(ImageChooser):
+    '''a dialog to create a custom emoticon'''
+    SMALL = _("Small (16x16)")
+    BIG = _("Big (50x50)")
+
+    def __init__(self, path, response_cb, smilie_list):
+        '''class constructor'''
+        ImageChooser.__init__(self, path, None)
+
+        self.response_cb = response_cb
+
+        label = gtk.Label(_("Shortcut"))
+        self.shortcut = gtk.Entry(7)
+        self.combo = gtk.combo_box_new_text()
+
+        self.combo.append_text(CEChooser.SMALL)
+        self.combo.append_text(CEChooser.BIG)
+        self.combo.set_active(0)
+
+        hbox0 = gtk.HBox()
+        hbox1 = gtk.HBox()
+        vbox1 = gtk.VBox()
+        vbox2 = gtk.VBox()
+
+        hbox1.add(self.shortcut)
+        hbox1.add(self.combo)
+
+        vbox2.add(hbox1)
+
+        vbox1.add(label)
+
+        hbox0.add(vbox1)
+        hbox0.add(vbox2)
+
+        self.vbox.pack_start(hbox0, False)
+        hbox0.show_all()
+
+        self.smilie_list = smilie_list
+        self._on_changed(None)
+        self.shortcut.connect('changed', self._on_changed)
+
+    def _on_accept(self, button):
+        '''method called when the user clicks the button'''
+        filename = self.get_filename()
+        shortcut = self.shortcut.get_text()
+        size = self.combo.get_model().get_value(self.combo.get_active_iter(), 0)
+
+        if os.path.isfile(filename):
+            if not shortcut:
+                Dialog.error(_("Empty shortcut"))
+            else:
+                self.hide()
+                self.response_cb(stock.ACCEPT, filename, shortcut, size)
+        else:
+            Dialog.error(_("No picture selected"))
+
+    def _on_cancel(self, button):
+        '''method called when the user clicks the button'''
+        self.hide()
+        self.response_cb(stock.CANCEL, None, None, None)
+
+    def _on_close(self, window, event):
+        '''called when the user click on close'''
+        self.hide()
+        self.response_cb(stock.CLOSE, None, None, None)
+
+    def _on_changed(self, shortcut):
+        '''called when the text in self.shortcut changes'''
+
+        SHORTCUT = self.shortcut.get_text()
+
+        if SHORTCUT in self.smilie_list or SHORTCUT == "":
+            self.shortcut.set_property('secondary-icon-stock', gtk.STOCK_DIALOG_ERROR)
+        else:
+            self.shortcut.set_property('secondary-icon-stock', None)
 
 class EmotesWindow(gtk.Window):
     """
@@ -916,6 +1130,9 @@ class EmotesWindow(gtk.Window):
 
         self.session = session
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        self.emcache = self.caches.get_emoticon_cache(self.session.account.account)
+
+        self.shortcut_list = []
 
         self.set_decorated(False)
         self.set_role("emotes")
@@ -926,16 +1143,23 @@ class EmotesWindow(gtk.Window):
         self.max_width = max_width
         self.emote_selected = emote_selected
 
-        emotes_count = gui.theme.get_emotes_count()
+        emotes_count = gui.theme.get_emotes_count() # TODO: remove me
         rows = emotes_count/max_width
+
         self.table = gtk.Table(max_width, rows)
-
         self._fill_emote_table(max_width)
+        button = gtk.Button("Add emoticon")
+        button.set_image(gtk.image_new_from_stock(gtk.STOCK_ADD,
+            gtk.ICON_SIZE_BUTTON))
+        button.connect('clicked', self._on_add_custom_emote_selected)
+        
+        self.box = gtk.VBox()
+        self.box.pack_start(self.table)
+        self.box.pack_start(button)
 
-        box = gtk.VBox()
-        box.pack_start(self.table)
-        self.add(box)
-        box.show_all()
+
+        self.add(self.box)
+        self.box.show_all()
 
         self.connect('leave-notify-event', self.on_leave_notify_event)
         self.connect('enter-notify-event', self.on_enter_notify_event)
@@ -967,6 +1191,7 @@ class EmotesWindow(gtk.Window):
         for shortcut, name in gui.theme.EMOTES.iteritems():
             if name in emotes:
                 continue
+            self.shortcut_list.append(shortcut)
 
             column = count % columns
             row = count / columns
@@ -983,12 +1208,13 @@ class EmotesWindow(gtk.Window):
 
             count += 1
 
-        emcache = self.caches.get_emoticon_cache(self.session.account.account)
-        for shortcut, hash_ in emcache.list():
+        for shortcut, hash_ in self.emcache.list():
+            self.shortcut_list.append(shortcut)
+
             column = count % columns
             row = count / columns
             button = gtk.Button()
-            path = os.path.join(emcache.path, hash_)
+            path = os.path.join(self.emcache.path, hash_)
 
             button.set_image(utils.safe_gtk_image_load(path))
             button.connect('clicked', self._on_emote_selected, shortcut)
@@ -996,13 +1222,21 @@ class EmotesWindow(gtk.Window):
 
             count += 1
 
-        button = gtk.Button("Add emoticon")
-        button.connect('clicked', self._on_add_custom_emote_selected)
-        self.table.attach(button, column, column + 1, row, row + 1)
-
     def _on_add_custom_emote_selected(self, button):
         ''' called when the user wants to add a custom emoticon '''
-        raise NotImplementedError
+        def _on_ce_choosed(response, path, shortcut, size):
+            '''method called when the ce is selected'''
+            if response != stock.ACCEPT:
+                return
+            if size == CEChooser.SMALL:
+                size = 0
+            else:
+                size = 1
+
+            #TODO: resize, etc. before inserting path, maybe use insert_raw.
+            self.emcache.insert((shortcut, path))
+
+        CEChooser(os.path.expanduser("~"), _on_ce_choosed, self.shortcut_list)
 
     def _on_emote_selected(self, button, shortcut):
         '''called when an emote is selected'''
