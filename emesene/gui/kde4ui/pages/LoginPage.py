@@ -15,7 +15,6 @@ import e3
 import gui.kde4ui.widgets as Widgets
 
 
-#TODO: Consider reimplementing LoginPage as a Qt state machine
 class LoginPage(QtGui.QWidget):
     ''' The Login Page '''
     def __init__(self, callback, on_preferences_changed, config=None,
@@ -57,7 +56,8 @@ class LoginPage(QtGui.QWidget):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
-        widget_dict['display_pic'] = Widgets.DisplayPic()
+        widget_dict['display_pic'] = Widgets.DisplayPic(self._config_dir,
+                                                    'messenger.hotmail.com')
         widget_dict['account_combo'] = KdeGui.KComboBox()
         widget_dict['password_edit'] = KdeGui.KLineEdit()
         widget_dict['status_combo'] = Widgets.StatusCombo()
@@ -93,7 +93,6 @@ class LoginPage(QtGui.QWidget):
         hor_lay.addStretch()
         self.setLayout(hor_lay)
 
-        #TODO: Check signal propagation - loop risk!
         widget_dict['account_combo'].currentIndexChanged.connect(
                                         self._on_chosen_account_changed)
         widget_dict['account_combo'].editTextChanged.connect(
@@ -117,9 +116,7 @@ class LoginPage(QtGui.QWidget):
         account_combo.setEditable(1)
         account_combo.setDuplicatesEnabled(False) #not working... why?
         account_combo.setInsertPolicy(KdeGui.KComboBox.NoInsert)
-        # ?
-        account_combo_completion = \
-            account_combo.completionObject(True)
+        # TODO: Investigate completion
         widget_dict['password_edit'].setPasswordMode()
         login_btn = widget_dict['login_btn']
         login_btn.setAutoDefault(True)
@@ -195,6 +192,8 @@ class LoginPage(QtGui.QWidget):
         account = self._account_list[index_in_account_list]
         
         self.clear_login_form()
+        # display_pic
+        widget_dict['display_pic'].set_display_pic(account.email)
         # password:
         if account.password:
             password_edit.setText(account.password)
@@ -302,6 +301,7 @@ class LoginPage(QtGui.QWidget):
         ''' Resets the login form '''
         print " *** clear_login_form"
         widget_dic = self._widget_dict
+        widget_dic['display_pic'].set_logo()
         widget_dic['password_edit'].clear()
         widget_dic['status_combo'].set_status(e3.status.ONLINE)
         # _on_checkbox_state_changed enables them:
