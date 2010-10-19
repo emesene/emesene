@@ -17,6 +17,13 @@ import gui.kde4ui.widgets as Widgets
 
 class LoginPage(QtGui.QWidget):
     ''' The Login Page '''
+    # pylint: disable=W0612
+    NAME = 'LoginPage'
+    DESCRIPTION = 'The widget used to to dislay the login screen'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
+    
     def __init__(self, callback, on_preferences_changed, config=None,
                  config_dir=None, config_path=None, proxy=None, use_http=None,
                  session_id=None, cancel_clicked=False, parent=None):
@@ -36,7 +43,6 @@ class LoginPage(QtGui.QWidget):
 
         # a widget dic to avoid proliferation of instance variables:
         self._widget_dict = {}
-        widget_dict = self._widget_dict
 
         # setup code:
         self._setup_accounts()
@@ -47,9 +53,11 @@ class LoginPage(QtGui.QWidget):
         if self._config.last_logged_account and \
            not self._config.last_logged_account == '':
             account_combo.setCurrentIndex(account_combo.findData(0))
+        # I don't know why this doesn't get called automatically:
+        self._on_chosen_account_changed(0)   
             
-        # TODO: this way, if there are remembered accounts, but no default account, no
-        # display pic is shown....
+        # TODO: this way, if there are remembered accounts, but no default 
+        #account, no display pic is shown....
         
 
     def _setup_ui(self):
@@ -349,7 +357,7 @@ class LoginPage(QtGui.QWidget):
 
 
 
-# -------------------- QT_OVERRIDE
+    # -------------------- QT_OVERRIDE
 
     def eventFilter(self, obj, event):
         ''' event filter to handle return pression in the login window'''
@@ -362,3 +370,5 @@ class LoginPage(QtGui.QWidget):
             return True
         else:
             return False
+            
+        

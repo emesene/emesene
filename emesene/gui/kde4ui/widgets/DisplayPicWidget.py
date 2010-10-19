@@ -7,6 +7,7 @@ import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
+
 import gui
 
 class DisplayPic (QtGui.QLabel):
@@ -15,6 +16,8 @@ class DisplayPic (QtGui.QLabel):
     FRAMESIZE = QtCore.QSize(104, 104)
     PIXMAPSIZE = QtCore.QSize(96, 96)
 
+    clicked = QtCore.pyqtSignal()
+    
     def __init__(self, config_dir, server_host, parent = None):
         '''constructor'''
         QtGui.QLabel.__init__(self, parent)
@@ -31,7 +34,6 @@ class DisplayPic (QtGui.QLabel):
 
     def set_logo(self):
         ''' sets emesene's logo as a display pic'''
-        print ' ***** set_logo',
         path = gui.theme.logo
         self._set_display_pic(path)
     
@@ -39,7 +41,6 @@ class DisplayPic (QtGui.QLabel):
         '''set a display pic from the account's name, the contact name, and pic
         name. If no contact is provided, the account's user's pic is set.
         If no pic is specified, then the last one is set'''
-        print ' ***** set_display_pic',
         path = self._config_dir.join(self._server_host, account, 
                                     contact, 'avatars', display_pic)
         self._set_display_pic(path)
@@ -59,6 +60,8 @@ class DisplayPic (QtGui.QLabel):
 #        self.adjust_size()
 
     def _draw_pixmap(self, pixmap):
+        '''Actually displays a pixmap. This is the callback method invoked by
+        the PixmapFader when there's a new frame to display'''
         self.setPixmap(pixmap)
         self.adjust_size()
 
@@ -74,6 +77,8 @@ class DisplayPic (QtGui.QLabel):
         ''' resizes the display pic to the correct size'''
         self.setMinimumSize(self.FRAMESIZE)
         self.setMaximumSize(self.FRAMESIZE)
+        
+    # -------------------- QT_OVERRIDE
 
     #separate in keyPressEvent and keyReleaseEvent
     def eventFilter(self, obj, event):
@@ -89,7 +94,7 @@ class DisplayPic (QtGui.QLabel):
              event.button() == Qt.LeftButton:
             self.setFrameShadow(QtGui.QFrame.Raised)
             self.adjust_size()
-            self.emit(QtCore.SIGNAL("clicked()"))
+            self.clicked.emit()
             return True
         elif event.type() == QtCore.QEvent.MouseButtonPress and  \
              event.button() == Qt.LeftButton:
@@ -100,18 +105,20 @@ class DisplayPic (QtGui.QLabel):
             return False
 
 class PixmapFader(QtCore.QObject):
+    '''Class which provides a fading animation between QPixmaps'''
     def __init__(self, callback, pixmap_size, first_pic=None, parent=None):
+        '''Constructor'''
         QtCore.QObject.__init__(self, parent)
         self._pixmaps = []
         self._size = pixmap_size
-        self._rect = QtCore.QRect(QtCore.QPoint(0,0), self._size)
+        self._rect = QtCore.QRect(QtCore.QPoint(0, 0), self._size)
         self._callback = callback
         # timer initialization
         self._timer = QtCore.QTimer(KdeGui.KApplication.instance())
         self._timer.timeout.connect(self._on_timeout)
-        self._fps = 120.0
-        self._duration = 100.0
-        self._frame_time = self._duration / self._fps
+        self._fpms = 0.12 # frames / millisencond
+        self._duration = 1000.0 # millisecond
+        self._frame_time = 1 / self._fpms
         self._alpha_step = self._frame_time / self._duration
         # pixmap painting initializations
         self._result = QtGui.QPixmap(gui.theme.logo)
@@ -119,45 +126,64 @@ class PixmapFader(QtCore.QObject):
         self._painter = QtGui.QPainter(self._result)
         
     def __del__(self): 
+        '''Destructor. Note: without this explicit destructor, we get a SIGABRT
+        due to a failed assertion in xcb.'''
         self._painter.end()
         
     def add_pixmap(self, pixmap):
+        '''Adds a pixmap to the pixmap stack'''
+        if pixmap.isNull():
+            return
         pixmap = pixmap.scaled(self._size)
-        # TODO: check for null pixmaps....
-        if len(self._pixmaps) == 0:
-            print ' ******* appending first pixmap'
+        number_of_pixmaps = len(self._pixmaps)
+        
+        # no pixmap yet:        
+        if number_of_pixmaps == 0:
             self._painter.save()
             self._pixmaps.append((pixmap, 1))
             self._painter.drawPixmap(self._rect, pixmap, self._rect)
             self._painter.restore()
             self._callback(self._result)
-        else:
-            if pixmap.toImage() == self._pixmaps[-1][0].toImage():
-                print ' ******* skipping pixmap'
-                return
-            print ' ******* non-first pixmap'
+            return
+       
+        # the pixmap is the same as the last one:
+        if pixmap.toImage() == self._pixmaps[-1][0].toImage():
+            return
+            
+        # we have already one pixmap:     
+        if number_of_pixmaps == 1:
             self._pixmaps.append((pixmap, 0))
             self._timer.start(self._frame_time)
+            return
+            
+        # we have already two pixmap:
+        if number_of_pixmaps == 2:
+            self._pixmaps[0] = (self._result, 1)
+            self._pixmaps[1] = (pixmap, 0)
+            self._timer.start(self._frame_time)
+        
+        # ops...
+        if number_of_pixmaps > 2:
+            raise RuntimeError('[BUG] Too many pixmaps!')
         
         
     def _on_timeout(self):
-        #print ".",
-        old_pixmap, old_opacity = self._pixmaps[-2]
-        new_pixmap, new_opacity = self._pixmaps[-1]
-        #print '[old: %s, new: %s]' % (old_opacity, new_opacity)
+        '''Compute a frame. This method is called by a QTimer 
+        various times per second.'''
+        old_pixmap, old_opacity = self._pixmaps[0]
+        new_pixmap, new_opacity = self._pixmaps[1]
         
         if old_opacity < 0 and new_opacity > 1:
             self._timer.stop()
-            self._pixmaps.remove(self._pixmaps[-2])
-            #print "X"
+            self._pixmaps.remove(self._pixmaps[0])
+            self._pixmaps[0] = (new_pixmap, 1)
             return
             
         old_opacity -= self._alpha_step
         new_opacity += self._alpha_step
          
-            
-        self._pixmaps[-2] = (old_pixmap, old_opacity)
-        self._pixmaps[-1] = (new_pixmap, new_opacity)
+        self._pixmaps[0] = (old_pixmap, old_opacity)
+        self._pixmaps[1] = (new_pixmap, new_opacity)
             
         painter = self._painter
         painter.save()

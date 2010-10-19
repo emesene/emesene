@@ -10,7 +10,7 @@ class TopLevelWindow (kdeui.KMainWindow):
     ''' Class representing the main window '''
     # pylint: disable=W0612
     NAME = 'TopLevelWindow'
-    DESCRIPTION = 'The window used to contain all the content of emesene'
+    DESCRIPTION = 'The window used to contain all the _content of emesene'
     AUTHOR = 'Gabriele Whisky Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
@@ -55,18 +55,43 @@ class TopLevelWindow (kdeui.KMainWindow):
         '''does nothing'''
         print "GO CONNECT! ^_^"
 
+    # TODO: don't reinstantiate existing pages, or don't preserve old pages.
     def go_login(self, callback, on_preferences_changed,
            config=None, config_dir=None, config_path=None,
            proxy=None, use_http=None, session_id=None, cancel_clicked=False):
                #emesene's
         # pylint: disable=R0913
-        '''add a login page to the top level window and shows it'''
+        '''Adds a login page to the top level window and shows it'''
+        print "GO LOGIN! ^_^"
         login_window_cls = extension.get_default('login window')
         login_page = login_window_cls(callback, on_preferences_changed,
                                       config, config_dir, config_path, proxy,
                                       use_http, session_id, cancel_clicked)
+        self._content_type = 'login'
         self._switch_to_page(login_page)
 
+    def go_main(self, session, on_new_conversation,
+            on_close, on_disconnect):
+        '''Adds a main page (the one with the contact list) to the top
+        level window and shows it'''
+        print "GO MAIN! ^_^"
+        main_window_cls = extension.get_default('main window')
+        print main_window_cls
+        main_page = main_window_cls(session, on_new_conversation, 
+                                    on_close, on_disconnect)
+        print main_page
+        self._content_type = 'main'
+        print self._content_type
+        self._switch_to_page(main_page)
+        print '***'
+        
+    
+    def _get_content(self):
+        print "Getting 'content'"
+        return self._content
+        
+    content = property(_get_content)
+    
 #    def setMenu(self, menuBar):
 #        KFELog().l("KFEMainWindow.setMenu()")
 #        self.setMenuBar(menuBar)
@@ -86,6 +111,7 @@ class TopLevelWindow (kdeui.KMainWindow):
         if index == -1:
             index = self._page_stack.addWidget(page_widget)
         self._page_stack.setCurrentIndex(index)
+        self._content = page_widget
 
 
 # -------------------- QT_OVERRIDE

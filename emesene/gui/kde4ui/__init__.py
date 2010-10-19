@@ -33,7 +33,7 @@ def kde4_main(controller_cls):
     app = KdeGui.KApplication()
     idletimer = QtCore.QTimer(KdeGui.KApplication.instance())
     idletimer.timeout.connect(on_idle)
-    idletimer.start(100)
+    idletimer.start(10)
 
     controller = controller_cls()
     controller.start()
@@ -58,8 +58,11 @@ def setup():
     import TopLevelWindow
     import TrayIcon
     import pages
+    import widgets
 
+    extension.category_register('contact list', widgets.ContactList)
     extension.category_register('login window', pages.LoginPage)
+    extension.category_register('main window', pages.MainPage)
     extension.category_register('window frame', TopLevelWindow.TopLevelWindow)
     extension.category_register('tray icon',    TrayIcon.TrayIcon)
 
