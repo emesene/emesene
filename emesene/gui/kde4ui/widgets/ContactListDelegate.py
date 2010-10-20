@@ -14,6 +14,8 @@ import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
+import gui
+
 from ContactListModel import Role
 
 class ContactListDelegate (QtGui.QStyledItemDelegate):
@@ -62,7 +64,14 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             x_pic_margin = self._MIN_PICTURE_MARGIN
             xy_pic_margin = QtCore.QPointF(x_pic_margin, y_pic_margin)
             # create the picture
-            picture = QtGui.QPixmap(model.data(index, Role.DecorationRole))
+            print "picture: [%s]" % model.data(index, Role.DecorationRole).toString()
+            try:
+                picture = QtGui.QPixmap(model.data(index, Role.DecorationRole))
+            except:
+                import traceback
+                traceback.print_exc()
+            if picture.isNull():
+                picture = QtGui.QPixmap(gui.theme.user)
             # calculate the target position
             source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
                                     QtCore.QSizeF(picture.size()) )
@@ -120,8 +129,8 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         '''Formats correctly the html string which represents the contact's
         display role'''
         smiley_size = 16
-        if not text.contains('<i></i>'):
-            text.replace('<i>','<br><i>')
+        #if not text.contains('<i></i>'):
+            #text.replace('<i>','<br><i>')
         text.replace('<img src', '<img width="%d" height="%d" src' % 
                      (smiley_size, smiley_size))
         return text

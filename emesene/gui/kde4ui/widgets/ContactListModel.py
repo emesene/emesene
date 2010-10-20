@@ -62,8 +62,12 @@ class ContactListModel (QtGui.QStandardItemModel):
             return
         else:
             print '**** FOUND: %s' % (contact)
-            
-        self._set_contact_info(self, contact_item, contact)
+        
+        try:
+            self._set_contact_info(contact_item, contact)
+        except Exception:
+            import traceback
+            traceback.print_exc()
         
     
     def _set_contact_info(self, contact_item, contact):
@@ -71,6 +75,8 @@ class ContactListModel (QtGui.QStandardItemModel):
         contact_item.setData(
             contact.display_name +'<br><i>'+ contact.message +'</i>',
             Role.DisplayRole)
+        print "PICTURE: %s" % contact.picture
+        contact_item.setData(contact.picture, Role.DecorationRole)
         contact_item.setData(contact.media, Role.MediaRole)
         contact_item.setData(contact.status, Role.StatusRole)
         contact_item.setData(contact.blocked, Role.BlockedRole)

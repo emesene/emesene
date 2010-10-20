@@ -306,7 +306,7 @@ class LoginPage(QtGui.QWidget):
             
         # Invoke the  login callback
         self._login_callback(e3_account, self._session_id, self._proxy,
-                             self._use_http, 'messenger.hotmail.com', '1863')
+                             self._use_http, 'omega.contacts.msn.com', '1863')
 
 
 
