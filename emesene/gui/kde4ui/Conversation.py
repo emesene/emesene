@@ -19,12 +19,14 @@ reload(sys)
 class Conversation (gui.base.Conversation, QtGui.QWidget):
     '''This widget represents the contents of a chat tab in the conversations
     page'''
-    def __init__(self, session, cid, members=None, parent=None):
+    def __init__(self, session, conv_id, members=None, parent=None):
         '''Constructor'''
-        gui.base.Conversation.__init__(self, session, cid, members)
+        gui.base.Conversation.__init__(self, session, conv_id, members)
         QtGui.QWidget.__init__(self, parent)
         
         self._session = session
+        self._conv_id = conv_id
+        self._members = members
         self._chat_text = QtCore.QString("<i>New Chat</i><br>")
         
         # emesene's
@@ -59,7 +61,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                KdeGui.KIcon("preferences-desktop-fonts"), "Change Color", self)
                     
                     
-        label = QtGui.QLabel(str(self.cid))
+        label = QtGui.QLabel(str(self._conv_id))
         # TOP LEFT
         top_left_widget = QtGui.QWidget()
         widget_dict['chat_view'] = KdeGui.KTextBrowser(None, True)
@@ -99,10 +101,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         widget_dict['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
-        #widget_dict['chat_edit'].return_pressed.connect(
-        #                    self.onSendMessage)
-        #widget_dict['send_btn'].clicked.connect(
-        #                    self.onSendMessage)
+        widget_dict['chat_edit'].return_pressed.connect(
+                            self._on_send_message)
+        widget_dict['send_btn'].clicked.connect(
+                            self._on_send_message)
         action_dict['add_smiley'].triggered.connect(
                             self._on_show_smiley_chooser)
         action_dict['change_font'].triggered.connect(
@@ -135,6 +137,13 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         right_lay.addWidget(widget_dict['his_display_pic'])
         right_lay.addStretch()
         right_lay.addWidget(widget_dict['my_display_pic'])
+        
+        widget_dict['my_display_pic']._set_display_pic(
+                                        self._session.contacts.me.picture)
+        if self._members:
+            his_account = self._session.contacts.get(self._members[0])
+            widget_dict['his_display_pic']._set_display_pic(
+                                            his_account.picture)
 
         # LEFT & RIGHT
         lay = QtGui.QHBoxLayout()
@@ -159,6 +168,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         self._append_to_chat(
             xml.sax.saxutils.escape(message.body) + '<br>')
+            
+    # emesene's
+    def send_message(self, formatter, my_account,
+                text, cedict, cstyle, first):
+        self._append_to_chat(
+            '<b>ME:</b>' + xml.sax.saxutils.escape(text) + '<br/>')
     
     
     def update_single_information(self, nick, message, account): # emesene's
@@ -185,6 +200,29 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         chooser panel. Inserts the smiley in the chat edit'''
         # handles cursor position
         self._widget_dict['chat_edit'].insert_text_after_cursor(shortcut)
+        
+    
+    def _on_send_message(self):
+        message_string = str(self._widget_dict['chat_edit'].toPlainText())
+        if len(message_string) == 0:
+            return
+        self._widget_dict['chat_edit'].clear()
+        gui.base.Conversation._on_send_message(self, message_string)
+        
+        
+    def _append_to_chat(self, html_string):
+        '''Method that appends an html string to the chat view'''
+        vert_scroll_bar = self._widget_dict['chat_view'].verticalScrollBar()
+        if vert_scroll_bar.value() == vert_scroll_bar.maximum():
+            at_bottom = True
+        else:
+            at_bottom = False
+
+        self._chat_text.append(html_string)
+        self._widget_dict['chat_view'].setText(self._chat_text)
+
+        if at_bottom:
+            vert_scroll_bar.setValue(vert_scroll_bar.maximum())
 
 
 #    def onMessageReceived(self, messageview, formatting):
@@ -221,31 +259,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 #        self.statusBar.insertItem("%s is typing a message" % (contact), 1)
 #        self.statusBar.setItemAlignment(1, Qt.AlignLeft)
 
-
-    
-#    def onSendMessage(self):
-#        messageString = str(self.textEditWidget.toPlainText())
-#        if len(messageString) == 0:
-#            return
-#        messageStringView = StringView()
-#        messageStringView.append_text(messageString)
-#
-#        self.textEditWidget.clear()
-#        self.sendMessage(messageStringView)
-
-    def _append_to_chat(self, html_string):
-        '''Method that appends an html string to the chat view'''
-        vert_scroll_bar = self._widget_dict['chat_view'].verticalScrollBar()
-        if vert_scroll_bar.value() == vert_scroll_bar.maximum():
-            at_bottom = True
-        else:
-            at_bottom = False
-
-        self._chat_text.append(html_string)
-        self._widget_dict['chat_view'].setText(self._chat_text)
-
-        if at_bottom:
-            vert_scroll_bar.setValue(vert_scroll_bar.maximum())
+   
 
         
         

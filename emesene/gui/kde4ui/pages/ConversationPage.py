@@ -38,10 +38,10 @@ class ConversationPage (gui.base.ConversationManager, KdeGui.KTabWidget):
         print "conversation manager adieeeeeeeuuuu ;______;"
         
         
-    def add_new_conversation(self, session, cid, members):
+    def add_new_conversation(self, session, conv_id, members):
         '''Creates a new chat tab and returns it'''
-        conversation = Conversation.Conversation(session, cid, members, self)
-        conversation.tab_index = self.addTab(conversation, str(cid))
+        conversation = Conversation.Conversation(session, conv_id, members, self)
+        conversation.tab_index = self.addTab(conversation, str(conv_id))
         return conversation
         
     def get_parent(self): # emesene's

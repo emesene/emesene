@@ -10,6 +10,8 @@ from PyQt4.QtCore   import Qt
 
 import gui.kde4ui.widgets as Widgets
 
+import time
+
 
 class MainPage (QtGui.QWidget):
     '''The main page (the one with the contact list)'''
@@ -27,6 +29,7 @@ class MainPage (QtGui.QWidget):
 
         self._session = session
         # callbacks:
+        print on_new_conversation
         self._on_new_conversation = on_new_conversation
         self._on_close = on_close
         self._on_disconnect = on_disconnect
@@ -83,7 +86,8 @@ class MainPage (QtGui.QWidget):
                                         self._on_set_new_status)
         #widget_dict['display_pic'].clicked.connect(
         #                                self._on_display_pic_choose_request)
-
+        widget_dict['contact_list'].new_conversation_requested.connect(
+                                        self._on_new_conversation_requested)
         
 
     def _on_ss_profile_get_succeed(self, nick, psm):
@@ -103,6 +107,14 @@ class MainPage (QtGui.QWidget):
         #print "display pic path: %s" % display_pic_path
         # investigate display pic...
         widget_dict['display_pic']._set_display_pic(display_pic_path)
+        
+    def _on_new_conversation_requested(self, account):
+        print account
+        conv_id = time.time()
+        self._on_new_conversation(conv_id, [account], False) 
+        # TODO: shouldn't this go somewhere else?!
+        # calls the e3 handler
+        self._session.new_conversation(account, conv_id)
     
     
     def _on_set_new_nick(self, nick):

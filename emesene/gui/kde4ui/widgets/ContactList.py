@@ -56,7 +56,7 @@ from   ContactListModel import Role
 
 class ContactList (gui.ContactList, QtGui.QTreeView):
     '''A Contactlist Widget'''
-    new_conversation_requested = QtCore.pyqtSignal(float)
+    new_conversation_requested = QtCore.pyqtSignal(basestring)
     
     def __init__(self, session, parent=None):
         QtGui.QTreeView.__init__(self, parent)
@@ -134,8 +134,8 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
     def _on_item_double_clicked(self, item):
         '''Slot called when the user double clicks a contact. requests
         a new conversation'''
-        contact_uid = self._model.data(item, Role.UidRole).toPyObject()
-        self.new_conversation_requested.emit(contact_uid)
+        contact = self._model.data(item, Role.DataRole).toPyObject()
+        self.new_conversation_requested.emit(str(contact.account))
 
 
 

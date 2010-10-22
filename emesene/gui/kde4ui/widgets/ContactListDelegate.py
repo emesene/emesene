@@ -125,7 +125,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             text_size = text_doc.size().toSize()
             return text_size
         else:
-            text = self._format_contact_display_role(text)
+            text = _format_contact_display_role(text)
             text_doc.setHtml(text)
             text_size = text_doc.size().toSize()
             text_width  = text_size.width()
