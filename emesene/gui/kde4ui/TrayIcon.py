@@ -2,10 +2,12 @@
 
 ''' This module contains the tray icon's class'''
 
-class TrayIcon(object):
+import PyQt4.QtGui as QtGui
+
+class TrayIcon (QtGui.QWidget):
     '''A class that implements the tray icon of emesene for KDE4'''
     # pylint: disable=W0612
-    NAME = 'MainWindow'
+    NAME = 'TrayIcon'
     DESCRIPTION = 'KDE4 Tray Icon'
     AUTHOR = 'Gabriele Whisky Visconti'
     WEBSITE = ''
@@ -17,7 +19,17 @@ class TrayIcon(object):
 
         handler -- a e3common.Handler.TrayIconHandler object
         '''
-        pass
+        QtGui.QWidget.__init__(self)
+        self.handler = handler
+        self.main_window = main_window
+        self.c = None
+        
+    def set_conversations(self, conversations): # emesene's
+        print "Tray Icon: %s" % conversations
+        
+        self.c = conversations 
+        
+        
 
     def set_login(self):
         '''does nothing'''

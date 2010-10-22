@@ -60,14 +60,8 @@ class ContactListModel (QtGui.QStandardItemModel):
         if not contact_item:
             print '***** NOT FOUND: %s' % (contact)
             return
-        else:
-            print '**** FOUND: %s' % (contact)
         
-        try:
-            self._set_contact_info(contact_item, contact)
-        except Exception:
-            import traceback
-            traceback.print_exc()
+        self._set_contact_info(contact_item, contact)
         
     
     def _set_contact_info(self, contact_item, contact):
@@ -75,11 +69,11 @@ class ContactListModel (QtGui.QStandardItemModel):
         contact_item.setData(
             contact.display_name +'<br><i>'+ contact.message +'</i>',
             Role.DisplayRole)
-        print "PICTURE: %s" % contact.picture
         contact_item.setData(contact.picture, Role.DecorationRole)
         contact_item.setData(contact.media, Role.MediaRole)
         contact_item.setData(contact.status, Role.StatusRole)
         contact_item.setData(contact.blocked, Role.BlockedRole)
+        contact_item.setData(contact.account, Role.ToolTipRole)
         contact_item.setData(contact, Role.DataRole)
         
         
@@ -89,11 +83,6 @@ class ContactListModel (QtGui.QStandardItemModel):
         new_group_item.setData(group.identifier, Role.UidRole)
         self.appendRow(new_group_item)
         
-        
-    def fill(self): # emesene's
-        '''Fill the contact list.'''
-        print "Filling ^_^   --- Ma perche sto qui?! O_O"
-        pass
         
 #    def onContactListUpdated(self, clView):
 #        KFELog().l("ContactListModel.onContactListUpdated()", False,  1)
@@ -106,7 +95,8 @@ class ContactListModel (QtGui.QStandardItemModel):
 #    def onGroupUpdated(self, gView):
 #        KFELog().l("ContactListModel.onGroupUpdated()",  False,  1)
 #        groupItem = self._search_item_by_uid(gView.uid,  self)
-#        groupItem.setData(gView.name.parse_default_smileys().to_HTML_string(),  KFERole.DisplayRole)
+#        groupItem.setData(gView.name.parse_default_smileys().to_HTML_string(),
+#                           KFERole.DisplayRole)
 #        groupItem.setData(gView.name.to_HTML_string(), KFERole.SortRole)
 #        # TODO: set the Icon. 
 #        #groupItem.setData()
@@ -119,35 +109,42 @@ class ContactListModel (QtGui.QStandardItemModel):
 #            
 #    def onContactUpdated(self, cView):
 #        #KFELog().l("ContactListModel.onContactUpdated()", False, 1)
-#        #searching the contact in the groups --> we will have to mantain a dict ['uid':idx]...
+#        #searching the contact in the groups --> we will have to 
+#        #mantain a dict ['uid':idx]...
 #        for idx in range(self.rowCount()):
-#            foundContactItem = self._search_item_by_uid(cView.uid,  self.item(idx, 0))
+#            foundContactItem = self._search_item_by_uid(cView.uid,  
+#                                                         self.item(idx, 0))
 #            if foundContactItem:
 #                break
 #        if not foundContactItem:
-#            #KFELog().d("Unable to find: %s" % cView.uid, "ContactListModel.onContactUpdated()")
 #            #temp code
 #            foundContactItem = QStandardItem(QString())
-#            self._search_item_by_uid(self.__debugGroupUid, self).appendRow(foundContactItem)
+#            self._search_item_by_uid(
+#                       self.__debugGroupUid, self).appendRow(foundContactItem)
 #        # setting DisplayRole
-#        foundContactItem.setData(cView.name.parse_default_smileys().to_HTML_string(), KFERole.DisplayRole)
+#        foundContactItem.setData(
+#    cView.name.parse_default_smileys().to_HTML_string(), KFERole.DisplayRole)
 #        # setting.... What?!
 #        #foundContactItem.setData(cView) ##????
 #        # setting DecorationRole
 #        _,displayPicPath = cView.dp.imgs[0]
 #        if displayPicPath == "dp_nopic":
 #            displayPicPath = KFEThemeManager().pathOf("dp_nopic")
-#        foundContactItem.setData(QPixmap(displayPicPath).scaled(50,50),  KFERole.DecorationRole)
+#        foundContactItem.setData(QPixmap(displayPicPath).scaled(50,50),  
+#                                  KFERole.DecorationRole)
 #        # setting SortRole
-#        sortString = self.sortRoleDict[cView.status.to_HTML_string()] + cView.name.to_HTML_string()
+#        sortString = self.sortRoleDict[cView.status.to_HTML_string()] + \
+#                                            cView.name.to_HTML_string()
 #        foundContactItem.setData(sortString, KFERole.SortRole)
 #        # setting StatusRole
-#        foundContactItem.setData(cView.status.to_HTML_string(),  KFERole.StatusRole)
+#        foundContactItem.setData(cView.status.to_HTML_string(),  
+#                                KFERole.StatusRole)
 #        
 #        self.sort(0)
         
         
     def _search_item_by_uid(self,  uid,  parent):
+        '''Searches na item, given its uid'''
         if parent == self:
             item_locator = parent.item
         else:
@@ -174,6 +171,7 @@ class Role:
         pass
     DisplayRole     = Qt.DisplayRole
     DecorationRole  = Qt.DecorationRole
+    ToolTipRole     = Qt.ToolTipRole
     BlockedRole     = Qt.UserRole
     DataRole        = Qt.UserRole + 1
     MediaRole       = Qt.UserRole + 2

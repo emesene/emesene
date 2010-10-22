@@ -55,14 +55,17 @@ def setup():
     define all the components for a kde4 environment
     """
     # pylint: disable=W0403
+    import Notifier
     import TopLevelWindow
     import TrayIcon
     import pages
     import widgets
 
+    extension.category_register('conversation window', pages.ConversationPage)
     extension.category_register('contact list', widgets.ContactList)
     extension.category_register('login window', pages.LoginPage)
     extension.category_register('main window', pages.MainPage)
+    extension.category_register('notificationGUI', Notifier.Notifier)
     extension.category_register('window frame', TopLevelWindow.TopLevelWindow)
     extension.category_register('tray icon',    TrayIcon.TrayIcon)
 
@@ -72,7 +75,7 @@ def on_idle():
     '''When there's nothing to do in the Qt event loop
     process events in the gobject event queue'''
     iterations = 0
-    while iterations < 10 and GCONTEXT.pending():
+    while GCONTEXT.pending():
         GCONTEXT.iteration()
         iterations += 1
 

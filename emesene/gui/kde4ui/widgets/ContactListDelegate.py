@@ -14,6 +14,7 @@ import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
+import e3
 import gui
 
 from ContactListModel import Role
@@ -44,8 +45,10 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         # -> Draw the skeleton of a ItemView widget: highlighting, selection...
         QtGui.QApplication.style().drawControl(QtGui.QStyle.CE_ItemViewItem, 
                                                option, painter, option.widget)
+        status = model.data(index, Role.StatusRole).toPyObject()
         text_doc = QtGui.QTextDocument()
-        text = model.data(index, Role.DisplayRole).toString()
+        text = model.data(index, Role.DisplayRole).toString() #+ \
+               #'<b>[' + e3.status.STATUS[status] + ']</b>'
         
         if not index.parent().isValid():
             # -> Start drawing the text_doc:
@@ -64,12 +67,8 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             x_pic_margin = self._MIN_PICTURE_MARGIN
             xy_pic_margin = QtCore.QPointF(x_pic_margin, y_pic_margin)
             # create the picture
-            print "picture: [%s]" % model.data(index, Role.DecorationRole).toString()
-            try:
-                picture = QtGui.QPixmap(model.data(index, Role.DecorationRole))
-            except:
-                import traceback
-                traceback.print_exc()
+            picture_path = model.data(index, Role.DecorationRole).toString()
+            picture = QtGui.QPixmap(picture_path)
             if picture.isNull():
                 picture = QtGui.QPixmap(gui.theme.user)
             # calculate the target position
@@ -81,12 +80,18 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             painter.drawPixmap(target, picture, source)
     
             # -> start drawing the emblem
-#            picture_path  = KFEThemeManager().pathOf("emblem_%s" % 
-#                        str(model.data(index, Role.StatusRole).toString()))
-#            picture = QtGui.QPixmap(picture_path)
-#            source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
-#                                    QtCore.QSizeF(picture.size()) )
-#            painter.drawPixmap(target, picture, source)
+            picture_path  = gui.theme.status_icons[
+                            model.data(index, Role.StatusRole).toPyObject()]
+            picture = QtGui.QPixmap(picture_path)
+            source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
+                                    QtCore.QSizeF(picture.size()) )
+            x_emblem_offset = self._PICTURE_SIZE - picture.size().width()
+            y_embmel_offset = self._PICTURE_SIZE - picture.size().height()
+            xy_emblem_offset = QtCore.QPointF(x_emblem_offset, y_embmel_offset)
+            target = QtCore.QRectF( top_left_point + xy_pic_margin + 
+                                        xy_emblem_offset,
+                                    QtCore.QSizeF(picture.size()) )
+            painter.drawPixmap(target, picture, source)
         
             # -> Start setting up the text_doc:
             text = self._format_contact_display_role(text)

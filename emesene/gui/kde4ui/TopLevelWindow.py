@@ -2,11 +2,12 @@
 
 ''' This module contains the top level window class '''
 
-import PyKDE4.kdeui as kdeui
+import PyKDE4.kdeui as KdeGui
 import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
 import extension
 
-class TopLevelWindow (kdeui.KMainWindow):
+class TopLevelWindow (KdeGui.KMainWindow):
     ''' Class representing the main window '''
     # pylint: disable=W0612
     NAME = 'TopLevelWindow'
@@ -16,21 +17,29 @@ class TopLevelWindow (kdeui.KMainWindow):
     # pylint: enable=W0612
 
     def __init__(self, cb_on_close):
-        kdeui.KMainWindow.__init__(self)
+        KdeGui.KMainWindow.__init__(self)
         self._content_type = 'empty'
         if cb_on_close:
             self._cb_on_close = cb_on_close
         else: # we're the main window
             self._cb_on_close = self.hide
+        self._content = None
 
         self.setObjectName('mainwindow')
-        self.setWindowIcon(kdeui.KIcon('im-user'))
+        self.setWindowIcon(KdeGui.KIcon('im-user'))
         self._page_stack = QtGui.QStackedWidget()
         self.setCentralWidget(self._page_stack)
+        
+    def __del__(self):
+        print "adieu TLW!!!"
 
     def clear(self): #emesene's
         '''remove the content from the main window'''
         pass
+        
+    def present(self): # emesene's
+        #KdeGui.KMainWindow.show(self)
+        KdeGui.KMainWindow.activateWindow(self)
 
     def set_location(self, width, height, posx, posy): #emesene's
         '''Sets size and position on screen '''
@@ -54,6 +63,15 @@ class TopLevelWindow (kdeui.KMainWindow):
     def go_connect(self, on_cancel_login, avatar_path, config):
         '''does nothing'''
         print "GO CONNECT! ^_^"
+        
+    def go_conversation(self, session):
+        '''Adds a conversation page to the top level window and shows it'''
+        print "GO CONVERSATION! ^_^"
+        conversation_window_cls = extension.get_default('conversation window')
+        conversation_page = conversation_window_cls(session, parent=self)
+        self._content_type = 'conversation'
+        self._switch_to_page(conversation_page)
+        self._content = conversation_page
 
     # TODO: don't reinstantiate existing pages, or don't preserve old pages.
     def go_login(self, callback, on_preferences_changed,
@@ -87,6 +105,7 @@ class TopLevelWindow (kdeui.KMainWindow):
         
     
     def _get_content(self):
+        '''Getter method for propery "content"'''
         print "Getting 'content'"
         return self._content
         
@@ -101,9 +120,20 @@ class TopLevelWindow (kdeui.KMainWindow):
 #        self.setPlainCaption(title)
 #
 #    def show(self):
-#        KFELog().l("KFEMainWindow.show()")
-#        KMainWindow.show(self)
-#        self.onMainWindowShown()
+#        print "TLW SHOW [%s]" % QtGui.QApplication.instance()
+#        self.timer = QtCore.QTimer(KdeGui.KApplication.instance())
+#        self.timer.timeout.connect(self._show)
+#        self.timer.start(2000)
+        
+#    def show(self):
+#        print "tout***"
+#        #self.timer.stop()
+#        QtGui.QMainWindow.show(self)
+#        
+#    def closeEvent(self, event):
+#        print "chiudooo"
+        
+
 #
     def _switch_to_page(self, page_widget):
         ''' Shows the given page '''
@@ -119,6 +149,7 @@ class TopLevelWindow (kdeui.KMainWindow):
     def closeEvent(self, event):
         # pylint: disable=C0103
         ''' Overrides KMainWindow's close event '''
+        print "chiudo TLW"
         self._cb_on_close()
         event.accept()
         #self.onClose()

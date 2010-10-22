@@ -119,22 +119,24 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         
     # [END] -------------------- GUI.CONTACTLIST_OVERRIDE
         
-    def onContactListUpdated(self, clView):
-        KFELog().l("KFEContactListWidget.onContactListUpdated()")
-        self.cl_model.onContactListUpdated(clView)
-
-
-    def onGroupUpdated(self, groupView):
-        KFELog().l("KFEContactListWidget.onGroupUpdated()")
-        self.cl_model.onGroupUpdated(groupView)
-
-
-    def onContactUpdated(self, contactView):
-        #KFELog().l("KFEContactListWidget.onContactUpdated()")
-        self.cl_model.onContactUpdated(contactView)
+#    def onContactListUpdated(self, clView):
+#        KFELog().l("KFEContactListWidget.onContactListUpdated()")
+#        self.cl_model.onContactListUpdated(clView)
+#
+#
+#    def onGroupUpdated(self, groupView):
+#        KFELog().l("KFEContactListWidget.onGroupUpdated()")
+#        self.cl_model.onGroupUpdated(groupView)
+#
+#
+#    def onContactUpdated(self, contactView):
+#        #KFELog().l("KFEContactListWidget.onContactUpdated()")
+#        self.cl_model.onContactUpdated(contactView)
 
 
     def _on_item_double_clicked(self, item):
+        '''Slot called when the user double clicks a contact. requests
+        a new conversation'''
         self.emit(SIGNAL("newConversationRequested(char*)"), 
                         str(self._model.data(item, Role.UidRole).toString()))
 

@@ -10,35 +10,9 @@ import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 
-class Test(KdeGui.KMainWindow):
-    '''Test class'''
-    def __init__(self):
-        KdeGui.KMainWindow.__init__(self)
-        self.nick_edit = NickEdit(allow_empty=True)
-        self.nick_edit.setText("Nick")
-        btn = KdeGui.KPushButton(":E")
-        lab = QtGui.QLabel(":O")
-        
-        lay = QtGui.QHBoxLayout()
-        lay.addWidget(self.nick_edit)
-        #lay.addWidget(btn)
-        #lay.addWidget(lab)
-        
-        QObject.connect(self.nick_edit, SIGNAL("nickChanged()"), self.cucu)
-        wid = QtGui.QWidget()
-        wid.setLayout(lay)
-        self.setCentralWidget(w)
-        self.setGeometry(100,100,370,230)
-        
-        
-    def cucu(self):
-        print "New Text:", self.nick_edit.text()
-
-
-
-
 class NickEdit(QtGui.QStackedWidget):
     '''A Nice nick / psm editor'''
+    nick_changed = QtCore.pyqtSignal(basestring)
     def __init__(self, allow_empty=False, 
                  empty_message=i18n(QtCore.QString("Click here to write")),
                  parent=None):
@@ -53,7 +27,7 @@ class NickEdit(QtGui.QStackedWidget):
         print "   1"
         self.line_edit = KdeGui.KLineEdit()
         print "   1.2"
-        self.label = QLabel_(i18n(QtCore.QString("If you see this, " \
+        self.label = QLabelEmph(i18n(QtCore.QString("If you see this, " \
                             "please invoke setText on KNickEdit.")))
         print "   1.3"
         self.set_text(QtCore.QString())
@@ -90,6 +64,8 @@ class NickEdit(QtGui.QStackedWidget):
 
 
     def _on_label_clicked(self):
+        '''Slot called when the user clicks on the label of 
+        this widget'''
         if self._is_empty_message_displayed:
             text = QtCore.QString()
         else:
@@ -100,17 +76,18 @@ class NickEdit(QtGui.QStackedWidget):
     
     
     def _on_line_edited(self):
+        '''Slot called when the user finishes editing the nick'''
         text = self.line_edit.text()
         self.set_text(text)
         #if the text is empty, and it is not allowed 
         # to be so, the label remains unchanged
         self.setCurrentWidget(self.label)
-        self.emit(SIGNAL("nickChanged(QString)"), text)
+        self.nick_changed.emit(str(text))
 
 
 
 
-class QLabel_(QtGui.QLabel):
+class QLabelEmph(QtGui.QLabel):
     '''Convenience class for a more interestin QLabel behaviour'''
     _LE = QtCore.QString("<u><em>")
     _RI = QtCore.QString("</em></u>")
@@ -121,6 +98,8 @@ class QLabel_(QtGui.QLabel):
         QtGui.QLabel.__init__(self)
         self._text = QtCore.QString()
         self.setText(text)
+        
+# -------------------- QT_OVERRIDE
     
     #you can pass either a pythonic string or a QString
     def setText(self, text): 
@@ -129,7 +108,7 @@ class QLabel_(QtGui.QLabel):
         text = QtCore.QString(text)
         self._text = QtCore.QString(text) 
         QtGui.QLabel.setText(self, text)
-    
+
     #returns a QString
     def text(self): 
         # pylint: disable=C0103
@@ -147,7 +126,7 @@ class QLabel_(QtGui.QLabel):
     def enterEvent(self, event): 
         # pylint: disable=C0103
         '''Handles mouse-in events'''
-        QtGui.QLabel.setText(self, QLabel_._LE + self._text + QLabel_._RI)
+        QtGui.QLabel.setText(self, QLabelEmph._LE + self._text + QLabelEmph._RI)
         
     #received even if mouse tracking not explicitly enabled
     def leaveEvent(self, event): 
@@ -155,76 +134,4 @@ class QLabel_(QtGui.QLabel):
         '''Handles mouse-out events'''
         QtGui.QLabel.setText(self, self._text)
         
-##############################################################################
 
-#class KFENickEdit2(QWidget):
-#    def __init__(self, allowEmpty = False, parent = None):
-#        QWidget.__init__(self, parent)
-#        
-#        self.lineEdit = KLineEdit(self)
-#        self.label = QLabel_(parent = self)
-#        
-#        self.editButton = KPushButton("edit", self)
-#        self.okButton = KPushButton("ok", self)
-#        self.cancelButton = KPushButton("cancel",self)
-#        
-#        self.viewState = QState()
-#        self.viewState.assignProperty(self.editButton, 
-#                                       "geometry", QRect(180, 5, 70, 30))
-#        self.viewState.assignProperty(self.okButton, 
-#                                       "geometry", QRect(110, -35, 70, 30))
-#        self.viewState.assignProperty(self.cancelButton, 
-#                                       "geometry", QRect(180, -35, 70, 30))
-#        self.viewState.assignProperty(self.label, 
-#                                       "geometry", QRect(5, 5, 175, 30))
-#        self.viewState.assignProperty(self.lineEdit, 
-#                                       "geometry", QRect(-110,5, 105, 30))
-#        
-#        self.editState = QState()
-#        self.editState.assignProperty(self.editButton, 
-#                                       "geometry", QRect(180, 55, 70, 30))
-#        self.editState.assignProperty(self.okButton, 
-#                                       "geometry", QRect(110, 5, 70, 30))
-#        self.editState.assignProperty(self.cancelButton, 
-#                                       "geometry", QRect(180, 5, 70, 30))
-#        self.editState.assignProperty(self.label, 
-#                                       "geometry", QRect(-200, 5, 175, 30))
-#        self.editState.assignProperty(self.lineEdit, 
-#                                       "geometry", QRect(5,5, 105, 30))
-#        
-#        self.viewState.addTransition(self.editButton, 
-#                                     SIGNAL("clicked()"), self.editState)
-#        self.editState.addTransition(self.okButton, 
-#                                     SIGNAL("clicked()"), self.viewState)
-#        self.editState.addTransition(self.cancelButton, 
-#                                     SIGNAL("clicked()"), self.viewState)
-#        
-#        self.machine = QStateMachine(self)
-#        self.machine.addState(self.viewState)
-#        self.machine.addState(self.editState)
-#        self.machine.setInitialState(self.viewState)
-#
-#        
-#        
-#        #self.pa.setEasingCurve(QEasingCurve.InOutBack)
-#        self.pa2 = QPropertyAnimation(self.lineEdit, "geometry")
-#        self.machine.addDefaultAnimation(self.pa2);
-#        self.pa = QPropertyAnimation(self.editButton, "geometry")
-#        self.pa.setEasingCurve(QEasingCurve.OutBack)
-#        self.machine.addDefaultAnimation(self.pa)
-#        
-#        
-#        self.machine.start()
-#    
-#    def setText(self, text):
-#        pass
-        
-        
-if __name__ == "__main__":
-    import sys
-    about_data = KdeCore.KAboutData("a", "b", ki18n("c"), "d")
-    KdeCore.KCmdLineArgs.init(sys.argv, about_data)
-    kapp = KdeGui.KApplication()
-    win = Test()
-    win.show()
-    kapp.exec_()
