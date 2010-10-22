@@ -38,6 +38,7 @@ class TopLevelWindow (KdeGui.KMainWindow):
         pass
         
     def present(self): # emesene's
+        '''(Tries to) raise the window'''
         #KdeGui.KMainWindow.show(self)
         KdeGui.KMainWindow.activateWindow(self)
 

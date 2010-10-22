@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+'''This module constains the ContactListModel class'''
+
 #from amsn2.ui.front_ends.kde4.adaptationLayer import KFEThemeManager, KFELog
 
 import PyKDE4.kdeui     as KdeGui
@@ -14,6 +16,7 @@ from PyQt4.QtCore   import Qt
 
 import gui
 
+import xml
 import sys
 
 
@@ -67,7 +70,8 @@ class ContactListModel (QtGui.QStandardItemModel):
     def _set_contact_info(self, contact_item, contact):
         '''Fills the contact Item with data'''
         contact_item.setData(
-            contact.display_name +'<br><i>'+ contact.message +'</i>',
+            xml.sax.saxutils.escape(contact.display_name) + '<br><i>' + 
+            xml.sax.saxutils.escape(contact.message) +'</i>',
             Role.DisplayRole)
         contact_item.setData(contact.picture, Role.DecorationRole)
         contact_item.setData(contact.media, Role.MediaRole)
@@ -79,7 +83,8 @@ class ContactListModel (QtGui.QStandardItemModel):
         
     def add_group(self, group):
         '''Add a group.'''
-        new_group_item = QtGui.QStandardItem(QtCore.QString(group.name))
+        new_group_item = QtGui.QStandardItem( QtCore.QString( 
+                    xml.sax.saxutils.escape(group.name)))
         new_group_item.setData(group.identifier, Role.UidRole)
         self.appendRow(new_group_item)
         

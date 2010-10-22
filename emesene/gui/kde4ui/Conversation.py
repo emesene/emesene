@@ -11,12 +11,16 @@ from PyQt4.QtCore   import Qt
 import gui
 import gui.kde4ui.widgets as Widgets
 
+import xml
 import sys
 reload(sys)
 
 
 class Conversation (gui.base.Conversation, QtGui.QWidget):
+    '''This widget represents the contents of a chat tab in the conversations
+    page'''
     def __init__(self, session, cid, members=None, parent=None):
+        '''Constructor'''
         gui.base.Conversation.__init__(self, session, cid, members)
         QtGui.QWidget.__init__(self, parent)
         
@@ -40,6 +44,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         
     def _setup_ui(self):
+        '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
         action_dict = self._action_dict
         
@@ -94,10 +99,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         widget_dict['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
-        widget_dict['chat_edit'].return_pressed.connect(
-                            self.onSendMessage)
-        widget_dict['send_btn'].clicked.connect(
-                            self.onSendMessage)
+        #widget_dict['chat_edit'].return_pressed.connect(
+        #                    self.onSendMessage)
+        #widget_dict['send_btn'].clicked.connect(
+        #                    self.onSendMessage)
         action_dict['add_smiley'].triggered.connect(
                             self._on_show_smiley_chooser)
         action_dict['change_font'].triggered.connect(
@@ -143,21 +148,29 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
     # emesene's
     def receive_message(self, formatter, contact, message, cedict, first):
-        #self.show()
+        '''This method is called from the core (e3 or base class or whatever
+        when a new message arrives. It shows the new message'''
         print formatter,
         print contact,
-        print message,
+        print message.type,
+        print message.account
         print cedict,
         print first
+        
+        self._append_to_chat(
+            xml.sax.saxutils.escape(message.body) + '<br>')
     
     
     def update_single_information(self, nick, message, account): # emesene's
+        '''This method is called from the core (e3 or base class or whatever
+        to update the contacts infos'''
         print nick,
         print message,
         print account
         
         
     def show(self):
+        '''Shows the widget'''
         QtGui.QWidget.show(self)
     
     
@@ -174,68 +187,66 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._widget_dict['chat_edit'].insert_text_after_cursor(shortcut)
 
 
-    def onMessageReceived(self, messageview, formatting):
-        """ Called for incoming and outgoing messages
-            message: a MessageView of the message"""
-            
-        messageReceived = messageview.to_stringview().parse_default_smileys()
-        tempStr = QString("<br>")
-        if formatting is not None:
-            tempStr.append("<font face=\"%s\" color=\"#%s\">" % (
-                                    formatting.font, formatting.color ))
+#    def onMessageReceived(self, messageview, formatting):
+#        """ Called for incoming and outgoing messages
+#            message: a MessageView of the message"""
+#            
+#        messageReceived = messageview.to_stringview().parse_default_smileys()
+#        tempStr = QString("<br>")
+#        if formatting is not None:
+#            tempStr.append("<font face=\"%s\" color=\"#%s\">" % (
+#                                    formatting.font, formatting.color ))
+#
+#
+#        tempStr.append(messageReceived.to_HTML_string())
+#
+#        if formatting is not None:
+#            tempStr.append("</font>")
+#        tempStr.append("<br>")
+#
+#        self.appendToChat(tempStr)
+#
+#
+#    def onUserJoined(self, nickname):
+#        self.appendToChat("<i>%s has joined the chat </i>"%(unicode(nickname)))
+#        self.statusBar.insertItem("%s has joined the chat" % (nickname), 0)
+#
+#
+#    def onNudge(self):
+#        pass
+#
+#    def onUserTyping(self, contact):
+#        if self.statusBar.hasItem(1):
+#            self.statusBar.removeItem(1)
+#        self.statusBar.insertItem("%s is typing a message" % (contact), 1)
+#        self.statusBar.setItemAlignment(1, Qt.AlignLeft)
 
 
-        tempStr.append(messageReceived.to_HTML_string())
+    
+#    def onSendMessage(self):
+#        messageString = str(self.textEditWidget.toPlainText())
+#        if len(messageString) == 0:
+#            return
+#        messageStringView = StringView()
+#        messageStringView.append_text(messageString)
+#
+#        self.textEditWidget.clear()
+#        self.sendMessage(messageStringView)
 
-        if formatting is not None:
-            tempStr.append("</font>")
-        tempStr.append("<br>")
-
-        self.appendToChat(tempStr)
-
-
-    def onUserJoined(self, nickname):
-        self.appendToChat("<i>%s has joined the chat </i>"%(unicode(nickname)))
-        self.statusBar.insertItem("%s has joined the chat" % (nickname), 0)
-
-
-    def onNudge(self):
-        pass
-
-    def onUserTyping(self, contact):
-        if self.statusBar.hasItem(1):
-            self.statusBar.removeItem(1)
-        self.statusBar.insertItem("%s is typing a message" % (contact), 1)
-        self.statusBar.setItemAlignment(1, Qt.AlignLeft)
-
-
-    # -------------------- QT_SLOTS
-
-    def onSendMessage(self):
-        messageString = str(self.textEditWidget.toPlainText())
-        if len(messageString) == 0:
-            return
-        messageStringView = StringView()
-        messageStringView.append_text(messageString)
-
-        self.textEditWidget.clear()
-        self.sendMessage(messageStringView)
-
-    def appendToChat(self, htmlString):
-        vertScrollBar = self.chatView.verticalScrollBar()
-        if vertScrollBar.value() == vertScrollBar.maximum():
-            atBottom = True
+    def _append_to_chat(self, html_string):
+        '''Method that appends an html string to the chat view'''
+        vert_scroll_bar = self._widget_dict['chat_view'].verticalScrollBar()
+        if vert_scroll_bar.value() == vert_scroll_bar.maximum():
+            at_bottom = True
         else:
-            atBottom = False
+            at_bottom = False
 
-        self._chat_text.append(htmlString)
-        self.chatView.setText(self._chat_text)
+        self._chat_text.append(html_string)
+        self._widget_dict['chat_view'].setText(self._chat_text)
 
-        if atBottom:
-            vertScrollBar.setValue(vertScrollBar.maximum())
+        if at_bottom:
+            vert_scroll_bar.setValue(vert_scroll_bar.maximum())
 
-    def setStatusBar(self, statusBar):
-        self.statusBar = statusBar
         
         
         

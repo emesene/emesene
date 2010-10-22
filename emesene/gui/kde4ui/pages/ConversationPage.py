@@ -26,6 +26,7 @@ class ConversationPage (gui.base.ConversationManager, KdeGui.KTabWidget):
     # pylint: enable=W0612
     
     def __init__(self, session, parent):
+        '''Constructor'''
         # TODO: understand what have to be passed as "on_last_close"
         gui.base.ConversationManager.__init__(self, session, on_last_close=None)
         KdeGui.KTabWidget.__init__(self, parent)
@@ -38,15 +39,17 @@ class ConversationPage (gui.base.ConversationManager, KdeGui.KTabWidget):
         
         
     def add_new_conversation(self, session, cid, members):
+        '''Creates a new chat tab and returns it'''
         conversation = Conversation.Conversation(session, cid, members, self)
-        self._saveeee_meee = conversation
         conversation.tab_index = self.addTab(conversation, str(cid))
         return conversation
         
     def get_parent(self): # emesene's
+        '''Return a reference to the top level window containing this page'''
         return KdeGui.KTabWidget.parent(self).parent()
                 
     def set_current_page(self, tab_index): # emesene's
+        '''Show the chat tab at the given index'''
         KdeGui.KTabWidget.setCurrentIndex(self, tab_index)
         
     def set_message_waiting(self, conversation, is_waiting): # emesene's

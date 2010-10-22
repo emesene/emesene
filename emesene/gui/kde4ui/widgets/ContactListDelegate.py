@@ -32,8 +32,11 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         QtGui.QStyledItemDelegate.__init__(self, parent)
         self._pic_size = QtCore.QSizeF(self._PICTURE_SIZE, self._PICTURE_SIZE)
         
+# -------------------- QT_OVERRIDE
+        
     def paint(self, painter, option, index):
         '''Paints the contact'''
+        # pylint: disable=C0103
         model = index.model()
         painter.save()
         # -> Configure the painter
@@ -94,7 +97,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             painter.drawPixmap(target, picture, source)
         
             # -> Start setting up the text_doc:
-            text = self._format_contact_display_role(text)
+            text = _format_contact_display_role(text)
             # set the text into text_doc
             text_doc.setHtml(text)
             # calculate the vertical offset, to center the text_doc vertically
@@ -113,6 +116,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
 
     def sizeHint(self, option, index):
         '''Returns a size hint for the contact'''
+        # pylint: disable=C0103
         text = index.model().data(index, Role.DisplayRole).toString()
         text_doc = QtGui.QTextDocument()
         if not index.parent().isValid():
@@ -130,12 +134,12 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                           max(text_height, 
                               self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
                           
-    def _format_contact_display_role(self, text):
-        '''Formats correctly the html string which represents the contact's
-        display role'''
-        smiley_size = 16
-        #if not text.contains('<i></i>'):
-            #text.replace('<i>','<br><i>')
-        text.replace('<img src', '<img width="%d" height="%d" src' % 
-                     (smiley_size, smiley_size))
-        return text
+def _format_contact_display_role(text):
+    '''Formats correctly the html string which represents the contact's
+    display role'''
+    smiley_size = 16
+    #if not text.contains('<i></i>'):
+        #text.replace('<i>','<br><i>')
+    text.replace('<img src', '<img width="%d" height="%d" src' % 
+                 (smiley_size, smiley_size))
+    return text

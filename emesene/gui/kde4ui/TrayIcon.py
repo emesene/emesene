@@ -22,12 +22,11 @@ class TrayIcon (QtGui.QWidget):
         QtGui.QWidget.__init__(self)
         self.handler = handler
         self.main_window = main_window
-        self.c = None
+        self._conversations = None
         
     def set_conversations(self, conversations): # emesene's
-        print "Tray Icon: %s" % conversations
-        
-        self.c = conversations 
+        '''Stores a reference to the conversation page'''
+        self._conversations = conversations 
         
         
 

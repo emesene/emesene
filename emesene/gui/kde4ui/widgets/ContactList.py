@@ -56,17 +56,14 @@ from   ContactListModel import Role
 
 class ContactList (gui.ContactList, QtGui.QTreeView):
     '''A Contactlist Widget'''
+    new_conversation_requested = QtCore.pyqtSignal(float)
+    
     def __init__(self, session, parent=None):
         QtGui.QTreeView.__init__(self, parent)
         dialog = extension.get_default('dialog')
         # We need a model *before* callig gui.ContactList's costructor!!
         self._model = ContactListModel.ContactListModel(self)
-        try:
-            gui.ContactList.__init__(self, session, dialog)
-        except Exception:
-            import traceback
-            print "********************* EXCEPTION *************************"
-            traceback.print_exc()
+        gui.ContactList.__init__(self, session, dialog)
             
         self.setModel(self._model)
         self.setItemDelegate(ContactListDelegate.ContactListDelegate(self))
@@ -105,10 +102,10 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         '''Add a group to the view. Resent to model.'''
         self._model.add_group(group)
     
-    def fill(self): # emesene's
+    def fill(self, clear=True): # emesene's
         '''Fill the contact list. Resent to model'''
         print "redirecting to base's fill"
-        gui.ContactList.fill(self)
+        gui.ContactList.fill(self, clear)
     
     def clear(self):
         '''Clears the contact list. Resent to model.'''
@@ -137,8 +134,8 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
     def _on_item_double_clicked(self, item):
         '''Slot called when the user double clicks a contact. requests
         a new conversation'''
-        self.emit(SIGNAL("newConversationRequested(char*)"), 
-                        str(self._model.data(item, Role.UidRole).toString()))
+        contact_uid = self._model.data(item, Role.UidRole).toPyObject()
+        self.new_conversation_requested.emit(contact_uid)
 
 
 
