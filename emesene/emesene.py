@@ -474,15 +474,6 @@ class Controller(object):
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
 
-        # testing a workaround on e3/common/notification.py
-        '''#we instantiate this here to prevent the whole contact list
-        #online notification
-        def instantiate_notification():
-            notificationcls = extension.get_default('notification')
-            self.notification = notificationcls(self.session)
-
-        glib.timeout_add_seconds(10, instantiate_notification)'''
-
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
         opening a conversation'''
