@@ -22,7 +22,7 @@ except ImportError:
 
 # This line will except with too old version of appindicator
 # so you'll get your nice gtk trayicon
-# This is fixed since Ubuntu Maverick (10.10)       
+# This is fixed since Ubuntu Maverick (10.10)
 # https://bugs.launchpad.net/indicator-application/+bug/607831
 try:
     func = getattr(appindicator.Indicator, "set_icon_theme_path")
@@ -112,14 +112,14 @@ class Indicator(appindicator.Indicator):
         """
         path = os.path.join(os.getcwd(), self.handler.theme.panel_path)
         self.set_icon_theme_path(path)
-        #the appindicator takes a 'name' of an icon and NOT a filename. 
+        #the appindicator takes a 'name' of an icon and NOT a filename.
         #that means that we have to strip the file extension
         icon_name = self.handler.theme.status_icons_panel[stat].split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
-        self.set_icon(icon_name)        
-        
+        self.set_icon(icon_name)
+
     def _on_activate(self, trayicon):
-	"""
+        """
         callback called when the menu entry 'hide/show emesene'
         is clicked
         """
