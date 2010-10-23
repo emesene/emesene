@@ -2,9 +2,16 @@
 
 ''' This module contains the tray icon's class'''
 
-import PyQt4.QtGui as QtGui
+import PyKDE4.kdeui     as KdeGui
+from PyKDE4.kdecore import i18n
+import PyQt4.QtGui      as QtGui
+import PyQt4.QtCore     as QtCore
+from PyQt4.QtCore   import Qt
 
-class TrayIcon (QtGui.QWidget):
+import gui
+import e3
+
+class TrayIcon (KdeGui.KStatusNotifierItem):
     '''A class that implements the tray icon of emesene for KDE4'''
     # pylint: disable=W0612
     NAME = 'TrayIcon'
@@ -19,14 +26,21 @@ class TrayIcon (QtGui.QWidget):
 
         handler -- a e3common.Handler.TrayIconHandler object
         '''
-        QtGui.QWidget.__init__(self)
-        self.handler = handler
-        self.main_window = main_window
+        KdeGui.KStatusNotifierItem.__init__(self)
+        
+        self._handler = handler
+        self._main_window = main_window
         self._conversations = None
         
-    def set_conversations(self, conversations): # emesene's
-        '''Stores a reference to the conversation page'''
-        self._conversations = conversations 
+        self.setStatus(KdeGui.KStatusNotifierItem.Active)
+        self.setIconByPixmap(QtGui.QIcon(
+                             QtGui.QPixmap(
+                             gui.theme.logo).scaled(QtCore.QSize(40, 40))))
+                             
+        self.activateRequested.connect(self._on_tray_icon_clicked)
+                            
+        
+    
         
         
 
@@ -36,4 +50,38 @@ class TrayIcon (QtGui.QWidget):
 
     def set_main(self, session):
         '''does nothing'''
-        pass
+        self._handler.session = session
+        self._handler.session.signals.status_change_succeed.subscribe(
+                                            self._on_status_changed)
+        
+        
+
+    def set_conversations(self, conversations): # emesene's
+        '''Stores a reference to the conversation page'''
+        self._conversations = conversations 
+        
+        
+        
+    def _on_status_changed(self, status):
+        self.setIconByPixmap(QtGui.QIcon(QtGui.QPixmap(gui.theme.status_icons_panel[status])))
+        
+        
+    def _on_tray_icon_clicked(self, active, pos):
+        if not self._main_window:
+            return 
+            
+        if not self._main_window.isVisible():
+            self._main_window.show()
+            self._main_window.activateWindow()
+            self._main_window.raise_()
+        else: # visible
+            if self._main_window.isActiveWindow():
+                self._main_window.hide()
+            else:
+                self._main_window.activateWindow()
+                self._main_window.raise_()
+        
+        
+        
+        
+        

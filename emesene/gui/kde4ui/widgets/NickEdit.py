@@ -11,8 +11,8 @@ from PyQt4.QtCore   import Qt
 
 import xml
 
-# important: at the moment return "str" not "unicode"
-# because of papyon raising exceptions.
+# important: at the moment emits "str" not "unicode"
+# because of papyon raising exceptions. [anyway, it seems to work.]
 
 
 class NickEdit(QtGui.QStackedWidget):
@@ -93,7 +93,7 @@ class NickEdit(QtGui.QStackedWidget):
 
 
 class QLabelEmph(QtGui.QLabel):
-    '''Convenience class for a more interestin QLabel behaviour'''
+    '''Convenience class for a more interesting QLabel behaviour'''
     _LE = QtCore.QString("<u><em>")
     _RI = QtCore.QString("</em></u>")
     
