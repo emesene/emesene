@@ -10,54 +10,53 @@ from PyQt4.QtCore   import Qt
 
 import gui
 
+
 class DisplayPic (QtGui.QLabel):
     ''' A DisplayPic widget. Supports changing the displayPic, and emits
     a "clicked" signal.'''
-    FRAMESIZE = QtCore.QSize(104, 104)
+    FRAMESIZE = QtCore.QSize(106, 106)
     PIXMAPSIZE = QtCore.QSize(96, 96)
 
     clicked = QtCore.pyqtSignal()
     
-    def __init__(self, config_dir, server_host, parent = None):
+    def __init__(self, session=None, first_pic=gui.theme.logo, parent = None):
         '''constructor'''
         QtGui.QLabel.__init__(self, parent)
-        self._config_dir = config_dir
-        self._server_host = server_host
+        self._session = session
         self._clickable = True
         self._fader = PixmapFader(self._draw_pixmap, self.PIXMAPSIZE)
-        self.mask = QtGui.QBitmap(
-            "/home/rayleigh/src/aMSN2/amsn2/ui/front_ends/kde4/mask.bmp")
+        
         self.setFrameStyle(QtGui.QFrame.StyledPanel)
         self.setFrameShadow(QtGui.QFrame.Raised)
-        self.set_logo()
+        self.setAlignment(Qt.AlignCenter)
+        
+        self.set_display_pic_from_file(first_pic)
         self.installEventFilter(self)
-
-    def set_logo(self):
-        ''' sets emesene's logo as a display pic'''
-        path = gui.theme.logo
-        self._set_display_pic(path)
     
-    def set_display_pic(self, account, contact='', display_pic='last' ):
+    
+    def set_display_pic_of_account(self, email=None):
         '''set a display pic from the account's name, the contact name, and pic
         name. If no contact is provided, the account's user's pic is set.
         If no pic is specified, then the last one is set'''
-        path = self._config_dir.join(self._server_host, account, 
-                                    contact, 'avatars', display_pic)
-        self._set_display_pic(path)
+        if not self._session:
+            raise RuntimeError('Trying to set display pic from account\'s'
+                               'email, but no "session" provided') 
+                               
+        if not email:
+            path = self._session.contacts.me.picture
+        else:
+            path = self._session.contacts.get(email).picture
+        self.set_display_pic_from_file(path)
 
-    def _set_display_pic(self, path):
+    def set_display_pic_from_file(self, path):
         ''' sets the display pic from the path'''
         pixmap = QtGui.QPixmap(path)
         if pixmap.isNull():
             return
-        if not pixmap.hasAlpha():
-            print " NO ALPHA"
-            pixmap.setMask(self.mask)
-        else:
-            print "ALPHA DETECTED"
+        
+        pixmap = gui.kde4ui.pixmap_rounder(pixmap)
         self._fader.add_pixmap(pixmap)
-#        self.setPixmap(pixmap.scaled(self.PIXMAPSIZE))
-#        self.adjust_size()
+        
 
     def _draw_pixmap(self, pixmap):
         '''Actually displays a pixmap. This is the callback method invoked by
@@ -77,6 +76,7 @@ class DisplayPic (QtGui.QLabel):
         ''' resizes the display pic to the correct size'''
         self.setMinimumSize(self.FRAMESIZE)
         self.setMaximumSize(self.FRAMESIZE)
+        
         
     # -------------------- QT_OVERRIDE
 

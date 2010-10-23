@@ -57,8 +57,7 @@ class MainPage (QtGui.QWidget):
                 "<u>Click here to set a personal message...</u>")))
         widget_dict['current_media'] = QtGui.QLabel()
         widget_dict['status_combo'] = Widgets.StatusCombo()
-        widget_dict['display_pic'] = Widgets.DisplayPic(
-                                        self._session.config_dir, None)
+        widget_dict['display_pic'] = Widgets.DisplayPic(self._session)
         widget_dict['contact_list'] = Widgets.ContactList(self._session)
         my_info_lay_left = QtGui.QVBoxLayout()
         my_info_lay_left.addWidget(widget_dict['nick_edit'])
@@ -98,7 +97,6 @@ class MainPage (QtGui.QWidget):
         if psm == '':
             psm = self._session.contacts.me.message
         status = self._session.contacts.me.status    
-        display_pic_path = self._session.config_dir.get_path('last_avatar')
         
         widget_dict = self._widget_dict
         widget_dict['nick_edit'].set_text(nick)
@@ -106,7 +104,7 @@ class MainPage (QtGui.QWidget):
         widget_dict['status_combo'].set_status(status)
         #print "display pic path: %s" % display_pic_path
         # investigate display pic...
-        widget_dict['display_pic']._set_display_pic(display_pic_path)
+        widget_dict['display_pic'].set_display_pic_of_account()
         
     def _on_new_conversation_requested(self, account):
         print account

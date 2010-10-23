@@ -129,21 +129,20 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         # RIGHT
         widget_dict['his_display_pic'] = Widgets.DisplayPic(
-                                            self._session.config_dir, None)
+                                    self._session, first_pic=gui.theme.user)
         widget_dict['my_display_pic'] = Widgets.DisplayPic(
-                                            self._session.config_dir, None)
+                                    self._session, first_pic=gui.theme.user)
         
         right_lay = QtGui.QVBoxLayout()
         right_lay.addWidget(widget_dict['his_display_pic'])
         right_lay.addStretch()
         right_lay.addWidget(widget_dict['my_display_pic'])
         
-        widget_dict['my_display_pic']._set_display_pic(
-                                        self._session.contacts.me.picture)
+        widget_dict['my_display_pic'].set_display_pic_of_account()
         if self._members:
-            his_account = self._session.contacts.get(self._members[0])
-            widget_dict['his_display_pic']._set_display_pic(
-                                            his_account.picture)
+            his_email = self._members[0]
+            widget_dict['his_display_pic'].set_display_pic_of_account(
+                                                                his_email)
 
         # LEFT & RIGHT
         lay = QtGui.QHBoxLayout()

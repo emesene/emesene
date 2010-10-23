@@ -8,6 +8,8 @@ import extension
 
 GCONTEXT = None
 
+from Utils import pixmap_rounder
+
 
 
 def kde4_main(controller_cls):

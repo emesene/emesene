@@ -63,8 +63,7 @@ class LoginPage(QtGui.QWidget):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
-        widget_dict['display_pic'] = Widgets.DisplayPic(self._config_dir,
-                                                    'messenger.hotmail.com')
+        widget_dict['display_pic'] = Widgets.DisplayPic()
         widget_dict['account_combo'] = KdeGui.KComboBox()
         widget_dict['password_edit'] = KdeGui.KLineEdit()
         widget_dict['status_combo'] = Widgets.StatusCombo()
@@ -206,7 +205,9 @@ class LoginPage(QtGui.QWidget):
         
         self.clear_login_form()
         # display_pic
-        widget_dict['display_pic'].set_display_pic(account.email)
+        path = self._config_dir.join('messenger.hotmail.com', account.email, 
+                                     'avatars', 'last')
+        widget_dict['display_pic'].set_display_pic_from_file(path)
         # password:
         if account.password:
             password_edit.setText(account.password)
