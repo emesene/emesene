@@ -7,6 +7,7 @@ import TinyButton
 import Renderers
 
 CLOSE_ON_LEFT = 0
+
 try:
     import gconf
     gclient = gconf.client_get_default()
@@ -31,6 +32,7 @@ class TabWidget(gtk.HBox):
 
         self.image = gtk.Image()
         self.label = Renderers.SmileyLabel()
+        self.label.set_ellipsize(True)
         self.label.set_text(text)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
         self.close.connect('clicked', on_close_clicked,
@@ -54,6 +56,7 @@ class TabWidget(gtk.HBox):
         if utils.file_readable(path):
             self.image.set_from_file(path)
             self.image.show()
+
             return True
 
         return False

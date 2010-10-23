@@ -47,11 +47,11 @@ class Conversation(gtk.VBox, gui.Conversation):
             dialog, gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
         self.output = OutputText(self.session.config)
-        self.output.set_size_request(-1,30)
+        self.output.set_size_request(-1, 30)
         self.input = InputText(self.session.config, self._on_send_message,
                 self.cycle_history)
-        self.output.set_size_request(-1,25)
-        self.input.set_size_request(-1,25)
+        self.output.set_size_request(-1, 25)
+        self.input.set_size_request(-1, 25)
         self.info = ContactInfo()
         self.transfers_bar = TransfersBar(self.session)
 

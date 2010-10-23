@@ -9,6 +9,7 @@ import Renderers
 
 class ConversationManager(gtk.Notebook, gui.ConversationManager):
     '''the main conversation, it only contains other widgets'''
+
     NAME = 'Conversation Manager'
     DESCRIPTION = 'The widget that contains a group of conversations'
     AUTHOR = 'Mariano Guerra'
@@ -20,6 +21,13 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         gui.ConversationManager.__init__(self, session, on_last_close)
 
         self.set_scrollable(True)
+
+        #self.set_scrollable(session.config.get_or_set('b_conv_tab_scroll',
+        #    True))
+
+        if session.config.get_or_set('b_conv_tab_popup', True):
+            self.popup_enable()
+
         self.set_property('can-focus', False)
         self.connect('switch-page', self._on_switch_page)
         self.connect('key-press-event', self.on_key_press)
@@ -44,9 +52,9 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
                                   self.on_key_close_tab)
 
         for i in range(1, 10):
-            accel_group.connect_group(gtk.keysyms._0 + i, \
-                                  gtk.gdk.MOD1_MASK, gtk.ACCEL_LOCKED, \
-                                  self.on_key_change_tab)
+            accel_group.connect_group(gtk.keysyms._0 + i,
+                gtk.gdk.MOD1_MASK, gtk.ACCEL_LOCKED,
+                self.on_key_change_tab)
 
     def on_key_press(self, widget, event):
         '''callback called when a key is pressed on the window'''
@@ -65,6 +73,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         '''Catches alt+number and shows tab number-1  '''
         pages = self.get_n_pages()
         new = keyval - gtk.keysyms._0 - 1
+
         if new < pages:
             self.set_current_page(new)
 
@@ -115,6 +124,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
     def _on_focus(self, widget, event):
         '''called when the widget receives the focus'''
         page_num = self.get_current_page()
+
         if page_num != -1:
             page = self.get_nth_page(page_num)
             self.set_message_waiting(page, False)
@@ -179,5 +189,6 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         conversation.tab_index=self.append_page_menu(conversation, label)
         self.set_tab_label_packing(conversation, False, True, gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
+
         return conversation
 
