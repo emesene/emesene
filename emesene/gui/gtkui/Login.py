@@ -44,6 +44,8 @@ class LoginBase(gtk.Alignment):
             self._on_account_key_press)
         self.cmb_account.connect('changed',
             self._on_account_changed)
+        self.cmb_account.connect('key-release-event',
+            self._on_account_key_release)
 
         self.btn_status = StatusButton.StatusButton()
         self.btn_status.set_status(e3.status.ONLINE)
@@ -325,6 +327,14 @@ class Login(LoginBase):
         called when the content of the account entry changes
         '''
         self._update_fields(self.cmb_account.get_active_text())
+
+    def _on_account_key_release(self, entry, event):
+        '''
+        called when a key is released in the account field
+        '''
+        self._update_fields(self.cmb_account.get_active_text())
+        if event.keyval == gtk.keysyms.Tab:
+            self.txt_password.grab_focus()
 
     def _update_fields(self, account):
         '''
