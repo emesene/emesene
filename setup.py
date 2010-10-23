@@ -39,7 +39,6 @@ _data_files = [
 ]
 
 setup(
-
     name = 'emesene',
     version = '1.9.0',
     description = 'Instant Messaging Client',
@@ -57,9 +56,9 @@ setup(
     data_files = _data_files,
     ext_package = "emesene",
     include_package_data = True,
-    package_data = {"emesene" : ['themes/conversations/*/*/*/*/*', 
+    package_data = {"emesene" : ['themes/conversations/*/*/*/*/*',
                                  'themes/emotes/*/*',
-                                 'themes/images/*/*',
+                                 'themes/images/*/*/*',
                                  'themes/sounds/*/*']},
     packages = find_packages(),
     classifiers=[
