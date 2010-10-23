@@ -63,7 +63,6 @@ import gui
 argv = sys.argv
 sys.argv = [argv[0]]
 
-import gettext
 # load translations
 if os.path.exists('default.mo'):
     gettext.GNUTranslations(open('default.mo')).install()
