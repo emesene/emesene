@@ -152,11 +152,15 @@ class InputText(TextBox):
         self.apply_tag()
 
         if event.state == gtk.gdk.CONTROL_MASK and \
-                chr(event.keyval) == "p":
+                ((event.keyval < 256 and chr(event.keyval) == "p") or \
+                    event.keyval == gtk.keysyms.Up):
+
             self.on_cycle_history()
+
         elif (event.keyval == gtk.keysyms.Return or \
                 event.keyval == gtk.keysyms.KP_Enter) and \
                 not event.state == gtk.gdk.SHIFT_MASK:
+
             if self.text == "":
                 return True
 
