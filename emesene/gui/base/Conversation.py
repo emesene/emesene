@@ -376,17 +376,20 @@ class Conversation(object):
         if self.session.config.b_play_type:
             gui.play(self.session, gui.theme.sound_type)
 
-    def cycle_history(self):
+    def cycle_history(self, change=-1):
         """
         return one of the last N messages sent, the one returned
         is the one pointed by message_offset, every time you call
         this function it will go to the previous one, you can
         reset it using reset_message_offset.
 
+        change is the direction of cycling, 1 will go forward
+        -1 will go backwards
+
         if no message in the buffer return an empty string
         """
         index = self.message_offset
-        self.message_offset -= 1
+        self.message_offset += change
 
         try:
             self.input.text = self.messages.peak(self.message_offset)
