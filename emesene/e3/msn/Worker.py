@@ -799,6 +799,8 @@ class Worker(e3.Worker):
     def _handle_action_set_message(self, message):
         '''handle e3.Action.ACTION_SET_MESSAGE
         '''
+        contact = self.session.contacts.me
+
         self.socket.send_command('UUX', payload='<Data><PSM>' + \
             common.escape(message) + '</PSM><CurrentMedia></CurrentMedia>' + \
             '<MachineGuid></MachineGuid></Data>')
