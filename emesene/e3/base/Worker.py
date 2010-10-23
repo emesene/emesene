@@ -2,6 +2,7 @@
 
 import Queue
 import threading
+import traceback
 
 import Logger
 from Event import Event
@@ -149,6 +150,7 @@ class Worker(threading.Thread):
             except TypeError:
                 self.session.add_event(Event.EVENT_ERROR,
                     'Error calling action handler', action.id_)
+                traceback.print_exc()
 
 
     # action handlers (the stubs, copy and complete them on your implementation)

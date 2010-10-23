@@ -64,6 +64,7 @@ class Signal(object):
                     break
             except TypeError:
                 to_remove.append(callback)
+                traceback.print_exc()
             except Exception, error:
                 log.warning('Signal handler (%s) error: %s' %
                         (format_callback_name(callback), str(error)))
