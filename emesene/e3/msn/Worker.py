@@ -1,16 +1,13 @@
 '''a thread that handles the connection with the main server'''
 
-import os
 import time
 import Queue
 import urllib
 import httplib
 import urlparse
-import threading
 
 import e3
 import mbi
-import p2p
 import msgs
 import common
 import challenge
