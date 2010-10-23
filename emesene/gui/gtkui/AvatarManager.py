@@ -55,9 +55,9 @@ class AvatarManager(object):
             unicodepath = u"%s" % faces_path
             faces_paths = [unicodepath]
         else:
-            faces_paths = [ '/usr/share/kde/apps/faces', \
+            faces_paths = ['/usr/share/kde/apps/faces', \
                             '/usr/share/kde4/apps/kdm/pics/users', \
-                            '/usr/share/pixmaps/faces' ]
+                            '/usr/share/pixmaps/faces']
         return faces_paths
 
     def is_cached(self, filename):

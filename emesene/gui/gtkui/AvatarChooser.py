@@ -28,7 +28,7 @@ class AvatarChooser(gtk.Window):
         self.response_cb = response_cb
         self.avatar_manager = avatar_manager
 
-        self.set_title("Avatar chooser")
+        self.set_title(_("Avatar chooser"))
         self.set_default_size(620, 400)
         self.set_border_width(4)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -51,10 +51,10 @@ class AvatarChooser(gtk.Window):
         vbbox.set_spacing(4)
         vbbox.set_layout(gtk.BUTTONBOX_START)
 
-        b_clear = gtk.Button("No picture")
+        b_clear = gtk.Button(_("No picture"))
         self.b_add = gtk.Button(stock=gtk.STOCK_ADD)
         self.b_remove = gtk.Button(stock=gtk.STOCK_REMOVE)
-        self.b_remove_all = gtk.Button("Remove all")
+        self.b_remove_all = gtk.Button(_("Remove all"))
         b_accept = gtk.Button(stock=gtk.STOCK_OK)
         b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
 
@@ -69,7 +69,7 @@ class AvatarChooser(gtk.Window):
 
         self.img_current = gtk.Image()
         self.img_current.set_size_request(96, 96)
-        frame_current = gtk.Frame("Current")
+        frame_current = gtk.Frame(_("Current"))
         frame_current.add(self.img_current)
 
         hbbox.pack_start(b_clear, False)
@@ -231,7 +231,8 @@ class AvatarChooser(gtk.Window):
                 self.remove_all()
 
         extension.get_default('dialog').yes_no(
-            "Are you sure you want to remove all items?", on_response_cb)
+            _("Are you sure you want to remove all items?"),
+            on_response_cb)
 
     def on_accept(self, button):
         '''method called when the user clicks the button'''
@@ -245,7 +246,7 @@ class AvatarChooser(gtk.Window):
             print filename
             self.response_cb(gui.stock.ACCEPT, filename)
         else:
-            extension.get_default('dialog').error("No picture selected")
+            extension.get_default('dialog').error(_("No picture selected"))
 
     def _on_cancel(self, button):
         '''method called when the user clicks the button'''

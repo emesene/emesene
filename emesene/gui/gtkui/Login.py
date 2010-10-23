@@ -148,7 +148,7 @@ class LoginBase(gtk.Alignment):
                 animated=True)
         self.throbber = gtk.image_new_from_animation(th_pix)
         self.label_timer = gtk.Label()
-        self.label_timer.set_markup('<b>Connection error!\n </b>')
+        self.label_timer.set_markup(_('<b>Connection error!\n </b>'))
 
         al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
