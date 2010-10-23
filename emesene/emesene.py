@@ -185,7 +185,8 @@ class Controller(object):
         use_http = self.config.get_or_set('b_use_http', False)
         self.go_login(proxy, use_http)
 
-    def go_login(self, proxy=None, use_http=None, cancel_clicked=False):
+    def go_login(self, proxy=None, use_http=None, cancel_clicked=False,
+            no_autologin=False):
         '''shows the login GUI'''
         if proxy is None:
             proxy = self._get_proxy_settings()
@@ -201,7 +202,7 @@ class Controller(object):
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed, self.config,
             self.config_dir, self.config_path, proxy,
-            use_http, self.config.session, cancel_clicked)
+            use_http, self.config.session, cancel_clicked, no_autologin)
         self.tray_icon.set_login()
         self.window.show()
 
@@ -541,7 +542,7 @@ class Controller(object):
         method called when the user selects disconnect
         '''
         self.close_session(False)
-        self.go_login()
+        self.go_login(no_autologin=True)
 
     def on_close(self):
         '''called on close'''
