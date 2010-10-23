@@ -26,9 +26,11 @@ class LoginPage(QtGui.QWidget):
     
     def __init__(self, callback, on_preferences_changed, config=None,
                  config_dir=None, config_path=None, proxy=None, use_http=None,
-                 session_id=None, cancel_clicked=False, parent=None):
+                 session_id=None, cancel_clicked=False, no_autologin=False,
+                 parent=None):
         '''Constructor'''
         # pylint: disable=R0913
+        # TODO: honour autologin stuff
         # instance variables:
         QtGui.QWidget.__init__(self, parent)
         self._account_list = []

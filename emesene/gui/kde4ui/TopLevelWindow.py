@@ -75,17 +75,17 @@ class TopLevelWindow (KdeGui.KMainWindow):
         self._content = conversation_page
 
     # TODO: don't reinstantiate existing pages, or don't preserve old pages.
-    def go_login(self, callback, on_preferences_changed,
-           config=None, config_dir=None, config_path=None,
-           proxy=None, use_http=None, session_id=None, cancel_clicked=False):
+    def go_login(self, callback, on_preferences_changed, config=None, 
+                 config_dir=None, config_path=None, proxy=None, use_http=None, 
+                 session_id=None, cancel_clicked=False, no_autologin=False):
                #emesene's
         # pylint: disable=R0913
         '''Adds a login page to the top level window and shows it'''
         print "GO LOGIN! ^_^"
         login_window_cls = extension.get_default('login window')
-        login_page = login_window_cls(callback, on_preferences_changed,
-                                      config, config_dir, config_path, proxy,
-                                      use_http, session_id, cancel_clicked)
+        login_page = login_window_cls(callback, on_preferences_changed, config,
+                                      config_dir, config_path, proxy,use_http, 
+                                      session_id, cancel_clicked, no_autologin)
         self._content_type = 'login'
         self._switch_to_page(login_page)
 
