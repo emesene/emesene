@@ -20,6 +20,15 @@ except ImportError:
     HASMESSAGINGMENU = False
     log.exception(_('Could not import python-indicate: please install via your package manager.'))
 
+# This line will except with too old version of appindicator
+# so you'll get your nice gtk trayicon
+# This is fixed since Ubuntu Maverick (10.10)       
+# https://bugs.launchpad.net/indicator-application/+bug/607831
+try:
+    func = getattr(appindicator.Indicator, "set_icon_theme_path")
+except AttributeError:
+    raise ImportError
+
 class Indicator(appindicator.Indicator):
     """
     A widget that implements the tray icon of emesene for gtk
@@ -38,9 +47,7 @@ class Indicator(appindicator.Indicator):
         appindicator.Indicator.__init__(self, "emesene", "logo", \
             appindicator.CATEGORY_APPLICATION_STATUS, \
             os.path.join(os.getcwd(), handler.theme.panel_path))
-        # TODO: this always starts up with default theme, find out how to change
-        #       icon-theme-path property in appindicator
-        # see _on_change_status(self,stat) for the gory details
+
         self.handler = handler
 
         self.main_window = main_window
@@ -103,14 +110,8 @@ class Indicator(appindicator.Indicator):
         """
         change the icon in the tray according to user's state
         """
-        # Currently we can set the path for the icon theme only on emesene load.
-        # However a bug has been opened upstream and the fix is available
-        # we hope to get this merged in time for Ubuntu Maverick (10.10)                
-        # https://bugs.launchpad.net/indicator-application/+bug/607831
-        # then you can enable these two lines.
-        #path = os.path.join(os.getcwd(), self.handler.theme.panel_path)
-        #self.set_icon_theme_path(path)
-
+        path = os.path.join(os.getcwd(), self.handler.theme.panel_path)
+        self.set_icon_theme_path(path)
         #the appindicator takes a 'name' of an icon and NOT a filename. 
         #that means that we have to strip the file extension
         icon_name = self.handler.theme.status_icons_panel[stat].split("/")[-1]

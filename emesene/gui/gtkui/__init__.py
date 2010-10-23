@@ -2,8 +2,8 @@
 import extension
 
 WEBKITERROR = False
-INDICATORERROR = True # FIXME: Disabled until we can support theme changing!
-                      # see Indicator.py for the gory details
+INDICATORERROR = False
+
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
