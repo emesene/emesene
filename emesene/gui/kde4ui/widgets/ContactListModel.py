@@ -70,8 +70,10 @@ class ContactListModel (QtGui.QStandardItemModel):
     def _set_contact_info(self, contact_item, contact):
         '''Fills the contact Item with data'''
         contact_item.setData(
-            xml.sax.saxutils.escape(contact.display_name) + '<br><i>' + 
-            xml.sax.saxutils.escape(contact.message) +'</i>',
+            xml.sax.saxutils.escape(unicode(contact.display_name)) + 
+            '<br><i>' + 
+            xml.sax.saxutils.escape(unicode(contact.message)) +
+            '</i>',
             Role.DisplayRole)
         contact_item.setData(contact.picture, Role.DecorationRole)
         contact_item.setData(contact.media, Role.MediaRole)

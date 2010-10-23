@@ -11,6 +11,9 @@ from PyQt4.QtCore   import Qt
 
 import xml
 
+# important: at the moment return "str" not "unicode"
+# because of papyon raising exceptions.
+
 
 class NickEdit(QtGui.QStackedWidget):
     '''A Nice nick / psm editor'''
@@ -44,19 +47,19 @@ class NickEdit(QtGui.QStackedWidget):
         
         
     def text(self):
-        '''Returns the displayed text'''
+        '''Returns the displayed text as a QString'''
         if self._is_empty_message_displayed:
             return QtCore.QString()
-        text = str(self.label.text())
-        print xml.sax.saxutils.unescape(text)
-        return xml.sax.saxutils.unescape(text)
+        text = unicode(self.label.text())
+        text = xml.sax.saxutils.unescape(text)
+        return QtCore.QString(text)
         
         
     def set_text(self, text):
         '''Displays the given text'''
         #NOTE: do we have to set also the KLineEdit's text? 
         #<-> method could be called while the KLEdit is active? 
-        text = xml.sax.saxutils.escape(text) 
+        text = xml.sax.saxutils.escape(unicode(text)) 
         text = QtCore.QString(text)
         if not text.isEmpty():
             self._is_empty_message_displayed = False
@@ -69,11 +72,8 @@ class NickEdit(QtGui.QStackedWidget):
     def _on_label_clicked(self):
         '''Slot called when the user clicks on the label of 
         this widget'''
-        if self._is_empty_message_displayed:
-            text = QtCore.QString()
-        else:
-            text = xml.sax.saxutils.unescape(str(self.label.text()))
-        self.line_edit.setText(text)
+        text = self.text() # handles unescaping
+        self.line_edit.setText(text) #remove this unicode once fixed
         self.setCurrentWidget(self.line_edit)
         self.line_edit.setFocus(Qt.MouseFocusReason)
     

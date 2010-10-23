@@ -166,13 +166,14 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         print first
         
         self._append_to_chat(
-            xml.sax.saxutils.escape(message.body) + '<br>')
+            xml.sax.saxutils.escape(unicode(message.body)) + '<br>')
             
     # emesene's
     def send_message(self, formatter, my_account,
                 text, cedict, cstyle, first):
-        self._append_to_chat(
-            '<b>ME:</b>' + xml.sax.saxutils.escape(text) + '<br/>')
+        self._append_to_chat('<b>ME:</b>' + 
+                             xml.sax.saxutils.escape(unicode(text)) + 
+                             '<br/>')
     
     
     def update_single_information(self, nick, message, account): # emesene's
@@ -202,7 +203,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
     
     def _on_send_message(self):
-        message_string = str(self._widget_dict['chat_edit'].toPlainText())
+        message_string = unicode(self._widget_dict['chat_edit'].toPlainText())
         if len(message_string) == 0:
             return
         self._widget_dict['chat_edit'].clear()
