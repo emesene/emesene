@@ -88,6 +88,7 @@ class ChatTextEdit (QtGui.QTextEdit):
                 cursor.insertHtml('<img src="%s" />' % 
                                   self._smiley_dict[text_search])
                 smiley_found = True
+                return smiley_found
         #print "\t No smiley Found"
         return smiley_found
 
