@@ -38,6 +38,51 @@ _data_files = [
     ('share/man/man1', ['docs/man/emesene.1'])
 ]
 
+
+if os.name == 'nt':
+	import py2exe
+
+	opts = {
+		'py2exe': {
+			'packages': ['encodings', 'gtk'],
+			'includes': ['locale', 'gio', 'cairo', 'pangocairo', 'pango',
+				'atk', 'gobject', 'os', 'code', 'winsound', 'win32api',
+				'win32gui', 'optparse'],
+			'excludes': ['ltihooks', 'pywin', 'pywin.debugger',
+				'pywin.debugger.dbgcon', 'pywin.dialogs',
+				'pywin.dialogs.list', 'Tkconstants', 'Tkinter', 'tcl'
+				'doctest', 'macpath', 'pdb', 'cookielib', 'ftplib',
+				'pickle', 'caledar', 'win32wnet', 'unicodedata',
+				'getopt', 'gdk'],
+			'dll_excludes': ['libglade-2.0-0.dll', 'w9xpopen.exe'],
+			'optimize': '2',
+			'dist_dir': './dist',
+			"skip_archive": 1,
+		}
+	}
+
+	_data_files.extend(['dlls/Microsoft.VC90.CRT.manifest',
+			'dlls/msvcm90.dll',
+			'dlls/msvcp90.dll',
+			'dlls/msvcr71.dll',
+			'dlls/msvcr90.dll'])
+
+	setup(
+		name="emesene",
+		version="2.0",
+		description="a simple yet poweful IM client for WLM and jabber networks",
+		author 		= "Mariano Guerra",
+		author_email	= "luismarianoguerra@gmail.com",
+		url		= "http://emesene.org",
+		license		= "GNU GPL 3",
+		requires	= ["gtk"],
+		windows		= [{"script": "emesene/emesene.py", "dest_base": "emesene"}], # XXX
+		console		= [{"script": "emesene/emesene.py", "dest_base": "emesene_debug"}], # XXX
+		options		= opts,
+		data_files	= _data_files)
+
+	print "done! files at: dist"
+
 setup(
     name = 'emesene',
     version = '1.9.0',
