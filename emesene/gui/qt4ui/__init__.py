@@ -8,7 +8,7 @@ import extension
 
 GCONTEXT = None
 
-from Utils import pixmap_rounder
+from gui.qt4ui.Utils import pixmap_rounder
 
 
 

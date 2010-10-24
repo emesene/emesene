@@ -34,7 +34,7 @@ class SmileyPopupChooser (QtGui.QDockWidget):
             if not icon_path:
                 continue
             icon_path = icon_path[6:]
-            icon = KdeGui.KIcon(QtGui.QIcon(icon_path))
+            icon = QtGui.QIcon(icon_path)
             button = SmileyButton(icon, smiley_dict[i],  i)
             button.setFlat(True)
             width, height = button.size().width(), button.size().height()

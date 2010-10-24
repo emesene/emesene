@@ -105,7 +105,8 @@ class DisplayPic (QtGui.QLabel):
 
 class PixmapFader(QtCore.QObject):
     '''Class which provides a fading animation between QPixmaps'''
-    def __init__(self, callback, pixmap_size, first_pic=gui.theme.logo, parent=None):
+    def __init__(self, callback, pixmap_size, 
+                 first_pic=gui.theme.logo, parent=None):
         '''Constructor'''
         QtCore.QObject.__init__(self, parent)
         self._pixmaps = []
