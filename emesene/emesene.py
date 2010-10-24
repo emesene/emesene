@@ -20,8 +20,10 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+from e3.common.utils import project_path
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(os.path.abspath(project_path()))
+print (project_path())
 
 import sys
 import glib
