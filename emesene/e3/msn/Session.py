@@ -40,7 +40,7 @@ class Session(e3.Session):
     def request_attention(self, cid):
         '''send a nudge message'''
         account = self.account.account
-        message = e3.Message(Message.TYPE_NUDGE, None, account)
+        message = Message(Message.TYPE_NUDGE, None, account)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
 
 extension.implements(Session, 'session')
