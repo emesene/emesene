@@ -63,9 +63,8 @@ class TopLevelWindow (QtGui.QMainWindow):
         '''Adds a conversation page to the top level window and shows it'''
         print "GO CONVERSATION! ^_^"
         conversation_window_cls = extension.get_default('conversation window')
-        # TODO: fix on_last_close
         conversation_page = conversation_window_cls(session, 
-                                        on_last_close=self.clear,parent=self)
+                            on_last_close=self._on_last_tab_close, parent=self)
         self._content_type = 'conversation'
         self._switch_to_page(conversation_page)
         self._content = conversation_page

@@ -3,8 +3,6 @@
 '''This module contains classes to represent the notifications.'''
 
 import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
 
 class Notifier (QtGui.QLabel):
     ''' Class representing the notifications '''

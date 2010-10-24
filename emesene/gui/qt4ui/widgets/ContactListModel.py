@@ -101,7 +101,6 @@ class ContactListModel (QtGui.QStandardItemModel):
 #        groupItem.setData(gView.name.parse_default_smileys().to_HTML_string(),
 #                           KFERole.DisplayRole)
 #        groupItem.setData(gView.name.to_HTML_string(), KFERole.SortRole)
-#        # TODO: set the Icon. 
 #        #groupItem.setData()
 #        for contactUid in gView.contact_ids:
 #            contactItem = self._search_item_by_uid(contactUid,  groupItem)
