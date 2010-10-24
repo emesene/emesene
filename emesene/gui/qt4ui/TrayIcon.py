@@ -3,13 +3,9 @@
 ''' This module contains the tray icon's class'''
 
 #import PyKDE4.kdeui     as KdeGui
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
 
 import gui
-import e3
 
 
 class TrayIcon (QtGui.QSystemTrayIcon):
@@ -63,6 +59,12 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         
         
     def _on_tray_icon_clicked(self, reason):
+        '''This slot is called when the user clicks the tray icon.
+        Toggles main window's visibility'''
+        
+        if not reason == QtGui.QSystemTrayIcon.Trigger:
+            return 
+            
         if not self._main_window:
             return 
             

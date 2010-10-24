@@ -7,7 +7,7 @@ import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 import gui
-
+import papyon
 import os
 
 

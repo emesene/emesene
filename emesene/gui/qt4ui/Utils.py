@@ -33,7 +33,7 @@ def pixmap_rounder(qpixmap, perc_radius=16.7):
     
     # paints the original pixmap in the black area.
     painter.setCompositionMode(QtGui.QPainter.CompositionMode_SourceIn)
-    rect = QtCore.QRect(QtCore.QPoint(0,0), qpixmap.size())
+    rect = QtCore.QRect(QtCore.QPoint(0, 0), qpixmap.size())
     painter.drawPixmap(rect, qpixmap, rect)
     
     painter.end()

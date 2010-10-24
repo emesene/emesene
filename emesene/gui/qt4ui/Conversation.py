@@ -100,9 +100,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_dict['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
         widget_dict['chat_edit'].return_pressed.connect(
-                            self._on_send_message)
+                            self._on_send_btn_clicked)
         widget_dict['send_btn'].clicked.connect(
-                            self._on_send_message)
+                            self._on_send_btn_clicked)
         action_dict['add_smiley'].triggered.connect(
                             self._on_show_smiley_chooser)
         action_dict['change_font'].triggered.connect(
@@ -169,6 +169,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     # emesene's
     def send_message(self, formatter, my_account,
                 text, cedict, cstyle, first):
+        '''This method is called from the core, when a message is sent by us.
+        It shows the message'''
         self._append_to_chat('<b>ME:</b>' + 
                              xml.sax.saxutils.escape(unicode(text)) + 
                              '<br/>')
@@ -200,7 +202,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._widget_dict['chat_edit'].insert_text_after_cursor(shortcut)
         
     
-    def _on_send_message(self):
+    def _on_send_btn_clicked(self):
+        '''Slot called when the user clicks the send button or presses Enter in
+        the chat line editor. Sends the message'''
         message_string = unicode(self._widget_dict['chat_edit'].toPlainText())
         if len(message_string) == 0:
             return

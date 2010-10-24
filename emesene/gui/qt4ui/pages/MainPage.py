@@ -105,6 +105,8 @@ class MainPage (QtGui.QWidget):
         widget_dict['display_pic'].set_display_pic_of_account()
         
     def _on_new_conversation_requested(self, account):
+        '''Slot called when the user doubleclicks 
+        an entry in the contact list'''
         print account
         conv_id = time.time()
         self._on_new_conversation(conv_id, [account], False) 

@@ -12,10 +12,8 @@ from PyQt4.QtCore   import Qt
 
 #from contactListDelegate    import  ContactStyledDelegate
 
-import gui
 
 import xml
-import sys
 
 
 class ContactListModel (QtGui.QStandardItemModel):

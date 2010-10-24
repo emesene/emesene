@@ -3,7 +3,7 @@
 ''' This module contains the top level window class '''
 
 import PyQt4.QtGui as QtGui
-import PyQt4.QtCore as QtCore
+
 import extension
 
 class TopLevelWindow (QtGui.QMainWindow):

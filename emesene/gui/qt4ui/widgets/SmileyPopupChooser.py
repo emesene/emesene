@@ -47,7 +47,8 @@ class SmileyPopupChooser (QtGui.QDockWidget):
         # constraints: x*y = len(smiley_dict) = r AND  x/y = 1.6
         # which gives: y = sqrt(num_elems/r) AND x = sqrt(r*num_elems)
         num_elems = len(smiley_button_list)
-        self.num_columns = math.ceil(math.sqrt(1.6 * num_elems)) #numero di colonne
+        self.num_columns = math.ceil(
+                            math.sqrt(1.6 * num_elems)) #numero di colonne
         self.num_rows = num_elems / self.num_columns #numero di righe
         
         grid = QtGui.QGridLayout()
@@ -134,7 +135,7 @@ class SmileyPopupChooser (QtGui.QDockWidget):
 
 
 
-class SmileyButton (KdeGui.KPushButton):
+class SmileyButton (QtGui.QPushButton):
     '''This class represents a single smiley button in the 
     smiley chooser panel.
     This is a KPushButton with the shortcut as tooltip, and 

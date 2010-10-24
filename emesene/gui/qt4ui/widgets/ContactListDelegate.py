@@ -8,16 +8,12 @@
 #
 #from amsn2.ui.front_ends.kde4.adaptationLayer import KFEThemeManager
 
-import PyKDE4.kdeui     as KdeGui
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
 
-import e3
 import gui
 
-from ContactListModel import Role
+from gui.qt4ui.widgets.ContactListModel import Role
 
 class ContactListDelegate (QtGui.QStyledItemDelegate):
     '''A Qt Delegate to paint an item of the contact list'''
