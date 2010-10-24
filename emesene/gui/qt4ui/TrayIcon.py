@@ -29,10 +29,14 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         self._main_window = main_window
         self._conversations = None
         
+        self._menu = QtGui.QMenu()
+        exit_action = QtGui.QAction("Exit", self)
+        self._menu.addAction( exit_action )
+        self.setContextMenu(self._menu)
         self.setIcon(QtGui.QIcon(QtGui.QPixmap(gui.theme.logo)))
         
         self.activated.connect(self._on_tray_icon_clicked)
-        
+        exit_action.triggered.connect(self._on_exit_clicked)
         self.show()
         
         
@@ -51,6 +55,11 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         '''Store a reference to the conversation page'''
         self._conversations = conversations
         
+        
+    def _on_exit_clicked(self, boh):
+        '''Slot called when the user clicks exit in the context menu'''
+        QtGui.QApplication.instance().exit()
+        
     def _on_status_changed(self, status):
         '''This slot is called when the status changes. Update the tray
         icon'''
@@ -62,22 +71,23 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         '''This slot is called when the user clicks the tray icon.
         Toggles main window's visibility'''
         
-        if not reason == QtGui.QSystemTrayIcon.Trigger:
-            return 
-            
         if not self._main_window:
             return 
-            
-        if not self._main_window.isVisible():
-            self._main_window.show()
-            self._main_window.activateWindow()
-            self._main_window.raise_()
-        else: # visible
-            if self._main_window.isActiveWindow():
-                self._main_window.hide()
-            else:
+        
+        if reason == QtGui.QSystemTrayIcon.Trigger:
+            if not self._main_window.isVisible():
+                self._main_window.show()
                 self._main_window.activateWindow()
                 self._main_window.raise_()
+            else: # visible
+                if self._main_window.isActiveWindow():
+                    self._main_window.hide()
+                else:
+                    self._main_window.activateWindow()
+                    self._main_window.raise_()
+                    
+        elif reason == QtGui.QSystemTrayIcon.Context:
+            self._menu.show()
         
             
 

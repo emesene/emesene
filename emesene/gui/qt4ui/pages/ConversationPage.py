@@ -20,11 +20,9 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     WEBSITE = ''
     # pylint: enable=W0612
     
-    def __init__(self, session, parent):
+    def __init__(self, session, on_last_close, parent):
         '''Constructor'''
-        # TODO: understand what have to be passed as "on_last_close"
-        gui.base.ConversationManager.__init__(self, session, 
-                                              on_last_close=None)
+        gui.base.ConversationManager.__init__(self, session, on_last_close)
         QtGui.QTabWidget.__init__(self, parent)
         
         # to prevent top level window's destruction:

@@ -16,6 +16,7 @@ class TopLevelWindow (QtGui.QMainWindow):
     # pylint: enable=W0612
 
     def __init__(self, cb_on_close):
+        print 'Creating a new main window!'
         QtGui.QMainWindow.__init__(self)
         self._content_type = 'empty'
         if cb_on_close:
@@ -46,12 +47,6 @@ class TopLevelWindow (QtGui.QMainWindow):
         self.resize(width, height)
         self.move(posx, posy)
 
-    def _get_content_type(self):
-        ''' Getter method for "content_type" property'''
-        return self._content_type
-
-    content_type = property(_get_content_type) #emesene's
-
     def get_dimensions(self): #emesene's
         '''
         Returns a tuple containing width, height, x coordinate, y coordinate
@@ -68,7 +63,9 @@ class TopLevelWindow (QtGui.QMainWindow):
         '''Adds a conversation page to the top level window and shows it'''
         print "GO CONVERSATION! ^_^"
         conversation_window_cls = extension.get_default('conversation window')
-        conversation_page = conversation_window_cls(session, parent=self)
+        # TODO: fix on_last_close
+        conversation_page = conversation_window_cls(session, 
+                                        on_last_close=self.clear,parent=self)
         self._content_type = 'conversation'
         self._switch_to_page(conversation_page)
         self._content = conversation_page
@@ -111,7 +108,18 @@ class TopLevelWindow (QtGui.QMainWindow):
         
     content = property(_get_content)
     
+    def _get_content_type(self):
+        ''' Getter method for "content_type" property'''
+        return self._content_type
 
+    content_type = property(_get_content_type) #emesene's
+    
+    def _on_last_tab_close(self):
+        '''Slot called when the user closes the last tab in 
+        a conversation window'''
+        self._cb_on_close()
+        self.hide()
+    
     def _switch_to_page(self, page_widget):
         ''' Shows the given page '''
         index = self._page_stack.indexOf(page_widget)
@@ -126,6 +134,8 @@ class TopLevelWindow (QtGui.QMainWindow):
     def closeEvent(self, event):
         # pylint: disable=C0103
         ''' Overrides QMainWindow's close event '''
+        print 'TopLevelWindow\'s close event: %s, %s' % (
+                                    self.content, self._cb_on_close)
         self._cb_on_close()
-        event.accept()
-        #self.onClose()
+        event.ignore()
+        
