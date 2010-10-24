@@ -2,7 +2,6 @@
 
 '''This modulke contains the SmileyPopupChooser class'''
 
-import PyKDE4.kdeui     as KdeGui
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
