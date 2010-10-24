@@ -2,7 +2,6 @@
 
 '''This module contains the ChatTextEdit class'''
 
-import PyKDE4.kdeui     as KdeGui
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
@@ -12,7 +11,7 @@ import gui
 import os
 
 
-class ChatTextEdit (KdeGui.KTextEdit):
+class ChatTextEdit (QtGui.QTextEdit):
     '''A widget suited for editing chat lines. Provides as-you-type
     smileys, color settings and font settings, chat line history'''
     return_pressed = QtCore.pyqtSignal()
@@ -20,7 +19,7 @@ class ChatTextEdit (KdeGui.KTextEdit):
     
     def __init__(self, parent=None):
         '''Constructor'''
-        KdeGui.KTextEdit.__init__(self, parent)
+        QtGui.QTextEdit.__init__(self, parent)
         self._chat_lines = [""]
         self._current_chat_line_idx = 0
 
@@ -101,7 +100,7 @@ class ChatTextEdit (KdeGui.KTextEdit):
         else:
             #print "switching to %d" % idx
             self._chat_lines[self._current_chat_line_idx] = self.toHtml()
-            KdeGui.KTextEdit.setHtml(self, self._chat_lines[idx])
+            QtGui.QTextEdit.setHtml(self, self._chat_lines[idx])
             cur = self.textCursor()
             cur.setPosition( self.document().characterCount()-1 )
             self.setTextCursor(cur)
@@ -111,8 +110,8 @@ class ChatTextEdit (KdeGui.KTextEdit):
     def show_font_style_chooser(self):
         '''Shows the font style chooser'''
         qt_font = self.default_font()
-        result, _ = KdeGui.KFontDialog.getFont(qt_font)
-        if result == KdeGui.KFontDialog.Accepted:
+        result, _ = QtGui.QFontDialog.getFont(qt_font)
+        if result == QtGui.QFontDialog.Accepted:
             print "accepted"
             self.set_default_font(qt_font)
         else:
@@ -136,7 +135,8 @@ class ChatTextEdit (KdeGui.KTextEdit):
         if qt_font.overline():
             style |= papyon.TextFormat.STRIKETHROUGH
         family = 0
-        papyon_font = papyon.TextFormat(font=font, style=style, color='0', family=family)
+        papyon_font = papyon.TextFormat(font=font, style=style, 
+                                        color='0', family=family)
         print qt_font.toString()
         print papyon_font
         return papyon_font
@@ -156,8 +156,8 @@ class ChatTextEdit (KdeGui.KTextEdit):
     def show_font_color_chooser(self):
         '''Shows the font color chooser'''
         qt_color = self._qt_color
-        result = KdeGui.KColorDialog.getColor(qt_color)
-        if result == KdeGui.KColorDialog.Accepted:
+        result = QtGui.QColorDialog.getColor(qt_color)
+        if result == QtGui.QColorDialog.Accepted:
             print "accepted"
             self.set_default_color(qt_color)
         else:
@@ -167,7 +167,7 @@ class ChatTextEdit (KdeGui.KTextEdit):
     def set_default_color(self, color):
         '''Sets the color'''
         self._qt_color = color
-        self.setStyleSheet("KTextEdit{color: %s;}"    \
+        self.setStyleSheet("QTextEdit{color: %s;}"    \
                            "QMenu{color: palette(text);}" % color.name() )
         print type(self.viewport())
         print str(self.viewport().objectName())
@@ -207,7 +207,7 @@ class ChatTextEdit (KdeGui.KTextEdit):
         if event.text().length() > 0:
             if self._insert_char(event.text()):
                 return
-        KdeGui.KTextEdit.keyPressEvent(self, event)
+        QtGui.QTextEdit.keyPressEvent(self, event)
         
     
     def canInsertFromMimeData(self, source):
@@ -226,7 +226,7 @@ class ChatTextEdit (KdeGui.KTextEdit):
     def createMimeDataFromSelection(self):
         '''Creates a mime data object from selection'''
         # pylint: disable=C0103
-        mime_data = KdeGui.KTextEdit.createMimeDataFromSelection(self)
+        mime_data = QtGui.QTextEdit.createMimeDataFromSelection(self)
         if mime_data.hasHtml():
             parser = MyHTMLParser(self._reverse_smiley_dict)
             parser.feed(mime_data.html())

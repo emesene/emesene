@@ -2,14 +2,12 @@
 
 '''This module contains classes to represent the conversation tab.'''
 
-import PyKDE4.kdeui     as KdeGui
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 import gui
-import gui.kde4ui.widgets as Widgets
+import gui.qt4ui.widgets as Widgets
 
 import xml
 import sys
@@ -51,20 +49,20 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         action_dict = self._action_dict
         
         # Actions
-        action_dict['add_smiley']   = KdeGui.KAction(
-               KdeGui.KIcon("preferences-desktop-font"),  "Add Smiley", self)
-        action_dict['send_nudge']   = KdeGui.KAction(
-               KdeGui.KIcon("preferences-desktop-font"),  "Send Nudge", self)
-        action_dict['change_font']  = KdeGui.KAction(
-               KdeGui.KIcon("preferences-desktop-font"),  "Change Font", self)
-        action_dict['change_color'] = KdeGui.KAction(
-               KdeGui.KIcon("preferences-desktop-fonts"), "Change Color", self)
+        action_dict['add_smiley']   = QtGui.QAction(
+               QtGui.QIcon("preferences-desktop-font"),  "Add Smiley", self)
+        action_dict['send_nudge']   = QtGui.QAction(
+               QtGui.QIcon("preferences-desktop-font"),  "Send Nudge", self)
+        action_dict['change_font']  = QtGui.QAction(
+               QtGui.QIcon("preferences-desktop-font"),  "Change Font", self)
+        action_dict['change_color'] = QtGui.QAction(
+               QtGui.QIcon("preferences-desktop-fonts"), "Change Color", self)
                     
                     
         label = QtGui.QLabel(str(self._conv_id))
         # TOP LEFT
         top_left_widget = QtGui.QWidget()
-        widget_dict['chat_view'] = KdeGui.KTextBrowser(None, True)
+        widget_dict['chat_view'] = QtGui.QTextBrowser()
         top_left_lay = QtGui.QHBoxLayout()
         top_left_lay.addWidget(widget_dict['chat_view'])
         top_left_widget.setLayout(top_left_lay)
@@ -74,10 +72,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         # BOTTOM LEFT
         bottom_left_widget = QtGui.QWidget()
-        widget_dict['toolbar'] = KdeGui.KToolBar(self)
+        widget_dict['toolbar'] = QtGui.QToolBar(self)
         widget_dict['smiley_chooser'] = Widgets.SmileyPopupChooser()
         widget_dict['chat_edit'] = Widgets.ChatTextEdit()
-        widget_dict['send_btn'] = KdeGui.KPushButton("Send")
+        widget_dict['send_btn'] = QtGui.QPushButton("Send")
         
         text_edit_lay = QtGui.QHBoxLayout()
         text_edit_lay.addWidget(widget_dict['chat_edit'])

@@ -2,9 +2,6 @@
 
 '''This module contains the NickEdit class'''
 
-import PyKDE4.kdeui     as KdeGui
-import PyKDE4.kdecore   as KdeCore
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
@@ -19,7 +16,7 @@ class NickEdit(QtGui.QStackedWidget):
     '''A Nice nick / psm editor'''
     nick_changed = QtCore.pyqtSignal(basestring)
     def __init__(self, allow_empty=False, 
-                 empty_message=i18n(QtCore.QString("Click here to write")),
+                 empty_message=QtCore.QString("Click here to write"),
                  parent=None):
         QtGui.QStackedWidget.__init__(self, parent)
 
@@ -29,9 +26,9 @@ class NickEdit(QtGui.QStackedWidget):
                               QtCore.QString("</u>")
         self._is_empty_message_displayed = False
 
-        self.line_edit = KdeGui.KLineEdit()
-        self.label = QLabelEmph(i18n(QtCore.QString("If you see this, " \
-                            "please invoke setText on KNickEdit.")))
+        self.line_edit = QtGui.QLineEdit()
+        self.label = QLabelEmph(QtCore.QString("If you see this, " \
+                            "please invoke setText on QNickEdit."))
 
         self.set_text(QtCore.QString())
 
@@ -57,8 +54,8 @@ class NickEdit(QtGui.QStackedWidget):
         
     def set_text(self, text):
         '''Displays the given text'''
-        #NOTE: do we have to set also the KLineEdit's text? 
-        #<-> method could be called while the KLEdit is active? 
+        #NOTE: do we have to set also the QLineEdit's text? 
+        #<-> method could be called while the QLEdit is active? 
         text = xml.sax.saxutils.escape(unicode(text)) 
         text = QtCore.QString(text)
         if not text.isEmpty():

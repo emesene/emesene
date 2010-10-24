@@ -2,12 +2,11 @@
 
 ''' This module contains the top level window class '''
 
-import PyKDE4.kdeui as KdeGui
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 import extension
 
-class TopLevelWindow (KdeGui.KMainWindow):
+class TopLevelWindow (QtGui.QMainWindow):
     ''' Class representing the main window '''
     # pylint: disable=W0612
     NAME = 'TopLevelWindow'
@@ -17,7 +16,7 @@ class TopLevelWindow (KdeGui.KMainWindow):
     # pylint: enable=W0612
 
     def __init__(self, cb_on_close):
-        KdeGui.KMainWindow.__init__(self)
+        QtGui.QMainWindow.__init__(self)
         self._content_type = 'empty'
         if cb_on_close:
             self._cb_on_close = cb_on_close
@@ -26,7 +25,7 @@ class TopLevelWindow (KdeGui.KMainWindow):
         self._content = None
 
         self.setObjectName('mainwindow')
-        self.setWindowIcon(KdeGui.KIcon('im-user'))
+        #self.setWindowIcon(KdeGui.KIcon('im-user'))
         self._page_stack = QtGui.QStackedWidget()
         self.setCentralWidget(self._page_stack)
         
@@ -39,8 +38,8 @@ class TopLevelWindow (KdeGui.KMainWindow):
         
     def present(self): # emesene's
         '''(Tries to) raise the window'''
-        #KdeGui.KMainWindow.show(self)
-        KdeGui.KMainWindow.activateWindow(self)
+        #QtGui.QMainWindow.show(self)
+        QtGui.QMainWindow.activateWindow(self)
 
     def set_location(self, width, height, posx, posy): #emesene's
         '''Sets size and position on screen '''
@@ -112,30 +111,7 @@ class TopLevelWindow (KdeGui.KMainWindow):
         
     content = property(_get_content)
     
-#    def setMenu(self, menuBar):
-#        KFELog().l("KFEMainWindow.setMenu()")
-#        self.setMenuBar(menuBar)
-#
-#    def setTitle(self, title):
-#        KFELog().l("KFEMainWindow.setTitle()")
-#        self.setPlainCaption(title)
-#
-#    def show(self):
-#        print "TLW SHOW [%s]" % QtGui.QApplication.instance()
-#        self.timer = QtCore.QTimer(KdeGui.KApplication.instance())
-#        self.timer.timeout.connect(self._show)
-#        self.timer.start(2000)
-        
-#    def show(self):
-#        print "tout***"
-#        #self.timer.stop()
-#        QtGui.QMainWindow.show(self)
-#        
-#    def closeEvent(self, event):
-#        print "chiudooo"
-        
 
-#
     def _switch_to_page(self, page_widget):
         ''' Shows the given page '''
         index = self._page_stack.indexOf(page_widget)
@@ -149,8 +125,7 @@ class TopLevelWindow (KdeGui.KMainWindow):
 
     def closeEvent(self, event):
         # pylint: disable=C0103
-        ''' Overrides KMainWindow's close event '''
-        print "chiudo TLW"
+        ''' Overrides QMainWindow's close event '''
         self._cb_on_close()
         event.accept()
         #self.onClose()

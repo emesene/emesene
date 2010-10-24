@@ -2,9 +2,6 @@
 
 ''' This module contains the PreseceCombo class'''
 
-
-import PyKDE4.kdeui     as KdeGui
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
@@ -17,21 +14,21 @@ import gui
 #(a Qt Delegate?! Does KComboBox support them?)
 #TODO: put inizialization out of constructor, add setstatusValues method.
 
-class StatusCombo(KdeGui.KComboBox):
+class StatusCombo(QtGui.QComboBox):
     '''A presence selection widget'''
 
     status_changed = QtCore.pyqtSignal(int)
 
     def __init__(self, parent=None):
         '''Constructor'''
-        KdeGui.KComboBox.__init__(self, parent)
+        QtGui.QComboBox.__init__(self, parent)
 
         self._status_strings = {}
         self._status_values = e3.status.ALL
 
         for status_key in self._status_values:
-            self._status_strings[status_key] =  \
-                    i18n( e3.status.STATUS[status_key].capitalize() )
+            self._status_strings[status_key] = \
+                                    e3.status.STATUS[status_key].capitalize()
 
         #status_key is of e3.status.ALL type
         #statusValue is a dict wich associates a e3.status with a string
@@ -52,7 +49,7 @@ class StatusCombo(KdeGui.KComboBox):
         """
         if not status in e3.status.ALL:
             return
-        KdeGui.KComboBox.setCurrentIndex(self,  self.findData(status))
+        QtGui.QComboBox.setCurrentIndex(self,  self.findData(status))
 
     def status(self):
         '''Return the status selected'''
@@ -74,7 +71,7 @@ class StatusCombo(KdeGui.KComboBox):
                     Come on, use set_status() instead! :("
         #the personalinfoview holds a string... so this is necessary...
         #maybe this will be removed in the future... I hope...
-        KdeGui.KComboBox.setCurrentIndex(self, index)
+        QtGui.QComboBox.setCurrentIndex(self, index)
 
 
 

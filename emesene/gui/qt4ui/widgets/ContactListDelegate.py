@@ -75,7 +75,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             if picture.isNull():
                 picture = QtGui.QPixmap(gui.theme.user)
             else:
-                picture = gui.kde4ui.pixmap_rounder(picture)
+                picture = gui.qt4ui.pixmap_rounder(picture)
             # calculate the target position
             source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
                                     QtCore.QSizeF(picture.size()) )

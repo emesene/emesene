@@ -4,8 +4,6 @@
 
 #from amsn2.ui.front_ends.kde4.adaptationLayer import KFEThemeManager, KFELog
 
-import PyKDE4.kdeui     as KdeGui
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt

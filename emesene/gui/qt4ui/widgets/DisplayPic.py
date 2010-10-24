@@ -2,7 +2,6 @@
 
 ''' This module contains the DisplayPic class'''
 
-import PyKDE4.kdeui     as KdeGui
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
@@ -54,7 +53,7 @@ class DisplayPic (QtGui.QLabel):
         if pixmap.isNull():
             return
         
-        pixmap = gui.kde4ui.pixmap_rounder(pixmap)
+        pixmap = gui.qt4ui.pixmap_rounder(pixmap)
         self._fader.add_pixmap(pixmap)
         
 
@@ -114,7 +113,7 @@ class PixmapFader(QtCore.QObject):
         self._rect = QtCore.QRect(QtCore.QPoint(0, 0), self._size)
         self._callback = callback
         # timer initialization
-        self._timer = QtCore.QTimer(KdeGui.KApplication.instance())
+        self._timer = QtCore.QTimer(QtGui.QApplication.instance())
         self._timer.timeout.connect(self._on_timeout)
         self._fpms = 0.12 # frames / millisencond
         self._duration = 1000.0 # millisecond

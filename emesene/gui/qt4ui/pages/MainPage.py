@@ -2,13 +2,11 @@
 
 '''This module contains classes to represent the main page.'''
 
-import PyKDE4.kdeui     as KdeGui
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
-import gui.kde4ui.widgets as Widgets
+import gui.qt4ui.widgets as Widgets
 
 import time
 
@@ -53,8 +51,8 @@ class MainPage (QtGui.QWidget):
 
         widget_dict['nick_edit'] = Widgets.NickEdit()
         widget_dict['psm_edit'] = Widgets.NickEdit(allow_empty=True, 
-            empty_message=i18n(QtCore.QString(
-                "<u>Click here to set a personal message...</u>")))
+            empty_message=QtCore.QString(
+                "<u>Click here to set a personal message...</u>"))
         widget_dict['current_media'] = QtGui.QLabel()
         widget_dict['status_combo'] = Widgets.StatusCombo()
         widget_dict['display_pic'] = Widgets.DisplayPic(self._session)

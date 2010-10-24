@@ -1,23 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''This module contains the ContactList class'''
-
-#from mainWindowPages    import  KFEContactListPage
-#from models             import  ContactListModel,       \
-#                                ContactStyledDelegate
-#                                
-#from models.contactListModel import KFERole
-#                                
-#
-#from amsn2.ui.front_ends.kde4   import adaptationLayer
-#from amsn2.ui.front_ends.kde4.adaptationLayer import KFEThemeManager, KFELog
-#
-#
-#from widgets        import  KFENickEdit,    \
-#                            KFEPresenceCombo
                             
-import PyKDE4.kdeui     as KdeGui
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
@@ -29,30 +13,7 @@ import gui
 import ContactListDelegate
 import ContactListModel
 from   ContactListModel import Role
-#class KFEContactListWindow (adaptationLayer.KFEAbstractContactListWindow):
-#    def constructor(self, parent=None):
-#        KFELog().l("KFEContactListWindow.constructor()")
-#        self._main_window = parent
-#
-#        self._clwidget = KFEContactListWidget()
-#        QObject.connect(self._clwidget, 
-#        self.contactListPage = KFEContactListPage(self._clwidget, self)
-#
-#    def hide(self):
-#        pass
-#    
-#    def show(self):
-#        KFELog().l("KFEContactListWindow.show()")
-#        self._main_window.switchToWidget(self.contactListPage)
-#
-#    def onMyInfoUpdated(self, view):
-#        KFELog().l("KFEContactListWindow.onMyInfoUpdated()")
-#        self.contactListPage.onMyInfoUpdated(view)
-#
-#
-#    def getContactListWidget(self):
-#        KFELog().l("KFEContactListWindow.getContactlistWidget()")
-#        return self._clwidget
+
 
 class ContactList (gui.ContactList, QtGui.QTreeView):
     '''A Contactlist Widget'''
@@ -116,20 +77,6 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         
     # [END] -------------------- GUI.CONTACTLIST_OVERRIDE
         
-#    def onContactListUpdated(self, clView):
-#        KFELog().l("KFEContactListWidget.onContactListUpdated()")
-#        self.cl_model.onContactListUpdated(clView)
-#
-#
-#    def onGroupUpdated(self, groupView):
-#        KFELog().l("KFEContactListWidget.onGroupUpdated()")
-#        self.cl_model.onGroupUpdated(groupView)
-#
-#
-#    def onContactUpdated(self, contactView):
-#        #KFELog().l("KFEContactListWidget.onContactUpdated()")
-#        self.cl_model.onContactUpdated(contactView)
-
 
     def _on_item_double_clicked(self, item):
         '''Slot called when the user double clicks a contact. requests

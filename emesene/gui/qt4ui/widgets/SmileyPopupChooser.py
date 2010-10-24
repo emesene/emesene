@@ -113,8 +113,8 @@ class SmileyPopupChooser (QtGui.QDockWidget):
         x_pos = pos.x()
         y_pos = pos.y()
         
-        k_app = KdeGui.KApplication.kApplication()
-        screen_geometry = k_app.desktop().screenGeometry()
+        q_app = QtGui.QApplication.instance()
+        screen_geometry = q_app.desktop().screenGeometry()
         max_x = screen_geometry.width()
         max_y = screen_geometry.height()
         
@@ -142,7 +142,7 @@ class SmileyButton (KdeGui.KPushButton):
     selected = QtCore.pyqtSignal("QString")
     def __init__(self, icon, tooltip, shortcut,  parent=None):
         '''Constructor'''
-        KdeGui.KPushButton.__init__(self, icon, QtCore.QString(), )
+        QtGui.QPushButton.__init__(self, icon, QtCore.QString(), )
         self.setToolTip("<b>%s</b> %s" % (shortcut, tooltip) )
         self.shortcut = QtCore.QString(shortcut)
         self.clicked.connect(self._emit_signal)

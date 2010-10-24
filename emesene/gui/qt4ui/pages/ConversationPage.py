@@ -2,21 +2,19 @@
 
 '''This module contains classes to represent the conversation page.'''
 
-import PyKDE4.kdeui     as KdeGui
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 import gui
-import gui.kde4ui.Conversation   as Conversation
-import gui.kde4ui.widgets as Widgets
+import gui.qt4ui.Conversation   as Conversation
+import gui.qt4ui.widgets as Widgets
 
 
 import sys
 reload(sys)
 
-class ConversationPage (gui.base.ConversationManager, KdeGui.KTabWidget):
+class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     '''The Conversation Page'''
     # pylint: disable=W0612
     NAME = 'MainPage'
@@ -28,8 +26,9 @@ class ConversationPage (gui.base.ConversationManager, KdeGui.KTabWidget):
     def __init__(self, session, parent):
         '''Constructor'''
         # TODO: understand what have to be passed as "on_last_close"
-        gui.base.ConversationManager.__init__(self, session, on_last_close=None)
-        KdeGui.KTabWidget.__init__(self, parent)
+        gui.base.ConversationManager.__init__(self, session, 
+                                              on_last_close=None)
+        QtGui.QTabWidget.__init__(self, parent)
         
         # to prevent top level window's destruction:
         self.qt_parent = parent
@@ -40,17 +39,18 @@ class ConversationPage (gui.base.ConversationManager, KdeGui.KTabWidget):
         
     def add_new_conversation(self, session, conv_id, members):
         '''Creates a new chat tab and returns it'''
-        conversation = Conversation.Conversation(session, conv_id, members, self)
+        conversation = Conversation.Conversation(session, conv_id, 
+                                                 members, self)
         conversation.tab_index = self.addTab(conversation, str(conv_id))
         return conversation
         
     def get_parent(self): # emesene's
         '''Return a reference to the top level window containing this page'''
-        return KdeGui.KTabWidget.parent(self).parent()
+        return QtGui.QTabWidget.parent(self).parent()
                 
     def set_current_page(self, tab_index): # emesene's
         '''Show the chat tab at the given index'''
-        KdeGui.KTabWidget.setCurrentIndex(self, tab_index)
+        QtGui.QTabWidget.setCurrentIndex(self, tab_index)
         
     def set_message_waiting(self, conversation, is_waiting): # emesene's
         '''Not Sure what to do here....'''

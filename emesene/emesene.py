@@ -84,11 +84,9 @@ except Exception, exc:
     log.warning('Errors occurred while importing python-xmpp: %s' % str(exc))
 
 try:
-    import PyQt4
-    import PyKDE4
-    from gui import kde4ui
+    from gui import qt4ui
 except Exception, e:
-    log.error('Cannot find/load PyQt4/PyKDE4: %s' % str(e))
+    log.error('Cannot find/load PyQt4: %s' % str(e))
 
 try:
     from e3 import papylib

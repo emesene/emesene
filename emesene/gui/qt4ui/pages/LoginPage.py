@@ -2,8 +2,6 @@
 
 ''' This module contains classes to represent the login page '''
 
-import PyKDE4.kdeui     as KdeGui
-from PyKDE4.kdecore import i18n
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
@@ -12,7 +10,7 @@ import base64
 
 import e3
 
-import gui.kde4ui.widgets as Widgets
+import gui.qt4ui.widgets as Widgets
 
 
 class LoginPage(QtGui.QWidget):
@@ -66,16 +64,16 @@ class LoginPage(QtGui.QWidget):
         '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
         widget_dict['display_pic'] = Widgets.DisplayPic()
-        widget_dict['account_combo'] = KdeGui.KComboBox()
-        widget_dict['password_edit'] = KdeGui.KLineEdit()
+        widget_dict['account_combo'] = QtGui.QComboBox()
+        widget_dict['password_edit'] = QtGui.QLineEdit()
         widget_dict['status_combo'] = Widgets.StatusCombo()
         widget_dict['save_account_chk'] =    \
-                QtGui.QCheckBox(i18n("Remember this account"))
+                QtGui.QCheckBox("Remember this account")
         widget_dict['save_password_chk'] =   \
-                QtGui.QCheckBox(i18n("Save password"))
+                QtGui.QCheckBox("Save password")
         widget_dict['auto_login_chk'] =  \
-                QtGui.QCheckBox(i18n("Login automagically"))
-        widget_dict['login_btn'] = KdeGui.KPushButton(i18n("Login"))
+                QtGui.QCheckBox("Login automagically")
+        widget_dict['login_btn'] = QtGui.QPushButton("Login")
 
         lay = QtGui.QVBoxLayout()
         lay.addSpacing(40)
@@ -129,9 +127,9 @@ class LoginPage(QtGui.QWidget):
         account_combo.setMinimumWidth(220)
         account_combo.setEditable(1)
         account_combo.setDuplicatesEnabled(False) #not working... why?
-        account_combo.setInsertPolicy(KdeGui.KComboBox.NoInsert)
+        account_combo.setInsertPolicy(QtGui.QComboBox.NoInsert)
         # TODO: Investigate completion
-        widget_dict['password_edit'].setPasswordMode()
+        widget_dict['password_edit'].setEchoMode(QtGui.QLineEdit.Password)
         login_btn = widget_dict['login_btn']
         login_btn.setAutoDefault(True)
         login_btn.setEnabled(False)
