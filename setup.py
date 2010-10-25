@@ -79,7 +79,8 @@ if os.name == 'nt':
             'dll_excludes': ['libglade-2.0-0.dll', 'w9xpopen.exe'],
             'optimize': '2',
             'dist_dir': '../dist',
-            #"skip_archive": 1,
+            'icon_resources': [(1, "emesene.ico")],
+            "skip_archive": 1,
         }
     }
 
