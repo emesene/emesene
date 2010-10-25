@@ -497,7 +497,7 @@ def is_implementation(cls, interface_cls):
 def _get_class_name(cls):
     '''Returns the full path of a class
     For instances, call get_full_name(self.__class__)'''
-    if hasattr(sys.modules[cls.__module__], "__file__")
+    if hasattr(sys.modules[cls.__module__], "__file__"):
         path = os.path.abspath(sys.modules[cls.__module__].__file__)
     else:
         path = ""
