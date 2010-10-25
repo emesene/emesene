@@ -1,6 +1,7 @@
 ; emesene.nsi
 
 Name "emesene2"
+Icon "emesene.ico"
 OutFile "emesene2-install.exe"
 SetCompressor /SOLID lzma
 InstallDir $PROGRAMFILES\emesene2

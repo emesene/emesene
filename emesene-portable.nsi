@@ -1,6 +1,7 @@
 SetCompressor 'lzma'
 
 Name 'emesene2-portable.exe'
+Icon "emesene.ico"
 OutFile 'emesene2-portable.exe'
 SilentInstall silent
 
