@@ -32,6 +32,16 @@ then get the latest version of emesene 2, copy setup.py and ez_setup.py to emese
 
 python setup.py py2exe
 
-copy the share directory from the gtk runtime installation (not the pygtk installation), remove unused locales and unused themes (I keep only ms theme)
+copy the lib and share directory from the gtk runtime installation (not the pygtk installation), remove unused locales and unused themes (I keep only ms theme)
+
+create the following dirs inside dist
+
+etc/gtk-2.0
+
+inside that create a file called gtkrc with a line like this inside:
+
+gtk-theme-name = "MS-Windows"
+
+you can change the theme by keeping that theme inside share/themes and changing the name in gtkrc
 
 run nsi scripts
