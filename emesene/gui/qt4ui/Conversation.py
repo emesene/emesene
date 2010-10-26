@@ -55,13 +55,15 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         # Actions
         action_dict['add_smiley']   = QtGui.QAction(
-               QtGui.QIcon("preferences-desktop-font"),  "Add Smiley", self)
+               QtGui.QIcon(gui.theme.emote_to_path(':)')[6:]),  
+               "Add Smiley", self)
         action_dict['send_nudge']   = QtGui.QAction(
-               QtGui.QIcon("preferences-desktop-font"),  "Send Nudge", self)
+               QtGui.QIcon(gui.theme.emote_to_path(':S')[6:]),  
+               "Send Nudge", self)
         action_dict['change_font']  = QtGui.QAction(
-               QtGui.QIcon("preferences-desktop-font"),  "Change Font", self)
+               QtGui.QIcon(""),  "Change Font", self)
         action_dict['change_color'] = QtGui.QAction(
-               QtGui.QIcon("preferences-desktop-fonts"), "Change Color", self)
+               QtGui.QIcon(""), "Change Color", self) 
                     
                     
         # TOP LEFT
