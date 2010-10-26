@@ -65,7 +65,8 @@ class LoginPage(QtGui.QWidget):
         '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
         widget_dict['display_pic'] = Widgets.DisplayPic(
-                                                default_pic=gui.theme.logo)
+                                                default_pic=gui.theme.logo,
+                                                clickable=False)
         widget_dict['account_combo'] = QtGui.QComboBox()
         widget_dict['password_edit'] = QtGui.QLineEdit()
         widget_dict['status_combo'] = Widgets.StatusCombo()
@@ -124,7 +125,6 @@ class LoginPage(QtGui.QWidget):
                                         
         self.installEventFilter(self)
 
-        widget_dict['display_pic'].set_clickable(False)
         account_combo = widget_dict['account_combo']
         account_combo.setMinimumWidth(220)
         account_combo.setEditable(1)

@@ -2,8 +2,8 @@
 
 ''' This module contains the DisplayPic class'''
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
+from PyQt4          import QtGui
+from PyQt4          import QtCore
 from PyQt4.QtCore   import Qt
 
 
@@ -13,23 +13,29 @@ import gui
 class DisplayPic (QtGui.QLabel):
     ''' A DisplayPic widget. Supports changing the displayPic, and emits
     a "clicked" signal.'''
-    FRAMESIZE = QtCore.QSize(106, 106)
-    PIXMAPSIZE = QtCore.QSize(96, 96)
 
     clicked = QtCore.pyqtSignal()
     
     def __init__(self, session=None, default_pic=gui.theme.user, 
-                 parent=None):
+                 size=None, clickable=True, parent=None):
         '''constructor'''
         QtGui.QLabel.__init__(self, parent)
         self._session = session
         self._default_pic = default_pic
-        self._clickable = True
-        self._fader = PixmapFader(self._draw_pixmap, self.PIXMAPSIZE,
+        if not size:
+            # TODO: take this from options and subscribe
+            self._size = QtCore.QSize(96, 96)
+        self._clickable = clickable
+        self._fader = PixmapFader(self.setPixmap, self._size,
                                   self._default_pic, self)
         
+        self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         self.setFrameStyle(QtGui.QFrame.StyledPanel)
-        self.setFrameShadow(QtGui.QFrame.Raised)
+        if clickable:
+            self.setAttribute(Qt.WA_Hover)
+            self.setFrameShadow(QtGui.QFrame.Plain)
+        else:
+            self.setFrameShadow(QtGui.QFrame.Sunken)
         self.setAlignment(Qt.AlignCenter)
         
         self.set_display_pic_from_file(default_pic)
@@ -64,51 +70,53 @@ class DisplayPic (QtGui.QLabel):
         self._fader.add_pixmap(pixmap)
         
 
-    def _draw_pixmap(self, pixmap):
-        '''Actually displays a pixmap. This is the callback method invoked by
-        the PixmapFader when there's a new frame to display'''
-        self.setPixmap(pixmap)
-        self.adjust_size()
-
-    def set_clickable(self, clickable):
-        ''' enables or disables clicks '''
-        self._clickable = clickable
-
-    def is_clickable(self):
-        ''' returns true if the widget is clickable, False otherwise'''
-        return self._clickable
-
-    def adjust_size(self):
-        ''' resizes the display pic to the correct size'''
-        self.setMinimumSize(self.FRAMESIZE)
-        self.setMaximumSize(self.FRAMESIZE)
+#    def set_clickable(self, clickable):
+#        ''' enables or disables clicks '''
+#        self._clickable = clickable
+#
+#    def is_clickable(self):
+#        ''' returns true if the widget is clickable, False otherwise'''
+#        return self._clickable
         
         
     # -------------------- QT_OVERRIDE
 
-    #separate in keyPressEvent and keyReleaseEvent
+    # TODO: consider sublcassing a button at this point.... -_-;;
     def eventFilter(self, obj, event):
         ''' custom event filter '''
         # pylint: disable=C0103
         if not obj == self:
             return False
-        if not isinstance(event, QtGui.QMouseEvent):
+        if not self._clickable:
             return False
-        if not self.is_clickable():
-            return False
+        elif event.type() == QtCore.QEvent.Enter:
+            print "enter"
+            self.setFrameShadow(QtGui.QFrame.Raised)
+            return True
+        elif event.type() == QtCore.QEvent.Leave:
+            print "leave"
+            self.setFrameShadow(QtGui.QFrame.Plain)
+            return True
         elif event.type() == QtCore.QEvent.MouseButtonRelease and    \
              event.button() == Qt.LeftButton:
             self.setFrameShadow(QtGui.QFrame.Raised)
-            self.adjust_size()
             self.clicked.emit()
             return True
         elif event.type() == QtCore.QEvent.MouseButtonPress and  \
              event.button() == Qt.LeftButton:
             self.setFrameShadow(QtGui.QFrame.Sunken)
-            self.adjust_size()
             return True
         else:
             return False
+            
+    def sizeHint(self):
+        '''Return an appropriate size hint'''
+        # pylint: disable=C0103
+        return QtCore.QSize(self._size.width()+10, self._size.height()+10)
+        
+
+
+
 
 class PixmapFader(QtCore.QObject):
     '''Class which provides a fading animation between QPixmaps'''
