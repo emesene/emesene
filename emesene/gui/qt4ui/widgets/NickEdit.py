@@ -2,11 +2,12 @@
 
 '''This module contains the NickEdit class'''
 
+import xml
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
-import xml
 
 # important: at the moment emits "str" not "unicode"
 # because of papyon raising exceptions. [anyway, it seems to work.]

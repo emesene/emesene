@@ -2,11 +2,6 @@
 
 '''This module contains the ContactList class'''
 
-#from amsn2.ui.front_ends.kde4.adaptationLayer import KFELog
-#
-#from contactListModel   import KFERole
-#
-#from amsn2.ui.front_ends.kde4.adaptationLayer import KFEThemeManager
 
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore

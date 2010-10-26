@@ -6,29 +6,30 @@ Module containing frontend initialization function, and frontend main loop
 
 import extension
 
-GCONTEXT = None
-
 from gui.qt4ui.Utils import pixmap_rounder
 
-
+GCONTEXT = None
 
 def qt4_main(controller_cls):
     """ main method for Qt4 frontend
     """
 
-    import gobject
-    global GCONTEXT
-    GCONTEXT = gobject.MainLoop().get_context()
-
-
     import os
     import sys
+    
+    import gobject
+    
     import PyQt4.QtCore     as QtCore
     import PyQt4.QtGui      as QtGui
     
+    global GCONTEXT
+    GCONTEXT = gobject.MainLoop().get_context()
+    
     reload(sys)
     sys.setdefaultencoding("utf8")
+    
     setup()
+    
     os.putenv('QT_NO_GLIB', '1')
     #about_data = KdeCore.KAboutData("emesene", "",
                                    #KdeCore.ki18n("emesene"), "0.001")

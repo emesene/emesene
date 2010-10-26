@@ -2,14 +2,14 @@
 
 '''This module contains the ChatTextEdit class'''
 
+import os
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
-import gui
 import e3
-
-import os
+import gui
 
 
 class ChatTextEdit (QtGui.QTextEdit):

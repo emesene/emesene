@@ -6,8 +6,6 @@ import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
 import e3
-# pylint fails to detect "theme" memeber of package "gui"
-# pylint: disable=E1101
 import gui
 
 #Maybe we need another class which makes status info more abstract?

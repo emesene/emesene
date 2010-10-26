@@ -2,13 +2,13 @@
 
 '''This modulke contains the SmileyPopupChooser class'''
 
+import math
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 import gui
-
-import math
 
 
 class SmileyPopupChooser (QtGui.QDockWidget):

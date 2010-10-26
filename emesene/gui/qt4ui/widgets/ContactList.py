@@ -8,10 +8,9 @@ import PyQt4.QtCore     as QtCore
 import extension
 import gui
 
-# pylint: disable=W0403
-import ContactListDelegate
-import ContactListModel
-from   ContactListModel import Role
+from gui.qt4ui.widgets import ContactListDelegate
+from gui.qt4ui.widgets import ContactListModel
+from gui.qt4ui.widgets.ContactListModel import Role
 
 
 class ContactList (gui.ContactList, QtGui.QTreeView):

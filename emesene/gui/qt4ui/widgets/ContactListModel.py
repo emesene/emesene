@@ -2,18 +2,11 @@
 
 '''This module constains the ContactListModel class'''
 
-#from amsn2.ui.front_ends.kde4.adaptationLayer import KFEThemeManager, KFELog
+import xml
 
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
-
-# imports for the Test class:
-
-#from contactListDelegate    import  ContactStyledDelegate
-
-
-import xml
 
 
 class ContactListModel (QtGui.QStandardItemModel):

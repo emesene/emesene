@@ -8,9 +8,6 @@ import gui
 import gui.qt4ui.Conversation   as Conversation
 
 
-import sys
-reload(sys)
-
 class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     '''The Conversation Page'''
     # pylint: disable=W0612
