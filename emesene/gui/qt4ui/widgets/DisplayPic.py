@@ -18,19 +18,26 @@ class DisplayPic (QtGui.QLabel):
 
     clicked = QtCore.pyqtSignal()
     
-    def __init__(self, session=None, first_pic=gui.theme.logo, parent = None):
+    def __init__(self, session=None, default_pic=gui.theme.user, 
+                 parent=None):
         '''constructor'''
         QtGui.QLabel.__init__(self, parent)
         self._session = session
+        self._default_pic = default_pic
         self._clickable = True
-        self._fader = PixmapFader(self._draw_pixmap, self.PIXMAPSIZE)
+        self._fader = PixmapFader(self._draw_pixmap, self.PIXMAPSIZE,
+                                  self._default_pic, self)
         
         self.setFrameStyle(QtGui.QFrame.StyledPanel)
         self.setFrameShadow(QtGui.QFrame.Raised)
         self.setAlignment(Qt.AlignCenter)
         
-        self.set_display_pic_from_file(first_pic)
+        self.set_display_pic_from_file(default_pic)
         self.installEventFilter(self)
+        
+    def set_default_pic(self):
+        '''Sets the default pic'''
+        self.set_display_pic_from_file(self._default_pic)
     
     
     def set_display_pic_of_account(self, email=None):
@@ -106,7 +113,7 @@ class DisplayPic (QtGui.QLabel):
 class PixmapFader(QtCore.QObject):
     '''Class which provides a fading animation between QPixmaps'''
     def __init__(self, callback, pixmap_size, 
-                 first_pic=gui.theme.logo, parent=None):
+                 first_pic, parent=None):
         '''Constructor'''
         QtCore.QObject.__init__(self, parent)
         self._pixmaps = []
@@ -121,7 +128,7 @@ class PixmapFader(QtCore.QObject):
         self._frame_time = 1 / self._fpms
         self._alpha_step = self._frame_time / self._duration
         # pixmap painting initializations
-        self._result = QtGui.QPixmap(first_pic)
+        self._result = QtGui.QPixmap(first_pic).scaled(self._size)
         self._result.fill(Qt.transparent)
         self._painter = QtGui.QPainter(self._result)
         

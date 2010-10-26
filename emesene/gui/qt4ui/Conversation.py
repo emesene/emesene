@@ -126,10 +126,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         left_widget.moveSplitter(splitter_pos, 1)
 
         # RIGHT
-        widget_dict['his_display_pic'] = Widgets.DisplayPic(
-                                    self._session, first_pic=gui.theme.user)
-        widget_dict['my_display_pic'] = Widgets.DisplayPic(
-                                    self._session, first_pic=gui.theme.user)
+        widget_dict['his_display_pic'] = Widgets.DisplayPic(self._session)
+        widget_dict['my_display_pic'] = Widgets.DisplayPic(self._session)
         
         right_lay = QtGui.QVBoxLayout()
         right_lay.addWidget(widget_dict['his_display_pic'])

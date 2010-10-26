@@ -2,13 +2,14 @@
 
 ''' This module contains classes to represent the login page '''
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
+from PyQt4          import QtGui
+from PyQt4          import QtCore
 from PyQt4.QtCore   import Qt
 
 import base64
 
 import e3
+import gui
 
 import gui.qt4ui.widgets as Widgets
 
@@ -63,7 +64,8 @@ class LoginPage(QtGui.QWidget):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
-        widget_dict['display_pic'] = Widgets.DisplayPic()
+        widget_dict['display_pic'] = Widgets.DisplayPic(
+                                                default_pic=gui.theme.logo)
         widget_dict['account_combo'] = QtGui.QComboBox()
         widget_dict['password_edit'] = QtGui.QLineEdit()
         widget_dict['status_combo'] = Widgets.StatusCombo()
@@ -201,24 +203,27 @@ class LoginPage(QtGui.QWidget):
         account_combo  = widget_dict['account_combo']
         password_edit  = widget_dict['password_edit']
         index_in_account_list = account_combo.itemData(acc_index).toPyObject()
-        account = self._account_list[index_in_account_list]
+        # If we don't have any account at all, this slots gets called but 
+        # index_in_account_list is None.
+        if not index_in_account_list is None: 
+            account = self._account_list[index_in_account_list]
         
-        self.clear_login_form()
-        # display_pic
-        path = self._config_dir.join('messenger.hotmail.com', account.email, 
-                                     'avatars', 'last')
-        widget_dict['display_pic'].set_display_pic_from_file(path)
-        # password:
-        if account.password:
-            password_edit.setText(account.password)
-        else:
-            password_edit.clear()
-        # status:
-        widget_dict['status_combo'].set_status(account.status)
-        # checkboxes:
-        widget_dict['save_account_chk'] .setChecked(account.save_account)
-        widget_dict['save_password_chk'].setChecked(account.save_password)
-        widget_dict['auto_login_chk']   .setChecked(account.auto_login)
+            self.clear_login_form()
+            # display_pic
+            path = self._config_dir.join('messenger.hotmail.com', account.email, 
+                                         'avatars', 'last')
+            widget_dict['display_pic'].set_display_pic_from_file(path)
+            # password:
+            if account.password:
+                password_edit.setText(account.password)
+            else:
+                password_edit.clear()
+            # status:
+            widget_dict['status_combo'].set_status(account.status)
+            # checkboxes:
+            widget_dict['save_account_chk'] .setChecked(account.save_account)
+            widget_dict['save_password_chk'].setChecked(account.save_password)
+            widget_dict['auto_login_chk']   .setChecked(account.auto_login)
         self._on_checkbox_state_refresh()
 
 
@@ -316,7 +321,7 @@ class LoginPage(QtGui.QWidget):
         print " *** clear_login_form"
         widget_dic = self._widget_dict
         if clear_pic:
-            widget_dic['display_pic'].set_logo()
+            widget_dic['display_pic'].set_default_pic()
         widget_dic['password_edit'].clear()
         widget_dic['status_combo'].set_status(e3.status.ONLINE)
         # _on_checkbox_state_changed enables them:

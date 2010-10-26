@@ -25,7 +25,9 @@ def qt4_main(controller_cls):
     import sys
     import PyQt4.QtCore     as QtCore
     import PyQt4.QtGui      as QtGui
-
+    
+    reload(sys)
+    sys.setdefaultencoding("utf8")
     setup()
     os.putenv('QT_NO_GLIB', '1')
     #about_data = KdeCore.KAboutData("emesene", "",
