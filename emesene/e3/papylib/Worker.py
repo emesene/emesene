@@ -754,7 +754,7 @@ class Worker(e3.base.Worker, papyon.Client):
             print "unblock fail", args
             self.session.add_event(e3.Event.EVENT_CONTACT_UNBLOCK_FAILED, '') #account
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        self.address_book.unblock_contact(papycontact, failed_cb=block_fail)
+        self.address_book.unblock_contact(papycontact, failed_cb=unblock_fail)
 
     def _handle_action_move_to_group(self, account, src_gid, dest_gid):
         '''handle Action.ACTION_MOVE_TO_GROUP '''
