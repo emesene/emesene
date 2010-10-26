@@ -54,18 +54,17 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         action_dict = self._action_dict
         
         # Actions
+        icon_path = gui.theme.emote_to_path(':)')[6:]
         action_dict['add_smiley']   = QtGui.QAction(
-               QtGui.QIcon(gui.theme.emote_to_path(':)')[6:]),  
-               "Add Smiley", self)
+                            QtGui.QIcon(icon_path), "Add Smiley", self)
+        icon_path = gui.theme.emote_to_path(':S')[6:]
         action_dict['send_nudge']   = QtGui.QAction(
-               QtGui.QIcon(gui.theme.emote_to_path(':S')[6:]),  
-               "Send Nudge", self)
+                            QtGui.QIcon(icon_path),"Send Nudge", self)
         action_dict['change_font']  = QtGui.QAction(
-               QtGui.QIcon(""),  "Change Font", self)
+                            QtGui.QIcon(""),  "Change Font", self)
         action_dict['change_color'] = QtGui.QAction(
-               QtGui.QIcon(""), "Change Color", self) 
-                    
-                    
+                            QtGui.QIcon(""), "Change Color", self) 
+    
         # TOP LEFT
         widget_dict['chat_view'] = QtGui.QTextBrowser()
         top_left_lay = QtGui.QHBoxLayout()
@@ -106,13 +105,15 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             self._on_new_style_selected)
         widget_dict['send_btn'].clicked.connect(
                             self._on_send_btn_clicked)
+                            
         action_dict['add_smiley'].triggered.connect(
                             self._on_show_smiley_chooser)
+        action_dict['send_nudge'].triggered.connect(
+                            self.on_notify_attention)
         action_dict['change_font'].triggered.connect(
                             widget_dict['chat_edit'].show_font_chooser)
         action_dict['change_color'].triggered.connect(
                             widget_dict['chat_edit'].show_color_chooser)
-
         
         # LEFT (TOP & BOTTOM)
         left_widget = QtGui.QSplitter(Qt.Vertical)
@@ -193,6 +194,13 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._append_to_chat('<b>ME:</b>' + 
                              xml.sax.saxutils.escape(unicode(text)) + 
                              '<br/>', cstyle)
+                             
+    def information(self, formatter, contact, message):
+        '''This method is called by the core, when there's the need to display 
+        an information message'''
+        self._append_to_chat('<p align="right"><i>' + 
+                             xml.sax.saxutils.escape(unicode(message)) + 
+                             '</i></p>')
     
     
     def update_single_information(self, nick, message, account): # emesene's
