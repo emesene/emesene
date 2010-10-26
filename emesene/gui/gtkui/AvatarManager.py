@@ -80,13 +80,10 @@ class AvatarManager(object):
         fpath = os.path.join(self.get_avatars_dir(), gen_filename(filename))
 
         try:
-            #FIXME temporaney hack for animations
+            #FIXME temporaney hack for animations = simple copy
             animation = gtk.gdk.PixbufAnimation(filename)
             if not animation.is_static_image():
-                self.session.set_picture(filename)
-                if os.path.exists(self.avatar_path):
-                    os.remove(self.avatar_path)
-                shutil.copy(filename, self.avatar_path)
+                shutil.copy(filename, fpath)
                 return None, fpath
             else:
                 if not os.path.exists(self.get_avatars_dir()):

@@ -195,17 +195,12 @@ class AvatarChooser(gtk.Window):
             '''method called when an image is selected'''
             if response == gui.stock.ACCEPT:
                 animation = gtk.gdk.PixbufAnimation(path)
-                #we don't need to resize animation here
-                if not animation.is_static_image():
-                    view = self.views[self.notebook.get_current_page()]
-                    view.add_picture(path)
-                    return
-                self._on_image_area_selector(path)
+                self._on_image_area_selector(path, animation.is_static_image())
 
         class_ = extension.get_default('image chooser')
         class_(os.path.expanduser('~'), _on_image_selected).show()
 
-    def _on_image_area_selector(self, path):
+    def _on_image_area_selector(self, path, static=True):
         '''called when the user must resize the added image'''
         def _on_image_resized(response, pix):
             '''method called when an image is selected'''
@@ -214,6 +209,12 @@ class AvatarChooser(gtk.Window):
                     view = self.views[self.notebook.get_current_page()]
                     pix, avpath = self.avatar_manager.add_new_avatar_from_pix(pix)
                     view.add_picture(avpath)
+
+        if not static:
+            view = self.views[self.notebook.get_current_page()]
+            pix, avpath = self.avatar_manager.add_new_avatar(path)
+            view.add_picture(avpath)
+            return
 
         class_ = extension.get_default('image area selector')
         class_(_on_image_resized, gtk.gdk.pixbuf_new_from_file(path),
