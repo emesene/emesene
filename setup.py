@@ -113,4 +113,4 @@ else:
     ]
 
     setup(data_files = _data_files,
-        packages = find_packages())
+        packages = find_packages(), **setup_info)
