@@ -159,6 +159,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
     # temp
     def update_style(self, style):
+        '''Don't remember what this was supposed to do and 
+        why I made it empty ;_;'''
         pass
     
     # emesene's
@@ -294,6 +296,7 @@ class UserInfoPanel (QtGui.QLabel):
     other contact's info in a conversation window'''
     
     def __init__(self, parent=None):
+        '''Constructor'''
         QtGui.QLabel.__init__(self, parent)
         self._text_skeleton = \
             '''<table>
@@ -308,6 +311,7 @@ class UserInfoPanel (QtGui.QLabel):
             <table>'''
 
     def update(self, status, nick, message, account):
+        '''Updates the infos shown in the panel'''
         text = self._text_skeleton % (
                         gui.theme.status_icons[status],
                         unicode(nick),

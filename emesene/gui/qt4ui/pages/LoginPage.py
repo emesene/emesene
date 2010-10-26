@@ -210,8 +210,8 @@ class LoginPage(QtGui.QWidget):
         
             self.clear_login_form()
             # display_pic
-            path = self._config_dir.join('messenger.hotmail.com', account.email, 
-                                         'avatars', 'last')
+            path = self._config_dir.join('messenger.hotmail.com', 
+                                         account.email, 'avatars', 'last')
             widget_dict['display_pic'].set_display_pic_from_file(path)
             # password:
             if account.password:

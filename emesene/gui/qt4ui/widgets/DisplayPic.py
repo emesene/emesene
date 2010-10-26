@@ -89,11 +89,9 @@ class DisplayPic (QtGui.QLabel):
         if not self._clickable:
             return False
         elif event.type() == QtCore.QEvent.Enter:
-            print "enter"
             self.setFrameShadow(QtGui.QFrame.Raised)
             return True
         elif event.type() == QtCore.QEvent.Leave:
-            print "leave"
             self.setFrameShadow(QtGui.QFrame.Plain)
             return True
         elif event.type() == QtCore.QEvent.MouseButtonRelease and    \

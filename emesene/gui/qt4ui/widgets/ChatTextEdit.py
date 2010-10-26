@@ -151,6 +151,7 @@ class ChatTextEdit (QtGui.QTextEdit):
         
     
     def _set_e3_style(self, e3_style):
+        '''Sets the font style, given an e3 style'''
         e3_color = e3_style.color
         qt_color = QtGui.QColor(e3_color.red,  e3_color.green, 
                                 e3_color.blue, e3_color.alpha  )
