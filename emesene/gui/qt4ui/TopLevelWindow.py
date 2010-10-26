@@ -134,7 +134,14 @@ class TopLevelWindow (QtGui.QMainWindow):
         # pylint: disable=C0103
         ''' Overrides QMainWindow's close event '''
         print 'TopLevelWindow\'s close event: %s, %s' % (
-                                    self.content, self._cb_on_close)
+                                    self.content, str(self._cb_on_close))
         self._cb_on_close()
+        # FIXME: dirty HACK. when we close the conversation window, 
+        # self._cb_on_close closes each conversation tab without checking 
+        # if it isclosing the last tab, so _on_last_tab_close doesn't get 
+        #called and the conversation window remains opened and empty.
+        if str(self._cb_on_close).find(
+                'Controller._on_conversation_window_close') > -1:
+            self.hide()
         event.ignore()
         

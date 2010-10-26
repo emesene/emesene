@@ -25,19 +25,17 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         gui.base.ConversationManager.__init__(self, session, on_last_close)
         QtGui.QTabWidget.__init__(self, parent)
         
+        self.setTabsClosable(True)
+        self.setDocumentMode(True)
+        
         # to prevent top level window's destruction:
         self.qt_parent = parent
         
+        self.tabCloseRequested.connect(self._on_tab_close_request)
+        
+        
     def __del__(self):
         print "conversation manager adieeeeeeeuuuu ;______;"
-        
-        
-    def add_new_conversation(self, session, conv_id, members):
-        '''Creates a new chat tab and returns it'''
-        conversation = Conversation.Conversation(session, conv_id, 
-                                                 members, self)
-        conversation.tab_index = self.addTab(conversation, str(conv_id))
-        return conversation
         
     def get_parent(self): # emesene's
         '''Return a reference to the top level window containing this page'''
@@ -47,23 +45,60 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         '''Show the chat tab at the given index'''
         QtGui.QTabWidget.setCurrentIndex(self, tab_index)
         
+    
+        
+        
+    #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
+    
+    def add_new_conversation(self, session, conv_id, members):
+        '''Creates a new chat tab and returns it. This implements base's
+        class abstract method.'''
+        conversation = Conversation.Conversation(session, conv_id, 
+                                                 members)
+        account = session.contacts.get(members[0])
+        conversation.tab_index = self.addTab(conversation, 
+                                             unicode(account.display_name))
+        self.setTabIcon(conversation.tab_index, 
+                        QtGui.QIcon(gui.theme.status_icons[account.status]))
+        return conversation
+        
+    def remove_conversation(self, conversation):
+        '''Removes the chat tab. This implements base's class 
+        abstract method.'''
+        index = self.indexOf(conversation)
+        self.removeTab(index)
+    
     def set_message_waiting(self, conversation, is_waiting): # emesene's
         '''Not Sure what to do here....'''
         print conversation,
         print is_waiting
+        
+        
+    def _on_contact_attr_changed(self, account, change_type, old_value,
+            do_notify=True):
+        '''called when an attribute of a contact changes.
+        Overridden to update tabs'''
+        gui.base.ConversationManager._on_contact_attr_changed(self, account, 
+                                                              change_type, 
+                                                              old_value, 
+                                                              do_notify)
+        for conversation in self.conversations.values():
+            if account in conversation.members:
+                index = self.indexOf(conversation)
+                account = self.session.contacts.get(conversation.members[0])
+                icon = QtGui.QIcon(gui.theme.status_icons[account.status])
+                self.setTabIcon(index, icon)
+                self.setTabText(index, unicode(account.display_name))
+                
+                
+    #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
                 
 
-#    def addChatWidget(self, chatWidget):
-#        self.lay.addWidget(chatWidget)
-#        chatWidget.setStatusBar(self.sBar)
-#
-#    def setMenu(self, menuBar):
-#        self.setMenuBar(menuBar)
-#
-#    def setTitle(self, title):
-#        self.setPlainCaption(title)
+    def _on_tab_close_request(self, index):
+        self.on_conversation_close(self.widget(index))
 
 
+        
 
 
 

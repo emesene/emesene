@@ -10,8 +10,6 @@ import gui
 import gui.qt4ui.widgets as Widgets
 
 import xml
-import sys
-reload(sys)
 
 
 class Conversation (gui.base.Conversation, QtGui.QWidget):
@@ -59,19 +57,15 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                QtGui.QIcon("preferences-desktop-fonts"), "Change Color", self)
                     
                     
-        label = QtGui.QLabel(str(self._conv_id))
         # TOP LEFT
-        top_left_widget = QtGui.QWidget()
         widget_dict['chat_view'] = QtGui.QTextBrowser()
         top_left_lay = QtGui.QHBoxLayout()
         top_left_lay.addWidget(widget_dict['chat_view'])
-        top_left_widget.setLayout(top_left_lay)
         
         widget_dict['chat_view'].setText(self._chat_text)
         
 
         # BOTTOM LEFT
-        bottom_left_widget = QtGui.QWidget()
         widget_dict['toolbar'] = QtGui.QToolBar(self)
         widget_dict['smiley_chooser'] = Widgets.SmileyPopupChooser()
         widget_dict['chat_edit'] = Widgets.ChatTextEdit()
@@ -84,7 +78,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         bottom_left_lay = QtGui.QVBoxLayout()
         bottom_left_lay.addWidget(widget_dict['toolbar'])
         bottom_left_lay.addLayout(text_edit_lay)
-        bottom_left_widget.setLayout(bottom_left_lay)
         
         toolbar = widget_dict['toolbar']
         toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
@@ -113,12 +106,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         # LEFT (TOP & BOTTOM)
         left_widget = QtGui.QSplitter(Qt.Vertical)
-        left_widget.addWidget(top_left_widget)
-        left_widget.addWidget(bottom_left_widget)
-
-        left_lay = QtGui.QVBoxLayout()
-        left_lay.addWidget(label)
-        left_lay.addWidget(left_widget)
+        splitter_up = QtGui.QWidget()
+        splitter_down = QtGui.QWidget()
+        splitter_up.setLayout(top_left_lay)
+        splitter_down.setLayout(bottom_left_lay)
+        left_widget.addWidget(splitter_up)
+        left_widget.addWidget(splitter_down)
 
         left_widget.setCollapsible (0, False)
         left_widget.setCollapsible (1, False)
@@ -141,14 +134,26 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                                                                 his_email)
 
         # LEFT & RIGHT
-        lay = QtGui.QHBoxLayout()
-        lay.addLayout(left_lay)
-        lay.addLayout(right_lay)
+        widget_dict['info_panel'] = UserInfoPanel()
+        
+        lay_no_info = QtGui.QHBoxLayout()
+        lay_no_info.addWidget(left_widget)
+        lay_no_info.addLayout(right_lay)
+        lay = QtGui.QVBoxLayout()
+        lay.addWidget(widget_dict['info_panel'])
+        lay.addLayout(lay_no_info)
+        
+        
         
         self.setLayout(lay)
-
-        sys.setdefaultencoding("utf8")
         
+        
+    # emesene's
+    # TODO: put this (and maybe the following) in the base 
+    # class as abstract methods
+    def on_close(self):
+        '''Method called when this chat widget is about to be closed'''
+        pass
         
     # emesene's
     def receive_message(self, formatter, contact, message, cedict, first):
@@ -177,9 +182,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def update_single_information(self, nick, message, account): # emesene's
         '''This method is called from the core (e3 or base class or whatever
         to update the contacts infos'''
-        print nick,
-        print message,
-        print account
+        # account is a string containing the email
+        # does this have to update the picture too?
+        status = self._session.contacts.get(account).status
+        self._widget_dict['info_panel'].update(status, nick, message, account)
         
         
     def show(self):
@@ -261,6 +267,35 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
    
 
+class UserInfoPanel (QtGui.QLabel):
+    '''This class represents a label widget showing
+    other contact's info in a conversation window'''
+    
+    def __init__(self, parent=None):
+        QtGui.QLabel.__init__(self, parent)
+        self._text_skeleton = \
+            '''<table>
+                <tr>    
+                    <td><img src="%s"></td>
+                    <td>%s [%s]</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><font><i>%s</i></font></td>
+                </tr>
+            <table>'''
+
+    def update(self, status, nick, message, account):
+        text = self._text_skeleton % (
+                        gui.theme.status_icons[status],
+                        unicode(nick),
+                        account,
+                        unicode(message))
+        self.setText(text)
+        
+        
+        
+        
         
         
         
