@@ -7,7 +7,8 @@ import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 import gui
-import papyon
+import e3
+
 import os
 
 
@@ -15,7 +16,7 @@ class ChatTextEdit (QtGui.QTextEdit):
     '''A widget suited for editing chat lines. Provides as-you-type
     smileys, color settings and font settings, chat line history'''
     return_pressed = QtCore.pyqtSignal()
-    font_changed = QtCore.pyqtSignal()
+    style_changed = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
         '''Constructor'''
@@ -108,74 +109,91 @@ class ChatTextEdit (QtGui.QTextEdit):
             self._current_chat_line_idx = idx
 
 
-    def show_font_style_chooser(self):
+    def show_font_chooser(self):
         '''Shows the font style chooser'''
-        qt_font = self.default_font()
-        result, _ = QtGui.QFontDialog.getFont(qt_font)
-        if result == QtGui.QFontDialog.Accepted:
+        qt_font = self._get_qt_font()
+        new_qt_font, result = QtGui.QFontDialog.getFont(qt_font)
+        if result:
             print "accepted"
-            self.set_default_font(qt_font)
+            self._set_qt_font(new_qt_font)
         else:
             print "canceled"
-
-
-    def default_papyon_font(self):
-        '''Returns the font style in papyon format'''
-        qt_font = self.default_font()
-        font = unicode(qt_font.family())
-        print "Font's raw Name: " + font
-        print qt_font.family()
-        print qt_font.defaultFamily()
-        style = papyon.TextFormat.NO_EFFECT
-        if qt_font.bold():
-            style |= papyon.TextFormat.BOLD
-        if qt_font.italic():
-            style |= papyon.TextFormat.ITALIC
-        if qt_font.underline():
-            style |= papyon.TextFormat.UNDERLINE
-        if qt_font.overline():
-            style |= papyon.TextFormat.STRIKETHROUGH
-        family = 0
-        papyon_font = papyon.TextFormat(font=font, style=style, 
-                                        color='0', family=family)
-        print qt_font.toString()
-        print papyon_font
-        return papyon_font
-        
-
-    def set_default_font(self, font):
-        '''sets the font style in qt format'''
-        self.document().setDefaultFont(font)
-        self.font_changed.emit() ## TODO emit only if really changed
-
-
-    def default_font(self):
-        '''Returns the default font in qt format'''
-        return self.document().defaultFont()
-
-
-    def show_font_color_chooser(self):
+            
+            
+    def show_color_chooser(self):
         '''Shows the font color chooser'''
         qt_color = self._qt_color
-        result = QtGui.QColorDialog.getColor(qt_color)
-        if result == QtGui.QColorDialog.Accepted:
-            print "accepted"
-            self.set_default_color(qt_color)
-        else:
-            print "canceled"
+        new_qt_color = QtGui.QColorDialog.getColor(qt_color)
+        if new_qt_color.isValid() and not new_qt_color == qt_color:
+            self._set_qt_color(new_qt_color)
+            
+
+    def _get_e3_style(self):
+        '''Returns the font style in e3 format'''
+        qt_font = self._get_qt_font()
+        qt_color = self._get_qt_color()
+        
+        e3_color = e3.Color.from_hex(unicode(qt_color.name()))
+        e3_color.alpha = qt_color.alpha()
+        
+        font = unicode(qt_font.family())
+        print "Font's raw Name: " + font
+        print "Font default family: " + qt_font.defaultFamily()
+        
+        e3_style = e3.Style(font, e3_color, qt_font.bold(), 
+                                            qt_font.italic(),
+                                            qt_font.underline(), 
+                                            qt_font.strikeOut(), 
+                                            qt_font.pointSize())
+        print qt_font.toString()
+        print e3_style
+        return e3_style
+        
+    
+    def _set_e3_style(self, e3_style):
+        e3_color = e3_style.color
+        qt_color = QtGui.QColor(e3_color.red,  e3_color.green, 
+                                e3_color.blue, e3_color.alpha  )
+        qt_font = QtGui.QFont()
+        qt_font.setFamily(      e3_style.font   )
+        qt_font.setBold(        e3_style.bold   )
+        qt_font.setItalic(      e3_style.italic )
+        qt_font.setStrikeOut(   e3_style.strike )
+        qt_font.setPointSize(      e3_style.size   )
+        
+        self._set_qt_color(qt_color)
+        self._set_qt_font(qt_font)
+        
+    
+    e3_style = property(_get_e3_style, _set_e3_style)
+        
+
+    def _set_qt_font(self, new_font):
+        '''sets the font style in qt format'''
+        old_font = self._get_qt_font()
+        self.document().setDefaultFont(new_font)
+        if not old_font == new_font:
+            self.style_changed.emit()
 
 
-    def set_default_color(self, color):
+    def _get_qt_font(self):
+        '''Returns the default font in qt format'''
+        return self.document().defaultFont()
+        
+
+    def _set_qt_color(self, new_color):
         '''Sets the color'''
-        self._qt_color = color
+        old_color = self._qt_color
+        self._qt_color = new_color
         self.setStyleSheet("QTextEdit{color: %s;}"    \
-                           "QMenu{color: palette(text);}" % color.name() )
+                           "QMenu{color: palette(text);}" % new_color.name() )
         print type(self.viewport())
         print str(self.viewport().objectName())
-        self.font_changed.emit() # TODO: view above
+        if not old_color == new_color:
+            self.style_changed.emit()
 
 
-    def default_color(self):
+    def _get_qt_color(self):
         '''gets the color'''
         return self._qt_color
         

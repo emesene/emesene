@@ -2,14 +2,18 @@
 
 '''This module contains classes to represent the conversation tab.'''
 
+import xml
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
+import e3
+
 import gui
 import gui.qt4ui.widgets as Widgets
 
-import xml
+
 
 
 class Conversation (gui.base.Conversation, QtGui.QWidget):
@@ -36,6 +40,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._action_dict = {}
         
         self._setup_ui()
+        #FIXME: move this to base class
+        self._load_style()
+        self._widget_dict['chat_edit'].e3_style = self.cstyle
         
     def __del__(self):
         print "conversation adieeeeeeeuuuu ;______;"
@@ -88,20 +95,21 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         toolbar.addAction(action_dict['change_color'])
         
         widget_dict['chat_edit'].set_smiley_dict(gui.theme.EMOTES)
-        
-        
+
         widget_dict['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
         widget_dict['chat_edit'].return_pressed.connect(
                             self._on_send_btn_clicked)
+        widget_dict['chat_edit'].style_changed.connect(
+                            self._on_new_style_selected)
         widget_dict['send_btn'].clicked.connect(
                             self._on_send_btn_clicked)
         action_dict['add_smiley'].triggered.connect(
                             self._on_show_smiley_chooser)
         action_dict['change_font'].triggered.connect(
-                            widget_dict['chat_edit'].show_font_style_chooser)
+                            widget_dict['chat_edit'].show_font_chooser)
         action_dict['change_color'].triggered.connect(
-                            widget_dict['chat_edit'].show_font_color_chooser)
+                            widget_dict['chat_edit'].show_color_chooser)
 
         
         # LEFT (TOP & BOTTOM)
@@ -147,7 +155,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         self.setLayout(lay)
         
-        
+    # temp
+    def update_style(self, style):
+        pass
+    
     # emesene's
     # TODO: put this (and maybe the following) in the base 
     # class as abstract methods
@@ -167,7 +178,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         print first
         
         self._append_to_chat(
-            xml.sax.saxutils.escape(unicode(message.body)) + '<br>')
+            xml.sax.saxutils.escape(unicode(message.body)) + '<br>',
+            message.style)
             
     # emesene's
     def send_message(self, formatter, my_account,
@@ -176,7 +188,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         It shows the message'''
         self._append_to_chat('<b>ME:</b>' + 
                              xml.sax.saxutils.escape(unicode(text)) + 
-                             '<br/>')
+                             '<br/>', cstyle)
     
     
     def update_single_information(self, nick, message, account): # emesene's
@@ -192,7 +204,11 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''Shows the widget'''
         QtGui.QWidget.show(self)
     
-    
+    def _on_new_style_selected(self):
+        '''Slot called when the user clicks ok in the color chooser or the 
+        font chooser'''
+        self.cstyle = self._widget_dict['chat_edit'].e3_style
+   
     def _on_show_smiley_chooser(self):
         '''Slot called when the user clicks the smiley button.
         Show the smiley chooser panel'''
@@ -216,13 +232,17 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         gui.base.Conversation._on_send_message(self, message_string)
         
         
-    def _append_to_chat(self, html_string):
+    def _append_to_chat(self, html_string, cstyle=None):
         '''Method that appends an html string to the chat view'''
         vert_scroll_bar = self._widget_dict['chat_view'].verticalScrollBar()
         if vert_scroll_bar.value() == vert_scroll_bar.maximum():
             at_bottom = True
         else:
             at_bottom = False
+         
+        if cstyle:
+            html_string = e3.common.add_style_to_message(html_string, 
+                                                         cstyle, False)
 
         self._chat_text.append(html_string)
         self._widget_dict['chat_view'].setText(self._chat_text)
