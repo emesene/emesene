@@ -12,7 +12,7 @@ import e3
 import gui
 
 
-class ChatTextEdit (QtGui.QTextEdit):
+class ChatInput (QtGui.QTextEdit):
     '''A widget suited for editing chat lines. Provides as-you-type
     smileys, color settings and font settings, chat line history'''
     return_pressed = QtCore.pyqtSignal()
@@ -28,6 +28,12 @@ class ChatTextEdit (QtGui.QTextEdit):
         self._max_shortcut_len = 0
         
         self._qt_color = QtGui.QColor(Qt.black)
+        
+    # emesene's
+    def update_style(self, style):
+        '''Don't remember what this was supposed to do and 
+        why I made it empty ;_;'''
+        pass
     
 
     def set_smiley_dict(self, smiley_dict):

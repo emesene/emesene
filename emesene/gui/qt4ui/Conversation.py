@@ -27,12 +27,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._session = session
         self._conv_id = conv_id
         self._members = members
-        self._chat_text = QtCore.QString("<i>New Chat</i><br>")
-        
-        # emesene's
-        self.tab_index = 0
-        self.input = self
-        self.output = self
         
         # a widget dic to avoid proliferation of instance variables:
         self._widget_dict = {}
@@ -40,9 +34,16 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._action_dict = {}
         
         self._setup_ui()
+        
+        # emesene's
+        self.tab_index = 0
+        self.input = self._widget_dict['chat_input']
+        self.output = self._widget_dict['chat_output']
+        
         #FIXME: move this to base class
         self._load_style()
-        self._widget_dict['chat_edit'].e3_style = self.cstyle
+        self._widget_dict['chat_input'].e3_style = self.cstyle
+        
         
     def __del__(self):
         print "conversation adieeeeeeeuuuu ;______;"
@@ -65,22 +66,21 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         action_dict['change_color'] = QtGui.QAction(
                             QtGui.QIcon(""), "Change Color", self) 
     
+        
         # TOP LEFT
-        widget_dict['chat_view'] = QtGui.QTextBrowser()
+        widget_dict['chat_output'] = Widgets.ChatOutput()
         top_left_lay = QtGui.QHBoxLayout()
-        top_left_lay.addWidget(widget_dict['chat_view'])
+        top_left_lay.addWidget(widget_dict['chat_output'])
         
-        widget_dict['chat_view'].setText(self._chat_text)
         
-
         # BOTTOM LEFT
         widget_dict['toolbar'] = QtGui.QToolBar(self)
         widget_dict['smiley_chooser'] = Widgets.SmileyPopupChooser()
-        widget_dict['chat_edit'] = Widgets.ChatTextEdit()
+        widget_dict['chat_input'] = Widgets.ChatInput()
         widget_dict['send_btn'] = QtGui.QPushButton("Send")
         
         text_edit_lay = QtGui.QHBoxLayout()
-        text_edit_lay.addWidget(widget_dict['chat_edit'])
+        text_edit_lay.addWidget(widget_dict['chat_input'])
         text_edit_lay.addWidget(widget_dict['send_btn'])
         
         bottom_left_lay = QtGui.QVBoxLayout()
@@ -95,13 +95,13 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         toolbar.addAction(action_dict['change_font'])
         toolbar.addAction(action_dict['change_color'])
         
-        widget_dict['chat_edit'].set_smiley_dict(gui.theme.EMOTES)
+        widget_dict['chat_input'].set_smiley_dict(gui.theme.EMOTES)
 
         widget_dict['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
-        widget_dict['chat_edit'].return_pressed.connect(
+        widget_dict['chat_input'].return_pressed.connect(
                             self._on_send_btn_clicked)
-        widget_dict['chat_edit'].style_changed.connect(
+        widget_dict['chat_input'].style_changed.connect(
                             self._on_new_style_selected)
         widget_dict['send_btn'].clicked.connect(
                             self._on_send_btn_clicked)
@@ -111,9 +111,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         action_dict['send_nudge'].triggered.connect(
                             self.on_notify_attention)
         action_dict['change_font'].triggered.connect(
-                            widget_dict['chat_edit'].show_font_chooser)
+                            widget_dict['chat_input'].show_font_chooser)
         action_dict['change_color'].triggered.connect(
-                            widget_dict['chat_edit'].show_color_chooser)
+                            widget_dict['chat_input'].show_color_chooser)
         
         # LEFT (TOP & BOTTOM)
         left_widget = QtGui.QSplitter(Qt.Vertical)
@@ -145,7 +145,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                                                                 his_email)
 
         # LEFT & RIGHT
-        widget_dict['info_panel'] = UserInfoPanel()
+        widget_dict['info_panel'] = Widgets.UserInfoPanel()
         
         lay_no_info = QtGui.QHBoxLayout()
         lay_no_info.addWidget(left_widget)
@@ -155,14 +155,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         lay.addLayout(lay_no_info)
         
         
-        
         self.setLayout(lay)
         
-    # temp
-    def update_style(self, style):
-        '''Don't remember what this was supposed to do and 
-        why I made it empty ;_;'''
-        pass
+        
     
     # emesene's
     # TODO: put this (and maybe the following) in the base 
@@ -172,36 +167,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         pass
         
     # emesene's
-    def receive_message(self, formatter, contact, 
-                        message, cedict, cedir, first):
-        '''This method is called from the core (e3 or base class or whatever
-        when a new message arrives. It shows the new message'''
-        print formatter,
-        print contact,
-        print message.type,
-        print message.account
-        print cedict,
-        print first
-        
-        self._append_to_chat(
-            xml.sax.saxutils.escape(unicode(message.body)) + '<br>',
-            message.style)
-            
-    # emesene's
-    def send_message(self, formatter, my_account,
-                     text, cedict, cedir, cstyle, first):
-        '''This method is called from the core, when a message is sent by us.
-        It shows the message'''
-        self._append_to_chat('<b>ME:</b>' + 
-                             xml.sax.saxutils.escape(unicode(text)) + 
-                             '<br/>', cstyle)
-                             
-    def information(self, formatter, contact, message):
-        '''This method is called by the core, when there's the need to display 
-        an information message'''
-        self._append_to_chat('<p align="right"><i>' + 
-                             xml.sax.saxutils.escape(unicode(message)) + 
-                             '</i></p>')
+    
     
     
     def update_single_information(self, nick, message, account): # emesene's
@@ -220,7 +186,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def _on_new_style_selected(self):
         '''Slot called when the user clicks ok in the color chooser or the 
         font chooser'''
-        self.cstyle = self._widget_dict['chat_edit'].e3_style
+        self.cstyle = self._widget_dict['chat_input'].e3_style
    
     def _on_show_smiley_chooser(self):
         '''Slot called when the user clicks the smiley button.
@@ -232,102 +198,23 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''Slot called when the user selects a smiley in the smiley 
         chooser panel. Inserts the smiley in the chat edit'''
         # handles cursor position
-        self._widget_dict['chat_edit'].insert_text_after_cursor(shortcut)
+        self._widget_dict['chat_input'].insert_text_after_cursor(shortcut)
         
     
     def _on_send_btn_clicked(self):
         '''Slot called when the user clicks the send button or presses Enter in
         the chat line editor. Sends the message'''
-        message_string = unicode(self._widget_dict['chat_edit'].toPlainText())
+        message_string = unicode(self._widget_dict['chat_input'].toPlainText())
         if len(message_string) == 0:
             return
-        self._widget_dict['chat_edit'].clear()
+        self._widget_dict['chat_input'].clear()
         gui.base.Conversation._on_send_message(self, message_string)
         
-        
-    def _append_to_chat(self, html_string, cstyle=None):
-        '''Method that appends an html string to the chat view'''
-        vert_scroll_bar = self._widget_dict['chat_view'].verticalScrollBar()
-        if vert_scroll_bar.value() == vert_scroll_bar.maximum():
-            at_bottom = True
-        else:
-            at_bottom = False
-         
-        if cstyle:
-            html_string = e3.common.add_style_to_message(html_string, 
-                                                         cstyle, False)
-
-        self._chat_text.append(html_string)
-        self._widget_dict['chat_view'].setText(self._chat_text)
-
-        if at_bottom:
-            vert_scroll_bar.setValue(vert_scroll_bar.maximum())
-
-
-#    def onMessageReceived(self, messageview, formatting):
-#        """ Called for incoming and outgoing messages
-#            message: a MessageView of the message"""
-#            
-#        messageReceived = messageview.to_stringview().parse_default_smileys()
-#        tempStr = QString("<br>")
-#        if formatting is not None:
-#            tempStr.append("<font face=\"%s\" color=\"#%s\">" % (
-#                                    formatting.font, formatting.color ))
-#
-#
-#        tempStr.append(messageReceived.to_HTML_string())
-#
-#        if formatting is not None:
-#            tempStr.append("</font>")
-#        tempStr.append("<br>")
-#
-#        self.appendToChat(tempStr)
-#
-#
-#    def onUserJoined(self, nickname):
-#        self.appendToChat("<i>%s has joined the chat </i>"%(unicode(nickname)))
-#        self.statusBar.insertItem("%s has joined the chat" % (nickname), 0)
-#
-#
-#    def onNudge(self):
-#        pass
-#
-#    def onUserTyping(self, contact):
-#        if self.statusBar.hasItem(1):
-#            self.statusBar.removeItem(1)
-#        self.statusBar.insertItem("%s is typing a message" % (contact), 1)
-#        self.statusBar.setItemAlignment(1, Qt.AlignLeft)
+    
 
    
 
-class UserInfoPanel (QtGui.QLabel):
-    '''This class represents a label widget showing
-    other contact's info in a conversation window'''
-    
-    def __init__(self, parent=None):
-        '''Constructor'''
-        QtGui.QLabel.__init__(self, parent)
-        self._text_skeleton = \
-            '''<table>
-                <tr>    
-                    <td><img src="%s"></td>
-                    <td>%s [%s]</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td><font><i>%s</i></font></td>
-                </tr>
-            <table>'''
 
-    def update(self, status, nick, message, account):
-        '''Updates the infos shown in the panel'''
-        text = self._text_skeleton % (
-                        gui.theme.status_icons[status],
-                        unicode(nick),
-                        account,
-                        unicode(message))
-        self.setText(text)
-        
         
         
         

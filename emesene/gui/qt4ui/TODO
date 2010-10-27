@@ -14,6 +14,7 @@ X Fix imports
 X Implement nudge support
 X remove "reverse_smiley_dict" in ChatTextEdit and add a list of recognized
     inserted shortcuts
+X refactor class structure
 - use emesene's extensions system to retrieve classes
 
 - Implement menus
