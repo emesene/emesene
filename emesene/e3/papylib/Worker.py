@@ -40,7 +40,7 @@ if os.path.exists(papypath):
     sys.path.insert(0, papypath)
 
 try:
-    REQ_VER = (0, 5, 1)
+    REQ_VER = (0, 5, 2)
 
     import papyon
     import papyon.event
