@@ -35,7 +35,7 @@ class Notification():
         self.notify_online = False
         self.last_online = None
 
-    def _on_message(self, cid, account, msgobj, cedict=[]):
+    def _on_message(self, cid, account, msgobj, cedict={}):
         """
         This is called when a new message arrives to a user.
         """
