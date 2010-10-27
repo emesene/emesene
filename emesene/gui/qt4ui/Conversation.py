@@ -172,7 +172,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         pass
         
     # emesene's
-    def receive_message(self, formatter, contact, message, cedict, first):
+    def receive_message(self, formatter, contact, 
+                        message, cedict, cedir, first):
         '''This method is called from the core (e3 or base class or whatever
         when a new message arrives. It shows the new message'''
         print formatter,
@@ -188,7 +189,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             
     # emesene's
     def send_message(self, formatter, my_account,
-                text, cedict, cstyle, first):
+                     text, cedict, cedir, cstyle, first):
         '''This method is called from the core, when a message is sent by us.
         It shows the message'''
         self._append_to_chat('<b>ME:</b>' + 
