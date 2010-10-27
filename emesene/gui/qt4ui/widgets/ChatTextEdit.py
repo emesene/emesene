@@ -25,25 +25,24 @@ class ChatTextEdit (QtGui.QTextEdit):
         self._current_chat_line_idx = 0
 
         self._smiley_dict = {}
-        self._reverse_smiley_dict = {}
         self._max_shortcut_len = 0
-
-
+        
+        self._qt_color = QtGui.QColor(Qt.black)
+    
 
     def set_smiley_dict(self, smiley_dict):
         '''Sets the smiley recognized by this widget'''
-        # TODO: investigate behaviour on case-sensitiveness
         shortcuts = smiley_dict.keys()
-        #print "shortcuts: " + unicode(shortcuts)
+        
         for shortcut in shortcuts:
-            path = gui.theme.emote_to_path(shortcut)
+            path = unicode(gui.theme.emote_to_path(shortcut))
             if not path:
                 print "\t%s, %s" % (shortcut, smiley_dict[shortcut])
                 continue
-            path = path[6:]
-            path = os.path.abspath(path)
-            self._smiley_dict[unicode(shortcut.lower())] = unicode(path)
-            self._reverse_smiley_dict[unicode(path)]=unicode(shortcut.lower())
+            shortcut = unicode(shortcut)
+            path = os.path.abspath(path[7:])
+            self._smiley_dict[shortcut] = path
+            
             current_len = len(shortcut)
             if current_len > self._max_shortcut_len:
                 self._max_shortcut_len = current_len
@@ -57,22 +56,21 @@ class ChatTextEdit (QtGui.QTextEdit):
             fake_event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, 0, 
                                          Qt.NoModifier, text[i])
             self.keyPressEvent(fake_event)
-
+            
 
     def _insert_char(self, char):
         '''Inserts a single char, checking for smileys'''
         # this method uses python's builtin string type, not QString
+        
         cursor = self.textCursor()
         max_shortcut_len = self._max_shortcut_len
         shortcuts = self._smiley_dict.keys()
-        smiley_found = False
 
-        text_search = unicode(char).lower()
+        text_search = unicode(char)
         i = 0
         while i < max_shortcut_len-1:
             # TODO: check if the returned QChar is valid
-            last_char = self.document().characterAt(cursor.position()-1-i)  \
-                                                                    .toLower()
+            last_char = self.document().characterAt(cursor.position()-1-i)
             if last_char.isPrint():
                 last_char = QtCore.QString(last_char)
                 text_search = unicode(last_char) + text_search
@@ -85,12 +83,19 @@ class ChatTextEdit (QtGui.QTextEdit):
                 #print "\t FOUND"
                 for i in range(length-1):
                     cursor.deletePreviousChar()
-                cursor.insertHtml('<img src="%s" />' % 
-                                  self._smiley_dict[text_search])
-                smiley_found = True
-                return smiley_found
+                self._insert_image_resource(text_search)
+                cursor.insertImage(text_search)
+                return True
         #print "\t No smiley Found"
-        return smiley_found
+        return False
+        
+        
+    def _insert_image_resource(self, shortcut):
+        image = QtGui.QImage(self._smiley_dict[shortcut])
+        self.document().addResource(QtGui.QTextDocument.ImageResource, 
+                                    QtCore.QUrl(shortcut),
+                                    image)
+
 
 
     def _swap_to_chat_line(self, idx):
@@ -247,7 +252,7 @@ class ChatTextEdit (QtGui.QTextEdit):
         # pylint: disable=C0103
         mime_data = QtGui.QTextEdit.createMimeDataFromSelection(self)
         if mime_data.hasHtml():
-            parser = MyHTMLParser(self._reverse_smiley_dict)
+            parser = MyHTMLParser()
             parser.feed(mime_data.html())
             mime_data.setText(parser.get_data())
         return mime_data
@@ -265,7 +270,7 @@ class ChatTextEdit (QtGui.QTextEdit):
     def toPlainText(self):
         '''Gets a plain text representation of the contents'''
         # pylint: disable=C0103
-        parser = MyHTMLParser(self._reverse_smiley_dict)
+        parser = MyHTMLParser()
         parser.feed(self.toHtml())
         return parser.get_data()
 
@@ -279,10 +284,9 @@ class MyHTMLParser (HTMLParser):
     text and substituting <img> tags with a proper 
     smiley shortcut if any'''
     
-    def __init__(self, reverse_img_dict):
+    def __init__(self):
         '''Constructor'''
         HTMLParser.__init__(self)
-        self._reverse_img_dict = reverse_img_dict
         self._in_body = False
         self._data = ''
 
@@ -305,12 +309,8 @@ class MyHTMLParser (HTMLParser):
             if tag == "body":
                 raise NameError("Malformed HTML")
             if tag == "img":
-                key = attrs[0][1]
-                if key in self._reverse_img_dict.keys():
-                    alt = self._reverse_img_dict[key]
-                    self._data += alt
-                else:
-                    raise NameError("Unrecognized Image")
+                src = attrs[0][1]
+                self._data += src
         else:
             if tag == "body":
                 self._in_body = True
