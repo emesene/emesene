@@ -28,7 +28,6 @@ class ChatTextEdit (QtGui.QTextEdit):
         self._reverse_smiley_dict = {}
         self._max_shortcut_len = 0
 
-        self._qt_color = QtGui.QColor("#000000")
 
 
     def set_smiley_dict(self, smiley_dict):
@@ -122,7 +121,7 @@ class ChatTextEdit (QtGui.QTextEdit):
             
     def show_color_chooser(self):
         '''Shows the font color chooser'''
-        qt_color = self._qt_color
+        qt_color = self._get_qt_color
         new_qt_color = QtGui.QColorDialog.getColor(qt_color)
         if new_qt_color.isValid() and not new_qt_color == qt_color:
             self._set_qt_color(new_qt_color)
@@ -160,7 +159,7 @@ class ChatTextEdit (QtGui.QTextEdit):
         qt_font.setBold(        e3_style.bold   )
         qt_font.setItalic(      e3_style.italic )
         qt_font.setStrikeOut(   e3_style.strike )
-        qt_font.setPointSize(      e3_style.size   )
+        qt_font.setPointSize(   e3_style.size   )
         
         self._set_qt_color(qt_color)
         self._set_qt_font(qt_font)
@@ -173,7 +172,7 @@ class ChatTextEdit (QtGui.QTextEdit):
         '''sets the font style in qt format'''
         old_font = self._get_qt_font()
         self.document().setDefaultFont(new_font)
-        if not old_font == new_font:
+        if old_font != new_font:
             self.style_changed.emit()
 
 
@@ -190,7 +189,7 @@ class ChatTextEdit (QtGui.QTextEdit):
                            "QMenu{color: palette(text);}" % new_color.name() )
         print type(self.viewport())
         print str(self.viewport().objectName())
-        if not old_color == new_color:
+        if old_color != new_color:
             self.style_changed.emit()
 
 
