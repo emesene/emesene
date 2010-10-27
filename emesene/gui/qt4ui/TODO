@@ -1,0 +1,36 @@
+Here's a todo list for Qt4 frontend:
+
+                                                        [ 'X' means done]
+
+X Implement the tray icon
+X Call correct callback when closing windows
+X fix the bug freezing ChatTextEdit widget taht 
+    occurs inserting an emoticon when empty
+X Implement updates to contact's info in conversation window
+- Implement remaining abstract methods
+X DisplayPic must handle various dimensions
+X Implement correct font style handling when sending receiving messages
+X Fix imports
+X Implement nudge support
+X remove "reverse_smiley_dict" in ChatTextEdit and add a list of recognized
+    inserted shortcuts
+- use emesene's extensions system to retrieve classes
+
+- Implement menus
+- Remove the empty space on the left in contact list
+
+- Implement a display pic chooser.
+- Implement actions on contact list
+
+- Implement nick rendering
+
+- Implement notifications
+
+- Honour options
+- Implement file transfer
+- Implement multiple conversations
+
+- Fix doubled smileys in SmileyChooser
+- No need for case-insensitive smiley shortcuts search
+
+- Think about KDE4 integration
