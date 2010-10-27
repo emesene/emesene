@@ -964,7 +964,7 @@ class Worker(e3.base.Worker, papyon.Client):
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         conv._invite_user(papycontact)
 
-    def _handle_action_send_message(self, cid, message):
+    def _handle_action_send_message(self, cid, message, cedict={}, l_custom_emoticons=[]):
         ''' handle Action.ACTION_SEND_MESSAGE '''
         #print "you're guin to send %(msg)s in %(ci)s" % \
         #{ 'msg' : message, 'ci' : cid }
@@ -977,8 +977,29 @@ class Worker(e3.base.Worker, papyon.Client):
         elif message.type == e3.base.Message.TYPE_MESSAGE:
             # format the text for papy
             formatting = formatting_e3_to_papy(message.style)
+            emoticon_cache = self.caches.get_emoticon_cache(self.session.account.account)
+            d_msn_objects = {}
+
+            for custom_emoticon in l_custom_emoticons:
+                try:
+                    fpath = os.path.join(emoticon_cache.path, cedict[custom_emoticon])
+                    f = open(fpath, 'rb')
+                    d_custom_emoticon = f.read()
+                    f.close()
+                except Exception as e:
+                    print e
+                if not isinstance(d_custom_emoticon, str):
+                    d_custom_emoticon = "".join([chr(b) for b in d_custom_emoticon])
+
+                msn_object = papyon.p2p.MSNObject(self.session.account.account,
+                                len(d_custom_emoticon),
+                                papyon.p2p.MSNObjectType.CUSTOM_EMOTICON,
+                                cedict[custom_emoticon],
+                                custom_emoticon, None, None,
+                                data=StringIO.StringIO(d_custom_emoticon))
+                d_msn_objects[custom_emoticon] = msn_object
             # create papymessage
-            msg = papyon.ConversationMessage(message.body, formatting)
+            msg = papyon.ConversationMessage(message.body, formatting, d_msn_objects)
             # send through the network
             papyconversation.send_text_message(msg)
 

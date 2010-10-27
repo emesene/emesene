@@ -7,6 +7,7 @@ import xml.sax.saxutils
 
 import parsers
 import gui
+import MarkupParser
 
 class AdiumTheme(object):
     '''a class that contains information of a adium theme
@@ -53,7 +54,7 @@ class AdiumTheme(object):
         self.outgoing_next = read_file(self.outgoing_path,
                 'NextContent.html')
 
-    def format_incoming(self, msg, style=None):
+    def format_incoming(self, msg, style=None, cedict={}, cedir=None):
         '''return a string containing the template for the incoming message
         with the vars replaced
         '''
@@ -71,9 +72,9 @@ class AdiumTheme(object):
         else:
             template = self.incoming
 
-        return self.replace(template, msg)
+        return self.replace(template, msg, style, cedict, cedir)
 
-    def format_outgoing(self, msg, style=None):
+    def format_outgoing(self, msg, style=None, cedict={}, cedir=None):
         '''return a string containing the template for the outgoing message
         with the vars replaced
         '''
@@ -97,13 +98,13 @@ class AdiumTheme(object):
         else:
             template = self.outgoing
 
-        return self.replace(template, msg, style)
+        return self.replace(template, msg, style, cedict, cedir)
 
-    def replace(self, template, msg, style=None):
+    def replace(self, template, msg, style=None, cedict={}, cedir=None):
         '''replace the variables on template for the values on msg
         '''
 
-        msgtext = replace_emotes(escape(msg.message))
+        msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir)
 
         if style is not None:
             msgtext = style_message(msgtext, style)
@@ -221,14 +222,3 @@ def style_message(msgtext, style):
     '''add html markupt to msgtext to format the style of the message'''
     return '<span style="%s">%s</span>' % (style.to_css(), msgtext)
 
-def replace_emotes(msgtext):
-    '''replace emotes with img tags to the images'''
-    for code in gui.Theme.EMOTES.iterkeys():
-        if code in msgtext:
-            path = gui.theme.emote_to_path(code)
-
-            if path is not None:
-                imgtag = '<img src="%s" alt="%s"/>' % (path, code)
-                msgtext = msgtext.replace(code, imgtag)
-
-    return msgtext

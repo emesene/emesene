@@ -17,6 +17,9 @@ class Conversation(object):
     def __init__(self, session, cid, members=None):
         '''constructor'''
         self.session = session
+        caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        self.emcache = caches.get_emoticon_cache(self.session.account.account)
+
         self.cid = float(cid)
         self.formatter = e3.common.MessageFormatter(session.contacts.me)
         self.first = True
@@ -196,11 +199,13 @@ class Conversation(object):
 
     group_chat = property(fget=_get_group_chat)
 
-    def _on_send_message(self, text, cedict=None):
+    def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
-        self.session.send_message(self.cid, text, self.cstyle)
+        custom_emoticons = gui.base.MarkupParser.get_custom_emotes(text, self.emcache.parse())
+
+        self.session.send_message(self.cid, text, self.cstyle, self.emcache.parse(), custom_emoticons)
         self.output.send_message(self.formatter, self.session.contacts.me,
-                text, cedict, self.cstyle, self.first)
+                text, self.emcache.parse(), self.emcache.path, self.cstyle, self.first)
         self.messages.push(text)
         self.play_send()
         self.first = False
@@ -214,7 +219,7 @@ class Conversation(object):
 
         if message.type == e3.Message.TYPE_MESSAGE:
             self.output.receive_message(self.formatter, contact, message,
-                    cedict, self.first)
+                    cedict, self.emcache.path, self.first) #FIXME: cedict and cedir when receiving messages
             self.play_type()
 
         elif message.type == e3.Message.TYPE_NUDGE:

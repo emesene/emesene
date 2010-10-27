@@ -41,7 +41,7 @@ class OutputView(webkit.WebView):
         self.pending = []
         self.ready = False
 
-    def add_message(self, msg, style=None):
+    def add_message(self, msg, style=None, cedict={}, cedir=None):
         '''add a message to the conversation'''
 
         if msg.incoming:
@@ -49,14 +49,14 @@ class OutputView(webkit.WebView):
                 self.last_incoming = False
 
             msg.first = not self.last_incoming
-            html = self.theme.format_incoming(msg, style)
+            html = self.theme.format_incoming(msg, style, cedict, cedir)
             self.last_incoming = True
         else:
             if self.last_incoming is None:
                 self.last_incoming = True
 
             msg.first = self.last_incoming
-            html = self.theme.format_outgoing(msg, style)
+            html = self.theme.format_outgoing(msg, style, cedict, cedir)
             self.last_incoming = False
 
         html = html.replace("\n", "<br>")
@@ -145,19 +145,19 @@ class OutputText(gtk.ScrolledWindow):
 
         self._texts = []
 
-    def send_message(self, formatter, contact, text, cedict, style, is_first):
+    def send_message(self, formatter, contact, text, cedict, cedir, style, is_first):
         '''add a message to the widget'''
         msg = gui.Message.from_contact(contact, text, is_first, False)
-        self.view.add_message(msg, style)
+        self.view.add_message(msg, style, cedict, cedir)
 
-    def receive_message(self, formatter, contact, message, cedict, is_first):
+    def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''
         msg = gui.Message.from_contact(contact, message.body, is_first, True)
-        self.view.add_message(msg, message.style)
+        self.view.add_message(msg, message.style, None, cedir)
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
         # TODO: make it with a status message
         msg = gui.Message.from_contact(contact, message, False, True)
-        self.view.add_message(msg, None)
+        self.view.add_message(msg, None, None, None)
 

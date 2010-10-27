@@ -270,7 +270,7 @@ class OutputText(TextBox):
     def append(self, text, cedict,scroll=True):
         '''append formatted text to the widget'''
         if self.config.b_show_emoticons:
-            text = MarkupParser.parse_emotes(text)
+            text = MarkupParser.parse_emotes(text, cedict)
 
         TextBox.append(self, text, scroll)
 
