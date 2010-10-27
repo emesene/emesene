@@ -153,7 +153,7 @@ class OutputText(gtk.ScrolledWindow):
     def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''
         msg = gui.Message.from_contact(contact, message.body, is_first, True)
-        self.view.add_message(msg, message.style, None, cedir)
+        self.view.add_message(msg, message.style, cedict, cedir)
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''

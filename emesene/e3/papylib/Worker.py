@@ -409,7 +409,7 @@ class Worker(e3.base.Worker, papyon.Client):
             papymessage.content, account, \
             formatting_papy_to_e3(papymessage.formatting))
         # convert papyon msnobjects to a simple dict {shortcut:identifier}
-        cedict = {}
+        received_custom_emoticons = {}
 
         emotes = self.caches.get_emoticon_cache(account)
         def download_failed(reason):
@@ -425,19 +425,19 @@ class Worker(e3.base.Worker, papyon.Client):
                 account, 'emoticon', emoticon_path)
 
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
-            cedict[shortcut] = None
+            received_custom_emoticons[shortcut] = None
 
             emoticon_hash = msn_object._data_sha.encode("hex")
             emoticon_path = os.path.join(emotes.path, emoticon_hash)
 
             if emoticon_hash in emotes:
-                cedict[shortcut] = emoticon_path
+                received_custom_emoticons[shortcut] = emoticon_path
             else:
                 self.msn_object_store.request(msn_object, \
                     (download_ok, download_failed))
 
         self.session.add_event(\
-            Event.EVENT_CONV_MESSAGE, cid, account, msgobj, cedict)
+            Event.EVENT_CONV_MESSAGE, cid, account, msgobj, received_custom_emoticons)
 
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):
         ''' handle received nudges '''

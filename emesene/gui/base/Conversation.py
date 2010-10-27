@@ -17,8 +17,8 @@ class Conversation(object):
     def __init__(self, session, cid, members=None):
         '''constructor'''
         self.session = session
-        caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
-        self.emcache = caches.get_emoticon_cache(self.session.account.account)
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        self.emcache = self.caches.get_emoticon_cache(self.session.account.account)
 
         self.cid = float(cid)
         self.formatter = e3.common.MessageFormatter(session.contacts.me)
@@ -210,7 +210,7 @@ class Conversation(object):
         self.play_send()
         self.first = False
 
-    def on_receive_message(self, message, account, cedict):
+    def on_receive_message(self, message, account, received_custom_emoticons):
         '''method called when a message arrives to the conversation'''
         contact = self.session.contacts.get(account)
 
@@ -218,8 +218,9 @@ class Conversation(object):
             contact = e3.Contact(account)
 
         if message.type == e3.Message.TYPE_MESSAGE:
+            user_emcache = self.caches.get_emoticon_cache(account)
             self.output.receive_message(self.formatter, contact, message,
-                    cedict, self.emcache.path, self.first) #FIXME: cedict and cedir when receiving messages
+                    received_custom_emoticons, user_emcache.path, self.first)
             self.play_type()
 
         elif message.type == e3.Message.TYPE_NUDGE:
