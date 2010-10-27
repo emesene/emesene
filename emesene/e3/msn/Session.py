@@ -31,7 +31,7 @@ class Session(e3.Session):
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
             host, port))
 
-    def send_message(self, cid, text, style=None):
+    def send_message(self, cid, text, style=None, cedict={}, celist=[]):
         '''send a common message'''
         account = self.account.account
         message = Message(Message.TYPE_MESSAGE, text, account, style)
