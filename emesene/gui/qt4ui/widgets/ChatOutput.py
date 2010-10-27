@@ -13,6 +13,12 @@ import e3
 
 class ChatOutput (QtGui.QTextBrowser):
     '''A widget which displays various messages of a conversation'''
+    # pylint: disable=W0612
+    NAME = 'MainPage'
+    DESCRIPTION = 'A widget to display the conversation messages'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
     
     def __init__(self, parent=None):
         '''Constructor'''

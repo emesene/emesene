@@ -15,6 +15,14 @@ import gui
 class ChatInput (QtGui.QTextEdit):
     '''A widget suited for editing chat lines. Provides as-you-type
     smileys, color settings and font settings, chat line history'''
+    # pylint: disable=W0612
+    NAME = 'MainPage'
+    DESCRIPTION = 'A widget used to to edit chat lines'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
+    
+    
     return_pressed = QtCore.pyqtSignal()
     style_changed = QtCore.pyqtSignal()
     

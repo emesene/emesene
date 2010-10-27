@@ -8,10 +8,18 @@ from PyQt4.QtCore   import Qt
 
 import gui
 
+from gui.qt4ui import Utils
+
 
 class DisplayPic (QtGui.QLabel):
     ''' A DisplayPic widget. Supports changing the displayPic, and emits
     a "clicked" signal.'''
+    # pylint: disable=W0612
+    NAME = 'MainPage'
+    DESCRIPTION = 'The widget used to to display avatars, aka display pictures'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
 
     clicked = QtCore.pyqtSignal()
     
@@ -65,7 +73,7 @@ class DisplayPic (QtGui.QLabel):
         if pixmap.isNull():
             return
         
-        pixmap = gui.qt4ui.pixmap_rounder(pixmap)
+        pixmap = Utils.pixmap_rounder(pixmap)
         self._fader.add_pixmap(pixmap)
         
 

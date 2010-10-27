@@ -15,6 +15,13 @@ class SmileyPopupChooser (QtGui.QDockWidget):
     '''This class represents a popup border-less smiley chooser, which 
     disappears 200ms after the mouse leaves it. It handles its positioning
     in a way such that it never appears off-screen'''
+    # pylint: disable=W0612
+    NAME = 'MainPage'
+    DESCRIPTION = 'The widget used to to select an emoticon'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
+    
     _FADE_TIME = 200
     emoticon_selected = QtCore.pyqtSignal("QString")
     

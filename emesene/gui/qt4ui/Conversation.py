@@ -9,7 +9,7 @@ import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 import e3
-
+import extension
 import gui
 import gui.qt4ui.widgets as Widgets
 
@@ -19,6 +19,13 @@ import gui.qt4ui.widgets as Widgets
 class Conversation (gui.base.Conversation, QtGui.QWidget):
     '''This widget represents the contents of a chat tab in the conversations
     page'''
+    # pylint: disable=W0612
+    NAME = 'MainPage'
+    DESCRIPTION = 'The widget used to to display a single conversation'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
+    
     def __init__(self, session, conv_id, members=None, parent=None):
         '''Constructor'''
         gui.base.Conversation.__init__(self, session, conv_id, members)
@@ -30,7 +37,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         # a widget dic to avoid proliferation of instance variables:
         self._widget_dict = {}
-        # an action dict to avoi proliferation of instance variables:
+        # an action dict to avoid proliferation of instance variables:
         self._action_dict = {}
         
         self._setup_ui()
@@ -54,6 +61,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_dict = self._widget_dict
         action_dict = self._action_dict
         
+        # Classes
+        conv_output_cls     = extension.get_default('conversation output')
+        smiley_chooser_cls  = extension.get_default('smiley chooser')
+        avatar_cls          = extension.get_default('avatar')
+        info_panel_cls      = extension.get_default('info panel')
+        
         # Actions
         icon_path = gui.theme.emote_to_path(':)')[6:]
         action_dict['add_smiley']   = QtGui.QAction(
@@ -68,14 +81,14 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     
         
         # TOP LEFT
-        widget_dict['chat_output'] = Widgets.ChatOutput()
+        widget_dict['chat_output'] = conv_output_cls()
         top_left_lay = QtGui.QHBoxLayout()
         top_left_lay.addWidget(widget_dict['chat_output'])
         
         
         # BOTTOM LEFT
         widget_dict['toolbar'] = QtGui.QToolBar(self)
-        widget_dict['smiley_chooser'] = Widgets.SmileyPopupChooser()
+        widget_dict['smiley_chooser'] = smiley_chooser_cls()
         widget_dict['chat_input'] = Widgets.ChatInput()
         widget_dict['send_btn'] = QtGui.QPushButton("Send")
         
@@ -130,8 +143,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         left_widget.moveSplitter(splitter_pos, 1)
 
         # RIGHT
-        widget_dict['his_display_pic'] = Widgets.DisplayPic(self._session)
-        widget_dict['my_display_pic'] = Widgets.DisplayPic(self._session)
+        widget_dict['his_display_pic'] = avatar_cls(self._session)
+        widget_dict['my_display_pic'] = avatar_cls(self._session)
         
         right_lay = QtGui.QVBoxLayout()
         right_lay.addWidget(widget_dict['his_display_pic'])
@@ -145,7 +158,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                                                                 his_email)
 
         # LEFT & RIGHT
-        widget_dict['info_panel'] = Widgets.UserInfoPanel()
+        widget_dict['info_panel'] = info_panel_cls()
         
         lay_no_info = QtGui.QHBoxLayout()
         lay_no_info.addWidget(left_widget)

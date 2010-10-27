@@ -8,10 +8,10 @@ from PyQt4.QtCore   import Qt
 
 import base64
 
+import extension
 import e3
 import gui
 
-import gui.qt4ui.widgets as Widgets
 
 
 class LoginPage(QtGui.QWidget):
@@ -64,12 +64,13 @@ class LoginPage(QtGui.QWidget):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
-        widget_dict['display_pic'] = Widgets.DisplayPic(
-                                                default_pic=gui.theme.logo,
+        avatar_cls          = extension.get_default('avatar')
+        status_combo_cls    = extension.get_default('status combo') 
+        widget_dict['display_pic'] = avatar_cls(default_pic=gui.theme.logo,
                                                 clickable=False)
         widget_dict['account_combo'] = QtGui.QComboBox()
         widget_dict['password_edit'] = QtGui.QLineEdit()
-        widget_dict['status_combo'] = Widgets.StatusCombo()
+        widget_dict['status_combo'] = status_combo_cls()
         widget_dict['save_account_chk'] =    \
                 QtGui.QCheckBox("Remember this account")
         widget_dict['save_password_chk'] =   \

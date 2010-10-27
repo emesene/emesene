@@ -5,7 +5,7 @@
 import PyQt4.QtGui      as QtGui
 
 import gui
-import gui.qt4ui.Conversation   as Conversation
+import extension
 
 
 class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
@@ -50,8 +50,8 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     def add_new_conversation(self, session, conv_id, members):
         '''Creates a new chat tab and returns it. This implements base's
         class abstract method.'''
-        conversation = Conversation.Conversation(session, conv_id, 
-                                                 members)
+        conversation_cls = extension.get_default('conversation')
+        conversation = conversation_cls(session, conv_id, members)
         account = session.contacts.get(members[0])
         conversation.tab_index = self.addTab(conversation, 
                                              unicode(account.display_name))

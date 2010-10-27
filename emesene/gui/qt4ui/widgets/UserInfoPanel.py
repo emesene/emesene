@@ -10,6 +10,13 @@ import gui
 class UserInfoPanel (QtGui.QLabel):
     '''This class represents a label widget showing
     other contact's info in a conversation window'''
+    # pylint: disable=W0612
+    NAME = 'MainPage'
+    DESCRIPTION = 'The widget used to to display tcontact\'s info in ' \
+                  'the conversation widget'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
     
     def __init__(self, parent=None):
         '''Constructor'''

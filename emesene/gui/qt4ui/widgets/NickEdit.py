@@ -15,6 +15,13 @@ from PyQt4.QtCore   import Qt
 
 class NickEdit(QtGui.QStackedWidget):
     '''A Nice nick / psm editor'''
+    # pylint: disable=W0612
+    NAME = 'MainPage'
+    DESCRIPTION = 'The widget used to to edit a nick or a personal message'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
+    
     nick_changed = QtCore.pyqtSignal(basestring)
     def __init__(self, allow_empty=False, 
                  empty_message=QtCore.QString("Click here to write"),

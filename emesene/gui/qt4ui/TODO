@@ -15,7 +15,7 @@ X Implement nudge support
 X remove "reverse_smiley_dict" in ChatTextEdit and add a list of recognized
     inserted shortcuts
 X refactor class structure
-- use emesene's extensions system to retrieve classes
+X use emesene's extensions system to retrieve classes
 
 - Implement menus
 - Remove the empty space on the left in contact list
@@ -26,6 +26,8 @@ X refactor class structure
 - Implement nick rendering
 
 - Implement notifications
+
+- Implement Preferences
 
 - Honour options
 - Implement file transfer

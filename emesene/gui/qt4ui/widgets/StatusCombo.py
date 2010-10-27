@@ -14,6 +14,12 @@ import gui
 
 class StatusCombo(QtGui.QComboBox):
     '''A presence selection widget'''
+    # pylint: disable=W0612
+    NAME = 'MainPage'
+    DESCRIPTION = 'The widget used to to select the status'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
 
     status_changed = QtCore.pyqtSignal(int)
 

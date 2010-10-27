@@ -15,6 +15,13 @@ from gui.qt4ui.widgets.ContactListModel import Role
 
 class ContactList (gui.ContactList, QtGui.QTreeView):
     '''A Contactlist Widget'''
+    # pylint: disable=W0612
+    NAME = 'MainPage'
+    DESCRIPTION = 'The widget used to to display the contact list'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
+    
     new_conversation_requested = QtCore.pyqtSignal(basestring)
     
     def __init__(self, session, parent=None):

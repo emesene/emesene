@@ -2,12 +2,12 @@
 
 '''This module contains classes to represent the main page.'''
 
+import time
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
-import gui.qt4ui.widgets as Widgets
-
-import time
+import extension
 
 
 class MainPage (QtGui.QWidget):
@@ -47,15 +47,20 @@ class MainPage (QtGui.QWidget):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
-
-        widget_dict['nick_edit'] = Widgets.NickEdit()
-        widget_dict['psm_edit'] = Widgets.NickEdit(allow_empty=True, 
+        
+        nick_edit_cls       = extension.get_default('nick edit')
+        status_combo_cls    = extension.get_default('status combo')
+        avatar_cls          = extension.get_default('avatar')
+        contact_list_cls    = extension.get_default('contact list')
+        
+        widget_dict['nick_edit'] = nick_edit_cls()
+        widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True, 
             empty_message=QtCore.QString(
                 "<u>Click here to set a personal message...</u>"))
         widget_dict['current_media'] = QtGui.QLabel()
-        widget_dict['status_combo'] = Widgets.StatusCombo()
-        widget_dict['display_pic'] = Widgets.DisplayPic(self._session)
-        widget_dict['contact_list'] = Widgets.ContactList(self._session)
+        widget_dict['status_combo'] = status_combo_cls()
+        widget_dict['display_pic'] = avatar_cls(self._session)
+        widget_dict['contact_list'] = contact_list_cls(self._session)
         my_info_lay_left = QtGui.QVBoxLayout()
         my_info_lay_left.addWidget(widget_dict['nick_edit'])
         my_info_lay_left.addWidget(widget_dict['psm_edit'])
