@@ -82,7 +82,7 @@ class Theme(object):
     #EMOTES['(h)'] = ''
     #EMOTES[':^)'] = ''
     EMOTES['(ip)'] = 'island'
-    EMOTES['({)'] = 'hughleft'
+    EMOTES['({)'] = 'hugleft'
     EMOTES['(i)'] = 'lamp'
     EMOTES['(I)'] = EMOTES['(i)']
     EMOTES['(li)'] = 'c10ud'
@@ -102,7 +102,7 @@ class Theme(object):
     EMOTES['(K)'] = EMOTES['(k)']
     EMOTES['(f)'] = 'rose'
     EMOTES['(F)'] = EMOTES['(f)']
-    EMOTES['(})'] = 'hughright'
+    EMOTES['(})'] = 'hugright'
     #EMOTES['^o)'] = ''
     EMOTES[':-*'] = 'secret'
     EMOTES['(S)'] = 'moon'
