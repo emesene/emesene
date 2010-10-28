@@ -12,7 +12,7 @@
 ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##   GNU General Public License for more details.
 
-# $Id: browser.py,v 1.12 2007/05/13 17:55:14 normanr Exp $
+# $Id$
 
 """Browser module provides DISCO server framework for your application.
 This functionality can be used for very different purposes - from publishing

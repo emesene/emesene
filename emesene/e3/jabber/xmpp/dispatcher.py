@@ -12,7 +12,7 @@
 ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##   GNU General Public License for more details.
 
-# $Id: dispatcher.py,v 1.42 2007/05/18 23:18:36 normanr Exp $
+# $Id$
 
 """
 Main xmpppy mechanism. Provides library with methods to assign different handlers

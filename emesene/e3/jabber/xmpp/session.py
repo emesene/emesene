@@ -205,7 +205,6 @@ class Session:
             This method is used internally.
         """
         self._owner.packets+=1
-        print self._owner.packets
         if self._stream_state==STREAM__OPENED or trusted:               # if the server really should reject all stanzas after he is closed stream (himeself)?
             self.DEBUG(stanza.__str__(),'dispatch')
             stanza.trusted=trusted
