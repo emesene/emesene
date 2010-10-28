@@ -37,8 +37,12 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         
         
     def set_login(self):    # emesene's
-        '''Do nothin'''
-        pass
+        '''Called when the login window is shown. Sets a proper
+        context menu un the Tray Icon.'''
+        tray_login_menu_cls = extension.get_default('tray login menu')
+        self._menu = tray_login_menu_cls(self._handler)
+        self.setContextMenu(self._menu)
+        
         
     def set_main(self, session):
         '''Called when the main window is shown. Stores the contact list

@@ -47,5 +47,29 @@ class TrayMainMenu (QtGui.QMenu):
             lambda *args: self._handler.on_disconnect_selected())
         self.quit.triggered.connect(
             lambda *args: self._handler.on_quit_selected())
+            
+            
 
-        
+
+
+class TrayLoginMenu (QtGui.QMenu):
+    '''a widget that represents the menu displayed 
+    on the trayicon on the login window'''
+
+    def __init__(self, handler, parent=None):
+        '''
+        constructor
+
+        handler -- a e3common.Handler.TrayIconHandler object
+        '''
+        QtGui.QMenu.__init__(self, parent)
+        self._handler = handler
+        self.hide_show_mainwindow = QtGui.QAction('Hide/Show emesene', self)
+        self.quit = QtGui.QAction('Quit', self)
+            
+        self.addAction(self.hide_show_mainwindow)
+        self.addSeparator()
+        self.addAction(self.quit)
+
+        self.quit.triggered.connect(
+            lambda *args: self.handler.on_quit_selected())

@@ -2,12 +2,11 @@
 
 '''This module contains the ContactList class'''
 
-
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
+from PyQt4      import QtCore
+from PyQt4      import QtGui
 
 import gui
-
+from gui.qt4ui import Utils
 from gui.qt4ui.widgets.ContactListModel import Role
 
 class ContactListDelegate (QtGui.QStyledItemDelegate):
@@ -66,7 +65,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             if picture.isNull():
                 picture = QtGui.QPixmap(gui.theme.user)
             else:
-                picture = gui.qt4ui.pixmap_rounder(picture)
+                picture = Utils.pixmap_rounder(picture)
             # calculate the target position
             source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
                                     QtCore.QSizeF(picture.size()) )

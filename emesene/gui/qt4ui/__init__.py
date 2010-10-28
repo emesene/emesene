@@ -100,7 +100,9 @@ def setup():
     extension.category_register('menu profile', menus.ProfileMenu)
     extension.category_register('menu status',  menus.StatusMenu)
     
-    extension.category_register('tray main menu', menus.TrayMainMenu)
+    extension.category_register('tray main menu',  menus.TrayMainMenu)
+    extension.category_register('tray login menu', menus.TrayLoginMenu)
+    
 
     
     
