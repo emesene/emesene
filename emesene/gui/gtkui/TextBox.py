@@ -274,7 +274,7 @@ class OutputText(TextBox):
 
         TextBox.append(self, text, scroll)
 
-    def send_message(self, formatter, contact, text, cedict, style, is_first):
+    def send_message(self, formatter, contact, text, cedict, cepath, style, is_first):
         '''add a message to the widget'''
         nick = contact.display_name
 
