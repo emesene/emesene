@@ -94,6 +94,11 @@ def setup():
     extension.category_register('menu actions', menus.ActionsMenu)
     extension.category_register('menu options', menus.OptionsMenu)
     extension.category_register('menu help',    menus.HelpMenu)
+    
+    extension.category_register('menu contact', menus.ContactMenu)
+    extension.category_register('menu group',   menus.GroupMenu)
+    extension.category_register('menu profile', menus.ProfileMenu)
+    extension.category_register('menu status',  menus.StatusMenu)
 
     
     
