@@ -28,6 +28,7 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         
         self._handler = handler
         self._main_window = main_window
+        self._menu = None
         self._conversations = None
         
         self.setIcon(QtGui.QIcon(QtGui.QPixmap(gui.theme.logo)))

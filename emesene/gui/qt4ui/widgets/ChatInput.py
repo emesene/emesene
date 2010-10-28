@@ -105,6 +105,8 @@ class ChatInput (QtGui.QTextEdit):
         
         
     def _insert_image_resource(self, shortcut):
+        '''Appends an image resource to this widget's
+        QTextDocument'''
         image = QtGui.QImage(self._smiley_dict[shortcut])
         self.document().addResource(QtGui.QTextDocument.ImageResource, 
                                     QtCore.QUrl(shortcut),

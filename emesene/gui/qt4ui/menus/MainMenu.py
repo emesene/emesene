@@ -2,15 +2,9 @@
 
 '''This module contains menu widgets' classes'''
 
-import os
-
 import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
 
-import e3
 import extension
-import gui
 
 
 class MainMenu(QtGui.QMenuBar):
@@ -44,7 +38,8 @@ class MainMenu(QtGui.QMenuBar):
         
         self.file_menu    =    file_menu_cls(self._handlers.file_handler)
         self.actions_menu = actions_menu_cls(self._handlers.actions_handler)
-        self.options_menu = options_menu_cls(self._handlers.options_handler, config)
+        self.options_menu = options_menu_cls(self._handlers.options_handler, 
+                                             config)
         self.help_menu    =    help_menu_cls(self._handlers.help_handler)
         
         self.addMenu(self.file_menu)
@@ -109,7 +104,8 @@ class ActionsMenu(QtGui.QMenu):
 
         self.contact_menu    = contacts_menu_cls(self._handler.contact_handler)
         self.group_menu      = group_menu_cls(self._handler.group_handler)
-        self.my_profile_menu = profile_menu_cls(self._handler.my_account_handler)
+        self.my_profile_menu = profile_menu_cls(
+                                            self._handler.my_account_handler)
 
         self.addMenu(self.contact_menu)
         self.addMenu(self.group_menu)

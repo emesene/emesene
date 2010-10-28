@@ -2,14 +2,10 @@
 
 '''This module contains menu widgets' classes'''
 
-import os
 
 import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
 
 import e3
-import extension
 import gui
 
 class StatusMenu (QtGui.QMenu):

@@ -17,7 +17,7 @@ X remove "reverse_smiley_dict" in ChatTextEdit and add a list of recognized
 X refactor class structure
 X use emesene's extensions system to retrieve classes
 
-- Implement menus
+X Implement menus
 - Remove the empty space on the left in contact list
 
 - Implement a display pic chooser.
@@ -34,6 +34,6 @@ X use emesene's extensions system to retrieve classes
 - Implement multiple conversations
 
 - Fix doubled smileys in SmileyChooser
-- No need for case-insensitive smiley shortcuts search
+X No need for case-insensitive smiley shortcuts search
 
 - Think about KDE4 integration
