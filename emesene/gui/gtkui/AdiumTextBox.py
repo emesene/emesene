@@ -15,6 +15,7 @@ class OutputView(webkit.WebView):
         webkit.WebView.__init__(self)
         self.theme = theme
         self.last_incoming = None
+        self.last_incoming_account = None
         self.ready = False
         self.pending = []
         self.connect('load-finished', self._loading_finished_cb)
@@ -49,8 +50,11 @@ class OutputView(webkit.WebView):
                 self.last_incoming = False
 
             msg.first = not self.last_incoming
+            if self.last_incoming_account != msg.sender:
+                msg.first = True
             html = self.theme.format_incoming(msg, style, cedict, cedir)
             self.last_incoming = True
+            self.last_incoming_account = msg.sender
         else:
             if self.last_incoming is None:
                 self.last_incoming = True
