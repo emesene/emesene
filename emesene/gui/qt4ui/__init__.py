@@ -65,28 +65,36 @@ def setup():
     import Notifier
     import TopLevelWindow
     import TrayIcon
+    import menus
     import pages
     import widgets
 
     
-    extension.category_register('conversation', Conversation.Conversation)
-    extension.category_register('notificationGUI', Notifier.Notifier)
-    extension.category_register('window frame', TopLevelWindow.TopLevelWindow)
-    extension.category_register('tray icon',    TrayIcon.TrayIcon)
+    extension.category_register('conversation',     Conversation.Conversation)
+    extension.category_register('notificationGUI',  Notifier.Notifier)
+    extension.category_register('window frame',  TopLevelWindow.TopLevelWindow)
+    extension.category_register('tray icon',        TrayIcon.TrayIcon)
 
     extension.category_register('conversation window', pages.ConversationPage)
-    extension.category_register('login window', pages.LoginPage)
-    extension.category_register('main window', pages.MainPage)
+    extension.category_register('login window',        pages.LoginPage)
+    extension.category_register('main window',         pages.MainPage)
     
     
-    extension.category_register('contact list', widgets.ContactList)
-    extension.category_register('conversation input', widgets.ChatInput)
+    extension.category_register('contact list',     widgets.ContactList)
+    extension.category_register('conversation input',  widgets.ChatInput)
     extension.category_register('conversation output', widgets.ChatOutput)
-    extension.category_register('avatar', widgets.DisplayPic)
-    extension.category_register('nick edit', widgets.NickEdit)
-    extension.category_register('smiley chooser', widgets.SmileyPopupChooser)
-    extension.category_register('status combo', widgets.StatusCombo)
-    extension.category_register('info panel', widgets.UserInfoPanel)
+    extension.category_register('avatar',           widgets.DisplayPic)
+    extension.category_register('nick edit',        widgets.NickEdit)
+    extension.category_register('smiley chooser',   widgets.SmileyPopupChooser)
+    extension.category_register('status combo',     widgets.StatusCombo)
+    extension.category_register('info panel',       widgets.UserInfoPanel)
+    
+    extension.category_register('main menu',    menus.MainMenu)
+    extension.category_register('menu file',    menus.FileMenu)
+    extension.category_register('menu actions', menus.ActionsMenu)
+    extension.category_register('menu options', menus.OptionsMenu)
+    extension.category_register('menu help',    menus.HelpMenu)
+
     
     
     

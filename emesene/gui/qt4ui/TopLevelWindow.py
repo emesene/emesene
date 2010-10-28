@@ -5,6 +5,7 @@
 import PyQt4.QtGui as QtGui
 
 import extension
+import gui
 
 class TopLevelWindow (QtGui.QMainWindow):
     ''' Class representing the main window '''
@@ -68,6 +69,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         self._content_type = 'conversation'
         self._switch_to_page(conversation_page)
         self._content = conversation_page
+        self.menuBar().hide()
 
     # TODO: don't reinstantiate existing pages, or don't preserve old pages.
     def go_login(self, callback, on_preferences_changed, config=None, 
@@ -83,6 +85,7 @@ class TopLevelWindow (QtGui.QMainWindow):
                                       session_id, cancel_clicked, no_autologin)
         self._content_type = 'login'
         self._switch_to_page(login_page)
+        self.menuBar().hide()
 
     def go_main(self, session, on_new_conversation,
             on_close, on_disconnect):
@@ -91,12 +94,14 @@ class TopLevelWindow (QtGui.QMainWindow):
         print "GO MAIN! ^_^"
         main_window_cls = extension.get_default('main window')
         print main_window_cls
-        main_page = main_window_cls(session, on_new_conversation, 
-                                    on_close, on_disconnect)
+        main_page = main_window_cls(session, on_new_conversation, on_close, 
+                                    on_disconnect, self.setMenuBar)
         print main_page
         self._content_type = 'main'
         print self._content_type
         self._switch_to_page(main_page)
+        self._setup_main_menu(session, main_page.contact_list, 
+                              on_close, on_disconnect)
         print '***'
         
     
@@ -118,6 +123,39 @@ class TopLevelWindow (QtGui.QMainWindow):
         a conversation window'''
         self._cb_on_close()
         self.hide()
+        
+    def _setup_main_menu(self, session, contact_list, on_close, on_disconnect):
+        '''build all the menus used on the client'''
+        
+        # retrieving classes:
+        dialog_cls = extension.get_default('dialog_cls')
+        avatar_manager_cls = extension.get_default('avatar manager')
+        # creating the avatar manager:
+        avatar_manager = None #avatar_manager_cls(self._session)
+        
+        # create menu handlers
+        menu_hnd = gui.base.MenuHandler(session, dialog_cls, 
+                                        contact_list, avatar_manager, 
+                                        on_disconnect, on_close)
+
+        contact_hnd = gui.base.ContactHandler(session, dialog_cls,
+                                              contact_list)
+        group_hnd = gui.base.GroupHandler(session, dialog_cls,
+                                          contact_list)
+        # retrieve menu classes
+        main_menu_cls = extension.get_default('main menu')
+        contact_menu_cls = extension.get_default('menu contact')
+        group_menu_cls = extension.get_default('menu group')
+        
+        # instantiate menu objects:
+        menu = main_menu_cls(menu_hnd, session.config)
+
+#        self._contact_menu = contact_menu_cls(contact_hnd)
+#        self._group_menu = group_menu_cls(group_hnd)
+#        self._contact_menu.show_all()
+#        self._group_menu.show_all()
+        self.setMenuBar(menu)
+
     
     def _switch_to_page(self, page_widget):
         ''' Shows the given page '''

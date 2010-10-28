@@ -36,7 +36,8 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         self.setIcon(QtGui.QIcon(QtGui.QPixmap(gui.theme.logo)))
         
         self.activated.connect(self._on_tray_icon_clicked)
-        exit_action.triggered.connect(self._on_exit_clicked)
+        exit_action.triggered.connect(
+                              lambda *args: self._handler.on_quit_selected())
         self.show()
         
         
@@ -54,11 +55,15 @@ class TrayIcon (QtGui.QSystemTrayIcon):
     def set_conversations(self, conversations):     # emesene's
         '''Store a reference to the conversation page'''
         self._conversations = conversations
+    
+    # emesene's
+    def set_visible(self, visible):
+        '''Changes icon's visibility'''
+        self.setVisible(visible)
         
-        
-    def _on_exit_clicked(self, boh):
-        '''Slot called when the user clicks exit in the context menu'''
-        QtGui.QApplication.instance().exit()
+#    def _on_exit_clicked(self, boh):
+#        '''Slot called when the user clicks exit in the context menu'''
+#        QtGui.QApplication.instance().exit()
         
     def _on_status_changed(self, status):
         '''This slot is called when the status changes. Update the tray

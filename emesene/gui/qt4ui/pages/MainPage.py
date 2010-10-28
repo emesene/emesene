@@ -8,6 +8,7 @@ import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
 import extension
+import gui
 
 
 class MainPage (QtGui.QWidget):
@@ -20,7 +21,7 @@ class MainPage (QtGui.QWidget):
     # pylint: enable=W0612
     
     def __init__(self,  session, on_new_conversation, on_close,
-                on_disconnect, parent=None):
+                on_disconnect, set_menu_bar_cb, parent=None):
         '''Constructor'''
         QtGui.QWidget.__init__(self, parent)
 
@@ -30,13 +31,22 @@ class MainPage (QtGui.QWidget):
         self._on_new_conversation = on_new_conversation
         self._on_close = on_close
         self._on_disconnect = on_disconnect
+        self._set_menu_bar_cb = set_menu_bar_cb
+        
+        # menu objects:
+        self._main_menu = None
+        self._contact_menu = None
+        self._group_menu = None
+
         
         # a widget dic to avoid proliferation of instance variables:
         self._widget_dict = {}
         
         self._setup_ui()
+        
         # emesene's
         self.contact_list = self._widget_dict['contact_list']
+        
         
         # Session's Signals: [Remember to unsubscribe! O_O]
         session.signals.profile_get_succeed.subscribe(
@@ -89,6 +99,8 @@ class MainPage (QtGui.QWidget):
         #                                self._on_display_pic_choose_request)
         widget_dict['contact_list'].new_conversation_requested.connect(
                                         self._on_new_conversation_requested)
+                                        
+    
         
 
     def _on_ss_profile_get_succeed(self, nick, psm):
