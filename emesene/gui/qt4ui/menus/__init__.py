@@ -16,3 +16,5 @@ from GroupMenu   import GroupMenu
 from ProfileMenu import ProfileMenu
 from StatusMenu  import StatusMenu
 
+from TrayMainMenu import TrayMainMenu
+

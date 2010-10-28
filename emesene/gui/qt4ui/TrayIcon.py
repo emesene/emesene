@@ -6,6 +6,7 @@
 import PyQt4.QtGui      as QtGui
 
 import gui
+import extension
 
 
 class TrayIcon (QtGui.QSystemTrayIcon):
@@ -29,15 +30,9 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         self._main_window = main_window
         self._conversations = None
         
-        self._menu = QtGui.QMenu()
-        exit_action = QtGui.QAction("Exit", self)
-        self._menu.addAction( exit_action )
-        self.setContextMenu(self._menu)
         self.setIcon(QtGui.QIcon(QtGui.QPixmap(gui.theme.logo)))
         
         self.activated.connect(self._on_tray_icon_clicked)
-        exit_action.triggered.connect(
-                              lambda *args: self._handler.on_quit_selected())
         self.show()
         
         
@@ -51,6 +46,9 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         self._handler.session = session
         self._handler.session.signals.status_change_succeed.subscribe(
                                                     self._on_status_changed)
+        tray_main_menu_cls = extension.get_default('tray main menu')
+        self._menu = tray_main_menu_cls(self._handler)
+        self.setContextMenu(self._menu)
                                                     
     def set_conversations(self, conversations):     # emesene's
         '''Store a reference to the conversation page'''
@@ -92,7 +90,8 @@ class TrayIcon (QtGui.QSystemTrayIcon):
                     self._main_window.raise_()
                     
         elif reason == QtGui.QSystemTrayIcon.Context:
-            self._menu.show()
+            if self._menu: # TODO: remove this line
+                self._menu.show()
         
             
 

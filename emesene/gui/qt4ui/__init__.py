@@ -99,6 +99,8 @@ def setup():
     extension.category_register('menu group',   menus.GroupMenu)
     extension.category_register('menu profile', menus.ProfileMenu)
     extension.category_register('menu status',  menus.StatusMenu)
+    
+    extension.category_register('tray main menu', menus.TrayMainMenu)
 
     
     
