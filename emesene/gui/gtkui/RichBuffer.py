@@ -48,8 +48,10 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         '''insert an image at the current position
         tip it's the alt text on mouse over
         and the text copied to the clipboard'''
-        pixbuf = gtk.gdk.PixbufAnimation(path)
-
+        if path.startswith("file://"):
+            pixbuf = gtk.gdk.PixbufAnimation(path[7:])
+        else
+            pixbuf = gtk.gdk.PixbufAnimation(path)
         img = gtk.Image()
         img.set_from_animation(pixbuf)
         img.show()
