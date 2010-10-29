@@ -6,8 +6,6 @@ import gui
 import utils
 import extension
 
-import Renderers
-
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
     NAME = 'Conversation'
@@ -223,9 +221,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_text(self.text)
 
         if self.conv_manager.get_current_page() == self.tab_index:
-            win = self.conv_manager.get_parent() # gtk.Window
-            win.set_title(Renderers.msnplus_to_plain_text(self.text))
-            win.set_icon(self.icon)
+            self.conv_manager.update_window(self.text, self.icon)
 
     def update_group_information(self):
         """

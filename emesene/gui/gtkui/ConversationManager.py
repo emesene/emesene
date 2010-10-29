@@ -135,9 +135,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         page = self.get_nth_page(page_num)
         self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
         self.set_message_waiting(page, False)
-        parent = self.get_parent()
-        parent.set_title(Renderers.msnplus_to_plain_text(page.text))
-        parent.set_icon(page.icon)
+        self.update_window(page.text, page.icon)
 #        glib.idle_add(self._on_switch_page_grab_focus)
 
     def _on_switch_page_grab_focus(self):
@@ -192,3 +190,9 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
         return conversation
 
+    def update_window(self, text, icon):
+        ''' updates the window's border and item on taskbar
+            with given text and icon '''
+        win = self.get_parent() # gtk.Window, not a nice hack.
+        win.set_title(Renderers.msnplus_to_plain_text(text))
+        win.set_icon(icon)
