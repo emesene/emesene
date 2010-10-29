@@ -290,7 +290,7 @@ class OutputText(TextBox):
         all_ = first + middle + last
         self.append(all_, cedict, self.config.b_allow_auto_scroll)
 
-    def receive_message(self, formatter, contact, message, cedict, is_first):
+    def receive_message(self, formatter, contact, message, cedict, cepath, is_first):
         '''add a message to the widget'''
         is_raw, consecutive, outgoing, first, last = formatter.format(contact)
 
