@@ -34,7 +34,9 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         self.setModel(self._model)
         self.setItemDelegate(ContactListDelegate.ContactListDelegate(self))
         self.setAnimated(True)
+        self.setRootIsDecorated(False)
         self.setHeaderHidden(True)
+        self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.setSortingEnabled(True)
         self.viewport().setStyleSheet( "QWidget{                    \
@@ -46,13 +48,9 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
             background-color: rgb(178, 216, 255);   \
             background-image: url(amsn2/ui/front_ends/kde4/background.png);}" )
         #self.verticalScrollBar().setStyleSheet("QScrollBar:vertical{}")
-        #self.setIndentation(0)
+        self.setIndentation(0)
         self.doubleClicked.connect(self._on_item_double_clicked)
 
-
-    def edit(self, index, trigger, event):
-        '''Returning False disables editing on the View'''
-        return False
     
     # [START] -------------------- GUI.CONTACTLIST_OVERRIDE
     

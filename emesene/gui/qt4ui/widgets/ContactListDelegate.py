@@ -29,6 +29,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         # pylint: disable=C0103
         model = index.model()
         painter.save()
+        painter.translate(0, 0)
         # -> Configure the painter
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
         # especially useful for scaled smileys.
@@ -54,6 +55,9 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             
         else:
             top_left_point = QtCore.QPointF(option.rect.topLeft())
+            # a little additional margin
+            # TODO: try to do this for the highlighting too
+            top_left_point.setX( top_left_point.x() + 5 )
             # -> Start drawing the decoration:
             # calc
             y_pic_margin = abs((option.rect.height() - self._PICTURE_SIZE)) / 2
