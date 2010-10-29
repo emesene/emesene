@@ -136,14 +136,16 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _content_roaming_state_changed(self, cr, pspec):
         if cr.state == CR.constants.ContentRoamingState.SYNCHRONIZED:
-            type, data = cr.display_picture
-            handle, path = tempfile.mkstemp(suffix="."+type.split('/')[1], prefix='emsnpic')
-            os.close(handle)
+            picfail = False            
             try:
+                type, data = cr.display_picture
+                handle, path = tempfile.mkstemp(suffix="."+type.split('/')[1], prefix='emsnpic')
+                os.close(handle)
                 f = open(path, 'wb')
                 f.write(data)
                 f.close()
             except Exception as e:
+                picfail = True
                 print e
             # update roaming stuff in papyon's session
             # changing display_name doesn't seem to update its value istantly, wtf?
@@ -155,7 +157,8 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_PROFILE_GET_SUCCEED, \
                        str(cr.display_name), self.profile.personal_message)
 
-            self._handle_action_set_picture(path, True)
+            if not picfail:
+                self._handle_action_set_picture(path, True)
 
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
@@ -492,8 +495,7 @@ class Worker(e3.base.Worker, papyon.Client):
         #that cid must be exists
         if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
-            if len(conv.total_participants) <= 1:
-                self._handle_action_close_conversation(cid)
+
             self.session.add_event(e3.Event.EVENT_CONV_CONTACT_LEFT,
                                    cid, account)
 
@@ -849,13 +851,6 @@ class Worker(e3.base.Worker, papyon.Client):
             print "set contact alias succeed"
             self.session.add_event(e3.Event.EVENT_CONTACT_ALIAS_SUCCEED, account)
 
-
-    # e3 action handlers - profile
-#                      TODO: this code stores your stuff, wow m3n
-#                      path = '/tmp/test.jpeg'
-#                      f = open(path, 'r')
-#                      cr.store("nick", "message", f.read())
-
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS '''
         self._set_status(status_)
@@ -953,11 +948,8 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_CLOSE_CONVERSATION
         '''
         #print "you close conversation %s, are you happy?" % cid
-        try:
-            account = self.rconversations[cid]
-            conv = self.papyconv[cid]
-        except KeyError: #we already closed this conversation when last user left
-            return        
+        account = self.rconversations[cid]
+        conv = self.papyconv[cid]
         conv.leave()
         del self.conversations[account]
         del self.rconversations[cid]
@@ -979,7 +971,9 @@ class Worker(e3.base.Worker, papyon.Client):
         #{ 'msg' : message, 'ci' : cid }
         #print "type:", message
         # find papyon conversation by cid
+
         papyconversation = self.papyconv[cid]
+
         if message.type == e3.base.Message.TYPE_NUDGE:
             papyconversation.send_nudge()
 
