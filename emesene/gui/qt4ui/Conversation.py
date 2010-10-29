@@ -24,7 +24,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     
     def __init__(self, session, conv_id, members=None, parent=None):
         '''Constructor'''
-        gui.base.Conversation.__init__(self, session, conv_id, members)
+        gui.base.Conversation.__init__(self, session, conv_id, None, members)
         QtGui.QWidget.__init__(self, parent)
         
         self._session = session
@@ -185,6 +185,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # account is a string containing the email
         # does this have to update the picture too?
         status = self._session.contacts.get(account).status
+        print 'USI: [%s], [%s], [%s], [%s]' % (status, nick, message, account)
         self._widget_dict['info_panel'].update(status, nick, message, account)
         
         
