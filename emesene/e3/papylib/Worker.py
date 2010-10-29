@@ -492,6 +492,8 @@ class Worker(e3.base.Worker, papyon.Client):
         #that cid must be exists
         if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
+            if len(conv.total_participants) <= 1:
+                self._handle_action_close_conversation(cid)
             self.session.add_event(e3.Event.EVENT_CONV_CONTACT_LEFT,
                                    cid, account)
 
