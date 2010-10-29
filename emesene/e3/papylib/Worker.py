@@ -155,7 +155,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_PROFILE_GET_SUCCEED, \
                        str(cr.display_name), self.profile.personal_message)
 
-            self._handle_action_set_picture(path)
+            self._handle_action_set_picture(path, True)
 
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
@@ -863,12 +863,14 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_set_message(self, message):
         ''' handle Action.ACTION_SET_MESSAGE '''
         self.profile.personal_message = message
+        self.content_roaming.store(None, message, None)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK '''
         self.profile.display_name = nick
+        self.content_roaming.store(nick, None, None)
 
-    def _handle_action_set_picture(self, picture_name):
+    def _handle_action_set_picture(self, picture_name, from_roaming=False):
         '''handle Action.ACTION_SET_PICTURE'''
         if isinstance(picture_name, papyon.p2p.MSNObject):
             #TODO: check if this can happen, and prevent it (!)
@@ -902,6 +904,8 @@ class Worker(e3.base.Worker, papyon.Client):
                                     self.session.account.account, avatar_path)
 
         self.session.contacts.me.picture = avatar_path
+        if not from_roaming:
+            self.content_roaming.store(None, None, picture_name)
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES
@@ -949,8 +953,11 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_CLOSE_CONVERSATION
         '''
         #print "you close conversation %s, are you happy?" % cid
-        account = self.rconversations[cid]
-        conv = self.papyconv[cid]
+        try:
+            account = self.rconversations[cid]
+            conv = self.papyconv[cid]
+        except KeyError: #we already closed this conversation when last user left
+            return        
         conv.leave()
         del self.conversations[account]
         del self.rconversations[cid]
