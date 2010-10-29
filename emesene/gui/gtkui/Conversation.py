@@ -13,10 +13,10 @@ class Conversation(gtk.VBox, gui.Conversation):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, conv_man, session, cid, tab_label, members=None):
+    def __init__(self, session, cid, update_win, tab_label, members=None):
         '''constructor'''
         gtk.VBox.__init__(self)
-        gui.Conversation.__init__(self, conv_man, session, cid, members)
+        gui.Conversation.__init__(self, session, cid, update_win, members)
         self.set_border_width(2)
 
         self.tab_label = tab_label
@@ -220,8 +220,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_image(self.icon)
         self.tab_label.set_text(self.text)
 
-        if self.conv_manager.get_current_page() == self.tab_index:
-            self.conv_manager.update_window(self.text, self.icon)
+        self.update_window(self.text, self.icon, self.tab_index)
 
     def update_group_information(self):
         """

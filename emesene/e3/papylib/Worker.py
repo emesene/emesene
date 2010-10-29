@@ -492,7 +492,7 @@ class Worker(e3.base.Worker, papyon.Client):
         account = papycontact.account
         conv = pyconvevent.conversation
 
-        #that cid must be exists
+        #that cid must exists
         if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
 
