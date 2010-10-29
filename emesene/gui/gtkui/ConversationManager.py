@@ -181,7 +181,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         """
         Conversation = extension.get_default('conversation')
         TabWidget = extension.get_default('conversation tab')
-        conversation = Conversation(self.session, cid, None, members)
+        conversation = Conversation(self, self.session, cid, None, members)
         label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close,
             conversation)
         label.set_image(gui.theme.connect)

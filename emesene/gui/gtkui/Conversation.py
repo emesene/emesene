@@ -6,6 +6,8 @@ import gui
 import utils
 import extension
 
+import Renderers
+
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
     NAME = 'Conversation'
@@ -13,10 +15,10 @@ class Conversation(gtk.VBox, gui.Conversation):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, session, cid, tab_label, members=None):
+    def __init__(self, conv_man, session, cid, tab_label, members=None):
         '''constructor'''
         gtk.VBox.__init__(self)
-        gui.Conversation.__init__(self, session, cid, members)
+        gui.Conversation.__init__(self, conv_man, session, cid, members)
         self.set_border_width(2)
 
         self.tab_label = tab_label
@@ -115,6 +117,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             'b_show_info')
         self.session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
+        self.session.signals.contact_attr_changed.subscribe(
+            self.on_contact_attr_changed_succeed)
 
         self.session.signals.filetransfer_invitation.subscribe(
                 self.on_filetransfer_invitation)
@@ -218,6 +222,11 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_image(self.icon)
         self.tab_label.set_text(self.text)
 
+        if self.conv_manager.get_current_page() == self.tab_index:
+            win = self.conv_manager.get_parent() # gtk.Window
+            win.set_title(Renderers.msnplus_to_plain_text(self.text))
+            win.set_icon(self.icon)
+
     def update_group_information(self):
         """
         update the information for a conversation with multiple users
@@ -320,6 +329,9 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.avatar.set_from_file(path)
         elif account in self.members:
             self.his_avatar.set_from_file(path)
+
+    def on_contact_attr_changed_succeed(self, account, what, old):
+        self.update_tab()
 
     def on_filetransfer_invitation(self, transfer):
         self.transfers_bar.add(transfer)

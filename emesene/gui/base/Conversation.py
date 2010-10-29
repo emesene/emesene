@@ -14,8 +14,9 @@ log = logging.getLogger('gui.base.Conversation')
 class Conversation(object):
     '''a widget that contains all the components inside'''
 
-    def __init__(self, session, cid, members=None):
+    def __init__(self, conv_man, session, cid, members=None):
         '''constructor'''
+        self.conv_manager = conv_man
         self.session = session
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         self.emcache = self.caches.get_emoticon_cache(self.session.account.account)
