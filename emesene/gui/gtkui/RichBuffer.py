@@ -50,7 +50,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         and the text copied to the clipboard'''
         if path.startswith("file://"):
             pixbuf = gtk.gdk.PixbufAnimation(path[7:])
-        else
+        else:
             pixbuf = gtk.gdk.PixbufAnimation(path)
         img = gtk.Image()
         img.set_from_animation(pixbuf)
