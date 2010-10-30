@@ -21,9 +21,15 @@ Can be used both for client and transport authentication.
 
 from protocol import *
 from client import PlugIn
-import sha,base64,random,dispatcher,re
+import base64,random,dispatcher,re
 
-import md5
+try:
+    from hashlib import md5
+    from hashlib import sha1 as sha
+except ImportError:
+    import md5
+    import sha
+
 def HH(some): return md5.new(some).hexdigest()
 def H(some): return md5.new(some).digest()
 def C(some): return ':'.join(some)
