@@ -1,5 +1,5 @@
 How to generate .exe files and installers for a python applications
-==================================================================
+===================================================================
 
 This document describes the steps required to create an executable file from a
 python program and how to build an installer and portable file from that
