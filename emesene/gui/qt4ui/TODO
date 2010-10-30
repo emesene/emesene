@@ -18,7 +18,7 @@ X refactor class structure
 X use emesene's extensions system to retrieve classes
 
 X Implement menus
-- Remove the empty space on the left in contact list
+X Remove the empty space on the left in contact list
 
 - Implement a display pic chooser.
 - Implement actions on contact list

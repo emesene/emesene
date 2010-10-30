@@ -128,7 +128,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         '''build all the menus used on the client'''
         
         # retrieving classes:
-        dialog_cls = extension.get_default('dialog_cls')
+        dialog_cls = extension.get_default('dialog')
         avatar_manager_cls = extension.get_default('avatar manager')
         # creating the avatar manager:
         avatar_manager = None #avatar_manager_cls(self._session)

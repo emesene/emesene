@@ -66,4 +66,4 @@ class TrayLoginMenu (QtGui.QMenu):
         self.addAction(self.quit)
 
         self.quit.triggered.connect(
-            lambda *args: self.handler.on_quit_selected())
+            lambda *args: self._handler.on_quit_selected())
