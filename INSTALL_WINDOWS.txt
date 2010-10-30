@@ -1,4 +1,4 @@
-How to generate .exe files and installers for a python aplications
+How to generate .exe files and installers for a python applications
 ==================================================================
 
 This document describes the steps required to create an executable file from a
@@ -97,7 +97,7 @@ steps
   * gtk-theme-name = "MS-Windows"
   * you can change the theme by keeping that theme inside share/themes and changing the name in gtkrc
 
-* rigth click on ejemplo.nsi and select "Compile NSIS Script"
+* right click on ejemplo.nsi and select "Compile NSIS Script"
 * right click on ejemplo-portable.nsi and select "Compile NSIS Script"
 * you should have the installer and portable versions available
 * to test that it works correctly, run the installer and portable versions in a windows installation without the packages you installed previously
@@ -127,7 +127,7 @@ steps
   * gtk-theme-name = "MS-Windows"
   * you can change the theme by keeping that theme inside share/themes and changing the name in gtkrc
 
-* rigth click on emesene.nsi and select "Compile NSIS Script"
+* right click on emesene.nsi and select "Compile NSIS Script"
 * right click on emesene-portable.nsi and select "Compile NSIS Script"
 * you should have the installer and portable versions available
 * to test that it works correctly, run the installer and portable versions in a windows installation without the packages you installed previously
