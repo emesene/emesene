@@ -20,11 +20,12 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+from e3.common.utils import project_path
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(os.path.abspath(project_path()))
+#print (project_path())
 
 import sys
-import base64
 import glib
 import gettext
 import optparse
@@ -42,7 +43,6 @@ from e3 import jabber
 from e3 import dummy
 
 try:
-    import gtk
     from gui import gtkui
 except Exception, e:
     log.error('Cannot find/load (py)gtk: %s' % str(e))
@@ -63,7 +63,6 @@ import gui
 argv = sys.argv
 sys.argv = [argv[0]]
 
-import gettext
 # load translations
 if os.path.exists('default.mo'):
     gettext.GNUTranslations(open('default.mo')).install()
@@ -188,7 +187,8 @@ class Controller(object):
         use_http = self.config.get_or_set('b_use_http', False)
         self.go_login(proxy, use_http)
 
-    def go_login(self, proxy=None, use_http=None, cancel_clicked=False):
+    def go_login(self, proxy=None, use_http=None, cancel_clicked=False,
+            no_autologin=False):
         '''shows the login GUI'''
         if proxy is None:
             proxy = self._get_proxy_settings()
@@ -204,7 +204,7 @@ class Controller(object):
         self.window.go_login(self.on_login_connect,
             self.on_preferences_changed, self.config,
             self.config_dir, self.config_path, proxy,
-            use_http, self.config.session, cancel_clicked)
+            use_http, self.config.session, cancel_clicked, no_autologin)
         self.tray_icon.set_login()
         self.window.show()
 
@@ -267,7 +267,8 @@ class Controller(object):
             signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
             signals.conv_first_action.unsubscribe(self.on_new_conversation)
             signals.disconnected.unsubscribe(self.on_disconnected)
-            signals.picture_change_succeed.unsubscribe(self.on_picture_change_succeed)
+            signals.picture_change_succeed.unsubscribe(
+                    self.on_picture_change_succeed)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -336,9 +337,6 @@ class Controller(object):
     def draw_main_screen(self):
         '''create and populate the main screen
         '''
-        # I comment this to avoid AttributeError:
-        # 'MainWindow' object has no attribute 'avatar' error
-        # self.window.content.avatar.stop() #stop the avatar amimation...if any..
         self.window.clear()
         self.tray_icon.set_main(self.session)
 
@@ -349,7 +347,8 @@ class Controller(object):
         image_name = self.session.config.get_or_set('image_theme', 'default')
         emote_name = self.session.config.get_or_set('emote_theme', 'default')
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
-        conv_name = self.session.config.get_or_set('adium_theme', 'renkoo.AdiumMessagesStyle')
+        conv_name = self.session.config.get_or_set('adium_theme',
+                'renkoo.AdiumMessagesStyle')
         gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
 
         last_avatar = self.session.config.get_or_set('last_avatar',
@@ -409,8 +408,10 @@ class Controller(object):
             self.on_preferences_changed(use_http, proxy, session_id,
                     self.config.service)
             self.window.clear()
-            self.avatar_path = self.config_dir.join(host, account.account, 'avatars', 'last')
-            self.window.go_connect(self.on_cancel_login, self.avatar_path, self.config)
+            self.avatar_path = self.config_dir.join(host, account.account,
+                    'avatars', 'last')
+            self.window.go_connect(self.on_cancel_login, self.avatar_path,
+                    self.config)
             self.window.show()
         else:
             self.window.content.clear_connect()
@@ -434,9 +435,11 @@ class Controller(object):
         self.session.config.get_or_set('b_show_info', True)
         self.session.config.get_or_set('b_show_toolbar', True)
         self.session.config.get_or_set('b_allow_auto_scroll', True)
-        self.session.config.get_or_set('adium_theme', 'renkoo.AdiumMessageStyle')
+        self.session.config.get_or_set('adium_theme',
+                'renkoo.AdiumMessageStyle')
 
-        self.timeout_id = glib.timeout_add(500, self.session.signals._handle_events)
+        self.timeout_id = glib.timeout_add(500,
+                self.session.signals._handle_events)
         self.session.login(account.account, account.password, account.status,
             proxy, host, port, use_http)
 
@@ -475,15 +478,6 @@ class Controller(object):
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
 
-        # testing a workaround on e3/common/notification.py
-        '''#we instantiate this here to prevent the whole contact list
-        #online notification
-        def instantiate_notification():
-            notificationcls = extension.get_default('notification')
-            self.notification = notificationcls(self.session)
-
-        glib.timeout_add_seconds(10, instantiate_notification)'''
-
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
         opening a conversation'''
@@ -518,14 +512,11 @@ class Controller(object):
         # raises the container (tabbed windows) if its minimized
         self.conversations.get_parent().present()
 
-#        conversation.show() # puts cursor in textbox
-
-        #play = extension.get_default('sound')
         if not self.session.config.b_mute_sounds and other_started and \
            self.session.contacts.me.status != e3.status.BUSY and \
            self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
-            gui.play(gui.theme.sound_send)
+            gui.play(self.session, gui.theme.sound_send)
 
     def _on_conversation_window_close(self):
         '''method called when the conversation window is closed'''
@@ -553,7 +544,7 @@ class Controller(object):
         method called when the user selects disconnect
         '''
         self.close_session(False)
-        self.go_login()
+        self.go_login(no_autologin=True)
 
     def on_close(self):
         '''called on close'''
@@ -573,12 +564,13 @@ class Controller(object):
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''
         self.window.clear()
-        self.window.go_connect(self.on_cancel_login, self.avatar_path, self.config)
+        self.window.go_connect(self.on_cancel_login, self.avatar_path,
+                self.config)
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
-        self.window.content.on_reconnect(self.on_login_connect, account,\
-                                         self.config.session, proxy, use_http,\
+        self.window.content.on_reconnect(self.on_login_connect, account, \
+                                         self.config.session, proxy, use_http, \
                                          self.cur_service)
 
     def on_picture_change_succeed(self, account, path):

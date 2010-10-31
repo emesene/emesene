@@ -144,7 +144,7 @@ class MainWindow(gtk.VBox):
         '''callback for the contact-selected signal'''
         cid = time.time()
         self.on_new_conversation(cid, [contact.account], False)
-        
+
         #this calls the e3 Handler
         self.session.new_conversation(contact.account, cid)
 

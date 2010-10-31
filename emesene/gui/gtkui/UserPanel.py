@@ -22,7 +22,7 @@ class UserPanel(gtk.VBox):
         self.session = session
         self.config_dir = session.config_dir
         self._enabled = True
-        
+
         Avatar = extension.get_default('avatar')
         AvatarManager = extension.get_default('avatar manager')
 
@@ -52,12 +52,12 @@ class UserPanel(gtk.VBox):
         self.search.set_relief(gtk.RELIEF_NONE)
 
         self.message = TextField.TextField(session.contacts.me.message,
-            '<span style="italic">click here to set message</span>',
+            '<span style="italic">' + _("click here to set message") + '</span>',
             True)
         self.toolbar = gtk.HBox()
 
         hbox = gtk.HBox()
-        hbox.set_border_width(2)
+        hbox.set_border_width(1)
         hbox.pack_start(self.avatarBox, False)
 
         vbox = gtk.VBox()

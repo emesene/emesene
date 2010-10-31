@@ -1,7 +1,12 @@
+'''base implementation of a conversation, it should contain all the logic
+derived classes should implement the GUI to operate the conversation and
+nothing more'''
+
 import e3
 import gui
-import extension
 import MarkupParser
+
+from e3.common import RingBuffer
 
 import logging
 log = logging.getLogger('gui.base.Conversation')
@@ -9,9 +14,13 @@ log = logging.getLogger('gui.base.Conversation')
 class Conversation(object):
     '''a widget that contains all the components inside'''
 
-    def __init__(self, session, cid, members=None):
+    def __init__(self, session, cid, update_window, members=None):
         '''constructor'''
+        self.update_window = update_window
         self.session = session
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        self.emcache = self.caches.get_emoticon_cache(self.session.account.account)
+
         self.cid = float(cid)
         self.formatter = e3.common.MessageFormatter(session.contacts.me)
         self.first = True
@@ -22,12 +31,21 @@ class Conversation(object):
 
         self._message_waiting = False
 
+        buffer_size = session.config.get_or_set("i_msg_history_size", 5)
+        self.messages = RingBuffer(buffer_size)
+        self.message_offset = 0
+
         if members is None:
             self.members = []
         else:
             self.members = members
 
         self._style = None
+
+        # the base class should override this attributes
+        self.info = None
+        self.input = None
+        self.output = None
 
     def _get_style(self):
         '''return the value of style'''
@@ -49,43 +67,23 @@ class Conversation(object):
 
     def _load_style(self):
         '''load the default style from the configuration'''
-        if self.session.config.font is None:
-            self.session.config.font = 'Sans'
+        font = self.session.config.get_or_set("font", "Sans")
+        font_color = self.session.config.get_or_set("font_color", "#000000")
+        font_size = self.session.config.get_or_set("i_font_size", 10)
+        font_bold = self.session.config.get_or_set("b_font_bold", False)
+        font_italic = self.session.config.get_or_set("b_font_italic", False)
+        font_underline = self.session.config.get_or_set("b_font_underline",
+                False)
+        font_strike = self.session.config.get_or_set("b_font_strike", False)
 
-        if self.session.config.i_font_size is None:
-            self.session.config.i_font_size = 10
-        elif self.session.config.i_font_size < 6 or \
+        if self.session.config.i_font_size < 6 or \
                 self.session.config.i_font_size > 32:
-            self.session.config.i_font_size = 10
-
-        if self.session.config.b_font_bold is None:
-            self.session.config.b_font_bold = False
-
-        if self.session.config.b_font_italic is None:
-            self.session.config.b_font_italic = False
-
-        if self.session.config.b_font_underline is None:
-            self.session.config.b_font_underline = False
-
-        if self.session.config.b_font_strike is None:
-            self.session.config.b_font_strike = False
-
-        if self.session.config.font_color is None:
-            self.session.config.font_color = '#000000'
-
-        font = self.session.config.font
-        font_size = self.session.config.i_font_size
-        font_bold = self.session.config.b_font_bold
-        font_italic = self.session.config.b_font_italic
-        font_underline = self.session.config.b_font_underline
-        font_strike = self.session.config.b_font_strike
-        font_color = self.session.config.font_color
+            font_size = self.session.config.i_font_size = 10
 
         try:
             color = e3.Color.from_hex(font_color)
         except ValueError:
-            self.session.config.font_color = '#000000'
-            font_color = self.session.config.font_color
+            font_color = self.session.config.font_color = '#000000'
             color = e3.Color.from_hex(font_color)
 
         self.cstyle = e3.Style(font, color, font_bold, font_italic,
@@ -109,9 +107,10 @@ class Conversation(object):
         '''called when a contact is selected to be invited'''
         self.session.conversation_invite(self.cid, account)
 
-    def on_filetransfer_invite(self, filename, completepath): 
+    def on_filetransfer_invite(self, filename, completepath):
         '''called when a filetransfer is issued'''
-        self.session.filetransfer_invite(self.cid, self.members[0], filename, completepath)
+        self.session.filetransfer_invite(self.cid, self.members[0],
+                filename, completepath)
 
     def on_clean(self):
         '''called when the clean button is clicked'''
@@ -201,15 +200,18 @@ class Conversation(object):
 
     group_chat = property(fget=_get_group_chat)
 
-    def _on_send_message(self, text, cedict=None):
+    def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
-        self.session.send_message(self.cid, text, self.cstyle)
+        custom_emoticons = gui.base.MarkupParser.get_custom_emotes(text, self.emcache.parse())
+
+        self.session.send_message(self.cid, text, self.cstyle, self.emcache.parse(), custom_emoticons)
         self.output.send_message(self.formatter, self.session.contacts.me,
-                text, cedict, self.cstyle, self.first)
+                text, self.emcache.parse(), self.emcache.path, self.cstyle, self.first)
+        self.messages.push(text)
         self.play_send()
         self.first = False
 
-    def on_receive_message(self, message, account, cedict):
+    def on_receive_message(self, message, account, received_custom_emoticons):
         '''method called when a message arrives to the conversation'''
         contact = self.session.contacts.get(account)
 
@@ -217,8 +219,9 @@ class Conversation(object):
             contact = e3.Contact(account)
 
         if message.type == e3.Message.TYPE_MESSAGE:
+            user_emcache = self.caches.get_emoticon_cache(account)
             self.output.receive_message(self.formatter, contact, message,
-                    cedict, self.first)
+                    received_custom_emoticons, user_emcache.path, self.first)
             self.play_type()
 
         elif message.type == e3.Message.TYPE_NUDGE:
@@ -380,3 +383,25 @@ class Conversation(object):
         if self.session.config.b_play_type:
             gui.play(self.session, gui.theme.sound_type)
 
+    def cycle_history(self, change=-1):
+        """
+        return one of the last N messages sent, the one returned
+        is the one pointed by message_offset, every time you call
+        this function it will go to the previous one, you can
+        reset it using reset_message_offset.
+
+        change is the direction of cycling, 1 will go forward
+        -1 will go backwards
+
+        if no message in the buffer return an empty string
+        """
+        index = self.message_offset
+        self.message_offset += change
+
+        try:
+            self.input.text = self.messages.peak(self.message_offset)
+        except IndexError:
+            pass
+
+    def reset_message_offset(self):
+        self.message_offset = 0

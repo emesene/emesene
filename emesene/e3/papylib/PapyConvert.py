@@ -41,16 +41,15 @@ STATUS_E3_TO_PAPY = { \
     status.AWAY : papyon.Presence.AWAY,
     status.OFFLINE : papyon.Presence.INVISIBLE}
     
-def formatting_papy_to_e3(format = papyon.TextFormat()):
+def formatting_papy_to_e3(format = papyon.TextFormat(), size=None):
     font = format.font
     color = e3.base.Color.from_hex('#' + str(format.color))
     bold = format.style & papyon.TextFormat.BOLD == papyon.TextFormat.BOLD
     italic = format.style & papyon.TextFormat.ITALIC == papyon.TextFormat.ITALIC
     underline = format.style & papyon.TextFormat.UNDERLINE == papyon.TextFormat.UNDERLINE
     strike = format.style & papyon.TextFormat.STRIKETHROUGH == papyon.TextFormat.STRIKETHROUGH
-    size_ = format.pitch # wtf?
     
-    return e3.base.Style(font, color, bold, italic, underline, strike, size_)
+    return e3.base.Style(font, color, bold, italic, underline, strike, size)
     
 def formatting_e3_to_papy(format = e3.base.Style()):
     font = format.font

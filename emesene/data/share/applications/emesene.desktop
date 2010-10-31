@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=emesene
 GenericName=emesene
-Comment=MSN Messenger client
+Comment=Instant messaging client for MSN, Gtalk and Facebook
 Exec=emesene
 Icon=emesene
 Terminal=false

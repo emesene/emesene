@@ -13,10 +13,10 @@ class Conversation(gtk.VBox, gui.Conversation):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, session, cid, tab_label, members=None):
+    def __init__(self, session, cid, update_win, tab_label, members=None):
         '''constructor'''
         gtk.VBox.__init__(self)
-        gui.Conversation.__init__(self, session, cid, members)
+        gui.Conversation.__init__(self, session, cid, update_win, members)
         self.set_border_width(2)
 
         self.tab_label = tab_label
@@ -24,7 +24,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self._header_visible = session.config.b_show_header
         self._image_visible = session.config.b_show_info
         self._toolbar_visible = session.config.b_show_toolbar
-        
+
         self.panel = gtk.VPaned()
 
         Header = extension.get_default('conversation header')
@@ -47,10 +47,11 @@ class Conversation(gtk.VBox, gui.Conversation):
             dialog, gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
         self.output = OutputText(self.session.config)
-        self.output.set_size_request(-1,30)
-        self.input = InputText(self.session.config, self._on_send_message)
-        self.output.set_size_request(-1,25)
-        self.input.set_size_request(-1,25)
+        self.output.set_size_request(-1, 30)
+        self.input = InputText(self.session.config, self._on_send_message,
+                self.cycle_history)
+        self.output.set_size_request(-1, 25)
+        self.input.set_size_request(-1, 25)
         self.info = ContactInfo()
         self.transfers_bar = TransfersBar(self.session)
 
@@ -114,6 +115,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             'b_show_info')
         self.session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
+        self.session.signals.contact_attr_changed.subscribe(
+            self.on_contact_attr_changed_succeed)
 
         self.session.signals.filetransfer_invitation.subscribe(
                 self.on_filetransfer_invitation)
@@ -216,6 +219,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''update the values of the tab'''
         self.tab_label.set_image(self.icon)
         self.tab_label.set_text(self.text)
+
+        self.update_window(self.text, self.icon, self.tab_index)
 
     def update_group_information(self):
         """
@@ -320,6 +325,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         elif account in self.members:
             self.his_avatar.set_from_file(path)
 
+    def on_contact_attr_changed_succeed(self, account, what, old):
+        self.update_tab()
+
     def on_filetransfer_invitation(self, transfer):
         self.transfers_bar.add(transfer)
 
@@ -328,3 +336,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_filetransfer_progress(self, transfer):
         self.transfers_bar.update(transfer)
+
+    def on_filetransfer_rejected(self, transfer):
+        self.transfers_bar.update(transfer)
+

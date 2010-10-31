@@ -2,8 +2,8 @@
 import extension
 
 WEBKITERROR = False
-INDICATORERROR = True # FIXME: Disabled until we can support theme changing!
-                      # see Indicator.py for the gory details
+INDICATORERROR = False
+
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
@@ -33,10 +33,12 @@ def gtk_main(Controller):
     import Header
     import ImageAreaSelector
     import ImageChooser
+
     try:
         import Indicator
     except ImportError:
         INDICATORERROR = True
+
     import Login
     import MainMenu
     import MainWindow
@@ -50,6 +52,7 @@ def gtk_main(Controller):
     import TrayIcon
     import UserPanel
     import Window
+
     try:
         import AdiumTextBox
     except ImportError:
@@ -98,11 +101,13 @@ def setup():
     extension.category_register('nick renderer', Renderers.CellRendererPlus)
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
     extension.category_register('user panel', UserPanel.UserPanel)
+
     if not INDICATORERROR:
         extension.category_register('tray icon', Indicator.Indicator)
         extension.register('tray icon', TrayIcon.TrayIcon)
-    else:    
-        extension.category_register('tray icon', TrayIcon.TrayIcon)        
+    else:
+        extension.category_register('tray icon', TrayIcon.TrayIcon)
+
     extension.category_register('debug window', DebugWindow.DebugWindow)
     extension.category_register('nice bar', NiceBar.NiceBar)
 

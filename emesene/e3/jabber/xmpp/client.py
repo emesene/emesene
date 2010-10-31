@@ -12,7 +12,7 @@
 ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##   GNU General Public License for more details.
 
-# $Id: client.py,v 1.60 2007/08/28 10:03:33 normanr Exp $
+# $Id$
 
 """
 Provides PlugIn class functionality to develop extentions for xmpppy.
@@ -251,15 +251,19 @@ class Client(CommonClient):
 
 class Component(CommonClient):
     """ Component class. The only difference from CommonClient is ability to perform component authentication. """
-    def __init__(self,server,port=5347,typ=None,debug=['always', 'nodebuilder'],domains=None,sasl=0,bind=0,route=0,xcp=0):
+    def __init__(self,transport,port=5347,typ=None,debug=['always', 'nodebuilder'],domains=None,sasl=0,bind=0,route=0,xcp=0):
         """ Init function for Components.
             As components use a different auth mechanism which includes the namespace of the component.
             Jabberd1.4 and Ejabberd use the default namespace then for all client messages.
             Jabberd2 uses jabber:client.
-            'server' argument is a server name that you are connecting to (f.e. "localhost").
-            'port' can be specified if 'server' resolves to correct IP. If it is not then you'll need to specify IP 
-            and port while calling "connect()"."""
-        CommonClient.__init__(self,server,port=port,debug=debug)
+            'transport' argument is a transport name that you are going to serve (f.e. "irc.localhost").
+            'port' can be specified if 'transport' resolves to correct IP. If it is not then you'll have to specify IP
+            and port while calling "connect()".
+            If you are going to serve several different domains with single Component instance - you must list them ALL
+            in the 'domains' argument.
+            For jabberd2 servers you should set typ='jabberd2' argument.
+        """
+        CommonClient.__init__(self,transport,port=port,debug=debug)
         self.typ=typ
         self.sasl=sasl
         self.bind=bind
@@ -268,7 +272,7 @@ class Component(CommonClient):
         if domains:
             self.domains=domains
         else:
-            self.domains=[server]
+            self.domains=[transport]
     
     def connect(self,server=None,proxy=None):
         """ This will connect to the server, and if the features tag is found then set

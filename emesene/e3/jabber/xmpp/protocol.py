@@ -12,7 +12,7 @@
 ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##   GNU General Public License for more details.
 
-# $Id: protocol.py,v 1.58 2007/05/13 17:55:46 normanr Exp $
+# $Id$
 
 """
 Protocol module contains tools that is needed for processing of 
@@ -58,36 +58,38 @@ NS_ADMIN_SHUTDOWN               =NS_ADMIN+'#shutdown'                       # XE
 NS_AGENTS           ='jabber:iq:agents'                                     # XEP-0094 (historical)
 NS_AMP              ='http://jabber.org/protocol/amp'                       # XEP-0079
 NS_AMP_ERRORS                   =NS_AMP+'#errors'                           # XEP-0079
-NS_AUTH             ='jabber:iq:auth'
+NS_AUTH             ='jabber:iq:auth'                                       # XEP-0078
 NS_AVATAR           ='jabber:iq:avatar'                                     # XEP-0008 (historical)
-NS_BIND             ='urn:ietf:params:xml:ns:xmpp-bind'
+NS_BIND             ='urn:ietf:params:xml:ns:xmpp-bind'                     # RFC 3920
 NS_BROWSE           ='jabber:iq:browse'                                     # XEP-0011 (historical)
 NS_BYTESTREAM       ='http://jabber.org/protocol/bytestreams'               # XEP-0065
 NS_CAPS             ='http://jabber.org/protocol/caps'                      # XEP-0115
 NS_CHATSTATES       ='http://jabber.org/protocol/chatstates'                # XEP-0085
-NS_CLIENT           ='jabber:client'
-NS_COMMANDS         ='http://jabber.org/protocol/commands'
-NS_COMPONENT_ACCEPT ='jabber:component:accept'
-NS_COMPONENT_1      ='http://jabberd.jabberstudio.org/ns/component/1.0'
+NS_CLIENT           ='jabber:client'                                        # RFC 3921
+NS_COMMANDS         ='http://jabber.org/protocol/commands'                  # XEP-0050
+NS_COMPONENT_ACCEPT ='jabber:component:accept'                              # XEP-0114
+NS_COMPONENT_1      ='http://jabberd.jabberstudio.org/ns/component/1.0'     # Jabberd2
 NS_COMPRESS         ='http://jabber.org/protocol/compress'                  # XEP-0138
 NS_DATA             ='jabber:x:data'                                        # XEP-0004
-NS_DELAY            ='jabber:x:delay'
-NS_DIALBACK         ='jabber:server:dialback'
+NS_DATA_LAYOUT      ='http://jabber.org/protocol/xdata-layout'              # XEP-0141
+NS_DATA_VALIDATE    ='http://jabber.org/protocol/xdata-validate'            # XEP-0122
+NS_DELAY            ='jabber:x:delay'                                       # XEP-0091 (deprecated)
+NS_DIALBACK         ='jabber:server:dialback'                               # RFC 3921
 NS_DISCO            ='http://jabber.org/protocol/disco'                     # XEP-0030
 NS_DISCO_INFO                   =NS_DISCO+'#info'                           # XEP-0030
 NS_DISCO_ITEMS                  =NS_DISCO+'#items'                          # XEP-0030
 NS_ENCRYPTED        ='jabber:x:encrypted'                                   # XEP-0027
-NS_EVENT            ='jabber:x:event'                                       # XEP-0022
-NS_FEATURE          ='http://jabber.org/protocol/feature-neg'  
+NS_EVENT            ='jabber:x:event'                                       # XEP-0022 (deprecated)
+NS_FEATURE          ='http://jabber.org/protocol/feature-neg'               # XEP-0020
 NS_FILE             ='http://jabber.org/protocol/si/profile/file-transfer'  # XEP-0096
-NS_GATEWAY          ='jabber:iq:gateway'
+NS_GATEWAY          ='jabber:iq:gateway'                                    # XEP-0100
 NS_GEOLOC           ='http://jabber.org/protocol/geoloc'                    # XEP-0080
-NS_GROUPCHAT        ='gc-1.0'
+NS_GROUPCHAT        ='gc-1.0'                                               # XEP-0045
 NS_HTTP_BIND        ='http://jabber.org/protocol/httpbind'                  # XEP-0124
-NS_IBB              ='http://jabber.org/protocol/ibb'
+NS_IBB              ='http://jabber.org/protocol/ibb'                       # XEP-0047
 NS_INVISIBLE        ='presence-invisible'                                   # Jabberd2
 NS_IQ               ='iq'                                                   # Jabberd2
-NS_LAST             ='jabber:iq:last'
+NS_LAST             ='jabber:iq:last'                                       # XEP-0012
 NS_MESSAGE          ='message'                                              # Jabberd2
 NS_MOOD             ='http://jabber.org/protocol/mood'                      # XEP-0107
 NS_MUC              ='http://jabber.org/protocol/muc'                       # XEP-0045
@@ -101,35 +103,36 @@ NS_MUC_ROOMCONFIG               =NS_MUC+'#roomconfig'                       # XE
 NS_MUC_ROOMINFO                 =NS_MUC+'#roominfo'                         # XEP-0045
 NS_MUC_ROOMS                    =NS_MUC+'#rooms'                            # XEP-0045
 NS_MUC_TRAFIC                   =NS_MUC+'#traffic'                          # XEP-0045
+NS_NICK             ='http://jabber.org/protocol/nick'                      # XEP-0172
 NS_OFFLINE          ='http://jabber.org/protocol/offline'                   # XEP-0013
 NS_PHYSLOC          ='http://jabber.org/protocol/physloc'                   # XEP-0112
 NS_PRESENCE         ='presence'                                             # Jabberd2
-NS_PRIVACY          ='jabber:iq:privacy'
-NS_PRIVATE          ='jabber:iq:private'
+NS_PRIVACY          ='jabber:iq:privacy'                                    # RFC 3921
+NS_PRIVATE          ='jabber:iq:private'                                    # XEP-0049
 NS_PUBSUB           ='http://jabber.org/protocol/pubsub'                    # XEP-0060
-NS_REGISTER         ='jabber:iq:register'
-NS_ROSTER           ='jabber:iq:roster'
+NS_REGISTER         ='jabber:iq:register'                                   # XEP-0077
+NS_RC               ='http://jabber.org/protocol/rc'                        # XEP-0146
+NS_ROSTER           ='jabber:iq:roster'                                     # RFC 3921
 NS_ROSTERX          ='http://jabber.org/protocol/rosterx'                   # XEP-0144
 NS_RPC              ='jabber:iq:rpc'                                        # XEP-0009
-NS_SASL             ='urn:ietf:params:xml:ns:xmpp-sasl'
-NS_SEARCH           ='jabber:iq:search'
-NS_SERVER           ='jabber:server'
-NS_SESSION          ='urn:ietf:params:xml:ns:xmpp-session'
+NS_SASL             ='urn:ietf:params:xml:ns:xmpp-sasl'                     # RFC 3920
+NS_SEARCH           ='jabber:iq:search'                                     # XEP-0055
+NS_SERVER           ='jabber:server'                                        # RFC 3921
+NS_SESSION          ='urn:ietf:params:xml:ns:xmpp-session'                  # RFC 3921
 NS_SI               ='http://jabber.org/protocol/si'                        # XEP-0096
 NS_SI_PUB           ='http://jabber.org/protocol/sipub'                     # XEP-0137
 NS_SIGNED           ='jabber:x:signed'                                      # XEP-0027
-NS_STANZAS          ='urn:ietf:params:xml:ns:xmpp-stanzas'
-NS_STREAMS          ='http://etherx.jabber.org/streams'
-NS_TIME             ='jabber:iq:time'
-NS_TLS              ='urn:ietf:params:xml:ns:xmpp-tls'
-NS_VACATION         ='http://jabber.org/protocol/vacation'
-NS_VCARD            ='vcard-temp'
-NS_VERSION          ='jabber:iq:version'
+NS_STANZAS          ='urn:ietf:params:xml:ns:xmpp-stanzas'                  # RFC 3920
+NS_STREAMS          ='http://etherx.jabber.org/streams'                     # RFC 3920
+NS_TIME             ='jabber:iq:time'                                       # XEP-0090 (deprecated)
+NS_TLS              ='urn:ietf:params:xml:ns:xmpp-tls'                      # RFC 3920
+NS_VACATION         ='http://jabber.org/protocol/vacation'                  # XEP-0109
+NS_VCARD            ='vcard-temp'                                           # XEP-0054
+NS_VCARD_UPDATE     ='vcard-temp:x:update'                                  # XEP-0153
+NS_VERSION          ='jabber:iq:version'                                    # XEP-0092
 NS_WAITINGLIST      ='http://jabber.org/protocol/waitinglist'               # XEP-0130
 NS_XHTML_IM         ='http://jabber.org/protocol/xhtml-im'                  # XEP-0071
-NS_DATA_LAYOUT      ='http://jabber.org/protocol/xdata-layout'              # XEP-0141
-NS_DATA_VALIDATE    ='http://jabber.org/protocol/xdata-validate'            # XEP-0122
-NS_XMPP_STREAMS     ='urn:ietf:params:xml:ns:xmpp-streams'
+NS_XMPP_STREAMS     ='urn:ietf:params:xml:ns:xmpp-streams'                  # RFC 3920
 
 xmpp_stream_error_conditions="""
 bad-format --  --  -- The entity has sent XML that cannot be processed.
@@ -665,14 +668,114 @@ class DataField(Node):
         """ Set 'var' attribute value of this field. """
         return self.setAttr('var',val)
 
+class DataReported(Node):
+    """ This class is used in the DataForm class to describe the 'reported data field' data items which are used in
+        'multiple item form results' (as described in XEP-0004).
+        Represents the fields that will be returned from a search. This information is useful when
+        you try to use the jabber:iq:search namespace to return dynamic form information.
+        """
+    def __init__(self,node=None):
+        """ Create new empty 'reported data' field. However, note that, according XEP-0004:
+            * It MUST contain one or more DataFields.
+            * Contained DataFields SHOULD possess a 'type' and 'label' attribute in addition to 'var' attribute
+            * Contained DataFields SHOULD NOT contain a <value/> element.
+            Alternatively other XML object can be passed in as the 'node' parameted to replicate it as a new
+            dataitem.
+        """
+        Node.__init__(self,'reported',node=node)
+        if node:
+            newkids=[]
+            for n in self.getChildren():
+                if    n.getName()=='field': newkids.append(DataField(node=n))
+                else: newkids.append(n)
+            self.kids=newkids
+    def getField(self,name):
+        """ Return the datafield object with name 'name' (if exists). """
+        return self.getTag('field',attrs={'var':name})
+    def setField(self,name,typ=None,label=None):
+        """ Create if nessessary or get the existing datafield object with name 'name' and return it.
+            If created, attributes 'type' and 'label' are applied to new datafield."""
+        f=self.getField(name)
+        if f: return f
+        return self.addChild(node=DataField(name,None,typ,0,label))
+    def asDict(self):
+        """ Represent dataitem as simple dictionary mapping of datafield names to their values."""
+        ret={}
+        for field in self.getTags('field'):
+            name=field.getAttr('var')
+            typ=field.getType()
+            if isinstance(typ,(str,unicode)) and typ[-6:]=='-multi':
+                val=[]
+                for i in field.getTags('value'): val.append(i.getData())
+            else: val=field.getTagData('value')
+            ret[name]=val
+        if self.getTag('instructions'): ret['instructions']=self.getInstructions()
+        return ret
+    def __getitem__(self,name):
+        """ Simple dictionary interface for getting datafields values by their names."""
+        item=self.getField(name)
+        if item: return item.getValue()
+        raise IndexError('No such field')
+    def __setitem__(self,name,val):
+        """ Simple dictionary interface for setting datafields values by their names."""
+        return self.setField(name).setValue(val)
+
+class DataItem(Node):
+    """ This class is used in the DataForm class to describe data items which are used in 'multiple
+        item form results' (as described in XEP-0004).
+        """
+    def __init__(self,node=None):
+        """ Create new empty data item. However, note that, according XEP-0004, DataItem MUST contain ALL
+            DataFields described in DataReported.
+            Alternatively other XML object can be passed in as the 'node' parameted to replicate it as a new
+            dataitem.
+            """
+        Node.__init__(self,'item',node=node)
+        if node:
+            newkids=[]
+            for n in self.getChildren():
+                if    n.getName()=='field': newkids.append(DataField(node=n))
+                else: newkids.append(n)
+            self.kids=newkids
+    def getField(self,name):
+        """ Return the datafield object with name 'name' (if exists). """
+        return self.getTag('field',attrs={'var':name})
+    def setField(self,name):
+        """ Create if nessessary or get the existing datafield object with name 'name' and return it. """
+        f=self.getField(name)
+        if f: return f
+        return self.addChild(node=DataField(name))
+    def asDict(self):
+        """ Represent dataitem as simple dictionary mapping of datafield names to their values."""
+        ret={}
+        for field in self.getTags('field'):
+            name=field.getAttr('var')
+            typ=field.getType()
+            if isinstance(typ,(str,unicode)) and typ[-6:]=='-multi':
+                val=[]
+                for i in field.getTags('value'): val.append(i.getData())
+            else: val=field.getTagData('value')
+            ret[name]=val
+        if self.getTag('instructions'): ret['instructions']=self.getInstructions()
+        return ret
+    def __getitem__(self,name):
+        """ Simple dictionary interface for getting datafields values by their names."""
+        item=self.getField(name)
+        if item: return item.getValue()
+        raise IndexError('No such field')
+    def __setitem__(self,name,val):
+        """ Simple dictionary interface for setting datafields values by their names."""
+        return self.setField(name).setValue(val)
+
 class DataForm(Node):
     """ DataForm class. Used for manipulating dataforms in XMPP.
         Relevant XEPs: 0004, 0068, 0122.
         Can be used in disco, pub-sub and many other applications."""
     def __init__(self, typ=None, data=[], title=None, node=None):
         """
-            Create new dataform of type 'typ'. 'data' is the list of DataField
-            instances that this dataform contains, 'title' - the title string.
+            Create new dataform of type 'typ'; 'data' is the list of DataReported,
+            DataItem and DataField instances that this dataform contains; 'title'
+            is the title string.
             You can specify the 'node' argument as the other node to be used as
             base for constructing this dataform.
 
@@ -687,7 +790,9 @@ class DataForm(Node):
         if node:
             newkids=[]
             for n in self.getChildren():
-                if n.getName()=='field': newkids.append(DataField(node=n))
+                if   n.getName()=='field': newkids.append(DataField(node=n))
+                elif n.getName()=='item': newkids.append(DataItem(node=n))
+                elif n.getName()=='reported': newkids.append(DataReported(node=n))
                 else: newkids.append(n)
             self.kids=newkids
         if typ: self.setType(typ)
@@ -700,6 +805,8 @@ class DataForm(Node):
         for child in data:
             if type(child) in [type(''),type(u'')]: self.addInstructions(child)
             elif child.__class__.__name__=='DataField': self.kids.append(child)
+            elif child.__class__.__name__=='DataItem': self.kids.append(child)
+            elif child.__class__.__name__=='DataReported': self.kids.append(child)
             else: self.kids.append(DataField(node=child))
     def getType(self):
         """ Return the type of dataform. """

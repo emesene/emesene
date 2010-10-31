@@ -40,7 +40,7 @@ if os.path.exists(papypath):
     sys.path.insert(0, papypath)
 
 try:
-    REQ_VER = (0, 4, 8)
+    REQ_VER = (0, 5, 2)
 
     import papyon
     import papyon.event
@@ -75,10 +75,10 @@ class Worker(e3.base.Worker, papyon.Client):
         if use_http:
             from papyon.transport import HTTPPollConnection
             self.client = papyon.Client.__init__( \
-               self, server, get_proxies(), HTTPPollConnection)
+               self, server, get_proxies(), HTTPPollConnection, version=18)
         else:
             self.client = papyon.Client.__init__( \
-               self, server, proxies = get_proxies())
+               self, server, proxies = get_proxies(), version=18)
 
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
@@ -122,10 +122,9 @@ class Worker(e3.base.Worker, papyon.Client):
     # some useful methods (mostly, gui only)
     def set_initial_infos(self):
         '''this is called on login'''
-        self._roaming_handler = CR.ContentRoaming(self._sso, self.address_book)
-        self._roaming_handler.connect("notify::state", \
+        self.content_roaming.connect("notify::state", \
                                         self._content_roaming_state_changed)
-        self._roaming_handler.sync()
+        self.content_roaming.sync()
         # sets the login-chosen presence in papyon
         presence = self.session.account.status
         nick = self.profile.display_name
@@ -137,14 +136,16 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _content_roaming_state_changed(self, cr, pspec):
         if cr.state == CR.constants.ContentRoamingState.SYNCHRONIZED:
-            type, data = cr.display_picture
-            handle, path = tempfile.mkstemp(suffix="."+type.split('/')[1], prefix='emsnpic')
-            os.close(handle)
+            picfail = False            
             try:
+                type, data = cr.display_picture
+                handle, path = tempfile.mkstemp(suffix="."+type.split('/')[1], prefix='emsnpic')
+                os.close(handle)
                 f = open(path, 'wb')
                 f.write(data)
                 f.close()
             except Exception as e:
+                picfail = True
                 print e
             # update roaming stuff in papyon's session
             # changing display_name doesn't seem to update its value istantly, wtf?
@@ -156,7 +157,8 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_PROFILE_GET_SUCCEED, \
                        str(cr.display_name), self.profile.personal_message)
 
-            self._handle_action_set_picture(path)
+            if not picfail:
+                self._handle_action_set_picture(path, True)
 
     def _set_status(self, stat):
         ''' changes the presence in papyon given an e3 status '''
@@ -272,6 +274,7 @@ class Worker(e3.base.Worker, papyon.Client):
         papysession.connect("accepted", self.papy_ft_accepted)
         papysession.connect("progressed", self.papy_ft_progressed)
         papysession.connect("completed", self.papy_ft_completed)
+        papysession.connect("rejected", self.papy_ft_rejected)
 
         self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr)
 
@@ -320,6 +323,12 @@ class Worker(e3.base.Worker, papyon.Client):
         #del self.rfiletransfers[tr]
 
         self.session.add_event(Event.EVENT_FILETRANSFER_COMPLETED, tr)
+
+    def papy_ft_rejected(self, ftsession):
+        tr = self.filetransfers[ftsession]
+
+        self.session.add_event(Event.EVENT_FILETRANSFER_REJECTED, tr)
+        print "[papy file transfer] rejected!"
 
     # call handlers
     def _on_call_incoming(self, papycallevent):
@@ -403,31 +412,35 @@ class Worker(e3.base.Worker, papyon.Client):
             papymessage.content, account, \
             formatting_papy_to_e3(papymessage.formatting))
         # convert papyon msnobjects to a simple dict {shortcut:identifier}
-        cedict = {}
+        received_custom_emoticons = {}
 
         emotes = self.caches.get_emoticon_cache(account)
         def download_failed(reason):
             print reason
 
         def download_ok(msnobj, download_failed_func):
+            if msnobj._data is None:
+                log.warning("[papylib] downloaded msnobj is None")
+                return
+
             emotes.insert_raw((msnobj._friendly, msnobj._data))
             self.session.add_event(Event.EVENT_P2P_FINISHED, \
                 account, 'emoticon', emoticon_path)
 
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
-            cedict[shortcut] = None
+            received_custom_emoticons[shortcut] = None
 
             emoticon_hash = msn_object._data_sha.encode("hex")
             emoticon_path = os.path.join(emotes.path, emoticon_hash)
 
             if emoticon_hash in emotes:
-                cedict[shortcut] = emoticon_path
+                received_custom_emoticons[shortcut] = emoticon_path
             else:
                 self.msn_object_store.request(msn_object, \
                     (download_ok, download_failed))
 
         self.session.add_event(\
-            Event.EVENT_CONV_MESSAGE, cid, account, msgobj, cedict)
+            Event.EVENT_CONV_MESSAGE, cid, account, msgobj, received_custom_emoticons)
 
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):
         ''' handle received nudges '''
@@ -479,9 +492,10 @@ class Worker(e3.base.Worker, papyon.Client):
         account = papycontact.account
         conv = pyconvevent.conversation
 
-        #that cid must be exists
+        #that cid must exists
         if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
+
             self.session.add_event(e3.Event.EVENT_CONV_CONTACT_LEFT,
                                    cid, account)
 
@@ -744,7 +758,7 @@ class Worker(e3.base.Worker, papyon.Client):
             print "unblock fail", args
             self.session.add_event(e3.Event.EVENT_CONTACT_UNBLOCK_FAILED, '') #account
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        self.address_book.unblock_contact(papycontact, failed_cb=block_fail)
+        self.address_book.unblock_contact(papycontact, failed_cb=unblock_fail)
 
     def _handle_action_move_to_group(self, account, src_gid, dest_gid):
         '''handle Action.ACTION_MOVE_TO_GROUP '''
@@ -837,13 +851,6 @@ class Worker(e3.base.Worker, papyon.Client):
             print "set contact alias succeed"
             self.session.add_event(e3.Event.EVENT_CONTACT_ALIAS_SUCCEED, account)
 
-
-    # e3 action handlers - profile
-#                      TODO: this code stores your stuff, wow m3n
-#                      path = '/tmp/test.jpeg'
-#                      f = open(path, 'r')
-#                      cr.store("nick", "message", f.read())
-
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS '''
         self._set_status(status_)
@@ -851,12 +858,14 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_set_message(self, message):
         ''' handle Action.ACTION_SET_MESSAGE '''
         self.profile.personal_message = message
+        self.content_roaming.store(None, message, None)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK '''
         self.profile.display_name = nick
+        self.content_roaming.store(nick, None, None)
 
-    def _handle_action_set_picture(self, picture_name):
+    def _handle_action_set_picture(self, picture_name, from_roaming=False):
         '''handle Action.ACTION_SET_PICTURE'''
         if isinstance(picture_name, papyon.p2p.MSNObject):
             #TODO: check if this can happen, and prevent it (!)
@@ -890,6 +899,8 @@ class Worker(e3.base.Worker, papyon.Client):
                                     self.session.account.account, avatar_path)
 
         self.session.contacts.me.picture = avatar_path
+        if not from_roaming:
+            self.content_roaming.store(None, None, picture_name)
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES
@@ -954,21 +965,44 @@ class Worker(e3.base.Worker, papyon.Client):
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         conv._invite_user(papycontact)
 
-    def _handle_action_send_message(self, cid, message):
+    def _handle_action_send_message(self, cid, message, cedict={}, l_custom_emoticons=[]):
         ''' handle Action.ACTION_SEND_MESSAGE '''
         #print "you're guin to send %(msg)s in %(ci)s" % \
         #{ 'msg' : message, 'ci' : cid }
         #print "type:", message
         # find papyon conversation by cid
+
         papyconversation = self.papyconv[cid]
+
         if message.type == e3.base.Message.TYPE_NUDGE:
             papyconversation.send_nudge()
 
         elif message.type == e3.base.Message.TYPE_MESSAGE:
             # format the text for papy
             formatting = formatting_e3_to_papy(message.style)
+            emoticon_cache = self.caches.get_emoticon_cache(self.session.account.account)
+            d_msn_objects = {}
+
+            for custom_emoticon in l_custom_emoticons:
+                try:
+                    fpath = os.path.join(emoticon_cache.path, cedict[custom_emoticon])
+                    f = open(fpath, 'rb')
+                    d_custom_emoticon = f.read()
+                    f.close()
+                except Exception as e:
+                    print e
+                if not isinstance(d_custom_emoticon, str):
+                    d_custom_emoticon = "".join([chr(b) for b in d_custom_emoticon])
+
+                msn_object = papyon.p2p.MSNObject(self.session.account.account,
+                                len(d_custom_emoticon),
+                                papyon.p2p.MSNObjectType.CUSTOM_EMOTICON,
+                                cedict[custom_emoticon],
+                                custom_emoticon, None, None,
+                                data=StringIO.StringIO(d_custom_emoticon))
+                d_msn_objects[custom_emoticon] = msn_object
             # create papymessage
-            msg = papyon.ConversationMessage(message.body, formatting)
+            msg = papyon.ConversationMessage(message.body, formatting, d_msn_objects)
             # send through the network
             papyconversation.send_text_message(msg)
 

@@ -1,16 +1,13 @@
 '''a thread that handles the connection with the main server'''
 
-import os
 import time
 import Queue
 import urllib
 import httplib
 import urlparse
-import threading
 
 import e3
 import mbi
-import p2p
 import msgs
 import common
 import challenge
@@ -799,6 +796,8 @@ class Worker(e3.Worker):
     def _handle_action_set_message(self, message):
         '''handle e3.Action.ACTION_SET_MESSAGE
         '''
+        contact = self.session.contacts.me
+
         self.socket.send_command('UUX', payload='<Data><PSM>' + \
             common.escape(message) + '</PSM><CurrentMedia></CurrentMedia>' + \
             '<MachineGuid></MachineGuid></Data>')

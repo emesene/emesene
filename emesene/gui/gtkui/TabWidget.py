@@ -7,6 +7,7 @@ import TinyButton
 import Renderers
 
 CLOSE_ON_LEFT = 0
+
 try:
     import gconf
     gclient = gconf.client_get_default()
@@ -23,14 +24,16 @@ class TabWidget(gtk.HBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, text, on_tab_menu, on_close_clicked, conversation):
+    def __init__(self, text, on_tab_menu, on_close_clicked, conversation, mozilla_like):
         '''constructor'''
         gtk.HBox.__init__(self)
         self.set_border_width(0)
         self.set_spacing(4)
 
+        self.mozilla_like = mozilla_like
         self.image = gtk.Image()
         self.label = Renderers.SmileyLabel()
+        self.label.set_ellipsize(True)
         self.label.set_text(text)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
         self.close.connect('clicked', on_close_clicked,
@@ -54,6 +57,7 @@ class TabWidget(gtk.HBox):
         if utils.file_readable(path):
             self.image.set_from_file(path)
             self.image.show()
+
             return True
 
         return False
@@ -61,5 +65,6 @@ class TabWidget(gtk.HBox):
     def set_text(self, text):
         '''set the text of the label'''
         self.label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(text)))
-        self.set_size_request(235, 18) # Firefox-like, at least here.
+        if self.mozilla_like:
+            self.set_size_request(235, 18) # Empiric measures.
 

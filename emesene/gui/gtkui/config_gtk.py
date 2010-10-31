@@ -103,7 +103,7 @@ def build_combo(item):
             return get
 
         child._get_gui_value = get_value(combo, child)
-        
+
         if child.value:
             selected = index
 
@@ -118,7 +118,7 @@ def build_text(item):
 
     entry = gtk.Entry()
     entry.set_text(item.value)
-    
+
     item._get_gui_value = lambda: entry.get_text()
 
     widget.pack_start(entry)

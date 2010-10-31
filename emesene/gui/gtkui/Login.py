@@ -44,6 +44,8 @@ class LoginBase(gtk.Alignment):
             self._on_account_key_press)
         self.cmb_account.connect('changed',
             self._on_account_changed)
+        self.cmb_account.connect('key-release-event',
+            self._on_account_key_release)
 
         self.btn_status = StatusButton.StatusButton()
         self.btn_status.set_status(e3.status.ONLINE)
@@ -99,7 +101,7 @@ class LoginBase(gtk.Alignment):
 
         self.b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
         self.b_cancel.connect('clicked', self._on_cancel_clicked)
-        
+
         vbuttonbox = gtk.VButtonBox()
         vbuttonbox.set_spacing(8)
         vbuttonbox.pack_start(self.b_connect)
@@ -146,7 +148,7 @@ class LoginBase(gtk.Alignment):
                 animated=True)
         self.throbber = gtk.image_new_from_animation(th_pix)
         self.label_timer = gtk.Label()
-        self.label_timer.set_markup('<b>Connection error!\n </b>')
+        self.label_timer.set_markup(_('<b>Connection error!\n </b>'))
 
         al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
@@ -169,14 +171,16 @@ class LoginBase(gtk.Alignment):
         al_account.add(self.avatar)
         al_preferences.add(self.b_preferences)
 
+        vbox_bottom = gtk.VBox(True)
         vbox.pack_start(self.nicebar, False)
         vbox.pack_start(al_account, True, False)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
-        vbox.pack_start(al_label_timer, True, False)
-        vbox.pack_start(al_throbber, False, False)
-        vbox.pack_start(al_button, True, True)
-        vbox.pack_start(al_preferences, False)
+        vbox_bottom.pack_start(al_label_timer, True, False)
+        vbox_bottom.pack_start(al_throbber, False, False)
+        vbox_bottom.pack_start(al_button, True, True)
+        vbox.pack_start(vbox_bottom, True, True)
+        vbox.pack_start(al_preferences, True, False)
 
         self.add(vbox)
         vbox.show_all()
@@ -193,7 +197,8 @@ class Login(LoginBase):
     '''
     def __init__(self, callback, on_preferences_changed,
                 config, config_dir, config_path, proxy=None,
-                use_http=None, session_id=None, cancel_clicked=False):
+                use_http=None, session_id=None, cancel_clicked=False,
+                no_autologin=False):
 
         LoginBase.__init__(self, callback)
 
@@ -202,6 +207,7 @@ class Login(LoginBase):
         self.config_path = config_path
         self.callback = callback
         self.on_preferences_changed = on_preferences_changed
+        self.no_autologin = no_autologin
         # the id of the default extension that handles the session
         # used to select the default session on the preference dialog
         self.use_http = use_http
@@ -215,7 +221,7 @@ class Login(LoginBase):
         self.accounts = self.config.d_accounts
 
         self._reload_account_list()
-        
+
         if proxy is None:
             self.proxy = e3.Proxy()
         else:
@@ -251,6 +257,7 @@ class Login(LoginBase):
 
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
+
         if not cancel_clicked:
             self._check_autologin()
 
@@ -266,7 +273,8 @@ class Login(LoginBase):
             self.cmb_account.get_children()[0].set_text(account)
             self.txt_password.set_text(password)
 
-            self.do_connect()
+            if not self.no_autologin:
+                self.do_connect()
 
     def do_connect(self):
         '''
@@ -323,6 +331,14 @@ class Login(LoginBase):
         called when the content of the account entry changes
         '''
         self._update_fields(self.cmb_account.get_active_text())
+
+    def _on_account_key_release(self, entry, event):
+        '''
+        called when a key is released in the account field
+        '''
+        self._update_fields(self.cmb_account.get_active_text())
+        if event.keyval == gtk.keysyms.Tab:
+            self.txt_password.grab_focus()
 
     def _update_fields(self, account):
         '''
@@ -591,21 +607,25 @@ class ConnectingWindow(Login):
 
         account = config.get_or_set('last_logged_account', '')
         remembers = config.get_or_set('d_remembers', {})
-        attr = int(remembers[account])
-        if attr == 3:#autologin,password,account checked
-            self.auto_login.set_active(True)
-        elif attr == 2:#password,account checked
-            self.remember_password.set_active(True)
-        elif attr == 1:#only account checked
-            self.remember_account.set_active(True)
-        password = base64.b64decode(config.d_accounts[account])
-        self.cmb_account.get_children()[0].set_text(account)
-        self.txt_password.set_text(password)
 
+        if not (account == ''):
+            attr = int(remembers[account])
+            if attr == 3:#autologin,password,account checked
+                self.auto_login.set_active(True)
+            elif attr == 2:#password,account checked
+                self.remember_password.set_active(True)
+            elif attr == 1:#only account checked
+                self.remember_account.set_active(True)
+
+            password = base64.b64decode(config.d_accounts.get(account, ""))
+            self.cmb_account.get_children()[0].set_text(account)
+            self.txt_password.set_text(password)
+
+        #FIXME: If not account remembered, txt_password & cmb_account, left without text.
         self.cmb_account.set_sensitive(False)
         self.b_preferences.set_sensitive(False)
         self.btn_status.set_sensitive(False)
-        self.txt_password.set_sensitive(False)        
+        self.txt_password.set_sensitive(False)
         self.nicebar.hide()
         self.throbber.show()
         self.label_timer.hide()

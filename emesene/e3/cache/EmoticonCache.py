@@ -120,3 +120,4 @@ class EmoticonCache(Cache.Cache):
         if 'lolw00t' in cache: asd()
         '''
         return os.path.isfile(os.path.join(self.path, name))
+

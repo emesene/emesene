@@ -1,4 +1,4 @@
-# $Id: __init__.py,v 1.9 2005/03/07 09:34:51 snakeru Exp $
+# $Id$
 
 """
 All features of xmpppy library contained within separate modules.

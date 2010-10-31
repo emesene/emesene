@@ -32,7 +32,7 @@ import Parser
 def replace_markup(markup, arg=None):
     '''replace the tags defined in gui.base.ContactList'''
     markup = markup.replace("[$nl]", "\n")
-    
+
     markup = markup.replace("[$small]", "<small>")
     markup = markup.replace("[$/small]", "</small>")
 
@@ -71,7 +71,7 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         self.__dict__['markup'] = ''
         self.function = function
         self._style_handler_id = None
-        self._selected_flgs = (int(gtk.CELL_RENDERER_SELECTED), \
+        self._selected_flgs = (int(gtk.CELL_RENDERER_SELECTED),
             int(gtk.CELL_RENDERER_SELECTED) + int(gtk.CELL_RENDERER_PRELIT))
 
         self._cached_markup = None
@@ -137,8 +137,8 @@ class CellRendererFunction(gtk.GenericCellRenderer):
             try:
                 decorated_markup = self.function(self.markup)
             except Exception, error:
-                print "this nick: '%s' made the parser go crazy, striping" % \
-                        (self.markup,)
+                print "this nick: '%s' made the parser go crazy, striping" % (
+                        self.markup,)
                 print error
 
                 decorated_markup = Plus.msnplus_strip(self.markup)
@@ -165,7 +165,7 @@ def plus_parse(obj, parser, filterdata):
     global plus_or_noplus
     # get a plain string with objects
     format, objects = filterdata.serialize(filterdata.list)
-        
+
     if parser and parser.tags != Parser.TAGS_NONE:
         # we have markup
         mohrtutchy_plus_parser.isHtml = False
@@ -182,7 +182,7 @@ def plus_parse(obj, parser, filterdata):
         format = mohrtutchy_plus_parser.removeMarkup(format)
         filterdata.list = filterdata.deserialize(format, objects)
 
-bigparser.connect('filter', plus_parse) 
+bigparser.connect('filter', plus_parse)
 
 def msnplus_to_list(txt, do_parse_emotes=True):
     '''parte text to a DictObj and return a list of strings and
@@ -204,7 +204,7 @@ def msnplus_to_list(txt, do_parse_emotes=True):
     ########################################
     # boyska's implementation, quite incomplete.
     dct = Plus.msnplus(txt, do_parse_emotes)
-    
+
     if not do_parse_emotes:
         return dct.to_xml()
 
@@ -224,7 +224,7 @@ def msnplus_to_list(txt, do_parse_emotes=True):
     accum.append(replace_markup("".join(temp)))
 
     return accum
-    
+
 def msnplus_to_plain_text(txt):
     ''' from a nasty string, returns a nice plain text string without
     bells and whistles, just text '''
@@ -251,19 +251,24 @@ def flatten_tree(dct, accum, parents):
     if dct.tag:
         previous = list()
         i = len(accum)-1
+
         while i>=0 and type(accum[i]) != gtk.gdk.Pixbuf:
             previous.append(accum[i])
             i -= 1
+
         if dct.tag == "img":
             closed = ""
             opened = ""
             tags = list()
             index = 0
+
             for prev in previous:
                 pos = prev.find("[$")
+
                 while pos != -1:
                     index = pos+2
                     found = prev[index]
+
                     if found == "b":
                         tags.append("b")
                     elif found == "i":
@@ -273,6 +278,7 @@ def flatten_tree(dct, accum, parents):
                     elif found == "/":
                         if len(tags) > 0:
                             tags.pop()
+
                     prev = prev[index+1:]
                     pos = prev.find("[$")
 
@@ -280,12 +286,15 @@ def flatten_tree(dct, accum, parents):
                 tag = tags.pop()
                 closed = closed+"[$/"+tag+"]"
                 opened = "[$"+tag+"]"+opened
-            
+
             closed = closed+"".join("</%s>" % (parent.tag, ) for parent in \
-                                                       parents[::-1] if parent)
+                parents[::-1] if parent)
+
             opened = "".join(open_tag(parent) for parent in \
-                                                      parents if parent)+opened
+                parents if parent)+opened
+
             accum += [closed, gtk.gdk.pixbuf_new_from_file(dct.src), opened]
+
             return accum
         else:
             accum += [open_tag(dct)]
@@ -306,6 +315,7 @@ def flatten_tree(dct, accum, parents):
 class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
+
     def __init__(self):
         global plus_or_noplus
         plus_or_noplus = 1
@@ -318,6 +328,7 @@ gobject.type_register(CellRendererPlus)
 class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
     but improving the readability'''
+
     def __init__(self):
         global plus_or_noplus
         plus_or_noplus = 0
@@ -398,6 +409,7 @@ class SmileyLayout(pango.Layout):
             self._ellipsize = True
         else:
             self._ellipsize = False
+
         self._update_layout()
 
     def set_smiley_scaling(self, smiley_scaling):
@@ -449,10 +461,12 @@ class SmileyLayout(pango.Layout):
 
                 while True:
                     attrs = itter.get_attrs()
+
                     for attr in attrs:
                         attr.end_index += shift
                         attr.start_index += shift
                         self._base_attrlist.insert(attr)
+
                     if not itter.next():
                         break
 
@@ -481,27 +495,34 @@ class SmileyLayout(pango.Layout):
     def _update_smilies(self):
         self._base_attrlist.filter(lambda attr: attr.type == pango.ATTR_SHAPE)
         self._smilies_scaled = {}
+
         #set max height of a pixbuf
         if self._scaling >= 0:
             max_height = self._text_height * self._scaling
         else:
             max_height = sys.maxint
+
         for index, pixbuf in self._smilies.iteritems():
+
             if pixbuf:
                 height, width = pixbuf.get_height(), pixbuf.get_width()
                 npix = pixbuf.copy()
+
                 if height > max_height:
                     cairo_scale = float(max_height) / float(height)
                     height = int(height * cairo_scale)
                     width = int(width * cairo_scale)
                     npix = npix.scale_simple(width, height,
                             gtk.gdk.INTERP_BILINEAR)
+
                 self._smilies_scaled[index] = npix
                 rect = (0,
                     -1 * (self._base_to_center + (height /2)) * pango.SCALE,
                          width * pango.SCALE, height * pango.SCALE)
+
                 self._base_attrlist.insert(pango.AttrShape((0, 0, 0, 0),
                     rect, index, index + 1))
+
         self._update_attrlists()
 
     def _update_attrlists(self):
@@ -519,11 +540,14 @@ class SmileyLayout(pango.Layout):
 
         while True:
             attrs = itter.get_attrs()
+
             for attr in attrs:
                 self._attrlist.insert(attr.copy())
+
                 if not (attr.type in (pango.ATTR_FOREGROUND,
                     pango.ATTR_BACKGROUND)):
                     self._override_attrlist.insert(attr.copy())
+
             if not itter.next():
                 break
 
@@ -543,6 +567,7 @@ class SmileyLayout(pango.Layout):
 
     def get_size(self):
         natural_width, natural_height = pango.Layout.get_size(self)
+
         if self._width >= 0 and self._ellipsize : # if ellipsize
             return self._width, natural_height
         else:
@@ -550,6 +575,7 @@ class SmileyLayout(pango.Layout):
 
     def get_pixel_size(self):
         natural_width, natural_height = pango.Layout.get_pixel_size(self)
+
         if self._width >= 0 and self._ellipsize : # if ellipsize
             return pango.PIXELS(self._width), natural_height
         else:
@@ -560,11 +586,13 @@ class SmileyLayout(pango.Layout):
         pxls = pango.PIXELS
         ctx.rectangle(x, y , width, height)
         ctx.clip()
+
         if self._is_rtl:
             layout_width = pango.Layout.get_pixel_size(self)[0]
             ctx.translate(x + width - layout_width, y)
         else:
             ctx.translate(x, y)
+
             #Clipping and ellipsation
             if self._width >= 0:
                 inline, byte = 0, 1
@@ -574,6 +602,7 @@ class SmileyLayout(pango.Layout):
                 e_ascent = pango.ASCENT(
                         self._elayout.get_line(0).get_pixel_extents()[1])
                 coords = [] # of path in px
+
                 for i in range(self.get_line_count()):
                     line = self.get_line(i)
                     edge = line.x_to_index(layout_width)
@@ -589,6 +618,7 @@ class SmileyLayout(pango.Layout):
                             for attr in attrs:
                                 if not attr.type == pango.ATTR_SHAPE:
                                     start, end = itter.range()
+
                                     if start <= edge[byte] < end:
                                         n_attr = attr.copy()
                                         n_attr.start_index = 0
@@ -623,8 +653,10 @@ class SmileyLayout(pango.Layout):
                             pxls(char[Y] + char[H])))
                 if coords:
                     ctx.move_to(0, 0)
+
                     for x, y in coords:
                         ctx.line_to(x, y)
+
                     ctx.line_to(0, coords[-1][1])
                     ctx.close_path()
                     ctx.clip()
@@ -649,12 +681,12 @@ class SmileyLabel(gtk.Widget):
     '''Label with smiley support. '''
 
     __gsignals__ = { 'size_request' : 'override',
-                     'size-allocate' : 'override', 
+                     'size-allocate' : 'override',
                      'expose-event' : 'override'}
-            
+
     def __init__(self):
         gtk.Widget.__init__(self)
-        self._text = ['']    
+        self._text = ['']
         self._ellipsize = True
         self._wrap = True
         self._smiley_layout = None
@@ -700,9 +732,10 @@ class SmileyLabel(gtk.Widget):
         self._smiley_layout.set_width(-1)
         width, height = self._smiley_layout.get_pixel_size()
         requisition.height = height
+
         if self._ellipsize or self._wrap:
             requisition.width = 0
-        else: 
+        else:
             requisition.width = width
 
     def do_size_allocate(self, allocation):
@@ -711,18 +744,21 @@ class SmileyLabel(gtk.Widget):
             width, height = self._smiley_layout.get_pixel_size()
             self.set_size_request(width, height)
         else:
-            if self._ellipsize: 
+            if self._ellipsize:
                 self._smiley_layout.set_ellipsize(pango.ELLIPSIZE_END)
-            else: 
+            else:
                 self._smiley_layout.set_ellipsize(pango.ELLIPSIZE_NONE)
+
             self._smiley_layout.set_width(allocation.width * pango.SCALE)
             self.set_size_request(-1, self._smiley_layout.get_pixel_size()[1])
+
         gtk.Widget.do_size_allocate(self, allocation)
 
     def do_expose_event(self, event):
         area = self.get_allocation()
         ctx = event.window.cairo_create()
         self._smiley_layout.draw(ctx, area)
+
 gobject.type_register(SmileyLabel)
 
 #from emesene1 by mariano guerra adapted by cando
@@ -760,7 +796,7 @@ class AvatarRenderer(gtk.GenericCellRenderer):
 
         #set up information of statusTransformation
         self._set_transformation('corner|gray')
-        #self.transId = self._config.connect('change::statusTransformation', \
+        #self.transId = self._config.connect('change::statusTransformation',
             #self._transformation_callback)
 
     def destroy(self):
@@ -806,17 +842,23 @@ class AvatarRenderer(gtk.GenericCellRenderer):
     def on_get_size(self, widget, cell_area=None):
         """Requisition size"""
         xpad, ypad = self._get_padding()
-        if self._dimention >= 32: width = self._dimention
-        elif self._corner: width = self._dimention * 2
-        else: width = self._dimention
+
+        if self._dimention >= 32:
+            width = self._dimention
+        elif self._corner:
+            width = self._dimention * 2
+        else:
+            width = self._dimention
+
         height = self._dimention + (ypad * 2)
+
         return (0, 0,  width, height)
 
     def func(self, model, path, iter, (image, tree)):
       if model.get_value(iter, 0) == image:
          self.redraw = 1
          cell_area = tree.get_cell_area(path, tree.get_column(1))
-         tree.queue_draw_area(cell_area.x, cell_area.y, cell_area.width, \
+         tree.queue_draw_area(cell_area.x, cell_area.y, cell_area.width,
             cell_area.height)
 
     def animation_timeout(self, tree, image):
@@ -825,8 +867,9 @@ class AvatarRenderer(gtk.GenericCellRenderer):
           image.get_data('iter').advance()
           model = tree.get_model()
           model.foreach(self.func, (image, tree))
+
           if self.redraw:
-             gobject.timeout_add(image.get_data('iter').get_delay_time(), \
+             gobject.timeout_add(image.get_data('iter').get_delay_time(),
                 self.animation_timeout, tree, image)
           else:
              image.set_data('iter', None)
@@ -848,7 +891,7 @@ class AvatarRenderer(gtk.GenericCellRenderer):
             if not self._image.get_data('iter'):
                 animation = self._image.get_animation()
                 self._image.set_data('iter', animation.get_iter())
-                gobject.timeout_add(self._image.get_data('iter').get_delay_time(), \
+                gobject.timeout_add(self._image.get_data('iter').get_delay_time(),
                    self.animation_timeout, widget, self._image)
 
             avatar = self._image.get_data('iter').get_pixbuf()
@@ -863,11 +906,11 @@ class AvatarRenderer(gtk.GenericCellRenderer):
             source.set_pixbuf(avatar)
             direction = widget.get_direction()
             avatar = widget.style.render_icon(source, direction,
-                                              gtk.STATE_INSENSITIVE,
-                                              -1, widget, "gtk-image")
+                gtk.STATE_INSENSITIVE, -1, widget, "gtk-image")
+
         if avatar:
             self._draw_avatar(ctx, avatar, width - dim, ypad, dim,
-                                gtk.ANCHOR_CENTER, self._radius_factor, alpha)
+                gtk.ANCHOR_CENTER, self._radius_factor, alpha)
 
     def _draw_avatar(self, ctx, pixbuf, x, y, dimention,
                          position = gtk.ANCHOR_CENTER,
@@ -879,10 +922,12 @@ class AvatarRenderer(gtk.GenericCellRenderer):
 
         pix_width = pixbuf.get_width()
         pix_height = pixbuf.get_height()
+
         if (pix_width > dimention) or (pix_height > dimention):
             scale_factor = float(dimention) / max (pix_width,pix_height)
         else:
             scale_factor = 1
+
         scale_width = pix_width* scale_factor
         scale_height = pix_height* scale_factor
 
@@ -899,12 +944,14 @@ class AvatarRenderer(gtk.GenericCellRenderer):
             y = (dimention/2) - (scale_height/2)
         else:
             y = dimention - scale_height
+
         ctx.translate(x, y)
 
         if radius > 0 :
             self._rounded_rectangle(ctx, 0, 0, scale_width, scale_height,
-                                      self._dimention * radius)
+                self._dimention * radius)
             ctx.clip()
+
         ctx.scale(scale_factor,scale_factor)
         ctx.set_source_pixbuf(pixbuf, 0, 0)
         ctx.paint_with_alpha(alpha)
@@ -918,8 +965,10 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         # http://graphics.stanford.edu/courses/cs248-98-fall/Final/q1.html
 
         ARC_TO_BEZIER = 0.55228475
+
         if radius > (min(w,h)/2):
             radius = (min(w,h)/2)
+
         #approximate (quite close) the arc using a bezier curve
         c = ARC_TO_BEZIER * radius
 

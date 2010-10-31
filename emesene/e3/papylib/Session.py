@@ -54,12 +54,12 @@ class Session(e3.Session):
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
             host, port))
 
-    def send_message(self, cid, text, style=None):
+    def send_message(self, cid, text, style=None, cedict={}, celist=[]):
         '''send a common message'''
         account = self.account.account
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, account,
             style)
-        self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
+        self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message, cedict, celist))
 
     def request_attention(self, cid):
         '''request the attention of the contact'''

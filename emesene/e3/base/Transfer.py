@@ -28,19 +28,23 @@ class FileTransfer(object):
         return self.received_data
 
     def get_fraction(self):
-        ''' received the percentage, which is < 0 and > 1 '''
+        ''' received the percentage, which is < 1 and > 0 '''
         return (float(self.received_data) / self.size)
 
     def get_eta(self):
         ''' returns the estimated time left to finish the transfer '''
         if self.received_data:
-            return ((self.size - self.received_data) / self.get_speed())
+            return ((self.size - self.received_data) / (self.get_speed() or 0.1))
         return 0    
 
     def get_speed(self):
         ''' returns the average speed of the transfer '''
+        if self.state is FileTransfer.WAITING:
+            return 0
         return (self.received_data / self.get_time())
 
     def get_time(self):
         ''' returns the elapsed time since the start of the transfer '''
-        return (time.time() - self.time_start)
+        if self.received_data:
+            return (time.time() - self.time_start)
+        return 0

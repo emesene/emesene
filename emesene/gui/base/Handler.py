@@ -377,7 +377,8 @@ class ConversationToolbarHandler(object):
 
     def on_emotes_selected(self):
         '''called when the emotes button is selected'''
-        self.dialog.select_emote(self.theme, self.conversation.on_emote)
+        self.dialog.select_emote(self.session, \
+                                 self.theme, self.conversation.on_emote)
 
     def on_notify_attention_selected(self):
         '''called when the nudge button is selected'''

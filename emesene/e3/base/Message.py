@@ -136,7 +136,7 @@ class Color(object):
                 hex_str = hex_str[1:]
         elif len(hex_str) not in (3, 6):
             raise ValueError('Invalid color format', hex_str)
-       
+
         if len(hex_str) == 3:
             hex_str = hex_str[0] * 2 + hex_str[1] * 2 + hex_str[2] * 2
 
