@@ -325,7 +325,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         elif account in self.members:
             self.his_avatar.set_from_file(path)
 
-    def on_contact_attr_changed_succeed(self, account, what, old):
+    def on_contact_attr_changed_succeed(self, account, what, old,
+            do_notify=True):
         self.update_tab()
 
     def on_filetransfer_invitation(self, transfer):
