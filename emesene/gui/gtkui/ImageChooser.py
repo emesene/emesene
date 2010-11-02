@@ -71,12 +71,12 @@ class ImageChooser(gtk.Window):
 
         # All files filter
         all_files = gtk.FileFilter()
-        all_files.set_name('All files')
+        all_files.set_name(_('All files'))
         all_files.add_pattern('*')
 
         # All images filter
         all_images = gtk.FileFilter()
-        all_images.set_name('All images')
+        all_images.set_name(_('All images'))
 
         filters = []
         formats = gtk.gdk.pixbuf_get_formats()
@@ -124,7 +124,7 @@ class ImageChooser(gtk.Window):
             self.hide()
             self.response_cb(gui.stock.ACCEPT, filename)
         else:
-            extension.get_default('dialog').error("No picture selected")
+            extension.get_default('dialog').error(_("No picture selected"))
 
     def _on_cancel(self, button):
         '''method called when the user clicks the button'''
