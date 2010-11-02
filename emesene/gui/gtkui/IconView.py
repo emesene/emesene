@@ -11,10 +11,15 @@ import gc
 class IconView(gtk.HBox):
     ''' class representing a listview in icon mode
         (using gtk.IconView + gtk.ListStore)        '''
-    def __init__(self, label, path_list, avatar_chooser):
+    TYPE_SYSTEM_PICS, TYPE_CONTACTS_PICS, TYPE_SELF_PICS = range(3)
+    def __init__(self, label, path_list, on_remove_cb, on_accept_cb, iconv_type):
         gtk.HBox.__init__(self)
         self.set_spacing(4)
-        self.chooser = avatar_chooser
+        
+        self.on_remove_cb = on_remove_cb
+        self.on_accept_cb = on_accept_cb
+        self.iconv_type = iconv_type
+
         self.model = gtk.ListStore(gtk.gdk.Pixbuf, str)   
         self.iconview = gtk.IconView(self.model)
         self.iconview.enable_model_drag_dest([('text/uri-list', 0, 0)],
@@ -70,7 +75,7 @@ class IconView(gtk.HBox):
     
     def pop_up(self, iconview, event):
         ''' manage the context menu (?) '''
-        if event.button == 3 and self.label.get_text() != _('System pictures'):
+        if event.button == 3 and self.iconv_type != IconView.TYPE_SYSTEM_PICS:
             path = self.iconview.get_path_at_pos(event.x, event.y)
             if path != None:
                 self.iconview.select_path(path)
@@ -78,7 +83,7 @@ class IconView(gtk.HBox):
                 remove_item = gtk.ImageMenuItem(_('Delete'))
                 remove_item.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
                                       gtk.ICON_SIZE_MENU))
-                remove_item.connect('activate', self.chooser.on_remove)
+                remove_item.connect('activate', self.on_remove_cb)
                 remove_menu.append(remove_item)
                 remove_menu.popup(None, None, None, event.button, event.time)
                 remove_menu.show_all()
@@ -119,8 +124,8 @@ class IconView(gtk.HBox):
  
                 # On nt images are 128x128 (48x48 on xp)
                 # On kde, images are 64x64
-                if (self.label.get_text() == _('System pictures') or \
-                 self.label.get_text() == _('Contact pictures')) and \
+                if (self.iconv_type == IconView.TYPE_SYSTEM_PICS or \
+                 self.iconv_type == IconView.TYPE_CONTACTS_PICS) and \
                  (pixbuf.get_width() != 96 or pixbuf.get_height() != 96):
                     pixbuf = pixbuf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
 
@@ -149,7 +154,7 @@ class IconView(gtk.HBox):
 
     def _on_icon_activated(self, *args):
         '''method called when a picture is double clicked'''
-        self.chooser.on_accept(None)
+        self.on_accept_cb(None)
     
     def get_selected_items(self):
         ''' gets the selected pictures '''
