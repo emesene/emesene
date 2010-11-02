@@ -99,7 +99,9 @@ class MainWindow(gtk.VBox):
         dialog = extension.get_default('dialog')
         avatar_manager = extension.get_default('avatar manager')
 
-        am = avatar_manager(self.session)
+        # TODO: probably there's no need to instantiate it from here, now.
+        # (instantiate directly in MenuHandler)
+        am = gui.base.AvatarManager(self.session)
 
         handler = gui.base.MenuHandler(self.session, dialog, self.contact_list,
             am, self.on_disconnect, self.on_close)

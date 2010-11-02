@@ -4,6 +4,8 @@ from Message import Message
 from ContactList import ContactList
 from Conversation import Conversation
 from ConversationManager import ConversationManager
+from AvatarManager  import AvatarManager
+from PictureHandler import PictureHandler
 
 theme = Theme()
 

@@ -24,8 +24,7 @@ class UserPanel(gtk.VBox):
         self._enabled = True
 
         Avatar = extension.get_default('avatar')
-        AvatarManager = extension.get_default('avatar manager')
-
+        
         self.avatar = Avatar(cellDimention=48)
 
         self.avatarBox = gtk.EventBox()
@@ -35,7 +34,7 @@ class UserPanel(gtk.VBox):
         self.avatarBox.set_tooltip_text(_('click here to set your avatar'))
 
         self.avatar_path = self.config_dir.get_path("last_avatar")
-        self.avatar_manager = AvatarManager(self.session)
+        self.avatar_manager = gui.base.AvatarManager(self.session)
 
         if not self.session.config_dir.file_readable(self.avatar_path):
             path = gui.theme.user

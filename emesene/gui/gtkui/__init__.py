@@ -14,7 +14,6 @@ def gtk_main(Controller):
 
     import AccountMenu
     import Avatar
-    import AvatarManager
     import AvatarChooser
     import config_gtk
     import ContactMenu
@@ -57,6 +56,8 @@ def gtk_main(Controller):
         import AdiumTextBox
     except ImportError:
         WEBKITERROR = True
+    
+    import PictureHandler
 
     setup()
     gobject.threads_init()
@@ -89,7 +90,6 @@ def setup():
     extension.category_register('image chooser', ImageChooser.ImageChooser)
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
     extension.category_register('avatar', Avatar.Avatar)
-    extension.category_register('avatar manager', AvatarManager.AvatarManager)
     extension.category_register('avatar renderer', Renderers.AvatarRenderer)
 
     extension.category_register('preferences', Preferences.Preferences)
@@ -153,4 +153,6 @@ def setup():
         extension.register(('notificationGUI'), GtkNotification.gtkNotification)
     except:
         extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
+    
+    extension.category_register('picture handler', PictureHandler.PictureHandler)
 
