@@ -35,9 +35,12 @@ class AvatarChooser(gtk.Window):
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
         self.views = []
-        self.views.append(IconView(_('Used'), [cache_path], self))
-        self.views.append(IconView(_('System pictures'), faces_paths, self))
-        self.views.append(IconView(_('Contact pictures'), [contact_cache_path], self))
+        self.views.append(IconView(_('Used'), [cache_path],
+            self.on_remove, self.on_accept, IconView.TYPE_SELF_PICS))
+        self.views.append(IconView(_('System pictures'), faces_paths,
+            self.on_remove, self.on_accept, IconView.TYPE_SYSTEM_PICS))
+        self.views.append(IconView(_('Contact pictures'), [contact_cache_path],
+            self.on_remove, self.on_accept, IconView.TYPE_CONTACTS_PICS))
 
         vbox = gtk.VBox(spacing=4)
         side_vbox = gtk.VBox(spacing=4)
