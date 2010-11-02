@@ -29,19 +29,19 @@ class MainMenu(gtk.MenuBar):
         OptionsMenu = extension.get_default('menu options')
         HelpMenu = extension.get_default('menu help')
 
-        self.file = gtk.MenuItem('_File')
+        self.file = gtk.MenuItem(_('_File'))
         self.file_menu = FileMenu(self.handlers.file_handler)
         self.file.set_submenu(self.file_menu)
 
-        self.actions = gtk.MenuItem('_Actions')
+        self.actions = gtk.MenuItem(_('_Actions'))
         self.actions_menu = ActionsMenu(self.handlers.actions_handler)
         self.actions.set_submenu(self.actions_menu)
 
-        self.options = gtk.MenuItem('_Options')
+        self.options = gtk.MenuItem(_('_Options'))
         self.options_menu = OptionsMenu(self.handlers.options_handler, config)
         self.options.set_submenu(self.options_menu)
 
-        self.help = gtk.MenuItem('_Help')
+        self.help = gtk.MenuItem(_('_Help'))
         self.help_menu = HelpMenu(self.handlers.help_handler)
         self.help.set_submenu(self.help_menu)
 
@@ -101,19 +101,19 @@ class ActionsMenu(gtk.Menu):
         GroupsMenu = extension.get_default('menu group')
         AccountMenu = extension.get_default('menu account')
 
-        self.contact = gtk.ImageMenuItem('_Contact')
+        self.contact = gtk.ImageMenuItem(_('_Contact'))
         self.contact.set_image(utils.safe_gtk_image_load(gui.theme.chat))
         self.contact_menu = ContactsMenu(self.handler.contact_handler)
         self.contact.set_submenu(self.contact_menu)
-        self.group = gtk.ImageMenuItem('_Group')
+        self.group = gtk.ImageMenuItem(_('_Group'))
         self.group.set_image(utils.safe_gtk_image_load(gui.theme.group_chat))
         self.group_menu = GroupsMenu(self.handler.group_handler)
         self.group.set_submenu(self.group_menu)
-        self.account = gtk.ImageMenuItem('_Account')
+        self.account = gtk.ImageMenuItem(_('_Account'))
         self.account.set_image(utils.safe_gtk_image_load(gui.theme.chat))
 
         self.account_menu = AccountMenu(self.handler.my_account_handler)
-        self.myaccount = gtk.ImageMenuItem('_Profile')
+        self.myaccount = gtk.ImageMenuItem(_('_Profile'))
         self.myaccount.set_image(utils.safe_gtk_image_load(gui.theme.chat))
         self.myaccount.set_submenu(self.account_menu)
 
@@ -135,21 +135,21 @@ class OptionsMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        self.by_status = gtk.RadioMenuItem(None, 'Order by _status')
-        self.by_group = gtk.RadioMenuItem(self.by_status, 'Order by _group')
+        self.by_status = gtk.RadioMenuItem(None, _('Order by _status'))
+        self.by_group = gtk.RadioMenuItem(self.by_status, _('Order by _group'))
         self.by_group.set_active(config.b_order_by_group)
         self.by_status.set_active(not config.b_order_by_group)
 
-        self.show_menu = gtk.MenuItem('Show...')
+        self.show_menu = gtk.MenuItem(_('Show...'))
         self.show_submenu = gtk.Menu()
 
-        self.show_offline = gtk.CheckMenuItem('Show _offline contacts')
+        self.show_offline = gtk.CheckMenuItem(_('Show _offline contacts'))
         self.show_offline.set_active(config.b_show_offline)
-        self.group_offline = gtk.CheckMenuItem('G_roup offline contacts')
+        self.group_offline = gtk.CheckMenuItem(_('G_roup offline contacts'))
         self.group_offline.set_active(config.b_group_offline)
-        self.show_empty_groups = gtk.CheckMenuItem('Show _empty groups')
+        self.show_empty_groups = gtk.CheckMenuItem(_('Show _empty groups'))
         self.show_empty_groups.set_active(config.b_show_empty_groups)
-        self.show_blocked = gtk.CheckMenuItem('Show _blocked contacts')
+        self.show_blocked = gtk.CheckMenuItem(_('Show _blocked contacts'))
         self.show_blocked.set_active(config.b_show_blocked)
 
         self.preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
@@ -202,7 +202,7 @@ class HelpMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        self.website = gtk.ImageMenuItem('_Website')
+        self.website = gtk.ImageMenuItem(_('_Website'))
         self.website.set_image(gtk.image_new_from_stock(gtk.STOCK_HOME,
             gtk.ICON_SIZE_MENU))
         self.website.connect('activate',
@@ -211,7 +211,7 @@ class HelpMenu(gtk.Menu):
         self.about.connect('activate',
             lambda *args: self.handler.on_about_selected())
 
-        self.debug = gtk.MenuItem('Debug')
+        self.debug = gtk.MenuItem(_('Debug'))
         self.debug.connect('activate',
                 lambda *args: self.handler.on_debug_selected())
 
