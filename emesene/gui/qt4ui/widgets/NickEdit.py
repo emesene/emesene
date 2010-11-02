@@ -66,7 +66,7 @@ class NickEdit(QtGui.QStackedWidget):
         '''Displays the given text'''
         #NOTE: do we have to set also the QLineEdit's text? 
         #<-> method could be called while the QLEdit is active? 
-        self._text = text
+        self._text = unicode(text)
         text = Utils.escape(unicode(text)) 
         parsed_text = Utils.parse_emotes(text)
         text = QtCore.QString(text)
