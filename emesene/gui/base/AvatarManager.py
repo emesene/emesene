@@ -23,9 +23,9 @@ methods.'''
 import os
 import hashlib
 import shutil
+import tempfile
 
 import extension
-
 
 class AvatarManager(object):
     '''an utility class to manage avatars and their paths'''
@@ -93,19 +93,19 @@ class AvatarManager(object):
         except OSError, error:
             print error
             return None, fpath
-            
+
 
     def add_new_avatar_from_toolkit_pix(self, toolkit_pix):
         ''' add a new picture into the avatar cache '''
-        temp_filename = os.tmpnam()
+        fd, fn = tempfile.mkstemp(prefix='emsnpic')
         PictureHandler = extension.get_default('picture handler')
         pix = PictureHandler.from_toolkit(toolkit_pix)
-        pix.save(temp_filename)
-        results = self.add_new_avatar(temp_filename)
-        os.remove(temp_filename)
+        pix.save(fn)
+        results = self.add_new_avatar(fn)
+        os.remove(fn)
         return results
-        
-        
+
+
     def set_as_avatar(self, filename):
         ''' set a picture as the current avatar 
         and make a copy in the cache '''
@@ -131,10 +131,4 @@ class AvatarManager(object):
                 shutil.copy(fpath, self.avatar_path)
             except OSError, error:
                 print error
-                
-                
-                
-
-        
-                
 
