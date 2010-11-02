@@ -2,14 +2,11 @@
 
 '''This module contains the NickEdit class'''
 
-import xml
-
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 from gui.qt4ui import Utils
-from gui.base import MarkupParser
 
 
 # important: at the moment emits "str" not "unicode"
@@ -84,8 +81,7 @@ class NickEdit(QtGui.QStackedWidget):
     def _on_label_clicked(self):
         '''Slot called when the user clicks on the label of 
         this widget'''
-        text = self.text() # handles unescaping
-        self.line_edit.setText(self._text) #remove this unicode once fixed
+        self.line_edit.setText(self._text)
         self.setCurrentWidget(self.line_edit)
         self.line_edit.setFocus(Qt.MouseFocusReason)
     

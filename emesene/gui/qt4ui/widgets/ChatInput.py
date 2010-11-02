@@ -320,7 +320,6 @@ class MyHTMLParser (HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         '''Handle opening tags'''
-        #print "TAG: %s, ATTRS: %s" % (tag, attrs)
         if self._in_body:
             if tag == "body":
                 raise NameError("Malformed HTML")

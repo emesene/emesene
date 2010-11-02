@@ -9,7 +9,6 @@ import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 from gui.qt4ui  import Utils
-from gui.base   import MarkupParser
 
 
 class ContactListModel (QtGui.QStandardItemModel):

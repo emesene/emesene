@@ -21,8 +21,8 @@ X Implement menus
 X Remove the empty space on the left in contact list
 
 - Implement a display pic chooser.
-- Implement actions on contact list
-
+> Implement actions on contact list
+X Implement default emoticon support
 - Implement nick rendering
 
 - Implement notifications

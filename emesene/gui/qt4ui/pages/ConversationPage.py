@@ -5,7 +5,6 @@
 import PyQt4.QtGui      as QtGui
 
 import gui
-from gui.base import MarkupParser
 import extension
 
 

@@ -87,7 +87,7 @@
       <item>
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>TextLabel</string>
+         <string>&lt;u&gt;C&amp;nbsp;i&lt;/u&gt;</string>
         </property>
        </widget>
       </item>

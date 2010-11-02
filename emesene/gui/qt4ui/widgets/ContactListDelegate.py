@@ -45,7 +45,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         
         if not index.parent().isValid():
             # -> Start drawing the text_doc:
-            text = self._build_display_role(index, isGroup=True)
+            text = _build_display_role(index, is_group=True)
             painter.translate( QtCore.QPointF(option.rect.topLeft()) )
             # create the text_doc
             text_doc.setHtml(text)
@@ -92,7 +92,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             painter.drawPixmap(target, picture, source)
         
             # -> Start setting up the text_doc:
-            text = self._build_display_role(index)
+            text = _build_display_role(index)
             # set the text into text_doc
             text_doc.setHtml(text)
             # calculate the vertical offset, to center the text_doc vertically
@@ -115,12 +115,12 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         text = index.model().data(index, Role.DisplayRole).toString()
         text_doc = QtGui.QTextDocument()
         if not index.parent().isValid():
-            text = self._build_display_role(index, isGroup=True)
+            text = _build_display_role(index, is_group=True)
             text_doc.setHtml(text)
             text_size = text_doc.size().toSize()
             return text_size
         else:
-            text = self._build_display_role(index)
+            text = _build_display_role(index)
             text_doc.setHtml(text)
             text_size = text_doc.size().toSize()
             text_width  = text_size.width()
@@ -130,30 +130,31 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                               self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
                               
                               
-    def _build_display_role(self, index, isGroup=False):
-        model = index.model()
-        display_role = model.data(index, Role.DisplayRole).toString()
-        if isGroup:
-            display_role = u'<b>' + display_role + u'</b>'
-        else:
-            display_role = _format_contact_display_role(display_role)
-            message = model.data(index, Role.MessageRole).toString()
-            if not message.isEmpty():
-                display_role += u'<p style="-qt-paragraph-type:empty; ' \
-                                u'margin-top:5px; margin-bottom:0px; '  \
-                                u'margin-left:0px; margin-right:0px; '  \
-                                u'-qt-block-indent:0; text-indent:0px;"></p>'
-                message = u'<i>' + message + u'</i>'
-                display_role += _format_contact_display_role(message)
-            # display_role = _format_contact_display_role(display_role)
-            #display_role += '</table>'
-        return display_role
+def _build_display_role(index, is_group=False):
+    '''Build a string to be used as item's display role'''
+    model = index.model()
+    display_role = model.data(index, Role.DisplayRole).toString()
+    if is_group:
+        display_role = u'<b>' + display_role + u'</b>'
+    else:
+        display_role = _format_contact_display_role(display_role)
+        message = model.data(index, Role.MessageRole).toString()
+        if not message.isEmpty():
+            display_role += u'<p style="-qt-paragraph-type:empty; ' \
+                            u'margin-top:5px; margin-bottom:0px; '  \
+                            u'margin-left:0px; margin-right:0px; '  \
+                            u'-qt-block-indent:0; text-indent:0px;"></p>'
+            message = u'<i>' + message + u'</i>'
+            display_role += _format_contact_display_role(message)
+        # display_role = _format_contact_display_role(display_role)
+        #display_role += '</table>'
+    return display_role
             
         
                           
 def _format_contact_display_role(text):
-    '''Formats correctly the html string which represents the contact's
-    display role'''
+    '''Formats correctly a string part of a display role. Parses emotes, and
+    scales them.'''
     # TODO: calculate smiley size from text's size.
     smiley_size = 16
     #if not text.contains('<i></i>'):

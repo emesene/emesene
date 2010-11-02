@@ -10,20 +10,24 @@ from PyQt4.QtCore   import Qt
 
 from gui.base import MarkupParser
 
-dic     = {' ': '&nbsp;'}
-dic_inv = {'&nbsp;': ' '}
 
 
 # consider changing these directly in MarkupParser
-def escape(string, add_dic={}):
+def escape(string, add_dic=None):
     '''replace the values on dic keys with the values'''
+    dic     = {' ': '&nbsp;'}
+    if not add_dic:
+        add_dic = {}
     add_dic.update(MarkupParser.dic)
     add_dic.update(dic)
     return xml.sax.saxutils.escape(string, dic)
     
 
-def unescape(string, add_dic_inv={}):
+def unescape(string, add_dic_inv=None):
     '''replace the values on dic_inv keys with the values'''
+    dic_inv = {'&nbsp;': ' '}
+    if not add_dic_inv:
+        add_dic_inv = {}
     add_dic_inv.update(MarkupParser.dic_inv)
     add_dic_inv.update(dic_inv)
     return xml.sax.saxutils.unescape(string, dic_inv)
@@ -65,12 +69,12 @@ def pixmap_rounder(qpixmap, perc_radius=16.7):
     
 
 def parse_emotes(text, include_table_tags=True):
+    '''Parses emotes in text string, returning a html string laid out
+    using a table, to vertically align emotes correctly'''
     text = MarkupParser.replace_emotes(text)
-    text = text.replace('file://', '')
     parser = MyHTMLParser(include_table_tags)
     parser.feed(text)
     text2 = parser.get_data()
-    #print 'parse_emotes: [%s]->[%s]' % (text, text2)
     return text2
     
     
@@ -107,9 +111,9 @@ class MyHTMLParser (HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         '''Handle opening tags'''
-        #print "TAG: %s, ATTRS: %s" % (tag, attrs)
         if tag == 'img':
             src = attrs[0][1]
+            src.replace('file://', '')
             self._data += u'<td valign="middle"><img src="%s" \></td>' % src
         if tag == 'i':
             self._italic = True
