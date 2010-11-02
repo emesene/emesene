@@ -75,7 +75,7 @@ class IconView(gtk.HBox):
             if path != None:
                 self.iconview.select_path(path)
                 remove_menu = gtk.Menu()
-                remove_item = gtk.ImageMenuItem('Delete')
+                remove_item = gtk.ImageMenuItem(_('Delete'))
                 remove_item.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
                                       gtk.ICON_SIZE_MENU))
                 remove_item.connect('activate', self.chooser.on_remove)
@@ -119,8 +119,8 @@ class IconView(gtk.HBox):
  
                 # On nt images are 128x128 (48x48 on xp)
                 # On kde, images are 64x64
-                if (self.label.get_text() == 'System pictures' or \
-                 self.label.get_text() == 'Contact pictures') and \
+                if (self.label.get_text() == _('System pictures') or \
+                 self.label.get_text() == _('Contact pictures')) and \
                  (pixbuf.get_width() != 96 or pixbuf.get_height() != 96):
                     pixbuf = pixbuf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
 
