@@ -129,9 +129,9 @@ class IconView(gtk.HBox):
                     # Esplicitely delete gtkpixbuf
                     del pixbuf
             else:
-                print path, _('not readable')
+                print path, 'not readable'
         except gobject.GError:
-            print _("image at %s could not be loaded") % path
+            print "image at %s could not be loaded" % path
 
     def is_in_view(self, filename):
         '''return True if filename already on the iconview'''

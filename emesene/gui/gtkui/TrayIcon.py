@@ -162,7 +162,7 @@ class ContactsMenu(gtk.Menu):
     """
     a gtk menu that contains session's contacts
     """
-    NAME = _('Contacts Menu')
+    NAME = 'Contacts Menu'
     DESCRIPTION = _('A menu with sessions\' contacts')
     AUTHOR = 'Riccardo (C10uD)'
     WEBSITE = 'www.emesene.org'

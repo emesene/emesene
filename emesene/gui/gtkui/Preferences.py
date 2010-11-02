@@ -32,7 +32,6 @@ class Preferences(gtk.Window):
         self.session = session
 
         self.set_default_size(600, 400)
-        self.set_role(_("New preferences Window"))
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
         if utils.file_readable(gui.theme.logo):
@@ -363,10 +362,10 @@ class Interface(BaseTable):
         """
         BaseTable.__init__(self, 4, 1)
         self.session = session
-        self.append_markup(_('<b>Main window:</b>'))
+        self.append_markup('<b>'+_('Main window:')+'</b>')
         self.append_check(_('Show user panel'),
             'session.config.b_show_userpanel')
-        self.append_markup(_('<b>Conversation window:</b>'))
+        self.append_markup('<b>'+_('Conversation window:')+'</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
         self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
@@ -398,7 +397,7 @@ class Sound(BaseTable):
         """
         BaseTable.__init__(self, 6, 1)
         self.session = session
-        self.append_markup(_('<b>Messages events:</b>'))
+        self.append_markup('<b>'+_('Messages events:')+'</b>')
         self.append_check(_('Mute sounds'),
             'session.config.b_mute_sounds')
         self.append_check(_('Play sound on sent message'),
@@ -410,7 +409,7 @@ class Sound(BaseTable):
         self.append_check(_('Play sound on nudge'),
             'session.config.b_play_nudge')
 
-        self.append_markup(_('<b>Users events:</b>'))
+        self.append_markup('<b>'+_('Users events:')+'</b>')
         self.append_check(_('Play sound on contact online'),
             'session.config.b_play_contact_online')
         self.append_check(_('Play sound on contact offline'),
@@ -571,10 +570,10 @@ class Extension(BaseTable):
 
     def _set_extension_info(self, ext):
         """fill the information about the ext"""
-        name = self.get_attr_or_default(ext, _('NAME'), '?')
-        description = self.get_attr_or_default(ext, _('DESCRIPTION'), '?')
-        author = self.get_attr_or_default(ext, _('AUTHOR'), '?')
-        website = self.get_attr_or_default(ext, _('WEBSITE'), '?')
+        name = self.get_attr_or_default(ext, 'NAME', '?')
+        description = self.get_attr_or_default(ext, 'DESCRIPTION', '?')
+        author = self.get_attr_or_default(ext, 'AUTHOR', '?')
+        website = self.get_attr_or_default(ext, 'WEBSITE', '?')
 
         self.name_info.set_text(name)
         self.description_info.set_text(description)

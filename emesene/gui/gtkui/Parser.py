@@ -533,9 +533,9 @@ if __name__=='__main__':
     parser = UnifiedParser( theme )
     #data = ':D :o :P http://someurl.com/~das/:Dx/index.od?asd=asd&asd [b]test[/b] :D <:o)(G)(@)")'
     data = '") <tag> [b][/b] %s % omg omg'
-    print _("Conversation:")
+    print "Conversation:"
     print '  ', parser.getParser( data, ConversationDataType ).get()
-    print _("UserList:")
+    print "UserList:"
     print '  ', parser.getParser( ('%s',data), UserListDataType ).get()
-    print _("Default:")
+    print "Default:"
     print '  ', parser.getParser( data ).get()

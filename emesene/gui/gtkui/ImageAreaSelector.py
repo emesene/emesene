@@ -36,7 +36,7 @@ NORMALBACKGROUND = gtk.gdk.Color(65025,65025,46155)
 
 class ImageAreaSelectorDialog(gtk.Dialog):
 
-    NAME = _('ImageAreaSelector')
+    NAME = 'ImageAreaSelector'
     DESCRIPTION = _('The widget that permits to resize an image added as avatar')
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
