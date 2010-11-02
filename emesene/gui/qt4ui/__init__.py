@@ -64,6 +64,7 @@ def setup():
     import Conversation
     import Dialog
     import Notifier
+    import PictureHandler
     import TopLevelWindow
     import TrayIcon
     import menus
@@ -104,6 +105,9 @@ def setup():
     
     extension.category_register('tray main menu',  menus.TrayMainMenu)
     extension.category_register('tray login menu', menus.TrayLoginMenu)
+    
+    extension.category_register('picture handler', 
+                                PictureHandler.PictureHandler)
     
 
     
