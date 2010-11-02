@@ -582,7 +582,7 @@ class Dialog(object):
         window = cls.new_window(_('Select font'))
 
         font_sel = gtk.FontSelection()
-        font_sel.set_preview_text(_('OMG PONNIES! I\'m a preview text!'))
+        font_sel.set_preview_text(_('This is a preview text!'))
         fdesc = utils.style_to_pango_font_description(style)
 
         window.hbox.pack_start(font_sel, True, True)
@@ -1199,7 +1199,7 @@ class EmotesWindow(gtk.Window):
             path = gui.theme.emote_to_path(shortcut, True)
 
             if path is None:
-                log.debug(shortcut + _(' has no path'))
+                log.debug(shortcut + ' has no path')
                 continue
 
             button.set_image(utils.safe_gtk_image_load(path))

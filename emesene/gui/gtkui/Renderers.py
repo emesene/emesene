@@ -103,14 +103,14 @@ class CellRendererFunction(gtk.GenericCellRenderer):
     def do_get_property(self, prop):
         '''return the value of prop if exists, raise TypeError if not found'''
         if prop.name not in self.property_names:
-            raise TypeError(_('No property named %s') % (prop.name,))
+            raise TypeError('No property named %s' % (prop.name,))
 
         return self.__dict__[prop.name]
 
     def do_set_property(self, prop, value):
         '''set the value of prop if exists, raise TypeError if not found'''
         if prop.name not in self.property_names:
-            raise TypeError(_('No property named %s') % (prop.name,))
+            raise TypeError('No property named %s' % (prop.name,))
 
         if prop == 'markup': #plus formatting
             value = Plus.msnplus_to_dict
@@ -137,7 +137,7 @@ class CellRendererFunction(gtk.GenericCellRenderer):
             try:
                 decorated_markup = self.function(self.markup)
             except Exception, error:
-                print _("this nick: '%s' made the parser go crazy, striping") % (
+                print "this nick: '%s' made the parser go crazy, striping" % (
                         self.markup,)
                 print error
 

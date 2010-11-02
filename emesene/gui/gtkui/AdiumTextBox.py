@@ -106,7 +106,7 @@ class OutputView(webkit.WebView):
 class OutputText(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
     text in the widget'''
-    NAME = _('Adium Output')
+    NAME = 'Adium Output'
     DESCRIPTION = _('A widget to display conversation messages using adium style')
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
