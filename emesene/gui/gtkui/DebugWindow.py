@@ -29,13 +29,13 @@ class DebugWindow(object):
 
         self.filter_entry = gtk.Entry()
         self.filter_level = gtk.combo_box_new_text()
-        self.filter_level.append_text("Debug")
-        self.filter_level.append_text("Info")
-        self.filter_level.append_text("Warning")
-        self.filter_level.append_text("Error")
-        self.filter_level.append_text("Critical")
+        self.filter_level.append_text(_("Debug"))
+        self.filter_level.append_text(_("Info"))
+        self.filter_level.append_text(_("Warning"))
+        self.filter_level.append_text(_("Error"))
+        self.filter_level.append_text(_("Critical"))
         self.filter_level.set_active(0)
-        self.filter_btn = gtk.Button("Filter")
+        self.filter_btn = gtk.Button(_("Filter"))
         self.filter_box.pack_start(self.filter_entry)
         self.filter_box.pack_start(self.filter_level, False)
         self.filter_box.pack_start(self.filter_btn, False)
@@ -43,7 +43,7 @@ class DebugWindow(object):
 
         self.vbox.pack_start(self.scroll_view)
 
-        self.close_btn = gtk.Button("Close")
+        self.close_btn = gtk.Button(_("Close"))
         self.buttons_box.pack_end(self.close_btn, False)
         self.vbox.pack_start(self.buttons_box, False)
         
