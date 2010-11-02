@@ -16,13 +16,16 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-''' this file contains the AvatarManager class, used to manage Avatars '''
+''' this file contains the AvatarManager abstract class, used to manage 
+Avatars. This class must be subclassed in gui code, implementing abstract
+methods.'''
 
 import os
 import hashlib
-import utils
 import shutil
-import gtk
+
+import extension
+
 
 class AvatarManager(object):
     '''an utility class to manage avatars and their paths'''
@@ -80,42 +83,32 @@ class AvatarManager(object):
         fpath = os.path.join(self.get_avatars_dir(), gen_filename(filename))
 
         try:
-            #FIXME temporaney hack for animations = simple copy
-            animation = gtk.gdk.PixbufAnimation(filename)
-            if not animation.is_static_image():
-                shutil.copy(filename, fpath)
-                return None, fpath
-            else:
-                if not os.path.exists(self.get_avatars_dir()):
+            if not os.path.exists(self.get_avatars_dir()):
                     os.makedirs(self.get_avatars_dir())
-                # Save in 96x96
-                pix_96 = utils.safe_gtk_pixbuf_load(filename, (96, 96))
-                pix_96.save(fpath, 'png')
-                return pix_96, fpath
+            pix_96 = extension.get_and_instantiate('picture handler', filename)
+            pix_96.resize(96)
+            pix_96.save(fpath)
+            return fpath
 
         except OSError, error:
             print error
             return None, fpath
+            
 
-    def add_new_avatar_from_pix(self, pix):
+    def add_new_avatar_from_toolkit_pix(self, toolkit_pix):
         ''' add a new picture into the avatar cache '''
-        def gen_filename(source):
-            # Generate a unique (?) filename for the new avatar in cache
-            # implemented as sha224 digest
-            return hashlib.sha224(source.get_pixels()).hexdigest()
-
-        fpath = os.path.join(self.get_avatars_dir(), gen_filename(pix))
-        if not os.path.exists(self.get_avatars_dir()):
-            os.makedirs(self.get_avatars_dir())
-
-        # Resize to 96x96
-        pix = pix.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
-        pix.save(fpath, 'png')
-        return pix, fpath
-
-
+        temp_filename = os.tmpnam()
+        PictureHandler = extension.get_default('picture handler')
+        pix = PictureHandler.from_toolkit(toolkit_pix)
+        pix.save(temp_filename)
+        results = self.add_new_avatar(temp_filename)
+        os.remove(temp_filename)
+        return results
+        
+        
     def set_as_avatar(self, filename):
-        ''' set a picture as the current avatar and make a copy in the cache '''
+        ''' set a picture as the current avatar 
+        and make a copy in the cache '''
         # Control if the filename is a already in cache
         if self.is_cached(filename):
             self.session.set_picture(filename)
@@ -130,16 +123,18 @@ class AvatarManager(object):
             shutil.copy(filename, self.avatar_path)
         else:
             try:
-                pix_96, fpath = self.add_new_avatar(filename)
+                fpath = self.add_new_avatar(filename)
 
                 self.session.set_picture(fpath)
                 if os.path.exists(self.avatar_path):
                     os.remove(self.avatar_path)
-                if pix_96 != None:
-                    pix_96.save(self.avatar_path, 'png')
-                else:
-                    #FIXME temporaney hack for animations
-                    shutil.copy(filename, self.avatar_path)
+                shutil.copy(fpath, self.avatar_path)
             except OSError, error:
                 print error
+                
+                
+                
+
+        
+                
 
