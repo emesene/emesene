@@ -113,7 +113,7 @@ class MyHTMLParser (HTMLParser):
         '''Handle opening tags'''
         if tag == 'img':
             src = attrs[0][1]
-            src.replace('file://', '')
+            src = src.replace('file://', '')
             self._data += u'<td valign="middle"><img src="%s" \></td>' % src
         if tag == 'i':
             self._italic = True

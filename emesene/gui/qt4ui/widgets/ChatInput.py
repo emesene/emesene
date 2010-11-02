@@ -142,7 +142,7 @@ class ChatInput (QtGui.QTextEdit):
             
     def show_color_chooser(self):
         '''Shows the font color chooser'''
-        qt_color = self._get_qt_color
+        qt_color = self._get_qt_color()
         new_qt_color = QtGui.QColorDialog.getColor(qt_color)
         if new_qt_color.isValid() and not new_qt_color == qt_color:
             self._set_qt_color(new_qt_color)
