@@ -65,7 +65,7 @@ class FileMenu(gtk.Menu):
         self.handler = handler
 
         StatusMenu = extension.get_default('menu status')
-        self.status = gtk.ImageMenuItem('Status')
+        self.status = gtk.ImageMenuItem(_('Status'))
         self.status.set_image(gtk.image_new_from_stock(gtk.STOCK_CONVERT,
             gtk.ICON_SIZE_MENU))
         self.status_menu = StatusMenu(handler.on_status_selected)
