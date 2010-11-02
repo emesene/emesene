@@ -579,10 +579,10 @@ class Dialog(object):
 
             window.hide()
 
-        window = cls.new_window('Select font')
+        window = cls.new_window(_('Select font'))
 
         font_sel = gtk.FontSelection()
-        font_sel.set_preview_text('OMG PONNIES! I\'m a preview text!')
+        font_sel.set_preview_text(_('OMG PONNIES! I\'m a preview text!'))
         fdesc = utils.style_to_pango_font_description(style)
 
         window.hbox.pack_start(font_sel, True, True)
@@ -665,7 +665,7 @@ class Dialog(object):
         """
 
         content = gtk.VBox(spacing=4)
-        advanced = gtk.Expander("Advanced")
+        advanced = gtk.Expander(_("Advanced"))
         box = gtk.Table(10, 2)
         box.set_property('row-spacing', 4)
         box.set_property('column-spacing', 4)
@@ -712,11 +712,11 @@ class Dialog(object):
         l_server_host.set_alignment(0.0, 0.5)
         l_server_port = gtk.Label(_('Port'))
         l_server_port.set_alignment(0.0, 0.5)
-        l_host = gtk.Label('Host')
+        l_host = gtk.Label(_('Host'))
         l_host.set_alignment(0.0, 0.5)
-        l_port = gtk.Label('Port')
+        l_port = gtk.Label(_('Port'))
         l_port.set_alignment(0.0, 0.5)
-        l_user = gtk.Label('User')
+        l_user = gtk.Label(_('User'))
         l_user.set_alignment(0.0, 0.5)
         l_passwd = gtk.Label(_('Password'))
         l_passwd.set_alignment(0.0, 0.5)
@@ -955,7 +955,7 @@ class ImageChooser(gtk.FileChooserDialog):
 
         # All images filter
         all_images = gtk.FileFilter()
-        all_images.set_name(_( 'All images'))
+        all_images.set_name(_('All images'))
 
         filters = []
         formats = gtk.gdk.pixbuf_get_formats()
@@ -1199,7 +1199,7 @@ class EmotesWindow(gtk.Window):
             path = gui.theme.emote_to_path(shortcut, True)
 
             if path is None:
-                log.debug(shortcut + ' has no path')
+                log.debug(shortcut + _(' has no path'))
                 continue
 
             button.set_image(utils.safe_gtk_image_load(path))
