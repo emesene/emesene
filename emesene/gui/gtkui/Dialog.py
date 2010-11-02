@@ -287,14 +287,14 @@ class Dialog(object):
         vbox = gtk.VBox()
         text = gtk.Label(message)
         vbox.pack_start(text)
-        hide_button = gtk.ToggleButton('Show details')
+        hide_button = gtk.ToggleButton(_('Show details'))
         trace = gtk.Label(traceback.format_exc())
         def on_hide(*args):
             if hide_button.get_active(): #show
-                hide_button.set_label('Hide details')
+                hide_button.set_label(_('Hide details'))
                 trace.show()
             else:
-                hide_button.set_label('Show details')
+                hide_button.set_label(_('Show details'))
                 trace.hide()
         hide_button.connect('toggled', on_hide)
 
@@ -612,7 +612,7 @@ class Dialog(object):
 
             window.hide()
 
-        window = cls.new_window('Select color')
+        window = cls.new_window(_('Select color'))
 
         color_sel = gtk.ColorSelection()
 
@@ -687,10 +687,10 @@ class Dialog(object):
             for entry in entries:
                 entry.set_sensitive(check_button.get_active())
 
-        c_use_http = gtk.CheckButton('Use HTTP method')
-        c_use_proxy = gtk.CheckButton('Use proxy')
+        c_use_http = gtk.CheckButton(_('Use HTTP method'))
+        c_use_proxy = gtk.CheckButton(_('Use proxy'))
         c_use_proxy.connect('toggled', on_toggled, t_proxy_host, t_proxy_port)
-        c_use_auth = gtk.CheckButton('Use authentication')
+        c_use_auth = gtk.CheckButton(_('Use authentication'))
         c_use_auth.connect('toggled', on_toggled, t_user, t_passwd)
 
         t_proxy_host.set_text(proxy.host or '')
@@ -706,11 +706,11 @@ class Dialog(object):
         c_use_auth.toggled()
         c_use_auth.toggled()
 
-        l_session = gtk.Label('Session')
+        l_session = gtk.Label(_('Session'))
         l_session.set_alignment(0.0, 0.5)
-        l_server_host = gtk.Label('Server')
+        l_server_host = gtk.Label(_('Server'))
         l_server_host.set_alignment(0.0, 0.5)
-        l_server_port = gtk.Label('Port')
+        l_server_port = gtk.Label(_('Port'))
         l_server_port.set_alignment(0.0, 0.5)
         l_host = gtk.Label('Host')
         l_host.set_alignment(0.0, 0.5)
@@ -718,7 +718,7 @@ class Dialog(object):
         l_port.set_alignment(0.0, 0.5)
         l_user = gtk.Label('User')
         l_user.set_alignment(0.0, 0.5)
-        l_passwd = gtk.Label('Password')
+        l_passwd = gtk.Label(_('Password'))
         l_passwd.set_alignment(0.0, 0.5)
 
         proxy_settings = (l_host, l_port, l_user, l_passwd, t_proxy_host,
@@ -811,7 +811,7 @@ class Dialog(object):
             response'''
             response_cb(response)
 
-        window = cls.new_window('Preferences', response_cb)
+        window = cls.new_window(_('Preferences'), response_cb)
         window.set_modal(True)
         window.hbox.pack_start(content, True, True)
 
@@ -839,14 +839,14 @@ class Dialog(object):
         windows = gtk.Window()
         windows.set_modal(True)
         windows.set_border_width(5)
-        windows.set_title('Change profile')
+        windows.set_title(_('Change profile'))
         windows.set_position(gtk.WIN_POS_CENTER)
         windows.set_resizable(False)
 
         hbox = gtk.HBox(spacing=5)
         vbox = gtk.VBox()
 
-        frame = gtk.Frame('Picture')
+        frame = gtk.Frame(_('Picture'))
 
         avatar = gtk.Image()
         avatar.set_size_request(96, 96)
@@ -864,13 +864,13 @@ class Dialog(object):
         hbox.pack_start(avatarEventBox)
         hbox.pack_start(vbox)
 
-        nick_label = gtk.Label('Nick:')
+        nick_label = gtk.Label(_('Nick:'))
         nick_label.set_alignment(0.0,0.5)
 
         nick = gtk.Entry()
         nick.set_text(user_nick)
 
-        pm_label = gtk.Label('PM:')
+        pm_label = gtk.Label(_('PM:'))
         pm_label.set_alignment(0.0,0.5)
 
         pm = gtk.Entry()
@@ -1148,7 +1148,7 @@ class EmotesWindow(gtk.Window):
 
         self.table = gtk.Table(max_width, rows)
         self._fill_emote_table(max_width)
-        button = gtk.Button("Add emoticon")
+        button = gtk.Button(_("Add emoticon"))
         button.set_image(gtk.image_new_from_stock(gtk.STOCK_ADD,
             gtk.ICON_SIZE_BUTTON))
         button.connect('clicked', self._on_add_custom_emote_selected)
