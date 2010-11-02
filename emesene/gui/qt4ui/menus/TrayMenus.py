@@ -6,6 +6,8 @@ import PyQt4.QtGui      as QtGui
 
 import extension
 
+ICON = QtGui.QIcon.fromTheme
+
 class TrayMainMenu (QtGui.QMenu):
     '''Tray's context menu, shown when main window is shown'''
     # pylint: disable=W0612
@@ -26,8 +28,10 @@ class TrayMainMenu (QtGui.QMenu):
         self.hide_show_mainwindow = QtGui.QAction('Hide/Show emesene', self)
         self.status_menu = status_menu_cls(handler.on_status_selected)
         #self.list_contacts_menu = ContactsMenu(handler, main_window)
-        self.disconnect = QtGui.QAction('Disconnect', self)
-        self.quit = QtGui.QAction('Quit', self)
+        self.disconnect = QtGui.QAction(ICON('network-disconnect'),
+                                        'Disconnect', self)
+        self.quit = QtGui.QAction(ICON('application-exit'),
+                                 'Quit', self)
         
 
         self.addAction(self.hide_show_mainwindow)
@@ -59,7 +63,7 @@ class TrayLoginMenu (QtGui.QMenu):
         QtGui.QMenu.__init__(self, parent)
         self._handler = handler
         self.hide_show_mainwindow = QtGui.QAction('Hide/Show emesene', self)
-        self.quit = QtGui.QAction('Quit', self)
+        self.quit = QtGui.QAction(ICON('application-exit'), 'Quit', self)
             
         self.addAction(self.hide_show_mainwindow)
         self.addSeparator()

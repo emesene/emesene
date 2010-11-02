@@ -6,6 +6,7 @@ import PyQt4.QtGui      as QtGui
 
 import extension
 
+ICON = QtGui.QIcon.fromTheme
 
 class MainMenu(QtGui.QMenuBar):
     '''A widget that represents the main menu of the main window'''
@@ -66,8 +67,9 @@ class FileMenu(QtGui.QMenu):
         status_menu_cls = extension.get_default('menu status')
         
         self.status_menu = status_menu_cls(handler.on_status_selected)
-        disconnect_action = QtGui.QAction('Disconnect', self)
-        quit_action = QtGui.QAction('Quit', self)
+        disconnect_action = QtGui.QAction(ICON('network-disconnect'),
+                                          'Disconnect', self)
+        quit_action = QtGui.QAction(ICON('application-exit'),'Quit', self)
         
         self.addMenu(self.status_menu)
         self.addAction(disconnect_action)
@@ -153,7 +155,8 @@ class OptionsMenu(QtGui.QMenu):
         by_status.setChecked(not config.b_order_by_group)
 
         group_offline = QtGui.QAction('G_roup offline contacts', self)
-        preferences = QtGui.QAction('Preferences...', self)
+        preferences = QtGui.QAction(ICON('preferences-other'),
+                                    'Preferences...', self)
         group_offline.setChecked(config.b_group_offline)
         
         self.addAction(by_status)

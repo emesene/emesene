@@ -5,6 +5,7 @@
 
 import PyQt4.QtGui      as QtGui
 
+ICON = QtGui.QIcon.fromTheme
 
 class ContactMenu(QtGui.QMenu):
     '''A class that represents a menu to handle contact related information'''
@@ -22,12 +23,12 @@ class ContactMenu(QtGui.QMenu):
         QtGui.QMenu.__init__(self, 'Contact', parent)
         self._handler = handler
 
-        self.add =       QtGui.QAction('Add', self)
-        self.remove =    QtGui.QAction('Remove', self)
-        self.block =     QtGui.QAction('Block', self)
-        self.unblock =   QtGui.QAction('Unblock', self)
-        self.set_alias = QtGui.QAction('Set alias...', self)
-        self.view_info = QtGui.QAction('View info...', self)
+        self.add =       QtGui.QAction(ICON('list-add'),    'Add',      self)
+        self.remove =    QtGui.QAction(ICON('list-remove'), 'Remove',   self)
+        self.block =     QtGui.QAction('Block',         self)
+        self.unblock =   QtGui.QAction('Unblock',       self)
+        self.set_alias = QtGui.QAction('Set alias...',  self)
+        self.view_info = QtGui.QAction('View info...',  self)
         
         self.addAction(self.add)
         self.addAction(self.remove)

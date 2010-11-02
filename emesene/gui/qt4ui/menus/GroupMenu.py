@@ -4,6 +4,7 @@
 
 import PyQt4.QtGui      as QtGui
 
+ICON = QtGui.QIcon.fromTheme
 
 class GroupMenu(QtGui.QMenu):
     '''A class that represents a menu to handle contact related information'''
@@ -21,8 +22,8 @@ class GroupMenu(QtGui.QMenu):
         QtGui.QMenu.__init__(self, 'Group', parent)
         self._handler = handler
 
-        self.add = QtGui.QAction('Add', self)
-        self.remove = QtGui.QAction('Remove', self)
+        self.add = QtGui.QAction(ICON('list-add'), 'Add', self)
+        self.remove = QtGui.QAction(ICON('list-remove'), 'Remove', self)
         self.rename = QtGui.QAction('Rename', self)
         
         self.addAction(self.add)
