@@ -8,6 +8,9 @@ import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
+from gui.qt4ui import Utils
+from gui.base import MarkupParser
+
 
 # important: at the moment emits "str" not "unicode"
 # because of papyon raising exceptions. [anyway, it seems to work.]
@@ -34,6 +37,8 @@ class NickEdit(QtGui.QStackedWidget):
                               QtCore.QString("</u>")
         self._is_empty_message_displayed = False
 
+        self._text = ''
+        
         self.line_edit = QtGui.QLineEdit()
         self.label = QLabelEmph(QtCore.QString("If you see this, " \
                             "please invoke setText on QNickEdit."))
@@ -55,8 +60,8 @@ class NickEdit(QtGui.QStackedWidget):
         '''Returns the displayed text as a QString'''
         if self._is_empty_message_displayed:
             return QtCore.QString()
-        text = unicode(self.label.text())
-        text = xml.sax.saxutils.unescape(text)
+        text = unicode(self._text)
+        #text = Utils.unescape(text)
         return QtCore.QString(text)
         
         
@@ -64,11 +69,13 @@ class NickEdit(QtGui.QStackedWidget):
         '''Displays the given text'''
         #NOTE: do we have to set also the QLineEdit's text? 
         #<-> method could be called while the QLEdit is active? 
-        text = xml.sax.saxutils.escape(unicode(text)) 
+        self._text = text
+        text = Utils.escape(unicode(text)) 
+        parsed_text = Utils.parse_emotes(text)
         text = QtCore.QString(text)
         if not text.isEmpty():
             self._is_empty_message_displayed = False
-            self.label.setText(text)
+            self.label.setText(parsed_text)
         elif self._allow_empty:
             self._is_empty_message_displayed = True
             self.label.setText(self._empty_message)
@@ -78,7 +85,7 @@ class NickEdit(QtGui.QStackedWidget):
         '''Slot called when the user clicks on the label of 
         this widget'''
         text = self.text() # handles unescaping
-        self.line_edit.setText(text) #remove this unicode once fixed
+        self.line_edit.setText(self._text) #remove this unicode once fixed
         self.setCurrentWidget(self.line_edit)
         self.line_edit.setFocus(Qt.MouseFocusReason)
     

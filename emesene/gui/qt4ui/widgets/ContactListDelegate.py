@@ -6,6 +6,7 @@ from PyQt4      import QtCore
 from PyQt4      import QtGui
 
 import gui
+
 from gui.qt4ui import Utils
 from gui.qt4ui.widgets.ContactListModel import Role
 
@@ -41,12 +42,10 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                                                option, painter, option.widget)
         status = model.data(index, Role.StatusRole).toPyObject()
         text_doc = QtGui.QTextDocument()
-        text = model.data(index, Role.DisplayRole).toString() #+ \
-               #'<b>[' + e3.status.STATUS[status] + ']</b>'
         
         if not index.parent().isValid():
             # -> Start drawing the text_doc:
-            text = "<b>"+text+"</b>"
+            text = self._build_display_role(index, isGroup=True)
             painter.translate( QtCore.QPointF(option.rect.topLeft()) )
             # create the text_doc
             text_doc.setHtml(text)
@@ -93,7 +92,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             painter.drawPixmap(target, picture, source)
         
             # -> Start setting up the text_doc:
-            text = _format_contact_display_role(text)
+            text = self._build_display_role(index)
             # set the text into text_doc
             text_doc.setHtml(text)
             # calculate the vertical offset, to center the text_doc vertically
@@ -116,12 +115,12 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         text = index.model().data(index, Role.DisplayRole).toString()
         text_doc = QtGui.QTextDocument()
         if not index.parent().isValid():
-            text = "<b>"+text+"</b>"
+            text = self._build_display_role(index, isGroup=True)
             text_doc.setHtml(text)
             text_size = text_doc.size().toSize()
             return text_size
         else:
-            text = _format_contact_display_role(text)
+            text = self._build_display_role(index)
             text_doc.setHtml(text)
             text_size = text_doc.size().toSize()
             text_width  = text_size.width()
@@ -129,13 +128,37 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             return QtCore.QSize( text_width,
                           max(text_height, 
                               self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
+                              
+                              
+    def _build_display_role(self, index, isGroup=False):
+        model = index.model()
+        display_role = model.data(index, Role.DisplayRole).toString()
+        if isGroup:
+            display_role = u'<b>' + display_role + u'</b>'
+        else:
+            display_role = _format_contact_display_role(display_role)
+            message = model.data(index, Role.MessageRole).toString()
+            if not message.isEmpty():
+                display_role += u'<p style="-qt-paragraph-type:empty; ' \
+                                u'margin-top:5px; margin-bottom:0px; '  \
+                                u'margin-left:0px; margin-right:0px; '  \
+                                u'-qt-block-indent:0; text-indent:0px;"></p>'
+                message = u'<i>' + message + u'</i>'
+                display_role += _format_contact_display_role(message)
+            # display_role = _format_contact_display_role(display_role)
+            #display_role += '</table>'
+        return display_role
+            
+        
                           
 def _format_contact_display_role(text):
     '''Formats correctly the html string which represents the contact's
     display role'''
+    # TODO: calculate smiley size from text's size.
     smiley_size = 16
     #if not text.contains('<i></i>'):
         #text.replace('<i>','<br><i>')
-    text.replace('<img src', '<img width="%d" height="%d" src' % 
+    text = Utils.parse_emotes(unicode(text))
+    text = text.replace('<img src', '<img width="%d" height="%d" src' % 
                  (smiley_size, smiley_size))
     return text

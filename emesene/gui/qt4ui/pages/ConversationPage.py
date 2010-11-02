@@ -5,6 +5,7 @@
 import PyQt4.QtGui      as QtGui
 
 import gui
+from gui.base import MarkupParser
 import extension
 
 
@@ -54,7 +55,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         conversation = conversation_cls(session, conv_id, members)
         account = session.contacts.get(members[0])
         conversation.tab_index = self.addTab(conversation, 
-                                             unicode(account.display_name))
+                    (unicode(account.display_name)))
         self.setTabIcon(conversation.tab_index, 
                         QtGui.QIcon(gui.theme.status_icons[account.status]))
         return conversation

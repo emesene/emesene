@@ -8,6 +8,9 @@ import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
+from gui.qt4ui  import Utils
+from gui.base   import MarkupParser
+
 
 class ContactListModel (QtGui.QStandardItemModel):
     '''Item model which represents a contact list'''
@@ -58,18 +61,17 @@ class ContactListModel (QtGui.QStandardItemModel):
     
     def _set_contact_info(self, contact_item, contact):
         '''Fills the contact Item with data'''
-        contact_item.setData(
-            xml.sax.saxutils.escape(unicode(contact.display_name)) + 
-            '<br><i>' + 
-            xml.sax.saxutils.escape(unicode(contact.message)) +
-            '</i>',
-            Role.DisplayRole)
-        contact_item.setData(contact.picture, Role.DecorationRole)
-        contact_item.setData(contact.media, Role.MediaRole)
-        contact_item.setData(contact.status, Role.StatusRole)
-        contact_item.setData(contact.blocked, Role.BlockedRole)
-        contact_item.setData(contact.account, Role.ToolTipRole)
-        contact_item.setData(contact, Role.DataRole)
+        display_name = Utils.escape(unicode(contact.display_name))
+        message      = Utils.escape(unicode(contact.message))
+                                               
+        contact_item.setData(display_name,      Role.DisplayRole)
+        contact_item.setData(message,           Role.MessageRole)
+        contact_item.setData(contact.picture,   Role.DecorationRole)
+        contact_item.setData(contact.media,     Role.MediaRole)
+        contact_item.setData(contact.status,    Role.StatusRole)
+        contact_item.setData(contact.blocked,   Role.BlockedRole)
+        contact_item.setData(contact.account,   Role.ToolTipRole)
+        contact_item.setData(contact,           Role.DataRole)
         
         
     def add_group(self, group):
@@ -172,4 +174,5 @@ class Role:
     MediaRole       = Qt.UserRole + 2
     UidRole         = Qt.UserRole + 3
     SortRole        = Qt.UserRole + 4
-    StatusRole      = Qt.UserRole + 5 
+    StatusRole      = Qt.UserRole + 5
+    MessageRole     = Qt.UserRole + 6

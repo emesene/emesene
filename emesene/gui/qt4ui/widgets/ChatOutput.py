@@ -9,6 +9,8 @@ import PyQt4.QtCore     as QtCore
 
 import e3
 
+from gui.qt4ui  import Utils
+
 
 class ChatOutput (QtGui.QTextBrowser):
     '''A widget which displays various messages of a conversation'''
@@ -38,24 +40,31 @@ class ChatOutput (QtGui.QTextBrowser):
         print first
         
         self._append_to_chat(
-            xml.sax.saxutils.escape(unicode(message.body)) + '<br>',
-            message.style)
+                Utils.parse_emotes(u'<b>' + contact.display_name + u':</b>'))
+        self._append_to_chat(
+                Utils.parse_emotes(Utils.escape(unicode(message.body))),
+                message.style)
+        self._append_to_chat('<br>')
+            
             
     # emesene's
     def send_message(self, formatter, my_account,
                      text, cedict, cedir, cstyle, first):
         '''This method is called from the core, when a message is sent by us.
         It shows the message'''
-        self._append_to_chat('<b>ME:</b>' + 
-                             xml.sax.saxutils.escape(unicode(text)) + 
-                             '<br/>', cstyle)
+        self._append_to_chat('<b>ME:</b>')
+        self._append_to_chat(Utils.parse_emotes(Utils.escape(unicode(text))), 
+                             cstyle)
+        self._append_to_chat('<br/>')
+        
+    
     # emesene's                         
     def information(self, formatter, contact, message):
         '''This method is called by the core, when there's the need to display 
         an information message'''
-        self._append_to_chat('<p align="right"><i>' + 
-                             xml.sax.saxutils.escape(unicode(message)) + 
-                             '</i></p>')
+        self._append_to_chat(Utils.parse_emotes('<p align="right"><i>' + 
+                             Utils.escape(unicode(message)) + 
+                             '</i></p>'))
                              
                              
     def _append_to_chat(self, html_string, cstyle=None):
