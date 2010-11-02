@@ -31,11 +31,11 @@ class Header(gtk.HBox):
         self.members = members
 
         self.menu = gtk.Menu()
-        copynick = gtk.ImageMenuItem('Copy nick to clipboard')
+        copynick = gtk.ImageMenuItem(_('Copy nick to clipboard'))
         copynick.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY, gtk.ICON_SIZE_MENU))
-        copypm = gtk.ImageMenuItem('Copy personal message to clipboard')
+        copypm = gtk.ImageMenuItem(_('Copy personal message to clipboard'))
         copypm.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY, gtk.ICON_SIZE_MENU))
-        copymail = gtk.ImageMenuItem('Copy mail to clipboard')
+        copymail = gtk.ImageMenuItem(_('Copy mail to clipboard'))
         copymail.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY, gtk.ICON_SIZE_MENU))
         self.menu.append(copynick)
         self.menu.append(copypm)
