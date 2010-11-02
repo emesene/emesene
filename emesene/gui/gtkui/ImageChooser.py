@@ -19,7 +19,7 @@ class ImageChooser(gtk.Window):
 
         self.response_cb = response_cb
 
-        self.set_title("Image Chooser")
+        self.set_title(_("Image Chooser"))
         self.set_default_size(600, 400)
         self.set_border_width(4)
         self.set_position(gtk.WIN_POS_CENTER)
