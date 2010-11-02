@@ -2,6 +2,7 @@
 # convert it into a restricted subset of xhtml
 import os
 import xml.sax.saxutils
+import re
 
 import gui
 
@@ -27,7 +28,11 @@ def parse_emotes(message, cedict={}):
     '''parser the emotes in a message, return a string with img tags
     for the emotes acording to the theme'''
 
-    chunks = [message]
+    # Get the message body to parse emotes
+    p = re.compile('<span.*?>(.*)</span>', re.DOTALL)
+    plain_text = p.search(message).group(1)
+
+    chunks = [plain_text]
     shortcuts = gui.Theme.EMOTES.keys()
     if cedict is not None:
         shortcuts.extend(cedict.keys())
@@ -57,7 +62,8 @@ def parse_emotes(message, cedict={}):
 
         chunks = temp
 
-    return ''.join(chunks)
+    # return the markup with plan text
+    return message.replace(plain_text, ''.join(chunks))
 
 
 def replace_emotes(msgtext, cedict={}, cedir=None):

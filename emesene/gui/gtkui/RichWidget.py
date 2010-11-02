@@ -1,4 +1,5 @@
 import gtk
+import xml.parsers.expat
 
 import e3
 import logging

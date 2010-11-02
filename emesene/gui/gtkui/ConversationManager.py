@@ -28,6 +28,9 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         if session.config.get_or_set('b_conv_tab_popup', True):
             self.popup_enable()
 
+        # mozilla tabs are fixed-width, otherwise do the same as emesene-1 
+        self.mozilla_tabs = session.config.get_or_set('b_conv_tab_mozilla_like', False)
+
         self.set_property('can-focus', False)
         self.connect('switch-page', self._on_switch_page)
         self.connect('key-press-event', self.on_key_press)
@@ -181,11 +184,11 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         TabWidget = extension.get_default('conversation tab')
         conversation = Conversation(self.session, cid, self.update_window, None, members)
         label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close,
-            conversation)
+            conversation, self.mozilla_tabs)
         label.set_image(gui.theme.connect)
         conversation.tab_label = label
         conversation.tab_index=self.append_page_menu(conversation, label)
-        self.set_tab_label_packing(conversation, False, True, gtk.PACK_START)
+        self.set_tab_label_packing(conversation, not self.mozilla_tabs, True, gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
 
         return conversation

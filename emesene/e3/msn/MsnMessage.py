@@ -7,7 +7,7 @@ class Message(e3.Message):
     '''a class that represent a msn message'''
 
     def __init__(self, type_, body, account, style=None, dest=''):
-        e3.Message.__init__(self, type_, body, account, style)
+        e3.Message.__init__(self, type_, body.encode('utf-8'), account, style)
 
         self.dest = dest
         if style:

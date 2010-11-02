@@ -341,7 +341,7 @@ class ChatWidget(gtk.VBox):
                     self.text.append(self.formatter.format_history(
                         date_text, nick, text))
                 except ValueError:
-                    log.debug('Invalid number of tokens' + str(tokens))
+                    log.debug(_('Invalid number of tokens') + str(tokens))
             else:
-                log.debug('unknown message type on ContactInfo')
+                log.debug(_('unknown message type on ContactInfo'))
 

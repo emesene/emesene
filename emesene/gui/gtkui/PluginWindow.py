@@ -8,8 +8,8 @@ from pluginmanager import get_pluginmanager
 class PluginListView(gtk.TreeView):
     def __init__(self, store):
         gtk.TreeView.__init__(self, store)
-        self.append_column(gtk.TreeViewColumn('Status', gtk.CellRendererToggle(), active=0))
-        self.append_column(gtk.TreeViewColumn('Name', gtk.CellRendererText(), text=1))
+        self.append_column(gtk.TreeViewColumn(_('Status'), gtk.CellRendererToggle(), active=0))
+        self.append_column(gtk.TreeViewColumn(_('Name'), gtk.CellRendererText(), text=1))
         self.set_rules_hint(True)
 
 class PluginListStore(gtk.ListStore):
@@ -113,7 +113,7 @@ class PluginWindow(gtk.Window):
     def __init__(self, session):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
         self.set_default_size(500, 300)
-        self.set_title('Plugins')
+        self.set_title(_('Plugins'))
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
 
         self.session = session

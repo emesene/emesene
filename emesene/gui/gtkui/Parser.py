@@ -357,7 +357,7 @@ class Smiley(object):
 
     def getHtml( self ):
         if gui.theme.emote_to_path(self.smiley) == None:
-            print 'Can\'t find the smiley %s'%self.smiley
+            print _('Can\'t find the smiley %s')%self.smiley
             return escape( self.smiley )
 
         path = gui.theme.emote_to_path(self.smiley, True).replace("%", "%25")

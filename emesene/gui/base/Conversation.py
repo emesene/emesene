@@ -124,7 +124,7 @@ class Conversation(object):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
         self.output.information(self.formatter, self.session.contacts.me,
-                'you just sent a nudge!')
+                _('you just sent a nudge!'))
         self.play_nudge()
 
     def show(self):
@@ -226,7 +226,7 @@ class Conversation(object):
 
         elif message.type == e3.Message.TYPE_NUDGE:
             self.output.information(self.formatter, contact,
-                    '%s just sent you a nudge!' % (contact.display_name,))
+                    _('%s just sent you a nudge!') % (contact.display_name,))
             self.play_nudge()
 
         self.first = False
@@ -262,7 +262,7 @@ class Conversation(object):
     def _get_text(self):
         '''return the text that represent the conversation title'''
         if self.group_chat:
-            text = 'Group chat'
+            text = _('Group chat')
         elif len(self.members) == 1:
             contact = self.session.contacts.get(self.members[0])
 
