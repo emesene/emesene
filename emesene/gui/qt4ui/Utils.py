@@ -65,7 +65,8 @@ def pixmap_rounder(qpixmap, perc_radius=16.7):
     
 
 def parse_emotes(text, include_table_tags=True):
-    text = MarkupParser.parse_emotes(text)
+    text = MarkupParser.replace_emotes(text)
+    text = text.replace('file://', '')
     parser = MyHTMLParser(include_table_tags)
     parser.feed(text)
     text2 = parser.get_data()

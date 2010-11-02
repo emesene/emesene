@@ -47,7 +47,6 @@ def unescape(string_):
     '''replace the values on dic_inv keys with the values'''
     return xml.sax.saxutils.unescape(string_, dic_inv)
 
-# FIXME: update upstream
 def parse_emotes(message, cedict={}):
     '''parse the emotes in a message, return a string with img tags
     for the emotes according to the theme'''
@@ -75,7 +74,7 @@ def parse_emotes(message, cedict={}):
 
             if len(parts) > 1:
                 if shortcut in gui.Theme.EMOTES.keys():
-                    path = gui.theme.emote_to_path(shortcut, True)
+                    path = gui.theme.emote_to_path(shortcut)
                 else:
                     path = cedict[shortcut]
                 tag = '<img src="%s" alt="%s"/>' % (path, shortcut)
