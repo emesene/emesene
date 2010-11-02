@@ -70,7 +70,7 @@ class IconView(gtk.HBox):
     
     def pop_up(self, iconview, event):
         ''' manage the context menu (?) '''
-        if event.button == 3 and self.label.get_text() != 'System pictures':
+        if event.button == 3 and self.label.get_text() != _('System pictures'):
             path = self.iconview.get_path_at_pos(event.x, event.y)
             if path != None:
                 self.iconview.select_path(path)
@@ -99,7 +99,7 @@ class IconView(gtk.HBox):
                 if os.path.exists(path):
                     self.add_picture(path)
             except TypeError, error:
-                print "Could not add picture:\n %s" % (str(error),)
+                print _("Could not add picture:\n %s") % (str(error),)
 
     def add_picture(self, path):
         '''Adds an avatar into the IconView'''
@@ -114,7 +114,7 @@ class IconView(gtk.HBox):
                         pixbuf = animation.get_static_image().scale_simple( \
                                     64, 64, gtk.gdk.INTERP_BILINEAR)
                 except gobject.GError:
-                    print 'image at %s could not be loaded' % (path, )
+                    print _('image at %s could not be loaded') % (path, )
                     print gobject.GError                      
  
                 # On nt images are 128x128 (48x48 on xp)
@@ -129,9 +129,9 @@ class IconView(gtk.HBox):
                     # Esplicitely delete gtkpixbuf
                     del pixbuf
             else:
-                print path, 'not readable'
+                print path, _('not readable')
         except gobject.GError:
-            print "image at %s could not be loaded" % path
+            print _("image at %s could not be loaded") % path
 
     def is_in_view(self, filename):
         '''return True if filename already on the iconview'''

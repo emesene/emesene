@@ -18,7 +18,7 @@ class AccountMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        self.change_profile = gtk.ImageMenuItem('Change profile')
+        self.change_profile = gtk.ImageMenuItem(_('Change profile'))
         self.change_profile.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
             gtk.ICON_SIZE_MENU))
         self.change_profile.connect('activate',

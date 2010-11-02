@@ -117,7 +117,7 @@ class HelpHandler(object):
     def on_about_selected(self):
         '''called when the about item is selected'''
         self.dialog.about_dialog('emesene', '2.0', 'marianoguerra',
-            'A simple yet powerful MSN & Gtalk client', 'GPL v3',
+            _('A simple yet powerful MSN & Gtalk client'), 'GPL v3',
             'http://www.emesene.org', ['marianoguerra', 'boyska', 'C10uD','Cando'], '',
             gui.theme.logo)
 
@@ -170,10 +170,10 @@ class ContactHandler(object):
 
         if contact:
             self.dialog.yes_no(
-                "Are you shure you want to delete %s?" % \
+                _("Are you sure you want to delete %s?") % \
                 (contact.account, ), remove_cb, contact.account)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
     def on_block_contact_selected(self):
         '''called when block contact is selected'''
@@ -182,7 +182,7 @@ class ContactHandler(object):
         if contact:
             self.session.block(contact.account)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
     def on_unblock_contact_selected(self):
         '''called when unblock contact is selected'''
@@ -191,7 +191,7 @@ class ContactHandler(object):
         if contact:
             self.session.unblock(contact.account)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
     def on_set_alias_contact_selected(self):
         '''called when set alias contact is selected'''
@@ -214,7 +214,7 @@ class ContactHandler(object):
             self.dialog.set_contact_alias(contact.account, contact.alias,
                  set_alias_cb)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
     def on_view_information_selected(self):
         '''called when view information is selected'''
@@ -224,7 +224,7 @@ class ContactHandler(object):
             self.dialog.contact_information_dialog(self.session,
                 contact.account)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
 class GroupHandler(object):
     '''this handler contains all the handlers needed to handle the group
@@ -261,10 +261,10 @@ class GroupHandler(object):
 
         if group:
             self.dialog.yes_no(
-                "Are you shure you want to delete the %s group?" % \
+                _("Are you sure you want to delete the %s group?") % \
                 (group.name, ), remove_group_cb, group.identifier)
         else:
-            self.dialog.error('No group selected')
+            self.dialog.error(_('No group selected'))
 
     def on_rename_group_selected(self):
         '''called when rename group is selected'''
@@ -284,7 +284,7 @@ class GroupHandler(object):
         if group:
             self.dialog.rename_group(group, rename_group_cb)
         else:
-            self.dialog.error('No group selected')
+            self.dialog.error(_('No group selected'))
 
 class MyAccountHandler(object):
     '''this handler contains all the handlers needed to handle the my account

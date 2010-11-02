@@ -108,7 +108,7 @@ class LoginMenu(gtk.Menu):
         """
         gtk.Menu.__init__(self)
         self.handler = handler
-        self.hide_show_mainwindow = gtk.MenuItem('Hide/Show emesene')
+        self.hide_show_mainwindow = gtk.MenuItem(_('Hide/Show emesene'))
         self.quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit.connect('activate',
             lambda *args: self.handler.on_quit_selected())
@@ -132,17 +132,17 @@ class MainMenu(gtk.Menu):
         self.handler = handler
 
         StatusMenu = extension.get_default('menu status')
-        self.status = gtk.ImageMenuItem('Status')
+        self.status = gtk.ImageMenuItem(_('Status'))
         self.status.set_image(gtk.image_new_from_stock(gtk.STOCK_CONVERT,
             gtk.ICON_SIZE_MENU))
         self.status_menu = StatusMenu(handler.on_status_selected)
         self.status.set_submenu(self.status_menu)
 
-        self.list = gtk.MenuItem('Contacts')
+        self.list = gtk.MenuItem(_('Contacts'))
         self.list_contacts = ContactsMenu(handler, main_window)
         self.list.set_submenu(self.list_contacts)
 
-        self.hide_show_mainwindow = gtk.MenuItem('Hide/Show emesene')
+        self.hide_show_mainwindow = gtk.MenuItem(_('Hide/Show emesene'))
 
         self.disconnect = gtk.ImageMenuItem(gtk.STOCK_DISCONNECT)
         self.disconnect.connect('activate',
@@ -162,8 +162,8 @@ class ContactsMenu(gtk.Menu):
     """
     a gtk menu that contains session's contacts
     """
-    NAME = 'Contacts Menu'
-    DESCRIPTION = 'A menu with sessions\' contacts'
+    NAME = _('Contacts Menu')
+    DESCRIPTION = _('A menu with sessions\' contacts')
     AUTHOR = 'Riccardo (C10uD)'
     WEBSITE = 'www.emesene.org'
 

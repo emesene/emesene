@@ -167,7 +167,7 @@ class AvatarChooser(gtk.Window):
             parts = os.path.splitext(path)
             #os.remove(parts[0] + "_thumb" + parts[1])
         except OSError:
-            print "could not remove", path
+            print _("could not remove"), path
 
     def remove_selected(self):
         '''Removes avatar from a TreeIter'''

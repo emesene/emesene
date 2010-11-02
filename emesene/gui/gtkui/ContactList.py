@@ -224,7 +224,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         elif contact:
             self.contact_selected.emit(contact)
         else:
-            log.debug('nothing selected?')
+            log.debug(_('nothing selected?'))
 
     def _on_button_press_event(self, treeview, event):
         '''callback called when the user press a button over a row
@@ -244,7 +244,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 elif type(obj) == e3.Contact:
                     self.contact_menu_selected.emit(obj)
             else:
-                log.debug('empty paths?')
+                log.debug(_('empty paths?'))
 
     # overrided methods
     def refilter(self):
@@ -317,7 +317,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             obj = row[1]
             if type(obj) == e3.Group:
                 if obj.name == group.name:
-                    log.debug('Trying to add an existing group! ' + obj.name)
+                    log.debug(_('Trying to add an existing group! ') + obj.name)
                     return row.iter
 
         itr = self._model.append(None, group_data)

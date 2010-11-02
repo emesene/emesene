@@ -106,8 +106,8 @@ class OutputView(webkit.WebView):
 class OutputText(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
     text in the widget'''
-    NAME = 'Adium Output'
-    DESCRIPTION = 'A widget to display conversation messages using adium style'
+    NAME = _('Adium Output')
+    DESCRIPTION = _('A widget to display conversation messages using adium style')
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
@@ -138,7 +138,7 @@ class OutputText(gtk.ScrolledWindow):
 
     def _error_cb(self, view, message, line, source_id):
         '''called when a message is sent to the console'''
-        message = "Webkit message: %s %s %s" % (message, line, source_id)
+        message = _("Webkit message: %s %s %s") % (message, line, source_id)
         log.debug(message)
 
     def _loading_stop_cb(self, view, frame):

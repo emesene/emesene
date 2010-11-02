@@ -357,7 +357,7 @@ class Smiley(object):
 
     def getHtml( self ):
         if gui.theme.emote_to_path(self.smiley) == None:
-            print 'Can\'t find the smiley %s'%self.smiley
+            print _('Can\'t find the smiley %s')%self.smiley
             return escape( self.smiley )
 
         path = gui.theme.emote_to_path(self.smiley, True).replace("%", "%25")
@@ -533,9 +533,9 @@ if __name__=='__main__':
     parser = UnifiedParser( theme )
     #data = ':D :o :P http://someurl.com/~das/:Dx/index.od?asd=asd&asd [b]test[/b] :D <:o)(G)(@)")'
     data = '") <tag> [b][/b] %s % omg omg'
-    print "Conversation:"
+    print _("Conversation:")
     print '  ', parser.getParser( data, ConversationDataType ).get()
-    print "UserList:"
+    print _("UserList:")
     print '  ', parser.getParser( ('%s',data), UserListDataType ).get()
-    print "Default:"
+    print _("Default:")
     print '  ', parser.getParser( data ).get()

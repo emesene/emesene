@@ -40,8 +40,8 @@ class Indicator(appindicator.Indicator):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        NAME = 'Indicator'
-        DESCRIPTION = 'The Ayatana Indicator applet extension'
+        NAME = _('Indicator')
+        DESCRIPTION = _('The Ayatana Indicator applet extension')
         AUTHOR = 'Riccardo (C10ud), Stefano(Cando)'
         WEBSITE = 'www.emesene.org'
         appindicator.Indicator.__init__(self, "emesene", "logo", \
