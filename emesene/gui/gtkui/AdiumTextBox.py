@@ -67,8 +67,6 @@ class OutputView(webkit.WebView):
             html = self.theme.format_outgoing(msg, style, cedict, cedir)
             self.last_incoming = False
 
-        html = html.replace("\n", "<br>")
-
         if msg.first:
             function = "appendMessage('" + html + "')"
         else:
