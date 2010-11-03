@@ -604,7 +604,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
             if avatar_hash not in avatars:
                 self.msn_object_store.request(msn_object, \
-                    (download_ok, download_failed))
+                    (download_ok, download_failed), peer=contact)
 
     # address book events
     def _on_addressbook_messenger_contact_added(contact):
@@ -965,7 +965,8 @@ class Worker(e3.base.Worker, papyon.Client):
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         conv._invite_user(papycontact)
 
-    def _handle_action_send_message(self, cid, message, cedict={}, l_custom_emoticons=[]):
+    def _handle_action_send_message(self, cid, message, 
+            cedict=None, l_custom_emoticons=None):
         ''' handle Action.ACTION_SEND_MESSAGE '''
         #print "you're guin to send %(msg)s in %(ci)s" % \
         #{ 'msg' : message, 'ci' : cid }
@@ -973,6 +974,13 @@ class Worker(e3.base.Worker, papyon.Client):
         # find papyon conversation by cid
 
         papyconversation = self.papyconv[cid]
+
+        if len(papyconversation.total_participants) == 1:
+            first_dude = papyconversation.total_participants.pop()
+            if first_dude.presence == papyon.Presence.OFFLINE and \
+                papyconversation.switchboard is None: #avoid fake-offline
+                self.oim_box.send_message(first_dude, message.body)
+                message.type = e3.base.Message.TYPE_FLNMSG # don't process this.
 
         if message.type == e3.base.Message.TYPE_NUDGE:
             papyconversation.send_nudge()
@@ -982,6 +990,9 @@ class Worker(e3.base.Worker, papyon.Client):
             formatting = formatting_e3_to_papy(message.style)
             emoticon_cache = self.caches.get_emoticon_cache(self.session.account.account)
             d_msn_objects = {}
+
+            if cedict is None: cedict = {}
+            if l_custom_emoticons is None: l_custom_emoticons = []
 
             for custom_emoticon in l_custom_emoticons:
                 try:
