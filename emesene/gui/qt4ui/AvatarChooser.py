@@ -89,4 +89,5 @@ class AvatarChooser(Dialog.OkCancelDialog):
             listview.model().appendRow(item)
             
         
+
         

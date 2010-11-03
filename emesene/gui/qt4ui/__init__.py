@@ -44,10 +44,13 @@ def qt4_main(controller_cls):
     if os.name == 'nt':
         # windows hack: instead of processing glib events
         # in Qt's event loop, let's do the opposite because
-        # g_main_loop.get_context() crashes on windows
+        # g_main_loop.get_context() makes python executable
+        # crashe on windows ... (follows)
         gobject.idle_add(app.processEvents)
         g_main_loop.run()
     else:
+        # (follows) ... while processing Qt's events in glib's
+        # main loop freezes the application on linux ^_^
         global GCONTEXT
         GCONTEXT = g_main_loop.get_context()
         idletimer.start(10)
