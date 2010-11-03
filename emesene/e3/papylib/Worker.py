@@ -374,6 +374,24 @@ class Worker(e3.base.Worker, papyon.Client):
         print "[papyon]", "[call] ended"
 
     # conversation handlers
+    def _on_conversation_oim_received(self, flnmsg):
+        ''' handle offline messages '''
+        account = flnmsg.sender.account
+        msg = str(flnmsg)
+
+        if account in self.conversations:
+            cid = self.conversations[account]
+        else:
+            cid = time.time()
+            self._handle_action_new_conversation(account, cid)
+            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
+                [account])
+
+        msgobj = e3.base.Message(e3.base.Message.TYPE_FLNMSG, \
+            msg, account, None, flnmsg.date)
+        self.session.add_event(\
+            Event.EVENT_CONV_MESSAGE, cid, account, msgobj, {})
+
     def _on_conversation_user_typing(self, papycontact, pyconvevent):
         ''' handle user typing event '''
         account = papycontact.account

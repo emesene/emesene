@@ -87,7 +87,7 @@ class MessageFormatter(object):
         template = template.replace('%MESSAGE%', message)
         return template
 
-    def format(self, contact, message_type=None):
+    def format(self, contact, message_type=None, timestamp_override=None):
         '''format the message according to the template'''
         if message_type is None:
             message_type=e3.Message.TYPE_MESSAGE
@@ -117,6 +117,11 @@ class MessageFormatter(object):
                     template = self.outgoing
                 else:
                     template = self.incoming
+
+        if message_type == e3.Message.TYPE_FLNMSG:
+            template = self.offline_incoming
+            timestamp = timestamp_override
+
         if message_type == e3.Message.TYPE_NUDGE:
             template = self.nudge
             self.last_message_sender = None

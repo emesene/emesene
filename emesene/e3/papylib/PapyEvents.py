@@ -251,7 +251,8 @@ class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
     Offline IM box."""
 
     def __init__(self, client):
-        papyon.event.BaseEventInterface.__init__(self, client)
+        self._client = client
+        papyon.event.OfflineMessagesEventInterface.__init__(self, client)
 
     def on_oim_state_changed(self, state):
         print "[papyon]", "oim state changed", state
@@ -259,12 +260,13 @@ class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
 
     def on_oim_messages_received(self, messages):
         print "[papyon]", "oims received", messages
-        #self._client.oim_box.fetch_messages(messages)
+        self._client.oim_box.fetch_messages(messages)
 
     def on_oim_messages_fetched(self, messages):
         print "[papyon]", "oim fetched", messages
-        #for message in messages:
-            #sender = message.sender
+        for message in sorted(messages):
+            self._client._on_conversation_oim_received(message)
+        self._client.oim_box.delete_messages()
 
     def on_oim_messages_deleted(self):
         print "[papyon]", "oim deleted"
