@@ -210,12 +210,12 @@ class AvatarChooser(gtk.Window):
             if response == gtk.RESPONSE_OK:
                 if self.avatar_manager is not None:
                     view = self.views[self.notebook.get_current_page()]
-                    pix, avpath = self.avatar_manager.add_new_avatar_from_pix(pix)
+                    avpath = self.avatar_manager.add_new_avatar_from_toolkit_pix(pix)
                     view.add_picture(avpath)
 
         if not static:
             view = self.views[self.notebook.get_current_page()]
-            pix, avpath = self.avatar_manager.add_new_avatar(path)
+            avpath = self.avatar_manager.add_new_avatar(path)
             view.add_picture(avpath)
             return
 
