@@ -22,9 +22,6 @@ def qt4_main(controller_cls):
     import PyQt4.QtCore     as QtCore
     import PyQt4.QtGui      as QtGui
     
-    global GCONTEXT
-    GCONTEXT = gobject.MainLoop().get_context()
-    
     reload(sys)
     sys.setdefaultencoding("utf8")
     
@@ -34,17 +31,27 @@ def qt4_main(controller_cls):
     #about_data = KdeCore.KAboutData("emesene", "",
                                    #KdeCore.ki18n("emesene"), "0.001")
     #KdeCore.KCmdLineArgs.init(sys.argv[2:], about_data)
+    g_main_loop = gobject.MainLoop()
     app = QtGui.QApplication(sys.argv)
     app.setApplicationName('emesene2')
     
     idletimer = QtCore.QTimer(QtGui.QApplication.instance())
     idletimer.timeout.connect(on_idle)
-    idletimer.start(10)
 
     controller = controller_cls()
     controller.start()
 
-    app.exec_()
+    if os.name == 'nt':
+        # windows hack: instead of processing glib events
+        # in Qt's event loop, let's do the opposite because
+        # g_main_loop.get_context() crashes on windows
+        gobject.idle_add(app.processEvents)
+        g_main_loop.run()
+    else:
+        global GCONTEXT
+        GCONTEXT = g_main_loop.get_context()
+        idletimer.start(10)
+        app.exec_()
 
 
 # pylint: disable=W0612
