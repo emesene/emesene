@@ -105,6 +105,7 @@ class AdiumTheme(object):
         '''
 
         msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir)
+        msgtext = MarkupParser.urlify(msgtext)
 
         if style is not None:
             msgtext = style_message(msgtext, style)
@@ -197,7 +198,10 @@ def read_file(*args):
 __dic = {
     '\"': '&quot;',
     '\'': '&apos;',
-    '\n': '<br>'
+    '\\': '\\\\',
+    '\r\n': '<br>', #windows
+    '\r': '<br>', #osx
+    '\n': '<br>' #linux
 }
 
 __dic_inv = {

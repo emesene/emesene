@@ -6,7 +6,7 @@
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -54,8 +54,14 @@ class Session(e3.Session):
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
             host, port))
 
-    def send_message(self, cid, text, style=None, cedict={}, celist=[]):
+    def send_message(self, cid, text, style=None, cedict=None, celist=None):
         '''send a common message'''
+        if cedict is None:
+            cedict = {}
+
+        if celist is None:
+            celist = []
+
         account = self.account.account
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, account,
             style)

@@ -2,9 +2,9 @@
 
 #   This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -357,7 +357,7 @@ class Smiley(object):
 
     def getHtml( self ):
         if gui.theme.emote_to_path(self.smiley) == None:
-            print 'Can\'t find the smiley %s'%self.smiley
+            print _('Can\'t find the smiley %s')%self.smiley
             return escape( self.smiley )
 
         path = gui.theme.emote_to_path(self.smiley, True).replace("%", "%25")

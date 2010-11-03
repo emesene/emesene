@@ -700,7 +700,7 @@ class ConnectingWindow(Login):
         updates reconnect label and launches login if counter is 0
         '''
         self.reconnect_after -= 1
-        self.label_timer.set_text('Reconnecting in %d seconds'\
+        self.label_timer.set_text(_('Reconnecting in %d seconds')\
                                              % self.reconnect_after )
         if self.reconnect_after <= 0:
             gobject.source_remove(self.reconnect_timer_id)

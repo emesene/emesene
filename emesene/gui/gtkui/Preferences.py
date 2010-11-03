@@ -28,11 +28,10 @@ class Preferences(gtk.Window):
         gtk.Window.__init__(self)
         self.set_border_width(2)
         self.set_modal(True)
-        self.set_title("Preferences")
+        self.set_title(_("Preferences"))
         self.session = session
 
         self.set_default_size(600, 400)
-        self.set_role("New preferences Window")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
         if utils.file_readable(gui.theme.logo):
@@ -57,7 +56,7 @@ class Preferences(gtk.Window):
         cellPix = gtk.CellRendererPixbuf()
 
         # Create the single Tree Column
-        treeViewColumn = gtk.TreeViewColumn('Categories')
+        treeViewColumn = gtk.TreeViewColumn(_('Categories'))
 
         treeViewColumn.pack_start(cellPix, expand=False)
         treeViewColumn.add_attribute(cellPix, 'pixbuf',0)
@@ -363,29 +362,29 @@ class Interface(BaseTable):
         """
         BaseTable.__init__(self, 4, 1)
         self.session = session
-        self.append_markup('<b>Main window:</b>')
-        self.append_check('Show user panel',
+        self.append_markup('<b>'+_('Main window:')+'</b>')
+        self.append_check(_('Show user panel'),
             'session.config.b_show_userpanel')
-        self.append_markup('<b>Conversation window:</b>')
+        self.append_markup('<b>'+_('Conversation window:')+'</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
-        self.append_check('Show emoticons', 'session.config.b_show_emoticons')
-        self.append_check('Show conversation header',
+        self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
+        self.append_check(_('Show conversation header'),
             'session.config.b_show_header')
-        self.append_check('Show conversation side panel',
+        self.append_check(_('Show conversation side panel'),
             'session.config.b_show_info')
-        self.append_check('Show conversation toolbar',
+        self.append_check(_('Show conversation toolbar'),
             'session.config.b_show_toolbar')
-        self.append_check('Small conversation toolbar',
+        self.append_check(_('Small conversation toolbar'),
             'session.config.b_toolbar_small')
-        self.append_check('Avatar on conversation left side',
+        self.append_check(_('Avatar on conversation left side'),
             'session.config.b_avatar_on_left')
-        self.append_check('Allow auto scroll in conversation',
+        self.append_check(_('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
 
-        self.append_range('Contact list avatar size',
+        self.append_range(_('Contact list avatar size'),
             'session.config.i_avatar_size', 18, 64)
-        self.append_range('Conversation avatar size',
+        self.append_range(_('Conversation avatar size'),
             'session.config.i_conv_avatar_size', 18, 128)
         self.show_all()
 
@@ -398,22 +397,22 @@ class Sound(BaseTable):
         """
         BaseTable.__init__(self, 6, 1)
         self.session = session
-        self.append_markup('<b>Messages events:</b>')
-        self.append_check('Mute sounds',
+        self.append_markup('<b>'+_('Messages events:')+'</b>')
+        self.append_check(_('Mute sounds'),
             'session.config.b_mute_sounds')
-        self.append_check('Play sound on sent message',
+        self.append_check(_('Play sound on sent message'),
             'session.config.b_play_send')
-        self.append_check('Play sound on first received message',
+        self.append_check(_('Play sound on first received message'),
             'session.config.b_play_first_send')
-        self.append_check('Play sound on received message',
+        self.append_check(_('Play sound on received message'),
             'session.config.b_play_type')
-        self.append_check('Play sound on nudge',
+        self.append_check(_('Play sound on nudge'),
             'session.config.b_play_nudge')
 
-        self.append_markup('<b>Users events:</b>')
-        self.append_check('Play sound on contact online',
+        self.append_markup('<b>'+_('Users events:')+'</b>')
+        self.append_check(_('Play sound on contact online'),
             'session.config.b_play_contact_online')
-        self.append_check('Play sound on contact offline',
+        self.append_check(_('Play sound on contact offline'),
             'session.config.b_play_contact_offline')
         self.show_all()
 
@@ -426,11 +425,11 @@ class Notification(BaseTable):
         """
         BaseTable.__init__(self, 2, 1)
         self.session = session
-        self.append_check('Notify on contact online',
+        self.append_check(_('Notify on contact online'),
             'session.config.b_notify_contact_online')
-        self.append_check('Notify on contact offline',
+        self.append_check(_('Notify on contact offline'),
             'session.config.b_notify_contact_offline')
-        self.append_check('Notify on received message',
+        self.append_check(_('Notify on received message'),
             'session.config.b_notify_receive_message')
         self.show_all()
 
@@ -448,17 +447,17 @@ class Theme(BaseTable):
 
         adium_theme = self.session.config.get_or_set('adium_theme', 'renkoo')
 
-        self.append_combo('Image theme', gui.theme.get_image_themes,
+        self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
-        self.append_combo('Sound theme', gui.theme.get_sound_themes,
+        self.append_combo(_('Sound theme'), gui.theme.get_sound_themes,
             'session.config.sound_theme')
-        self.append_combo('Emote theme', gui.theme.get_emote_themes,
+        self.append_combo(_('Emote theme'), gui.theme.get_emote_themes,
             'session.config.emote_theme')
-        self.append_combo('Adium theme', gui.theme.get_adium_themes,
+        self.append_combo(_('Adium theme'), gui.theme.get_adium_themes,
             'session.config.adium_theme')
-        self.append_entry_default('Nick format',
+        self.append_entry_default(_('Nick format'),
                 'session.config.nick_template', ContactList.NICK_TPL)
-        self.append_entry_default('Group format',
+        self.append_entry_default(_('Group format'),
                 'session.config.group_template', ContactList.GROUP_TPL)
 
 class Extension(BaseTable):
@@ -487,20 +486,20 @@ class Extension(BaseTable):
         """add the widgets that will display the information of the extension
         category and the selected extension
         """
-        self.add_text('Categories', 0, 0, True)
-        self.add_text('Selected', 0, 1, True)
+        self.add_text(_('Categories'), 0, 0, True)
+        self.add_text(_('Selected'), 0, 1, True)
         self.add_text('', 0, 2, True)
-        self.add_text('Name', 0, 3, True)
-        self.add_text('Description', 0, 4, True)
-        self.add_text('Author', 0, 5, True)
-        self.add_text('Website', 0, 6, True)
+        self.add_text(_('Name'), 0, 3, True)
+        self.add_text(_('Description'), 0, 4, True)
+        self.add_text(_('Author'), 0, 5, True)
+        self.add_text(_('Website'), 0, 6, True)
 
         self.add_label(self.name_info, 1, 3, True)
         self.add_label(self.description_info, 1, 4, True)
         self.add_label(self.author_info, 1, 5, True)
         self.add_label(self.website_info, 1, 6, True)
 
-        self.add_button('Redraw main screen', 1, 7,
+        self.add_button(_('Redraw main screen'), 1, 7,
                 self._on_redraw_main_screen, 0, 0)
 
     def _on_redraw_main_screen(self, button):
@@ -562,7 +561,7 @@ class Extension(BaseTable):
         ext, identifier = self.extension_list[extension_index]
         if not extension.set_default_by_id(category, identifier):
             # TODO: revert the selection to the previous selected extension
-            log.warning('Could not set %s as default extension for %s' % \
+            log.warning(_('Could not set %s as default extension for %s') % \
                 (extension_id, category))
             return
 

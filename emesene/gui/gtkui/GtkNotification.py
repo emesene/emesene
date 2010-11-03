@@ -11,7 +11,7 @@ import logging
 log = logging.getLogger('gui.gtkui.GtkNotification')
 
 NAME = 'GtkNotification'
-DESCRIPTION = 'Emesene\'s notification system\'s gtk ui'
+DESCRIPTION = 'emesene\'s notification system\'s gtk ui'
 AUTHOR = 'arielj'
 WEBSITE = 'www.emesene.org'
 

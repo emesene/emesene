@@ -4,6 +4,8 @@ import logging
 log = logging.getLogger('gtkui.AdiumTextBox')
 import webkit
 
+import webbrowser
+
 import gui
 
 class OutputView(webkit.WebView):
@@ -20,6 +22,8 @@ class OutputView(webkit.WebView):
         self.pending = []
         self.connect('load-finished', self._loading_finished_cb)
         self.connect('populate-popup', self.on_populate_popup)
+        self.connect("navigation-requested", self.on_navigation_requested)
+
 
     def _loading_finished_cb(self, *args):
         '''callback called when the content finished loading
@@ -63,8 +67,6 @@ class OutputView(webkit.WebView):
             html = self.theme.format_outgoing(msg, style, cedict, cedir)
             self.last_incoming = False
 
-        html = html.replace("\n", "<br>")
-
         if msg.first:
             function = "appendMessage('" + html + "')"
         else:
@@ -102,12 +104,21 @@ class OutputView(webkit.WebView):
         for child in menu.get_children():
             menu.remove(child)
 
+    def on_navigation_requested(self, widget, WebKitWebFrame, WebKitNetworkRequest):
+        '''callback called when a link is clicked'''
+        href = WebKitNetworkRequest.get_uri()
+
+        if not href.startswith("file://"):
+            log.info("link clicked: " + href)
+            webbrowser.open_new_tab(href)
+            return True
+
 
 class OutputText(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
     text in the widget'''
     NAME = 'Adium Output'
-    DESCRIPTION = 'A widget to display conversation messages using adium style'
+    DESCRIPTION = _('A widget to display conversation messages using adium style')
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
@@ -138,7 +149,7 @@ class OutputText(gtk.ScrolledWindow):
 
     def _error_cb(self, view, message, line, source_id):
         '''called when a message is sent to the console'''
-        message = "Webkit message: %s %s %s" % (message, line, source_id)
+        message = _("Webkit message: %s %s %s") % (message, line, source_id)
         log.debug(message)
 
     def _loading_stop_cb(self, view, frame):

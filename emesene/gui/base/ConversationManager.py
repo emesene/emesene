@@ -77,9 +77,11 @@ class ConversationManager(object):
         if conversation is not None:
             error = conversation.formatter.format_error(
                 'message couldn\'t be sent: ')
-            conversation.output.append(error,self.session.config.b_allow_auto_scroll)
+            conversation.output.append(error, {},
+                self.session.config.b_allow_auto_scroll)
             conversation.output.append(
-                self.format_from_message(message),self.session.config.b_allow_auto_scroll)
+                self.format_from_message(message),
+                {}, self.session.config.b_allow_auto_scroll)
         else:
             log.debug('conversation %s not found' % cid)
 
