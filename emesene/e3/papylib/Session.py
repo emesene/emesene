@@ -80,3 +80,8 @@ class Session(e3.Session):
     def filetransfer_invite(self, cid, account, filename, completepath):
         '''send a file to the first user of the conversation'''
         self.add_action(e3.Action.ACTION_FT_INVITE, (cid, account, filename, completepath))
+
+    def call_invite(self, cid, account):
+        '''try to start a call with the first user of the conversation'''
+        self.add_action(e3.Action.ACTION_CALL_INVITE, (cid, account))
+
