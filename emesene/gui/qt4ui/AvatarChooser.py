@@ -2,7 +2,10 @@
 
 '''This module contains a class to select an avatar'''
 
+import os
+
 from PyQt4  import QtGui
+from PyQt4  import QtCore
 
 from gui.qt4ui import Dialog
 from gui.qt4ui import widgets
@@ -26,6 +29,9 @@ class AvatarChooser(Dialog.OkCancelDialog):
         self._widget_dict = {}
         
         self._setup_ui()
+        for path in faces_paths:
+            self._populate_list(self._widget_dict['System pictures'], path)
+            
         
     def _setup_ui(self):
         widget_dict = self._widget_dict
@@ -35,9 +41,9 @@ class AvatarChooser(Dialog.OkCancelDialog):
         widget_dict['preview_dpic']     = widgets.DisplayPic(clickable=False)
         widget_dict['add_btn']          = QtGui.QPushButton('Add...')
         widget_dict['remove_btn']       = QtGui.QPushButton('Remove')
-        widget_dict['used_pictures']    = QtGui.QListWidget()
-        widget_dict['system_pictures']  = QtGui.QListWidget()
-        widget_dict['contact_pictures'] = QtGui.QListWidget()
+        widget_dict['Used pictures']    = QtGui.QListView()
+        widget_dict['System pictures']  = QtGui.QListView()
+        widget_dict['Contact pictures'] = QtGui.QListView()
         
         
         group_box_lay = QtGui.QVBoxLayout()
@@ -53,18 +59,34 @@ class AvatarChooser(Dialog.OkCancelDialog):
         lay.addWidget(widget_dict['tab_widget'])
         lay.addLayout(right_lay)
         self.setLayout(lay)
+        self.resize(725, 430)
         
-        widget_dict['tab_widget'].addTab(widget_dict['used_pictures'], 
-                                         'Used pictures')
-        widget_dict['tab_widget'].addTab(widget_dict['system_pictures'],
-                                         'System pictures')
-        widget_dict['tab_widget'].addTab(widget_dict['contact_pictures'],
-                                         'Contact pictures')
+        delegate = widgets.IconViewDelegate()
+        for l_view in ['Used pictures', 'System pictures', 'Contact pictures']:
+            widget_dict['tab_widget'].addTab(widget_dict[l_view], l_view)
+            widget_dict[l_view].setViewMode    (QtGui.QListView.IconMode)
+            widget_dict[l_view].setMovement    (QtGui.QListView.Static)
+            widget_dict[l_view].setResizeMode  (QtGui.QListView.Adjust)
+            widget_dict[l_view].setModel       (QtGui.QStandardItemModel())
+            widget_dict[l_view].setItemDelegate(delegate)
         widget_dict['group_box'].setTitle('Preview')
         widget_dict['add_btn'].setIcon(QtGui.QIcon.fromTheme('list-add'))
         widget_dict['remove_btn'].setIcon(QtGui.QIcon.fromTheme('list-remove'))
         
-        
-        
+       
+    def _populate_list(self, listview, path):
+        if not os.path.exists(path):
+            return
+        entries = os.listdir(path)
+        for entry in entries:
+            entry = os.path.join(path, entry)
+            if not os.path.isfile(entry):
+                continue
+            if not QtGui.QImageReader(entry).canRead():
+                continue
+            pixmap = QtGui.QIcon(entry)
+            item = QtGui.QStandardItem(entry)
+            listview.model().appendRow(item)
+            
         
         

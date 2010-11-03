@@ -19,7 +19,10 @@ def main():
 
     test_stuff()
     qapp = QtGui.QApplication(sys.argv)
-    window = AvatarChooser.AvatarChooser(None)
+    faces = ['/usr/share/kde/apps/faces', \
+            '/usr/share/kde4/apps/kdm/pics/users', \
+            '/usr/share/pixmaps/faces']
+    window = AvatarChooser.AvatarChooser(None, faces_paths=faces)
     window.exec_()
     #qapp.exec_()
 
