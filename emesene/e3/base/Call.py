@@ -20,7 +20,7 @@
 
 class Call(object):
     '''a class that represent a file transfer'''
-    (NORMAL, INVITING, INVITED, ESTABLISHED) = range(4)
+    (WAITING, INVITING, INVITED, ESTABLISHED) = range(4)
 
     def __init__(self, obj, peer, accept_cb, reject_cb, cancel_cb):
         self.object = obj

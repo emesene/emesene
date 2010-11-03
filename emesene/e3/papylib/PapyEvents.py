@@ -220,6 +220,7 @@ class CallEvent(papyon.event.CallEventInterface):
     def __init__(self, call, client):
         papyon.event.CallEventInterface.__init__(self, call)
         self._client = client
+        self._call = call
 
     def on_call_incoming(self):
         self._client._on_call_incoming(self)

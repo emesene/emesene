@@ -265,11 +265,15 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_conference_invite(self, call):
         print "New conference invite", call
-        callsess = MediaSessionHandler(call.media_session)
-        callhandler = CallEvent(call, self)
+        ca = e3.base.Call(call, call.peer, None, None, None)
+        self.calls[call] = ca
+        self.rcalls[ca] = call
+        call_handler = CallEvent(call, self)
         call.ring()
         # leave the accept stuff to the call event handler
         # because codecs aren't ready yet
+        
+        self.session.add_event(Event.EVENT_CALL_INVITATION, ca)
 
     def _on_invite_file_transfer(self, papysession):
         tr = e3.base.FileTransfer(papysession, papysession.filename, \
@@ -339,13 +343,13 @@ class Worker(e3.base.Worker, papyon.Client):
     # call handlers
     def _on_call_incoming(self, papycallevent):
         """Called once the incoming call is ready."""
-        print "[papyon]", "[call] ready", papycallevent._call.media_session.prepared, papycallevent._call.media_session.ready
+        print "call incoming"
         if papycallevent._call.media_session.prepared:
             papycallevent._call.accept()
-            print "wut"
+            print "accepting call"
         else:
             papycallevent._call.ring()
-            print "ring"
+            print "ringing (session not ready)"
 
     def _on_call_ringing(self, papycallevent):
         print "[papyon]", "[call] ringing"
