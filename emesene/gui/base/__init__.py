@@ -1,3 +1,5 @@
+import MarkupParser
+
 from Theme import Theme
 from Handler import *
 from Message import Message

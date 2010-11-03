@@ -16,6 +16,9 @@ dic_inv = {
     '&apos;'    :'\''
 }
 
+URL_REGEX_STR = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+URL_REGEX = re.compile(URL_REGEX_STR)
+
 def escape(string_):
     '''replace the values on dic keys with the values'''
     return xml.sax.saxutils.escape(string_, dic)
@@ -85,11 +88,11 @@ def replace_emotes(msgtext, cedict={}, cedir=None):
     return msgtext
 
 def get_custom_emotes(message, cedict={}):
-    ''' returns a list with the shortcuts of the 
+    ''' returns a list with the shortcuts of the
         custom emoticons present in the message
         celist comes from cache '''
     chunks = [message]
-    l = []    
+    l = []
     if cedict is None:
         return l
     shortcuts = cedict.keys()
@@ -102,4 +105,13 @@ def get_custom_emotes(message, cedict={}):
             if len(parts) > 1:
                 l.append(shortcut)
     return l
+
+def replace_urls(match):
+    '''function to be called on each url match'''
+    url = match.group()
+    return '<a href="%s">%s</a>' % (url, url)
+
+def urlify(strng):
+    '''replace urls by an html link'''
+    return re.sub(URL_REGEX, replace_urls, strng)
 
