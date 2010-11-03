@@ -1,7 +1,7 @@
 Here's a todo list for Qt4 frontend:
 
-                                                        [ 'X' means done]
-
+                                             [ 'X' means done           ]
+                                             [ '>' means partially done ]
 X Implement the tray icon
 X Call correct callback when closing windows
 X fix the bug freezing ChatTextEdit widget taht 
@@ -20,7 +20,7 @@ X use emesene's extensions system to retrieve classes
 X Implement menus
 X Remove the empty space on the left in contact list
 
-- Implement a display pic chooser.
+> Implement a display pic chooser.
 > Implement actions on contact list
 X Implement default emoticon support
 - Implement nick rendering

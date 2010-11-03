@@ -149,7 +149,7 @@ class Dialog(object):
 
 class OkCancelDialog (QtGui.QDialog):
     '''Skeleton for a dialog window having Ok and Cancel buttons'''
-    def __init__(self, parent=None):
+    def __init__(self, expanding=False, parent=None):
         '''Constructor'''
 
         QtGui.QDialog.__init__(self, parent)
@@ -161,7 +161,8 @@ class OkCancelDialog (QtGui.QDialog):
         vlay.addWidget(self.central_widget)
         vlay.addSpacing(10)
         vlay.addWidget(button_box)
-        vlay.addStretch()
+        if not expanding:
+            vlay.addStretch()
         QtGui.QDialog.setLayout(self, vlay)
 
         button_box.addButton(QtGui.QDialogButtonBox.Cancel)

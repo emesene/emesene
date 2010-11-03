@@ -61,6 +61,7 @@ def setup():
     define all the components for a Qt4 environment
     """
     # pylint: disable=W0403
+    import AvatarChooser
     import Conversation
     import Dialog
     import Notifier
@@ -72,11 +73,12 @@ def setup():
     import widgets
 
     
-    extension.category_register('conversation',     Conversation.Conversation)
-    extension.category_register('dialog',           Dialog.Dialog)
-    extension.category_register('notificationGUI',  Notifier.Notifier)
+    extension.category_register('avatar chooser',  AvatarChooser.AvatarChooser)
+    extension.category_register('conversation',    Conversation.Conversation)
+    extension.category_register('dialog',          Dialog.Dialog)
+    extension.category_register('notificationGUI', Notifier.Notifier)
     extension.category_register('window frame',  TopLevelWindow.TopLevelWindow)
-    extension.category_register('tray icon',        TrayIcon.TrayIcon)
+    extension.category_register('tray icon',       TrayIcon.TrayIcon)
 
     extension.category_register('conversation window', pages.ConversationPage)
     extension.category_register('login window',        pages.LoginPage)
