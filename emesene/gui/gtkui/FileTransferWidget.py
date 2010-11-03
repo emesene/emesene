@@ -48,11 +48,11 @@ class FileTransferWidget(gtk.HBox):
         img_dir = gtk.image_new_from_stock(gtk.STOCK_OPEN, \
                                         gtk.ICON_SIZE_BUTTON)
 
-        m_open_file = gtk.ImageMenuItem(('Open file'))
+        m_open_file = gtk.ImageMenuItem(_('Open file'))
         m_open_file.connect('activate', self._on_menu_file_clicked)
         m_open_file.set_image(img_file)
 
-        m_open_dir = gtk.ImageMenuItem(('Open folder'))
+        m_open_dir = gtk.ImageMenuItem(_('Open folder'))
         m_open_dir.connect('activate', self._on_menu_folder_clicked)
         m_open_dir.set_image(img_dir)
 
@@ -180,10 +180,10 @@ class FileTransferTooltip(gtk.Window):
         self.table = gtk.Table(3, 2, False)
         self.table.set_col_spacings(5)
 
-        self.add_label(('Status:'), 0, 1, 0, 1)
-        self.add_label(('Average speed:'), 0, 1, 1, 2)
-        self.add_label(('Time elapsed:'), 0, 1, 2, 3)
-        self.add_label(('Estimated time left:'), 0, 1, 3, 4)
+        self.add_label(_('Status:'), 0, 1, 0, 1)
+        self.add_label(_('Average speed:'), 0, 1, 1, 2)
+        self.add_label(_('Time elapsed:'), 0, 1, 2, 3)
+        self.add_label(_('Estimated time left:'), 0, 1, 3, 4)
 
         self.status = gtk.Label()
         self.speed = gtk.Label()

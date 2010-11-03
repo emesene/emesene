@@ -55,7 +55,7 @@ class TextField(gtk.VBox):
         
         dialog = extension.get_default('dialog')
         if not self.entry.get_text() and not self.allow_empty:
-            dialog.error("Empty text not allowed")
+            dialog.error(_("Empty text not allowed"))
             return
 
         new_text = self.entry.get_text()
