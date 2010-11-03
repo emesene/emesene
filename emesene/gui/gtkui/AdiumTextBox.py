@@ -4,6 +4,8 @@ import logging
 log = logging.getLogger('gtkui.AdiumTextBox')
 import webkit
 
+import webbrowser
+
 import gui
 
 class OutputView(webkit.WebView):
@@ -20,6 +22,8 @@ class OutputView(webkit.WebView):
         self.pending = []
         self.connect('load-finished', self._loading_finished_cb)
         self.connect('populate-popup', self.on_populate_popup)
+        self.connect("navigation-requested", self.on_navigation_requested)
+
 
     def _loading_finished_cb(self, *args):
         '''callback called when the content finished loading
@@ -101,6 +105,15 @@ class OutputView(webkit.WebView):
         '''disables the right-click menu by removing the MenuItems'''
         for child in menu.get_children():
             menu.remove(child)
+
+    def on_navigation_requested(self, widget, WebKitWebFrame, WebKitNetworkRequest):
+        '''callback called when a link is clicked'''
+        href = WebKitNetworkRequest.get_uri()
+
+        if not href.startswith("file://"):
+            log.info("link clicked: " + href)
+            webbrowser.open_new_tab(href)
+            return True
 
 
 class OutputText(gtk.ScrolledWindow):
