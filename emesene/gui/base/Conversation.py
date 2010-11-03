@@ -218,7 +218,7 @@ class Conversation(object):
         if contact is None:
             contact = e3.Contact(account)
 
-        if message.type == e3.Message.TYPE_MESSAGE:
+        if message.type == e3.Message.TYPE_MESSAGE or message.type == e3.Message.TYPE_FLNMSG:
             user_emcache = self.caches.get_emoticon_cache(account)
             self.output.receive_message(self.formatter, contact, message,
                     received_custom_emoticons, user_emcache.path, self.first)

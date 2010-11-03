@@ -120,8 +120,14 @@ class AdiumTheme(object):
         template = template.replace('%messageDirection%',
             escape(msg.direction))
         template = template.replace('%message%', msgtext)
-        template = template.replace('%time%',
-            escape(time.strftime(self.timefmt)))
+        msg.timestamp = None
+        if msg.timestamp is None:
+            template = template.replace('%time%',
+                escape(time.strftime(self.timefmt)))
+        else:
+            template = template.replace('%time%',
+                escape(time.strftime(self.timefmt, msg.timestamp)))
+
         template = re.sub("%time{(.*?)}%", replace_time, template)
         template = template.replace('%shortTime%',
             escape(time.strftime("%H:%M")))

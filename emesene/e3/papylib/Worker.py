@@ -27,6 +27,7 @@ import gobject
 import hashlib
 import tempfile
 
+import e3
 from e3 import cache
 from e3.base import *
 import e3.base.Logger as Logger
@@ -46,6 +47,7 @@ try:
     import papyon.event
     import papyon.service.ContentRoaming as CR
     import papyon.util.string_io as StringIO
+
     papyver = papyon.version
     if papyver[1] == REQ_VER[1]:
         if papyver[2] < REQ_VER[2]:
@@ -59,7 +61,8 @@ except Exception, e:
 from PapyEvents import *
 from PapyConvert import *
 try:
-    from PapyConference import *
+    import papyon.media.conference
+    import papyon.media.constants
 except Exception, e:
     log.exception("You need gstreamer to use the webcam support")
 
@@ -99,7 +102,10 @@ class Worker(e3.base.Worker, papyon.Client):
         self._conversation_handler = {}
         # store ongoing filetransfers
         self.filetransfers = {}
-        self.rfiletransfers = {} 
+        self.rfiletransfers = {}
+        # store ongoing calls
+        self.calls = {}
+        self.rcalls = {}
 
     def run(self):
         '''main method, block waiting for data, process it, and send data back
@@ -259,11 +265,15 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_conference_invite(self, call):
         print "New conference invite", call
-        callsess = MediaSessionHandler(call.media_session)
-        callhandler = CallEvent(call, self)
+        ca = e3.base.Call(call, call.peer, None, None, None)
+        self.calls[call] = ca
+        self.rcalls[ca] = call
+        call_handler = CallEvent(call, self)
         call.ring()
         # leave the accept stuff to the call event handler
         # because codecs aren't ready yet
+        
+        self.session.add_event(Event.EVENT_CALL_INVITATION, ca)
 
     def _on_invite_file_transfer(self, papysession):
         tr = e3.base.FileTransfer(papysession, papysession.filename, \
@@ -333,47 +343,54 @@ class Worker(e3.base.Worker, papyon.Client):
     # call handlers
     def _on_call_incoming(self, papycallevent):
         """Called once the incoming call is ready."""
-        print "[papyon]", "[call] ready", papycallevent._call.media_session.prepared, papycallevent._call.media_session.ready
+        print "call incoming"
         if papycallevent._call.media_session.prepared:
             papycallevent._call.accept()
-            print "wut"
+            print "accepting call"
         else:
             papycallevent._call.ring()
-            print "ring"
+            print "ringing (session not ready)"
 
     def _on_call_ringing(self, papycallevent):
-        """Called when we received a ringing response from the callee."""
         print "[papyon]", "[call] ringing"
 
     def _on_call_accepted(self, papycallevent):
-        """Called when the callee accepted the call."""
         print "[papyon]", "[call] accepted"
 
     def _on_call_rejected(self, papycallevent, response):
-        """Called when the callee rejected the call.
-            @param response: response associated with the rejection
-            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
         print "[papyon]", "[call] rejected", response
 
     def _on_call_error(self, papycallevent, response):
-        """Called when an error is sent by the other party.
-            @param response: response associated with the error
-            @type response: L{SIPResponse<papyon.sip.SIPResponse>}"""
         print "[papyon]", "[call] err", response
 
     def _on_call_missed(self, papycallevent):
-        """Called when the call is missed."""
         print "[papyon]", "[call] missd"
 
     def _on_call_connected(self, papycallevent):
-        """Called once the call is connected."""
         print "[papyon]", "[call] connected"
 
     def _on_call_ended(self, papycallevent):
-        """Called when the call is ended."""
         print "[papyon]", "[call] ended"
 
     # conversation handlers
+    def _on_conversation_oim_received(self, flnmsg):
+        ''' handle offline messages '''
+        account = flnmsg.sender.account
+        msg = str(flnmsg)
+
+        if account in self.conversations:
+            cid = self.conversations[account]
+        else:
+            cid = time.time()
+            self._handle_action_new_conversation(account, cid)
+            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
+                [account])
+
+        msgobj = e3.base.Message(e3.base.Message.TYPE_FLNMSG, \
+            msg, account, None, flnmsg.date)
+        self.session.add_event(\
+            Event.EVENT_CONV_MESSAGE, cid, account, msgobj, {})
+
     def _on_conversation_user_typing(self, papycontact, pyconvevent):
         ''' handle user typing event '''
         account = papycontact.account
@@ -1063,6 +1080,38 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_ft_reject(self, t):
         self.rfiletransfers[t].reject()
 
+        del self.filetransfers[self.rfiletransfers[t]]
+        del self.rfiletransfers[t]
+
     def _handle_action_ft_cancel(self, t):
         self.rfiletransfers[t].cancel()
+
+        del self.filetransfers[self.rfiletransfers[t]]
+        del self.rfiletransfers[t]
+
+    # call handlers
+    def _handle_action_call_invite(self, cid, account):
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
+        papysession = self.call_manager.create_call(peer)
+
+        ca = e3.base.Call(papysession, papycontact.account)
+        self.calls[papysession] = ca
+        self.rcalls[ca] = papysession
+        
+        self.session.add_event(Event.EVENT_CALL_INVITATION, ca)
+    
+    def _handle_action_call_accept(self, c):
+        self.rcalls[c].accept()
+
+    def _handle_action_call_reject(self, c):
+        self.rcalls[c].reject()
+
+        del self.calls[self.rcalls[c]]
+        del self.rcalls[c]
+
+    def _handle_action_call_cancel(self, c):
+        self.rcalls[c].cancel()
+
+        del self.calls[self.rcalls[c]]
+        del self.rcalls[c]
 

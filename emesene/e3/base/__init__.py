@@ -29,6 +29,7 @@ from Contact import Contact
 from Session import Session
 from Account import Account
 from Transfer import FileTransfer
+from Call import Call
 
 from ContactManager import ContactManager
 
