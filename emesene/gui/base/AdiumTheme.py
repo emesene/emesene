@@ -199,7 +199,9 @@ __dic = {
     '\"': '&quot;',
     '\'': '&apos;',
     '\\': '\\\\',
-    '\n': '<br>'
+    '\r\n': '<br>', #windows
+    '\r': '<br>', #osx
+    '\n': '<br>' #linux
 }
 
 __dic_inv = {
