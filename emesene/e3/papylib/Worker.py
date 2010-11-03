@@ -978,7 +978,7 @@ class Worker(e3.base.Worker, papyon.Client):
         if len(papyconversation.total_participants) == 1:
             first_dude = papyconversation.total_participants.pop()
             if first_dude.presence == papyon.Presence.OFFLINE and \
-                papyconversation.switchboard is None: #avoid fake-offline
+                len(papyconversation._pending_invites) != 0: #avoid fake-offline
                 self.oim_box.send_message(first_dude, message.body)
                 message.type = e3.base.Message.TYPE_FLNMSG # don't process this.
 
