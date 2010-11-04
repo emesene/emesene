@@ -6,7 +6,7 @@ import urllib
 import glib
 import Preferences
 
-from gui.gtkui.AvatarManager import AvatarManager
+from gui.base.AvatarManager import AvatarManager
 from gui.gtkui.Preferences import BaseTable
 
 class Song(object):
