@@ -149,7 +149,7 @@ class OutputText(gtk.ScrolledWindow):
 
     def _error_cb(self, view, message, line, source_id):
         '''called when a message is sent to the console'''
-        message = _("Webkit message: %s %s %s") % (message, line, source_id)
+        message = "Webkit message: %s %s %s" % (message, line, source_id)
         log.debug(message)
 
     def _loading_stop_cb(self, view, frame):

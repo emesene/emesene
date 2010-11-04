@@ -123,8 +123,9 @@ class Conversation(object):
     def on_notify_attention(self):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
-        self.output.information(self.formatter, self.session.contacts.me,
-                _('you just sent a nudge!'))
+        self.output.send_message(self.formatter, self.session.contacts.me,
+            _('You just sent a nudge!'), {}, '', None, self.first)
+
         self.play_nudge()
 
     def show(self):
