@@ -121,7 +121,7 @@ class Conversation(object):
         account = self.members[0]
         contact = self.session.contacts.contacts[account]
 
-        if not contact.blocked:
+        if contact.blocked:
             self.session.unblock(account)
         else:
             self.session.block(account)
