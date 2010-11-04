@@ -81,7 +81,7 @@ class AdiumThemes(object):
         '''
 
         if not os.path.isdir(theme_path):
-            return False, _("%s is not a directoy") % (theme_path,)
+            return False, "%s is not a directory" % (theme_path,)
 
         return self.validate_structure(theme_path, REQUIRED_FILES)
 
