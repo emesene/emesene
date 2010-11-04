@@ -442,7 +442,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
             emotes.insert_raw((msnobj._friendly, msnobj._data))
             self.session.add_event(Event.EVENT_P2P_FINISHED, \
-                account, 'emoticon', emoticon_path)
+                account, 'emoticon', (msnobj._friendly, emoticon_path))
 
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
             received_custom_emoticons[shortcut] = None
@@ -450,9 +450,9 @@ class Worker(e3.base.Worker, papyon.Client):
             emoticon_hash = msn_object._data_sha.encode("hex")
             emoticon_path = os.path.join(emotes.path, emoticon_hash)
 
-            if emoticon_hash in emotes:
-                received_custom_emoticons[shortcut] = emoticon_path
-            else:
+            received_custom_emoticons[shortcut] = emoticon_path
+
+            if emoticon_hash not in emotes:
                 self.msn_object_store.request(msn_object, \
                     (download_ok, download_failed))
 

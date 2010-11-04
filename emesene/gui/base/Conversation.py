@@ -298,6 +298,10 @@ class Conversation(object):
         elif len(self.members) > 1:
             self.update_group_information()
 
+    def update_p2p(self, *what):
+        ''' update the p2p data in the conversation (custom emoticons) '''
+        self.output.update_p2p(*what)
+
     def on_contact_joined(self, account):
         '''called when a contact joins the conversation'''
         if account not in self.members:
