@@ -87,8 +87,15 @@ class TrayIcon(gtk.StatusIcon):
         callback called when the status icon is activated
         (includes clicking the icon)
         """
-       
-        if(self.main_window != None):
+        
+        if self.last_new_message is not None:
+            # show the tab with the latest message
+            conversation = self.conversations.conversations[self.last_new_message]
+            page = self.conversations.page_num(conversation)
+            self.conversations.set_current_page(page)
+            self.conversations.get_parent().present()
+
+        elif (self.main_window != None):
             if(self.main_window.get_property("visible")):
                 self.main_window.hide()
             else:
