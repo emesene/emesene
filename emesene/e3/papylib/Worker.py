@@ -89,7 +89,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
         self._oim_handler = OfflineEvent(self)
-        self._roaming_handler = None
+
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
