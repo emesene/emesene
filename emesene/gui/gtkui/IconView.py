@@ -119,6 +119,7 @@ class IconView(gtk.HBox):
                 except gobject.GError:
                     print _('image at %s could not be loaded') % (path, )
                     print gobject.GError                      
+                    return
  
                 # On nt images are 128x128 (48x48 on xp)
                 # On kde, images are 64x64
