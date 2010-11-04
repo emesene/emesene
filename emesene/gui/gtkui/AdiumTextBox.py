@@ -178,3 +178,11 @@ class OutputText(gtk.ScrolledWindow):
         msg = gui.Message.from_contact(contact, message, False, True)
         self.view.add_message(msg, None, None, None)
 
+    def update_p2p(self, *what):
+        ''' new p2p data has been received (custom emoticons) '''
+        account, _type, obj = what
+        if _type == 'emoticon':
+            short, path = obj
+            mystr = "var now=new Date();document.images['%s'].src='%s?'+now.getTime();" % (short, path)
+            self.view.execute_script(mystr.replace("\0", ""))
+

@@ -85,7 +85,7 @@ def replace_emotes(msgtext, cedict={}, cedir=None):
                     path = None
 
             if path is not None:
-                imgtag = '<img src="%s" alt="%s"/>' % (path, shortcut)
+                imgtag = '<img src="%s" alt="%s" name="%s"/>' % (path, shortcut, shortcut)
                 msgtext = msgtext.replace(shortcut, imgtag)
 
     return msgtext
