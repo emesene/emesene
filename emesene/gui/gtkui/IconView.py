@@ -56,12 +56,8 @@ class IconView(gtk.HBox):
                         return False
                     full_path = os.path.join(search_path, path)
                     if not name.endswith('_thumb') and \
-                        not path.endswith('tmp') and   \
-                        not path.endswith('xml') and   \
-                        not path.endswith('db') and    \
-                        not path.endswith('info') and  \
-                        not path.endswith('last') and  \
-                        not path.endswith('avatars') and \
+                        not path.endswith(('tmp', 'xml', 'db', 'info',
+                                           'last', 'avatars')) and \
                         not os.path.isdir(full_path):
                         gtk.gdk.threads_enter()
                         self.add_picture(full_path)
