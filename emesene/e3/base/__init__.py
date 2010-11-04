@@ -3,9 +3,9 @@
 
 #   This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -29,6 +29,7 @@ from Contact import Contact
 from Session import Session
 from Account import Account
 from Transfer import FileTransfer
+from Call import Call
 
 from ContactManager import ContactManager
 

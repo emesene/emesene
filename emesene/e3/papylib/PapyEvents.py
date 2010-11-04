@@ -6,7 +6,7 @@
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -218,7 +218,7 @@ class WebcamEvent(papyon.event.WebcamEventInterface):
 
 class CallEvent(papyon.event.CallEventInterface):
     def __init__(self, call, client):
-        papyon.event.BaseEventInterface.__init__(self, call)
+        papyon.event.CallEventInterface.__init__(self, call)
         self._client = client
         self._call = call
 
@@ -251,7 +251,8 @@ class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
     Offline IM box."""
 
     def __init__(self, client):
-        papyon.event.BaseEventInterface.__init__(self, client)
+        self._client = client
+        papyon.event.OfflineMessagesEventInterface.__init__(self, client)
 
     def on_oim_state_changed(self, state):
         print "[papyon]", "oim state changed", state
@@ -259,12 +260,13 @@ class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
 
     def on_oim_messages_received(self, messages):
         print "[papyon]", "oims received", messages
-        #self._client.oim_box.fetch_messages(messages)
+        self._client.oim_box.fetch_messages(messages)
 
     def on_oim_messages_fetched(self, messages):
         print "[papyon]", "oim fetched", messages
-        #for message in messages:
-            #sender = message.sender
+        for message in sorted(messages):
+            self._client._on_conversation_oim_received(message)
+        self._client.oim_box.delete_messages()
 
     def on_oim_messages_deleted(self):
         print "[papyon]", "oim deleted"

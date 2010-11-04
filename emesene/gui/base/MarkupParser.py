@@ -8,7 +8,7 @@ import gui
 
 dic = {
     '\"'    :    '&quot;',
-    '\''    :    '&apos;'
+    '\''    :    '&apos;',
 }
 
 dic_inv = {

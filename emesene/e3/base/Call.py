@@ -1,5 +1,6 @@
+'''audio/video handling module'''
+
 # -*- coding: utf-8 -*-
-'''a module that defines an action object'''
 
 #   This file is part of emesene.
 #
@@ -17,23 +18,27 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-class Action(object):
-    '''this class represent an action that must be performed by the server'''
+class Call(object):
+    '''a class that represent a file transfer'''
+    (WAITING, INVITING, INVITED, ESTABLISHED) = range(4)
 
-    def __init__(self, id_, args=None):
-        '''class constructor'''
-        self.id_ = id_
-        
-        if args is not None:
-            self.args = args
-        else:
-            self.args = []
-    
-    @classmethod
-    def set_constants(cls, actions):
-        '''creates an event class that has the event list as constants starting
-        with EVENT_ and an uppercase string replacing the spaces with 
-        underscores
-        '''
-        for (index, action) in enumerate(actions):
-            setattr(cls, 'ACTION_' + action.upper().replace(' ', '_'), index)
+    def __init__(self, obj, peer, accept_cb, reject_cb, cancel_cb):
+        self.object = obj
+        self.state = Call.WAITING
+        self.peer = peer
+
+        self.time_start = 0
+
+    def __str__(self):
+        '''return a string representation of a call'''
+        return '<e3.base.Call state="%i" peer="%s">' % (self.state, self.peer)
+
+    def accept(self):
+        pass
+
+    def reject(self):
+        pass
+
+    def cancel(self):
+        pass
+

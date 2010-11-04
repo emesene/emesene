@@ -1,11 +1,12 @@
 class Message(object):
     '''a class that represent a msn message'''
-    (TYPE_MESSAGE, TYPE_TYPING, TYPE_NUDGE, TYPE_P2P, TYPE_UNK) = range(5)
+    (TYPE_MESSAGE, TYPE_TYPING, TYPE_NUDGE, TYPE_P2P, TYPE_UNK, TYPE_FLNMSG) = range(6)
 
-    def __init__(self, type_, body, account, style=None):
+    def __init__(self, type_, body, account, style=None, timestamp=None):
         self.type = type_
         self.body = body
         self.account = account
+        self.timestamp = timestamp
 
         if style is not None:
             self.style = style
