@@ -251,6 +251,7 @@ class Theme(object):
             self.tool_invite = os.path.join(self.toolbar_path, "invite.png")
             self.tool_clean = os.path.join(self.toolbar_path, "clean-chat.png")
             self.tool_file_transfer = os.path.join(self.toolbar_path, "file-transfer.png")
+            self.tool_ublock = os.path.join(self.toolbar_path, "ublock.png")
 
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
 

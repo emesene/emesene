@@ -116,6 +116,16 @@ class Conversation(object):
         '''called when the clean button is clicked'''
         self.output.clear()
 
+    def on_block_user(self):
+        '''blocks the first user of the conversation'''
+        account = self.members[0]
+        contact = self.session.contacts.contacts[account]
+
+        if not contact.blocked:
+            self.session.unblock(account)
+        else:
+            self.session.block(account)
+
     def on_emote(self, emote):
         '''called when a emote is selected on the emote window'''
         self.input.append(emote)

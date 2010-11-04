@@ -393,7 +393,10 @@ class ConversationToolbarHandler(object):
                 self.conversation.on_filetransfer_invite(filename, filepath)
 
         self.dialog.choose_file(os.path.expanduser("~"), open_file_cb)
-        
+
+    def on_ublock_selected(self):
+        '''called when block/unblock button is selected'''
+        self.conversation.on_block_user()        
 
 class TrayIconHandler(FileHandler):
     """
