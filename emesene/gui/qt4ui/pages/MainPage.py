@@ -94,8 +94,8 @@ class MainPage (QtGui.QWidget):
                                         self._on_set_new_psm)
         widget_dict['status_combo'].status_changed.connect(
                                         self._on_set_new_status)
-        #widget_dict['display_pic'].clicked.connect(
-        #                                self._on_display_pic_choose_request)
+        widget_dict['display_pic'].clicked.connect(
+                                        self._on_display_pic_clicked)
         widget_dict['contact_list'].new_conversation_requested.connect(
                                         self._on_new_conversation_requested)
                                         
@@ -144,6 +144,13 @@ class MainPage (QtGui.QWidget):
         '''Slot called when the user tries to set a new status'''
         self._session.set_status(status)
         # to be completed handling the subsequent signal from e3
+        
+    def _on_display_pic_clicked(self):
+        '''Slot called when the user clicks the display pic. It shows
+        the AvatarChooser'''
+        chooser_cls = extension.get_default('avatar chooser')
+        chooser = chooser_cls(self._session)
+        chooser.exec_()
 
         
         

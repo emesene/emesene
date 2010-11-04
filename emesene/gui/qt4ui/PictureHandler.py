@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4  import QtGui
-from PyQt4  import Qt
+from PyQt4          import QtGui
+from PyQt4.QtCore   import Qt
 
 from gui   import base
 
@@ -25,7 +25,7 @@ class PictureHandler (base.PictureHandler):
         if format == 'gif' or format == 'pbm' or format == 'pgm':
             self._is_animated = True
         else:
-            self._qimage = QImage(source_filename)
+            self._qimage = QtGui.QImage(source_filename)
         
     
     

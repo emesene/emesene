@@ -45,9 +45,9 @@ class IconViewDelegate (QtGui.QStyledItemDelegate):
         # create the picture
         picture_path = model.data(index, Qt.DisplayRole).toString()
         picture = QtGui.QPixmap(picture_path)
-        picture = picture.scaled(96, 96, transformMode=Qt.SmoothTransformation)
         if picture.isNull():
             picture = QtGui.QPixmap(gui.theme.user)
+        picture = picture.scaled(96, 96, transformMode=Qt.SmoothTransformation)
         # calculate the target position
         top_left_point = QtCore.QPointF(option.rect.topLeft())
         target_point = top_left_point + self._xy_pic_margin
