@@ -185,7 +185,5 @@ class OutputText(gtk.ScrolledWindow):
         if _type == 'emoticon':
             _creator, _friendly, path = what
             _id = base64.b64encode(_creator+xml.sax.saxutils.unescape(_friendly)) #see gui/base/MarkupParser.py
-            # this script only works for one image, i don't know enough js
-            # to change the src for images with the same name property. 
-            mystr = "var now=new Date();document.images['%s'].src='%s?'+now.getTime();" % (_id, path)
+            mystr = "var now=new Date();var x=document.images;for(var i=0;i<x.length;i++){if(x[i].name=='%s'){x[i].src='%s?'+now.getTime();}}" % (_id, path)
             self.view.execute_script(mystr)
