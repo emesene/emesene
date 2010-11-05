@@ -3,6 +3,7 @@
 import os
 import xml.sax.saxutils
 import re
+import base64
 
 import gui
 
@@ -69,24 +70,25 @@ def parse_emotes(message, cedict={}):
     return message.replace(plain_text, ''.join(chunks))
 
 
-def replace_emotes(msgtext, cedict={}, cedir=None):
+def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
     '''replace emotes with img tags to the images'''
     shortcuts = gui.Theme.EMOTES.keys()
     if cedict is not None:
         shortcuts.extend(cedict.keys())
     for shortcut in shortcuts:
-        if shortcut in msgtext:
+        eshort = escape(shortcut)
+        if eshort in msgtext:
             if shortcut in gui.Theme.EMOTES.keys():
                 path = gui.theme.emote_to_path(shortcut)
             else:
-                if cedict[shortcut] is not None:
-                    path = os.path.join(cedir, cedict[shortcut])
-                else:
-                    path = None
+                path = os.path.join(cedir, cedict[shortcut])
 
             if path is not None:
-                imgtag = '<img src="%s" alt="%s" name="%s"/>' % (path, shortcut, shortcut)
-                msgtext = msgtext.replace(shortcut, imgtag)
+                # creating sort of uid for image name since different users
+                # may have different images with the same shortcut
+                _id = base64.b64encode(sender+shortcut)
+                imgtag = '<img src="%s" alt="%s" name="%s"/>' % (path, eshort, _id)
+                msgtext = msgtext.replace(eshort, imgtag)
 
     return msgtext
 

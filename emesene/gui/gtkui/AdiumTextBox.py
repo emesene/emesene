@@ -3,6 +3,8 @@ import gtk
 import logging
 log = logging.getLogger('gtkui.AdiumTextBox')
 import webkit
+import base64
+import xml.sax.saxutils
 
 import webbrowser
 
@@ -178,11 +180,12 @@ class OutputText(gtk.ScrolledWindow):
         msg = gui.Message.from_contact(contact, message, False, True)
         self.view.add_message(msg, None, None, None)
 
-    def update_p2p(self, *what):
+    def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
-        account, _type, obj = what
         if _type == 'emoticon':
-            short, path = obj
-            mystr = "var now=new Date();document.images['%s'].src='%s?'+now.getTime();" % (short, path)
-            self.view.execute_script(mystr.replace("\0", ""))
-
+            _creator, _friendly, path = what
+            _id = base64.b64encode(_creator+xml.sax.saxutils.unescape(_friendly)) #see gui/base/MarkupParser.py
+            # this script only works for one image, i don't know enough js
+            # to change the src for images with the same name property. 
+            mystr = "var now=new Date();document.images['%s'].src='%s?'+now.getTime();" % (_id, path)
+            self.view.execute_script(mystr)

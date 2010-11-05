@@ -104,7 +104,7 @@ class AdiumTheme(object):
         '''replace the variables on template for the values on msg
         '''
 
-        msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir)
+        msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir, msg.sender)
         msgtext = MarkupParser.urlify(msgtext)
 
         if style is not None:

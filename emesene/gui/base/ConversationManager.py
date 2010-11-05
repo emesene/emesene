@@ -156,10 +156,11 @@ class ConversationManager(object):
             if account in conversation.members:
                 conversation.update_data()
 
-    def _on_p2p_finished(self, *what):
+    def _on_p2p_finished(self, account, _type, *what):
         ''' called when a p2p is finished - currently custom emoticons only '''
         for conversation in self.conversations.values():
-            conversation.update_p2p(*what)
+            if account in conversation.members:
+                conversation.update_p2p(account, _type, *what)
 
     def on_conversation_close(self, conversation):
         """

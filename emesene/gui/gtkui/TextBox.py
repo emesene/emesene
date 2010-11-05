@@ -305,7 +305,7 @@ class OutputText(TextBox):
         self.append(formatter.format_information(message), None,
                 self.config.b_allow_auto_scroll)
 
-    def update_p2p(self, what):
+    def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
         return # NotImplemented
 
