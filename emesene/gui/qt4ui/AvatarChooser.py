@@ -143,6 +143,20 @@ class AvatarChooser(Dialog.OkCancelDialog):
             
             
     def _on_add_clicked(self):
+        def show_and_select(filename):
+            # append the image to the first tab:
+            item = self._add_image_to_view(self._vn[0], filename)
+            # show first tab:
+            self._widget_dict['tab_widget'].setCurrentIndex(0)
+            # select the new appended image:
+            self._widget_dict[self._vn[0]].selectionModel().\
+                            select(item.index(), QtGui.QItemSelectionModel.Select)
+                            
+        def response_cb(response, pixmap):
+            if response == gui.stock.ACCEPT:
+                filename = self._avatar_manager.add_new_avatar_from_toolkit_pix(pixmap)
+                show_and_select(filename)
+        
         filename = QtGui.QFileDialog.getOpenFileName(
                                          self, 'Select an image', 
                                          QtCore.QString(),
@@ -152,17 +166,11 @@ class AvatarChooser(Dialog.OkCancelDialog):
         filename = unicode(filename)
         pic_handler = extension.get_and_instantiate('picture handler', filename)
         # substitute the filename with the name of the cached one:
-        if pic_handler.is_animated():
-            filename = self._avatar_manager.add_new_avatar(filename)
+        if pic_handler.can_handle():
+            Dialog.crop_image(response_cb, filename)
         else:
-            filename = self._avatar_manager.add_new_avatar(filename) #:)
-        # append the image to the first tab:
-        item = self._add_image_to_view(self._vn[0], filename)
-        # show first tab:
-        self._widget_dict['tab_widget'].setCurrentIndex(0)
-        # select the new appended image:
-        self._widget_dict[self._vn[0]].selectionModel().\
-                        select(item.index(), QtGui.QItemSelectionModel.Select)
+            filename = self._avatar_manager.add_new_avatar(filename)
+            show_and_select(filename)
     
     
     def _on_selection_changed(self, view_name, current_idx, previous_idx):

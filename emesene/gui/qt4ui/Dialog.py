@@ -145,6 +145,65 @@ class Dialog(object):
         
         response_cb(response, group_name)
         
+    @classmethod
+    def crop_image(cls, response_cb, filename, title='Select image area'):
+        dialog = OkCancelDialog()
+        
+        # Actions
+        act_dict['rotate_left' ] = QtGui.QAction('Rotate Left' )
+        act_dict['rotate_right'] = QtGui.QAction('Rotate right')
+        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit')
+        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit')
+        act_dict['reset_zoom']   = QtGui.QAction('Reset zoom')
+        act_dict['select_all']   = QtGui.QAction('Select All')
+        act_dict['select_unsc']  = QtGui.QAction('Select Unscaled')
+        
+        # widgets
+        toolbar = QtGui.QToolbar()
+        scroll_area = QtGui.QScrollArea()
+        area_selector = widgets.ImageAreaSelector(QtGui.QPixmap(filename))
+        
+        # layout
+        lay = QtGui.QVBoxLayout()
+        lay.addWidget(toolbar)
+        lay.addWidget(scroll_area)
+        dialog.setLayout(lay)
+        
+        # widget setup
+        toolbar.addAction(act_dict['rotate_left'])
+        toolbar.addAction(act_dict['rotate_right'])
+        toolbar.addSeparator()
+        toolbar.addAction(act_dict['fit_zoom'])
+        toolbar.addAction(act_dict['reset_zoom'])
+        toolbar.addSeparator()
+        toolbar.addAction(act_dict['select_all'])
+        toolbar.addAction(act_dict['select_unsc'])
+        
+        # Signal connection:
+        act_dict['rotate_left'].triggered.connect(area_selector.rotate_left)
+        act_dict['rotate_right'].triggered.connect(area_selector.rotate_right)
+        act_dict['fit_zoom'].triggered.connect(area_selector.fit_zoom)
+        act_dict['reset_zoom'].triggered.connect(
+                                            lambda: area_selector.set_zoom(1))
+        act_dict['select_all'].triggered.connect(area_selector.select_all)
+        act_dict['select_unsc'].triggered.connect(
+                                            area_selector.select_unscaled)
+                                            
+        # Dialog execution:
+        responde = dialog.exec_()
+        
+        if response == QtGui.QDialog.Accepted:
+            response = gui.stock.ACCEPT
+        elif response == QtGui.QDialog.Rejected:
+            response = gui.stock.CANCEL
+        print response
+        
+        selected_pixmap = area_selector.get_selection()
+        
+        response_cb(response, selected_pixmap)
+        
+
+
 
 
 class OkCancelDialog (QtGui.QDialog):

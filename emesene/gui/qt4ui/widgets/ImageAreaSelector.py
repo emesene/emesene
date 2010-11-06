@@ -3,6 +3,7 @@
 '''This module contains the ChatInput class'''
 
 import os
+import math
 
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
@@ -18,6 +19,8 @@ import gui
 
 class ImageAreaSelector (QtGui.QWidget):
     
+    selectionChanged = QtCore.pyqtSignal()
+    
     def __init__(self, pixmap, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self._pixmap = pixmap
@@ -31,6 +34,7 @@ class ImageAreaSelector (QtGui.QWidget):
         self._hl_color1 = QtGui.QPalette().color(QtGui.QPalette.Highlight)
         self._hl_color2 = QtGui.QPalette().color(QtGui.QPalette.Highlight)
         self._hl_color2.setAlpha(150)
+        self._zoom = 2
         
         self.adjust_size()
         self.setBackgroundRole(QtGui.QPalette.Dark)
@@ -39,7 +43,7 @@ class ImageAreaSelector (QtGui.QWidget):
         
 
     def mousePressEvent (self, event):
-        mouse_pos = event.pos()
+        mouse_pos = event.pos() / self._zoom
         sel_rect = self._selection_rect
         
         if not event.button() == Qt.LeftButton:
@@ -61,19 +65,20 @@ class ImageAreaSelector (QtGui.QWidget):
     def mouseMoveEvent (self, event):
         sel_rect = self._selection_rect
         if self._resize_start:
-            resize_end = event.pos()
+            resize_end = event.pos() / self._zoom
             sel_rect.setBottomRight(sel_rect.bottomRight() +
                                     (resize_end - self._resize_start))
             self._resize_start = resize_end
+            self.make_selection_square()
             self.update()
         elif self._drag_start is not None:
-            drag_end = event.pos()
+            drag_end = event.pos() / self._zoom
             sel_rect.translate(drag_end - self._drag_start)
             self._drag_start = drag_end
             self.update()
             
         # cursor shape:
-        mouse_pos = event.pos()
+        mouse_pos = event.pos() / self._zoom
         if (not sel_rect.isNull()) and sel_rect.contains(mouse_pos, True):
             handle_rect = QRect(sel_rect.bottomRight(), self._handle_size)
             if handle_rect.contains(mouse_pos):
@@ -91,30 +96,37 @@ class ImageAreaSelector (QtGui.QWidget):
         self._resize_start = None
         self._drag_start = None
         self.update()
+        if not self._selection_rect.isNull():
+            self.selectionChanged.emit()
         
     
     def paintEvent(self, event):
         QtGui.QWidget.paintEvent(self, event)
         self._painter.begin(self)
-        self._painter.drawPixmap(self._image_origin, self._pixmap)
+        pixmap_dest_rect = QRect(self._image_origin * self._zoom, 
+                                 self._pixmap.size()*self._zoom)
+        self._painter.drawPixmap(pixmap_dest_rect, self._pixmap)
         if not self._selection_rect.isNull():
             # preparing the darkened frame:
             sel_rect = self._selection_rect.normalized()
-            frame = QtGui.QPixmap(event.rect().size())
+            frame = QtGui.QPixmap(event.rect().size()*self._zoom)
             frame.fill(QtGui.QColor(0, 0, 0, 127))
             frame_painter = QtGui.QPainter(frame)
             # erase the selected area from the frame:
             frame_painter.setCompositionMode(
                                 QtGui.QPainter.CompositionMode_DestinationIn)
-            frame_painter.fillRect(sel_rect, QtGui.QColor(0, 0, 0, 0))
+            sel_rect_scaled = QRect(sel_rect.topLeft() * self._zoom,
+                                    sel_rect.size() * self._zoom)
+            frame_painter.fillRect(sel_rect_scaled, QtGui.QColor(0, 0, 0, 0))
             # draw selection border :
             frame_painter.setCompositionMode(
                                 QtGui.QPainter.CompositionMode_SourceOver)
             frame_painter.setPen(self._hl_color1)
-            frame_painter.drawRect(sel_rect)
+            frame_painter.drawRect(sel_rect_scaled)
             # draw the resize grip (if possible)
-            if sel_rect.width() > 20 and sel_rect.height() > 20:
-                handle_rect = QRect(sel_rect.bottomRight(), self._handle_size)
+            if sel_rect_scaled.width() > 20 and sel_rect_scaled.height() > 20:
+                handle_rect = QRect(sel_rect_scaled.bottomRight(), 
+                                    self._handle_size)
                 frame_painter.fillRect(handle_rect, self._hl_color2)
                 frame_painter.drawRect(handle_rect)
             frame_painter.end()
@@ -125,7 +137,7 @@ class ImageAreaSelector (QtGui.QWidget):
         
         
     def resizeEvent(self, event):
-        new_size = event.size()
+        new_size = event.size() / self._zoom
         pix_size = self._pixmap.size()
         
         dx = (new_size.width()  - pix_size.width() ) /2
@@ -134,6 +146,7 @@ class ImageAreaSelector (QtGui.QWidget):
         new_image_origin = QPoint(dx, dy)
         self._selection_rect.translate(new_image_origin - self._image_origin)
         self._image_origin = new_image_origin
+        print 'image origin: %s' % new_image_origin
         
 
         
@@ -157,11 +170,13 @@ class ImageAreaSelector (QtGui.QWidget):
     def rotate_left(self):
         self._pixmap = self._pixmap.transformed(QtGui.QTransform().rotate(90))
         self.adjust_size()
+        self.update()
 
 
     def rotate_right(self):
         self._pixmap = self._pixmap.transformed(QtGui.QTransform().rotate(-90))
         self.adjust_size()
+        self.update()
         
     
     def adjust_size(self):
@@ -171,9 +186,38 @@ class ImageAreaSelector (QtGui.QWidget):
         else:
             min_size = pixmap.size()
             
-        self.setMinimumSize(min_size)
+        self.setMinimumSize(min_size*self._zoom)
 
 
+    def make_selection_square(self):
+        wid = self._selection_rect.width ()
+        self._selection_rect.setSize(QSize(wid, wid))
+        
+    
+    def set_zoom(self, zoomlevel):
+        self._zoom = zoomlevel
+        self.adjust_size()
+        self.update()
+        
+        
+    def fit_zoom(self):
+        widget_wid = self.size().width ()
+        widget_hei = self.size().height()
+        
+        pixmap_wid = self._pixmap.width ()
+        pixmap_hei = self._pixmap.height()
+        
+        self._zoom = (min(widget_wid, widget_hei) / 
+                      min(pixmap_wid, pixmap_hei))
+                      
+        self.adjust_size()
+        self.update()
+        
+    def get_selected_pixmap(self):
+        return self._pixmap.copy(self._selection_rect)
+        
+        
+        
 
 
 
