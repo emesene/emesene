@@ -877,6 +877,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_set_message(self, message):
         ''' handle Action.ACTION_SET_MESSAGE '''
+        if message is None:
+            message = ''
         self.profile.personal_message = message
         self.content_roaming.store(None, message, None)
 
