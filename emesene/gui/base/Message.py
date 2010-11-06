@@ -10,7 +10,7 @@ class Message(object):
 
     def __init__(self, incoming, first, sender, display_name, alias, image_path,
             status_path, message, status, service='MSN', classes='',
-            direction='ltr'):
+            direction='ltr', timestamp=None):
         '''constructor, see
         http://trac.adium.im/wiki/CreatingMessageStyles for more information
         of the values
@@ -27,9 +27,10 @@ class Message(object):
         self.service        = service
         self.classes        = classes
         self.direction      = direction
+        self.timestamp      = timestamp
 
     @classmethod
-    def from_contact(cls, contact, message, first, incomming):
+    def from_contact(cls, contact, message, first, incomming, tstamp=None):
         picture = contact.picture
 
         if not picture:
@@ -38,7 +39,7 @@ class Message(object):
         return gui.base.Message(incomming, first, contact.account,
                 contact.display_name, contact.alias, picture,
                 gui.theme.status_icons[contact.status], message,
-                e3.status.STATUS[contact.status])
+                e3.status.STATUS[contact.status], timestamp=tstamp)
 
     @classmethod
     def from_data(cls, nick, message, first, incomming):
