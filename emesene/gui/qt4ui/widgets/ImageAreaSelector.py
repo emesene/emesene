@@ -34,9 +34,9 @@ class ImageAreaSelector (QtGui.QWidget):
         self._hl_color1 = QtGui.QPalette().color(QtGui.QPalette.Highlight)
         self._hl_color2 = QtGui.QPalette().color(QtGui.QPalette.Highlight)
         self._hl_color2.setAlpha(150)
-        self._zoom = 2
+        self._zoom = 1.0
         
-        self.adjust_size()
+        self.adjust_minum_size()
         self.setBackgroundRole(QtGui.QPalette.Dark)
         self.setMouseTracking(True)
         self.setCursor(Qt.CrossCursor)
@@ -109,7 +109,7 @@ class ImageAreaSelector (QtGui.QWidget):
         if not self._selection_rect.isNull():
             # preparing the darkened frame:
             sel_rect = self._selection_rect.normalized()
-            frame = QtGui.QPixmap(event.rect().size()*self._zoom)
+            frame = QtGui.QPixmap(event.rect().size())
             frame.fill(QtGui.QColor(0, 0, 0, 127))
             frame_painter = QtGui.QPainter(frame)
             # erase the selected area from the frame:
@@ -137,7 +137,11 @@ class ImageAreaSelector (QtGui.QWidget):
         
         
     def resizeEvent(self, event):
-        new_size = event.size() / self._zoom
+        self.adjust_image_origin()
+        
+    
+    def adjust_image_origin(self):
+        new_size = self.size() / self._zoom
         pix_size = self._pixmap.size()
         
         dx = (new_size.width()  - pix_size.width() ) /2
@@ -148,8 +152,6 @@ class ImageAreaSelector (QtGui.QWidget):
         self._image_origin = new_image_origin
         print 'image origin: %s' % new_image_origin
         
-
-        
     def select_unscaled(self):
         pix_size = self._pixmap.size()
         if pix_size.width() <= 96 and pix_size.height() <= 96:
@@ -159,27 +161,33 @@ class ImageAreaSelector (QtGui.QWidget):
             self._selection_rect.setTopLeft(QPoint(x, y))
             self._selection_rect.setSize(QSize(96, 96))
             self.update()
+            self.selectionChanged.emit()
             
             
     def select_all(self):
         self._selection_rect.setTopLeft(self._image_origin)
         self._selection_rect.setSize(self._pixmap.size())
         self.update()
+        self.selectionChanged.emit()
         
         
     def rotate_left(self):
-        self._pixmap = self._pixmap.transformed(QtGui.QTransform().rotate(90))
-        self.adjust_size()
+        self._pixmap = self._pixmap.transformed(QtGui.QTransform().rotate(-90))
+        self.adjust_minum_size()
+        self.adjust_image_origin()
         self.update()
+        self.selectionChanged.emit()
 
 
     def rotate_right(self):
-        self._pixmap = self._pixmap.transformed(QtGui.QTransform().rotate(-90))
-        self.adjust_size()
+        self._pixmap = self._pixmap.transformed(QtGui.QTransform().rotate(90))
+        self.adjust_minum_size()
+        self.adjust_image_origin()
         self.update()
+        self.selectionChanged.emit()
         
     
-    def adjust_size(self):
+    def adjust_minum_size(self):
         pixmap = self._pixmap
         if pixmap.width() < 96 or pixmap.height() < 96:
             min_size = QSize(96, 96)
@@ -196,8 +204,10 @@ class ImageAreaSelector (QtGui.QWidget):
     
     def set_zoom(self, zoomlevel):
         self._zoom = zoomlevel
-        self.adjust_size()
+        self.adjust_minum_size()
+        self.adjust_image_origin()
         self.update()
+        self.selectionChanged.emit()
         
         
     def fit_zoom(self):
@@ -210,11 +220,15 @@ class ImageAreaSelector (QtGui.QWidget):
         self._zoom = (min(widget_wid, widget_hei) / 
                       min(pixmap_wid, pixmap_hei))
                       
-        self.adjust_size()
+        self.adjust_minum_size()
+        self.adjust_image_origin()
         self.update()
+        self.selectionChanged.emit()
         
     def get_selected_pixmap(self):
-        return self._pixmap.copy(self._selection_rect)
+        sel_rect_scaled = QRect(self._selection_rect.topLeft() * self._zoom,
+                                self._selection_rect.size() * self._zoom)
+        return QtGui.QPixmap.grabWidget(self, sel_rect_scaled)
         
         
         

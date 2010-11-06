@@ -167,7 +167,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
         pic_handler = extension.get_and_instantiate('picture handler', filename)
         # substitute the filename with the name of the cached one:
         if pic_handler.can_handle():
-            Dialog.crop_image(response_cb, filename)
+            Dialog.Dialog.crop_image(response_cb, filename)
         else:
             filename = self._avatar_manager.add_new_avatar(filename)
             show_and_select(filename)

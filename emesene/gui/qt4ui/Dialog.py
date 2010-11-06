@@ -8,6 +8,8 @@ from PyQt4.QtCore  import Qt
 
 import gui
 
+from gui.qt4ui import widgets
+
 
 
 class Dialog(object):
@@ -147,19 +149,20 @@ class Dialog(object):
         
     @classmethod
     def crop_image(cls, response_cb, filename, title='Select image area'):
-        dialog = OkCancelDialog()
+        dialog = OkCancelDialog(expanding=True)
         
         # Actions
-        act_dict['rotate_left' ] = QtGui.QAction('Rotate Left' )
-        act_dict['rotate_right'] = QtGui.QAction('Rotate right')
-        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit')
-        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit')
-        act_dict['reset_zoom']   = QtGui.QAction('Reset zoom')
-        act_dict['select_all']   = QtGui.QAction('Select All')
-        act_dict['select_unsc']  = QtGui.QAction('Select Unscaled')
+        act_dict = {}
+        act_dict['rotate_left' ] = QtGui.QAction('Rotate Left'    , dialog)
+        act_dict['rotate_right'] = QtGui.QAction('Rotate right'   , dialog)
+        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit'    , dialog)
+        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit'    , dialog)
+        act_dict['reset_zoom']   = QtGui.QAction('Reset zoom'     , dialog)
+        act_dict['select_all']   = QtGui.QAction('Select All'     , dialog)
+        act_dict['select_unsc']  = QtGui.QAction('Select Unscaled', dialog)
         
         # widgets
-        toolbar = QtGui.QToolbar()
+        toolbar = QtGui.QToolBar()
         scroll_area = QtGui.QScrollArea()
         area_selector = widgets.ImageAreaSelector(QtGui.QPixmap(filename))
         
@@ -178,6 +181,8 @@ class Dialog(object):
         toolbar.addSeparator()
         toolbar.addAction(act_dict['select_all'])
         toolbar.addAction(act_dict['select_unsc'])
+        scroll_area.setWidget(area_selector)
+        scroll_area.setWidgetResizable(True)
         
         # Signal connection:
         act_dict['rotate_left'].triggered.connect(area_selector.rotate_left)
@@ -189,8 +194,24 @@ class Dialog(object):
         act_dict['select_unsc'].triggered.connect(
                                             area_selector.select_unscaled)
                                             
+        # test:
+        if (False):
+            preview = QtGui.QLabel()
+            lay.addWidget(preview)
+            area_selector.selectionChanged.connect(
+                lambda: preview.setPixmap(area_selector.get_selected_pixmap()))
+            
+            zoom_sli = QtGui.QSlider(Qt.Horizontal)
+            zoom_sli.setMinimum(1)
+            zoom_sli.setMaximum(40)
+            zoom_sli.setValue(20)
+            zoom_sli.setSingleStep(1)
+            lay.addWidget(zoom_sli)
+            zoom_sli.valueChanged.connect(
+                lambda z:area_selector.set_zoom(z/10.0))
+                                            
         # Dialog execution:
-        responde = dialog.exec_()
+        response = dialog.exec_()
         
         if response == QtGui.QDialog.Accepted:
             response = gui.stock.ACCEPT
@@ -198,7 +219,7 @@ class Dialog(object):
             response = gui.stock.CANCEL
         print response
         
-        selected_pixmap = area_selector.get_selection()
+        selected_pixmap = area_selector.get_selected_pixmap()
         
         response_cb(response, selected_pixmap)
         

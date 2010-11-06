@@ -11,6 +11,7 @@ from PyQt4 import QtGui
 import gui
 import e3
 from gui.qt4ui import widgets
+from gui.qt4ui.Dialog import Dialog
 
     
 # test stuff:
@@ -28,14 +29,16 @@ def main():
     def test_stuff():
         '''Makes varios test stuff'''
         pass
+    def response_cb(response, pixmap):
+        print response, pixmap
 
     test_stuff()
     os.putenv('QT_NO_GLIB', '1')
     qapp = QtGui.QApplication(sys.argv)
     pixmap = QtGui.QPixmap('themes/images/default/logo.png')
-    window = widgets.ImageAreaSelector(pixmap)
-    window.show()
-    qapp.exec_()
+    Dialog.crop_image(response_cb, 'themes/images/default/logo.png')
+#    window.show()
+#    qapp.exec_()
 
 if __name__ == "__main__":
     main()

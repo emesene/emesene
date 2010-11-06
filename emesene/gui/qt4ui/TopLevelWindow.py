@@ -134,8 +134,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         avatar_manager = None #avatar_manager_cls(self._session)
         
         # create menu handlers
-        menu_hnd = gui.base.MenuHandler(session, dialog_cls, 
-                                        contact_list, avatar_manager, 
+        menu_hnd = gui.base.MenuHandler(session, dialog_cls, contact_list,  
                                         on_disconnect, on_close)
 
         contact_hnd = gui.base.ContactHandler(session, dialog_cls,

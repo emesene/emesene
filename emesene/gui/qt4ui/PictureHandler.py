@@ -29,11 +29,10 @@ class PictureHandler (base.PictureHandler):
         
     
     
-    def resize(self, new_size):
+    def _resize(self, new_size):
         '''Resizes to new_size the given avatar pix. Overrides base's 
         class abstract method.'''
-        if not self.is_animated():
-            self._qimage = self._qimage.scaled(new_size, new_size, 
+        self._qimage = self._qimage.scaled(new_size, new_size, 
                                                Qt.IgnoreAspectRatio, 
                                                Qt.SmoothTransformation)
         
@@ -44,9 +43,9 @@ class PictureHandler (base.PictureHandler):
         self._source_filename = dest_filename
         
         
-    def is_animated(self):
+    def can_handle(self):
         '''Returns true if the image is an animation'''
-        return self._is_animated
+        return not self._is_animated
         
     @staticmethod
     def from_toolkit(pix):

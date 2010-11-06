@@ -21,7 +21,7 @@ X Implement menus
 X Remove the empty space on the left in contact list
 
 > Implement a display pic chooser.
-- Fix update behaviour in the panel that shows account's info (display pick nick...)
+- Fix update behaviour in the panel that shows account's info (display pic nick...)
 > Implement actions on contact list
 X Implement default emoticon support
 - Implement nick rendering
@@ -35,6 +35,8 @@ X Implement default emoticon support
 - Implement multiple conversations
 
 - Fix doubled smileys in SmileyChooser
+- Fix transparency and off-screen selection in ImageAreaSelector 
+  (and selected pixmap's size shouldn't be affected by zoom -> don't grab the widget!)
 X No need for case-insensitive smiley shortcuts search
 
 - Think about KDE4 integration
