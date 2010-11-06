@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''This module contains the ChatTextEdit class'''
+'''This module contains the ChatInput class'''
 
 import os
 

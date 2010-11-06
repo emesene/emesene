@@ -10,6 +10,7 @@ from ChatOutput             import ChatOutput
 from ContactList            import ContactList
 from DisplayPic             import DisplayPic
 from IconViewDelegate       import IconViewDelegate
+from ImageAreaSelector      import ImageAreaSelector
 from NickEdit               import NickEdit
 from SmileyPopupChooser     import SmileyPopupChooser
 from StatusCombo            import StatusCombo
