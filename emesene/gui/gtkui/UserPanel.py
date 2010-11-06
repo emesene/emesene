@@ -31,7 +31,7 @@ class UserPanel(gtk.VBox):
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.avatarBox.connect('button-press-event', self.on_avatar_click)
         self.avatarBox.add(self.avatar)
-        self.avatarBox.set_tooltip_text(_('click here to set your avatar'))
+        self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
 
         self.avatar_path = self.config_dir.get_path("last_avatar")
 
@@ -50,7 +50,7 @@ class UserPanel(gtk.VBox):
         self.search.set_relief(gtk.RELIEF_NONE)
 
         self.message = TextField.TextField(session.contacts.me.message,
-            '<span style="italic">' + _("click here to set message") + '</span>',
+            '<span style="italic">' + _("Click here to set a message") + '.</span>',
             True)
         self.toolbar = gtk.HBox()
 
