@@ -140,6 +140,16 @@ class InputText(TextBox):
         self.invisible_tag.set_property('invisible', True)
         self._buffer.get_tag_table().add(self.invisible_tag)
 
+        self.spell_checker = None
+
+        try:
+            import gtkspell
+
+            self.spell_checker = gtkspell.Spell(self._textbox)
+        except ImportError as error:
+            print error
+            pass
+
     def grab_focus(self):
         """
         override grab_focus method
@@ -217,6 +227,7 @@ class InputText(TextBox):
 
         return True
 
+
     def update_style(self, style):
         '''update the global style of the widget'''
         try:
@@ -239,6 +250,22 @@ class InputText(TextBox):
 
         if is_new:
             self._buffer.get_tag_table().add(self._tag)
+
+        if self.spell_checker:
+            buffer = self._textbox.get_buffer()
+
+            if not buffer:
+                return
+
+            table = buffer.get_tag_table()
+            if not table:
+                return
+
+            tag = table.lookup('gtkspell-misspelled')
+            if not tag:
+                return
+
+            tag.set_priority(table.get_size() - 1)
 
         self.apply_tag()
 
