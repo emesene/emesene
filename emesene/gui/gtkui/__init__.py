@@ -92,7 +92,8 @@ def setup():
     extension.category_register('avatar', Avatar.Avatar)
     extension.category_register('avatar renderer', Renderers.AvatarRenderer)
 
-    extension.category_register('preferences', Preferences.Preferences)
+    extension.category_register('preferences', Preferences.Preferences,
+            single_instance=True)
     extension.category_register('login window', Login.Login)
     extension.category_register('connecting window', Login.ConnectingWindow)
     extension.category_register('window frame', Window.Window)
