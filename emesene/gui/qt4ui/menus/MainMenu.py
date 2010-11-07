@@ -21,14 +21,6 @@ class MainMenu(QtGui.QMenuBar):
     def __init__(self, handlers, config, parent=None):
         '''Constructor'''
         QtGui.QMenuBar.__init__(self, parent)
-        print 'Main Menu'
-#        #
-#        self.addAction('Ciao')
-#        self.addAction('Come')
-#        self.addAction('Stai')
-#        self.addAction('?')
-#        return
-#        #
         
         self._handlers = handlers
         
@@ -78,7 +70,6 @@ class FileMenu(QtGui.QMenu):
         
         disconnect_action.triggered.connect(
                         lambda *args: self._handler.on_disconnect_selected())
-        
         quit_action.triggered.connect(
                         lambda *args: self._handler.on_quit_selected())
 
@@ -137,6 +128,10 @@ class OptionsMenu(QtGui.QMenu):
         show_offline =      QtGui.QAction('Show _offline contacts', self)
         show_empty_groups = QtGui.QAction('Show _empty groups', self)
         show_blocked =      QtGui.QAction('Show _blocked contacts', self)
+        
+        show_offline.setCheckable(True)
+        show_empty_groups.setCheckable(True)
+        show_blocked.setCheckable(True)
         show_offline.setChecked(config.b_show_offline)
         show_empty_groups.setChecked(config.b_show_empty_groups)
         show_blocked.setChecked(config.b_show_blocked)
@@ -144,20 +139,21 @@ class OptionsMenu(QtGui.QMenu):
         self.show_menu.addAction(show_offline)
         self.show_menu.addAction(show_empty_groups)
         self.show_menu.addAction(show_blocked)
+        
+        show_offline.triggered.connect(
+                            self.handler.on_show_offline_toggled)
+        show_empty_groups.triggered.connect(
+                            self.handler.on_show_empty_groups_toggled)
+        show_blocked.triggered.connect(
+                            self.handler.on_show_blocked_toggled)
         # ----
         
         order_action_group = QtGui.QActionGroup(self)
         by_status = QtGui.QAction('Order by _status', self)
         by_group  = QtGui.QAction('Order by _group', self)
-        order_action_group.addAction(by_status)
-        order_action_group.addAction(by_group)
-        by_group.setChecked(config.b_order_by_group)
-        by_status.setChecked(not config.b_order_by_group)
-
         group_offline = QtGui.QAction('G_roup offline contacts', self)
         preferences = QtGui.QAction(ICON('preferences-other'),
                                     'Preferences...', self)
-        group_offline.setChecked(config.b_group_offline)
         
         self.addAction(by_status)
         self.addAction(by_group)
@@ -167,31 +163,27 @@ class OptionsMenu(QtGui.QMenu):
         self.addSeparator()
         self.addAction(preferences)
         
+        order_action_group.addAction(by_status)
+        order_action_group.addAction(by_group)
+        by_group.setCheckable(True)
+        by_status.setCheckable(True)
+        group_offline.setCheckable(True)
+        by_group.setChecked(config.b_order_by_group)
+        by_status.setChecked(not config.b_order_by_group)
+        group_offline.setChecked(config.b_group_offline)
+        
+        by_group.triggered.connect(
+                            self.handler.on_order_by_group_toggled)
+        group_offline.triggered.connect(
+                            self.handler.on_group_offline_toggled)
         preferences.triggered.connect(
             lambda *args: self.handler.on_preferences_selected())
-
         by_status.toggled.connect(
-            lambda *args: self.handler.on_order_by_status_toggled(
-                self.by_status.isChecked()))
-        by_group.toggled.connect(
-            lambda *args: self.handler.on_order_by_group_toggled(
-                self.by_group.isChecked()))
-        show_empty_groups.toggled.connect(
-            lambda *args: self.handler.on_show_empty_groups_toggled(
-                self.show_empty_groups.isChecked()))
-        show_offline.toggled.connect(
-            lambda *args: self.handler.on_show_offline_toggled(
-                self.show_offline.isChecked()))
-        group_offline.toggled.connect(
-            lambda *args: self.handler.on_group_offline_toggled(
-                self.group_offline.isChecked()))
-        show_blocked.toggled.connect(
-            lambda *args: self.handler.on_show_blocked_toggled(
-                self.show_blocked.isChecked()))
+                            self.handler.on_order_by_status_toggled)
 
 
 
-        
+
 
 class HelpMenu(QtGui.QMenu):
     '''A widget that represents the Help popup menu located on the main menu'''
@@ -207,8 +199,8 @@ class HelpMenu(QtGui.QMenu):
         self.handler = handler
 
         self.website = QtGui.QAction('_Website', self)
-        self.about = QtGui.QAction('About', self)
-        self.debug = QtGui.QAction('Debug', self)
+        self.about =   QtGui.QAction('About',    self)
+        self.debug =   QtGui.QAction('Debug',    self)
         
         self.addAction(self.website)
         self.addAction(self.about)
@@ -216,10 +208,8 @@ class HelpMenu(QtGui.QMenu):
         
         self.website.triggered.connect(
             lambda *args: self.handler.on_website_selected())
-        
         self.about.triggered.connect(
             lambda *args: self.handler.on_about_selected())
-       
         self.debug.triggered.connect(
             lambda *args: self.handler.on_debug_selected())
 

@@ -22,9 +22,9 @@ class GroupMenu(QtGui.QMenu):
         QtGui.QMenu.__init__(self, 'Group', parent)
         self._handler = handler
 
-        self.add = QtGui.QAction(ICON('list-add'), 'Add', self)
+        self.add    = QtGui.QAction(ICON('list-add'),    'Add',    self)
         self.remove = QtGui.QAction(ICON('list-remove'), 'Remove', self)
-        self.rename = QtGui.QAction('Rename', self)
+        self.rename = QtGui.QAction(                     'Rename', self)
         
         self.addAction(self.add)
         self.addAction(self.remove)
