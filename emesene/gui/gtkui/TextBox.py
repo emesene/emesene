@@ -19,7 +19,7 @@ class TextBox(gtk.ScrolledWindow):
         self.config = config
 
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self._textbox = gtk.TextView()
+        self._textbox = InputView()
         self._textbox.set_left_margin(4)
         self._textbox.set_right_margin(4)
         self._textbox.set_pixels_above_lines(4)
@@ -118,6 +118,19 @@ class TextBox(gtk.ScrolledWindow):
 
     text = property(fget=_get_text, fset=_set_text)
 
+class InputView(gtk.TextView):
+    __gsignals__ = {
+        'message-send':(gobject.SIGNAL_RUN_LAST|gobject.SIGNAL_ACTION,
+                        gobject.TYPE_NONE, ())
+    }
+
+    def __init__(self):
+        gobject.GObject.__init__(self)
+        gtk.binding_entry_add_signal(self, gtk.keysyms.KP_Enter, 0, 'message-send')
+        gtk.binding_entry_add_signal(self, gtk.keysyms.Return, 0, 'message-send')
+
+gobject.type_register(InputView)
+
 class InputText(TextBox):
     '''a widget that is used to insert the messages to send'''
     NAME = 'Input Text'
@@ -150,6 +163,19 @@ class InputText(TextBox):
             print error
             pass
 
+        self._textbox.connect_after('message-send', self._on_message_send)
+
+    def _on_message_send(self, widget):
+        '''callback called when enter is pressed in the input widget'''
+
+        if self.text == "":
+            return True
+
+        self.on_send_message(self.text)
+        self.text = ''
+
+        return True
+
     def grab_focus(self):
         """
         override grab_focus method
@@ -172,18 +198,6 @@ class InputText(TextBox):
                     event.keyval == gtk.keysyms.Down):
 
             self.on_cycle_history(1)
-
-        elif (event.keyval == gtk.keysyms.Return or \
-                event.keyval == gtk.keysyms.KP_Enter) and \
-                not event.state == gtk.gdk.SHIFT_MASK:
-
-            if self.text == "":
-                return True
-
-            self.on_send_message(self.text)
-            self.text = ''
-
-            return True
 
     def parse_emotes(self):
         """
