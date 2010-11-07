@@ -147,6 +147,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         otherwise it won't work. Maybe this is solved if we iterate the
         mainloop inside of _on_switch_page() instead of connecting an
         idle signal.'''
+        #TODO: can we remove this? it's not used ~arielj~
         try:
             page_num = self.get_current_page()
             page = self.get_nth_page(page_num)
