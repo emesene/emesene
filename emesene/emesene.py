@@ -490,9 +490,9 @@ class Controller(object):
             self._set_location(window, True)
             self.conversations = window.content
             self.tray_icon.set_conversations(self.conversations)
-            window.show()
             if self.session.config.b_conv_minimized:
                 window.iconify()
+            window.show()
 
         conversation = self.conversations.new_conversation(cid, members)
 
