@@ -49,6 +49,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
             
         
     def _setup_ui(self):
+        '''Builds up the UI'''
         widget_dict = self._widget_dict
         
         widget_dict['tab_widget']   = QtGui.QTabWidget()
@@ -113,6 +114,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
     
     
     def _add_image_to_view(self, view_name, filename):
+        '''Adds an image element in the view having the given view_name'''
         listview = self._widget_dict[view_name] 
         item = QtGui.QStandardItem(filename)
         listview.model().appendRow(item)
@@ -120,6 +122,8 @@ class AvatarChooser(Dialog.OkCancelDialog):
     
     
     def _populate_list(self, view_name, path):
+        '''Iteratively finds elements to be added to a view, and adds 
+        them'''
         #print 'PATH: %s' % path
         if not os.path.exists(path):
             return
@@ -134,6 +138,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
             
             
     def _get_selection(self):
+        '''Returns the selected item'''
         if not self._view_with_selection:
             return None
         listview = self._widget_dict[self._view_with_selection]
@@ -143,19 +148,30 @@ class AvatarChooser(Dialog.OkCancelDialog):
             
             
     def _on_add_clicked(self):
-        def show_and_select(filename):
+        '''This slot is executed when the user clicks the 'Add' button.
+        It shows up a file chooser, than if the image can be manipulate through
+        toolkit function (Test is performed through PictureHandler) shows an
+        image area selector. Then, the image in added to the cache (through 
+        AvatarManager object, and to the views'''
+        def add_and_select(filename):
+            '''Adds the image with he given filename to the first view and 
+            selects it'''
             # append the image to the first tab:
             item = self._add_image_to_view(self._vn[0], filename)
             # show first tab:
             self._widget_dict['tab_widget'].setCurrentIndex(0)
             # select the new appended image:
             self._widget_dict[self._vn[0]].selectionModel().\
-                            select(item.index(), QtGui.QItemSelectionModel.Select)
+                        select(item.index(), QtGui.QItemSelectionModel.Select)
                             
         def response_cb(response, pixmap):
+            '''Callback invoked when the crop_image dialog is closed.
+            If the user clicks ok calls adds the picture to the cache
+            and calls add_and_select.'''
             if response == gui.stock.ACCEPT:
-                filename = self._avatar_manager.add_new_avatar_from_toolkit_pix(pixmap)
-                show_and_select(filename)
+                filename = self._avatar_manager.\
+                        add_new_avatar_from_toolkit_pix(pixmap)
+                add_and_select(filename)
         
         filename = QtGui.QFileDialog.getOpenFileName(
                                          self, 'Select an image', 
@@ -170,10 +186,12 @@ class AvatarChooser(Dialog.OkCancelDialog):
             Dialog.Dialog.crop_image(response_cb, filename)
         else:
             filename = self._avatar_manager.add_new_avatar(filename)
-            show_and_select(filename)
+            add_and_select(filename)
     
     
     def _on_selection_changed(self, view_name, current_idx, previous_idx):
+        '''This slot is called when the selected image in a view changes.
+        Currently it doesn't anything useful nor interesting :P'''
         if current_idx.isValid():
             self._view_with_selection = view_name
             print 'Valid: [%d:%d]' % (previous_idx.row(), current_idx.row()),
@@ -184,12 +202,14 @@ class AvatarChooser(Dialog.OkCancelDialog):
     
     # OVERRIDE
     def _on_accept(self):
+        '''This method overrides OkCancelDialog class' _on_accept.
+        If the user clicks 'Ok', set the selected image (if any)
+        as the user's avatar'''
         filename = self._get_selection()
         if filename:
             print 'fn[%s]' % filename
-            import os
             if os.path.exists(filename):
-                #self._avatar_manager.set_as_avatar(filename)
+                self._avatar_manager.set_as_avatar(filename)
                 pass
             else:
                 print "Error"

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+'''This module contains the Picture Handler class'''
 
 from PyQt4          import QtGui
 from PyQt4.QtCore   import Qt
@@ -7,6 +8,9 @@ from gui   import base
 
 
 class PictureHandler (base.PictureHandler): 
+    '''This is a class provides to the core the means to manipulate
+    images through the toolkit used, if possible, without having to
+    to depend on third-party stuff when unnecessary'''
     NAME = 'PictureHandler'
     DESCRIPTION = 'An object to manipulate images using ' \
                    'gui toolkit\'s facilities'
@@ -21,11 +25,13 @@ class PictureHandler (base.PictureHandler):
         if not source_filename:
             return
         
-        format = QtGui.QImageReader(source_filename).format()
-        if format == 'gif' or format == 'pbm' or format == 'pgm':
-            self._is_animated = True
+        file_format = QtGui.QImageReader(source_filename).format()
+        if (file_format == 'gif' or 
+            file_format == 'pbm' or 
+            file_format == 'pgm'):
+                self._is_animated = True
         else:
-            self._qimage = QtGui.QImage(source_filename)
+                self._qimage = QtGui.QImage(source_filename)
         
     
     

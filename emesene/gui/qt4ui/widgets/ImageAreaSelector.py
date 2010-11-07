@@ -2,9 +2,6 @@
 
 '''This module contains the ChatInput class'''
 
-import os
-import math
-
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
@@ -13,15 +10,21 @@ from PyQt4.QtCore   import Qt
 # fingers life :)
 from PyQt4.QtCore import QRect, QSize, QPoint
 
-import e3
-import gui
-
 
 class ImageAreaSelector (QtGui.QWidget):
+    '''This widget provides means to visually crop a portion of
+    an image by selecting it'''
+     # pylint: disable=W0612
+    NAME = 'ImageAreaSelector'
+    DESCRIPTION = 'A widget used to select part of an image'
+    AUTHOR = 'Gabriele Whisky Visconti'
+    WEBSITE = ''
+    # pylint: enable=W0612
     
-    selectionChanged = QtCore.pyqtSignal()
+    selection_changed = QtCore.pyqtSignal()
     
     def __init__(self, pixmap, parent=None):
+        '''Constructor'''
         QtGui.QWidget.__init__(self, parent)
         self._pixmap = pixmap
         
@@ -41,8 +44,12 @@ class ImageAreaSelector (QtGui.QWidget):
         self.setMouseTracking(True)
         self.setCursor(Qt.CrossCursor)
         
+# -------------------- [BEGIN] QT_OVERRIDE
 
     def mousePressEvent (self, event):
+        '''Overrides QWidget's mousePressEvent. Handles starting
+        a new selection, starting a drag operation'''
+        # pylint: disable=C0103
         mouse_pos = event.pos() / self._zoom
         sel_rect = self._selection_rect
         
@@ -63,6 +70,9 @@ class ImageAreaSelector (QtGui.QWidget):
 
     
     def mouseMoveEvent (self, event):
+        '''Overrides QWidget's mouseMoveEvent. Handles resizing
+        and dragging operations on selection'''
+        # pylint: disable=C0103
         sel_rect = self._selection_rect
         if self._resize_start:
             resize_end = event.pos() / self._zoom
@@ -92,15 +102,20 @@ class ImageAreaSelector (QtGui.QWidget):
             
     
     def mouseReleaseEvent (self, event):
+        '''Overrides QWidget's mouseReleaseEvent. Handles ending a resizing or
+        draggin operation on the selection'''
+        # pylint: disable=C0103
         self._selection_rect = self._selection_rect.normalized()
         self._resize_start = None
         self._drag_start = None
         self.update()
         if not self._selection_rect.isNull():
-            self.selectionChanged.emit()
+            self.selection_changed.emit()
         
     
     def paintEvent(self, event):
+        '''Overrides QWidtget's paintEvent.'''
+        # pylint: disable=C0103
         QtGui.QWidget.paintEvent(self, event)
         self._painter.begin(self)
         pixmap_dest_rect = QRect(self._image_origin * self._zoom, 
@@ -137,10 +152,16 @@ class ImageAreaSelector (QtGui.QWidget):
         
         
     def resizeEvent(self, event):
+        '''Overrides QWidget's resizeEvent. Handles image centering.'''
+        # pylint: disable=C0103
         self.adjust_image_origin()
         
-    
+# -------------------- [END] QT_OVERRIDE
+
     def adjust_image_origin(self):
+        '''Recalculates the top left corner's image position, so the
+        image is painted centered'''
+        # pylint: disable=C0103
         new_size = self.size() / self._zoom
         pix_size = self._pixmap.size()
         
@@ -153,6 +174,10 @@ class ImageAreaSelector (QtGui.QWidget):
         print 'image origin: %s' % new_image_origin
         
     def select_unscaled(self):
+        '''Selects, if possible, a 96 x 96 square centered around the original
+        image. In this way the image won't be scaled but won't take up all the 
+        96 x 96 area.'''
+        # pylint: disable=C0103
         pix_size = self._pixmap.size()
         if pix_size.width() <= 96 and pix_size.height() <= 96:
             viewport_size = self.size()
@@ -161,33 +186,40 @@ class ImageAreaSelector (QtGui.QWidget):
             self._selection_rect.setTopLeft(QPoint(x, y))
             self._selection_rect.setSize(QSize(96, 96))
             self.update()
-            self.selectionChanged.emit()
+            self.selection_changed.emit()
             
             
     def select_all(self):
+        '''Selects the whole image. Currently broken for images taller
+        than wide.'''
+        # TODO: make me work!
         self._selection_rect.setTopLeft(self._image_origin)
         self._selection_rect.setSize(self._pixmap.size())
         self.update()
-        self.selectionChanged.emit()
+        self.selection_changed.emit()
         
         
     def rotate_left(self):
+        '''Rotates the image counterclockwise.'''
         self._pixmap = self._pixmap.transformed(QtGui.QTransform().rotate(-90))
         self.adjust_minum_size()
         self.adjust_image_origin()
         self.update()
-        self.selectionChanged.emit()
+        self.selection_changed.emit()
 
 
     def rotate_right(self):
+        '''Rotates the image clockwise'''
         self._pixmap = self._pixmap.transformed(QtGui.QTransform().rotate(90))
         self.adjust_minum_size()
         self.adjust_image_origin()
         self.update()
-        self.selectionChanged.emit()
+        self.selection_changed.emit()
         
     
     def adjust_minum_size(self):
+        '''Sets the new minimum size, calculated upon the image size
+        and the _zoom factor.'''
         pixmap = self._pixmap
         if pixmap.width() < 96 or pixmap.height() < 96:
             min_size = QSize(96, 96)
@@ -198,19 +230,23 @@ class ImageAreaSelector (QtGui.QWidget):
 
 
     def make_selection_square(self):
+        '''Modify the selected area making it square'''
         wid = self._selection_rect.width ()
         self._selection_rect.setSize(QSize(wid, wid))
         
     
     def set_zoom(self, zoomlevel):
+        '''Sets the specified zoomlevel'''
         self._zoom = zoomlevel
         self.adjust_minum_size()
         self.adjust_image_origin()
         self.update()
-        self.selectionChanged.emit()
+        self.selection_changed.emit()
         
         
     def fit_zoom(self):
+        '''Chooses a zoomlevel that makes visible the entire image.
+        Currently broken.'''
         widget_wid = self.size().width ()
         widget_hei = self.size().height()
         
@@ -223,9 +259,11 @@ class ImageAreaSelector (QtGui.QWidget):
         self.adjust_minum_size()
         self.adjust_image_origin()
         self.update()
-        self.selectionChanged.emit()
+        self.selection_changed.emit()
         
     def get_selected_pixmap(self):
+        '''Returns the pixmap contained in the selection rect.
+        Currently doesn't handle transparency correctly'''
         sel_rect_scaled = QRect(self._selection_rect.topLeft() * self._zoom,
                                 self._selection_rect.size() * self._zoom)
         return QtGui.QPixmap.grabWidget(self, sel_rect_scaled)

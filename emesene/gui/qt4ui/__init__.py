@@ -99,6 +99,8 @@ def setup():
     extension.category_register('conversation input',  widgets.ChatInput)
     extension.category_register('conversation output', widgets.ChatOutput)
     extension.category_register('avatar',              widgets.DisplayPic)
+    extension.category_register('image area selector', 
+                                                    widgets.ImageAreaSelector)
     extension.category_register('nick edit',           widgets.NickEdit)
     extension.category_register('smiley chooser',   widgets.SmileyPopupChooser)
     extension.category_register('status combo',        widgets.StatusCombo)

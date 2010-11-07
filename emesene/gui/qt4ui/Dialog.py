@@ -164,7 +164,8 @@ class Dialog(object):
         # widgets
         toolbar = QtGui.QToolBar()
         scroll_area = QtGui.QScrollArea()
-        area_selector = widgets.ImageAreaSelector(QtGui.QPixmap(filename))
+        area_selector = extension.get_and_instantiate(
+                                'image area selector', QtGui.QPixmap(filename))
         
         # layout
         lay = QtGui.QVBoxLayout()
@@ -173,6 +174,7 @@ class Dialog(object):
         dialog.setLayout(lay)
         
         # widget setup
+        dialog.setWindowTitle(title)
         toolbar.addAction(act_dict['rotate_left'])
         toolbar.addAction(act_dict['rotate_right'])
         toolbar.addSeparator()
@@ -198,7 +200,7 @@ class Dialog(object):
         if (False):
             preview = QtGui.QLabel()
             lay.addWidget(preview)
-            area_selector.selectionChanged.connect(
+            area_selector.selection_changed.connect(
                 lambda: preview.setPixmap(area_selector.get_selected_pixmap()))
             
             zoom_sli = QtGui.QSlider(Qt.Horizontal)

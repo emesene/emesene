@@ -69,7 +69,7 @@ class FileMenu(QtGui.QMenu):
         self.status_menu = status_menu_cls(handler.on_status_selected)
         disconnect_action = QtGui.QAction(ICON('network-disconnect'),
                                           'Disconnect', self)
-        quit_action = QtGui.QAction(ICON('application-exit'),'Quit', self)
+        quit_action = QtGui.QAction(ICON('application-exit'), 'Quit', self)
         
         self.addMenu(self.status_menu)
         self.addAction(disconnect_action)
