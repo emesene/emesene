@@ -2,7 +2,7 @@
 import re
 import os
 import time
-
+import datetime
 import xml.sax.saxutils
 
 import parsers
@@ -104,7 +104,7 @@ class AdiumTheme(object):
         '''replace the variables on template for the values on msg
         '''
 
-        msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir)
+        msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir, msg.sender)
         msgtext = MarkupParser.urlify(msgtext)
 
         if style is not None:
@@ -120,13 +120,13 @@ class AdiumTheme(object):
         template = template.replace('%messageDirection%',
             escape(msg.direction))
         template = template.replace('%message%', msgtext)
-        msg.timestamp = None
+
         if msg.timestamp is None:
             template = template.replace('%time%',
                 escape(time.strftime(self.timefmt)))
         else:
-            template = template.replace('%time%',
-                escape(time.strftime(self.timefmt, msg.timestamp)))
+            template = template.replace('%time%', 
+                escape(msg.timestamp.strftime('%x %X')))
 
         template = re.sub("%time{(.*?)}%", replace_time, template)
         template = template.replace('%shortTime%',

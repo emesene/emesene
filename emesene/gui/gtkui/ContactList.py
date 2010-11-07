@@ -25,6 +25,9 @@ import gui
 import utils
 import extension
 import logging
+
+import Tooltips
+
 log = logging.getLogger('gtkui.ContactList')
 
 class ContactList(gui.ContactList, gtk.TreeView):
@@ -53,13 +56,16 @@ class ContactList(gui.ContactList, gtk.TreeView):
         if self.session.config.d_weights is None:
             self.session.config.d_weights = {}
 
-        # the image (None for groups),
-        # the object (group or contact),
-        # the string to display and a boolean indicating if the pixbuf should
-        # be shown (False for groups, True for contacts), the status
-        # image, an int that is used to allow ordering specified by the user
-        # a boolean indicating special groups always False for contacts, True
-        # for special groups like "No group" and a boolean indicating if the contact is offline
+        # [0] the image (None for groups),
+        # [1] the object (group or contact),
+        # [2] the string to display
+        # [3] a boolean indicating if the pixbuf should
+        #     be shown (False for groups, True for contacts)
+        # [4] the status image
+        # [5] an int that is used to allow ordering specified by the user
+        # [6] a boolean indicating special groups always False for contacts, True
+        #     for special groups like "No group"
+        # [7] a boolean indicating if the contact is offline
         self._model = gtk.TreeStore(gtk.Image, object, str, bool,
             gtk.gdk.Pixbuf, int, bool, bool)
         self.model = self._model.filter_new(root=None)
@@ -69,6 +75,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self._model.set_sort_column_id(1, gtk.SORT_ASCENDING)
 
         self.set_model(self.model)
+
+        self.tooltips = Tooltips.Tooltips()
+        self.connect('motion-notify-event', self.tooltips.on_motion)
+        self.connect('leave-notify-event', self.tooltips.on_leave)
 
         crt = extension.get_and_instantiate('nick renderer')
         crt.set_property('ellipsize', pango.ELLIPSIZE_END)

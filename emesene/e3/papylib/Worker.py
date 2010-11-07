@@ -89,7 +89,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
         self._oim_handler = OfflineEvent(self)
-        self._roaming_handler = None
+
         # this stores account : cid
         self.conversations = {}
         # this stores cid : account
@@ -435,26 +435,29 @@ class Worker(e3.base.Worker, papyon.Client):
         def download_failed(reason):
             print reason
 
-        def download_ok(msnobj, download_failed_func):
+        def download_ok(msnobj, em_path, download_failed_func):
             if msnobj._data is None:
                 log.warning("[papylib] downloaded msnobj is None")
                 return
 
-            emotes.insert_raw((msnobj._friendly, msnobj._data))
+            mo_fr = msnobj._friendly.replace("\x00", "")
+            emotes.insert_raw((mo_fr, msnobj._data))
             self.session.add_event(Event.EVENT_P2P_FINISHED, \
-                account, 'emoticon', emoticon_path)
+                account, 'emoticon', msnobj._creator, mo_fr, em_path)
 
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
+            if shortcut in received_custom_emoticons:
+                break # avoid multi p2p
             received_custom_emoticons[shortcut] = None
 
             emoticon_hash = msn_object._data_sha.encode("hex")
             emoticon_path = os.path.join(emotes.path, emoticon_hash)
 
-            if emoticon_hash in emotes:
-                received_custom_emoticons[shortcut] = emoticon_path
-            else:
+            received_custom_emoticons[shortcut] = emoticon_path
+
+            if emoticon_hash not in emotes:
                 self.msn_object_store.request(msn_object, \
-                    (download_ok, download_failed))
+                    (download_ok, emoticon_path, download_failed))
 
         self.session.add_event(\
             Event.EVENT_CONV_MESSAGE, cid, account, msgobj, received_custom_emoticons)
@@ -874,6 +877,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_set_message(self, message):
         ''' handle Action.ACTION_SET_MESSAGE '''
+        if message is None:
+            message = ''
         self.profile.personal_message = message
         self.content_roaming.store(None, message, None)
 

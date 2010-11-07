@@ -31,10 +31,9 @@ class UserPanel(gtk.VBox):
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.avatarBox.connect('button-press-event', self.on_avatar_click)
         self.avatarBox.add(self.avatar)
-        self.avatarBox.set_tooltip_text(_('click here to set your avatar'))
+        self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
 
         self.avatar_path = self.config_dir.get_path("last_avatar")
-        self.avatar_manager = gui.base.AvatarManager(self.session)
 
         if not self.session.config_dir.file_readable(self.avatar_path):
             path = gui.theme.user
@@ -51,7 +50,7 @@ class UserPanel(gtk.VBox):
         self.search.set_relief(gtk.RELIEF_NONE)
 
         self.message = TextField.TextField(session.contacts.me.message,
-            '<span style="italic">' + _("click here to set message") + '</span>',
+            '<span style="italic">' + _("Click here to set a message") + '.</span>',
             True)
         self.toolbar = gtk.HBox()
 
@@ -157,26 +156,7 @@ class UserPanel(gtk.VBox):
     def on_avatar_click(self, widget, data):
         '''method called when user click on his avatar
         '''
-        def set_picture_cb(response, filename):
-            '''callback for the avatar chooser'''
-            if _av_chooser is not None:
-                _av_chooser.stop_and_clear()
-            if response == gui.stock.ACCEPT:
-                self.avatar_manager.set_as_avatar(filename)
-
-        # Directory for user's avatars
-        path_dir = self.avatar_manager.get_avatars_dir()
-
-        # Directory for contact's cached avatars
-        cached_avatar_dir = self.avatar_manager.get_cached_avatars_dir()
-
-        # Directories for System Avatars
-        faces_paths = self.avatar_manager.get_system_avatars_dirs()
-
-        _av_chooser = extension.get_default('avatar chooser')(set_picture_cb,
-                                                self.avatar_path, path_dir,
-                                                cached_avatar_dir, faces_paths,
-                                                self.avatar_manager)
-        _av_chooser.set_modal(True)
-        _av_chooser.show()
+        av_chooser = extension.get_default('avatar chooser')(self.session)
+        av_chooser.set_modal(True)
+        av_chooser.show()
 
