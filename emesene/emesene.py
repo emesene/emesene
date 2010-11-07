@@ -507,9 +507,9 @@ class Controller(object):
         conversation.show() # puts widget visible
 
         # raises the container (tabbed windows) if its minimized
-        # self.conversations.get_parent().present()
-        # NOTE: this is commented to prevent new conversations to steal other
-        # application focus, can we remove this? ~arielj~
+        if not other_started:
+            self.conversations.set_current_page(conversation.tab_index)
+            self.conversations.get_parent().present()
 
         if not self.session.config.b_mute_sounds and other_started and \
            self.session.contacts.me.status != e3.status.BUSY and \
