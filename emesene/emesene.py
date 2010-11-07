@@ -419,6 +419,7 @@ class Controller(object):
         self._new_session()
 
         # set default values if not already set
+        self.session.config.get_or_set('b_conv_minimized', True)
         self.session.config.get_or_set('b_mute_sounds', False)
         self.session.config.get_or_set('b_play_send', True)
         self.session.config.get_or_set('b_play_nudge', True)
@@ -490,6 +491,8 @@ class Controller(object):
             self.conversations = window.content
             self.tray_icon.set_conversations(self.conversations)
             window.show()
+            if self.session.config.b_conv_minimized:
+                window.iconify()
 
         conversation = self.conversations.new_conversation(cid, members)
 
