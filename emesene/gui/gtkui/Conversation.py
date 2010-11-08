@@ -220,7 +220,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_image(self.icon)
         self.tab_label.set_text(self.text)
 
-        self.update_window(self.text, self.icon, self.tab_index)
+        self.update_window(self)
 
     def update_group_information(self):
         """

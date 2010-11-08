@@ -32,7 +32,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         self.mozilla_tabs = session.config.get_or_set('b_conv_tab_mozilla_like', False)
 
         self.set_property('can-focus', False)
-        self.connect('switch-page', self._on_switch_page)
+        self.connect_after('switch-page', self._on_switch_page)
         self.connect('key-press-event', self.on_key_press)
 
     def _set_accels(self):
@@ -138,7 +138,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         page = self.get_nth_page(page_num)
         self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
         self.set_message_waiting(page, False)
-        self.update_window(page.text, page.icon, self.get_current_page())
+        self.update_window(page)
 #        glib.idle_add(self._on_switch_page_grab_focus)
 
     def _on_switch_page_grab_focus(self):
@@ -194,11 +194,11 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
         return conversation
 
-    def update_window(self, text, icon, index):
+    def update_window(self, page):
         ''' updates the window's border and item on taskbar
             with given text and icon '''
-        if self.get_current_page() == index:
+        if self.get_current_page() == self.page_num(page):
             win = self.get_parent() # gtk.Window, not a nice hack.
-            win.set_title(Renderers.msnplus_to_plain_text(text))
-            win.set_icon(icon)
+            win.set_title(Renderers.msnplus_to_plain_text(page.text))
+            win.set_icon(page.icon)
 
