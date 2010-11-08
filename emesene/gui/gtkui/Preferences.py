@@ -381,7 +381,7 @@ class Interface(BaseTable):
             'session.config.b_avatar_on_left')
         self.append_check(_('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
-        self.append_check(_('Enable spell check if available (requires %s)' % 'python-gtkspell'),
+        self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
             'session.config.b_enable_spell_check')
 
         self.append_range(_('Contact list avatar size'),
