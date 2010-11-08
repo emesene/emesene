@@ -56,8 +56,10 @@ class OutputView(webkit.WebView):
                 self.last_incoming = False
 
             msg.first = not self.last_incoming
+
             if self.last_incoming_account != msg.sender:
                 msg.first = True
+
             html = self.theme.format_incoming(msg, style, cedict, cedir)
             self.last_incoming = True
             self.last_incoming_account = msg.sender

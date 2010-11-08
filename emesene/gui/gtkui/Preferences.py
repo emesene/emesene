@@ -27,7 +27,6 @@ class Preferences(gtk.Window):
         """
         gtk.Window.__init__(self)
         self.set_border_width(2)
-        self.set_modal(True)
         self.set_title(_("Preferences"))
         self.session = session
 
@@ -368,6 +367,7 @@ class Interface(BaseTable):
         self.append_markup('<b>'+_('Conversation window:')+'</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
+        self.append_check(_('Start minimized/iconified'), 'session.config.b_conv_minimized')
         self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
         self.append_check(_('Show conversation header'),
             'session.config.b_show_header')

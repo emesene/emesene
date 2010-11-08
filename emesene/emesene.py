@@ -23,7 +23,6 @@ import os
 from e3.common.utils import project_path
 
 os.chdir(os.path.abspath(project_path()))
-#print (project_path())
 
 import sys
 import glib
@@ -419,6 +418,7 @@ class Controller(object):
         self._new_session()
 
         # set default values if not already set
+        self.session.config.get_or_set('b_conv_minimized', True)
         self.session.config.get_or_set('b_mute_sounds', False)
         self.session.config.get_or_set('b_play_send', True)
         self.session.config.get_or_set('b_play_nudge', True)
@@ -489,6 +489,8 @@ class Controller(object):
             self._set_location(window, True)
             self.conversations = window.content
             self.tray_icon.set_conversations(self.conversations)
+            if self.session.config.b_conv_minimized:
+                window.iconify()
             window.show()
 
         conversation = self.conversations.new_conversation(cid, members)
@@ -506,10 +508,9 @@ class Controller(object):
 
         conversation.show() # puts widget visible
 
-        # raises the container (tabbed windows) if its minimized
-        # self.conversations.get_parent().present()
-        # NOTE: this is commented to prevent new conversations to steal other
-        # application focus, can we remove this? ~arielj~
+        if not other_started:
+            self.conversations.set_current_page(conversation.tab_index)
+            self.conversations.get_parent().present()
 
         if not self.session.config.b_mute_sounds and other_started and \
            self.session.contacts.me.status != e3.status.BUSY and \

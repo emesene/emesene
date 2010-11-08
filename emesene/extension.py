@@ -425,8 +425,10 @@ def get_instance(category_name):
     Otherwise None
     '''
     category = get_category(category_name)
+
     if category is not None:
         return category.get_instance()
+
     return None
 
 
@@ -439,8 +441,10 @@ def get_and_instantiate(category_name, *args, **kwargs):
     return that one, NOT a new one.
     '''
     category = get_category(category_name)
+
     if category is not None:
         return category.get_and_instantiate(*args, **kwargs)
+
     return None
 
 

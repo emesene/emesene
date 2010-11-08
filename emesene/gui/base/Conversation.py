@@ -142,6 +142,10 @@ class Conversation(object):
         '''override the show method'''
         raise NotImplementedError("Method not implemented")
 
+    def iconify(self):
+        '''override the iconify method'''
+        raise NotImplementedError("Method not implemented")
+
     def update_message_waiting(self, is_waiting):
         """
         update the information on the conversation to inform if a message is waiting
