@@ -158,8 +158,8 @@ class InputText(TextBox):
 
         try:
             import gtkspell
-
-            self.spell_checker = gtkspell.Spell(self._textbox)
+            if self.config.b_enable_spell_check:
+                self.spell_checker = gtkspell.Spell(self._textbox)
         except ImportError as error:
             pass
 
