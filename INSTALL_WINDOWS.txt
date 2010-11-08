@@ -114,7 +114,7 @@ steps
 
 * download it from http://github.com/emesene/emesene
 * unpack it
-* copy setup.py and ez_setup.py to the emesene directory
+* copy setup.py, ez_setup.py and emesene.ico to the emesene directory
 * cd to emesene
 * run python setup.py py2exe
 * cd ..
