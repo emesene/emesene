@@ -161,7 +161,6 @@ class InputText(TextBox):
 
             self.spell_checker = gtkspell.Spell(self._textbox)
         except ImportError as error:
-            print error
             pass
 
         self._textbox.connect_after('message-send', self._on_message_send)
