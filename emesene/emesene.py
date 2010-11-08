@@ -23,7 +23,6 @@ import os
 from e3.common.utils import project_path
 
 os.chdir(os.path.abspath(project_path()))
-#print (project_path())
 
 import sys
 import glib
