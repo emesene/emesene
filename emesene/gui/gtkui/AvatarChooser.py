@@ -14,9 +14,7 @@ from IconView import IconView
 class AvatarChooser(gtk.Window):
     '''A dialog to choose an avatar'''
 
-    def __init__(self, response_cb, picture_path='',
-            cache_path='.', contact_cache_path='.',
-            faces_paths=[], avatar_manager = None):
+    def __init__(self, session):
         '''Constructor, response_cb receive the response number, the new file
         selected and a list of the paths on the icon view.
         picture_path is the path of the current display picture,
@@ -25,15 +23,17 @@ class AvatarChooser(gtk.Window):
         self.set_modal(True)
         self.set_icon(gui.theme.logo)
 
-        self.response_cb = response_cb
-        self.avatar_manager = avatar_manager
-
+        self.avatar_manager = gui.base.AvatarManager(session)
+        
         self.set_title(_("Avatar chooser"))
         self.set_default_size(620, 400)
         self.set_border_width(4)
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
+        cache_path = self.avatar_manager.get_avatars_dir()
+        faces_paths = self.avatar_manager.get_system_avatars_dirs()
+        contact_cache_path = self.avatar_manager.get_cached_avatars_dir()
         self.views = []
         self.views.append(IconView(_('Used'), [cache_path],
             self.on_remove, self.on_accept, IconView.TYPE_SELF_PICS))
@@ -101,8 +101,10 @@ class AvatarChooser(gtk.Window):
 
         vbox.show_all()
         self.add(vbox)
-
-        self.set_current_picture(picture_path)
+        
+        current_avatar = session.config.last_avatar
+        # which is the difference with self.config_dir.get_path("last_avatar")?
+        self.set_current_picture(current_avatar)
 
     def _on_tab_changed(self, notebook, page, page_num):
         view = self.views[page_num]
@@ -248,24 +250,26 @@ class AvatarChooser(gtk.Window):
 
             self.hide()
             print filename
-            self.response_cb(gui.stock.ACCEPT, filename)
+            self.stop_and_clear()
+            self.avatar_manager.set_as_avatar(filename)
+            
         else:
             extension.get_default('dialog').error(_("No picture selected"))
 
     def _on_cancel(self, button):
         '''method called when the user clicks the button'''
         self.hide()
-        self.response_cb(gui.stock.CANCEL, '')
+        self.stop_and_clear()
 
     def _on_clear(self, button):
         '''method called when the user clicks the button'''
         self.hide()
-        self.response_cb(gui.stock.CLEAR, '')
+        self.stop_and_clear()
 
     def _on_close(self, window, event):
         '''called when the user click on close'''
         self.hide()
-        self.response_cb(gui.stock.CLOSE, '')
+        self.stop_and_clear()
 
     def on_key_press(self , widget, event):
         '''called when the user press a key'''

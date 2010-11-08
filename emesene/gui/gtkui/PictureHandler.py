@@ -44,12 +44,11 @@ class PictureHandler (base.PictureHandler):
             self._is_animated = True
     
     
-    def resize(self, new_size):
+    def _resize(self, new_size):
         '''Resizes to new_size the given avatar pix. Overrides base's 
         class abstract method.'''
-        if not self.is_animated():
-            self._pixbuf = self._pixbuf.scale_simple(new_size, new_size, 
-                                                   gtk.gdk.INTERP_BILINEAR)
+        self._pixbuf = self._pixbuf.scale_simple(new_size, new_size, 
+                                                 gtk.gdk.INTERP_BILINEAR)
         
             
     def _save(self, dest_filename):
@@ -58,9 +57,10 @@ class PictureHandler (base.PictureHandler):
         self._source_filename = dest_filename
         
         
-    def is_animated(self):
+    def can_handle(self):
         '''Returns true if the image is an animation'''
-        return self._is_animated
+        return not self._is_animated
+        
         
     @staticmethod
     def from_toolkit(pix):

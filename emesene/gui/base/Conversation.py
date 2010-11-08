@@ -116,6 +116,16 @@ class Conversation(object):
         '''called when the clean button is clicked'''
         self.output.clear()
 
+    def on_block_user(self):
+        '''blocks the first user of the conversation'''
+        account = self.members[0]
+        contact = self.session.contacts.contacts[account]
+
+        if contact.blocked:
+            self.session.unblock(account)
+        else:
+            self.session.block(account)
+
     def on_emote(self, emote):
         '''called when a emote is selected on the emote window'''
         self.input.append(emote)
@@ -123,12 +133,17 @@ class Conversation(object):
     def on_notify_attention(self):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
-        self.output.information(self.formatter, self.session.contacts.me,
-                _('you just sent a nudge!'))
+        self.output.send_message(self.formatter, self.session.contacts.me,
+            _('You just sent a nudge!'), {}, '', None, self.first)
+
         self.play_nudge()
 
     def show(self):
         '''override the show method'''
+        raise NotImplementedError("Method not implemented")
+
+    def iconify(self):
+        '''override the iconify method'''
         raise NotImplementedError("Method not implemented")
 
     def update_message_waiting(self, is_waiting):
@@ -286,6 +301,10 @@ class Conversation(object):
             self._update_single_information(self.members[0])
         elif len(self.members) > 1:
             self.update_group_information()
+
+    def update_p2p(self, account, _type, *what):
+        ''' update the p2p data in the conversation (custom emoticons) '''
+        self.output.update_p2p(account, _type, *what)
 
     def on_contact_joined(self, account):
         '''called when a contact joins the conversation'''

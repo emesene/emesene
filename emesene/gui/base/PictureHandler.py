@@ -37,12 +37,18 @@ class PictureHandler (object):
     
     def resize(self, new_size):
         '''Resizes to new_size the given avatar pix'''
+        if self.can_handle():
+            self._resize(new_size)
+    
+    
+    def _resize(self, new_size):
+        '''This method actually resizes to new_size the given avatar pix'''
         raise NotImplementedError("Method not implemented")
         
         
     def save(self, dest_filename):
         '''Saves to disk the given avatar pix'''
-        if self.is_animated():
+        if not self.can_handle():
             shutil.copy(self._source_filename, dest_filename)
         else:
             self._save(dest_filename)
@@ -53,7 +59,7 @@ class PictureHandler (object):
         raise NotImplementedError("Method not implemented")
     
         
-    def is_animated(self):
+    def can_handle(self):
         '''Return true if this object is operating on an animated image'''
         raise NotImplementedError("Method not implemented")
     

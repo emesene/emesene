@@ -46,6 +46,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
             dialog, gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
+        self.toolbar.set_property('can-focus', False)
         self.output = OutputText(self.session.config)
         self.output.set_size_request(-1, 30)
         self.input = InputText(self.session.config, self._on_send_message,
