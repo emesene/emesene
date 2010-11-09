@@ -257,8 +257,7 @@ class Controller(object):
             sys.exit(0)
 
     def _remove_subscriptions(self):
-        '''remove the subscriptions to signals
-        '''
+        '''remove the subscriptions to signals'''
         if self.session is not None:
             signals = self.session.signals
             signals.login_succeed.unsubscribe(self.on_login_succeed)
