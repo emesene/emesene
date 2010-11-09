@@ -78,13 +78,14 @@ class Preferences(QtGui.QWidget):
                                                         self._on_row_activated)
 
 
+
     def _on_row_activated(self,new_idx, old_idx):
         # Get information about the row that has been selected
         self.widget_stack.setCurrentIndex(new_idx.row())
         self.widget_stack.currentWidget().on_update()
         
     
-    def present(self):
+    def _present(self):
         pass
 
 
