@@ -10,59 +10,197 @@ from PyQt4.QtCore   import Qt
 
 from gui.qt4ui  import Utils
 
+import e3
 
 class ContactListModel (QtGui.QStandardItemModel):
     '''Item model which represents a contact list'''
-    sortRoleDict = {'online'  : "00",
-                    'brb'     : "10",
-                    'idle'    : "20",
-                    'away'    : "30",
-                    'phone'   : "40",
-                    'lunch'   : "50",
-                    'busy'    : "60",
-                    'offline' : "99"}
+    # TODO: generate this on the fly in the constructor.
+    sort_role_dict = { e3.status.ONLINE  : u'00',
+                       e3.status.BUSY    : u'10',
+                       e3.status.AWAY    : u'20',
+                       e3.status.IDLE    : u'30',
+                       e3.status.OFFLINE : u'40' }
                     
-    def __init__(self, parent=None):
+    NO_GRP_UID  = 'nogroup'
+    ONL_GRP_UID = 'onlinegroup'
+    OFF_GRP_UID = 'offlinegroup'
+    
+    def __init__(self, config, parent=None):
         '''Constructor'''
         QtGui.QStandardItemModel.__init__(self,  parent)
         self.setSortRole(Role.SortRole)
-        self._no_group_uid = 'nogroup'
+        
+        self._no_grp  = self._search_item(self.NO_GRP_UID, self)
+        self._onl_grp = self._search_item(self.ONL_GRP_UID, self)
+        self._off_grp = self._search_item(self.OFF_GRP_UID, self)
+        
+        self._show_offline   = config.b_show_offline
+        self._show_empty     = config.b_show_empty_groups
+        self._show_blocked   = config.b_show_blocked
+        self._order_by_group = config.b_order_by_group
+        self._group_offline  = config.b_group_offline
+        
+        config.subscribe(self._on_cc_order_by_group, 'b_order_by_group')
+        config.subscribe(self._on_cc_show_offline, 'b_show_offline')
         
     
     def add_contact(self, contact, group=None):
         '''Add a contact'''
-        if not group:
-            group_uid = self._no_group_uid
+        # TODO: check adding an existing contact
+        print 'add ',
+        print contact.display_name,
+        if group:
+            gname = group.name
         else:
-            group_uid = group.identifier
-        group_item = self._search_item_by_uid(group_uid, self)
-        new_contact_item = QtGui.QStandardItem(contact.display_name)
-        new_contact_item.setData(contact.identifier, Role.UidRole)
-        self._set_contact_info(new_contact_item, contact)
-        group_item.appendRow(new_contact_item)
+            gname = 'NONE'
+        print ' to group: %s' % gname
         
+        # decide in which group we have to add the contact:
+        if self._order_by_group:
+            if not group:
+                group_uid = self.NO_GRP_UID
+            else:
+                group_uid = group.identifier
+        else:
+            if contact.status == e3.status.OFFLINE:
+                group_uid = self.OFF_GRP_UID
+            else:
+                group_uid = self.ONL_GRP_UID
+                
+        # if the target group is not the offline group add the contact:
+        # (we skip the offline group because it is a target group each 
+        # time a contact is offline, for convenience.)
+        if not self._order_by_group or group_uid != self.OFF_GRP_UID:
+            group_item = self._search_item(group_uid, self)
+            new_contact_item = QtGui.QStandardItem(contact.display_name)
+            new_contact_item.setData(contact.identifier, Role.UidRole)
+            self._set_contact_info(new_contact_item, contact)
+            group_item.appendRow(new_contact_item)
+        
+        if self._order_by_group and contact.status == e3.status.OFFLINE:
+            group_item = self._search_item(self.OFF_GRP_UID, self)
+            new_contact_item = QtGui.QStandardItem(contact.display_name)
+            new_contact_item.setData(contact.identifier+'FLN', Role.UidRole)
+            self._set_contact_info(new_contact_item, contact)
+            group_item.appendRow(new_contact_item)
+            
     
     def update_contact(self, contact):
         '''Update a contact'''
-        # TODO: Keep a {contact uid:group item} dict
-        for index in range(self.rowCount()):
-            contact_item = self._search_item_by_uid(contact.identifier,  
-                                                        self.item(index, 0))
+        # TODO: Keep a {contact uid:group item} dict... maybe..
+        # btw this method is horrible...
+        print 'UPDATING ',
+        print contact.display_name
+        print contact.identifier
+        if self._order_by_group:
+            for index in range(self.rowCount()):
+                group_item = self.item(index, 0)
+                if group_item == self._off_grp:
+                    continue
+                contact_item = self._search_item(contact.identifier, 
+                                                 group_item)
+                if contact_item:
+                    break
+                    
+            if not contact_item:
+                print '***** NOT FOUND: %s' % (contact)
+                return
+                    
+            old_status = contact_item.data(Role.StatusRole)
+            new_status = contact.status
+            
+            self._set_contact_info(contact_item, contact)
+            
+            if old_status == e3.status.OFFLINE:
+                contact_item = self._search_item(contact.identifier+'FLN', self._off_grp)
+                self._set_contact_info(contact_item, contact)
+            
+            if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLINE:
+                # If this block is executed then for sure the previous one has
+                # been executed too. So contact_item is the offline one
+                self._off_grp.removeRow(contact_item.index().row())
+                   
+            if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLINE:
+                contact_item = contact_item.clone()
+                contact_item.setData(str(contact_item.data(Role.UidRole).toPyObject())+'FLN', Role.UidRole)
+                self._off_grp.appendRow(contact_item)
+                
+                
+                
+        else:
+            contact_item = self._search_item(contact.identifier, self._onl_grp)
+                    
             if contact_item:
-                break
-        
-        if not contact_item:
-            print '***** NOT FOUND: %s' % (contact)
-            return
-        
-        self._set_contact_info(contact_item, contact)
+                new_status = contact.status
+            
+                self._set_contact_info(contact_item, contact)
+                
+                if new_status == e3.status.OFFLINE:
+                    self._onl_grp.takeRow(contact_item.index().row())
+                    self._off_grp.appendRow(contact_item)
+            
+            else:
+                contact_item = self._search_item(contact.identifier, self._off_grp)
+                
+                if not contact_item:
+                    print '***** NOT FOUND: %s' % (contact)
+                    return
+                
+                new_status = contact.status
+                
+                self._set_contact_info(contact_item, contact)
+                
+                if new_status != e3.status.OFFLINE:
+                    self._off_grp.takeRow(contact_item.index().row())
+                    self._onl_grp.appendRow(contact_item)
+                
+                
+            
+#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLINE:
+#            group_item.removeRow(contact_item.index().row())
+#               
+#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLINE:
+#            group_item = self._search_item(self._offline_group_uid, self)
+#            contact_item = contact_item.clone()
+#            contact_item.setData(contact_item.data(Role.UidRole)+'FLN')
+#            group_item.appendRow(contact_item)
+#            
+#            
+#        
+#            
+#        
+#        if not contact_item:
+#            print '***** NOT FOUND: %s' % (contact)
+#            return
+#        
+#        old_status = contact_item.data(Role.StatusRole)
+#        new_status = contact.status
+#        
+#        self._set_contact_info(contact_item, contact)
+#    
+#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLINE:
+#            group_item = self._search_item(self._offline_group_uid, self)
+#            group_item.takeRow(contact_item.index().row())
+#            if not self._order_by_group:
+#                group_item = self._search_item(self._online_group_uid, self)
+#                group_item.appendRow(contact_item)
+#               
+#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLINE:
+#            if not self._order_by_group:
+#                group_item = self._search_item(self._online_group_uid, self)
+#                group_item.takeRow(contact_item.index().row())
+#            group_item = self._search_item(self._offline_group_uid, self)
+#            group_item.appendRow(contact_item)
         
     
     def _set_contact_info(self, contact_item, contact):
         '''Fills the contact Item with data'''
+        # TODO: handle moving contact between groups 
+        # in particular: online/offiline
         display_name = Utils.escape(unicode(contact.display_name))
         message      = Utils.escape(unicode(contact.message))
-                                               
+        sort_role    = self.sort_role_dict[contact.status] + display_name
+        
         contact_item.setData(display_name,      Role.DisplayRole)
         contact_item.setData(message,           Role.MessageRole)
         contact_item.setData(contact.picture,   Role.DecorationRole)
@@ -70,76 +208,29 @@ class ContactListModel (QtGui.QStandardItemModel):
         contact_item.setData(contact.status,    Role.StatusRole)
         contact_item.setData(contact.blocked,   Role.BlockedRole)
         contact_item.setData(contact.account,   Role.ToolTipRole)
+        contact_item.setData(sort_role,         Role.SortRole)
         contact_item.setData(contact,           Role.DataRole)
-        
+        #self.sort(0)
         
     def add_group(self, group):
         '''Add a group.'''
+        if not self._order_by_group:
+            return
         new_group_item = QtGui.QStandardItem( QtCore.QString( 
                     xml.sax.saxutils.escape(group.name)))
         new_group_item.setData(group.identifier, Role.UidRole)
+        new_group_item.setData(group, Role.DataRole)
         self.appendRow(new_group_item)
+
+    
+    def clear(self):
+        QtGui.QStandardItemModel.clear(self)
+        self._no_grp  = self._search_item(self.NO_GRP_UID, self)
+        self._onl_grp = self._search_item(self.ONL_GRP_UID, self)
+        self._off_grp  = self._search_item(self.OFF_GRP_UID, self)
         
-        
-#    def onContactListUpdated(self, clView):
-#        KFELog().l("ContactListModel.onContactListUpdated()", False,  1)
-#        for groupUid in clView.group_ids:
-#            newGroupItem = QStandardItem(QString(groupUid))
-#            newGroupItem.setData(groupUid,  KFERole.UidRole)
-#            newGroupItem.setData(QString(groupUid), KFERole.SortRole)
-#            self.appendRow(newGroupItem)
-#            
-#    def onGroupUpdated(self, gView):
-#        KFELog().l("ContactListModel.onGroupUpdated()",  False,  1)
-#        groupItem = self._search_item_by_uid(gView.uid,  self)
-#        groupItem.setData(gView.name.parse_default_smileys().to_HTML_string(),
-#                           KFERole.DisplayRole)
-#        groupItem.setData(gView.name.to_HTML_string(), KFERole.SortRole)
-#        #groupItem.setData()
-#        for contactUid in gView.contact_ids:
-#            contactItem = self._search_item_by_uid(contactUid,  groupItem)
-#            if contactItem == None:
-#                newContactItem = QStandardItem(QString(contactUid))
-#                newContactItem.setData(contactUid,  KFERole.UidRole)
-#                groupItem.appendRow(newContactItem)
-#            
-#    def onContactUpdated(self, cView):
-#        #KFELog().l("ContactListModel.onContactUpdated()", False, 1)
-#        #searching the contact in the groups --> we will have to 
-#        #mantain a dict ['uid':idx]...
-#        for idx in range(self.rowCount()):
-#            foundContactItem = self._search_item_by_uid(cView.uid,  
-#                                                         self.item(idx, 0))
-#            if foundContactItem:
-#                break
-#        if not foundContactItem:
-#            #temp code
-#            foundContactItem = QStandardItem(QString())
-#            self._search_item_by_uid(
-#                       self.__debugGroupUid, self).appendRow(foundContactItem)
-#        # setting DisplayRole
-#        foundContactItem.setData(
-#    cView.name.parse_default_smileys().to_HTML_string(), KFERole.DisplayRole)
-#        # setting.... What?!
-#        #foundContactItem.setData(cView) ##????
-#        # setting DecorationRole
-#        _,displayPicPath = cView.dp.imgs[0]
-#        if displayPicPath == "dp_nopic":
-#            displayPicPath = KFEThemeManager().pathOf("dp_nopic")
-#        foundContactItem.setData(QPixmap(displayPicPath).scaled(50,50),  
-#                                  KFERole.DecorationRole)
-#        # setting SortRole
-#        sortString = self.sortRoleDict[cView.status.to_HTML_string()] + \
-#                                            cView.name.to_HTML_string()
-#        foundContactItem.setData(sortString, KFERole.SortRole)
-#        # setting StatusRole
-#        foundContactItem.setData(cView.status.to_HTML_string(),  
-#                                KFERole.StatusRole)
-#        
-#        self.sort(0)
-        
-        
-    def _search_item_by_uid(self,  uid,  parent):
+    def _search_item(self,  uid,  parent):
+        # TODO: refactor
         '''Searches na item, given its uid'''
         if parent == self:
             item_locator = parent.item
@@ -150,14 +241,30 @@ class ContactListModel (QtGui.QStandardItemModel):
         for i in range(num_rows):
             found_item = item_locator(i,  0)
             found_uid = found_item.data(Role.UidRole).toString()
-            #str(uid) is necessary because gid "0" is passed as a int.... -_-;
             if found_uid == QtCore.QString(str(uid)).trimmed():
                 return found_item
-        if uid == self._no_group_uid:
-            new_group_item = QtGui.QStandardItem(QtCore.QString("No Group"))
-            new_group_item.setData(self._no_group_uid, Role.UidRole)
+        if uid in [self.NO_GRP_UID, 
+                   self.ONL_GRP_UID, 
+                   self.OFF_GRP_UID]:
+            group_name = {self.NO_GRP_UID  : u'No Group',
+                          self.OFF_GRP_UID : u'Offline' ,
+                          self.ONL_GRP_UID : u'Online'  }
+            new_group_item = QtGui.QStandardItem(group_name[uid])
+            new_group_item.setData(uid, Role.UidRole)
             self.appendRow(new_group_item)
             return new_group_item
+            
+            
+    # cc = configchange
+    def _on_cc_order_by_group(self, value):
+        self._order_by_group = value
+
+       
+    def _on_cc_show_offline(self, value):
+        self._show_offline = value
+
+        
+
 
 
 class Role:

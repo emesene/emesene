@@ -10,6 +10,7 @@ import gui
 
 from gui.qt4ui.widgets import ContactListDelegate
 from gui.qt4ui.widgets import ContactListModel
+from gui.qt4ui.widgets import ContactListProxy
 from gui.qt4ui.widgets.ContactListModel import Role
 
 
@@ -28,10 +29,12 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         QtGui.QTreeView.__init__(self, parent)
         dialog = extension.get_default('dialog')
         # We need a model *before* callig gui.ContactList's costructor!!
-        self._model = ContactListModel.ContactListModel(self)
+        self._model = ContactListModel.ContactListModel(session.config, self)
+        self._pmodel = ContactListProxy.ContactListProxy(session.config, self)
         gui.ContactList.__init__(self, session, dialog)
-            
-        self.setModel(self._model)
+        
+        self._pmodel.setSourceModel(self._model)
+        self.setModel(self._pmodel)
         self.setItemDelegate(ContactListDelegate.ContactListDelegate(self))
         self.setAnimated(True)
         self.setRootIsDecorated(False)
@@ -76,17 +79,30 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         self._model.clear()
         return True
         
-    
+    def refilter(self):
+        pass
         
     # [END] -------------------- GUI.CONTACTLIST_OVERRIDE
         
 
-    def _on_item_double_clicked(self, item):
+    def _on_item_double_clicked(self, index):
         '''Slot called when the user double clicks a contact. requests
         a new conversation'''
-        contact = self._model.data(item, Role.DataRole).toPyObject()
-        self.new_conversation_requested.emit(str(contact.account))
-
+        print self._pmodel.data(index, Role.UidRole).toPyObject()
+        if index.parent().isValid():
+            contact = self._pmodel.data(index, Role.DataRole).toPyObject()
+            self.new_conversation_requested.emit(str(contact.account))
+        else:
+            group = self._pmodel.data(index, Role.DataRole).toPyObject()
+            if not group:
+                return
+            if self.isExpanded(index):
+                print 'Expanded: %s' % group.name
+                self.on_group_expanded(group)
+            else:
+                print 'Collapsed: %s' % group.name
+                self.on_group_collapsed(group)
+            
 
 
 
