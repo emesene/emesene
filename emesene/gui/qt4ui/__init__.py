@@ -76,6 +76,7 @@ def setup():
     import Dialog
     import Notifier
     import PictureHandler
+    import Preferences
     import TopLevelWindow
     import TrayIcon
     import menus
@@ -87,6 +88,8 @@ def setup():
     extension.category_register('conversation',    Conversation.Conversation)
     extension.category_register('dialog',          Dialog.Dialog)
     extension.category_register('notificationGUI', Notifier.Notifier)
+    extension.category_register('preferences',     Preferences.Preferences,
+                                                   single_instance=True)
     extension.category_register('window frame',  TopLevelWindow.TopLevelWindow)
     extension.category_register('tray icon',       TrayIcon.TrayIcon)
 
