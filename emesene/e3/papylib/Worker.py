@@ -922,7 +922,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.contacts.me.picture = avatar_path
         if not from_roaming:
-            self.content_roaming.store(None, None, picture_name)
+            self.content_roaming.store(None, None, avatar)
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES
