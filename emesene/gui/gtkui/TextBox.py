@@ -158,10 +158,9 @@ class InputText(TextBox):
 
         try:
             import gtkspell
-
-            self.spell_checker = gtkspell.Spell(self._textbox)
+            if self.config.b_enable_spell_check:
+                self.spell_checker = gtkspell.Spell(self._textbox)
         except ImportError as error:
-            print error
             pass
 
         self._textbox.connect_after('message-send', self._on_message_send)
@@ -316,18 +315,19 @@ class OutputText(TextBox):
 
         TextBox.append(self, text, scroll)
 
-    def send_message(self, formatter, contact, text, cedict, cepath, style, is_first):
+    def send_message(self, formatter, contact, text, cedict, cepath, style, is_first, type_=None):
         '''add a message to the widget'''
-        nick = contact.display_name
-
         is_raw, consecutive, outgoing, first, last = \
-            formatter.format(contact)
+            formatter.format(contact, type_)
 
-        if is_raw:
-            middle = MarkupParser.escape(text)
+        if type_ == e3.Message.TYPE_NUDGE:
+            middle = ''
         else:
-            middle = MarkupParser.escape(text)
-            middle = e3.common.add_style_to_message(middle, style, False)
+            if is_raw:
+                middle = MarkupParser.escape(text)
+            else:
+                middle = MarkupParser.escape(text)
+                middle = e3.common.add_style_to_message(middle, style, False)
 
         all_ = first + middle + last
         self.append(all_, cedict, self.config.b_allow_auto_scroll)

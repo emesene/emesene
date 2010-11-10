@@ -75,16 +75,25 @@ class ContactInformation(gtk.Window):
 
     def _on_nicks_ready(self, results):
         '''called when the nick history is ready'''
+        if not results:
+            return
+
         for (stat, timestamp, nick) in results:
             self.nicks.add(stat, timestamp, nick)
 
     def _on_messages_ready(self, results):
         '''called when the message history is ready'''
+        if not results:
+            return
+
         for (stat, timestamp, message) in results:
             self.messages.add(stat, timestamp, message)
 
     def _on_status_ready(self, results):
         '''called when the status history is ready'''
+        if not results:
+            return
+
         for (stat, timestamp, stat_) in results:
             self.status.add(stat, timestamp, e3.status.STATUS.get(stat,
                 'unknown'))
@@ -258,9 +267,9 @@ class ChatWidget(gtk.VBox):
         refresh.connect('clicked', self._on_refresh_clicked)
         toggle_calendars.connect('clicked', self._on_toggle_calendars)
 
-        self.calendars.pack_start(gtk.Label(_('Chats from:')), False)
+        self.calendars.pack_start(gtk.Label(_('Chats from')), False)
         self.calendars.pack_start(self.from_calendar, True, True)
-        self.calendars.pack_start(gtk.Label(_('Chats to:')), False)
+        self.calendars.pack_start(gtk.Label(_('Chats to')), False)
         self.calendars.pack_start(self.to_calendar, True, True)
 
         chat_box.pack_start(self.text, True, True)
@@ -321,6 +330,9 @@ class ChatWidget(gtk.VBox):
         def _on_save_chats_ready(results):
             '''called when the chats requested are ready
             '''
+            if not results:
+                return
+
             exporter = extension.get_default('history exporter')
             exporter(results, path)
 
@@ -328,17 +340,24 @@ class ChatWidget(gtk.VBox):
 
     def _on_chats_ready(self, results):
         '''called when the chat history is ready'''
+        if not results:
+            return
+
         for (stat, timestamp, message, nick) in results:
             date_text = time.strftime('[%c]', time.gmtime(timestamp))
             tokens = message.split('\r\n', 3)
             type_ = tokens[0]
 
+            # XXX: hack, I don't have the mail here FIXME
+            contact = e3.Contact(nick)
+
             if type_ == 'text/x-msnmsgr-datacast':
-                self.text.append(date_text + ' ' + nick + ': ' + '<i>nudge</i><br/>')
+                self.output.information(self.formatter, contact,
+                    _('%s just sent you a nudge!') % (nick,))
             elif type_.find('text/plain;') != -1:
                 try:
                     (type_, format, empty, text) = tokens
-                    self.text.append(self.formatter.format_history(
+                    self.text.add_message(self.formatter.format_history(
                         date_text, nick, text))
                 except ValueError:
                     log.debug(_('Invalid number of tokens') + str(tokens))

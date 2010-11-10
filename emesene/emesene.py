@@ -23,7 +23,6 @@ import os
 from e3.common.utils import project_path
 
 os.chdir(os.path.abspath(project_path()))
-#print (project_path())
 
 import sys
 import glib
@@ -438,6 +437,7 @@ class Controller(object):
         self.session.config.get_or_set('b_allow_auto_scroll', True)
         self.session.config.get_or_set('adium_theme',
                 'renkoo.AdiumMessageStyle')
+        self.session.config.get_or_set('b_enable_spell_check', False)
 
         self.timeout_id = glib.timeout_add(500,
                 self.session.signals._handle_events)

@@ -34,7 +34,11 @@ def parse_emotes(message, cedict={}):
 
     # Get the message body to parse emotes
     p = re.compile('<span.*?>(.*)</span>', re.DOTALL)
-    plain_text = p.search(message).group(1)
+    plain_find = p.search(message)
+    if plain_find:
+        plain_text = plain_find.group(1)
+    else:
+        plain_text = ''
 
     chunks = [plain_text]
     shortcuts = gui.Theme.EMOTES.keys()

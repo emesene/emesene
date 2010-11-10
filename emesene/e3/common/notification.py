@@ -1,5 +1,6 @@
 '''emesene's notification system'''
 from e3 import status
+from e3 import Message
 import extension
 
 import time
@@ -42,7 +43,11 @@ class Notification():
         #TODO don't notify if the conversation is on focus
         if self.session.config.b_notify_receive_message:
             contact = self.session.contacts.get(account)
-            self._notify(contact, contact.nick , msgobj.body)
+            if msgobj.type == Message.TYPE_NUDGE:
+                # The message needs to be translated.
+                self._notify(contact, contact.nick , 'Has nudged you!')
+            else:
+                self._notify(contact, contact.nick , msgobj.body)
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):

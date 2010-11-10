@@ -57,7 +57,7 @@ if os.name == 'nt':
             '../dlls/msvcr90.dll']
 
 
-    for base in ("themes", "plugins"):
+    for base in ("e3/msn/xml templates", "themes", "plugins"):
         for dirname, dirnames, files in os.walk(base):
             fpath = []
             for file in files:
@@ -69,7 +69,7 @@ if os.name == 'nt':
             'packages': ['encodings', 'gtk'],
             'includes': ['locale', 'gio', 'cairo', 'pangocairo', 'pango',
                 'atk', 'gobject', 'os', 'code', 'winsound', 'win32api',
-                'win32gui', 'optparse'],
+                'win32gui', 'optparse', 'plugin_base'],
             'excludes': ['ltihooks', 'pywin', 'pywin.debugger',
                 'pywin.debugger.dbgcon', 'pywin.dialogs',
                 'pywin.dialogs.list', 'Tkconstants', 'Tkinter', 'tcl'

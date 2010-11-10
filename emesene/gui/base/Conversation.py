@@ -134,7 +134,8 @@ class Conversation(object):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
         self.output.send_message(self.formatter, self.session.contacts.me,
-            _('You just sent a nudge!'), {}, '', None, self.first)
+                                 '', {}, '', None, self.first,
+                                 e3.Message.TYPE_NUDGE)
 
         self.play_nudge()
 
@@ -221,7 +222,7 @@ class Conversation(object):
 
         self.session.send_message(self.cid, text, self.cstyle, self.emcache.parse(), custom_emoticons)
         self.output.send_message(self.formatter, self.session.contacts.me,
-                text, self.emcache.parse(), self.emcache.path, self.cstyle, self.first)
+                                 text, self.emcache.parse(), self.emcache.path, self.cstyle, self.first)
         self.messages.push(text)
         self.play_send()
         self.first = False
