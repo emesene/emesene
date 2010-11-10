@@ -118,6 +118,7 @@ class Preferences(gtk.Window):
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
 
+        self.connect('delete_event', self.hide_on_delete)
         self.add(vbox)
         vbox.show_all()
 
