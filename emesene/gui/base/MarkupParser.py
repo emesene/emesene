@@ -73,19 +73,18 @@ def parse_emotes(message, cedict={}):
     # return the markup with plan text
     return message.replace(plain_text, ''.join(chunks))
 
-
 def replace_shortcut_with_tag(string, short, tag):
-	def repltags(m):
-		tags.append(m.group(0))
-		return '#THEREISATAGHERE#'
-	def backtags(m):
-		return tags.pop()
-	tags = []
-	result = re.sub(r'(<img[^>]+\>)', repltags, string)
-	result = result.replace(short, tag)
-	tags.reverse()
-	result = re.sub(r'#THEREISATAGHERE#', backtags, result)
-	return result
+    def repltags(m):
+        tags.append(m.group(0))
+        return '#THEREISATAGHERE#'
+    def backtags(m):
+        return tags.pop()
+    tags = []
+    result = re.sub(r'(<img[^>]+\>)', repltags, string)
+    result = result.replace(short, tag)
+    tags.reverse()
+    result = re.sub(r'#THEREISATAGHERE#', backtags, result)
+    return result
 
 def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
     '''replace emotes with img tags to the images'''
