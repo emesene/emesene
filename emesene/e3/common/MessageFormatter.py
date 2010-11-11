@@ -54,7 +54,7 @@ class MessageFormatter(object):
             '<span style="color: #A52A2A;"><b>%MESSAGE%</b></span>%NL%'
         self.nudge = \
             '<i>%DISPLAYNAME% sent you a nudge!</i>%NL%'
-        self.outgoing_nudge = '<i>You just sent a nudge!</i>%NL%'
+        self.outgoing_nudge = '<i>'+_('You just sent a nudge!')+'</i>%NL%'
         self.history = '<div class="message-history">'\
             '<b>%TIME% %NICK%</b>: %MESSAGE%%NL%</div>'
 

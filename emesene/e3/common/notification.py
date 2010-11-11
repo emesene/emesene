@@ -45,7 +45,7 @@ class Notification():
             contact = self.session.contacts.get(account)
             if msgobj.type == Message.TYPE_NUDGE:
                 # The message needs to be translated.
-                self._notify(contact, contact.nick , 'Has nudged you!')
+                self._notify(contact, contact.nick , _('%s just sent you a nudge!') % (contact.nick,))
             else:
                 self._notify(contact, contact.nick , msgobj.body)
 
