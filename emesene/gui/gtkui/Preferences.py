@@ -1,4 +1,5 @@
 import gtk
+import webbrowser
 
 import gui
 import utils
@@ -114,6 +115,13 @@ class Preferences(gtk.Window):
         self.page_dict.append(self.theme_page)
         self.page_dict.append(self.extensions_page)
         self.page_dict.append(self.plugins_page)
+
+        if 'msn' in self.session.SERVICES: # only when session is papylib.
+            listStore.append([self.render_icon(gtk.STOCK_NETWORK,
+                             gtk.ICON_SIZE_LARGE_TOOLBAR), _('Live Messenger')])
+            self.msn_papylib = MSNPapylib(session)
+            self.msn_papylib_page = self.msn_papylib
+            self.page_dict.append(self.msn_papylib_page)
 
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
@@ -597,6 +605,24 @@ class Extension(BaseTable):
         self.categories.set_model(model)
         self.categories.set_active(0)
 
+class MSNPapylib(BaseTable):
+    """ This panel contains some msn-papylib specific settings """
 
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 8, 2)
+        self.session = session
 
+        self.add_text(_('If you have problems with your nickname/message/picture '
+                        'just click on this button, sign in with your account '
+                        'and load a picture in your Live Profile. '
+                        'Then restart emesene and have fun.'), 0, 0, True)
+        self.add_button(_('Open Live Profile'), 1, 0, self._on_live_profile_clicked, 0, 0)
+
+        self.show_all()
+
+    def _on_live_profile_clicked(self, arg):
+        ''' called when live profile button is clicked '''
+        webbrowser.open("http://profile.live.com/details/Edit/Pic")
 
