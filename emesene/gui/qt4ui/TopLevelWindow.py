@@ -3,6 +3,7 @@
 ''' This module contains the top level window class '''
 
 import PyQt4.QtGui as QtGui
+from PyQt4.QtCore import Qt
 
 import extension
 import gui
@@ -37,6 +38,9 @@ class TopLevelWindow (QtGui.QMainWindow):
     def clear(self): #emesene's
         '''remove the content from the main window'''
         pass
+        
+    def iconify(self):
+        self.setWindowState(Qt.WindowMinimized)
         
     def present(self): # emesene's
         '''(Tries to) raise the window'''
