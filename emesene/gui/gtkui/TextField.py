@@ -5,6 +5,7 @@ import gobject
 import Renderers
 import extension
 
+
 class TextField(gtk.VBox):
     '''this class represent a widget that is a button and when clicked
     it shows a textfield until the text is set, then the button appears again'''
@@ -34,6 +35,10 @@ class TextField(gtk.VBox):
         self.empty_text = empty_text
         self.allow_empty = allow_empty
 
+        NiceBar = extension.get_default('nice bar')
+        self.nicebar = NiceBar()
+
+        self.pack_start(self.nicebar,False)
         self.pack_start(self.button, True, True)
         self.pack_start(self.entry, True, True)
 
@@ -53,9 +58,10 @@ class TextField(gtk.VBox):
     def on_entry_activate(self, entry):
         '''method called when the user press enter on the entry'''
         
-        dialog = extension.get_default('dialog')
+        self.nicebar.empty_queue()
         if not self.entry.get_text() and not self.allow_empty:
-            dialog.error(_("Empty text not allowed"))
+            self.entry.grab_focus()
+            self.nicebar.new_message(_("Empty text not allowed"), gtk.STOCK_DIALOG_ERROR)
             return
 
         new_text = self.entry.get_text()
@@ -64,7 +70,8 @@ class TextField(gtk.VBox):
             old_text = self._text
             self.text = self.entry.get_text()
             self.emit('text-changed', old_text, self._text)
-
+        
+        self.nicebar.hide()
         self.entry.hide()
         self.button.show()
 
