@@ -23,6 +23,7 @@ import utils
 import gtk
 import time
 from glib import timeout_add, source_remove
+import xml.sax.saxutils
 
 import Renderers
 
@@ -131,8 +132,8 @@ class Tooltips(gtk.Window):
         ''' shows the tooltip of an e3.Contact '''
         self.tag = -1
 
-        text = Renderers.msnplus_to_plain_text(obj.nick) 
-        text += '\n' + Renderers.msnplus_to_plain_text(obj.message)
+        text = xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.nick)) 
+        text += '\n' + xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.message))
         text += '\n' + self.data_string % (\
             obj.account, self.yes_no[bool(obj.blocked)])
 
