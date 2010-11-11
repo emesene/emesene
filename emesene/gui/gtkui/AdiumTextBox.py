@@ -8,6 +8,7 @@ import xml.sax.saxutils
 
 import webbrowser
 
+import e3
 import gui
 
 class OutputView(webkit.WebView):
