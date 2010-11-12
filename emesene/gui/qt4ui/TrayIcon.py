@@ -31,7 +31,7 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         self._menu = None
         self._conversations = None
         
-        self.setIcon(QtGui.QIcon(QtGui.QPixmap(gui.theme.logo)))
+        self.setIcon(QtGui.QIcon(gui.theme.logo))
         
         self.activated.connect(self._on_tray_icon_clicked)
         self.show()
@@ -43,6 +43,7 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         tray_login_menu_cls = extension.get_default('tray login menu')
         self._menu = tray_login_menu_cls(self._handler)
         self.setContextMenu(self._menu)
+        self.setIcon(QtGui.QIcon(gui.theme.logo))
         
         
     def set_main(self, session):
