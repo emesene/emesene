@@ -42,15 +42,19 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
             
             if not self._group_offline and \
                model.data(index, Role.UidRole) == ContactListModel.OFF_GRP_UID:
-                   return False
+                   print '*** Group %s filtered because of _group_offline=%s' % (
+                        model.data(index, Role.DisplayRole).toString(), self._group_offline)
+                   return True
                    
             if not self._show_empty and \
                 model.rowCount(index) == 0:
                     # well here we should effectively /count/ the items...
-                    return False
+                    print '*** Group %s filtered because of _show_empty = %s' % (
+                        model.data(index, Role.DisplayRole).toString(), self._show_empty)
+                    return True
                     
                    
-        print 'GT'           
+        print 'Showing group: %s' % model.data(index, Role.DisplayRole).toString()
         return True
             
         
@@ -104,14 +108,18 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
             
             if not self._show_offline and \
                model.data(index, Role.StatusRole) == e3.status.OFFLINE:
+                   print '*** Contact %s filtered because of _show_offline=%s' % (
+                        model.data(index, Role.DisplayRole).toString(), self._group_offline)
                    return False
                    
             if self._group_offline and \
                 model.data(index, Role.StatusRole) == e3.status.OFFLINE and \
                 model.data(index.parent(), Role.UidRole) != ContactListModel.OFF_GRP_UID:
+                    print '*** Contact %s filtered because of _group_offline=%s' % (
+                        model.data(index, Role.DisplayRole).toString(), self._group_offline)
                     return False
                    
-        print 'CT'           
+        print 'Showing contact: %s' % model.data(index, Role.DisplayRole).toString()          
         return True
             
         
