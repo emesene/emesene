@@ -32,27 +32,32 @@ class LoginPage(QtGui.QWidget):
         # TODO: honour autologin stuff
         # instance variables:
         QtGui.QWidget.__init__(self, parent)
-        self._account_list = []
 
+        self._on_preferences_changed = on_preferences_changed
         self._config = config
         self._config_dir = config_dir
         self._config_path = config_path
-        self._session_id = session_id
-        self._proxy = proxy
-        self._use_http = use_http
+        self._session_id = session_id       # DON'T USE
+        self._proxy = proxy or e3.Proxy()
+        self._use_http = use_http           # DON'T USE
         self._login_callback = callback
 
         # a widget dic to avoid proliferation of instance variables:
-        self._widget_dict = {}
+        self._widget_d = {}
+        self._account_list = []
+        self._service2data = {}
+        self._service2id   = {}
+        self._host = None
+        self._port = None
 
         # setup code:
+        self._setup_config()
         self._setup_accounts()
         self._setup_ui()
         
         # selects the default account if any:
-        account_combo = self._widget_dict['account_combo']
-        if self._config.last_logged_account and \
-           not self._config.last_logged_account == '':
+        account_combo = self._widget_d['account_combo']
+        if self._config.last_logged_account != '':
             account_combo.setCurrentIndex(account_combo.findData(0))
         # I don't know why this doesn't get called automatically:
         self._on_chosen_account_changed(0)   
@@ -61,22 +66,41 @@ class LoginPage(QtGui.QWidget):
         #account, no display pic is shown....
         
 
+    def _setup_config(self):
+        '''Adds missing options to config file'''
+        default_session = extension.get_default('session')
+        service = default_session.SERVICES.keys()[0]
+        self._host = default_session.SERVICES[service]['host']
+        self._port = default_session.SERVICES[service]['port']
+        self._config.get_or_set('last_logged_account', '')
+        self._config.get_or_set('d_remembers', {})
+        self._config.get_or_set('d_user_service', {})
+        self._config.get_or_set('d_status', {})
+        self._config.get_or_set('service', service)
+        # obtaining host and port info for each service
+        for ext_id, ext_class in extension.get_extensions('session').iteritems():
+            for service_name, service_data in ext_class.SERVICES.iteritems():
+                self._service2data[service_name] = service_data
+                self._service2id[service_name] = ext_id
+        
+        
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
-        widget_dict = self._widget_dict
+        widget_dict = self._widget_d
         avatar_cls          = extension.get_default('avatar')
         status_combo_cls    = extension.get_default('status combo') 
         widget_dict['display_pic'] = avatar_cls(default_pic=gui.theme.logo,
                                                 clickable=False)
         widget_dict['account_combo'] = QtGui.QComboBox()
         widget_dict['password_edit'] = QtGui.QLineEdit()
-        widget_dict['status_combo'] = status_combo_cls()
+        widget_dict['status_combo']  = status_combo_cls()
         widget_dict['save_account_chk'] =    \
                 QtGui.QCheckBox("Remember this account")
         widget_dict['save_password_chk'] =   \
                 QtGui.QCheckBox("Save password")
         widget_dict['auto_login_chk'] =  \
                 QtGui.QCheckBox("Login automagically")
+        widget_dict['advanced_btn']  = QtGui.QToolButton() 
         widget_dict['login_btn'] = QtGui.QPushButton("Login")
 
         lay = QtGui.QVBoxLayout()
@@ -90,6 +114,7 @@ class LoginPage(QtGui.QWidget):
         lay.addWidget(widget_dict['save_account_chk'])
         lay.addWidget(widget_dict['save_password_chk'])
         lay.addWidget(widget_dict['auto_login_chk'])
+        lay.addWidget(widget_dict['advanced_btn'], 0, Qt.AlignRight)
         lay.addSpacing(35)
         lay.addWidget(widget_dict['login_btn'], 0, Qt.AlignCenter)
         lay.addSpacing(45)
@@ -121,6 +146,8 @@ class LoginPage(QtGui.QWidget):
                                         self._on_checkbox_state_refresh) 
         widget_dict['auto_login_chk'].stateChanged.connect(
                                         self._on_checkbox_state_refresh)
+        widget_dict['advanced_btn'].clicked.connect(
+                                        self._on_connection_preferences_clicked)
         widget_dict['login_btn'].clicked.connect(
                                         self._on_start_login)
                                         
@@ -133,6 +160,8 @@ class LoginPage(QtGui.QWidget):
         account_combo.setInsertPolicy(QtGui.QComboBox.NoInsert)
         # TODO: Investigate completion
         widget_dict['password_edit'].setEchoMode(QtGui.QLineEdit.Password)
+        widget_dict['advanced_btn'].setAutoRaise(True)
+        widget_dict['advanced_btn'].setIcon(QtGui.QIcon.fromTheme('preferences-other'))
         login_btn = widget_dict['login_btn']
         login_btn.setAutoDefault(True)
         login_btn.setEnabled(False)
@@ -145,42 +174,44 @@ class LoginPage(QtGui.QWidget):
         '''Builds up the account list'''
         class Account(object):
             '''Convenience class to store account's settings'''
-            def __init__(self, email, password, status, remember_level):
+            def __init__(self, service, email, password, status, remember_lvl):
                 '''Constructor'''
+                self.service, self.status             = service, status
                 self.email, self.password             = email, password
-                self.status                           = status
                 self.save_account, self.save_password = False, False
                 self.auto_login                       = False
-                if remember_level >= 1:
+                if remember_lvl >= 1:
                     self.save_account   = True
-                if remember_level >= 2:
+                if remember_lvl >= 2:
                     self.save_password  = True
-                if remember_level >= 3:
+                if remember_lvl >= 3:
                     self.auto_login     = True
         
-        remember_level_dict = self._config.d_remembers
-        emails = remember_level_dict.keys()
-        status_dict = self._config.d_status
-        password_dict = self._config.d_accounts
-        email_of_default_account = self._config.last_logged_account
+        service_d         = self._config.d_user_service
+        remember_lvl_d    = self._config.d_remembers
+        emails            = remember_lvl_d.keys()
+        status_d          = self._config.d_status
+        password_d        = self._config.d_accounts
+        default_acc_email = self._config.last_logged_account
 
-        if email_of_default_account in emails:
-            index = emails.index(email_of_default_account)
+        if default_acc_email in emails:
+            index = emails.index(default_acc_email)
             # put the default account's email in the first position
             emails[0], emails[index] = emails[index], emails[0]
             
         for email in emails:
-            remember_level = remember_level_dict[email]
-            if remember_level >= 1: # we have at least a status
-                status = status_dict[email]
+            service = service_d[email]
+            remember_lvl = remember_lvl_d[email]
+            if remember_lvl >= 1: # we have at least a status
+                status = status_d[email]
             else:
                 status = e3.status.ONLINE
-            if remember_level >= 2: # we have also a password
-                password = base64.b64decode(password_dict[email])
+            if remember_lvl >= 2: # we have also a password
+                password = base64.b64decode(password_d[email])
             else:
                 password = ''
 
-            account = Account(email, password, status, remember_level)
+            account = Account(service, email, password, status, remember_lvl)
             self._account_list.append(account)
 
 
@@ -188,7 +219,7 @@ class LoginPage(QtGui.QWidget):
     def _on_account_combo_text_changed(self, new_text): #new text is a QString
         ''' Slot executed when the text in the account combo changes '''
         print " *** _on_account_combo_text_changed"
-        index = self._widget_dict['account_combo'].findText(new_text)
+        index = self._widget_d['account_combo'].findText(new_text)
         if index > -1:
             self._on_chosen_account_changed(index)
         else:
@@ -200,9 +231,9 @@ class LoginPage(QtGui.QWidget):
         ''' Slot executed when the user select another account from the drop
         down menu of the account combo'''
         print " *** _on_chosen_account_changed"
-        widget_dict = self._widget_dict
-        account_combo  = widget_dict['account_combo']
-        password_edit  = widget_dict['password_edit']
+        widget_d = self._widget_d
+        account_combo  = widget_d['account_combo']
+        password_edit  = widget_d['password_edit']
         index_in_account_list = account_combo.itemData(acc_index).toPyObject()
         # If we don't have any account at all, this slots gets called but 
         # index_in_account_list is None.
@@ -213,32 +244,67 @@ class LoginPage(QtGui.QWidget):
             # display_pic
             path = self._config_dir.join('messenger.hotmail.com', 
                                          account.email, 'avatars', 'last')
-            widget_dict['display_pic'].set_display_pic_from_file(path)
+            widget_d['display_pic'].set_display_pic_from_file(path)
             # password:
             if account.password:
                 password_edit.setText(account.password)
             else:
                 password_edit.clear()
             # status:
-            widget_dict['status_combo'].set_status(account.status)
+            widget_d['status_combo'].set_status(account.status)
             # checkboxes:
-            widget_dict['save_account_chk'] .setChecked(account.save_account)
-            widget_dict['save_password_chk'].setChecked(account.save_password)
-            widget_dict['auto_login_chk']   .setChecked(account.auto_login)
+            widget_d['save_account_chk'] .setChecked(account.save_account)
+            widget_d['save_password_chk'].setChecked(account.save_password)
+            widget_d['auto_login_chk']   .setChecked(account.auto_login)
+            # host and port:
+            self._host = self._service2data[account.service]['host'] 
+            self._port = self._service2data[account.service]['port']
         self._on_checkbox_state_refresh()
+        
+    def _on_connection_preferences_clicked(self):
+        def new_preferences_cb(use_http, use_proxy, proxy_host, proxy_port,
+            use_auth, user, passwd, session_id, service, server_host, server_port):
+            '''
+            called when the user press accept on the preferences dialog
+            '''
+            self._proxy = e3.Proxy(use_proxy, proxy_host, proxy_port, use_auth, user, passwd)
+            self._host = server_host
+            self._port = server_port
+            account = str(self._widget_d['account_combo'].currentText())
+            if account != '':
+                self._config.d_user_service[account] = service
+    
+            self._on_preferences_changed(use_http, self._proxy, session_id,
+                    service)
+
+        service = self._config.service
+        account = str(self._widget_d['account_combo'].currentText())
+        if account in self._config.d_user_service.keys():
+            service = self._config.d_user_service[account]
+        extension.get_default('dialog').login_preferences(service, self._host,
+                                        self._port, new_preferences_cb, 
+                                        self._config.b_use_http, self._proxy)
 
 
     def _on_start_login(self):
         ''' Slot executed when the user clicks the login button'''
-        widget_dic = self._widget_dict
+        widget_dic = self._widget_d
         user            =  str(widget_dic['account_combo'].currentText())
         password        =  str(widget_dic['password_edit'].text())
         status          =      widget_dic['status_combo'].status()
         save_account    =      widget_dic['save_account_chk'].isChecked()
         save_password   =      widget_dic['save_password_chk'].isChecked()
         auto_login      =      widget_dic['auto_login_chk'].isChecked()
+        
+        if user in self._config.d_user_service.keys():
+            service_name = self._config.d_user_service[user]
+            session_id = self._service2id[service_name]
+        else:
+            session_id = self._config.session
+        self._config.d_user_service[user] = service_name
+        
 
-        e3_account = e3.Account(user, password, status, 'messenger.hotmail.com')
+        e3_account = e3.Account(user, password, status, self._host)
         #is this the email?
         email = e3_account.account
 
@@ -312,15 +378,15 @@ class LoginPage(QtGui.QWidget):
         self._config.save(self._config_path)
             
         # Invoke the  login callback
-        self._login_callback(e3_account, self._session_id, self._proxy,
-                             self._use_http, 'messenger.hotmail.com', '1863')
+        self._login_callback(e3_account, session_id, self._proxy,
+                             self._config.b_use_http, self._host, self._port)
 
 
 
     def clear_login_form(self, clear_pic=False):
         ''' Resets the login form '''
         print " *** clear_login_form"
-        widget_dic = self._widget_dict
+        widget_dic = self._widget_d
         if clear_pic:
             widget_dic['display_pic'].set_default_pic()
         widget_dic['password_edit'].clear()
@@ -336,7 +402,7 @@ class LoginPage(QtGui.QWidget):
         enabled or disabled, checked or unchecked and changes its
         state accordingly'''
         #print " *** _widget_status_refresh"
-        widget_dict = self._widget_dict
+        widget_dict = self._widget_d
         account_combo       = widget_dict['account_combo']
         password_edit       = widget_dict['password_edit']
         save_account_chk    = widget_dict['save_account_chk']
@@ -373,7 +439,7 @@ class LoginPage(QtGui.QWidget):
             return False
         if event.type() == QtCore.QEvent.KeyRelease and \
             event.key() == Qt.Key_Return:
-            self._widget_dict['login_btn'].animateClick()
+            self._widget_d['login_btn'].animateClick()
             return True
         else:
             return False

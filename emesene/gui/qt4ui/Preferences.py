@@ -322,7 +322,7 @@ class BaseTable(QtGui.QWidget):
         """default callback for a cehckbutton, set property_name
         to the status of the checkbutton
         """
-        self.set_attr(property_name, checkbutton.checked())
+        self.set_attr(property_name, checkbutton.isChecked())
 
 
     def get_attr(self, name):

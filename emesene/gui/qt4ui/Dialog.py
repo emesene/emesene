@@ -4,9 +4,11 @@
 
 
 from PyQt4  import QtGui
+from PyQt4  import QtCore
 from PyQt4.QtCore  import Qt
 
 import gui
+import extension
 
 from gui.qt4ui import widgets
 
@@ -224,6 +226,187 @@ class Dialog(object):
         selected_pixmap = area_selector.get_selected_pixmap()
         
         response_cb(response, selected_pixmap)
+        
+
+    @classmethod
+    def login_preferences(cls, service, service_host, service_port, 
+                          callback, use_http, proxy):
+        """
+        display the preferences dialog for the login window
+
+        cls -- the dialog class
+        service -- the service string identifier (for example 'gtalk')
+        callback -- callback to call if the user press accept, call with the
+            new values
+        use_http -- boolean that indicates if the e3 should use http
+            method
+        proxy -- a e3.Proxy object
+        """
+        def on_session_changed(*args):
+            service = str(session_cmb.currentText())
+            session_id, ext = name_to_ext[service]
+            server_host_edit.setText(ext.SERVICES[service]['host'])
+            server_port_edit.setText(ext.SERVICES[service]['port'])
+            
+        def on_use_auth_toggled(is_enabled, is_checked):
+            '''called when a check button is toggled, receive a set
+            of entries, enable or disable them deppending on the state
+            of the check button'''
+            auth_settings = (user_lbl, user_edit, pwd_lbl, pwd_edit)
+            state = (is_enabled and is_checked)
+            for widget in auth_settings:
+                widget.setEnabled(state)
+                
+                
+        def on_use_proxy_toggled(is_checked, *args):
+            proxy_settings = (host_lbl, proxy_host_edit, port_lbl, 
+                              proxy_port_edit, auth_chk)
+            print 'upt'
+            for widget in proxy_settings:
+                widget.setEnabled(is_checked)
+            on_use_auth_toggled(is_checked, auth_chk.isChecked())
+                    
+        def response_cb(response):
+            '''called on any response (close, accept, cancel) if accept
+            get the new values and call callback with those values'''
+            if response == gui.stock.ACCEPT:
+                use_http = http_chk.isChecked()
+                use_proxy = proxy_chk.isChecked()
+                use_auth = auth_chk.isChecked()
+                proxy_host = str(proxy_host_edit.text())
+                proxy_port = str(proxy_port_edit.text())
+                server_host = str(server_host_edit.text())
+                server_port = str(server_port_edit.text())
+                user = str(user_edit.text())
+                passwd = str(pwd_edit.text())
+
+                service = str(session_cmb.currentText())
+                session_id, ext = name_to_ext[service]
+                print session_id
+                callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
+                        user, passwd, session_id, service, server_host, server_port)
+            dialog.hide()
+                    
+
+        
+        dialog           = OkCancelDialog()
+        session_lbl      = QtGui.QLabel(_('Session'))
+        session_cmb      = QtGui.QComboBox()
+        server_host_lbl  = QtGui.QLabel(_('Server'))
+        server_host_edit = QtGui.QLineEdit()
+        server_port_lbl  = QtGui.QLabel(_('Port'))
+        server_port_edit = QtGui.QLineEdit()
+        http_chk         = QtGui.QCheckBox(_('Use HTTP method'))
+        proxy_chk        = QtGui.QCheckBox(_('Use proxy'))
+        host_lbl         = QtGui.QLabel(_('Host'))
+        proxy_host_edit  = QtGui.QLineEdit()
+        port_lbl         = QtGui.QLabel(_('Port'))
+        proxy_port_edit  = QtGui.QLineEdit()
+        auth_chk         = QtGui.QCheckBox(_('Use authentication'))
+        user_lbl         = QtGui.QLabel(_('User'))
+        user_edit        = QtGui.QLineEdit()
+        pwd_lbl          = QtGui.QLabel(_('Password'))
+        pwd_edit         = QtGui.QLineEdit()
+        
+        grid_lay = QtGui.QGridLayout()
+        grid_lay.setHorizontalSpacing(20)
+        grid_lay.setVerticalSpacing(4)
+        grid_lay.addWidget(session_lbl, 0, 0)
+        grid_lay.addWidget(session_cmb, 0, 2)
+        grid_lay.addWidget(server_host_lbl, 1, 0)
+        grid_lay.addWidget(server_host_edit, 1, 2)
+        grid_lay.addWidget(server_port_lbl, 2, 0)
+        grid_lay.addWidget(server_port_edit, 2, 2)
+        grid_lay.addWidget(http_chk, 3, 0, 1, -1)
+        grid_lay.addWidget(proxy_chk, 4, 0, 1, -1)
+        grid_lay.addWidget(host_lbl, 5, 0)
+        grid_lay.addWidget(proxy_host_edit, 5, 2)
+        grid_lay.addWidget(port_lbl, 6, 0)
+        grid_lay.addWidget(proxy_port_edit, 6, 2)
+        grid_lay.addWidget(auth_chk, 7, 0, 1, -1)
+        grid_lay.addWidget(user_lbl, 8, 0)
+        grid_lay.addWidget(user_edit, 8, 2)
+        grid_lay.addWidget(pwd_lbl, 9, 0)
+        grid_lay.addWidget(pwd_edit, 9, 2)
+        dialog.setLayout(grid_lay)
+        
+        dialog.setWindowTitle('Preferences')
+        server_host_edit.setText(service_host)
+        server_port_edit.setText(service_port)
+        proxy_host_edit.setText(proxy.host or '')
+        proxy_port_edit.setText(proxy.port or '')
+        user_edit.setText(proxy.user or '')
+        pwd_edit.setText(proxy.passwd or '')
+        #pwd_edit.setVisible(False)
+        http_chk.setChecked(use_http)
+        
+        index = 0
+        count = 0
+        name_to_ext = {}
+        session_found = False
+        default_session_index = 0
+        default_session = extension.get_default('session')
+        for ext_id, ext in extension.get_extensions('session').iteritems():
+            if default_session.NAME == ext.NAME:
+                default_session_index = count
+            for service_name, service_data in ext.SERVICES.iteritems():
+                if service == service_name:
+                    index = count
+                    server_host_edit.setText(service_data['host'])
+                    server_port_edit.setText(service_data['port'])
+                    session_found = True
+                session_cmb.addItem(service_name)
+                name_to_ext[service_name] = (ext_id, ext)
+                count += 1
+        if session_found:
+            session_cmb.setCurrentIndex(index)
+        else:
+            session_cmb.setCurrentIndex(default_session_index)
+            
+        
+        
+        session_cmb.currentIndexChanged.connect(on_session_changed)
+        proxy_chk.toggled.connect(on_use_proxy_toggled)
+        auth_chk.toggled.connect(lambda checked: 
+                        on_use_auth_toggled(auth_chk.isEnabled(), checked))
+        
+        # putting these there to trigger the slots:
+        proxy_chk.setChecked(not proxy.use_proxy)
+        proxy_chk.setChecked(proxy.use_proxy)
+        auth_chk.setChecked(not proxy.use_auth)
+        auth_chk.setChecked(proxy.use_auth)
+
+
+        dialog.resize(300, 300)
+        dialog.show()
+
+        #for widget in proxy_settings:
+            #widget.hide()
+            
+        response = dialog.exec_()
+        
+        if response == QtGui.QDialog.Accepted:
+            response = gui.stock.ACCEPT
+        elif response == QtGui.QDialog.Rejected:
+            response = gui.stock.CANCEL
+        print response
+        
+        response_cb(response)
+
+        
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
         
 
 
