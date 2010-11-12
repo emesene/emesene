@@ -300,6 +300,7 @@ class LoginPage(QtGui.QWidget):
             service_name = self._config.d_user_service[user]
             session_id = self._service2id[service_name]
         else:
+            service_name = self._config.d_service
             session_id = self._config.session
         self._config.d_user_service[user] = service_name
         
