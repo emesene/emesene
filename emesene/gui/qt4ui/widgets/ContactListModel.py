@@ -34,6 +34,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         self._onl_grp = self._search_item(self.ONL_GRP_UID, self)
         self._off_grp = self._search_item(self.OFF_GRP_UID, self)
         
+        self._config         = config
         self._show_offline   = config.b_show_offline
         self._show_empty     = config.b_show_empty_groups
         self._show_blocked   = config.b_show_blocked
@@ -59,7 +60,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         print ' to group: %s' % gname
         
         # decide in which group we have to add the contact:
-        if self._order_by_group:
+        if self._config.b_order_by_group:
             if not group:
                 group_uid = self.NO_GRP_UID
             else:
@@ -73,20 +74,20 @@ class ContactListModel (QtGui.QStandardItemModel):
         # if the target group is not the offline group add the contact:
         # (we skip the offline group because it is a target group each 
         # time a contact is offline, for convenience.)
-        if not self._order_by_group or group_uid != self.OFF_GRP_UID:
+        if not self._config.b_order_by_group or group_uid != self.OFF_GRP_UID:
             group_item = self._search_item(group_uid, self)
             new_contact_item = QtGui.QStandardItem(contact.display_name)
             new_contact_item.setData(contact.identifier, Role.UidRole)
             self._set_contact_info(new_contact_item, contact)
             group_item.appendRow(new_contact_item)
         
-        if self._order_by_group and contact.status == e3.status.OFFLINE:
+        if self._config.b_order_by_group and contact.status == e3.status.OFFLINE:
             group_item = self._search_item(self.OFF_GRP_UID, self)
             new_contact_item = QtGui.QStandardItem(contact.display_name)
             new_contact_item.setData(contact.identifier+'FLN', Role.UidRole)
             self._set_contact_info(new_contact_item, contact)
             group_item.appendRow(new_contact_item)
-        self.refilter()
+        #self.refilter()
             
     
     def update_contact(self, contact):
@@ -96,7 +97,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         print 'UPDATING ',
         print contact.display_name
         print contact.identifier
-        if self._order_by_group:
+        if self._config.b_order_by_group:
             for index in range(self.rowCount()):
                 group_item = self.item(index, 0)
                 if group_item == self._off_grp:
@@ -157,7 +158,7 @@ class ContactListModel (QtGui.QStandardItemModel):
                 if new_status != e3.status.OFFLINE:
                     self._off_grp.takeRow(contact_item.index().row())
                     self._onl_grp.appendRow(contact_item)
-        self.refilter()
+        #self.refilter()
                 
                 
             
@@ -265,14 +266,14 @@ class ContactListModel (QtGui.QStandardItemModel):
         
     def add_group(self, group):
         '''Add a group.'''
-        if not self._order_by_group:
+        if not self._config.b_order_by_group:
             return
         new_group_item = QtGui.QStandardItem( QtCore.QString( 
                     xml.sax.saxutils.escape(group.name)))
         new_group_item.setData(group.identifier, Role.UidRole)
         new_group_item.setData(group, Role.DataRole)
         self.appendRow(new_group_item)
-        self.refilter()
+        #self.refilter()
 
     
     def clear(self):
@@ -310,23 +311,23 @@ class ContactListModel (QtGui.QStandardItemModel):
     # cc = configchange
     def _on_cc_show_offline(self, value):
         self._show_offline = value
-        self.refilter()
+        #self.refilter()
         
     def _on_cc_show_empty(self, value):
         self._show_empty = value
-        self.refilter()
+        #self.refilter()
         
     def _on_cc_show_blocked(self, value):
-        self._show_offline = value
-        self.refilter()
+        self._show_blocked = value
+        #self.refilter()
         
     def _on_cc_order_by_group(self, value):
         self._order_by_group = value
-        self.refilter()
+        #self.refilter()
 
     def _on_cc_group_offline(self, value):
         self._group_offline = value
-        self.refilter()
+        #self.refilter()
     
     
     
