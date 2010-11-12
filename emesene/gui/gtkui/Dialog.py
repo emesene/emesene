@@ -1220,6 +1220,7 @@ class EmotesWindow(gtk.Window):
 
             button.set_image(utils.safe_gtk_image_load(path, (20, 20)))
             button.set_tooltip_text(shortcut)
+            button.set_relief(gtk.RELIEF_NONE)
             button.connect('clicked', self._on_emote_selected, shortcut)
             self.table.attach(button, column, column + 1, row, row + 1)
 
