@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import webbrowser
+
 from PyQt4  import QtGui
 from PyQt4  import QtCore
 from PyQt4.QtCore import Qt
@@ -40,7 +42,12 @@ class Preferences(QtGui.QWidget):
         self.theme = Theme(session)
         self.extension = Extension(session)
         #self.plugins = PluginWindow.PluginMainVBox(session)
-
+        self.msn_papylib = None
+        if 'msn' in self._session.SERVICES: # only when session is papylib.	
+            self.msn_papylib = MSNPapylib(session)
+            LIST.append({'stock_id' : 'network-disconnect',
+                         'text' : ('Live Messeger')})
+    
         listView          = QListViewMod()
         self.widget_stack = QtGui.QStackedWidget()
         
@@ -70,8 +77,10 @@ class Preferences(QtGui.QWidget):
         
         for page in [self.interface,     self.sound, 
                      self.notification,  self.theme,
-                     self.extension      ]: #self.plugins_page
-            self.widget_stack.addWidget(page)
+                     self.extension,     BaseTable(1,1),
+                     self.msn_papylib]: #self.plugins_page instead of BaseTable
+            if page:
+                self.widget_stack.addWidget(page)
             
         
         listView.selectionModel().currentRowChanged.connect(
@@ -184,7 +193,8 @@ class BaseTable(QtGui.QWidget):
         self.append_row(label, None)
         
 
-    def add_button(self, text, column, row, on_click):
+    def add_button(self, text, column, row, on_click, 
+                   xoptions=None, yoptions=None):
         """add a button with text to the row and column, connect the clicked
         event to on_click"""
         button = QtGui.QPushButton(text)
@@ -622,3 +632,26 @@ class Extension(BaseTable):
         categories = [ctg for ctg in extension.get_categories().keys() if len(extension.get_extensions(ctg)) > 1]
         categories.sort()
         return categories
+        
+        
+        
+class MSNPapylib(BaseTable):
+    """ This panel contains some msn-papylib specific settings """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 8, 2)
+        self.session = session
+
+        self.add_text(_('If you have problems with your nickname/message/\n'
+                        'picture just click on this button, sign in with \n'
+                        'your account and load a picture in your Live Profile.'
+                        '\nThen restart emesene and have fun.'), 0, 0, True)
+        self.add_button(_('Open Live Profile'), 1, 0, 
+                        self._on_live_profile_clicked, 0, 0)
+
+
+    def _on_live_profile_clicked(self, arg):
+        ''' called when live profile button is clicked '''
+        webbrowser.open("http://profile.live.com/details/Edit/Pic")
