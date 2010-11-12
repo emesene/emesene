@@ -12,6 +12,21 @@ from gui.qt4ui  import Utils
 from gui.qt4ui.widgets.ContactListModel import ContactListModel
 from gui.qt4ui.widgets.ContactListModel import Role
 
+class ContactListProxy435 (QtGui.QSortFilterProxyModel):
+    def __init__(self, config, parent=None):
+        QtGui.QSortFilterProxyModel.__init__(self, parent)
+        
+        self.setSortRole(Role.SortRole)
+        self.setDynamicSortFilter(True)
+        
+    def filterAcceptsRow(self, row, parent_idx):
+        model = self.sourceModel()
+        index = model.index(row, 0, parent_idx)
+        print 'FR: %s[%s]' % (self.data(index, Role.FilterRole).toPyObject(), index.isValid())
+        return self.data(index, Role.FilterRole).toPyObject()
+            
+    
+
 class ContactListProxy (QtGui.QSortFilterProxyModel):
     '''This class provides a proxy to access the contact list
     data model. This proxy Exports contact list's information

@@ -40,10 +40,13 @@ class ContactListModel (QtGui.QStandardItemModel):
         self._order_by_group = config.b_order_by_group
         self._group_offline  = config.b_group_offline
         
-        config.subscribe(self._on_cc_order_by_group, 'b_order_by_group')
         config.subscribe(self._on_cc_show_offline, 'b_show_offline')
+        config.subscribe(self._on_cc_show_empty, 'b_show_empty_groups')
+        config.subscribe(self._on_cc_show_blocked, 'b_show_blocked')
+        config.subscribe(self._on_cc_order_by_group, 'b_order_by_group')
+        config.subscribe(self._on_cc_group_offline, 'b_group_offline')
         
-    
+        
     def add_contact(self, contact, group=None):
         '''Add a contact'''
         # TODO: check adding an existing contact
@@ -83,6 +86,7 @@ class ContactListModel (QtGui.QStandardItemModel):
             new_contact_item.setData(contact.identifier+'FLN', Role.UidRole)
             self._set_contact_info(new_contact_item, contact)
             group_item.appendRow(new_contact_item)
+        self.refilter()
             
     
     def update_contact(self, contact):
@@ -153,6 +157,7 @@ class ContactListModel (QtGui.QStandardItemModel):
                 if new_status != e3.status.OFFLINE:
                     self._off_grp.takeRow(contact_item.index().row())
                     self._onl_grp.appendRow(contact_item)
+        self.refilter()
                 
                 
             
@@ -212,6 +217,52 @@ class ContactListModel (QtGui.QStandardItemModel):
         contact_item.setData(contact,           Role.DataRole)
         #self.sort(0)
         
+    def _set_filter_role(self, index):
+        filter_role = True
+        if not index.parent().isValid():
+            # 1) Special Groups:
+            uid = self.data(index, Role.UidRole).toPyObject() 
+            if  uid == self.ONL_GRP_UID and self._order_by_group:
+                filter_role = False
+            if  uid == self.OFF_GRP_UID and not self._group_offline:
+                filter_role = False
+            # 2) Check for empty groups
+            if self._is_group_empty(index) and not self._show_empty:
+                filter_role = False
+        else:
+            blocked = self.data(index, Role.BlockedRole).toPyObject()
+            status  = self.data(index, Role.StatusRole ).toPyObject()
+            parent_uid = self.data(index.parent(), Role.UidRole).toPyObject()
+            # 3) Blocked Contacts:
+            if blocked and not self._show_blocked:
+                filter_role = False
+            # 4) Offline Contacts:
+            if status == e3.status.OFFLINE and parent_uid != self.OFF_GRP_UID \
+                and not self._show_offline:
+                filter_role = False
+        print '> Setting FR for %s to %s' % (self.data(index, Role.DisplayRole).toString(), filter_role)
+        self.dataChanged.emit(index, index)
+        self.setData(index, filter_role, Role.FilterRole)
+        
+    def refilter(self):
+        for i in range(self.rowCount()):
+            group_index = self.index(i, 0)
+            for j in range(self.rowCount(group_index)):
+                contact_index = self.index(j, 0, group_index)
+                self._set_filter_role(contact_index)
+            self._set_filter_role(group_index)
+            
+    def _is_group_empty(self, index):
+        if index.parent().isValid():
+            raise ValueError('Not a group')
+        visible_contacts = 0
+        group_item = self.itemFromIndex(index)
+        for i in range (group_item.rowCount()):
+            contact_item = group_item.child(i, 0)
+            if contact_item.data(Role.FilterRole) == True:
+                visible_contacts += 1
+        return visible_contacts > 0
+        
     def add_group(self, group):
         '''Add a group.'''
         if not self._order_by_group:
@@ -221,6 +272,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         new_group_item.setData(group.identifier, Role.UidRole)
         new_group_item.setData(group, Role.DataRole)
         self.appendRow(new_group_item)
+        self.refilter()
 
     
     def clear(self):
@@ -256,12 +308,28 @@ class ContactListModel (QtGui.QStandardItemModel):
             
             
     # cc = configchange
-    def _on_cc_order_by_group(self, value):
-        self._order_by_group = value
-
-       
     def _on_cc_show_offline(self, value):
         self._show_offline = value
+        self.refilter()
+        
+    def _on_cc_show_empty(self, value):
+        self._show_empty = value
+        self.refilter()
+        
+    def _on_cc_show_blocked(self, value):
+        self._show_offline = value
+        self.refilter()
+        
+    def _on_cc_order_by_group(self, value):
+        self._order_by_group = value
+        self.refilter()
+
+    def _on_cc_group_offline(self, value):
+        self._group_offline = value
+        self.refilter()
+    
+    
+    
 
         
 
@@ -276,9 +344,10 @@ class Role:
     DecorationRole  = Qt.DecorationRole
     ToolTipRole     = Qt.ToolTipRole
     BlockedRole     = Qt.UserRole
-    DataRole        = Qt.UserRole + 1
+    DataRole        = Qt.UserRole + 17
     MediaRole       = Qt.UserRole + 2
     UidRole         = Qt.UserRole + 3
     SortRole        = Qt.UserRole + 4
     StatusRole      = Qt.UserRole + 5
     MessageRole     = Qt.UserRole + 6
+    FilterRole      = Qt.UserRole + 7
