@@ -246,7 +246,7 @@ class LoginPage(QtGui.QWidget):
         
             self.clear_login_form()
             # display_pic
-            path = self._config_dir.join('messenger.hotmail.com', 
+            path = self._config_dir.join(self._host, 
                                          account.email, 'avatars', 'last')
             widget_d['display_pic'].set_display_pic_from_file(path)
             # password:
@@ -277,12 +277,15 @@ class LoginPage(QtGui.QWidget):
                                    proxy_port, use_auth, user, passwd)
             self._host = server_host
             self._port = server_port
-            account = str(self._widget_d['account_combo'].currentText())
-            if account != '':
-                self._config.d_user_service[account] = service
+            account_email = str(self._widget_d['account_combo'].currentText())
+            if account_email != '':
+                self._config.d_user_service[account_email] = service
+                # to trigger eventual update of dp:
+            self._on_account_combo_text_changed(account_email)
     
             self._on_preferences_changed(use_http, self._proxy, session_id,
                     service)
+            
 
         service = self._config.service
         account = str(self._widget_d['account_combo'].currentText())

@@ -71,7 +71,7 @@ class DisplayPic (QtGui.QLabel):
         ''' sets the display pic from the path'''
         pixmap = QtGui.QPixmap(path)
         if pixmap.isNull():
-            return
+            pixmap = QtGui.QPixmap(self._default_pic)
         
         pixmap = Utils.pixmap_rounder(pixmap)
         self._fader.add_pixmap(pixmap)
