@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+'''This module contains classes used to build up a Preferences window'''
+
 import webbrowser
 
 from PyQt4  import QtGui
@@ -8,8 +10,7 @@ from PyQt4.QtCore import Qt
 
 import extension
 import gui
-from gui.qt4ui import Dialog
-from gui.qt4ui import widgets
+
 
 LIST = [
     {'stock_id' : 'preferences-desktop-accessibility','text' : ('Interface')},
@@ -21,14 +22,14 @@ LIST = [
 ]
 
 class Preferences(QtGui.QWidget):
+    '''This class represents the Preferences window'''
     NAME = 'Preferences'
     DESCRIPTION = 'A dialog to select the preferences'
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
 
     def __init__(self, session, parent=None):
-        """constructor
-        """
+        '''constructor'''
         QtGui.QWidget.__init__(self, parent)
         
         self.setWindowTitle(("Preferences"))
@@ -48,32 +49,32 @@ class Preferences(QtGui.QWidget):
             LIST.append({'stock_id' : 'network-disconnect',
                          'text' : ('Live Messeger')})
     
-        listView          = QListViewMod()
+        list_view          = QListViewMod()
         self.widget_stack = QtGui.QStackedWidget()
         
         lay = QtGui.QHBoxLayout()
-        lay.addWidget(listView)
+        lay.addWidget(list_view)
         lay.addWidget(self.widget_stack)
         self.setLayout(lay)
         
         
-        self._listModel = QtGui.QStandardItemModel(listView)
-        seleModel = QtGui.QItemSelectionModel(self._listModel, listView)
-        listView.setModel(self._listModel)
-        listView.setSelectionModel(seleModel)
-        self._delegate = listView.itemDelegate()
+        self._list_model = QtGui.QStandardItemModel(list_view)
+        select_model = QtGui.QItemSelectionModel(self._list_model, list_view)
+        list_view.setModel(self._list_model)
+        list_view.setSelectionModel(select_model)
+        self._delegate = list_view.itemDelegate()
         
-        listView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        listView.setIconSize(QtCore.QSize(32, 32))
-        listView.setMovement(QtGui.QListView.Static)
-        listView.setUniformItemSizes(True)
-        listView.setResizeMode    (QtGui.QListView.Adjust)
-        listView.setSizePolicy(QtGui.QSizePolicy.Fixed, 
+        list_view.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        list_view.setIconSize(QtCore.QSize(32, 32))
+        list_view.setMovement(QtGui.QListView.Static)
+        list_view.setUniformItemSizes(True)
+        list_view.setResizeMode    (QtGui.QListView.Adjust)
+        list_view.setSizePolicy(QtGui.QSizePolicy.Fixed, 
                                QtGui.QSizePolicy.Expanding)
         for i in LIST:
-            listItem = QtGui.QStandardItem(
+            item = QtGui.QStandardItem(
                             QtGui.QIcon.fromTheme(i['stock_id']), i['text'])
-            self._listModel.appendRow(listItem)
+            self._list_model.appendRow(item)
         
         for page in [self.interface,     self.sound, 
                      self.notification,  self.theme,
@@ -83,18 +84,22 @@ class Preferences(QtGui.QWidget):
                 self.widget_stack.addWidget(page)
             
         
-        listView.selectionModel().currentRowChanged.connect(
+        list_view.selectionModel().currentRowChanged.connect(
                                                         self._on_row_activated)
 
 
 
-    def _on_row_activated(self,new_idx, old_idx):
+    def _on_row_activated(self, new_idx, old_idx):
+        '''Callback executed when the user clicks an elemet in the list 
+        on the left. Shows the matching preference page in the righ part 
+        of the window'''
         # Get information about the row that has been selected
         self.widget_stack.setCurrentIndex(new_idx.row())
         self.widget_stack.currentWidget().on_update()
         
     
     def _present(self):
+        '''Does Nothing...'''
         pass
 
 
@@ -103,10 +108,17 @@ class Preferences(QtGui.QWidget):
 
 
 class QListViewMod (QtGui.QListView):
+    '''This is a QListView with a modified sizeHint'''
     def __init__(self, parent=None):
+        '''Constructor'''
         QtGui.QListView.__init__(self, parent)
         
     def sizeHint(self):
+        '''Returns the size hint. Width and Height are 
+        calculated as a weighted average between the the one's
+        of the QListView itself and the biggest ones of the 
+        elemens in the list'''
+        # pylint: disable=C0103
         width = 0
         height = 0
         rows = self.model().rowCount()
@@ -127,12 +139,11 @@ class QListViewMod (QtGui.QListView):
 
 
 
+
 class BaseTable(QtGui.QWidget):
-    """a base table to display preferences
-    """
+    '''This is the base class to create a table to edit preferences'''
     def __init__(self, rows, columns, homogeneous=False, parent=None):
-        """constructor
-        """
+        '''Constructor'''
         QtGui.QWidget.__init__(self)
         
         # TODO: add checks for row and column values
@@ -151,12 +162,12 @@ class BaseTable(QtGui.QWidget):
 
         
     def attach(self, widget, column, col_span, row, row_span, *args):
+        '''Adds a widget to the table'''
         self.grid_lay.addWidget(widget, row, column, row_span, col_span)
         
     
     def append_row(self, widget, row=None):
-        """append a row to the table
-        """
+        '''Appends a row to the table'''
         increment_current_row = False
         if row == None:
             row = self._current_row
@@ -169,17 +180,15 @@ class BaseTable(QtGui.QWidget):
     
     
     def add_text(self, text, column, row, align_left=False, line_wrap=True):
-        """add a label with thext to row and column, align the text left if
-        align_left is True
-        """
+        '''Adds a label with thext to row and column, align the text left if
+        align_left is True'''
         label = QtGui.QLabel(text)
         self.add_label(label, column, row, align_left)
 
 
     def add_label(self, label, column, row, align_left=False, line_wrap=True):
-        """add a label with thext to row and column, align the text left if
-        align_left is True
-        """
+        '''Adds a label with thext to row and column, align the text left if
+        align_left is True'''
         if align_left:
             pass
 
@@ -187,34 +196,33 @@ class BaseTable(QtGui.QWidget):
         self.grid_lay.addWidget(label, row, column)
     
     def append_markup(self, text):
-        """append a label
-        """
+        '''Appends a label'''
         label = QtGui.QLabel(text)
         self.append_row(label, None)
         
 
     def add_button(self, text, column, row, on_click, 
                    xoptions=None, yoptions=None):
-        """add a button with text to the row and column, connect the clicked
-        event to on_click"""
+        '''Adds a button with text to the row and column, connect the clicked
+        event to on_click'''
         button = QtGui.QPushButton(text)
         button.clicked.connect(on_click)
         self.grid_lay.addWidget(button, row, column)
         
 
     def append_entry_default(self, text, property_name, default):
-        """append a row with a label and a line_edit, set the value to the
+        '''Append a row with a label and a line_edit, set the value to the
         value of property_name if exists, if not set it to default.
-         Add a reset button that sets the value to the default"""
+        Add a reset button that sets the value to the default'''
 
         def on_reset_clicked(button, entry, default):
-            """called when the reset button is clicked, set
-            entry text to default"""
+            '''called when the reset button is clicked, sets
+            entry text to default'''
             entry.setText(default)
 
         def on_entry_changed(entry, property_name):
-            """called when the content of an entry changes,
-            set the value of the property to the new value"""
+            '''Called when the content of an entry changes,
+            set the value of the property to the new value'''
             self.set_attr(property_name, entry.text())
 
         label = QtGui.QLabel(text)
@@ -240,9 +248,8 @@ class BaseTable(QtGui.QWidget):
 
 
     def append_check(self, text, property_name, row=None):
-        """append a row with a check box with text as label and
-        set the check state with default
-        """
+        '''Append a row with a check box with text as label and
+        set the check state with default'''
         # TODO: Inspect if we can put self.on_toggle inside this method.
         widget = QtGui.QCheckBox(text)
         
@@ -251,13 +258,13 @@ class BaseTable(QtGui.QWidget):
         default = self.get_attr(property_name)
         widget.setChecked(default)
         
-        widget.toggled.connect(lambda checked: self.on_toggled(widget, property_name))
+        widget.toggled.connect(
+                        lambda checked: self.on_toggled(widget, property_name))
         
 
     def append_range(self, text, property_name, min_val, max_val, is_int=True):
-        """append a row with a scale to select an integer value between
-        min and max
-        """
+        '''Append a row with a scale to select an integer value between
+        min and max'''
         
         label = QtGui.QLabel(text)
         scale = QtGui.QSlider(Qt.Horizontal)
@@ -285,9 +292,8 @@ class BaseTable(QtGui.QWidget):
         
 
     def append_combo(self, text, getter, property_name):
-        """append a row with a check box with text as label and
-        set the check state with default
-        """
+        '''Append a row with a check box with text as label and
+        set the check state with default'''
         label = QtGui.QLabel(text)
         combo = QtGui.QComboBox()
         
@@ -314,14 +320,13 @@ class BaseTable(QtGui.QWidget):
 
 
     def on_combo_changed(self, combo, property_name):
-        """callback called when the selection of the combo changed
-        """
+        '''Callback called when the selection of the combo changed
+        '''
         self.set_attr(property_name, str(combo.currentText()))
 
 
     def on_range_changed(self, scale, property_name, is_int):
-        """callback called when the selection of the combo changed
-        """
+        '''Callback called when the selection of the combo changed'''
         value = scale.value()
         if is_int:
             value = int(value)
@@ -329,16 +334,14 @@ class BaseTable(QtGui.QWidget):
         
 
     def on_toggled(self, checkbutton, property_name):
-        """default callback for a cehckbutton, set property_name
-        to the status of the checkbutton
-        """
+        '''Default callback for a cehckbutton, set property_name
+        to the status of the checkbutton'''
         self.set_attr(property_name, checkbutton.isChecked())
 
 
     def get_attr(self, name):
-        """return the value of an attribute, if it has dots, then
-        get the values until the last
-        """
+        '''Return the value of an attribute, if it has dots, then
+        get the values until the last'''
 
         obj = self
         for attr in name.split('.'):
@@ -347,9 +350,8 @@ class BaseTable(QtGui.QWidget):
         return obj
 
     def set_attr(self, name, value):
-        """set the value of an attribute, if it has dots, then
-        get the values until the last
-        """
+        '''Set the value of an attribute, if it has dots, then
+        get the values until the last'''
 
         obj = self
         terms = name.split('.')
@@ -361,8 +363,8 @@ class BaseTable(QtGui.QWidget):
         return obj
 
     def get_attr_or_default(self, obj, name, default=None):
-        """try to get the value of the attribute 'name' from obj, if it
-        doesn't exist return default"""
+        '''Try to get the value of the attribute 'name' from obj, if it
+        doesn't exist return default'''
         if not hasattr(obj, name):
             return default
 
@@ -376,12 +378,12 @@ class BaseTable(QtGui.QWidget):
 
 
 class Interface(BaseTable):
-    """the panel to display/modify the config related to the gui
-    """
+    '''the panel to display/modify the config related to the gui
+    '''
 
     def __init__(self, session):
-        """constructor
-        """
+        '''constructor
+        '''
         BaseTable.__init__(self, 4, 1)
         self.session = session
         self.append_markup('<b>'+('Main window:')+'</b>')
@@ -390,8 +392,10 @@ class Interface(BaseTable):
         self.append_markup('<b>'+('Conversation window:')+'</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
-        self.append_check(('Start minimized/iconified'), 'session.config.b_conv_minimized')
-        self.append_check(('Show emoticons'), 'session.config.b_show_emoticons')
+        self.append_check(('Start minimized/iconified'), 
+                           'session.config.b_conv_minimized')
+        self.append_check(('Show emoticons'), 
+                           'session.config.b_show_emoticons')
         self.append_check(('Show conversation header'),
             'session.config.b_show_header')
         self.append_check(('Show conversation side panel'),
@@ -404,7 +408,8 @@ class Interface(BaseTable):
             'session.config.b_avatar_on_left')
         self.append_check(('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
-        self.append_check(('Enable spell check if available (requires %s)') % 'python-gtkspell',
+        self.append_check(('Enable spell check if available (requires %s)') % \
+                                                            'python-gtkspell',
             'session.config.b_enable_spell_check')
 
         self.append_range(('Contact list avatar size'),
@@ -417,12 +422,12 @@ class Interface(BaseTable):
 
 
 class Sound(BaseTable):
-    """the panel to display/modify the config related to the sounds
-    """
+    '''the panel to display/modify the config related to the sounds
+    '''
 
     def __init__(self, session):
-        """constructor
-        """
+        '''constructor
+        '''
         BaseTable.__init__(self, 6, 1)
         self.session = session
         self.append_markup('<b>'+('Messages events:')+'</b>')
@@ -448,12 +453,12 @@ class Sound(BaseTable):
 
 
 class Notification(BaseTable):
-    """the panel to display/modify the config related to the notifications
-    """
+    '''the panel to display/modify the config related to the notifications
+    '''
 
     def __init__(self, session):
-        """constructor
-        """
+        '''constructor
+        '''
         BaseTable.__init__(self, 2, 1)
         self.session = session
         self.append_check(('Notify on contact online'),
@@ -468,16 +473,16 @@ class Notification(BaseTable):
 
 
 class Theme(BaseTable):
-    """the panel to display/modify the config related to the theme
-    """
+    '''the panel to display/modify the config related to the theme
+    '''
 
     def __init__(self, session):
-        """constructor
-        """
+        '''constructor
+        '''
         BaseTable.__init__(self, 5, 1)
         self.session = session
 
-        ContactList = extension.get_default('contact list')
+        contact_list_cls = extension.get_default('contact list')
 
         adium_theme = self.session.config.get_or_set('adium_theme', 'renkoo')
 
@@ -490,21 +495,21 @@ class Theme(BaseTable):
         self.append_combo(('Adium theme'), gui.theme.get_adium_themes,
             'session.config.adium_theme')
         self.append_entry_default(('Nick format'),
-                'session.config.nick_template', ContactList.NICK_TPL)
+                'session.config.nick_template', contact_list_cls.NICK_TPL)
         self.append_entry_default(('Group format'),
-                'session.config.group_template', ContactList.GROUP_TPL)
+                'session.config.group_template', contact_list_cls.GROUP_TPL)
 
 
 
 
 
 class Extension(BaseTable):
-    """the panel to display/modify the config related to the extensions_cmb
-    """
+    '''the panel to display/modify the config related to the extensions_cmb
+    '''
 
     def __init__(self, session):
-        """constructor
-        """
+        '''constructor
+        '''
         BaseTable.__init__(self, 8, 2)
         self._session = session
 
@@ -521,9 +526,9 @@ class Extension(BaseTable):
         
 
     def _setup_ui(self):
-        """add the widgets that will display the information of the 
+        '''add the widgets that will display the information of the 
         extension category and the selected extension and widgets 
-        to display the extensions"""
+        to display the extensions'''
         
         self.add_text(('Categories'),  0, 0, True)
         self.add_text(('Selected'),    0, 1, True)
@@ -548,19 +553,21 @@ class Extension(BaseTable):
         self.categories_cmb.setCurrentIndex(0)
         self._on_category_changed(self.categories_cmb)
         
-        self.categories_cmb.currentIndexChanged.connect(lambda text: self._on_category_changed(self.categories_cmb))
-        self.extensions_cmb.currentIndexChanged.connect(lambda text: self._on_extension_changed(self.extensions_cmb))
+        self.categories_cmb.currentIndexChanged.connect(
+                lambda text: self._on_category_changed(self.categories_cmb))
+        self.extensions_cmb.currentIndexChanged.connect(
+                lambda text: self._on_extension_changed(self.extensions_cmb))
         
         
     def _on_redraw_main_screen(self, button):
-        """called when the Redraw main screen button is clicked"""
+        '''called when the Redraw main screen button is clicked'''
         self._session.save_config()
         self._session.signals.login_succeed.emit()
         self._session.signals.contact_list_ready.emit()
 
 
     def _on_category_changed(self, combo):
-        """callback called when the category on the combo changes"""
+        '''callback called when the category on the combo changes'''
         self.extensions_cmb.model().clear()
         self.extension_list = []
         category = str(combo.currentText())
@@ -583,7 +590,7 @@ class Extension(BaseTable):
         
 
     def _on_extension_changed(self, combo):
-        """callback called when the extension on the combo changes"""
+        '''callback called when the extension on the combo changes'''
         category = str(self.categories_cmb.currentText())
         extension_index = self.extensions_cmb.currentIndex()
 
@@ -615,7 +622,7 @@ class Extension(BaseTable):
 
     
     def _set_extension_info(self, ext):
-        """fill the information about the ext"""
+        '''fill the information about the ext'''
         name        = self.get_attr_or_default(ext, 'NAME', '?')
         description = self.get_attr_or_default(ext, 'DESCRIPTION', '?')
         author      = self.get_attr_or_default(ext, 'AUTHOR', '?')
@@ -629,18 +636,19 @@ class Extension(BaseTable):
 
     def _get_categories(self):
         ''' get available categories'''
-        categories = [ctg for ctg in extension.get_categories().keys() if len(extension.get_extensions(ctg)) > 1]
+        categories = [ctg for ctg in extension.get_categories().keys() \
+                      if len(extension.get_extensions(ctg)) > 1]
         categories.sort()
         return categories
         
         
         
 class MSNPapylib(BaseTable):
-    """ This panel contains some msn-papylib specific settings """
+    ''' This panel contains some msn-papylib specific settings '''
 
     def __init__(self, session):
-        """constructor
-        """
+        '''constructor
+        '''
         BaseTable.__init__(self, 8, 2)
         self.session = session
 

@@ -40,6 +40,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         pass
         
     def iconify(self):
+        '''Iconifies the window'''
         self.setWindowState(Qt.WindowMinimized)
         
     def present(self): # emesene's

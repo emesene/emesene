@@ -210,7 +210,6 @@ class AvatarChooser(Dialog.OkCancelDialog):
             print 'fn[%s]' % filename
             if os.path.exists(filename):
                 self._avatar_manager.set_as_avatar(filename)
-                pass
             else:
                 print "Error"
         Dialog.OkCancelDialog._on_accept(self)

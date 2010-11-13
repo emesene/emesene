@@ -29,7 +29,7 @@ class ImageAreaSelector (QtGui.QWidget):
         self._pixmap = pixmap
         
         self._selection_rect = QRect() 
-        self._image_origin= QPoint()
+        self._image_origin = QPoint()
         self._resize_start = None
         self._drag_start = None
         self._handle_size = QSize(-10, -10)

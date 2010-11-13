@@ -81,7 +81,8 @@ class ContactListModel (QtGui.QStandardItemModel):
             self._set_contact_info(new_contact_item, contact)
             group_item.appendRow(new_contact_item)
         
-        if self._config.b_order_by_group and contact.status == e3.status.OFFLINE:
+        if self._config.b_order_by_group and \
+                                        contact.status == e3.status.OFFLINE:
             group_item = self._search_item(self.OFF_GRP_UID, self)
             new_contact_item = QtGui.QStandardItem(contact.display_name)
             new_contact_item.setData(contact.identifier+'FLN', Role.UidRole)
@@ -113,21 +114,25 @@ class ContactListModel (QtGui.QStandardItemModel):
                     
             old_status = contact_item.data(Role.StatusRole)
             new_status = contact.status
+            off_status = e3.status.OFFLINE
             
             self._set_contact_info(contact_item, contact)
             
-            if old_status == e3.status.OFFLINE:
-                contact_item = self._search_item(contact.identifier+'FLN', self._off_grp)
+            if old_status == off_status:
+                contact_item = self._search_item(contact.identifier + 'FLN',
+                                                 self._off_grp)
                 self._set_contact_info(contact_item, contact)
             
-            if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLINE:
+            if old_status == off_status and new_status != off_status:
                 # If this block is executed then for sure the previous one has
                 # been executed too. So contact_item is the offline one
                 self._off_grp.removeRow(contact_item.index().row())
                    
-            if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLINE:
+            if old_status != off_status and new_status == off_status:
                 contact_item = contact_item.clone()
-                contact_item.setData(str(contact_item.data(Role.UidRole).toPyObject())+'FLN', Role.UidRole)
+                contact_item.setData(str(
+                        contact_item.data(Role.UidRole).toPyObject()) + 'FLN', 
+                        Role.UidRole)
                 self._off_grp.appendRow(contact_item)
                 
                 
@@ -145,7 +150,8 @@ class ContactListModel (QtGui.QStandardItemModel):
                     self._off_grp.appendRow(contact_item)
             
             else:
-                contact_item = self._search_item(contact.identifier, self._off_grp)
+                contact_item = self._search_item(contact.identifier, 
+                                                 self._off_grp)
                 
                 if not contact_item:
                     print '***** NOT FOUND: %s' % (contact)
@@ -162,10 +168,10 @@ class ContactListModel (QtGui.QStandardItemModel):
                 
                 
             
-#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLINE:
+#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLIN:
 #            group_item.removeRow(contact_item.index().row())
 #               
-#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLINE:
+#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLIN:
 #            group_item = self._search_item(self._offline_group_uid, self)
 #            contact_item = contact_item.clone()
 #            contact_item.setData(contact_item.data(Role.UidRole)+'FLN')
@@ -184,14 +190,14 @@ class ContactListModel (QtGui.QStandardItemModel):
 #        
 #        self._set_contact_info(contact_item, contact)
 #    
-#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLINE:
+#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLIN:
 #            group_item = self._search_item(self._offline_group_uid, self)
 #            group_item.takeRow(contact_item.index().row())
 #            if not self._order_by_group:
 #                group_item = self._search_item(self._online_group_uid, self)
 #                group_item.appendRow(contact_item)
 #               
-#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLINE:
+#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLIN:
 #            if not self._order_by_group:
 #                group_item = self._search_item(self._online_group_uid, self)
 #                group_item.takeRow(contact_item.index().row())
@@ -219,6 +225,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         #self.sort(0)
         
     def _set_filter_role(self, index):
+        '''Sets the filter role data filed on the given element'''
         filter_role = True
         if not index.parent().isValid():
             # 1) Special Groups:
@@ -241,11 +248,11 @@ class ContactListModel (QtGui.QStandardItemModel):
             if status == e3.status.OFFLINE and parent_uid != self.OFF_GRP_UID \
                 and not self._show_offline:
                 filter_role = False
-        print '> Setting FR for %s to %s' % (self.data(index, Role.DisplayRole).toString(), filter_role)
         self.dataChanged.emit(index, index)
         self.setData(index, filter_role, Role.FilterRole)
         
     def refilter(self):
+        '''Recalculates filtering for each element in the model'''
         for i in range(self.rowCount()):
             group_index = self.index(i, 0)
             for j in range(self.rowCount(group_index)):
@@ -254,6 +261,7 @@ class ContactListModel (QtGui.QStandardItemModel):
             self._set_filter_role(group_index)
             
     def _is_group_empty(self, index):
+        '''Checks if a group has no visible child'''
         if index.parent().isValid():
             raise ValueError('Not a group')
         visible_contacts = 0
@@ -277,10 +285,12 @@ class ContactListModel (QtGui.QStandardItemModel):
 
     
     def clear(self):
+        '''Clears the model'''
         QtGui.QStandardItemModel.clear(self)
         self._no_grp  = self._search_item(self.NO_GRP_UID, self)
         self._onl_grp = self._search_item(self.ONL_GRP_UID, self)
         self._off_grp  = self._search_item(self.OFF_GRP_UID, self)
+        
         
     def _search_item(self,  uid,  parent):
         # TODO: refactor
@@ -336,7 +346,7 @@ class ContactListModel (QtGui.QStandardItemModel):
 
 
 
-class Role:
+class Role (object):
     '''A Class representing various custom Qt User Roles'''
     def __init__(self):
         '''Constructor'''

@@ -4,14 +4,10 @@
 
 
 from PyQt4  import QtGui
-from PyQt4  import QtCore
 from PyQt4.QtCore  import Qt
 
 import gui
 import extension
-
-from gui.qt4ui import widgets
-
 
 
 class Dialog(object):
@@ -21,44 +17,6 @@ class Dialog(object):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
 
-
-#    @classmethod
-#    def new_window(cls, title, response_cb=None, *args):
-#        '''build a window with the default values and connect the common
-#        signals, return the window'''
-#
-#        window = QtGui.QDialog()
-#        window.set_title(title)
-#        window.set_role("dialog")
-#        window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
-#        window.set_default_size(150, 100)
-#        window.set_position(gtk.WIN_POS_CENTER)
-#        window.set_border_width(8)
-#        window.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
-#
-#        vbox = gtk.VBox(spacing=4)
-#        hbox = gtk.HBox(spacing=4)
-#        bbox = gtk.HButtonBox()
-#        bbox.set_spacing(4)
-#        bbox.set_layout(gtk.BUTTONBOX_END)
-#
-#        vbox.pack_start(hbox, True, True)
-#        vbox.pack_start(bbox, False)
-#
-#        window.add(vbox)
-#
-#        setattr(window, 'vbox', vbox)
-#        setattr(window, 'hbox', hbox)
-#        setattr(window, 'bbox', bbox)
-#
-#        args = list(args)
-#        args.insert(0, stock.CLOSE)
-#        window.connect('delete-event', cls.close_cb, window,
-#            response_cb, *args)
-#
-#        vbox.show_all()
-#
-#        return window
 
     @classmethod
     def add_contact(cls, groups, group_selected, response_cb,
@@ -151,6 +109,7 @@ class Dialog(object):
         
     @classmethod
     def crop_image(cls, response_cb, filename, title='Select image area'):
+        '''Shows a dialog to select a portion of an image.'''
         dialog = OkCancelDialog(expanding=True)
         
         # Actions
@@ -243,15 +202,17 @@ class Dialog(object):
         proxy -- a e3.Proxy object
         """
         def on_session_changed(*args):
+            '''Callback called when the session type in the combo is
+            called'''
             service = str(session_cmb.currentText())
             session_id, ext = name_to_ext[service]
             server_host_edit.setText(ext.SERVICES[service]['host'])
             server_port_edit.setText(ext.SERVICES[service]['port'])
             
         def on_use_auth_toggled(is_enabled, is_checked):
-            '''called when a check button is toggled, receive a set
-            of entries, enable or disable them deppending on the state
-            of the check button'''
+            '''called when the auth check button is toggled, receive a set
+            of entries, enable or disable auth related widgets deppending 
+            on the state of the check button'''
             auth_settings = (user_lbl, user_edit, pwd_lbl, pwd_edit)
             state = (is_enabled and is_checked)
             for widget in auth_settings:
@@ -259,6 +220,8 @@ class Dialog(object):
                 
                 
         def on_use_proxy_toggled(is_checked, *args):
+            '''Callback invoked when the 'use proxy' checkbox is toggled.
+            enables or disables widgets to insert proxy settings accordingly'''
             proxy_settings = (host_lbl, proxy_host_edit, port_lbl, 
                               proxy_port_edit, auth_chk)
             print 'upt'
@@ -283,8 +246,9 @@ class Dialog(object):
                 service = str(session_cmb.currentText())
                 session_id, ext = name_to_ext[service]
                 print session_id
-                callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
-                        user, passwd, session_id, service, server_host, server_port)
+                callback(use_http, use_proxy, proxy_host, proxy_port, 
+                         use_auth, user, passwd, session_id, service, 
+                         server_host, server_port)
             dialog.hide()
                     
 

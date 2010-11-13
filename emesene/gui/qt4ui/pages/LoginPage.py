@@ -78,7 +78,8 @@ class LoginPage(QtGui.QWidget):
         self._config.get_or_set('d_status', {})
         self._config.get_or_set('service', service)
         # obtaining host and port info for each service
-        for ext_id, ext_class in extension.get_extensions('session').iteritems():
+        for ext_id, ext_class in extension.get_extensions('session').\
+                                 iteritems():
             for service_name, service_data in ext_class.SERVICES.iteritems():
                 self._service2data[service_name] = service_data
                 self._service2id[service_name] = ext_id
@@ -135,21 +136,21 @@ class LoginPage(QtGui.QWidget):
                                   self._account_list.index(account) )
 
         widget_dict['account_combo'].currentIndexChanged.connect(
-                                        self._on_chosen_account_changed)
+                                    self._on_chosen_account_changed)
         widget_dict['account_combo'].editTextChanged.connect(
-                                        self._on_account_combo_text_changed)
+                                    self._on_account_combo_text_changed)
         widget_dict['password_edit'].textChanged.connect(
-                                        self._on_checkbox_state_refresh)
+                                    self._on_checkbox_state_refresh)
         widget_dict['save_account_chk'].stateChanged.connect(
-                                        self._on_checkbox_state_refresh)
+                                    self._on_checkbox_state_refresh)
         widget_dict['save_password_chk'].stateChanged.connect(
-                                        self._on_checkbox_state_refresh) 
+                                    self._on_checkbox_state_refresh) 
         widget_dict['auto_login_chk'].stateChanged.connect(
-                                        self._on_checkbox_state_refresh)
+                                    self._on_checkbox_state_refresh)
         widget_dict['advanced_btn'].clicked.connect(
-                                        self._on_connection_preferences_clicked)
+                                    self._on_connection_preferences_clicked)
         widget_dict['login_btn'].clicked.connect(
-                                        self._on_start_login)
+                                    self._on_start_login)
                                         
         self.installEventFilter(self)
 
@@ -161,7 +162,8 @@ class LoginPage(QtGui.QWidget):
         # TODO: Investigate completion
         widget_dict['password_edit'].setEchoMode(QtGui.QLineEdit.Password)
         widget_dict['advanced_btn'].setAutoRaise(True)
-        widget_dict['advanced_btn'].setIcon(QtGui.QIcon.fromTheme('preferences-other'))
+        widget_dict['advanced_btn'].setIcon(
+                                    tGui.QIcon.fromTheme('preferences-other'))
         login_btn = widget_dict['login_btn']
         login_btn.setAutoDefault(True)
         login_btn.setEnabled(False)
@@ -262,12 +264,15 @@ class LoginPage(QtGui.QWidget):
         self._on_checkbox_state_refresh()
         
     def _on_connection_preferences_clicked(self):
+        '''Callback invoked when the user clicks the connection preferences
+        button'''
         def new_preferences_cb(use_http, use_proxy, proxy_host, proxy_port,
-            use_auth, user, passwd, session_id, service, server_host, server_port):
-            '''
-            called when the user press accept on the preferences dialog
-            '''
-            self._proxy = e3.Proxy(use_proxy, proxy_host, proxy_port, use_auth, user, passwd)
+                               use_auth, user, passwd, session_id, service, 
+                               server_host, server_port):
+            '''called when the user press accept on the preferences dialog'''
+            
+            self._proxy = e3.Proxy(use_proxy, proxy_host,
+                                   proxy_port, use_auth, user, passwd)
             self._host = server_host
             self._port = server_port
             account = str(self._widget_d['account_combo'].currentText())

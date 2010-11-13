@@ -26,12 +26,10 @@ class PictureHandler (base.PictureHandler):
             return
         
         file_format = QtGui.QImageReader(source_filename).format()
-        if (file_format == 'gif' or 
-            file_format == 'pbm' or 
-            file_format == 'pgm'):
-                self._is_animated = True
+        if file_format in ['gif', 'pbm', 'pgm']:
+            self._is_animated = True
         else:
-                self._qimage = QtGui.QImage(source_filename)
+            self._qimage = QtGui.QImage(source_filename)
         
     
     

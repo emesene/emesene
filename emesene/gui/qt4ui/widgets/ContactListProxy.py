@@ -12,18 +12,19 @@ from gui.qt4ui  import Utils
 from gui.qt4ui.widgets.ContactListModel import ContactListModel
 from gui.qt4ui.widgets.ContactListModel import Role
 
-class ContactListProxy435 (QtGui.QSortFilterProxyModel):
-    def __init__(self, config, parent=None):
-        QtGui.QSortFilterProxyModel.__init__(self, parent)
-        
-        self.setSortRole(Role.SortRole)
-        self.setDynamicSortFilter(True)
-        
-    def filterAcceptsRow(self, row, parent_idx):
-        model = self.sourceModel()
-        index = model.index(row, 0, parent_idx)
-        print 'FR: %s[%s]' % (self.data(index, Role.FilterRole).toPyObject(), index.isValid())
-        return self.data(index, Role.FilterRole).toPyObject()
+#class ContactListProxy435 (QtGui.QSortFilterProxyModel):
+#    def __init__(self, config, parent=None):
+#        QtGui.QSortFilterProxyModel.__init__(self, parent)
+#        
+#        self.setSortRole(Role.SortRole)
+#        self.setDynamicSortFilter(True)
+#        
+#    def filterAcceptsRow(self, row, parent_idx):
+#        model = self.sourceModel()
+#        index = model.index(row, 0, parent_idx)
+#        print 'FR: %s[%s]' % (self.data(index, Role.FilterRole).toPyObject(), 
+#                              index.isValid())
+#        return self.data(index, Role.FilterRole).toPyObject()
             
     
 
@@ -35,7 +36,9 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
     
     def __init__(self, config, parent=None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
-        QtGui.QSortFilterProxyModel.setSourceModel(self, InternalContactListProxy(config, self))
+        QtGui.QSortFilterProxyModel.setSourceModel(self, 
+                                            InternalContactListProxy(config, 
+                                                                     self  ))
         
         self.setSortRole(Role.SortRole)
         self.setDynamicSortFilter(True)
@@ -58,10 +61,11 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
         # Filtering groups:
         if not index.parent().isValid():
             uid = model.data(index, Role.UidRole).toPyObject()
-            if uid == ContactListModel.ONL_GRP_UID and self._config.b_order_by_group:
-                print '*** Group %s filtered because of _order_by_group=%s' % (
-                        model.data(index, Role.DisplayRole).toString(), self._config.b_order_by_group)
-                return False
+            if self._config.b_order_by_group and \
+                uid == ContactListModel.ONL_GRP_UID :
+                    print '*** Group %s filtered because of _order_by_group=%s' % (
+                            model.data(index, Role.DisplayRole).toString(), self._config.b_order_by_group)
+                    return False
             if not self._config.b_group_offline and \
                uid == ContactListModel.OFF_GRP_UID:
                    print '*** Group %s filtered because of _group_offline=%s' % (
