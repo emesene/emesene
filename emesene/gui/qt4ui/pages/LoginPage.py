@@ -29,7 +29,6 @@ class LoginPage(QtGui.QWidget):
                  parent=None):
         '''Constructor'''
         # pylint: disable=R0913
-        # TODO: honour autologin stuff
         # instance variables:
         QtGui.QWidget.__init__(self, parent)
 
@@ -54,13 +53,16 @@ class LoginPage(QtGui.QWidget):
         self._setup_config()
         self._setup_accounts()
         self._setup_ui()
+        self._on_chosen_account_changed(0)
         
         # selects the default account if any:
         account_combo = self._widget_d['account_combo']
         if self._config.last_logged_account != '':
             account_combo.setCurrentIndex(account_combo.findData(0))
-        # I don't know why this doesn't get called automatically:
-        self._on_chosen_account_changed(0)   
+            self._on_chosen_account_changed(0)
+            if not cancel_clicked and not no_autologin and \
+                    config.d_remembers[config.last_logged_account] == 3:
+                self._on_start_login()
             
         # TODO: this way, if there are remembered accounts, but no default 
         #account, no display pic is shown....
@@ -163,7 +165,7 @@ class LoginPage(QtGui.QWidget):
         widget_dict['password_edit'].setEchoMode(QtGui.QLineEdit.Password)
         widget_dict['advanced_btn'].setAutoRaise(True)
         widget_dict['advanced_btn'].setIcon(
-                                    tGui.QIcon.fromTheme('preferences-other'))
+                                    QtGui.QIcon.fromTheme('preferences-other'))
         login_btn = widget_dict['login_btn']
         login_btn.setAutoDefault(True)
         login_btn.setEnabled(False)
