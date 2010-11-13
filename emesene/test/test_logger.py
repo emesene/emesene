@@ -7,8 +7,6 @@ logger = e3.Logger.LoggerProcess("test")
 logger.start()
 full_path = os.path.join("test", "base.db")
 
-if os.path.exists(full_path):
-        os.remove(full_path)
 
 class LoggerTestCase(unittest.TestCase):
 
@@ -18,3 +16,6 @@ class LoggerTestCase(unittest.TestCase):
     def __del__(self):
         logger.quit()
         logger.join()
+
+        if os.path.exists(full_path):
+                os.remove(full_path)
