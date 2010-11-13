@@ -169,6 +169,7 @@ class OutputText(gtk.ScrolledWindow):
         '''add a message to the widget'''
         if type_ is e3.Message.TYPE_NUDGE:
             text = _('You just sent a nudge!')
+
         msg = gui.Message.from_contact(contact, text, is_first, False)
         self.view.add_message(msg, style, cedict, cedir)
 

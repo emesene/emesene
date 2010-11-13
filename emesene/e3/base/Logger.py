@@ -249,23 +249,23 @@ class Logger(object):
     '''
 
     SELECT_CHATS = '''
-        SELECT f.status, f.tmstp, f.payload, i.nick
-        FROM fact_event f, d_info i
+        SELECT f.status, f.tmstp, f.payload, i.nick, a.account
+        FROM fact_event f, d_info i, d_account a
         WHERE f.id_event=? and
             ((f.id_src_acc=? and id_dest_acc=?) or
             (f.id_dest_acc=? and id_src_acc=?)) and
-            f.id_src_info = i.id_info
+            f.id_src_info = i.id_info and f.id_src_acc = a.id_account
         ORDER BY tmstp LIMIT ?;
     '''
 
     SELECT_CHATS_BETWEEN = '''
-        SELECT f.status, f.tmstp, f.payload, i.nick
-        FROM fact_event f, d_info i
+        SELECT f.status, f.tmstp, f.payload, i.nick, a.account
+        FROM fact_event f, d_info i, d_account a
         WHERE f.id_event=? and
             ((f.id_src_acc=? and id_dest_acc=?) or
             (f.id_dest_acc=? and id_src_acc=?)) and
             f.id_src_info = i.id_info and
-            f.tmstp >= ? and f.tmstp <= ?
+            f.tmstp >= ? and f.tmstp <= ? and f.id_src_acc = a.id_account
         ORDER BY tmstp LIMIT ?;
     '''
 
@@ -849,7 +849,7 @@ def save_logs_as_txt(results, path):
     '''
     handle = file(path, 'w')
 
-    for (stat, timestamp, message, nick) in results:
+    for (stat, timestamp, message, nick, account) in results:
         date_text = time.strftime('[%c]', time.gmtime(timestamp))
         tokens = message.split('\r\n', 3)
         type_ = tokens[0]

@@ -5,6 +5,12 @@ import MessageFormatter
 
 def add_style_to_message(text, stl, escape=True):
     '''add the style in a xhtml like syntax to text'''
+    if escape:
+        text = MessageFormatter.escape(text)
+
+    if stl is None:
+        return text
+
     style_start = ''
     style_end = ''
     style = 'color: #' + stl.color.to_hex() + ';'
@@ -31,8 +37,6 @@ def add_style_to_message(text, stl, escape=True):
     style_start += '<span style="%s; ">' % (style, )
     style_end = '</span>' + style_end
 
-    if escape:
-        text = MessageFormatter.escape(text)
 
     return style_start + text + style_end
 
