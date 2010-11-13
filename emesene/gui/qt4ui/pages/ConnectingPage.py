@@ -2,6 +2,8 @@
 
 ''' This module contains classes to represent the login page '''
 
+import os
+
 from PyQt4          import QtGui
 from PyQt4          import QtCore
 from PyQt4.QtCore   import Qt
@@ -40,8 +42,14 @@ class ConnectingPage(QtGui.QWidget):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
+        # FIXME: ok, this should be substituted with the picture handler
+        # too lazy to do it now -.-'
+        if not os.path.exists(self._avatar_path):
+            self._avatar_path = gui.theme.logo
         avatar_cls = extension.get_default('avatar')
-        widget_d['display_pic']  = avatar_cls(default_pic=gui.theme.logo,
+        # _avatar_path is passed as a default pic to avoid dpic's 
+        # flickering
+        widget_d['display_pic']  = avatar_cls(default_pic=self._avatar_path,
                                              clickable=False)
         widget_d['label']        = QtGui.QLabel()
         widget_d['progress_bar'] = QtGui.QProgressBar()
@@ -67,7 +75,6 @@ class ConnectingPage(QtGui.QWidget):
         hor_lay.addStretch()
         self.setLayout(hor_lay)
         
-        widget_d['display_pic' ].set_display_pic_from_file(self._avatar_path)
         widget_d['progress_bar'].setMinimum(0)
         widget_d['progress_bar'].setMaximum(0)
         widget_d['progress_bar'].setMinimumWidth(220)
