@@ -269,15 +269,16 @@ class Logger(object):
         ORDER BY tmstp LIMIT ?;
     '''
 
-    def __init__(self, path):
+    def __init__(self, path, db_name="base.db"):
         '''constructor'''
         self.path = path
+        self.db_name = db_name
 
         self.events = {}
         self.groups = {}
         self.accounts = {}
 
-        full_path = os.path.join(path, "base.db")
+        full_path = os.path.join(path, db_name)
         self.connection = sqlite.connect(full_path)
         self.cursor = self.connection.cursor()
 
@@ -703,12 +704,13 @@ class Logger(object):
 class LoggerProcess(threading.Thread):
     '''a process that exposes a thread safe api to log events of a session'''
 
-    def __init__(self, path):
+    def __init__(self, path, db_name="base.db"):
         '''constructor'''
         threading.Thread.__init__(self)
         self.setDaemon(True)
 
         self.path = path
+        self.db_name = db_name
         self.logger = None
         self.input = Queue.Queue()
         self.output = Queue.Queue()
@@ -718,7 +720,7 @@ class LoggerProcess(threading.Thread):
     def run(self):
         '''main method'''
         data = None
-        self.logger = Logger(self.path)
+        self.logger = Logger(self.path, self.db_name)
 
         self.actions['get_event'] = self.logger.get_event
         self.actions['get_nicks'] = self.logger.get_nicks
