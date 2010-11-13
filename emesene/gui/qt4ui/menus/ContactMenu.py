@@ -2,8 +2,9 @@
 
 '''This module contains menu widgets' classes'''
 
-
 import PyQt4.QtGui      as QtGui
+
+import gui
 
 ICON = QtGui.QIcon.fromTheme
 
@@ -23,10 +24,11 @@ class ContactMenu(QtGui.QMenu):
         QtGui.QMenu.__init__(self, 'Contact', parent)
         self._handler = handler
 
-        self.add =       QtGui.QAction(ICON('list-add'),    'Add',      self)
-        self.remove =    QtGui.QAction(ICON('list-remove'), 'Remove',   self)
-        self.block =     QtGui.QAction('Block',         self)
-        self.unblock =   QtGui.QAction('Unblock',       self)
+        self.add =       QtGui.QAction(ICON('list-add'),       'Add',     self)
+        self.remove =    QtGui.QAction(ICON('list-remove'),    'Remove',  self)
+        self.block =     QtGui.QAction(ICON('dialog-cancel'),  'Block',   self)
+        self.unblock =   QtGui.QAction(ICON('dialog-ok-apply'), 
+                                       'Unblock', self)
         self.set_alias = QtGui.QAction('Set alias...',  self)
         self.view_info = QtGui.QAction('View info...',  self)
         
@@ -36,6 +38,8 @@ class ContactMenu(QtGui.QMenu):
         self.addAction(self.unblock)
         self.addAction(self.set_alias)
         self.addAction(self.view_info)
+        
+        self.setIcon(QtGui.QIcon(gui.theme.user))
         
         self.add.triggered.connect(
             lambda *args: self._handler.on_add_contact_selected())

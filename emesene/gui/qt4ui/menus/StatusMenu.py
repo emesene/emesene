@@ -29,7 +29,7 @@ class StatusMenu (QtGui.QMenu):
         for stat in e3.status.ORDERED:
             temp_item = QtGui.QAction(
                     QtGui.QIcon(QtGui.QPixmap(gui.theme.status_icons[stat])),
-                    e3.status.STATUS[stat],
+                    e3.status.STATUS[stat].capitalize(),
                     self)
             temp_item.triggered.connect(self._on_activate)
             self._status_actions[stat] = temp_item

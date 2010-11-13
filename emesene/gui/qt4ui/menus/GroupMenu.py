@@ -4,6 +4,8 @@
 
 import PyQt4.QtGui      as QtGui
 
+import gui
+
 ICON = QtGui.QIcon.fromTheme
 
 class GroupMenu(QtGui.QMenu):
@@ -22,15 +24,16 @@ class GroupMenu(QtGui.QMenu):
         QtGui.QMenu.__init__(self, 'Group', parent)
         self._handler = handler
 
-        self.add    = QtGui.QAction(ICON('list-add'),    'Add',    self)
-        self.remove = QtGui.QAction(ICON('list-remove'), 'Remove', self)
-        self.rename = QtGui.QAction(                     'Rename', self)
+        self.add    = QtGui.QAction(ICON('list-add'),      'Add',    self)
+        self.remove = QtGui.QAction(ICON('list-remove'),   'Remove', self)
+        self.rename = QtGui.QAction(ICON('document-edit'), 'Rename', self)
         
         self.addAction(self.add)
         self.addAction(self.remove)
         self.addAction(self.rename)
-
         
+        self.setIcon(QtGui.QIcon(gui.theme.users))
+
         self.add.triggered.connect(
             lambda *args: self._handler.on_add_group_selected())
         self.remove.triggered.connect(

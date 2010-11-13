@@ -28,7 +28,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         self._content = None
 
         self.setObjectName('mainwindow')
-        #self.setWindowIcon(KdeGui.KIcon('im-user'))
+        self.setWindowIcon(QtGui.QIcon(gui.theme.logo))
         self._page_stack = QtGui.QStackedWidget()
         self.setCentralWidget(self._page_stack)
         

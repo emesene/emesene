@@ -5,6 +5,7 @@
 
 import PyQt4.QtGui      as QtGui
 
+ICON = QtGui.QIcon.fromTheme
 
 class ProfileMenu(QtGui.QMenu):
     '''A class that represents a menu to handle contact related information'''
@@ -24,6 +25,8 @@ class ProfileMenu(QtGui.QMenu):
 
         self.change_profile = QtGui.QAction('Change profile', self)
         self.addAction(self.change_profile)
+        
+        self.setIcon(ICON('document-properties'))
         
         self.change_profile.triggered.connect(
             lambda *args: self._handler.change_profile())
