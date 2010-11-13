@@ -254,14 +254,12 @@ class ChatWidget(gtk.VBox):
 
         self.from_calendar = gtk.Calendar()
         from_year, from_month, from_day = self.from_calendar.get_date()
+        from_datetime = datetime.date(from_year, from_month,
+                from_day) - datetime.timedelta(30)
 
-        if from_month == 0:
-            from_month = 11
-            from_year -= 1
-        else:
-            from_month -= 1
+        from_t = from_datetime.timetuple()
 
-        self.from_calendar.select_month(from_month, from_year)
+        self.from_calendar.select_month(from_t.tm_mon, from_year)
         self.to_calendar = gtk.Calendar()
 
         save.connect('clicked', self._on_save_clicked)
@@ -343,9 +341,6 @@ class ChatWidget(gtk.VBox):
         '''called when the chat history is ready'''
         if not results:
             return
-
-        import pprint
-        pprint.pprint(results)
 
         for stat, timestamp, msg_text, nick, account in results:
             date_text = time.strftime('[%c]', time.gmtime(timestamp))
