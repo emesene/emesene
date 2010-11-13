@@ -320,16 +320,16 @@ class Worker(e3.base.Worker, papyon.Client):
             pass
         else:
             sender = tr.sender
+            fname = tr.filename
             # TODO: save somewhere else the data!
             handle, path = tempfile.mkstemp(suffix=".temp", prefix='emesenefile')
-            os.close(handle)
             try:
                 f = open(path, 'wb')
-                f.write(data)
+                f.write(data.getvalue())
                 f.close()
             except Exception as e:
                 print e
-
+            os.close(handle)
         #del self.rfiletransfers[tr]
 
         self.session.add_event(Event.EVENT_FILETRANSFER_COMPLETED, tr)
