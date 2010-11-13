@@ -17,7 +17,7 @@ dic_inv = {
     '&apos;'    :'\''
 }
 
-URL_REGEX_STR = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+URL_REGEX_STR = '(http[s]?://|www.)(?:[a-zA-Z]|[0-9]|[$\-_@.&+#/]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 URL_REGEX = re.compile(URL_REGEX_STR)
 
 def escape(string_):
@@ -132,8 +132,10 @@ def get_custom_emotes(message, cedict={}):
 
 def replace_urls(match):
     '''function to be called on each url match'''
-    url = match.group()
-    return '<a href="%s">%s</a>' % (url, url)
+    hurl = url = match.group()
+    if url[:4] == 'www.':
+        hurl = 'http://' + url
+    return '<a href="%s">%s</a>' % (hurl, url)
 
 def urlify(strng):
     '''replace urls by an html link'''
