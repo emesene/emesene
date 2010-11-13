@@ -62,8 +62,14 @@ class TopLevelWindow (QtGui.QMainWindow):
         return size.width(), size.height(), position.x(), position.y()
 
     def go_connect(self, on_cancel_login, avatar_path, config):
-        '''does nothing'''
+        '''Adds a 'connecting' page to the top level window and shows it'''
         print "GO CONNECT! ^_^"
+        connecting_window_cls = extension.get_default('connecting window')
+        connecting_page = connecting_window_cls(on_cancel_login, 
+                                                avatar_path, config)
+        self._content_type = 'connecting'
+        self._switch_to_page(connecting_page)
+        self.menuBar().hide()
         
     def go_conversation(self, session):
         '''Adds a conversation page to the top level window and shows it'''
@@ -73,7 +79,6 @@ class TopLevelWindow (QtGui.QMainWindow):
                             on_last_close=self._on_last_tab_close, parent=self)
         self._content_type = 'conversation'
         self._switch_to_page(conversation_page)
-        self._content = conversation_page
         self.menuBar().hide()
 
     # TODO: don't reinstantiate existing pages, or don't preserve old pages.
@@ -89,7 +94,8 @@ class TopLevelWindow (QtGui.QMainWindow):
                                       config_dir, config_path, proxy,use_http, 
                                       session_id, cancel_clicked, no_autologin)
         self._content_type = 'login'
-        self._switch_to_page(login_page)
+        if not login_page.autologin_started:
+            self._switch_to_page(login_page)
         self.menuBar().hide()
 
     def go_main(self, session, on_new_conversation,
@@ -98,16 +104,12 @@ class TopLevelWindow (QtGui.QMainWindow):
         level window and shows it'''
         print "GO MAIN! ^_^"
         main_window_cls = extension.get_default('main window')
-        print main_window_cls
         main_page = main_window_cls(session, on_new_conversation, on_close, 
                                     on_disconnect, self.setMenuBar)
-        print main_page
         self._content_type = 'main'
-        print self._content_type
         self._switch_to_page(main_page)
         self._setup_main_menu(session, main_page.contact_list, 
                               on_close, on_disconnect)
-        print '***'
         
     
     def _get_content(self):

@@ -48,6 +48,7 @@ class LoginPage(QtGui.QWidget):
         self._service2id   = {}
         self._host = None
         self._port = None
+        self.autologin_started = False
 
         # setup code:
         self._setup_config()
@@ -62,6 +63,7 @@ class LoginPage(QtGui.QWidget):
             self._on_chosen_account_changed(0)
             if not cancel_clicked and not no_autologin and \
                     config.d_remembers[config.last_logged_account] == 3:
+                self.autologin_started = True
                 self._on_start_login()
             
         # TODO: this way, if there are remembered accounts, but no default 
@@ -89,39 +91,40 @@ class LoginPage(QtGui.QWidget):
         
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
-        widget_dict = self._widget_d
+        widget_d = self._widget_d
         avatar_cls          = extension.get_default('avatar')
         status_combo_cls    = extension.get_default('status combo') 
-        widget_dict['display_pic'] = avatar_cls(default_pic=gui.theme.logo,
+        widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.logo,
                                                 clickable=False)
-        widget_dict['account_combo'] = QtGui.QComboBox()
-        widget_dict['password_edit'] = QtGui.QLineEdit()
-        widget_dict['status_combo']  = status_combo_cls()
-        widget_dict['save_account_chk'] =    \
+        widget_d['account_combo'] = QtGui.QComboBox()
+        widget_d['password_edit'] = QtGui.QLineEdit()
+        widget_d['status_combo']  = status_combo_cls()
+        widget_d['save_account_chk'] =    \
                 QtGui.QCheckBox("Remember this account")
-        widget_dict['save_password_chk'] =   \
+        widget_d['save_password_chk'] =   \
                 QtGui.QCheckBox("Save password")
-        widget_dict['auto_login_chk'] =  \
+        widget_d['auto_login_chk'] =  \
                 QtGui.QCheckBox("Login automagically")
-        widget_dict['advanced_btn']  = QtGui.QToolButton() 
-        widget_dict['login_btn'] = QtGui.QPushButton("Login")
+        widget_d['advanced_btn']  = QtGui.QToolButton() 
+        widget_d['login_btn'] = QtGui.QPushButton("Login")
 
         lay = QtGui.QVBoxLayout()
         lay.addSpacing(40)
-        lay.addWidget(widget_dict['display_pic'], 0, Qt.AlignCenter)
+        lay.addWidget(widget_d['display_pic'], 0, Qt.AlignCenter)
         lay.addSpacing(40)
-        lay.addWidget(widget_dict['account_combo'])
-        lay.addWidget(widget_dict['password_edit'])
-        lay.addWidget(widget_dict['status_combo'])
+        lay.addWidget(widget_d['account_combo'])
+        lay.addWidget(widget_d['password_edit'])
+        lay.addWidget(widget_d['status_combo'])
         lay.addSpacing(20)
-        lay.addWidget(widget_dict['save_account_chk'])
-        lay.addWidget(widget_dict['save_password_chk'])
-        lay.addWidget(widget_dict['auto_login_chk'])
-        lay.addWidget(widget_dict['advanced_btn'], 0, Qt.AlignRight)
+        lay.addWidget(widget_d['save_account_chk'])
+        lay.addWidget(widget_d['save_password_chk'])
+        lay.addWidget(widget_d['auto_login_chk'])
+        lay.addWidget(widget_d['advanced_btn'], 0, Qt.AlignRight)
         lay.addSpacing(35)
-        lay.addWidget(widget_dict['login_btn'], 0, Qt.AlignCenter)
-        lay.addSpacing(45)
         lay.addStretch()
+        lay.addWidget(widget_d['login_btn'], 0, Qt.AlignCenter)
+        lay.addSpacing(45)
+        
 
         hor_lay = QtGui.QHBoxLayout()
         hor_lay.addStretch()
@@ -132,41 +135,41 @@ class LoginPage(QtGui.QWidget):
         self.setLayout(hor_lay)
         
         # insert accounts in the combo box:
-        account_combo = widget_dict['account_combo']
+        account_combo = widget_d['account_combo']
         for account in self._account_list:
             account_combo.addItem(account.email,
                                   self._account_list.index(account) )
 
-        widget_dict['account_combo'].currentIndexChanged.connect(
+        widget_d['account_combo'].currentIndexChanged.connect(
                                     self._on_chosen_account_changed)
-        widget_dict['account_combo'].editTextChanged.connect(
+        widget_d['account_combo'].editTextChanged.connect(
                                     self._on_account_combo_text_changed)
-        widget_dict['password_edit'].textChanged.connect(
+        widget_d['password_edit'].textChanged.connect(
                                     self._on_checkbox_state_refresh)
-        widget_dict['save_account_chk'].stateChanged.connect(
+        widget_d['save_account_chk'].stateChanged.connect(
                                     self._on_checkbox_state_refresh)
-        widget_dict['save_password_chk'].stateChanged.connect(
+        widget_d['save_password_chk'].stateChanged.connect(
                                     self._on_checkbox_state_refresh) 
-        widget_dict['auto_login_chk'].stateChanged.connect(
+        widget_d['auto_login_chk'].stateChanged.connect(
                                     self._on_checkbox_state_refresh)
-        widget_dict['advanced_btn'].clicked.connect(
+        widget_d['advanced_btn'].clicked.connect(
                                     self._on_connection_preferences_clicked)
-        widget_dict['login_btn'].clicked.connect(
+        widget_d['login_btn'].clicked.connect(
                                     self._on_start_login)
                                         
         self.installEventFilter(self)
 
-        account_combo = widget_dict['account_combo']
+        account_combo = widget_d['account_combo']
         account_combo.setMinimumWidth(220)
         account_combo.setEditable(1)
         account_combo.setDuplicatesEnabled(False) #not working... why?
         account_combo.setInsertPolicy(QtGui.QComboBox.NoInsert)
         # TODO: Investigate completion
-        widget_dict['password_edit'].setEchoMode(QtGui.QLineEdit.Password)
-        widget_dict['advanced_btn'].setAutoRaise(True)
-        widget_dict['advanced_btn'].setIcon(
+        widget_d['password_edit'].setEchoMode(QtGui.QLineEdit.Password)
+        widget_d['advanced_btn'].setAutoRaise(True)
+        widget_d['advanced_btn'].setIcon(
                                     QtGui.QIcon.fromTheme('preferences-other'))
-        login_btn = widget_dict['login_btn']
+        login_btn = widget_d['login_btn']
         login_btn.setAutoDefault(True)
         login_btn.setEnabled(False)
         login_btn.setMinimumWidth(110)

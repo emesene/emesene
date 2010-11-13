@@ -93,6 +93,7 @@ def setup():
     extension.category_register('window frame',  TopLevelWindow.TopLevelWindow)
     extension.category_register('tray icon',       TrayIcon.TrayIcon)
 
+    extension.category_register('connecting window',   pages.ConnectingPage)
     extension.category_register('conversation window', pages.ConversationPage)
     extension.category_register('login window',        pages.LoginPage)
     extension.category_register('main window',         pages.MainPage)
