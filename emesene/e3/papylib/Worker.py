@@ -390,6 +390,7 @@ class Worker(e3.base.Worker, papyon.Client):
             msg, account, None, flnmsg.date)
         self.session.add_event(\
             Event.EVENT_CONV_MESSAGE, cid, account, msgobj, {})
+        e3.Logger.log_message(self.session, None, msgobj, False)
 
     def _on_conversation_user_typing(self, papycontact, pyconvevent):
         ''' handle user typing event '''
