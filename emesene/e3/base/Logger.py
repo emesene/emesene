@@ -9,6 +9,8 @@ import status as pstatus
 import logging
 log = logging.getLogger('e3.base.Logger') # oh snap!
 
+import e3
+
 class Account(object):
     '''a class to store account data'''
 
@@ -862,4 +864,53 @@ def save_logs_as_txt(results, handle):
     for stat, timestamp, message, nick, account in results:
         date_text = time.strftime('[%c]', time.gmtime(timestamp))
         handle.write("%s %s: %s\n" % (date_text, nick, message))
+
+def log_message(session, members, message, sent, error=False):
+    '''log a message, session is an e3.Session object, members is a list of
+    members only used if sent is False, sent is True if we sent the message,
+    False if we received the message. error is True if the message send
+    failed'''
+
+    if message.type == e3.Message.TYPE_TYPING:
+        return
+
+    if error:
+        event = 'message-error'
+    else:
+        event = 'message'
+
+    if sent:
+        contact = session.contacts.me
+        status = contact.status
+        src = e3.Logger.Account.from_contact(session.contacts.me)
+
+        if message.type == e3.Message.TYPE_NUDGE:
+            message.body = _("you just sent a nudge!")
+
+        for dst_account in members:
+            dst = session.contacts.get(dst_account)
+
+            if dst is None:
+                dst = e3.Contact(dst_account)
+
+            dest = e3.Logger.Account.from_contact(dst)
+
+            session.logger.log(event, status, message.body, src, dest)
+    else:
+        dest = e3.Logger.Account.from_contact(session.contacts.me)
+        contact = session.contacts.get(message.account)
+
+        if contact is None:
+            src = e3.Contact(message.account)
+            status = e3.status.OFFLINE
+            display_name = message.account
+        else:
+            src = e3.Logger.Account.from_contact(contact)
+            status = contact.status
+            display_name = contact.display_name
+
+        if message.type == e3.Message.TYPE_NUDGE:
+            message.body = _("%s just sent you a nudge!" % display_name)
+
+        session.logger.log(event, status, message.body, src, dest)
 

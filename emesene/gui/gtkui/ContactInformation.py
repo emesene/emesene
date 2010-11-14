@@ -344,36 +344,23 @@ class ChatWidget(gtk.VBox):
 
         for stat, timestamp, msg_text, nick, account in results:
             date_text = time.strftime('[%c]', time.gmtime(timestamp))
-            tokens = msg_text.split('\r\n', 3)
-            type_ = tokens[0]
-
-            if len(tokens) >= 4:
-                msg_body = tokens[3]
-            else:
-                msg_body = ""
 
             contact = e3.Contact(account, nick=nick)
 
-            if type_ == 'text/x-msnmsgr-datacast':
-                text =  _('%s just sent you a nudge!') % (nick,)
-                self.text.information(self.formatter, contact, text)
-                self.first = False
-            elif type_.find('text/plain;') != -1:
-                is_me = self.session.contacts.me.account == account
-                incoming = not is_me
-                datetimestamp = datetime.datetime.fromtimestamp(timestamp)
+            is_me = self.session.contacts.me.account == account
+            incoming = not is_me
+            datetimestamp = datetime.datetime.fromtimestamp(timestamp)
 
-                message = e3.Message(e3.Message.TYPE_MESSAGE, msg_body,
-                        account, timestamp=datetimestamp)
 
-                if is_me:
-                    self.text.send_message(self.formatter, contact,
-                            msg_body, None, None, None, self.first)
-                else:
-                    self.text.receive_message(self.formatter, contact, message,
-                            None, None, self.first)
-
-                self.first = False
+            if is_me:
+                self.text.send_message(self.formatter, contact,
+                        msg_text, None, None, None, self.first)
             else:
-                log.debug(_('unknown message type on ContactInfo'))
+                message = e3.Message(e3.Message.TYPE_MESSAGE, msg_text,
+                            account, timestamp=datetimestamp)
+
+                self.text.receive_message(self.formatter, contact, message,
+                        None, None, self.first)
+
+            self.first = False
 
