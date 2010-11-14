@@ -268,6 +268,10 @@ class Worker(e3.Worker):
         self.session.add_event(e3.Event.EVENT_CONV_MESSAGE,
             cid, account, message)
 
+        e3.Logger.log_message(self.session, [account], message, True)
+        message.account = account
+        e3.Logger.log_message(self.session, None, message, False)
+
     # p2p handlers
 
     def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):

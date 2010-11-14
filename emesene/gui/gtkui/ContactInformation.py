@@ -12,20 +12,18 @@ import extension
 import logging
 log = logging.getLogger('gtkui.ContactInformation')
 
-class ContactInformation(gtk.Window):
+class ContactInformation(gtk.Window, gui.base.ContactInformation):
     '''a window that displays information about a contact'''
 
     def __init__(self, session, account):
         '''constructor'''
+        gui.base.ContactInformation.__init__(self, session, account)
         gtk.Window.__init__(self)
         self.set_default_size(640, 350)
         self.set_title(_('Contact information (%s)') % (account,))
         self.set_role("dialog")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
-
-        self.session = session
-        self.account = account
 
         self.tabs = gtk.Notebook()
 
@@ -34,30 +32,7 @@ class ContactInformation(gtk.Window):
 
         self.add(self.tabs)
 
-        if self.session:
-            self.fill_nicks()
-            self.fill_status()
-            self.fill_messages()
-
-    def fill_nicks(self):
-        '''fill the nick history (clear and refill if called another time)'''
-        self.session.logger.get_nicks(self.account, 1000, self._on_nicks_ready)
-
-    def fill_messages(self):
-        '''fill the messages history (clear and refill if called another time)
-        '''
-        self.session.logger.get_messages(self.account, 1000,
-            self._on_messages_ready)
-
-    def fill_status(self):
-        '''fill the status history (clear and refill if called another time)'''
-        self.session.logger.get_status(self.account, 1000,
-            self._on_status_ready)
-
-    def fill_chats(self):
-        '''fill the chats history (clear and refill if called another time)'''
-        self.session.logger.get_chats(self.account,
-            self.session.account.account, 1000, self.chats._on_chats_ready)
+        self.fill_all()
 
     def _create_tabs(self):
         '''create all the tabs on the window'''
@@ -73,30 +48,18 @@ class ContactInformation(gtk.Window):
         self.tabs.append_page(self.status, gtk.Label(_('Status history')))
         self.tabs.append_page(self.chats, gtk.Label(_('Chat history')))
 
-    def _on_nicks_ready(self, results):
-        '''called when the nick history is ready'''
-        if not results:
-            return
+    def add_nick(self, stat, timestamp, nick):
+        '''add a nick to the list of nicks'''
+        self.nicks.add(stat, timestamp, nick)
 
-        for (stat, timestamp, nick) in results:
-            self.nicks.add(stat, timestamp, nick)
+    def add_message(self, stat, timestamp, message):
+        '''add a message to the list of message'''
+        self.messages.add(stat, timestamp, message)
 
-    def _on_messages_ready(self, results):
-        '''called when the message history is ready'''
-        if not results:
-            return
+    def add_status(self, stat, timestamp, status):
+        '''add a status to the list of status'''
+        self.status.add(stat, timestamp, status)
 
-        for (stat, timestamp, message) in results:
-            self.messages.add(stat, timestamp, message)
-
-    def _on_status_ready(self, results):
-        '''called when the status history is ready'''
-        if not results:
-            return
-
-        for (stat, timestamp, stat_) in results:
-            self.status.add(stat, timestamp, e3.status.STATUS.get(stat,
-                'unknown'))
 
 class InformationWidget(gtk.VBox):
     '''shows information about the contact'''

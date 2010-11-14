@@ -867,7 +867,7 @@ def save_logs_as_txt(results, handle):
 
 def log_message(session, members, message, sent, error=False):
     '''log a message, session is an e3.Session object, members is a list of
-    members only used if sent is False, sent is True if we sent the message,
+    members only used if sent is True, sent is True if we sent the message,
     False if we received the message. error is True if the message send
     failed'''
 
