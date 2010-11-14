@@ -146,13 +146,13 @@ class Conversation(threading.Thread):
                 if contact is None:
                     contact = e3.Contact(message.account)
 
-                src = e3.Logger.Account(contact.attrs.get('CID', None), None,
+                src = e3.Logger.Account(contact.cid, None,
                     contact.account, contact.status, contact.nick,
                     contact.message, contact.picture)
 
                 dst = self.session.contacts.me
 
-                dest = e3.Logger.Account(dst.attrs.get('CID', None), None,
+                dest = e3.Logger.Account(dst.cid, None,
                     dst.account, dst.status, dst.nick, dst.message, dst.picture)
 
                 # we remove the content type part since it's always equal
@@ -333,7 +333,7 @@ class Conversation(threading.Thread):
     def _log_message(self, message, error=False):
             # log the message
             contact = self.session.contacts.me
-            src = e3.Logger.Account(contact.attrs.get('CID', None), None,
+            src = e3.Logger.Account(contact.cid, None,
                 contact.account, contact.status, contact.nick, contact.message,
                 contact.picture)
 
@@ -355,7 +355,7 @@ class Conversation(threading.Thread):
                 if dst is None:
                     dst = e3.Contact(message.account)
 
-                dest = e3.Logger.Account(dst.attrs.get('CID', None), None,
+                dest = e3.Logger.Account(dst.cid, None,
                     dst.account, dst.status, dst.nick, dst.message, dst.picture)
 
                 self.session.logger.log(event, contact.status, msgstr,

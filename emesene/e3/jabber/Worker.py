@@ -102,7 +102,7 @@ class Worker(e3.Worker):
         contact.message = message
         contact.status = stat
 
-        log_account =  e3.Logger.Account(contact.attrs.get('CID', None), None,
+        log_account =  e3.Logger.Account(contact.cid, None,
             contact.account, contact.status, contact.nick, contact.message,
             contact.picture)
 
@@ -224,7 +224,7 @@ class Worker(e3.Worker):
             if account in self.session.contacts.contacts:
                 contact = self.session.contacts.contacts[account]
             else:
-                contact = e3.Contact(account)
+                contact = e3.Contact(account, cid=account)
                 self.session.contacts.contacts[account] = contact
 
             if name is not None:

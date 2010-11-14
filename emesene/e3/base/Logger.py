@@ -40,7 +40,7 @@ class Account(object):
     @classmethod
     def from_contact(cls, contact):
         '''Creates a Account object from a Contact'''
-        return cls(contact.attrs.get('CID', None), None, contact.account,
+        return cls(contact.cid, None, contact.account,
             contact.status, contact.nick, contact.message, contact.picture)
 
 class Group(object):
@@ -53,6 +53,10 @@ class Group(object):
         self.gid = gid
         self.enabled = enabled
         self.accounts = []
+
+    def __str__(self):
+        '''return a string representation of the object'''
+        return "<group '%s'>" % (self.name,)
 
 class Logger(object):
     '''a class to log activity on an IM'''
@@ -373,6 +377,7 @@ class Logger(object):
         if account in self.accounts:
             exists = True
             acc = self.accounts[account]
+
             if acc.equals(acc.id_account, account, nick, message, path) and \
                 acc.id_account:
                 return (acc.id, acc.id_account)
@@ -513,6 +518,7 @@ class Logger(object):
     def execute(self, query, args=()):
         '''execute the query with optional args'''
         #log.debug(query + str(args))
+        #print query, args
         self.cursor.execute(query, args)
 
     # utility methods
@@ -535,6 +541,7 @@ class Logger(object):
 
         self.insert_fact_event(id_time, id_event, id_src_info, id_dest_info,
             id_src_acc, id_dest_acc, status, payload, timestamp)
+        self._stat()
 
     def close(self):
         '''call this method when you are closing the app'''
@@ -590,9 +597,6 @@ class Logger(object):
         id_src = self.accounts[src].id_account
         id_dest = self.accounts[dest].id_account
 
-        if id_event is None:
-            return None
-
         self.execute(Logger.SELECT_SENT_MESSAGES, (id_event, id_src, id_dest,
             limit))
 
@@ -610,9 +614,6 @@ class Logger(object):
         id_src = self.accounts[src].id_account
         id_dest = self.accounts[dest].id_account
 
-        if id_event is None:
-            return None
-
         self.execute(Logger.SELECT_CHATS, (id_event, id_src, id_dest, id_src,
             id_dest, limit))
 
@@ -629,9 +630,6 @@ class Logger(object):
 
         id_src = self.accounts[src].id_account
         id_dest = self.accounts[dest].id_account
-
-        if id_event is None:
-            return None
 
         self.execute(Logger.SELECT_CHATS_BETWEEN, (id_event, id_src, id_dest, id_src,
             id_dest, from_t, to_t, limit))
@@ -664,7 +662,7 @@ class Logger(object):
 
         for acc in new_accounts:
             account = accounts[acc]
-            cid = account.attrs.get('CID', None)
+            cid = account.cid
             self.insert_info(acc, cid, pstatus.OFFLINE, '', '', '')
 
         for acc in removed:
@@ -741,7 +739,7 @@ class LoggerProcess(threading.Thread):
 
                 if quit:
                     self.logger.close()
-                    log.debug('closing logger thread')
+                    #log.debug('closing logger thread')
                     break
 
             except Queue.Empty:
@@ -749,10 +747,10 @@ class LoggerProcess(threading.Thread):
 
     def _process(self, data):
         '''process the received data'''
-        (action, args) = data
+        action, args = data
 
         if action == 'log':
-            (event, status, payload, src, dest) = args
+            event, status, payload, src, dest = args
             self.logger.add_event(event, status, payload, src, dest)
         elif action == 'quit':
             return True
@@ -767,18 +765,27 @@ class LoggerProcess(threading.Thread):
             except Exception, e:
                 log.error('error calling action %s on LoggerProcess: %s' %
                     (action, e))
+        else:
+            log.error('invalid action %s on LoggerProcess' % (action,))
 
         return False
 
-    def check(self):
+    def check(self, sync=False):
         '''call this method from the main thread if you dont want to have
         problems with threads, it will extract the results and call the
-        callback that was passed to the get_* call'''
+        callback that was passed to the get_* call
+
+        the sync parameter is used for testing, it basically waits for a
+        message'''
 
         try:
-            while True:
-                (action, result, callback) = self.output.get(False)
+            if sync:
+                action, result, callback = self.output.get()
                 callback(result)
+            else:
+                while True:
+                    action, result, callback = self.output.get(False)
+                    callback(result)
         except Queue.Empty:
             pass
 
@@ -845,27 +852,14 @@ class LoggerProcess(threading.Thread):
         '''add all contacts, groups and relations to the database'''
         self.input.put(('add_contact_by_group', (contacts, groups, None)))
 
-def save_logs_as_txt(results, path):
+def save_logs_as_txt(results, handle):
     '''save the chats in results (from get_chats or get_chats_between) as txt
-    to path
+    to handle (file like object)
+
+    the caller is responsible of closing the handle
     '''
-    handle = file(path, 'w')
 
-    for (stat, timestamp, message, nick, account) in results:
+    for stat, timestamp, message, nick, account in results:
         date_text = time.strftime('[%c]', time.gmtime(timestamp))
-        tokens = message.split('\r\n', 3)
-        type_ = tokens[0]
+        handle.write("%s %s: %s\n" % (date_text, nick, message))
 
-        if type_ == 'text/x-msnmsgr-datacast':
-            handle.write(date_text + ' ' + nick + ': ' + '<<nudge>>\n')
-        elif type_.find('text/plain;') != -1:
-            try:
-                (type_, format, empty, text) = tokens
-                handle.write("%s %s: %s\n" % \
-                    (date_text, nick, text))
-            except ValueError:
-                log.debug('Invalid number of tokens' + str(tokens))
-        else:
-            log.debug('unknown message type on ContactInfo')
-
-    handle.close()

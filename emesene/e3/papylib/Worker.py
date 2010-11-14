@@ -541,7 +541,7 @@ class Worker(e3.base.Worker, papyon.Client):
         contact.nick = nick
         status_ = contact.status
 
-        log_account = Logger.Account(contact.attrs.get('CID', None), None, \
+        log_account = Logger.Account(contact.cid, None, \
             contact.account, contact.status, contact.nick, contact.message, \
             contact.picture)
 
@@ -566,7 +566,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account, \
                 'message', old_message)
             self.session.logger.log('message change', contact.status, \
-                contact.message, Logger.Account(contact.attrs.get('CID', None),\
+                contact.message, Logger.Account(contact.cid,\
                     None, contact.account, contact.status, contact.nick, \
                     contact.message, contact.picture))
 
@@ -670,7 +670,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.account.status = stat
         # log the status
         contact = self.session.contacts.me
-        account = Logger.Account(contact.attrs.get('CID', None), None,
+        account = Logger.Account(contact.cid, None,
             contact.account, stat, contact.nick, contact.message,
             contact.picture)
 
@@ -683,7 +683,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.contacts.me.nick = display_name
 
         contact = self.session.contacts.me
-        account = Logger.Account(contact.attrs.get('CID', None), None,
+        account = Logger.Account(contact.cid, None,
             contact.account, contact.status, display_name, contact.message,
             contact.picture)
 
@@ -696,7 +696,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.contacts.me.message = message
         # log the change
         contact = self.session.contacts.me
-        account = Logger.Account(contact.attrs.get('CID', None), None,
+        account = Logger.Account(contact.cid, None,
             contact.account, contact.status, contact.nick, contact.message,
             contact.picture)
 
@@ -711,7 +711,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.contacts.me.message = message
         # log the change
         contact = self.session.contacts.me
-        account = Logger.Account(contact.attrs.get('CID', None), None,
+        account = Logger.Account(contact.cid, None,
             contact.account, contact.status, contact.nick, contact.message,
             contact.picture)
 
@@ -1041,7 +1041,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         # log the message
         contact = self.session.contacts.me
-        src =  Logger.Account(contact.attrs.get('CID', None), None, \
+        src =  Logger.Account(contact.cid, None, \
             contact.account, contact.status, contact.nick, contact.message, \
             contact.picture)
 
@@ -1056,7 +1056,7 @@ class Worker(e3.base.Worker, papyon.Client):
             if dst is None:
                 dst = e3.base.Contact(message.account)
 
-                dest =  Logger.Account(dst.attrs.get('CID', None), None, \
+                dest =  Logger.Account(dst.cid, None, \
                     dst.account, dst.status, dst.nick, dst.message, dst.picture)
 
                 self.session.logger.log(event, contact.status, msgstr,

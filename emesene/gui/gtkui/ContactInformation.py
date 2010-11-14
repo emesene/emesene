@@ -333,7 +333,7 @@ class ChatWidget(gtk.VBox):
                 return
 
             exporter = extension.get_default('history exporter')
-            exporter(results, path)
+            exporter(results, open(path, "w"))
 
         self.request_chats_between(limit, _on_save_chats_ready)
 
