@@ -152,10 +152,7 @@ class Worker(e3.Worker):
         self.session.add_event(e3.Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
 
         # log message
-        contact = self.session.contacts.get(account)
-        src = e3.Logger.Account.from_contact(contact)
-        dest  = e3.Logger.Account.from_contact(self.session.contacts.me)
-        self.session.logger.log('message', contact.status, body, src, dest)
+        e3.Logger.log_message(self.session, None, msgobj, False)
 
     # action handlers
     def _handle_action_add_contact(self, account):
@@ -344,14 +341,7 @@ class Worker(e3.Worker):
                 'chat'))
 
             # log message
-            contact = self.session.contacts.get(recipient)
-
-            if contact is None:
-                contact = e3.Contact(message.account)
-
-            src = e3.Logger.Account.from_contact(self.session.contacts.me)
-            dest = e3.Logger.Account.from_contact(contact)
-            self.session.logger.log('message', contact.status, message.body, src, dest)
+        e3.Logger.log_message(self.session, recipients, message, True)
 
     # p2p handlers
 
