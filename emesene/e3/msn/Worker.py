@@ -536,7 +536,7 @@ class Worker(e3.Worker):
 
         if params_length == 4:
             msnobj = urllib.unquote(message.params[3])
-            contact.attrs['CID'] = int(message.params[2])
+            contact.cid = int(message.params[2])
 
         log_account = e3.Logger.Account.from_contact(contact)
 

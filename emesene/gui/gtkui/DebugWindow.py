@@ -82,7 +82,6 @@ class DebugWindow(object):
         return False
 
     def on_delete(self, widget, event, data=None):
-        self.safely_close()
         return False
 
 class DebugView( gtk.TextView ):

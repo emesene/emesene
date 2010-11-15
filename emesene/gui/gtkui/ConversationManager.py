@@ -1,13 +1,30 @@
 '''a module that define classes to build the conversation widget'''
 import gtk
 import glib
+import gobject
 
 import e3
 import gui
 import extension
 import Renderers
 
-class ConversationManager(gtk.Notebook, gui.ConversationManager):
+class Notebook(gtk.Notebook):
+    """Notebook class to define a new signal to handle tab cycling a la firefox"""
+    __gsignals__ = {
+         "prev-page": (gobject.SIGNAL_RUN_LAST | gobject.SIGNAL_ACTION, None, ()),
+         "next-page": (gobject.SIGNAL_RUN_LAST | gobject.SIGNAL_ACTION, None, ())
+    }
+
+    def __init__(self):
+        gobject.GObject.__init__(self)
+        gtk.Notebook.__init__(self)
+
+        gtk.binding_entry_add_signal(self, gtk.keysyms.Tab, gtk.gdk.CONTROL_MASK | gtk.gdk.SHIFT_MASK, 'prev-page')
+        gtk.binding_entry_add_signal(self, gtk.keysyms.Tab, gtk.gdk.CONTROL_MASK, 'next-page')
+
+gobject.type_register(Notebook)
+
+class ConversationManager(Notebook, gui.ConversationManager):
     '''the main conversation, it only contains other widgets'''
 
     NAME = 'Conversation Manager'
@@ -17,7 +34,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
     def __init__(self, session, on_last_close):
         '''class constructor'''
-        gtk.Notebook.__init__(self)
+        Notebook.__init__(self)
         gui.ConversationManager.__init__(self, session, on_last_close)
 
         self.set_scrollable(True)
@@ -28,12 +45,20 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         if session.config.get_or_set('b_conv_tab_popup', True):
             self.popup_enable()
 
-        # mozilla tabs are fixed-width, otherwise do the same as emesene-1 
+        # mozilla tabs are fixed-width, otherwise do the same as emesene-1
         self.mozilla_tabs = session.config.get_or_set('b_conv_tab_mozilla_like', False)
 
-        self.set_property('can-focus', False)
         self.connect('switch-page', self._on_switch_page)
-        self.connect('key-press-event', self.on_key_press)
+        self.connect('next-page', self.on_next_page)
+        self.connect('prev-page', self.on_prev_page)
+
+    def on_next_page(self, widget):
+        '''called when ctrl+tab is pressed'''
+        self.cycle_tabs()
+
+    def on_prev_page(self, widget):
+        '''called when ctrl+tab is pressed'''
+        self.cycle_tabs(-1)
 
     def _set_accels(self):
         """set the keyboard shortcuts
@@ -58,13 +83,6 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             accel_group.connect_group(gtk.keysyms._0 + i,
                 gtk.gdk.MOD1_MASK, gtk.ACCEL_LOCKED,
                 self.on_key_change_tab)
-
-    def on_key_press(self, widget, event):
-        '''callback called when a key is pressed on the window'''
-        if (event.state & gtk.gdk.CONTROL_MASK) and event.keyval in [
-                gtk.keysyms.Tab, gtk.keysyms.ISO_Left_Tab]:
-            self.cycle_tabs()
-            return True
 
     def on_key_close_tab(self, accel_group, window, keyval, modifier):
         '''Catches events like Ctrl+W and closes current tab'''
@@ -139,21 +157,6 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
         self.set_message_waiting(page, False)
         self.update_window(page.text, page.icon, self.get_current_page())
-#        glib.idle_add(self._on_switch_page_grab_focus)
-
-    def _on_switch_page_grab_focus(self):
-        '''Dirty hack. When _on_switch_page() is called the actual switch
-        has not yet occured. We connect an idle handler to grab the focus,
-        otherwise it won't work. Maybe this is solved if we iterate the
-        mainloop inside of _on_switch_page() instead of connecting an
-        idle signal.'''
-        try:
-            page_num = self.get_current_page()
-            page = self.get_nth_page(page_num)
-            page.input.grab_focus()
-            return False
-        except:
-            return False
 
     def _on_tab_close(self, button, conversation):
         '''called when the user clicks the close button on a tab'''

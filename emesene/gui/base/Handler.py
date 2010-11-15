@@ -5,6 +5,7 @@ import webbrowser
 import e3.base
 import gui
 import extension
+import Desktop
 
 import logging
 log = logging.getLogger('gui.base.Handler')
@@ -96,8 +97,9 @@ class OptionsHandler(object):
 
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
-        Preferences = extension.get_default('preferences')
-        Preferences(self.session).show()
+        instance = extension.get_and_instantiate('preferences', self.session)
+        instance.show()
+        instance.present()
 
     def on_plugins_selected(self):
         '''called when the plugins button is selected'''
@@ -402,11 +404,11 @@ class FileTransferHandler(object):
 
     def open(self):
         ''' use desktop's open to open the file, once state is finished '''
-        raise NotImplementedError
+        Desktop.open(self.transfer.completepath)
 
     def opendir(self):
         ''' open the directory that contains the file, once the transfer is finished '''
-        raise NotImplementedError
+        Desktop.open(os.path.dirname(self.transfer.completepath))
 
     def accept(self):
         ''' accepts a file transfer '''
@@ -428,3 +430,4 @@ class FileTransferHandler(object):
         ''' cancels a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.cancel_filetransfer(self.transfer)
+

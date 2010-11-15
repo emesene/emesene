@@ -8,6 +8,7 @@ from Conversation import Conversation
 from ConversationManager import ConversationManager
 from AvatarManager  import AvatarManager
 from PictureHandler import PictureHandler
+from ContactInformation import ContactInformation
 
 theme = Theme()
 

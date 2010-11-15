@@ -1,4 +1,5 @@
 import gtk
+import webbrowser
 
 import gui
 import utils
@@ -27,7 +28,6 @@ class Preferences(gtk.Window):
         """
         gtk.Window.__init__(self)
         self.set_border_width(2)
-        self.set_modal(True)
         self.set_title(_("Preferences"))
         self.session = session
 
@@ -116,9 +116,17 @@ class Preferences(gtk.Window):
         self.page_dict.append(self.extensions_page)
         self.page_dict.append(self.plugins_page)
 
+        if 'msn' in self.session.SERVICES: # only when session is papylib.
+            listStore.append([self.render_icon(gtk.STOCK_NETWORK,
+                             gtk.ICON_SIZE_LARGE_TOOLBAR), _('Live Messenger')])
+            self.msn_papylib = MSNPapylib(session)
+            self.msn_papylib_page = self.msn_papylib
+            self.page_dict.append(self.msn_papylib_page)
+
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
 
+        self.connect('delete_event', self.hide_on_delete)
         self.add(vbox)
         vbox.show_all()
 
@@ -368,6 +376,7 @@ class Interface(BaseTable):
         self.append_markup('<b>'+_('Conversation window:')+'</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
+        self.append_check(_('Start minimized/iconified'), 'session.config.b_conv_minimized')
         self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
         self.append_check(_('Show conversation header'),
             'session.config.b_show_header')
@@ -381,6 +390,8 @@ class Interface(BaseTable):
             'session.config.b_avatar_on_left')
         self.append_check(_('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
+        self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
+            'session.config.b_enable_spell_check')
 
         self.append_range(_('Contact list avatar size'),
             'session.config.i_avatar_size', 18, 64)
@@ -594,6 +605,24 @@ class Extension(BaseTable):
         self.categories.set_model(model)
         self.categories.set_active(0)
 
+class MSNPapylib(BaseTable):
+    """ This panel contains some msn-papylib specific settings """
 
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 8, 2)
+        self.session = session
 
+        self.add_text(_('If you have problems with your nickname/message/picture '
+                        'just click on this button, sign in with your account '
+                        'and load a picture in your Live Profile. '
+                        'Then restart emesene and have fun.'), 0, 0, True)
+        self.add_button(_('Open Live Profile'), 1, 0, self._on_live_profile_clicked, 0, 0)
+
+        self.show_all()
+
+    def _on_live_profile_clicked(self, arg):
+        ''' called when live profile button is clicked '''
+        webbrowser.open("http://profile.live.com/details/Edit/Pic")
 

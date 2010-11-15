@@ -9,6 +9,8 @@ import status as pstatus
 import logging
 log = logging.getLogger('e3.base.Logger') # oh snap!
 
+import e3
+
 class Account(object):
     '''a class to store account data'''
 
@@ -40,7 +42,7 @@ class Account(object):
     @classmethod
     def from_contact(cls, contact):
         '''Creates a Account object from a Contact'''
-        return cls(contact.attrs.get('CID', None), None, contact.account,
+        return cls(contact.cid, None, contact.account,
             contact.status, contact.nick, contact.message, contact.picture)
 
 class Group(object):
@@ -53,6 +55,10 @@ class Group(object):
         self.gid = gid
         self.enabled = enabled
         self.accounts = []
+
+    def __str__(self):
+        '''return a string representation of the object'''
+        return "<group '%s'>" % (self.name,)
 
 class Logger(object):
     '''a class to log activity on an IM'''
@@ -249,35 +255,36 @@ class Logger(object):
     '''
 
     SELECT_CHATS = '''
-        SELECT f.status, f.tmstp, f.payload, i.nick
-        FROM fact_event f, d_info i
+        SELECT f.status, f.tmstp, f.payload, i.nick, a.account
+        FROM fact_event f, d_info i, d_account a
         WHERE f.id_event=? and
             ((f.id_src_acc=? and id_dest_acc=?) or
             (f.id_dest_acc=? and id_src_acc=?)) and
-            f.id_src_info = i.id_info
+            f.id_src_info = i.id_info and f.id_src_acc = a.id_account
         ORDER BY tmstp LIMIT ?;
     '''
 
     SELECT_CHATS_BETWEEN = '''
-        SELECT f.status, f.tmstp, f.payload, i.nick
-        FROM fact_event f, d_info i
+        SELECT f.status, f.tmstp, f.payload, i.nick, a.account
+        FROM fact_event f, d_info i, d_account a
         WHERE f.id_event=? and
             ((f.id_src_acc=? and id_dest_acc=?) or
             (f.id_dest_acc=? and id_src_acc=?)) and
             f.id_src_info = i.id_info and
-            f.tmstp >= ? and f.tmstp <= ?
+            f.tmstp >= ? and f.tmstp <= ? and f.id_src_acc = a.id_account
         ORDER BY tmstp LIMIT ?;
     '''
 
-    def __init__(self, path):
+    def __init__(self, path, db_name="base.db"):
         '''constructor'''
         self.path = path
+        self.db_name = db_name
 
         self.events = {}
         self.groups = {}
         self.accounts = {}
 
-        full_path = os.path.join(path, "base.db")
+        full_path = os.path.join(path, db_name)
         self.connection = sqlite.connect(full_path)
         self.cursor = self.connection.cursor()
 
@@ -372,6 +379,7 @@ class Logger(object):
         if account in self.accounts:
             exists = True
             acc = self.accounts[account]
+
             if acc.equals(acc.id_account, account, nick, message, path) and \
                 acc.id_account:
                 return (acc.id, acc.id_account)
@@ -512,6 +520,7 @@ class Logger(object):
     def execute(self, query, args=()):
         '''execute the query with optional args'''
         #log.debug(query + str(args))
+        #print query, args
         self.cursor.execute(query, args)
 
     # utility methods
@@ -534,6 +543,7 @@ class Logger(object):
 
         self.insert_fact_event(id_time, id_event, id_src_info, id_dest_info,
             id_src_acc, id_dest_acc, status, payload, timestamp)
+        self._stat()
 
     def close(self):
         '''call this method when you are closing the app'''
@@ -589,9 +599,6 @@ class Logger(object):
         id_src = self.accounts[src].id_account
         id_dest = self.accounts[dest].id_account
 
-        if id_event is None:
-            return None
-
         self.execute(Logger.SELECT_SENT_MESSAGES, (id_event, id_src, id_dest,
             limit))
 
@@ -609,9 +616,6 @@ class Logger(object):
         id_src = self.accounts[src].id_account
         id_dest = self.accounts[dest].id_account
 
-        if id_event is None:
-            return None
-
         self.execute(Logger.SELECT_CHATS, (id_event, id_src, id_dest, id_src,
             id_dest, limit))
 
@@ -628,9 +632,6 @@ class Logger(object):
 
         id_src = self.accounts[src].id_account
         id_dest = self.accounts[dest].id_account
-
-        if id_event is None:
-            return None
 
         self.execute(Logger.SELECT_CHATS_BETWEEN, (id_event, id_src, id_dest, id_src,
             id_dest, from_t, to_t, limit))
@@ -663,7 +664,7 @@ class Logger(object):
 
         for acc in new_accounts:
             account = accounts[acc]
-            cid = account.attrs.get('CID', None)
+            cid = account.cid
             self.insert_info(acc, cid, pstatus.OFFLINE, '', '', '')
 
         for acc in removed:
@@ -703,12 +704,13 @@ class Logger(object):
 class LoggerProcess(threading.Thread):
     '''a process that exposes a thread safe api to log events of a session'''
 
-    def __init__(self, path):
+    def __init__(self, path, db_name="base.db"):
         '''constructor'''
         threading.Thread.__init__(self)
         self.setDaemon(True)
 
         self.path = path
+        self.db_name = db_name
         self.logger = None
         self.input = Queue.Queue()
         self.output = Queue.Queue()
@@ -718,7 +720,7 @@ class LoggerProcess(threading.Thread):
     def run(self):
         '''main method'''
         data = None
-        self.logger = Logger(self.path)
+        self.logger = Logger(self.path, self.db_name)
 
         self.actions['get_event'] = self.logger.get_event
         self.actions['get_nicks'] = self.logger.get_nicks
@@ -739,7 +741,7 @@ class LoggerProcess(threading.Thread):
 
                 if quit:
                     self.logger.close()
-                    log.debug('closing logger thread')
+                    #log.debug('closing logger thread')
                     break
 
             except Queue.Empty:
@@ -747,10 +749,10 @@ class LoggerProcess(threading.Thread):
 
     def _process(self, data):
         '''process the received data'''
-        (action, args) = data
+        action, args = data
 
         if action == 'log':
-            (event, status, payload, src, dest) = args
+            event, status, payload, src, dest = args
             self.logger.add_event(event, status, payload, src, dest)
         elif action == 'quit':
             return True
@@ -765,18 +767,27 @@ class LoggerProcess(threading.Thread):
             except Exception, e:
                 log.error('error calling action %s on LoggerProcess: %s' %
                     (action, e))
+        else:
+            log.error('invalid action %s on LoggerProcess' % (action,))
 
         return False
 
-    def check(self):
+    def check(self, sync=False):
         '''call this method from the main thread if you dont want to have
         problems with threads, it will extract the results and call the
-        callback that was passed to the get_* call'''
+        callback that was passed to the get_* call
+
+        the sync parameter is used for testing, it basically waits for a
+        message'''
 
         try:
-            while True:
-                (action, result, callback) = self.output.get(False)
+            if sync:
+                action, result, callback = self.output.get()
                 callback(result)
+            else:
+                while True:
+                    action, result, callback = self.output.get(False)
+                    callback(result)
         except Queue.Empty:
             pass
 
@@ -843,27 +854,63 @@ class LoggerProcess(threading.Thread):
         '''add all contacts, groups and relations to the database'''
         self.input.put(('add_contact_by_group', (contacts, groups, None)))
 
-def save_logs_as_txt(results, path):
+def save_logs_as_txt(results, handle):
     '''save the chats in results (from get_chats or get_chats_between) as txt
-    to path
+    to handle (file like object)
+
+    the caller is responsible of closing the handle
     '''
-    handle = file(path, 'w')
 
-    for (stat, timestamp, message, nick) in results:
+    for stat, timestamp, message, nick, account in results:
         date_text = time.strftime('[%c]', time.gmtime(timestamp))
-        tokens = message.split('\r\n', 3)
-        type_ = tokens[0]
+        handle.write("%s %s: %s\n" % (date_text, nick, message))
 
-        if type_ == 'text/x-msnmsgr-datacast':
-            handle.write(date_text + ' ' + nick + ': ' + '<<nudge>>\n')
-        elif type_.find('text/plain;') != -1:
-            try:
-                (type_, format, empty, text) = tokens
-                handle.write("%s %s: %s\n" % \
-                    (date_text, nick, text))
-            except ValueError:
-                log.debug('Invalid number of tokens' + str(tokens))
+def log_message(session, members, message, sent, error=False):
+    '''log a message, session is an e3.Session object, members is a list of
+    members only used if sent is True, sent is True if we sent the message,
+    False if we received the message. error is True if the message send
+    failed'''
+
+    if message.type == e3.Message.TYPE_TYPING:
+        return
+
+    if error:
+        event = 'message-error'
+    else:
+        event = 'message'
+
+    if sent:
+        contact = session.contacts.me
+        status = contact.status
+        src = e3.Logger.Account.from_contact(session.contacts.me)
+
+        if message.type == e3.Message.TYPE_NUDGE:
+            message.body = _("you just sent a nudge!")
+
+        for dst_account in members:
+            dst = session.contacts.get(dst_account)
+
+            if dst is None:
+                dst = e3.Contact(dst_account)
+
+            dest = e3.Logger.Account.from_contact(dst)
+
+            session.logger.log(event, status, message.body, src, dest)
+    else:
+        dest = e3.Logger.Account.from_contact(session.contacts.me)
+        contact = session.contacts.get(message.account)
+
+        if contact is None:
+            src = e3.Contact(message.account)
+            status = e3.status.OFFLINE
+            display_name = message.account
         else:
-            log.debug('unknown message type on ContactInfo')
+            src = e3.Logger.Account.from_contact(contact)
+            status = contact.status
+            display_name = contact.display_name
 
-    handle.close()
+        if message.type == e3.Message.TYPE_NUDGE:
+            message.body = _("%s just sent you a nudge!" % display_name)
+
+        session.logger.log(event, status, message.body, src, dest)
+

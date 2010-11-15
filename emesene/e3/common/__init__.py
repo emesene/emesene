@@ -1,5 +1,6 @@
 import sys
 sys.path.append('..')
+import locations
 import play_sound
 import notification
 

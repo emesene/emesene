@@ -134,12 +134,17 @@ class Conversation(object):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
         self.output.send_message(self.formatter, self.session.contacts.me,
-            _('You just sent a nudge!'), {}, '', None, self.first)
+                                 '', {}, '', None, self.first,
+                                 e3.Message.TYPE_NUDGE)
 
         self.play_nudge()
 
     def show(self):
         '''override the show method'''
+        raise NotImplementedError("Method not implemented")
+
+    def iconify(self):
+        '''override the iconify method'''
         raise NotImplementedError("Method not implemented")
 
     def update_message_waiting(self, is_waiting):
@@ -217,7 +222,7 @@ class Conversation(object):
 
         self.session.send_message(self.cid, text, self.cstyle, self.emcache.parse(), custom_emoticons)
         self.output.send_message(self.formatter, self.session.contacts.me,
-                text, self.emcache.parse(), self.emcache.path, self.cstyle, self.first)
+                                 text, self.emcache.parse(), self.emcache.path, self.cstyle, self.first)
         self.messages.push(text)
         self.play_send()
         self.first = False
@@ -298,9 +303,9 @@ class Conversation(object):
         elif len(self.members) > 1:
             self.update_group_information()
 
-    def update_p2p(self, *what):
+    def update_p2p(self, account, _type, *what):
         ''' update the p2p data in the conversation (custom emoticons) '''
-        self.output.update_p2p(*what)
+        self.output.update_p2p(account, _type, *what)
 
     def on_contact_joined(self, account):
         '''called when a contact joins the conversation'''

@@ -5,6 +5,8 @@ import os
 import extension
 from e3 import status
 
+import Renderers
+
 class TrayIcon(gtk.StatusIcon):
     """
     A widget that implements the tray icon of emesene for gtk
@@ -72,8 +74,9 @@ class TrayIcon(gtk.StatusIcon):
         """
         Blink tray icon and save newest unread message
         """
-        self.set_blinking(True)
-        self.last_new_message = cid
+        if not self.conversations.get_parent().is_active():
+            self.set_blinking(True)
+            self.last_new_message = cid
 
     def _on_read(self, page):
         """
@@ -88,13 +91,12 @@ class TrayIcon(gtk.StatusIcon):
         (includes clicking the icon)
         """
         
-        if self.last_new_message is not None:
+        if self.last_new_message is not None and self.is_blinking():
             # show the tab with the latest message
             conversation = self.conversations.conversations[self.last_new_message]
             page = self.conversations.page_num(conversation)
             self.conversations.set_current_page(page)
             self.conversations.get_parent().present()
-
         elif (self.main_window != None):
             if(self.main_window.get_property("visible")):
                 self.main_window.hide()
@@ -218,7 +220,7 @@ class ContactsMenu(gtk.Menu):
         """
         #item = gtk.ImageMenuItem()
         item = gtk.MenuItem()
-        item.set_label(contact.nick)
+        item.set_label(Renderers.msnplus_to_plain_text(contact.nick))
         #pict = self.__get_contact_pixbuf_or_default(contact)
         #item.set_image(pict)
         item.connect('activate', self._on_contact_clicked)    

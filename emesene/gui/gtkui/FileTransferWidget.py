@@ -89,6 +89,10 @@ class FileTransferWidget(gtk.HBox):
 
     def _on_menu_folder_clicked(self, widget):
         self.handler.opendir()
+
+    def finished(self):
+        ''' sets the transfer state to finished '''
+        self.transfer.state = self.transfer.RECEIVED
         
     def do_update_progress(self):
         ''' updates the progress bar status '''
@@ -152,7 +156,6 @@ class FileTransferWidget(gtk.HBox):
         self.handler.accept()
 
     def _on_close_clicked(self, widget):
-        self.handler.remove()
         self.main_transfer_bar.hbox.remove(self)
         self.main_transfer_bar.num_transfers -= 1
         if self.main_transfer_bar.num_transfers == 0:

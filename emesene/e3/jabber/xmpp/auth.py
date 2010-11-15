@@ -23,16 +23,23 @@ from protocol import *
 from client import PlugIn
 import base64,random,dispatcher,re
 
+NO_HASHLIB=0
 try:
     from hashlib import md5
     from hashlib import sha1 as sha
 except ImportError:
+    NO_HASHLIB=1
     import md5
     import sha
 
-def HH(some): return md5.new(some).hexdigest()
-def H(some): return md5.new(some).digest()
-def C(some): return ':'.join(some)
+if NO_HASHLIB:
+    def HH(some): return md5.new(some).hexdigest()
+    def H(some): return md5.new(some).digest()
+    def C(some): return ':'.join(some)
+else:
+    def HH(some): m = md5(); m.update(some); return m.hexdigest()
+    def H(some): m = md5(); m.update(some); return m.digest()
+    def C(some): return ':'.join(some)
 
 class NonSASL(PlugIn):
     """ Implements old Non-SASL (JEP-0078) authentication used in jabberd1.4 and transport authentication."""
