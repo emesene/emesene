@@ -323,7 +323,7 @@ class Worker(e3.base.Worker, papyon.Client):
         else:
             download_path = self.session.config.get_or_set("download_folder", 
                 e3.common.locations.downloads())
-            if self.session.config.get_or_set("download_folder_per_account", False):
+            if self.session.config.b_download_folder_per_account:
                 full_path = os.path.join(download_path, tr.sender, tr.filename)
             else:
                 full_path = os.path.join(download_path, tr.filename)
