@@ -32,6 +32,7 @@ from e3 import cache
 from e3.base import *
 import e3.base.Logger as Logger
 from e3.common import ConfigDir
+from e3.common import locations
 
 import logging
 log = logging.getLogger('papylib.Worker')
@@ -312,24 +313,27 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_FILETRANSFER_PROGRESS, tr)
 
     def papy_ft_completed(self, ftsession, data):
-        #print "data:", len(data.getvalue())
-        # TODO: save the file somewhere and kill the dicts
+        ''' save the file according to user prefs
+            or do nothing if we sent it '''
+        # TODO: kill the dicts (?)
         tr = self.filetransfers[ftsession]
         if tr.sender == 'Me':
             # we sent the file, do nothing pls.
             pass
         else:
-            sender = tr.sender
-            fname = tr.filename
-            # TODO: save somewhere else the data!
-            handle, path = tempfile.mkstemp(suffix=".temp", prefix='emesenefile')
+            download_path = self.session.config.get_or_set("download_folder", 
+                e3.common.locations.downloads())
+            if self.session.config.get_or_set("download_folder_per_account", False):
+                full_path = os.path.join(download_path, tr.sender, tr.filename)
+            else:
+                full_path = os.path.join(download_path, tr.filename)
             try:
-                f = open(path, 'wb')
+                f = open(full_path, 'wb')
                 f.write(data.getvalue())
                 f.close()
+                tr.completepath = full_path
             except Exception as e:
                 print e
-            os.close(handle)
         #del self.rfiletransfers[tr]
 
         self.session.add_event(Event.EVENT_FILETRANSFER_COMPLETED, tr)
