@@ -372,6 +372,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             return None
 
         if self.is_contact_selected():
+            print '(%s,%s)' % (self._model[selected][1], type(self._model[selected][1]))
             return self._model[selected][1]
 
         return None

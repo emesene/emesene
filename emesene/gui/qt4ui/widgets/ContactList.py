@@ -73,6 +73,36 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         '''Fill the contact list. Resent to model'''
         print "redirecting to base's fill"
         gui.ContactList.fill(self, clear)
+        
+    def get_contact_selected(self):
+        idx_list = self.selectedIndexes()
+        index = idx_list[0]
+        print '*** GET CONTACT SELECTED ***'
+        print index
+        print ' --> (%d, %d)[%s]' % (index.row(), index.column(), index.isValid())
+        if len(idx_list) > 1 :
+            print 'Returning None because of len>1'
+            return None
+        if not index.parent().isValid():
+            print "Returning None because of group."
+            return None
+        print 'Returning %s' % self._pmodel.data(index, Role.DataRole).toPyObject()
+        return self._pmodel.data(index, Role.DataRole).toPyObject()
+        
+    def get_group_selected(self):
+        idx_list = self.selectedIndexes()
+        index = idx_list[0]
+        print '*** GET GROUP SELECTED ***'
+        print index
+        print ' --> (%d, %d)[%s]' % (index.row(), index.column(), index.isValid())
+        if len(idx_list) > 1 :
+            print 'Returning None because of len>1'
+            return None
+        if index.parent().isValid():
+            print "Returning None because of contact."
+            return None
+        print 'Returning %s' % self._pmodel.data(index, Role.DataRole).toPyObject()
+        return None#self._pmodel.data(index, Role.DataRole).toPyObject()
     
     def clear(self):
         '''Clears the contact list. Resent to model.'''
