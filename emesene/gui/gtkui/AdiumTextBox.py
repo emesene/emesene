@@ -8,6 +8,7 @@ import xml.sax.saxutils
 
 import webbrowser
 
+import e3
 import gui
 
 class OutputView(webkit.WebView):
@@ -164,8 +165,11 @@ class OutputText(gtk.ScrolledWindow):
 
         self._texts = []
 
-    def send_message(self, formatter, contact, text, cedict, cedir, style, is_first):
+    def send_message(self, formatter, contact, text, cedict, cedir, style, is_first, type_=None):
         '''add a message to the widget'''
+        if type_ is e3.Message.TYPE_NUDGE:
+            text = _('You just sent a nudge!')
+
         msg = gui.Message.from_contact(contact, text, is_first, False)
         self.view.add_message(msg, style, cedict, cedir)
 
@@ -173,7 +177,7 @@ class OutputText(gtk.ScrolledWindow):
         '''add a message to the widget'''
         msg = gui.Message.from_contact(contact, message.body, is_first, True, message.timestamp)
         # WARNING: this is a hack to keep out config from backend libraries
-        message.style.size = self.config.get_or_set("i_font_size", 10)
+        message.style.size = self.config.i_font_size
         self.view.add_message(msg, message.style, cedict, cedir)
 
     def information(self, formatter, contact, message):

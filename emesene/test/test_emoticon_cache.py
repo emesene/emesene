@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath('.'))
 from e3 import cache
 import testutils
 
-class TestCreate(unittest.TestCase):
+class EmoticonCacheTestCase(unittest.TestCase):
     def setUp(self):
         self.cache = cache.EmoticonCache('tmp', 'user@host.com')
         self.image_path = testutils.create_binary_file(self.cache.path)

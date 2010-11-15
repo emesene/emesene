@@ -12,4 +12,5 @@ WEBSITE = 'www.emesene.org'
 
 def pyNotification(title, text, picturePath=None):
     n = pynotify.Notification(title, text, picturePath)
+    n.set_hint_string("append", "allowed")
     n.show()

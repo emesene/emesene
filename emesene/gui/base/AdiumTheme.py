@@ -1,7 +1,7 @@
 '''a module that contains a class that describes a adium theme'''
 import re
 import os
-import time
+import time, calendar
 import datetime
 import xml.sax.saxutils
 
@@ -125,8 +125,13 @@ class AdiumTheme(object):
             template = template.replace('%time%',
                 escape(time.strftime(self.timefmt)))
         else:
+            def utc_to_local(t):
+                secs = calendar.timegm(t)
+                return time.localtime(secs)
+            l_time = utc_to_local(msg.timestamp.timetuple()) #time.struct_time
+            d_time = datetime.datetime.fromtimestamp(time.mktime(l_time))
             template = template.replace('%time%', 
-                escape(msg.timestamp.strftime('%x %X')))
+                escape(d_time.strftime('%x %X')))
 
         template = re.sub("%time{(.*?)}%", replace_time, template)
         template = template.replace('%shortTime%',

@@ -5,6 +5,8 @@ import os
 import extension
 from e3 import status
 
+import Renderers
+
 class TrayIcon(gtk.StatusIcon):
     """
     A widget that implements the tray icon of emesene for gtk
@@ -218,7 +220,7 @@ class ContactsMenu(gtk.Menu):
         """
         #item = gtk.ImageMenuItem()
         item = gtk.MenuItem()
-        item.set_label(contact.nick)
+        item.set_label(Renderers.msnplus_to_plain_text(contact.nick))
         #pict = self.__get_contact_pixbuf_or_default(contact)
         #item.set_image(pict)
         item.connect('activate', self._on_contact_clicked)    

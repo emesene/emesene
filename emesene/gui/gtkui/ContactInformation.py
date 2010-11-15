@@ -12,20 +12,18 @@ import extension
 import logging
 log = logging.getLogger('gtkui.ContactInformation')
 
-class ContactInformation(gtk.Window):
+class ContactInformation(gtk.Window, gui.base.ContactInformation):
     '''a window that displays information about a contact'''
 
     def __init__(self, session, account):
         '''constructor'''
+        gui.base.ContactInformation.__init__(self, session, account)
         gtk.Window.__init__(self)
         self.set_default_size(640, 350)
         self.set_title(_('Contact information (%s)') % (account,))
         self.set_role("dialog")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
-
-        self.session = session
-        self.account = account
 
         self.tabs = gtk.Notebook()
 
@@ -34,30 +32,7 @@ class ContactInformation(gtk.Window):
 
         self.add(self.tabs)
 
-        if self.session:
-            self.fill_nicks()
-            self.fill_status()
-            self.fill_messages()
-
-    def fill_nicks(self):
-        '''fill the nick history (clear and refill if called another time)'''
-        self.session.logger.get_nicks(self.account, 1000, self._on_nicks_ready)
-
-    def fill_messages(self):
-        '''fill the messages history (clear and refill if called another time)
-        '''
-        self.session.logger.get_messages(self.account, 1000,
-            self._on_messages_ready)
-
-    def fill_status(self):
-        '''fill the status history (clear and refill if called another time)'''
-        self.session.logger.get_status(self.account, 1000,
-            self._on_status_ready)
-
-    def fill_chats(self):
-        '''fill the chats history (clear and refill if called another time)'''
-        self.session.logger.get_chats(self.account,
-            self.session.account.account, 1000, self.chats._on_chats_ready)
+        self.fill_all()
 
     def _create_tabs(self):
         '''create all the tabs on the window'''
@@ -73,30 +48,18 @@ class ContactInformation(gtk.Window):
         self.tabs.append_page(self.status, gtk.Label(_('Status history')))
         self.tabs.append_page(self.chats, gtk.Label(_('Chat history')))
 
-    def _on_nicks_ready(self, results):
-        '''called when the nick history is ready'''
-        if not results:
-            return
+    def add_nick(self, stat, timestamp, nick):
+        '''add a nick to the list of nicks'''
+        self.nicks.add(stat, timestamp, nick)
 
-        for (stat, timestamp, nick) in results:
-            self.nicks.add(stat, timestamp, nick)
+    def add_message(self, stat, timestamp, message):
+        '''add a message to the list of message'''
+        self.messages.add(stat, timestamp, message)
 
-    def _on_messages_ready(self, results):
-        '''called when the message history is ready'''
-        if not results:
-            return
+    def add_status(self, stat, timestamp, status):
+        '''add a status to the list of status'''
+        self.status.add(stat, timestamp, status)
 
-        for (stat, timestamp, message) in results:
-            self.messages.add(stat, timestamp, message)
-
-    def _on_status_ready(self, results):
-        '''called when the status history is ready'''
-        if not results:
-            return
-
-        for (stat, timestamp, stat_) in results:
-            self.status.add(stat, timestamp, e3.status.STATUS.get(stat,
-                'unknown'))
 
 class InformationWidget(gtk.VBox):
     '''shows information about the contact'''
@@ -222,6 +185,7 @@ class ChatWidget(gtk.VBox):
         self.set_border_width(2)
         all = gtk.HBox()
         all.set_border_width(2)
+        self.first = True
 
         self.calendars = gtk.VBox()
         self.calendars.set_border_width(2)
@@ -253,14 +217,12 @@ class ChatWidget(gtk.VBox):
 
         self.from_calendar = gtk.Calendar()
         from_year, from_month, from_day = self.from_calendar.get_date()
+        from_datetime = datetime.date(from_year, from_month,
+                from_day) - datetime.timedelta(30)
 
-        if from_month == 0:
-            from_month = 11
-            from_year -= 1
-        else:
-            from_month -= 1
+        from_t = from_datetime.timetuple()
 
-        self.from_calendar.select_month(from_month, from_year)
+        self.from_calendar.select_month(from_t.tm_mon, from_year)
         self.to_calendar = gtk.Calendar()
 
         save.connect('clicked', self._on_save_clicked)
@@ -334,7 +296,7 @@ class ChatWidget(gtk.VBox):
                 return
 
             exporter = extension.get_default('history exporter')
-            exporter(results, path)
+            exporter(results, open(path, "w"))
 
         self.request_chats_between(limit, _on_save_chats_ready)
 
@@ -343,24 +305,25 @@ class ChatWidget(gtk.VBox):
         if not results:
             return
 
-        for (stat, timestamp, message, nick) in results:
+        for stat, timestamp, msg_text, nick, account in results:
             date_text = time.strftime('[%c]', time.gmtime(timestamp))
-            tokens = message.split('\r\n', 3)
-            type_ = tokens[0]
 
-            # XXX: hack, I don't have the mail here FIXME
-            contact = e3.Contact(nick)
+            contact = e3.Contact(account, nick=nick)
 
-            if type_ == 'text/x-msnmsgr-datacast':
-                self.output.information(self.formatter, contact,
-                    _('%s just sent you a nudge!') % (nick,))
-            elif type_.find('text/plain;') != -1:
-                try:
-                    (type_, format, empty, text) = tokens
-                    self.text.add_message(self.formatter.format_history(
-                        date_text, nick, text))
-                except ValueError:
-                    log.debug(_('Invalid number of tokens') + str(tokens))
+            is_me = self.session.contacts.me.account == account
+            incoming = not is_me
+            datetimestamp = datetime.datetime.fromtimestamp(timestamp)
+
+
+            if is_me:
+                self.text.send_message(self.formatter, contact,
+                        msg_text, None, None, None, self.first)
             else:
-                log.debug(_('unknown message type on ContactInfo'))
+                message = e3.Message(e3.Message.TYPE_MESSAGE, msg_text,
+                            account, timestamp=datetimestamp)
+
+                self.text.receive_message(self.formatter, contact, message,
+                        None, None, self.first)
+
+            self.first = False
 

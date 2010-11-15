@@ -652,7 +652,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         blocked_text = ''
 
         if contact.blocked:
-            blocked_text = '(blocked)'
+            blocked_text = _('blocked')
 
         template = template.replace('[$BLOCKED]', blocked_text)
 

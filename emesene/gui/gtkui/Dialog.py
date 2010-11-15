@@ -1202,7 +1202,9 @@ class EmotesWindow(gtk.Window):
                 log.debug(shortcut + ' has no path')
                 continue
 
-            button.set_image(utils.safe_gtk_image_load(path))
+            button.set_image(utils.safe_gtk_image_load(path, (20, 20)))
+            button.set_tooltip_text(shortcut)
+            button.set_relief(gtk.RELIEF_NONE)
             button.connect('clicked', self._on_emote_selected, shortcut)
             self.table.attach(button, column, column + 1, row, row + 1)
 
@@ -1216,7 +1218,9 @@ class EmotesWindow(gtk.Window):
             button = gtk.Button()
             path = os.path.join(self.emcache.path, hash_)
 
-            button.set_image(utils.safe_gtk_image_load(path))
+            button.set_image(utils.safe_gtk_image_load(path, (20, 20)))
+            button.set_tooltip_text(shortcut)
+            button.set_relief(gtk.RELIEF_NONE)
             button.connect('clicked', self._on_emote_selected, shortcut)
             self.table.attach(button, column, column + 1, row, row + 1)
 

@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath('.'))
 from e3 import cache
 import testutils
 
-class TestCreate(unittest.TestCase):
+class CacheManagerTestCase(unittest.TestCase):
     def setUp(self):
         self.cache = cache.CacheManager('tmp')
 

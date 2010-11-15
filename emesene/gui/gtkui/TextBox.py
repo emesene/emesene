@@ -244,6 +244,9 @@ class InputText(TextBox):
 
     def update_style(self, style):
         '''update the global style of the widget'''
+        if style is None:
+            return
+
         try:
             color = gtk.gdk.color_parse('#' + style.color.to_hex())
             gtk.gdk.colormap_get_system().alloc_color(color)

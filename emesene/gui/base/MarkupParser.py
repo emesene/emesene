@@ -17,7 +17,7 @@ dic_inv = {
     '&apos;'    :'\''
 }
 
-URL_REGEX_STR = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+URL_REGEX_STR = '(http[s]?://|www.)(?:[a-zA-Z]|[0-9]|[$\-_@.&+]|[!*\"\'\(\),]|[=;/#?:]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 URL_REGEX = re.compile(URL_REGEX_STR)
 
 def escape(string_):
@@ -73,12 +73,26 @@ def parse_emotes(message, cedict={}):
     # return the markup with plan text
     return message.replace(plain_text, ''.join(chunks))
 
+def replace_shortcut_with_tag(string, short, tag):
+    def repltags(m):
+        tags.append(m.group(0))
+        return '#THEREISATAGHERE#'
+    def backtags(m):
+        return tags.pop()
+    tags = []
+    result = re.sub(r'(<img[^>]+\>)', repltags, string)
+    result = result.replace(short, tag)
+    tags.reverse()
+    result = re.sub(r'#THEREISATAGHERE#', backtags, result)
+    return result
 
 def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
     '''replace emotes with img tags to the images'''
     shortcuts = gui.Theme.EMOTES.keys()
     if cedict is not None:
-        shortcuts.extend(cedict.keys())
+        l_cedict = cedict.keys()
+        l_cedict.sort(key=lambda x: len(x), reverse=True)
+        shortcuts.extend(l_cedict)
     for shortcut in shortcuts:
         eshort = escape(shortcut)
         if eshort in msgtext:
@@ -92,7 +106,8 @@ def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
                 # may have different images with the same shortcut
                 _id = base64.b64encode(sender+shortcut)
                 imgtag = '<img src="%s" alt="%s" name="%s"/>' % (path, eshort, _id)
-                msgtext = msgtext.replace(eshort, imgtag)
+                #msgtext = msgtext.replace(eshort, imgtag)
+                msgtext = replace_shortcut_with_tag(msgtext, eshort, imgtag)
 
     return msgtext
 
@@ -117,8 +132,10 @@ def get_custom_emotes(message, cedict={}):
 
 def replace_urls(match):
     '''function to be called on each url match'''
-    url = match.group()
-    return '<a href="%s">%s</a>' % (url, url)
+    hurl = url = match.group()
+    if url[:4] == 'www.':
+        hurl = 'http://' + url
+    return '<a href="%s">%s</a>' % (hurl, url)
 
 def urlify(strng):
     '''replace urls by an html link'''
