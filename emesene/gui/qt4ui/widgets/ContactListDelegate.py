@@ -77,19 +77,34 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             # draw the picture
             painter.drawPixmap(target, picture, source)
     
-            # -> start drawing the emblem
+            # -> start drawing the status emblem
             picture_path  = gui.theme.status_icons[
                             model.data(index, Role.StatusRole).toPyObject()]
             picture = QtGui.QPixmap(picture_path)
             source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
                                     QtCore.QSizeF(picture.size()) )
             x_emblem_offset = self._PICTURE_SIZE - picture.size().width()
-            y_embmel_offset = self._PICTURE_SIZE - picture.size().height()
-            xy_emblem_offset = QtCore.QPointF(x_emblem_offset, y_embmel_offset)
+            y_emblem_offset = self._PICTURE_SIZE - picture.size().height()
+            xy_emblem_offset = QtCore.QPointF(x_emblem_offset, y_emblem_offset)
             target = QtCore.QRectF( top_left_point + xy_pic_margin + 
                                         xy_emblem_offset,
                                     QtCore.QSizeF(picture.size()) )
             painter.drawPixmap(target, picture, source)
+            
+            # -> start drawing the 'blocked' emblem
+            if model.data(index, Role.BlockedRole).toPyObject():
+                picture_path = gui.theme.blocked_overlay
+                picture = QtGui.QPixmap(picture_path)
+                source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0),
+                                        QtCore.QSizeF(picture.size()) )
+                x_emblem_offset = 0
+                y_emblem_offset = self._PICTURE_SIZE - picture.size().height()
+                xy_emblem_offset = QtCore.QPointF(x_emblem_offset, 
+                                                  y_emblem_offset)
+                target = QtCore.QRectF( top_left_point + xy_pic_margin + 
+                                                      xy_emblem_offset,
+                                                  QtCore.QSizeF(picture.size()))
+                painter.drawPixmap(target, picture, source)
         
             # -> Start setting up the text_doc:
             text = _build_display_role(index)
