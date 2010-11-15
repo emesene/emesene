@@ -8,6 +8,7 @@ from plugin_base import PluginBase
 import handler_amarok2
 import handler_audacious2
 import handler_banshee
+import handler_exaile
 import handler_gmusicbrowser
 import handler_guayadeque
 import handler_lastfm
@@ -75,6 +76,7 @@ class Plugin(PluginBase):
         extension.register(CATEGORY, handler_amarok2.Amarok2Handler)
         extension.register(CATEGORY, handler_audacious2.Audacious2Handler)
         extension.register(CATEGORY, handler_banshee.BansheeHandler)
+        extension.register(CATEGORY, handler_exaile.ExaileHandler)
         extension.register(CATEGORY, handler_gmusicbrowser.GMusicBrowserHandler)
         extension.register(CATEGORY, handler_guayadeque.GuayadequeHandler)
         extension.register(CATEGORY, handler_lastfm.LastfmHandler)
