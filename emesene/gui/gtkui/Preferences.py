@@ -241,6 +241,7 @@ class BaseTable(gtk.Table):
         widget.set_active(default)
         widget.connect('toggled', self.on_toggled, property_name)
         self.append_row(widget, row)
+        return widget
 
     def append_range(self, text, property_name, min_val, max_val, is_int=True):
         """append a row with a scale to select an integer value between
@@ -414,24 +415,37 @@ class Sound(BaseTable):
         """
         BaseTable.__init__(self, 6, 1)
         self.session = session
+        self.array = []
         self.append_markup('<b>'+_('Messages events:')+'</b>')
         self.append_check(_('Mute sounds'),
             'session.config.b_mute_sounds')
-        self.append_check(_('Play sound on sent message'),
-            'session.config.b_play_send')
-        self.append_check(_('Play sound on first received message'),
-            'session.config.b_play_first_send')
-        self.append_check(_('Play sound on received message'),
-            'session.config.b_play_type')
-        self.append_check(_('Play sound on nudge'),
-            'session.config.b_play_nudge')
-
+        self.array.append(self.append_check(_('Play sound on sent message'),
+            'session.config.b_play_send'))
+        self.array.append(self.append_check(_('Play sound on first received message'),
+            'session.config.b_play_first_send'))
+        self.array.append(self.append_check(_('Play sound on received message'),
+            'session.config.b_play_type'))
+        self.array.append(self.append_check(_('Play sound on nudge'),
+            'session.config.b_play_nudge'))
         self.append_markup('<b>'+_('Users events:')+'</b>')
-        self.append_check(_('Play sound on contact online'),
-            'session.config.b_play_contact_online')
-        self.append_check(_('Play sound on contact offline'),
-            'session.config.b_play_contact_offline')
+        self.array.append(self.append_check(_('Play sound on contact online'),
+            'session.config.b_play_contact_online'))
+        self.array.append(self.append_check(_('Play sound on contact offline'),
+            'session.config.b_play_contact_offline'))
+
+        self._on_mute_sounds_changed(self.session.config.b_mute_sounds)
+
+        self.session.config.subscribe(self._on_mute_sounds_changed,
+            'b_mute_sounds')
+
         self.show_all()
+
+    def _on_mute_sounds_changed(self, value):
+        for i in self.array:        
+            if value:
+                i.set_sensitive(False)
+            else:
+                i.set_sensitive(True)
 
 class Notification(BaseTable):
     """the panel to display/modify the config related to the notifications
