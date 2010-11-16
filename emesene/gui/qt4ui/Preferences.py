@@ -8,17 +8,19 @@ from PyQt4  import QtGui
 from PyQt4  import QtCore
 from PyQt4.QtCore import Qt
 
+import e3.common
 import extension
 import gui
 
 
 LIST = [
-    {'stock_id' : 'preferences-desktop-accessibility','text' : ('Interface')},
-    {'stock_id' : 'preferences-desktop-multimedia','text' : ('Sounds')},
-    {'stock_id' : 'window-new','text' : ('Notifications')},
-    {'stock_id' : 'preferences-desktop-theme','text' : ('Theme')},
-    {'stock_id' : 'network-disconnect','text' : ('Extensions')},
-    {'stock_id' : 'network-disconnect','text' : ('Plugins')},
+    {'stock_id' : 'preferences-desktop-accessibility', 'text' : ('Interface')},
+    {'stock_id' : 'preferences-desktop',               'text' : ('Desktop'  )},
+    {'stock_id' : 'preferences-desktop-multimedia',    'text' : ('Sounds'   )},
+    {'stock_id' : 'window-new',                    'text' : ('Notifications')},
+    {'stock_id' : 'preferences-desktop-theme',         'text' : ('Theme'    )},
+    {'stock_id' : 'network-disconnect',            'text' : ('Extensions'   )},
+    {'stock_id' : 'network-disconnect',                'text' : ('Plugins'  )},
 ]
 
 class Preferences(QtGui.QWidget):
@@ -37,12 +39,13 @@ class Preferences(QtGui.QWidget):
         self.resize(600, 400)
         
         self._session = session
-        self.interface = Interface(session)
-        self.sound = Sound(session)
+        self.interface    = Interface(session)
+        self.desktop      = Desktop(session)
+        self.sound        = Sound(session)
         self.notification = Notification(session)
-        self.theme = Theme(session)
-        self.extension = Extension(session)
-        #self.plugins = PluginWindow.PluginMainVBox(session)
+        self.theme        = Theme(session)
+        self.extension    = Extension(session)
+        #self.plugins     = PluginWindow.PluginMainVBox(session)
         self.msn_papylib = None
         if 'msn' in self._session.SERVICES: # only when session is papylib.	
             self.msn_papylib = MSNPapylib(session)
@@ -76,10 +79,10 @@ class Preferences(QtGui.QWidget):
                             QtGui.QIcon.fromTheme(i['stock_id']), i['text'])
             self._list_model.appendRow(item)
         
-        for page in [self.interface,     self.sound, 
-                     self.notification,  self.theme,
-                     self.extension,     BaseTable(1,1),
-                     self.msn_papylib]: #self.plugins_page instead of BaseTable
+        for page in [self.interface,     self.desktop,     self.sound, 
+                     self.notification,  self.theme,       self.extension,
+                     BaseTable(1,1),     self.msn_papylib]: 
+                     #self.plugins_page instead of BaseTable
             if page:
                 self.widget_stack.addWidget(page)
             
@@ -372,6 +375,10 @@ class BaseTable(QtGui.QWidget):
 
     def on_update(self):
         pass
+        
+    
+    def show_all(self):
+        pass
 
 
 
@@ -420,6 +427,51 @@ class Interface(BaseTable):
 
 
 
+
+class Desktop(BaseTable):
+    ''' This panel contains some desktop related settings '''
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 3, 2)
+        self._session = session
+
+        self.append_markup('<b>'+_('File transfers')+'</b>')
+        self.append_check(_('Sort received files by sender'), 
+                          '_session.config.b_download_folder_per_account')
+        self.add_text(_('Save files to:'), 0, 2, True)
+
+        def on_path_button_clicked():
+            ''' updates the download dir config value '''
+            new_path = unicode(QtGui.QFileDialog.getExistingDirectory(
+                            directory = self._session.config.download_folder))
+            set_new_path(new_path)
+            path_edit.setText(new_path)
+        
+        def set_new_path(new_path):
+            if new_path != self._session.config.download_folder:
+                self._session.config.download_folder = new_path
+            
+        path_edit = QtGui.QLineEdit(
+            self._session.config.get_or_set("download_folder", 
+                                           e3.common.locations.downloads()))
+        path = QtGui.QWidget()
+        path_button = QtGui.QPushButton( QtGui.QIcon.fromTheme('folder'), '')
+        path_lay = QtGui.QHBoxLayout()
+        path_lay.addWidget(path_edit)
+        path_lay.addWidget(path_button)
+        path.setLayout(path_lay)
+        self.attach(path, 2, 3, 2, 3)
+        
+        path_button.clicked.connect(on_path_button_clicked)
+        path_edit.textChanged.connect(
+                            lambda new_path: set_new_path(unicode(new_path)))
+        self.show_all()
+        
+        
+        
+        
 
 class Sound(BaseTable):
     '''the panel to display/modify the config related to the sounds
