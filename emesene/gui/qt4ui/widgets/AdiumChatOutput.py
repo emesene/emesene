@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''This module contains the AdiumChatOutput class'''
+import base64
 
 from PyQt4      import QtGui
 from PyQt4      import QtCore
@@ -53,6 +54,14 @@ class AdiumChatOutput (QtGui.QScrollArea):
         html = gui.theme.conv_theme.format_incoming(msg, message.style, cedict, cedir)
         function = "appendMessage('" + html + "')"
         self._qwebview.page().mainFrame().evaluateJavaScript(function)
+        
+    def update_p2p(self, account, _type, *what):
+        ''' new p2p data has been received (custom emoticons) '''
+        if _type == 'emoticon':
+            _creator, _friendly, path = what
+            _id = base64.b64encode(_creator+xml.sax.saxutils.unescape(_friendly)) #see gui/base/MarkupParser.py
+            mystr = "var now=new Date();var x=document.images;for(var i=0;i<x.length;i++){if(x[i].name=='%s'){x[i].src='%s?'+now.getTime();}}" % (_id, path)
+            self._qwebview.page().mainFrame().evaluateJavaScript(mystr)
         
         
         
