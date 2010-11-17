@@ -101,7 +101,6 @@ def setup():
     
     extension.category_register('contact list',        widgets.ContactList)
     extension.category_register('conversation input',  widgets.ChatInput)
-    extension.category_register('conversation output', widgets.ChatOutput)
     extension.category_register('avatar',              widgets.DisplayPic)
     extension.category_register('image area selector', 
                                                     widgets.ImageAreaSelector)
@@ -109,7 +108,14 @@ def setup():
     extension.category_register('smiley chooser',   widgets.SmileyPopupChooser)
     extension.category_register('status combo',        widgets.StatusCombo)
     extension.category_register('info panel',          widgets.UserInfoPanel)
-    
+    try:
+        import PyQt4.QtWebKit
+        extension.category_register('conversation output',
+                                                  widgets.AdiumChatOutput)
+        extension.register('conversation output', widgets.ChatOutput)
+    except:
+        extension.category_register('conversation output', widgets.ChatOutput)
+        
     extension.category_register('main menu',    menus.MainMenu)
     extension.category_register('menu file',    menus.FileMenu)
     extension.category_register('menu actions', menus.ActionsMenu)

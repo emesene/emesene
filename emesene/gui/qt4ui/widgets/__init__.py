@@ -5,6 +5,7 @@ Module containing various widgets used throughout the frontend
 '''
 
 # pylint: disable=W0403
+from AdiumChatOutput        import AdiumChatOutput
 from ChatInput              import ChatInput
 from ChatOutput             import ChatOutput
 from ContactList            import ContactList

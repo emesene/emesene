@@ -13,7 +13,7 @@ from gui.qt4ui  import Utils
 class ChatOutput (QtGui.QTextBrowser):
     '''A widget which displays various messages of a conversation'''
     # pylint: disable=W0612
-    NAME = 'MainPage'
+    NAME = 'ChatOutput'
     DESCRIPTION = 'A widget to display the conversation messages'
     AUTHOR = 'Gabriele Whisky Visconti'
     WEBSITE = ''
