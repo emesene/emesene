@@ -392,6 +392,13 @@ class TrayIconHandler(FileHandler):
         """
         FileHandler.__init__(self, session, on_disconnect, on_quit)
         self.theme = theme
+        
+    def on_hide_show_mainwindow(self, main_window=None):
+        if (main_window != None):
+            if(main_window.get_property("visible")):
+                main_window.hide()
+            else:
+                main_window.show()
 
 class FileTransferHandler(object):
     ''' this handler handles a file transfer object '''
