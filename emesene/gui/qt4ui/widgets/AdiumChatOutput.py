@@ -24,43 +24,85 @@ class AdiumChatOutput (QtGui.QScrollArea):
     WEBSITE = ''
     # pylint: enable=W0612
     
+    
     def __init__(self, parent=None):
         QtGui.QScrollArea.__init__(self, parent)
+        
         self._qwebview = QtWebKit.QWebView(self)
+        self._qwebview.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
+        self._last_sender = None
         
         self.setWidget(self._qwebview)
         self.setWidgetResizable(True)
-        self._qwebview.setHtml(
-                            gui.theme.conv_theme.get_body('', '', '', '', ''))
+        pic = gui.theme.user
+        body = gui.theme.conv_theme.get_body('', '', '', pic, pic)
+        self._qwebview.setHtml(body)
                             
-    def send_message(self, formatter, contact, text, cedict, cedir, style, is_first, type_=None):
+                            
+    def _append_message(self, contact, text, cedict,
+                        cedir, style, is_incoming, timestamp=None):
+                            
+        msg = gui.Message.from_contact(contact, text, first=True,
+                                       incomming=is_incoming, tstamp=timestamp)
+        if msg.sender != self._last_sender:
+            function = "appendMessage('%s')"
+            msg.first = True
+            self._last_sender = msg.sender
+        else:
+            function = "appendNextMessage('%s')"
+            msg.first = False
+            
+        if is_incoming:
+            html = gui.theme.conv_theme.format_incoming(msg, style, 
+                                                        cedict, cedir)
+        else:
+            html = gui.theme.conv_theme.format_outgoing(msg, style, 
+                                                        cedict, cedir)
+            
+        self._qwebview.page().mainFrame().evaluateJavaScript(function % html)
+                            
+
+    def information(self, formatter, contact, message):
+        '''add an information message to the widget'''
+        # TODO: make it with a status message
+        self._append_message(contact, message, cedict={}, 
+                             cedir='', style=None, is_incoming=True)
+        
+        
+    def send_message(self, formatter, contact, text, 
+                     cedict, cedir, style, is_first, type_=None):
         '''add a message to the widget'''
         if type_ is e3.Message.TYPE_NUDGE:
-            text = _('You just sent a nudge!')
-
-        msg = gui.Message.from_contact(contact, text, is_first, False)
-        #self.view.add_message(msg, style, cedict, cedir)
-        msg.first = True
-        html = gui.theme.conv_theme.format_outgoing(msg, style, cedict, cedir)
-        function = "appendMessage('" + html + "')"
-        self._qwebview.page().mainFrame().evaluateJavaScript(function)
+            text = _('You just sent a nudge!')        
+        self._append_message(contact, text, cedict, 
+                             cedir, style, is_incoming=False)
         
-    def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
+        
+    def receive_message(self, formatter, contact, 
+                        message, cedict, cedir, is_first):
         '''add a message to the widget'''
-        msg = gui.Message.from_contact(contact, message.body, is_first, True, message.timestamp)
         # WARNING: this is a hack to keep out config from backend libraries
         #message.style.size = self.config.i_font_size
-        msg.first = True
-        html = gui.theme.conv_theme.format_incoming(msg, message.style, cedict, cedir)
-        function = "appendMessage('" + html + "')"
-        self._qwebview.page().mainFrame().evaluateJavaScript(function)
+        self._append_message(contact, message.body, cedict, cedir, 
+                             message.style, is_incoming=True, 
+                             timestamp=message.timestamp)
+
         
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
         if _type == 'emoticon':
             _creator, _friendly, path = what
-            _id = base64.b64encode(_creator+xml.sax.saxutils.unescape(_friendly)) #see gui/base/MarkupParser.py
-            mystr = "var now=new Date();var x=document.images;for(var i=0;i<x.length;i++){if(x[i].name=='%s'){x[i].src='%s?'+now.getTime();}}" % (_id, path)
+            _friendly = xml.sax.saxutils.unescape(_friendly)
+            #see gui/base/MarkupParser.py:
+            _id = base64.b64encode(_creator + _friendly) 
+            mystr = '''
+                        var now=new Date();
+                        var x=document.images;
+                        for (var i=0; i<x.length; i++){
+                            if (x[i].name=='%s') {
+                                x[i].src='%s?'+now.getTime();
+                            }
+                       }''' % (_id, path)
             self._qwebview.page().mainFrame().evaluateJavaScript(mystr)
         
         
