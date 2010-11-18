@@ -179,10 +179,16 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.hbox.show()
         self.panel.show_all()
 
-        self.input.grab_focus()
+        self.input_grab_focus()
 
         if not self.session.config.b_show_toolbar:
             self.toolbar.hide()
+
+    def input_grab_focus(self):
+        '''
+        sets the focus on the input widget
+        '''
+        self.input.grab_focus()
 
     def update_panel_position(self, *args):
         """update the panel position to be on the 80% of the height
@@ -318,7 +324,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_emote(self, emote):
         '''called when an emoticon is selected'''
         self.input.append(gobject.markup_escape_text(emote))
-        self.input.grab_focus()
+        self.input_grab_focus()
 
     def on_picture_change_succeed(self, account, path):
         '''callback called when the picture of an account is changed'''

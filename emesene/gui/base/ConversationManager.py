@@ -56,7 +56,7 @@ class ConversationManager(object):
         inform that the other user has started typing
         """
         # TODO: implement, this seems to be cross gui so it should go here
-        log.debug('typing')
+        log.debug('%s is typing in %s' % (account, cid))
 
     def set_message_waiting(self, conversation, is_waiting):
         """

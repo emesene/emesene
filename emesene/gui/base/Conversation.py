@@ -195,6 +195,12 @@ class Conversation(object):
         '''
         raise NotImplementedError("Method not implemented")
 
+    def input_grab_focus(self):
+        '''
+        sets the focus on the input widget
+        '''
+        raise NotImplementedError("Method not implemented")
+
     def _get_message_waiting(self):
         '''return True if a message is waiting'''
         return self._message_waiting

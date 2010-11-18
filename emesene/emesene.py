@@ -498,21 +498,14 @@ class Controller(object):
 
         conversation.update_data()
 
-        # the following lines (up to and including the second show() )
-        # do 2 things:
-        # a) make sure proper tab is selected (if multiple tabs are opened)
-        #    when clicking on a user icon
-        # b) place cursor on text box
-        # both the show() calls are needed - won't work otherwise
-        # EDIT: it works with the first show() setting the input as the first
-        #       focused widget and deniing focus to notebook's tabs
-
         conversation.show() # puts widget visible
 
-        # raises the container (tabbed windows) if its minimized
+        # raises the container and grabs the focus
+        # handles cases where window is minimized and ctrl+tab focus stealing
         if not other_started:
             self.conversations.set_current_page(conversation.tab_index)
             self.conversations.get_parent().present()
+            conversation.input_grab_focus()
 
         if not self.session.config.b_mute_sounds and other_started and \
            self.session.contacts.me.status != e3.status.BUSY and \

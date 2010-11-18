@@ -38,7 +38,6 @@ class ConversationManager(Notebook, gui.ConversationManager):
         gui.ConversationManager.__init__(self, session, on_last_close)
 
         self.set_scrollable(True)
-
         #self.set_scrollable(session.config.get_or_set('b_conv_tab_scroll',
         #    True))
 
@@ -157,6 +156,8 @@ class ConversationManager(Notebook, gui.ConversationManager):
         self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
         self.set_message_waiting(page, False)
         self.update_window(page.text, page.icon, self.get_current_page())
+        page.input_grab_focus()
+        return True
 
     def _on_tab_close(self, button, conversation):
         '''called when the user clicks the close button on a tab'''
