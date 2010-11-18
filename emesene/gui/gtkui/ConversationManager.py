@@ -38,6 +38,7 @@ class ConversationManager(Notebook, gui.ConversationManager):
         gui.ConversationManager.__init__(self, session, on_last_close)
 
         self.set_scrollable(True)
+        self.set_property('can-focus', False)
         #self.set_scrollable(session.config.get_or_set('b_conv_tab_scroll',
         #    True))
 
