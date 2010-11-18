@@ -13,7 +13,7 @@ def add_style_to_message(text, stl, escape=True):
 
     style_start = ''
     style_end = ''
-    style = 'color: #' + stl.color.to_hex() + ';'
+    style = 'color: #' + stl.color.to_hex() + '; '
 
     if stl.bold:
         style_start = style_start + '<b>'
@@ -32,9 +32,9 @@ def add_style_to_message(text, stl, escape=True):
         style_end = '</s>' + style_end
 
     if stl.font:
-        style += 'font-family: ' + stl.font
+        style += "font-family: '%s'; " % (stl.font, )
 
-    style_start += '<span style="%s; ">' % (style, )
+    style_start += '<span style="%s">' % (style, )
     style_end = '</span>' + style_end
 
 
