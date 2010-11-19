@@ -35,8 +35,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         
         self._pmodel.setSourceModel(self._model)
         self.setModel(self._pmodel)
-        delegate = ContactListDelegate.ContactListDelegate(self)
-        delegate.set_group_template(self.group_template)
+        delegate = ContactListDelegate.ContactListDelegate(session, self)
         delegate.set_nick_formatter(self.format_nick)
         self.setItemDelegate(delegate)
         self.setAnimated(True)

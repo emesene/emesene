@@ -20,21 +20,27 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
     # _MIN_PICTURE_MARGIN = defaultPicture(Outer)Margin
     _MIN_PICTURE_MARGIN = 3.0
     
-    def __init__(self, parent):
+    def __init__(self, session, parent):
         '''Constructor'''
         QtGui.QStyledItemDelegate.__init__(self, parent)
         
+        self._config = session.config
         self._pic_size = QtCore.QSizeF(self._PICTURE_SIZE, self._PICTURE_SIZE)
-        self._group_template = (lambda group: group)
         self._format_nick  = (lambda nick:  nick )
         
+        self._config.subscribe(self._on_template_change, 
+                              'nick_template')
+        self._config.subscribe(self._on_template_change,
+                               'group_template')
     
-    def set_group_template(self, template):
-        # TODO: from config
-        self._group_template = template
-        
+    
     def set_nick_formatter(self, func):
         self._format_nick = func
+        self.parent().update()
+        
+    def _on_template_change(self, *args):
+        print "template changed"
+        self.parent().repaint()
     
     def _build_display_role(self, index, is_group=False):
         '''Build a string to be used as item's display role'''
@@ -44,7 +50,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             name = model.data(index, Role.DisplayRole).toPyObject()
             online = model.data(index, Role.OnlCountRole).toPyObject()
             total = model.data(index, Role.TotalCountRole).toPyObject()
-            display_role = self._group_template
+            display_role = self._config.group_template
             display_role = replace_markup(display_role)
             display_role = display_role.replace('[$NAME]', name)
             display_role = display_role.replace('[$ONLINE_COUNT]', str(online))
