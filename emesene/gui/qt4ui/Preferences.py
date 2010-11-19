@@ -271,19 +271,23 @@ class BaseTable(QtGui.QWidget):
         
         label = QtGui.QLabel(text)
         scale = QtGui.QSlider(Qt.Horizontal)
+        spin  = QtGui.QSpinBox()
         
         hlay = QtGui.QHBoxLayout()
         hlay.addWidget(label)
         hlay.addWidget(scale)
+        hlay.addWidget(spin)
         widget = QtGui.QWidget()
         widget.setLayout(hlay)
         self.append_row(widget, None)
         
         scale.setRange(min_val, max_val)
+        spin.setRange(min_val, max_val)
         default = self.get_attr(property_name)
         if default is None:
             default = min_val
         scale.setValue(default)
+        spin.setValue(default)
 
         #if is_int:
         #    scale.set_digits(0)
@@ -292,6 +296,8 @@ class BaseTable(QtGui.QWidget):
                                                             scale, 
                                                             property_name,
                                                             is_int))
+        scale.valueChanged.connect(spin.setValue)
+        spin.valueChanged.connect(scale.setValue)
         
 
     def append_combo(self, text, getter, property_name):
