@@ -218,7 +218,7 @@ class BaseTable(QtGui.QWidget):
         value of property_name if exists, if not set it to default.
         Add a reset button that sets the value to the default'''
 
-        def on_reset_clicked(button, entry, default):
+        def on_reset_clicked(entry, default):
             '''called when the reset button is clicked, sets
             entry text to default'''
             entry.setText(default)
@@ -226,7 +226,7 @@ class BaseTable(QtGui.QWidget):
         def on_entry_changed(entry, property_name):
             '''Called when the content of an entry changes,
             set the value of the property to the new value'''
-            self.set_attr(property_name, entry.text())
+            self.set_attr(property_name, unicode(entry.text()))
 
         label = QtGui.QLabel(text)
         line_edit = QtGui.QLineEdit()
@@ -245,9 +245,9 @@ class BaseTable(QtGui.QWidget):
         line_edit.setText(text)
         
         reset.clicked.connect(
-                            lambda: on_reset_clicked(line_edit, default))
+                        lambda: on_reset_clicked(line_edit, default))
         line_edit.textChanged.connect(
-                            lambda t: on_entry_changed(property_name))
+                        lambda t: on_entry_changed(line_edit, property_name))
 
 
     def append_check(self, text, property_name, row=None):
