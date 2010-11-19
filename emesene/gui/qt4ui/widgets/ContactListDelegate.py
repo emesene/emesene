@@ -25,6 +25,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         QtGui.QStyledItemDelegate.__init__(self, parent)
         
         self._config = session.config
+        self._PICTURE_SIZE = self._config.get_or_set('i_avatar_size', 50)
         self._pic_size = QtCore.QSizeF(self._PICTURE_SIZE, self._PICTURE_SIZE)
         self._format_nick  = (lambda nick:  nick )
         

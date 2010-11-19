@@ -28,13 +28,20 @@ class DisplayPic (QtGui.QLabel):
                  size=None, clickable=True, parent=None):
         '''constructor'''
         QtGui.QLabel.__init__(self, parent)
+        
         self._session = session
         self._default_pic = default_pic
-        self._movie = None
-        if not size:
-            # TODO: take this from options and subscribe
+        if size:
+            self._size = size
+        elif not session:
             self._size = QtCore.QSize(96, 96)
+        else:
+            self._size = QtCore.QSize(session.config.i_conv_avatar_size,
+                                      session.config.i_conv_avatar_size)
         self._clickable = clickable
+        
+        self._movie = None
+        self._last = None
         self._fader = PixmapFader(self.setPixmap, self._size,
                                   self._default_pic, self)
         
@@ -52,6 +59,13 @@ class DisplayPic (QtGui.QLabel):
         
         self._fader.movie_fadein_complete.connect(
                                         lambda: self.setMovie(self._movie))
+                                        
+    def _on_cc_avatar_size(self, *args):
+        self._size = QtCore.QSize(self._session.config.i_conv_avatar_size,
+                                  self._session.config.i_conv_avatar_size)
+        self._fader.set_size(self._size)
+        self.set_display_pic_from_file(self._last)
+        
         
     def set_default_pic(self):
         '''Sets the default pic'''
@@ -86,6 +100,7 @@ class DisplayPic (QtGui.QLabel):
         else:
             self._movie = QtGui.QMovie(path)
             self._fader.add_pixmap(self._movie)
+        self._last = path
         
 
 #    def set_clickable(self, clickable):
@@ -144,7 +159,7 @@ class PixmapFader(QtCore.QObject):
         QtCore.QObject.__init__(self, parent)
         self._elements = []
         self._size = pixmap_size
-        self._rect = QtCore.QRect(QtCore.QPoint(0, 0), self._size)
+        self._rect= QtCore.QRect(QtCore.QPoint(0, 0), self._size)
         self._callback = callback
         # timer initialization
         self._timer = QtCore.QTimer(QtGui.QApplication.instance())
@@ -159,6 +174,12 @@ class PixmapFader(QtCore.QObject):
         self._result.fill(Qt.transparent)
         self._painter = QtGui.QPainter(self._result)
         #self._painter.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
+        
+    def set_size(self, qsize):
+        self._size = qsize
+        self._rect= QtCore.QRect(QtCore.QPoint(0, 0), self._size)
+        self._result = self._result.scaled(self._size,
+                                       transformMode=Qt.SmoothTransformation)
         
     def __del__(self): 
         '''Destructor. Note: without this explicit destructor, we get a SIGABRT
