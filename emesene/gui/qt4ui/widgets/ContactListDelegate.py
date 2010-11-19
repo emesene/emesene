@@ -86,7 +86,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         
         if not index.parent().isValid():
             # -> Start drawing the text_doc:
-            text = '<b>%s</b>' % self._build_display_role(index, True)
+            text = self._build_display_role(index, True)
             painter.translate( QtCore.QPointF(option.rect.topLeft()) )
             # create the text_doc
             text_doc.setHtml(text)
