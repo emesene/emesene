@@ -186,6 +186,7 @@ class BaseTable(QtGui.QWidget):
         '''Adds a label with thext to row and column, align the text left if
         align_left is True'''
         label = QtGui.QLabel(text)
+        label.setWordWrap(line_wrap)
         self.add_label(label, column, row, align_left)
 
 
@@ -194,8 +195,7 @@ class BaseTable(QtGui.QWidget):
         align_left is True'''
         if align_left:
             pass
-
-        #label.set_line_wrap(line_wrap)
+        label.setWordWrap(line_wrap)
         self.grid_lay.addWidget(label, row, column)
     
     def append_markup(self, text):
