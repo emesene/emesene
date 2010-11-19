@@ -32,7 +32,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._members = members
         
         # a widget dic to avoid proliferation of instance variables:
-        self._widget_dict = {}
+        self._widget_d = {}
         # an action dict to avoid proliferation of instance variables:
         self._action_dict = {}
         
@@ -40,12 +40,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         # emesene's
         self.tab_index = 0
-        self.input = self._widget_dict['chat_input']
-        self.output = self._widget_dict['chat_output']
+        self.input = self._widget_d['chat_input']
+        self.output = self._widget_d['chat_output']
         
         #FIXME: move this to base class
         self._load_style()
-        self._widget_dict['chat_input'].e3_style = self.cstyle
+        self._widget_d['chat_input'].e3_style = self.cstyle
         
         
     def __del__(self):
@@ -54,7 +54,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
-        widget_dict = self._widget_dict
+        widget_d = self._widget_d
         action_dict = self._action_dict
         
         # Classes
@@ -77,26 +77,26 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     
         
         # TOP LEFT
-        widget_dict['chat_output'] = conv_output_cls()
+        widget_d['chat_output'] = conv_output_cls()
         top_left_lay = QtGui.QHBoxLayout()
-        top_left_lay.addWidget(widget_dict['chat_output'])
+        top_left_lay.addWidget(widget_d['chat_output'])
         
         
         # BOTTOM LEFT
-        widget_dict['toolbar'] = QtGui.QToolBar(self)
-        widget_dict['smiley_chooser'] = smiley_chooser_cls()
-        widget_dict['chat_input'] = Widgets.ChatInput()
-        widget_dict['send_btn'] = QtGui.QPushButton("Send")
+        widget_d['toolbar'] = QtGui.QToolBar(self)
+        widget_d['smiley_chooser'] = smiley_chooser_cls()
+        widget_d['chat_input'] = Widgets.ChatInput()
+        widget_d['send_btn'] = QtGui.QPushButton("Send")
         
         text_edit_lay = QtGui.QHBoxLayout()
-        text_edit_lay.addWidget(widget_dict['chat_input'])
-        text_edit_lay.addWidget(widget_dict['send_btn'])
+        text_edit_lay.addWidget(widget_d['chat_input'])
+        text_edit_lay.addWidget(widget_d['send_btn'])
         
         bottom_left_lay = QtGui.QVBoxLayout()
-        bottom_left_lay.addWidget(widget_dict['toolbar'])
+        bottom_left_lay.addWidget(widget_d['toolbar'])
         bottom_left_lay.addLayout(text_edit_lay)
         
-        toolbar = widget_dict['toolbar']
+        toolbar = widget_d['toolbar']
         toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
         toolbar.addAction(action_dict['add_smiley'])
         toolbar.addAction(action_dict['send_nudge'])
@@ -104,15 +104,15 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         toolbar.addAction(action_dict['change_font'])
         toolbar.addAction(action_dict['change_color'])
         
-        widget_dict['chat_input'].set_smiley_dict(gui.theme.EMOTES)
+        widget_d['chat_input'].set_smiley_dict(gui.theme.EMOTES)
 
-        widget_dict['smiley_chooser'].emoticon_selected.connect(
+        widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
-        widget_dict['chat_input'].return_pressed.connect(
+        widget_d['chat_input'].return_pressed.connect(
                             self._on_send_btn_clicked)
-        widget_dict['chat_input'].style_changed.connect(
+        widget_d['chat_input'].style_changed.connect(
                             self._on_new_style_selected)
-        widget_dict['send_btn'].clicked.connect(
+        widget_d['send_btn'].clicked.connect(
                             self._on_send_btn_clicked)
                             
         action_dict['add_smiley'].triggered.connect(
@@ -120,9 +120,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         action_dict['send_nudge'].triggered.connect(
                             self.on_notify_attention)
         action_dict['change_font'].triggered.connect(
-                            widget_dict['chat_input'].show_font_chooser)
+                            widget_d['chat_input'].show_font_chooser)
         action_dict['change_color'].triggered.connect(
-                            widget_dict['chat_input'].show_color_chooser)
+                            widget_d['chat_input'].show_color_chooser)
         
         # LEFT (TOP & BOTTOM)
         left_widget = QtGui.QSplitter(Qt.Vertical)
@@ -139,28 +139,28 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         left_widget.moveSplitter(splitter_pos, 1)
 
         # RIGHT
-        widget_dict['his_display_pic'] = avatar_cls(self._session)
-        widget_dict['my_display_pic'] = avatar_cls(self._session)
+        widget_d['his_display_pic'] = avatar_cls(self._session)
+        widget_d['my_display_pic'] = avatar_cls(self._session)
         
         right_lay = QtGui.QVBoxLayout()
-        right_lay.addWidget(widget_dict['his_display_pic'])
+        right_lay.addWidget(widget_d['his_display_pic'])
         right_lay.addStretch()
-        right_lay.addWidget(widget_dict['my_display_pic'])
+        right_lay.addWidget(widget_d['my_display_pic'])
         
-        widget_dict['my_display_pic'].set_display_pic_of_account()
+        widget_d['my_display_pic'].set_display_pic_of_account()
         if self._members:
             his_email = self._members[0]
-            widget_dict['his_display_pic'].set_display_pic_of_account(
+            widget_d['his_display_pic'].set_display_pic_of_account(
                                                                 his_email)
 
         # LEFT & RIGHT
-        widget_dict['info_panel'] = info_panel_cls()
+        widget_d['info_panel'] = info_panel_cls()
         
         lay_no_info = QtGui.QHBoxLayout()
         lay_no_info.addWidget(left_widget)
         lay_no_info.addLayout(right_lay)
         lay = QtGui.QVBoxLayout()
-        lay.addWidget(widget_dict['info_panel'])
+        lay.addWidget(widget_d['info_panel'])
         lay.addLayout(lay_no_info)
         
         
@@ -169,6 +169,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
     
     # emesene's
+    
+    def input_grab_focus(self):
+        '''sets the focus on the input widget'''
+        self._widget_d['chat_input'].setFocus(Qt.OtherFocusReason)
+        
+        
     # TODO: put this (and maybe the following) in the base 
     # class as abstract methods
     def on_close(self):
@@ -186,7 +192,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # does this have to update the picture too?
         status = self._session.contacts.get(account).status
         print 'USI: [%s], [%s], [%s], [%s]' % (status, nick, message, account)
-        self._widget_dict['info_panel'].update(status, nick, message, account)
+        self._widget_d['info_panel'].update(status, nick, message, account)
         
         
     def show(self):
@@ -196,28 +202,28 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def _on_new_style_selected(self):
         '''Slot called when the user clicks ok in the color chooser or the 
         font chooser'''
-        self.cstyle = self._widget_dict['chat_input'].e3_style
+        self.cstyle = self._widget_d['chat_input'].e3_style
    
     def _on_show_smiley_chooser(self):
         '''Slot called when the user clicks the smiley button.
         Show the smiley chooser panel'''
-        self._widget_dict['smiley_chooser'].show()
+        self._widget_d['smiley_chooser'].show()
 
 
     def _on_smiley_selected(self, shortcut):
         '''Slot called when the user selects a smiley in the smiley 
         chooser panel. Inserts the smiley in the chat edit'''
         # handles cursor position
-        self._widget_dict['chat_input'].insert_text_after_cursor(shortcut)
+        self._widget_d['chat_input'].insert_text_after_cursor(shortcut)
         
     
     def _on_send_btn_clicked(self):
         '''Slot called when the user clicks the send button or presses Enter in
         the chat line editor. Sends the message'''
-        message_string = unicode(self._widget_dict['chat_input'].toPlainText())
+        message_string = unicode(self._widget_d['chat_input'].toPlainText())
         if len(message_string) == 0:
             return
-        self._widget_dict['chat_input'].clear()
+        self._widget_d['chat_input'].clear()
         gui.base.Conversation._on_send_message(self, message_string)
         
     

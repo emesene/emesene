@@ -9,6 +9,7 @@ from PyQt4.QtCore   import Qt
 import gui
 
 from gui.qt4ui import Utils
+from gui.qt4ui import PictureHandler
 
 
 class DisplayPic (QtGui.QLabel):
@@ -29,6 +30,7 @@ class DisplayPic (QtGui.QLabel):
         QtGui.QLabel.__init__(self, parent)
         self._session = session
         self._default_pic = default_pic
+        self._movie = None
         if not size:
             # TODO: take this from options and subscribe
             self._size = QtCore.QSize(96, 96)
@@ -47,6 +49,9 @@ class DisplayPic (QtGui.QLabel):
         
         self.set_display_pic_from_file(default_pic)
         self.installEventFilter(self)
+        
+        self._fader.movie_fadein_complete.connect(
+                                        lambda: self.setMovie(self._movie))
         
     def set_default_pic(self):
         '''Sets the default pic'''
@@ -69,12 +74,18 @@ class DisplayPic (QtGui.QLabel):
 
     def set_display_pic_from_file(self, path):
         ''' sets the display pic from the path'''
-        pixmap = QtGui.QPixmap(path)
-        if pixmap.isNull():
-            pixmap = QtGui.QPixmap(self._default_pic)
-        
-        pixmap = Utils.pixmap_rounder(pixmap)
-        self._fader.add_pixmap(pixmap)
+        pic_handler = PictureHandler.PictureHandler(path)
+        if pic_handler.can_handle():
+            pixmap = QtGui.QPixmap(path)
+            if pixmap.isNull():
+                pixmap = QtGui.QPixmap(self._default_pic)
+            
+            pixmap = Utils.pixmap_rounder(pixmap.scaled(self._size,
+                                        transformMode=Qt.SmoothTransformation))
+            self._fader.add_pixmap(pixmap)
+        else:
+            self._movie = QtGui.QMovie(path)
+            self._fader.add_pixmap(self._movie)
         
 
 #    def set_clickable(self, clickable):
@@ -125,11 +136,13 @@ class DisplayPic (QtGui.QLabel):
 
 class PixmapFader(QtCore.QObject):
     '''Class which provides a fading animation between QPixmaps'''
+    
+    movie_fadein_complete = QtCore.pyqtSignal()
     def __init__(self, callback, pixmap_size, 
                  first_pic, parent=None):
         '''Constructor'''
         QtCore.QObject.__init__(self, parent)
-        self._pixmaps = []
+        self._elements = []
         self._size = pixmap_size
         self._rect = QtCore.QRect(QtCore.QPoint(0, 0), self._size)
         self._callback = callback
@@ -141,69 +154,88 @@ class PixmapFader(QtCore.QObject):
         self._frame_time = 1 / self._fpms
         self._alpha_step = self._frame_time / self._duration
         # pixmap painting initializations
-        self._result = QtGui.QPixmap(first_pic).scaled(self._size)
+        self._result = QtGui.QPixmap(first_pic).scaled(self._size,
+                                       transformMode=Qt.SmoothTransformation)
         self._result.fill(Qt.transparent)
         self._painter = QtGui.QPainter(self._result)
+        #self._painter.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
         
     def __del__(self): 
         '''Destructor. Note: without this explicit destructor, we get a SIGABRT
         due to a failed assertion in xcb.'''
         self._painter.end()
         
-    def add_pixmap(self, pixmap):
+    def add_pixmap(self, element):
         '''Adds a pixmap to the pixmap stack'''
+        
+        if isinstance(element, QtGui.QMovie):
+            movie = element
+            movie.setScaledSize(self._size)
+            movie.start()
+            pixmap = movie.currentPixmap()
+        else:    
+            pixmap = element
+            
         if pixmap.isNull():
             return
-        pixmap = pixmap.scaled(self._size)
-        number_of_pixmaps = len(self._pixmaps)
-        
+                               
+        mumber_of_elements = len(self._elements)
         # no pixmap yet:        
-        if number_of_pixmaps == 0:
+        if mumber_of_elements == 0:
             self._painter.save()
-            self._pixmaps.append((pixmap, 1))
+            self._elements.append((element, 1))
             self._painter.drawPixmap(self._rect, pixmap, self._rect)
             self._painter.restore()
             self._callback(self._result)
             return
        
         # the pixmap is the same as the last one:
-        if pixmap.toImage() == self._pixmaps[-1][0].toImage():
+        if isinstance(self._elements[-1][0], QtGui.QPixmap) and \
+           pixmap.toImage() == self._elements[-1][0].toImage():
             return
             
         # we have already one pixmap:     
-        if number_of_pixmaps == 1:
-            self._pixmaps.append((pixmap, 0))
+        if mumber_of_elements == 1:
+            self._elements.append((element, 0))
             self._timer.start(self._frame_time)
             return
             
         # we have already two pixmap:
-        if number_of_pixmaps == 2:
-            self._pixmaps[0] = (self._result, 1)
-            self._pixmaps[1] = (pixmap, 0)
+        if mumber_of_elements == 2:
+            self._elements[0] = (self._result, 1)
+            self._elements[1] = (element, 0)
             self._timer.start(self._frame_time)
         
         # ops...
-        if number_of_pixmaps > 2:
+        if mumber_of_elements > 2:
             raise RuntimeError('[BUG] Too many pixmaps!')
         
         
     def _on_timeout(self):
         '''Compute a frame. This method is called by a QTimer 
         various times per second.'''
-        old_pixmap, old_opacity = self._pixmaps[0]
-        new_pixmap, new_opacity = self._pixmaps[1]
+        old_element, old_opacity = self._elements[0]
+        new_element, new_opacity = self._elements[1]
+        old_pixmap = old_element
+        new_pixmap = new_element 
+        if isinstance(old_pixmap, QtGui.QMovie):
+            old_pixmap = old_element.currentPixmap()
+        if isinstance(new_pixmap, QtGui.QMovie):
+            new_pixmap = new_element.currentPixmap()
         
         if old_opacity < 0 and new_opacity > 1:
             self._timer.stop()
-            self._pixmaps.remove(self._pixmaps[0])
-            self._pixmaps[0] = (new_pixmap, 1)
+            if isinstance(new_element, QtGui.QMovie):
+                self.movie_fadein_complete.emit()
+            self._elements.remove(self._elements[0])
+            self._elements[0] = (new_pixmap, 1)
             return
             
         old_opacity -= self._alpha_step
         new_opacity += self._alpha_step
          
-        self._pixmaps[0] = (old_pixmap, old_opacity)
-        self._pixmaps[1] = (new_pixmap, new_opacity)
+        self._elements[0] = (old_element, old_opacity)
+        self._elements[1] = (new_element, new_opacity)
             
         painter = self._painter
         painter.save()

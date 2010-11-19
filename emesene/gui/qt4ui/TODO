@@ -7,7 +7,7 @@ X Call correct callback when closing windows
 X fix the bug freezing ChatTextEdit widget taht 
     occurs inserting an emoticon when empty
 X Implement updates to contact's info in conversation window
-- Implement remaining abstract methods
+> Implement remaining abstract methods
 X DisplayPic must handle various dimensions
 X Implement correct font style handling when sending receiving messages
 X Fix imports
@@ -22,9 +22,9 @@ X Remove the empty space on the left in contact list
 
 X Implement a display pic chooser.
 - Fix update behaviour in the panel that shows account's info (display pic nick...)
-> Implement actions on contact list
+X Implement actions on contact list
 X Implement default emoticon support
-- Implement custom emoticon support
+> Implement custom emoticon support
 - Implement nick rendering
 
 - Implement notifications
@@ -35,7 +35,7 @@ X Implement Preferences
 - Implement file transfer
 - Implement multiple conversations
 
-- Support for animated avatars
+X Support for animated avatars
 
 - Fix doubled smileys in SmileyChooser
 - Fix transparency and off-screen selection in ImageAreaSelector 

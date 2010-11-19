@@ -34,7 +34,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
         self._vn = ['Used pictures', 'System pictures', 'Contact pictures']
         self._view_with_selection = None
         self._current_avatar = session.config_dir.get_path("last_avatar")
-        self._widget_dict = {}
+        self._widget_d = {}
         
         self._setup_ui()
         used_path    = self._avatar_manager.get_avatars_dir()
@@ -50,40 +50,40 @@ class AvatarChooser(Dialog.OkCancelDialog):
         
     def _setup_ui(self):
         '''Builds up the UI'''
-        widget_dict = self._widget_dict
+        widget_d = self._widget_d
         
-        widget_dict['tab_widget']   = QtGui.QTabWidget()
-        widget_dict['group_box']    = QtGui.QGroupBox()
-        widget_dict['preview_dpic'] = widgets.DisplayPic(self._session,
+        widget_d['tab_widget']   = QtGui.QTabWidget()
+        widget_d['group_box']    = QtGui.QGroupBox()
+        widget_d['preview_dpic'] = widgets.DisplayPic(self._session,
                                                              clickable=False)
-        widget_dict['add_btn']      = QtGui.QPushButton('Add...')
-        widget_dict['remove_btn']   = QtGui.QPushButton('Remove')
-        widget_dict[self._vn[0]]    = QtGui.QListView()
-        widget_dict[self._vn[1]]    = QtGui.QListView()
-        widget_dict[self._vn[2]]    = QtGui.QListView()
+        widget_d['add_btn']      = QtGui.QPushButton('Add...')
+        widget_d['remove_btn']   = QtGui.QPushButton('Remove')
+        widget_d[self._vn[0]]    = QtGui.QListView()
+        widget_d[self._vn[1]]    = QtGui.QListView()
+        widget_d[self._vn[2]]    = QtGui.QListView()
         
         
         group_box_lay = QtGui.QVBoxLayout()
-        group_box_lay.addWidget(widget_dict['preview_dpic'])
-        widget_dict['group_box'].setLayout(group_box_lay)
+        group_box_lay.addWidget(widget_d['preview_dpic'])
+        widget_d['group_box'].setLayout(group_box_lay)
         right_lay = QtGui.QVBoxLayout()
-        right_lay.addWidget(widget_dict['group_box'])
+        right_lay.addWidget(widget_d['group_box'])
         right_lay.addSpacing(50)
-        right_lay.addWidget(widget_dict['add_btn'])
-        right_lay.addWidget(widget_dict['remove_btn'])
+        right_lay.addWidget(widget_d['add_btn'])
+        right_lay.addWidget(widget_d['remove_btn'])
         right_lay.addStretch(20)
         lay = QtGui.QHBoxLayout()
-        lay.addWidget(widget_dict['tab_widget'])
+        lay.addWidget(widget_d['tab_widget'])
         lay.addLayout(right_lay)
         self.setLayout(lay)
         self.resize(725, 430)
         
         delegate = widgets.IconViewDelegate()
         for view_name in self._vn:
-            listview = widget_dict[view_name]
+            listview = widget_d[view_name]
             model = QtGui.QStandardItemModel(listview)
             selection_model = QtGui.QItemSelectionModel(model, listview)
-            widget_dict['tab_widget'].addTab(listview, view_name)
+            widget_d['tab_widget'].addTab(listview, view_name)
             listview.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
             listview.setViewMode      (QtGui.QListView.IconMode)
             listview.setMovement      (QtGui.QListView.Static)
@@ -91,31 +91,31 @@ class AvatarChooser(Dialog.OkCancelDialog):
             listview.setModel         (model)
             listview.setSelectionModel(selection_model)
             listview.setItemDelegate  (delegate)
-        widget_dict['group_box'].setTitle('Preview')
-        widget_dict['preview_dpic'].set_display_pic_of_account()
-        widget_dict['add_btn'].setIcon(QtGui.QIcon.fromTheme('list-add'))
-        widget_dict['remove_btn'].setIcon(QtGui.QIcon.fromTheme('list-remove'))
+        widget_d['group_box'].setTitle('Preview')
+        widget_d['preview_dpic'].set_display_pic_of_account()
+        widget_d['add_btn'].setIcon(QtGui.QIcon.fromTheme('list-add'))
+        widget_d['remove_btn'].setIcon(QtGui.QIcon.fromTheme('list-remove'))
         
         
-        widget_dict[self._vn[0]].selectionModel().currentChanged.   \
+        widget_d[self._vn[0]].selectionModel().currentChanged.   \
             connect(                                                       \
                 lambda *args:                                              \
                     self._on_selection_changed(self._vn[0], *args))
-        widget_dict[self._vn[1]].selectionModel().currentChanged.   \
+        widget_d[self._vn[1]].selectionModel().currentChanged.   \
             connect(                                                       \
                 lambda *args:                                              \
                     self._on_selection_changed(self._vn[1], *args))
-        widget_dict[self._vn[2]].selectionModel().currentChanged.   \
+        widget_d[self._vn[2]].selectionModel().currentChanged.   \
             connect(                                                       \
                 lambda *args:                                              \
                     self._on_selection_changed(self._vn[2], *args))
-        widget_dict['add_btn'].clicked.connect(self._on_add_clicked)
+        widget_d['add_btn'].clicked.connect(self._on_add_clicked)
         
     
     
     def _add_image_to_view(self, view_name, filename):
         '''Adds an image element in the view having the given view_name'''
-        listview = self._widget_dict[view_name] 
+        listview = self._widget_d[view_name] 
         item = QtGui.QStandardItem(filename)
         listview.model().appendRow(item)
         return item
@@ -141,7 +141,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
         '''Returns the selected item'''
         if not self._view_with_selection:
             return None
-        listview = self._widget_dict[self._view_with_selection]
+        listview = self._widget_d[self._view_with_selection]
         selection_idxs = listview.selectionModel().selection().indexes()
         filename = listview.model().data(selection_idxs[0]).toString()
         return unicode(filename)
@@ -159,9 +159,9 @@ class AvatarChooser(Dialog.OkCancelDialog):
             # append the image to the first tab:
             item = self._add_image_to_view(self._vn[0], filename)
             # show first tab:
-            self._widget_dict['tab_widget'].setCurrentIndex(0)
+            self._widget_d['tab_widget'].setCurrentIndex(0)
             # select the new appended image:
-            self._widget_dict[self._vn[0]].selectionModel().\
+            self._widget_d[self._vn[0]].selectionModel().\
                         select(item.index(), QtGui.QItemSelectionModel.Select)
                             
         def response_cb(response, pixmap):
@@ -195,6 +195,9 @@ class AvatarChooser(Dialog.OkCancelDialog):
         if current_idx.isValid():
             self._view_with_selection = view_name
             print 'Valid: [%d:%d]' % (previous_idx.row(), current_idx.row()),
+            listview = self._widget_d[self._view_with_selection]
+            filename = unicode(listview.model().data(current_idx).toString())
+            self._widget_d['preview_dpic'].set_display_pic_from_file(filename)
         else:
             print 'Invalid',
         print '\t%s' % view_name
