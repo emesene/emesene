@@ -9,6 +9,8 @@ import gui
 
 from gui.qt4ui import Utils
 from gui.qt4ui.widgets.ContactListModel import Role
+from gui.qt4ui.widgets.ContactListModel import ContactListModel
+
 
 class ContactListDelegate (QtGui.QStyledItemDelegate):
     '''A Qt Delegate to paint an item of the contact list'''
@@ -21,7 +23,46 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
     def __init__(self, parent):
         '''Constructor'''
         QtGui.QStyledItemDelegate.__init__(self, parent)
+        
         self._pic_size = QtCore.QSizeF(self._PICTURE_SIZE, self._PICTURE_SIZE)
+        self._group_template = (lambda group: group)
+        self._format_nick  = (lambda nick:  nick )
+        
+    
+    def set_group_template(self, template):
+        # TODO: from config
+        self._group_template = template
+        
+    def set_nick_formatter(self, func):
+        self._format_nick = func
+    
+    def _build_display_role(self, index, is_group=False):
+        '''Build a string to be used as item's display role'''
+        model = index.model()
+        data_role = model.data(index, Role.DataRole).toPyObject()
+        if is_group:
+            name = model.data(index, Role.DisplayRole).toPyObject()
+            online = model.data(index, Role.OnlCountRole).toPyObject()
+            total = model.data(index, Role.TotalCountRole).toPyObject()
+            display_role = self._group_template
+            display_role = replace_markup(display_role)
+            display_role = display_role.replace('[$NAME]', name)
+            display_role = display_role.replace('[$ONLINE_COUNT]', str(online))
+            display_role = display_role.replace('[$TOTAL_COUNT]', str(total))
+        else:
+            display_role = self._format_nick(data_role)
+            display_role = _format_contact_display_role(display_role)
+    #        message = model.data(index, Role.MessageRole).toString()
+    #        if not message.isEmpty():
+    #            display_role += u'<p style="-qt-paragraph-type:empty; ' \
+    #                            u'margin-top:5px; margin-bottom:0px; '  \
+    #                            u'margin-left:0px; margin-right:0px; '  \
+    #                            u'-qt-block-indent:0; text-indent:0px;"></p>'
+    #            message = u'<i>' + message + u'</i>'
+    #            display_role += _format_contact_display_role(message)
+            # display_role = _format_contact_display_role(display_role)
+            #display_role += '</table>'
+        return display_role
         
 # -------------------- QT_OVERRIDE
         
@@ -45,7 +86,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         
         if not index.parent().isValid():
             # -> Start drawing the text_doc:
-            text = _build_display_role(index, is_group=True)
+            text = '<b>%s</b>' % self._build_display_role(index, True)
             painter.translate( QtCore.QPointF(option.rect.topLeft()) )
             # create the text_doc
             text_doc.setHtml(text)
@@ -107,7 +148,8 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                 painter.drawPixmap(target, picture, source)
         
             # -> Start setting up the text_doc:
-            text = _build_display_role(index)
+            #text = _build_display_role(index)
+            text = self._build_display_role(index)
             # set the text into text_doc
             text_doc.setHtml(text)
             # calculate the vertical offset, to center the text_doc vertically
@@ -130,12 +172,12 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         text = index.model().data(index, Role.DisplayRole).toString()
         text_doc = QtGui.QTextDocument()
         if not index.parent().isValid():
-            text = _build_display_role(index, is_group=True)
+            text = self._build_display_role(index, is_group=True)
             text_doc.setHtml(text)
             text_size = text_doc.size().toSize()
             return text_size
         else:
-            text = _build_display_role(index)
+            text = self._build_display_role(index)
             text_doc.setHtml(text)
             text_size = text_doc.size().toSize()
             text_width  = text_size.width()
@@ -145,25 +187,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                               self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
                               
                               
-def _build_display_role(index, is_group=False):
-    '''Build a string to be used as item's display role'''
-    model = index.model()
-    display_role = model.data(index, Role.DisplayRole).toString()
-    if is_group:
-        display_role = u'<b>' + display_role + u'</b>'
-    else:
-        display_role = _format_contact_display_role(display_role)
-        message = model.data(index, Role.MessageRole).toString()
-        if not message.isEmpty():
-            display_role += u'<p style="-qt-paragraph-type:empty; ' \
-                            u'margin-top:5px; margin-bottom:0px; '  \
-                            u'margin-left:0px; margin-right:0px; '  \
-                            u'-qt-block-indent:0; text-indent:0px;"></p>'
-            message = u'<i>' + message + u'</i>'
-            display_role += _format_contact_display_role(message)
-        # display_role = _format_contact_display_role(display_role)
-        #display_role += '</table>'
-    return display_role
+    
             
         
                           
@@ -174,7 +198,23 @@ def _format_contact_display_role(text):
     smiley_size = 16
     #if not text.contains('<i></i>'):
         #text.replace('<i>','<br><i>')
+    text = replace_markup(text)
     text = Utils.parse_emotes(unicode(text))
     text = text.replace('<img src', '<img width="%d" height="%d" src' % 
                  (smiley_size, smiley_size))
     return text
+    
+def replace_markup(markup):
+    '''replace the tags defined in gui.base.ContactList'''
+    markup = markup.replace("[$NL]", "<br />")
+
+    markup = markup.replace("[$small]", "<small>")
+    markup = markup.replace("[$/small]", "</small>")
+
+    markup = markup.replace("[$b]", "<b>")
+    markup = markup.replace("[$/b]", "</b>")
+
+    markup = markup.replace("[$i]", "<i>")
+    markup = markup.replace("[$/i]", "</i>")
+    return markup
+    

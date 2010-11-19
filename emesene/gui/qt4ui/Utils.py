@@ -75,6 +75,7 @@ def parse_emotes(text, include_table_tags=True):
     parser = MyHTMLParser(include_table_tags)
     parser.feed(text)
     text2 = parser.get_data()
+    #print '***\n%s\n%s\n***' % (text, text2)
     return text2
     
     
@@ -95,6 +96,7 @@ class MyHTMLParser (HTMLParser):
         self._include_table_tags = include_table_tags
         self._italic = False
         self._bold   = False
+        self._small  = False
         if self._include_table_tags:
             self._data = u'<table cellspacing="0"><tr>'
 
@@ -119,6 +121,10 @@ class MyHTMLParser (HTMLParser):
             self._italic = True
         if tag == 'b':
             self._bold = True
+        if tag == 'small':
+            self._small = True
+        if tag == 'br':
+            self._data += u'</tr></table><table cellspacing="0"><tr>'
         
 
     def handle_endtag(self, tag):
@@ -127,6 +133,9 @@ class MyHTMLParser (HTMLParser):
             self._italic = False
         if tag == 'b':
             self._bold = False
+        if tag == 'small':
+            self._small = False
+            
             
     def handle_charref(self, name):
         self._data += u'<td>&%s;</td>' % name
@@ -139,9 +148,11 @@ class MyHTMLParser (HTMLParser):
         #print "DATA :",
         #print data
         if self._italic:
-            data = u'<i>' + data + u'</i>'
+            data = u'<i>%s</i>' % data
         if self._bold:
-            data = u'<b>' + data + u'</b>'
+            data = u'<b>%s</b>' % data
+        if self._small:
+            data = u'<small>%s</small>' % data
         self._data += u'<td valign="middle">%s</td>' % data
 
     def get_data(self):

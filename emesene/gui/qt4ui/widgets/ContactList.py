@@ -35,7 +35,10 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         
         self._pmodel.setSourceModel(self._model)
         self.setModel(self._pmodel)
-        self.setItemDelegate(ContactListDelegate.ContactListDelegate(self))
+        delegate = ContactListDelegate.ContactListDelegate(self)
+        delegate.set_group_template(self.group_template)
+        delegate.set_nick_formatter(self.format_nick)
+        self.setItemDelegate(delegate)
         self.setAnimated(True)
         self.setRootIsDecorated(False)
         self.setHeaderHidden(True)
@@ -48,8 +51,8 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
             background-position: bottom left;       \
             background-repeat: no-repeat;           \
             background-clip: content;               \
-            background-color: rgb(178, 216, 255);   \
             background-image: url(amsn2/ui/front_ends/kde4/background.png);}" )
+            # background-color: rgb(178, 216, 255);   \
         #self.verticalScrollBar().setStyleSheet("QScrollBar:vertical{}")
         self.setIndentation(0)
         self.doubleClicked.connect(self._on_item_double_clicked)

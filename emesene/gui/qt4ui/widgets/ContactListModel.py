@@ -80,6 +80,14 @@ class ContactListModel (QtGui.QStandardItemModel):
             new_contact_item.setData(contact.identifier, Role.UidRole)
             self._set_contact_info(new_contact_item, contact)
             group_item.appendRow(new_contact_item)
+            # increment the total count:
+            tot_count = group_item.data(Role.TotalCountRole).toPyObject()
+            group_item.setData(tot_count+1, Role.TotalCountRole)
+            if contact.status != e3.status.OFFLINE:
+                # increment the online count:
+                onl_count = group_item.data(Role.OnlCountRole).toPyObject()
+                group_item.setData(tot_count+1, Role.OnlCountRole)
+                
         
         if self._config.b_order_by_group and \
                                         contact.status == e3.status.OFFLINE:
@@ -88,6 +96,12 @@ class ContactListModel (QtGui.QStandardItemModel):
             new_contact_item.setData(contact.identifier+'FLN', Role.UidRole)
             self._set_contact_info(new_contact_item, contact)
             group_item.appendRow(new_contact_item)
+            # increment the total count:
+            tot_count = group_item.data(Role.TotalCountRole).toPyObject()
+            group_item.setData(tot_count+1, Role.TotalCountRole)
+            # increment the online count:
+            onl_count = group_item.data(Role.OnlCountRole).toPyObject()
+            group_item.setData(tot_count+1, Role.OnlCountRole)
         #self.refilter()
             
     
@@ -127,6 +141,9 @@ class ContactListModel (QtGui.QStandardItemModel):
                 # If this block is executed then for sure the previous one has
                 # been executed too. So contact_item is the offline one
                 self._off_grp.removeRow(contact_item.index().row())
+                # increment the onlie count:
+                onl_count = group_item.data(Role.OnlCountRole).toPyObject()
+                group_item.setData(onl_count+1, Role.OnlCountRole)
                    
             if old_status != off_status and new_status == off_status:
                 contact_item = contact_item.clone()
@@ -134,6 +151,12 @@ class ContactListModel (QtGui.QStandardItemModel):
                         contact_item.data(Role.UidRole).toPyObject()) + 'FLN', 
                         Role.UidRole)
                 self._off_grp.appendRow(contact_item)
+                # decrement the online count:
+                onl_count = group_item.data(Role.OnlCountRole).toPyObject()
+                group_item.setData(onl_count-1, Role.OnlCountRole)
+                # increment the online count:
+                onl_count = self._off_grp.data(Role.OnlCountRole).toPyObject()
+                self._off_grp.setData(onl_count+1, Role.OnlCountRole)
                 
                 
                 
@@ -148,7 +171,13 @@ class ContactListModel (QtGui.QStandardItemModel):
                 if new_status == e3.status.OFFLINE:
                     self._onl_grp.takeRow(contact_item.index().row())
                     self._off_grp.appendRow(contact_item)
-            
+                    # increment the online count:
+                    onl_count = self._off_grp.data(Role.OnlCountRole).toPyObject()
+                    self._off_grp.setData(onl_count+1, Role.OnlCountRole)
+                    # decrement the online count:
+                    onl_count = self._onl_grp.data(Role.OnlCountRole).toPyObject()
+                    self._onl_grp.setData(onl_count-1, Role.OnlCountRole)
+                
             else:
                 contact_item = self._search_item(contact.identifier, 
                                                  self._off_grp)
@@ -164,6 +193,12 @@ class ContactListModel (QtGui.QStandardItemModel):
                 if new_status != e3.status.OFFLINE:
                     self._off_grp.takeRow(contact_item.index().row())
                     self._onl_grp.appendRow(contact_item)
+                    # decrement the online count:
+                    onl_count = self._off_grp.data(Role.OnlCountRole).toPyObject()
+                    self._off_grp.setData(onl_count-1, Role.OnlCountRole)
+                    # increment the online count:
+                    onl_count = self._onl_grp.data(Role.OnlCountRole).toPyObject()
+                    self._onl_grp.setData(onl_count+1, Role.OnlCountRole)
         #self.refilter()
                 
                 
@@ -279,6 +314,8 @@ class ContactListModel (QtGui.QStandardItemModel):
         new_group_item = QtGui.QStandardItem( QtCore.QString( 
                     xml.sax.saxutils.escape(group.name)))
         new_group_item.setData(group.identifier, Role.UidRole)
+        new_group_item.setData(0, Role.TotalCountRole)
+        new_group_item.setData(0, Role.OnlCountRole)
         new_group_item.setData(group, Role.DataRole)
         self.appendRow(new_group_item)
         #self.refilter()
@@ -314,6 +351,8 @@ class ContactListModel (QtGui.QStandardItemModel):
                           self.ONL_GRP_UID : u'Online'  }
             new_group_item = QtGui.QStandardItem(group_name[uid])
             new_group_item.setData(uid, Role.UidRole)
+            new_group_item.setData(0, Role.TotalCountRole)
+            new_group_item.setData(0, Role.OnlCountRole)
             self.appendRow(new_group_item)
             return new_group_item
             
@@ -355,10 +394,12 @@ class Role (object):
     DecorationRole  = Qt.DecorationRole
     ToolTipRole     = Qt.ToolTipRole
     BlockedRole     = Qt.UserRole
-    DataRole        = Qt.UserRole + 17
+    DataRole        = Qt.UserRole + 1
     MediaRole       = Qt.UserRole + 2
     UidRole         = Qt.UserRole + 3
     SortRole        = Qt.UserRole + 4
     StatusRole      = Qt.UserRole + 5
     MessageRole     = Qt.UserRole + 6
     FilterRole      = Qt.UserRole + 7
+    TotalCountRole  = Qt.UserRole + 8
+    OnlCountRole    = Qt.UserRole + 9
