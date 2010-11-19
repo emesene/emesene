@@ -160,8 +160,8 @@ class InputText(TextBox):
             import gtkspell
             if self.config.b_enable_spell_check:
                 self.spell_checker = gtkspell.Spell(self._textbox)
-        except ImportError as error:
-            pass
+        except Exception, e:
+            print e
 
         self._textbox.connect_after('message-send', self._on_message_send)
 

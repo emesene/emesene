@@ -1,6 +1,7 @@
 import gtk
 import webbrowser
 
+import e3.common
 import gui
 import utils
 import extension
@@ -10,12 +11,14 @@ import PluginWindow
 import logging
 log = logging.getLogger('gtkui.Preferences')
 
+# TODO: consider moving to nicer icons than stock ones.
 LIST = [
     {'stock_id' : gtk.STOCK_FULLSCREEN,'text' : _('Interface')},
+    {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('Desktop')},
     {'stock_id' : gtk.STOCK_MEDIA_NEXT,'text' : _('Sounds')},
     {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
     {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
-    {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Extensions')},
+    {'stock_id' : gtk.STOCK_DIALOG_WARNING,'text' : _('Extensions')},
     {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
 ]
 
@@ -83,6 +86,7 @@ class Preferences(gtk.Window):
         vbox.pack_start(hbox, True,True) # hbox, True, True
 
         self.interface = Interface(session)
+        self.desktop = DesktopTab(session)
         self.sound = Sound(session)
         self.notification = Notification(session)
         self.theme = Theme(session)
@@ -101,6 +105,7 @@ class Preferences(gtk.Window):
 
         # Keep local copies of the objects
         self.interface_page = self.interface
+        self.desktop_page = self.desktop
         self.sound_page = self.sound
         self.notifications_page = self.notification
         self.theme_page = self.theme
@@ -110,6 +115,7 @@ class Preferences(gtk.Window):
         # Whack the pages into a dict for future reference
 
         self.page_dict.append(self.interface_page)
+        self.page_dict.append(self.desktop_page)
         self.page_dict.append(self.sound_page)
         self.page_dict.append(self.notifications_page)
         self.page_dict.append(self.theme_page)
@@ -604,6 +610,38 @@ class Extension(BaseTable):
             model.append([item])
         self.categories.set_model(model)
         self.categories.set_active(0)
+
+class DesktopTab(BaseTable):
+    """ This panel contains some msn-papylib specific settings """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 3, 2)
+        self.session = session
+
+        self.append_markup('<b>'+_('File transfers')+'</b>')
+        self.append_check(_('Sort received files by sender'), 
+                          'session.config.b_download_folder_per_account')
+        self.add_text(_('Save files to:'), 0, 2, True)
+
+        def on_path_selected(f_chooser):
+            ''' updates the download dir config value '''
+            if f_chooser.get_filename() != self.session.config.download_folder:
+                self.session.config.download_folder = f_chooser.get_filename()
+
+        path_chooser = gtk.FileChooserDialog(
+            title=_('Choose a Directory'),
+            action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        fc_button = gtk.FileChooserButton(path_chooser)
+        fc_button.set_current_folder(self.session.config.get_or_set("download_folder", 
+                e3.common.locations.downloads()))
+        path_chooser.connect('selection-changed', on_path_selected)
+        self.attach(fc_button, 2, 3, 2, 3, gtk.EXPAND|gtk.FILL, gtk.EXPAND)
+
+        self.show_all()
 
 class MSNPapylib(BaseTable):
     """ This panel contains some msn-papylib specific settings """

@@ -85,7 +85,14 @@ class FileTransferBarWidget(gtk.HBox):
         self.show_all()
 
     def update(self, transfer):
+        ''' called when the bar needs to be updated '''
         tr = self.transfers[transfer]
+        tr.do_update_progress()
+
+    def finished(self, transfer):
+        ''' called when the bar needs to be updated '''
+        tr = self.transfers[transfer]
+        tr.finished()
         tr.do_update_progress()
 
     def _on_left_button_clicked(self, widget):

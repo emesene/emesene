@@ -5,6 +5,7 @@ import webbrowser
 import e3.base
 import gui
 import extension
+import Desktop
 
 import logging
 log = logging.getLogger('gui.base.Handler')
@@ -391,6 +392,13 @@ class TrayIconHandler(FileHandler):
         """
         FileHandler.__init__(self, session, on_disconnect, on_quit)
         self.theme = theme
+        
+    def on_hide_show_mainwindow(self, main_window=None):
+        if (main_window != None):
+            if(main_window.get_property("visible")):
+                main_window.hide()
+            else:
+                main_window.show()
 
 class FileTransferHandler(object):
     ''' this handler handles a file transfer object '''
@@ -403,11 +411,11 @@ class FileTransferHandler(object):
 
     def open(self):
         ''' use desktop's open to open the file, once state is finished '''
-        raise NotImplementedError
+        Desktop.open(self.transfer.completepath)
 
     def opendir(self):
         ''' open the directory that contains the file, once the transfer is finished '''
-        raise NotImplementedError
+        Desktop.open(os.path.dirname(self.transfer.completepath))
 
     def accept(self):
         ''' accepts a file transfer '''
@@ -429,3 +437,4 @@ class FileTransferHandler(object):
         ''' cancels a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.cancel_filetransfer(self.transfer)
+
