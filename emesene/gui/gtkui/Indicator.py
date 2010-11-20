@@ -73,8 +73,7 @@ class Indicator(appindicator.Indicator):
         icon_name = self.handler.theme.logo.split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)
-        self.menu = TrayIcon.LoginMenu(self.handler)
-        self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
+        self.menu = TrayIcon.LoginMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_menu(self.menu)
 
@@ -85,7 +84,6 @@ class Indicator(appindicator.Indicator):
         self.handler.session = session
         self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
         self.menu = TrayIcon.MainMenu(self.handler, self.main_window)
-        self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
         self.menu.show_all()
         self.set_menu(self.menu)
 
@@ -117,16 +115,3 @@ class Indicator(appindicator.Indicator):
         icon_name = self.handler.theme.status_icons_panel[stat].split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)
-
-    def _on_activate(self, trayicon):
-        """
-        callback called when the menu entry 'hide/show emesene'
-        is clicked
-        """
-
-        if(self.main_window != None):
-            if(self.main_window.get_property("visible")):
-                self.main_window.hide()
-            else:
-                self.main_window.show()
-

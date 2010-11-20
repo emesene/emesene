@@ -201,6 +201,10 @@ class Conversation(object):
         '''
         raise NotImplementedError("Method not implemented")
 
+    def on_close(self):
+        '''called when the conversation is closed'''
+        raise NotImplementedError("Method not implemented")
+
     def _get_message_waiting(self):
         '''return True if a message is waiting'''
         return self._message_waiting
@@ -431,3 +435,4 @@ class Conversation(object):
 
     def reset_message_offset(self):
         self.message_offset = 0
+

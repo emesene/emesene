@@ -161,6 +161,19 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''called when the conversation is closed'''
         self.session.config.unsubscribe(self._on_show_toolbar_changed,
             'b_show_toolbar')
+        self.session.signals.picture_change_succeed.unsubscribe(
+            self.on_picture_change_succeed)
+        self.session.signals.contact_attr_changed.unsubscribe(
+            self.on_contact_attr_changed_succeed)
+
+        self.session.signals.filetransfer_invitation.unsubscribe(
+                self.on_filetransfer_invitation)
+        self.session.signals.filetransfer_accepted.unsubscribe(
+                self.on_filetransfer_accepted)
+        self.session.signals.filetransfer_progress.unsubscribe(
+                self.on_filetransfer_progress)
+        self.session.signals.filetransfer_completed.unsubscribe(
+                self.on_filetransfer_completed)
         #stop the avatars animation...if any..
         self.avatar.stop()
         self.his_avatar.stop()
@@ -337,7 +350,8 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_contact_attr_changed_succeed(self, account, what, old,
             do_notify=True):
         ''' called when contacts change their attributes'''
-        self.update_tab()
+        if account in self.members and what in ('status', 'nick'):
+            self.update_tab()
 
     def on_filetransfer_invitation(self, transfer):
         ''' called when a new file transfer is issued '''

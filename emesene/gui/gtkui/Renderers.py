@@ -29,6 +29,9 @@ import extension
 import utils
 import Parser
 
+import logging
+log = logging.getLogger('gtkui.Renderers')
+
 def replace_markup(markup, arg=None):
     '''replace the tags defined in gui.base.ContactList'''
     markup = markup.replace("[$nl]", "\n")
@@ -137,9 +140,8 @@ class CellRendererFunction(gtk.GenericCellRenderer):
             try:
                 decorated_markup = self.function(self.markup)
             except Exception, error:
-                print "this nick: '%s' made the parser go crazy, striping" % (
-                        self.markup,)
-                print error
+                log.error("this nick: '%s' made the parser go crazy, striping. Error: %s" % (
+                        self.markup, error))
 
                 decorated_markup = Plus.msnplus_strip(self.markup)
 
@@ -675,7 +677,7 @@ class SmileyLayout(pango.Layout):
                 ctx.set_source_pixbuf(pixbuf, tx, ty)
                 ctx.paint()
             except Exception, error:
-                print error
+                log.error("Error when painting smilies: %s" % error)
 
 class SmileyLabel(gtk.Widget):
     '''Label with smiley support. '''

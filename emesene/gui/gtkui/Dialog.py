@@ -353,7 +353,7 @@ class Dialog(object):
             cls.default_cb, *args)
         cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb,
             cls.default_cb, *args)
-
+        window.set_modal(True)
         window.show()
 
     @classmethod
@@ -1222,6 +1222,7 @@ class EmotesWindow(gtk.Window):
             button.set_tooltip_text(shortcut)
             button.set_relief(gtk.RELIEF_NONE)
             button.connect('clicked', self._on_emote_selected, shortcut)
+            button.connect('button-release-event', self._on_emote_clicked, shortcut)
             self.table.attach(button, column, column + 1, row, row + 1)
 
             count += 1
@@ -1246,6 +1247,55 @@ class EmotesWindow(gtk.Window):
         '''called when an emote is selected'''
         self.emote_selected(shortcut)
         self.hide()
+
+    def _on_emote_clicked(self, button, event, shortcut):
+        '''intercept right click and show a nice menu'''
+        if event.type == gtk.gdk.BUTTON_RELEASE and event.button == 3:
+            emoticon_menu = gtk.Menu()
+            emoticon_menu.connect('enter-notify-event', self.on_enter_notify_event)
+            short_name = gtk.MenuItem(label=shortcut)
+            short_edit = gtk.ImageMenuItem(_("Change shortcut"))
+            short_edit.set_image(gtk.image_new_from_stock(
+                gtk.STOCK_EDIT, gtk.ICON_SIZE_MENU))
+            short_edit.connect("activate", self._on_emote_shortcut_edit, shortcut)
+
+            short_dele = gtk.ImageMenuItem(_("Delete"))
+            short_dele.set_image(gtk.image_new_from_stock(
+                gtk.STOCK_DELETE, gtk.ICON_SIZE_MENU))
+            short_dele.connect("activate", self._on_emote_shortcut_dele, shortcut)
+
+            emoticon_menu.add(short_name)
+            emoticon_menu.add(short_edit)
+            emoticon_menu.add(short_dele)
+
+            emoticon_menu.show_all()
+            emoticon_menu.popup(None, None, None, event.button, event.time)
+
+    def _on_emote_shortcut_edit(self, widget, shortcut):
+        '''modify a shortcut for the selected custom emoticon'''
+        self.hide()
+        cedict = self.emcache.parse()
+
+        def _on_ce_edit_cb(response, emcache, shortcut, hash_, text=''):
+            '''method called when the modification is done'''
+            if response == stock.ACCEPT:
+                if text:
+                    emcache.remove_entry(hash_)
+                    emcache.add_entry(text, hash_)
+                else:
+                    dialog.error(_("Empty shortcut"))
+
+        window = Dialog.entry_window(_("New shortcut"), shortcut,
+                    _on_ce_edit_cb, _("Change shortcut"), 
+                    self.emcache, shortcut, cedict[shortcut])
+        window.show()
+
+    def _on_emote_shortcut_dele(self, widget, shortcut):
+        '''delete a custom emoticon and its shortcut'''
+        self.hide()
+        cedict = self.emcache.parse()
+        #TODO: confirmation? or not?
+        self.emcache.remove(cedict[shortcut])
 
 class InviteWindow(gtk.Window):
     """
