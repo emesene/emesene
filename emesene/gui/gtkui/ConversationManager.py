@@ -51,6 +51,7 @@ class ConversationManager(Notebook, gui.ConversationManager):
         self.connect('switch-page', self._on_switch_page)
         self.connect('next-page', self.on_next_page)
         self.connect('prev-page', self.on_prev_page)
+        self.connect('page-reordered', self._on_page_reordered)
 
     def on_next_page(self, widget):
         '''called when ctrl+tab is pressed'''
@@ -172,6 +173,10 @@ class ConversationManager(Notebook, gui.ConversationManager):
         if event.button == 3:
             conversation.show_tab_menu()
 
+    def _on_page_reordered(self, widget, conversation, new_num):
+        '''called when a page is reordered'''
+        conversation.tab_index = new_num
+
     def remove_conversation(self, conversation):
         """
         remove the conversation from the gui
@@ -180,6 +185,9 @@ class ConversationManager(Notebook, gui.ConversationManager):
         """
         page_num = self.page_num(conversation)
         self.remove_page(page_num)
+        #FIXME: Dirty hack, why conversation is still alive when it's closed?
+        #       Signals are being unsubscribed (see gtkui.Conversation) but...
+        conversation.tab_index=-2
 
     def add_new_conversation(self, session, cid, members):
         """
@@ -201,7 +209,7 @@ class ConversationManager(Notebook, gui.ConversationManager):
     def update_window(self, text, icon, index):
         ''' updates the window's border and item on taskbar
             with given text and icon '''
-        if self.get_current_page() == index:
+        if self.get_current_page() == index or index == (self.get_current_page() + self.get_n_pages()):
             win = self.get_parent() # gtk.Window, not a nice hack.
             win.set_title(Renderers.msnplus_to_plain_text(text))
             win.set_icon(icon)

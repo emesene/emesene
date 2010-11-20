@@ -28,8 +28,8 @@ class ConversationManager(object):
                 self._on_group_ended)
             self.session.signals.conv_message_send_failed.subscribe(
                 self._on_message_send_failed)
-            self.session.signals.contact_attr_changed.subscribe(
-                self._on_contact_attr_changed)
+            #self.session.signals.contact_attr_changed.subscribe(
+            #    self._on_contact_attr_changed)
             self.session.signals.p2p_finished.subscribe(
                 self._on_p2p_finished)
 
@@ -194,8 +194,8 @@ class ConversationManager(object):
             self._on_group_ended)
         self.session.signals.conv_message_send_failed.unsubscribe(
             self._on_message_send_failed)
-        self.session.signals.contact_attr_changed.unsubscribe(
-            self._on_contact_attr_changed)
+        #self.session.signals.contact_attr_changed.unsubscribe(
+        #    self._on_contact_attr_changed)
         self.session.signals.p2p_finished.unsubscribe(
             self._on_p2p_finished)
         for conversation in self.conversations.values():
