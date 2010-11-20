@@ -153,7 +153,7 @@ class Worker(e3.base.Worker, papyon.Client):
                 f.close()
             except Exception as e:
                 picfail = True
-                print e
+                log.error("Writing of content roaming picture failed: %s" % e)
             # update roaming stuff in papyon's session
             # changing display_name doesn't seem to update its value istantly, wtf?
             # however, other clients see this correctly, wow m3n
@@ -296,7 +296,7 @@ class Worker(e3.base.Worker, papyon.Client):
             filedata = f.read()
             f.close()
         except Exception as e:
-            print e
+            log.error("Reading of file %s failed: %s" % (tr.completepath, e))
 
         if not isinstance(filedata, str):
             filedata = "".join([chr(b) for b in filedata])
@@ -333,7 +333,7 @@ class Worker(e3.base.Worker, papyon.Client):
                 f.close()
                 tr.completepath = full_path
             except Exception as e:
-                print e
+                log.error("Writing file %s failed: %s" % (full_path, e))
         #del self.rfiletransfers[tr]
 
         self.session.add_event(Event.EVENT_FILETRANSFER_COMPLETED, tr)
@@ -441,7 +441,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         def download_ok(msnobj, em_path, download_failed_func):
             if msnobj._data is None:
-                log.warning("[papylib] downloaded msnobj is None")
+                log.warning("downloaded msnobj is None")
                 return
 
             mo_fr = msnobj._friendly.replace("\x00", "")
@@ -904,7 +904,7 @@ class Worker(e3.base.Worker, papyon.Client):
             avatar = f.read()
             f.close()
         except Exception as e:
-            print e
+            log.error("Loading of picture %s failed" % picture_name)
 
         if not isinstance(avatar, str):
             avatar = "".join([chr(b) for b in avatar])
@@ -1030,7 +1030,7 @@ class Worker(e3.base.Worker, papyon.Client):
                     d_custom_emoticon = f.read()
                     f.close()
                 except Exception as e:
-                    print e
+                    log.error("Loading of emoticon failed: %s" % e)
                 if not isinstance(d_custom_emoticon, str):
                     d_custom_emoticon = "".join([chr(b) for b in d_custom_emoticon])
 
