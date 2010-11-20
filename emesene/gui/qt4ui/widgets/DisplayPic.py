@@ -36,8 +36,8 @@ class DisplayPic (QtGui.QLabel):
         elif not session:
             self._size = QtCore.QSize(96, 96)
         else:
-            self._size = QtCore.QSize(session.config.i_conv_avatar_size,
-                                      session.config.i_conv_avatar_size)
+            size = session.config.get_or_set('i_conv_avatar_size', 96)
+            self._size = QtCore.QSize(size, size)
         self._clickable = clickable
         
         self._movie = None
