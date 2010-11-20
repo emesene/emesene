@@ -11,6 +11,8 @@ from PyQt4.QtCore   import Qt
 import e3
 import gui
 
+from gui.qt4ui import Utils
+
 
 class ChatInput (QtGui.QTextEdit):
     '''A widget suited for editing chat lines. Provides as-you-type
@@ -342,6 +344,14 @@ class MyHTMLParser (HTMLParser):
         #print data
         if self._in_body:
             self._data += data
+    
+    def handle_charref(self, name):
+        self._data += Utils.unescape(u'&%s;' % name)
+        
+    
+    def handle_entityref(self, name):
+        self._data += Utils.unescape(u'&%s;' % name)
+        
 
     def get_data(self):
         '''returns parsed string'''

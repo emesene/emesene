@@ -41,7 +41,7 @@ class AdiumChatOutput (QtGui.QScrollArea):
                             
     def _append_message(self, contact, text, cedict,
                         cedir, style, is_incoming, timestamp=None):
-                            
+        
         msg = gui.Message.from_contact(contact, text, first=True,
                                        incomming=is_incoming, tstamp=timestamp)
         if msg.sender != self._last_sender:
