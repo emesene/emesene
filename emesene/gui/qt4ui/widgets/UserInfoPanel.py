@@ -37,11 +37,11 @@ class UserInfoPanel (QtGui.QWidget):
     def update(self, status, display_name, message, account):
         '''Updates the infos shown in the panel'''
         pixmap          = QtGui.QPixmap(gui.theme.status_icons[status])
-        display_name    = Utils.escape(display_name)
+        #display_name    = Utils.escape(display_name)
         display_name    = Utils.parse_emotes(unicode(display_name + 
                                                  u'&nbsp;&nbsp;&nbsp;&nbsp;' \
                                                  u'[' + account + u']'))
-        message         = Utils.escape(message)
+        #message         = Utils.escape(message)
         message         = Utils.parse_emotes(unicode(message))
         
         self._emblem_lbl.setPixmap(pixmap)

@@ -49,6 +49,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         data_role = model.data(index, Role.DataRole).toPyObject()
         if is_group:
             name = model.data(index, Role.DisplayRole).toPyObject()
+            name = Utils.escape(name)
             online = model.data(index, Role.OnlCountRole).toPyObject()
             total = model.data(index, Role.TotalCountRole).toPyObject()
             display_role = self._config.group_template
@@ -203,8 +204,7 @@ def _format_contact_display_role(text):
     scales them.'''
     # TODO: calculate smiley size from text's size.
     smiley_size = 16
-    #if not text.contains('<i></i>'):
-        #text.replace('<i>','<br><i>')
+    text = Utils.escape(text)
     text = replace_markup(text)
     text = Utils.parse_emotes(unicode(text))
     text = text.replace('<img src', '<img width="%d" height="%d" src' % 
