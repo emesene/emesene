@@ -249,7 +249,7 @@ class AvatarChooser(gtk.Window):
             filename = selected[1]
 
             self.hide()
-            print filename
+            #print filename
             self.stop_and_clear()
             self.avatar_manager.set_as_avatar(filename)
             

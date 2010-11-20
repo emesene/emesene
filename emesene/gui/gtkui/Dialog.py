@@ -353,7 +353,7 @@ class Dialog(object):
             cls.default_cb, *args)
         cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb,
             cls.default_cb, *args)
-
+        window.set_modal(True)
         window.show()
 
     @classmethod
