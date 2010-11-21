@@ -74,16 +74,15 @@ def parse_emotes(message, cedict={}):
     return message.replace(plain_text, ''.join(chunks))
 
 def replace_shortcut_with_tag(string, short, tag):
-    def repltags(m):
-        tags.append(m.group(0))
-        return '#THEREISATAGHERE#'
-    def backtags(m):
-        return tags.pop()
-    tags = []
-    result = re.sub(r'(<img[^>]+\>)', repltags, string)
+    token = '#IRREPLACEABLE#'
+    def extract(m):
+        irreplaceable.append(m.group(0))
+        return token
+    irreplaceable = []
+    result = re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)', extract, string)
     result = result.replace(short, tag)
-    tags.reverse()
-    result = re.sub(r'#THEREISATAGHERE#', backtags, result)
+    irreplaceable.reverse()
+    result = re.sub(token, lambda m: irreplaceable.pop(), result)
     return result
 
 def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
