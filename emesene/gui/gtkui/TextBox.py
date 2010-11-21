@@ -164,7 +164,7 @@ class InputText(TextBox):
             if self.config.b_enable_spell_check:
                 self.spell_checker = gtkspell.Spell(self._textbox)
         except Exception, e:
-            logger.warning("Could not load spell-check: %s" % e)
+            log.warning("Could not load spell-check: %s" % e)
 
         self._textbox.connect_after('message-send', self._on_message_send)
 
