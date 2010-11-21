@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=emesene
-GenericName=emesene
+Name=emesene2
+GenericName=emesene2
 Comment=Instant messaging client for MSN, Gtalk and Facebook
 Exec=emesene
-Icon=emesene
+Icon=emesene2
 Terminal=false
 Type=Application
 Categories=Network;InstantMessaging;

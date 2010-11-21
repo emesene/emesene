@@ -12,7 +12,7 @@ import platform
 
 python_version = platform.python_version()[0:3]
 
-setup_info = dict(name = 'emesene',
+setup_info = dict(name = 'emesene2',
         version = '2.0',
         description = 'Instant Messaging Client',
         author = 'Luis Mariano Guerra',
@@ -32,9 +32,9 @@ setup_info = dict(name = 'emesene',
         "Programming Language :: Python",
         "Topic :: Communications :: Chat",
         ],
-        ext_package = "emesene",
+        ext_package = "emesene2",
         include_package_data = True,
-        package_data = {"emesene" : ['themes/conversations/*/*/*/*/*',
+        package_data = {"emesene2" : ['themes/conversations/*/*/*/*/*',
                      'themes/emotes/*/*',
                      'themes/images/*/*/*',
                      'themes/sounds/*/*']})
@@ -94,22 +94,23 @@ if os.name == 'nt':
 else:
     # Data files to be installed to the system
     _data_files = [
-        ('share/icons/scalable/apps', ['emesene/data/icons/scalable/apps/emesene.svg']),
-        ('share/icons/hicolor/16x16/apps', ['emesene/data/icons/hicolor/16x16/apps/emesene.png']),
-        ('share/icons/hicolor/22x22/apps', ['emesene/data/icons/hicolor/22x22/apps/emesene.png']),
-        ('share/icons/hicolor/24x24/apps', ['emesene/data/icons/hicolor/24x24/apps/emesene.png']),
-        ('share/icons/hicolor/32x32/apps', ['emesene/data/icons/hicolor/32x32/apps/emesene.png']),
-        ('share/icons/hicolor/36x36/apps', ['emesene/data/icons/hicolor/36x36/apps/emesene.png']),
-        ('share/icons/hicolor/48x48/apps', ['emesene/data/icons/hicolor/48x48/apps/emesene.png']),
-        ('share/icons/hicolor/64x64/apps', ['emesene/data/icons/hicolor/64x64/apps/emesene.png']),
-        ('share/icons/hicolor/72x72/apps', ['emesene/data/icons/hicolor/72x72/apps/emesene.png']),
-        ('share/icons/hicolor/96x96/apps', ['emesene/data/icons/hicolor/96x96/apps/emesene.png']),
-        ('share/icons/hicolor/128x128/apps', ['emesene/data/icons/hicolor/128x128/apps/emesene.png']),
-        ('share/icons/hicolor/192x192/apps', ['emesene/data/icons/hicolor/192x192/apps/emesene.png']),
-        ('share/icons/hicolor/256x256/apps', ['emesene/data/icons/hicolor/256x256/apps/emesene.png']),
-        ('share/applications', ['emesene/data/share/applications/emesene.desktop']),
-        ('share/pixmaps', ['emesene/data/pixmaps/emesene.png', 'emesene/data/pixmaps/emesene.xpm']),
-        ('share/man/man1', ['docs/man/emesene.1'])
+        ('share/icons/scalable/apps',
+            ['emesene/data/icons/scalable/apps/emesene2.svg']),
+        ('share/icons/hicolor/16x16/apps', ['emesene/data/icons/hicolor/16x16/apps/emesene2.png']),
+        ('share/icons/hicolor/22x22/apps', ['emesene/data/icons/hicolor/22x22/apps/emesene2.png']),
+        ('share/icons/hicolor/24x24/apps', ['emesene/data/icons/hicolor/24x24/apps/emesene2.png']),
+        ('share/icons/hicolor/32x32/apps', ['emesene/data/icons/hicolor/32x32/apps/emesene2.png']),
+        ('share/icons/hicolor/36x36/apps', ['emesene/data/icons/hicolor/36x36/apps/emesene2.png']),
+        ('share/icons/hicolor/48x48/apps', ['emesene/data/icons/hicolor/48x48/apps/emesene2.png']),
+        ('share/icons/hicolor/64x64/apps', ['emesene/data/icons/hicolor/64x64/apps/emesene2.png']),
+        ('share/icons/hicolor/72x72/apps', ['emesene/data/icons/hicolor/72x72/apps/emesene2.png']),
+        ('share/icons/hicolor/96x96/apps', ['emesene/data/icons/hicolor/96x96/apps/emesene2.png']),
+        ('share/icons/hicolor/128x128/apps', ['emesene/data/icons/hicolor/128x128/apps/emesene2.png']),
+        ('share/icons/hicolor/192x192/apps', ['emesene/data/icons/hicolor/192x192/apps/emesene2.png']),
+        ('share/icons/hicolor/256x256/apps', ['emesene/data/icons/hicolor/256x256/apps/emesene2.png']),
+        ('share/applications', ['emesene/data/share/applications/emesene2.desktop']),
+        ('share/pixmaps', ['emesene/data/pixmaps/emesene2.png', 'emesene/data/pixmaps/emesene2.xpm']),
+        ('share/man/man1', ['docs/man/emesene2.1'])
     ]
 
     setup(data_files = _data_files,
