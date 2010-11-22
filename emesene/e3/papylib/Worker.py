@@ -212,11 +212,6 @@ class Worker(e3.base.Worker, papyon.Client):
         gid = papygroup.id
         self.session.groups[gid] = e3.base.Group(papygroup.name, gid)
 
-    def _remove_group(self, papygroup):
-        ''' removes a group from the list (gui) '''
-        if papygroup.id in self.session.groups:
-            del self.session.groups[papygroup.id]
-
     def _add_contact_to_group(self, papycontact, papygroup):
         ''' method to add a contact to a (gui) group '''
         self.session.groups[papygroup.id].contacts.append(papycontact.account)
@@ -261,7 +256,7 @@ class Worker(e3.base.Worker, papyon.Client):
             members)
 
     def _on_webcam_invite(self, session, producer):
-        print "New webcam invite", session, producer
+        log.info("New webcam invite from %s: %s" % (producer, session))
         websess = MediaSessionHandler(session.media_session)
         if 0:
             session.reject()
@@ -269,7 +264,7 @@ class Worker(e3.base.Worker, papyon.Client):
             session.accept()
 
     def _on_conference_invite(self, call):
-        print "New conference invite", call
+        log.info("New conference invite: %s" % call)
         ca = e3.base.Call(call, call.peer, None, None, None)
         self.calls[call] = ca
         self.rcalls[ca] = call
@@ -346,39 +341,38 @@ class Worker(e3.base.Worker, papyon.Client):
         tr = self.filetransfers[ftsession]
 
         self.session.add_event(Event.EVENT_FILETRANSFER_REJECTED, tr)
-        print "[papy file transfer] rejected!"
 
     # call handlers
     def _on_call_incoming(self, papycallevent):
         """Called once the incoming call is ready."""
-        print "call incoming"
+        log.info("New call incoming")
         if papycallevent._call.media_session.prepared:
             papycallevent._call.accept()
-            print "accepting call"
+            log.info("Accepting the new call")
         else:
             papycallevent._call.ring()
-            print "ringing (session not ready)"
-
+            log.info("Ringing...session not ready")
+        
     def _on_call_ringing(self, papycallevent):
-        print "[papyon]", "[call] ringing"
-
+        log.info("Ringing")
+        
     def _on_call_accepted(self, papycallevent):
-        print "[papyon]", "[call] accepted"
+        log.info("Call accepted")
 
     def _on_call_rejected(self, papycallevent, response):
-        print "[papyon]", "[call] rejected", response
+        log.info("Call rejected: %s" % response)
 
     def _on_call_error(self, papycallevent, response):
-        print "[papyon]", "[call] err", response
+        log.error("Call error: %s" % response)
 
     def _on_call_missed(self, papycallevent):
-        print "[papyon]", "[call] missd"
+        log.info("Call missed")
 
     def _on_call_connected(self, papycallevent):
-        print "[papyon]", "[call] connected"
+        log.info("Call connected")
 
     def _on_call_ended(self, papycallevent):
-        print "[papyon]", "[call] ended"
+        log.info("Call ended")
 
     # conversation handlers
     def _on_conversation_oim_received(self, flnmsg):
@@ -441,7 +435,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         emotes = self.caches.get_emoticon_cache(account)
         def download_failed(reason):
-            print reason
+            log.error("Custom emoticon download failed: %s" % reason)
 
         def download_ok(msnobj, em_path, download_failed_func):
             if msnobj._data is None:
@@ -497,7 +491,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_conversation_message_error(self, err_type, error, papyconversation):
         #TODO: tell the user the sending failed, and the reason (err_type)
-        print "error sending message because", err_type, error
+        log.error("Error sending message: %s %s" % (err_type, error))
 
     def _on_conversation_user_joined(self, papycontact, pyconvevent):
         '''handle user joined event'''
@@ -515,7 +509,7 @@ class Worker(e3.base.Worker, papyon.Client):
                                        cid, account)
             else:
                 #TODO dialog error????
-                print 'error while inviting user....'
+                log.error("Error inviting user to conversation")
 
     def _on_conversation_user_left(self, papycontact, pyconvevent):
         '''handle user left event'''
@@ -597,7 +591,7 @@ class Worker(e3.base.Worker, papyon.Client):
             # TODO: log the media change
 
     def _on_contact_msnobject_changed(self, contact):
-
+        '''called when a contact changes his display picture'''
         msn_object = contact.msn_object
         if msn_object is None: #sometimes, happens.
             return
@@ -615,7 +609,7 @@ class Worker(e3.base.Worker, papyon.Client):
                 return avatar_path
 
             def download_failed(reason):
-                print reason
+                log.error("Error downloading display picture: %s" % reason)
 
             def download_ok(msnobj, callback):
                 avatars.insert_raw(msnobj._data)
@@ -658,7 +652,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_GROUP_ADD_SUCCEED, group.id)
 
     def _on_addressbook_group_deleted(self, group):
-        self._remove_group(group)
         self.session.add_event(Event.EVENT_GROUP_REMOVE_SUCCEED, group.id)
 
     def _on_addressbook_group_renamed(self, group):
@@ -757,27 +750,27 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_add_contact(self, account):
         ''' handle Action.ACTION_ADD_CONTACT '''
         def add_contact_fail(*args):
-            print "add contact fail", args
+            log.error("Error adding a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_ADD_FAILED, '') #account
         self.address_book.add_messenger_contact(account, failed_cb=add_contact_fail)
 
     def _handle_action_add_group(self, name):
         '''handle Action.ACTION_ADD_GROUP '''
         def add_group_fail(*args):
-            print "add group fail", args
+            log.error("Error adding a group: %s", args)
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_FAILED, '') #group name
         self.address_book.add_group(name, failed_cb=add_group_fail)
 
     def _handle_action_add_to_group(self, account, gid):
         ''' handle Action.ACTION_ADD_TO_GROUP '''
         def add_to_group_fail(*args):
-            print "add group fail", args
+            log.error("Error adding a contact to a group: %s", args)
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_FAILED, 0, 0) #gid, cid
 
     def _handle_action_block_contact(self, account):
         ''' handle Action.ACTION_BLOCK_CONTACT '''
         def block_fail(*args):
-            print "block fail", args
+            log.error("Error blocking a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_BLOCK_FAILED, '') #account
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         self.address_book.block_contact(papycontact, failed_cb=block_fail)
@@ -785,7 +778,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_unblock_contact(self, account):
         '''handle Action.ACTION_UNBLOCK_CONTACT '''
         def unblock_fail(*args):
-            print "unblock fail", args
+            log.error("Error unblocking a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_UNBLOCK_FAILED, '') #account
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         self.address_book.unblock_contact(papycontact, failed_cb=unblock_fail)
@@ -793,17 +786,16 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_move_to_group(self, account, src_gid, dest_gid):
         '''handle Action.ACTION_MOVE_TO_GROUP '''
         def move_to_group_fail(*args):
-            print "move to group fail",args
+            log.error("Error moving a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_MOVE_FAILED, '') #account
         def add_to_group_succeed(*args):
             #delete from old group only if previuos contact-add succeed..
             #TODO but if this fails?i've to remove the contact in the new group previosly added?
             self.address_book.delete_contact_from_group(papygroupsrc, papycontact,
-            done_cb=move_to_group_succeed, failed_cb=move_to_group_fail)
+                done_cb=move_to_group_succeed, failed_cb=move_to_group_fail)
         def move_to_group_succeed(*args):
-           print "move to group succeed",args
-           self.session.add_event(Event.EVENT_CONTACT_MOVE_SUCCEED,
-           account, src_gid, dest_gid)
+            self.session.add_event(Event.EVENT_CONTACT_MOVE_SUCCEED,
+                                    account, src_gid, dest_gid)
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papygroupdest = None
         papygroupsrc = None
@@ -820,10 +812,9 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_remove_contact(self, account):
         '''handle Action.ACTION_REMOVE_CONTACT '''
         def remove_contact_fail(*args):
-            print "remove contact fail"
-            self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_FAILED, self.gid)
+            log.error("Error when removing contact: %s" % args)
+            self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_FAILED, self.gid) ###########wtf
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        print "account, ",papycontact
         self.address_book.delete_contact(papycontact, failed_cb=remove_contact_fail)
 
     def _handle_action_reject_contact(self, account): #TODO: finish this
@@ -837,7 +828,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_remove_from_group(self, account, gid):
         ''' handle Action.ACTION_REMOVE_FROM_GROUP '''
         def remove_from_group_fail(*args):
-            print "remove contact from group fail",args
+            log.error("Error when removing contact from group: %s" % args)
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_FAILED, '')
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papygroup = None
@@ -850,8 +841,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_remove_group(self, gid):
         ''' handle Action.ACTION_REMOVE_GROUP '''
-        def remove_group_fail(*args):
-            print "remove group fail"
+        def remove_group_fail(*args):            
+            log.error("Error when removing group: %s" % args)
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_FAILED, 0) #gid
         papygroup = None
         for group in self.address_book.groups:
@@ -863,7 +854,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_rename_group(self, gid, name):
         ''' handle Action.ACTION_RENAME_GROUP '''
         def rename_group_fail(*args):
-            print "rename group fail"
+            log.error("Error when renaming group: %s" % args)
             self.session.add_event(e3.Event.EVENT_GROUP_RENAME_FAILED, 0, '') # gid, name
         papygroup = None
         for group in self.address_book.groups:
@@ -874,11 +865,11 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_set_contact_alias(self, account, alias): #TODO: finish this
         ''' handle Action.ACTION_SET_CONTACT_ALIAS '''
-        def set_contact_alias_fail(*args):
-            print "set contact alias fail"
+        def set_contact_alias_fail(*args):            
+            log.error("Error when settings alias: %s" % args)
             self.session.add_event(e3.Event.EVENT_CONTACT_ALIAS_FAILED,'') # account
         def set_contact_alias_succeed(*args):
-            print "set contact alias succeed"
+            log.info("Setting alias ok: %s" % args)
             self.session.add_event(e3.Event.EVENT_CONTACT_ALIAS_SUCCEED, account)
 
     def _handle_action_change_status(self, status_):
