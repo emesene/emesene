@@ -186,12 +186,13 @@ class ContactList(object):
     def _on_remove_group(self, group, *args):
         '''called when we remove a group
         '''
-        group = self.session.groups[group]
+        c_group = self.session.groups[group]
 
-        if not group:
+        if not c_group:
             return
 
-        self.remove_group(group)
+        self.remove_group(c_group)
+        del self.session.groups[group]
 
     def _on_update_group(self, group, *args):
         '''called when we remove a group
