@@ -202,11 +202,6 @@ class Worker(e3.base.Worker, papyon.Client):
         if 'last' in avatars:
             contact.picture = os.path.join(avatars.path, 'last')
 
-    def _remove_contact(self, papycontact):
-        ''' removes a contact from the list (gui) '''
-        if papycontact.account in self.session.contacts.contacts:
-            del self.session.contacts.contacts[papycontact.account]
-
     def _add_group(self, papygroup):
         ''' method to add a group to the (gui) contact list '''
         gid = papygroup.id
@@ -636,7 +631,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, contact.account)
 
     def _on_addressbook_contact_deleted(self, contact):
-        self._remove_contact(contact)
         self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED, contact.account)
 
     def _on_addressbook_contact_blocked(self, contact):
@@ -813,7 +807,7 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_REMOVE_CONTACT '''
         def remove_contact_fail(*args):
             log.error("Error when removing contact: %s" % args)
-            self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_FAILED, self.gid) ###########wtf
+            self.session.add_event(e3.Event.EVENT_CONTACT_REMOVE_FAILED, '')
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         self.address_book.delete_contact(papycontact, failed_cb=remove_contact_fail)
 
