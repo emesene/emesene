@@ -22,6 +22,9 @@ from e3.base.Event import Event
 
 import papyon.event
 
+import logging
+log = logging.getLogger('papylib.Events')
+
 class ClientEvents(papyon.event.ClientEventInterface):
     def on_client_state_changed(self, state):
         if state == papyon.event.ClientState.CLOSED:
@@ -68,11 +71,11 @@ class ClientEvents(papyon.event.ClientEventInterface):
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
                                                'Protocol error', 0)
         elif error_type == papyon.event.ClientErrorType.ADDRESSBOOK:#TODO
-            pass
+            log.error("Client got an error handling addressbook: %s %s" % (error_type, error))
         elif error_type == papyon.event.ClientErrorType.OFFLINE_MESSAGGES:#TODO
-            pass
+            log.error("Client got an error handling offline messages: %s %s" % (error_type, error))
         else:
-            print "ERROR :", error_type, " ->", error    
+            log.error("Client got an error: %s %s" % (error_type, error))
 
 class InviteEvent(papyon.event.InviteEventInterface):
     def on_invite_conversation(self, conversation):
@@ -118,7 +121,7 @@ class ContactEvent(papyon.event.ContactEventInterface):
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}
             @see: L{Memberships<papyon.profile.Membership>}"""
-        print "on_contact_memberships_changed", contact
+        log.info("Contact membership changed: %s" % contact)
 
     def on_contact_presence_changed(self, contact):
         self._client._on_contact_status_changed(contact)
@@ -137,13 +140,14 @@ class ContactEvent(papyon.event.ContactEventInterface):
         """Called when the infos of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
-        print "[papyon]", "on_contact_infos_changed", contact, infos
+        log.info("Contact informations changed: %s %s" % (contact, infos))
 
     def on_contact_client_capabilities_changed(self, contact):
         """Called when the client capabilities of a contact changes.
             @param contact: the contact whose presence changed
             @type contact: L{Contact<papyon.profile.Contact>}"""
         # TODO: handle this -- capabilities? wtf?
+        log.info("Contact's client capabilities changed: %s" % contact)
 
     def on_contact_msn_object_changed(self, contact):
         self._client._on_contact_msnobject_changed(contact)
@@ -202,19 +206,19 @@ class WebcamEvent(papyon.event.WebcamEventInterface):
 
     def on_webcam_viewer_data_received(self):
         """Called when we received viewer data"""
-        print "[papyon]", "[webcam]", "viewer data received"
+        log.info("Webcam viewer data received")
 
     def on_webcam_accepted(self):
         """Called when our invitation got accepted"""
-        print "[papyon]", "[webcam]", "accepted"
+        log.info("Webcam invitation accepted")
 
     def on_webcam_rejected(self):
         """Called when our invitation got rejected"""
-        print "[papyon]", "[webcam]", "rejected"
+        log.info("Webcam invitation rejected")
 
     def on_webcam_paused(self):
         """Called when the webcam is paused"""
-        print "[papyon]", "[webcam]", "paused"
+        log.info("Webcam paused")
 
 class CallEvent(papyon.event.CallEventInterface):
     def __init__(self, call, client):
@@ -255,24 +259,22 @@ class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
         papyon.event.OfflineMessagesEventInterface.__init__(self, client)
 
     def on_oim_state_changed(self, state):
-        print "[papyon]", "oim state changed", state
         ''' NOT_SYNCHRONIZED = 0 SYNCHRONIZING = 1 SYNCHRONIZED = 2 '''
+        log.info("OIM service state changed: %s" % state)
 
     def on_oim_messages_received(self, messages):
-        print "[papyon]", "oims received", messages
         self._client.oim_box.fetch_messages(messages)
 
     def on_oim_messages_fetched(self, messages):
-        print "[papyon]", "oim fetched", messages
         for message in sorted(messages):
             self._client._on_conversation_oim_received(message)
         self._client.oim_box.delete_messages()
 
     def on_oim_messages_deleted(self):
-        print "[papyon]", "oim deleted"
+        log.info("OIMs deleted on the server")
 
     def on_oim_message_sent(self, recipient, message):
-        print "[papyon]", "oim sent to", recipient, message
+        log.info("OIM sent correctly: %s" % (recipient, message))
 
 class MailboxEvent(papyon.event.MailboxEventInterface):
     """interfaces allowing the user to get notified about events from the Inbox.
@@ -284,11 +286,11 @@ class MailboxEvent(papyon.event.MailboxEventInterface):
     def on_mailbox_unread_mail_count_changed(self, unread_mail_count, 
                                                    initial=False):
         """The number of unread mail messages"""
-        print "[papyon]", "mailbox number changed", unread_mail_count, initial
+        log.info("Mailbox count changed (initial? %s): %s" % (initial, unread_mail_count))
 
     def on_mailbox_new_mail_received(self, mail_message):
         """New mail message notification"""
-        print "[papyon]", "mailbox mail received", mail_message
+        log.info("New mailbox message received: %s" % mail_message)
         ''' MAIL MESSAGE:
         def name(self):
         """The name of the person who sent the email"""
