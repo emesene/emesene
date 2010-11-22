@@ -178,6 +178,10 @@ class Worker(e3.base.Worker, papyon.Client):
             self._add_group(group)
 
         for contact in abook.contacts:
+            if not (papyon.profile.Membership.FORWARD & contact.memberships):
+                # This skips contacts that are not in our contact list
+                # but are still in the Live Address Book
+                continue
             self._add_contact(contact)
             for group in contact.groups:
                 self._add_contact_to_group(contact, group)
