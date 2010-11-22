@@ -149,10 +149,9 @@ class ContactHandler(object):
         def add_cb(response, account, groups):
             '''callback to the add_dialog method, add the user and add him
             to the defined groups'''
-
             if response == gui.stock.ADD:
                 self.session.add_contact(account)
-                # TODO: this doesn't work
+                # TODO: this doesn't work (?)
                 if groups:
                     for group in groups:
                         self.session.add_to_group(account, group)
