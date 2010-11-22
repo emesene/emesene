@@ -451,14 +451,14 @@ class Dialog(object):
 
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.add_contact_cb)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
+        cls.add_button(window, gtk.STOCK_OK, stock.ADD, response_cb,
             cls.add_contact_cb)
 
         setattr(window, 'entry', entry)
         setattr(window, 'combo', combo)
 
         entry.connect('activate', cls.add_contact_cb, window, response_cb,
-            stock.ACCEPT)
+            stock.ADD)
         window.show_all()
 
     @classmethod
