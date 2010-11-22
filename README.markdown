@@ -1,8 +1,12 @@
 # emesene2 git
 
-emesene2 is a rewrite of emesene focused on doing things The Right Way™.
+emesene is an istant messenger capable of connecting to various networks 
+and utilizing different graphical toolkits.
+Currently msn and jabber are supported through papyon and xmppy,
+which allows emesene to connect to various IM services such as
+Windows Live Messenger, GTalk, Facebook Chat, etc.
 
-Status: alpha. Works, but doesn't do everything you'd expect. No API stability anywhere yet.
+Status: beta. Works quite good, but there are still a good amount of bugs.
 
 ## Useful links
 
