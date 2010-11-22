@@ -118,7 +118,7 @@ class HelpHandler(object):
 
     def on_about_selected(self):
         '''called when the about item is selected'''
-        self.dialog.about_dialog('emesene', '2.0', 'marianoguerra',
+        self.dialog.about_dialog('emesene', '2.0', 'marianoguerra & c10ud',
             _('A simple yet powerful MSN & Gtalk client'), 'GPL v3',
             'http://www.emesene.org', ['marianoguerra', 'boyska', 'C10uD','Cando'], '',
             gui.theme.logo)
