@@ -42,6 +42,7 @@ class ContactList(object):
         self.session = session
         self.dialog = dialog
 
+        self.session.config.get_or_set('b_order_by_name', True)
         self.session.config.get_or_set('b_order_by_group', True)
         self.session.config.get_or_set('b_show_nick', True)
         self.session.config.get_or_set('b_show_empty_groups', False)
@@ -65,6 +66,7 @@ class ContactList(object):
         # value to this attribute
         self.order_by_group = self.session.config.b_order_by_group
         self.show_nick = self.session.config.b_show_nick
+        self._order_by_name = self.session.config.b_order_by_name
         self._show_empty_groups = self.session.config.b_show_empty_groups
         self._show_offline = self.session.config.b_show_offline
         self._show_blocked = self.session.config.b_show_blocked
@@ -267,6 +269,19 @@ class ContactList(object):
         self.refilter()
 
     show_blocked = property(fget=_get_show_blocked, fset=_set_show_blocked)
+
+    def _get_order_by_name(self):
+        '''return the value of self._order_by_name'''
+        return self._order_by_name
+
+    def _set_order_by_name(self, value):
+        '''set the value of self._order_by_name to value and call to
+        self.refilter()'''
+        self._order_by_name = value
+        self.session.config.b_order_by_name = self._order_by_name
+        self.fill() # TODO: FIXME: Why refilter() ain't working here?
+
+    order_by_name = property(fget=_get_order_by_name, fset=_set_order_by_name)
 
     def _get_show_empty_groups(self):
         '''return the value of show_emptry_groups'''
