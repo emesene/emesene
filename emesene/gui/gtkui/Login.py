@@ -141,7 +141,6 @@ class LoginBase(gtk.Alignment):
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
 
-        # TODO: FIXME: GtkInfoBar this.
         self.nicebar = NiceBar()
 
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.throbber, None,
