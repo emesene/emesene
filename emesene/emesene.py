@@ -494,6 +494,10 @@ class Controller(object):
         self.on_pending_contacts()
 
         glib.timeout_add(500, self.session.logger.check)
+        if self.session.config.get_or_set('b_group_offline', False):
+            # WARNING: This is an HAX! TODO: Find why the issue happens
+            # https://github.com/emesene/emesene/issues#issue/128
+            glib.timeout_add_seconds(1, self.window.content.contact_list.fill)
 
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
