@@ -533,6 +533,7 @@ class Worker(e3.base.Worker, papyon.Client):
         contact = self.session.contacts.contacts.get(papycontact.account, None)
         if contact not in self.session.contacts.contacts:
             self._add_contact(papycontact)
+            self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, papycontact.account)
 
     def _on_contact_status_changed(self, papycontact):
         status_ = STATUS_PAPY_TO_E3[papycontact.presence]
