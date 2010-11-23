@@ -223,7 +223,10 @@ class MainWindow(gtk.VBox):
         if button.get_active():
             self.entry.show()
             self.entry.grab_focus()
+            self.contact_list.is_searching = True
         else:
             self.entry.set_text('')
             self.entry.hide()
+            self.contact_list.is_searching = False
+            self.contact_list.un_expand_groups()
 
