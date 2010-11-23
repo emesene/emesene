@@ -13,6 +13,7 @@ class DebugWindow(object):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("debug")
         self.window.connect("delete_event", self.on_delete)
+        self.window.resize(800, 600)
         self.store = DebugStore()
         self.view = DebugView(self.store)
         
