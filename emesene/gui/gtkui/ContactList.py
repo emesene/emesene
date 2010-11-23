@@ -559,18 +559,20 @@ class ContactList(gui.ContactList, gtk.TreeView):
         group_data = (None, self.no_group, self.format_group(self.no_group), False, None,
             0, True, False)
         self._model[self.no_group_iter] = group_data
-
+        self.update_group(self.no_group)
 
     def update_online_group(self):
         '''update the special "Online" group '''
         group_data = (None, self.online_group, self.format_group(self.online_group), False, None, 0, True, False)
         self._model[self.online_group_iter] = group_data
+        self.update_group(self.online_group)
 
     def update_offline_group(self):
         '''update the special "Offline" group'''
         group_data = (None, self.offline_group, self.format_group(self.offline_group), False, None,
             0, True, False)
         self._model[self.offline_group_iter] = group_data
+        self.update_group(self.offline_group)
 
     def un_expand_groups(self):
         ''' restore groups after a search'''
@@ -590,7 +592,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         for row in self._model:
             obj = row[1]
-            if type(obj) == e3.Group and obj.identifier == group.identifier:
+            if type(obj) == e3.Group and obj.name == group.name:
                 if group.name in self.group_state:
                     state = self.group_state[group.name]
                     childpath = self._model.get_path(row.iter)
