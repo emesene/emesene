@@ -441,6 +441,8 @@ class ContactList(object):
         for contact in self.contacts.get_no_group():
             self.add_contact(contact)
 
+        return False # required for a hax: see emesene.py @ on_contact_list_ready
+
     def clear(self):
         '''clear the contact list, return True if the list was cleared
         False otherwise (normally returns false when clear is called before
