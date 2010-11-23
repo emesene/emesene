@@ -223,6 +223,7 @@ class Controller(object):
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
         signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
+        signals.contact_added_you.subscribe(self.on_pending_contacts)
 
     def close_session(self, do_exit=True):
         '''close session'''
@@ -267,6 +268,7 @@ class Controller(object):
             signals.disconnected.unsubscribe(self.on_disconnected)
             signals.picture_change_succeed.unsubscribe(
                     self.on_picture_change_succeed)
+            signals.contact_added_you.unsubscribe(self.on_pending_contacts)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -452,10 +454,8 @@ class Controller(object):
             self.session.quit()
         self.go_login(cancel_clicked=True)
 
-    def on_contact_list_ready(self):
-        '''callback called when the contact list is ready to be used'''
-        self.window.content.contact_list.fill()
-
+    def on_pending_contacts(self):
+        '''callback called when some contact is pending'''
         def on_contact_added_you(responses):
             '''
             callback called when the dialog is closed
@@ -473,6 +473,12 @@ class Controller(object):
 
             dialog = extension.get_default('dialog')
             dialog.contact_added_you(accounts, on_contact_added_you)
+
+    def on_contact_list_ready(self):
+        '''callback called when the contact list is ready to be used'''
+        self.window.content.contact_list.fill()
+
+        self.on_pending_contacts()
 
         glib.timeout_add(500, self.session.logger.check)
 

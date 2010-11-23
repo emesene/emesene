@@ -116,12 +116,7 @@ class ConversationEvent(papyon.event.ConversationEventInterface):
 
 class ContactEvent(papyon.event.ContactEventInterface):
     def on_contact_memberships_changed(self, contact):
-        # TODO: handle this, maybe instead of BLOCK events
-        """Called when the memberships of a contact changes.
-            @param contact: the contact whose presence changed
-            @type contact: L{Contact<papyon.profile.Contact>}
-            @see: L{Memberships<papyon.profile.Membership>}"""
-        log.info("Contact membership changed: %s" % contact)
+        self._client._on_contact_membership_changed(contact)
 
     def on_contact_presence_changed(self, contact):
         self._client._on_contact_status_changed(contact)
@@ -153,6 +148,9 @@ class ContactEvent(papyon.event.ContactEventInterface):
         self._client._on_contact_msnobject_changed(contact)
 
 class AddressBookEvent(papyon.event.AddressBookEventInterface):
+    def on_addressbook_contact_pending(self, contact):
+        self._client._on_addressbook_contact_pending(contact)
+
     def on_addressbook_messenger_contact_added(self, contact):
         self._client._on_addressbook_messenger_contact_added(contact)
 

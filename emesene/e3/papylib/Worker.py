@@ -178,6 +178,15 @@ class Worker(e3.base.Worker, papyon.Client):
             self._add_group(group)
 
         for contact in abook.contacts:
+            if (papyon.profile.Membership.PENDING & contact.memberships):
+                # Add to the pending contacts
+                tmp_cont = e3.base.Contact(contact.account, contact.id, \
+                            contact.display_name, contact.personal_message, \
+                            STATUS_PAPY_TO_E3[contact.presence], '', \
+                            (papyon.profile.Membership.BLOCK & contact.memberships))
+                self.session.contacts.pending[contact.account] = tmp_cont
+                continue
+
             if not (papyon.profile.Membership.FORWARD & contact.memberships):
                 # This skips contacts that are not in our contact list
                 # but are still in the Live Address Book
@@ -519,6 +528,12 @@ class Worker(e3.base.Worker, papyon.Client):
                                    cid, account)
 
     # contact changes handlers
+    def _on_contact_membership_changed(self, papycontact):
+        log.info("Contact membership changed: %s" % papycontact)
+        contact = self.session.contacts.contacts.get(papycontact.account, None)
+        if contact not in self.session.contacts.contacts:
+            self._add_contact(papycontact)
+
     def _on_contact_status_changed(self, papycontact):
         status_ = STATUS_PAPY_TO_E3[papycontact.presence]
         contact = self.session.contacts.contacts.get(papycontact.account, None)
@@ -626,7 +641,17 @@ class Worker(e3.base.Worker, papyon.Client):
                     (download_ok, download_failed), peer=contact)
 
     # address book events
-    def _on_addressbook_messenger_contact_added(contact):
+    def _on_addressbook_contact_pending(self, contact):
+        log.debug("contact pending: %s" % contact)
+        # Add to the pending contacts
+        tmp_cont = e3.base.Contact(contact.account, contact.id, \
+            contact.display_name, contact.personal_message, \
+            STATUS_PAPY_TO_E3[contact.presence], '', \
+            (papyon.profile.Membership.BLOCK & contact.memberships))
+        self.session.contacts.pending[contact.account] = tmp_cont
+        self.session.add_event(Event.EVENT_CONTACT_ADDED_YOU)
+
+    def _on_addressbook_messenger_contact_added(self, contact):
         self._add_contact(contact)
         self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, contact.account)
 
