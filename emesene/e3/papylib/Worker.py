@@ -531,9 +531,12 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_contact_membership_changed(self, papycontact):
         log.info("Contact membership changed: %s" % papycontact)
         contact = self.session.contacts.contacts.get(papycontact.account, None)
-        if contact not in self.session.contacts.contacts:
+        if not contact:
             self._add_contact(papycontact)
             self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, papycontact.account)
+        else:
+            self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, 
+                                    papycontact.account, 'membership', None)
 
     def _on_contact_status_changed(self, papycontact):
         status_ = STATUS_PAPY_TO_E3[papycontact.presence]
