@@ -47,6 +47,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         gui.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
+        self.is_searching = False
         self.online_group = None # added
         self.online_group_iter = None # added
         self.no_group = None
@@ -570,6 +571,13 @@ class ContactList(gui.ContactList, gtk.TreeView):
         group_data = (None, self.offline_group, self.format_group(self.offline_group), False, None,
             0, True, False)
         self._model[self.offline_group_iter] = group_data
+
+    def un_expand_groups(self):
+        ''' restore groups after a search'''
+        for row in self._model:
+            obj = row[1]
+            if type(obj) == e3.Group:
+                self.update_group(obj)
 
     def update_group(self, group):
         '''update the data of group'''
