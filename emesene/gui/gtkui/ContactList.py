@@ -160,11 +160,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         if type(obj) == e3.Group:
             if not self.show_empty_groups:
-                # TODO: check this when we start translating the app
-                if special and obj.name == "Offline":
+                if special and obj.type == e3.Group.OFFLINE:
                     return True
 
-                if special and obj.name == "Online":
+                if special and obj.type == e3.Group.ONLINE:
                     return True
 
                 # get a list of contact objects from a list of accounts
@@ -362,7 +361,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # special offline group
         if self.group_offline and offline:
             if not self.offline_group:
-                self.offline_group = e3.Group("Offline")
+                self.offline_group = e3.Group(_("Offline"), type_ = e3.Group.OFFLINE)
                 self.offline_group_iter = self.add_group(self.offline_group, True)
 
             self.offline_group.contacts.append(contact.account)
@@ -373,7 +372,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # we add online contacts to their online group :)
         if self.order_by_status and is_online:
             if not self.online_group:
-                self.online_group = e3.Group("Online") # FIXME: Check this when translate.
+                self.online_group = e3.Group(_("Online"), type_ = e3.Group.ONLINE)
                 self.online_group_iter = self.add_group(self.online_group, True)
 
             self.online_group.contacts.append(contact.account)
@@ -389,7 +388,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 self.update_no_group()
                 return self._model.append(self.no_group_iter, contact_data)
             else:
-                self.no_group = e3.Group("No group")
+                self.no_group = e3.Group(_("No group"), type_ = e3.Group.NONE)
                 self.no_group_iter = self.add_group(self.no_group, True)
                 self.no_group.contacts.append(contact.account)
                 self.update_no_group()
@@ -482,9 +481,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         if group.contacts.count(contact.account) > 0:
                             group.contacts.remove(contact.account)
                         self.update_group(group)
-
-
-
 
     def clear(self):
         '''clear the contact list, return True if the list was cleared

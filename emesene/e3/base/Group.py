@@ -19,16 +19,18 @@
 
 class Group(object):
     '''a class representing a group'''
-
-    def __init__(self, name, identifier=None, contacts=None):
+    (ONLINE, OFFLINE, NONE, STANDARD) = range(4)
+    def __init__(self, name, identifier=None, contacts=None, type_=None):
         '''class constructor'''
         self.name = name
         self.identifier = identifier or '0'
         self.contacts = contacts or []
+        self.type = type_ or Group.STANDARD
 
     def dict(self):
         '''return a dict representing the object'''
-        return dict(name = self.name,
+        return dict(type_ = self.type, 
+          name = self.name,
           identifier = self.identifier,
           contacts = self.contacts)
 
