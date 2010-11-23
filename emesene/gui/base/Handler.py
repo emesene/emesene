@@ -113,6 +113,10 @@ class OptionsHandler(object):
         '''called when the show blocked item is toggled'''
         self.contact_list.show_blocked = active
 
+    def on_order_by_name_toggled(self, active):
+        '''called when the sort by name item is toggled'''
+        self.contact_list.order_by_name = active
+
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
         instance = extension.get_and_instantiate('preferences', self.session)

@@ -28,6 +28,7 @@ import extension
 import logging
 
 import Tooltips
+import Renderers
 
 log = logging.getLogger('gtkui.ContactList')
 
@@ -696,4 +697,36 @@ class ContactList(gui.ContactList, gtk.TreeView):
         """
         self.avatar_size = size
         self.pbr.set_fixed_size(size, size)
+
+    def compare_contacts(self, contact1, contact2, order1=0, order2=0):
+        '''compare two contacts and return 1 if contact1 should go first, 0
+        if equal and -1 if contact2 should go first, use order1 and order2 to
+        override the group sorting (the user can set the values on these to
+        have custom ordering)'''
+
+        override = cmp(order2, order1)
+
+        if override != 0:
+            return override
+
+        if self.order_by_name:
+            return cmp(Renderers.msnplus_to_plain_text(contact1.display_name), \
+                       Renderers.msnplus_to_plain_text(contact2.display_name))
+
+        result = cmp(e3.status.ORDERED.index(contact1.status),
+            e3.status.ORDERED.index(contact2.status))
+
+        if result != 0:
+            return result
+
+        if self.order_by_status:
+            return cmp(contact1.display_name, contact2.display_name)
+
+        if len(contact1.groups) == 0:
+            if len(contact2.groups) == 0:
+                return cmp(contact1.display_name, contact2.display_name)
+            else:
+                return -1
+        elif len(contact2.groups) == 0:
+            return 1
 
