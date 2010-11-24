@@ -280,6 +280,17 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_CALL_INVITATION, ca)
 
     def _on_invite_file_transfer(self, papysession):
+        ''' handle file transfer invites '''
+        account = papysession.peer.account
+
+        if account in self.conversations:
+            cid = self.conversations[account]
+        else:
+            cid = time.time()
+            self._handle_action_new_conversation(account, cid)
+            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
+                [account])
+
         tr = e3.base.FileTransfer(papysession, papysession.filename, \
             papysession.size, papysession.preview, sender=papysession.peer)
         self.filetransfers[papysession] = tr
@@ -290,7 +301,7 @@ class Worker(e3.base.Worker, papyon.Client):
         papysession.connect("completed", self.papy_ft_completed)
         papysession.connect("rejected", self.papy_ft_rejected)
 
-        self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr)
+        self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr, cid)
 
     def papy_ft_accepted(self, ftsession):
         tr = self.filetransfers[ftsession]
@@ -1088,7 +1099,7 @@ class Worker(e3.base.Worker, papyon.Client):
         papysession.connect("progressed", self.papy_ft_progressed)
         papysession.connect("completed", self.papy_ft_completed)
 
-        self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr)
+        self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr, cid)
     
     def _handle_action_ft_accept(self, t):
         self.rfiletransfers[t].accept()

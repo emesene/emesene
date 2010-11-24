@@ -371,9 +371,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         if account in self.members and what in ('status', 'nick'):
             self.update_tab()
 
-    def on_filetransfer_invitation(self, transfer):
+    def on_filetransfer_invitation(self, transfer, cid):
         ''' called when a new file transfer is issued '''
-        self.transfers_bar.add(transfer)
+        if cid == self.cid:
+            self.transfers_bar.add(transfer)
 
     def on_filetransfer_accepted(self, transfer):
         ''' called when the file transfer is accepted '''
@@ -381,13 +382,16 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_filetransfer_progress(self, transfer):
         ''' called every chunk received '''
-        self.transfers_bar.update(transfer)
+        if transfer in self.transfers_bar.transfers:
+            self.transfers_bar.update(transfer)
 
     def on_filetransfer_rejected(self, transfer):
         ''' called when a file transfer is rejected '''
-        self.transfers_bar.update(transfer)
+        if transfer in self.transfers_bar.transfers:
+            self.transfers_bar.update(transfer)
 
     def on_filetransfer_completed(self, transfer):
         ''' called when a file transfer is completed '''
-        self.transfers_bar.finished(transfer)
+        if transfer in self.transfers_bar.transfers:
+            self.transfers_bar.finished(transfer)
 
