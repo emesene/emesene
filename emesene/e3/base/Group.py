@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 '''a module that defines a group object'''
+# -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,16 +19,18 @@
 
 class Group(object):
     '''a class representing a group'''
-
-    def __init__(self, name, identifier=None, contacts=None):
+    (ONLINE, OFFLINE, NONE, STANDARD) = range(4)
+    def __init__(self, name, identifier=None, contacts=None, type_=None):
         '''class constructor'''
         self.name = name
         self.identifier = identifier or '0'
         self.contacts = contacts or []
+        self.type = type_ or Group.STANDARD
 
     def dict(self):
         '''return a dict representing the object'''
-        return dict(name = self.name,
+        return dict(type_ = self.type, 
+          name = self.name,
           identifier = self.identifier,
           contacts = self.contacts)
 

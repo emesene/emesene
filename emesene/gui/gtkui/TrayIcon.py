@@ -1,9 +1,29 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 import time
 import os
 
 import extension
 from e3 import status
+
+import Renderers
 
 class TrayIcon(gtk.StatusIcon):
     """
@@ -40,7 +60,7 @@ class TrayIcon(gtk.StatusIcon):
         """
         method called to set the state to the login window
         """
-        self.menu = LoginMenu(self.handler)
+        self.menu = LoginMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_from_file(self.handler.theme.logo)
 
@@ -95,11 +115,8 @@ class TrayIcon(gtk.StatusIcon):
             page = self.conversations.page_num(conversation)
             self.conversations.set_current_page(page)
             self.conversations.get_parent().present()
-        elif (self.main_window != None):
-            if(self.main_window.get_property("visible")):
-                self.main_window.hide()
-            else:
-                self.main_window.show()
+        else:
+            self.handler.on_hide_show_mainwindow(self.main_window)
 
     def _on_change_status(self,stat):
         """
@@ -125,7 +142,7 @@ class LoginMenu(gtk.Menu):
     login window
     """
 
-    def __init__(self, handler):
+    def __init__(self, handler, main_window=None):
         """
         constructor
 
@@ -134,6 +151,8 @@ class LoginMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
         self.hide_show_mainwindow = gtk.MenuItem(_('Hide/Show emesene'))
+        self.hide_show_mainwindow.connect('activate',
+            lambda *args: self.handler.on_hide_show_mainwindow(main_window))
         self.quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit.connect('activate',
             lambda *args: self.handler.on_quit_selected())
@@ -168,6 +187,8 @@ class MainMenu(gtk.Menu):
         self.list.set_submenu(self.list_contacts)
 
         self.hide_show_mainwindow = gtk.MenuItem(_('Hide/Show emesene'))
+        self.hide_show_mainwindow.connect('activate',
+            lambda *args: self.handler.on_hide_show_mainwindow(main_window))
 
         self.disconnect = gtk.ImageMenuItem(gtk.STOCK_DISCONNECT)
         self.disconnect.connect('activate',
@@ -218,7 +239,7 @@ class ContactsMenu(gtk.Menu):
         """
         #item = gtk.ImageMenuItem()
         item = gtk.MenuItem()
-        item.set_label(contact.nick)
+        item.set_label(Renderers.msnplus_to_plain_text(contact.nick))
         #pict = self.__get_contact_pixbuf_or_default(contact)
         #item.set_image(pict)
         item.connect('activate', self._on_contact_clicked)    

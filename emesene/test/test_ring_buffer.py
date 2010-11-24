@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath('.'))
 
 from e3.common import RingBuffer
 
-class TestCreate(unittest.TestCase):
+class RingBufferTestCase(unittest.TestCase):
 
     ITEMS = [1, 2.4, False, None, "foo", [], (1,2,3)]
 
@@ -28,10 +28,10 @@ class TestCreate(unittest.TestCase):
         self.assertEquals(ring.pop(), "foo")
         self.assertRaises(IndexError, ring.pop)
 
-        for item in TestCreate.ITEMS:
+        for item in RingBufferTestCase.ITEMS:
             ring.push(item)
 
-        for item in TestCreate.ITEMS[-5::][::-1]:
+        for item in RingBufferTestCase.ITEMS[-5::][::-1]:
             self.assertEquals(ring.pop(), item)
 
         self.assertRaises(IndexError, ring.pop)

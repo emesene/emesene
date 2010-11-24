@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import e3
 import MarkupParser
 
@@ -28,8 +46,8 @@ class ConversationManager(object):
                 self._on_group_ended)
             self.session.signals.conv_message_send_failed.subscribe(
                 self._on_message_send_failed)
-            self.session.signals.contact_attr_changed.subscribe(
-                self._on_contact_attr_changed)
+            #self.session.signals.contact_attr_changed.subscribe(
+            #    self._on_contact_attr_changed)
             self.session.signals.p2p_finished.subscribe(
                 self._on_p2p_finished)
 
@@ -56,7 +74,7 @@ class ConversationManager(object):
         inform that the other user has started typing
         """
         # TODO: implement, this seems to be cross gui so it should go here
-        log.debug('typing')
+        log.debug('%s is typing in %s' % (account, cid))
 
     def set_message_waiting(self, conversation, is_waiting):
         """
@@ -194,8 +212,8 @@ class ConversationManager(object):
             self._on_group_ended)
         self.session.signals.conv_message_send_failed.unsubscribe(
             self._on_message_send_failed)
-        self.session.signals.contact_attr_changed.unsubscribe(
-            self._on_contact_attr_changed)
+        #self.session.signals.contact_attr_changed.unsubscribe(
+        #    self._on_contact_attr_changed)
         self.session.signals.p2p_finished.unsubscribe(
             self._on_p2p_finished)
         for conversation in self.conversations.values():

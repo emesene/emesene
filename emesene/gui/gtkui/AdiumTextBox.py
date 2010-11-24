@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import gtk
 import logging
@@ -8,6 +26,7 @@ import xml.sax.saxutils
 
 import webbrowser
 
+import e3
 import gui
 
 class OutputView(webkit.WebView):
@@ -164,8 +183,11 @@ class OutputText(gtk.ScrolledWindow):
 
         self._texts = []
 
-    def send_message(self, formatter, contact, text, cedict, cedir, style, is_first):
+    def send_message(self, formatter, contact, text, cedict, cedir, style, is_first, type_=None):
         '''add a message to the widget'''
+        if type_ is e3.Message.TYPE_NUDGE:
+            text = _('You just sent a nudge!')
+
         msg = gui.Message.from_contact(contact, text, is_first, False)
         self.view.add_message(msg, style, cedict, cedir)
 
@@ -173,7 +195,7 @@ class OutputText(gtk.ScrolledWindow):
         '''add a message to the widget'''
         msg = gui.Message.from_contact(contact, message.body, is_first, True, message.timestamp)
         # WARNING: this is a hack to keep out config from backend libraries
-        message.style.size = self.config.get_or_set("i_font_size", 10)
+        message.style.size = self.config.i_font_size
         self.view.add_message(msg, message.style, cedict, cedir)
 
     def information(self, formatter, contact, message):

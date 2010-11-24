@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 import gobject
 
@@ -7,6 +25,9 @@ import utils
 import RichBuffer
 
 from gui.base import MarkupParser
+
+import logging
+log = logging.getLogger('gtkui.Textbox')
 
 class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
@@ -158,10 +179,10 @@ class InputText(TextBox):
 
         try:
             import gtkspell
-
-            self.spell_checker = gtkspell.Spell(self._textbox)
-        except ImportError as error:
-            pass
+            if self.config.b_enable_spell_check:
+                self.spell_checker = gtkspell.Spell(self._textbox)
+        except Exception, e:
+            log.warning("Could not load spell-check: %s" % e)
 
         self._textbox.connect_after('message-send', self._on_message_send)
 
@@ -244,6 +265,9 @@ class InputText(TextBox):
 
     def update_style(self, style):
         '''update the global style of the widget'''
+        if style is None:
+            return
+
         try:
             color = gtk.gdk.color_parse('#' + style.color.to_hex())
             gtk.gdk.colormap_get_system().alloc_color(color)
@@ -315,18 +339,19 @@ class OutputText(TextBox):
 
         TextBox.append(self, text, scroll)
 
-    def send_message(self, formatter, contact, text, cedict, cepath, style, is_first):
+    def send_message(self, formatter, contact, text, cedict, cepath, style, is_first, type_=None):
         '''add a message to the widget'''
-        nick = contact.display_name
-
         is_raw, consecutive, outgoing, first, last = \
-            formatter.format(contact)
+            formatter.format(contact, type_)
 
-        if is_raw:
-            middle = MarkupParser.escape(text)
+        if type_ == e3.Message.TYPE_NUDGE:
+            middle = ''
         else:
-            middle = MarkupParser.escape(text)
-            middle = e3.common.add_style_to_message(middle, style, False)
+            if is_raw:
+                middle = MarkupParser.escape(text)
+            else:
+                middle = MarkupParser.escape(text)
+                middle = e3.common.add_style_to_message(middle, style, False)
 
         all_ = first + middle + last
         self.append(all_, cedict, self.config.b_allow_auto_scroll)

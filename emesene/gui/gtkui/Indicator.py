@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import gtk
 import time
@@ -73,8 +91,7 @@ class Indicator(appindicator.Indicator):
         icon_name = self.handler.theme.logo.split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)
-        self.menu = TrayIcon.LoginMenu(self.handler)
-        self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
+        self.menu = TrayIcon.LoginMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_menu(self.menu)
 
@@ -85,7 +102,6 @@ class Indicator(appindicator.Indicator):
         self.handler.session = session
         self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
         self.menu = TrayIcon.MainMenu(self.handler, self.main_window)
-        self.menu.hide_show_mainwindow.connect('activate', self._on_activate)
         self.menu.show_all()
         self.set_menu(self.menu)
 
@@ -117,16 +133,3 @@ class Indicator(appindicator.Indicator):
         icon_name = self.handler.theme.status_icons_panel[stat].split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)
-
-    def _on_activate(self, trayicon):
-        """
-        callback called when the menu entry 'hide/show emesene'
-        is clicked
-        """
-
-        if(self.main_window != None):
-            if(self.main_window.get_property("visible")):
-                self.main_window.hide()
-            else:
-                self.main_window.show()
-

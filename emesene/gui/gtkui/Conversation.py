@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 import gobject
 
@@ -125,6 +143,8 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.on_filetransfer_accepted)
         self.session.signals.filetransfer_progress.subscribe(
                 self.on_filetransfer_progress)
+        self.session.signals.filetransfer_completed.subscribe(
+                self.on_filetransfer_completed)
 
         self.tab_index = -1 # used to select an existing conversation
         self.index = 0 # used for the rotate picture function
@@ -159,6 +179,19 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''called when the conversation is closed'''
         self.session.config.unsubscribe(self._on_show_toolbar_changed,
             'b_show_toolbar')
+        self.session.signals.picture_change_succeed.unsubscribe(
+            self.on_picture_change_succeed)
+        self.session.signals.contact_attr_changed.unsubscribe(
+            self.on_contact_attr_changed_succeed)
+
+        self.session.signals.filetransfer_invitation.unsubscribe(
+                self.on_filetransfer_invitation)
+        self.session.signals.filetransfer_accepted.unsubscribe(
+                self.on_filetransfer_accepted)
+        self.session.signals.filetransfer_progress.unsubscribe(
+                self.on_filetransfer_progress)
+        self.session.signals.filetransfer_completed.unsubscribe(
+                self.on_filetransfer_completed)
         #stop the avatars animation...if any..
         self.avatar.stop()
         self.his_avatar.stop()
@@ -177,10 +210,16 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.hbox.show()
         self.panel.show_all()
 
-        self.input.grab_focus()
+        self.input_grab_focus()
 
         if not self.session.config.b_show_toolbar:
             self.toolbar.hide()
+
+    def input_grab_focus(self):
+        '''
+        sets the focus on the input widget
+        '''
+        self.input.grab_focus()
 
     def update_panel_position(self, *args):
         """update the panel position to be on the 80% of the height
@@ -316,7 +355,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_emote(self, emote):
         '''called when an emoticon is selected'''
         self.input.append(gobject.markup_escape_text(emote))
-        self.input.grab_focus()
+        self.input_grab_focus()
 
     def on_picture_change_succeed(self, account, path):
         '''callback called when the picture of an account is changed'''
@@ -328,17 +367,27 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_contact_attr_changed_succeed(self, account, what, old,
             do_notify=True):
-        self.update_tab()
+        ''' called when contacts change their attributes'''
+        if account in self.members and what in ('status', 'nick'):
+            self.update_tab()
 
     def on_filetransfer_invitation(self, transfer):
+        ''' called when a new file transfer is issued '''
         self.transfers_bar.add(transfer)
 
     def on_filetransfer_accepted(self, transfer):
+        ''' called when the file transfer is accepted '''
         pass
 
     def on_filetransfer_progress(self, transfer):
+        ''' called every chunk received '''
         self.transfers_bar.update(transfer)
 
     def on_filetransfer_rejected(self, transfer):
+        ''' called when a file transfer is rejected '''
         self.transfers_bar.update(transfer)
+
+    def on_filetransfer_completed(self, transfer):
+        ''' called when a file transfer is completed '''
+        self.transfers_bar.finished(transfer)
 

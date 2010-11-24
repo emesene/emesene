@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import time
 import webbrowser
@@ -5,6 +23,7 @@ import webbrowser
 import e3.base
 import gui
 import extension
+import Desktop
 
 import logging
 log = logging.getLogger('gui.base.Handler')
@@ -94,6 +113,10 @@ class OptionsHandler(object):
         '''called when the show blocked item is toggled'''
         self.contact_list.show_blocked = active
 
+    def on_order_by_name_toggled(self, active):
+        '''called when the sort by name item is toggled'''
+        self.contact_list.order_by_name = active
+
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
         instance = extension.get_and_instantiate('preferences', self.session)
@@ -117,7 +140,7 @@ class HelpHandler(object):
 
     def on_about_selected(self):
         '''called when the about item is selected'''
-        self.dialog.about_dialog('emesene', '2.0', 'marianoguerra',
+        self.dialog.about_dialog('emesene', '2.0', 'marianoguerra & c10ud',
             _('A simple yet powerful MSN & Gtalk client'), 'GPL v3',
             'http://www.emesene.org', ['marianoguerra', 'boyska', 'C10uD','Cando'], '',
             gui.theme.logo)
@@ -148,10 +171,9 @@ class ContactHandler(object):
         def add_cb(response, account, groups):
             '''callback to the add_dialog method, add the user and add him
             to the defined groups'''
-
             if response == gui.stock.ADD:
                 self.session.add_contact(account)
-                # TODO: this doesn't work
+                # TODO: this doesn't work (?)
                 if groups:
                     for group in groups:
                         self.session.add_to_group(account, group)
@@ -391,6 +413,13 @@ class TrayIconHandler(FileHandler):
         """
         FileHandler.__init__(self, session, on_disconnect, on_quit)
         self.theme = theme
+        
+    def on_hide_show_mainwindow(self, main_window=None):
+        if (main_window != None):
+            if(main_window.get_property("visible")):
+                main_window.hide()
+            else:
+                main_window.show()
 
 class FileTransferHandler(object):
     ''' this handler handles a file transfer object '''
@@ -403,11 +432,11 @@ class FileTransferHandler(object):
 
     def open(self):
         ''' use desktop's open to open the file, once state is finished '''
-        raise NotImplementedError
+        Desktop.open(self.transfer.completepath)
 
     def opendir(self):
         ''' open the directory that contains the file, once the transfer is finished '''
-        raise NotImplementedError
+        Desktop.open(os.path.dirname(self.transfer.completepath))
 
     def accept(self):
         ''' accepts a file transfer '''
@@ -429,3 +458,4 @@ class FileTransferHandler(object):
         ''' cancels a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.cancel_filetransfer(self.transfer)
+

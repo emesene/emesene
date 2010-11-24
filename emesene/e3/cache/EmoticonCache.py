@@ -102,6 +102,14 @@ class EmoticonCache(Cache.Cache):
 
         handle.close()
 
+    def add_entry(self, shortcut, hash_):
+        '''wrapper method for custom emoticon manipulation'''
+        return self.__add_entry(shortcut, hash_)
+
+    def remove_entry(self, hash_to_remove):
+        '''wrapper method for custom emoticon manipulation'''
+        self.__remove_entry(hash_to_remove)
+
     def remove(self, item):
         '''remove an item from cache
         return True on success False otherwise

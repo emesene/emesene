@@ -1,5 +1,25 @@
-import gtk
+# -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+import gtk
+import webbrowser
+
+import e3.common
 import gui
 import utils
 import extension
@@ -9,12 +29,14 @@ import PluginWindow
 import logging
 log = logging.getLogger('gtkui.Preferences')
 
+# TODO: consider moving to nicer icons than stock ones.
 LIST = [
     {'stock_id' : gtk.STOCK_FULLSCREEN,'text' : _('Interface')},
+    {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('Desktop')},
     {'stock_id' : gtk.STOCK_MEDIA_NEXT,'text' : _('Sounds')},
     {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
     {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
-    {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Extensions')},
+    {'stock_id' : gtk.STOCK_DIALOG_WARNING,'text' : _('Extensions')},
     {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
 ]
 
@@ -82,6 +104,7 @@ class Preferences(gtk.Window):
         vbox.pack_start(hbox, True,True) # hbox, True, True
 
         self.interface = Interface(session)
+        self.desktop = DesktopTab(session)
         self.sound = Sound(session)
         self.notification = Notification(session)
         self.theme = Theme(session)
@@ -100,6 +123,7 @@ class Preferences(gtk.Window):
 
         # Keep local copies of the objects
         self.interface_page = self.interface
+        self.desktop_page = self.desktop
         self.sound_page = self.sound
         self.notifications_page = self.notification
         self.theme_page = self.theme
@@ -109,15 +133,24 @@ class Preferences(gtk.Window):
         # Whack the pages into a dict for future reference
 
         self.page_dict.append(self.interface_page)
+        self.page_dict.append(self.desktop_page)
         self.page_dict.append(self.sound_page)
         self.page_dict.append(self.notifications_page)
         self.page_dict.append(self.theme_page)
         self.page_dict.append(self.extensions_page)
         self.page_dict.append(self.plugins_page)
 
+        if 'msn' in self.session.SERVICES: # only when session is papylib.
+            listStore.append([self.render_icon(gtk.STOCK_NETWORK,
+                             gtk.ICON_SIZE_LARGE_TOOLBAR), _('Live Messenger')])
+            self.msn_papylib = MSNPapylib(session)
+            self.msn_papylib_page = self.msn_papylib
+            self.page_dict.append(self.msn_papylib_page)
+
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
 
+        self.connect('delete_event', self.hide_on_delete)
         self.add(vbox)
         vbox.show_all()
 
@@ -226,6 +259,7 @@ class BaseTable(gtk.Table):
         widget.set_active(default)
         widget.connect('toggled', self.on_toggled, property_name)
         self.append_row(widget, row)
+        return widget
 
     def append_range(self, text, property_name, min_val, max_val, is_int=True):
         """append a row with a scale to select an integer value between
@@ -381,6 +415,8 @@ class Interface(BaseTable):
             'session.config.b_avatar_on_left')
         self.append_check(_('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
+        self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
+            'session.config.b_enable_spell_check')
 
         self.append_range(_('Contact list avatar size'),
             'session.config.i_avatar_size', 18, 64)
@@ -397,24 +433,37 @@ class Sound(BaseTable):
         """
         BaseTable.__init__(self, 6, 1)
         self.session = session
+        self.array = []
         self.append_markup('<b>'+_('Messages events:')+'</b>')
         self.append_check(_('Mute sounds'),
             'session.config.b_mute_sounds')
-        self.append_check(_('Play sound on sent message'),
-            'session.config.b_play_send')
-        self.append_check(_('Play sound on first received message'),
-            'session.config.b_play_first_send')
-        self.append_check(_('Play sound on received message'),
-            'session.config.b_play_type')
-        self.append_check(_('Play sound on nudge'),
-            'session.config.b_play_nudge')
-
+        self.array.append(self.append_check(_('Play sound on sent message'),
+            'session.config.b_play_send'))
+        self.array.append(self.append_check(_('Play sound on first received message'),
+            'session.config.b_play_first_send'))
+        self.array.append(self.append_check(_('Play sound on received message'),
+            'session.config.b_play_type'))
+        self.array.append(self.append_check(_('Play sound on nudge'),
+            'session.config.b_play_nudge'))
         self.append_markup('<b>'+_('Users events:')+'</b>')
-        self.append_check(_('Play sound on contact online'),
-            'session.config.b_play_contact_online')
-        self.append_check(_('Play sound on contact offline'),
-            'session.config.b_play_contact_offline')
+        self.array.append(self.append_check(_('Play sound on contact online'),
+            'session.config.b_play_contact_online'))
+        self.array.append(self.append_check(_('Play sound on contact offline'),
+            'session.config.b_play_contact_offline'))
+
+        self._on_mute_sounds_changed(self.session.config.b_mute_sounds)
+
+        self.session.config.subscribe(self._on_mute_sounds_changed,
+            'b_mute_sounds')
+
         self.show_all()
+
+    def _on_mute_sounds_changed(self, value):
+        for i in self.array:        
+            if value:
+                i.set_sensitive(False)
+            else:
+                i.set_sensitive(True)
 
 class Notification(BaseTable):
     """the panel to display/modify the config related to the notifications
@@ -594,6 +643,56 @@ class Extension(BaseTable):
         self.categories.set_model(model)
         self.categories.set_active(0)
 
+class DesktopTab(BaseTable):
+    """ This panel contains some msn-papylib specific settings """
 
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 3, 2)
+        self.session = session
 
+        self.append_markup('<b>'+_('File transfers')+'</b>')
+        self.append_check(_('Sort received files by sender'), 
+                          'session.config.b_download_folder_per_account')
+        self.add_text(_('Save files to:'), 0, 2, True)
+
+        def on_path_selected(f_chooser):
+            ''' updates the download dir config value '''
+            if f_chooser.get_filename() != self.session.config.download_folder:
+                self.session.config.download_folder = f_chooser.get_filename()
+
+        path_chooser = gtk.FileChooserDialog(
+            title=_('Choose a Directory'),
+            action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        fc_button = gtk.FileChooserButton(path_chooser)
+        fc_button.set_current_folder(self.session.config.get_or_set("download_folder", 
+                e3.common.locations.downloads()))
+        path_chooser.connect('selection-changed', on_path_selected)
+        self.attach(fc_button, 2, 3, 2, 3, gtk.EXPAND|gtk.FILL, gtk.EXPAND)
+
+        self.show_all()
+
+class MSNPapylib(BaseTable):
+    """ This panel contains some msn-papylib specific settings """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 8, 2)
+        self.session = session
+
+        self.add_text(_('If you have problems with your nickname/message/picture '
+                        'just click on this button, sign in with your account '
+                        'and load a picture in your Live Profile. '
+                        'Then restart emesene and have fun.'), 0, 0, True)
+        self.add_button(_('Open Live Profile'), 1, 0, self._on_live_profile_clicked, 0, 0)
+
+        self.show_all()
+
+    def _on_live_profile_clicked(self, arg):
+        ''' called when live profile button is clicked '''
+        webbrowser.open("http://profile.live.com/details/Edit/Pic")
 

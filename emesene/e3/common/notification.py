@@ -1,5 +1,24 @@
 '''emesene's notification system'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 from e3 import status
+from e3 import Message
 import extension
 
 import time
@@ -42,7 +61,11 @@ class Notification():
         #TODO don't notify if the conversation is on focus
         if self.session.config.b_notify_receive_message:
             contact = self.session.contacts.get(account)
-            self._notify(contact, contact.nick , msgobj.body)
+            if msgobj.type == Message.TYPE_NUDGE:
+                # The message needs to be translated.
+                self._notify(contact, contact.nick , _('%s just sent you a nudge!') % (contact.nick,))
+            else:
+                self._notify(contact, contact.nick , msgobj.body)
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):

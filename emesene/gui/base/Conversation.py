@@ -1,6 +1,23 @@
 '''base implementation of a conversation, it should contain all the logic
 derived classes should implement the GUI to operate the conversation and
 nothing more'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import e3
 import gui
@@ -134,7 +151,8 @@ class Conversation(object):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
         self.output.send_message(self.formatter, self.session.contacts.me,
-            _('You just sent a nudge!'), {}, '', None, self.first)
+                                 '', {}, '', None, self.first,
+                                 e3.Message.TYPE_NUDGE)
 
         self.play_nudge()
 
@@ -194,6 +212,16 @@ class Conversation(object):
         '''
         raise NotImplementedError("Method not implemented")
 
+    def input_grab_focus(self):
+        '''
+        sets the focus on the input widget
+        '''
+        raise NotImplementedError("Method not implemented")
+
+    def on_close(self):
+        '''called when the conversation is closed'''
+        raise NotImplementedError("Method not implemented")
+
     def _get_message_waiting(self):
         '''return True if a message is waiting'''
         return self._message_waiting
@@ -221,7 +249,7 @@ class Conversation(object):
 
         self.session.send_message(self.cid, text, self.cstyle, self.emcache.parse(), custom_emoticons)
         self.output.send_message(self.formatter, self.session.contacts.me,
-                text, self.emcache.parse(), self.emcache.path, self.cstyle, self.first)
+                                 text, self.emcache.parse(), self.emcache.path, self.cstyle, self.first)
         self.messages.push(text)
         self.play_send()
         self.first = False
@@ -424,3 +452,4 @@ class Conversation(object):
 
     def reset_message_offset(self):
         self.message_offset = 0
+

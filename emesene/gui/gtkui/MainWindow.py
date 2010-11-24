@@ -1,4 +1,21 @@
 # -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import gtk
 import time
@@ -130,7 +147,7 @@ class MainWindow(gtk.VBox):
 
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
-        self.contact_list.filter_text = entry.get_text()
+        self.contact_list.filter_text = entry.get_text().lower()
 
     def _on_entry_key_press(self, entry, event):
         '''called when a key is pressed on the search box'''
@@ -206,7 +223,10 @@ class MainWindow(gtk.VBox):
         if button.get_active():
             self.entry.show()
             self.entry.grab_focus()
+            self.contact_list.is_searching = True
         else:
             self.entry.set_text('')
             self.entry.hide()
+            self.contact_list.is_searching = False
+            self.contact_list.un_expand_groups()
 

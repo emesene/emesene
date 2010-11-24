@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 # this module will include a parser for all the markups that will
 # convert it into a restricted subset of xhtml
 import os
@@ -17,7 +35,7 @@ dic_inv = {
     '&apos;'    :'\''
 }
 
-URL_REGEX_STR = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+URL_REGEX_STR = '(http[s]?://|www.)(?:[a-zA-Z]|[0-9]|[$\-_@.&+]|[!*\"\'\(\),]|[=;/#?:]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 URL_REGEX = re.compile(URL_REGEX_STR)
 
 def escape(string_):
@@ -34,7 +52,11 @@ def parse_emotes(message, cedict={}):
 
     # Get the message body to parse emotes
     p = re.compile('<span.*?>(.*)</span>', re.DOTALL)
-    plain_text = p.search(message).group(1)
+    plain_find = p.search(message)
+    if plain_find:
+        plain_text = plain_find.group(1)
+    else:
+        plain_text = ''
 
     chunks = [plain_text]
     shortcuts = gui.Theme.EMOTES.keys()
@@ -69,12 +91,25 @@ def parse_emotes(message, cedict={}):
     # return the markup with plan text
     return message.replace(plain_text, ''.join(chunks))
 
+def replace_shortcut_with_tag(string, short, tag):
+    token = '#IRREPLACEABLE#'
+    def extract(m):
+        irreplaceable.append(m.group(0))
+        return token
+    irreplaceable = []
+    result = re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)', extract, string)
+    result = result.replace(short, tag)
+    irreplaceable.reverse()
+    result = re.sub(token, lambda m: irreplaceable.pop(), result)
+    return result
 
 def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
     '''replace emotes with img tags to the images'''
     shortcuts = gui.Theme.EMOTES.keys()
     if cedict is not None:
-        shortcuts.extend(cedict.keys())
+        l_cedict = cedict.keys()
+        l_cedict.sort(key=lambda x: len(x), reverse=True)
+        shortcuts.extend(l_cedict)
     for shortcut in shortcuts:
         eshort = escape(shortcut)
         if eshort in msgtext:
@@ -88,7 +123,8 @@ def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
                 # may have different images with the same shortcut
                 _id = base64.b64encode(sender+shortcut)
                 imgtag = '<img src="%s" alt="%s" name="%s"/>' % (path, eshort, _id)
-                msgtext = msgtext.replace(eshort, imgtag)
+                #msgtext = msgtext.replace(eshort, imgtag)
+                msgtext = replace_shortcut_with_tag(msgtext, eshort, imgtag)
 
     return msgtext
 
@@ -113,8 +149,10 @@ def get_custom_emotes(message, cedict={}):
 
 def replace_urls(match):
     '''function to be called on each url match'''
-    url = match.group()
-    return '<a href="%s">%s</a>' % (url, url)
+    hurl = url = match.group()
+    if url[:4] == 'www.':
+        hurl = 'http://' + url
+    return '<a href="%s">%s</a>' % (hurl, url)
 
 def urlify(strng):
     '''replace urls by an html link'''

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 '''main module of emesene, does the startup and related stuff'''
-
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -223,6 +222,7 @@ class Controller(object):
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
         signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
+        signals.contact_added_you.subscribe(self.on_pending_contacts)
 
     def close_session(self, do_exit=True):
         '''close session'''
@@ -257,8 +257,7 @@ class Controller(object):
             sys.exit(0)
 
     def _remove_subscriptions(self):
-        '''remove the subscriptions to signals
-        '''
+        '''remove the subscriptions to signals'''
         if self.session is not None:
             signals = self.session.signals
             signals.login_succeed.unsubscribe(self.on_login_succeed)
@@ -268,6 +267,7 @@ class Controller(object):
             signals.disconnected.unsubscribe(self.on_disconnected)
             signals.picture_change_succeed.unsubscribe(
                     self.on_picture_change_succeed)
+            signals.contact_added_you.unsubscribe(self.on_pending_contacts)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -437,6 +437,8 @@ class Controller(object):
         self.session.config.get_or_set('b_allow_auto_scroll', True)
         self.session.config.get_or_set('adium_theme',
                 'renkoo.AdiumMessageStyle')
+        self.session.config.get_or_set('b_enable_spell_check', False)
+        self.session.config.get_or_set('b_download_folder_per_account', False)
 
         self.timeout_id = glib.timeout_add(500,
                 self.session.signals._handle_events)
@@ -451,10 +453,8 @@ class Controller(object):
             self.session.quit()
         self.go_login(cancel_clicked=True)
 
-    def on_contact_list_ready(self):
-        '''callback called when the contact list is ready to be used'''
-        self.window.content.contact_list.fill()
-
+    def on_pending_contacts(self):
+        '''callback called when some contact is pending'''
         def on_contact_added_you(responses):
             '''
             callback called when the dialog is closed
@@ -473,7 +473,17 @@ class Controller(object):
             dialog = extension.get_default('dialog')
             dialog.contact_added_you(accounts, on_contact_added_you)
 
+    def on_contact_list_ready(self):
+        '''callback called when the contact list is ready to be used'''
+        self.window.content.contact_list.fill()
+
+        self.on_pending_contacts()
+
         glib.timeout_add(500, self.session.logger.check)
+        if self.session.config.get_or_set('b_group_offline', False):
+            # WARNING: This is an HAX! TODO: Find why the issue happens
+            # https://github.com/emesene/emesene/issues#issue/128
+            glib.timeout_add_seconds(1, self.window.content.contact_list.fill)
 
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
@@ -497,20 +507,14 @@ class Controller(object):
 
         conversation.update_data()
 
-        # the following lines (up to and including the second show() )
-        # do 2 things:
-        # a) make sure proper tab is selected (if multiple tabs are opened)
-        #    when clicking on a user icon
-        # b) place cursor on text box
-        # both the show() calls are needed - won't work otherwise
-        # EDIT: it works with the first show() setting the input as the first
-        #       focused widget and deniing focus to notebook's tabs
-
         conversation.show() # puts widget visible
 
+        # raises the container and grabs the focus
+        # handles cases where window is minimized and ctrl+tab focus stealing
         if not other_started:
             self.conversations.set_current_page(conversation.tab_index)
             self.conversations.get_parent().present()
+            conversation.input_grab_focus()
 
         if not self.session.config.b_mute_sounds and other_started and \
            self.session.contacts.me.status != e3.status.BUSY and \

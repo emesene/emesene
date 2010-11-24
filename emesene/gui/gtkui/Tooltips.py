@@ -1,12 +1,12 @@
 ''' gtk tooltips for contact list '''
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 3 of the License, or
-#    (at your option)any later version.
+#    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,6 +23,9 @@ import utils
 import gtk
 import time
 from glib import timeout_add, source_remove
+import xml.sax.saxutils
+
+import Renderers
 
 class Tooltips(gtk.Window):
     ''' Class that implements the tooltips shown in the user list '''
@@ -129,10 +132,10 @@ class Tooltips(gtk.Window):
         ''' shows the tooltip of an e3.Contact '''
         self.tag = -1
 
-        text = obj.nick 
-        text += '\n' + obj.message
+        text = xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.nick)) 
+        text += '\n' + xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.message))
         text += '\n' + self.data_string % (\
-            obj.account, self.yes_no[obj.blocked])
+            obj.account, self.yes_no[bool(obj.blocked)])
 
         self.label.set_markup(text)
 
