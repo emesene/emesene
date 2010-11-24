@@ -397,7 +397,19 @@ class ConversationToolbarHandler(object):
 
     def on_ublock_selected(self):
         '''called when block/unblock button is selected'''
-        self.conversation.on_block_user()        
+        self.conversation.on_block_user()
+
+    def on_invite_video_call_selected(self):
+        '''called when the user is requesting a video-only call'''
+        self.conversation.on_video_call()
+
+    def on_invite_voice_call_selected(self):
+        '''called when the user is requesting an audio-only call'''
+        self.conversation.on_voice_call()
+
+    def on_invite_av_call_selected(self):
+        '''called when the user is requesting an audio-video call'''
+        self.conversation.on_av_call()
 
 class TrayIconHandler(FileHandler):
     """
