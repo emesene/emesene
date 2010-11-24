@@ -45,6 +45,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel = gtk.VPaned()
 
+        self.show_avatar_in_taskbar = self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
+
         Header = extension.get_default('conversation header')
         OutputText = extension.get_default('conversation output')
         InputText = extension.get_default('conversation input')
@@ -260,7 +262,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_image(self.icon)
         self.tab_label.set_text(self.text)
 
-        self.update_window(self.text, self.icon, self.tab_index)
+        if self.show_avatar_in_taskbar:
+            self.update_window(self.text, self.his_avatar.filename, self.tab_index)
+        else:
+            self.update_window(self.text, self.icon, self.tab_index)
 
     def update_group_information(self):
         """
