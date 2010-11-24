@@ -425,9 +425,9 @@ class Conversation(object):
 
     def play_type(self):
         """
-        play the send sound
+        play the receive sound
         """
-        if self.session.config.b_play_type:
+        if self.session.config.b_play_type and self.message_waiting:
             gui.play(self.session, gui.theme.sound_type)
 
     def cycle_history(self, change=-1):
