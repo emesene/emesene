@@ -75,6 +75,10 @@ class ConversationToolbar(gtk.Toolbar):
             theme_tool_file_transfer = gtk.STOCK_GO_UP
             theme_tool_ublock = gtk.STOCK_STOP
 
+        theme_tool_call = utils.safe_gtk_image_load(gui.theme.call, whsize)
+        theme_tool_video = utils.safe_gtk_image_load(gui.theme.video, whsize)
+        theme_tool_av = utils.safe_gtk_image_load(gui.theme.av, whsize)
+
         self.font = gtk.ToolButton(theme_tool_font)
         self.font.set_label(_('Select font'))
         self.font.set_tooltip_text(_('Select font')) 
@@ -123,6 +127,23 @@ class ConversationToolbar(gtk.Toolbar):
         self.ublock.connect('clicked',
             lambda *args: self.handler.on_ublock_selected())
 
+        self.invite_video_call = gtk.ToolButton(theme_tool_video)
+        self.invite_video_call.set_label(_('Video Call'))
+        self.invite_video_call.set_tooltip_text(_('Video Call')) 
+        self.invite_video_call.connect('clicked',
+            lambda *args: self.handler.on_invite_video_call_selected())
+
+        self.invite_audio_call = gtk.ToolButton(theme_tool_call)
+        self.invite_audio_call.set_label(_('Voice Call'))
+        self.invite_audio_call.set_tooltip_text(_('Voice Call')) 
+        self.invite_audio_call.connect('clicked',
+            lambda *args: self.handler.on_invite_voice_call_selected())
+
+        self.invite_av_call = gtk.ToolButton(theme_tool_av)
+        self.invite_av_call.set_label(_('Audio/Video Call'))
+        self.invite_av_call.set_tooltip_text(_('Audio/Video Call')) 
+        self.invite_av_call.connect('clicked',
+            lambda *args: self.handler.on_invite_av_call_selected())
 
         self.add(self.font)
         self.add(self.color)
@@ -134,6 +155,11 @@ class ConversationToolbar(gtk.Toolbar):
 
         self.add(self.invite)
         self.add(self.invite_file_transfer)
+        self.add(gtk.SeparatorToolItem())
+
+        #self.add(self.invite_video_call)
+        #self.add(self.invite_audio_call)
+        #self.add(self.invite_av_call)
         self.add(gtk.SeparatorToolItem())
 
         self.add(self.clean)
