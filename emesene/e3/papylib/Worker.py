@@ -394,6 +394,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
         msgobj = e3.base.Message(e3.base.Message.TYPE_FLNMSG, \
             msg, account, None, flnmsg.date)
+        # override font size!
+        msgobj.style.size = self.session.config.i_font_size
         self.session.add_event(\
             Event.EVENT_CONV_MESSAGE, cid, account, msgobj, {})
         e3.Logger.log_message(self.session, None, msgobj, False)
@@ -433,7 +435,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         msgobj = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             papymessage.content, account, \
-            formatting_papy_to_e3(papymessage.formatting))
+            formatting_papy_to_e3(papymessage.formatting, self.session.config.i_font_size))
         # convert papyon msnobjects to a simple dict {shortcut:identifier}
         received_custom_emoticons = {}
 
