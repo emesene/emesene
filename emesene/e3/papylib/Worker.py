@@ -1039,6 +1039,17 @@ class Worker(e3.base.Worker, papyon.Client):
         #print "type:", message
         # find papyon conversation by cid
 
+        # Handle super-long messages that destroy the switchboard
+        if len(message.body) > 1000:
+            def split_len(seq, length):
+                return [seq[i:i+length] for i in range(0, len(seq), length)]
+            parts = split_len(message.body, 1000)
+            new_msg = message
+            for part in parts:
+                new_msg.body = part
+                self._handle_action_send_message(cid, new_msg, cedict, l_custom_emoticons)
+            return
+
         papyconversation = self.papyconv[cid]
 
         if len(papyconversation.total_participants) == 1:
