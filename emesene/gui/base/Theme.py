@@ -167,7 +167,7 @@ class Theme(object):
         'secret.png', 'sheep.png', 'snail.png', 'soccerball.png', 'star.png',
         'sun.png', 'turtle.png', 'tv.png', 'umbrella.png', 'video.png']
     IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
-        'group-chat.png', 'idle.png', 'logo.png', 'new-message.png',
+        'group-chat.png', 'idle.png', 'logo.png', 'new-message.gif',
         'offline.png', 'online.png', 'password.png', 'typing.png', 'user.png',
         'users.png', 'video.png']
 
@@ -210,7 +210,7 @@ class Theme(object):
         self.chat = os.path.join(self.theme_path, "chat.png")
         self.group_chat = os.path.join(self.theme_path, "group-chat.png")
         self.typing = os.path.join(self.theme_path, "typing.png")
-        self.new_message = os.path.join(self.theme_path, "new-message.png")
+        self.new_message = os.path.join(self.theme_path, "new-message.gif")
         self.blocked_overlay = os.path.join(self.theme_path, "blocked-overlay.png")
 
         self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
