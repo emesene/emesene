@@ -433,14 +433,13 @@ class ContactList(object):
         for group in self.groups.values():
             # get a list of contact objects from a list of accounts
             contacts = self.contacts.get_contacts(group.contacts)
-            self.add_group(group)
+            if not self.order_by_status:
+                self.add_group(group)
             for contact in contacts:
                 self.add_contact(contact, group)
 
         for contact in self.contacts.get_no_group():
             self.add_contact(contact)
-
-        return False # required for a hax: see emesene.py @ on_contact_list_ready
 
     def clear(self):
         '''clear the contact list, return True if the list was cleared
