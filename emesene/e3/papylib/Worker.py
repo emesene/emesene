@@ -419,8 +419,7 @@ class Worker(e3.base.Worker, papyon.Client):
         account = papycontact.account
         conv = pyconvevent.conversation
 
-        if conv in self.papyconv:
-            # emesene conversation already exists
+        if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
         else:
             # we don't care about users typing if no conversation is opened

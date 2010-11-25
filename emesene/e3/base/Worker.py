@@ -66,7 +66,7 @@ EVENTS = (\
  'profile get succeed'  , 'profile get failed',
  'profile set succeed'  , 'profile set failed',
  'media received' , 'message read',
- 'contact added you')
+ 'contact added you', 'user typing')
 
 ACTIONS = (\
  'login'            , 'logout'           ,

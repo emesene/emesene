@@ -17,7 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
-import gobject
+import glib
 
 import e3
 import gui
@@ -154,7 +154,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if self.group_chat:
             self.rotate_started = True #to prevents more than one timeout_add
-            gobject.timeout_add_seconds(5, self.rotate_picture)
+            glib.timeout_add_seconds(5, self.rotate_picture)
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
@@ -273,7 +273,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         if not self.rotate_started:
             self.rotate_started = True
-            gobject.timeout_add_seconds(5, self.rotate_picture)
+            glib.timeout_add_seconds(5, self.rotate_picture)
 
         #TODO add plus support for nick to the tab label!
         members_nick = []
@@ -351,15 +351,17 @@ class Conversation(gtk.VBox, gui.Conversation):
         increment()
         return True
 
-    def _on_user_typing(self, cid, account, *args):
+    def on_user_typing(self, account):
         """
         inform that the other user has started typing
         """
-        pass
+        if account in self.members:
+            self.tab_label.set_image(gui.theme.typing)
+            glib.timeout_add_seconds(3, self.update_tab)
 
     def on_emote(self, emote):
         '''called when an emoticon is selected'''
-        self.input.append(gobject.markup_escape_text(emote))
+        self.input.append(glib.markup_escape_text(emote))
         self.input_grab_focus()
 
     def on_picture_change_succeed(self, account, path):
