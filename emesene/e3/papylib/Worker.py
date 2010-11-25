@@ -26,6 +26,7 @@ import Queue
 import gobject
 import hashlib
 import tempfile
+import xml.sax.saxutils
 
 import e3
 from e3 import cache
@@ -929,7 +930,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK '''
         self.profile.display_name = nick
-        self.content_roaming.store(nick, None, None)
+        self.content_roaming.store(xml.sax.saxutils.escape(nick), None, None)
 
     def _handle_action_set_picture(self, picture_name, from_roaming=False):
         '''handle Action.ACTION_SET_PICTURE'''
