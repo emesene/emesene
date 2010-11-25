@@ -289,6 +289,10 @@ class Conversation(object):
 
         self.first = False
 
+    def on_user_typing(self, account):
+        '''method called when a someone is typing'''
+        raise NotImplementedError
+
     def _get_icon(self):
         '''return the icon that represent the current status of the
             conversation (the status of the contact on a single
