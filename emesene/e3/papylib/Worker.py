@@ -62,10 +62,12 @@ except Exception, e:
 
 from PapyEvents import *
 from PapyConvert import *
+PAPY_HAS_AUDIOVIDEO = 1
 try:
-    import papyon.media.conference
+    import PapyConference
     import papyon.media.constants
 except Exception, e:
+    PAPY_HAS_AUDIOVIDEO = 0
     log.exception("You need gstreamer to use the Audio/Video calls support")
 
 class Worker(e3.base.Worker, papyon.Client):
@@ -138,8 +140,10 @@ class Worker(e3.base.Worker, papyon.Client):
         nick = self.profile.display_name
         self.session.contacts.me.picture = self.session.config_dir.get_path("last_avatar")
         self._set_status(presence)
-        self.profile.client_capabilities.has_webcam = True
-        self.profile.client_capabilities.supports_rtc_video = True
+        global PAPY_HAS_AUDIOVIDEO
+        if PAPY_HAS_AUDIOVIDEO:
+            self.profile.client_capabilities.has_webcam = True
+            self.profile.client_capabilities.supports_rtc_video = True
         # initialize caches
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         self.my_avatars = self.caches.get_avatar_cache(self.session.account.account)
@@ -264,15 +268,21 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_conference_invite(self, call):
         log.info("New conference invite: %s" % call)
-        ca = e3.base.Call(call, call.peer, None, None, None)
+        account = call.peer.account
+        if account in self.conversations:
+            cid = self.conversations[account]
+        else:
+            cid = time.time()
+            self._handle_action_new_conversation(account, cid)
+            self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
+                [account])
+
+        ca = e3.base.Call(call, call.peer.account)
         self.calls[call] = ca
         self.rcalls[ca] = call
         call_handler = CallEvent(call, self)
-        session_handler = papyon.media.conference.MediaSessionHandler(call.media_session)
-        call.ring()
-        call.accept()
 
-        self.session.add_event(Event.EVENT_CALL_INVITATION, ca)
+        self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid)
 
     def _on_invite_file_transfer(self, papysession):
         ''' handle file transfer invites '''
@@ -1127,10 +1137,11 @@ class Worker(e3.base.Worker, papyon.Client):
 
     # call handlers
     def _handle_action_call_invite(self, cid, account, a_v_both):
+        return # :D
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papysession = self.call_manager.create_call(papycontact)
         call_handler = CallEvent(papysession, self)
-        session_handler = papyon.media.conference.MediaSessionHandler(papysession.media_session)
+        session_handler = PapyConference.MediaSessionHandler(papysession.media_session)
         log.info("Call %s - %s" % (account, a_v_both))
         if a_v_both == 0: # see gui.base.Conversation.py 0=V,1=A,2=AV
             stream = papysession.media_session.create_stream("video",
@@ -1148,14 +1159,18 @@ class Worker(e3.base.Worker, papyon.Client):
             papysession.media_session.add_stream(stream)
             papysession.media_session.add_stream(stream)
 
-        ca = e3.base.Call(papysession, papycontact.account, None, None, None)
+        ca = e3.base.Call(papysession, papycontact.account)
         self.calls[papysession] = ca
         self.rcalls[ca] = papysession
 
         papysession.invite()
-        self.session.add_event(Event.EVENT_CALL_INVITATION, ca)
+        self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid)
 
     def _handle_action_call_accept(self, c):
+        session_handler = PapyConference.MediaSessionHandler(
+            c.object.media_session, c.surface_buddy, c.surface_self)
+
+        self.rcalls[c].ring()
         self.rcalls[c].accept()
 
     def _handle_action_call_reject(self, c):

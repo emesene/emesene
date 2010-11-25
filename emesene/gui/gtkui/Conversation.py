@@ -54,6 +54,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         ConversationToolbar = extension.get_default(
             'conversation toolbar')
         TransfersBar = extension.get_default('filetransfer pool')
+        CallWidget = extension.get_default('call widget')
         dialog = extension.get_default('dialog')
         Avatar = extension.get_default('avatar')
 
@@ -75,6 +76,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.input.set_size_request(-1, 25)
         self.info = ContactInfo()
         self.transfers_bar = TransfersBar(self.session)
+        self.call_widget = CallWidget(self.session)
 
         frame_input = gtk.Frame()
         frame_input.set_shadow_type(gtk.SHADOW_IN)
@@ -148,6 +150,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.session.signals.filetransfer_completed.subscribe(
                 self.on_filetransfer_completed)
 
+        self.session.signals.call_invitation.subscribe(
+                self.on_call_invitation)
+
         self.tab_index = -1 # used to select an existing conversation
         self.index = 0 # used for the rotate picture function
         self.rotate_started = False
@@ -194,6 +199,9 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.on_filetransfer_progress)
         self.session.signals.filetransfer_completed.unsubscribe(
                 self.on_filetransfer_completed)
+        self.session.signals.call_invitation.unsubscribe(
+                self.on_call_invitation)
+
         #stop the avatars animation...if any..
         self.avatar.stop()
         self.his_avatar.stop()
@@ -401,4 +409,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         ''' called when a file transfer is completed '''
         if transfer in self.transfers_bar.transfers:
             self.transfers_bar.finished(transfer)
+
+    def on_call_invitation(self, call, cid):
+        '''called when a new call is issued both from us or other party'''
+        if cid == self.cid:
+            self.call_widget.add_call(call)
+            self.call_widget.show_all()
 
