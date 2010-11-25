@@ -166,10 +166,10 @@ class Theme(object):
         'present.png', 'rainbow.png', 'rain.png', 'rose-dead.png', 'rose.png',
         'secret.png', 'sheep.png', 'snail.png', 'soccerball.png', 'star.png',
         'sun.png', 'turtle.png', 'tv.png', 'umbrella.png', 'video.png']
-    IMAGE_FILES = ['away.png', 'busy.png', 'chat.png', 'connect.png',
+    IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
         'group-chat.png', 'idle.png', 'logo.png', 'new-message.png',
         'offline.png', 'online.png', 'password.png', 'typing.png', 'user.png',
-        'users.png']
+        'users.png', 'video.png']
 
     def __init__(self, image_name="default", emote_name="default",
             sound_name="default", conv_name='renkoo.AdiumMessageStyle'):
@@ -198,6 +198,9 @@ class Theme(object):
         self.sound_theme_path = os.path.join("themes", "sounds",
                 self.sound_name)
 
+        self.av = os.path.join(self.theme_path, "audiovideo.png")
+        self.video = os.path.join(self.theme_path, "video.png")
+        self.call = os.path.join(self.theme_path, "call.png")
         self.user = os.path.join(self.theme_path, "user.png")
         self.users = os.path.join(self.theme_path, "users.png")
         self.password = os.path.join(self.theme_path, "password.png")

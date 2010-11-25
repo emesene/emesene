@@ -129,6 +129,21 @@ class Conversation(object):
         self.session.filetransfer_invite(self.cid, self.members[0],
                 filename, completepath)
 
+    def on_video_call(self):
+        '''called when the user is requesting a video-only call'''
+        account = self.members[0]
+        self.session.call_invite(self.cid, account, 0) # 0 = Video only
+
+    def on_voice_call(self):
+        '''called when the user is requesting an audio-only call'''
+        account = self.members[0]
+        self.session.call_invite(self.cid, account, 1) # 1 = Audio only
+
+    def on_av_call(self):
+        '''called when the user is requesting an audio-video call'''
+        account = self.members[0]
+        self.session.call_invite(self.cid, account, 2) # 2 = Audio/Video
+
     def on_clean(self):
         '''called when the clean button is clicked'''
         self.output.clear()
@@ -425,9 +440,9 @@ class Conversation(object):
 
     def play_type(self):
         """
-        play the send sound
+        play the receive sound
         """
-        if self.session.config.b_play_type:
+        if self.session.config.b_play_type and self.message_waiting:
             gui.play(self.session, gui.theme.sound_type)
 
     def cycle_history(self, change=-1):

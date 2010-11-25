@@ -194,8 +194,6 @@ class OutputText(gtk.ScrolledWindow):
     def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''
         msg = gui.Message.from_contact(contact, message.body, is_first, True, message.timestamp)
-        # WARNING: this is a hack to keep out config from backend libraries
-        message.style.size = self.config.i_font_size
         self.view.add_message(msg, message.style, cedict, cedir)
 
     def information(self, formatter, contact, message):

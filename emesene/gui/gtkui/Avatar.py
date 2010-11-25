@@ -52,6 +52,7 @@ class Avatar(gtk.Widget):
         gtk.Widget.__init__(self)
         self.set_flags(self.flags() | gtk.NO_WINDOW)
 
+        self.filename = ''
         self._pixbuf = None
         self._dimention = cellDimention
         self._radius_factor = cellRadius
@@ -143,8 +144,9 @@ class Avatar(gtk.Widget):
     #public methods
     #
     def set_from_file(self, filename):
+        self.filename = filename
         if not gui.gtkui.utils.file_readable(filename):
-            filename = gui.theme.logo
+            self.filename = gui.theme.logo
 
         try:
             animation = gtk.gdk.PixbufAnimation(filename)

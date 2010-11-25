@@ -48,7 +48,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
         gui.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
-        self.is_searching = False
         self.online_group = None # added
         self.online_group_iter = None # added
         self.no_group = None
@@ -435,7 +434,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         del self._model[irow.iter]
 
                 return return_iter
-        else:
+        else: #######WTF???
             self.add_group(group)
             result = self.add_contact(contact, group)
             self.update_group(group)
@@ -456,6 +455,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         if con.account == contact.account:
                             # we remove it from tree and from group.
                             del self._model[contact_row.iter]
+                            del con
                             if contact or group is None:
                                 return
                             if group.contacts.count(contact.account) > 0:
@@ -551,6 +551,19 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 self.remove_contact(contact, self.offline_group)
                 self.add_contact(contact, self.online_group)
 
+        if self.order_by_group and self.group_offline and found:
+            # y todavia no estoy en el grupo.
+            if offline and group_found != self.offline_group:
+                self.remove_contact(contact, group_found)
+                self.add_contact(contact, self.offline_group)
+
+            if online and group_found == self.offline_group:
+                self.remove_contact(contact, self.offline_group)
+                if len(contact.groups) == 0:
+                    self.add_contact(contact)
+                else:
+                    for group in contact.groups:
+                        self.add_contact(contact, self.session.groups[group])
 
     def update_no_group(self):
         '''update the special "No group" group'''

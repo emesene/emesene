@@ -30,6 +30,7 @@ class ContactList(object):
     def __init__(self, session, dialog):
         '''class constructor'''
 
+        self.is_searching = False
         # define the class signals
         # the param is the contact object
         self.contact_selected = e3.common.Signal()
@@ -463,7 +464,7 @@ class ContactList(object):
         '''called when a group is collapsed, update the status of the
         groups'''
         self.group_state[group.name] = False
-        if self.is_searching:
+        if self.is_searching or len(group.contacts) == 0:
             return
         self.session.config.d_group_state[group.name] = "0"
 

@@ -182,11 +182,14 @@ class MainWindow(gtk.VBox):
         if not contact:
             log.debug('account %s not found on contacts' % account)
 
-        if change_type == 'online' and do_notify:
-            if self.session.config.b_play_contact_online:
+        if change_type == 'status' and do_notify:
+            if old_value == e3.base.status.OFFLINE and \
+              contact.status != e3.base.status.OFFLINE and \
+              self.session.config.b_play_contact_online:
                 gui.play(self.session, gui.theme.sound_online)
-        elif change_type == 'offline':
-            if self.session.config.b_play_contact_offline:
+            elif old_value != e3.base.status.OFFLINE and \
+              contact.status == e3.base.status.OFFLINE and \
+              self.session.config.b_play_contact_offline:
                 gui.play(self.session, gui.theme.sound_offline)
 
     def _on_nick_changed(self, textfield, old_text, new_text):
