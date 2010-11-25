@@ -1,4 +1,4 @@
-'''audio/video handling module'''
+'''e3.Call handling module'''
 # -*- coding: utf-8 -*-
 
 #    This file is part of emesene.
@@ -18,26 +18,20 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 class Call(object):
-    '''a class that represent a file transfer'''
-    (WAITING, INVITING, INVITED, ESTABLISHED) = range(4)
+    '''a class that represent a call'''
+    (WAITING, INVITING, INVITED, ESTABLISHED, FAILED) = range(5)
 
-    def __init__(self, obj, peer, accept_cb, reject_cb, cancel_cb):
+    def __init__(self, obj, peer):
         self.object = obj
         self.state = Call.WAITING
         self.peer = peer
 
         self.time_start = 0
 
+        self.surface_buddy = None
+        self.surface_self = None
+
     def __str__(self):
         '''return a string representation of a call'''
         return '<e3.base.Call state="%i" peer="%s">' % (self.state, self.peer)
-
-    def accept(self):
-        pass
-
-    def reject(self):
-        pass
-
-    def cancel(self):
-        pass
 
