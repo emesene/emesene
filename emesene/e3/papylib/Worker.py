@@ -66,7 +66,7 @@ try:
     import papyon.media.conference
     import papyon.media.constants
 except Exception, e:
-    log.exception("You need gstreamer to use the webcam support")
+    log.exception("You need gstreamer to use the Audio/Video calls support")
 
 class Worker(e3.base.Worker, papyon.Client):
     ''' papylib's worker - an emesene extension for papyon library '''
@@ -262,14 +262,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
             members)
 
-    def _on_webcam_invite(self, session, producer):
-        log.info("New webcam invite from %s: %s" % (producer, session))
-        websess = MediaSessionHandler(session.media_session)
-        if 0:
-            session.reject()
-        else:
-            session.accept()
-
     def _on_conference_invite(self, call):
         log.info("New conference invite: %s" % call)
         ca = e3.base.Call(call, call.peer, None, None, None)
@@ -279,7 +271,7 @@ class Worker(e3.base.Worker, papyon.Client):
         session_handler = papyon.media.conference.MediaSessionHandler(call.media_session)
         call.ring()
         call.accept()
-        
+
         self.session.add_event(Event.EVENT_CALL_INVITATION, ca)
 
     def _on_invite_file_transfer(self, papysession):
