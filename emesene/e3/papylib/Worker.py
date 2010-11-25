@@ -924,13 +924,15 @@ class Worker(e3.base.Worker, papyon.Client):
         ''' handle Action.ACTION_SET_MESSAGE '''
         if message is None:
             message = ''
+        nick = self.profile.display_name
         self.profile.personal_message = message
-        self.content_roaming.store(None, message, None)
+        self.content_roaming.store(xml.sax.saxutils.escape(nick), xml.sax.saxutils.escape(message), None)
 
     def _handle_action_set_nick(self, nick):
         '''handle Action.ACTION_SET_NICK '''
         self.profile.display_name = nick
-        self.content_roaming.store(xml.sax.saxutils.escape(nick), None, None)
+        message = self.profile.personal_message
+        self.content_roaming.store(xml.sax.saxutils.escape(nick), xml.sax.saxutils.escape(message), None)
 
     def _handle_action_set_picture(self, picture_name, from_roaming=False):
         '''handle Action.ACTION_SET_PICTURE'''
@@ -967,7 +969,9 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.contacts.me.picture = avatar_path
         if not from_roaming:
-            self.content_roaming.store(None, None, avatar)
+            nick = self.profile.display_name
+            message = self.profile.personal_message
+            self.content_roaming.store(xml.sax.saxutils.escape(nick), xml.sax.saxutils.escape(message), avatar)
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES
