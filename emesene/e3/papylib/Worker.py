@@ -1140,7 +1140,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     # call handlers
     def _handle_action_call_invite(self, cid, account, a_v_both, surface_other, surface_self):
-        return # :D
+        #return # :D
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papysession = self.call_manager.create_call(papycontact)
         call_handler = CallEvent(papysession, self)
