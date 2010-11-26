@@ -30,8 +30,10 @@ def downloads():
     '''
 
     if sys.platform.startswith('win'): # Windows
-        from win32com.shell import shell, shellcon
-        return shell.SHGetFolderPath(0, shellcon.CSIDL_DESKTOP, None, 0)
+        import ctypes
+        path = ctypes.c_wchar_p('')
+        ctypes.windll.shell32.SHGetFolderPathW(0, 0x0000, None, 0, path)
+        return path.value
     elif sys.platform.startswith('darwin'): # Mac OS X
         return os.path.expanduser('~/Desktop')
     else: # Linux
