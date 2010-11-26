@@ -49,8 +49,6 @@ class MainWindow(gtk.VBox):
         self.below_panel = extension.get_and_instantiate('below panel', self)
         self.below_userlist = extension.get_and_instantiate('below userlist', self)
 
-        self.music = extension.get_and_instantiate('listening to', self)
-
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)

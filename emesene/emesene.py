@@ -403,6 +403,11 @@ class Controller(object):
 
         for plugin in self.session.config.l_active_plugins:
             plugin_manager.plugin_start(plugin, self.session)
+            # hack: where do we start this? how do we generalize for other
+            # extensions?
+            if plugin == "music":
+                extension.get_and_instantiate('listening to',
+                        self.window.content)
 
         self.set_default_extensions_from_config()
 
