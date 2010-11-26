@@ -34,7 +34,7 @@ class ConversationManager(object):
         if self.session:
             self.session.signals.conv_message.subscribe(
                 self._on_message)
-            self.session.signals.conv_message.subscribe(
+            self.session.signals.user_typing.subscribe(
                 self._on_user_typing)
             self.session.signals.conv_contact_joined.subscribe(
                 self._on_contact_joined)
@@ -66,15 +66,18 @@ class ConversationManager(object):
 
         conversation.on_receive_message(message, account, cedict)
 
-        if message.type != e3.Message.TYPE_TYPING:
-            self.set_message_waiting(conversation, True)
+        self.set_message_waiting(conversation, True)
 
     def _on_user_typing(self, cid, account, *args):
         """
         inform that the other user has started typing
         """
-        # TODO: implement, this seems to be cross gui so it should go here
-        log.debug('%s is typing in %s' % (account, cid))
+        conversation = self.conversations.get(float(cid), None)
+
+        if conversation is None:
+            return
+
+        conversation.on_user_typing(account)
 
     def set_message_waiting(self, conversation, is_waiting):
         """
@@ -200,7 +203,7 @@ class ConversationManager(object):
         '''close and finish all conversations'''
         self.session.signals.conv_message.unsubscribe(
             self._on_message)
-        self.session.signals.conv_message.unsubscribe(
+        self.session.signals.user_typing.unsubscribe(
             self._on_user_typing)
         self.session.signals.conv_contact_joined.unsubscribe(
             self._on_contact_joined)

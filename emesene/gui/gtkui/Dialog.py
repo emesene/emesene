@@ -150,7 +150,7 @@ class Dialog(object):
         window = cls.common_window(message, stock_id, response_cb, title)
         cls.add_button(window, gtk.STOCK_CLOSE, stock.CLOSE, response_cb,
             cls.default_cb)
-
+        window.set_modal(True)
         return window
 
     @classmethod

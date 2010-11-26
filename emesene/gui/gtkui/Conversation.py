@@ -17,7 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
-import gobject
+import glib
 
 import e3
 import gui
@@ -54,6 +54,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         ConversationToolbar = extension.get_default(
             'conversation toolbar')
         TransfersBar = extension.get_default('filetransfer pool')
+        CallWidget = extension.get_default('call widget')
         dialog = extension.get_default('dialog')
         Avatar = extension.get_default('avatar')
 
@@ -75,6 +76,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.input.set_size_request(-1, 25)
         self.info = ContactInfo()
         self.transfers_bar = TransfersBar(self.session)
+        self.call_widget = CallWidget(self.session)
 
         frame_input = gtk.Frame()
         frame_input.set_shadow_type(gtk.SHADOW_IN)
@@ -148,13 +150,16 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.session.signals.filetransfer_completed.subscribe(
                 self.on_filetransfer_completed)
 
+        self.session.signals.call_invitation.subscribe(
+                self.on_call_invitation)
+
         self.tab_index = -1 # used to select an existing conversation
         self.index = 0 # used for the rotate picture function
         self.rotate_started = False
 
         if self.group_chat:
             self.rotate_started = True #to prevents more than one timeout_add
-            gobject.timeout_add_seconds(5, self.rotate_picture)
+            glib.timeout_add_seconds(5, self.rotate_picture)
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
@@ -194,6 +199,9 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.on_filetransfer_progress)
         self.session.signals.filetransfer_completed.unsubscribe(
                 self.on_filetransfer_completed)
+        self.session.signals.call_invitation.unsubscribe(
+                self.on_call_invitation)
+
         #stop the avatars animation...if any..
         self.avatar.stop()
         self.his_avatar.stop()
@@ -273,7 +281,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         if not self.rotate_started:
             self.rotate_started = True
-            gobject.timeout_add_seconds(5, self.rotate_picture)
+            glib.timeout_add_seconds(5, self.rotate_picture)
 
         #TODO add plus support for nick to the tab label!
         members_nick = []
@@ -351,15 +359,17 @@ class Conversation(gtk.VBox, gui.Conversation):
         increment()
         return True
 
-    def _on_user_typing(self, cid, account, *args):
+    def on_user_typing(self, account):
         """
         inform that the other user has started typing
         """
-        pass
+        if account in self.members:
+            self.tab_label.set_image(gui.theme.typing)
+            glib.timeout_add_seconds(3, self.update_tab)
 
     def on_emote(self, emote):
         '''called when an emoticon is selected'''
-        self.input.append(gobject.markup_escape_text(emote))
+        self.input.append(glib.markup_escape_text(emote))
         self.input_grab_focus()
 
     def on_picture_change_succeed(self, account, path):
@@ -399,4 +409,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         ''' called when a file transfer is completed '''
         if transfer in self.transfers_bar.transfers:
             self.transfers_bar.finished(transfer)
+
+    def on_call_invitation(self, call, cid):
+        '''called when a new call is issued both from us or other party'''
+        if cid == self.cid:
+            self.call_widget.add_call(call)
+            self.call_widget.show_all()
 

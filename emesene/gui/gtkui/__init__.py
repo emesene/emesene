@@ -33,6 +33,7 @@ def gtk_main(Controller):
     import AccountMenu
     import Avatar
     import AvatarChooser
+    import CallWidget
     import config_gtk
     import ContactMenu
     import ContactList
@@ -155,6 +156,7 @@ def setup():
     extension.category_register('below panel', EmptyWidget.EmptyWidget)
     extension.category_register('below userlist', EmptyWidget.EmptyWidget)
 
+    extension.category_register('call widget', CallWidget.CallWindow)
     extension.category_register('conversation window', \
         ConversationManager.ConversationManager)
     extension.category_register('conversation', Conversation.Conversation)

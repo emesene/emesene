@@ -462,7 +462,7 @@ class FileTransferHandler(object):
         self.transfer.state = e3.base.FileTransfer.TRANSFERRING
         
     def reject(self):
-        ''' cancels a file transfer '''
+        ''' rejects a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.reject_filetransfer(self.transfer)
 
@@ -470,4 +470,32 @@ class FileTransferHandler(object):
         ''' cancels a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.cancel_filetransfer(self.transfer)
+
+class CallHandler(object):
+    ''' this handler handles a file transfer object '''
+    def __init__(self, session, call):
+        ''' session - e3.session implementation
+            transfer - e3.call
+        '''
+        self.session = session
+        self.call = call
+
+    def accept(self):
+        ''' accepts a call '''
+        self.call.state = e3.base.Call.ESTABLISHED
+        self.session.accept_call(self.call)
+
+    def accepted(self):
+        ''' when a call is accepted by the other party'''
+        self.call.state = e3.base.Call.ESTABLISHED
+        
+    def reject(self):
+        ''' rejects a call '''
+        self.call.state = e3.base.Call.FAILED
+        self.session.reject_call(self.call)
+
+    def cancel(self):
+        ''' cancels a call '''
+        self.call.state = e3.base.Call.FAILED
+        self.session.cancel_call(self.call)
 

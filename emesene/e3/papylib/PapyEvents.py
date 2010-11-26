@@ -82,7 +82,7 @@ class InviteEvent(papyon.event.InviteEventInterface):
         self._client._on_conversation_invite(conversation)
 
     def on_invite_webcam(self, session, producer):
-        self._client._on_webcam_invite(session, producer)
+        pass # silently ignore invites, they're deprecated by calls.
 
     def on_invite_conference(self, call):
         self._client._on_conference_invite(call)
@@ -193,30 +193,6 @@ class ProfileEvent(papyon.event.ProfileEventInterface):
 
     def on_profile_msn_object_changed(self):
         self._client._on_profile_msn_object_changed()
-
-class WebcamEvent(papyon.event.WebcamEventInterface):
-    def __init__(self, session):
-        """Initializer
-            @param session: the session we want to be notified for its events
-            @type session: L{WebcamSession<papyon.msnp2p.webcam.WebcamSession>}"""
-        papyon.event.BaseEventInterface.__init__(self, session)
-        self._session = session
-
-    def on_webcam_viewer_data_received(self):
-        """Called when we received viewer data"""
-        log.info("Webcam viewer data received")
-
-    def on_webcam_accepted(self):
-        """Called when our invitation got accepted"""
-        log.info("Webcam invitation accepted")
-
-    def on_webcam_rejected(self):
-        """Called when our invitation got rejected"""
-        log.info("Webcam invitation rejected")
-
-    def on_webcam_paused(self):
-        """Called when the webcam is paused"""
-        log.info("Webcam paused")
 
 class CallEvent(papyon.event.CallEventInterface):
     def __init__(self, call, client):
