@@ -401,6 +401,9 @@ class Interface(BaseTable):
         self.append_markup('<b>'+_('Conversation window:')+'</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
+        self.session.config.get_or_set('b_conversation_tabs', True)
+        self.append_check(_('Tabbed Conversations'),
+                'session.config.b_conversation_tabs')
         self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
         self.append_check(_('Start minimized/iconified'), 'session.config.b_conv_minimized')
         self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
@@ -462,7 +465,7 @@ class Sound(BaseTable):
         self.show_all()
 
     def _on_mute_sounds_changed(self, value):
-        for i in self.array:        
+        for i in self.array:
             if value:
                 i.set_sensitive(False)
             else:
