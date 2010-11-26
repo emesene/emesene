@@ -415,4 +415,26 @@ class Conversation(gtk.VBox, gui.Conversation):
         if cid == self.cid:
             self.call_widget.add_call(call)
             self.call_widget.show_all()
+            self.call_widget.set_xids()
+
+    def on_video_call(self):
+        '''called when the user is requesting a video-only call'''
+        account = self.members[0]
+        self.call_widget.show_all()
+        x_other, x_self = self.call_widget.get_xids()
+        self.session.call_invite(self.cid, account, 0, x_other, x_self) # 0 = Video only
+
+    def on_voice_call(self):
+        '''called when the user is requesting an audio-only call'''
+        account = self.members[0]
+        self.call_widget.show_all()
+        x_other, x_self = self.call_widget.get_xids()
+        self.session.call_invite(self.cid, account, 1, x_other, x_self) # 1 = Audio only
+
+    def on_av_call(self):
+        '''called when the user is requesting an audio-video call'''
+        account = self.members[0]
+        self.call_widget.show_all()
+        x_other, x_self = self.call_widget.get_xids()
+        self.session.call_invite(self.cid, account, 2, x_other, x_self) # 2 = Audio/Video
 
