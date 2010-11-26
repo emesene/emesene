@@ -126,7 +126,7 @@ class Controller(object):
         #extension.category_register('session', msn.Session,
         #        single_instance=True)
         extension.register('session', jabber.Session)
-        #extension.register('session', dummy.Session)
+        extension.register('session', dummy.Session)
         #extension.register('session', msn.Session)
 
         if papylib is not None:
