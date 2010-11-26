@@ -1147,20 +1147,20 @@ class Worker(e3.base.Worker, papyon.Client):
             papysession.media_session, surface_other, surface_self)
         log.info("Call %s - %s" % (account, a_v_both))
         if a_v_both == 0: # see gui.base.Conversation.py 0=V,1=A,2=AV
-            stream = papysession.media_session.create_stream("video",
+            streamv = papysession.media_session.create_stream("video",
                          papyon.media.constants.MediaStreamDirection.BOTH, True)
-            papysession.media_session.add_stream(stream)
+            papysession.media_session.add_stream(streamv)
         elif a_v_both == 1:
-            stream = papysession.media_session.create_stream("audio",
+            streama = papysession.media_session.create_stream("audio",
                          papyon.media.constants.MediaStreamDirection.BOTH, True)
-            papysession.media_session.add_stream(stream)
+            papysession.media_session.add_stream(streama)
         elif a_v_both == 2:
-            stream = papysession.media_session.create_stream("video",
+            streamv = papysession.media_session.create_stream("video",
                          papyon.media.constants.MediaStreamDirection.BOTH, True)
-            stream = papysession.media_session.create_stream("audio",
+            papysession.media_session.add_stream(streamv)
+            streama = papysession.media_session.create_stream("audio",
                          papyon.media.constants.MediaStreamDirection.BOTH, True)
-            papysession.media_session.add_stream(stream)
-            papysession.media_session.add_stream(stream)
+            papysession.media_session.add_stream(streama)
 
         ca = e3.base.Call(papysession, papycontact.account)
         self.calls[papysession] = ca
