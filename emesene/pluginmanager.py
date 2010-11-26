@@ -82,7 +82,7 @@ class PluginHandler:
             if hasattr(self.module, 'plugin'):
                 self.module = self.module.plugin
         except Exception, reason:
-            log.warning('error importing "%s": %s', self.name, reason)
+            log.warning('error importing "%s": %s' % (self.name, reason))
             self.module = None
         finally:
             sys.path = old_syspath
@@ -95,8 +95,8 @@ class PluginHandler:
             self._instance = self.module.Plugin()
         except Exception, reason:
             self._instance = None
-            log.warning('error creating instance for "%s": %s',
-                    self.name, reason)
+            log.warning('error creating instance for "%s": %s' % (
+                self.name, reason))
         else:
             if self.is_package:
                 self._instance.resource = \
@@ -117,8 +117,8 @@ class PluginHandler:
             inst._started = True
         except Exception, reason:
             raise reason
-            log.warning('error starting "%s": %s', (self.name, reason))
-            print 'error starting "%s": %s', (self.name, reason)
+            log.warning('error starting "%s": %s' % (self.name, reason))
+            print 'error starting "%s": %s' % (self.name, reason)
             return False
         return True
 
@@ -160,10 +160,10 @@ class PluginManager:
                 mod = PluginHandler(dir_, filename, os.path.isdir(path))
                 self._plugins[mod.name] = mod
             except Exception, reason:
-                log.warning('Exception while importing %s:\n%s',
-                        (filename, reason))
+                log.warning('Exception while importing %s:\n%s' % (
+                    filename, reason))
 
-        log.debug('Imported plugins: %s', ', '.join(self._plugins.keys()))
+        log.debug('Imported plugins: %s' % ', '.join(self._plugins.keys()))
 
     def plugin_start(self, name, session):
         '''Starts a plugin.
@@ -172,7 +172,7 @@ class PluginManager:
         if name not in self._plugins:
             return False
 
-        log.info('starting plugin "%s"', name)
+        log.info('starting plugin "%s"' % name)
         self._plugins[name].start(session)
         return True
 
@@ -183,7 +183,7 @@ class PluginManager:
         if name not in self._plugins:
             return False
 
-        log.info('stopping plugin "%s"', name)
+        log.info('stopping plugin "%s"' % name)
         self._plugins[name].stop()
         return True
 
@@ -194,7 +194,7 @@ class PluginManager:
         if name not in self._plugins:
             return False
 
-        log.info('configuring plugin "%s"', name)
+        log.info('configuring plugin "%s"' % name)
         return self._plugins[name].config(session)
 
     def plugin_is_active(self, name):
