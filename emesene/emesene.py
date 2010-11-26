@@ -36,7 +36,7 @@ import logging
 log = logging.getLogger('emesene')
 
 import e3
-from e3 import msn
+#from e3 import msn
 from e3 import jabber
 from e3 import dummy
 
@@ -122,17 +122,18 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', msn.Session,
-                single_instance=True)
+        extension.category_register('session', dummy.Session, single_instance=True)
+        #extension.category_register('session', msn.Session,
+        #        single_instance=True)
         extension.register('session', jabber.Session)
-        extension.register('session', dummy.Session)
-        extension.register('session', msn.Session)
+        #extension.register('session', dummy.Session)
+        #extension.register('session', msn.Session)
 
         if papylib is not None:
             extension.register('session', papylib.Session)
             extension.set_default('session', papylib.Session)
         else:
-            extension.set_default('session', msn.Session)
+            extension.set_default('session', dummy.Session)
 
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
@@ -663,7 +664,7 @@ def main():
     """
     the main method of emesene
     """
-    extension.category_register('session', msn.Session, single_instance=True)
+    extension.category_register('session', dummy.Session, single_instance=True)
     extension.category_register('option provider', None,
             interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
