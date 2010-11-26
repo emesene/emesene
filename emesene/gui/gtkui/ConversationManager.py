@@ -168,12 +168,12 @@ class ConversationManager(Notebook, gui.ConversationManager):
         if page_num != -1:
             page = self.get_nth_page(page_num)
             self.set_message_waiting(page, False)
-            self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
+            self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
 
     def _on_switch_page(self, notebook, page, page_num):
         '''called when the user changes the tab'''
         page = self.get_nth_page(page_num)
-        self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
+        self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
         self.set_message_waiting(page, False)
         if page.show_avatar_in_taskbar:
             self.update_window(page.text, page.his_avatar.filename, self.get_current_page())
@@ -208,7 +208,7 @@ class ConversationManager(Notebook, gui.ConversationManager):
         self.remove_page(page_num)
         #FIXME: Dirty hack, why conversation is still alive when it's closed?
         #       Signals are being unsubscribed (see gtkui.Conversation) but...
-        conversation.tab_index=-2
+        conversation.tab_index = -2
 
     def add_new_conversation(self, session, cid, members):
         """
@@ -237,3 +237,29 @@ class ConversationManager(Notebook, gui.ConversationManager):
             win.set_title(Renderers.msnplus_to_plain_text(text))
             win.set_icon(icon)
 
+    def present(self, conversation):
+        '''
+        present the given conversation
+        '''
+        self.set_current_page(conversation.tab_index)
+        self.get_parent().present()
+        conversation.input_grab_focus()
+
+    def get_dimensions(self):
+        '''
+        return dimensions of the conversation window, if more than one return
+        the value of one of them
+        '''
+        return self.get_parent().get_dimensions()
+
+    def hide_all(self):
+        '''
+        hide all conversations
+        '''
+        self.get_parent().hide()
+
+    def is_active(self):
+        '''
+        return True if the conversation manager is active
+        '''
+        return self.get_parent().is_active()

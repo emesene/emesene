@@ -102,7 +102,7 @@ class Controller(object):
         '''class constructor'''
         self.window = None
         self.tray_icon = None
-        self.conversations = None
+        self.conversations = []
         self.single_instance = None
         self.config = e3.common.Config()
         self.config_dir = e3.common.ConfigDir('emesene2')
@@ -228,9 +228,10 @@ class Controller(object):
         '''close session'''
 
         self._remove_subscriptions()
-        if self.conversations:
-            self.conversations.get_parent().hide()
-            self._on_conversation_window_close()
+
+        for conv_manager in self.conversations:
+            conv_manager.hide_all()
+            self._on_conversation_window_close(conv_manager)
 
         if self.timeout_id:
             glib.source_remove(self.timeout_id)
@@ -487,30 +488,49 @@ class Controller(object):
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
         opening a conversation'''
-        if self.conversations is None:
-            windowcls = extension.get_default('window frame')
-            window = windowcls(self._on_conversation_window_close)
+        conversation_tabs = self.session.config.get_or_set(
+                'b_conversation_tabs', True)
 
-            window.go_conversation(self.session)
-            self._set_location(window, True)
-            self.conversations = window.content
-            self.tray_icon.set_conversations(self.conversations)
-            if self.session.config.b_conv_minimized:
-                window.iconify()
-            window.show()
+        conv_manager = None
 
-        conversation = self.conversations.new_conversation(cid, members)
+        # check to see if there is a conversation with the same member
+        for convman in self.conversations:
+            if convman.reuse_conversation(cid, members):
+                conv_manager = convman
+                break
+
+        if conv_manager is None:
+            if not self.conversations or not conversation_tabs:
+
+                windowcls = extension.get_default('window frame')
+                window = windowcls(self._on_conversation_window_close)
+
+                window.go_conversation(self.session)
+                self._set_location(window, True)
+                conv_manager = window.content
+                self.conversations.append(conv_manager)
+
+                if self.session.config.b_conv_minimized:
+                    window.iconify()
+
+                window.show()
+
+            else:
+                conv_manager = self.conversations[0]
+
+
+        self.tray_icon.set_conversations(self.conversations)
+
+        conversation = conv_manager.new_conversation(cid, members)
 
         conversation.update_data()
-
         conversation.show() # puts widget visible
 
         # raises the container and grabs the focus
         # handles cases where window is minimized and ctrl+tab focus stealing
         if not other_started:
-            self.conversations.set_current_page(conversation.tab_index)
-            self.conversations.get_parent().present()
-            conversation.input_grab_focus()
+            conv_manager.present(conversation)
+
 
         if not self.session.config.b_mute_sounds and other_started and \
            self.session.contacts.me.status != e3.status.BUSY and \
@@ -518,10 +538,10 @@ class Controller(object):
            self.session.config.b_play_type:
             gui.play(self.session, gui.theme.sound_send)
 
-    def _on_conversation_window_close(self):
+    def _on_conversation_window_close(self, conv_manager):
         '''method called when the conversation window is closed'''
         width, height, posx, posy = \
-                self.conversations.get_parent().get_dimensions()
+                conv_manager.get_dimensions()
 
         # when window is minimized, posx and posy are -32000 on Windows
         if os.name == "nt":
@@ -536,8 +556,7 @@ class Controller(object):
         self.session.config.i_conv_posx = posx
         self.session.config.i_conv_posy = posy
 
-        self.conversations.close_all()
-        self.conversations = None
+        self.conversations.remove(conv_manager)
 
     def on_user_disconnect(self):
         '''
