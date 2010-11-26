@@ -619,6 +619,8 @@ class Extension(BaseTable):
             log.warning(_('Could not set %s as default extension for %s') % \
                 (extension_id, category))
             return
+        else:
+            self.session.config.d_extensions[category] = identifier
 
         ext = extension.get_default(category)
         self._set_extension_info(ext)
@@ -644,8 +646,10 @@ class Extension(BaseTable):
         # fill it again with available categories
         # this is done because a plugin may have changed them
         categories = self._get_categories()
+
         for item in categories:
             model.append([item])
+
         self.categories.set_model(model)
         self.categories.set_active(0)
 

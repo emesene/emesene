@@ -7,19 +7,15 @@ class MpdMusicHandlerConfig(songretriever.BaseMusicHandlerConfig):
     '''the panel to display/modify the config related to
     the 'listening to' extension for the mpd music handler'''
 
-    def __init__(self):
+    def __init__(self, config):
         '''constructor'''
-        songretriever.BaseMusicHandlerConfig.__init__(self)
+        songretriever.BaseMusicHandlerConfig.__init__(self, config)
 
-        self.host_default = "localhost"
-        # This should be loaded from a config option
-        self.host = self.host_default
-        self.append_entry_default('Host', 'host', self.host_default)
+        host = config.mpd_host
+        self.append_entry_default('Host', 'host', host)
 
-        self.port_default = "6600"
-        # This should be loaded from a config option
-        self.port = self.port_default
-        self.append_entry_default('Port', 'port', self.port_default)
+        port = config.mpd_port
+        self.append_entry_default('Port', 'port', port)
 
 class MpdHandler(songretriever.MusicHandler):
     '''a simple handler for mpd music player'''
@@ -28,11 +24,17 @@ class MpdHandler(songretriever.MusicHandler):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, main_window = None):
+    def __init__(self, main_window):
         songretriever.MusicHandler.__init__(self, main_window)
 
         # Use our specific config dialog
-        self.config = MpdMusicHandlerConfig()
+        self.config = main_window.session.config
+
+        # set default values if not set
+        self.config.get_or_set("mpd_host", "localhost")
+        self.config.get_or_set("mpd_port", "6600")
+
+        self.config_dialog_class = MpdMusicHandlerConfig
 
         self.client = None
 
@@ -43,7 +45,7 @@ class MpdHandler(songretriever.MusicHandler):
         return True if connected'''
         try:
             self.client = mpd.MPDClient()
-            self.client.connect(self.config.host, self.config.port)
+            self.client.connect(self.config.mpd_host, self.config.mpd_port)
             return True
         except mpd.ConnectionError:
             return False

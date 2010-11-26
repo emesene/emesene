@@ -80,3 +80,11 @@ class Plugin(PluginBase):
         if XMMSCLIENT:
             extension.register(CATEGORY, handler_xmms2.Xmms2Handler)
 
+        handler_id = self.session.config.d_extensions.get(CATEGORY, None)
+
+        if handler_id is None:
+            handler_id = extension._get_class_name(handler_rhythmbox.RhythmboxHandler)
+            self.session.config.d_extensions.get(CATEGORY, handler_id)
+
+        extension.set_default_by_id(CATEGORY, handler_id)
+
