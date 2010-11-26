@@ -282,6 +282,8 @@ class Worker(e3.base.Worker, papyon.Client):
         self.rcalls[ca] = call
         call_handler = CallEvent(call, self)
 
+        call.ring()
+
         self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid)
 
     def _on_invite_file_transfer(self, papysession):
@@ -1137,12 +1139,13 @@ class Worker(e3.base.Worker, papyon.Client):
         del self.rfiletransfers[t]
 
     # call handlers
-    def _handle_action_call_invite(self, cid, account, a_v_both):
+    def _handle_action_call_invite(self, cid, account, a_v_both, surface_other, surface_self):
         return # :D
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papysession = self.call_manager.create_call(papycontact)
         call_handler = CallEvent(papysession, self)
-        session_handler = PapyConference.MediaSessionHandler(papysession.media_session)
+        session_handler = PapyConference.MediaSessionHandler(
+            papysession.media_session, surface_other, surface_self)
         log.info("Call %s - %s" % (account, a_v_both))
         if a_v_both == 0: # see gui.base.Conversation.py 0=V,1=A,2=AV
             stream = papysession.media_session.create_stream("video",
@@ -1171,7 +1174,6 @@ class Worker(e3.base.Worker, papyon.Client):
         session_handler = PapyConference.MediaSessionHandler(
             c.object.media_session, c.surface_buddy, c.surface_self)
 
-        self.rcalls[c].ring()
         self.rcalls[c].accept()
 
     def _handle_action_call_reject(self, c):
@@ -1181,7 +1183,7 @@ class Worker(e3.base.Worker, papyon.Client):
         del self.rcalls[c]
 
     def _handle_action_call_cancel(self, c):
-        self.rcalls[c].cancel()
+        self.rcalls[c].end()
 
         del self.calls[self.rcalls[c]]
         del self.rcalls[c]
