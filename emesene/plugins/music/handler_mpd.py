@@ -11,11 +11,8 @@ class MpdMusicHandlerConfig(songretriever.BaseMusicHandlerConfig):
         '''constructor'''
         songretriever.BaseMusicHandlerConfig.__init__(self, config)
 
-        host = config.mpd_host
-        self.append_entry_default('Host', 'host', host)
-
-        port = config.mpd_port
-        self.append_entry_default('Port', 'port', port)
+        self.append_entry_default('Host', 'config.mpd_host', config.mpd_host)
+        self.append_entry_default('Port', 'config.mpd_port', config.mpd_port)
 
 class MpdHandler(songretriever.MusicHandler):
     '''a simple handler for mpd music player'''
@@ -45,11 +42,10 @@ class MpdHandler(songretriever.MusicHandler):
         return True if connected'''
         try:
             self.client = mpd.MPDClient()
-            self.client.connect(self.config.mpd_host, self.config.mpd_port)
+            self.client.connect(self.config.mpd_host,
+                    int(self.config.mpd_port))
             return True
-        except mpd.ConnectionError:
-            return False
-        except socket.error:
+        except Exception as error:
             return False
 
     def is_running(self):

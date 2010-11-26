@@ -403,6 +403,8 @@ class Controller(object):
         for plugin in self.session.config.l_active_plugins:
             plugin_manager.plugin_start(plugin, self.session)
 
+        self.set_default_extensions_from_config()
+
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):
         '''called when the user press the connect button'''
