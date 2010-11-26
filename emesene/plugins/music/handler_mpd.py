@@ -73,8 +73,7 @@ class MpdHandler(songretriever.MusicHandler):
         info = self.client.currentsong()
 
         return songretriever.Song(info.get('artist', '?'),
-                info.get('album', '?'),
-                info.get('title', '?'),
-                info.get('file', '?'))
+            info.get('album', '?'), info.get('title', '?'),
+            info.get('file', '?'))
 
 
