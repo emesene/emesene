@@ -148,7 +148,6 @@ class Controller(object):
             default_id = self.config.session
 
         extension.set_default_by_id('session', default_id)
-        get_pluginmanager().scan_directory('plugins')
 
     def _parse_commandline(self):
         '''parse command line options'''
@@ -397,7 +396,13 @@ class Controller(object):
         '''callback called on login succeed'''
         self._save_login_dimensions()
         self.config.save(self.config_path)
+        plugin_manager = get_pluginmanager()
+        plugin_manager.scan_directory('plugins')
+
         self.draw_main_screen()
+
+        for plugin in self.session.config.l_active_plugins:
+            plugin_manager.plugin_start(plugin, self.session)
 
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):

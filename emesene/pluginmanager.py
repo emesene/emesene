@@ -26,7 +26,7 @@ log = logging.getLogger('pluginmanager')
 
 BLACKLIST = ["lint.py", "__init__.py"]
 
-class PackageResource:
+class PackageResource(object):
     '''Handle various files that could be put in the package'''
     def __init__(self, base_dir, directory):
         self.path = os.path.join(base_dir, directory)
@@ -52,7 +52,7 @@ class PackageResource:
             except IOError:
                 return
 
-class PluginHandler:
+class PluginHandler(object):
     '''Abstraction over a plugin.
 
     Given a directory, will import the plugin.py file inside it and allows to control it.
@@ -108,8 +108,10 @@ class PluginHandler:
         @return False if something goes wrong, else True.
         '''
         inst = self.instanciate()
+
         if not inst:
             return False
+
         try:
             inst.category_register()
             inst.start(session)
@@ -120,6 +122,7 @@ class PluginHandler:
             log.warning('error starting "%s": %s' % (self.name, reason))
             print 'error starting "%s": %s' % (self.name, reason)
             return False
+
         return True
 
     def stop(self):
@@ -142,7 +145,7 @@ class PluginHandler:
         return self._instance.is_active()
 
 
-class PluginManager:
+class PluginManager(object):
     '''Scan directories and manage plugins loading/unloading/control'''
     def __init__(self):
         self._plugins = {} #'name': Plugin/Package
