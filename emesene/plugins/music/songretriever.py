@@ -34,13 +34,10 @@ class BaseMusicHandlerConfig(BaseTable):
     def __init__(self, config):
         '''constructor'''
         BaseTable.__init__(self, 4, 1)
+        self.config = config
 
-        format_default = config.music_format
-        BaseTable.append_entry_default(self,
-            'Format', 'format', format_default)
-
-        BaseTable.append_check(self,
-            _('Set song cover as avatar'), 'change_avatar')
+        self.append_entry_default('Format', 'config.music_format', config.music_format)
+        self.append_check(_('Set song cover as avatar'), 'config.change_avatar')
 
 class MusicHandler(object):
     '''Base class for all music handlers'''
@@ -64,7 +61,7 @@ class MusicHandler(object):
 
         self.config_dialog_class = BaseMusicHandlerConfig
 
-        glib.timeout_add_seconds(1, self.check_song)
+        glib.timeout_add_seconds(15, self.check_song)
 
     def preferences(self):
         ''' Shows the extension preferences dialog
@@ -78,7 +75,6 @@ class MusicHandler(object):
 
     def _on_config(self, status):
         '''callback for the config dialog'''
-        print status
         if status:
             pass
 
@@ -90,7 +86,7 @@ class MusicHandler(object):
 
             if song:
                 # print self.config.format
-                current_title = song.format(self.config.format)
+                current_title = song.format(self.config.music_format)
 
                 if current_title != self.last_title:
                     self.session.set_media(current_title)
