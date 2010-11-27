@@ -415,8 +415,6 @@ class Controller(object):
 
         self.set_default_extensions_from_config()
 
-        self.set_default_extensions_from_config()
-
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):
         '''called when the user press the connect button'''
