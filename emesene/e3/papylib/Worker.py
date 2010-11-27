@@ -267,7 +267,7 @@ class Worker(e3.base.Worker, papyon.Client):
             members)
 
     def _on_conference_invite(self, call):
-        log.info("New conference invite: %s" % call)
+        '''handles a conference (call) invite'''
         account = call.peer.account
         if account in self.conversations:
             cid = self.conversations[account]
@@ -282,9 +282,9 @@ class Worker(e3.base.Worker, papyon.Client):
         self.rcalls[ca] = call
         call_handler = CallEvent(call, self)
 
-        call.ring()
+        call.ring() #Hello, we're waiting for user input
 
-        self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid)
+        #self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid)
 
     def _on_invite_file_transfer(self, papysession):
         ''' handle file transfer invites '''
