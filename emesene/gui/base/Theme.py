@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import re
 
@@ -148,10 +166,10 @@ class Theme(object):
         'present.png', 'rainbow.png', 'rain.png', 'rose-dead.png', 'rose.png',
         'secret.png', 'sheep.png', 'snail.png', 'soccerball.png', 'star.png',
         'sun.png', 'turtle.png', 'tv.png', 'umbrella.png', 'video.png']
-    IMAGE_FILES = ['away.png', 'busy.png', 'chat.png', 'connect.png',
-        'group-chat.png', 'idle.png', 'logo.png', 'new-message.png',
+    IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
+        'group-chat.png', 'idle.png', 'logo.png', 'new-message.gif',
         'offline.png', 'online.png', 'password.png', 'typing.png', 'user.png',
-        'users.png']
+        'users.png', 'video.png']
 
     def __init__(self, image_name="default", emote_name="default",
             sound_name="default", conv_name='renkoo.AdiumMessageStyle'):
@@ -180,6 +198,9 @@ class Theme(object):
         self.sound_theme_path = os.path.join("themes", "sounds",
                 self.sound_name)
 
+        self.av = os.path.join(self.theme_path, "audiovideo.png")
+        self.video = os.path.join(self.theme_path, "video.png")
+        self.call = os.path.join(self.theme_path, "call.png")
         self.user = os.path.join(self.theme_path, "user.png")
         self.users = os.path.join(self.theme_path, "users.png")
         self.password = os.path.join(self.theme_path, "password.png")
@@ -189,7 +210,7 @@ class Theme(object):
         self.chat = os.path.join(self.theme_path, "chat.png")
         self.group_chat = os.path.join(self.theme_path, "group-chat.png")
         self.typing = os.path.join(self.theme_path, "typing.png")
-        self.new_message = os.path.join(self.theme_path, "new-message.png")
+        self.new_message = os.path.join(self.theme_path, "new-message.gif")
         self.blocked_overlay = os.path.join(self.theme_path, "blocked-overlay.png")
 
         self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")

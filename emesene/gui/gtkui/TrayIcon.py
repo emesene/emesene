@@ -1,13 +1,37 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+import os
 import gtk
 import time
-import os
+import gobject
 
 import extension
 from e3 import status
 
+import gui
+import utils
+
 import Renderers
 
-class TrayIcon(gtk.StatusIcon):
+from BaseTray import BaseTray
+
+class TrayIcon(gtk.StatusIcon, BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
     """
@@ -18,6 +42,7 @@ class TrayIcon(gtk.StatusIcon):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
+        BaseTray.__init__(self)
         NAME = 'Tray Icon'
         DESCRIPTION = 'The gtk tray icon'
         AUTHOR = 'Mariano Guerra'
@@ -27,7 +52,6 @@ class TrayIcon(gtk.StatusIcon):
         self.handler = handler
 
         self.main_window = main_window
-        self.conversations = None
         self.last_new_message = None
 
         self.connect('activate', self._on_activate)
@@ -59,26 +83,18 @@ class TrayIcon(gtk.StatusIcon):
         self.menu.show_all()
         self.set_tooltip("emesene - " + self.handler.session.account.account)
 
-    def set_conversations(self, convs):
-        """
-        Sets the conversations manager
-        """
-        self.conversations = convs
-
-    def set_contacts(self, contacts):
-        """
-        sets the contacts
-        """
-
     def _on_message(self, cid, account, msgobj, cedict={}):
         """
         Blink tray icon and save newest unread message
         """
-        if not self.conversations.get_parent().is_active():
+
+        conv_manager = self._get_conversation_manager(cid, account)
+
+        if conv_manager and conv_manager.is_active():
             self.set_blinking(True)
             self.last_new_message = cid
 
-    def _on_read(self, page):
+    def _on_read(self, conv):
         """
         Stop tray blinking and resets the newest unread message reference
         """
@@ -90,13 +106,15 @@ class TrayIcon(gtk.StatusIcon):
         callback called when the status icon is activated
         (includes clicking the icon)
         """
-        
+
         if self.last_new_message is not None and self.is_blinking():
             # show the tab with the latest message
-            conversation = self.conversations.conversations[self.last_new_message]
-            page = self.conversations.page_num(conversation)
-            self.conversations.set_current_page(page)
-            self.conversations.get_parent().present()
+            cid = self.last_new_message
+            conv_manager = self._get_conversation_manager(cid)
+
+            if conv_manager:
+                conversation = conv_manager.conversations[cid]
+                conv_manager.present(conversation)
         else:
             self.handler.on_hide_show_mainwindow(self.main_window)
 

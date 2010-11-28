@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''a module that defines a session object'''
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -223,4 +223,13 @@ class Session(object):
 
     def cancel_filetransfer(self, transfer):
         self.add_action(Action.ACTION_FT_CANCEL, (transfer,))
+
+    def accept_call(self, call):
+        self.add_action(Action.ACTION_CALL_ACCEPT, (call,))
+
+    def reject_call(self, call):
+        self.add_action(Action.ACTION_CALL_REJECT, (call,))
+
+    def cancel_call(self, call):
+        self.add_action(Action.ACTION_CALL_CANCEL, (call,))
 

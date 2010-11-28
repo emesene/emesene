@@ -1,6 +1,7 @@
+'''a abstract object that define the API of a contact list and some behavior'''
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -15,7 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-'''a abstract object that define the API of a contact list and some behavior'''
 
 import e3
 
@@ -23,13 +23,14 @@ class ContactList(object):
     '''an abstract class that defines the api that the contact list should
     have'''
     NICK_TPL = \
-        '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small][$NL][$small][$BLOCKED]([$STATUS]) - [$MESSAGE][$/small]'
+        '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small][$NL][$small][$BLOCKED] ([$STATUS]) - [$MESSAGE][$/small]'
 
     GROUP_TPL = '[$b][$NAME] ([$ONLINE_COUNT]/[$TOTAL_COUNT])[$/b]'
 
     def __init__(self, session, dialog):
         '''class constructor'''
 
+        self.is_searching = False
         # define the class signals
         # the param is the contact object
         self.contact_selected = e3.common.Signal()
@@ -42,6 +43,7 @@ class ContactList(object):
         self.session = session
         self.dialog = dialog
 
+        self.session.config.get_or_set('b_order_by_name', True)
         self.session.config.get_or_set('b_order_by_group', True)
         self.session.config.get_or_set('b_show_nick', True)
         self.session.config.get_or_set('b_show_empty_groups', False)
@@ -65,6 +67,7 @@ class ContactList(object):
         # value to this attribute
         self.order_by_group = self.session.config.b_order_by_group
         self.show_nick = self.session.config.b_show_nick
+        self._order_by_name = self.session.config.b_order_by_name
         self._show_empty_groups = self.session.config.b_show_empty_groups
         self._show_offline = self.session.config.b_show_offline
         self._show_blocked = self.session.config.b_show_blocked
@@ -186,12 +189,13 @@ class ContactList(object):
     def _on_remove_group(self, group, *args):
         '''called when we remove a group
         '''
-        group = self.session.groups[group]
+        c_group = self.session.groups[group]
 
-        if not group:
+        if not c_group:
             return
 
-        self.remove_group(group)
+        self.remove_group(c_group)
+        del self.session.groups[group]
 
     def _on_update_group(self, group, *args):
         '''called when we remove a group
@@ -266,6 +270,19 @@ class ContactList(object):
         self.refilter()
 
     show_blocked = property(fget=_get_show_blocked, fset=_set_show_blocked)
+
+    def _get_order_by_name(self):
+        '''return the value of self._order_by_name'''
+        return self._order_by_name
+
+    def _set_order_by_name(self, value):
+        '''set the value of self._order_by_name to value and call to
+        self.refilter()'''
+        self._order_by_name = value
+        self.session.config.b_order_by_name = self._order_by_name
+        self.fill() # TODO: FIXME: Why refilter() ain't working here?
+
+    order_by_name = property(fget=_get_order_by_name, fset=_set_order_by_name)
 
     def _get_show_empty_groups(self):
         '''return the value of show_emptry_groups'''
@@ -416,7 +433,8 @@ class ContactList(object):
         for group in self.groups.values():
             # get a list of contact objects from a list of accounts
             contacts = self.contacts.get_contacts(group.contacts)
-            self.add_group(group)
+            if not self.order_by_status:
+                self.add_group(group)
             for contact in contacts:
                 self.add_contact(contact, group)
 
@@ -445,12 +463,16 @@ class ContactList(object):
         '''called when a group is collapsed, update the status of the
         groups'''
         self.group_state[group.name] = False
+        if self.is_searching or len(group.contacts) == 0:
+            return
         self.session.config.d_group_state[group.name] = "0"
 
     def on_group_expanded(self, group):
         '''called when a group is expanded, update the status of the
         groups'''
         self.group_state[group.name] = True
+        if self.is_searching:
+            return
         self.session.config.d_group_state[group.name] = "1"
 
     def compare_groups(self, group1, group2, order1=0, order2=0):

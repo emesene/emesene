@@ -1,4 +1,21 @@
 # -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import gtk
 import time
@@ -31,8 +48,6 @@ class MainWindow(gtk.VBox):
         self.below_menu = extension.get_and_instantiate('below menu', self)
         self.below_panel = extension.get_and_instantiate('below panel', self)
         self.below_userlist = extension.get_and_instantiate('below userlist', self)
-
-        self.music = extension.get_and_instantiate('listening to', self)
 
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
@@ -165,11 +180,14 @@ class MainWindow(gtk.VBox):
         if not contact:
             log.debug('account %s not found on contacts' % account)
 
-        if change_type == 'online' and do_notify:
-            if self.session.config.b_play_contact_online:
+        if change_type == 'status' and do_notify:
+            if old_value == e3.base.status.OFFLINE and \
+              contact.status != e3.base.status.OFFLINE and \
+              self.session.config.b_play_contact_online:
                 gui.play(self.session, gui.theme.sound_online)
-        elif change_type == 'offline':
-            if self.session.config.b_play_contact_offline:
+            elif old_value != e3.base.status.OFFLINE and \
+              contact.status == e3.base.status.OFFLINE and \
+              self.session.config.b_play_contact_offline:
                 gui.play(self.session, gui.theme.sound_offline)
 
     def _on_nick_changed(self, textfield, old_text, new_text):
@@ -206,7 +224,10 @@ class MainWindow(gtk.VBox):
         if button.get_active():
             self.entry.show()
             self.entry.grab_focus()
+            self.contact_list.is_searching = True
         else:
             self.entry.set_text('')
             self.entry.hide()
+            self.contact_list.is_searching = False
+            self.contact_list.un_expand_groups()
 

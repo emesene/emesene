@@ -1,13 +1,31 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import extension
 
 WEBKITERROR = False
 INDICATORERROR = False
+INFOBARERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR, INDICATORERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR
 
     import gtk
     import gobject
@@ -15,6 +33,7 @@ def gtk_main(Controller):
     import AccountMenu
     import Avatar
     import AvatarChooser
+    import CallWidget
     import config_gtk
     import ContactMenu
     import ContactList
@@ -41,7 +60,13 @@ def gtk_main(Controller):
     import Login
     import MainMenu
     import MainWindow
+
+    try:
+        import InfoBar
+    except ImportError:
+        INFOBARERROR = True
     import NiceBar
+
     import PluginWindow
     import Preferences
     import Renderers
@@ -81,7 +106,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR, INDICATORERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR
 
     import gtk
     gtk.settings_get_default().set_property("gtk-error-bell", False)
@@ -110,7 +135,12 @@ def setup():
         extension.category_register('tray icon', TrayIcon.TrayIcon)
 
     extension.category_register('debug window', DebugWindow.DebugWindow)
-    extension.category_register('nice bar', NiceBar.NiceBar)
+
+    if not INFOBARERROR:
+        extension.category_register('nice bar', InfoBar.NiceBar)
+        extension.register('nice bar', NiceBar.NiceBar)
+    else:
+        extension.category_register('nice bar', NiceBar.NiceBar)
 
     extension.category_register('main menu', MainMenu.MainMenu)
     extension.category_register('menu file', MainMenu.FileMenu)
@@ -126,6 +156,7 @@ def setup():
     extension.category_register('below panel', EmptyWidget.EmptyWidget)
     extension.category_register('below userlist', EmptyWidget.EmptyWidget)
 
+    extension.category_register('call widget', CallWidget.CallWindow)
     extension.category_register('conversation window', \
         ConversationManager.ConversationManager)
     extension.category_register('conversation', Conversation.Conversation)

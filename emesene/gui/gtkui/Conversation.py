@@ -1,5 +1,23 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
-import gobject
+import glib
 
 import e3
 import gui
@@ -27,6 +45,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel = gtk.VPaned()
 
+        self.show_avatar_in_taskbar = self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
+
         Header = extension.get_default('conversation header')
         OutputText = extension.get_default('conversation output')
         InputText = extension.get_default('conversation input')
@@ -34,6 +54,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         ConversationToolbar = extension.get_default(
             'conversation toolbar')
         TransfersBar = extension.get_default('filetransfer pool')
+        CallWidget = extension.get_default('call widget')
         dialog = extension.get_default('dialog')
         Avatar = extension.get_default('avatar')
 
@@ -55,6 +76,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.input.set_size_request(-1, 25)
         self.info = ContactInfo()
         self.transfers_bar = TransfersBar(self.session)
+        self.call_widget = CallWidget(self.session)
 
         frame_input = gtk.Frame()
         frame_input.set_shadow_type(gtk.SHADOW_IN)
@@ -128,13 +150,16 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.session.signals.filetransfer_completed.subscribe(
                 self.on_filetransfer_completed)
 
+        self.session.signals.call_invitation.subscribe(
+                self.on_call_invitation)
+
         self.tab_index = -1 # used to select an existing conversation
         self.index = 0 # used for the rotate picture function
         self.rotate_started = False
 
         if self.group_chat:
             self.rotate_started = True #to prevents more than one timeout_add
-            gobject.timeout_add_seconds(5, self.rotate_picture)
+            glib.timeout_add_seconds(5, self.rotate_picture)
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
@@ -174,6 +199,9 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.on_filetransfer_progress)
         self.session.signals.filetransfer_completed.unsubscribe(
                 self.on_filetransfer_completed)
+        self.session.signals.call_invitation.unsubscribe(
+                self.on_call_invitation)
+
         #stop the avatars animation...if any..
         self.avatar.stop()
         self.his_avatar.stop()
@@ -242,7 +270,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_image(self.icon)
         self.tab_label.set_text(self.text)
 
-        self.update_window(self.text, self.icon, self.tab_index)
+        if self.show_avatar_in_taskbar:
+            self.update_window(self.text, self.his_avatar.filename, self.tab_index)
+        else:
+            self.update_window(self.text, self.icon, self.tab_index)
 
     def update_group_information(self):
         """
@@ -250,7 +281,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         if not self.rotate_started:
             self.rotate_started = True
-            gobject.timeout_add_seconds(5, self.rotate_picture)
+            glib.timeout_add_seconds(5, self.rotate_picture)
 
         #TODO add plus support for nick to the tab label!
         members_nick = []
@@ -328,15 +359,17 @@ class Conversation(gtk.VBox, gui.Conversation):
         increment()
         return True
 
-    def _on_user_typing(self, cid, account, *args):
+    def on_user_typing(self, account):
         """
         inform that the other user has started typing
         """
-        pass
+        if account in self.members:
+            self.tab_label.set_image(gui.theme.typing)
+            glib.timeout_add_seconds(3, self.update_tab)
 
     def on_emote(self, emote):
         '''called when an emoticon is selected'''
-        self.input.append(gobject.markup_escape_text(emote))
+        self.input.append(glib.markup_escape_text(emote))
         self.input_grab_focus()
 
     def on_picture_change_succeed(self, account, path):
@@ -353,9 +386,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         if account in self.members and what in ('status', 'nick'):
             self.update_tab()
 
-    def on_filetransfer_invitation(self, transfer):
+    def on_filetransfer_invitation(self, transfer, cid):
         ''' called when a new file transfer is issued '''
-        self.transfers_bar.add(transfer)
+        if cid == self.cid:
+            self.transfers_bar.add(transfer)
 
     def on_filetransfer_accepted(self, transfer):
         ''' called when the file transfer is accepted '''
@@ -363,13 +397,44 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_filetransfer_progress(self, transfer):
         ''' called every chunk received '''
-        self.transfers_bar.update(transfer)
+        if transfer in self.transfers_bar.transfers:
+            self.transfers_bar.update(transfer)
 
     def on_filetransfer_rejected(self, transfer):
         ''' called when a file transfer is rejected '''
-        self.transfers_bar.update(transfer)
+        if transfer in self.transfers_bar.transfers:
+            self.transfers_bar.update(transfer)
 
     def on_filetransfer_completed(self, transfer):
         ''' called when a file transfer is completed '''
-        self.transfers_bar.finished(transfer)
+        if transfer in self.transfers_bar.transfers:
+            self.transfers_bar.finished(transfer)
+
+    def on_call_invitation(self, call, cid):
+        '''called when a new call is issued both from us or other party'''
+        if cid == self.cid:
+            self.call_widget.add_call(call)
+            self.call_widget.show_all()
+            self.call_widget.set_xids()
+
+    def on_video_call(self):
+        '''called when the user is requesting a video-only call'''
+        account = self.members[0]
+        self.call_widget.show_all()
+        x_other, x_self = self.call_widget.get_xids()
+        self.session.call_invite(self.cid, account, 0, x_other, x_self) # 0 = Video only
+
+    def on_voice_call(self):
+        '''called when the user is requesting an audio-only call'''
+        account = self.members[0]
+        self.call_widget.show_all()
+        x_other, x_self = self.call_widget.get_xids()
+        self.session.call_invite(self.cid, account, 1, x_other, x_self) # 1 = Audio only
+
+    def on_av_call(self):
+        '''called when the user is requesting an audio-video call'''
+        account = self.members[0]
+        self.call_widget.show_all()
+        x_other, x_self = self.call_widget.get_xids()
+        self.session.call_invite(self.cid, account, 2, x_other, x_self) # 2 = Audio/Video
 

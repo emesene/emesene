@@ -1,6 +1,23 @@
 '''base implementation of a conversation, it should contain all the logic
 derived classes should implement the GUI to operate the conversation and
 nothing more'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import e3
 import gui
@@ -111,6 +128,18 @@ class Conversation(object):
         '''called when a filetransfer is issued'''
         self.session.filetransfer_invite(self.cid, self.members[0],
                 filename, completepath)
+
+    def on_video_call(self):
+        '''called when the user is requesting a video-only call'''
+        raise NotImplementedError
+
+    def on_voice_call(self):
+        '''called when the user is requesting an audio-only call'''
+        raise NotImplementedError
+
+    def on_av_call(self):
+        '''called when the user is requesting an audio-video call'''
+        raise NotImplementedError
 
     def on_clean(self):
         '''called when the clean button is clicked'''
@@ -256,6 +285,10 @@ class Conversation(object):
             self.play_nudge()
 
         self.first = False
+
+    def on_user_typing(self, account):
+        '''method called when a someone is typing'''
+        raise NotImplementedError
 
     def _get_icon(self):
         '''return the icon that represent the current status of the
@@ -408,9 +441,9 @@ class Conversation(object):
 
     def play_type(self):
         """
-        play the send sound
+        play the receive sound
         """
-        if self.session.config.b_play_type:
+        if self.session.config.b_play_type and self.message_waiting:
             gui.play(self.session, gui.theme.sound_type)
 
     def cycle_history(self, change=-1):

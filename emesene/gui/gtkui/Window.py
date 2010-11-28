@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import sys
 import gtk
 
@@ -23,7 +41,7 @@ class Window(gtk.Window):
         if cb_on_close is not None:
             self.cb_on_close = cb_on_close
         else: # we're the main window: close button only hides it
-            self.cb_on_close = self.hide_on_delete
+            self.cb_on_close = lambda *args: self.hide_on_delete()
 
         self.connect('delete-event', self._on_delete_event)
         self.connect('key-press-event', self._on_key_press)
@@ -121,11 +139,13 @@ class Window(gtk.Window):
         '''call the cb_on_close callback, if the callback return True
         then dont close the window'''
         width, height, posx, posy = self.get_dimensions()
+
         self.set_or_get_width(width)
         self.set_or_get_height(height)
         self.set_or_get_posx(posx)
         self.set_or_get_posy(posy)
-        return self.cb_on_close()
+
+        return self.cb_on_close(self.content)
 
     def _on_key_press(self, widget, event):
         '''called when a key is pressed on the window'''
@@ -135,7 +155,7 @@ class Window(gtk.Window):
     def _on_last_tab_close(self):
         '''do the action when the last tab is closed on a conversation window
         '''
-        self.cb_on_close()
+        self.cb_on_close(self.content)
         self.hide()
 
     def hide(self):

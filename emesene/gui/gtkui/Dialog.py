@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -150,7 +150,7 @@ class Dialog(object):
         window = cls.common_window(message, stock_id, response_cb, title)
         cls.add_button(window, gtk.STOCK_CLOSE, stock.CLOSE, response_cb,
             cls.default_cb)
-
+        window.set_modal(True)
         return window
 
     @classmethod
@@ -451,14 +451,14 @@ class Dialog(object):
 
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.add_contact_cb)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
+        cls.add_button(window, gtk.STOCK_OK, stock.ADD, response_cb,
             cls.add_contact_cb)
 
         setattr(window, 'entry', entry)
         setattr(window, 'combo', combo)
 
         entry.connect('activate', cls.add_contact_cb, window, response_cb,
-            stock.ACCEPT)
+            stock.ADD)
         window.show_all()
 
     @classmethod

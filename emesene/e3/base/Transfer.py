@@ -1,8 +1,7 @@
 '''file transfer handling module'''
-
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,7 +40,7 @@ class FileTransfer(object):
     def __str__(self):
         '''return a string representation of a file transfer'''
         return '<e3.base.filetransfer filename="%s" len="%i">' % (self.filename,
-            len(self.data))
+                                                            self.received_data)
 
     def get_progress(self):
         ''' returns the lenght of the received data '''

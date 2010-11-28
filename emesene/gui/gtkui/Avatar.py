@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import pygtk
 import gtk
 import gtk.gdk
@@ -34,6 +52,7 @@ class Avatar(gtk.Widget):
         gtk.Widget.__init__(self)
         self.set_flags(self.flags() | gtk.NO_WINDOW)
 
+        self.filename = ''
         self._pixbuf = None
         self._dimention = cellDimention
         self._radius_factor = cellRadius
@@ -125,8 +144,9 @@ class Avatar(gtk.Widget):
     #public methods
     #
     def set_from_file(self, filename):
+        self.filename = filename
         if not gui.gtkui.utils.file_readable(filename):
-            filename = gui.theme.logo
+            self.filename = gui.theme.logo
 
         try:
             animation = gtk.gdk.PixbufAnimation(filename)

@@ -1,4 +1,22 @@
 '''A module to handle a debug console'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import time
 
 import gtk
@@ -13,6 +31,7 @@ class DebugWindow(object):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("debug")
         self.window.connect("delete_event", self.on_delete)
+        self.window.resize(800, 600)
         self.store = DebugStore()
         self.view = DebugView(self.store)
         
@@ -29,13 +48,13 @@ class DebugWindow(object):
 
         self.filter_entry = gtk.Entry()
         self.filter_level = gtk.combo_box_new_text()
-        self.filter_level.append_text(_("Debug"))
-        self.filter_level.append_text(_("Info"))
-        self.filter_level.append_text(_("Warning"))
-        self.filter_level.append_text(_("Error"))
-        self.filter_level.append_text(_("Critical"))
+        self.filter_level.append_text("Debug")
+        self.filter_level.append_text("Info")
+        self.filter_level.append_text("Warning")
+        self.filter_level.append_text("Error")
+        self.filter_level.append_text("Critical")
         self.filter_level.set_active(0)
-        self.filter_btn = gtk.Button(_("Filter"))
+        self.filter_btn = gtk.Button("Filter")
         self.filter_box.pack_start(self.filter_entry)
         self.filter_box.pack_start(self.filter_level, False)
         self.filter_box.pack_start(self.filter_btn, False)

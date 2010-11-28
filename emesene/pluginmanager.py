@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 '''Handles plugin importing'''
-
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +26,7 @@ log = logging.getLogger('pluginmanager')
 
 BLACKLIST = ["lint.py", "__init__.py"]
 
-class PackageResource:
+class PackageResource(object):
     '''Handle various files that could be put in the package'''
     def __init__(self, base_dir, directory):
         self.path = os.path.join(base_dir, directory)
@@ -53,7 +52,7 @@ class PackageResource:
             except IOError:
                 return
 
-class PluginHandler:
+class PluginHandler(object):
     '''Abstraction over a plugin.
 
     Given a directory, will import the plugin.py file inside it and allows to control it.
@@ -83,7 +82,7 @@ class PluginHandler:
             if hasattr(self.module, 'plugin'):
                 self.module = self.module.plugin
         except Exception, reason:
-            log.warning('error importing "%s": %s', self.name, reason)
+            log.warning('error importing "%s": %s' % (self.name, reason))
             self.module = None
         finally:
             sys.path = old_syspath
@@ -96,8 +95,8 @@ class PluginHandler:
             self._instance = self.module.Plugin()
         except Exception, reason:
             self._instance = None
-            log.warning('error creating instance for "%s": %s',
-                    self.name, reason)
+            log.warning('error creating instance for "%s": %s' % (
+                self.name, reason))
         else:
             if self.is_package:
                 self._instance.resource = \
@@ -109,8 +108,10 @@ class PluginHandler:
         @return False if something goes wrong, else True.
         '''
         inst = self.instanciate()
+
         if not inst:
             return False
+
         try:
             inst.category_register()
             inst.start(session)
@@ -118,9 +119,10 @@ class PluginHandler:
             inst._started = True
         except Exception, reason:
             raise reason
-            log.warning('error starting "%s": %s', (self.name, reason))
-            print 'error starting "%s": %s', (self.name, reason)
+            log.warning('error starting "%s": %s' % (self.name, reason))
+            print 'error starting "%s": %s' % (self.name, reason)
             return False
+
         return True
 
     def stop(self):
@@ -143,7 +145,7 @@ class PluginHandler:
         return self._instance.is_active()
 
 
-class PluginManager:
+class PluginManager(object):
     '''Scan directories and manage plugins loading/unloading/control'''
     def __init__(self):
         self._plugins = {} #'name': Plugin/Package
@@ -161,10 +163,10 @@ class PluginManager:
                 mod = PluginHandler(dir_, filename, os.path.isdir(path))
                 self._plugins[mod.name] = mod
             except Exception, reason:
-                log.warning('Exception while importing %s:\n%s',
-                        (filename, reason))
+                log.warning('Exception while importing %s:\n%s' % (
+                    filename, reason))
 
-        log.debug('Imported plugins: %s', ', '.join(self._plugins.keys()))
+        log.debug('Imported plugins: %s' % ', '.join(self._plugins.keys()))
 
     def plugin_start(self, name, session):
         '''Starts a plugin.
@@ -173,7 +175,7 @@ class PluginManager:
         if name not in self._plugins:
             return False
 
-        log.info('starting plugin "%s"', name)
+        log.info('starting plugin "%s"' % name)
         self._plugins[name].start(session)
         return True
 
@@ -184,7 +186,7 @@ class PluginManager:
         if name not in self._plugins:
             return False
 
-        log.info('stopping plugin "%s"', name)
+        log.info('stopping plugin "%s"' % name)
         self._plugins[name].stop()
         return True
 
@@ -195,7 +197,7 @@ class PluginManager:
         if name not in self._plugins:
             return False
 
-        log.info('configuring plugin "%s"', name)
+        log.info('configuring plugin "%s"' % name)
         return self._plugins[name].config(session)
 
     def plugin_is_active(self, name):

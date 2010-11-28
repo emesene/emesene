@@ -2,7 +2,7 @@
 #
 # papylib - an emesene extension for papyon
 #
-# Copyright (C) 2009 Riccardo (C10uD) <c10ud.dev@gmail.com>
+# Copyright (C) 2009-2010 Riccardo (C10uD) <c10ud.dev@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ class Session(e3.Session):
         '''send a file to the first user of the conversation'''
         self.add_action(e3.Action.ACTION_FT_INVITE, (cid, account, filename, completepath))
 
-    def call_invite(self, cid, account):
+    def call_invite(self, cid, account, a_v_both, surface_other, surface_self):
         '''try to start a call with the first user of the conversation'''
-        self.add_action(e3.Action.ACTION_CALL_INVITE, (cid, account))
+        self.add_action(e3.Action.ACTION_CALL_INVITE, (cid, account, a_v_both, surface_other, surface_self))
 

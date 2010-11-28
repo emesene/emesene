@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import time
 import webbrowser
@@ -95,6 +113,10 @@ class OptionsHandler(object):
         '''called when the show blocked item is toggled'''
         self.contact_list.show_blocked = active
 
+    def on_order_by_name_toggled(self, active):
+        '''called when the sort by name item is toggled'''
+        self.contact_list.order_by_name = active
+
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
         instance = extension.get_and_instantiate('preferences', self.session)
@@ -149,10 +171,9 @@ class ContactHandler(object):
         def add_cb(response, account, groups):
             '''callback to the add_dialog method, add the user and add him
             to the defined groups'''
-
             if response == gui.stock.ADD:
                 self.session.add_contact(account)
-                # TODO: this doesn't work
+                # TODO: this doesn't work (?)
                 if groups:
                     for group in groups:
                         self.session.add_to_group(account, group)
@@ -376,7 +397,19 @@ class ConversationToolbarHandler(object):
 
     def on_ublock_selected(self):
         '''called when block/unblock button is selected'''
-        self.conversation.on_block_user()        
+        self.conversation.on_block_user()
+
+    def on_invite_video_call_selected(self):
+        '''called when the user is requesting a video-only call'''
+        self.conversation.on_video_call()
+
+    def on_invite_voice_call_selected(self):
+        '''called when the user is requesting an audio-only call'''
+        self.conversation.on_voice_call()
+
+    def on_invite_av_call_selected(self):
+        '''called when the user is requesting an audio-video call'''
+        self.conversation.on_av_call()
 
 class TrayIconHandler(FileHandler):
     """
@@ -429,7 +462,7 @@ class FileTransferHandler(object):
         self.transfer.state = e3.base.FileTransfer.TRANSFERRING
         
     def reject(self):
-        ''' cancels a file transfer '''
+        ''' rejects a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.reject_filetransfer(self.transfer)
 
@@ -437,4 +470,32 @@ class FileTransferHandler(object):
         ''' cancels a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.cancel_filetransfer(self.transfer)
+
+class CallHandler(object):
+    ''' this handler handles a file transfer object '''
+    def __init__(self, session, call):
+        ''' session - e3.session implementation
+            transfer - e3.call
+        '''
+        self.session = session
+        self.call = call
+
+    def accept(self):
+        ''' accepts a call '''
+        self.call.state = e3.base.Call.ESTABLISHED
+        self.session.accept_call(self.call)
+
+    def accepted(self):
+        ''' when a call is accepted by the other party'''
+        self.call.state = e3.base.Call.ESTABLISHED
+        
+    def reject(self):
+        ''' rejects a call '''
+        self.call.state = e3.base.Call.FAILED
+        self.session.reject_call(self.call)
+
+    def cancel(self):
+        ''' cancels a call '''
+        self.call.state = e3.base.Call.FAILED
+        self.session.cancel_call(self.call)
 

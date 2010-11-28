@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 '''main module of emesene, does the startup and related stuff'''
-
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,7 +36,7 @@ import logging
 log = logging.getLogger('emesene')
 
 import e3
-from e3 import msn
+#from e3 import msn
 from e3 import jabber
 from e3 import dummy
 
@@ -103,7 +102,7 @@ class Controller(object):
         '''class constructor'''
         self.window = None
         self.tray_icon = None
-        self.conversations = None
+        self.conversations = []
         self.single_instance = None
         self.config = e3.common.Config()
         self.config_dir = e3.common.ConfigDir('emesene2')
@@ -123,17 +122,18 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', msn.Session,
-                single_instance=True)
+        extension.category_register('session', dummy.Session, single_instance=True)
+        #extension.category_register('session', msn.Session,
+        #        single_instance=True)
         extension.register('session', jabber.Session)
         extension.register('session', dummy.Session)
-        extension.register('session', msn.Session)
+        #extension.register('session', msn.Session)
 
         if papylib is not None:
             extension.register('session', papylib.Session)
             extension.set_default('session', papylib.Session)
         else:
-            extension.set_default('session', msn.Session)
+            extension.set_default('session', dummy.Session)
 
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
@@ -148,7 +148,6 @@ class Controller(object):
             default_id = self.config.session
 
         extension.set_default_by_id('session', default_id)
-        get_pluginmanager().scan_directory('plugins')
 
     def _parse_commandline(self):
         '''parse command line options'''
@@ -223,14 +222,16 @@ class Controller(object):
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
         signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
+        signals.contact_added_you.subscribe(self.on_pending_contacts)
 
     def close_session(self, do_exit=True):
         '''close session'''
 
         self._remove_subscriptions()
-        if self.conversations:
-            self.conversations.get_parent().hide()
-            self._on_conversation_window_close()
+
+        for conv_manager in self.conversations:
+            conv_manager.hide_all()
+            self._on_conversation_window_close(conv_manager)
 
         if self.timeout_id:
             glib.source_remove(self.timeout_id)
@@ -267,6 +268,7 @@ class Controller(object):
             signals.disconnected.unsubscribe(self.on_disconnected)
             signals.picture_change_succeed.unsubscribe(
                     self.on_picture_change_succeed)
+            signals.contact_added_you.unsubscribe(self.on_pending_contacts)
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -394,7 +396,20 @@ class Controller(object):
         '''callback called on login succeed'''
         self._save_login_dimensions()
         self.config.save(self.config_path)
+        plugin_manager = get_pluginmanager()
+        plugin_manager.scan_directory('plugins')
+
         self.draw_main_screen()
+
+        for plugin in self.session.config.l_active_plugins:
+            plugin_manager.plugin_start(plugin, self.session)
+            # hack: where do we start this? how do we generalize for other
+            # extensions?
+            if plugin == "music":
+                extension.get_and_instantiate('listening to',
+                        self.window.content)
+
+        self.set_default_extensions_from_config()
 
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):
@@ -452,10 +467,8 @@ class Controller(object):
             self.session.quit()
         self.go_login(cancel_clicked=True)
 
-    def on_contact_list_ready(self):
-        '''callback called when the contact list is ready to be used'''
-        self.window.content.contact_list.fill()
-
+    def on_pending_contacts(self):
+        '''callback called when some contact is pending'''
         def on_contact_added_you(responses):
             '''
             callback called when the dialog is closed
@@ -474,6 +487,12 @@ class Controller(object):
             dialog = extension.get_default('dialog')
             dialog.contact_added_you(accounts, on_contact_added_you)
 
+    def on_contact_list_ready(self):
+        '''callback called when the contact list is ready to be used'''
+        self.window.content.contact_list.fill()
+
+        self.on_pending_contacts()
+
         glib.timeout_add(500, self.session.logger.check)
 
         notificationcls = extension.get_default('notification')
@@ -482,30 +501,49 @@ class Controller(object):
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
         opening a conversation'''
-        if self.conversations is None:
-            windowcls = extension.get_default('window frame')
-            window = windowcls(self._on_conversation_window_close)
+        conversation_tabs = self.session.config.get_or_set(
+                'b_conversation_tabs', True)
 
-            window.go_conversation(self.session)
-            self._set_location(window, True)
-            self.conversations = window.content
-            self.tray_icon.set_conversations(self.conversations)
-            if self.session.config.b_conv_minimized:
-                window.iconify()
-            window.show()
+        conv_manager = None
 
-        conversation = self.conversations.new_conversation(cid, members)
+        # check to see if there is a conversation with the same member
+        for convman in self.conversations:
+            if convman.reuse_conversation(cid, members):
+                conv_manager = convman
+                break
+
+        if conv_manager is None:
+            if not self.conversations or not conversation_tabs:
+
+                windowcls = extension.get_default('window frame')
+                window = windowcls(self._on_conversation_window_close)
+
+                window.go_conversation(self.session)
+                self._set_location(window, True)
+                conv_manager = window.content
+                self.conversations.append(conv_manager)
+
+                if self.session.config.b_conv_minimized:
+                    window.iconify()
+
+                window.show()
+
+            else:
+                conv_manager = self.conversations[0]
+
+
+        self.tray_icon.set_conversations(self.conversations)
+
+        conversation = conv_manager.new_conversation(cid, members)
 
         conversation.update_data()
-
         conversation.show() # puts widget visible
 
         # raises the container and grabs the focus
         # handles cases where window is minimized and ctrl+tab focus stealing
         if not other_started:
-            self.conversations.set_current_page(conversation.tab_index)
-            self.conversations.get_parent().present()
-            conversation.input_grab_focus()
+            conv_manager.present(conversation)
+
 
         if not self.session.config.b_mute_sounds and other_started and \
            self.session.contacts.me.status != e3.status.BUSY and \
@@ -513,10 +551,10 @@ class Controller(object):
            self.session.config.b_play_type:
             gui.play(self.session, gui.theme.sound_send)
 
-    def _on_conversation_window_close(self):
+    def _on_conversation_window_close(self, conv_manager):
         '''method called when the conversation window is closed'''
         width, height, posx, posy = \
-                self.conversations.get_parent().get_dimensions()
+                conv_manager.get_dimensions()
 
         # when window is minimized, posx and posy are -32000 on Windows
         if os.name == "nt":
@@ -531,8 +569,7 @@ class Controller(object):
         self.session.config.i_conv_posx = posx
         self.session.config.i_conv_posy = posy
 
-        self.conversations.close_all()
-        self.conversations = None
+        self.conversations.remove(conv_manager)
 
     def on_user_disconnect(self):
         '''
@@ -627,7 +664,7 @@ def main():
     """
     the main method of emesene
     """
-    extension.category_register('session', msn.Session, single_instance=True)
+    extension.category_register('session', dummy.Session, single_instance=True)
     extension.category_register('option provider', None,
             interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
