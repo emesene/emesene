@@ -267,7 +267,7 @@ class Worker(e3.base.Worker, papyon.Client):
             members)
 
     def _on_conference_invite(self, call):
-        log.info("New conference invite: %s" % call)
+        '''handles a conference (call) invite'''
         account = call.peer.account
         if account in self.conversations:
             cid = self.conversations[account]
@@ -282,7 +282,9 @@ class Worker(e3.base.Worker, papyon.Client):
         self.rcalls[ca] = call
         call_handler = CallEvent(call, self)
 
-        self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid)
+        call.ring() #Hello, we're waiting for user input
+
+        #self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid)
 
     def _on_invite_file_transfer(self, papysession):
         ''' handle file transfer invites '''
@@ -1046,15 +1048,16 @@ class Worker(e3.base.Worker, papyon.Client):
         # find papyon conversation by cid
 
         # Handle super-long messages that destroy the switchboard
-        if len(message.body) > 1000 and message.type == e3.base.Message.TYPE_MESSAGE:
-            def split_len(seq, length):
-                return [seq[i:i+length] for i in range(0, len(seq), length)]
-            parts = split_len(message.body, 1000)
-            new_msg = message
-            for part in parts:
-                new_msg.body = part
-                self._handle_action_send_message(cid, new_msg, cedict, l_custom_emoticons)
-            return
+        if message.type == e3.base.Message.TYPE_MESSAGE:
+            if len(message.body) > 1000:
+                def split_len(seq, length):
+                    return [seq[i:i+length] for i in range(0, len(seq), length)]
+                parts = split_len(message.body, 1000)
+                new_msg = message
+                for part in parts:
+                    new_msg.body = part
+                    self._handle_action_send_message(cid, new_msg, cedict, l_custom_emoticons)
+                return
 
         papyconversation = self.papyconv[cid]
 
@@ -1136,28 +1139,28 @@ class Worker(e3.base.Worker, papyon.Client):
         del self.rfiletransfers[t]
 
     # call handlers
-    def _handle_action_call_invite(self, cid, account, a_v_both):
-        return # :D
+    def _handle_action_call_invite(self, cid, account, a_v_both, surface_other, surface_self):
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papysession = self.call_manager.create_call(papycontact)
         call_handler = CallEvent(papysession, self)
-        session_handler = PapyConference.MediaSessionHandler(papysession.media_session)
+        session_handler = PapyConference.MediaSessionHandler(
+            papysession.media_session, surface_other, surface_self)
         log.info("Call %s - %s" % (account, a_v_both))
         if a_v_both == 0: # see gui.base.Conversation.py 0=V,1=A,2=AV
-            stream = papysession.media_session.create_stream("video",
+            streamv = papysession.media_session.create_stream("video",
                          papyon.media.constants.MediaStreamDirection.BOTH, True)
-            papysession.media_session.add_stream(stream)
+            papysession.media_session.add_stream(streamv)
         elif a_v_both == 1:
-            stream = papysession.media_session.create_stream("audio",
+            streama = papysession.media_session.create_stream("audio",
                          papyon.media.constants.MediaStreamDirection.BOTH, True)
-            papysession.media_session.add_stream(stream)
+            papysession.media_session.add_stream(streama)
         elif a_v_both == 2:
-            stream = papysession.media_session.create_stream("video",
+            streamv = papysession.media_session.create_stream("video",
                          papyon.media.constants.MediaStreamDirection.BOTH, True)
-            stream = papysession.media_session.create_stream("audio",
+            papysession.media_session.add_stream(streamv)
+            streama = papysession.media_session.create_stream("audio",
                          papyon.media.constants.MediaStreamDirection.BOTH, True)
-            papysession.media_session.add_stream(stream)
-            papysession.media_session.add_stream(stream)
+            papysession.media_session.add_stream(streama)
 
         ca = e3.base.Call(papysession, papycontact.account)
         self.calls[papysession] = ca
@@ -1170,7 +1173,6 @@ class Worker(e3.base.Worker, papyon.Client):
         session_handler = PapyConference.MediaSessionHandler(
             c.object.media_session, c.surface_buddy, c.surface_self)
 
-        self.rcalls[c].ring()
         self.rcalls[c].accept()
 
     def _handle_action_call_reject(self, c):
@@ -1180,7 +1182,7 @@ class Worker(e3.base.Worker, papyon.Client):
         del self.rcalls[c]
 
     def _handle_action_call_cancel(self, c):
-        self.rcalls[c].cancel()
+        self.rcalls[c].end()
 
         del self.calls[self.rcalls[c]]
         del self.rcalls[c]

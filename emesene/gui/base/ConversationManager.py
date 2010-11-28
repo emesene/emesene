@@ -144,6 +144,47 @@ class ConversationManager(object):
         '''return a markup text representing the format on the message'''
         return e3.common.add_style_to_message(message.body, message.style)
 
+    def has_similar_conversation(self, cid, members):
+        '''
+        try to find a conversation with the given cid, if not search for a
+        conversation with the same members and return it
+
+        if not found return None
+        '''
+        cid = float(cid)
+
+        if cid in self.conversations:
+            return self.conversations[cid]
+
+        elif members is not None:
+            for (key, conversation) in self.conversations.iteritems():
+                if conversation.members == members:
+                    return conversation
+
+    def reuse_conversation(self, cid, members):
+        '''
+        return an existing conversation if the cid is registered or there is
+        a conversation with the same members
+
+        *warning* this method updates the old conversation cid to the new
+        if reused, don't use to check if the conversation is available
+
+        otherwise return None
+        '''
+        conversation = self.has_similar_conversation(cid, members)
+
+        if conversation:
+            old_cid = conversation.cid
+
+            if old_cid in self.conversations:
+                del self.conversations[old_cid]
+
+            conversation.cid = cid
+            self.conversations[cid] = conversation
+            return conversation
+
+        return None
+
     def new_conversation(self, cid, members=None):
         '''create a new conversation widget and append it to the tabs,
         if the cid already exists or there is already a conversation with
@@ -151,23 +192,12 @@ class ConversationManager(object):
         this method returns a tuple containing a boolean and a conversation
         object. If the conversation already exists, return True on as first
         value'''
-        cid = float(cid)
-        if cid in self.conversations:
-            return self.conversations[cid]
-        elif members is not None:
-            for (key, conversation) in self.conversations.iteritems():
-                if conversation.members == members:
-                    old_cid = conversation.cid
+        conversation = self.reuse_conversation(cid, members)
 
-                    if old_cid in self.conversations:
-                        del self.conversations[old_cid]
+        if conversation is None:
+            conversation = self.add_new_conversation(self.session, cid, members)
+            self.conversations[cid] = conversation
 
-                    conversation.cid = cid
-                    self.conversations[cid] = conversation
-                    return conversation
-
-        conversation = self.add_new_conversation(self.session, cid, members)
-        self.conversations[cid] = conversation
         return conversation
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
@@ -187,6 +217,8 @@ class ConversationManager(object):
         """
         called when the user wants to close a conversation widget
         """
+        # TODO: there is a strange case when changing the tabbed to no tabbed
+        # config, for some reason that conversations don't seem to be removed
         self.close(conversation)
 
         if len(self.conversations) == 0:
@@ -221,3 +253,28 @@ class ConversationManager(object):
             self._on_p2p_finished)
         for conversation in self.conversations.values():
             self.close(conversation)
+
+    def present(self, conversation):
+        '''
+        present the given conversation
+        '''
+        raise NotImplementedError("not implemented")
+
+    def get_dimensions(self):
+        '''
+        return dimensions of the conversation window, if more than one return
+        the value of one of them
+        '''
+        raise NotImplementedError("not implemented")
+
+    def hide_all(self):
+        '''
+        hide all conversations
+        '''
+        raise NotImplementedError("not implemented")
+
+    def is_active(self):
+        '''
+        return True if the conversation manager is active
+        '''
+        raise NotImplementedError("not implemented")

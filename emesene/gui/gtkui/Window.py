@@ -41,7 +41,7 @@ class Window(gtk.Window):
         if cb_on_close is not None:
             self.cb_on_close = cb_on_close
         else: # we're the main window: close button only hides it
-            self.cb_on_close = self.hide_on_delete
+            self.cb_on_close = lambda *args: self.hide_on_delete()
 
         self.connect('delete-event', self._on_delete_event)
         self.connect('key-press-event', self._on_key_press)
@@ -139,11 +139,13 @@ class Window(gtk.Window):
         '''call the cb_on_close callback, if the callback return True
         then dont close the window'''
         width, height, posx, posy = self.get_dimensions()
+
         self.set_or_get_width(width)
         self.set_or_get_height(height)
         self.set_or_get_posx(posx)
         self.set_or_get_posy(posy)
-        return self.cb_on_close()
+
+        return self.cb_on_close(self.content)
 
     def _on_key_press(self, widget, event):
         '''called when a key is pressed on the window'''
@@ -153,7 +155,7 @@ class Window(gtk.Window):
     def _on_last_tab_close(self):
         '''do the action when the last tab is closed on a conversation window
         '''
-        self.cb_on_close()
+        self.cb_on_close(self.content)
         self.hide()
 
     def hide(self):

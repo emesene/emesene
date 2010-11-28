@@ -371,7 +371,7 @@ class Worker(threading.Thread):
         pass
 
     # call handlers
-    def _handle_action_call_invite(self, c):
+    def _handle_action_call_invite(self, cid, account, a_v_both, surface_other, surface_self):
         pass
     
     def _handle_action_call_accept(self, c):
