@@ -401,6 +401,8 @@ class Controller(object):
 
         self.draw_main_screen()
 
+        self.session.config.get_or_set('l_active_plugins', [])
+
         for plugin in self.session.config.l_active_plugins:
             plugin_manager.plugin_start(plugin, self.session)
             # hack: where do we start this? how do we generalize for other
@@ -408,6 +410,8 @@ class Controller(object):
             if plugin == "music":
                 extension.get_and_instantiate('listening to',
                         self.window.content)
+
+        self.set_default_extensions_from_config()
 
         self.set_default_extensions_from_config()
 

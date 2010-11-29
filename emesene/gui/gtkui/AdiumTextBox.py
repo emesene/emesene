@@ -36,6 +36,11 @@ class OutputView(webkit.WebView):
     def __init__(self, theme, source, target, target_display, source_img,
             target_img):
         webkit.WebView.__init__(self)
+        # Trying to debug issue #232
+        # https://github.com/emesene/emesene/issues/#issue/232
+        webkit_settings = self.get_settings()
+        webkit_settings.set_property("enable-plugins", False)
+
         self.theme = theme
         self.last_incoming = None
         self.last_incoming_account = None
