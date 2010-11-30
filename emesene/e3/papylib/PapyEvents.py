@@ -259,19 +259,8 @@ class MailboxEvent(papyon.event.MailboxEventInterface):
 
     def on_mailbox_unread_mail_count_changed(self, unread_mail_count, 
                                                    initial=False):
-        """The number of unread mail messages"""
-        log.info("Mailbox count changed (initial? %s): %s" % (initial, unread_mail_count))
+        self._client._on_mailbox_unread_mail_count_changed(unread_mail_count, initial)
 
     def on_mailbox_new_mail_received(self, mail_message):
-        """New mail message notification"""
-        log.info("New mailbox message received: %s" % mail_message)
-        ''' MAIL MESSAGE:
-        def name(self):
-        """The name of the person who sent the email"""
-        def address(self):
-        """Email address of the person who sent the email"""
-        def post_url(self):
-        """post url"""
-        def form_data(self):
-        """form url"""
-        return self._form_data '''
+        self._client._on_mailbox_new_mail_received(mail_message)
+
