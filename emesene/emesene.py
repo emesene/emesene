@@ -573,6 +573,7 @@ class Controller(object):
         self.session.config.i_conv_posx = posx
         self.session.config.i_conv_posy = posy
 
+        conv_manager.close_all()
         self.conversations.remove(conv_manager)
 
     def on_user_disconnect(self):
