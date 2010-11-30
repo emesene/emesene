@@ -24,6 +24,15 @@ try:
     import pygst
     pygst.require("0.10")
     import gst
+
+    def gst_on_message(bus, message, player):
+        if message.type == gst.MESSAGE_EOS:
+            player.set_state(gst.STATE_NULL)
+    gst_player = gst.element_factory_make("playbin", "player")
+    bus = gst_player.get_bus()
+    bus.enable_sync_message_emission()
+    bus.add_signal_watch()
+    bus.connect('message', gst_on_message, gst_player)           
 except ImportError:
     HAVE_GSTREAMER = 0
 
@@ -51,16 +60,8 @@ if os.name == 'nt':
 elif os.name == 'posix':
     if HAVE_GSTREAMER:
         def play(path):
-            def gst_on_message(bus, message, player):
-                if message.type == gst.MESSAGE_EOS:
-                    player.set_state(gst.STATE_NULL)
-            player = gst.element_factory_make("playbin", "player")
-            bus = player.get_bus()
-            bus.enable_sync_message_emission()
-            bus.add_signal_watch()
-            bus.connect('message', gst_on_message, player)
-            player.set_property('uri', "file://"+os.path.abspath(path))
-            player.set_state(gst.STATE_PLAYING)
+            gst_player.set_property('uri', "file://"+os.path.abspath(path))
+            gst_player.set_state(gst.STATE_PLAYING)
     elif is_on_path('play'):
         def play(path):
             subprocess.Popen(['play', path],
