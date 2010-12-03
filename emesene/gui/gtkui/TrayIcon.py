@@ -90,7 +90,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
 
         conv_manager = self._get_conversation_manager(cid, account)
 
-        if conv_manager and conv_manager.is_active():
+        if conv_manager and not conv_manager.is_active():
             self.set_blinking(True)
             self.last_new_message = cid
 

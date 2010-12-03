@@ -43,7 +43,7 @@ if os.path.exists(papypath):
     sys.path.insert(0, papypath)
 
 try:
-    REQ_VER = (0, 5, 2)
+    REQ_VER = (0, 5, 3)
 
     import papyon
     import papyon.event
@@ -93,6 +93,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self._abook_handler = AddressBookEvent(self)
         self._profile_handler = ProfileEvent(self)
         self._oim_handler = OfflineEvent(self)
+        self._mail_handler = MailboxEvent(self)
 
         # this stores account : cid
         self.conversations = {}
@@ -769,6 +770,23 @@ class Worker(e3.base.Worker, papyon.Client):
         msn_object = self.profile.msn_object
         if msn_object is not None:
             self._handle_action_set_picture(msn_object)
+
+    # mailbox handlers
+    def _on_mailbox_unread_mail_count_changed(self, unread_mail_count, initial):
+        log.info("Mailbox count changed (initial? %s): %s" % (initial, unread_mail_count))
+
+    def _on_mailbox_new_mail_received(self, mail_message):
+        log.info("New mailbox message received: %s" % mail_message)
+        ''' MAIL MESSAGE:
+        def name(self):
+        """The name of the person who sent the email"""
+        def address(self):
+        """Email address of the person who sent the email"""
+        def post_url(self):
+        """post url"""
+        def form_data(self):
+        """form url"""
+        return self._form_data '''
 
 ################################################################################
 # BELOW THIS LINE, ONLY e3 HANDLERS

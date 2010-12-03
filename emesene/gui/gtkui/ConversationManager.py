@@ -167,14 +167,15 @@ class ConversationManager(Notebook, gui.ConversationManager):
 
         if page_num != -1:
             page = self.get_nth_page(page_num)
-            self.set_message_waiting(page, False)
             self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
+            self.set_message_waiting(page, False)
 
     def _on_switch_page(self, notebook, page, page_num):
         '''called when the user changes the tab'''
         page = self.get_nth_page(page_num)
-        self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
-        self.set_message_waiting(page, False)
+        if self.get_current_page() > -1:
+            self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
+            self.set_message_waiting(page, False)
         if page.show_avatar_in_taskbar:
             self.update_window(page.text, page.his_avatar.filename, self.get_current_page())
         else:
