@@ -61,6 +61,7 @@ class TextField(gtk.VBox):
         self.button.connect('clicked', self.on_button_clicked)
         self.entry.connect('activate', self.on_entry_activate)
         self.entry.connect('focus-out-event', self._on_focus_out)
+        self.entry.connect('key-press-event', self._on_key_press)
 
     def on_button_clicked(self, button):
         '''method called when the button is clicked'''
@@ -128,3 +129,11 @@ class TextField(gtk.VBox):
 
     enabled = property(fget=_get_enabled, fset=_set_enabled)
 
+    def _on_key_press(self, widget, event):
+        ''' if escape key is pressed put old text in the entry and cancel edit
+        '''
+        if event.keyval == gtk.keysyms.Escape:
+          self.entry.set_text(self._text)
+          self.on_entry_activate(self.entry)
+          return True
+        return False
