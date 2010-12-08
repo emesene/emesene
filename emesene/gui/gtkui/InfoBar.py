@@ -22,10 +22,8 @@ import pango
 import logging
 log = logging.getLogger('gtkui.InfoBar')
 
-try:
-    assert(gtk.InfoBar)
-except AttributeError:
-    raise ImportError
+if not hasattr(gtk, "InfoBar"):
+    raise ImportError("InfoBar not available in gtk")
 
 class NiceBar(gtk.InfoBar):
     '''A class used to display messages in a non-intrusive bar'''
