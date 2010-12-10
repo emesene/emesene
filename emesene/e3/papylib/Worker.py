@@ -56,6 +56,8 @@ try:
             raise Exception
     elif papyver[1] < REQ_VER[1]:
         raise Exception
+except ImportError, ie:
+    print ie
 except Exception, e:
     log.exception("You need at least python-papyon(>=%s.%s.%s) to be installed " \
                   "in order to use this extension" % REQ_VER)

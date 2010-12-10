@@ -44,6 +44,9 @@ here are listed the links to the installers of all the components used in the ex
 * http://sourceforge.net/projects/gtk-win/files/GTK%2B%20Runtime%20Environment/GTK%2B%202.22/gtk2-runtime-2.22.0-2010-10-01-ash.exe/download
 * http://sourceforge.net/projects/gtk-win/files/GTK%2B%20Themes%20Package/2009-09-07/gtk2-themes-2009-09-07-ash.exe/download
 * http://prdownloads.sourceforge.net/nsis/nsis-2.46-setup.exe?download
+* http://download.microsoft.com/download/d/d/9/dd9a82d0-52ef-40db-8dab-795376989c03/vcredist_x86.exe
+* http://www.slproweb.com/download/Win32OpenSSL_Light-1_0_0c.exe
+* http://www.voidspace.org.uk/downloads/pycrypto-2.0.1.win32-py2.6.exe
 
 installation order
 ------------------
@@ -59,6 +62,9 @@ some installers are independent from the others, but to avoid posible problems I
 * pygtk
 * pywin32
 * py2exe
+* VC++ resistributable
+* Win32OpenSSL
+* PyCrypto
 
 extra tasks
 -----------
