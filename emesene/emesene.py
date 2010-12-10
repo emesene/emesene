@@ -413,8 +413,6 @@ class Controller(object):
 
         self.set_default_extensions_from_config()
 
-        self.set_default_extensions_from_config()
-
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):
         '''called when the user press the connect button'''
@@ -573,6 +571,7 @@ class Controller(object):
         self.session.config.i_conv_posx = posx
         self.session.config.i_conv_posy = posy
 
+        conv_manager.close_all()
         self.conversations.remove(conv_manager)
 
     def on_user_disconnect(self):

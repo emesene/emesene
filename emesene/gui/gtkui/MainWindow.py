@@ -146,6 +146,7 @@ class MainWindow(gtk.VBox):
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
         self.contact_list.filter_text = entry.get_text().lower()
+        self.contact_list.un_expand_groups()
 
     def _on_entry_key_press(self, entry, event):
         '''called when a key is pressed on the search box'''

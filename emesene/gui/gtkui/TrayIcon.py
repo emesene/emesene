@@ -90,7 +90,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
 
         conv_manager = self._get_conversation_manager(cid, account)
 
-        if conv_manager and conv_manager.is_active():
+        if conv_manager and not conv_manager.is_active():
             self.set_blinking(True)
             self.last_new_message = cid
 
@@ -107,7 +107,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
         (includes clicking the icon)
         """
 
-        if self.last_new_message is not None and self.is_blinking():
+        if self.last_new_message is not None and self.get_blinking():
             # show the tab with the latest message
             cid = self.last_new_message
             conv_manager = self._get_conversation_manager(cid)
