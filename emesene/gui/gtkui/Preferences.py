@@ -286,6 +286,10 @@ class BaseTable(gtk.Table):
 
         scale.connect('value-changed', self.on_range_changed, property_name,
                 is_int)
+
+        scale.connect('button_release_event', self.on_range_leave, property_name,
+                is_int)
+
         self.append_row(hbox, None)
 
     def append_combo(self, text, getter, property_name):
@@ -344,11 +348,21 @@ class BaseTable(gtk.Table):
 
         self.set_attr(property_name, value)
 
+    def on_range_leave(self,widget, scale, property_name, is_int):
+        """callback called when the mouse button is released
+        """
+        self.redraw_main_screen()
+
     def on_toggled(self, checkbutton, property_name):
         """default callback for a cehckbutton, set property_name
         to the status of the checkbutton
         """
         self.set_attr(property_name, checkbutton.get_active())
+
+    def redraw_main_screen(self):
+        self.session.save_config()
+        self.session.signals.login_succeed.emit()
+        self.session.signals.contact_list_ready.emit()
 
     def get_attr(self, name):
         """return the value of an attribute, if it has dots, then
@@ -559,9 +573,7 @@ class Extension(BaseTable):
 
     def _on_redraw_main_screen(self, button):
         """called when the Redraw main screen button is clicked"""
-        self.session.save_config()
-        self.session.signals.login_succeed.emit()
-        self.session.signals.contact_list_ready.emit()
+        self.redraw_main_screen()
 
     def _get_categories(self):
         ''' get available categories'''
