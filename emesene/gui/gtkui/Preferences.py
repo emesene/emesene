@@ -287,8 +287,7 @@ class BaseTable(gtk.Table):
         scale.connect('value-changed', self.on_range_changed, property_name,
                 is_int)
 
-        scale.connect('button_release_event', self.on_range_leave, property_name,
-                is_int)
+        scale.connect('button_release_event', self.on_range_leave)
 
         self.append_row(hbox, None)
 
@@ -348,7 +347,7 @@ class BaseTable(gtk.Table):
 
         self.set_attr(property_name, value)
 
-    def on_range_leave(self,widget, scale, property_name, is_int):
+    def on_range_leave(self,widget,button):
         """callback called when the mouse button is released
         """
         self.redraw_main_screen()
