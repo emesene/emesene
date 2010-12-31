@@ -261,7 +261,7 @@ class BaseTable(gtk.Table):
         self.append_row(widget, row)
         return widget
 
-    def append_range(self, text, property_name, min_val, max_val, is_int=True):
+    def append_range(self, text, property_name, min_val, max_val,is_int=True):
         """append a row with a scale to select an integer value between
         min and max
         """
@@ -284,10 +284,8 @@ class BaseTable(gtk.Table):
         hbox.pack_start(label, True, True)
         hbox.pack_start(scale, False)
 
-        scale.connect('value-changed', self.on_range_changed, property_name,
+        scale.connect('button_release_event', self.on_range_changed, property_name,
                 is_int)
-
-        scale.connect('button_release_event', self.on_range_leave)
 
         self.append_row(hbox, None)
 
@@ -337,7 +335,7 @@ class BaseTable(gtk.Table):
         """
         self.set_attr(property_name, combo.get_active_text())
 
-    def on_range_changed(self, scale, property_name, is_int):
+    def on_range_changed(self, scale, widget, property_name, is_int):
         """callback called when the selection of the combo changed
         """
         value = scale.get_value()
@@ -347,10 +345,10 @@ class BaseTable(gtk.Table):
 
         self.set_attr(property_name, value)
 
-    def on_range_leave(self,widget,button):
+    def on_range_leave(self,widget,button,callback):
         """callback called when the mouse button is released
         """
-        self.redraw_main_screen()
+        callback()
 
     def on_toggled(self, checkbutton, property_name):
         """default callback for a cehckbutton, set property_name
@@ -362,6 +360,7 @@ class BaseTable(gtk.Table):
         self.session.save_config()
         self.session.signals.login_succeed.emit()
         self.session.signals.contact_list_ready.emit()
+	self.session.signals.conv_started.emit()
 
     def get_attr(self, name):
         """return the value of an attribute, if it has dots, then

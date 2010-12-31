@@ -59,6 +59,9 @@ class ContactList(object):
             except ValueError:
                 self.group_state[group] = False
 
+        self.session.config.subscribe(self._on_avatarssize_changed,
+            'i_avatar_size')
+
         self.avatar_size = self.session.config.get_or_set('i_avatar_size', 32)
         self.set_avatar_size(self.avatar_size)
 
@@ -123,6 +126,11 @@ class ContactList(object):
         self.session.signals.group_rename_succeed.subscribe(
             self._on_update_group)
         #TODO fix offline group on connection e add fail signals
+
+    def _on_avatarssize_changed(self, value):
+        '''callback called when config.i_avatar_size changes'''
+        self.set_avatar_size(value)
+        self.fill()
 
     def _on_contact_attr_changed(self, account, *args):
         '''called when an attribute of the contact changes
