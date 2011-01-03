@@ -25,6 +25,8 @@ import time
 from glib import timeout_add, source_remove
 import xml.sax.saxutils
 
+import gui
+
 import Renderers
 
 class Tooltips(gtk.Window):
@@ -140,7 +142,11 @@ class Tooltips(gtk.Window):
         self.label.set_markup(text)
 
         # Sets tooltip image
-        pixbuf = utils.safe_gtk_pixbuf_load(obj.picture, (96,96))
+        if obj.picture!="":
+            pixbuf = utils.safe_gtk_pixbuf_load(obj.picture, (96,96))
+        else:
+            pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user_def_image)
+
         self.image.set_from_pixbuf(pixbuf)
         self.image.show()
 
