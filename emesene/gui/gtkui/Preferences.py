@@ -345,11 +345,6 @@ class BaseTable(gtk.Table):
 
         self.set_attr(property_name, value)
 
-    def on_range_leave(self,widget,button,callback):
-        """callback called when the mouse button is released
-        """
-        callback()
-
     def on_toggled(self, checkbutton, property_name):
         """default callback for a cehckbutton, set property_name
         to the status of the checkbutton
