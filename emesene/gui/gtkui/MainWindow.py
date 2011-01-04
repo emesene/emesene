@@ -24,6 +24,7 @@ import e3
 import gui
 import utils
 import extension
+import webbrowser
 
 import logging
 log = logging.getLogger('gtkui.MainWindow')
@@ -71,6 +72,7 @@ class MainWindow(gtk.VBox):
         self.panel = UserPanel(session)
         self.panel.nick.connect('text-changed', self._on_nick_changed)
         self.panel.message.connect('text-changed', self._on_message_changed)
+        self.panel.mail.connect('button_release_event', self._on_mail_click)
         self.panel.search.connect('toggled', self._on_search_toggled)
         self.panel.enabled = False
 
@@ -93,7 +95,6 @@ class MainWindow(gtk.VBox):
         self.contact_list.group_menu_selected.subscribe(
             self._on_group_menu_selected)
 
-        #self.session.signals.mail_received.subscribe(self._on_mail_received)
         self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
 
         scroll.add(self.contact_list)
@@ -105,15 +106,11 @@ class MainWindow(gtk.VBox):
         self.session.config.subscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
 
-    """def _on_mail_received(self,message):
-        print dir(message)
-        print gui.theme.email
-        self.notifier = extension.get_default('notificationGUI')
-        self.notifier("New mail from %s" % (message.address),message._subject, gui.theme.user)"""
-	
-
     def _on_mail_count_changed(self,count):
         self.panel.mail.set_label("(%d)" % count)
+
+    def _on_mail_click(self, widget, data):
+        webbrowser.open("http://hotmail.com")
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''
