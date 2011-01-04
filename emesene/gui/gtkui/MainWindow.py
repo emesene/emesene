@@ -93,6 +93,9 @@ class MainWindow(gtk.VBox):
         self.contact_list.group_menu_selected.subscribe(
             self._on_group_menu_selected)
 
+        #self.session.signals.mail_received.subscribe(self._on_mail_received)
+        self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
+
         scroll.add(self.contact_list)
         scroll.show_all()
 
@@ -101,6 +104,16 @@ class MainWindow(gtk.VBox):
 
         self.session.config.subscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
+
+    """def _on_mail_received(self,message):
+        print dir(message)
+        print gui.theme.email
+        self.notifier = extension.get_default('notificationGUI')
+        self.notifier("New mail from %s" % (message.address),message._subject, gui.theme.user)"""
+	
+
+    def _on_mail_count_changed(self,count):
+        self.panel.mail.set_label("(%d)" % count)
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''

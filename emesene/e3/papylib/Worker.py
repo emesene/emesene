@@ -776,9 +776,11 @@ class Worker(e3.base.Worker, papyon.Client):
     # mailbox handlers
     def _on_mailbox_unread_mail_count_changed(self, unread_mail_count, initial):
         log.info("Mailbox count changed (initial? %s): %s" % (initial, unread_mail_count))
+	self.session.add_event(Event.EVENT_MAIL_COUNT_CHANGED, unread_mail_count)
 
     def _on_mailbox_new_mail_received(self, mail_message):
         log.info("New mailbox message received: %s" % mail_message)
+	self.session.add_event(Event.EVENT_MAIL_RECEIVED, mail_message)
         ''' MAIL MESSAGE:
         def name(self):
         """The name of the person who sent the email"""

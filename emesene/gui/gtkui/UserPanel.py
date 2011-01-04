@@ -63,6 +63,8 @@ class UserPanel(gtk.VBox):
         self.status = StatusButton.StatusButton(session)
         self.status.set_status(session.contacts.me.status)
         self.search = gtk.ToggleButton()
+        self.mail = gtk.Button(label="0")
+        self.mail.set_relief(gtk.RELIEF_NONE)
         self.search.set_image(gtk.image_new_from_stock(gtk.STOCK_FIND,
             gtk.ICON_SIZE_MENU))
         self.search.set_relief(gtk.RELIEF_NONE)
@@ -79,6 +81,7 @@ class UserPanel(gtk.VBox):
         vbox = gtk.VBox()
         nick_hbox = gtk.HBox()
         nick_hbox.pack_start(self.nick, True, True)
+        nick_hbox.pack_start(self.mail, False)
         nick_hbox.pack_start(self.search, False)
         vbox.pack_start(nick_hbox, False)
         message_hbox = gtk.HBox()
@@ -120,6 +123,7 @@ class UserPanel(gtk.VBox):
         self.message.show()
         self.status.show()
         self.search.show()
+        self.mail.show()
         self.toolbar.show()
 
     def show_all(self):
