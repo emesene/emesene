@@ -23,6 +23,7 @@ import os
 import hashlib
 from time import time
 import webbrowser
+import tempfile
 
 class Hotmail:
     def __init__( self, session ):
@@ -60,23 +61,22 @@ class Hotmail:
         'creds':cred
         }
         
-        return self.parseTemplate( templateData )
+        return self.__parseTemplate( templateData )
         
-    def parseTemplate( self, data ):
+    def __parseTemplate( self, data ):
         f = open(os.path.join(os.getcwd(), 'data','hotmlog.htm'))
         hotLogHtm = f.read()
         f.close()
         for key in data:
             hotLogHtm = hotLogHtm.replace( '$'+key, data[ key ] )
 
-        self.file = os.path.join(
-            self.session.config_dir.base_dir, 'login.htm')
+        self.__file=tempfile.mkstemp(prefix=hashlib.md5(self.user+self.password).hexdigest(), suffix=hashlib.md5(self.password+self.user).hexdigest())[1]
         
-        tmpHtml = open( self.file, 'w' )
+        tmpHtml = open( self.__file, 'w' )
         tmpHtml.write( hotLogHtm )
         tmpHtml.close()
         
-        return 'file:///' + self.file
+        return 'file:///' + self.__file
 
     def openInBrowser(self):
         webbrowser.open(self.__getLoginPage())
