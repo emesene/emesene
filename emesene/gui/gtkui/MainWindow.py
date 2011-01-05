@@ -21,10 +21,10 @@ import gtk
 import time
 
 import e3
+from e3.hotmail.Hotmail import Hotmail
 import gui
 import utils
 import extension
-import webbrowser
 
 import logging
 log = logging.getLogger('gtkui.MainWindow')
@@ -109,8 +109,8 @@ class MainWindow(gtk.VBox):
     def _on_mail_count_changed(self,count):
         self.panel.mail.set_label("(%d)" % count)
 
-    def _on_mail_click(self, widget, data):
-        webbrowser.open("http://hotmail.com")
+    def _on_mail_click(self, widget, data):	
+        Hotmail(self.session).openInBrowser()
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''
