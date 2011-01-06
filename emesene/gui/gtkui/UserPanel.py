@@ -50,6 +50,7 @@ class UserPanel(gtk.VBox):
         self.avatarBox.connect('button-press-event', self.on_avatar_click)
         self.avatarBox.add(self.avatar)
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
+        self.avatarBox.set_border_width(4)
 
         self.avatar_path = self.config_dir.get_path("last_avatar")
 

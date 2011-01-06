@@ -92,6 +92,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel_signal_id = self.panel.connect_after('expose-event',
                 self.update_panel_position)
+        self.panel.connect('button-release-event', self.on_input_panel_resize)
 
         self.hbox = gtk.HBox()
         if self.session.config.get_or_set('b_avatar_on_left', False):
@@ -246,9 +247,15 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         height = self.panel.get_allocation().height
         if height > 0:
-            self.panel.set_position(int(height * 0.8))
+            pos = self.session.config.get_or_set("i_input_panel_position",
+                    int(height*0.8))
+            self.panel.set_position(pos)
             self.panel.disconnect(self.panel_signal_id)
             del self.panel_signal_id
+
+    def on_input_panel_resize(self, *args):
+        pos = self.panel.get_position()
+        self.session.config.i_input_panel_position = pos
 
     def update_message_waiting(self, is_waiting):
         """
