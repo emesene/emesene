@@ -23,7 +23,6 @@ import extension
 
 import time
 import logging
-import gui
 import os
 log = logging.getLogger('gui.gtkui.Notification')
 
@@ -58,11 +57,9 @@ class Notification():
         self.notify_online = False
         self.last_online = None
 
-    def _on_mail_received(self,message):
-        #print gui.theme.email
-        #self.notifier = extension.get_default('notificationGUI')
-        print "file://"+ os.path.join(os.getcwd() , gui.theme.email)
-        self.notifier("New mail from %s" % (message.address),message._subject, "file://"+ os.path.join(os.getcwd() , gui.theme.email))
+    def _on_mail_received(self, message):
+        ''' called when a new mail is received '''
+        self.notifier("New mail from %s" % (message.address), message._subject, 'notification-message-email')
 
     def _on_message(self, cid, account, msgobj, cedict={}):
         """
@@ -115,7 +112,7 @@ class Notification():
         if contact.picture is not None:
             uri = "file://" + contact.picture
         else:
-            uri = "file://"+ os.path.join(os.getcwd() , gui.theme.user)
+            uri = 'notification-message-im'
 
         self.notifier(title, text, uri)
 
