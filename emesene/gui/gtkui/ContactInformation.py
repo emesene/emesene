@@ -235,12 +235,12 @@ class ChatWidget(gtk.VBox):
 
         self.from_calendar = gtk.Calendar()
         from_year, from_month, from_day = self.from_calendar.get_date()
-        from_datetime = datetime.date(from_year, from_month,
+        from_datetime = datetime.date(from_year, from_month + 1,
                 from_day) - datetime.timedelta(30)
 
         from_t = from_datetime.timetuple()
 
-        self.from_calendar.select_month(from_t.tm_mon, from_year)
+        self.from_calendar.select_month(from_t.tm_mon - 1, from_t.tm_year)
         self.to_calendar = gtk.Calendar()
 
         save.connect('clicked', self._on_save_clicked)
