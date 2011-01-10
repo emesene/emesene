@@ -192,15 +192,6 @@ def setup():
         extension.register(('notificationGUI'), ThemeNotification.themeNotification)
     except:
         print "Error import themenotification"
-
-    """try:
-        import PyNotification
-        import ThemeNotification
-        extension.category_register(('notificationGUI'), PyNotification.pyNotification)
-        extension.register(('notificationGUI'), ThemeNotification.themeNotification)
-        extension.register(('notificationGUI'), GtkNotification.gtkNotification)
-    except:
-        extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)"""
     
     extension.category_register('picture handler', PictureHandler.PictureHandler)
 

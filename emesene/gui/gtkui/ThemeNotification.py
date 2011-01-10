@@ -26,7 +26,7 @@ import logging
 log = logging.getLogger('gui.gtkui.ThemeNotification')
 
 NAME = 'ThemeNotification'
-DESCRIPTION = 'Wrapper around pynotify for the notification system'
+DESCRIPTION = 'Wrapper around pynotify for the notification system. Notifier depends by the current theme'
 AUTHOR = 'Andrea Stagi'
 WEBSITE = 'www.emesene.org'
 
