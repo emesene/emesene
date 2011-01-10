@@ -179,12 +179,28 @@ def setup():
     else:
         extension.category_register('conversation output', TextBox.OutputText)
 
+    extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
+
     try:
         import PyNotification
+        extension.register(('notificationGUI'), PyNotification.pyNotification)
+    except:
+        print "Error import pynotification"
+
+    try:
+        import ThemeNotification
+        extension.register(('notificationGUI'), ThemeNotification.themeNotification)
+    except:
+        print "Error import themenotification"
+
+    """try:
+        import PyNotification
+        import ThemeNotification
         extension.category_register(('notificationGUI'), PyNotification.pyNotification)
+        extension.register(('notificationGUI'), ThemeNotification.themeNotification)
         extension.register(('notificationGUI'), GtkNotification.gtkNotification)
     except:
-        extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
+        extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)"""
     
     extension.category_register('picture handler', PictureHandler.PictureHandler)
 
