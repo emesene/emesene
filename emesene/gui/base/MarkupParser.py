@@ -35,7 +35,7 @@ dic_inv = {
     '&apos;'    :'\''
 }
 
-URL_REGEX_STR = '(http[s]?://|www\..)(?:[a-zA-Z]|[0-9]|[$\-_@.&+]|[!*\"\'\(\),]|[=;/#?:]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+URL_REGEX_STR = '(http[s]?://|www\.)(?:[a-zA-Z]|[0-9]|[$\-_@\.&+]|[!*\"\'\(\),]|[=;/#?:]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 URL_REGEX = re.compile(URL_REGEX_STR)
 
 def escape(string_):
@@ -97,8 +97,8 @@ def replace_shortcut_with_tag(string, short, tag):
         irreplaceable.append(m.group(0))
         return token
     irreplaceable = []
-    result = re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)', extract, string)
-    result = re.sub(URL_REGEX, extract, result)
+    result = re.sub(URL_REGEX, extract, string)
+    result = re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)', extract, result)
     result = result.replace(short, tag)
     irreplaceable.reverse()
     result = re.sub(token, lambda m: irreplaceable.pop(), result)
