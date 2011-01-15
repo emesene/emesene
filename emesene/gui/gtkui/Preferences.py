@@ -622,7 +622,7 @@ class Extension(BaseTable):
         if not extension.set_default_by_id(category, identifier):
             # TODO: revert the selection to the previous selected extension
             log.warning(_('Could not set %s as default extension for %s') % \
-                (extension_id, category))
+                (extension_index, category))
             return
         else:
             self.session.config.d_extensions[category] = identifier

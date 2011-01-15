@@ -20,6 +20,7 @@
 
 import extension
 import logging
+import types
 log = logging.getLogger('ExternalAPI')
 
 ERROR = False
@@ -36,7 +37,7 @@ if not ERROR:
     BUS_PATH = "/com/gtk/emesene"
 
     
-    def create_function(name,Qargs):
+    def create_function(name, args):
         '''hack to create a function with a certain number of arguments'''
         def y():
             pass
