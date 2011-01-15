@@ -1283,7 +1283,7 @@ class EmotesWindow(gtk.Window):
                     emcache.remove_entry(hash_)
                     emcache.add_entry(text, hash_)
                 else:
-                    dialog.error(_("Empty shortcut"))
+                    Dialog.error(_("Empty shortcut"))
 
         window = Dialog.entry_window(_("New shortcut"), shortcut,
                     _on_ce_edit_cb, _("Change shortcut"), 
