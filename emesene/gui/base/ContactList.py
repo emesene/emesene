@@ -360,6 +360,10 @@ class ContactList(object):
         template = template.replace('[$/i]', '')
         template = template.replace('[$small]', '')
         template = template.replace('[$/small]', '')
+        
+        color = template.split("[$COLOR=")[1].split("]")[0]
+        template = template.replace('[$COLOR=' + color + ']', '') 
+        template = template.replace('[$/COLOR]', '')
 
         return template
 
