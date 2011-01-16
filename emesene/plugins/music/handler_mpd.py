@@ -1,6 +1,5 @@
 import songretriever
 
-import socket
 from thirdparty import mpd
 
 class MpdMusicHandlerConfig(songretriever.BaseMusicHandlerConfig):

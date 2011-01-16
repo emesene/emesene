@@ -16,14 +16,12 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
 import gtk
 import time
 
 import e3
 from e3.hotmail.Hotmail import Hotmail
 import gui
-import utils
 import extension
 
 import logging

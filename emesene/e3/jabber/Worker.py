@@ -1,4 +1,3 @@
-import sys
 import time
 import xmpp
 import Queue
@@ -220,7 +219,7 @@ class Worker(e3.Worker):
                 if name is not None:
                     self.session.contacts.me.nick = name
                     self.session.add_event(e3.Event.EVENT_NICK_CHANGE_SUCCEED,
-                        nick)
+                        name)
 
                 continue
 

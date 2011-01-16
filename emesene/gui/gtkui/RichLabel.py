@@ -20,7 +20,7 @@ import gtk
 import pango
 import cairo
 
-import protocol 
+import protocol
 import RichWidget
 import e3common.XmlParser
 

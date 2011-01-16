@@ -17,14 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-import gtk
-import time
 import appindicator
-
-import gui
-import utils
-import extension
-from e3 import status
 
 import logging
 log = logging.getLogger('gui.gtkui.Indicator')
