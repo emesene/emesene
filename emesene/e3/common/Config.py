@@ -22,8 +22,6 @@ try:
 except ImportError:
     import simplejson as json
 
-import urllib
-
 import logging
 log = logging.getLogger('e3.common.Config')
 

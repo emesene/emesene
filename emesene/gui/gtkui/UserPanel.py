@@ -19,7 +19,6 @@
 import gtk
 
 import gui
-import utils
 
 import TextField
 import StatusButton

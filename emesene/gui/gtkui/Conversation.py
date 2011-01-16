@@ -19,9 +19,7 @@
 import gtk
 import glib
 
-import e3
 import gui
-import utils
 import extension
 
 class Conversation(gtk.VBox, gui.Conversation):

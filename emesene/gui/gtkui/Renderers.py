@@ -23,10 +23,8 @@ import pango
 import cairo
 import gobject
 
-import gui
 from gui.base import Plus
 import extension
-import utils
 import Parser
 
 import logging

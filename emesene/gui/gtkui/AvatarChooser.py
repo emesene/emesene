@@ -19,7 +19,6 @@
 
 import os
 import gtk
-import gobject
 
 import gui
 import utils

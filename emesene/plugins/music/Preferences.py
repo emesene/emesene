@@ -1,7 +1,5 @@
 import gtk
 
-import songretriever
-
 import gui
 from gui.gtkui import utils
 

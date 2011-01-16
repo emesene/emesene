@@ -21,7 +21,6 @@ import gtk
 import pango
 import gobject
 
-import e3.base
 import gui
 
 class FileTransferWidget(gtk.HBox):

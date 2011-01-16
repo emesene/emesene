@@ -21,7 +21,6 @@ import e3
 import utils
 
 import gtk
-import time
 from glib import timeout_add, source_remove
 import xml.sax.saxutils
 

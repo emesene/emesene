@@ -16,7 +16,6 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import pygtk
 import gtk
 import gtk.gdk
 import cairo

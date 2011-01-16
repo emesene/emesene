@@ -20,7 +20,6 @@
 import gtk
 import gobject
 
-import e3.base
 import extension
 
 class FileTransferBarWidget(gtk.HBox):
