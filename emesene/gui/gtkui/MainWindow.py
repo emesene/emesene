@@ -64,7 +64,6 @@ class MainWindow(gtk.VBox):
 
         self.menu = None
         self.contact_menu = None
-        self.contact_menu = None
         self.group_menu = None
 
         self._build_menus()
