@@ -507,7 +507,7 @@ class Theme(BaseTable):
 
         ContactList = extension.get_default('contact list')
 
-        adium_theme = self.session.config.get_or_set('adium_theme', 'renkoo')
+        self.session.config.get_or_set('adium_theme', 'renkoo')
 
         self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
