@@ -205,7 +205,7 @@ class Session(object):
         '''set the preferences of the session to preferences, that is a
         dict containing key:value pairs where the keys are the preference name
         and value is the new value of that preference'''
-        self.add_action(Action.ACTION_SET_PREFERENCE, (preferences,))
+        self.add_action(Action.ACTION_SET_PREFERENCES, (preferences,))
 
     def send_message(self, cid, text, style=None):
         '''send a common message'''
