@@ -124,7 +124,6 @@ class AvatarChooser(gtk.Window):
         self.set_current_picture(current_avatar)
 
     def _on_tab_changed(self, notebook, page, page_num):
-        view = self.views[page_num]
         if page_num == 1: # System Pictures
             self.b_add.set_sensitive(False)
             self.b_remove.set_sensitive(False)

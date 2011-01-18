@@ -42,8 +42,6 @@ class LoginBase(gtk.Alignment):
         Avatar = extension.get_default('avatar')
         NiceBar = extension.get_default('nice bar')
 
-        default_session = extension.get_default('session')
-
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
         completion.set_model(self.liststore)
@@ -280,8 +278,6 @@ class Login(LoginBase):
     def _check_autologin(self):
         '''check if autologin is set and can be started'''
         account = self.config.get_or_set('last_logged_account', '')
-
-        default_session = extension.get_default('session')
 
         if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
             password = base64.b64decode(self.config.d_accounts[account])
@@ -553,8 +549,6 @@ class Login(LoginBase):
         '''
         called when the auto-login check button is toggled
         '''
-        user = self.cmb_account.get_active_text()
-
         if self.auto_login.get_active():
             self.remember_password.set_active(True)
             self.remember_account.set_sensitive(False)

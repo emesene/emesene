@@ -351,8 +351,7 @@ class Controller(object):
                 'renkoo.AdiumMessagesStyle')
         gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
 
-        last_avatar = self.session.config.get_or_set('last_avatar',
-            last_avatar_path)
+        self.session.config.get_or_set('last_avatar', last_avatar_path)
 
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
