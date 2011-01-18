@@ -75,6 +75,8 @@ class TextField(gtk.VBox):
         dialog = extension.get_default('dialog')
         if not self.entry.get_text() and not self.allow_empty:
             self.entry.set_text(self._text)
+            self.entry.hide()
+            self.button.show()
             return
 
         new_text = self.entry.get_text()
