@@ -351,12 +351,6 @@ class BaseTable(gtk.Table):
         """
         self.set_attr(property_name, checkbutton.get_active())
 
-    def redraw_main_screen(self):
-        self.session.save_config()
-        self.session.signals.login_succeed.emit()
-        self.session.signals.contact_list_ready.emit()
-	self.session.signals.conv_started.emit()
-
     def get_attr(self, name):
         """return the value of an attribute, if it has dots, then
         get the values until the last
@@ -566,7 +560,9 @@ class Extension(BaseTable):
 
     def _on_redraw_main_screen(self, button):
         """called when the Redraw main screen button is clicked"""
-        self.redraw_main_screen()
+        self.session.save_config()
+        self.session.signals.login_succeed.emit()
+        self.session.signals.contact_list_ready.emit()
 
     def _get_categories(self):
         ''' get available categories'''
