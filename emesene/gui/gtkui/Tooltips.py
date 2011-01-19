@@ -131,6 +131,7 @@ class Tooltips(gtk.Window):
                                             path_array, obj)
 
     def show_tooltip(self, view, origCoords, path_array, obj):
+        ''' shows the tooltip of an e3.Contact '''
         self.tag = -1
 
         text = xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.nick)) 
