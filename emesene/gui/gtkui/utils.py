@@ -59,6 +59,28 @@ def safe_gtk_pixbuf_load(path, size=None, animated=False):
     else:
         return None
 
+
+def gtk_pixbuf_load(path, size=None, animated=False):
+    '''try to return a gtk pixbuf from path, if fails, return None'''
+    path = os.path.abspath(path)
+
+    if animated:
+        creator = gtk.gdk.PixbufAnimation
+    else:
+        creator = gtk.gdk.pixbuf_new_from_file
+
+    if file_readable(path):
+
+        pixbuf = creator(path)
+
+        if size is not None:
+            width, height = size
+            pixbuf = pixbuf.scale_simple(width, height,gtk.gdk.INTERP_BILINEAR)
+        return pixbuf
+    else:
+        return None
+
+
 def scale_nicely(pixbuf):
     '''scale a pixbuf'''
     return pixbuf.scale_simple(20, 20, gtk.gdk.INTERP_BILINEAR)

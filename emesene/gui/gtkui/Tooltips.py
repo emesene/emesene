@@ -130,7 +130,6 @@ class Tooltips(gtk.Window):
                                             path_array, obj)
 
     def show_tooltip(self, view, origCoords, path_array, obj):
-        ''' shows the tooltip of an e3.Contact '''
         self.tag = -1
 
         text = xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.nick)) 
@@ -142,12 +141,12 @@ class Tooltips(gtk.Window):
 
         # Sets tooltip image
         if obj.picture!="":
-            pixbuf = utils.safe_gtk_pixbuf_load(obj.picture, (96,96))
+            pixbuf = utils.gtk_pixbuf_load(obj.picture, (96,96))
         else:
-            pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user_def_image)
+            pixbuf = utils.gtk_pixbuf_load(gui.theme.user_def_image)
 
         if bool(obj.blocked)==True:
-            pixbufblock=utils.safe_gtk_pixbuf_load(gui.theme.blocked_overlay_big)
+            pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay_big)
             utils.simple_images_overlap(pixbuf,pixbufblock,-pixbufblock.props.width,-pixbufblock.props.width)
 
         self.image.set_from_pixbuf(pixbuf)
