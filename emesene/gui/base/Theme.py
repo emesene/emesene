@@ -214,6 +214,7 @@ class Theme(object):
         self.typing = os.path.join(self.theme_path, "typing.png")
         self.new_message = os.path.join(self.theme_path, "new-message.gif")
         self.blocked_overlay = os.path.join(self.theme_path, "blocked-overlay.png")
+        self.blocked_overlay_big = os.path.join(self.theme_path, "blocked-overlay-big.png")
 
         self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
         self.sound_nudge = os.path.join(self.sound_theme_path, "nudge.wav")
