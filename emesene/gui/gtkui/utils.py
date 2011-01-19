@@ -108,3 +108,16 @@ def pango_font_description_to_style(fdesc):
     return e3.Style(font, e3.Color(0, 0, 0), font_bold,
         font_italic, font_underline, font_strike, font_size)
 
+def simple_images_overlap(pixbuf_src,pixbuf_dest,x,y):
+    if x>=0 :
+         xstart=0
+    else:
+         xstart=pixbuf_src.props.height
+
+    if y>=0 :
+         ystart=0
+    else:
+         ystart=pixbuf_src.props.height
+
+    pixbuf_dest.composite(pixbuf_src, 0, 0, pixbuf_src.props.width, pixbuf_src.props.height, xstart+x, ystart+y, 1.0, 1.0, gtk.gdk.INTERP_HYPER, 255)
+
