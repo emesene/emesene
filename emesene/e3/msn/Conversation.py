@@ -274,8 +274,8 @@ class Conversation(threading.Thread):
             log.info('reinviting members ' + str(self.members))
             members = self.members
             self.members = []
-            while len(self.members):
-                member = self.members.pop()
+            while len(members):
+                member = members.pop()
                 self.invite(member)
 
         self.socket.start()

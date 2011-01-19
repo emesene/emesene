@@ -277,7 +277,6 @@ class des:
                 raise ValueError("For CBC mode, you must supply the Initial Value (IV) for ciphering")
 
         i = 0
-        dict = {}
         result = []
         while i < len(data):
             block = self.__String_to_BitList(data[i:i+8])

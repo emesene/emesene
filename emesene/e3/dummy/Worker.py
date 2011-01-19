@@ -18,8 +18,6 @@ class Worker(e3.Worker):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        data = None
-
         while True:
             try:
                 action = self.session.actions.get(True, 0.1)
