@@ -166,9 +166,9 @@ class Theme(object):
         'secret.png', 'sheep.png', 'snail.png', 'soccerball.png', 'star.png',
         'sun.png', 'turtle.png', 'tv.png', 'umbrella.png', 'video.png']
     IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
-        'group-chat.png', 'idle.png', 'logo.png', 'new-message.gif',
-        'offline.png', 'online.png', 'password.png', 'typing.png', 'user.png',
-        'users.png', 'user_def_image.png', 'video.png', 'email.png']
+        'email.png','group-chat.png', 'idle.png', 'logo.png', 'new-message.gif','mailbox.png',
+        'offline.png', 'online.png', 'password.png', 'typing.png', 'transfer_success.png', 'user.png',
+        'users.png', 'user_def_image.png', 'video.png']
 
     def __init__(self, image_name="default", emote_name="default",
             sound_name="default", conv_name='renkoo.AdiumMessageStyle'):
@@ -183,7 +183,7 @@ class Theme(object):
         # conv_name is the name of the selected adium conversation theme
         self.conv_name = conv_name
 
-        self.theme_path = os.path.join("themes", "images", self.image_name)
+        self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
         self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
         self.conv_themes = AdiumThemes.get_instance()
         self.conv_themes.add_themes_path(self.conv_themes_path)
@@ -203,6 +203,7 @@ class Theme(object):
         self.user = os.path.join(self.theme_path, "user.png")
         self.user_def_image = os.path.join(self.theme_path, "user_def_image.png")
         self.email = os.path.join(self.theme_path, "email.png")
+        self.mailbox = os.path.join(self.theme_path, "mailbox.png")
         self.users = os.path.join(self.theme_path, "users.png")
         self.password = os.path.join(self.theme_path, "password.png")
         self.logo = os.path.join(self.theme_path, "logo.png")
@@ -213,6 +214,8 @@ class Theme(object):
         self.typing = os.path.join(self.theme_path, "typing.png")
         self.new_message = os.path.join(self.theme_path, "new-message.gif")
         self.blocked_overlay = os.path.join(self.theme_path, "blocked-overlay.png")
+        self.blocked_overlay_big = os.path.join(self.theme_path, "blocked-overlay-big.png")
+        self.transfer_success = os.path.join(self.theme_path, "transfer_success.png")
 
         self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
         self.sound_nudge = os.path.join(self.sound_theme_path, "nudge.wav")

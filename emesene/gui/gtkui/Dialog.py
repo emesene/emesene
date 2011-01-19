@@ -650,8 +650,9 @@ class Dialog(object):
         '''
         InviteWindow(session, callback).show()
 
+
     @classmethod
-    def login_preferences(cls, service, callback, use_http, proxy):
+    def login_preferences(cls, service, callback, use_http, proxy,login_obj):
         """
         display the preferences dialog for the login window
 
@@ -749,40 +750,16 @@ class Dialog(object):
         box.attach(l_passwd, 0, 1, 8, 9)
         box.attach(t_passwd, 1, 2, 8, 9)
 
-        index = 0
-        count = 0
         name_to_ext = {}
-        session_found = False
-        default_session_index = 0
-        default_session = extension.get_default('session')
-
-        for ext_id, ext in extension.get_extensions('session').iteritems():
-            if default_session.NAME == ext.NAME:
-                default_session_index = count
-
-            for service_name, service_data in ext.SERVICES.iteritems():
-                if service == service_name:
-                    index = count
-                    t_server_host.set_text(service_data['host'])
-                    t_server_port.set_text(service_data['port'])
-                    session_found = True
-
-                combo.append_text(service_name)
-                name_to_ext[service_name] = (ext_id, ext)
-                count += 1
-
-        if session_found:
-            combo.set_active(index)
-        else:
-            combo.set_active(default_session_index)
 
         def on_session_changed(*args):
+            name_to_ext=args[1]
             service = combo.get_active_text()
             session_id, ext = name_to_ext[service]
             t_server_host.set_text(ext.SERVICES[service]['host'])
             t_server_port.set_text(ext.SERVICES[service]['port'])
 
-        combo.connect('changed', on_session_changed)
+        name_to_ext=login_obj.new_combo_session(combo,on_session_changed)
 
         def response_cb(response):
             '''called on any response (close, accept, cancel) if accept

@@ -63,7 +63,11 @@ class UserPanel(gtk.VBox):
         self.status = StatusButton.StatusButton(session)
         self.status.set_status(session.contacts.me.status)
         self.search = gtk.ToggleButton()
-        self.mail = gtk.Button(label="0")
+        self.mail = gtk.Button(label="(0)")
+
+        self.mail.get_settings().set_property( "gtk-button-images", True )
+
+        self.mail.set_image(gtk.image_new_from_file(gui.theme.mailbox))
         self.mail.set_relief(gtk.RELIEF_NONE)
         self.search.set_image(gtk.image_new_from_stock(gtk.STOCK_FIND,
             gtk.ICON_SIZE_MENU))

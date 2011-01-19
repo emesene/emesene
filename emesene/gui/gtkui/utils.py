@@ -59,6 +59,28 @@ def safe_gtk_pixbuf_load(path, size=None, animated=False):
     else:
         return None
 
+
+def gtk_pixbuf_load(path, size=None, animated=False):
+    '''try to return a gtk pixbuf from path, if fails, return None'''
+    path = os.path.abspath(path)
+
+    if animated:
+        creator = gtk.gdk.PixbufAnimation
+    else:
+        creator = gtk.gdk.pixbuf_new_from_file
+
+    if file_readable(path):
+
+        pixbuf = creator(path)
+
+        if size is not None:
+            width, height = size
+            pixbuf = pixbuf.scale_simple(width, height,gtk.gdk.INTERP_BILINEAR)
+        return pixbuf
+    else:
+        return None
+
+
 def scale_nicely(pixbuf):
     '''scale a pixbuf'''
     return pixbuf.scale_simple(20, 20, gtk.gdk.INTERP_BILINEAR)
@@ -107,4 +129,17 @@ def pango_font_description_to_style(fdesc):
 
     return e3.Style(font, e3.Color(0, 0, 0), font_bold,
         font_italic, font_underline, font_strike, font_size)
+
+def simple_images_overlap(pixbuf_src,pixbuf_dest,x,y):
+    if x>=0 :
+         xstart=0
+    else:
+         xstart=pixbuf_src.props.height
+
+    if y>=0 :
+         ystart=0
+    else:
+         ystart=pixbuf_src.props.height
+
+    pixbuf_dest.composite(pixbuf_src, 0, 0, pixbuf_src.props.width, pixbuf_src.props.height, xstart+x, ystart+y, 1.0, 1.0, gtk.gdk.INTERP_HYPER, 255)
 
