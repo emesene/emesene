@@ -71,10 +71,10 @@ class TextField(gtk.VBox):
 
     def on_entry_activate(self, entry):
         '''method called when the user press enter on the entry'''
-        
-        dialog = extension.get_default('dialog')
         if not self.entry.get_text() and not self.allow_empty:
-            dialog.error(_("Empty text not allowed"))
+            self.entry.set_text(self._text)
+            self.entry.hide()
+            self.button.show()
             return
 
         new_text = self.entry.get_text()

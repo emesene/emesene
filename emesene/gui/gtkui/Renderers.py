@@ -23,10 +23,8 @@ import pango
 import cairo
 import gobject
 
-import gui
 from gui.base import Plus
 import extension
-import utils
 import Parser
 
 import logging
@@ -38,6 +36,15 @@ def replace_markup(markup, arg=None):
 
     markup = markup.replace("[$small]", "<small>")
     markup = markup.replace("[$/small]", "</small>")
+
+    if markup.count("[$COLOR=") > 0:
+        hexcolor = color = markup.split("[$COLOR=")[1].split("]")[0]
+        if color.count("#") == 0:
+            hexcolor = "#" + color
+
+        markup = markup.replace("[$COLOR=" + color + "]", \
+                "<span foreground='" + hexcolor + "'>")
+        markup = markup.replace("[$/COLOR]", "</span>")
 
     markup = markup.replace("[$b]", "<b>")
     markup = markup.replace("[$/b]", "</b>")
@@ -881,7 +888,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         """Prepare rendering setting for avatar"""
         xpad, ypad = self._get_padding()
         x, y, width, height = cell_area
-        cell = (x, y, width, height)
         ctx = window.cairo_create()
         ctx.translate(x, y)
 

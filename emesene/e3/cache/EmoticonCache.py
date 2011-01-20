@@ -3,7 +3,6 @@
 import Cache
 
 import os
-import time
 import shutil
 import urllib
 
@@ -80,7 +79,6 @@ class EmoticonCache(Cache.Cache):
         '''add an entry to the information file with the current timestamp
         and the hash_ of the file that was saved
         '''
-        time_info = int(time.time())
         handle = file(self.info_path, 'a')
         handle.write('%s %s\n' % (urllib.quote(shortcut), hash_))
         handle.close()

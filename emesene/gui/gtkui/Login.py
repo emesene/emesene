@@ -42,8 +42,6 @@ class LoginBase(gtk.Alignment):
         Avatar = extension.get_default('avatar')
         NiceBar = extension.get_default('nice bar')
 
-        default_session = extension.get_default('session')
-
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
         completion.set_model(self.liststore)
@@ -111,6 +109,10 @@ class LoginBase(gtk.Alignment):
         vbox_remember.pack_start(hboxremember)
         vbox_remember.pack_start(self.remember_password)
         vbox_remember.pack_start(self.auto_login)
+        vbox_remember.pack_start(gtk.Label())
+        
+        self.session_combo=gtk.combo_box_new_text()
+        vbox_remember.pack_start(self.session_combo)
 
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
@@ -237,6 +239,7 @@ class Login(LoginBase):
         self.accounts = self.config.d_accounts
 
         self._reload_account_list()
+        self.__combo_session_list=[]
 
         if proxy is None:
             self.proxy = e3.Proxy()
@@ -277,11 +280,57 @@ class Login(LoginBase):
         if not cancel_clicked:
             self._check_autologin()
 
+        self._show_sessions()
+
+    def __on_session_changed(self,*args):
+
+        name_to_ext=args[1]
+        service = args[0].get_active_text()
+        session_id, ext = name_to_ext[service]
+        self._on_new_preferences(self.use_http, self.proxy.use_proxy, self.proxy.host, self.proxy.port,self.proxy.use_auth, self.proxy.user, self.proxy.passwd, session_id, service, ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
+
+    def _show_sessions(self):
+
+        self.new_combo_session(self.session_combo,self.__on_session_changed)
+
+    def new_combo_session(self,session_combo,on_session_changed):
+
+        account = self.config.get_or_set('last_logged_account', '')
+        default_session=extension.get_default('session')
+        count=0
+
+        name_to_ext={}
+
+        if account in self.accounts:
+            service = self.config.d_user_service.get(account, 'msn')
+
+        for ext_id, ext in extension.get_extensions('session').iteritems():
+            if default_session.NAME == ext.NAME:
+                default_session_index = count
+
+            for service_name, service_data in ext.SERVICES.iteritems():
+                if service == service_name:
+                    index = count
+                    session_found = True
+
+                session_combo.append_text(service_name)
+                name_to_ext[service_name] = (ext_id, ext)
+                count += 1
+
+        if session_found:
+            session_combo.set_active(index)
+        else:
+            session_combo.set_active(default_session_index)
+
+        session_combo.connect('changed', on_session_changed,name_to_ext)
+
+        self.__combo_session_list.append(session_combo)
+
+        return name_to_ext
+        
     def _check_autologin(self):
         '''check if autologin is set and can be started'''
         account = self.config.get_or_set('last_logged_account', '')
-
-        default_session = extension.get_default('session')
 
         if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
             password = base64.b64decode(self.config.d_accounts[account])
@@ -553,8 +602,6 @@ class Login(LoginBase):
         '''
         called when the auto-login check button is toggled
         '''
-        user = self.cmb_account.get_active_text()
-
         if self.auto_login.get_active():
             self.remember_password.set_active(True)
             self.remember_account.set_sensitive(False)
@@ -586,7 +633,7 @@ class Login(LoginBase):
             service = self.config.d_user_service.get(account, 'msn')
 
         extension.get_default('dialog').login_preferences(service,
-            self._on_new_preferences, self.use_http, self.proxy)
+            self._on_new_preferences, self.use_http, self.proxy,self)
 
     def _on_new_preferences(self, use_http, use_proxy, proxy_host, proxy_port,
         use_auth, user, passwd, session_id, service, server_host, server_port):
@@ -607,6 +654,18 @@ class Login(LoginBase):
         self.on_preferences_changed(self.use_http, self.proxy, self.session_id,
                 service)
         self._on_account_changed(None)
+
+        def searchService(model, path, iter, user_data):
+                if(model.get(iter,0)[0]==user_data[0]):
+                        user_data[2].set_active(user_data[1])
+                        return True
+                user_data[1]+=1
+                return False
+
+        i=0
+	
+	for combo in self.__combo_session_list:
+        	combo.get_model().foreach(searchService,[service,i,combo])
 
 class ConnectingWindow(Login):
     '''

@@ -21,9 +21,10 @@ import e3
 import utils
 
 import gtk
-import time
 from glib import timeout_add, source_remove
 import xml.sax.saxutils
+
+import gui
 
 import Renderers
 
@@ -140,7 +141,15 @@ class Tooltips(gtk.Window):
         self.label.set_markup(text)
 
         # Sets tooltip image
-        pixbuf = utils.safe_gtk_pixbuf_load(obj.picture, (96,96))
+        if obj.picture!="":
+            pixbuf = utils.gtk_pixbuf_load(obj.picture, (96,96))
+        else:
+            pixbuf = utils.gtk_pixbuf_load(gui.theme.user_def_image)
+
+        if bool(obj.blocked)==True:
+            pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay_big)
+            utils.simple_images_overlap(pixbuf,pixbufblock,-pixbufblock.props.width,-pixbufblock.props.width)
+
         self.image.set_from_pixbuf(pixbuf)
         self.image.show()
 

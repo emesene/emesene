@@ -66,7 +66,8 @@ EVENTS = (\
  'profile get succeed'  , 'profile get failed',
  'profile set succeed'  , 'profile set failed',
  'media received' , 'message read',
- 'contact added you', 'user typing')
+ 'contact added you', 'user typing',
+ 'mail received', 'mail count changed')
 
 ACTIONS = (\
  'login'            , 'logout'           ,
@@ -168,7 +169,7 @@ class Worker(threading.Thread):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        raise NotImplentedError('not implemented')
+        raise NotImplementedError('not implemented')
 
     def _process_action(self, action):
         '''process an action'''

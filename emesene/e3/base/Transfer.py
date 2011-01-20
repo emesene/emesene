@@ -58,7 +58,7 @@ class FileTransfer(object):
 
     def get_speed(self):
         ''' returns the average speed of the transfer '''
-        if self.state is FileTransfer.WAITING:
+        if self.state is FileTransfer.WAITING or self.get_time() == 0:
             return 0
         return (self.received_data / self.get_time())
 

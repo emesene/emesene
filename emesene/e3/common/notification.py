@@ -50,9 +50,15 @@ class Notification():
                 self._on_message)
             self.session.signals.contact_attr_changed.subscribe(
                 self._on_contact_attr_changed)
+            self.session.signals.mail_received.subscribe(
+                self._on_mail_received)
 
         self.notify_online = False
         self.last_online = None
+
+    def _on_mail_received(self, message):
+        ''' called when a new mail is received '''
+        self.notifier("New mail from %s" % (message.address), message._subject, 'notification-message-email')
 
     def _on_message(self, cid, account, msgobj, cedict={}):
         """
@@ -105,7 +111,7 @@ class Notification():
         if contact.picture is not None:
             uri = "file://" + contact.picture
         else:
-            uri = "notification-message-IM"
+            uri = 'notification-message-im'
 
         self.notifier(title, text, uri)
 

@@ -261,7 +261,7 @@ class BaseTable(gtk.Table):
         self.append_row(widget, row)
         return widget
 
-    def append_range(self, text, property_name, min_val, max_val, is_int=True):
+    def append_range(self, text, property_name, min_val, max_val,is_int=True):
         """append a row with a scale to select an integer value between
         min and max
         """
@@ -284,8 +284,9 @@ class BaseTable(gtk.Table):
         hbox.pack_start(label, True, True)
         hbox.pack_start(scale, False)
 
-        scale.connect('value-changed', self.on_range_changed, property_name,
+        scale.connect('button_release_event', self.on_range_changed, property_name,
                 is_int)
+
         self.append_row(hbox, None)
 
     def append_combo(self, text, getter, property_name):
@@ -334,7 +335,7 @@ class BaseTable(gtk.Table):
         """
         self.set_attr(property_name, combo.get_active_text())
 
-    def on_range_changed(self, scale, property_name, is_int):
+    def on_range_changed(self, scale, widget, property_name, is_int):
         """callback called when the selection of the combo changed
         """
         value = scale.get_value()
@@ -500,7 +501,7 @@ class Theme(BaseTable):
 
         ContactList = extension.get_default('contact list')
 
-        adium_theme = self.session.config.get_or_set('adium_theme', 'renkoo')
+        self.session.config.get_or_set('adium_theme', 'renkoo')
 
         self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
@@ -617,7 +618,7 @@ class Extension(BaseTable):
         if not extension.set_default_by_id(category, identifier):
             # TODO: revert the selection to the previous selected extension
             log.warning(_('Could not set %s as default extension for %s') % \
-                (extension_id, category))
+                (extension_index, category))
             return
         else:
             self.session.config.d_extensions[category] = identifier

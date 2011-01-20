@@ -140,7 +140,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.content_roaming.sync()
         # sets the login-chosen presence in papyon
         presence = self.session.account.status
-        nick = self.profile.display_name
         self.session.contacts.me.picture = self.session.config_dir.get_path("last_avatar")
         self._set_status(presence)
         global PAPY_HAS_AUDIOVIDEO
@@ -735,6 +734,8 @@ class Worker(e3.base.Worker, papyon.Client):
             contact.account, contact.status, display_name, contact.message,
             contact.picture)
 
+        self.session.logger.log(\
+            'nick change', contact.status, display_name, account)
         self.session.add_event(Event.EVENT_NICK_CHANGE_SUCCEED, display_name)
 
     def _on_profile_personal_message_changed(self):
@@ -776,9 +777,11 @@ class Worker(e3.base.Worker, papyon.Client):
     # mailbox handlers
     def _on_mailbox_unread_mail_count_changed(self, unread_mail_count, initial):
         log.info("Mailbox count changed (initial? %s): %s" % (initial, unread_mail_count))
+        self.session.add_event(Event.EVENT_MAIL_COUNT_CHANGED, unread_mail_count)
 
     def _on_mailbox_new_mail_received(self, mail_message):
         log.info("New mailbox message received: %s" % mail_message)
+        self.session.add_event(Event.EVENT_MAIL_RECEIVED, mail_message)
         ''' MAIL MESSAGE:
         def name(self):
         """The name of the person who sent the email"""
@@ -967,7 +970,7 @@ class Worker(e3.base.Worker, papyon.Client):
             f = open(picture_name, 'rb')
             avatar = f.read()
             f.close()
-        except Exception as e:
+        except Exception:
             log.error("Loading of picture %s failed" % picture_name)
 
         if not isinstance(avatar, str):

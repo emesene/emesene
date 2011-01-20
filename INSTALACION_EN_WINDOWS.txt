@@ -8,8 +8,8 @@ para dicha instalación.
 Este documento asume que la aplicación se basa en GTK pero debería funcionar
 con menores cambios en otros toolkits.
 
-porque un instalador
---------------------
+por qué un instalador
+---------------------
 
 * se requiere instalar muchos componentes a mano por el usuario final para una sola aplicación
 * muchos instaladores pequeños
@@ -62,7 +62,7 @@ algunos instaladores son independientes de otros, pero para evitar posibles prob
 * pygtk
 * pywin32
 * py2exe
-* VC++ resistributable
+* VC++ redistributable
 * Win32OpenSSL
 * PyCrypto
 

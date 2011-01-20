@@ -19,9 +19,7 @@
 import gtk
 import glib
 
-import e3
 import gui
-import utils
 import extension
 
 class Conversation(gtk.VBox, gui.Conversation):
@@ -92,6 +90,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel_signal_id = self.panel.connect_after('expose-event',
                 self.update_panel_position)
+        self.panel.connect('button-release-event', self.on_input_panel_resize)
 
         self.hbox = gtk.HBox()
         if self.session.config.get_or_set('b_avatar_on_left', False):
@@ -130,6 +129,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self._load_style()
 
+        self.session.config.subscribe(self._on_avatarsize_changed,
+            'i_conv_avatar_size')
         self.session.config.subscribe(self._on_show_toolbar_changed,
             'b_show_toolbar')
         self.session.config.subscribe(self._on_show_header_changed,
@@ -160,6 +161,14 @@ class Conversation(gtk.VBox, gui.Conversation):
         if self.group_chat:
             self.rotate_started = True #to prevents more than one timeout_add
             glib.timeout_add_seconds(5, self.rotate_picture)
+
+    def _on_avatarsize_changed(self, value):
+        '''callback called when config.i_conv_avatar_size changes'''
+        self.avatar.set_property('dimention',value)
+        self.his_avatar.set_property('dimention',value)
+
+        self.info.last = self.avatar
+        self.info.first = self.his_avatar
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
@@ -236,9 +245,15 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         height = self.panel.get_allocation().height
         if height > 0:
-            self.panel.set_position(int(height * 0.8))
+            pos = self.session.config.get_or_set("i_input_panel_position",
+                    int(height*0.8))
+            self.panel.set_position(pos)
             self.panel.disconnect(self.panel_signal_id)
             del self.panel_signal_id
+
+    def on_input_panel_resize(self, *args):
+        pos = self.panel.get_position()
+        self.session.config.i_input_panel_position = pos
 
     def update_message_waiting(self, is_waiting):
         """

@@ -118,10 +118,9 @@ class PluginHandler(object):
             inst.extension_register()
             inst._started = True
         except Exception, reason:
-            raise reason
             log.warning('error starting "%s": %s' % (self.name, reason))
             print 'error starting "%s": %s' % (self.name, reason)
-            return False
+            raise reason
 
         return True
 

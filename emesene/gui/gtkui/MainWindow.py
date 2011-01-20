@@ -16,13 +16,12 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
 import gtk
 import time
 
 import e3
+from e3.hotmail.Hotmail import Hotmail
 import gui
-import utils
 import extension
 
 import logging
@@ -63,7 +62,6 @@ class MainWindow(gtk.VBox):
 
         self.menu = None
         self.contact_menu = None
-        self.contact_menu = None
         self.group_menu = None
 
         self._build_menus()
@@ -71,6 +69,7 @@ class MainWindow(gtk.VBox):
         self.panel = UserPanel(session)
         self.panel.nick.connect('text-changed', self._on_nick_changed)
         self.panel.message.connect('text-changed', self._on_message_changed)
+        self.panel.mail.connect('button_release_event', self._on_mail_click)
         self.panel.search.connect('toggled', self._on_search_toggled)
         self.panel.enabled = False
 
@@ -93,6 +92,8 @@ class MainWindow(gtk.VBox):
         self.contact_list.group_menu_selected.subscribe(
             self._on_group_menu_selected)
 
+        self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
+
         scroll.add(self.contact_list)
         scroll.show_all()
 
@@ -101,6 +102,12 @@ class MainWindow(gtk.VBox):
 
         self.session.config.subscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
+
+    def _on_mail_count_changed(self,count):
+        self.panel.mail.set_label("(%d)" % count)
+
+    def _on_mail_click(self, widget, data):	
+        Hotmail(self.session).openInBrowser()
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''
@@ -112,7 +119,6 @@ class MainWindow(gtk.VBox):
     def _build_menus(self):
         '''buildall the menus used on the client'''
         dialog = extension.get_default('dialog')
-        avatar_manager = extension.get_default('avatar manager')
 
         handler = gui.base.MenuHandler(self.session, dialog, self.contact_list,
             self.on_disconnect, self.on_close)
