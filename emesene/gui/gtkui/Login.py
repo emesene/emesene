@@ -295,7 +295,7 @@ class Login(LoginBase):
 
         self.new_combo_session(self.session_combo,self.__on_session_changed)
 
-    def new_combo_session(self,session_combo,on_session_changed):
+    def new_combo_session(self, session_combo, on_session_changed):
 
         account = self.config.get_or_set('last_logged_account', '')
         default_session=extension.get_default('session')
@@ -305,6 +305,9 @@ class Login(LoginBase):
 
         if account in self.accounts:
             service = self.config.d_user_service.get(account, 'msn')
+        else:
+            service='msn'
+
 
         for ext_id, ext in extension.get_extensions('session').iteritems():
             if default_session.NAME == ext.NAME:
