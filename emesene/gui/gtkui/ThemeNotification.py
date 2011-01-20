@@ -32,7 +32,14 @@ WEBSITE = 'www.emesene.org'
 
 def themeNotification(title, text, picturePath=None,const=None):
     
-    def pictureFactory(constValue):
+    def pictureFactory(picture,constValue):
+
+        print picture
+        print const
+
+        if(picture):
+            if(picture[:7]=="file://"):
+                return picture
         if(constValue=='mail-received'):
             return "file://" + gui.theme.email
         elif(constValue=='file-transf-completed'):
@@ -44,7 +51,7 @@ def themeNotification(title, text, picturePath=None,const=None):
         else:
             return "file://" + gui.theme.user_def_imagetool
 
-    n = pynotify.Notification(title, text, pictureFactory(const)) 
+    n = pynotify.Notification(title, text, pictureFactory(picturePath,const)) 
     n.set_hint_string("append", "allowed")
     n.show()
 

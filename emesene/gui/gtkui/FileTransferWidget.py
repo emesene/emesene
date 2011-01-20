@@ -243,7 +243,7 @@ class FileTransferTooltip(gtk.Window):
         if self.transfer.preview is not None:
             pixbuf = gtk.gdk.pixbuf_new_from_data(self.transfer.preview)
         else:
-            pixbuf = None
+            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.transfer_success)
         #amsn sends a big. black preview? :S
         if pixbuf:
             if pixbuf.get_height() <= 96 and pixbuf.get_width() <= 96:

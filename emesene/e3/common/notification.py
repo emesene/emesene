@@ -119,7 +119,7 @@ class Notification():
         """
         This creates and shows the nofification
         """
-        if contact.picture is not None:
+        if contact.picture is not None and contact.picture != "":
             uri = "file://" + contact.picture
         else:
             uri = 'notification-message-im'
