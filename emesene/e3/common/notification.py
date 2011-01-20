@@ -53,13 +53,23 @@ class Notification():
                 self._on_contact_attr_changed)
             self.session.signals.mail_received.subscribe(
                 self._on_mail_received)
+            self.session.signals.filetransfer_completed.subscribe(
+                self._on_filetransfer_completed)
+            self.session.signals.filetransfer_canceled.subscribe(
+                self._on_filetransfer_canceled)
 
         self.notify_online = False
         self.last_online = None
 
+    def _on_filetransfer_completed(self,args):
+        self.notifier("File transfer successful", "", 'notification-message-email', 'file-transf-completed')
+
+    def _on_filetransfer_canceled(self,args):
+        self.notifier("File transfer canceled", "", 'notification-message-email', 'file-transf-canceled')
+
     def _on_mail_received(self, message):
         ''' called when a new mail is received '''
-        self.notifier("New mail from %s" % (message.address), message._subject, 'notification-message-email')
+        self.notifier("New mail from %s" % (message.address), message._subject, 'notification-message-email','mail-received')
 
     def _on_message(self, cid, account, msgobj, cedict={}):
         """
@@ -114,5 +124,5 @@ class Notification():
         else:
             uri = 'notification-message-im'
 
-        self.notifier(title, text, uri)
+        self.notifier(title, text, uri,'message-im')
 

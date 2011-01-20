@@ -125,10 +125,6 @@ class FileTransferWidget(gtk.HBox):
             self.buttons.append(button)
 
         if state in (self.transfer.RECEIVED, self.transfer.FAILED):
-            if(state==self.transfer.RECEIVED):
-                self.notifier("File transfer successful", "", "file://" + gui.theme.transfer_success)   
-            elif(state==self.transfer.FAILED):
-                self.notifier("File transfer failed", "", gtk.STOCK_CANCEL)
 
             button = gtk.Button(None, None)
             button.set_image(self.__get_button_img(gtk.STOCK_CLEAR))
