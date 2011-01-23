@@ -18,7 +18,6 @@
 
 import gtk
 import webbrowser
-from enchant_dicts import list_dicts
 
 import e3.common
 import gui
@@ -29,6 +28,12 @@ import PluginWindow
 
 import logging
 log = logging.getLogger('gtkui.Preferences')
+
+try:
+    from enchant_dicts import list_dicts
+except:
+    def list_dicts():
+        return []
 
 # TODO: consider moving to nicer icons than stock ones.
 LIST = [
