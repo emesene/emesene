@@ -124,11 +124,6 @@ class FileTransferWidget(gtk.HBox):
             self.buttons.append(button)
 
         if state in (self.transfer.RECEIVED, self.transfer.FAILED):
-            if(state==self.transfer.RECEIVED):
-                self.notifier("File transfer successful", "", "file://" + gui.theme.transfer_success)   
-            elif(state==self.transfer.FAILED):
-                self.notifier("File transfer failed", "", gtk.STOCK_CANCEL)
-
             button = gtk.Button(None, None)
             button.set_image(self.__get_button_img(gtk.STOCK_CLEAR))
             button.connect('clicked', self._on_close_clicked)
@@ -246,7 +241,7 @@ class FileTransferTooltip(gtk.Window):
         if self.transfer.preview is not None:
             pixbuf = gtk.gdk.pixbuf_new_from_data(self.transfer.preview)
         else:
-            pixbuf = None
+            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.transfer_success)
         #amsn sends a big. black preview? :S
         if pixbuf:
             if pixbuf.get_height() <= 96 and pixbuf.get_width() <= 96:

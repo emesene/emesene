@@ -304,7 +304,7 @@ class Worker(e3.base.Worker, papyon.Client):
             papysession.size, papysession.preview, sender=papysession.peer)
         self.filetransfers[papysession] = tr
         self.rfiletransfers[tr] = papysession
-        
+
         papysession.connect("accepted", self.papy_ft_accepted)
         papysession.connect("progressed", self.papy_ft_progressed)
         papysession.connect("completed", self.papy_ft_completed)

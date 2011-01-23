@@ -30,18 +30,29 @@ DESCRIPTION = 'Wrapper around pynotify for the notification system. Notifier dep
 AUTHOR = 'Andrea Stagi'
 WEBSITE = 'www.emesene.org'
 
-def localThemeEl(el):
-    return "file://"+ os.path.join(os.getcwd() , el)
+def themeNotification(title, text, picturePath=None,const=None):
+    
+    def pictureFactory(picture,constValue):
 
-def pictureFactory(constValue):
-    if(constValue=='notification-message-email'):
-        return localThemeEl(gui.theme.email)
-    elif(constValue=='notification-message-im'):
-        return localThemeEl(gui.theme.user_def_image)
-    else:
-        return constValue
+        print picture
+        print const
 
-def themeNotification(title, text, picturePath=None):
-    n = pynotify.Notification(title, text, pictureFactory(picturePath)) 
+        if(picture):
+            if(picture[:7]=="file://"):
+                return picture
+        if(constValue=='mail-received'):
+            return "file://" + gui.theme.email
+        elif(constValue=='file-transf-completed'):
+            return "file://" + gui.theme.transfer_success
+        elif(constValue=='file-transf-canceled'):
+            return "file://" + gui.theme.transfer_unsuccess
+        elif(constValue=='message-im'):
+            return "file://" + gui.theme.user_def_imagetool
+        else:
+            return "file://" + gui.theme.user_def_imagetool
+
+    n = pynotify.Notification(title, text, pictureFactory(picturePath,const)) 
     n.set_hint_string("append", "allowed")
     n.show()
+
+

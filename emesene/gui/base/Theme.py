@@ -168,7 +168,7 @@ class Theme(object):
     IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
         'email.png','group-chat.png', 'idle.png', 'logo.png', 'new-message.gif','mailbox.png',
         'offline.png', 'online.png', 'password.png', 'typing.png', 'transfer_success.png', 'user.png',
-        'users.png', 'user_def_image.png', 'video.png']
+        'users.png', 'user_def_image.png', 'user_def_imagetool.png', 'video.png']
 
     def __init__(self, image_name="default", emote_name="default",
             sound_name="default", conv_name='renkoo.AdiumMessageStyle'):
@@ -202,6 +202,7 @@ class Theme(object):
         self.call = os.path.join(self.theme_path, "call.png")
         self.user = os.path.join(self.theme_path, "user.png")
         self.user_def_image = os.path.join(self.theme_path, "user_def_image.png")
+        self.user_def_imagetool = os.path.join(self.theme_path, "user_def_imagetool.png")
         self.email = os.path.join(self.theme_path, "email.png")
         self.mailbox = os.path.join(self.theme_path, "mailbox.png")
         self.users = os.path.join(self.theme_path, "users.png")
@@ -216,6 +217,7 @@ class Theme(object):
         self.blocked_overlay = os.path.join(self.theme_path, "blocked-overlay.png")
         self.blocked_overlay_big = os.path.join(self.theme_path, "blocked-overlay-big.png")
         self.transfer_success = os.path.join(self.theme_path, "transfer_success.png")
+        self.transfer_unsuccess = os.path.join(self.theme_path, "transfer_unsuccess.png")
 
         self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
         self.sound_nudge = os.path.join(self.sound_theme_path, "nudge.wav")

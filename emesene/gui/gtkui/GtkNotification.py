@@ -109,7 +109,7 @@ if os.name == "nt":
 queue = list()
 actual_notification = None
 
-def gtkNotification(title, text, picturePath=None, callback=None):
+def gtkNotification(title, text, picturePath=None, const=None, callback=None):
     global actual_notification
     global queue
 
