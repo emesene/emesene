@@ -219,6 +219,9 @@ class Theme(object):
         self.blocked_overlay_big = os.path.join(self.theme_path, "blocked-overlay-big.png")
         self.transfer_success = os.path.join(self.theme_path, "transfer_success.png")
         self.transfer_unsuccess = os.path.join(self.theme_path, "transfer_unsuccess.png")
+        self.service_msn = os.path.join(self.theme_path, "msn.png")
+        self.service_facebook = os.path.join(self.theme_path, "facebook.png")
+        self.service_gtalk = os.path.join(self.theme_path, "gtalk.png")
 
         self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
         self.sound_nudge = os.path.join(self.sound_theme_path, "nudge.wav")

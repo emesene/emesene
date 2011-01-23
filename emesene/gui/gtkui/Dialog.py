@@ -671,7 +671,19 @@ class Dialog(object):
         box.set_property('row-spacing', 4)
         box.set_property('column-spacing', 4)
 
-        combo = gtk.combo_box_new_text()
+        session_combo_store = gtk.ListStore(gtk.gdk.Pixbuf, str)
+        crp = gtk.CellRendererPixbuf()
+        crt = gtk.CellRendererText()
+        crp.set_property("xalign", 0)
+        crt.set_property("xalign", 0)
+
+        combo = gtk.ComboBox()
+        combo.set_model(session_combo_store)
+        combo.pack_start(crp, True)
+        combo.pack_start(crt, True)
+        combo.add_attribute(crp, "pixbuf", 0)
+        combo.add_attribute(crt, "text", 1)
+        combo.set_active(0)
 
         t_proxy_host = gtk.Entry()
         t_proxy_port = gtk.Entry()
@@ -752,14 +764,14 @@ class Dialog(object):
 
         name_to_ext = {}
 
-        def on_session_changed(*args):
-            name_to_ext=args[1]
-            service = combo.get_active_text()
+        def on_session_changed(combo, name_to_ext):
+            active = combo.get_active()
+            service = combo.get_model()[active][1] 
             session_id, ext = name_to_ext[service]
             t_server_host.set_text(ext.SERVICES[service]['host'])
             t_server_port.set_text(ext.SERVICES[service]['port'])
 
-        name_to_ext=login_obj.new_combo_session(combo,on_session_changed)
+        name_to_ext = login_obj.new_combo_session(combo, on_session_changed)
 
         def response_cb(response):
             '''called on any response (close, accept, cancel) if accept
