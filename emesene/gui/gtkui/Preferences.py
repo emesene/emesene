@@ -18,7 +18,7 @@
 
 import gtk
 import webbrowser
-import commands
+from enchant_dicts import list_dicts
 
 import e3.common
 import gui
@@ -404,11 +404,7 @@ class Interface(BaseTable):
         BaseTable.__init__(self, 4, 2)
         self.session = session
 
-        status, langs = commands.getstatusoutput('enchant-lsmod -list-dicts')
-        if status == 0:
-            langs = [x.split(" ")[0] for x in langs.split("\n")] 
-        else:
-            langs = []
+        langs = list_dicts()
 
         self.spell_lang = self.session.config.get_or_set("spell_lang", "en")
         self.lang_menu = gtk.combo_box_new_text()
