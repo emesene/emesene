@@ -18,6 +18,7 @@
 
 import gtk
 import webbrowser
+import commands
 
 import e3.common
 import gui
@@ -400,8 +401,26 @@ class Interface(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 4, 1)
+        BaseTable.__init__(self, 4, 2)
         self.session = session
+
+        status, langs = commands.getstatusoutput('enchant-lsmod -list-dicts')
+        if status == 0:
+            langs = [x.split(" ")[0] for x in langs.split("\n")] 
+        else:
+            langs = []
+
+        self.spell_lang = self.session.config.get_or_set("spell_lang", "en")
+        self.lang_menu = gtk.combo_box_new_text()
+        self.lang_menu.connect("changed", self._on_lang_combo_change)
+
+        index = 0
+        for lang in langs:
+            self.lang_menu.append_text(lang)
+            if lang == self.spell_lang:
+                self.lang_menu.set_active(index)
+            index += 1
+
         self.append_markup('<b>'+_('Main window:')+'</b>')
         self.append_check(_('Show user panel'),
             'session.config.b_show_userpanel')
@@ -428,6 +447,7 @@ class Interface(BaseTable):
             'session.config.b_allow_auto_scroll')
         self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
             'session.config.b_enable_spell_check')
+        self.attach(self.lang_menu, 2, 3, 12, 13) 
         self.append_check(_('Show avatars in taskbar instead of status icons'), 
             'session.config.b_show_avatar_in_taskbar')
 
@@ -435,7 +455,21 @@ class Interface(BaseTable):
             'session.config.i_avatar_size', 18, 64)
         self.append_range(_('Conversation avatar size'),
             'session.config.i_conv_avatar_size', 18, 128)
+        
+        self.session.config.subscribe(self._on_spell_change,
+            'b_enable_spell_check')
+        
         self.show_all()
+
+    def _on_spell_change(self, value):
+        if value:
+            self.lang_menu.set_sensitive(True)
+        else:
+            self.lang_menu.set_sensitive(False)
+
+    def _on_lang_combo_change(self, combo):
+        self.session.config.spell_lang = combo.get_active_text()
+
 
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
