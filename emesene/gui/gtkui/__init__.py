@@ -48,6 +48,8 @@ def gtk_main(Controller):
     import FileTransferWidget
     import GroupMenu
     import GtkNotification
+    import ThemeNotification
+    import PyNotification
     import Header
     import ImageAreaSelector
     import ImageChooser
@@ -179,19 +181,11 @@ def setup():
     else:
         extension.category_register('conversation output', TextBox.OutputText)
 
-    extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
+    extension.category_register(('notificationGUI'), ThemeNotification.themeNotification)
 
-    try:
-        import PyNotification
-        extension.register(('notificationGUI'), PyNotification.pyNotification)
-    except:
-        print "Error import pynotification"
+    extension.register(('notificationGUI'), PyNotification.pyNotification)
 
-    try:
-        import ThemeNotification
-        extension.register(('notificationGUI'), ThemeNotification.themeNotification)
-    except:
-        print "Error import themenotification"
+    extension.register(('notificationGUI'), GtkNotification.gtkNotification)
     
     extension.category_register('picture handler', PictureHandler.PictureHandler)
 
