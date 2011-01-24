@@ -25,6 +25,9 @@ import extension
 import e3.base
 import gui
 
+import hashlib
+import tempfile
+
 class FileTransferWidget(gtk.HBox):
     '''this class represents the ui widget for one filetransfer'''
 
@@ -218,6 +221,8 @@ class FileTransferTooltip(gtk.Window):
 
         self.pointer_is_over_widget = False
 
+        self.__fileprev=None
+
     def add_label(self, l_string, left, right, top, bottom, label = None):
         ''' adds a label to the widget '''
         if label == None:
@@ -241,7 +246,13 @@ class FileTransferTooltip(gtk.Window):
             return
 
         if self.transfer.preview is not None:
-            pixbuf = gtk.gdk.pixbuf_new_from_data(self.transfer.preview)
+            if(self.__fileprev==None):
+                self.__fileprev=tempfile.mkstemp(prefix=hashlib.md5(self.transfer.preview).hexdigest(), suffix=hashlib.md5(self.transfer.preview).hexdigest())[1]
+
+            tmpPrev = open( self.__fileprev, 'wb' )
+            tmpPrev.write(self.transfer.preview)
+            tmpPrev.close()
+            pixbuf = gtk.gdk.pixbuf_new_from_file(self.__fileprev)
         else:
             pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.transfer_success)
         #amsn sends a big. black preview? :S

@@ -291,6 +291,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_invite_file_transfer(self, papysession):
         ''' handle file transfer invites '''
+
         account = papysession.peer.account
 
         if account in self.conversations:

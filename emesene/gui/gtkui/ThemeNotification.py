@@ -34,9 +34,6 @@ def themeNotification(title, text, picturePath=None,const=None):
     
     def pictureFactory(picture,constValue):
 
-        print picture
-        print const
-
         if(picture):
             if(picture[:7]=="file://"):
                 return picture
