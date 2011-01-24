@@ -221,6 +221,7 @@ class Theme(object):
         self.service_msn = os.path.join(self.theme_path, "msn.png")
         self.service_facebook = os.path.join(self.theme_path, "facebook.png")
         self.service_gtalk = os.path.join(self.theme_path, "gtalk.png")
+        self.service_dummy = os.path.join(self.theme_path, "dummy.png")
 
         self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
         self.sound_nudge = os.path.join(self.sound_theme_path, "nudge.wav")
