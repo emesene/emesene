@@ -28,7 +28,7 @@ DESCRIPTION = 'Wrapper around pynotify for the notification system'
 AUTHOR = 'arielj'
 WEBSITE = 'www.emesene.org'
 
-def pyNotification(title, text, picturePath=None):
+def pyNotification(title, text, picturePath=None,const=None):
     n = pynotify.Notification(title, text, picturePath)
     n.set_hint_string("append", "allowed")
     n.show()
