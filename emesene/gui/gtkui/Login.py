@@ -298,6 +298,7 @@ class Login(LoginBase):
         account = self.config.get_or_set('last_logged_account', '')
         default_session=extension.get_default('session')
         count=0
+        session_found = False
 
         name_to_ext={}
 
