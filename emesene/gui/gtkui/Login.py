@@ -42,8 +42,6 @@ class LoginBase(gtk.Alignment):
         Avatar = extension.get_default('avatar')
         NiceBar = extension.get_default('nice bar')
 
-        default_session = extension.get_default('session')
-
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
         completion.set_model(self.liststore)
@@ -309,10 +307,10 @@ class Login(LoginBase):
         self.new_combo_session(self.session_combo, self.__on_session_changed)
 
     def new_combo_session(self, session_combo, on_session_changed):
-
         account = self.config.get_or_set('last_logged_account', '')
         default_session = extension.get_default('session')
         count=0
+        session_found = False
 
         name_to_ext = {}
 
@@ -320,7 +318,6 @@ class Login(LoginBase):
             service = self.config.d_user_service.get(account, 'msn')
         else:
             service = 'msn'
-
 
         for ext_id, ext in extension.get_extensions('session').iteritems():
             if default_session.NAME == ext.NAME:
@@ -333,7 +330,8 @@ class Login(LoginBase):
 
                 try:
                     # ugly eval here, is there another way?
-                    image = utils.safe_gtk_pixbuf_load(eval("gui.theme.service_" + service_name))
+                    s_name = getattr(gui.theme, "service_" + service_name) 
+                    image = utils.safe_gtk_pixbuf_load(s_name)
                 except:
                     image = None
 
@@ -355,8 +353,6 @@ class Login(LoginBase):
     def _check_autologin(self):
         '''check if autologin is set and can be started'''
         account = self.config.get_or_set('last_logged_account', '')
-
-        default_session = extension.get_default('session')
 
         if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
             password = base64.b64decode(self.config.d_accounts[account])
@@ -628,8 +624,6 @@ class Login(LoginBase):
         '''
         called when the auto-login check button is toggled
         '''
-        user = self.cmb_account.get_active_text()
-
         if self.auto_login.get_active():
             self.remember_password.set_active(True)
             self.remember_account.set_sensitive(False)

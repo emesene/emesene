@@ -16,14 +16,12 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
 import gtk
 import time
 
 import e3
 from e3.hotmail.Hotmail import Hotmail
 import gui
-import utils
 import extension
 
 import logging
@@ -63,7 +61,6 @@ class MainWindow(gtk.VBox):
             self._on_contact_attr_changed)
 
         self.menu = None
-        self.contact_menu = None
         self.contact_menu = None
         self.group_menu = None
 
@@ -122,7 +119,6 @@ class MainWindow(gtk.VBox):
     def _build_menus(self):
         '''buildall the menus used on the client'''
         dialog = extension.get_default('dialog')
-        avatar_manager = extension.get_default('avatar manager')
 
         handler = gui.base.MenuHandler(self.session, dialog, self.contact_list,
             self.on_disconnect, self.on_close)

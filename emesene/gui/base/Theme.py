@@ -20,7 +20,6 @@ import os
 import re
 
 import AdiumThemes
-import e3
 from e3 import status
 
 class Theme(object):

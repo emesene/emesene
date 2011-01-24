@@ -23,7 +23,6 @@ import extension
 
 import time
 import logging
-import os
 log = logging.getLogger('gui.gtkui.Notification')
 
 #TODO add config

@@ -28,7 +28,6 @@ import farsight
 import gobject
 import gst
 import logging
-import sys
 
 logger = logging.getLogger("papylib.conference")
 

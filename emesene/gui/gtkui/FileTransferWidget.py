@@ -22,7 +22,6 @@ import pango
 import gobject
 import extension
 
-import e3.base
 import gui
 
 import hashlib
@@ -128,7 +127,6 @@ class FileTransferWidget(gtk.HBox):
             self.buttons.append(button)
 
         if state in (self.transfer.RECEIVED, self.transfer.FAILED):
-
             button = gtk.Button(None, None)
             button.set_image(self.__get_button_img(gtk.STOCK_CLEAR))
             button.connect('clicked', self._on_close_clicked)

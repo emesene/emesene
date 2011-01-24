@@ -169,7 +169,6 @@ class ListWidget(gtk.VBox):
         crt_timestamp = gtk.CellRendererText()
         crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr = gtk.CellRendererPixbuf()
-        pbr_status = gtk.CellRendererPixbuf()
 
         self.list.append_column(column)
         self.list.append_column(column1)
@@ -324,14 +323,10 @@ class ChatWidget(gtk.VBox):
             return
 
         for stat, timestamp, msg_text, nick, account in results:
-            date_text = time.strftime('[%c]', time.gmtime(timestamp))
-
             contact = e3.Contact(account, nick=nick)
 
             is_me = self.session.contacts.me.account == account
-            incoming = not is_me
             datetimestamp = datetime.datetime.fromtimestamp(timestamp)
-
 
             if is_me:
                 self.text.send_message(self.formatter, contact,

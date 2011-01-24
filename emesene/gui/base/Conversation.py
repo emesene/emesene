@@ -458,7 +458,6 @@ class Conversation(object):
 
         if no message in the buffer return an empty string
         """
-        index = self.message_offset
         self.message_offset += change
 
         try:

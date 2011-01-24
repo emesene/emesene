@@ -1008,8 +1008,6 @@ class ImageChooser(gtk.FileChooserDialog):
         '''
         Updates the preview image
         '''
-        hasPreview = False
-
         path = self.get_filename()
 
         if path:

@@ -23,10 +23,8 @@ import pango
 import cairo
 import gobject
 
-import gui
 from gui.base import Plus
 import extension
-import utils
 import Parser
 
 import logging
@@ -890,7 +888,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         """Prepare rendering setting for avatar"""
         xpad, ypad = self._get_padding()
         x, y, width, height = cell_area
-        cell = (x, y, width, height)
         ctx = window.cairo_create()
         ctx.translate(x, y)
 
