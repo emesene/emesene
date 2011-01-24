@@ -111,7 +111,19 @@ class LoginBase(gtk.Alignment):
         vbox_remember.pack_start(self.auto_login)
         vbox_remember.pack_start(gtk.Label())
         
-        self.session_combo=gtk.combo_box_new_text()
+        session_combo_store = gtk.ListStore(gtk.gdk.Pixbuf, str)
+        crp = gtk.CellRendererPixbuf()
+        crt = gtk.CellRendererText()
+        crp.set_property("xalign", 0)
+        crt.set_property("xalign", 0)
+
+        self.session_combo = gtk.ComboBox()
+        self.session_combo.set_model(session_combo_store)
+        self.session_combo.pack_start(crp, True)
+        self.session_combo.pack_start(crt, True)
+        self.session_combo.add_attribute(crp, "pixbuf", 0)
+        self.session_combo.add_attribute(crt, "text", 1)
+
         vbox_remember.pack_start(self.session_combo)
 
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
@@ -282,28 +294,29 @@ class Login(LoginBase):
 
         self._show_sessions()
 
-    def __on_session_changed(self,*args):
+    def __on_session_changed(self, session_combo, name_to_ext):
 
-        name_to_ext=args[1]
-        service = args[0].get_active_text()
+        active = session_combo.get_active()
+        model = session_combo.get_model()
+        service = model[active][1]
         session_id, ext = name_to_ext[service]
         self._on_new_preferences(self.use_http, self.proxy.use_proxy, self.proxy.host, self.proxy.port,self.proxy.use_auth, self.proxy.user, self.proxy.passwd, session_id, service, ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
 
     def _show_sessions(self):
 
-        self.new_combo_session(self.session_combo,self.__on_session_changed)
+        self.new_combo_session(self.session_combo, self.__on_session_changed)
 
     def new_combo_session(self, session_combo, on_session_changed):
         account = self.config.get_or_set('last_logged_account', '')
-        default_session=extension.get_default('session')
+        default_session = extension.get_default('session')
         count=0
 
-        name_to_ext={}
+        name_to_ext = {}
 
         if account in self.accounts:
             service = self.config.d_user_service.get(account, 'msn')
         else:
-            service='msn'
+            service = 'msn'
 
         for ext_id, ext in extension.get_extensions('session').iteritems():
             if default_session.NAME == ext.NAME:
@@ -314,7 +327,13 @@ class Login(LoginBase):
                     index = count
                     session_found = True
 
-                session_combo.append_text(service_name)
+                try:
+                    # ugly eval here, is there another way?
+                    image = utils.safe_gtk_pixbuf_load(eval("gui.theme.service_" + service_name))
+                except:
+                    image = None
+
+                session_combo.get_model().append([image, service_name])
                 name_to_ext[service_name] = (ext_id, ext)
                 count += 1
 
@@ -323,7 +342,7 @@ class Login(LoginBase):
         else:
             session_combo.set_active(default_session_index)
 
-        session_combo.connect('changed', on_session_changed,name_to_ext)
+        session_combo.connect('changed', on_session_changed, name_to_ext)
 
         self.__combo_session_list.append(session_combo)
 
