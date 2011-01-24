@@ -27,14 +27,14 @@ class MessagingMenu(BaseTray):
     """
     A widget that implements the messaging menu for ubuntu
     """
+    NAME = 'Messaging Menu'
+    DESCRIPTION = 'The Ayatana Messaging Menu extension'
+    AUTHOR = 'Cando, Tom Cowell'
+    WEBSITE = 'www.emesene.org'
 
     def __init__ (self, handler, main_window=None):
         '''constructor'''
         BaseTray.__init__(self)
-        NAME = 'Messaging Menu'
-        DESCRIPTION = 'The Ayatana Messaging Menu extension'
-        AUTHOR = 'Cando, Tom Cowell'
-        WEBSITE = 'www.emesene.org'
         self.handler = handler
         self.main_window = main_window
         self.signals_have_been_connected = False
