@@ -160,7 +160,7 @@ class ConversationToolbar(gtk.Toolbar):
         #self.add(self.invite_video_call)
         #self.add(self.invite_audio_call)
         #self.add(self.invite_av_call)
-        self.add(gtk.SeparatorToolItem())
+        #self.add(gtk.SeparatorToolItem())
 
         self.add(self.clean)
         self.add(self.ublock)
