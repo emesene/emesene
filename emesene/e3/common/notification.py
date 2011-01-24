@@ -57,6 +57,8 @@ class Notification():
                 self._on_filetransfer_completed)
             self.session.signals.filetransfer_canceled.subscribe(
                 self._on_filetransfer_canceled)
+            self.session.signals.filetransfer_invitation.subscribe(
+                self._on_filetransfer_invitation)
 
         self.notify_online = False
         self.last_online = None
@@ -67,6 +69,10 @@ class Notification():
     def _on_filetransfer_canceled(self,args):
         self.notifier("File transfer canceled", "", 'notification-message-email', 'file-transf-canceled')
 
+    def _on_filetransfer_invitation(self, arg1, arg2):
+        contact = self.session.contacts.get(arg1.sender.account)
+        self._notify(contact, contact.nick, "File transfer invitation")
+        
     def _on_mail_received(self, message):
         ''' called when a new mail is received '''
         self.notifier("New mail from %s" % (message.address), message._subject, 'notification-message-email','mail-received')
