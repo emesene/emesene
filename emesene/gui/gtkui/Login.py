@@ -330,7 +330,8 @@ class Login(LoginBase):
 
                 try:
                     # ugly eval here, is there another way?
-                    image = utils.safe_gtk_pixbuf_load(eval("gui.theme.service_" + service_name))
+                    s_name = getattr(gui.theme, "service_" + service_name) 
+                    image = utils.safe_gtk_pixbuf_load(s_name)
                 except:
                     image = None
 
