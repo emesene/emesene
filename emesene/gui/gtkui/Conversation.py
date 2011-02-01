@@ -408,7 +408,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_filetransfer_accepted(self, transfer):
         ''' called when the file transfer is accepted '''
-        pass
+        if transfer in self.transfers_bar.transfers:
+            self.transfers_bar.accepted(transfer)
 
     def on_filetransfer_progress(self, transfer):
         ''' called every chunk received '''

@@ -95,6 +95,10 @@ class FileTransferWidget(gtk.HBox):
     def _on_menu_folder_clicked(self, widget):
         self.handler.opendir()
 
+    def accepted(self):
+        ''' called when the other party accepts our transfer '''
+        self.handler.accepted()
+
     def finished(self):
         ''' sets the transfer state to finished '''
         self.transfer.state = self.transfer.RECEIVED
