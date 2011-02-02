@@ -28,11 +28,18 @@ import hashlib
 import tempfile
 
 def makePreview(src):
-    ## I'm still developing it
-    """filetmp=tempfile.mkstemp(prefix=hashlib.md5(src).hexdigest(), suffix=hashlib.md5(src).hexdigest())[1]
+    ## I'm still developing it (I'm working on proportions)
+    filetmp = tempfile.mkstemp(prefix=hashlib.md5(src).hexdigest(), suffix=hashlib.md5(src).hexdigest())[1]
     tmp = open( filetmp, 'w' )
-    tmp.write( hotLogHtm )
-    tmp.close()"""
-    out_file = open(src,"rb")
-    cnt=out_file.read()
+    tmp.close()
+
+    pbf = gui.gtkui.utils.gtk_pixbuf_load(src)
+    pbf = pbf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
+
+    pbf.save(filetmp,"png")
+    
+    out_file = open(filetmp,"rb")
+    cnt = out_file.read()
+    out_file.close()
+
     return cnt
