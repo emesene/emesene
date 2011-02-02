@@ -21,6 +21,7 @@ import gtk
 import pango
 import gobject
 import extension
+import time
 
 import gui
 
@@ -95,6 +96,10 @@ class FileTransferWidget(gtk.HBox):
     def _on_menu_folder_clicked(self, widget):
         self.handler.opendir()
 
+    def accepted(self):
+        ''' called when the other party accepts our transfer '''
+        self.handler.accepted()
+
     def finished(self):
         ''' sets the transfer state to finished '''
         self.transfer.state = self.transfer.RECEIVED
@@ -127,6 +132,8 @@ class FileTransferWidget(gtk.HBox):
             self.buttons.append(button)
 
         if state in (self.transfer.RECEIVED, self.transfer.FAILED):
+            self.transfer.time_finished = time.time()
+
             button = gtk.Button(None, None)
             button.set_image(self.__get_button_img(gtk.STOCK_CLEAR))
             button.connect('clicked', self._on_close_clicked)

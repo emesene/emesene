@@ -387,7 +387,7 @@ class Controller(object):
         self._save_login_dimensions()
         self._remove_subscriptions()
         self._new_session()
-        self.go_login()
+        self.go_login(cancel_clicked=True)
         self.window.content.clear_all()
         self.window.content.show_error(reason)
 
@@ -398,7 +398,6 @@ class Controller(object):
         plugin_manager = get_pluginmanager()
         plugin_manager.scan_directory('plugins')
 
-        self.draw_main_screen()
 
         self.session.config.get_or_set('l_active_plugins', [])
 
@@ -466,7 +465,7 @@ class Controller(object):
         '''
         if self.session is not None:
             self.session.quit()
-        self.go_login(cancel_clicked=True)
+        self.go_login(cancel_clicked=True, no_autologin=True)
 
     def on_pending_contacts(self):
         '''callback called when some contact is pending'''
@@ -490,6 +489,7 @@ class Controller(object):
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
+        self.draw_main_screen()
         self.window.content.contact_list.fill()
 
         self.on_pending_contacts()
@@ -578,7 +578,7 @@ class Controller(object):
         method called when the user selects disconnect
         '''
         self.close_session(False)
-        self.go_login(no_autologin=True)
+        self.go_login(cancel_clicked=True, no_autologin=True)
 
     def on_close(self):
         '''called on close'''
@@ -591,9 +591,10 @@ class Controller(object):
         if reconnect:
             self.on_reconnect(account)
         else:
-            self.go_login()
-            self.window.content.clear_all()
-            self.window.content.show_error(reason)
+            self.go_login(cancel_clicked=True, no_autologin=True)
+            if(reason != None):
+                self.window.content.clear_all()
+                self.window.content.show_error(reason)
 
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''

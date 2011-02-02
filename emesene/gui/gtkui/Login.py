@@ -236,6 +236,7 @@ class Login(LoginBase):
         self.config_dir = config_dir
         self.config_path = config_path
         self.callback = callback
+        self.cancel_clickled=cancel_clicked
         self.on_preferences_changed = on_preferences_changed
         self.no_autologin = no_autologin
         # the id of the default extension that handles the session
@@ -289,7 +290,7 @@ class Login(LoginBase):
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
 
-        if not cancel_clicked:
+        if not self.cancel_clickled:
             self._check_autologin()
 
         self._show_sessions()
@@ -596,7 +597,7 @@ class Login(LoginBase):
         close emesene
         '''
         while gtk.events_pending():
-            gtk.main_iteration(False)
+                gtk.main_iteration(False)
 
         sys.exit(0)
 
@@ -747,6 +748,7 @@ class ConnectingWindow(Login):
         '''
         cause the return to login window
         '''
+        self.cancel_clickled=True
         self.avatar.stop()
         if self.reconnect_timer_id is not None:
             gobject.source_remove(self.reconnect_timer_id)

@@ -69,6 +69,11 @@ class Notification():
         self.notifier("File transfer canceled", "", 'notification-message-email', 'file-transf-canceled')
 
     def _on_filetransfer_invitation(self, arg1, arg2):
+<<<<<<< HEAD
+=======
+        if isinstance(arg1.sender, str): # prevent notifying when we send a file
+            return
+>>>>>>> upstream/master
         contact = self.session.contacts.get(arg1.sender.account)
         self._notify(contact, contact.nick, "File transfer invitation")
         
