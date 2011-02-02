@@ -210,10 +210,14 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _add_contact(self, papycontact):
         ''' helper method to add a contact to the (gui) contact list '''
+        alias = papycontact.infos.get(papyon.service.description.AB.constants.ContactGeneral.ANNOTATIONS, {}).\
+                     get(papyon.service.description.AB.constants.ContactAnnotations.NICKNAME, None)
+        if alias == "" or alias is None:
+            alias = papycontact.display_name
+        alias = unicode(alias, 'utf-8')
         contact = e3.base.Contact(papycontact.account, papycontact.id, \
             papycontact.display_name, papycontact.personal_message, \
-                                                   # alias isn't in papyon yet?
-            STATUS_PAPY_TO_E3[papycontact.presence], '', \
+            STATUS_PAPY_TO_E3[papycontact.presence], alias, \
             (papyon.profile.Membership.BLOCK & papycontact.memberships))
 
         self.session.contacts.contacts[papycontact.account] = contact
@@ -944,6 +948,28 @@ class Worker(e3.base.Worker, papyon.Client):
         def set_contact_alias_succeed(*args):
             log.info("Setting alias ok: %s" % args)
             self.session.add_event(e3.Event.EVENT_CONTACT_ALIAS_SUCCEED, account)
+
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
+        new_alias = alias.encode("utf-8")
+        infos = {papyon.service.description.AB.constants.ContactGeneral.ANNOTATIONS :
+                    {papyon.service.description.AB.constants.ContactAnnotations.NICKNAME : new_alias}
+                }
+        self.address_book.update_contact_infos(papycontact, infos)
+        #   TODO: Find out why these don't work
+        #    done_cb=set_contact_alias_succeed, failed_cb=set_contact_alias_fail)
+
+        contact = self.session.contacts.contacts.get(account, None)
+        if not contact:
+            return
+        account = contact.account
+        old_nick = contact.nick
+        if alias != "":
+            contact.nick = new_alias
+        else:
+            contact.nick = papycontact.display_name
+
+        self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account, \
+                'nick', old_nick)
 
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS '''
