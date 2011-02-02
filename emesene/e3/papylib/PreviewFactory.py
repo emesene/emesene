@@ -29,12 +29,18 @@ import tempfile
 
 def makePreview(src):
     ## I'm still developing it (I'm working on proportions)
+
+    try:
+    	pbf = gui.gtkui.utils.gtk_pixbuf_load(src)
+    except:
+        return None
+
+
+    pbf = pbf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
+
     filetmp = tempfile.mkstemp(prefix=hashlib.md5(src).hexdigest(), suffix=hashlib.md5(src).hexdigest())[1]
     tmp = open( filetmp, 'w' )
     tmp.close()
-
-    pbf = gui.gtkui.utils.gtk_pixbuf_load(src)
-    pbf = pbf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
 
     pbf.save(filetmp,"png")
     
