@@ -641,9 +641,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # + NL
         '''
         message = gobject.markup_escape_text(contact.message)
-        nick = gobject.markup_escape_text(contact.nick)
-        display_name = gobject.markup_escape_text(contact.display_name)
-
+        display_name = gobject.markup_escape_text(contact.nick)
+        nick = display_name
+        
         #TODO: fix those "no-more-color" with msgplus codes, '&#173;'?
         def fix_plus(text):
             escaped = self.escape_tags(text)
