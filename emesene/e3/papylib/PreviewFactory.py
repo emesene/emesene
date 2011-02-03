@@ -23,7 +23,6 @@
 #
 
 import gtk
-import gui.gtkui.utils
 import hashlib
 import tempfile
 
@@ -31,7 +30,7 @@ def makePreview(src):
     ## I'm still developing it (I'm working on proportions)
 
     try:
-    	pbf = gui.gtkui.utils.gtk_pixbuf_load(src)
+    	pbf = gtk.gdk.pixbuf_new_from_file(src)
     except:
         return None
 
