@@ -48,6 +48,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         gui.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
+        self.set_enable_search(False) #we enable our searching widget with CTRL+F in MainWindow.py
+
         self.online_group = None # added
         self.online_group_iter = None # added
         self.no_group = None
