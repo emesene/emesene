@@ -209,9 +209,12 @@ class MainWindow(gtk.VBox):
         '''method called when a key is pressed on the input widget'''
         if event.keyval == gtk.keysyms.f and \
                 event.state == gtk.gdk.CONTROL_MASK:
-            self.panel.search.set_active(True)
-            self.entry.show()
-            self.entry.grab_focus()
+            self.panel.search.set_active(not self.panel.search.get_active())
+            if self.panel.search.get_active():
+                self.entry.show()
+                self.entry.grab_focus()
+            else:
+                self.entry.hide()
 
     def on_disconnect(self):
         '''callback called when the disconnect option is selected'''
