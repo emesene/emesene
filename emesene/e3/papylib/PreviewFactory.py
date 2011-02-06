@@ -22,20 +22,18 @@
 # Created by Andrea Stagi <stagi.andrea(at)gmail.com>
 #
 
-import gtk
+import Image
 import hashlib
 import tempfile
 
 def makePreview(src):
-    ## I'm still developing it (I'm working on proportions)
 
     try:
-    	pbf = gtk.gdk.pixbuf_new_from_file(src)
+    	pbf = Image.open(src)
     except:
         return None
 
-
-    pbf = pbf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
+    pbf = pbf.resize((96, 96), Image.BILINEAR)
 
     filetmp = tempfile.mkstemp(prefix=hashlib.md5(src).hexdigest(), suffix=hashlib.md5(src).hexdigest())[1]
     tmp = open( filetmp, 'w' )
