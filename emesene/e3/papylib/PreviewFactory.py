@@ -36,8 +36,6 @@ def makePreview(src):
     pbf = pbf.resize((96, 96), Image.BILINEAR)
 
     filetmp = tempfile.mkstemp(prefix=hashlib.md5(src).hexdigest(), suffix=hashlib.md5(src).hexdigest())[1]
-    tmp = open( filetmp, 'w' )
-    tmp.close()
 
     pbf.save(filetmp,"png")
     
