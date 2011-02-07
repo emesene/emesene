@@ -398,6 +398,7 @@ class Controller(object):
         plugin_manager = get_pluginmanager()
         plugin_manager.scan_directory('plugins')
 
+        self.draw_main_screen()
 
         self.session.config.get_or_set('l_active_plugins', [])
 
@@ -489,7 +490,6 @@ class Controller(object):
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
-        self.draw_main_screen()
         self.window.content.contact_list.fill()
 
         self.on_pending_contacts()
