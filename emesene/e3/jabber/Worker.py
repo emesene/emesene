@@ -53,19 +53,16 @@ class Worker(e3.Worker):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        while True:
+        while self._continue==True:
+
             if hasattr(self.client, 'Process'):
                 self.client.Process(1)
 
             try:
+
                 action = self.session.actions.get(True, 0.1)
-
-                if action.id_ == e3.Action.ACTION_QUIT:
-                    log.debug('closing thread')
-                    self.session.logger.quit()
-                    break
-
                 self._process_action(action)
+
             except Queue.Empty:
                 pass
 
@@ -150,6 +147,17 @@ class Worker(e3.Worker):
         e3.Logger.log_message(self.session, None, msgobj, False)
 
     # action handlers
+
+    def _handle_action_quit(self):
+        '''handle Action.ACTION_QUIT
+        '''
+        log.debug('closing thread')
+        self.session.events.queue.clear()
+        self.session.logger.quit()
+        self.client.disconnect()
+        self._continue=False
+        self.session.add_event(e3.Event.EVENT_DISCONNECTED, None,False)
+
     def _handle_action_add_contact(self, account):
         '''handle Action.ACTION_ADD_CONTACT
         '''

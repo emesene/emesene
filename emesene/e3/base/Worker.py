@@ -20,6 +20,7 @@
 import Queue
 import threading
 import traceback
+import bisect
 
 import Logger
 from Event import Event
@@ -101,6 +102,7 @@ class Worker(threading.Thread):
     def __init__(self, app_name, session):
         '''class constructor'''
         threading.Thread.__init__(self)
+        self._continue=True
         self.setDaemon(True)
 
         self.app_name = app_name
@@ -148,6 +150,7 @@ class Worker(threading.Thread):
             self._handle_action_conv_invite
         dah[Action.ACTION_SEND_MESSAGE] = self._handle_action_send_message
         dah[Action.ACTION_SEND_OIM] = self._handle_action_send_oim
+        dah[Action.ACTION_QUIT] = self._handle_action_quit
 
         # p2p actions (unused!)
         dah[Action.ACTION_P2P_INVITE] = self._handle_action_p2p_invite
@@ -207,6 +210,10 @@ class Worker(threading.Thread):
         '''handle Action.ACTION_UNBLOCK_CONTACT
         '''
         pass
+
+    def _handle_action_quit(self):
+        '''handle Action.ACTION_QUIT
+        '''
 
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS

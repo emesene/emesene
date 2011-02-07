@@ -28,6 +28,8 @@ import hashlib
 import tempfile
 import xml.sax.saxutils
 
+import PreviewFactory
+
 import e3
 from e3 import cache
 from e3.base import *
@@ -1159,8 +1161,11 @@ class Worker(e3.base.Worker, papyon.Client):
 
     # ft handlers
     def _handle_action_ft_invite(self, cid, account, filename, completepath):
+
+        cnt=PreviewFactory.makePreview(completepath)
+
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        papysession = self._ft_manager.send(papycontact, filename, os.path.getsize(completepath))
+        papysession = self._ft_manager.send(papycontact, filename, os.path.getsize(completepath), cnt)
  
         tr = e3.base.FileTransfer(papysession, papysession.filename, \
         papysession.size, papysession.preview, sender='Me', completepath=completepath)
