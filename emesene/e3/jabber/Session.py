@@ -27,7 +27,7 @@ class Session(e3.Session):
         '''start the login process'''
         self.account = e3.Account(account, password, status, host)
         self.__worker = Worker('emesene2', self, proxy, use_http)
-        self.__worker .start()
+        self.__worker.start()
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
             host, port))

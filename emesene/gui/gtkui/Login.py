@@ -236,7 +236,7 @@ class Login(LoginBase):
         self.config_dir = config_dir
         self.config_path = config_path
         self.callback = callback
-        self.cancel_clickled=cancel_clicked
+        self.cancel_clicked=cancel_clicked
         self.on_preferences_changed = on_preferences_changed
         self.no_autologin = no_autologin
         # the id of the default extension that handles the session
@@ -290,7 +290,7 @@ class Login(LoginBase):
         if account != '':
             self.cmb_account.get_children()[0].set_text(account)
 
-        if not self.cancel_clickled:
+        if not self.cancel_clicked:
             self._check_autologin()
 
         self._show_sessions()
@@ -748,7 +748,7 @@ class ConnectingWindow(Login):
         '''
         cause the return to login window
         '''
-        self.cancel_clickled=True
+        self.cancel_clicked=True
         self.avatar.stop()
         if self.reconnect_timer_id is not None:
             gobject.source_remove(self.reconnect_timer_id)
