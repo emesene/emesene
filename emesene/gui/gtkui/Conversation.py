@@ -137,6 +137,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             'b_show_header')
         self.session.config.subscribe(self._on_show_info_changed,
             'b_show_info')
+        self.session.config.subscribe(self._on_show_avatar_onleft,
+            'b_avatar_on_left')
         self.session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
         self.session.signals.contact_attr_changed.subscribe(
@@ -190,6 +192,15 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.info.show()
         else:
             self.info.hide()
+
+    def _on_show_avatar_onleft(self,value):
+        '''callback called when config.b_avatar_on_left changes'''
+        if value:
+            self.hbox.reorder_child(self.panel, 1)
+            self.hbox.reorder_child(self.info, 0)
+        else:
+            self.hbox.reorder_child(self.panel, 0)
+            self.hbox.reorder_child(self.info, 1)
 
     def on_close(self):
         '''called when the conversation is closed'''
