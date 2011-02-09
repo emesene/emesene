@@ -59,6 +59,8 @@ class Notification():
             self.session.signals.filetransfer_invitation.subscribe(
                 self._on_filetransfer_invitation)
 
+      
+
         self.notify_online = False
         self.last_online = None
 
@@ -82,9 +84,9 @@ class Notification():
         """
         This is called when a new message arrives to a user.
         """
-        #TODO don't notify if the conversation is on focus
-        if self.session.config.b_notify_receive_message:
-            contact = self.session.contacts.get(account)
+        if self.session.config.b_notify_receive_message and \
+            not(self.session.conversations[cid].get_parent().is_active()):
+            contact = self.session.contacts.get(account)            
             if msgobj.type == Message.TYPE_NUDGE:
                 # The message needs to be translated.
                 self._notify(contact, contact.nick , _('%s just sent you a nudge!') % (contact.nick,))

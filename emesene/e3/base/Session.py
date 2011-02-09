@@ -45,6 +45,7 @@ class Session(object):
         self._account = None
         self.contacts = None
         self.logger = None
+        self.conversations = None
         self.extras = {}
 
         self.events = Queue.Queue()
