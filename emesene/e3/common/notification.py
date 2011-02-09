@@ -59,6 +59,8 @@ class Notification():
             self.session.signals.filetransfer_invitation.subscribe(
                 self._on_filetransfer_invitation)
 
+      
+
         self.notify_online = False
         self.last_online = None
 
