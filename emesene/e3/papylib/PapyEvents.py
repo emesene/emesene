@@ -67,6 +67,9 @@ class ClientEvents(papyon.event.ClientEventInterface):
             elif error == papyon.event.ProtocolError.SERVER_DOWN:
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
                                                'Server down', 1)#for reconnecting
+            elif error == papyon.event.ProtocolError.AUTHENTICATION_FAILED:
+                self._client.session.add_event(Event.EVENT_DISCONNECTED,
+                                               'Authentication failure', 0)
             else:
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
                                                'Protocol error', 0)
