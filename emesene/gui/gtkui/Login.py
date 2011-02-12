@@ -661,7 +661,7 @@ class Login(LoginBase):
             service = self.config.d_user_service.get(account, 'msn')
 
         extension.get_default('dialog').login_preferences(service,
-            self._on_new_preferences, self.use_http, self.proxy,self)
+            self._on_new_preferences, self.use_http, self.proxy)
 
     def _on_new_preferences(self, use_http, use_proxy, proxy_host, proxy_port,
         use_auth, user, passwd, session_id, service, server_host, server_port):

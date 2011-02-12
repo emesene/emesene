@@ -652,7 +652,7 @@ class Dialog(object):
 
 
     @classmethod
-    def login_preferences(cls, service, callback, use_http, proxy,login_obj):
+    def login_preferences(cls, service, callback, use_http, proxy):
         """
         display the preferences dialog for the login window
 
@@ -671,19 +671,16 @@ class Dialog(object):
         box.set_property('row-spacing', 4)
         box.set_property('column-spacing', 4)
 
-        session_combo_store = gtk.ListStore(gtk.gdk.Pixbuf, str)
-        crp = gtk.CellRendererPixbuf()
-        crt = gtk.CellRendererText()
-        crp.set_property("xalign", 0)
-        crt.set_property("xalign", 0)
+        try:
+            s_name = getattr(gui.theme, "service_" + service)
+            session_pixbuf = utils.safe_gtk_pixbuf_load(s_name)
+        except:
+            session_pixbuf = None
 
-        combo = gtk.ComboBox()
-        combo.set_model(session_combo_store)
-        combo.pack_start(crp, True)
-        combo.pack_start(crt, True)
-        combo.add_attribute(crp, "pixbuf", 0)
-        combo.add_attribute(crt, "text", 1)
-        combo.set_active(0)
+        session_image = gtk.Image()
+        session_image.set_from_pixbuf(session_pixbuf)
+
+        session_label = gtk.Label(service)
 
         t_proxy_host = gtk.Entry()
         t_proxy_port = gtk.Entry()
@@ -706,20 +703,23 @@ class Dialog(object):
         c_use_auth = gtk.CheckButton(_('Use authentication'))
         c_use_auth.connect('toggled', on_toggled, t_user, t_passwd)
 
-        t_proxy_host.set_text(proxy.host or '')
-        t_proxy_port.set_text(proxy.port or '')
+        for ext_id, ext in extension.get_extensions('session').iteritems():
+            for service_name, service_data in ext.SERVICES.iteritems():
+                if service_name == service:
+                    t_server_host.set_text(proxy.host or service_data['host'])
+                    t_server_port.set_text(proxy.port or service_data['port'])
+                    session_id = ext_id
+
         t_user.set_text(proxy.user or '')
         t_passwd.set_text(proxy.passwd or '')
         t_passwd.set_visibility(False)
         c_use_http.set_active(use_http)
         c_use_proxy.set_active(proxy.use_proxy)
         c_use_proxy.toggled()
-        c_use_proxy.toggled()
         c_use_auth.set_active(proxy.use_auth)
         c_use_auth.toggled()
-        c_use_auth.toggled()
 
-        l_session = gtk.Label(_('Session'))
+        l_session = gtk.Label(_('Session:'))
         l_session.set_alignment(0.0, 0.5)
         l_server_host = gtk.Label(_('Server'))
         l_server_host.set_alignment(0.0, 0.5)
@@ -762,17 +762,6 @@ class Dialog(object):
         box.attach(l_passwd, 0, 1, 8, 9)
         box.attach(t_passwd, 1, 2, 8, 9)
 
-        name_to_ext = {}
-
-        def on_session_changed(combo, name_to_ext):
-            active = combo.get_active()
-            service = combo.get_model()[active][1] 
-            session_id, ext = name_to_ext[service]
-            t_server_host.set_text(ext.SERVICES[service]['host'])
-            t_server_port.set_text(ext.SERVICES[service]['port'])
-
-        name_to_ext = login_obj.new_combo_session(combo, on_session_changed)
-
         def response_cb(response):
             '''called on any response (close, accept, cancel) if accept
             get the new values and call callback with those values'''
@@ -787,8 +776,6 @@ class Dialog(object):
                 user = t_user.get_text()
                 passwd = t_passwd.get_text()
 
-                service = combo.get_active_text()
-                session_id, ext = name_to_ext[service]
                 callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
                         user, passwd, session_id, service, server_host, server_port)
 
@@ -802,15 +789,16 @@ class Dialog(object):
 
         window = cls.new_window(_('Preferences'), response_cb)
         window.set_modal(True)
-        window.hbox.pack_start(content, True, True)
+        window.hbox.pack_start(content)
 
         session_box = gtk.HBox(spacing=4)
-        session_box.pack_start(l_session, True, True)
-        session_box.pack_start(combo, True, True)
+        session_box.pack_start(l_session)
+        session_box.pack_start(session_image)
+        session_box.pack_start(session_label)
 
         advanced.add(box)
         content.pack_start(session_box, False)
-        content.pack_start(advanced, True, True)
+        content.pack_start(advanced, False)
 
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
                 button_cb)
