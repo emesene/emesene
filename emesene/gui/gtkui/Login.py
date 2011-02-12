@@ -110,21 +110,6 @@ class LoginBase(gtk.Alignment):
         vbox_remember.pack_start(self.remember_password)
         vbox_remember.pack_start(self.auto_login)
         vbox_remember.pack_start(gtk.Label())
-        
-        session_combo_store = gtk.ListStore(gtk.gdk.Pixbuf, str)
-        crp = gtk.CellRendererPixbuf()
-        crt = gtk.CellRendererText()
-        crp.set_property("xalign", 0)
-        crt.set_property("xalign", 0)
-
-        self.session_combo = gtk.ComboBox()
-        self.session_combo.set_model(session_combo_store)
-        self.session_combo.pack_start(crp, True)
-        self.session_combo.pack_start(crt, True)
-        self.session_combo.add_attribute(crp, "pixbuf", 0)
-        self.session_combo.add_attribute(crt, "text", 1)
-
-        vbox_remember.pack_start(self.session_combo)
 
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
@@ -158,6 +143,22 @@ class LoginBase(gtk.Alignment):
         vbox_entries.set_border_width(8)
         vbox_entries.pack_start(hbox_account)
         vbox_entries.pack_start(hbox_password)
+        
+        session_combo_store = gtk.ListStore(gtk.gdk.Pixbuf, str)
+        crp = gtk.CellRendererPixbuf()
+        crt = gtk.CellRendererText()
+        crp.set_property("xalign", 0)
+        crt.set_property("xalign", 0)
+
+        self.session_combo = gtk.ComboBox()
+        self.session_combo.set_model(session_combo_store)
+        self.session_combo.pack_start(crp)
+        self.session_combo.pack_start(crt)
+        self.session_combo.add_attribute(crp, "pixbuf", 0)
+        self.session_combo.add_attribute(crt, "text", 1)
+        
+        hbox_session = gtk.HBox(spacing=10)
+        hbox_session.pack_start(self.session_combo)
 
         self.b_preferences = gtk.Button()
         self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
@@ -171,6 +172,10 @@ class LoginBase(gtk.Alignment):
             self._on_preferences_leave)
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
+        hbox_session.pack_start(self.b_preferences, False)
+        
+        vbox_session = gtk.VBox(spacing=4)
+        vbox_session.pack_start(hbox_session)
 
         self.nicebar = NiceBar()
 
@@ -188,10 +193,11 @@ class LoginBase(gtk.Alignment):
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.2)
+        al_vbox_session = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.5,
+            yscale=0.0)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2)
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
-        al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
 
         al_label_timer.add(self.label_timer)
         al_throbber.add(self.throbber)
@@ -199,18 +205,18 @@ class LoginBase(gtk.Alignment):
         al_vbox_remember.add(vbox_remember)
         al_button.add(vbuttonbox)
         al_account.add(self.avatar)
-        al_preferences.add(self.b_preferences)
+        al_vbox_session.add(vbox_session)
 
         vbox_bottom = gtk.VBox(True)
         vbox.pack_start(self.nicebar, False)
         vbox.pack_start(al_account, True, False)
         vbox.pack_start(al_vbox_entries, True, True)
         vbox.pack_start(al_vbox_remember, True, False)
+        vbox.pack_start(al_vbox_session, True, False)
         vbox_bottom.pack_start(al_label_timer, True, False)
         vbox_bottom.pack_start(al_throbber, False, False)
         vbox_bottom.pack_start(al_button, True, True)
         vbox.pack_start(vbox_bottom, True, True)
-        vbox.pack_start(al_preferences, True, False)
 
         self.add(vbox)
         vbox.show_all()
@@ -330,7 +336,6 @@ class Login(LoginBase):
                     session_found = True
 
                 try:
-                    # ugly eval here, is there another way?
                     s_name = getattr(gui.theme, "service_" + service_name) 
                     image = utils.safe_gtk_pixbuf_load(s_name)
                 except:
