@@ -64,6 +64,7 @@ class LoginBase(gtk.Alignment):
 
         self.btn_status = StatusButton.StatusButton()
         self.btn_status.set_status(e3.status.ONLINE)
+        self.btn_status.set_size_request(34, -1)
 
         self.txt_password = gtk.Entry()
         self.txt_password.set_visibility(False)
@@ -98,6 +99,7 @@ class LoginBase(gtk.Alignment):
         self.forget_me.set_image(forget_img)
         self.forget_me.set_relief(gtk.RELIEF_NONE)
         self.forget_me.set_border_width(0)
+        self.forget_me.set_size_request(34, -1)
         self.forget_me.connect('clicked', self._on_forget_me_clicked)
         self.forget_me.set_sensitive(False)
 
@@ -139,11 +141,6 @@ class LoginBase(gtk.Alignment):
         hbox_password.pack_start(self.txt_password)
         hbox_password.pack_start(self.btn_status, False)
 
-        vbox_entries = gtk.VBox(spacing=12)
-        vbox_entries.set_border_width(8)
-        vbox_entries.pack_start(hbox_account)
-        vbox_entries.pack_start(hbox_password)
-
         session_combo_store = gtk.ListStore(gtk.gdk.Pixbuf, str)
         crp = gtk.CellRendererPixbuf()
         crt = gtk.CellRendererText()
@@ -157,9 +154,6 @@ class LoginBase(gtk.Alignment):
         self.session_combo.add_attribute(crp, "pixbuf", 0)
         self.session_combo.add_attribute(crt, "text", 1)
 
-        hbox_session = gtk.HBox(spacing=10)
-        hbox_session.pack_start(self.session_combo)
-
         self.b_preferences = gtk.Button()
         self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
             gtk.ICON_SIZE_MENU)
@@ -172,10 +166,21 @@ class LoginBase(gtk.Alignment):
             self._on_preferences_leave)
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
+        self.b_preferences.set_size_request(34, -1)
+
+        img_sessionpix = gtk.image_new_from_stock(gtk.STOCK_CONNECT, gtk.ICON_SIZE_MENU)
+        img_sessionpix.set_size_request(20, -1)
+        img_sessionpix.set_sensitive(False)
+        hbox_session = gtk.HBox(spacing=6)
+        hbox_session.pack_start(img_sessionpix, False)
+        hbox_session.pack_start(self.session_combo)
         hbox_session.pack_start(self.b_preferences, False)
 
-        vbox_session = gtk.VBox(spacing=4)
-        vbox_session.pack_start(hbox_session)
+        vbox_entries = gtk.VBox(spacing=12)
+        vbox_entries.set_border_width(8)
+        vbox_entries.pack_start(hbox_account)
+        vbox_entries.pack_start(hbox_password)
+        vbox_entries.pack_start(hbox_session)
 
         self.nicebar = NiceBar()
 
@@ -193,8 +198,6 @@ class LoginBase(gtk.Alignment):
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.2)
-        al_vbox_session = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.5,
-            yscale=0.0)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2)
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
@@ -205,7 +208,6 @@ class LoginBase(gtk.Alignment):
         al_vbox_remember.add(vbox_remember)
         al_button.add(vbuttonbox)
         al_account.add(self.avatar)
-        al_vbox_session.add(vbox_session)
 
         vbox = gtk.VBox()
         vbox_top = gtk.VBox()
@@ -214,8 +216,7 @@ class LoginBase(gtk.Alignment):
         vbox_bottom = gtk.VBox(True)
         vbox_content.pack_start(al_account, True, False)
         vbox_content.pack_start(al_vbox_entries, False)
-        vbox_content.pack_start(al_vbox_remember, False)
-        vbox_content.pack_start(al_vbox_session, False)
+        vbox_content.pack_start(al_vbox_remember, True, False)
         vbox_bottom.pack_start(al_label_timer, True, False)
         vbox_bottom.pack_start(al_throbber, False)
         vbox_bottom.pack_start(al_button)
