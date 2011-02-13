@@ -222,7 +222,7 @@ class BaseTable(gtk.Table):
         if increment_current_row:
             self.current_row += 1
 
-    def append_entry_default(self, text, property_name, default):
+    def append_entry_default(self, text, format_type, property_name, default):
         """append a row with a label and a entry, set the value to the
         value of property_name if exists, if not set it to default.
          Add a reset button that sets the value to the default"""
@@ -237,8 +237,11 @@ class BaseTable(gtk.Table):
             set the value of the property to the new value"""
             self.set_attr(property_name, entry.get_text())
 
+        def on_help_clicked(button, format_type):
+            """called when the help button is clicked"""
+            extension.get_default('dialog').contactlist_format_help(format_type)
+
         hbox = gtk.HBox(spacing=4)
-        hbox.set_homogeneous(True)
         label = gtk.Label(text)
         label.set_alignment(0.0, 0.5)
         text = self.get_attr(property_name)
@@ -246,14 +249,26 @@ class BaseTable(gtk.Table):
         entry = gtk.Entry()
         entry.set_text(text)
 
-        reset = gtk.Button(stock=gtk.STOCK_CLEAR)
+        reset = gtk.Button()
+        entry_help = gtk.Button()
 
-        hbox.pack_start(label, True, True)
+        hbox.pack_start(label)
         hbox.pack_start(entry, False)
         hbox.pack_start(reset, False)
+        hbox.pack_start(entry_help, False)
 
+        reset_image = gtk.image_new_from_stock(gtk.STOCK_CLEAR,
+                                               gtk.ICON_SIZE_MENU)
+        reset.set_label(_('Reset'))
+        reset.set_image(reset_image)
         reset.connect('clicked', on_reset_clicked, entry, default)
         entry.connect('changed', on_entry_changed, property_name)
+
+        help_image = gtk.image_new_from_stock(gtk.STOCK_HELP,
+                                              gtk.ICON_SIZE_MENU)
+        entry_help.set_image(help_image)
+        entry_help.connect('clicked', on_help_clicked, format_type)
+
         self.append_row(hbox, None)
 
     def append_check(self, text, property_name, row=None):
@@ -392,6 +407,12 @@ class BaseTable(gtk.Table):
 
     def on_update(self):
         pass
+
+    def on_redraw_main_screen(self, button):
+        """called when the Redraw main screen button is clicked"""
+        self.session.save_config()
+        self.session.signals.login_succeed.emit()
+        self.session.signals.contact_list_ready.emit()
 
 class Interface(BaseTable):
     """the panel to display/modify the config related to the gui
@@ -546,10 +567,13 @@ class Theme(BaseTable):
             'session.config.emote_theme')
         self.append_combo(_('Adium theme'), gui.theme.get_adium_themes,
             'session.config.adium_theme')
-        self.append_entry_default(_('Nick format'),
+        self.append_entry_default(_('Nick format'), 'nick',
                 'session.config.nick_template', ContactList.NICK_TPL)
-        self.append_entry_default(_('Group format'),
+        self.append_entry_default(_('Group format'), 'group',
                 'session.config.group_template', ContactList.GROUP_TPL)
+
+        self.add_button(_('Apply'), 0, 7,
+                self.on_redraw_main_screen, 0, 0)
 
 class Extension(BaseTable):
     """the panel to display/modify the config related to the extensions
@@ -591,13 +615,7 @@ class Extension(BaseTable):
         self.add_label(self.website_info, 1, 6, True)
 
         self.add_button(_('Redraw main screen'), 1, 7,
-                self._on_redraw_main_screen, 0, 0)
-
-    def _on_redraw_main_screen(self, button):
-        """called when the Redraw main screen button is clicked"""
-        self.session.save_config()
-        self.session.signals.login_succeed.emit()
-        self.session.signals.contact_list_ready.emit()
+                self.on_redraw_main_screen, 0, 0)
 
     def _get_categories(self):
         ''' get available categories'''
