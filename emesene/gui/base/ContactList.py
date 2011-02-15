@@ -322,7 +322,7 @@ class ContactList(object):
         '''
         return value.replace("[$", "[ $")
 
-    def format_nick(self, contact):
+    def format_nick(self, contact, escaped_information):
         '''replace the appearance of the template vars using the values of
         the contact
         # valid values:
@@ -334,7 +334,8 @@ class ContactList(object):
         # + BLOCKED
         # + NL
         '''
-        nick = contact.nick
+        display_name, message = escaped_information
+        nick = display_name
 
         #TODO: fix those "no-more-color" with msgplus codes, '&#173;'?
         def fix_plus(text):
@@ -364,11 +365,11 @@ class ContactList(object):
         template = template.replace('[$ACCOUNT]',
                 self.escape_tags(contact.account))
         template = template.replace('[$MESSAGE]',
-                fix_plus(contact.message))
+                fix_plus(message))
         template = template.replace('[$STATUS]',
                 self.escape_tags(e3.status.STATUS[contact.status]))
         template = template.replace('[$DISPLAY_NAME]',
-                fix_plus(contact.nick))
+                fix_plus(display_name))
 
         blocked_text = ''
 
@@ -379,7 +380,7 @@ class ContactList(object):
 
         return template
 
-    def format_group(self, group):
+    def format_group(self, group, escaped_name):
         '''replace the appearance of the template vars using the values of
         the group
         # valid values:
@@ -397,7 +398,7 @@ class ContactList(object):
             template = template.replace('[$ONLINE_COUNT]', str(online))
 
         template = template.replace('[$TOTAL_COUNT]', str(total))
-        template = template.replace('[$NAME]', self.escape_tags(group.name))
+        template = template.replace('[$NAME]', self.escape_tags(escaped_name))
 
         return template
 
