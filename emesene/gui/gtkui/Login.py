@@ -333,7 +333,7 @@ class Login(LoginBase):
         if account in self.accounts:
             service = self.config.d_user_service.get(account, 'msn')
         else:
-            service = 'msn'
+            service = self.config.service
 
         for ext_id, ext in extension.get_extensions('session').iteritems():
             if default_session.NAME == ext.NAME:
