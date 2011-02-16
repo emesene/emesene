@@ -168,7 +168,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
 
     def _on_icon_size_change(self, value):
-        '''callback called when config.b_show_toolbar changes'''
+        '''callback called when config.b_toolbar_small changes'''
         self.toolbar.draw()
 
     def _on_avatarsize_changed(self, value):
@@ -180,7 +180,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.info.first = self.his_avatar
 
     def _on_show_toolbar_changed(self, value):
-        '''callback called when config.b_toolbar_small changes'''
+        '''callback called when config.b_show_toolbar changes'''
         if value:
             self.toolbar.show()
         else:
