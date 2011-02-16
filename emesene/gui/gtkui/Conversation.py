@@ -139,6 +139,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             'b_show_info')
         self.session.config.subscribe(self._on_show_avatar_onleft,
             'b_avatar_on_left')
+        self.session.config.subscribe(self._on_icon_size_change,
+            'b_toolbar_small')
         self.session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
         self.session.signals.contact_attr_changed.subscribe(
@@ -164,6 +166,11 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.rotate_started = True #to prevents more than one timeout_add
             glib.timeout_add_seconds(5, self.rotate_picture)
 
+
+    def _on_icon_size_change(self, value):
+        '''callback called when config.b_show_toolbar changes'''
+        self.toolbar.draw()
+
     def _on_avatarsize_changed(self, value):
         '''callback called when config.i_conv_avatar_size changes'''
         self.avatar.set_property('dimention',value)
@@ -173,7 +180,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.info.first = self.his_avatar
 
     def _on_show_toolbar_changed(self, value):
-        '''callback called when config.b_show_toolbar changes'''
+        '''callback called when config.b_toolbar_small changes'''
         if value:
             self.toolbar.show()
         else:
