@@ -40,6 +40,8 @@ import e3
 from e3 import jabber
 from e3 import dummy
 
+from e3.common.DBus import DBusController
+
 try:
     from gui import gtkui
 except Exception, e:
@@ -135,6 +137,11 @@ class Controller(object):
         else:
             extension.set_default('session', dummy.Session)
 
+        #DBus extension stuffs
+        extension.category_register('external api', DBusController)
+        extension.set_default('external api', DBusController)
+        self.dbus_ext = extension.get_and_instantiate('external api')
+        
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
                 e3.common.notification.Notification)
@@ -223,6 +230,9 @@ class Controller(object):
         signals.disconnected.subscribe(self.on_disconnected)
         signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
         signals.contact_added_you.subscribe(self.on_pending_contacts)
+        
+        #let's start dbus
+        self.dbus_ext.set_new_session(self.session)
 
     def close_session(self, do_exit=True):
         '''close session'''
