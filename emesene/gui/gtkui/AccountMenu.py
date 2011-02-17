@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 
 class AccountMenu(gtk.Menu):
@@ -18,7 +36,7 @@ class AccountMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        self.change_profile = gtk.ImageMenuItem('Change profile')
+        self.change_profile = gtk.ImageMenuItem(_('Change profile'))
         self.change_profile.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
             gtk.ICON_SIZE_MENU))
         self.change_profile.connect('activate',

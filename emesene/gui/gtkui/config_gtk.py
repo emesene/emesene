@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 
 import gui.base.config as config
@@ -103,7 +121,7 @@ def build_combo(item):
             return get
 
         child._get_gui_value = get_value(combo, child)
-        
+
         if child.value:
             selected = index
 
@@ -118,7 +136,7 @@ def build_text(item):
 
     entry = gtk.Entry()
     entry.set_text(item.value)
-    
+
     item._get_gui_value = lambda: entry.get_text()
 
     widget.pack_start(entry)

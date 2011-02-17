@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
-import time
 import Queue
 import random
 
@@ -20,8 +18,6 @@ class Worker(e3.Worker):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        data = None
-
         while True:
             try:
                 action = self.session.actions.get(True, 0.1)
@@ -85,6 +81,7 @@ class Worker(e3.Worker):
         self._add_contact('seven@hotmail.com', '[c=5]((_...sdsdf..._))..)_<(_))(°.°)(...][/c=48][u][/u]', e3.status.BUSY,
                 '', False)
         self._add_contact('eight@hotmail.com', '[i][B][c=12]☆[/c=0][c=0]☆[/c=12][c=12]☆[/c=0] (W) [c=12]Bellamezz[/c=49] (F) [c=0]☆[/c=0][c=12]☆[/c=12][c=0]☆[/c=0][/B][/i]', e3.status.BUSY, '', False)
+        self._add_contact('nine@hotmail.com', '[b](*) ... [c=12]Ricky[/c=33] ...(*)[/b]', e3.status.BUSY, '', False)
 
         self._add_group('ninjas')
         self._add_group('pirates')
@@ -115,6 +112,7 @@ class Worker(e3.Worker):
         self._add_contact_to_group('six@hotmail.com', 'strange nicks')
         self._add_contact_to_group('seven@hotmail.com', 'strange nicks')
         self._add_contact_to_group('eight@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('nine@hotmail.com', 'strange nicks')
 
     def _add_contact(self, mail, nick, status_, alias, blocked):
         """
@@ -265,6 +263,10 @@ class Worker(e3.Worker):
         account = random.choice(self.session.contacts.contacts.keys())
         self.session.add_event(e3.Event.EVENT_CONV_MESSAGE,
             cid, account, message)
+
+        e3.Logger.log_message(self.session, [account], message, True)
+        message.account = account
+        e3.Logger.log_message(self.session, None, message, False)
 
     # p2p handlers
 

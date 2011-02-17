@@ -7,7 +7,9 @@ class Message(e3.Message):
     '''a class that represent a msn message'''
 
     def __init__(self, type_, body, account, style=None, dest=''):
-        e3.Message.__init__(self, type_, body, account, style)
+        if not isinstance(body, basestring):
+            body = ''
+        e3.Message.__init__(self, type_, body.encode('utf-8'), account, style)
 
         self.dest = dest
         if style:
@@ -107,7 +109,7 @@ class Message(e3.Message):
         elif type_ == 'application/x-msnmsgrp2p':
             mtype = Message.TYPE_P2P
             dest = common.get_value_between(head, 'P2P-Dest: ', '\r\n')
-        elif type_ == 'text/x-msnmsgr-datacast' and body == 'ID: 1\r\n\r\n':
+        elif type_ == 'text/x-msnmsgr-datacast' and body.strip() == 'ID: 1':
             mtype = Message.TYPE_NUDGE
         else:
             mtype = Message.TYPE_UNK

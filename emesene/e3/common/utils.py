@@ -1,10 +1,37 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+import os
+import sys
+
 import MessageFormatter
 
 def add_style_to_message(text, stl, escape=True):
     '''add the style in a xhtml like syntax to text'''
+    if escape:
+        text = MessageFormatter.escape(text)
+
+    if stl is None:
+        return text
+
     style_start = ''
     style_end = ''
-    style = 'color: #' + stl.color.to_hex() + ';'
+    style = 'color: #' + stl.color.to_hex() + '; '
 
     if stl.bold:
         style_start = style_start + '<b>'
@@ -23,13 +50,29 @@ def add_style_to_message(text, stl, escape=True):
         style_end = '</s>' + style_end
 
     if stl.font:
-        style += 'font-family: ' + stl.font
+        style += "font-family: '%s'; " % (stl.font, )
 
-    style_start += '<span style="%s; ">' % (style, )
+    style_start += '<span style="%s">' % (style, )
     style_end = '</span>' + style_end
 
-    if escape:
-        text = MessageFormatter.escape(text)
 
     return style_start + text + style_end
 
+def we_are_frozen():
+    """Returns whether we are frozen via py2exe.
+    This will affect how we find out where we are located."""
+
+    return hasattr(sys, "frozen")
+
+def project_path():
+    """ This will get us the program's directory,
+    even if we are frozen using py2exe"""
+
+    if we_are_frozen():
+        return os.path.abspath(os.path.dirname(unicode(sys.executable, sys.getfilesystemencoding())))
+
+
+    this_module_path = os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))
+    proj_path = os.path.join(this_module_path, "..", "..")
+
+    return os.path.abspath(proj_path)

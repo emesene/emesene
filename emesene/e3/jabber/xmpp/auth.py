@@ -12,7 +12,7 @@
 ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##   GNU General Public License for more details.
 
-# $Id: auth.py,v 1.38 2007/08/28 10:03:33 normanr Exp $
+# $Id$
 
 """
 Provides library with all Non-SASL and SASL authentication mechanisms.
@@ -23,17 +23,23 @@ from protocol import *
 from client import PlugIn
 import base64,random,dispatcher,re
 
+NO_HASHLIB=0
 try:
-    import hashlib
-    sha = hashlib.sha1
-    md5 = hashlib.md5
+    from hashlib import md5
+    from hashlib import sha1 as sha
 except ImportError:
-    from sha import sha
-    from md5 import md5
+    NO_HASHLIB=1
+    import md5
+    import sha
 
-def HH(some): return md5(some).hexdigest()
-def H(some): return md5(some).digest()
-def C(some): return ':'.join(some)
+if NO_HASHLIB:
+    def HH(some): return md5.new(some).hexdigest()
+    def H(some): return md5.new(some).digest()
+    def C(some): return ':'.join(some)
+else:
+    def HH(some): m = md5(); m.update(some); return m.hexdigest()
+    def H(some): m = md5(); m.update(some); return m.digest()
+    def C(some): return ':'.join(some)
 
 class NonSASL(PlugIn):
     """ Implements old Non-SASL (JEP-0078) authentication used in jabberd1.4 and transport authentication."""
@@ -61,15 +67,15 @@ class NonSASL(PlugIn):
 
         if query.getTag('digest'):
             self.DEBUG("Performing digest authentication",'ok')
-            query.setTagData('digest',sha(owner.Dispatcher.Stream._document_attrs['id']+self.password).hexdigest())
+            query.setTagData('digest',sha.new(owner.Dispatcher.Stream._document_attrs['id']+self.password).hexdigest())
             if query.getTag('password'): query.delChild('password')
             method='digest'
         elif query.getTag('token'):
             token=query.getTagData('token')
             seq=query.getTagData('sequence')
             self.DEBUG("Performing zero-k authentication",'ok')
-            hash = sha(sha(self.password).hexdigest()+token).hexdigest()
-            for foo in xrange(int(seq)): hash = sha(hash).hexdigest()
+            hash = sha.new(sha.new(self.password).hexdigest()+token).hexdigest()
+            for foo in xrange(int(seq)): hash = sha.new(hash).hexdigest()
             query.setTagData('hash',hash)
             method='0k'
         else:
@@ -88,7 +94,7 @@ class NonSASL(PlugIn):
     def authComponent(self,owner):
         """ Authenticate component. Send handshake stanza and wait for result. Returns "ok" on success. """
         self.handshake=0
-        owner.send(Node(NS_COMPONENT_ACCEPT+' handshake',payload=[sha(owner.Dispatcher.Stream._document_attrs['id']+self.password).hexdigest()]))
+        owner.send(Node(NS_COMPONENT_ACCEPT+' handshake',payload=[sha.new(owner.Dispatcher.Stream._document_attrs['id']+self.password).hexdigest()]))
         owner.RegisterHandler('handshake',self.handshakeHandler,xmlns=NS_COMPONENT_ACCEPT)
         while not self.handshake:
             self.DEBUG("waiting on handshake",'notify')
@@ -144,11 +150,13 @@ class SASL(PlugIn):
         self._owner.RegisterHandler('challenge',self.SASLHandler,xmlns=NS_SASL)
         self._owner.RegisterHandler('failure',self.SASLHandler,xmlns=NS_SASL)
         self._owner.RegisterHandler('success',self.SASLHandler,xmlns=NS_SASL)
-        if "DIGEST-MD5" in mecs:
+        if "ANONYMOUS" in mecs and self.username == None:
+            node=Node('auth',attrs={'xmlns':NS_SASL,'mechanism':'ANONYMOUS'})
+        elif "DIGEST-MD5" in mecs:
             node=Node('auth',attrs={'xmlns':NS_SASL,'mechanism':'DIGEST-MD5'})
         elif "PLAIN" in mecs:
             sasl_data='%s\x00%s\x00%s'%(self.username+'@'+self._owner.Server,self.username,self.password)
-            node=Node('auth',attrs={'xmlns':NS_SASL,'mechanism':'PLAIN'},payload=[base64.encodestring(sasl_data)])
+            node=Node('auth',attrs={'xmlns':NS_SASL,'mechanism':'PLAIN'},payload=[base64.encodestring(sasl_data).replace('\r','').replace('\n','')])
         else:
             self.startsasl='failure'
             self.DEBUG('I can only use DIGEST-MD5 and PLAIN mecanisms.','error')
@@ -180,11 +188,11 @@ class SASL(PlugIn):
         chal={}
         data=base64.decodestring(incoming_data)
         self.DEBUG('Got challenge:'+data,'ok')
-        for pair in re.findall('(\w+=(?:"[^"]+")|(?:[^,]+))',data):
-            key,value=pair.split('=', 1)
+        for pair in re.findall('(\w+\s*=\s*(?:(?:"[^"]+")|(?:[^,]+)))',data):
+            key,value=[x.strip() for x in pair.split('=', 1)]
             if value[:1]=='"' and value[-1:]=='"': value=value[1:-1]
             chal[key]=value
-        if chal.has_key('qop') and 'auth' in chal['qop'].split(','):
+        if chal.has_key('qop') and 'auth' in [x.strip() for x in chal['qop'].split(',')]:
             resp={}
             resp['username']=self.username
             resp['realm']=self._owner.Server

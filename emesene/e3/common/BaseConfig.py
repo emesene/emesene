@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-#   This file is part of emesene.
+
+#    This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -14,12 +15,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-import urllib
 
 import logging
 log = logging.getLogger('e3.common.Config')
 
-import BaseConfig
+from Signal import WeakMethod
 
 class Config(object):
     '''a class that contains all the configurations of the user,
@@ -77,6 +77,8 @@ class Config(object):
         on an attribute change, if item is None then notify on
         all item changes, it item is a string, then notify on
         the change of that item'''
+        callback = WeakMethod(callback)
+
         if self._callbacks is None:
             self._callbacks = []
 
@@ -97,13 +99,21 @@ class Config(object):
         '''remove the callback from the callback list, if item is None
         try to remove the callback from the global callback list, if it's
         a string try to remove from the callback list of that item'''
+        callbacks = []
+
         if item is None:
-            if callback in self._callbacks:
-                self._callbacks.remove(callback)
-        else:
-            if item in self._item_callbacks and\
-                    callback in self._item_callbacks[item]:
-                self._item_callbacks[item].remove(callback)
+            callbacks = self._callbacks
+        elif item in self._item_callbacks:
+            callbacks = self._item_callbacks[item]
+
+
+        to_remove = None
+        for weakmethod in callbacks:
+            if callback == weakmethod.f:
+                to_remove = weakmethod
+
+        if to_remove is not None:
+            self._callbacks.remove(to_remove)
 
     def load(self, path, clear=False):
         '''load the config file from path, clear old values if

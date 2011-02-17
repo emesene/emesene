@@ -1,4 +1,22 @@
 '''a module to handle themes'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import glob
 
@@ -81,7 +99,7 @@ class AdiumThemes(object):
         '''
 
         if not os.path.isdir(theme_path):
-            return False, "%s is not a directoy" % (theme_path,)
+            return False, "%s is not a directory" % (theme_path,)
 
         return self.validate_structure(theme_path, REQUIRED_FILES)
 
@@ -94,12 +112,12 @@ class AdiumThemes(object):
 
             if item['type'] == FILE:
                 if not os.path.isfile(name):
-                    return False, "%s is not a file" % (name, )
+                    return False, _("%s is not a file") % (name, )
                 if not os.access(name, os.R_OK):
-                    return False, "%s is not readable" % (name, )
+                    return False, _("%s is not readable") % (name, )
             elif item['type'] == DIRECTORY:
                 if not os.path.isdir(name):
-                    return False, "%s is not a directory" % (name, )
+                    return False, _("%s is not a directory") % (name, )
 
                 return self.validate_structure(name, item['childs'])
 

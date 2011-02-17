@@ -1,7 +1,26 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 import pango
 import gobject
 
+import Renderers
 import extension
 
 class TextField(gtk.VBox):
@@ -21,8 +40,8 @@ class TextField(gtk.VBox):
         gtk.VBox.__init__(self)
 
         self.entry = gtk.Entry()
-        self.label = gtk.Label()
-        self.label.set_ellipsize(pango.ELLIPSIZE_END)
+        self.label = Renderers.SmileyLabel()
+        #self.label.set_ellipsize(pango.ELLIPSIZE_END)
         self.button = gtk.Button()
         self.button.set_alignment(0.0, 0.5)
         self.button.set_relief(gtk.RELIEF_NONE)
@@ -42,6 +61,7 @@ class TextField(gtk.VBox):
         self.button.connect('clicked', self.on_button_clicked)
         self.entry.connect('activate', self.on_entry_activate)
         self.entry.connect('focus-out-event', self._on_focus_out)
+        self.entry.connect('key-press-event', self._on_key_press)
 
     def on_button_clicked(self, button):
         '''method called when the button is clicked'''
@@ -51,10 +71,10 @@ class TextField(gtk.VBox):
 
     def on_entry_activate(self, entry):
         '''method called when the user press enter on the entry'''
-        
-        dialog = extension.get_default('dialog')
         if not self.entry.get_text() and not self.allow_empty:
-            dialog.error("Empty text not allowed")
+            self.entry.set_text(self._text)
+            self.entry.hide()
+            self.button.show()
             return
 
         new_text = self.entry.get_text()
@@ -90,7 +110,7 @@ class TextField(gtk.VBox):
     def _set_text(self, value):
         '''set the value of text'''
         self._text = value
-        self.label.set_text(self._text)
+        self.label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(self._text)))
         self.entry.set_text(self._text)
 
     text = property(fget=_get_text, fset=_set_text)
@@ -109,3 +129,11 @@ class TextField(gtk.VBox):
 
     enabled = property(fget=_get_enabled, fset=_set_enabled)
 
+    def _on_key_press(self, widget, event):
+        ''' if escape key is pressed put old text in the entry and cancel edit
+        '''
+        if event.keyval == gtk.keysyms.Escape:
+          self.entry.set_text(self._text)
+          self.on_entry_activate(self.entry)
+          return True
+        return False

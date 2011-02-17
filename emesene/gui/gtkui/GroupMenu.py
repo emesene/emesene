@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 
 class GroupMenu(gtk.Menu):
@@ -26,7 +44,7 @@ class GroupMenu(gtk.Menu):
         self.remove.connect('activate', 
             lambda *args: self.handler.on_remove_group_selected())
 
-        self.rename = gtk.ImageMenuItem('Rename')
+        self.rename = gtk.ImageMenuItem(_('Rename'))
         self.rename.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
             gtk.ICON_SIZE_MENU))
         self.rename.connect('activate', 

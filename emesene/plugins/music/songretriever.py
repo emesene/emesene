@@ -2,11 +2,12 @@
 the status and song of a music player.'''
 
 import os
+import sys
 import urllib
-import gobject
+import glib
 import Preferences
 
-from gui.gtkui.AvatarManager import AvatarManager
+from gui.base.AvatarManager import AvatarManager
 from gui.gtkui.Preferences import BaseTable
 
 class Song(object):
@@ -31,20 +32,13 @@ class BaseMusicHandlerConfig(BaseTable):
     '''the panel to display/modify the config related to
     the 'listening to' extension'''
 
-    def __init__(self):
+    def __init__(self, config):
         '''constructor'''
         BaseTable.__init__(self, 4, 1)
+        self.config = config
 
-        # This should be loaded from a config option
-        self.format_default = "%ARTIST% - %ALBUM% - %TITLE%"
-        self.format = self.format_default
-        BaseTable.append_entry_default(self,
-            'Format', 'format', self.format_default)
-
-        # This should be loaded from a config option
-        self.change_avatar = True
-        BaseTable.append_check(self,
-            _('Set song cover as avatar'), 'change_avatar')
+        self.append_entry_default('Format', 'config.music_format', config.music_format)
+        self.append_check(_('Set song cover as avatar'), 'config.change_avatar')
 
 class MusicHandler(object):
     '''Base class for all music handlers'''
@@ -53,53 +47,65 @@ class MusicHandler(object):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, main_window = None):
+    def __init__(self, main_window):
         self.last_title = None
         self.session = None
         self.avatar_manager = None
 
-        if main_window != None:
-            self.session = main_window.session
-            self.avatar_manager = AvatarManager(self.session)
+        self.session = main_window.session
+        self.avatar_manager = AvatarManager(self.session)
 
-        self.preferences_dialog = None
-        self.config = BaseMusicHandlerConfig()
+        self.config = self.session.config
+        # set default values if not set
+        self.config.get_or_set('music_format', "%ARTIST% - %ALBUM% - %TITLE%")
+        self.config.get_or_set('change_avatar', True)
 
-        gobject.timeout_add(500, self.check_song)
+        self.config_dialog_class = BaseMusicHandlerConfig
+
+        glib.timeout_add_seconds(15, self.check_song)
 
     def preferences(self):
-        ''' Shows the extension preferences dialog'''
-        ''' You don't need to override this'''
-        if self.preferences_dialog == None:
-            self.preferences_dialog = Preferences.Preferences(
-                self._on_config, self.NAME, self.config)
-        self.preferences_dialog.show()
- 
+        ''' Shows the extension preferences dialog
+        You don't need to override this'''
+        config_dialog = self.config_dialog_class(self.config)
+
+        preferences_dialog = Preferences.Preferences(
+            self._on_config, self.NAME, config_dialog)
+
+        preferences_dialog.show()
+
     def _on_config(self, status):
         '''callback for the config dialog'''
         if status:
             pass
 
     def check_song(self):
-        '''get the current song and set it if different than the last one'''
-        ''' You don't need to override this'''
+        '''get the current song and set it if different than the last one
+        You don't need to override this'''
         if self.session:
             song = self.get_current_song()
+
             if song:
                 # print self.config.format
-                current_title = song.format(self.config.format)
+                current_title = song.format(self.config.music_format)
+
                 if current_title != self.last_title:
                     self.session.set_media(current_title)
                     self.last_title = current_title
                     self.set_cover_as_avatar(song)
+
             elif self.last_title is not None:
                 self.last_title = None
                 self.session.set_media(_("not playing"))
+
         return True
 
     def set_cover_as_avatar(self, song):
-        ''' Sets song cover as avatar '''
-        ''' You don't need to override this'''
+        ''' Sets song cover as avatar
+        You don't need to override this'''
+        if not self.config.change_avatar:
+            return
+
         image_path = self.get_cover_path(song)
         if image_path != None and self.avatar_manager != None:
             self.avatar_manager.set_as_avatar(image_path)
@@ -109,7 +115,7 @@ class MusicHandler(object):
         if not found also searches in albumart covers website
         returns None if no image found'''
         ''' You don't need to override this'''
-        
+
         artist = song.artist.encode('utf8')
         album = song.album.encode('utf8')
 
@@ -167,16 +173,16 @@ class MusicHandler(object):
         return None
 
     def get_current_song(self):
-        ''' returns current song info'''
-        ''' This MUST be overriden'''
+        ''' returns current song info
+        This MUST be overriden'''
         return None
 
     def is_running(self):
-        '''returns True if the player is running'''
-        ''' This MUST be overriden'''
+        '''returns True if the player is running
+        This MUST be overriden'''
         return False
 
     def is_playing(self):
-        '''returns True if the player is playing a song'''
-        ''' This MUST be overriden'''
+        '''returns True if the player is playing a song
+        This MUST be overriden'''
         return False

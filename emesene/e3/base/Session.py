@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 '''a module that defines a session object'''
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -45,6 +45,7 @@ class Session(object):
         self._account = None
         self.contacts = None
         self.logger = None
+        self.conversations = None
         self.extras = {}
 
         self.events = Queue.Queue()
@@ -94,7 +95,10 @@ class Session(object):
         config_path = self.config_dir.get_path('config')
 
         if config_path:
-            self.config.save(config_path)
+            try:
+                self.config.save(config_path)
+            except:
+                print "Error on save configuration"
 
     def load_config(self):
         '''load the config of the session'''
@@ -205,7 +209,7 @@ class Session(object):
         '''set the preferences of the session to preferences, that is a
         dict containing key:value pairs where the keys are the preference name
         and value is the new value of that preference'''
-        self.add_action(Action.ACTION_SET_PREFERENCE, (preferences,))
+        self.add_action(Action.ACTION_SET_PREFERENCES, (preferences,))
 
     def send_message(self, cid, text, style=None):
         '''send a common message'''
@@ -223,4 +227,13 @@ class Session(object):
 
     def cancel_filetransfer(self, transfer):
         self.add_action(Action.ACTION_FT_CANCEL, (transfer,))
+
+    def accept_call(self, call):
+        self.add_action(Action.ACTION_CALL_ACCEPT, (call,))
+
+    def reject_call(self, call):
+        self.add_action(Action.ACTION_CALL_REJECT, (call,))
+
+    def cancel_call(self, call):
+        self.add_action(Action.ACTION_CALL_CANCEL, (call,))
 

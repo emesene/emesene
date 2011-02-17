@@ -9,8 +9,12 @@ class Session(e3.Session):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    DEFAULT_HOST = "dummy.server.com"
-    DEFAULT_PORT = "1337"
+    SERVICES = {
+        "dummy": {
+            "host": "dummy.server.com",
+            "port": "1337"
+        }
+    }
 
     def __init__(self, id_=None, account=None):
         '''constructor'''
@@ -24,8 +28,14 @@ class Session(e3.Session):
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status))
 
-    def send_message(self, cid, text, style=None):
+    def send_message(self, cid, text, style=None, cedict=None, celist=None):
         '''send a common message'''
+        if cedict is None:
+            cedict = {}
+
+        if celist is None:
+            celist = []
+
         account = self.account.account
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, account,
             style)

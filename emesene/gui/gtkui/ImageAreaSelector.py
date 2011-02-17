@@ -1,10 +1,11 @@
+'''a module that permit to resize an image added as avatar'''
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -16,7 +17,6 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-'''a module that permit to resize an image added as avatar'''
 import gtk
 import cairo
 import pango
@@ -37,7 +37,7 @@ NORMALBACKGROUND = gtk.gdk.Color(65025,65025,46155)
 class ImageAreaSelectorDialog(gtk.Dialog):
 
     NAME = 'ImageAreaSelector'
-    DESCRIPTION = 'The widget that permits to resize an image added as avatar'
+    DESCRIPTION = _('The widget that permits to resize an image added as avatar')
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 

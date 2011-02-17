@@ -2,11 +2,11 @@
 #
 # papylib - an emesene extension for papyon
 #
-# Copyright (C) 2009 Riccardo (C10uD) <c10ud.dev@gmail.com>
+# Copyright (C) 2009-2010 Riccardo (C10uD) <c10ud.dev@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,

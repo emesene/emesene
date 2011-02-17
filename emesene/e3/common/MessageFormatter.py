@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import time
 import xml.sax.saxutils
 
@@ -54,6 +72,7 @@ class MessageFormatter(object):
             '<span style="color: #A52A2A;"><b>%MESSAGE%</b></span>%NL%'
         self.nudge = \
             '<i>%DISPLAYNAME% sent you a nudge!</i>%NL%'
+        self.outgoing_nudge = '<i>'+_('You just sent a nudge!')+'</i>%NL%'
         self.history = '<div class="message-history">'\
             '<b>%TIME% %NICK%</b>: %MESSAGE%%NL%</div>'
 
@@ -87,7 +106,7 @@ class MessageFormatter(object):
         template = template.replace('%MESSAGE%', message)
         return template
 
-    def format(self, contact, message_type=None):
+    def format(self, contact, message_type=None, timestamp_override=None):
         '''format the message according to the template'''
         if message_type is None:
             message_type=e3.Message.TYPE_MESSAGE
@@ -117,9 +136,19 @@ class MessageFormatter(object):
                     template = self.outgoing
                 else:
                     template = self.incoming
+
+        if message_type == e3.Message.TYPE_FLNMSG:
+            template = self.offline_incoming
+            timestamp = timestamp_override
+
         if message_type == e3.Message.TYPE_NUDGE:
-            template = self.nudge
+            if outgoing:
+                template = self.outgoing_nudge
+            else:
+                template = self.nudge
+                
             self.last_message_sender = None
+
 
         formated_time = time.strftime('%c', time.gmtime(timestamp))
 

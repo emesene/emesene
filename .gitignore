@@ -5,3 +5,4 @@ doc/
 emesene.egg-info/*
 dist/*
 docs/_build
+emesene/build

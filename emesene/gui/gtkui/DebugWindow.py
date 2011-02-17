@@ -1,4 +1,22 @@
 '''A module to handle a debug console'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import time
 
 import gtk
@@ -7,12 +25,13 @@ import pango
 import debugger
 import logging
 
-class DebugWindow():
+class DebugWindow(object):
     '''The window containing the debug info'''
     def __init__(self):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("debug")
         self.window.connect("delete_event", self.on_delete)
+        self.window.resize(800, 600)
         self.store = DebugStore()
         self.view = DebugView(self.store)
         
@@ -43,7 +62,7 @@ class DebugWindow():
 
         self.vbox.pack_start(self.scroll_view)
 
-        self.close_btn = gtk.Button("Close")
+        self.close_btn = gtk.Button(_("Close"))
         self.buttons_box.pack_end(self.close_btn, False)
         self.vbox.pack_start(self.buttons_box, False)
         
@@ -82,7 +101,6 @@ class DebugWindow():
         return False
 
     def on_delete(self, widget, event, data=None):
-        self.safely_close()
         return False
 
 class DebugView( gtk.TextView ):

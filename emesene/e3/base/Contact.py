@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 '''a module that defines a contact object'''
+# -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -23,7 +23,7 @@ class Contact(object):
     '''a class that represent a contact'''
 
     def __init__(self, account, identifier=None, nick='', message=None,
-        _status=status.OFFLINE, alias='', blocked=False):
+        _status=status.OFFLINE, alias='', blocked=False, cid=None):
         '''class contructor'''
         self.account = account
         self.identifier = identifier or '0'
@@ -37,6 +37,7 @@ class Contact(object):
         self.blocked = blocked
         self.picture = ''
         self.groups = []
+        self.cid = cid
 
         # extra atributes (use contact.attrs.get("attr", "default"))
         self.attrs = {}

@@ -1,8 +1,25 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import re
 
 import AdiumThemes
-import e3
 from e3 import status
 
 class Theme(object):
@@ -10,24 +27,34 @@ class Theme(object):
     # if you add a smilie key twice you will have a nice stack overflow :D
     EMOTES = {}
     EMOTES[':)'] = 'face-smile'
+    EMOTES[':-)'] = EMOTES[':)']
     EMOTES[';)'] = 'face-wink'
+    EMOTES[';-)'] = EMOTES[';)']
     EMOTES['|-)'] = 'face-tired'
     EMOTES[':D'] = 'face-laugh'
     EMOTES[':d'] = EMOTES[':D']
+    EMOTES[':-D'] = EMOTES[':D']
     EMOTES[':S'] = 'face-worried'
     EMOTES[':s'] = EMOTES[':S']
     EMOTES[':('] = 'face-sad'
+    EMOTES[':-('] = EMOTES[':(']
     EMOTES['(K)'] = 'face-kiss'
     EMOTES['(k)'] = EMOTES['(K)']
     EMOTES[':P'] = 'face-raspberry'
     EMOTES[':p'] = EMOTES[':P']
+    EMOTES[':-P'] = EMOTES[':P']
+    EMOTES[':-p'] = EMOTES[':P']
     EMOTES[':|'] = 'face-plain'
+    EMOTES[':-|'] = EMOTES[':|']
     EMOTES['*-)'] = 'face-uncertain'
     EMOTES[':O'] = 'face-surprise'
     EMOTES[':o'] = EMOTES[':O']
+    EMOTES[':-o'] = EMOTES[':O']
+    EMOTES[':-O'] = EMOTES[':O']
     EMOTES[':$'] = 'face-embarrassed'
     EMOTES[':\'('] = 'face-crying'
     EMOTES[':@'] = 'face-angry'
+    EMOTES[':-@'] = EMOTES[':@']
     EMOTES['(6)'] = 'face-devilish'
     EMOTES['(A)'] = 'face-angel'
     EMOTES['(a)'] = EMOTES['(A)']
@@ -36,49 +63,63 @@ class Theme(object):
     EMOTES['(au)'] = 'car'
     #EMOTES['8o|'] = ''
     EMOTES['(b)'] = 'beer'
-    EMOTES['(B)'] = 'beer'
+    EMOTES['(B)'] = EMOTES['(b)']
     EMOTES['(^)'] = 'cake'
     EMOTES['(bah)'] = 'sheep'
     EMOTES['(nah)'] = 'goat'
     EMOTES['(||)'] = 'bowl'
     EMOTES['(z)'] = 'boy'
+    EMOTES['(Z)'] = EMOTES['(z)']
     EMOTES['(u)'] = 'love-over'
+    EMOTES['(U)'] = EMOTES['(u)']
     EMOTES['(p)'] = 'camera'
+    EMOTES['(P)'] = EMOTES['(p)']
     EMOTES['(@)'] = 'cat'
     EMOTES['(ci)'] = 'cigarette'
     EMOTES['(o)'] = 'clock'
-    EMOTES['(c)'] = 'coffe'
+    EMOTES['(O)'] = EMOTES['(o)']
+    EMOTES['(c)'] = 'coffee'
+    EMOTES['(C)'] = EMOTES['(c)']
     EMOTES['(co)'] = 'computer'
     EMOTES['(&)'] = 'dog'
     #EMOTES[':-#'] = ''
     EMOTES['(d)'] = 'drink'
+    EMOTES['(D)'] = EMOTES['(d)']
     EMOTES['(e)'] = 'mail'
+    EMOTES['(E)'] = EMOTES['(e)']
     #EMOTES['8-)'] = ''
     EMOTES['(~)'] = 'video'
     #EMOTES['(yn)'] = ''
     EMOTES['(g)'] = 'present'
+    EMOTES['(G)'] = EMOTES['(g)']
     EMOTES['(x)'] = 'girl'
+    EMOTES['(X)'] = EMOTES['(x)']
     EMOTES['(%)'] = 'handcuffs'
     EMOTES['(h5)'] = 'hifive'
     #EMOTES['(h)'] = ''
-    EMOTES[':^)'] = EMOTES[':o']
+    #EMOTES[':^)'] = ''
     EMOTES['(ip)'] = 'island'
-    EMOTES['({)'] = 'hughleft'
+    EMOTES['({)'] = 'hugleft'
     EMOTES['(i)'] = 'lamp'
+    EMOTES['(I)'] = EMOTES['(i)']
     EMOTES['(li)'] = 'c10ud'
     EMOTES['(m)'] = 'msn'
+    EMOTES['(M)'] = EMOTES['(m)']
     EMOTES['(mp)'] = 'mobile'
     EMOTES['(mo)'] = 'coins'
     EMOTES['(8)'] = 'music'
     EMOTES['(pi)'] = 'pizza'
     EMOTES['(pl)'] = 'plate'
     EMOTES['(r)'] = 'rainbow'
+    EMOTES['(R)'] = EMOTES['(r)']
     EMOTES['(st)'] = 'rain'
     EMOTES['(l)'] = 'love'
-    EMOTES['(L)'] = 'love'
+    EMOTES['(L)'] = EMOTES['(l)']
     EMOTES['(k)'] = 'face-kiss'
+    EMOTES['(K)'] = EMOTES['(k)']
     EMOTES['(f)'] = 'rose'
-    EMOTES['(})'] = 'hughright'
+    EMOTES['(F)'] = EMOTES['(f)']
+    EMOTES['(})'] = 'hugright'
     #EMOTES['^o)'] = ''
     EMOTES[':-*'] = 'secret'
     EMOTES['(S)'] = 'moon'
@@ -87,15 +128,22 @@ class Theme(object):
     EMOTES['(*)'] = 'star'
     EMOTES['(#)'] = 'sun'
     EMOTES['(t)'] = 'phone'
+    EMOTES['(T)'] = EMOTES['(t)']
     EMOTES['(n)'] = 'bad'
+    EMOTES['(N)'] = EMOTES['(n)']
     EMOTES['(y)'] = 'good'
+    EMOTES['(Y)'] = EMOTES['(y)']
     EMOTES['(tu)'] = 'turtle'
     EMOTES['(um)'] = 'umbrella'
     EMOTES[':-['] = 'bat'
+    EMOTES[':['] = EMOTES[':-[']
     EMOTES['(w)'] = 'rose-dead'
+    EMOTES['(W)'] = EMOTES['(w)']
     EMOTES['(xx)'] = 'console'
 
-    EMOTE_REGEX_STR = "|".join("(%s)" % (re.escape(key), ) for key in EMOTES)
+    EMOTE_REGEX_STR = ""
+    for key in EMOTES:
+        EMOTE_REGEX_STR += re.escape(key) + "|"
     EMOTE_REGEX = re.compile(EMOTE_REGEX_STR)
 
     SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
@@ -117,10 +165,10 @@ class Theme(object):
         'present.png', 'rainbow.png', 'rain.png', 'rose-dead.png', 'rose.png',
         'secret.png', 'sheep.png', 'snail.png', 'soccerball.png', 'star.png',
         'sun.png', 'turtle.png', 'tv.png', 'umbrella.png', 'video.png']
-    IMAGE_FILES = ['away.png', 'busy.png', 'chat.png', 'connect.png',
-        'group-chat.png', 'idle.png', 'logo.png', 'new-message.png',
-        'offline.png', 'online.png', 'password.png', 'typing.png', 'user.png',
-        'users.png']
+    IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
+        'email.png','group-chat.png', 'idle.png', 'logo.png', 'new-message.gif','mailbox.png',
+        'offline.png', 'online.png', 'password.png', 'typing.png', 'transfer_success.png', 'user.png',
+        'users.png', 'user_def_image.png', 'user_def_imagetool.png', 'video.png']
 
     def __init__(self, image_name="default", emote_name="default",
             sound_name="default", conv_name='renkoo.AdiumMessageStyle'):
@@ -135,8 +183,8 @@ class Theme(object):
         # conv_name is the name of the selected adium conversation theme
         self.conv_name = conv_name
 
-        self.theme_path = os.path.join("themes", "images", self.image_name)
-        self.conv_themes_path = os.path.join(os.getcwd(), "themes/conversations")
+        self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
+        self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
         self.conv_themes = AdiumThemes.get_instance()
         self.conv_themes.add_themes_path(self.conv_themes_path)
 
@@ -149,7 +197,14 @@ class Theme(object):
         self.sound_theme_path = os.path.join("themes", "sounds",
                 self.sound_name)
 
+        self.av = os.path.join(self.theme_path, "audiovideo.png")
+        self.video = os.path.join(self.theme_path, "video.png")
+        self.call = os.path.join(self.theme_path, "call.png")
         self.user = os.path.join(self.theme_path, "user.png")
+        self.user_def_image = os.path.join(self.theme_path, "user_def_image.png")
+        self.user_def_imagetool = os.path.join(self.theme_path, "user_def_imagetool.png")
+        self.email = os.path.join(self.theme_path, "email.png")
+        self.mailbox = os.path.join(self.theme_path, "mailbox.png")
         self.users = os.path.join(self.theme_path, "users.png")
         self.password = os.path.join(self.theme_path, "password.png")
         self.logo = os.path.join(self.theme_path, "logo.png")
@@ -158,7 +213,15 @@ class Theme(object):
         self.chat = os.path.join(self.theme_path, "chat.png")
         self.group_chat = os.path.join(self.theme_path, "group-chat.png")
         self.typing = os.path.join(self.theme_path, "typing.png")
-        self.new_message = os.path.join(self.theme_path, "new-message.png")
+        self.new_message = os.path.join(self.theme_path, "new-message.gif")
+        self.blocked_overlay = os.path.join(self.theme_path, "blocked-overlay.png")
+        self.blocked_overlay_big = os.path.join(self.theme_path, "blocked-overlay-big.png")
+        self.transfer_success = os.path.join(self.theme_path, "transfer_success.png")
+        self.transfer_unsuccess = os.path.join(self.theme_path, "transfer_unsuccess.png")
+        self.service_msn = os.path.join(self.theme_path, "msn.png")
+        self.service_facebook = os.path.join(self.theme_path, "facebook.png")
+        self.service_gtalk = os.path.join(self.theme_path, "gtalk.png")
+        self.service_dummy = os.path.join(self.theme_path, "dummy.png")
 
         self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
         self.sound_nudge = os.path.join(self.sound_theme_path, "nudge.wav")
@@ -178,6 +241,49 @@ class Theme(object):
             os.path.join(self.theme_path, "away.png")
         self.status_icons[status.IDLE] = \
             os.path.join(self.theme_path, "idle.png")
+
+        self.status_icons_panel = {}
+        self.panel_path = self.theme_path
+        # allow different icons for indicators/tray icons
+        # note: a panel subdirectory requires six pics: 
+        #logo.png, online.png, offline.png, busy.png, away.png, idle.png
+        panel_path = os.path.join(self.theme_path, "panel")        
+        if os.path.exists(panel_path):
+            self.panel_path = panel_path
+            self.status_icons_panel[status.ONLINE] = \
+                os.path.join(self.panel_path, "online.png")
+            self.status_icons_panel[status.OFFLINE] = \
+                os.path.join(self.panel_path, "offline.png")
+            self.status_icons_panel[status.BUSY] = \
+                os.path.join(self.panel_path, "busy.png")
+            self.status_icons_panel[status.AWAY] = \
+                os.path.join(self.panel_path, "away.png")
+            self.status_icons_panel[status.IDLE] = \
+                os.path.join(self.panel_path, "idle.png")
+        else:
+            self.status_icons_panel = self.status_icons.copy()
+
+        # allow theme-specific toolbar icons
+        self.tool_font = None
+        self.tool_font_color = None
+        self.tool_emotes = None
+        self.tool_nudge = None
+        self.tool_invite = None
+        self.tool_clean = None
+        self.tool_file_transfer = None
+
+        self.toolbar_path = None
+        toolbar_path = os.path.join(self.theme_path, "toolbar")        
+        if os.path.exists(toolbar_path):
+            self.toolbar_path = toolbar_path
+            self.tool_font = os.path.join(self.toolbar_path, "font.png")
+            self.tool_font_color = os.path.join(self.toolbar_path, "font-color.png")
+            self.tool_emotes = os.path.join(self.toolbar_path, "emotes.png")
+            self.tool_nudge = os.path.join(self.toolbar_path, "nudge.png")
+            self.tool_invite = os.path.join(self.toolbar_path, "invite.png")
+            self.tool_clean = os.path.join(self.toolbar_path, "clean-chat.png")
+            self.tool_file_transfer = os.path.join(self.toolbar_path, "file-transfer.png")
+            self.tool_ublock = os.path.join(self.toolbar_path, "ublock.png")
 
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
 
@@ -257,6 +363,7 @@ class Theme(object):
         for theme in self.get_child_dirs(path_conv):
             if AdiumThemesM.validate(
                                 os.path.join(os.path.abspath(path_conv), theme))[0]:
+                theme = theme.replace('.AdiumMessageStyle', '')
                 themes.append(theme)
 
         return themes

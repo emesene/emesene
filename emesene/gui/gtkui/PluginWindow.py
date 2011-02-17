@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 
 import gui
@@ -8,8 +26,8 @@ from pluginmanager import get_pluginmanager
 class PluginListView(gtk.TreeView):
     def __init__(self, store):
         gtk.TreeView.__init__(self, store)
-        self.append_column(gtk.TreeViewColumn('Status', gtk.CellRendererToggle(), active=0))
-        self.append_column(gtk.TreeViewColumn('Name', gtk.CellRendererText(), text=1))
+        self.append_column(gtk.TreeViewColumn(_('Status'), gtk.CellRendererToggle(), active=0))
+        self.append_column(gtk.TreeViewColumn(_('Name'), gtk.CellRendererText(), text=1))
         self.set_rules_hint(True)
 
 class PluginListStore(gtk.ListStore):
@@ -36,6 +54,7 @@ class PluginMainVBox(gtk.VBox):
         self.set_border_width(2)
 
         self.session = session
+        self.session.config.get_or_set('l_active_plugins', [])
 
         self.plugin_list_store = PluginListStore()
         self.plugin_list_store.update_list()
@@ -74,7 +93,10 @@ class PluginMainVBox(gtk.VBox):
             name = model.get_value(iter, 2)
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_start(name, self.session)
-            print pluginmanager.plugin_is_active(name), 'after start'
+
+            if name not in self.session.config.l_active_plugins:
+                self.session.config.l_active_plugins.append(name)
+
             model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
 
     def on_stop(self, *args):
@@ -85,7 +107,10 @@ class PluginMainVBox(gtk.VBox):
             name = model.get_value(iter, 2)
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_stop(name)
-            print pluginmanager.plugin_is_active(name), 'after stop'
+
+            if name in self.session.config.l_active_plugins:
+                self.session.config.l_active_plugins.remove(name)
+
             model.set_value(iter, 0, pluginmanager.plugin_is_active(name))
 
     def on_config(self, *args):
@@ -106,7 +131,7 @@ class PluginWindow(gtk.Window):
     def __init__(self, session):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
         self.set_default_size(500, 300)
-        self.set_title('Plugins')
+        self.set_title(_('Plugins'))
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
 
         self.session = session

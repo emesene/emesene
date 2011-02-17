@@ -1,5 +1,22 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import e3
-import MarkupParser
 
 import logging
 log = logging.getLogger('gui.base.ConversationManager')
@@ -11,12 +28,12 @@ class ConversationManager(object):
         '''class constructor'''
         self.session = session
         self.on_last_close = on_last_close
-
+        
         self.conversations = {}
         if self.session:
             self.session.signals.conv_message.subscribe(
                 self._on_message)
-            self.session.signals.conv_message.subscribe(
+            self.session.signals.user_typing.subscribe(
                 self._on_user_typing)
             self.session.signals.conv_contact_joined.subscribe(
                 self._on_contact_joined)
@@ -28,9 +45,12 @@ class ConversationManager(object):
                 self._on_group_ended)
             self.session.signals.conv_message_send_failed.subscribe(
                 self._on_message_send_failed)
-            self.session.signals.contact_attr_changed.subscribe(
-                self._on_contact_attr_changed)
-
+            #self.session.signals.contact_attr_changed.subscribe(
+            #    self._on_contact_attr_changed)
+            self.session.signals.p2p_finished.subscribe(
+                self._on_p2p_finished)
+         
+        self.session.conversations = self.conversations
     def add_new_conversation(self, session, cid, members):
         """
         create and append a new conversation
@@ -46,14 +66,18 @@ class ConversationManager(object):
 
         conversation.on_receive_message(message, account, cedict)
 
-        if message.type != e3.Message.TYPE_TYPING:
-            self.set_message_waiting(conversation, True)
+        self.set_message_waiting(conversation, True)
 
     def _on_user_typing(self, cid, account, *args):
         """
         inform that the other user has started typing
         """
-        raise NotImplementedError("Method not implemented")
+        conversation = self.conversations.get(float(cid), None)
+
+        if conversation is None:
+            return
+
+        conversation.on_user_typing(account)
 
     def set_message_waiting(self, conversation, is_waiting):
         """
@@ -76,9 +100,11 @@ class ConversationManager(object):
         if conversation is not None:
             error = conversation.formatter.format_error(
                 'message couldn\'t be sent: ')
-            conversation.output.append(error,self.session.config.b_allow_auto_scroll)
+            conversation.output.append(error, {},
+                self.session.config.b_allow_auto_scroll)
             conversation.output.append(
-                self.format_from_message(message),self.session.config.b_allow_auto_scroll)
+                self.format_from_message(message),
+                {}, self.session.config.b_allow_auto_scroll)
         else:
             log.debug('conversation %s not found' % cid)
 
@@ -118,6 +144,47 @@ class ConversationManager(object):
         '''return a markup text representing the format on the message'''
         return e3.common.add_style_to_message(message.body, message.style)
 
+    def has_similar_conversation(self, cid, members):
+        '''
+        try to find a conversation with the given cid, if not search for a
+        conversation with the same members and return it
+
+        if not found return None
+        '''
+        cid = float(cid)
+
+        if cid in self.conversations:
+            return self.conversations[cid]
+
+        elif members is not None:
+            for (key, conversation) in self.conversations.iteritems():
+                if conversation.members == members:
+                    return conversation
+
+    def reuse_conversation(self, cid, members):
+        '''
+        return an existing conversation if the cid is registered or there is
+        a conversation with the same members
+
+        *warning* this method updates the old conversation cid to the new
+        if reused, don't use to check if the conversation is available
+
+        otherwise return None
+        '''
+        conversation = self.has_similar_conversation(cid, members)
+
+        if conversation:
+            old_cid = conversation.cid
+
+            if old_cid in self.conversations:
+                del self.conversations[old_cid]
+
+            conversation.cid = cid
+            self.conversations[cid] = conversation
+            return conversation
+
+        return None
+
     def new_conversation(self, cid, members=None):
         '''create a new conversation widget and append it to the tabs,
         if the cid already exists or there is already a conversation with
@@ -125,23 +192,12 @@ class ConversationManager(object):
         this method returns a tuple containing a boolean and a conversation
         object. If the conversation already exists, return True on as first
         value'''
-        cid = float(cid)
-        if cid in self.conversations:
-            return self.conversations[cid]
-        elif members is not None:
-            for (key, conversation) in self.conversations.iteritems():
-                if conversation.members == members:
-                    old_cid = conversation.cid
+        conversation = self.reuse_conversation(cid, members)
 
-                    if old_cid in self.conversations:
-                        del self.conversations[old_cid]
+        if conversation is None:
+            conversation = self.add_new_conversation(self.session, cid, members)
+            self.conversations[cid] = conversation
 
-                    conversation.cid = cid
-                    self.conversations[cid] = conversation
-                    return conversation
-
-        conversation = self.add_new_conversation(self.session, cid, members)
-        self.conversations[cid] = conversation
         return conversation
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
@@ -151,10 +207,18 @@ class ConversationManager(object):
             if account in conversation.members:
                 conversation.update_data()
 
+    def _on_p2p_finished(self, account, _type, *what):
+        ''' called when a p2p is finished - currently custom emoticons only '''
+        for conversation in self.conversations.values():
+            if account in conversation.members:
+                conversation.update_p2p(account, _type, *what)
+
     def on_conversation_close(self, conversation):
         """
         called when the user wants to close a conversation widget
         """
+        # TODO: there is a strange case when changing the tabbed to no tabbed
+        # config, for some reason that conversations don't seem to be removed
         self.close(conversation)
 
         if len(self.conversations) == 0:
@@ -169,7 +233,48 @@ class ConversationManager(object):
 
     def close_all(self):
         '''close and finish all conversations'''
-        conversations = self.conversations.values()
-        for conversation in conversations:
+        self.session.signals.conv_message.unsubscribe(
+            self._on_message)
+        self.session.signals.user_typing.unsubscribe(
+            self._on_user_typing)
+        self.session.signals.conv_contact_joined.unsubscribe(
+            self._on_contact_joined)
+        self.session.signals.conv_contact_left.unsubscribe(
+            self._on_contact_left)
+        self.session.signals.conv_group_started.unsubscribe(
+            self._on_group_started)
+        self.session.signals.conv_group_ended.unsubscribe(
+            self._on_group_ended)
+        self.session.signals.conv_message_send_failed.unsubscribe(
+            self._on_message_send_failed)
+        #self.session.signals.contact_attr_changed.unsubscribe(
+        #    self._on_contact_attr_changed)
+        self.session.signals.p2p_finished.unsubscribe(
+            self._on_p2p_finished)
+        for conversation in self.conversations.values():
             self.close(conversation)
 
+    def present(self, conversation):
+        '''
+        present the given conversation
+        '''
+        raise NotImplementedError("not implemented")
+
+    def get_dimensions(self):
+        '''
+        return dimensions of the conversation window, if more than one return
+        the value of one of them
+        '''
+        raise NotImplementedError("not implemented")
+
+    def hide_all(self):
+        '''
+        hide all conversations
+        '''
+        raise NotImplementedError("not implemented")
+
+    def is_active(self):
+        '''
+        return True if the conversation manager is active
+        '''
+        raise NotImplementedError("not implemented")

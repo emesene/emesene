@@ -1,4 +1,4 @@
-## $Id: commands.py,v 1.17 2007/08/28 09:54:15 normanr Exp $
+## $Id$
 
 ## Ad-Hoc Command manager
 ## Mike Albon (c) 5th January 2005

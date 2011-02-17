@@ -10,8 +10,12 @@ class Session(e3.Session):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    DEFAULT_HOST = "messenger.hotmail.com"
-    DEFAULT_PORT = "1863"
+    SERVICES = {
+        "e3.msn": {
+            "host": "messenger.hotmail.com",
+            "port": "1863"
+        }
+    }
 
     def __init__(self, id_=None, account=None):
         '''constructor'''
@@ -22,13 +26,22 @@ class Session(e3.Session):
         worker = Worker('emesene2', self, proxy, use_http)
         worker.start()
 
+        #msn password must have 16 chars max.
+        password=password[:16]
+        #------------------------------------
         self.account = e3.Account(account, password, status, host)
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
             host, port))
 
-    def send_message(self, cid, text, style=None):
+    def send_message(self, cid, text, style=None, cedict=None, celist=None):
         '''send a common message'''
+        if cedict is None:
+            cedict = {}
+
+        if celist is None:
+            celist = []
+
         account = self.account.account
         message = Message(Message.TYPE_MESSAGE, text, account, style)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
@@ -36,7 +49,7 @@ class Session(e3.Session):
     def request_attention(self, cid):
         '''send a nudge message'''
         account = self.account.account
-        message = e3.Message(Message.TYPE_NUDGE, None, account)
+        message = Message(Message.TYPE_NUDGE, None, account)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
 
 extension.implements(Session, 'session')

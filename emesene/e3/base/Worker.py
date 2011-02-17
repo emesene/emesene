@@ -1,7 +1,26 @@
 '''a thread that handles the connection with the main server'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import Queue
 import threading
+import traceback
+import bisect
 
 import Logger
 from Event import Event
@@ -37,14 +56,19 @@ EVENTS = (\
  'conv message send succeed'  , 'conv message send failed',
  'oim received',       'oims data received',
  'filetransfer invitation', 'filetransfer completed',
- 'filetransfer error', 'filetransfer canceled',
+ 'filetransfer rejected', 'filetransfer canceled',
  'filetransfer accepted', 'filetransfer progress',
+ 'call invitation', 'call completed',
+ 'call rejected', 'call canceled',
+ 'call accepted', 'call progress',
  'p2p invitation',      'p2p finished',
  'p2p error',           'p2p canceled',
  'p2p accepted',        'p2p progress',
  'profile get succeed'  , 'profile get failed',
  'profile set succeed'  , 'profile set failed',
- 'media received' , 'message read')
+ 'media received' , 'message read',
+ 'contact added you', 'user typing',
+ 'mail received', 'mail count changed')
 
 ACTIONS = (\
  'login'            , 'logout'           ,
@@ -62,6 +86,8 @@ ACTIONS = (\
  'send message'     , 'conv invite',
  'ft invite', 'ft accept',
  'ft cancel', 'ft reject',
+ 'call invite', 'call accept',
+ 'call cancel', 'call reject',
  'p2p invite'       , 'p2p accept',
  'p2p cancel'       , 'media send', # media send if got Wink and audio clips
  'send oim')
@@ -76,6 +102,7 @@ class Worker(threading.Thread):
     def __init__(self, app_name, session):
         '''class constructor'''
         threading.Thread.__init__(self)
+        self._continue=True
         self.setDaemon(True)
 
         self.app_name = app_name
@@ -123,6 +150,7 @@ class Worker(threading.Thread):
             self._handle_action_conv_invite
         dah[Action.ACTION_SEND_MESSAGE] = self._handle_action_send_message
         dah[Action.ACTION_SEND_OIM] = self._handle_action_send_oim
+        dah[Action.ACTION_QUIT] = self._handle_action_quit
 
         # p2p actions (unused!)
         dah[Action.ACTION_P2P_INVITE] = self._handle_action_p2p_invite
@@ -133,13 +161,18 @@ class Worker(threading.Thread):
         dah[Action.ACTION_FT_ACCEPT] = self._handle_action_ft_accept
         dah[Action.ACTION_FT_REJECT] = self._handle_action_ft_reject
         dah[Action.ACTION_FT_CANCEL] = self._handle_action_ft_cancel
+        # call actions
+        dah[Action.ACTION_CALL_INVITE] = self._handle_action_call_invite
+        dah[Action.ACTION_CALL_ACCEPT] = self._handle_action_call_accept
+        dah[Action.ACTION_CALL_REJECT] = self._handle_action_call_reject
+        dah[Action.ACTION_CALL_CANCEL] = self._handle_action_call_cancel
 
         self.action_handlers = dah
 
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        raise NotImplentedError('not implemented')
+        raise NotImplementedError('not implemented')
 
     def _process_action(self, action):
         '''process an action'''
@@ -149,6 +182,7 @@ class Worker(threading.Thread):
             except TypeError:
                 self.session.add_event(Event.EVENT_ERROR,
                     'Error calling action handler', action.id_)
+                traceback.print_exc()
 
 
     # action handlers (the stubs, copy and complete them on your implementation)
@@ -176,6 +210,10 @@ class Worker(threading.Thread):
         '''handle Action.ACTION_UNBLOCK_CONTACT
         '''
         pass
+
+    def _handle_action_quit(self):
+        '''handle Action.ACTION_QUIT
+        '''
 
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS
@@ -329,7 +367,7 @@ class Worker(threading.Thread):
 
     # ft handlers
     def _handle_action_ft_invite(self, t):
-        pass    
+        pass
     
     def _handle_action_ft_accept(self, t):
         pass
@@ -338,5 +376,18 @@ class Worker(threading.Thread):
         pass
 
     def _handle_action_ft_cancel(self, t):
+        pass
+
+    # call handlers
+    def _handle_action_call_invite(self, cid, account, a_v_both, surface_other, surface_self):
+        pass
+    
+    def _handle_action_call_accept(self, c):
+        pass
+
+    def _handle_action_call_reject(self, c):
+        pass
+
+    def _handle_action_call_cancel(self, c):
         pass
 

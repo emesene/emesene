@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -20,6 +20,7 @@
 
 import traceback
 
+import os
 import gtk
 import pango
 import gobject
@@ -34,9 +35,6 @@ import ContactInformation
 
 import logging
 log = logging.getLogger('gtkui.Dialog')
-
-# TODO: remove this
-_ = lambda x: x
 
 class Dialog(object):
     '''a class full of static methods to handle dialogs, dont instantiate it'''
@@ -152,7 +150,7 @@ class Dialog(object):
         window = cls.common_window(message, stock_id, response_cb, title)
         cls.add_button(window, gtk.STOCK_CLOSE, stock.CLOSE, response_cb,
             cls.default_cb)
-
+        window.set_modal(True)
         return window
 
     @classmethod
@@ -250,6 +248,24 @@ class Dialog(object):
         window.show_all()
 
     @classmethod
+    def choose_file(cls, current_path, response_cb, title=_("Choose file")):
+        '''show a choose dialog with the current directory set to path.
+        the buttons should display a cancel and save buttons.
+         the posible reasons are stock.CANCEL, stock.SAVE and stock.CLOSE'''
+        window = cls.new_window(title, response_cb)
+        window.set_default_size(640, 480)
+        chooser = gtk.FileChooserWidget(gtk.FILE_CHOOSER_ACTION_OPEN)
+        chooser.set_current_folder(current_path)
+        setattr(window, 'chooser', chooser)
+        window.hbox.pack_start(chooser)
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
+            cls.chooser_cb)
+        cls.add_button(window, gtk.STOCK_OPEN, stock.OPEN, response_cb,
+            cls.chooser_cb)
+
+        window.show_all()
+
+    @classmethod
     def error(cls, message, response_cb=None, title=_("Error!")):
         '''show an error dialog displaying the message, this dialog should
         have only the option to close and the response callback is optional
@@ -271,14 +287,14 @@ class Dialog(object):
         vbox = gtk.VBox()
         text = gtk.Label(message)
         vbox.pack_start(text)
-        hide_button = gtk.ToggleButton('Show details')
+        hide_button = gtk.ToggleButton(_('Show details'))
         trace = gtk.Label(traceback.format_exc())
         def on_hide(*args):
             if hide_button.get_active(): #show
-                hide_button.set_label('Hide details')
+                hide_button.set_label(_('Hide details'))
                 trace.show()
             else:
-                hide_button.set_label('Show details')
+                hide_button.set_label(_('Show details'))
                 trace.hide()
         hide_button.connect('toggled', on_hide)
 
@@ -337,7 +353,7 @@ class Dialog(object):
             cls.default_cb, *args)
         cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb,
             cls.default_cb, *args)
-
+        window.set_modal(True)
         window.show()
 
     @classmethod
@@ -435,14 +451,14 @@ class Dialog(object):
 
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.add_contact_cb)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
+        cls.add_button(window, gtk.STOCK_OK, stock.ADD, response_cb,
             cls.add_contact_cb)
 
         setattr(window, 'entry', entry)
         setattr(window, 'combo', combo)
 
         entry.connect('activate', cls.add_contact_cb, window, response_cb,
-            stock.ACCEPT)
+            stock.ADD)
         window.show_all()
 
     @classmethod
@@ -563,10 +579,10 @@ class Dialog(object):
 
             window.hide()
 
-        window = cls.new_window('Select font')
+        window = cls.new_window(_('Select font'))
 
         font_sel = gtk.FontSelection()
-        font_sel.set_preview_text('OMG PONNIES! I\'m a preview text!')
+        font_sel.set_preview_text(_('This is a preview text!'))
         fdesc = utils.style_to_pango_font_description(style)
 
         window.hbox.pack_start(font_sel, True, True)
@@ -596,7 +612,7 @@ class Dialog(object):
 
             window.hide()
 
-        window = cls.new_window('Select color')
+        window = cls.new_window(_('Select color'))
 
         color_sel = gtk.ColorSelection()
 
@@ -619,12 +635,12 @@ class Dialog(object):
         pass
 
     @classmethod
-    def select_emote(cls, theme, callback, max_width=8):
+    def select_emote(cls, session, theme, callback, max_width=16):
         '''select an emoticon, receives a gui.Theme object with the theme
         settings the callback receives the response and a string representing
         the selected emoticon
         '''
-        EmotesWindow(callback, max_width).show()
+        EmotesWindow(session, callback, max_width).show()
 
     @classmethod
     def invite_dialog(cls, session, callback):
@@ -635,12 +651,12 @@ class Dialog(object):
         InviteWindow(session, callback).show()
 
     @classmethod
-    def login_preferences(cls, session, callback, use_http, proxy):
+    def login_preferences(cls, service, callback, use_http, proxy):
         """
         display the preferences dialog for the login window
 
         cls -- the dialog class
-        session -- the session string identifier
+        service -- the service string identifier (for example 'gtalk')
         callback -- callback to call if the user press accept, call with the
             new values
         use_http -- boolean that indicates if the e3 should use http
@@ -649,12 +665,21 @@ class Dialog(object):
         """
 
         content = gtk.VBox(spacing=4)
-        advanced = gtk.Expander("Advanced")
+        advanced = gtk.Expander(_("Advanced"))
         box = gtk.Table(10, 2)
         box.set_property('row-spacing', 4)
         box.set_property('column-spacing', 4)
 
-        combo = gtk.combo_box_new_text()
+        try:
+            s_name = getattr(gui.theme, "service_" + service)
+            session_pixbuf = utils.safe_gtk_pixbuf_load(s_name)
+        except:
+            session_pixbuf = None
+
+        session_image = gtk.Image()
+        session_image.set_from_pixbuf(session_pixbuf)
+
+        session_label = gtk.Label(service)
 
         t_proxy_host = gtk.Entry()
         t_proxy_port = gtk.Entry()
@@ -671,38 +696,41 @@ class Dialog(object):
             for entry in entries:
                 entry.set_sensitive(check_button.get_active())
 
-        c_use_http = gtk.CheckButton('Use HTTP method')
-        c_use_proxy = gtk.CheckButton('Use proxy')
+        c_use_http = gtk.CheckButton(_('Use HTTP method'))
+        c_use_proxy = gtk.CheckButton(_('Use proxy'))
         c_use_proxy.connect('toggled', on_toggled, t_proxy_host, t_proxy_port)
-        c_use_auth = gtk.CheckButton('Use authentication')
+        c_use_auth = gtk.CheckButton(_('Use authentication'))
         c_use_auth.connect('toggled', on_toggled, t_user, t_passwd)
 
-        t_proxy_host.set_text(proxy.host or '')
-        t_proxy_port.set_text(proxy.port or '')
+        for ext_id, ext in extension.get_extensions('session').iteritems():
+            for service_name, service_data in ext.SERVICES.iteritems():
+                if service_name == service:
+                    t_server_host.set_text(proxy.host or service_data['host'])
+                    t_server_port.set_text(proxy.port or service_data['port'])
+                    session_id = ext_id
+
         t_user.set_text(proxy.user or '')
         t_passwd.set_text(proxy.passwd or '')
         t_passwd.set_visibility(False)
         c_use_http.set_active(use_http)
         c_use_proxy.set_active(proxy.use_proxy)
         c_use_proxy.toggled()
-        c_use_proxy.toggled()
         c_use_auth.set_active(proxy.use_auth)
         c_use_auth.toggled()
-        c_use_auth.toggled()
 
-        l_session = gtk.Label('Session')
+        l_session = gtk.Label(_('Session:'))
         l_session.set_alignment(0.0, 0.5)
-        l_server_host = gtk.Label('Server')
+        l_server_host = gtk.Label(_('Server'))
         l_server_host.set_alignment(0.0, 0.5)
-        l_server_port = gtk.Label('Port')
+        l_server_port = gtk.Label(_('Port'))
         l_server_port.set_alignment(0.0, 0.5)
-        l_host = gtk.Label('Host')
+        l_host = gtk.Label(_('Host'))
         l_host.set_alignment(0.0, 0.5)
-        l_port = gtk.Label('Port')
+        l_port = gtk.Label(_('Port'))
         l_port.set_alignment(0.0, 0.5)
-        l_user = gtk.Label('User')
+        l_user = gtk.Label(_('User'))
         l_user.set_alignment(0.0, 0.5)
-        l_passwd = gtk.Label('Password')
+        l_passwd = gtk.Label(_('Password'))
         l_passwd.set_alignment(0.0, 0.5)
 
         proxy_settings = (l_host, l_port, l_user, l_passwd, t_proxy_host,
@@ -733,40 +761,6 @@ class Dialog(object):
         box.attach(l_passwd, 0, 1, 8, 9)
         box.attach(t_passwd, 1, 2, 8, 9)
 
-        index = 0
-        count = 0
-        name_to_ext = {}
-        session_found = False
-        default_session_index = 0
-        default_session = extension.get_default('session')
-
-        for ext_id, ext in extension.get_extensions('session').iteritems():
-            if session == ext_id:
-                index = count
-                t_server_host.set_text(ext.DEFAULT_HOST)
-                t_server_port.set_text(ext.DEFAULT_PORT)
-                session_found = True
-                print session
-
-            if default_session.NAME == ext.NAME:
-                default_session_index = count
-
-            combo.append_text(ext.NAME)
-            name_to_ext[ext.NAME] = (ext_id, ext)
-            count += 1
-
-        if session_found:
-            combo.set_active(index)
-        else:
-            combo.set_active(default_session_index)
-
-        def on_session_changed(*args):
-            session_id, ext = name_to_ext[combo.get_active_text()]
-            t_server_host.set_text(ext.DEFAULT_HOST)
-            t_server_port.set_text(ext.DEFAULT_PORT)
-
-        combo.connect('changed', on_session_changed)
-
         def response_cb(response):
             '''called on any response (close, accept, cancel) if accept
             get the new values and call callback with those values'''
@@ -781,9 +775,8 @@ class Dialog(object):
                 user = t_user.get_text()
                 passwd = t_passwd.get_text()
 
-                session_id, ext = name_to_ext[combo.get_active_text()]
                 callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
-                        user, passwd, session_id, server_host, server_port)
+                        user, passwd, session_id, service, server_host, server_port)
 
             window.hide()
 
@@ -793,17 +786,18 @@ class Dialog(object):
             response'''
             response_cb(response)
 
-        window = cls.new_window('Preferences', response_cb)
+        window = cls.new_window(_('Preferences'), response_cb)
         window.set_modal(True)
-        window.hbox.pack_start(content, True, True)
+        window.hbox.pack_start(content)
 
         session_box = gtk.HBox(spacing=4)
-        session_box.pack_start(l_session, True, True)
-        session_box.pack_start(combo, True, True)
+        session_box.pack_start(l_session)
+        session_box.pack_start(session_image)
+        session_box.pack_start(session_label)
 
         advanced.add(box)
         content.pack_start(session_box, False)
-        content.pack_start(advanced, True, True)
+        content.pack_start(advanced, False)
 
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
                 button_cb)
@@ -819,15 +813,16 @@ class Dialog(object):
     def edit_profile(cls, handler, user_nick, user_message, last_avatar):
 
         windows = gtk.Window()
+        windows.set_modal(True)
         windows.set_border_width(5)
-        windows.set_title('Change profile')
+        windows.set_title(_('Change profile'))
         windows.set_position(gtk.WIN_POS_CENTER)
         windows.set_resizable(False)
 
         hbox = gtk.HBox(spacing=5)
         vbox = gtk.VBox()
 
-        frame = gtk.Frame('Picture')
+        frame = gtk.Frame(_('Picture'))
 
         avatar = gtk.Image()
         avatar.set_size_request(96, 96)
@@ -845,13 +840,13 @@ class Dialog(object):
         hbox.pack_start(avatarEventBox)
         hbox.pack_start(vbox)
 
-        nick_label = gtk.Label('Nick:')
+        nick_label = gtk.Label(_('Nick:'))
         nick_label.set_alignment(0.0,0.5)
 
         nick = gtk.Entry()
         nick.set_text(user_nick)
 
-        pm_label = gtk.Label('PM:')
+        pm_label = gtk.Label(_('PM:'))
         pm_label.set_alignment(0.0,0.5)
 
         pm = gtk.Entry()
@@ -882,18 +877,287 @@ class Dialog(object):
         windows.add(hbox)
         windows.show_all()
 
+    @classmethod
+    def contactlist_format_help(cls, format_type):
+        '''called when the help button for the nick or group format
+        is pressed'''
+        class TableText(gtk.Alignment):
+            '''class that implements selectable labels aligned to the left'''
+            def __init__(self, text):
+                gtk.Alignment.__init__(self, xalign=0.0, yalign=0.0, xscale=0.0,
+                                       yscale=0.0)
+                self.label = gtk.Label(text)
+                self.label.set_selectable(True)
+                self.add(self.label)
+
+        content = gtk.Table(homogeneous=True)
+        if format_type == 'nick':
+            window = cls.new_window(_('Nick Format Help'))
+            content.attach(TableText('[$NICK]'), 0, 1, 0, 1)
+            content.attach(TableText(_('Nickname')), 1, 2, 0, 1)
+            content.attach(TableText('[$ACCOUNT]'), 0, 1, 1, 2)
+            content.attach(TableText(_('Mail')), 1, 2, 1, 2)
+            content.attach(TableText('[$DISPLAY_NAME]'), 0, 1, 2, 3)
+            content.attach(TableText(_('Alias if available, or nick if available or mail')), 1, 2, 2, 3)
+            content.attach(TableText('[$STATUS]'), 0, 1, 3, 4)
+            content.attach(TableText(_('Status')), 1, 2, 3, 4)
+            content.attach(TableText('[$MESSAGE]'), 0, 1, 4, 5)
+            content.attach(TableText(_('Personal message')), 1, 2, 4, 5)
+            content.attach(TableText('[$BLOCKED]'), 0, 1, 5, 6)
+            content.attach(TableText(_('Displays \'Blocked\' if a contact is blocked')), 1, 2, 5, 6)
+            last = 7
+        else:
+            window = cls.new_window(_('Group Format Help'))
+            content.attach(TableText('[$NAME]'), 0, 1, 0, 1)
+            content.attach(TableText(_('The name of the group')), 1, 2, 0, 1)
+            content.attach(TableText('[$ONLINE_COUNT]'), 0, 1, 1, 2)
+            content.attach(TableText(_('Contacts online')), 1, 2, 1, 2)
+            content.attach(TableText('[$TOTAL_COUNT]'), 0, 1, 2, 3)
+            content.attach(TableText(_('Total amount of contacts')), 1, 2, 2, 3)
+            last = 4
+
+        content.attach(TableText('[$b][$/b]'), 0, 1, last, last + 1)
+        content.attach(TableText(_('Make text bold')), 1, 2, last, last + 1)
+        content.attach(TableText('[$i][$/i]'), 0, 1, last + 1, last + 2)
+        content.attach(TableText(_('Make text italic')), 1, 2, last + 1, last + 2)
+        content.attach(TableText('[$small][$/small]'), 0, 1, last + 2, last + 3)
+        content.attach(TableText(_('Make text small')), 1, 2, last + 2, last + 3)
+        content.attach(TableText('[$COLOR=][$/COLOR]'), 0, 1, last + 3, last + 4)
+        content.attach(TableText(_('Give text a color (in hex)')), 1, 2, last + 3, last + 4)
+        window.hbox.pack_start(content)
+        window.show_all()
+
+class ImageChooser(gtk.FileChooserDialog):
+    '''a class to select images'''
+
+    def __init__(self, path, response_cb):
+        '''class constructor, path is the directory where the
+        dialog opens'''
+        gtk.FileChooserDialog.__init__(self, _("Image Chooser"), \
+                    parent=None, action=gtk.FILE_CHOOSER_ACTION_OPEN)
+
+        self.response_cb = response_cb
+
+        self.set_default_size(600, 400)
+        self.set_border_width(4)
+        self.set_position(gtk.WIN_POS_CENTER)
+
+        self.vbox.set_spacing(4)
+
+        self.set_current_folder(path)
+
+        hbbox = gtk.HButtonBox()
+        hbbox.set_spacing(4)
+        hbbox.set_layout(gtk.BUTTONBOX_END)
+
+        b_accept = gtk.Button(stock=gtk.STOCK_OK)
+        b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
+
+        b_accept.connect('clicked', self._on_accept)
+        b_cancel.connect('clicked', self._on_cancel)
+        self.connect('delete-event', self._on_close)
+        self.connect("file-activated",self._on_accept)
+
+        hbbox.pack_start(b_cancel, False)
+        hbbox.pack_start(b_accept, False)
+
+        self.vbox.pack_end(hbbox, False)
+
+        self.show_all()
+
+        self._add_filters()
+        self._add_preview()
+
+    def _add_filters(self):
+        '''
+        Adds all the possible file filters to the dialog. The filters correspond
+        to the gdk available image formats
+        '''
+
+        # All files filter
+        all_files = gtk.FileFilter()
+        all_files.set_name(_('All files'))
+        all_files.add_pattern('*')
+
+        # All images filter
+        all_images = gtk.FileFilter()
+        all_images.set_name(_('All images'))
+
+        filters = []
+        formats = gtk.gdk.pixbuf_get_formats()
+        for format in formats:
+            filter = gtk.FileFilter()
+            name = "%s (*.%s)" % (format['description'], format['name'])
+            filter.set_name(name)
+
+            for mtype in format['mime_types']:
+                filter.add_mime_type(mtype)
+                all_images.add_mime_type(mtype)
+
+            for pattern in format['extensions']:
+                tmp = '*.' + pattern
+                filter.add_pattern(tmp)
+                all_images.add_pattern(tmp)
+
+            filters.append(filter)
+
+
+        self.add_filter(all_files)
+        self.add_filter(all_images)
+        self.set_filter(all_images)
+
+        for filter in filters:
+            self.add_filter(filter)
+
+    def _add_preview(self):
+        '''
+        Adds a preview widget to the file chooser
+        '''
+        self.image = gtk.Image()
+        self.image.set_size_request(128, 128)
+        self.image.show()
+
+        self.set_preview_widget(self.image)
+        self.set_preview_widget_active(True)
+
+        self.connect('selection-changed', self._on_update_preview)
+
+    def _on_accept(self, button):
+        '''method called when the user clicks the button'''
+        filename = self.get_filename()
+        if os.path.isfile(filename):
+            self.hide()
+            self.response_cb(gtk.RESPONSE_ACCEPT, filename)
+        else:
+            Dialog.error(_("No picture selected"))
+
+    def _on_cancel(self, button):
+        '''method called when the user clicks the button'''
+        self.hide()
+        self.response_cb(gtk.RESPONSE_CANCEL, self.get_filename())
+
+    def _on_close(self, window, event):
+        '''called when the user click on close'''
+        self.hide()
+        self.response_cb(gtk.RESPONSE_CLOSE, self.get_filename())
+
+    def _on_update_preview(self, filechooser):
+        '''
+        Updates the preview image
+        '''
+        path = self.get_filename()
+
+        if path:
+            # if the file is smaller than 1MB we
+            # load it, otherwise we dont
+            if os.path.isfile(path) and os.path.getsize(path) <= 1000000:
+                try:
+                    pixbuf = gtk.gdk.pixbuf_new_from_file(self.get_filename())
+                    if pixbuf.get_width() > 128 and pixbuf.get_height() > 128:
+                        pixbuf = pixbuf.scale_simple(128, 128, gtk.gdk.INTERP_BILINEAR)
+                    self.image.set_from_pixbuf(pixbuf)
+
+                except gobject.GError:
+                    self.image.set_from_stock(gtk.STOCK_DIALOG_ERROR,
+                        gtk.ICON_SIZE_DIALOG)
+            else:
+                self.image.set_from_stock(gtk.STOCK_DIALOG_ERROR,
+                    gtk.ICON_SIZE_DIALOG)
+
+class CEChooser(ImageChooser):
+    '''a dialog to create a custom emoticon'''
+    SMALL = _("Small (16x16)")
+    BIG = _("Big (50x50)")
+
+    def __init__(self, path, response_cb, smilie_list):
+        '''class constructor'''
+        ImageChooser.__init__(self, path, None)
+
+        self.response_cb = response_cb
+
+        label = gtk.Label(_("Shortcut"))
+        self.shortcut = gtk.Entry(7)
+        self.combo = gtk.combo_box_new_text()
+
+        self.combo.append_text(CEChooser.SMALL)
+        self.combo.append_text(CEChooser.BIG)
+        self.combo.set_active(0)
+
+        hbox0 = gtk.HBox()
+        hbox1 = gtk.HBox()
+        vbox1 = gtk.VBox()
+        vbox2 = gtk.VBox()
+
+        hbox1.add(self.shortcut)
+        hbox1.add(self.combo)
+
+        vbox2.add(hbox1)
+
+        vbox1.add(label)
+
+        hbox0.add(vbox1)
+        hbox0.add(vbox2)
+
+        self.vbox.pack_start(hbox0, False)
+        hbox0.show_all()
+
+        self.smilie_list = smilie_list
+        self._on_changed(None)
+        self.shortcut.connect('changed', self._on_changed)
+
+    def _on_accept(self, button):
+        '''method called when the user clicks the button'''
+        filename = self.get_filename()
+        shortcut = self.shortcut.get_text()
+        size = self.combo.get_model().get_value(self.combo.get_active_iter(), 0)
+
+        if os.path.isfile(filename):
+            if not shortcut:
+                Dialog.error(_("Empty shortcut"))
+            else:
+                self.hide()
+                self.response_cb(stock.ACCEPT, filename, shortcut, size)
+        else:
+            Dialog.error(_("No picture selected"))
+
+    def _on_cancel(self, button):
+        '''method called when the user clicks the button'''
+        self.hide()
+        self.response_cb(stock.CANCEL, None, None, None)
+
+    def _on_close(self, window, event):
+        '''called when the user click on close'''
+        self.hide()
+        self.response_cb(stock.CLOSE, None, None, None)
+
+    def _on_changed(self, shortcut):
+        '''called when the text in self.shortcut changes'''
+
+        SHORTCUT = self.shortcut.get_text()
+
+        if SHORTCUT in self.smilie_list or SHORTCUT == "":
+            self.shortcut.set_property('secondary-icon-stock', gtk.STOCK_DIALOG_ERROR)
+        else:
+            self.shortcut.set_property('secondary-icon-stock', None)
 
 class EmotesWindow(gtk.Window):
     """
     This class represents a window to select an emoticon
     """
 
-    def __init__(self, emote_selected, max_width=8):
+    def __init__(self, session, emote_selected, max_width=8):
         """
         Constructor.
         max_width -- the maximum number of columns
         """
         gtk.Window.__init__(self)
+
+        self.session = session
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        self.emcache = self.caches.get_emoticon_cache(self.session.account.account)
+
+        self.shortcut_list = []
+
         self.set_decorated(False)
         self.set_role("emotes")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
@@ -903,16 +1167,23 @@ class EmotesWindow(gtk.Window):
         self.max_width = max_width
         self.emote_selected = emote_selected
 
-        emotes_count = gui.theme.get_emotes_count()
+        emotes_count = gui.theme.get_emotes_count() # TODO: remove me
         rows = emotes_count/max_width
+
         self.table = gtk.Table(max_width, rows)
-
         self._fill_emote_table(max_width)
+        button = gtk.Button(_("Add emoticon"))
+        button.set_image(gtk.image_new_from_stock(gtk.STOCK_ADD,
+            gtk.ICON_SIZE_BUTTON))
+        button.connect('clicked', self._on_add_custom_emote_selected)
+        
+        self.box = gtk.VBox()
+        self.box.pack_start(self.table)
+        self.box.pack_start(button)
 
-        box = gtk.VBox()
-        box.pack_start(self.table)
-        self.add(box)
-        box.show_all()
+
+        self.add(self.box)
+        self.box.show_all()
 
         self.connect('leave-notify-event', self.on_leave_notify_event)
         self.connect('enter-notify-event', self.on_enter_notify_event)
@@ -939,9 +1210,12 @@ class EmotesWindow(gtk.Window):
         emotes = []
 
         count = 0
+        column = 0
+        row = 0
         for shortcut, name in gui.theme.EMOTES.iteritems():
             if name in emotes:
                 continue
+            self.shortcut_list.append(shortcut)
 
             column = count % columns
             row = count / columns
@@ -952,16 +1226,100 @@ class EmotesWindow(gtk.Window):
                 log.debug(shortcut + ' has no path')
                 continue
 
-            button.set_image(utils.safe_gtk_image_load(path))
+            button.set_image(utils.safe_gtk_image_load(path, (20, 20)))
+            button.set_tooltip_text(shortcut)
+            button.set_relief(gtk.RELIEF_NONE)
             button.connect('clicked', self._on_emote_selected, shortcut)
             self.table.attach(button, column, column + 1, row, row + 1)
 
             count += 1
 
+        for shortcut, hash_ in self.emcache.list():
+            self.shortcut_list.append(shortcut)
+
+            column = count % columns
+            row = count / columns
+            button = gtk.Button()
+            path = os.path.join(self.emcache.path, hash_)
+
+            button.set_image(utils.safe_gtk_image_load(path, (20, 20)))
+            button.set_tooltip_text(shortcut)
+            button.set_relief(gtk.RELIEF_NONE)
+            button.connect('clicked', self._on_emote_selected, shortcut)
+            button.connect('button-release-event', self._on_emote_clicked, shortcut)
+            self.table.attach(button, column, column + 1, row, row + 1)
+
+            count += 1
+
+    def _on_add_custom_emote_selected(self, button):
+        ''' called when the user wants to add a custom emoticon '''
+        def _on_ce_choosed(response, path, shortcut, size):
+            '''method called when the ce is selected'''
+            if response != stock.ACCEPT:
+                return
+            if size == CEChooser.SMALL:
+                size = 0
+            else:
+                size = 1
+
+            #TODO: resize, etc. before inserting path, maybe use insert_raw.
+            self.emcache.insert((shortcut, path))
+
+        CEChooser(os.path.expanduser("~"), _on_ce_choosed, self.shortcut_list)
+
     def _on_emote_selected(self, button, shortcut):
         '''called when an emote is selected'''
         self.emote_selected(shortcut)
         self.hide()
+
+    def _on_emote_clicked(self, button, event, shortcut):
+        '''intercept right click and show a nice menu'''
+        if event.type == gtk.gdk.BUTTON_RELEASE and event.button == 3:
+            emoticon_menu = gtk.Menu()
+            emoticon_menu.connect('enter-notify-event', self.on_enter_notify_event)
+            short_name = gtk.MenuItem(label=shortcut)
+            short_edit = gtk.ImageMenuItem(_("Change shortcut"))
+            short_edit.set_image(gtk.image_new_from_stock(
+                gtk.STOCK_EDIT, gtk.ICON_SIZE_MENU))
+            short_edit.connect("activate", self._on_emote_shortcut_edit, shortcut)
+
+            short_dele = gtk.ImageMenuItem(_("Delete"))
+            short_dele.set_image(gtk.image_new_from_stock(
+                gtk.STOCK_DELETE, gtk.ICON_SIZE_MENU))
+            short_dele.connect("activate", self._on_emote_shortcut_dele, shortcut)
+
+            emoticon_menu.add(short_name)
+            emoticon_menu.add(short_edit)
+            emoticon_menu.add(short_dele)
+
+            emoticon_menu.show_all()
+            emoticon_menu.popup(None, None, None, event.button, event.time)
+
+    def _on_emote_shortcut_edit(self, widget, shortcut):
+        '''modify a shortcut for the selected custom emoticon'''
+        self.hide()
+        cedict = self.emcache.parse()
+
+        def _on_ce_edit_cb(response, emcache, shortcut, hash_, text=''):
+            '''method called when the modification is done'''
+            if response == stock.ACCEPT:
+                if text:
+                    emcache.remove_entry(hash_)
+                    emcache.add_entry(text, hash_)
+                else:
+                    Dialog.error(_("Empty shortcut"))
+
+        window = Dialog.entry_window(_("New shortcut"), shortcut,
+                    _on_ce_edit_cb, _("Change shortcut"), 
+                    self.emcache, shortcut, cedict[shortcut])
+        window.show()
+
+    def _on_emote_shortcut_dele(self, widget, shortcut):
+        '''delete a custom emoticon and its shortcut'''
+        self.hide()
+        cedict = self.emcache.parse()
+        #TODO: confirmation? or not?
+        self.emcache.remove(cedict[shortcut])
 
 class InviteWindow(gtk.Window):
     """
@@ -983,8 +1341,7 @@ class InviteWindow(gtk.Window):
         ContactList = extension.get_default('contact list')
         self.contact_list = ContactList(session)
         self.contact_list.nick_template = \
-            '%DISPLAY_NAME%\n<span foreground="#AAAAAA" size="small">' \
-            '%ACCOUNT%</span>'
+            '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
         self.contact_list.order_by_group = False
 
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)

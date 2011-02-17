@@ -1,7 +1,24 @@
 '''module to define a class to select an avatar'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import gtk
-import gobject
 
 import gui
 import utils
@@ -14,29 +31,33 @@ from IconView import IconView
 class AvatarChooser(gtk.Window):
     '''A dialog to choose an avatar'''
 
-    def __init__(self, response_cb, picture_path='',
-            cache_path='.', contact_cache_path='.',
-            faces_paths=[], avatar_manager = None):
+    def __init__(self, session):
         '''Constructor, response_cb receive the response number, the new file
         selected and a list of the paths on the icon view.
         picture_path is the path of the current display picture,
         '''
         gtk.Window.__init__(self)
+        self.set_modal(True)
         self.set_icon(gui.theme.logo)
 
-        self.response_cb = response_cb
-        self.avatar_manager = avatar_manager
-
-        self.set_title("Avatar chooser")
+        self.avatar_manager = gui.base.AvatarManager(session)
+        
+        self.set_title(_("Avatar chooser"))
         self.set_default_size(620, 400)
         self.set_border_width(4)
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
+        cache_path = self.avatar_manager.get_avatars_dir()
+        faces_paths = self.avatar_manager.get_system_avatars_dirs()
+        contact_cache_path = self.avatar_manager.get_cached_avatars_dir()
         self.views = []
-        self.views.append(IconView(_('Used'), [cache_path], self))
-        self.views.append(IconView(_('System pictures'), faces_paths, self))
-        self.views.append(IconView(_('Contact pictures'), [contact_cache_path], self))
+        self.views.append(IconView(_('Used'), [cache_path],
+            self.on_remove, self.on_accept, IconView.TYPE_SELF_PICS))
+        self.views.append(IconView(_('System pictures'), faces_paths,
+            self.on_remove, self.on_accept, IconView.TYPE_SYSTEM_PICS))
+        self.views.append(IconView(_('Contact pictures'), [contact_cache_path],
+            self.on_remove, self.on_accept, IconView.TYPE_CONTACTS_PICS))
 
         vbox = gtk.VBox(spacing=4)
         side_vbox = gtk.VBox(spacing=4)
@@ -50,10 +71,10 @@ class AvatarChooser(gtk.Window):
         vbbox.set_spacing(4)
         vbbox.set_layout(gtk.BUTTONBOX_START)
 
-        b_clear = gtk.Button("No picture")
+        b_clear = gtk.Button(_("No picture"))
         self.b_add = gtk.Button(stock=gtk.STOCK_ADD)
         self.b_remove = gtk.Button(stock=gtk.STOCK_REMOVE)
-        self.b_remove_all = gtk.Button("Remove all")
+        self.b_remove_all = gtk.Button(_("Remove all"))
         b_accept = gtk.Button(stock=gtk.STOCK_OK)
         b_cancel = gtk.Button(stock=gtk.STOCK_CANCEL)
 
@@ -68,7 +89,7 @@ class AvatarChooser(gtk.Window):
 
         self.img_current = gtk.Image()
         self.img_current.set_size_request(96, 96)
-        frame_current = gtk.Frame("Current")
+        frame_current = gtk.Frame(_("Current"))
         frame_current.add(self.img_current)
 
         hbbox.pack_start(b_clear, False)
@@ -97,11 +118,12 @@ class AvatarChooser(gtk.Window):
 
         vbox.show_all()
         self.add(vbox)
-
-        self.set_current_picture(picture_path)
+        
+        current_avatar = session.config.last_avatar
+        # which is the difference with self.config_dir.get_path("last_avatar")?
+        self.set_current_picture(current_avatar)
 
     def _on_tab_changed(self, notebook, page, page_num):
-        view = self.views[page_num]
         if page_num == 1: # System Pictures
             self.b_add.set_sensitive(False)
             self.b_remove.set_sensitive(False)
@@ -166,7 +188,7 @@ class AvatarChooser(gtk.Window):
             parts = os.path.splitext(path)
             #os.remove(parts[0] + "_thumb" + parts[1])
         except OSError:
-            print "could not remove", path
+            print _("could not remove"), path
 
     def remove_selected(self):
         '''Removes avatar from a TreeIter'''
@@ -194,25 +216,26 @@ class AvatarChooser(gtk.Window):
             '''method called when an image is selected'''
             if response == gui.stock.ACCEPT:
                 animation = gtk.gdk.PixbufAnimation(path)
-                #we don't need to resize animation here
-                if not animation.is_static_image():
-                    view = self.views[self.notebook.get_current_page()]
-                    view.add_picture(path)
-                    return
-                self._on_image_area_selector(path)
+                self._on_image_area_selector(path, animation.is_static_image())
 
         class_ = extension.get_default('image chooser')
         class_(os.path.expanduser('~'), _on_image_selected).show()
 
-    def _on_image_area_selector(self, path):
+    def _on_image_area_selector(self, path, static=True):
         '''called when the user must resize the added image'''
         def _on_image_resized(response, pix):
             '''method called when an image is selected'''
             if response == gtk.RESPONSE_OK:
                 if self.avatar_manager is not None:
                     view = self.views[self.notebook.get_current_page()]
-                    pix, avpath = self.avatar_manager.add_new_avatar_from_pix(pix)
+                    avpath = self.avatar_manager.add_new_avatar_from_toolkit_pix(pix)
                     view.add_picture(avpath)
+
+        if not static:
+            view = self.views[self.notebook.get_current_page()]
+            avpath = self.avatar_manager.add_new_avatar(path)
+            view.add_picture(avpath)
+            return
 
         class_ = extension.get_default('image area selector')
         class_(_on_image_resized, gtk.gdk.pixbuf_new_from_file(path),
@@ -230,7 +253,8 @@ class AvatarChooser(gtk.Window):
                 self.remove_all()
 
         extension.get_default('dialog').yes_no(
-            "Are you sure you want to remove all items?", on_response_cb)
+            _("Are you sure you want to remove all items?"),
+            on_response_cb)
 
     def on_accept(self, button):
         '''method called when the user clicks the button'''
@@ -241,25 +265,27 @@ class AvatarChooser(gtk.Window):
             filename = selected[1]
 
             self.hide()
-            print filename
-            self.response_cb(gui.stock.ACCEPT, filename)
+            #print filename
+            self.stop_and_clear()
+            self.avatar_manager.set_as_avatar(filename)
+            
         else:
-            extension.get_default('dialog').error("No picture selected")
+            extension.get_default('dialog').error(_("No picture selected"))
 
     def _on_cancel(self, button):
         '''method called when the user clicks the button'''
         self.hide()
-        self.response_cb(gui.stock.CANCEL, '')
+        self.stop_and_clear()
 
     def _on_clear(self, button):
         '''method called when the user clicks the button'''
         self.hide()
-        self.response_cb(gui.stock.CLEAR, '')
+        self.stop_and_clear()
 
     def _on_close(self, window, event):
         '''called when the user click on close'''
         self.hide()
-        self.response_cb(gui.stock.CLOSE, '')
+        self.stop_and_clear()
 
     def on_key_press(self , widget, event):
         '''called when the user press a key'''

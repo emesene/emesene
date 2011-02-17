@@ -1,11 +1,11 @@
 ''' a gtk widget for managing file transfers '''
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -20,7 +20,6 @@
 import gtk
 import gobject
 
-import e3.base
 import extension
 
 class FileTransferBarWidget(gtk.HBox):
@@ -85,8 +84,22 @@ class FileTransferBarWidget(gtk.HBox):
         self.show_all()
 
     def update(self, transfer):
+        ''' called when the bar needs to be updated '''
         tr = self.transfers[transfer]
         tr.do_update_progress()
+
+    def accepted(self, transfer):
+        ''' called when the bar needs to be updated '''
+        tr = self.transfers[transfer]
+        tr.accepted()
+        tr.do_update_progress()
+
+    def finished(self, transfer):
+        ''' called when the bar needs to be updated '''
+        tr = self.transfers[transfer]
+        tr.finished()
+        tr.do_update_progress()
+        self.num_transfers -= 1
 
     def _on_left_button_clicked(self, widget):
         ''' when the user click on the go-left button '''

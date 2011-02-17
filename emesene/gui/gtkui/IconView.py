@@ -1,4 +1,22 @@
 '''module to define a class to present a list of thumbnails'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import os
 import gtk
 import gobject
@@ -11,10 +29,15 @@ import gc
 class IconView(gtk.HBox):
     ''' class representing a listview in icon mode
         (using gtk.IconView + gtk.ListStore)        '''
-    def __init__(self, label, path_list, avatar_chooser):
+    TYPE_SYSTEM_PICS, TYPE_CONTACTS_PICS, TYPE_SELF_PICS = range(3)
+    def __init__(self, label, path_list, on_remove_cb, on_accept_cb, iconv_type):
         gtk.HBox.__init__(self)
         self.set_spacing(4)
-        self.chooser = avatar_chooser
+        
+        self.on_remove_cb = on_remove_cb
+        self.on_accept_cb = on_accept_cb
+        self.iconv_type = iconv_type
+
         self.model = gtk.ListStore(gtk.gdk.Pixbuf, str)   
         self.iconview = gtk.IconView(self.model)
         self.iconview.enable_model_drag_dest([('text/uri-list', 0, 0)],
@@ -49,15 +72,13 @@ class IconView(gtk.HBox):
                     name = os.path.splitext(path)[0]
                     if self.stop:
                         return False
+                    full_path = os.path.join(search_path, path)
                     if not name.endswith('_thumb') and \
-                        not path.endswith('tmp') and   \
-                        not path.endswith('xml') and   \
-                        not path.endswith('db') and    \
-                        not path.endswith('info') and  \
-                        not path.endswith('last') and  \
-                        not path.endswith('avatars'):
+                        not path.endswith(('tmp', 'xml', 'db', 'info',
+                                           'last', 'avatars')) and \
+                        not os.path.isdir(full_path):
                         gtk.gdk.threads_enter()
-                        self.add_picture(os.path.join(search_path, path))
+                        self.add_picture(full_path)
                         # make update the iconview
                         self.iconview.queue_draw()
                         gtk.gdk.threads_leave()        
@@ -70,15 +91,15 @@ class IconView(gtk.HBox):
     
     def pop_up(self, iconview, event):
         ''' manage the context menu (?) '''
-        if event.button == 3 and self.label.get_text() != 'System pictures':
+        if event.button == 3 and self.iconv_type != IconView.TYPE_SYSTEM_PICS:
             path = self.iconview.get_path_at_pos(event.x, event.y)
             if path != None:
                 self.iconview.select_path(path)
                 remove_menu = gtk.Menu()
-                remove_item = gtk.ImageMenuItem('Delete')
+                remove_item = gtk.ImageMenuItem(_('Delete'))
                 remove_item.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
                                       gtk.ICON_SIZE_MENU))
-                remove_item.connect('activate', self.chooser.on_remove)
+                remove_item.connect('activate', self.on_remove_cb)
                 remove_menu.append(remove_item)
                 remove_menu.popup(None, None, None, event.button, event.time)
                 remove_menu.show_all()
@@ -99,7 +120,7 @@ class IconView(gtk.HBox):
                 if os.path.exists(path):
                     self.add_picture(path)
             except TypeError, error:
-                print "Could not add picture:\n %s" % (str(error),)
+                print _("Could not add picture:\n %s") % (str(error),)
 
     def add_picture(self, path):
         '''Adds an avatar into the IconView'''
@@ -114,13 +135,14 @@ class IconView(gtk.HBox):
                         pixbuf = animation.get_static_image().scale_simple( \
                                     64, 64, gtk.gdk.INTERP_BILINEAR)
                 except gobject.GError:
-                    print 'image at %s could not be loaded' % (path, )
+                    print _('image at %s could not be loaded') % (path, )
                     print gobject.GError                      
+                    return
  
                 # On nt images are 128x128 (48x48 on xp)
                 # On kde, images are 64x64
-                if (self.label.get_text() == 'System pictures' or \
-                 self.label.get_text() == 'Contact pictures') and \
+                if (self.iconv_type == IconView.TYPE_SYSTEM_PICS or \
+                 self.iconv_type == IconView.TYPE_CONTACTS_PICS) and \
                  (pixbuf.get_width() != 96 or pixbuf.get_height() != 96):
                     pixbuf = pixbuf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
 
@@ -149,7 +171,7 @@ class IconView(gtk.HBox):
 
     def _on_icon_activated(self, *args):
         '''method called when a picture is double clicked'''
-        self.chooser.on_accept(None)
+        self.on_accept_cb(None)
     
     def get_selected_items(self):
         ''' gets the selected pictures '''

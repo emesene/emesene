@@ -141,30 +141,8 @@ class Conversation(threading.Thread):
 
             # log the message
             if message.type != MsnMessage.Message.TYPE_TYPING:
-                contact = self.session.contacts.get(message.account)
+                e3.Logger.log_message(self.session, self.members, message, False)
 
-                if contact is None:
-                    contact = e3.Contact(message.account)
-
-                src = e3.Logger.Account(contact.attrs.get('CID', None), None,
-                    contact.account, contact.status, contact.nick,
-                    contact.message, contact.picture)
-
-                dst = self.session.contacts.me
-
-                dest = e3.Logger.Account(dst.attrs.get('CID', None), None,
-                    dst.account, dst.status, dst.nick, dst.message, dst.picture)
-
-                # we remove the content type part since it's always equal
-                msgstr = message.format().split('\r\n', 1)[1]
-                # remove the Content-type, X-MMS-IM-Format and TypingUser
-                # XXX WHAT THE HELL
-                msgstr = msgstr.replace('Content-Type: ', '')
-                msgstr = msgstr.replace('X-MMS-IM-Format: ', '')
-                msgstr = msgstr.replace('TypingUser: ', '')
-
-                self.session.logger.log('message', contact.status, msgstr,
-                    src, dest)
         elif message.type == MsnMessage.Message.TYPE_P2P and \
                 message.dest == self.account and \
                 len(self.members) == 0:
@@ -253,7 +231,7 @@ class Conversation(threading.Thread):
             del self.sent_messages[tid]
             self.session.add_event(e3.Event.EVENT_CONV_MESSAGE_SEND_FAILED,
                 self.cid, message)
-            self._log_message(message, True)
+            e3.Logger.log_message(self.session, self.members, message, True, True)
 
     def _on_unknown_command(self, message):
         '''handle the unknown commands'''
@@ -296,8 +274,8 @@ class Conversation(threading.Thread):
             log.info('reinviting members ' + str(self.members))
             members = self.members
             self.members = []
-            while len(self.members):
-                member = self.members.pop()
+            while len(members):
+                member = members.pop()
                 self.invite(member)
 
         self.socket.start()
@@ -328,38 +306,7 @@ class Conversation(threading.Thread):
             self.sent_messages[self.socket.tid] = message
             # TODO: change that A when applies
             self.socket.send_command('MSG', ('A',), message.format())
-            self._log_message(message)
-
-    def _log_message(self, message, error=False):
-            # log the message
-            contact = self.session.contacts.me
-            src = e3.Logger.Account(contact.attrs.get('CID', None), None,
-                contact.account, contact.status, contact.nick, contact.message,
-                contact.picture)
-
-            # we remove the content type part since it's always equal
-            msgstr = message.format().split('\r\n', 1)[1]
-            # remove the Content-type, X-MMS-IM-Format and TypingUser
-            msgstr = msgstr.replace('Content-Type: ', '')
-            msgstr = msgstr.replace('X-MMS-IM-Format: ', '')
-            msgstr = msgstr.replace('TypingUser: ', '')
-
-            if error:
-                event = 'message-error'
-            else:
-                event = 'message'
-
-            for dst_account in self.members:
-                dst = self.session.contacts.get(dst_account)
-
-                if dst is None:
-                    dst = e3.Contact(message.account)
-
-                dest = e3.Logger.Account(dst.attrs.get('CID', None), None,
-                    dst.account, dst.status, dst.nick, dst.message, dst.picture)
-
-                self.session.logger.log(event, contact.status, msgstr,
-                    src, dest)
+            e3.Logger.log_message(self.session, self.members, message, True)
 
     def _get_socket(self, host, port):
         """

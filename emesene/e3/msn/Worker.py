@@ -1,16 +1,13 @@
 '''a thread that handles the connection with the main server'''
 
-import os
 import time
 import Queue
 import urllib
 import httplib
 import urlparse
-import threading
 
 import e3
 import mbi
-import p2p
 import msgs
 import common
 import challenge
@@ -61,8 +58,8 @@ class Worker(e3.Worker):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
 
-        self.host = session.DEFAULT_HOST
-        self.port = session.DEFAULT_PORT
+        self.host = session.SERVICES['e3.msn']['host']
+        self.port = session.SERVICES['e3.msn']['port']
 
         if proxy is None:
             self.proxy = e3.Proxy()
@@ -539,7 +536,7 @@ class Worker(e3.Worker):
 
         if params_length == 4:
             msnobj = urllib.unquote(message.params[3])
-            contact.attrs['CID'] = int(message.params[2])
+            contact.cid = int(message.params[2])
 
         log_account = e3.Logger.Account.from_contact(contact)
 
@@ -799,6 +796,8 @@ class Worker(e3.Worker):
     def _handle_action_set_message(self, message):
         '''handle e3.Action.ACTION_SET_MESSAGE
         '''
+        contact = self.session.contacts.me
+
         self.socket.send_command('UUX', payload='<Data><PSM>' + \
             common.escape(message) + '</PSM><CurrentMedia></CurrentMedia>' + \
             '<MachineGuid></MachineGuid></Data>')

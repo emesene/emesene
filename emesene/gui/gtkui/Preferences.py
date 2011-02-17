@@ -1,5 +1,25 @@
-import gtk
+# -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+import gtk
+import webbrowser
+
+import e3.common
 import gui
 import utils
 import extension
@@ -9,12 +29,20 @@ import PluginWindow
 import logging
 log = logging.getLogger('gtkui.Preferences')
 
+try:
+    from enchant_dicts import list_dicts
+except:
+    def list_dicts():
+        return []
+
+# TODO: consider moving to nicer icons than stock ones.
 LIST = [
     {'stock_id' : gtk.STOCK_FULLSCREEN,'text' : _('Interface')},
+    {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('Desktop')},
     {'stock_id' : gtk.STOCK_MEDIA_NEXT,'text' : _('Sounds')},
     {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
     {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
-    {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Extensions')},
+    {'stock_id' : gtk.STOCK_DIALOG_WARNING,'text' : _('Extensions')},
     {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
 ]
 
@@ -27,11 +55,10 @@ class Preferences(gtk.Window):
         """
         gtk.Window.__init__(self)
         self.set_border_width(2)
-        self.set_title("Preferences")
+        self.set_title(_("Preferences"))
         self.session = session
 
         self.set_default_size(600, 400)
-        self.set_role("New preferences Window")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
         if utils.file_readable(gui.theme.logo):
@@ -56,7 +83,7 @@ class Preferences(gtk.Window):
         cellPix = gtk.CellRendererPixbuf()
 
         # Create the single Tree Column
-        treeViewColumn = gtk.TreeViewColumn('Categories')
+        treeViewColumn = gtk.TreeViewColumn(_('Categories'))
 
         treeViewColumn.pack_start(cellPix, expand=False)
         treeViewColumn.add_attribute(cellPix, 'pixbuf',0)
@@ -83,6 +110,7 @@ class Preferences(gtk.Window):
         vbox.pack_start(hbox, True,True) # hbox, True, True
 
         self.interface = Interface(session)
+        self.desktop = DesktopTab(session)
         self.sound = Sound(session)
         self.notification = Notification(session)
         self.theme = Theme(session)
@@ -101,6 +129,7 @@ class Preferences(gtk.Window):
 
         # Keep local copies of the objects
         self.interface_page = self.interface
+        self.desktop_page = self.desktop
         self.sound_page = self.sound
         self.notifications_page = self.notification
         self.theme_page = self.theme
@@ -110,15 +139,24 @@ class Preferences(gtk.Window):
         # Whack the pages into a dict for future reference
 
         self.page_dict.append(self.interface_page)
+        self.page_dict.append(self.desktop_page)
         self.page_dict.append(self.sound_page)
         self.page_dict.append(self.notifications_page)
         self.page_dict.append(self.theme_page)
         self.page_dict.append(self.extensions_page)
         self.page_dict.append(self.plugins_page)
 
+        if 'msn' in self.session.SERVICES: # only when session is papylib.
+            listStore.append([self.render_icon(gtk.STOCK_NETWORK,
+                             gtk.ICON_SIZE_LARGE_TOOLBAR), _('Live Messenger')])
+            self.msn_papylib = MSNPapylib(session)
+            self.msn_papylib_page = self.msn_papylib
+            self.page_dict.append(self.msn_papylib_page)
+
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
 
+        self.connect('delete_event', self.hide_on_delete)
         self.add(vbox)
         vbox.show_all()
 
@@ -184,7 +222,7 @@ class BaseTable(gtk.Table):
         if increment_current_row:
             self.current_row += 1
 
-    def append_entry_default(self, text, property_name, default):
+    def append_entry_default(self, text, format_type, property_name, default):
         """append a row with a label and a entry, set the value to the
         value of property_name if exists, if not set it to default.
          Add a reset button that sets the value to the default"""
@@ -199,8 +237,11 @@ class BaseTable(gtk.Table):
             set the value of the property to the new value"""
             self.set_attr(property_name, entry.get_text())
 
+        def on_help_clicked(button, format_type):
+            """called when the help button is clicked"""
+            extension.get_default('dialog').contactlist_format_help(format_type)
+
         hbox = gtk.HBox(spacing=4)
-        hbox.set_homogeneous(True)
         label = gtk.Label(text)
         label.set_alignment(0.0, 0.5)
         text = self.get_attr(property_name)
@@ -208,14 +249,26 @@ class BaseTable(gtk.Table):
         entry = gtk.Entry()
         entry.set_text(text)
 
-        reset = gtk.Button(stock=gtk.STOCK_CLEAR)
+        reset = gtk.Button()
+        entry_help = gtk.Button()
 
-        hbox.pack_start(label, True, True)
+        hbox.pack_start(label)
         hbox.pack_start(entry, False)
         hbox.pack_start(reset, False)
+        hbox.pack_start(entry_help, False)
 
+        reset_image = gtk.image_new_from_stock(gtk.STOCK_CLEAR,
+                                               gtk.ICON_SIZE_MENU)
+        reset.set_label(_('Reset'))
+        reset.set_image(reset_image)
         reset.connect('clicked', on_reset_clicked, entry, default)
         entry.connect('changed', on_entry_changed, property_name)
+
+        help_image = gtk.image_new_from_stock(gtk.STOCK_HELP,
+                                              gtk.ICON_SIZE_MENU)
+        entry_help.set_image(help_image)
+        entry_help.connect('clicked', on_help_clicked, format_type)
+
         self.append_row(hbox, None)
 
     def append_check(self, text, property_name, row=None):
@@ -227,8 +280,9 @@ class BaseTable(gtk.Table):
         widget.set_active(default)
         widget.connect('toggled', self.on_toggled, property_name)
         self.append_row(widget, row)
+        return widget
 
-    def append_range(self, text, property_name, min_val, max_val, is_int=True):
+    def append_range(self, text, property_name, min_val, max_val,is_int=True):
         """append a row with a scale to select an integer value between
         min and max
         """
@@ -251,8 +305,9 @@ class BaseTable(gtk.Table):
         hbox.pack_start(label, True, True)
         hbox.pack_start(scale, False)
 
-        scale.connect('value-changed', self.on_range_changed, property_name,
+        scale.connect('button_release_event', self.on_range_changed, property_name,
                 is_int)
+
         self.append_row(hbox, None)
 
     def append_combo(self, text, getter, property_name):
@@ -301,7 +356,7 @@ class BaseTable(gtk.Table):
         """
         self.set_attr(property_name, combo.get_active_text())
 
-    def on_range_changed(self, scale, property_name, is_int):
+    def on_range_changed(self, scale, widget, property_name, is_int):
         """callback called when the selection of the combo changed
         """
         value = scale.get_value()
@@ -353,6 +408,12 @@ class BaseTable(gtk.Table):
     def on_update(self):
         pass
 
+    def on_redraw_main_screen(self, button):
+        """called when the Redraw main screen button is clicked"""
+        self.session.save_config()
+        self.session.signals.login_succeed.emit()
+        self.session.signals.contact_list_ready.emit()
+
 class Interface(BaseTable):
     """the panel to display/modify the config related to the gui
     """
@@ -360,30 +421,71 @@ class Interface(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 4, 1)
+        BaseTable.__init__(self, 4, 2)
         self.session = session
-        self.append_markup('<b>Main window:</b>')
-        self.append_check('Show user panel',
-            'session.config.b_show_userpanel')
-        self.append_markup('<b>Conversation window:</b>')
-        self.session.config.get_or_set('b_avatar_on_left', False)
-        self.append_check('Show emoticons', 'session.config.b_show_emoticons')
-        self.append_check('Show conversation header',
-            'session.config.b_show_header')
-        self.append_check('Show conversation side panel',
-            'session.config.b_show_info')
-        self.append_check('Show conversation toolbar',
-            'session.config.b_show_toolbar')
-        self.append_check('Avatar on conversation left side',
-            'session.config.b_avatar_on_left')
-        self.append_check('Allow auto scroll in conversation',
-            'session.config.b_allow_auto_scroll')
 
-        self.append_range('Contact list avatar size',
+        langs = list_dicts()
+
+        self.spell_lang = self.session.config.get_or_set("spell_lang", "en")
+        self.lang_menu = gtk.combo_box_new_text()
+        self.lang_menu.connect("changed", self._on_lang_combo_change)
+
+        index = 0
+        for lang in langs:
+            self.lang_menu.append_text(lang)
+            if lang == self.spell_lang:
+                self.lang_menu.set_active(index)
+            index += 1
+
+        self.append_markup('<b>'+_('Main window:')+'</b>')
+        self.append_check(_('Show user panel'),
+            'session.config.b_show_userpanel')
+        self.append_markup('<b>'+_('Conversation window:')+'</b>')
+        self.session.config.get_or_set('b_avatar_on_left', False)
+        self.session.config.get_or_set('b_toolbar_small', False)
+        self.session.config.get_or_set('b_conversation_tabs', True)
+        self.append_check(_('Tabbed Conversations'),
+                'session.config.b_conversation_tabs')
+        self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
+        self.append_check(_('Start minimized/iconified'), 'session.config.b_conv_minimized')
+        self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
+        self.append_check(_('Show conversation header'),
+            'session.config.b_show_header')
+        self.append_check(_('Show conversation side panel'),
+            'session.config.b_show_info')
+        self.append_check(_('Show conversation toolbar'),
+            'session.config.b_show_toolbar')
+        self.append_check(_('Small conversation toolbar'),
+            'session.config.b_toolbar_small')
+        self.append_check(_('Avatar on conversation left side'),
+            'session.config.b_avatar_on_left')
+        self.append_check(_('Allow auto scroll in conversation'),
+            'session.config.b_allow_auto_scroll')
+        self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
+            'session.config.b_enable_spell_check')
+        self.attach(self.lang_menu, 2, 3, 12, 13) 
+        self.append_check(_('Show avatars in taskbar instead of status icons'), 
+            'session.config.b_show_avatar_in_taskbar')
+
+        self.append_range(_('Contact list avatar size'),
             'session.config.i_avatar_size', 18, 64)
-        self.append_range('Conversation avatar size',
+        self.append_range(_('Conversation avatar size'),
             'session.config.i_conv_avatar_size', 18, 128)
+        
+        self.session.config.subscribe(self._on_spell_change,
+            'b_enable_spell_check')
+        
         self.show_all()
+
+    def _on_spell_change(self, value):
+        if value:
+            self.lang_menu.set_sensitive(True)
+        else:
+            self.lang_menu.set_sensitive(False)
+
+    def _on_lang_combo_change(self, combo):
+        self.session.config.spell_lang = combo.get_active_text()
+
 
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
@@ -394,22 +496,37 @@ class Sound(BaseTable):
         """
         BaseTable.__init__(self, 6, 1)
         self.session = session
-        self.append_markup('<b>Messages events:</b>')
-        self.append_check('Play sound on first sent message',
-            'session.config.b_play_first_send')
-        self.append_check('Play sound on sent message',
-            'session.config.b_play_send')
-        self.append_check('Play sound on received message',
-            'session.config.b_play_type')
-        self.append_check('Play sound on nudge',
-            'session.config.b_play_nudge')
+        self.array = []
+        self.append_markup('<b>'+_('Messages events:')+'</b>')
+        self.append_check(_('Mute sounds'),
+            'session.config.b_mute_sounds')
+        self.array.append(self.append_check(_('Play sound on sent message'),
+            'session.config.b_play_send'))
+        self.array.append(self.append_check(_('Play sound on first received message'),
+            'session.config.b_play_first_send'))
+        self.array.append(self.append_check(_('Play sound on received message'),
+            'session.config.b_play_type'))
+        self.array.append(self.append_check(_('Play sound on nudge'),
+            'session.config.b_play_nudge'))
+        self.append_markup('<b>'+_('Users events:')+'</b>')
+        self.array.append(self.append_check(_('Play sound on contact online'),
+            'session.config.b_play_contact_online'))
+        self.array.append(self.append_check(_('Play sound on contact offline'),
+            'session.config.b_play_contact_offline'))
 
-        self.append_markup('<b>Users events:</b>')
-        self.append_check('Play sound on contact online',
-            'session.config.b_play_contact_online')
-        self.append_check('Play sound on contact offline',
-            'session.config.b_play_contact_offline')
+        self._on_mute_sounds_changed(self.session.config.b_mute_sounds)
+
+        self.session.config.subscribe(self._on_mute_sounds_changed,
+            'b_mute_sounds')
+
         self.show_all()
+
+    def _on_mute_sounds_changed(self, value):
+        for i in self.array:
+            if value:
+                i.set_sensitive(False)
+            else:
+                i.set_sensitive(True)
 
 class Notification(BaseTable):
     """the panel to display/modify the config related to the notifications
@@ -420,11 +537,11 @@ class Notification(BaseTable):
         """
         BaseTable.__init__(self, 2, 1)
         self.session = session
-        self.append_check('Notify on contact online',
+        self.append_check(_('Notify on contact online'),
             'session.config.b_notify_contact_online')
-        self.append_check('Notify on contact offline',
+        self.append_check(_('Notify on contact offline'),
             'session.config.b_notify_contact_offline')
-        self.append_check('Notify on received message',
+        self.append_check(_('Notify on received message'),
             'session.config.b_notify_receive_message')
         self.show_all()
 
@@ -440,20 +557,23 @@ class Theme(BaseTable):
 
         ContactList = extension.get_default('contact list')
 
-        adium_theme = self.session.config.get_or_set('adium_theme', 'renkoo.AdiumMessageStyle')
+        self.session.config.get_or_set('adium_theme', 'renkoo')
 
-        self.append_combo('Image theme', gui.theme.get_image_themes,
+        self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
-        self.append_combo('Sound theme', gui.theme.get_sound_themes,
+        self.append_combo(_('Sound theme'), gui.theme.get_sound_themes,
             'session.config.sound_theme')
-        self.append_combo('Emote theme', gui.theme.get_emote_themes,
+        self.append_combo(_('Emote theme'), gui.theme.get_emote_themes,
             'session.config.emote_theme')
-        self.append_combo('Adium theme', gui.theme.get_adium_themes,
+        self.append_combo(_('Adium theme'), gui.theme.get_adium_themes,
             'session.config.adium_theme')
-        self.append_entry_default('Nick format',
+        self.append_entry_default(_('Nick format'), 'nick',
                 'session.config.nick_template', ContactList.NICK_TPL)
-        self.append_entry_default('Group format',
+        self.append_entry_default(_('Group format'), 'group',
                 'session.config.group_template', ContactList.GROUP_TPL)
+
+        self.add_button(_('Apply'), 0, 7,
+                self.on_redraw_main_screen, 0, 0)
 
 class Extension(BaseTable):
     """the panel to display/modify the config related to the extensions
@@ -481,27 +601,21 @@ class Extension(BaseTable):
         """add the widgets that will display the information of the extension
         category and the selected extension
         """
-        self.add_text('Categories', 0, 0, True)
-        self.add_text('Selected', 0, 1, True)
+        self.add_text(_('Categories'), 0, 0, True)
+        self.add_text(_('Selected'), 0, 1, True)
         self.add_text('', 0, 2, True)
-        self.add_text('Name', 0, 3, True)
-        self.add_text('Description', 0, 4, True)
-        self.add_text('Author', 0, 5, True)
-        self.add_text('Website', 0, 6, True)
+        self.add_text(_('Name'), 0, 3, True)
+        self.add_text(_('Description'), 0, 4, True)
+        self.add_text(_('Author'), 0, 5, True)
+        self.add_text(_('Website'), 0, 6, True)
 
         self.add_label(self.name_info, 1, 3, True)
         self.add_label(self.description_info, 1, 4, True)
         self.add_label(self.author_info, 1, 5, True)
         self.add_label(self.website_info, 1, 6, True)
 
-        self.add_button('Redraw main screen', 1, 7,
-                self._on_redraw_main_screen, 0, 0)
-
-    def _on_redraw_main_screen(self, button):
-        """called when the Redraw main screen button is clicked"""
-        self.session.save_config()
-        self.session.signals.login_succeed.emit()
-        self.session.signals.contact_list_ready.emit()
+        self.add_button(_('Redraw main screen'), 1, 7,
+                self.on_redraw_main_screen, 0, 0)
 
     def _get_categories(self):
         ''' get available categories'''
@@ -556,9 +670,11 @@ class Extension(BaseTable):
         ext, identifier = self.extension_list[extension_index]
         if not extension.set_default_by_id(category, identifier):
             # TODO: revert the selection to the previous selected extension
-            log.warning('Could not set %s as default extension for %s' % \
-                (extension_id, category))
+            log.warning(_('Could not set %s as default extension for %s') % \
+                (extension_index, category))
             return
+        else:
+            self.session.config.d_extensions[category] = identifier
 
         ext = extension.get_default(category)
         self._set_extension_info(ext)
@@ -584,11 +700,63 @@ class Extension(BaseTable):
         # fill it again with available categories
         # this is done because a plugin may have changed them
         categories = self._get_categories()
+
         for item in categories:
             model.append([item])
+
         self.categories.set_model(model)
         self.categories.set_active(0)
 
+class DesktopTab(BaseTable):
+    """ This panel contains some msn-papylib specific settings """
 
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 3, 2)
+        self.session = session
 
+        self.append_markup('<b>'+_('File transfers')+'</b>')
+        self.append_check(_('Sort received files by sender'), 
+                          'session.config.b_download_folder_per_account')
+        self.add_text(_('Save files to:'), 0, 2, True)
+
+        def on_path_selected(f_chooser):
+            ''' updates the download dir config value '''
+            if f_chooser.get_filename() != self.session.config.download_folder:
+                self.session.config.download_folder = f_chooser.get_filename()
+
+        path_chooser = gtk.FileChooserDialog(
+            title=_('Choose a Directory'),
+            action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        fc_button = gtk.FileChooserButton(path_chooser)
+        fc_button.set_current_folder(self.session.config.get_or_set("download_folder", 
+                e3.common.locations.downloads()))
+        path_chooser.connect('selection-changed', on_path_selected)
+        self.attach(fc_button, 2, 3, 2, 3, gtk.EXPAND|gtk.FILL, gtk.EXPAND)
+
+        self.show_all()
+
+class MSNPapylib(BaseTable):
+    """ This panel contains some msn-papylib specific settings """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 8, 2)
+        self.session = session
+
+        self.add_text(_('If you have problems with your nickname/message/picture '
+                        'just click on this button, sign in with your account '
+                        'and load a picture in your Live Profile. '
+                        'Then restart emesene and have fun.'), 0, 0, True)
+        self.add_button(_('Open Live Profile'), 1, 0, self._on_live_profile_clicked, 0, 0)
+
+        self.show_all()
+
+    def _on_live_profile_clicked(self, arg):
+        ''' called when live profile button is clicked '''
+        webbrowser.open("http://profile.live.com/details/Edit/Pic")
 

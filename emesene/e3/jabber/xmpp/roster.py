@@ -12,7 +12,7 @@
 ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##   GNU General Public License for more details.
 
-# $Id: roster.py,v 1.20 2005/07/13 13:22:52 snakeru Exp $
+# $Id$
 
 """
 Simple roster implementation. Can be used though for different tasks like

@@ -2,13 +2,13 @@
  * python >= 2.5
 
 === Libs ===
- * papyon >= 0.4.8
- * xmppy
+ * papyon >= 0.5.2 (optional)
+ * xmppy (optional)
 
 === Gtk ===
- * python-notify (libnotify python wrapper)
+ * python-notify (libnotify python wrapper) (optional)
  * pygtk >= 2.12
 
 === Indicators ===
- * python-appindicator
+ * python-appindicator (optional)
 

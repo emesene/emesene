@@ -1,11 +1,30 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 class Message(object):
     '''a class that represent a msn message'''
-    (TYPE_MESSAGE, TYPE_TYPING, TYPE_NUDGE, TYPE_P2P, TYPE_UNK) = range(5)
+    (TYPE_MESSAGE, TYPE_TYPING, TYPE_NUDGE, TYPE_P2P, TYPE_UNK, TYPE_FLNMSG) = range(6)
 
-    def __init__(self, type_, body, account, style=None):
+    def __init__(self, type_, body, account, style=None, timestamp=None):
         self.type = type_
         self.body = body
         self.account = account
+        self.timestamp = timestamp
 
         if style is not None:
             self.style = style
@@ -38,8 +57,35 @@ class Style(object):
     def __str__(self):
         '''return a string representation of the object'''
         return '<style font="%s" color="%s" b="%s" i="%s" u="%s" s="%s">' \
-            % (self.font, str(self.color), self.bold, self.italic, 
+            % (self.font, str(self.color), self.bold, self.italic,
                 self.underline, self.strike)
+
+    def to_css(self):
+        '''return a string representing the current style as CSS rules'''
+        style = ''
+
+        if self.font is not None:
+            style += 'font-family: %s; ' % self.font
+
+        if self.size is not None:
+            style += 'font-size: %spt; ' % str(self.size)
+
+        if self.color is not None:
+            style += 'color: #%s; ' % self.color.to_hex()
+
+        if self.bold:
+            style += 'font-weight: bold; '
+
+        if self.italic:
+            style += 'font-style: italic; '
+
+        if self.underline:
+            style += 'text-decoration: underline; '
+
+        if self.strike:
+            style += 'text-decoration: line-through;'
+
+        return style
 
 class Color(object):
     '''a class representing a RGBA color'''
@@ -57,19 +103,19 @@ class Color(object):
 
         red = self.red
         if red > 255:
-            red /= 255
+            red /= 256
 
         green = self.green
         if green > 255:
-            green /= 255
+            green /= 256
 
         blue = self.blue
         if blue > 255:
-            blue /= 255
+            blue /= 256
 
-        red = hex(red)[2:]
-        green = hex(green)[2:]
-        blue = hex(blue)[2:]
+        red = hex(red)[2:][-2:]
+        green = hex(green)[2:][-2:]
+        blue = hex(blue)[2:][-2:]
 
         if len(red) == 1:
             red = '0' + red
@@ -109,7 +155,7 @@ class Color(object):
                 hex_str = hex_str[1:]
         elif len(hex_str) not in (3, 6):
             raise ValueError('Invalid color format', hex_str)
-       
+
         if len(hex_str) == 3:
             hex_str = hex_str[0] * 2 + hex_str[1] * 2 + hex_str[2] * 2
 

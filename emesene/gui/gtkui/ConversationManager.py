@@ -1,13 +1,49 @@
 '''a module that define classes to build the conversation widget'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
-import glib
+import gobject
 
 import e3
 import gui
 import extension
+import Renderers
 
-class ConversationManager(gtk.Notebook, gui.ConversationManager):
+class Notebook(gtk.Notebook):
+    """Notebook class to define a new signal to handle tab cycling a la firefox"""
+    __gsignals__ = {
+         "prev-page": (gobject.SIGNAL_RUN_LAST | gobject.SIGNAL_ACTION, None, ()),
+         "next-page": (gobject.SIGNAL_RUN_LAST | gobject.SIGNAL_ACTION, None, ())
+    }
+
+    def __init__(self):
+        gobject.GObject.__init__(self)
+        gtk.Notebook.__init__(self)
+
+        gtk.binding_entry_add_signal(self, gtk.keysyms.Tab, gtk.gdk.CONTROL_MASK | gtk.gdk.SHIFT_MASK, 'prev-page')
+        gtk.binding_entry_add_signal(self, gtk.keysyms.Tab, gtk.gdk.CONTROL_MASK, 'next-page')
+
+gobject.type_register(Notebook)
+
+class ConversationManager(Notebook, gui.ConversationManager):
     '''the main conversation, it only contains other widgets'''
+
     NAME = 'Conversation Manager'
     DESCRIPTION = 'The widget that contains a group of conversations'
     AUTHOR = 'Mariano Guerra'
@@ -15,12 +51,32 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
     def __init__(self, session, on_last_close):
         '''class constructor'''
-        gtk.Notebook.__init__(self)
+        Notebook.__init__(self)
         gui.ConversationManager.__init__(self, session, on_last_close)
 
         self.set_scrollable(True)
+        self.set_property('can-focus', False)
+        #self.set_scrollable(session.config.get_or_set('b_conv_tab_scroll',
+        #    True))
+
+        if session.config.get_or_set('b_conv_tab_popup', True):
+            self.popup_enable()
+
+        # mozilla tabs are fixed-width, otherwise do the same as emesene-1
+        self.mozilla_tabs = session.config.get_or_set('b_conv_tab_mozilla_like', False)
+
         self.connect('switch-page', self._on_switch_page)
-        self.connect('key-press-event', self.on_key_press)
+        self.connect('next-page', self.on_next_page)
+        self.connect('prev-page', self.on_prev_page)
+        self.connect('page-reordered', self._on_page_reordered)
+
+    def on_next_page(self, widget):
+        '''called when ctrl+tab is pressed'''
+        self.cycle_tabs()
+
+    def on_prev_page(self, widget):
+        '''called when ctrl+tab is pressed'''
+        self.cycle_tabs(-1)
 
     def _set_accels(self):
         """set the keyboard shortcuts
@@ -42,16 +98,9 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
                                   self.on_key_close_tab)
 
         for i in range(1, 10):
-            accel_group.connect_group(gtk.keysyms._0 + i, \
-                                  gtk.gdk.MOD1_MASK, gtk.ACCEL_LOCKED, \
-                                  self.on_key_change_tab)
-
-    def on_key_press(self, widget, event):
-        '''callback called when a key is pressed on the window'''
-        if (event.state & gtk.gdk.CONTROL_MASK) and event.keyval in [
-                gtk.keysyms.Tab, gtk.keysyms.ISO_Left_Tab]:
-            self.cycle_tabs()
-            return True
+            accel_group.connect_group(gtk.keysyms._0 + i,
+                gtk.gdk.MOD1_MASK, gtk.ACCEL_LOCKED,
+                self.on_key_change_tab)
 
     def on_key_close_tab(self, accel_group, window, keyval, modifier):
         '''Catches events like Ctrl+W and closes current tab'''
@@ -63,6 +112,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         '''Catches alt+number and shows tab number-1  '''
         pages = self.get_n_pages()
         new = keyval - gtk.keysyms._0 - 1
+
         if new < pages:
             self.set_current_page(new)
 
@@ -113,32 +163,24 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
     def _on_focus(self, widget, event):
         '''called when the widget receives the focus'''
         page_num = self.get_current_page()
+
         if page_num != -1:
             page = self.get_nth_page(page_num)
+            self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
             self.set_message_waiting(page, False)
-            self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
 
     def _on_switch_page(self, notebook, page, page_num):
         '''called when the user changes the tab'''
         page = self.get_nth_page(page_num)
-        self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
-        self.set_message_waiting(page, False)
-        parent = self.get_parent()
-        parent.set_title(page.text)
-        parent.set_icon(page.icon)
-        
-        glib.idle_add(self._on_switch_page_grab_focus)
-        
-    def _on_switch_page_grab_focus(self):
-        '''Dirty hack. When _on_switch_page() is called the actual switch
-        has not yet occured. We connect an idle handler to grab the focus,
-        otherwise it won't work. Maybe this is solved if we iterate the
-        mainloop inside of _on_switch_page() instead of connecting an
-        idle signal.'''
-        page_num = self.get_current_page()
-        page = self.get_nth_page(page_num)
-        page.input.grab_focus()
-        return False
+        if self.get_current_page() > -1:
+            self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
+            self.set_message_waiting(page, False)
+        if page.show_avatar_in_taskbar:
+            self.update_window(page.text, page.his_avatar.filename, self.get_current_page())
+        else:
+            self.update_window(page.text, page.icon, self.get_current_page())
+        page.input_grab_focus()
+        return True
 
     def _on_tab_close(self, button, conversation):
         '''called when the user clicks the close button on a tab'''
@@ -152,6 +194,10 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         if event.button == 3:
             conversation.show_tab_menu()
 
+    def _on_page_reordered(self, widget, conversation, new_num):
+        '''called when a page is reordered'''
+        conversation.tab_index = new_num
+
     def remove_conversation(self, conversation):
         """
         remove the conversation from the gui
@@ -160,6 +206,9 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         """
         page_num = self.page_num(conversation)
         self.remove_page(page_num)
+        #FIXME: Dirty hack, why conversation is still alive when it's closed?
+        #       Signals are being unsubscribed (see gtkui.Conversation) but...
+        conversation.tab_index = -2
 
     def add_new_conversation(self, session, cid, members):
         """
@@ -167,13 +216,50 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         """
         Conversation = extension.get_default('conversation')
         TabWidget = extension.get_default('conversation tab')
-        conversation = Conversation(self.session, cid, None, members)
+        conversation = Conversation(self.session, cid, self.update_window, None, members)
         label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close,
-            conversation)
+            conversation, self.mozilla_tabs)
         label.set_image(gui.theme.connect)
         conversation.tab_label = label
         conversation.tab_index=self.append_page_menu(conversation, label)
-        self.set_tab_label_packing(conversation, True, True, gtk.PACK_START)
+        self.set_tab_label_packing(conversation, not self.mozilla_tabs, True, gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
+
         return conversation
 
+    def update_window(self, text, icon, index):
+        ''' updates the window's border and item on taskbar
+            with given text and icon '''
+        if self.get_current_page() == index or index == (self.get_current_page() + self.get_n_pages()):
+            win = self.get_parent() # gtk.Window, not a nice hack.
+            if win is None:
+                return
+            win.set_title(Renderers.msnplus_to_plain_text(text))
+            win.set_icon(icon)
+
+    def present(self, conversation):
+        '''
+        present the given conversation
+        '''
+        self.set_current_page(conversation.tab_index)
+        self.get_parent().present()
+        conversation.input_grab_focus()
+
+    def get_dimensions(self):
+        '''
+        return dimensions of the conversation window, if more than one return
+        the value of one of them
+        '''
+        return self.get_parent().get_dimensions()
+
+    def hide_all(self):
+        '''
+        hide all conversations
+        '''
+        self.get_parent().hide()
+
+    def is_active(self):
+        '''
+        return True if the conversation manager is active
+        '''
+        return self.get_parent().is_active()

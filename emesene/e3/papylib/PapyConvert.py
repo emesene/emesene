@@ -2,11 +2,11 @@
 #
 # papylib - an emesene extension for papyon
 #
-# Copyright (C) 2009 Riccardo (C10uD) <c10ud.dev@gmail.com>
+# Copyright (C) 2009-2010 Riccardo (C10uD) <c10ud.dev@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -41,16 +41,15 @@ STATUS_E3_TO_PAPY = { \
     status.AWAY : papyon.Presence.AWAY,
     status.OFFLINE : papyon.Presence.INVISIBLE}
     
-def formatting_papy_to_e3(format = papyon.TextFormat()):
+def formatting_papy_to_e3(format = papyon.TextFormat(), size_=None):
     font = format.font
     color = e3.base.Color.from_hex('#' + str(format.color))
     bold = format.style & papyon.TextFormat.BOLD == papyon.TextFormat.BOLD
     italic = format.style & papyon.TextFormat.ITALIC == papyon.TextFormat.ITALIC
     underline = format.style & papyon.TextFormat.UNDERLINE == papyon.TextFormat.UNDERLINE
     strike = format.style & papyon.TextFormat.STRIKETHROUGH == papyon.TextFormat.STRIKETHROUGH
-    size_ = format.pitch # wtf?
-    
-    return e3.base.Style(font, color, bold, italic, underline, strike, size_)
+    size = size_
+    return e3.base.Style(font, color, bold, italic, underline, strike, size)
     
 def formatting_e3_to_papy(format = e3.base.Style()):
     font = format.font

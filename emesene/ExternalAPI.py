@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 '''External API module, provides a DBUS API for emesene'''
-
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
@@ -21,6 +20,7 @@
 
 import extension
 import logging
+import types
 log = logging.getLogger('ExternalAPI')
 
 ERROR = False
@@ -37,7 +37,7 @@ if not ERROR:
     BUS_PATH = "/com/gtk/emesene"
 
     
-    def create_function(name,Qargs):
+    def create_function(name, args):
         '''hack to create a function with a certain number of arguments'''
         def y():
             pass

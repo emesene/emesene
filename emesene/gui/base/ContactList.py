@@ -1,10 +1,11 @@
+'''a abstract object that define the API of a contact list and some behavior'''
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -15,7 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-'''a abstract object that define the API of a contact list and some behavior'''
 
 import e3
 
@@ -23,13 +23,14 @@ class ContactList(object):
     '''an abstract class that defines the api that the contact list should
     have'''
     NICK_TPL = \
-        '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small][$NL][$small]([$STATUS]) - [$MESSAGE][$/small]'
+        '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small][$NL][$small][$BLOCKED] ([$STATUS]) - [$MESSAGE][$/small]'
 
     GROUP_TPL = '[$b][$NAME] ([$ONLINE_COUNT]/[$TOTAL_COUNT])[$/b]'
 
     def __init__(self, session, dialog):
         '''class constructor'''
 
+        self.is_searching = False
         # define the class signals
         # the param is the contact object
         self.contact_selected = e3.common.Signal()
@@ -42,14 +43,24 @@ class ContactList(object):
         self.session = session
         self.dialog = dialog
 
-        self.group_state = {}
-
+        self.session.config.get_or_set('b_order_by_name', True)
         self.session.config.get_or_set('b_order_by_group', True)
         self.session.config.get_or_set('b_show_nick', True)
         self.session.config.get_or_set('b_show_empty_groups', False)
         self.session.config.get_or_set('b_show_offline', False)
         self.session.config.get_or_set('b_show_blocked', False)
         self.session.config.get_or_set('b_group_offline', False)
+        group_state = self.session.config.get_or_set('d_group_state', {})
+
+        self.group_state = {}
+        for (group, state) in group_state.iteritems():
+            try:
+                self.group_state[group] = bool(int(state))
+            except ValueError:
+                self.group_state[group] = False
+
+        self.session.config.subscribe(self._on_avatarssize_changed,
+            'i_avatar_size')
 
         self.avatar_size = self.session.config.get_or_set('i_avatar_size', 32)
         self.set_avatar_size(self.avatar_size)
@@ -59,6 +70,7 @@ class ContactList(object):
         # value to this attribute
         self.order_by_group = self.session.config.b_order_by_group
         self.show_nick = self.session.config.b_show_nick
+        self._order_by_name = self.session.config.b_order_by_name
         self._show_empty_groups = self.session.config.b_show_empty_groups
         self._show_offline = self.session.config.b_show_offline
         self._show_blocked = self.session.config.b_show_blocked
@@ -82,20 +94,12 @@ class ContactList(object):
         self.nick_template = self.session.config.get_or_set('nick_template',
             ContactList.NICK_TPL)
 
-        # TODO: remove this after some time
-        if "%" in self.nick_template:
-            self.nick_template = ContactList.NICK_TPL
-
         # valid values:
         # + NAME
         # + ONLINE_COUNT
         # + TOTAL_COUNT
         self.group_template = self.session.config.get_or_set('group_template',
             ContactList.GROUP_TPL)
-
-        # TODO: remove this after some time
-        if "%" in self.group_template:
-            self.group_template = ContactList.GROUP_TPL
 
         #contact signals
         self.session.signals.contact_attr_changed.subscribe(
@@ -122,6 +126,11 @@ class ContactList(object):
         self.session.signals.group_rename_succeed.subscribe(
             self._on_update_group)
         #TODO fix offline group on connection e add fail signals
+
+    def _on_avatarssize_changed(self, value):
+        '''callback called when config.i_avatar_size changes'''
+        self.set_avatar_size(value)
+        self.fill()
 
     def _on_contact_attr_changed(self, account, *args):
         '''called when an attribute of the contact changes
@@ -188,12 +197,13 @@ class ContactList(object):
     def _on_remove_group(self, group, *args):
         '''called when we remove a group
         '''
-        group = self.session.groups[group]
+        c_group = self.session.groups[group]
 
-        if not group:
+        if not c_group:
             return
 
-        self.remove_group(group)
+        self.remove_group(c_group)
+        del self.session.groups[group]
 
     def _on_update_group(self, group, *args):
         '''called when we remove a group
@@ -204,7 +214,6 @@ class ContactList(object):
             return
 
         self.update_group(group)
-
 
     def _get_order_by_status(self):
         '''return the value of order by status'''
@@ -269,6 +278,19 @@ class ContactList(object):
 
     show_blocked = property(fget=_get_show_blocked, fset=_set_show_blocked)
 
+    def _get_order_by_name(self):
+        '''return the value of self._order_by_name'''
+        return self._order_by_name
+
+    def _set_order_by_name(self, value):
+        '''set the value of self._order_by_name to value and call to
+        self.refilter()'''
+        self._order_by_name = value
+        self.session.config.b_order_by_name = self._order_by_name
+        self.fill() # TODO: FIXME: Why refilter() ain't working here?
+
+    order_by_name = property(fget=_get_order_by_name, fset=_set_order_by_name)
+
     def _get_show_empty_groups(self):
         '''return the value of show_emptry_groups'''
         return self._show_empty_groups
@@ -294,7 +316,13 @@ class ContactList(object):
 
     filter_text = property(fget=_get_filter_text, fset=_set_filter_text)
 
-    def format_nick(self, contact):
+    def escape_tags(self, value):
+        '''break text that starts with [$ so a nick containing a format
+        won't be replaced
+        '''
+        return value.replace("[$", "[ $")
+
+    def format_nick(self, contact, escaped_information):
         '''replace the appearance of the template vars using the values of
         the contact
         # valid values:
@@ -304,47 +332,55 @@ class ContactList(object):
         # + STATUS
         # + MESSAGE
         # + BLOCKED
+        # + NL
         '''
+        display_name, message = escaped_information
+        nick = display_name
+
+        #TODO: fix those "no-more-color" with msgplus codes, '&#173;'?
+        def fix_plus(text):
+            escaped = self.escape_tags(text)
+            pos = escaped.find("\xc2\xb7")
+            tail = ""
+            irc = "#&@'"
+            flag = False
+            while pos != -1:
+                try:
+                    char = escaped[pos+2]
+                    if char in irc and escaped.count("\xc2\xb7"+char)%2 != 0:
+                        tail = "\xc2\xb7" + char + tail
+                        irc = irc.replace(char,"")
+                    flag = flag or char == "$"
+                except:
+                    pos = pos+1
+                pos = escaped.find("\xc2\xb7",pos+2)
+            if flag:
+                tail += "no-more-color"
+            return escaped + tail
+
         template = self.nick_template
+        template = template.replace('[$NL]', '\n')
         template = template.replace('[$NICK]',
-                self.escape_tags(contact.nick))
+                fix_plus(nick))
         template = template.replace('[$ACCOUNT]',
                 self.escape_tags(contact.account))
         template = template.replace('[$MESSAGE]',
-                self.escape_tags(contact.message))
+                fix_plus(message))
         template = template.replace('[$STATUS]',
                 self.escape_tags(e3.status.STATUS[contact.status]))
         template = template.replace('[$DISPLAY_NAME]',
-                self.escape_tags(contact.display_name))
+                fix_plus(display_name))
 
         blocked_text = ''
+
         if contact.blocked:
-            blocked_text = '(blocked)'
+            blocked_text = _('Blocked')
 
         template = template.replace('[$BLOCKED]', blocked_text)
 
-        return self._clean_format_tags(template)
-
-    def _clean_format_tags(self, template):
-        '''remove the formating tags like [$b] since at this level we can't
-        format them, you have to override the format_ methods to do something
-        '''
-        template = template.replace('[$b]', '')
-        template = template.replace('[$/b]', '')
-        template = template.replace('[$i]', '')
-        template = template.replace('[$/i]', '')
-        template = template.replace('[$small]', '')
-        template = template.replace('[$/small]', '')
-
         return template
 
-    def escape_tags(self, value):
-        '''break text that starts with [$ so a nick containing a format
-        won't be replaced
-        '''
-        return value.replace("[$", "[ $")
-
-    def format_group(self, group):
+    def format_group(self, group, escaped_name):
         '''replace the appearance of the template vars using the values of
         the group
         # valid values:
@@ -355,11 +391,16 @@ class ContactList(object):
         contacts = self.contacts.get_contacts(group.contacts)
         (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
-        template = template.replace('[$NAME]', self.escape_tags(group.name))
-        template = template.replace('[$ONLINE_COUNT]', str(online))
-        template = template.replace('[$TOTAL_COUNT]', str(total))
 
-        return self._clean_format_tags(template)
+        if group == self.offline_group or group == self.online_group:
+            template = template.replace('[$ONLINE_COUNT]', str(total))
+        else:
+            template = template.replace('[$ONLINE_COUNT]', str(online))
+
+        template = template.replace('[$TOTAL_COUNT]', str(total))
+        template = template.replace('[$NAME]', self.escape_tags(escaped_name))
+
+        return template
 
     def refilter(self):
         '''refilter the values according to the value of self.filter_text'''
@@ -416,7 +457,8 @@ class ContactList(object):
         for group in self.groups.values():
             # get a list of contact objects from a list of accounts
             contacts = self.contacts.get_contacts(group.contacts)
-            self.add_group(group)
+            if not self.order_by_status:
+                self.add_group(group)
             for contact in contacts:
                 self.add_contact(contact, group)
 
@@ -441,21 +483,21 @@ class ContactList(object):
         '''expand group id state is True, collapse it if False'''
         raise NotImplementedError()
 
-    def expand_collapse_groups(self):
-        '''expand and collapse the groups according to the state of the
-        group'''
-        for (group, state) in self.group_state.iteritems():
-            self.set_group_state(group, state)
-
     def on_group_collapsed(self, group):
         '''called when a group is collapsed, update the status of the
         groups'''
-        self.group_state.update({group.name:False})
+        self.group_state[group.name] = False
+        if self.is_searching or len(group.contacts) == 0:
+            return
+        self.session.config.d_group_state[group.name] = "0"
 
     def on_group_expanded(self, group):
         '''called when a group is expanded, update the status of the
         groups'''
-        self.group_state.update({group.name:True})
+        self.group_state[group.name] = True
+        if self.is_searching:
+            return
+        self.session.config.d_group_state[group.name] = "1"
 
     def compare_groups(self, group1, group2, order1=0, order2=0):
         '''compare two groups and return 1 if group1 should go first, 0

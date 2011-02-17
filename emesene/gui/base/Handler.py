@@ -1,9 +1,29 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+import os
 import time
 import webbrowser
 
 import e3.base
 import gui
 import extension
+import Desktop
 
 import logging
 log = logging.getLogger('gui.base.Handler')
@@ -13,11 +33,11 @@ class MenuHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, contact_list, avatar_manager, on_disconnect=None,
+    def __init__(self, session, dialog, contact_list, on_disconnect=None,
             on_quit=None):
         '''constructor'''
         self.file_handler = FileHandler(session, on_disconnect, on_quit)
-        self.actions_handler = ActionsHandler(session, dialog, contact_list, avatar_manager)
+        self.actions_handler = ActionsHandler(session, dialog, contact_list)
         self.options_handler = OptionsHandler(session, contact_list)
         self.help_handler = HelpHandler(dialog)
 
@@ -51,11 +71,11 @@ class ActionsHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, contact_list, avatar_manager):
+    def __init__(self, session, dialog, contact_list):
         '''constructor'''
         self.contact_handler = ContactHandler(session, dialog, contact_list)
         self.group_handler = GroupHandler(session, dialog, contact_list)
-        self.my_account_handler = MyAccountHandler(session, dialog, avatar_manager)
+        self.my_account_handler = MyAccountHandler(session, dialog)
 
 class OptionsHandler(object):
     '''this handler contains all the handlers needed to handle the options
@@ -93,10 +113,15 @@ class OptionsHandler(object):
         '''called when the show blocked item is toggled'''
         self.contact_list.show_blocked = active
 
+    def on_order_by_name_toggled(self, active):
+        '''called when the sort by name item is toggled'''
+        self.contact_list.order_by_name = active
+
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
-        Preferences = extension.get_default('preferences')
-        Preferences(self.session).show()
+        instance = extension.get_and_instantiate('preferences', self.session)
+        instance.show()
+        instance.present()
 
     def on_plugins_selected(self):
         '''called when the plugins button is selected'''
@@ -115,8 +140,8 @@ class HelpHandler(object):
 
     def on_about_selected(self):
         '''called when the about item is selected'''
-        self.dialog.about_dialog('emesene', '2.0', 'marianoguerra',
-            'A simple yet powerful MSN & Gtalk client', 'GPL v3',
+        self.dialog.about_dialog('emesene', '2.0', 'marianoguerra & c10ud',
+            _('A simple yet powerful MSN & Gtalk client'), 'GPL v3',
             'http://www.emesene.org', ['marianoguerra', 'boyska', 'C10uD','Cando'], '',
             gui.theme.logo)
 
@@ -146,10 +171,9 @@ class ContactHandler(object):
         def add_cb(response, account, groups):
             '''callback to the add_dialog method, add the user and add him
             to the defined groups'''
-
             if response == gui.stock.ADD:
                 self.session.add_contact(account)
-                # TODO: this doesn't work
+                # TODO: this doesn't work (?)
                 if groups:
                     for group in groups:
                         self.session.add_to_group(account, group)
@@ -169,10 +193,10 @@ class ContactHandler(object):
 
         if contact:
             self.dialog.yes_no(
-                "Are you shure you want to delete %s?" % \
+                _("Are you sure you want to delete %s?") % \
                 (contact.account, ), remove_cb, contact.account)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
     def on_block_contact_selected(self):
         '''called when block contact is selected'''
@@ -181,7 +205,7 @@ class ContactHandler(object):
         if contact:
             self.session.block(contact.account)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
     def on_unblock_contact_selected(self):
         '''called when unblock contact is selected'''
@@ -190,7 +214,7 @@ class ContactHandler(object):
         if contact:
             self.session.unblock(contact.account)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
     def on_set_alias_contact_selected(self):
         '''called when set alias contact is selected'''
@@ -213,7 +237,7 @@ class ContactHandler(object):
             self.dialog.set_contact_alias(contact.account, contact.alias,
                  set_alias_cb)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
     def on_view_information_selected(self):
         '''called when view information is selected'''
@@ -223,7 +247,7 @@ class ContactHandler(object):
             self.dialog.contact_information_dialog(self.session,
                 contact.account)
         else:
-            self.dialog.error('No contact selected')
+            self.dialog.error(_('No contact selected'))
 
 class GroupHandler(object):
     '''this handler contains all the handlers needed to handle the group
@@ -260,10 +284,10 @@ class GroupHandler(object):
 
         if group:
             self.dialog.yes_no(
-                "Are you shure you want to delete the %s group?" % \
+                _("Are you sure you want to delete the %s group?") % \
                 (group.name, ), remove_group_cb, group.identifier)
         else:
-            self.dialog.error('No group selected')
+            self.dialog.error(_('No group selected'))
 
     def on_rename_group_selected(self):
         '''called when rename group is selected'''
@@ -283,18 +307,17 @@ class GroupHandler(object):
         if group:
             self.dialog.rename_group(group, rename_group_cb)
         else:
-            self.dialog.error('No group selected')
+            self.dialog.error(_('No group selected'))
 
 class MyAccountHandler(object):
     '''this handler contains all the handlers needed to handle the my account
     menu items
     '''
 
-    def __init__(self, session, dialog, avatar_manager):
+    def __init__(self, session, dialog):
         '''constructor'''
         self.session = session
         self.dialog = dialog
-        self.avatar_manager = avatar_manager
 
         self.old_nick = self.session.contacts.me.nick
         self.old_pm = self.session.contacts.me.message
@@ -315,28 +338,7 @@ class MyAccountHandler(object):
 
     def on_set_picture_selected(self, widget, data=None):
         '''called when set picture is selected'''
-        def set_picture_cb(response, filename):
-            '''callback for the avatar chooser'''
-            if _av_chooser is not None:
-                _av_chooser.stop_and_clear()
-            if response == gui.stock.ACCEPT:
-                self.avatar_manager.set_as_avatar(filename)
-
-        # Directory for user's avatars
-        path_dir = self.avatar_manager.get_avatars_dir()
-
-        # Directory for contact's cached avatars
-        cached_avatar_dir = self.avatar_manager.get_cached_avatars_dir()
-
-        # Directories for System Avatars
-        faces_paths = self.avatar_manager.get_system_avatars_dirs()
-
-        self.avatar_path = self.session.config.last_avatar
-
-        _av_chooser = extension.get_default('avatar chooser')(set_picture_cb,
-                                                self.avatar_path, path_dir,
-                                                cached_avatar_dir, faces_paths,
-                                                self.avatar_manager)
+        _av_chooser = extension.get_default('avatar chooser')(self.session)
         _av_chooser.show()
 
 class ConversationToolbarHandler(object):
@@ -376,7 +378,8 @@ class ConversationToolbarHandler(object):
 
     def on_emotes_selected(self):
         '''called when the emotes button is selected'''
-        self.dialog.select_emote(self.theme, self.conversation.on_emote)
+        self.dialog.select_emote(self.session, \
+                                 self.theme, self.conversation.on_emote)
 
     def on_notify_attention_selected(self):
         '''called when the nudge button is selected'''
@@ -385,9 +388,28 @@ class ConversationToolbarHandler(object):
     def on_invite_file_transfer_selected(self):
         '''called when the client requestes to a remote user to
         start a file transfer'''
-        # TODO: select the file, create a dialog in gui/gtkui/Dialog.py
-        # (and a stub in gui/base?) 
-        self.conversation.on_filetransfer_invite("test", "/tmp/test")
+        def open_file_cb(response, filepath):
+            if response is not gui.stock.CANCEL:
+                filename = os.path.basename(filepath)
+                self.conversation.on_filetransfer_invite(filename, filepath)
+
+        self.dialog.choose_file(os.path.expanduser("~"), open_file_cb)
+
+    def on_ublock_selected(self):
+        '''called when block/unblock button is selected'''
+        self.conversation.on_block_user()
+
+    def on_invite_video_call_selected(self):
+        '''called when the user is requesting a video-only call'''
+        self.conversation.on_video_call()
+
+    def on_invite_voice_call_selected(self):
+        '''called when the user is requesting an audio-only call'''
+        self.conversation.on_voice_call()
+
+    def on_invite_av_call_selected(self):
+        '''called when the user is requesting an audio-video call'''
+        self.conversation.on_av_call()
 
 class TrayIconHandler(FileHandler):
     """
@@ -403,6 +425,13 @@ class TrayIconHandler(FileHandler):
         """
         FileHandler.__init__(self, session, on_disconnect, on_quit)
         self.theme = theme
+        
+    def on_hide_show_mainwindow(self, main_window=None):
+        if (main_window != None):
+            if(main_window.get_property("visible")):
+                main_window.hide()
+            else:
+                main_window.show()
 
 class FileTransferHandler(object):
     ''' this handler handles a file transfer object '''
@@ -415,11 +444,11 @@ class FileTransferHandler(object):
 
     def open(self):
         ''' use desktop's open to open the file, once state is finished '''
-        raise NotImplementedError
+        Desktop.open(self.transfer.completepath)
 
     def opendir(self):
         ''' open the directory that contains the file, once the transfer is finished '''
-        raise NotImplementedError
+        Desktop.open(os.path.dirname(self.transfer.completepath))
 
     def accept(self):
         ''' accepts a file transfer '''
@@ -433,7 +462,7 @@ class FileTransferHandler(object):
         self.transfer.state = e3.base.FileTransfer.TRANSFERRING
         
     def reject(self):
-        ''' cancels a file transfer '''
+        ''' rejects a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.reject_filetransfer(self.transfer)
 
@@ -441,3 +470,32 @@ class FileTransferHandler(object):
         ''' cancels a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
         self.session.cancel_filetransfer(self.transfer)
+
+class CallHandler(object):
+    ''' this handler handles a file transfer object '''
+    def __init__(self, session, call):
+        ''' session - e3.session implementation
+            transfer - e3.call
+        '''
+        self.session = session
+        self.call = call
+
+    def accept(self):
+        ''' accepts a call '''
+        self.call.state = e3.base.Call.ESTABLISHED
+        self.session.accept_call(self.call)
+
+    def accepted(self):
+        ''' when a call is accepted by the other party'''
+        self.call.state = e3.base.Call.ESTABLISHED
+        
+    def reject(self):
+        ''' rejects a call '''
+        self.call.state = e3.base.Call.FAILED
+        self.session.reject_call(self.call)
+
+    def cancel(self):
+        ''' cancels a call '''
+        self.call.state = e3.base.Call.FAILED
+        self.session.cancel_call(self.call)
+

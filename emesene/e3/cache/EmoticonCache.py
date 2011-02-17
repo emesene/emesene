@@ -3,7 +3,6 @@
 import Cache
 
 import os
-import time
 import shutil
 import urllib
 
@@ -80,7 +79,6 @@ class EmoticonCache(Cache.Cache):
         '''add an entry to the information file with the current timestamp
         and the hash_ of the file that was saved
         '''
-        time_info = int(time.time())
         handle = file(self.info_path, 'a')
         handle.write('%s %s\n' % (urllib.quote(shortcut), hash_))
         handle.close()
@@ -102,6 +100,14 @@ class EmoticonCache(Cache.Cache):
 
         handle.close()
 
+    def add_entry(self, shortcut, hash_):
+        '''wrapper method for custom emoticon manipulation'''
+        return self.__add_entry(shortcut, hash_)
+
+    def remove_entry(self, hash_to_remove):
+        '''wrapper method for custom emoticon manipulation'''
+        self.__remove_entry(hash_to_remove)
+
     def remove(self, item):
         '''remove an item from cache
         return True on success False otherwise
@@ -120,3 +126,4 @@ class EmoticonCache(Cache.Cache):
         if 'lolw00t' in cache: asd()
         '''
         return os.path.isfile(os.path.join(self.path, name))
+

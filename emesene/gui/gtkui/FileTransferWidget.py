@@ -1,11 +1,11 @@
 ''' a gtk widget for managing file transfers '''
 # -*- coding: utf-8 -*-
 
-#   This file is part of emesene.
+#    This file is part of emesene.
 #
-#    Emesene is free software; you can redistribute it and/or modify
+#    emesene is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
+#    the Free Software Foundation; either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    emesene is distributed in the hope that it will be useful,
@@ -20,9 +20,13 @@
 import gtk
 import pango
 import gobject
+import extension
+import time
 
-import e3.base
 import gui
+
+import hashlib
+import tempfile
 
 class FileTransferWidget(gtk.HBox):
     '''this class represents the ui widget for one filetransfer'''
@@ -48,11 +52,11 @@ class FileTransferWidget(gtk.HBox):
         img_dir = gtk.image_new_from_stock(gtk.STOCK_OPEN, \
                                         gtk.ICON_SIZE_BUTTON)
 
-        m_open_file = gtk.ImageMenuItem(('Open file'))
+        m_open_file = gtk.ImageMenuItem(_('Open file'))
         m_open_file.connect('activate', self._on_menu_file_clicked)
         m_open_file.set_image(img_file)
 
-        m_open_dir = gtk.ImageMenuItem(('Open folder'))
+        m_open_dir = gtk.ImageMenuItem(_('Open folder'))
         m_open_dir.connect('activate', self._on_menu_folder_clicked)
         m_open_dir.set_image(img_dir)
 
@@ -67,6 +71,8 @@ class FileTransferWidget(gtk.HBox):
         self.buttons = []
         self.show_all()
         self.tooltip = FileTransferTooltip(self.event_box, self.transfer)
+
+        self.notifier = extension.get_default('notificationGUI')
 
         self.event_box.connect('event', self._on_progressbar_event)
 
@@ -89,6 +95,14 @@ class FileTransferWidget(gtk.HBox):
 
     def _on_menu_folder_clicked(self, widget):
         self.handler.opendir()
+
+    def accepted(self):
+        ''' called when the other party accepts our transfer '''
+        self.handler.accepted()
+
+    def finished(self):
+        ''' sets the transfer state to finished '''
+        self.transfer.state = self.transfer.RECEIVED
         
     def do_update_progress(self):
         ''' updates the progress bar status '''
@@ -111,13 +125,15 @@ class FileTransferWidget(gtk.HBox):
 
         self.buttons = []
 
-        if state == self.transfer.WAITING and self.transfer.sender != 'Me':
+        if state == self.transfer.WAITING and self.transfer.sender != 'Me':        
             button = gtk.Button(None, None)
             button.set_image(self.__get_button_img(gtk.STOCK_APPLY))
             button.connect('clicked', self._on_accept_clicked)
             self.buttons.append(button)
 
         if state in (self.transfer.RECEIVED, self.transfer.FAILED):
+            self.transfer.time_finished = time.time()
+
             button = gtk.Button(None, None)
             button.set_image(self.__get_button_img(gtk.STOCK_CLEAR))
             button.connect('clicked', self._on_close_clicked)
@@ -152,7 +168,6 @@ class FileTransferWidget(gtk.HBox):
         self.handler.accept()
 
     def _on_close_clicked(self, widget):
-        self.handler.remove()
         self.main_transfer_bar.hbox.remove(self)
         self.main_transfer_bar.num_transfers -= 1
         if self.main_transfer_bar.num_transfers == 0:
@@ -180,10 +195,10 @@ class FileTransferTooltip(gtk.Window):
         self.table = gtk.Table(3, 2, False)
         self.table.set_col_spacings(5)
 
-        self.add_label(('Status:'), 0, 1, 0, 1)
-        self.add_label(('Average speed:'), 0, 1, 1, 2)
-        self.add_label(('Time elapsed:'), 0, 1, 2, 3)
-        self.add_label(('Estimated time left:'), 0, 1, 3, 4)
+        self.add_label(_('Status:'), 0, 1, 0, 1)
+        self.add_label(_('Average speed:'), 0, 1, 1, 2)
+        self.add_label(_('Time elapsed:'), 0, 1, 2, 3)
+        self.add_label(_('Estimated time left:'), 0, 1, 3, 4)
 
         self.status = gtk.Label()
         self.speed = gtk.Label()
@@ -211,6 +226,8 @@ class FileTransferTooltip(gtk.Window):
 
         self.pointer_is_over_widget = False
 
+        self.__fileprev=None
+
     def add_label(self, l_string, left, right, top, bottom, label = None):
         ''' adds a label to the widget '''
         if label == None:
@@ -234,12 +251,22 @@ class FileTransferTooltip(gtk.Window):
             return
 
         if self.transfer.preview is not None:
-            pixbuf = gtk.gdk.pixbuf_new_from_data(self.transfer.preview)
+            if(self.__fileprev==None):
+                self.__fileprev=tempfile.mkstemp(prefix=hashlib.md5(self.transfer.preview).hexdigest(), suffix=hashlib.md5(self.transfer.preview).hexdigest())[1]
+
+            tmpPrev = open( self.__fileprev, 'wb' )
+            tmpPrev.write(self.transfer.preview)
+            tmpPrev.close()
+            pixbuf = gtk.gdk.pixbuf_new_from_file(self.__fileprev)
         else:
-            pixbuf = None
+            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.transfer_success)
         #amsn sends a big. black preview? :S
-        if pixbuf and pixbuf.get_height() <= 96 and pixbuf.get_width() <= 96:
-            self.image.set_from_pixbuf(pixbuf)
+        if pixbuf:
+            if pixbuf.get_height() <= 96 and pixbuf.get_width() <= 96:
+                self.image.set_from_pixbuf(pixbuf)
+            else:
+                pixbuf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
+                self.image.set_from_pixbuf(pixbuf)
 
         # set the location of the tooltip
         x, y = self.find_position(o_coords, view.window)

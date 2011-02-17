@@ -251,7 +251,7 @@ class Membership(Requester):
                         contact.blocked = False
 
                     if 'CID' in member:
-                        contact.attrs['CID'] = member['CID']
+                        contact.cid = member['CID']
 
                 all_accounts = set(contacts.keys())
                 removed_accounts = all_accounts.difference(new_accounts)
@@ -315,7 +315,7 @@ class DynamicItems(Requester):
                     continue
 
                 contact.identifier = contact_dict.get('contactId', '')
-                contact.attrs['CID'] = contact_dict.get('CID', '')
+                contact.cid = contact_dict.get('CID', '')
 
                 contact.groups = []
                 for guid in contact_dict['groupIds']:

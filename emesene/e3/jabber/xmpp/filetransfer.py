@@ -12,7 +12,7 @@
 ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##   GNU General Public License for more details.
 
-# $Id: filetransfer.py,v 1.6 2004/12/25 20:06:59 snakeru Exp $
+# $Id$
 
 """
 This module contains IBB class that is the simple implementation of JEP-0047.

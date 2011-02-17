@@ -3,7 +3,9 @@
 import os
 import common
 
-TEMPLATE_FOLDER = os.path.abspath(os.path.dirname(__file__)) + '/xml templates'
+from e3.common.utils import project_path
+
+TEMPLATE_FOLDER = os.path.join(os.path.abspath(project_path()), "e3", "msn", "xml templates")
 
 def get(name, *args):
     '''try to get a template from the template folder and return it,

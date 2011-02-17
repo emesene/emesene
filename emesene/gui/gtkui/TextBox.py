@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 import gobject
 
@@ -7,6 +25,9 @@ import utils
 import RichBuffer
 
 from gui.base import MarkupParser
+
+import logging
+log = logging.getLogger('gtkui.Textbox')
 
 class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
@@ -19,9 +40,11 @@ class TextBox(gtk.ScrolledWindow):
         self.config = config
 
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self._textbox = gtk.TextView()
-        self._textbox.set_left_margin(2)
-        self._textbox.set_right_margin(2)
+        self._textbox = InputView()
+        self._textbox.set_left_margin(4)
+        self._textbox.set_right_margin(4)
+        self._textbox.set_pixels_above_lines(4)
+        self._textbox.set_pixels_below_lines(4)
         self._textbox.set_wrap_mode(gtk.WRAP_WORD_CHAR)
         self._textbox.show()
         self._buffer = RichBuffer.RichBuffer()
@@ -116,6 +139,20 @@ class TextBox(gtk.ScrolledWindow):
 
     text = property(fget=_get_text, fset=_set_text)
 
+class InputView(gtk.TextView):
+    __gsignals__ = {
+        'message-send':(gobject.SIGNAL_RUN_LAST|gobject.SIGNAL_ACTION,
+                        gobject.TYPE_NONE, ())
+    }
+
+    def __init__(self):
+        gobject.GObject.__init__(self)
+        gtk.TextView.__init__(self)
+        gtk.binding_entry_add_signal(self, gtk.keysyms.KP_Enter, 0, 'message-send')
+        gtk.binding_entry_add_signal(self, gtk.keysyms.Return, 0, 'message-send')
+
+gobject.type_register(InputView)
+
 class InputText(TextBox):
     '''a widget that is used to insert the messages to send'''
     NAME = 'Input Text'
@@ -123,10 +160,11 @@ class InputText(TextBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, config, on_send_message):
+    def __init__(self, config, on_send_message, on_cycle_history):
         '''constructor'''
         TextBox.__init__(self, config)
         self.on_send_message = on_send_message
+        self.on_cycle_history = on_cycle_history
         self._tag = None
         self._textbox.connect('key-press-event', self._on_key_press_event)
         self._buffer.connect('changed', self.on_changed_event)
@@ -136,6 +174,29 @@ class InputText(TextBox):
         self.invisible_tag = gtk.TextTag()
         self.invisible_tag.set_property('invisible', True)
         self._buffer.get_tag_table().add(self.invisible_tag)
+
+        self.spell_checker = None
+
+        try:
+            import gtkspell
+            if self.config.b_enable_spell_check:
+                spell_lang = self.config.get_or_set("spell_lang", "en")
+                self.spell_checker = gtkspell.Spell(self._textbox, spell_lang)
+        except Exception, e:
+            log.warning("Could not load spell-check: %s" % e)
+
+        self._textbox.connect_after('message-send', self._on_message_send)
+
+    def _on_message_send(self, widget):
+        '''callback called when enter is pressed in the input widget'''
+
+        if self.text == "":
+            return True
+
+        self.on_send_message(self.text)
+        self.text = ''
+
+        return True
 
     def grab_focus(self):
         """
@@ -147,15 +208,18 @@ class InputText(TextBox):
         '''method called when a key is pressed on the input widget'''
         self.changed = True
         self.apply_tag()
-        if (event.keyval == gtk.keysyms.Return or \
-                event.keyval == gtk.keysyms.KP_Enter) and \
-                not event.state == gtk.gdk.SHIFT_MASK:
-            if self.text == "":
-                return True
 
-            self.on_send_message(self.text)
-            self.text = ''
-            return True
+        if event.state == gtk.gdk.CONTROL_MASK and \
+                ((event.keyval < 256 and chr(event.keyval) == "p") or \
+                    event.keyval == gtk.keysyms.Up):
+
+            self.on_cycle_history()
+
+        elif event.state == gtk.gdk.CONTROL_MASK and \
+                ((event.keyval < 256 and chr(event.keyval) == "n") or \
+                    event.keyval == gtk.keysyms.Down):
+
+            self.on_cycle_history(1)
 
     def parse_emotes(self):
         """
@@ -199,8 +263,12 @@ class InputText(TextBox):
 
         return True
 
+
     def update_style(self, style):
         '''update the global style of the widget'''
+        if style is None:
+            return
+
         try:
             color = gtk.gdk.color_parse('#' + style.color.to_hex())
             gtk.gdk.colormap_get_system().alloc_color(color)
@@ -221,6 +289,22 @@ class InputText(TextBox):
 
         if is_new:
             self._buffer.get_tag_table().add(self._tag)
+
+        if self.spell_checker:
+            buffer = self._textbox.get_buffer()
+
+            if not buffer:
+                return
+
+            table = buffer.get_tag_table()
+            if not table:
+                return
+
+            tag = table.lookup('gtkspell-misspelled')
+            if not tag:
+                return
+
+            tag.set_priority(table.get_size() - 1)
 
         self.apply_tag()
 
@@ -252,27 +336,28 @@ class OutputText(TextBox):
     def append(self, text, cedict,scroll=True):
         '''append formatted text to the widget'''
         if self.config.b_show_emoticons:
-            text = MarkupParser.parse_emotes(text)
+            text = MarkupParser.parse_emotes(text, cedict)
 
         TextBox.append(self, text, scroll)
 
-    def send_message(self, formatter, contact, text, cedict, style, is_first):
+    def send_message(self, formatter, contact, text, cedict, cepath, style, is_first, type_=None):
         '''add a message to the widget'''
-        nick = contact.display_name
-
         is_raw, consecutive, outgoing, first, last = \
-            formatter.format(contact)
+            formatter.format(contact, type_)
 
-        if is_raw:
-            middle = MarkupParser.escape(text)
+        if type_ == e3.Message.TYPE_NUDGE:
+            middle = ''
         else:
-            middle = MarkupParser.escape(text)
-            middle = e3.common.add_style_to_message(middle, style, False)
+            if is_raw:
+                middle = MarkupParser.escape(text)
+            else:
+                middle = MarkupParser.escape(text)
+                middle = e3.common.add_style_to_message(middle, style, False)
 
         all_ = first + middle + last
         self.append(all_, cedict, self.config.b_allow_auto_scroll)
 
-    def receive_message(self, formatter, contact, message, cedict, is_first):
+    def receive_message(self, formatter, contact, message, cedict, cepath, is_first):
         '''add a message to the widget'''
         is_raw, consecutive, outgoing, first, last = formatter.format(contact)
 
@@ -286,4 +371,8 @@ class OutputText(TextBox):
         '''add an information message to the widget'''
         self.append(formatter.format_information(message), None,
                 self.config.b_allow_auto_scroll)
+
+    def update_p2p(self, account, _type, *what):
+        ''' new p2p data has been received (custom emoticons) '''
+        return # NotImplemented
 

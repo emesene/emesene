@@ -1,7 +1,24 @@
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import gtk
 
 import gui
-import utils
 
 import TextField
 import StatusButton
@@ -22,10 +39,9 @@ class UserPanel(gtk.VBox):
         self.session = session
         self.config_dir = session.config_dir
         self._enabled = True
-        
-        Avatar = extension.get_default('avatar')
-        AvatarManager = extension.get_default('avatar manager')
 
+        Avatar = extension.get_default('avatar')
+        
         self.avatar = Avatar(cellDimention=48)
 
         self.avatarBox = gtk.EventBox()
@@ -33,9 +49,9 @@ class UserPanel(gtk.VBox):
         self.avatarBox.connect('button-press-event', self.on_avatar_click)
         self.avatarBox.add(self.avatar)
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
+        self.avatarBox.set_border_width(4)
 
         self.avatar_path = self.config_dir.get_path("last_avatar")
-        self.avatar_manager = AvatarManager(self.session)
 
         if not self.session.config_dir.file_readable(self.avatar_path):
             path = gui.theme.user
@@ -47,22 +63,29 @@ class UserPanel(gtk.VBox):
         self.status = StatusButton.StatusButton(session)
         self.status.set_status(session.contacts.me.status)
         self.search = gtk.ToggleButton()
+        self.mail = gtk.Button(label="(0)")
+
+        self.mail.get_settings().set_property( "gtk-button-images", True )
+
+        self.mail.set_image(gtk.image_new_from_file(gui.theme.mailbox))
+        self.mail.set_relief(gtk.RELIEF_NONE)
         self.search.set_image(gtk.image_new_from_stock(gtk.STOCK_FIND,
             gtk.ICON_SIZE_MENU))
         self.search.set_relief(gtk.RELIEF_NONE)
 
         self.message = TextField.TextField(session.contacts.me.message,
-            '<span style="italic">&lt;Click here to set message&gt;</span>',
+            '<span style="italic">' + _("Click here to set a message") + '.</span>',
             True)
         self.toolbar = gtk.HBox()
 
         hbox = gtk.HBox()
-        hbox.set_border_width(2)
+        hbox.set_border_width(1)
         hbox.pack_start(self.avatarBox, False)
 
         vbox = gtk.VBox()
         nick_hbox = gtk.HBox()
         nick_hbox.pack_start(self.nick, True, True)
+        nick_hbox.pack_start(self.mail, False)
         nick_hbox.pack_start(self.search, False)
         vbox.pack_start(nick_hbox, False)
         message_hbox = gtk.HBox()
@@ -104,6 +127,7 @@ class UserPanel(gtk.VBox):
         self.message.show()
         self.status.show()
         self.search.show()
+        self.mail.show()
         self.toolbar.show()
 
     def show_all(self):
@@ -152,30 +176,13 @@ class UserPanel(gtk.VBox):
         '''method called when information about our profile is obtained
         '''
         self.nick.text = nick
-        self.message.text = message
+        if message is not '':
+            self.message.text = message
 
     def on_avatar_click(self, widget, data):
         '''method called when user click on his avatar
         '''
-        def set_picture_cb(response, filename):
-            '''callback for the avatar chooser'''
-            if _av_chooser is not None:
-                _av_chooser.stop_and_clear()
-            if response == gui.stock.ACCEPT:
-                self.avatar_manager.set_as_avatar(filename)
-
-        # Directory for user's avatars
-        path_dir = self.avatar_manager.get_avatars_dir()                   
-
-        # Directory for contact's cached avatars
-        cached_avatar_dir = self.avatar_manager.get_cached_avatars_dir()
-                   
-        # Directories for System Avatars
-        faces_paths = self.avatar_manager.get_system_avatars_dirs()
-
-        _av_chooser = extension.get_default('avatar chooser')(set_picture_cb,
-                                                self.avatar_path, path_dir,
-                                                cached_avatar_dir, faces_paths,
-                                                self.avatar_manager)
-        _av_chooser.show()
+        av_chooser = extension.get_default('avatar chooser')(self.session)
+        av_chooser.set_modal(True)
+        av_chooser.show()
 
