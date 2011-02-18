@@ -450,6 +450,7 @@ class Interface(BaseTable):
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
         self.session.config.get_or_set('b_conversation_tabs', True)
+        self.session.config.get_or_set('i_tab_position', 0)
         self.append_check(_('Tabbed Conversations'),
                 'session.config.b_conversation_tabs')
         self.append_combo(_('Tab position'),self.get_tab_positions,
