@@ -314,7 +314,10 @@ class BaseTable(gtk.Table):
         """append a row with a check box with text as label and
         set the check state with default
         """      
-        default = self.get_attr(property_name)
+        if values:
+            default = getter()[values.index(self.get_attr(property_name))]
+        else:
+            default = self.get_attr(property_name)
         hbox = gtk.HBox()
         hbox.set_homogeneous(True)
         label = gtk.Label(text)
