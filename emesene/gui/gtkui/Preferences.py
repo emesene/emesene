@@ -310,10 +310,10 @@ class BaseTable(gtk.Table):
 
         self.append_row(hbox, None)
 
-    def append_combo(self, text, getter, property_name):
+    def append_combo(self, text, getter, property_name,values=None):
         """append a row with a check box with text as label and
         set the check state with default
-        """
+        """      
         default = self.get_attr(property_name)
         hbox = gtk.HBox()
         hbox.set_homogeneous(True)
@@ -335,7 +335,7 @@ class BaseTable(gtk.Table):
         hbox.pack_start(label, True, True)
         hbox.pack_start(combo, False)
 
-        combo.connect('changed', self.on_combo_changed, property_name)
+        combo.connect('changed', self.on_combo_changed, property_name, values)
         self.append_row(hbox, None)
 
     def append_markup(self, text):
@@ -351,10 +351,13 @@ class BaseTable(gtk.Table):
 
         self.append_row(hbox, None)
 
-    def on_combo_changed(self, combo, property_name):
+    def on_combo_changed(self, combo, property_name, values=None):
         """callback called when the selection of the combo changed
         """
-        self.set_attr(property_name, combo.get_active_text())
+        if not(values):
+            self.set_attr(property_name, combo.get_active_text())
+        else:
+            self.set_attr(property_name, values[combo.get_active()])
 
     def on_range_changed(self, scale, widget, property_name, is_int):
         """callback called when the selection of the combo changed
@@ -446,6 +449,8 @@ class Interface(BaseTable):
         self.session.config.get_or_set('b_conversation_tabs', True)
         self.append_check(_('Tabbed Conversations'),
                 'session.config.b_conversation_tabs')
+        self.append_combo(_('Tab position'),self.get_tab_positions,
+                'session.config.i_tab_position',range(4))
         self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
         self.append_check(_('Start minimized/iconified'), 'session.config.b_conv_minimized')
         self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
@@ -486,7 +491,8 @@ class Interface(BaseTable):
     def _on_lang_combo_change(self, combo):
         self.session.config.spell_lang = combo.get_active_text()
 
-
+    def get_tab_positions(self):
+        return [_("Top"),_("Bottom"),_("Left"),_("Right")]
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
     """

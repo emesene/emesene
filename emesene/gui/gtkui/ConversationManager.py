@@ -54,8 +54,10 @@ class ConversationManager(Notebook, gui.ConversationManager):
         Notebook.__init__(self)
         gui.ConversationManager.__init__(self, session, on_last_close)
 
+        self.session = session;
         self.set_scrollable(True)
         self.set_property('can-focus', False)
+        self.set_tab_pos(pos=self.get_tab_position())
         #self.set_scrollable(session.config.get_or_set('b_conv_tab_scroll',
         #    True))
 
@@ -69,7 +71,8 @@ class ConversationManager(Notebook, gui.ConversationManager):
         self.connect('next-page', self.on_next_page)
         self.connect('prev-page', self.on_prev_page)
         self.connect('page-reordered', self._on_page_reordered)
-
+        self.session.config.subscribe(self._on_tab_position_changed,
+            'i_tab_position')
     def on_next_page(self, widget):
         '''called when ctrl+tab is pressed'''
         self.cycle_tabs()
@@ -77,6 +80,10 @@ class ConversationManager(Notebook, gui.ConversationManager):
     def on_prev_page(self, widget):
         '''called when ctrl+tab is pressed'''
         self.cycle_tabs(-1)
+    
+    def _on_tab_position_changed(self,value):
+        '''callback called when i_tab_position changes'''
+        self.set_tab_pos(pos=self.get_tab_position())
 
     def _set_accels(self):
         """set the keyboard shortcuts
@@ -251,6 +258,10 @@ class ConversationManager(Notebook, gui.ConversationManager):
         the value of one of them
         '''
         return self.get_parent().get_dimensions()
+
+    def get_tab_position(self):
+        positions = [gtk.POS_TOP,gtk.POS_BOTTOM,gtk.POS_LEFT,gtk.POS_RIGHT]
+        return positions[self.session.config.get_or_set('i_tab_position',0)]
 
     def hide_all(self):
         '''
