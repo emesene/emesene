@@ -54,6 +54,7 @@ class LoginBase(gtk.Alignment):
         self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
 
         self.cmb_account = gtk.ComboBoxEntry(self.liststore, 0)
+        self.cmb_account.set_tooltip_text(_('Account'))
         self.cmb_account.get_children()[0].set_completion(completion)
         self.cmb_account.get_children()[0].connect('key-press-event',
             self._on_account_key_press)
@@ -63,10 +64,12 @@ class LoginBase(gtk.Alignment):
             self._on_account_key_release)
 
         self.btn_status = StatusButton.StatusButton()
+        self.btn_status.set_tooltip_text(_('Status'))
         self.btn_status.set_status(e3.status.ONLINE)
         self.btn_status.set_size_request(34, -1)
 
         self.txt_password = gtk.Entry()
+        self.txt_password.set_tooltip_text(_('Password'))
         self.txt_password.set_visibility(False)
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
@@ -148,6 +151,7 @@ class LoginBase(gtk.Alignment):
         crt.set_property("xalign", 0)
 
         self.session_combo = gtk.ComboBox()
+        self.session_combo.set_tooltip_text(_('Choose your network'))
         self.session_combo.set_model(session_combo_store)
         self.session_combo.pack_start(crp)
         self.session_combo.pack_start(crt)
@@ -155,6 +159,7 @@ class LoginBase(gtk.Alignment):
         self.session_combo.add_attribute(crt, "text", 1)
 
         self.b_preferences = gtk.Button()
+        self.b_preferences.set_tooltip_text(_('Preferences'))
         self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
             gtk.ICON_SIZE_MENU)
         self.img_preferences.set_sensitive(False)
