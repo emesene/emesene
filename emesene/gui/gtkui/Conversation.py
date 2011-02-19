@@ -147,7 +147,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self._load_style()
 
         self.session.config.subscribe(self._on_avatarsize_changed,
-            'cd ..i_conv_avatar_size')
+            'i_conv_avatar_size')
         self.session.config.subscribe(self._on_show_toolbar_changed,
             'b_show_toolbar')
         self.session.config.subscribe(self._on_show_header_changed,
