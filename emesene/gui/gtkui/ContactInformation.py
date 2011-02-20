@@ -136,7 +136,10 @@ class InformationWidget(gtk.VBox):
             self.message.set_markup(self.contact.message)
             self.status.set_from_file(
                 gui.theme.status_icons[self.contact.status])
-            self.image.set_from_file(gui.theme.user)
+            if (self.contact.picture):
+                self.image.set_from_file(self.contact.picture)
+            else:
+                self.image.set_from_file(gui.theme.user)
 
 
 class ListWidget(gtk.VBox):
