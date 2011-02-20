@@ -72,10 +72,9 @@ class TextField(gtk.VBox):
     def on_entry_activate(self, entry):
         '''method called when the user press enter on the entry'''
         if not self.entry.get_text() and not self.allow_empty:
-            self.entry.set_text(self._text)
+            self.entry.set_text(self.empty_text)
             self.entry.hide()
             self.button.show()
-            return
 
         new_text = self.entry.get_text()
 
@@ -110,7 +109,7 @@ class TextField(gtk.VBox):
     def _set_text(self, value):
         '''set the value of text'''
         self._text = value
-        self.label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(self._text)))
+        self.label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(self._text)) or self.empty_text)
         self.entry.set_text(self._text)
 
     text = property(fget=_get_text, fset=_set_text)
