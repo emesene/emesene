@@ -59,7 +59,7 @@ class UserPanel(gtk.VBox):
             path = self.avatar_path
         self.avatar.set_from_file(path)
 
-        self.nick = TextField.TextField(session.contacts.me.display_name, '', False)
+        self.nick = TextField.TextField(session.contacts.me.display_name, session.contacts.me.account, False)
         self.status = StatusButton.StatusButton(session)
         self.status.set_status(session.contacts.me.status)
         self.search = gtk.ToggleButton()
