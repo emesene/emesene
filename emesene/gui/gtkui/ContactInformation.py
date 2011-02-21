@@ -96,6 +96,9 @@ class InformationWidget(gtk.VBox):
         self.nick = gtk.Label()
         self.nick.set_alignment(0.0, 0.5)
         self.nick.set_ellipsize(pango.ELLIPSIZE_END)
+        self.mail = gtk.Label()
+        self.mail.set_alignment(0.0, 0.5)
+        self.mail.set_ellipsize(pango.ELLIPSIZE_END)
         self.message = gtk.Label()
         self.message.set_ellipsize(pango.ELLIPSIZE_END)
         self.message.set_alignment(0.0, 0.5)
@@ -104,6 +107,9 @@ class InformationWidget(gtk.VBox):
         self.image = gtk.Image()
         image_align = gtk.Alignment(0.5,0.5)
         image_align.add(self.image)
+        self.blocked = gtk.Label()
+        self.blocked.set_alignment(0.0, 0.5)
+        self.blocked.set_ellipsize(pango.ELLIPSIZE_END)
 
         table = gtk.Table(4, 2, False)
         table.set_border_width(20)
@@ -114,17 +120,25 @@ class InformationWidget(gtk.VBox):
         l_image.set_alignment(0.0, 0.5)
         l_nick = gtk.Label(_('Nick'))
         l_nick.set_alignment(0.0, 0.5)
+        l_mail = gtk.Label(_('E-Mail'))
+        l_mail.set_alignment(0.0, 0.5)
         l_status = gtk.Label(_('Status'))
         l_status.set_alignment(0.0, 0.5)
         l_message = gtk.Label(_('Message'))
         l_message.set_alignment(0.0, 0.5)
+        l_blocked = gtk.Label(_('Blocked'))
+        l_blocked.set_alignment(0.0, 0.5)
 
         table.attach(l_nick, 0, 1, 0, 1, 0)
         table.attach(self.nick, 1, 2, 0, 1)
-        table.attach(l_status, 0, 1, 1, 2, 0)
-        table.attach(self.status, 1, 2, 1, 2)
-        table.attach(l_message, 0, 1, 2, 3, 0)
-        table.attach(self.message, 1, 2, 2, 3)
+        table.attach(l_mail, 0, 1, 1, 2, 0)
+        table.attach(self.mail, 1, 2, 1, 2)
+        table.attach(l_status, 0, 1, 2, 3, 0)
+        table.attach(self.status, 1, 2, 2, 3)
+        table.attach(l_message, 0, 1, 3, 4, 0)
+        table.attach(self.message, 1, 2, 3, 4)
+        table.attach(l_blocked, 0, 1, 4, 5, 0)
+        table.attach(self.blocked, 1, 2, 4, 5)
 
         hbox = gtk.HBox(False, 0)
         self.set_border_width(15)
@@ -139,6 +153,7 @@ class InformationWidget(gtk.VBox):
         '''update the information of the contact'''
         if self.contact:
             self.nick.set_markup(self.contact.display_name)
+            self.mail.set_markup(self.contact.account)
             self.message.set_markup(self.contact.message)
             self.status.set_from_file(
                 gui.theme.status_icons[self.contact.status])
@@ -146,6 +161,10 @@ class InformationWidget(gtk.VBox):
                 self.image.set_from_file(self.contact.picture)
             else:
                 self.image.set_from_file(gui.theme.user)
+            if (self.contact.blocked):
+                self.blocked.set_markup(_('Yes'))
+            else:
+                self.blocked.set_markup(_('No'))
 
 
 class ListWidget(gtk.VBox):
