@@ -472,7 +472,7 @@ class Interface(BaseTable):
             'session.config.b_allow_auto_scroll')
         self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
             'session.config.b_enable_spell_check')
-        self.attach(self.lang_menu, 2, 3, 12, 13) 
+        self.attach(self.lang_menu, 2, 3, 13, 14) 
         self.append_check(_('Show avatars in taskbar instead of status icons'), 
             'session.config.b_show_avatar_in_taskbar')
 

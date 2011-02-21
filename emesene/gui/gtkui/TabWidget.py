@@ -54,6 +54,7 @@ class TabWidget(gtk.HBox):
         self.label.set_ellipsize(True)
         self.label.set_text(text)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
+        self.close.set_tooltip_text(_('Close Tab (Ctrl+W)'))
         self.close.connect('clicked', on_close_clicked,
             conversation)
 
