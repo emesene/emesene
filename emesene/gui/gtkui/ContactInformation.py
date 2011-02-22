@@ -26,6 +26,8 @@ import e3
 import gui
 import utils
 import extension
+import gobject
+import Renderers
 
 import logging
 log = logging.getLogger('gtkui.ContactInformation')
@@ -93,13 +95,13 @@ class InformationWidget(gtk.VBox):
         else:
             self.contact = None
 
-        self.nick = gtk.Label()
+        self.nick = Renderers.SmileyLabel()
         self.nick.set_alignment(0.0, 0.5)
         self.nick.set_ellipsize(pango.ELLIPSIZE_END)
         self.mail = gtk.Label()
         self.mail.set_alignment(0.0, 0.5)
         self.mail.set_ellipsize(pango.ELLIPSIZE_END)
-        self.message = gtk.Label()
+        self.message = Renderers.SmileyLabel()
         self.message.set_ellipsize(pango.ELLIPSIZE_END)
         self.message.set_alignment(0.0, 0.5)
         self.status = gtk.Image()
@@ -152,22 +154,19 @@ class InformationWidget(gtk.VBox):
     def update_information(self):
         '''update the information of the contact'''
         if self.contact:
-            self.nick.set_markup(self.contact.display_name)
+            self.nick.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(self.contact.display_name)))
             self.mail.set_markup(self.contact.account)
-            self.message.set_markup(self.contact.message)
+            self.message.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(self.contact.message)))
             self.status.set_from_file(
                 gui.theme.status_icons[self.contact.status])
             if (self.contact.picture):
                 self.image.set_from_file(self.contact.picture)
             else:
                 self.image.set_from_file(gui.theme.user)
-<<<<<<< HEAD
-=======
             if (self.contact.blocked):
                 self.blocked.set_markup(_('Yes'))
             else:
                 self.blocked.set_markup(_('No'))
->>>>>>> f723529e17c0f1499e8b36fdafd300d68d526ee4
 
 
 class ListWidget(gtk.VBox):
@@ -196,7 +195,7 @@ class ListWidget(gtk.VBox):
         column2 = gtk.TreeViewColumn()
         column2.set_expand(True)
 
-        crt = gtk.CellRendererText()
+        crt = Renderers.CellRendererPlus()
         crt_timestamp = gtk.CellRendererText()
         crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr = gtk.CellRendererPixbuf()
