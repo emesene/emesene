@@ -192,9 +192,11 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def _on_his_avatar_click(self, widget, data):
         '''method called when user click on the other avatar
-           Note: not implemented yet
         '''
-        pass
+        account = self.members[0]
+        contact = self.session.contacts.get(account)
+        dialog = extension.get_default('dialog')
+        dialog.contact_information_dialog(self.session, contact.account)
 
     def _on_icon_size_change(self, value):
         '''callback called when config.b_toolbar_small changes'''
