@@ -56,6 +56,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.no_group_iter = None
         self.offline_group = None
         self.offline_group_iter = None
+        self.enable_model_drag_source(gtk.gdk.BUTTON1_MASK,[
+            ('text/html',0,1),
+            ('text/plain',0,2)],gtk.gdk.ACTION_COPY)
 
         if self.session.config.d_weights is None:
             self.session.config.d_weights = {}
@@ -117,6 +120,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.connect('button-release-event' , self._on_button_press_event)
         self.connect('row-expanded' , self._on_expand)
         self.connect('row-collapsed' , self._on_collapse)
+        self.connect('drag-data-get', self._on_drag_data_get)
 
     def _on_expand(self, treeview, iter_, path):
         group = self.model[path][1]
@@ -682,3 +686,24 @@ class ContactList(gui.ContactList, gtk.TreeView):
         elif len(contact2.groups) == 0:
             return 1
 
+    def _on_drag_data_get(self, widget, context, selection, target_id, etime):
+        if self.is_contact_selected():
+            account = self.get_contact_selected().account
+            display_name = self.get_contact_selected().display_name
+            
+            if selection.target == 'text/html':
+                formatter = gui.base.Plus.MsnPlusMarkupMohrtutchy() # - colors
+                formatter.isHtml = True
+
+                display_name = formatter.replaceMarkup(display_name)
+                display_name = gui.base.Plus.parse_emotes(display_name) # - emotes
+
+                for x in range(len(display_name)):
+                    if type(display_name[x]) is dict:
+                        display_name[x] = '<img src="file://%s" alt="%s">' %\
+                                (display_name[x]["src"], display_name[x]["alt"])
+                                            
+                selection.set(selection.target,
+                    8, u'{0} &lt;<a href="mailto:{1}">{1}</a>&gt;'.format(''.join(display_name), account))
+            elif selection.target == 'text/plain':
+                selection.set(selection.target, 8, u'%s <%s>' % (Renderers.msnplus_to_plain_text(display_name), account))

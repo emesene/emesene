@@ -144,7 +144,7 @@ class Theme(object):
     EMOTE_REGEX_STR = ""
     for key in EMOTES:
         EMOTE_REGEX_STR += re.escape(key) + "|"
-    EMOTE_REGEX = re.compile(EMOTE_REGEX_STR)
+    EMOTE_REGEX = re.compile("("+EMOTE_REGEX_STR+")")
 
     SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
             'send.wav', 'type.wav']
