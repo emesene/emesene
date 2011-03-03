@@ -94,6 +94,7 @@ class Header(gtk.HBox):
 
     def on_clicked(self, widget, event):
         '''called when the header clicked'''
-        self.menu.popup(None, None, None, event.button, event.time, None)
+        if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            self.menu.popup(None, None, None, event.button, event.time, None)            
 
     information = property(fget=_get_information, fset=_set_information)
