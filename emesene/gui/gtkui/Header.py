@@ -77,7 +77,7 @@ class Header(gtk.HBox):
         contact = self.session.contacts.get(account)
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
-        clipboard.set_text(contact.display_name)
+        clipboard.set_text(contact.nick)
 
     def copy_pm(self, data, widget=None):
         account = self.members[0]
@@ -95,6 +95,6 @@ class Header(gtk.HBox):
     def on_clicked(self, widget, event):
         '''called when the header clicked'''
         if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-            self.menu.popup(None, None, None, event.button, event.time, None)            
+            self.menu.popup(None, None, None, event.button, event.time, None)
 
     information = property(fget=_get_information, fset=_set_information)
