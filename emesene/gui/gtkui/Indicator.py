@@ -55,22 +55,24 @@ class Indicator(appindicator.Indicator):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        appindicator.Indicator.__init__(self, "emesene", "logo", \
-            appindicator.CATEGORY_APPLICATION_STATUS, \
-            os.path.join(os.getcwd(), handler.theme.panel_path))
-
-        self.handler = handler
-
-        self.main_window = main_window
-        self.conversations = None
-
-        self.menu = None
-        self.set_login()
-        self.set_status(appindicator.STATUS_ACTIVE)
-
-        self.messaging_menu = None
         if HASMESSAGINGMENU:
             self.messaging_menu = MessagingMenu.MessagingMenu(handler, main_window)
+        else:
+            appindicator.Indicator.__init__(self, "emesene", "logo", \
+                appindicator.CATEGORY_APPLICATION_STATUS, \
+                os.path.join(os.getcwd(), handler.theme.panel_path))
+
+            self.handler = handler
+
+            self.main_window = main_window
+            self.conversations = None
+
+            self.menu = None
+            self.set_login()
+            self.set_status(appindicator.STATUS_ACTIVE)
+
+            self.messaging_menu = None
+
 
     def set_visible(self, arg):
         """ dummy, indicators remove themselves automagically """
@@ -81,6 +83,7 @@ class Indicator(appindicator.Indicator):
         """
         method called to set the state to the login window
         """
+        if self.messaging_menu: return
         icon_name = self.handler.theme.logo.split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)
@@ -92,23 +95,25 @@ class Indicator(appindicator.Indicator):
         """
         method called to set the state to the main window
         """
+        if self.messaging_menu:
+            self.messaging_menu.set_main(session)
+            return
         self.handler.session = session
         self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
         self.menu = TrayIcon.MainMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_menu(self.menu)
 
-        if self.messaging_menu:
-            self.messaging_menu.set_main(session)
 
     def set_conversations(self, convs):
         """
         Sets the conversations manager
         """
-        self.conversations = convs
-
         if self.messaging_menu:
             self.messaging_menu.set_conversations(convs)
+            return
+
+        self.conversations = convs
 
     def set_contacts(self, contacts):
         """
@@ -119,6 +124,8 @@ class Indicator(appindicator.Indicator):
         """
         change the icon in the tray according to user's state
         """
+        if self.messaging_menu:
+            return
         path = os.path.join(os.getcwd(), self.handler.theme.panel_path)
         self.set_icon_theme_path(path)
         #the appindicator takes a 'name' of an icon and NOT a filename.
