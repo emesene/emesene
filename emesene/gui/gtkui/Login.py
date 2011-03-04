@@ -698,16 +698,16 @@ class Login(LoginBase):
         self._on_account_changed(None)
 
         def searchService(model, path, iter, user_data):
-                if(model.get(iter,0)[0]==user_data[0]):
-                        user_data[2].set_active(user_data[1])
-                        return True
-                user_data[1]+=1
-                return False
+            if(model.get(iter,0)[0]==user_data[0]):
+                user_data[2].set_active(user_data[1])
+                return True
+            user_data[1]+=1
+            return False
 
         i=0
-	
-	for combo in self.__combo_session_list:
-        	combo.get_model().foreach(searchService,[service,i,combo])
+
+        for combo in self.__combo_session_list:
+                combo.get_model().foreach(searchService,[service,i,combo])
 
 class ConnectingWindow(Login):
     '''
