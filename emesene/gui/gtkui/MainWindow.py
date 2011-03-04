@@ -208,7 +208,7 @@ class MainWindow(gtk.VBox):
     def _on_key_press(self, widget, event):
         '''method called when a key is pressed on the input widget'''
         if event.keyval == gtk.keysyms.f and \
-                event.state == gtk.gdk.CONTROL_MASK:
+                event.state & gtk.gdk.CONTROL_MASK:
             self.panel.search.set_active(not self.panel.search.get_active())
             if self.panel.search.get_active():
                 self.entry.show()

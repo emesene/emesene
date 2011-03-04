@@ -328,7 +328,7 @@ class Conversation(object):
             # can be false if we are un a group chat with someone we dont
             # have and the last contact leaves..
             if contact:
-                text = contact.display_name
+                text = contact.nick
             else:
                 text = self.members[0]
         else:

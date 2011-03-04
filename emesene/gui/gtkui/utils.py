@@ -34,6 +34,16 @@ def safe_gtk_image_load(path, size=None):
         return gtk.image_new_from_stock(gtk.STOCK_MISSING_IMAGE,
             gtk.ICON_SIZE_DIALOG)
 
+def gtk_ico_image_load(path, icosize=None):
+    '''try to return a gtk image from path, if fails, return a broken image'''
+    if file_readable(path):
+        pixbuf = gtk_pixbuf_load(path)
+        iconset = gtk.IconSet(pixbuf)
+        return gtk.image_new_from_icon_set(iconset,icosize)
+    else:
+        return gtk.image_new_from_stock(gtk.STOCK_MISSING_IMAGE,
+            gtk.ICON_SIZE_DIALOG)
+
 def safe_gtk_pixbuf_load(path, size=None, animated=False):
     '''try to return a gtk pixbuf from path, if fails, return None'''
     path = os.path.abspath(path)

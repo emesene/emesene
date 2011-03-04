@@ -59,11 +59,15 @@ class UserPanel(gtk.VBox):
             path = self.avatar_path
         self.avatar.set_from_file(path)
 
-        self.nick = TextField.TextField(session.contacts.me.display_name, '', False)
+        self.nick = TextField.TextField(session.contacts.me.display_name, session.contacts.me.account, False)
+        self.nick.set_tooltip_text(_('Click here to set your nick name'))
         self.status = StatusButton.StatusButton(session)
+        self.status.set_tooltip_text(_('Click here to change your status'))
         self.status.set_status(session.contacts.me.status)
         self.search = gtk.ToggleButton()
+        self.search.set_tooltip_text(_('Search (Ctrl+F)'))
         self.mail = gtk.Button(label="(0)")
+        self.mail.set_tooltip_text(_('Click here to access your mail'))
 
         self.mail.get_settings().set_property( "gtk-button-images", True )
 
@@ -74,8 +78,9 @@ class UserPanel(gtk.VBox):
         self.search.set_relief(gtk.RELIEF_NONE)
 
         self.message = TextField.TextField(session.contacts.me.message,
-            '<span style="italic">' + _("Click here to set a message") + '.</span>',
+            '<span style="italic">' + _("Click here to set your message") + '.</span>',
             True)
+        self.message.set_tooltip_text(_('Click here to set your message'))
         self.toolbar = gtk.HBox()
 
         hbox = gtk.HBox()

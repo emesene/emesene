@@ -54,6 +54,7 @@ class LoginBase(gtk.Alignment):
         self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.user)
 
         self.cmb_account = gtk.ComboBoxEntry(self.liststore, 0)
+        self.cmb_account.set_tooltip_text(_('Account'))
         self.cmb_account.get_children()[0].set_completion(completion)
         self.cmb_account.get_children()[0].connect('key-press-event',
             self._on_account_key_press)
@@ -63,9 +64,12 @@ class LoginBase(gtk.Alignment):
             self._on_account_key_release)
 
         self.btn_status = StatusButton.StatusButton()
+        self.btn_status.set_tooltip_text(_('Status'))
         self.btn_status.set_status(e3.status.ONLINE)
+        self.btn_status.set_size_request(34, -1)
 
         self.txt_password = gtk.Entry()
+        self.txt_password.set_tooltip_text(_('Password'))
         self.txt_password.set_visibility(False)
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
@@ -98,11 +102,12 @@ class LoginBase(gtk.Alignment):
         self.forget_me.set_image(forget_img)
         self.forget_me.set_relief(gtk.RELIEF_NONE)
         self.forget_me.set_border_width(0)
+        self.forget_me.set_size_request(34, -1)
         self.forget_me.connect('clicked', self._on_forget_me_clicked)
         self.forget_me.set_sensitive(False)
 
         hboxremember = gtk.HBox(spacing=2)
-        hboxremember.pack_start(self.remember_account, False, False)
+        hboxremember.pack_start(self.remember_account, False)
 
         vbox_remember = gtk.VBox(spacing=4)
         vbox_remember.set_border_width(8)
@@ -110,21 +115,6 @@ class LoginBase(gtk.Alignment):
         vbox_remember.pack_start(self.remember_password)
         vbox_remember.pack_start(self.auto_login)
         vbox_remember.pack_start(gtk.Label())
-        
-        session_combo_store = gtk.ListStore(gtk.gdk.Pixbuf, str)
-        crp = gtk.CellRendererPixbuf()
-        crt = gtk.CellRendererText()
-        crp.set_property("xalign", 0)
-        crt.set_property("xalign", 0)
-
-        self.session_combo = gtk.ComboBox()
-        self.session_combo.set_model(session_combo_store)
-        self.session_combo.pack_start(crp, True)
-        self.session_combo.pack_start(crt, True)
-        self.session_combo.add_attribute(crp, "pixbuf", 0)
-        self.session_combo.add_attribute(crt, "text", 1)
-
-        vbox_remember.pack_start(self.session_combo)
 
         self.b_connect = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.b_connect.connect('clicked', self._on_connect_clicked)
@@ -138,28 +128,38 @@ class LoginBase(gtk.Alignment):
         vbuttonbox.pack_start(self.b_connect)
         vbuttonbox.pack_start(self.b_cancel)
 
-        vbox = gtk.VBox()
+        vbox_content = gtk.VBox()
 
         hbox_account = gtk.HBox(spacing=6)
         img_accountpix = gtk.Image()
         img_accountpix.set_from_pixbuf(utils.scale_nicely(pix_account))
         hbox_account.pack_start(img_accountpix, False)
-        hbox_account.pack_start(self.cmb_account, True, True)
+        hbox_account.pack_start(self.cmb_account)
         hbox_account.pack_start(self.forget_me, False)
 
         hbox_password = gtk.HBox(spacing=6)
         img_password = gtk.Image()
         img_password.set_from_pixbuf(utils.scale_nicely(pix_password))
         hbox_password.pack_start(img_password, False)
-        hbox_password.pack_start(self.txt_password, True, True)
+        hbox_password.pack_start(self.txt_password)
         hbox_password.pack_start(self.btn_status, False)
 
-        vbox_entries = gtk.VBox(spacing=12)
-        vbox_entries.set_border_width(8)
-        vbox_entries.pack_start(hbox_account)
-        vbox_entries.pack_start(hbox_password)
+        session_combo_store = gtk.ListStore(gtk.gdk.Pixbuf, str)
+        crp = gtk.CellRendererPixbuf()
+        crt = gtk.CellRendererText()
+        crp.set_property("xalign", 0)
+        crt.set_property("xalign", 0)
+
+        self.session_combo = gtk.ComboBox()
+        self.session_combo.set_tooltip_text(_('Choose your network'))
+        self.session_combo.set_model(session_combo_store)
+        self.session_combo.pack_start(crp)
+        self.session_combo.pack_start(crt)
+        self.session_combo.add_attribute(crp, "pixbuf", 0)
+        self.session_combo.add_attribute(crt, "text", 1)
 
         self.b_preferences = gtk.Button()
+        self.b_preferences.set_tooltip_text(_('Preferences'))
         self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
             gtk.ICON_SIZE_MENU)
         self.img_preferences.set_sensitive(False)
@@ -171,6 +171,21 @@ class LoginBase(gtk.Alignment):
             self._on_preferences_leave)
         self.b_preferences.connect('clicked',
             self._on_preferences_selected)
+        self.b_preferences.set_size_request(34, -1)
+
+        img_sessionpix = gtk.image_new_from_stock(gtk.STOCK_CONNECT, gtk.ICON_SIZE_MENU)
+        img_sessionpix.set_size_request(20, -1)
+        img_sessionpix.set_sensitive(False)
+        hbox_session = gtk.HBox(spacing=6)
+        hbox_session.pack_start(img_sessionpix, False)
+        hbox_session.pack_start(self.session_combo)
+        hbox_session.pack_start(self.b_preferences, False)
+
+        vbox_entries = gtk.VBox(spacing=12)
+        vbox_entries.set_border_width(8)
+        vbox_entries.pack_start(hbox_account)
+        vbox_entries.pack_start(hbox_password)
+        vbox_entries.pack_start(hbox_session)
 
         self.nicebar = NiceBar()
 
@@ -191,7 +206,6 @@ class LoginBase(gtk.Alignment):
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2)
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
-        al_preferences = gtk.Alignment(xalign=1.0, yalign=0.5)
 
         al_label_timer.add(self.label_timer)
         al_throbber.add(self.throbber)
@@ -199,18 +213,24 @@ class LoginBase(gtk.Alignment):
         al_vbox_remember.add(vbox_remember)
         al_button.add(vbuttonbox)
         al_account.add(self.avatar)
-        al_preferences.add(self.b_preferences)
+
+        vbox = gtk.VBox()
+        vbox_top = gtk.VBox()
+        vbox_far_bottom = gtk.VBox()
 
         vbox_bottom = gtk.VBox(True)
-        vbox.pack_start(self.nicebar, False)
-        vbox.pack_start(al_account, True, False)
-        vbox.pack_start(al_vbox_entries, True, True)
-        vbox.pack_start(al_vbox_remember, True, False)
+        vbox_content.pack_start(al_account, True, False)
+        vbox_content.pack_start(al_vbox_entries, False)
+        vbox_content.pack_start(al_vbox_remember, True, False)
         vbox_bottom.pack_start(al_label_timer, True, False)
-        vbox_bottom.pack_start(al_throbber, False, False)
-        vbox_bottom.pack_start(al_button, True, True)
-        vbox.pack_start(vbox_bottom, True, True)
-        vbox.pack_start(al_preferences, True, False)
+        vbox_bottom.pack_start(al_throbber, False)
+        vbox_bottom.pack_start(al_button)
+        vbox_content.pack_start(vbox_bottom)
+
+        vbox.pack_start(self.nicebar, False)
+        vbox.pack_start(vbox_top)
+        vbox.pack_start(vbox_content)
+        vbox.pack_start(vbox_far_bottom)
 
         self.add(vbox)
         vbox.show_all()
@@ -318,7 +338,7 @@ class Login(LoginBase):
         if account in self.accounts:
             service = self.config.d_user_service.get(account, 'msn')
         else:
-            service = 'msn'
+            service = self.config.service
 
         for ext_id, ext in extension.get_extensions('session').iteritems():
             if default_session.NAME == ext.NAME:
@@ -330,7 +350,6 @@ class Login(LoginBase):
                     session_found = True
 
                 try:
-                    # ugly eval here, is there another way?
                     s_name = getattr(gui.theme, "service_" + service_name) 
                     image = utils.safe_gtk_pixbuf_load(s_name)
                 except:
@@ -656,7 +675,7 @@ class Login(LoginBase):
             service = self.config.d_user_service.get(account, 'msn')
 
         extension.get_default('dialog').login_preferences(service,
-            self._on_new_preferences, self.use_http, self.proxy,self)
+            self._on_new_preferences, self.use_http, self.proxy)
 
     def _on_new_preferences(self, use_http, use_proxy, proxy_host, proxy_port,
         use_auth, user, passwd, session_id, service, server_host, server_port):

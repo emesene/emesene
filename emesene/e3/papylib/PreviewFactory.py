@@ -22,11 +22,19 @@
 # Created by Andrea Stagi <stagi.andrea(at)gmail.com>
 #
 
-import Image
+try:
+    import Image
+    pyimage = True
+except:
+    pyimage = False
+    
 import hashlib
 import tempfile
 
 def makePreview(src):
+
+    if pyimage == False:
+        return None
 
     try:
     	pbf = Image.open(src)

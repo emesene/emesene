@@ -58,8 +58,25 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
 
+        self.avatarBox = gtk.EventBox()
+        self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
+        self.avatarBox.connect('button-press-event', self._on_avatar_click)
+
         self.avatar = Avatar(cellDimention=avatar_size)
+        self.avatarBox.add(self.avatar)
+
+        self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
+        self.avatarBox.set_border_width(4)
+
+        self.his_avatarBox = gtk.EventBox()
+        self.his_avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
+        self.his_avatarBox.connect('button-press-event', self._on_his_avatar_click)
+
         self.his_avatar = Avatar(cellDimention=avatar_size)
+        self.his_avatarBox.add(self.his_avatar)
+
+        self.his_avatarBox.set_tooltip_text(_('Click to see informations'))
+        self.his_avatarBox.set_border_width(4)
 
         self.header = Header(session, members)
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
@@ -121,10 +138,10 @@ class Conversation(gtk.VBox, gui.Conversation):
             if contact and contact.picture:
                 his_picture = contact.picture
 
-        self.info.first = self.his_avatar
+        self.info.first = self.his_avatarBox
         self.his_avatar.set_from_file(his_picture)
 
-        self.info.last = self.avatar
+        self.info.last = self.avatarBox
         self.avatar.set_from_file(my_picture)
 
         self._load_style()
@@ -137,6 +154,10 @@ class Conversation(gtk.VBox, gui.Conversation):
             'b_show_header')
         self.session.config.subscribe(self._on_show_info_changed,
             'b_show_info')
+        self.session.config.subscribe(self._on_show_avatar_onleft,
+            'b_avatar_on_left')
+        self.session.config.subscribe(self._on_icon_size_change,
+            'b_toolbar_small')
         self.session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
         self.session.signals.contact_attr_changed.subscribe(
@@ -162,13 +183,36 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.rotate_started = True #to prevents more than one timeout_add
             glib.timeout_add_seconds(5, self.rotate_picture)
 
+    def _on_avatar_click(self, widget, data):
+        '''method called when user click on his avatar
+        '''
+        av_chooser = extension.get_default('avatar chooser')(self.session)
+        av_chooser.set_modal(True)
+        av_chooser.show()
+
+    def _on_his_avatar_click(self, widget, data):
+        '''method called when user click on the other avatar
+        '''
+        account = self.members[0]
+        contact = self.session.contacts.get(account)
+        dialog = extension.get_default('dialog')
+        dialog.contact_information_dialog(self.session, contact.account)
+
+    def _on_icon_size_change(self, value):
+        '''callback called when config.b_toolbar_small changes'''
+        self.toolbar.draw()
+
     def _on_avatarsize_changed(self, value):
         '''callback called when config.i_conv_avatar_size changes'''
+
+        self.avatarBox.remove(self.avatar)
+        self.his_avatarBox.remove(self.his_avatar)
+
         self.avatar.set_property('dimention',value)
         self.his_avatar.set_property('dimention',value)
 
-        self.info.last = self.avatar
-        self.info.first = self.his_avatar
+        self.avatarBox.add(self.avatar)
+        self.his_avatarBox.add(self.his_avatar)
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
@@ -190,6 +234,15 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.info.show()
         else:
             self.info.hide()
+
+    def _on_show_avatar_onleft(self,value):
+        '''callback called when config.b_avatar_on_left changes'''
+        if value:
+            self.hbox.reorder_child(self.panel, 1)
+            self.hbox.reorder_child(self.info, 0)
+        else:
+            self.hbox.reorder_child(self.panel, 0)
+            self.hbox.reorder_child(self.info, 1)
 
     def on_close(self):
         '''called when the conversation is closed'''

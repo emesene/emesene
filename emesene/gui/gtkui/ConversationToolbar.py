@@ -40,7 +40,13 @@ class ConversationToolbar(gtk.Toolbar):
         self.set_style(gtk.TOOLBAR_ICONS)
         self.set_tooltips(True)
 
-        toolbar_small = handler.session.config.get_or_set('b_toolbar_small', False)
+        self.handler = handler
+
+        self.draw()
+
+    def draw(self):
+        '''draw the toolbar'''
+        toolbar_small = self.handler.session.config.get_or_set('b_toolbar_small', False)
 
         if toolbar_small:
             size = gtk.ICON_SIZE_MENU
@@ -49,35 +55,34 @@ class ConversationToolbar(gtk.Toolbar):
 
         whsize = gtk.icon_size_lookup(size)
 
-        settings = self.get_settings()
-        settings.set_long_property('gtk-toolbar-icon-size', size, \
+        self.settings = self.get_settings()
+        self.settings.set_long_property('gtk-toolbar-icon-size', size, \
             'ConversationToolbar.py:37')
 
-        self.handler = handler
-
         # check if we have theme-specific toolbar-icons
+
         if gui.theme.toolbar_path:
-            theme_tool_font = utils.safe_gtk_image_load(gui.theme.tool_font, whsize)
-            theme_tool_font_color = utils.safe_gtk_image_load(gui.theme.tool_font_color, whsize)
-            theme_tool_emotes = utils.safe_gtk_image_load(gui.theme.tool_emotes, whsize)
-            theme_tool_nudge = utils.safe_gtk_image_load(gui.theme.tool_nudge, whsize)
-            theme_tool_invite = utils.safe_gtk_image_load(gui.theme.tool_invite, whsize)
-            theme_tool_clean = utils.safe_gtk_image_load(gui.theme.tool_clean, whsize)
-            theme_tool_file_transfer = utils.safe_gtk_image_load(gui.theme.tool_file_transfer, whsize)
-            theme_tool_ublock = utils.safe_gtk_image_load(gui.theme.tool_ublock, whsize)
+            theme_tool_font = utils.gtk_ico_image_load(gui.theme.tool_font, size)
+            theme_tool_font_color = utils.gtk_ico_image_load(gui.theme.tool_font_color, size)
+            theme_tool_emotes = utils.gtk_ico_image_load(gui.theme.tool_emotes, size)
+            theme_tool_nudge = utils.gtk_ico_image_load(gui.theme.tool_nudge, size)
+            theme_tool_invite = utils.gtk_ico_image_load(gui.theme.tool_invite, size)
+            theme_tool_clean = utils.gtk_ico_image_load(gui.theme.tool_clean, size)
+            theme_tool_file_transfer = utils.gtk_ico_image_load(gui.theme.tool_file_transfer, size)
+            theme_tool_ublock = utils.gtk_ico_image_load(gui.theme.tool_ublock, size)
         else:
             theme_tool_font = gtk.STOCK_SELECT_FONT
             theme_tool_font_color = gtk.STOCK_SELECT_COLOR
-            theme_tool_emotes = utils.safe_gtk_image_load(gui.theme.emote_to_path(':D', True), whsize)
-            theme_tool_nudge = utils.safe_gtk_image_load(gui.theme.emote_to_path(':S', True), whsize)
+            theme_tool_emotes = utils.gtk_ico_image_load(gui.theme.emote_to_path(':D', True), size)
+            theme_tool_nudge = utils.gtk_ico_image_load(gui.theme.emote_to_path(':S', True), size)
             theme_tool_invite = gtk.STOCK_ADD
             theme_tool_clean = gtk.STOCK_CLEAR
             theme_tool_file_transfer = gtk.STOCK_GO_UP
             theme_tool_ublock = gtk.STOCK_STOP
 
-        theme_tool_call = utils.safe_gtk_image_load(gui.theme.call, whsize)
-        theme_tool_video = utils.safe_gtk_image_load(gui.theme.video, whsize)
-        theme_tool_av = utils.safe_gtk_image_load(gui.theme.av, whsize)
+        theme_tool_call = utils.gtk_ico_image_load(gui.theme.call, size)
+        theme_tool_video = utils.gtk_ico_image_load(gui.theme.video, size)
+        theme_tool_av = utils.gtk_ico_image_load(gui.theme.av, size)
 
         self.font = gtk.ToolButton(theme_tool_font)
         self.font.set_label(_('Select font'))

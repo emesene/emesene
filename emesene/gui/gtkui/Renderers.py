@@ -104,10 +104,12 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         if not self._style_handler_id:
             self._style_handler_id = widget.connect('style-set',
                     self._style_set)
-
+        
         layout = self.get_layout(widget)
-        width, height = layout.get_pixel_size()
-
+        if layout:
+            width, height = layout.get_pixel_size()
+        else:
+            width, height = [0,0]
         return (0, 0, -1, height + (self.ypad * 2))
 
     def do_get_property(self, prop):
@@ -135,9 +137,10 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         width -= self.xpad
         ctx = win.cairo_create()
         layout = self.get_layout(widget)
-        layout.set_width(width  * pango.SCALE)
-        layout.set_in_color_override_mode(flags in self._selected_flgs)
-        layout.draw(ctx, (x_coord, y_coord, width, height))
+        if layout:
+            layout.set_width(width  * pango.SCALE)
+            layout.set_in_color_override_mode(flags in self._selected_flgs)
+            layout.draw(ctx, (x_coord, y_coord, width, height))
 
     def get_layout(self, widget):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
@@ -686,7 +689,7 @@ class SmileyLayout(pango.Layout):
             except Exception, error:
                 log.error("Error when painting smilies: %s" % error)
 
-class SmileyLabel(gtk.Widget):
+class SmileyLabel(gtk.Label):
     '''Label with smiley support. '''
 
     __gsignals__ = { 'size_request' : 'override',
