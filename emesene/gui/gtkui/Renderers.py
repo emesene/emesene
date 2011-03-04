@@ -866,7 +866,8 @@ class AvatarRenderer(gtk.GenericCellRenderer):
 
         return (0, 0,  width, height)
 
-    def func(self, model, path, iter, (image, tree)):
+    def func(self, model, path, iter, image_and_tree):
+      image, tree = image_and_tree
       if model.get_value(iter, 0) == image:
          self.redraw = 1
          cell_area = tree.get_cell_area(path, tree.get_column(1))
