@@ -15,6 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from __future__ import division
 
 import gtk
 import gtk.gdk
@@ -22,6 +23,7 @@ import cairo
 import gobject
 
 import gui
+
 
 class Avatar(gtk.Widget):
     """AvatarWidget """
@@ -251,14 +253,14 @@ class Avatar(gtk.Widget):
         if key in [gtk.ANCHOR_NORTH_WEST,gtk.ANCHOR_WEST,gtk.ANCHOR_SOUTH_WEST]:
             x = 0
         elif key in [gtk.ANCHOR_NORTH,gtk.ANCHOR_CENTER,gtk.ANCHOR_SOUTH]:
-            x = (w/2) - (sw/2)
+            x = (w // 2) - (sw // 2)
         else:
             x = w - sw
 
         if key in [gtk.ANCHOR_NORTH_WEST,gtk.ANCHOR_NORTH,gtk.ANCHOR_NORTH_EAST]:
             y = 0
         elif key in [gtk.ANCHOR_EAST,gtk.ANCHOR_CENTER,gtk.ANCHOR_WEST]:
-            y = (h/2) - (sh/2)
+            y = (h // 2) - (sh // 2)
         else:
             y = h - sh
 
