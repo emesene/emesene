@@ -72,6 +72,9 @@ class MessagingMenu(BaseTray):
     def set_visible(self, arg):
         """ we are exiting from emesene: disconnect all signals """
         if arg:
+	    #FIXME: Hack to workaround bug #330. hide all indicators
+	    for key in self.indicator_dict.keys():
+               key.hide()
             return
 
         for key in self.r_indicator_dict.keys():
