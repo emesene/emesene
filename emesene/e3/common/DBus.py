@@ -16,6 +16,10 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import logging
+
+log = logging.getLogger("emesene.e3.common.DBus")
+
 import extension
 from e3.base import Action
 
@@ -30,11 +34,11 @@ try:
         DBusGMainLoop(set_as_default=True)
     else:
         import dbus.mainloop.glib
-        import dbus.dbus_bindings as dbus_bindings  
-except Exception, e:
-    log.warning('Failed some import on dbus: %s' % str(description))
+        import dbus.dbus_bindings as dbus_bindings
+except ImportError, e:
+    log.warning('Failed some import on dbus: %s' % str(e))
     ERROR = True
-    
+
 if not ERROR:
     BUS_NAME = 'org.emesene.Service'
     OBJECT_PATH = '/org/emesene/Service'
@@ -44,7 +48,7 @@ if not ERROR:
         def __init__(self):
             self.__session = None
             self.__dbus_object = None
-            
+
         #Public methods
         def set_new_session(self, session):
             self.__session = session
@@ -52,17 +56,17 @@ if not ERROR:
                 self.__dbus_object.session = session
             else:
                 self.__setup()
-                
+
         def stop(self):
             self.__session.signals.status_change_succeed.unsubscribe(self.__on_status_changed)
             self.destroy_dbus_session()
-            
+
         #Private methods
         def __setup(self):
-            self.__start_dbus()          
+            self.__start_dbus()
             self.__session.signals.status_change_succeed.subscribe(self.__on_status_changed)
-       
-        
+
+
         def __start_dbus(self):
             '''Start dbus session'''
             self.__destroy_dbus_session()
@@ -71,21 +75,55 @@ if not ERROR:
             self.__dbus_object = EmeseneObject(self.__bus_name, OBJECT_PATH, self.__session)
 
         def __destroy_dbus_session(self):
-            '''Destroy current dbus session'''     
+            '''Destroy current dbus session'''
             if self.__dbus_object:
                 try:
                     dbus.service.Object.remove_from_connection(self.__dbus_object)
                 except AttributeError:
                     pass
                 self.__dbus_object = None
-                
+
         #Callback functions
         def __on_status_changed(self, status):
              self.__dbus_object.status_changed(status)
-                
-                
-    extension.register('external api', DBusController) 
-    
+
+
+    extension.register('external api', DBusController)
+
+    class EmeseneObject(dbus.service.Object):
+        """
+        The object that is exported via DBUS
+        """
+        def __init__(self, bus_name, object_path, session):
+            try:
+                dbus.service.Object.__init__(self, bus_name, object_path)
+            except Exception, ex:
+                print 'Emesene DBUS error: %s' % str(ex)
+
+            self.__session = session
+
+        def get_session(self):
+            return self.__session
+
+        def set_session(self, session):
+            self.__session = session
+
+        session = property(get_session, set_session)
+
+        #Methods
+        @dbus.service.method(BUS_NAME)
+        def get_status(self):
+            return self.session.account.status
+
+        @dbus.service.method(BUS_NAME, 'i')
+        def set_status(self, status):
+            self.session.add_action(Action.ACTION_CHANGE_STATUS, (status,))
+
+        #Signals
+        @dbus.service.signal(BUS_NAME, 'i')
+        def status_changed(self, status):
+            pass
+
 else: #ERROR
     class DummyExternalAPI(object):
         provides=('external api', )
@@ -93,39 +131,6 @@ else: #ERROR
             pass
         def set_new_session(self, session):
             pass
-            
-    extension.register('external api', DummyExternalAPI)
-              
-class EmeseneObject(dbus.service.Object):
-    """
-    The object that is exported via DBUS  
-    """
-    def __init__(self, bus_name, object_path, session):
-        try:
-            dbus.service.Object.__init__(self, bus_name, object_path)
-        except Exception, ex:
-            print 'Emesene DBUS error: %s' % str(ex)
-            
-        self.__session = session
-        
-    def get_session(self):
-        return self.__session
-        
-    def set_session(self, session):
-        self.__session = session
-        
-    session = property(get_session, set_session)
 
-    #Methods
-    @dbus.service.method(BUS_NAME)
-    def get_status(self):
-        return self.session.account.status
-    
-    @dbus.service.method(BUS_NAME, 'i')
-    def set_status(self, status):
-        self.session.add_action(Action.ACTION_CHANGE_STATUS, (status,))
-            
-    #Signals
-    @dbus.service.signal(BUS_NAME, 'i')
-    def status_changed(self, status):
-        pass
+    extension.register('external api', DummyExternalAPI)
+
