@@ -197,15 +197,15 @@ class LoginBase(gtk.Alignment):
 
         al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.0)
-        al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
-            yscale=0.2)
+        al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.1,
+            yscale=0.1)
         al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
             yscale=0.0)
         al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
             yscale=0.2)
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2)
         al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.0)
+            yscale=0.3)
 
         al_label_timer.add(self.label_timer)
         al_throbber.add(self.throbber)
@@ -219,13 +219,16 @@ class LoginBase(gtk.Alignment):
         vbox_far_bottom = gtk.VBox()
 
         vbox_bottom = gtk.VBox(True)
+        vbox_content.pack_start(gtk.Label(""), True, True)
         vbox_content.pack_start(al_account, True, False)
+        vbox_content.pack_start(gtk.Label(""), True, True)
         vbox_content.pack_start(al_vbox_entries, False)
         vbox_content.pack_start(al_vbox_remember, True, False)
         vbox_bottom.pack_start(al_label_timer, True, False)
         vbox_bottom.pack_start(al_throbber, False)
         vbox_bottom.pack_start(al_button)
         vbox_content.pack_start(vbox_bottom)
+        vbox_content.pack_start(gtk.Label(""), True, True)
 
         vbox.pack_start(self.nicebar, False)
         vbox.pack_start(vbox_top)
