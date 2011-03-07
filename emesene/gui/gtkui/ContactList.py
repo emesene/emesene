@@ -622,6 +622,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
     def update_group(self, group):
         '''update the data of group'''
+
         try:
             weight = int(self.session.config.d_weights.get(group.identifier, 0))
         except ValueError:
@@ -631,7 +632,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         for row in self._model:
             obj = row[1]
-            if type(obj) == e3.Group and obj.name == group.name:
+            if type(obj) == e3.Group and obj.identifier == group.identifier:
                 if group.name in self.group_state:
                     state = self.group_state[group.name]
                     childpath = self._model.get_path(row.iter)
