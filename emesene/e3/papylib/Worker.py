@@ -193,7 +193,7 @@ class Worker(e3.base.Worker, papyon.Client):
                 # Add to the pending contacts
                 tmp_cont = e3.base.Contact(contact.account, contact.id, \
                             contact.display_name, contact.personal_message, \
-                            STATUS_PAPY_TO_E3[contact.presence], '', \
+                            STATUS_PAPY_TO_E3[contact.presence], contact.display_name, \
                             (papyon.profile.Membership.BLOCK & contact.memberships))
                 self.session.contacts.pending[contact.account] = tmp_cont
                 continue
@@ -964,8 +964,10 @@ class Worker(e3.base.Worker, papyon.Client):
         account = contact.account
         old_nick = contact.nick
         if alias != "":
+            contact.alias = new_alias
             contact.nick = new_alias
         else:
+            contact.alias = ""
             contact.nick = papycontact.display_name
 
         self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED, account, \
