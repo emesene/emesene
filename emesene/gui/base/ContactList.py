@@ -334,8 +334,7 @@ class ContactList(object):
         # + BLOCKED
         # + NL
         '''
-        display_name, message = escaped_information
-        nick = display_name
+        display_name, nick, message = escaped_information
 
         #TODO: fix those "no-more-color" with msgplus codes, '&#173;'?
         def fix_plus(text):

@@ -275,7 +275,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
     def _markup_escape_contact(self, contact):
         '''return contact with escaped markup'''
-        return gobject.markup_escape_text(contact.nick), \
+        return gobject.markup_escape_text(contact.display_name), \
+            gobject.markup_escape_text(contact.nick), \
             gobject.markup_escape_text(contact.message)
 
     # overrided methods
