@@ -38,7 +38,8 @@ except ImportError:
 try:
     func = getattr(appindicator.Indicator, "set_icon_theme_path")
 except AttributeError:
-    raise ImportError
+    if not HASMESSAGINGMENU:
+        raise ImportError
 
 class Indicator(appindicator.Indicator):
     """

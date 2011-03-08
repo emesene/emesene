@@ -74,6 +74,15 @@ class MessagingMenu(BaseTray):
         if arg:
             return
 
+        for key in self.r_indicator_dict.keys():
+            ind = self.r_indicator_dict[key]
+            if ind is not None:
+                ind.hide()
+            if self.indicator_dict[ind] is not None:
+                del self.indicator_dict[ind]
+            if self.r_indicator_dict[key] is not None:
+                del self.r_indicator_dict[key]
+
         if self.signals_have_been_connected:
             self.handler.session.signals.conv_message.unsubscribe(
                 self._on_message)
