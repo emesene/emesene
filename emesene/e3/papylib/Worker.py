@@ -211,9 +211,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _add_contact(self, papycontact):
         ''' helper method to add a contact to the (gui) contact list '''
         alias = papycontact.infos.get(papyon.service.description.AB.constants.ContactGeneral.ANNOTATIONS, {}).\
-                     get(papyon.service.description.AB.constants.ContactAnnotations.NICKNAME, None)
-        if alias == "" or alias is None:
-            alias = papycontact.display_name
+                     get(papyon.service.description.AB.constants.ContactAnnotations.NICKNAME, "")
         alias = unicode(alias, 'utf-8')
         contact = e3.base.Contact(papycontact.account, papycontact.id, \
             papycontact.display_name, papycontact.personal_message, \
