@@ -36,6 +36,7 @@ class FileTransfer(object):
         self.received_data = 0
 
         self.time_start = 0
+        self.time_finished = 0
 
     def __str__(self):
         '''return a string representation of a file transfer'''
@@ -58,12 +59,14 @@ class FileTransfer(object):
 
     def get_speed(self):
         ''' returns the average speed of the transfer '''
-        if self.state is FileTransfer.WAITING:
+        if self.state is FileTransfer.WAITING or self.get_time() == 0:
             return 0
         return (self.received_data / self.get_time())
 
     def get_time(self):
         ''' returns the elapsed time since the start of the transfer '''
-        if self.received_data:
+        if self.state in (FileTransfer.RECEIVED, FileTransfer.FAILED):
+            return (self.time_finished - self.time_start)
+        elif self.received_data:
             return (time.time() - self.time_start)
         return 0

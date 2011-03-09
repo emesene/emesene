@@ -20,9 +20,13 @@
 import gtk
 import pango
 import gobject
+import extension
+import time
 
-import e3.base
 import gui
+
+import hashlib
+import tempfile
 
 class FileTransferWidget(gtk.HBox):
     '''this class represents the ui widget for one filetransfer'''
@@ -68,6 +72,8 @@ class FileTransferWidget(gtk.HBox):
         self.show_all()
         self.tooltip = FileTransferTooltip(self.event_box, self.transfer)
 
+        self.notifier = extension.get_default('notificationGUI')
+
         self.event_box.connect('event', self._on_progressbar_event)
 
         self.do_update_progress()
@@ -89,6 +95,10 @@ class FileTransferWidget(gtk.HBox):
 
     def _on_menu_folder_clicked(self, widget):
         self.handler.opendir()
+
+    def accepted(self):
+        ''' called when the other party accepts our transfer '''
+        self.handler.accepted()
 
     def finished(self):
         ''' sets the transfer state to finished '''
@@ -115,13 +125,15 @@ class FileTransferWidget(gtk.HBox):
 
         self.buttons = []
 
-        if state == self.transfer.WAITING and self.transfer.sender != 'Me':
+        if state == self.transfer.WAITING and self.transfer.sender != 'Me':        
             button = gtk.Button(None, None)
             button.set_image(self.__get_button_img(gtk.STOCK_APPLY))
             button.connect('clicked', self._on_accept_clicked)
             self.buttons.append(button)
 
         if state in (self.transfer.RECEIVED, self.transfer.FAILED):
+            self.transfer.time_finished = time.time()
+
             button = gtk.Button(None, None)
             button.set_image(self.__get_button_img(gtk.STOCK_CLEAR))
             button.connect('clicked', self._on_close_clicked)
@@ -214,6 +226,8 @@ class FileTransferTooltip(gtk.Window):
 
         self.pointer_is_over_widget = False
 
+        self.__fileprev=None
+
     def add_label(self, l_string, left, right, top, bottom, label = None):
         ''' adds a label to the widget '''
         if label == None:
@@ -237,12 +251,22 @@ class FileTransferTooltip(gtk.Window):
             return
 
         if self.transfer.preview is not None:
-            pixbuf = gtk.gdk.pixbuf_new_from_data(self.transfer.preview)
+            if(self.__fileprev==None):
+                self.__fileprev=tempfile.mkstemp(prefix=hashlib.md5(self.transfer.preview).hexdigest(), suffix=hashlib.md5(self.transfer.preview).hexdigest())[1]
+
+            tmpPrev = open( self.__fileprev, 'wb' )
+            tmpPrev.write(self.transfer.preview)
+            tmpPrev.close()
+            pixbuf = gtk.gdk.pixbuf_new_from_file(self.__fileprev)
         else:
-            pixbuf = None
+            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.transfer_success)
         #amsn sends a big. black preview? :S
-        if pixbuf and pixbuf.get_height() <= 96 and pixbuf.get_width() <= 96:
-            self.image.set_from_pixbuf(pixbuf)
+        if pixbuf:
+            if pixbuf.get_height() <= 96 and pixbuf.get_width() <= 96:
+                self.image.set_from_pixbuf(pixbuf)
+            else:
+                pixbuf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
+                self.image.set_from_pixbuf(pixbuf)
 
         # set the location of the tooltip
         x, y = self.find_position(o_coords, view.window)

@@ -24,7 +24,6 @@ import datetime
 import xml.sax.saxutils
 
 import parsers
-import gui
 import MarkupParser
 
 class AdiumTheme(object):

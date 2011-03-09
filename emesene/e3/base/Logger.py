@@ -543,7 +543,7 @@ class Logger(object):
 
     # utility methods
 
-    def add_event(self, event, status, payload, src, dest=None):
+    def add_event(self, event, status, payload, src, dest=None, ext_time=None):
         '''add an event on the fact and the dimensiones using the actual time'''
         id_event = self.insert_event(event)
         (id_src_info, id_src_acc) = self.insert_info(src.account, src.id,
@@ -556,8 +556,12 @@ class Logger(object):
             id_dest_info = None
             id_dest_acc = None
 
-        id_time = self.insert_time_now()
-        timestamp = time.time()
+        if ext_time:
+            pass
+            
+        else: 
+            id_time = self.insert_time_now()
+            timestamp = time.time()
 
         self.insert_fact_event(id_time, id_event, id_src_info, id_dest_info,
             id_src_acc, id_dest_acc, status, payload, timestamp)

@@ -16,7 +16,6 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys
 import gtk
 
 import gui
@@ -66,6 +65,7 @@ class Window(gtk.Window):
            proxy=None, use_http=None, session_id=None, cancel_clicked=False,
            no_autologin=False):
         '''draw the login window on the main window'''
+
         LoginWindow = extension.get_default('login window')
 
         self.content = LoginWindow(callback, on_preferences_changed,

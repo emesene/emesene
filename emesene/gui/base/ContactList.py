@@ -59,6 +59,9 @@ class ContactList(object):
             except ValueError:
                 self.group_state[group] = False
 
+        self.session.config.subscribe(self._on_avatarssize_changed,
+            'i_avatar_size')
+
         self.avatar_size = self.session.config.get_or_set('i_avatar_size', 32)
         self.set_avatar_size(self.avatar_size)
 
@@ -123,6 +126,11 @@ class ContactList(object):
         self.session.signals.group_rename_succeed.subscribe(
             self._on_update_group)
         #TODO fix offline group on connection e add fail signals
+
+    def _on_avatarssize_changed(self, value):
+        '''callback called when config.i_avatar_size changes'''
+        self.set_avatar_size(value)
+        self.fill()
 
     def _on_contact_attr_changed(self, account, *args):
         '''called when an attribute of the contact changes
@@ -206,7 +214,6 @@ class ContactList(object):
             return
 
         self.update_group(group)
-
 
     def _get_order_by_status(self):
         '''return the value of order by status'''
@@ -309,7 +316,13 @@ class ContactList(object):
 
     filter_text = property(fget=_get_filter_text, fset=_set_filter_text)
 
-    def format_nick(self, contact):
+    def escape_tags(self, value):
+        '''break text that starts with [$ so a nick containing a format
+        won't be replaced
+        '''
+        return value.replace("[$", "[ $")
+
+    def format_nick(self, contact, escaped_information):
         '''replace the appearance of the template vars using the values of
         the contact
         # valid values:
@@ -319,49 +332,54 @@ class ContactList(object):
         # + STATUS
         # + MESSAGE
         # + BLOCKED
+        # + NL
         '''
+        display_name, nick, message = escaped_information
+
+        #TODO: fix those "no-more-color" with msgplus codes, '&#173;'?
+        def fix_plus(text):
+            escaped = self.escape_tags(text)
+            pos = escaped.find("\xc2\xb7")
+            tail = ""
+            irc = "#&@'"
+            flag = False
+            while pos != -1:
+                try:
+                    char = escaped[pos+2]
+                    if char in irc and escaped.count("\xc2\xb7"+char)%2 != 0:
+                        tail = "\xc2\xb7" + char + tail
+                        irc = irc.replace(char,"")
+                    flag = flag or char == "$"
+                except:
+                    pos = pos+1
+                pos = escaped.find("\xc2\xb7",pos+2)
+            if flag:
+                tail += "no-more-color"
+            return escaped + tail
+
         template = self.nick_template
+        template = template.replace('[$NL]', '\n')
         template = template.replace('[$NICK]',
-                self.escape_tags(contact.nick))
+                fix_plus(nick))
         template = template.replace('[$ACCOUNT]',
                 self.escape_tags(contact.account))
         template = template.replace('[$MESSAGE]',
-                self.escape_tags(contact.message))
+                fix_plus(message))
         template = template.replace('[$STATUS]',
                 self.escape_tags(e3.status.STATUS[contact.status]))
         template = template.replace('[$DISPLAY_NAME]',
-                self.escape_tags(contact.display_name))
+                fix_plus(display_name))
 
         blocked_text = ''
 
         if contact.blocked:
-            blocked_text = _('blocked')
+            blocked_text = _('Blocked')
 
         template = template.replace('[$BLOCKED]', blocked_text)
 
-
         return template
 
-    def _clean_format_tags(self, template):
-        '''remove the formating tags like [$b] since at this level we can't
-        format them, you have to override the format_ methods to do something
-        '''
-        template = template.replace('[$b]', '')
-        template = template.replace('[$/b]', '')
-        template = template.replace('[$i]', '')
-        template = template.replace('[$/i]', '')
-        template = template.replace('[$small]', '')
-        template = template.replace('[$/small]', '')
-
-        return template
-
-    def escape_tags(self, value):
-        '''break text that starts with [$ so a nick containing a format
-        won't be replaced
-        '''
-        return value.replace("[$", "[ $")
-
-    def format_group(self, group):
+    def format_group(self, group, escaped_name):
         '''replace the appearance of the template vars using the values of
         the group
         # valid values:
@@ -372,11 +390,16 @@ class ContactList(object):
         contacts = self.contacts.get_contacts(group.contacts)
         (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
-        template = template.replace('[$NAME]', self.escape_tags(group.name))
-        template = template.replace('[$ONLINE_COUNT]', str(online))
-        template = template.replace('[$TOTAL_COUNT]', str(total))
 
-        return self._clean_format_tags(template)
+        if group == self.offline_group or group == self.online_group:
+            template = template.replace('[$ONLINE_COUNT]', str(total))
+        else:
+            template = template.replace('[$ONLINE_COUNT]', str(online))
+
+        template = template.replace('[$TOTAL_COUNT]', str(total))
+        template = template.replace('[$NAME]', self.escape_tags(escaped_name))
+
+        return template
 
     def refilter(self):
         '''refilter the values according to the value of self.filter_text'''

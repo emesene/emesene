@@ -423,7 +423,7 @@ class MsnPlusMarkupMohrtutchy:
 
         '''replace the [b][/b] etc markup for pango and html markup'''
 
-        text = unicode(text,'utf8')
+        text = unicode(text,'utf8') if type(text) is not unicode else text
 
         text = text.replace\
             ('\xc2\xb7&amp;','\xc2\xb7&').replace('\xc2\xb7&quot;','\xc2\xb7"')\

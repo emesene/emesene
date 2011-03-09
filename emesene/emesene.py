@@ -37,19 +37,29 @@ log = logging.getLogger('emesene')
 
 import e3
 #from e3 import msn
-from e3 import jabber
 from e3 import dummy
 
 try:
+    from e3.common.DBus import DBusController
+except ImportError:
+    DBusController = None
+
+try:
     from gui import gtkui
-except Exception, e:
-    log.error('Cannot find/load (py)gtk: %s' % str(e))
+except Exception, exc:
+    log.error('Cannot find/load (py)gtk: %s' % str(exc))
+
+try:
+    from e3 import jabber
+except Exception, exc:
+    jabber = None
+    log.warning('Errors occurred while importing python-xmpp: %s' % str(exc))
 
 try:
     from e3 import papylib
 except Exception, exc:
     papylib = None
-    log.warning('Errors occurred on papyon importing: %s' % str(exc))
+    log.warning('Errors occurred while importing python-papyon: %s' % str(exc))
 
 from pluginmanager import get_pluginmanager
 import extension
@@ -125,7 +135,8 @@ class Controller(object):
         extension.category_register('session', dummy.Session, single_instance=True)
         #extension.category_register('session', msn.Session,
         #        single_instance=True)
-        extension.register('session', jabber.Session)
+        if jabber is not None:
+            extension.register('session', jabber.Session)
         extension.register('session', dummy.Session)
         #extension.register('session', msn.Session)
 
@@ -134,6 +145,14 @@ class Controller(object):
             extension.set_default('session', papylib.Session)
         else:
             extension.set_default('session', dummy.Session)
+
+        #DBus extension stuffs
+        if DBusController is not None:
+            extension.category_register('external api', DBusController)
+            extension.set_default('external api', DBusController)
+            self.dbus_ext = extension.get_and_instantiate('external api')
+        else:
+            self.dbus_ext = None
 
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
@@ -223,6 +242,10 @@ class Controller(object):
         signals.disconnected.subscribe(self.on_disconnected)
         signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
         signals.contact_added_you.subscribe(self.on_pending_contacts)
+
+        #let's start dbus
+        if self.dbus_ext is not None:
+            self.dbus_ext.set_new_session(self.session)
 
     def close_session(self, do_exit=True):
         '''close session'''
@@ -351,8 +374,7 @@ class Controller(object):
                 'renkoo.AdiumMessagesStyle')
         gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
 
-        last_avatar = self.session.config.get_or_set('last_avatar',
-            last_avatar_path)
+        self.session.config.get_or_set('last_avatar', last_avatar_path)
 
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
@@ -388,7 +410,7 @@ class Controller(object):
         self._save_login_dimensions()
         self._remove_subscriptions()
         self._new_session()
-        self.go_login()
+        self.go_login(cancel_clicked=True)
         self.window.content.clear_all()
         self.window.content.show_error(reason)
 
@@ -467,7 +489,7 @@ class Controller(object):
         '''
         if self.session is not None:
             self.session.quit()
-        self.go_login(cancel_clicked=True)
+        self.go_login(cancel_clicked=True, no_autologin=True)
 
     def on_pending_contacts(self):
         '''callback called when some contact is pending'''
@@ -579,7 +601,7 @@ class Controller(object):
         method called when the user selects disconnect
         '''
         self.close_session(False)
-        self.go_login(no_autologin=True)
+        self.go_login(cancel_clicked=True, no_autologin=True)
 
     def on_close(self):
         '''called on close'''
@@ -592,9 +614,10 @@ class Controller(object):
         if reconnect:
             self.on_reconnect(account)
         else:
-            self.go_login()
-            self.window.content.clear_all()
-            self.window.content.show_error(reason)
+            self.go_login(cancel_clicked=True, no_autologin=True)
+            if(reason != None):
+                self.window.content.clear_all()
+                self.window.content.show_error(reason)
 
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''

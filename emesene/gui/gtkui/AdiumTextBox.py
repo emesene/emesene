@@ -141,6 +141,8 @@ class OutputView(webkit.WebView):
             webbrowser.open_new_tab(href)
             return True
 
+        return False
+
 
 class OutputText(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the

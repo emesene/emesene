@@ -20,7 +20,6 @@
 import gtk
 import gobject
 
-import e3.base
 import extension
 
 class FileTransferBarWidget(gtk.HBox):
@@ -87,6 +86,12 @@ class FileTransferBarWidget(gtk.HBox):
     def update(self, transfer):
         ''' called when the bar needs to be updated '''
         tr = self.transfers[transfer]
+        tr.do_update_progress()
+
+    def accepted(self, transfer):
+        ''' called when the bar needs to be updated '''
+        tr = self.transfers[transfer]
+        tr.accepted()
         tr.do_update_progress()
 
     def finished(self, transfer):

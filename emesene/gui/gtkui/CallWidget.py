@@ -17,13 +17,9 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
 import gtk
-import gobject
 
 import gui
-import utils
-import extension
 
 class CallWindow(gtk.Window):
     '''A dialog to choose an avatar'''

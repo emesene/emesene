@@ -29,6 +29,12 @@ import PluginWindow
 import logging
 log = logging.getLogger('gtkui.Preferences')
 
+try:
+    from enchant_dicts import list_dicts
+except:
+    def list_dicts():
+        return []
+
 # TODO: consider moving to nicer icons than stock ones.
 LIST = [
     {'stock_id' : gtk.STOCK_FULLSCREEN,'text' : _('Interface')},
@@ -216,7 +222,7 @@ class BaseTable(gtk.Table):
         if increment_current_row:
             self.current_row += 1
 
-    def append_entry_default(self, text, property_name, default):
+    def append_entry_default(self, text, format_type, property_name, default):
         """append a row with a label and a entry, set the value to the
         value of property_name if exists, if not set it to default.
          Add a reset button that sets the value to the default"""
@@ -231,8 +237,11 @@ class BaseTable(gtk.Table):
             set the value of the property to the new value"""
             self.set_attr(property_name, entry.get_text())
 
+        def on_help_clicked(button, format_type):
+            """called when the help button is clicked"""
+            extension.get_default('dialog').contactlist_format_help(format_type)
+
         hbox = gtk.HBox(spacing=4)
-        hbox.set_homogeneous(True)
         label = gtk.Label(text)
         label.set_alignment(0.0, 0.5)
         text = self.get_attr(property_name)
@@ -240,14 +249,26 @@ class BaseTable(gtk.Table):
         entry = gtk.Entry()
         entry.set_text(text)
 
-        reset = gtk.Button(stock=gtk.STOCK_CLEAR)
+        reset = gtk.Button()
+        entry_help = gtk.Button()
 
-        hbox.pack_start(label, True, True)
+        hbox.pack_start(label)
         hbox.pack_start(entry, False)
         hbox.pack_start(reset, False)
+        hbox.pack_start(entry_help, False)
 
+        reset_image = gtk.image_new_from_stock(gtk.STOCK_CLEAR,
+                                               gtk.ICON_SIZE_MENU)
+        reset.set_label(_('Reset'))
+        reset.set_image(reset_image)
         reset.connect('clicked', on_reset_clicked, entry, default)
         entry.connect('changed', on_entry_changed, property_name)
+
+        help_image = gtk.image_new_from_stock(gtk.STOCK_HELP,
+                                              gtk.ICON_SIZE_MENU)
+        entry_help.set_image(help_image)
+        entry_help.connect('clicked', on_help_clicked, format_type)
+
         self.append_row(hbox, None)
 
     def append_check(self, text, property_name, row=None):
@@ -261,7 +282,7 @@ class BaseTable(gtk.Table):
         self.append_row(widget, row)
         return widget
 
-    def append_range(self, text, property_name, min_val, max_val, is_int=True):
+    def append_range(self, text, property_name, min_val, max_val,is_int=True):
         """append a row with a scale to select an integer value between
         min and max
         """
@@ -284,15 +305,19 @@ class BaseTable(gtk.Table):
         hbox.pack_start(label, True, True)
         hbox.pack_start(scale, False)
 
-        scale.connect('value-changed', self.on_range_changed, property_name,
+        scale.connect('button_release_event', self.on_range_changed, property_name,
                 is_int)
+
         self.append_row(hbox, None)
 
-    def append_combo(self, text, getter, property_name):
+    def append_combo(self, text, getter, property_name,values=None):
         """append a row with a check box with text as label and
         set the check state with default
-        """
-        default = self.get_attr(property_name)
+        """      
+        if values:
+            default = getter()[values.index(self.get_attr(property_name))]
+        else:
+            default = self.get_attr(property_name)
         hbox = gtk.HBox()
         hbox.set_homogeneous(True)
         label = gtk.Label(text)
@@ -313,7 +338,7 @@ class BaseTable(gtk.Table):
         hbox.pack_start(label, True, True)
         hbox.pack_start(combo, False)
 
-        combo.connect('changed', self.on_combo_changed, property_name)
+        combo.connect('changed', self.on_combo_changed, property_name, values)
         self.append_row(hbox, None)
 
     def append_markup(self, text):
@@ -329,12 +354,15 @@ class BaseTable(gtk.Table):
 
         self.append_row(hbox, None)
 
-    def on_combo_changed(self, combo, property_name):
+    def on_combo_changed(self, combo, property_name, values=None):
         """callback called when the selection of the combo changed
         """
-        self.set_attr(property_name, combo.get_active_text())
+        if not(values):
+            self.set_attr(property_name, combo.get_active_text())
+        else:
+            self.set_attr(property_name, values[combo.get_active()])
 
-    def on_range_changed(self, scale, property_name, is_int):
+    def on_range_changed(self, scale, widget, property_name, is_int):
         """callback called when the selection of the combo changed
         """
         value = scale.get_value()
@@ -386,6 +414,12 @@ class BaseTable(gtk.Table):
     def on_update(self):
         pass
 
+    def on_redraw_main_screen(self, button):
+        """called when the Redraw main screen button is clicked"""
+        self.session.save_config()
+        self.session.signals.login_succeed.emit()
+        self.session.signals.contact_list_ready.emit()
+
 class Interface(BaseTable):
     """the panel to display/modify the config related to the gui
     """
@@ -393,8 +427,22 @@ class Interface(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 4, 1)
+        BaseTable.__init__(self, 4, 2)
         self.session = session
+
+        langs = list_dicts()
+
+        self.spell_lang = self.session.config.get_or_set("spell_lang", "en")
+        self.lang_menu = gtk.combo_box_new_text()
+        self.lang_menu.connect("changed", self._on_lang_combo_change)
+
+        index = 0
+        for lang in langs:
+            self.lang_menu.append_text(lang)
+            if lang == self.spell_lang:
+                self.lang_menu.set_active(index)
+            index += 1
+
         self.append_markup('<b>'+_('Main window:')+'</b>')
         self.append_check(_('Show user panel'),
             'session.config.b_show_userpanel')
@@ -402,8 +450,11 @@ class Interface(BaseTable):
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
         self.session.config.get_or_set('b_conversation_tabs', True)
+        self.session.config.get_or_set('i_tab_position', 0)
         self.append_check(_('Tabbed Conversations'),
                 'session.config.b_conversation_tabs')
+        self.append_combo(_('Tab position'),self.get_tab_positions,
+                'session.config.i_tab_position',range(4))
         self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
         self.append_check(_('Start minimized/iconified'), 'session.config.b_conv_minimized')
         self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
@@ -421,6 +472,7 @@ class Interface(BaseTable):
             'session.config.b_allow_auto_scroll')
         self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
             'session.config.b_enable_spell_check')
+        self.attach(self.lang_menu, 2, 3, 13, 14) 
         self.append_check(_('Show avatars in taskbar instead of status icons'), 
             'session.config.b_show_avatar_in_taskbar')
 
@@ -428,8 +480,23 @@ class Interface(BaseTable):
             'session.config.i_avatar_size', 18, 64)
         self.append_range(_('Conversation avatar size'),
             'session.config.i_conv_avatar_size', 18, 128)
+        
+        self.session.config.subscribe(self._on_spell_change,
+            'b_enable_spell_check')
+        
         self.show_all()
 
+    def _on_spell_change(self, value):
+        if value:
+            self.lang_menu.set_sensitive(True)
+        else:
+            self.lang_menu.set_sensitive(False)
+
+    def _on_lang_combo_change(self, combo):
+        self.session.config.spell_lang = combo.get_active_text()
+
+    def get_tab_positions(self):
+        return [_("Top"),_("Bottom"),_("Left"),_("Right")]
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
     """
@@ -500,7 +567,7 @@ class Theme(BaseTable):
 
         ContactList = extension.get_default('contact list')
 
-        adium_theme = self.session.config.get_or_set('adium_theme', 'renkoo')
+        self.session.config.get_or_set('adium_theme', 'renkoo')
 
         self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
@@ -510,10 +577,13 @@ class Theme(BaseTable):
             'session.config.emote_theme')
         self.append_combo(_('Adium theme'), gui.theme.get_adium_themes,
             'session.config.adium_theme')
-        self.append_entry_default(_('Nick format'),
+        self.append_entry_default(_('Nick format'), 'nick',
                 'session.config.nick_template', ContactList.NICK_TPL)
-        self.append_entry_default(_('Group format'),
+        self.append_entry_default(_('Group format'), 'group',
                 'session.config.group_template', ContactList.GROUP_TPL)
+
+        self.add_button(_('Apply'), 0, 7,
+                self.on_redraw_main_screen, 0, 0)
 
 class Extension(BaseTable):
     """the panel to display/modify the config related to the extensions
@@ -555,13 +625,7 @@ class Extension(BaseTable):
         self.add_label(self.website_info, 1, 6, True)
 
         self.add_button(_('Redraw main screen'), 1, 7,
-                self._on_redraw_main_screen, 0, 0)
-
-    def _on_redraw_main_screen(self, button):
-        """called when the Redraw main screen button is clicked"""
-        self.session.save_config()
-        self.session.signals.login_succeed.emit()
-        self.session.signals.contact_list_ready.emit()
+                self.on_redraw_main_screen, 0, 0)
 
     def _get_categories(self):
         ''' get available categories'''
@@ -617,7 +681,7 @@ class Extension(BaseTable):
         if not extension.set_default_by_id(category, identifier):
             # TODO: revert the selection to the previous selected extension
             log.warning(_('Could not set %s as default extension for %s') % \
-                (extension_id, category))
+                (extension_index, category))
             return
         else:
             self.session.config.d_extensions[category] = identifier

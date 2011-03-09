@@ -23,7 +23,7 @@ import e3
 import gui
 import MarkupParser
 
-from e3.common import RingBuffer
+from e3.common.RingBuffer import RingBuffer
 
 import logging
 log = logging.getLogger('gui.base.Conversation')
@@ -49,7 +49,7 @@ class Conversation(object):
         self._message_waiting = False
 
         buffer_size = session.config.get_or_set("i_msg_history_size", 5)
-        self.messages = RingBuffer(buffer_size)
+        self.messages = RingBuffer(max=buffer_size)
         self.message_offset = 0
 
         if members is None:
@@ -458,7 +458,6 @@ class Conversation(object):
 
         if no message in the buffer return an empty string
         """
-        index = self.message_offset
         self.message_offset += change
 
         try:

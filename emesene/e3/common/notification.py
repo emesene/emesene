@@ -50,17 +50,45 @@ class Notification():
                 self._on_message)
             self.session.signals.contact_attr_changed.subscribe(
                 self._on_contact_attr_changed)
+            self.session.signals.mail_received.subscribe(
+                self._on_mail_received)
+            self.session.signals.filetransfer_completed.subscribe(
+                self._on_filetransfer_completed)
+            self.session.signals.filetransfer_canceled.subscribe(
+                self._on_filetransfer_canceled)
+            self.session.signals.filetransfer_invitation.subscribe(
+                self._on_filetransfer_invitation)
+
+      
 
         self.notify_online = False
         self.last_online = None
+
+    def _on_filetransfer_completed(self,args):
+        self.notifier("File transfer successful", "", 'notification-message-email', 'file-transf-completed')
+
+    def _on_filetransfer_canceled(self,args):
+        self.notifier("File transfer canceled", "", 'notification-message-email', 'file-transf-canceled')
+
+    def _on_filetransfer_invitation(self, arg1, arg2):
+
+        if isinstance(arg1.sender, str): # prevent notifying when we send a file
+            return
+
+        contact = self.session.contacts.get(arg1.sender.account)
+        self._notify(contact, contact.nick, "File transfer invitation")
+        
+    def _on_mail_received(self, message):
+        ''' called when a new mail is received '''
+        self.notifier("New mail from %s" % (message.address), message._subject, 'notification-message-email','mail-received')
 
     def _on_message(self, cid, account, msgobj, cedict={}):
         """
         This is called when a new message arrives to a user.
         """
-        #TODO don't notify if the conversation is on focus
-        if self.session.config.b_notify_receive_message:
-            contact = self.session.contacts.get(account)
+        if self.session.config.b_notify_receive_message and \
+            not(self.session.conversations[cid].get_parent().is_active()):
+            contact = self.session.contacts.get(account)            
             if msgobj.type == Message.TYPE_NUDGE:
                 # The message needs to be translated.
                 self._notify(contact, contact.nick , _('%s just sent you a nudge!') % (contact.nick,))
@@ -102,10 +130,10 @@ class Notification():
         """
         This creates and shows the nofification
         """
-        if contact.picture is not None:
+        if contact.picture is not None and contact.picture != "":
             uri = "file://" + contact.picture
         else:
-            uri = "notification-message-IM"
+            uri = 'notification-message-im'
 
-        self.notifier(title, text, uri)
+        self.notifier(title, text, uri,'message-im')
 

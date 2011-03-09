@@ -113,7 +113,17 @@ except ImportError:
         opener.wait()
         return opener.poll() == 0
 
-import commands
+# function copied from commands to allow forward compatibility with python 3
+def mkarg(x):
+    if '\'' not in x:
+        return ' \'' + x + '\''
+    s = ' "'
+    for c in x:
+        if c in '\\$"`':
+            s = s + '\\'
+        s = s + c
+    s = s + '"'
+    return s
 
 # Private functions.
 
@@ -247,7 +257,7 @@ def open(url, desktop=None, wait=0):
     desktop_in_use = use_desktop(desktop)
 
     if desktop_in_use == "standard":
-        arg = "".join([os.environ["DESKTOP_LAUNCH"], commands.mkarg(url)])
+        arg = "".join([os.environ["DESKTOP_LAUNCH"], mkarg(url)])
         return _run(arg, 1, wait)
 
     elif desktop_in_use == "Windows":

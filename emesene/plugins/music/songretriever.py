@@ -2,6 +2,7 @@
 the status and song of a music player.'''
 
 import os
+import sys
 import urllib
 import glib
 import Preferences

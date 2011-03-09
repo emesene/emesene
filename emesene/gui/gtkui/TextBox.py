@@ -180,7 +180,8 @@ class InputText(TextBox):
         try:
             import gtkspell
             if self.config.b_enable_spell_check:
-                self.spell_checker = gtkspell.Spell(self._textbox)
+                spell_lang = self.config.get_or_set("spell_lang", "en")
+                self.spell_checker = gtkspell.Spell(self._textbox, spell_lang)
         except Exception, e:
             log.warning("Could not load spell-check: %s" % e)
 

@@ -23,10 +23,8 @@ import pango
 import cairo
 import gobject
 
-import gui
 from gui.base import Plus
 import extension
-import utils
 import Parser
 
 import logging
@@ -38,6 +36,15 @@ def replace_markup(markup, arg=None):
 
     markup = markup.replace("[$small]", "<small>")
     markup = markup.replace("[$/small]", "</small>")
+
+    if markup.count("[$COLOR=") > 0:
+        hexcolor = color = markup.split("[$COLOR=")[1].split("]")[0]
+        if color.count("#") == 0:
+            hexcolor = "#" + color
+
+        markup = markup.replace("[$COLOR=" + color + "]", \
+                "<span foreground='" + hexcolor + "'>")
+        markup = markup.replace("[$/COLOR]", "</span>")
 
     markup = markup.replace("[$b]", "<b>")
     markup = markup.replace("[$/b]", "</b>")
@@ -97,10 +104,12 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         if not self._style_handler_id:
             self._style_handler_id = widget.connect('style-set',
                     self._style_set)
-
+        
         layout = self.get_layout(widget)
-        width, height = layout.get_pixel_size()
-
+        if layout:
+            width, height = layout.get_pixel_size()
+        else:
+            width, height = [0,0]
         return (0, 0, -1, height + (self.ypad * 2))
 
     def do_get_property(self, prop):
@@ -128,9 +137,10 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         width -= self.xpad
         ctx = win.cairo_create()
         layout = self.get_layout(widget)
-        layout.set_width(width  * pango.SCALE)
-        layout.set_in_color_override_mode(flags in self._selected_flgs)
-        layout.draw(ctx, (x_coord, y_coord, width, height))
+        if layout:
+            layout.set_width(width  * pango.SCALE)
+            layout.set_in_color_override_mode(flags in self._selected_flgs)
+            layout.draw(ctx, (x_coord, y_coord, width, height))
 
     def get_layout(self, widget):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
@@ -679,7 +689,7 @@ class SmileyLayout(pango.Layout):
             except Exception, error:
                 log.error("Error when painting smilies: %s" % error)
 
-class SmileyLabel(gtk.Widget):
+class SmileyLabel(gtk.Label):
     '''Label with smiley support. '''
 
     __gsignals__ = { 'size_request' : 'override',
@@ -856,7 +866,8 @@ class AvatarRenderer(gtk.GenericCellRenderer):
 
         return (0, 0,  width, height)
 
-    def func(self, model, path, iter, (image, tree)):
+    def func(self, model, path, iter, image_and_tree):
+      image, tree = image_and_tree
       if model.get_value(iter, 0) == image:
          self.redraw = 1
          cell_area = tree.get_cell_area(path, tree.get_column(1))
@@ -881,7 +892,6 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         """Prepare rendering setting for avatar"""
         xpad, ypad = self._get_padding()
         x, y, width, height = cell_area
-        cell = (x, y, width, height)
         ctx = window.cairo_create()
         ctx.translate(x, y)
 

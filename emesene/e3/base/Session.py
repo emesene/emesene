@@ -45,6 +45,7 @@ class Session(object):
         self._account = None
         self.contacts = None
         self.logger = None
+        self.conversations = None
         self.extras = {}
 
         self.events = Queue.Queue()
@@ -94,7 +95,10 @@ class Session(object):
         config_path = self.config_dir.get_path('config')
 
         if config_path:
-            self.config.save(config_path)
+            try:
+                self.config.save(config_path)
+            except:
+                print "Error on save configuration"
 
     def load_config(self):
         '''load the config of the session'''
@@ -205,7 +209,7 @@ class Session(object):
         '''set the preferences of the session to preferences, that is a
         dict containing key:value pairs where the keys are the preference name
         and value is the new value of that preference'''
-        self.add_action(Action.ACTION_SET_PREFERENCE, (preferences,))
+        self.add_action(Action.ACTION_SET_PREFERENCES, (preferences,))
 
     def send_message(self, cid, text, style=None):
         '''send a common message'''

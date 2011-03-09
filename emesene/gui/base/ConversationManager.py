@@ -17,7 +17,6 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import e3
-import MarkupParser
 
 import logging
 log = logging.getLogger('gui.base.ConversationManager')
@@ -29,7 +28,7 @@ class ConversationManager(object):
         '''class constructor'''
         self.session = session
         self.on_last_close = on_last_close
-
+        
         self.conversations = {}
         if self.session:
             self.session.signals.conv_message.subscribe(
@@ -50,7 +49,8 @@ class ConversationManager(object):
             #    self._on_contact_attr_changed)
             self.session.signals.p2p_finished.subscribe(
                 self._on_p2p_finished)
-
+         
+        self.session.conversations = self.conversations
     def add_new_conversation(self, session, cid, members):
         """
         create and append a new conversation

@@ -48,12 +48,17 @@ class ContactList(gui.ContactList, gtk.TreeView):
         gui.ContactList.__init__(self, session, dialog)
         gtk.TreeView.__init__(self)
 
+        self.set_enable_search(False) #we enable our searching widget with CTRL+F in MainWindow.py
+
         self.online_group = None # added
         self.online_group_iter = None # added
         self.no_group = None
         self.no_group_iter = None
         self.offline_group = None
         self.offline_group_iter = None
+        self.enable_model_drag_source(gtk.gdk.BUTTON1_MASK,[
+            ('text/html',0,1),
+            ('text/plain',0,2)],gtk.gdk.ACTION_COPY)
 
         if self.session.config.d_weights is None:
             self.session.config.d_weights = {}
@@ -115,6 +120,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.connect('button-release-event' , self._on_button_press_event)
         self.connect('row-expanded' , self._on_expand)
         self.connect('row-collapsed' , self._on_collapse)
+        self.connect('drag-data-get', self._on_drag_data_get)
 
     def _on_expand(self, treeview, iter_, path):
         group = self.model[path][1]
@@ -132,21 +138,27 @@ class ContactList(gui.ContactList, gtk.TreeView):
             try:
                 animation = gtk.gdk.PixbufAnimation(contact.picture)
             except gobject.GError:
-                pix = utils.safe_gtk_pixbuf_load(gui.theme.user,
+                pix = utils.gtk_pixbuf_load(gui.theme.user,
                         (self.avatar_size, self.avatar_size))
                 picture = gtk.image_new_from_pixbuf(pix)
                 return picture
 
             if animation.is_static_image():
-                pix = utils.safe_gtk_pixbuf_load(contact.picture,
+                pix = utils.gtk_pixbuf_load(contact.picture,
                         (self.avatar_size, self.avatar_size))
+                if bool(contact.blocked)==True:
+                    pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
+                    utils.simple_images_overlap(pix,pixbufblock,-pixbufblock.props.width,-pixbufblock.props.width)
                 picture = gtk.image_new_from_pixbuf(pix)
             else:
                 picture = gtk.image_new_from_animation(animation)
 
         else:
-            pix = utils.safe_gtk_pixbuf_load(gui.theme.user,
+            pix = utils.gtk_pixbuf_load(gui.theme.user,
                         (self.avatar_size, self.avatar_size))
+            if bool(contact.blocked)==True:
+                pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
+                utils.simple_images_overlap(pix,pixbufblock,-pixbufblock.props.width,-pixbufblock.props.width)
             picture = gtk.image_new_from_pixbuf(pix)
 
         return picture
@@ -257,6 +269,16 @@ class ContactList(gui.ContactList, gtk.TreeView):
             else:
                 log.debug('empty paths?')
 
+    def _markup_escape_group(self, group):
+        '''return group with escaped markup'''
+        return gobject.markup_escape_text(group.name)
+
+    def _markup_escape_contact(self, contact):
+        '''return contact with escaped markup'''
+        return gobject.markup_escape_text(contact.display_name), \
+            gobject.markup_escape_text(contact.nick), \
+            gobject.markup_escape_text(contact.message)
+
     # overrided methods
     def refilter(self):
         '''refilter the values according to the value of self.filter_text'''
@@ -321,8 +343,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.session.config.d_weights[group.identifier] = weight
 
-        group_data = (None, group, self.format_group(group), False, None,
-            False, weight, special)
+        group_data = (None, group, self.format_group(group, self._markup_escape_group(group)),
+            False, None, False, weight, special)
 
         for row in self._model:
             obj = row[1]
@@ -354,8 +376,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         offline = contact.status == e3.status.OFFLINE
         is_online  = not offline
 
-        contact_data = (self._get_contact_pixbuf_or_default(contact), 
-            contact, self.format_nick(contact), True,
+        contact_data = (self._get_contact_pixbuf_or_default(contact),
+            contact, self.format_nick(contact, self._markup_escape_contact(contact)), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
             weight, False, offline)
 
@@ -518,7 +540,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         online  = not offline
 
         contact_data = (self._get_contact_pixbuf_or_default(contact),
-            contact, self.format_nick(contact), True,
+            contact, self.format_nick(contact, self._markup_escape_contact(contact)), True,
             utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
             weight, False, offline)
 
@@ -570,21 +592,25 @@ class ContactList(gui.ContactList, gtk.TreeView):
         if self.no_group_iter is None:
             return
 
-        group_data = (None, self.no_group, self.format_group(self.no_group), False, None,
-            0, True, False)
+        group_data = (None, self.no_group,
+            self.format_group(self.no_group, self._markup_escape_group(self.no_group)),
+            False, None, 0, True, False)
         self._model[self.no_group_iter] = group_data
         self.update_group(self.no_group)
 
     def update_online_group(self):
         '''update the special "Online" group '''
-        group_data = (None, self.online_group, self.format_group(self.online_group), False, None, 0, True, False)
+        group_data = (None, self.online_group,
+            self.format_group(self.online_group, self._markup_escape_group(self.online_group)),
+            False, None, 0, True, False)
         self._model[self.online_group_iter] = group_data
         self.update_group(self.online_group)
 
     def update_offline_group(self):
         '''update the special "Offline" group'''
-        group_data = (None, self.offline_group, self.format_group(self.offline_group), False, None,
-            0, True, False)
+        group_data = (None, self.offline_group,
+            self.format_group(self.offline_group, self._markup_escape_group(self.offline_group)),
+            False, None, 0, True, False)
         self._model[self.offline_group_iter] = group_data
         self.update_group(self.offline_group)
 
@@ -597,6 +623,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
     def update_group(self, group):
         '''update the data of group'''
+
         try:
             weight = int(self.session.config.d_weights.get(group.identifier, 0))
         except ValueError:
@@ -606,7 +633,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         for row in self._model:
             obj = row[1]
-            if type(obj) == e3.Group and obj.name == group.name:
+            if type(obj) == e3.Group and obj.identifier == group.identifier:
                 if group.name in self.group_state:
                     state = self.group_state[group.name]
                     childpath = self._model.get_path(row.iter)
@@ -618,92 +645,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         else:
                             self.collapse_row(path)
 
-                group_data = (None, group, self.format_group(group), False, None,
-                    weight, row[6], False)
+                group_data = (None, group,
+                    self.format_group(group, self._markup_escape_group(group)),
+                    False, None, weight, row[6], False)
                 self._model[row.iter] = group_data
-
-
-    def format_nick(self, contact):
-        '''replace the appearance of the template vars using the values of
-        the contact
-        # valid values:
-        # + NICK
-        # + ACCOUNT
-        # + DISPLAY_NAME (alias if available, or nick if available or mail)
-        # + STATUS
-        # + MESSAGE
-        # + NL
-        '''
-        message = gobject.markup_escape_text(contact.message)
-        nick = gobject.markup_escape_text(contact.nick)
-        display_name = gobject.markup_escape_text(contact.display_name)
-
-        #TODO: fix those "no-more-color" with msgplus codes, '&#173;'?
-        def fix_plus(text):
-            escaped = self.escape_tags(text)
-            pos = escaped.find("\xc2\xb7")
-            tail = ""
-            irc = "#&@'"
-            flag = False
-            while pos != -1:
-                try:
-                    char = escaped[pos+2]
-                    if char in irc and escaped.count("\xc2\xb7"+char)%2 != 0:
-                        tail = "\xc2\xb7" + char + tail
-                        irc = irc.replace(char,"")
-                    flag = flag or char == "$"
-                except:
-                    pos = pos+1
-                pos = escaped.find("\xc2\xb7",pos+2)
-            if flag:
-                tail += "no-more-color"
-            return escaped + tail
-
-        template = self.nick_template
-        template = template.replace('[$NL]', '\n')
-        template = template.replace('[$NICK]',
-                fix_plus(nick))
-        template = template.replace('[$ACCOUNT]',
-                self.escape_tags(contact.account))
-        template = template.replace('[$MESSAGE]',
-                fix_plus(message))
-        template = template.replace('[$STATUS]',
-                self.escape_tags(e3.status.STATUS[contact.status]))
-        template = template.replace('[$DISPLAY_NAME]',
-                fix_plus(display_name))
-        
-        blocked_text = ''
-
-        if contact.blocked:
-            blocked_text = _('Blocked')
-
-        template = template.replace('[$BLOCKED]', blocked_text)
-
-        return template
-
-    def format_group(self, group):
-        '''replace the appearance of the template vars using the values of
-        the group
-        # valid values:
-        # + NAME
-        # + ONLINE_COUNT
-        # + TOTAL_COUNT
-        '''
-        name = gobject.markup_escape_text(group.name)
-
-        contacts = self.contacts.get_contacts(group.contacts)
-        (online, total) = self.contacts.get_online_total_count(contacts)
-        template = self.group_template
-
-        if group == self.offline_group or group == self.online_group:
-            template = template.replace('[$ONLINE_COUNT]', str(total))
-        else:
-            template = template.replace('[$ONLINE_COUNT]', str(online))
-
-        template = template.replace('[$TOTAL_COUNT]', str(total))
-        template = template.replace('[$NAME]', self.escape_tags(group.name))
-
-        return template
 
     def set_avatar_size(self, size):
         """set the size of the avatars on the contact list
@@ -743,3 +688,24 @@ class ContactList(gui.ContactList, gtk.TreeView):
         elif len(contact2.groups) == 0:
             return 1
 
+    def _on_drag_data_get(self, widget, context, selection, target_id, etime):
+        if self.is_contact_selected():
+            account = self.get_contact_selected().account
+            display_name = self.get_contact_selected().display_name
+            
+            if selection.target == 'text/html':
+                formatter = gui.base.Plus.MsnPlusMarkupMohrtutchy() # - colors
+                formatter.isHtml = True
+
+                display_name = formatter.replaceMarkup(display_name)
+                display_name = gui.base.Plus.parse_emotes(display_name) # - emotes
+
+                for x in range(len(display_name)):
+                    if type(display_name[x]) is dict:
+                        display_name[x] = '<img src="file://%s" alt="%s">' %\
+                                (display_name[x]["src"], display_name[x]["alt"])
+                                            
+                selection.set(selection.target,
+                    8, u'{0} &lt;<a href="mailto:{1}">{1}</a>&gt;'.format(''.join(display_name), account))
+            elif selection.target == 'text/plain':
+                selection.set(selection.target, 8, u'%s <%s>' % (Renderers.msnplus_to_plain_text(display_name), account))

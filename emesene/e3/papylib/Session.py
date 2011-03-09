@@ -46,8 +46,8 @@ class Session(e3.Session):
 
     def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
-        worker = Worker('emesene2', self, proxy, use_http)
-        worker.start()
+        self.__worker = Worker('emesene2', self, proxy, use_http)
+        self.__worker.start()
 
         # msn password must have 16 chars max.
         password = password[:16]
@@ -87,4 +87,10 @@ class Session(e3.Session):
     def call_invite(self, cid, account, a_v_both, surface_other, surface_self):
         '''try to start a call with the first user of the conversation'''
         self.add_action(e3.Action.ACTION_CALL_INVITE, (cid, account, a_v_both, surface_other, surface_self))
+
+    def get_worker(self):
+        return self.__worker
+
+    def get_profile(self):
+        return self.__worker.profile.profile
 

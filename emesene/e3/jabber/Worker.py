@@ -1,4 +1,3 @@
-import sys
 import time
 import xmpp
 import Queue
@@ -54,21 +53,16 @@ class Worker(e3.Worker):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        data = None
+        while self._continue==True:
 
-        while True:
             if hasattr(self.client, 'Process'):
                 self.client.Process(1)
 
             try:
+
                 action = self.session.actions.get(True, 0.1)
-
-                if action.id_ == e3.Action.ACTION_QUIT:
-                    log.debug('closing thread')
-                    self.session.logger.quit()
-                    break
-
                 self._process_action(action)
+
             except Queue.Empty:
                 pass
 
@@ -77,7 +71,6 @@ class Worker(e3.Worker):
         contact = self.session.contacts.me
         stat = STATUS_MAP[status_]
 
-        pres = xmpp.protocol.Presence(priority=24, show=stat, status=contact.message)
         self.client.send(xmpp.protocol.Presence(priority=24,
             show=stat,status=contact.message))
         e3.base.Worker._handle_action_change_status(self, status_)
@@ -86,7 +79,6 @@ class Worker(e3.Worker):
         '''handle the reception of a presence message'''
         message = presence.getStatus() or ''
         show = presence.getShow()
-        type_ = presence.getType()
         account = presence.getFrom().getStripped()
 
         stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
@@ -155,6 +147,17 @@ class Worker(e3.Worker):
         e3.Logger.log_message(self.session, None, msgobj, False)
 
     # action handlers
+
+    def _handle_action_quit(self):
+        '''handle Action.ACTION_QUIT
+        '''
+        log.debug('closing thread')
+        self.session.events.queue.clear()
+        self.session.logger.quit()
+        self.client.disconnect()
+        self._continue=False
+        self.session.add_event(e3.Event.EVENT_DISCONNECTED, None,False)
+
     def _handle_action_add_contact(self, account):
         '''handle Action.ACTION_ADD_CONTACT
         '''
@@ -220,7 +223,7 @@ class Worker(e3.Worker):
                 if name is not None:
                     self.session.contacts.me.nick = name
                     self.session.add_event(e3.Event.EVENT_NICK_CHANGE_SUCCEED,
-                        nick)
+                        name)
 
                 continue
 
