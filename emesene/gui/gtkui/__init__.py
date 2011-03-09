@@ -21,11 +21,12 @@ import extension
 WEBKITERROR = False
 INDICATORERROR = False
 INFOBARERROR = False
+PYNOTIFYERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR
 
     import gtk
     import gobject
@@ -48,8 +49,12 @@ def gtk_main(Controller):
     import FileTransferWidget
     import GroupMenu
     import GtkNotification
-    import ThemeNotification
-    import PyNotification
+    try:
+        import PyNotification
+        import ThemeNotification
+    except ImportError:
+        PYNOTIFYERROR = True
+
     import Header
     import ImageAreaSelector
     import ImageChooser
@@ -108,7 +113,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR
 
     import gtk
     gtk.settings_get_default().set_property("gtk-error-bell", False)
@@ -181,11 +186,12 @@ def setup():
     else:
         extension.category_register('conversation output', TextBox.OutputText)
 
-    extension.category_register(('notificationGUI'), ThemeNotification.themeNotification)
-
-    extension.register(('notificationGUI'), PyNotification.pyNotification)
-
-    extension.register(('notificationGUI'), GtkNotification.gtkNotification)
+    if not PYNOTIFYERROR:
+        extension.category_register(('notificationGUI'), ThemeNotification.themeNotification)
+        extension.register(('notificationGUI'), PyNotification.pyNotification)
+        extension.register(('notificationGUI'), GtkNotification.gtkNotification)
+    else: #leave this here for Windows users!
+        extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
     
     extension.category_register('picture handler', PictureHandler.PictureHandler)
 
