@@ -1,6 +1,6 @@
 # emesene2 git
 
-emesene is an istant messenger capable of connecting to various networks 
+emesene is an instant messenger capable of connecting to various networks
 and utilizing different graphical toolkits.
 Currently msn and jabber are supported through papyon and xmppy,
 which allows emesene to connect to various IM services such as
