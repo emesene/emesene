@@ -108,7 +108,7 @@ class WeakMethodBound(object):
         if self.c() == None:
             raise TypeError('Method called on dead object')
 
-        apply(self.f, (self.c(),) + arg)
+        self.f(self.c(), *arg)
 
 class WeakMethodFree(object):
 
@@ -119,7 +119,7 @@ class WeakMethodFree(object):
         if self.f() == None:
             raise TypeError('Function no longer exist')
 
-        apply(self.f(), arg)
+        self.f()(*arg)
 
 def WeakMethod(f):
     try:

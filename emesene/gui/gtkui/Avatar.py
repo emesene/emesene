@@ -96,8 +96,8 @@ class Avatar(gtk.Widget):
                     if self.fps < 1:
                         self.fps = 24 # reset fps if not valid fps
 
-                    timeBetweenFrames = 1000 / self.fps
-                    self.totalFrames = self.duration / timeBetweenFrames
+                    timeBetweenFrames = 1000 // self.fps
+                    self.totalFrames = self.duration // timeBetweenFrames
                     self.currentFrame = 1
                     gobject.timeout_add(timeBetweenFrames, self.animate_callback)
                     self.inAnimation = True

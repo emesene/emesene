@@ -16,6 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from __future__ import division
 
 import e3
 import utils
@@ -176,11 +177,11 @@ class Tooltips(gtk.Window):
         ''' calculates the position of the tooltip '''
         x_root, y_root, origY = origCoords
         currentY = viewWindow.get_pointer()[1]
-        
+
         width, height = self.get_size()
         s_width, s_height = gtk.gdk.screen_width(), gtk.gdk.screen_height()
 
-        x = int(x_root)- width/2
+        x = int(x_root) - width // 2
         if currentY >= origY:
             y = int(y_root)+ 24
         else:

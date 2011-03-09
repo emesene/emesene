@@ -17,6 +17,8 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from __future__ import division
+
 import sys
 import gtk
 import pango
@@ -501,7 +503,7 @@ class SmileyLayout(pango.Layout):
         ascent = pango.ASCENT(logical)
         decent = pango.DESCENT(logical)
         self._text_height =  ascent + decent
-        self._base_to_center = (self._text_height / 2) - decent
+        self._base_to_center = (self._text_height // 2) - decent
         self._update_smilies()
 
     def _update_smilies(self):
