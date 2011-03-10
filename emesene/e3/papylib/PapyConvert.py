@@ -71,13 +71,17 @@ def get_proxies():
     import urllib
     proxies = urllib.getproxies()
     result = {}
+    #see https://github.com/emesene/emesene/issues/289#comment_852091
     if 'https' not in proxies and \
             'http' in proxies:
         url = proxies['http'].replace("http://", "https://")
         result['https'] = papyon.Proxy(url)
     for type, url in proxies.items():
         if type == 'no': continue
+        if type == 'ftp' and url.startswith('ftp://'):
+            url = url.replace('ftp://', 'https://', 1)
         if type == 'https' and url.startswith('http://'):
             url = url.replace('http://', 'https://', 1)
         result[type] = papyon.Proxy(url)
+
     return result
