@@ -272,8 +272,6 @@ class Controller(object):
 
         self.config.save(self.config_path)
 
-        #FIXME: Hack to workaround bug #330.
-        self.tray_icon.set_visible(True)
         if do_exit:
             if self.tray_icon is not None:
                 self.tray_icon.set_visible(False)
