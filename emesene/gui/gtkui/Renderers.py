@@ -531,7 +531,7 @@ class SmileyLayout(pango.Layout):
 
                 self._smilies_scaled[index] = npix
                 rect = (0,
-                    -1 * (self._base_to_center + (height /2)) * pango.SCALE,
+                    -1 * (self._base_to_center + (height // 2)) * pango.SCALE,
                          width * pango.SCALE, height * pango.SCALE)
 
                 self._base_attrlist.insert(pango.AttrShape((0, 0, 0, 0),
@@ -685,7 +685,7 @@ class SmileyLayout(pango.Layout):
                 x, y, width, height = self.index_to_pos(index)
                 pixbuf = self._smilies_scaled[index]
                 tx = pxls(x)
-                ty = pxls(y) + (pxls(height)/2) - (pixbuf.get_height()/2)
+                ty = pxls(y) + (pxls(height) // 2) - (pixbuf.get_height() // 2)
                 ctx.set_source_pixbuf(pixbuf, tx, ty)
                 ctx.paint()
             except Exception, error:
@@ -949,13 +949,13 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         if position in (gtk.ANCHOR_NW, gtk.ANCHOR_W, gtk.ANCHOR_SW):
             x = 0
         elif position in (gtk.ANCHOR_N, gtk.ANCHOR_CENTER, gtk.ANCHOR_S):
-            x = (dimention/2) - (scale_width/2)
+            x = (dimention // 2) - (scale_width // 2)
         else:
             x = dimention - scale_width
         if position in (gtk.ANCHOR_NW, gtk.ANCHOR_N, gtk.ANCHOR_NE):
             y = 0
         elif position in (gtk.ANCHOR_E, gtk.ANCHOR_CENTER, gtk.ANCHOR_W):
-            y = (dimention/2) - (scale_height/2)
+            y = (dimention // 2) - (scale_height // 2)
         else:
             y = dimention - scale_height
 
