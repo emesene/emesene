@@ -58,15 +58,15 @@ class MessageFormatter(object):
 
         # default formats
         self.incoming = '<div class="message-incomming">'\
-            '<b>%DISPLAYNAME%</b>: %MESSAGE%%NL%</div>'
+            '<b>%DISPLAYNAME%</b>:%NL%    %MESSAGE%%NL%</div>'
         self.outgoing = '<div class="message-outgoing">'\
-            '<b>%DISPLAYNAME%</b>: %MESSAGE%%NL%</div>'
+            '<b>%DISPLAYNAME%</b>:%NL%    %MESSAGE%%NL%</div>'
         self.consecutive_incoming = '<div class="consecutive-incomming">'\
             '    %MESSAGE%%NL%</div>'
         self.consecutive_outgoing = '<div class="consecutive-outgoing">'\
             '    %MESSAGE%%NL%</div>'
         self.offline_incoming = \
-            '<i>(offline message)</i><b>%DISPLAYNAME%</b>: %MESSAGE%%NL%'
+            '<i>(offline message)</i><b>%DISPLAYNAME%</b>:%NL%    %MESSAGE%%NL%'
         self.information = '<i>%MESSAGE%</i>%NL%'
         self.error = \
             '<span style="color: #A52A2A;"><b>%MESSAGE%</b></span>%NL%'
@@ -75,6 +75,7 @@ class MessageFormatter(object):
         self.outgoing_nudge = '<i>'+_('You just sent a nudge!')+'</i>%NL%'
         self.history = '<div class="message-history">'\
             '<b>%TIME% %NICK%</b>: %MESSAGE%%NL%</div>'
+
 
 
     def format_message(self, template, message):
