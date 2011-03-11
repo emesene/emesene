@@ -14,7 +14,7 @@ Documentation
 
 To build the documentation we use:
 
- * `Restructured Text`__ as the documentation format
+ * `reStructured Text`__ as the documentation format
 
 __ http://docutils.sourceforge.net/rst.html
 

@@ -1,4 +1,4 @@
-@ECHO OFF
+@echo off
 
 REM Command file for Sphinx documentation
 

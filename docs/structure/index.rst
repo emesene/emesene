@@ -9,4 +9,3 @@ Project Structure
    gui
    themes
    plugins
-

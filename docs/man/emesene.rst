@@ -17,4 +17,3 @@ since emesene 2 is a single protocol/account client you will have to start more
 than one instance to use more than one account, if you think this is a problem
 we recommend clients like pidgin, empathy or kopete that are built to handle
 multiple accounts.
-
