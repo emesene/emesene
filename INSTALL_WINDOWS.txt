@@ -70,7 +70,7 @@ extra tasks
 -----------
 
 * set the PATH environment variable to add the path to the python installation
-* test that the installation works with a simple gtk application
+* test that the installation works with a simple GTK application
 
 ::
 
@@ -84,7 +84,7 @@ extra tasks
 test with a sample application
 ------------------------------
 
-I created a repository with a sample application to test the steps, the application is available in github here:
+I created a repository with a sample application to test the steps, the application is available in GitHub here:
 
 http://github.com/marianoguerra/PyGtkOnWindows
 
@@ -94,7 +94,7 @@ steps
 * download it
 * unpack it
 * run python setup.py py2exe
-* copy the lib and share directory from the gtk runtime installation  (not the pygtk installation) to the dist directory
+* copy the lib and share directory from the gtk runtime installation (not the pygtk installation) to the dist directory
 * copy all the files from the dll directory to the dist directory
 * remove unused locales and unused themes (I keep only ms theme)
 * create the following dirs inside dist: etc/gtk-2.0
@@ -106,7 +106,7 @@ steps
 * right click on ejemplo.nsi and select "Compile NSIS Script"
 * right click on ejemplo-portable.nsi and select "Compile NSIS Script"
 * you should have the installer and portable versions available
-* to test that it works correctly, run the installer and portable versions in a windows installation without the packages you installed previously
+* to test that it works correctly, run the installer and portable versions in a Windows installation without the packages you installed previously
 
 test with a real application
 ----------------------------
@@ -124,7 +124,7 @@ steps
 * cd to emesene
 * run python setup.py py2exe
 * cd ..
-* copy the lib and share directory from the gtk runtime installation  (not the pygtk installation) to the dist directory
+* copy the lib and share directory from the gtk runtime installation (not the pygtk installation) to the dist directory
 * copy all the files from the dll directory to the dist directory
 * remove unused locales and unused themes (I keep only ms theme)
 * create the following dirs inside dist: etc/gtk-2.0
@@ -136,10 +136,9 @@ steps
 * right click on emesene.nsi and select "Compile NSIS Script"
 * right click on emesene-portable.nsi and select "Compile NSIS Script"
 * you should have the installer and portable versions available
-* to test that it works correctly, run the installer and portable versions in a windows installation without the packages you installed previously
+* to test that it works correctly, run the installer and portable versions in a Windows installation without the packages you installed previously
 
 notes
 -----
 
 * I get some needed dlls from portable python (http://www.portablepython.com/) and inkscape (http://inkscape.org/)
-

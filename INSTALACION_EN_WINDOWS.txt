@@ -1,11 +1,11 @@
-Como generar archivos .exe e instaladores para una aplicación python
+Cómo generar archivos .exe e instaladores para una aplicación python
 ====================================================================
 
 Este documento describe los pasos necesarios para crear un archivo ejecutable
-de una aplicación python y como generar un instalador y una versión portable
-para dicha instalación.
+de una aplicación python y cómo generar un instalador y una versión portable
+para su instalación.
 
-Este documento asume que la aplicación se basa en GTK pero debería funcionar
+Este documento asume que la aplicación se basa en GTK, pero debería funcionar
 con menores cambios en otros toolkits.
 
 por qué un instalador
@@ -33,7 +33,7 @@ componentes requeridos
 instaladores
 ------------
 
-aquí se listan los links a los instaladores de todos los componentes usados en el ejemplo.
+aquí se listan los enlaces a los instaladores de todos los componentes usados en el ejemplo.
 
 * http://python.org/ftp/python/2.6.6/python-2.6.6.msi
 * http://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.6.exe/download
@@ -51,7 +51,7 @@ aquí se listan los links a los instaladores de todos los componentes usados en 
 orden de instalación
 --------------------
 
-algunos instaladores son independientes de otros, pero para evitar posibles problemas recomiendo la instalación en el siguiente orden.
+algunos instaladores son independientes de otros, pero para evitar posibles problemas se recomienda la instalación en el siguiente orden.
 
 * python
 * gtk-runtime
@@ -69,8 +69,8 @@ algunos instaladores son independientes de otros, pero para evitar posibles prob
 tareas extra
 ------------
 
-* setear la variable de entorno PATH para agregar el path a la instalación de python
-* probar la instalación con una pequeña aplicación gtk
+* agregar a la variable de entorno PATH la ruta a la instalación de python
+* probar la instalación con una pequeña aplicación GTK
 
 ::
 
@@ -84,7 +84,7 @@ tareas extra
 prueba con una aplicación de ejemplo
 ------------------------------------
 
-Cree un repositorio con una aplicación de ejemplo para probar los pasos, la aplicación esta disponible en github acá:
+Cree un repositorio con una aplicación de ejemplo para probar los pasos, la aplicación está disponible en GitHub aquí:
 
 http://github.com/marianoguerra/PyGtkOnWindows
 
@@ -101,17 +101,17 @@ pasos
 * dentro de ese directorio crear un archivo llamado gtkrc con una linea como la siguiente dentro:
 
   * gtk-theme-name = "MS-Windows"
-  * podes cambiar el tema usado manteniendo otro theme dentro de share/themes y cambiando el nombre del theme en gtkrc
+  * puedes cambiar el tema usado manteniendo otro tema dentro de share/themes y cambiando el nombre del tema en gtkrc
 
-* right click en ejemplo.nsi y seleccionar "Compile NSIS Script"
-* right click en ejemplo-portable.nsi y seleccionar "Compile NSIS Script"
+* clic derecho en ejemplo.nsi y seleccionar "Compile NSIS Script"
+* clic derecho en ejemplo-portable.nsi y seleccionar "Compile NSIS Script"
 * deberías tener el instalador y la versión portable disponibles
-* para probar que funciona correctamente, correr el instalador y la versión portable en una instalación de windows sin los paquetes que instalaste anteriormente
+* para probar que funciona correctamente, ejecutar el instalador y la versión portable en una instalación de Windows sin los paquetes que instalaste anteriormente
 
 probar con una aplicación real
 ------------------------------
 
-ahora para sentirlo mas real, creemos un instalador y una versión portable de
+ahora, para sentirlo más real, creemos un instalador y una versión portable de
 un programa real, en este caso, un proyecto personal llamado emesene 2
 (http://www.emesene.org/).
 
@@ -120,9 +120,9 @@ pasos
 
 * descargarlo de http://github.com/emesene/emesene
 * descomprimirlo
-* copiar setup.py, ez_setup.py and emesene.ico al directorio emesene
+* copiar setup.py, ez_setup.py y emesene.ico al directorio emesene
 * cd emesene
-* correr python setup.py py2exe
+* ejecutar python setup.py py2exe
 * cd ..
 * copiar los directorios lib y share de la instalación del runtime de gtk (no de la instalación de pygtk) al directorio dist
 * copiar todos los archivos del directorio dll al directorio dist
@@ -131,15 +131,14 @@ pasos
 * dentro de ese directorio crear un archivo llamado gtkrc con una linea como la siguiente dentro:
 
   * gtk-theme-name = "MS-Windows"
-  * podes cambiar el tema usado manteniendo otro theme dentro de share/themes y cambiando el nombre del theme en gtkrc
+  * puedes cambiar el tema usado manteniendo otro tema dentro de share/themes y cambiando el nombre del tema en gtkrc
 
-* right click en emesene.nsi y seleccionar "Compile NSIS Script"
-* right click en emesene-portable.nsi y seleccionar "Compile NSIS Script"
+* clic derecho en ejemplo.nsi y seleccionar "Compile NSIS Script"
+* clic derecho en ejemplo-portable.nsi y seleccionar "Compile NSIS Script"
 * deberías tener el instalador y la versión portable disponibles
-* para probar que funciona correctamente, correr el instalador y la versión portable en una instalación de windows sin los paquetes que instalaste anteriormente
+* para probar que funciona correctamente, ejecutar el instalador y la versión portable en una instalación de Windows sin los paquetes que instalaste anteriormente
 
 notas
 -----
 
 * obtengo algunos de los dlls requeridos de portable python (http://www.portablepython.com/) e inkscape (http://inkscape.org/)
-
