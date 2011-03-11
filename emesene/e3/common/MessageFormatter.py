@@ -34,6 +34,7 @@ class MessageFormatter(object):
     %DISPLAYNAME%: the alias if exist otherwise the nick if exist
         otherwise the account
     %TIME%: the time of the message
+    %SHORTTIME%: the time of the message in format HH:MM:SS
     %MESSAGE%: the message with format
     %RAWMESSAGE%: the message without format
     %STATUS%: the status of the account
@@ -58,15 +59,15 @@ class MessageFormatter(object):
 
         # default formats
         self.incoming = '<div class="message-incomming">'\
-            '<b>%DISPLAYNAME%</b>:%NL%    %MESSAGE%%NL%</div>'
+            '<b>%DISPLAYNAME%</b>:%NL%    [%SHORTTIME%] %MESSAGE%%NL%</div>'
         self.outgoing = '<div class="message-outgoing">'\
-            '<b>%DISPLAYNAME%</b>:%NL%    %MESSAGE%%NL%</div>'
+            '<b>%DISPLAYNAME%</b>:%NL%    [%SHORTTIME%] %MESSAGE%%NL%</div>'
         self.consecutive_incoming = '<div class="consecutive-incomming">'\
-            '    %MESSAGE%%NL%</div>'
+            '    [%SHORTTIME%] %MESSAGE%%NL%</div>'
         self.consecutive_outgoing = '<div class="consecutive-outgoing">'\
-            '    %MESSAGE%%NL%</div>'
+            '    [%SHORTTIME%] %MESSAGE%%NL%</div>'
         self.offline_incoming = \
-            '<i>(offline message)</i><b>%DISPLAYNAME%</b>:%NL%    %MESSAGE%%NL%'
+            '<i>(offline message)</i><b>%DISPLAYNAME%</b>:%NL%    [%SHORTTIME%] %MESSAGE%%NL%'
         self.information = '<i>%MESSAGE%</i>%NL%'
         self.error = \
             '<span style="color: #A52A2A;"><b>%MESSAGE%</b></span>%NL%'
@@ -75,7 +76,6 @@ class MessageFormatter(object):
         self.outgoing_nudge = '<i>'+_('You just sent a nudge!')+'</i>%NL%'
         self.history = '<div class="message-history">'\
             '<b>%TIME% %NICK%</b>: %MESSAGE%%NL%</div>'
-
 
 
     def format_message(self, template, message):
@@ -152,6 +152,7 @@ class MessageFormatter(object):
 
 
         formated_time = time.strftime('%c', time.gmtime(timestamp))
+        formated_short_time = time.strftime('%X', time.localtime(timestamp))
 
         template = template.replace('%NICK%',
             escape(contact.nick))
@@ -163,6 +164,8 @@ class MessageFormatter(object):
             escape(contact.display_name))
         template = template.replace('%TIME%',
             escape(formated_time))
+        template = template.replace('%SHORTTIME%',
+            escape(formated_short_time))
         template = template.replace('%STATUS%',
             escape(e3.status.STATUS[contact.status]))
         template = template.replace('%PERSONALMESSAGE%',
