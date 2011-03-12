@@ -75,7 +75,7 @@ class ClientEvents(papyon.event.ClientEventInterface):
                                                'Protocol error', 0)
         elif error_type == papyon.event.ClientErrorType.ADDRESSBOOK:#TODO
             log.error("Client got an error handling addressbook: %s %s" % (error_type, error))
-        elif error_type == papyon.event.ClientErrorType.OFFLINE_MESSAGGES:#TODO
+        elif error_type == papyon.event.ClientErrorType.OFFLINE_MESSAGES:#TODO
             log.error("Client got an error handling offline messages: %s %s" % (error_type, error))
         else:
             log.error("Client got an error: %s %s" % (error_type, error))
