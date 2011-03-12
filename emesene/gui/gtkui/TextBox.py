@@ -344,6 +344,9 @@ class OutputText(TextBox):
         #Parse links
         text = MarkupParser.urlify(text)
 
+        #Parse links
+        text = MarkupParser.urlify(text)
+
         TextBox.append(self, text, scroll)
 
     def send_message(self, formatter, contact, text, cedict, cepath, style, is_first, type_=None):
