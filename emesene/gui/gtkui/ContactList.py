@@ -645,6 +645,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         else:
                             self.collapse_row(path)
 
+                group.contacts = obj.contacts
+
                 group_data = (None, group,
                     self.format_group(group, self._markup_escape_group(group)),
                     False, None, weight, row[6], False)
