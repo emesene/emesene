@@ -361,9 +361,10 @@ class OutputText(TextBox):
         '''add a message to the widget'''
         is_raw, consecutive, outgoing, first, last = formatter.format(contact)
 
-        middle = MarkupParser.escape(message.body)
         if not is_raw:
             middle = e3.common.add_style_to_message(message.body, message.style)
+        else:
+            middle = MarkupParser.escape(message.body)
 
         self.append(first + middle + last, cedict, self.config.b_allow_auto_scroll)
 
