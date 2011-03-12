@@ -338,6 +338,9 @@ class OutputText(TextBox):
         if self.config.b_show_emoticons:
             text = MarkupParser.parse_emotes(text, cedict)
 
+        #Parse links
+        text = MarkupParser.urlify(text)
+
         TextBox.append(self, text, scroll)
 
     def send_message(self, formatter, contact, text, cedict, cepath, style, is_first, type_=None):

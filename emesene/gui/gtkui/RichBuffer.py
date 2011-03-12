@@ -83,6 +83,13 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         iterator = self.get_end_iter()
         self._insert(iterator, '\n')
 
+    def put_link(self, link):
+        '''insert a link at the current position'''
+        lnk = gtk.Label()
+        lnk.set_markup("<a href='" + link +"'>" + link + "</a>")
+        lnk.show()
+        self.put_widget(lnk)
+
     def _insert(self, iterator, text, tags=None):
         '''insert text at the current position with the style defined by the
         optional parameters'''
