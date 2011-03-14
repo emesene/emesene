@@ -755,14 +755,32 @@ class MSNPapylib(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 8, 2)
+        BaseTable.__init__(self, 1, 1)
         self.session = session
 
-        self.add_text(_('If you have problems with your nickname/message/picture '
+        align_prin = gtk.Alignment(0.5, 0.5, 1, 1)
+        vbox = gtk.VBox(False, 5)
+        vbox.set_border_width(15)
+        align_prin.add(vbox)
+
+        l_text = gtk.Label(_('If you have problems with your nickname/message/picture '
                         'just click on this button, sign in with your account '
                         'and load a picture in your Live Profile. '
-                        'Then restart emesene and have fun.'), 0, 0, True)
-        self.add_button(_('Open Live Profile'), 1, 0, self._on_live_profile_clicked, 0, 0)
+                        'Then restart emesene and have fun.'))
+        l_text.set_line_wrap(True)
+
+        vbox.pack_start(l_text, False, False)
+
+        hbox = gtk.HBox(False, 0)
+        align2 = gtk.Alignment(0.5, 0.5, 1, 1)
+        hbox.pack_start(align2, True, False)
+        button = gtk.Button(_('Open Live Profile'))
+        button.connect('clicked', self._on_live_profile_clicked)
+        align2.add(button)
+
+        vbox.pack_start(hbox, False, False)
+
+        self.attach(align_prin, 0, 1, 0, 1)
 
         self.show_all()
 
