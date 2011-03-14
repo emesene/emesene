@@ -98,7 +98,7 @@ def replace_shortcut_with_tag(string, short, tag):
         return token
     irreplaceable = []
     result = re.sub(URL_REGEX, extract, string)
-    result = re.sub(r'(<img[^>]+>)', extract, result)
+    result = re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)', extract, result)
     result = result.replace(short, tag)
     irreplaceable.reverse()
     result = re.sub(token, lambda m: irreplaceable.pop(), result)
