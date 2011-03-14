@@ -1216,6 +1216,7 @@ class EmotesWindow(gtk.Window):
             if name in emotes:
                 continue
             self.shortcut_list.append(shortcut)
+            emotes.append(name)
 
             column = count % columns
             row = count / columns
