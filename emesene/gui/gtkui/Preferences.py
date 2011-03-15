@@ -505,6 +505,7 @@ class Sound(BaseTable):
         """constructor
         """
         BaseTable.__init__(self, 6, 1)
+        self.set_border_width(5)
         self.session = session
         self.array = []
         self.append_markup('<b>'+_('Messages events:')+'</b>')
