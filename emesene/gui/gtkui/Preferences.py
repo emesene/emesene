@@ -428,6 +428,7 @@ class Interface(BaseTable):
         """constructor
         """
         BaseTable.__init__(self, 4, 2)
+        self.set_border_width(5)
         self.session = session
 
         langs = list_dicts()
@@ -547,6 +548,7 @@ class Notification(BaseTable):
         """constructor
         """
         BaseTable.__init__(self, 2, 1)
+        self.set_border_width(5)
         self.session = session
         self.append_check(_('Notify on contact online'),
             'session.config.b_notify_contact_online')
@@ -564,6 +566,7 @@ class Theme(BaseTable):
         """constructor
         """
         BaseTable.__init__(self, 5, 1)
+        self.set_border_width(5)
         self.session = session
 
         ContactList = extension.get_default('contact list')
@@ -594,6 +597,7 @@ class Extension(BaseTable):
         """constructor
         """
         BaseTable.__init__(self, 8, 2)
+        self.set_border_width(5)
         self.session = session
 
         self.category_info = gtk.Label('')
@@ -765,11 +769,12 @@ class MSNPapylib(BaseTable):
         """constructor
         """
         BaseTable.__init__(self, 1, 1)
+        self.set_border_width(5)
         self.session = session
 
         align_prin = gtk.Alignment(0.5, 0.5, 1, 1)
         vbox = gtk.VBox(False, 5)
-        vbox.set_border_width(15)
+        vbox.set_border_width(10)
         align_prin.add(vbox)
 
         l_text = gtk.Label(_('If you have problems with your nickname/message/picture '
