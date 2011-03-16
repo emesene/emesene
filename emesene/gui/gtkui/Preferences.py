@@ -20,9 +20,12 @@ import gtk
 import webbrowser
 
 import e3.common
+from e3.synch.synchronizer import *
 import gui
 import utils
 import extension
+
+import os
 
 import PluginWindow
 
@@ -420,6 +423,21 @@ class BaseTable(gtk.Table):
         self.session.signals.login_succeed.emit()
         self.session.signals.contact_list_ready.emit()
 
+    def on_synch_emesene1(self, button):
+        """called when the Redraw main screen button is clicked"""
+        user_account = self.session._account.account
+        emesene1_usr_acc = (user_account.replace("@","_")).replace(".","_")
+
+        syn=get_synchronizer("emesene")
+
+        sourcedb = os.path.join(os.path.expanduser("~"),".config","emesene1.0",emesene1_usr_acc,"cache",user_account + ".db")
+        destdb = os.path.join(os.path.expanduser("~"),".config","emesene2","messenger.hotmail.com",user_account,"log","base.db")
+
+        syn.set_source_path(sourcedb)
+        syn.set_destination_path(destdb)
+        syn.start_synch(self.session)
+
+
 class Interface(BaseTable):
     """the panel to display/modify the config related to the gui
     """
@@ -631,6 +649,9 @@ class Extension(BaseTable):
 
         self.add_button(_('Redraw main screen'), 1, 7,
                 self.on_redraw_main_screen, 0, 0)
+
+        self.add_button(_('Synch with emesene1'), 1, 8,
+                self.on_synch_emesene1, 0, 0)
 
     def _get_categories(self):
         ''' get available categories'''
