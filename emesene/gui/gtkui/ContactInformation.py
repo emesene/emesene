@@ -154,9 +154,16 @@ class InformationWidget(gtk.VBox):
     def update_information(self):
         '''update the information of the contact'''
         if self.contact:
-            self.nick.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(self.contact.display_name)))
+            if self.contact.display_name == self.contact.nick:
+                self.nick.set_markup(Renderers.msnplus_to_list(
+                        gobject.markup_escape_text(self.contact.display_name)))
+            else:
+                self.nick.set_markup(Renderers.msnplus_to_list(
+                        gobject.markup_escape_text(self.contact.nick
+                            + ' (' + self.contact.display_name + ')')))
             self.mail.set_markup(self.contact.account)
-            self.message.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(self.contact.message)))
+            self.message.set_markup(Renderers.msnplus_to_list(
+                    gobject.markup_escape_text(self.contact.message)))
             self.status.set_from_file(
                 gui.theme.status_icons[self.contact.status])
             if (self.contact.picture):

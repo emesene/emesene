@@ -134,7 +134,7 @@ class Tooltips(gtk.Window):
         ''' shows the tooltip of an e3.Contact '''
         self.tag = -1
 
-        text = xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.nick)) 
+        text = xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.display_name)) 
         text += '\n' + xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.message))
         text += '\n' + self.data_string % (\
             obj.account, self.yes_no[bool(obj.blocked)])
