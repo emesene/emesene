@@ -19,6 +19,7 @@
 
 import re
 import os
+import urllib
 import time, calendar
 import datetime
 import xml.sax.saxutils
@@ -123,6 +124,8 @@ class AdiumTheme(object):
 
         msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir, msg.sender)
         msgtext = MarkupParser.urlify(msgtext)
+        image_path = escape(path_to_url(msg.image_path))
+        status_path = escape(path_to_url(msg.status_path))
 
         if style is not None:
             msgtext = style_message(msgtext, style)
@@ -131,9 +134,9 @@ class AdiumTheme(object):
         template = template.replace('%senderScreenName%', escape(msg.sender))
         template = template.replace('%senderDisplayName%',
             escape(msg.display_name))
-        template = template.replace('%userIconPath%', escape(msg.image_path))
+        template = template.replace('%userIconPath%', image_path)
         template = template.replace('%senderStatusIcon%',
-            escape(msg.status_path))
+            status_path)
         template = template.replace('%messageDirection%',
             escape(msg.direction))
         template = template.replace('%message%', msgtext)
@@ -147,7 +150,7 @@ class AdiumTheme(object):
                 return time.localtime(secs)
             l_time = utc_to_local(msg.timestamp.timetuple()) #time.struct_time
             d_time = datetime.datetime.fromtimestamp(time.mktime(l_time))
-            template = template.replace('%time%', 
+            template = template.replace('%time%',
                 escape(d_time.strftime('%x %X')))
 
         template = re.sub("%time{(.*?)}%", replace_time, template)
@@ -181,14 +184,16 @@ class AdiumTheme(object):
     def get_body(self, source, target, target_display, source_img, target_img):
         '''return the template to put as html content
         '''
-        template = read_file(os.path.join("gui", "base", "template.html"))
-        css_path = "file://" + os.path.join(self.resources_path, "main.css")
+        path = urljoin("gui", "base", "template.html")
+        resources_url = path_to_url(self.resources_path)
+        template = read_file(path)
+        css_path = urljoin(resources_url, "main.css")
         variant_name = self.info.get('DefaultVariant', None)
-        template = template.replace("%@", "file://" + self.resources_path + "/", 1)
+        template = template.replace("%@", resources_url + "/", 1)
         template = template.replace("%@", css_path, 1)
 
         if variant_name is not None:
-            variant_css_path = "file://" + os.path.join(self.resources_path,
+            variant_css_path = "file://" + urljoin(resources_url,
                     "Variants", variant_name + ".css")
             variant_tag = '<style id="mainStyle" type="text/css"' + \
                 'media="screen,print">	@import url( "' + variant_css_path + '" ); </style>'
@@ -223,6 +228,9 @@ def read_file(*args):
 
     return None
 
+def urljoin(*args):
+    return "/".join(list(args))
+
 __dic = {
     '\"': '&quot;',
     '\'': '&apos;',
@@ -254,3 +262,13 @@ def style_message(msgtext, style):
     '''add html markupt to msgtext to format the style of the message'''
     return '<span style="%s">%s</span>' % (style.to_css(), msgtext)
 
+def path_to_url(path):
+    if os.name == "nt":
+        # on windows os.path.join uses backslashes
+        path = path.replace("\\", "/")
+        path = path[2:]
+
+    path = urllib.quote(path)
+    path = "file://" + path
+
+    return path

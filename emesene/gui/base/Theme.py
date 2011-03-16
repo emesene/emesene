@@ -298,9 +298,15 @@ class Theme(object):
         path = os.path.abspath(path)
 
         if os.access(path, os.R_OK) and os.path.isfile(path):
+            path = path.replace("\\", "/")
+
             if remove_protocol:
                 return path
             else:
+                if os.name == "nt":
+                    if path[1] == ":":
+                        path = path[2:]
+
                 return 'file://' + path
 
         return None
