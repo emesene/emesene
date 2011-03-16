@@ -65,10 +65,10 @@ class emesenesynch(synch):
             for id_found in dest_users_id:
                 return id_found[0]
 
-	def __time_conversion(self,time):
+        def __time_conversion(self,time):
             return date.fromtimestamp(time)
 
-	def __data_conversion(self,data):
+        def __data_conversion(self,data):
             d=data.partition("UTF-8\r\n")
             end=d[2].encode('UTF-8')
             return end

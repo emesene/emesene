@@ -7,15 +7,13 @@ class synch(object):
             pass
 
         def start_synch(self, session, synch_function=None):
-	    self.__session = session
+            self.__session = session
 
         def set_source_path(self,path):
-	    self.__srcpath=path
-	    print path
+            self.__srcpath=path
 
         def set_destination_path(self,path):
             self.__destpath=path
-            print path
 
         @property
         def dest_path(self):
