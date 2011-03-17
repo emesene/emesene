@@ -54,11 +54,11 @@ class emesenesynch(synch):
 
             self.__conn_src = sqlite.connect(self.src_path)
             users = self.__conn_src.cursor()
-            users.execute("select * from user")
+            users.execute(EM1_SELECT_USER)
 
             self.__conn_dest = sqlite.connect(self.dest_path)
             dest_users = self.__conn_dest.cursor()
-            dest_users.execute("select * from d_account")
+            dest_users.execute(EM2_SELECT_USER)
 
             user_names=[]
 
@@ -70,18 +70,19 @@ class emesenesynch(synch):
                 found=0
 
                 for dest_user in user_names:
-                    if(user[1]==dest_user):
+                    if(user[1].lower()==dest_user.lower()):
                         found=1
                 if found == 0:
                     new_account = self.__user_to_account(user[1])
+                    print user[1]
  
                     if(new_account == None):
                         new_account = e3.base.Contact(user[1])
                         new_account = e3.Logger.Account.from_contact(new_account)
-                        self._session.logger.log("nick change", 0, new_account.nick, new_account)
+                        self._session.logger.log("status change", 0, new_account.nick, new_account)
                     else:
                         new_account = e3.Logger.Account.from_contact(new_account)
-                        self._session.logger.log("nick change", 0, new_account.nick, new_account)
+                        self._session.logger.log("status change", 0, new_account.nick, new_account)
 
 
             #Get all old conversations		
