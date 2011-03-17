@@ -202,7 +202,7 @@ class BaseTable(gtk.Table):
             label.set_alignment(0.0, 0.5)
 
         label.set_line_wrap(line_wrap)
-        self.attach(label, column, column + 1, row, row + 1)
+        self.attach(label, column, column + 1, row, row + 1, yoptions=0)
 
     def add_button(self, text, column, row, on_click, xoptions=gtk.EXPAND|gtk.FILL, yoptions=gtk.EXPAND|gtk.FILL):
         """add a button with text to the row and column, connect the clicked
@@ -635,6 +635,7 @@ class Extension(BaseTable):
         self.add_text(_('Website'), 0, 6, True)
 
         self.add_label(self.name_info, 1, 3, True)
+        self.description_info.set_width_chars(40)
         self.add_label(self.description_info, 1, 4, True)
         self.add_label(self.author_info, 1, 5, True)
         self.add_label(self.website_info, 1, 6, True)
@@ -661,8 +662,8 @@ class Extension(BaseTable):
 
         self.categories.connect('changed', self._on_category_changed)
         self.extensions.connect('changed', self._on_extension_changed)
-        self.attach(self.categories, 1, 2, 0, 1, yoptions=gtk.EXPAND)
-        self.attach(self.extensions, 1, 2, 1, 2, yoptions=gtk.EXPAND)
+        self.attach(self.categories, 1, 2, 0, 1, yoptions=0)
+        self.attach(self.extensions, 1, 2, 1, 2, yoptions=0)
         self.categories.set_active(0)
 
     def _on_category_changed(self, combo):
