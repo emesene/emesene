@@ -558,8 +558,8 @@ class Logger(object):
             id_dest_acc = None
 
         if ext_time:
-            pass
-            
+            id_time = self.insert_time_now()
+            timestamp = ext_time
         else: 
             id_time = self.insert_time_now()
             timestamp = time.time()

@@ -18,16 +18,13 @@
 #
 #    Module written by Andrea Stagi <stagi.andrea(at)gmail.com>
 
-from xml.dom.minidom import Document
-import sqlite3.dbapi2 as sqlite
-
 class synch(object):
 
         def __init__(self):
             pass
 
         def start_synch(self, session, synch_function=None):
-            self.__session = session
+            self._session = session
 
         def set_source_path(self,path):
             self.__srcpath=path

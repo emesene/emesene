@@ -425,16 +425,8 @@ class BaseTable(gtk.Table):
 
     def on_synch_emesene1(self, button):
         """called when the Redraw main screen button is clicked"""
-        user_account = self.session._account.account
-        emesene1_usr_acc = (user_account.replace("@","_")).replace(".","_")
-
-        syn=get_synchronizer("emesene")
-
-        sourcedb = os.path.join(os.path.expanduser("~"),".config","emesene1.0",emesene1_usr_acc,"cache",user_account + ".db")
-        destdb = os.path.join(os.path.expanduser("~"),".config","emesene2","messenger.hotmail.com",user_account,"log","base.db")
-
-        syn.set_source_path(sourcedb)
-        syn.set_destination_path(destdb)
+        syn = get_synchronizer("emesene")
+        syn.set_user(self.session._account.account)
         syn.start_synch(self.session)
 
 
