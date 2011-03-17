@@ -559,13 +559,15 @@ class Notification(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 2, 1)
+        BaseTable.__init__(self, 4, 1)
         self.set_border_width(5)
         self.session = session
+        self.append_markup('<b>'+_('Users events:')+'</b>')
         self.append_check(_('Notify on contact online'),
             'session.config.b_notify_contact_online')
         self.append_check(_('Notify on contact offline'),
             'session.config.b_notify_contact_offline')
+        self.append_markup('<b>'+_('Messages events:')+'</b>')
         self.append_check(_('Notify on received message'),
             'session.config.b_notify_receive_message')
         self.show_all()
