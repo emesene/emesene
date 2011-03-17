@@ -644,7 +644,9 @@ class Extension(BaseTable):
         self.add_label(self.author_info, 1, 5, True)
         self.add_label(self.website_info, 1, 6, True)
 
-        self.add_button(_('Redraw main screen'), 1, 7,
+        self.add_text('', 0, 7, True)
+
+        self.add_button(_('Redraw main screen'), 0, 8,
                 self.on_redraw_main_screen, 0, 0)
 
         self.add_button(_('Synch with emesene1'), 1, 8,
