@@ -749,12 +749,7 @@ class DesktopTab(BaseTable):
         self.append_markup('<b>'+_('File transfers')+'</b>')
         self.append_check(_('Sort received files by sender'), 
                           'session.config.b_download_folder_per_account')
-
-        hbox = gtk.HBox(False, 0)
-
-        l_text = gtk.Label(_('Save files to:'))
-        l_text.set_alignment(0.0, 0.5)
-        hbox.pack_start(l_text, True, True)
+        self.add_text(_('Save files to:'), 0, 2, True)
 
         def on_path_selected(f_chooser):
             ''' updates the download dir config value '''
@@ -770,9 +765,7 @@ class DesktopTab(BaseTable):
         fc_button.set_current_folder(self.session.config.get_or_set("download_folder", 
                 e3.common.locations.downloads()))
         path_chooser.connect('selection-changed', on_path_selected)
-        hbox.pack_start(fc_button, True, True)
-
-        self.attach(hbox, 0, 3, 2, 3, gtk.EXPAND|gtk.FILL, 0)
+        self.attach(fc_button, 2, 3, 2, 3, gtk.EXPAND|gtk.FILL, 0)
 
         self.show_all()
 
