@@ -537,16 +537,12 @@ class Logger(object):
 
     def execute(self, query, args=()):
         '''execute the query with optional args'''
-        #log.debug(query + str(args))
-        #print query, args
         self.cursor.execute(query, args)
 
     # utility methods
 
     def add_event(self, event, status, payload, src, dest=None, ext_time=None):
         '''add an event on the fact and the dimensiones using the actual time'''
-
-        print src.__class__
 
         id_event = self.insert_event(event)
         (id_src_info, id_src_acc) = self.insert_info(src.account, src.id,
@@ -565,8 +561,6 @@ class Logger(object):
         else: 
             id_time = self.insert_time_now()
             timestamp = time.time()
-
-        #print "EVENT %s %s %s %s %s %s %s" % (event, status, payload, src, dest, id_time, timestamp)
 
         self.insert_fact_event(id_time, id_event, id_src_info, id_dest_info,
             id_src_acc, id_dest_acc, status, payload, timestamp)
@@ -822,12 +816,6 @@ class LoggerProcess(threading.Thread):
 
     def log(self, event, status, payload, src, dest=None):
         '''add an event to the log database'''
-        print "Addinggggggggggg"
-        print event
-        print status
-        print payload
-        print src
-        print dest
         self.input.put(('log', (event, status, payload, src, dest)))
 
     def quit(self):
