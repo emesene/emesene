@@ -25,6 +25,8 @@ import gui
 import utils
 import extension
 
+from gui.base import MarkupParser
+
 import os
 
 import PluginWindow
@@ -718,7 +720,7 @@ class Extension(BaseTable):
         self.name_info.set_text(name)
         self.description_info.set_text(description)
         self.author_info.set_text(author)
-        self.website_info.set_text(website)
+        self.website_info.set_markup(MarkupParser.urlify(website))
 
     def on_update(self):
         '''called when changed to this page'''
