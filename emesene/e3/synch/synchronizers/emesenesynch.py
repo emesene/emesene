@@ -22,6 +22,7 @@ from synch import synch
 import sqlite3.dbapi2 as sqlite
 from datetime import date
 import os
+import e3
 
 EM1_SELECT_USER = "select * from user"
 EM2_SELECT_USER = "select * from d_account"
@@ -72,9 +73,16 @@ class emesenesynch(synch):
                     if(user[1]==dest_user):
                         found=1
                 if found == 0:
-                    #make an insert procedure
-                    #"insert into d_account (account,enabled) values ('%s', 1)" % user[1]
-                    pass
+                    new_account = self.__user_to_account(user[1])
+ 
+                    if(new_account == None):
+                        new_account = e3.base.Contact(user[1])
+                        new_account = e3.Logger.Account.from_contact(new_account)
+                        self._session.logger.log("nick change", 0, new_account.nick, new_account)
+                    else:
+                        new_account = e3.Logger.Account.from_contact(new_account)
+                        self._session.logger.log("nick change", 0, new_account.nick, new_account)
+
 
             #Get all old conversations		
 
@@ -87,6 +95,7 @@ class emesenesynch(synch):
             for conv in conversations:
                 conversations_attr.append({"user":self.__user_to_account(conv[1]),"dest": self.__user_to_account(self.__myuser) if (self.__myuser != conv[1]) else self.__dest_user(conv[0]),"time":conv[2],"data":self.__data_conversion(conv[3])})
 
+            """
             for conv in conversations_attr:
                 print "-------------"
                 print conv["user"],
@@ -95,6 +104,7 @@ class emesenesynch(synch):
                 print conv["time"],
                 print "-------------"
                 #add the event in this form :: EVENT message 0 TEXT_OF_MESSAGE <account 'mail1'> <account 'mail2'> time
+            """
 
         def __user_to_account(self,user):
             return self._session.contacts.get(user)
