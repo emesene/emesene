@@ -446,6 +446,13 @@ def get_and_instantiate(category_name, *args, **kwargs):
 
     return None
 
+def delete_instance(category_name):
+    '''
+    Delete an instance of a "single interface" category.
+    '''
+    category = get_category(category_name)
+
+    category.instance = None
 
 def set_default(category_name, cls):
     '''set the cls as default for the category category_name, if cls is not

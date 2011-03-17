@@ -120,6 +120,9 @@ class OptionsHandler(object):
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
         instance = extension.get_and_instantiate('preferences', self.session)
+        if self.session is not instance.session:
+            extension.delete_instance('preferences')
+            instance = extension.get_and_instantiate('preferences', self.session)
         instance.show()
         instance.present()
 
