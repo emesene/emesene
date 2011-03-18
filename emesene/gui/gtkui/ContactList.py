@@ -30,6 +30,8 @@ import logging
 import Tooltips
 import Renderers
 
+import time
+
 log = logging.getLogger('gtkui.ContactList')
 
 class ContactList(gui.ContactList, gtk.TreeView):
@@ -151,8 +153,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     utils.simple_images_overlap(pix,pixbufblock,-pixbufblock.props.width,-pixbufblock.props.width)
                 picture = gtk.image_new_from_pixbuf(pix)
             else:
+                if bool(contact.blocked)==True:
+                    pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
+                    utils.simple_animation_overlap(animation,pixbufblock)
                 picture = gtk.image_new_from_animation(animation)
-
         else:
             pix = utils.gtk_pixbuf_load(gui.theme.user,
                         (self.avatar_size, self.avatar_size))
