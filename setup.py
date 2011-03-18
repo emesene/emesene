@@ -58,13 +58,12 @@ def osx_check():
 if os.name == "nt":
     import py2exe
 
-    _data_files = [
-        "../dlls/Microsoft.VC90.CRT.manifest",
-        "../dlls/msvcm90.dll",
-        "../dlls/msvcp90.dll",
-        "../dlls/msvcr71.dll",
-        "../dlls/msvcr90.dll"
-    ]
+    _data_files = ['../dlls/Microsoft.VC90.CRT.manifest',
+        '../dlls/msvcm90.dll',
+        '../dlls/msvcp90.dll',
+        '../dlls/msvcr71.dll',
+        '../dlls/msvcr90.dll',
+        ('gui/base', ['gui/base/template.html'])]
 
     for base in ("e3/msn/xml templates", "themes", "plugins"):
         for dirname, dirnames, files in os.walk(base):
@@ -75,7 +74,7 @@ if os.name == "nt":
 
     opts = {
         "py2exe": {
-            "packages": ["encodings", "gtk", "OpenSSL", "Crypto", "papyon"],
+            "packages": ["encodings", "gtk", "OpenSSL", "Crypto", "papyon", "xml", "xml.etree", "xml.etree.ElementTree"],
             "includes": ["locale", "gio", "cairo", "pangocairo", "pango",
                 "atk", "gobject", "os", "code", "winsound", "win32api",
                 "win32gui", "optparse", "plugin_base", "OpenSSL", "Crypto", "papyon"],
@@ -83,7 +82,7 @@ if os.name == "nt":
                 "pywin.debugger.dbgcon", "pywin.dialogs",
                 "pywin.dialogs.list", "Tkconstants", "Tkinter", "tcl",
                 "doctest", "macpath", "pdb", "cookielib", "ftplib",
-                "pickle", "calendar", "win32wnet", "unicodedata",
+                "pickle", "win32wnet", "unicodedata",
                 "getopt", "gdk"],
             "dll_excludes": ["libglade-2.0-0.dll", "w9xpopen.exe"],
             "optimize": "2",
