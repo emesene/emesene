@@ -26,7 +26,7 @@ import e3
 
 EM1_SELECT_USER = "select * from user"
 EM2_SELECT_USER = "select * from d_account"
-EM1_SELECT_CONVERSATIONS = "select conversation.id,account as account1,started,data from user inner join conversation_event on ( user.id=conversation_event.id_user ) inner join conversation on(conversation.id=conversation_event.id_conversation)"
+EM1_SELECT_CONVERSATIONS = "select conversation.id,account as account1,stamp,data from user inner join conversation_event on ( user.id=conversation_event.id_user ) inner join conversation on(conversation.id=conversation_event.id_conversation) inner join event on(conversation_event.id_event=event.id)"
 EM1_SELECT_DEST_USER = "select account from (conversation_event inner join user on conversation_event.id_user = user.id) where conversation_event.id_conversation=%s and account <> '%s'"
 
 class emesenesynch(synch):
@@ -74,7 +74,6 @@ class emesenesynch(synch):
                         found=1
                 if found == 0:
                     new_account = self.__user_to_account(user[1])
-                    print user[1]
  
                     if(new_account == None):
                         new_account = e3.base.Contact(user[1])
@@ -105,10 +104,23 @@ class emesenesynch(synch):
                 print conv["time"],
                 print "-------------"
                 #add the event in this form :: EVENT message 0 TEXT_OF_MESSAGE <account 'mail1'> <account 'mail2'> time
-            """
+             """
+            for conv in conversations_attr:
+                self._session.logger.log("message", 0, conv["data"], conv["user"], conv["dest"], conv["time"])
 
         def __user_to_account(self,user):
-            return self._session.contacts.get(user)
+
+            for account in self._session.contacts.contacts.keys():
+                if(account.lower() == user.lower()):
+                    user = account
+
+            founded_account = self._session.contacts.get(user)
+
+            if(founded_account != None):
+                return e3.Logger.Account.from_contact( founded_account )
+            else:
+                return e3.Logger.Account.from_contact( e3.base.Contact(user) )
+
 
         def __dest_user(self,conv_id):
 
@@ -118,8 +130,10 @@ class emesenesynch(synch):
              for user_found in users_dest:
                  return self.__user_to_account(user_found[0])
 
+
         def __time_conversion(self,time):
             return date.fromtimestamp(time)
+
 
         def __data_conversion(self,data):
             d=data.partition("UTF-8\r\n")

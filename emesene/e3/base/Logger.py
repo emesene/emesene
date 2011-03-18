@@ -556,8 +556,9 @@ class Logger(object):
             id_dest_acc = None
 
         if ext_time:
-            id_time = self.insert_time_now()
             timestamp = ext_time
+            (year, month, day, hour, minute, seconds, wday, yday, tm_isdst) = time.gmtime(ext_time)
+            id_time = self.insert_time(year, month, day, wday, hour, minute, seconds)
         else: 
             id_time = self.insert_time_now()
             timestamp = time.time()
@@ -773,8 +774,8 @@ class LoggerProcess(threading.Thread):
         action, args = data
 
         if action == 'log':
-            event, status, payload, src, dest = args
-            self.logger.add_event(event, status, payload, src, dest)
+            event, status, payload, src, dest, new_time = args
+            self.logger.add_event(event, status, payload, src, dest, new_time)
         elif action == 'quit':
             return True
         elif action in self.actions:
@@ -814,9 +815,9 @@ class LoggerProcess(threading.Thread):
 
         return True
 
-    def log(self, event, status, payload, src, dest=None):
+    def log(self, event, status, payload, src, dest=None, new_time=None):
         '''add an event to the log database'''
-        self.input.put(('log', (event, status, payload, src, dest)))
+        self.input.put(('log', (event, status, payload, src, dest, new_time)))
 
     def quit(self):
         '''stop the logger thread, and close the logger'''
