@@ -140,14 +140,22 @@ def pango_font_description_to_style(fdesc):
     return e3.Style(font, e3.Color(0, 0, 0), font_bold,
         font_italic, font_underline, font_strike, font_size)
 
+def simple_animation_scale(path,width, height):
+    f = open(path, 'r')
+    pixloader = gtk.gdk.PixbufLoader('gif')
+    pixloader.set_size(width, height)
+    pixloader.write(f.read())
+    pixloader.close()
+    return pixloader.get_animation()
+
 def simple_animation_overlap(animation,pixbuf_dest):
     iter = animation.get_iter()
     while not iter.on_currently_loading_frame():
         
         pixx=iter.get_pixbuf()
         simple_images_overlap(pixx,pixbuf_dest,-pixbuf_dest.props.width,-pixbuf_dest.props.width)
-
         iter.advance()
+
 
 def simple_images_overlap(pixbuf_src,pixbuf_dest,x,y):
     if x>=0 :

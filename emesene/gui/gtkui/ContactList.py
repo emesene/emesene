@@ -154,9 +154,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 picture = gtk.image_new_from_pixbuf(pix)
             else:
                 if bool(contact.blocked)==True:
+                    print contact.picture
+                    myanimation = utils.simple_animation_scale(contact.picture,self.avatar_size, self.avatar_size)
                     pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
-                    utils.simple_animation_overlap(animation,pixbufblock)
-                picture = gtk.image_new_from_animation(animation)
+                    utils.simple_animation_overlap(myanimation,pixbufblock)
+                picture = gtk.image_new_from_animation(myanimation)
         else:
             pix = utils.gtk_pixbuf_load(gui.theme.user,
                         (self.avatar_size, self.avatar_size))
