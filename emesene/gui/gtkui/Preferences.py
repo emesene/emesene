@@ -510,6 +510,7 @@ class Interface(BaseTable):
 
     def get_tab_positions(self):
         return [_("Top"),_("Bottom"),_("Left"),_("Right")]
+
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
     """
@@ -517,13 +518,14 @@ class Sound(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 6, 1)
+        BaseTable.__init__(self, 7, 1)
         self.set_border_width(5)
         self.session = session
         self.array = []
-        self.append_markup('<b>'+_('Messages events:')+'</b>')
+        self.append_markup('<b>'+_('General:')+'</b>')
         self.append_check(_('Mute sounds'),
             'session.config.b_mute_sounds')
+        self.append_markup('<b>'+_('Messages events:')+'</b>')
         self.array.append(self.append_check(_('Play sound on sent message'),
             'session.config.b_play_send'))
         self.array.append(self.append_check(_('Play sound on first received message'),
