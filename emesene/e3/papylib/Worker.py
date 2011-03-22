@@ -833,7 +833,10 @@ class Worker(e3.base.Worker, papyon.Client):
         def add_group_fail(*args):
             log.error("Error adding a group: %s", args)
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_FAILED, '') #group name
-        self.address_book.add_group(name, failed_cb=add_group_fail)
+        def add_group_succeed(*args):
+            self.session.add_event(e3.Event.EVENT_GROUP_ADD_SUCCEED, args[0]) #group name
+        callback_vect = [add_group_succeed,name]
+        self.address_book.add_group(name, failed_cb=add_group_fail, done_cb=tuple(callback_vect))
 
     def _handle_action_add_to_group(self, account, gid):
         ''' handle Action.ACTION_ADD_TO_GROUP '''

@@ -130,7 +130,7 @@ class Dialog(object):
         contact = window.entry.get_text()
         group = window.combo.get_model().get_value(
             window.combo.get_active_iter(), 0)
-        print group
+
         window.hide()
         response_cb(response, contact, group)
 
