@@ -168,15 +168,16 @@ class ContactHandler(object):
 
     def on_add_contact_selected(self):
         '''called when add contact is selected'''
-        def add_cb(response, account, groups):
+        def add_cb(response, account, group):
             '''callback to the add_dialog method, add the user and add him
-            to the defined groups'''
+            to the defined group'''
             if response == gui.stock.ADD:
-                self.session.add_contact(account)
-                # TODO: this doesn't work (?)
-                if groups:
-                    for group in groups:
-                        self.session.add_to_group(account, group)
+                if group:
+                    for group_to_find,group_obj in self.session.groups.iteritems():
+                        if(group_obj.name == group):
+                            self.session.add_to_group(account, group_obj.identifier)
+                else:
+                    self.session.add_contact(account)
 
         self.dialog.add_contact(self.session.groups.values(), None, add_cb)
 

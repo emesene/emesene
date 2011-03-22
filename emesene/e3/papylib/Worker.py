@@ -822,6 +822,7 @@ class Worker(e3.base.Worker, papyon.Client):
         def add_contact_fail(*args):
             log.error("Error adding a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_ADD_FAILED, '') #account
+            print "FAIL ADDEDD"
         #TODO: support fancy stuff like: invite_display_name='',
         #    invite_message='', groups=[], network_id=NetworkID.MSN,
         #    auto_allow=True, done_cb=None, failed_cb=None
@@ -839,8 +840,17 @@ class Worker(e3.base.Worker, papyon.Client):
         def add_to_group_fail(*args):
             log.error("Error adding a contact to a group: %s", args)
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_FAILED, 0, 0) #gid, cid
-        #TODO: implement me
-        raise NotImplementedError
+        def add_to_group_succeed(*args):
+            self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, args[1], args[0].account) #gid, cid
+
+        papygroupdest = None
+        for group in self.address_book.groups:
+            if group.id == self.session.groups[gid].identifier:
+                papygroupdest = group
+        if papygroupdest is not None:
+            group_vect = [papygroupdest]
+            callback_vect = [add_to_group_succeed,gid,account]
+            self.address_book.add_messenger_contact(account, groups=group_vect, failed_cb=add_to_group_fail, done_cb=tuple(callback_vect))
 
     def _handle_action_block_contact(self, account):
         ''' handle Action.ACTION_BLOCK_CONTACT '''
