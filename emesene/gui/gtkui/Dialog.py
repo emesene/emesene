@@ -97,6 +97,11 @@ class Dialog(object):
         window.hide()
 
     @classmethod
+    def on_file_click_cb(cls, widget, window, response_cb):
+        response_cb(gtk.STOCK_OPEN, widget.get_filename())
+        window.hide()
+
+    @classmethod
     def chooser_cb(cls, widget, window, response_cb, response):
         '''callback user for dialogs that contain a chooser, return the
         status and the selected file'''
@@ -258,6 +263,7 @@ class Dialog(object):
         chooser.set_current_folder(current_path)
         setattr(window, 'chooser', chooser)
         window.hbox.pack_start(chooser)
+        chooser.connect("file-activated", cls.on_file_click_cb, window, response_cb)
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.chooser_cb)
         cls.add_button(window, gtk.STOCK_OPEN, stock.OPEN, response_cb,
