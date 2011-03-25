@@ -699,6 +699,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         elif len(contact2.groups) == 0:
             return 1
 
+        return 0
+
     def _on_drag_data_get(self, widget, context, selection, target_id, etime):
         if self.is_contact_selected():
             account = self.get_contact_selected().account
