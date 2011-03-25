@@ -36,6 +36,19 @@ try:
 except ImportError:
     HAVE_GSTREAMER = 0
 
+IS_MAC = 1
+try:
+    from AppKit import NSSound
+    def mac_play(path):
+        """
+        play a sound using mac api
+        """
+        macsound = NSSound.alloc()
+        macsound.initWithContentsOfFile_byReference_(path, True)
+        macsound.play()
+except ImportError:
+    IS_MAC = 0
+
 def is_on_path(fname):
     """
     returns True if fname is the name of an executable on path (*nix only)
@@ -70,17 +83,12 @@ elif os.name == 'posix':
         def play(path):
             subprocess.Popen(['aplay', path],
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    elif IS_MAC:
+        play = mac_play
     else:
         play = dummy_play
 elif os.name == 'mac':
-    from AppKit import NSSound
-    def play(path):
-        """
-        play a sound using mac api
-        """
-        macsound = NSSound.alloc()
-        macsound.initWithContentsOfFile_byReference_(path, True)
-        macsound.play()
+    play = mac_play
 else:
     play = dummy_play
 
