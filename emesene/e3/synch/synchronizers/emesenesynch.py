@@ -34,6 +34,9 @@ class emesenesynch(synch):
         def __init__(self):
                 synch.__init__(self)
 
+        def exists_source(self):
+            return os.path.exists(self.src_path)
+
         def set_user(self, user_account):
 
             self.__myuser = user_account

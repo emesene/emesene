@@ -426,10 +426,27 @@ class BaseTable(gtk.Table):
         self.session.signals.contact_list_ready.emit()
 
     def on_synch_emesene1(self, button):
-        """called when the Redraw main screen button is clicked"""
+        """called when the Synch test button is clicked"""
         syn = get_synchronizer("emesene")
         syn.set_user(self.session._account.account)
-        syn.start_synch(self.session)
+
+        def synch_cb(response):
+            '''callback for DialogManager.yes_no, asking to synch'''
+            if response == gui.stock.YES:
+                syn.start_synch(self.session)
+                self.session.config.logs_imported = True
+                self.session.config.get_or_set("synch_retry",False)
+                self.session.save_config()
+
+            elif response == gui.stock.NO:
+                self.session.config.logs_imported = True
+                self.session.config.get_or_set("synch_retry",True)
+                self.session.save_config()
+
+        if not self.session.config.get_or_set("logs_imported",False) and syn.exists_source():
+            dialog = extension.get_default('dialog')
+            dialog.yes_no_cancel(
+                _("Do you want synch with emesene 1?"), synch_cb)
 
 
 class Interface(BaseTable):
