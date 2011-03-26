@@ -446,7 +446,7 @@ class BaseTable(gtk.Table):
         if not self.session.config.get_or_set("logs_imported",False) and syn.exists_source():
             dialog = extension.get_default('dialog')
             dialog.yes_no_cancel(
-                _("Do you want synch with emesene 1?"), synch_cb)
+                _("Do you want to synch with emesene 1?"), synch_cb)
 
 
 class Interface(BaseTable):

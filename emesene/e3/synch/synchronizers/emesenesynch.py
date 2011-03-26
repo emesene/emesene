@@ -27,7 +27,7 @@ import e3
 EM1_SELECT_USER = "select * from user"
 EM2_SELECT_USER = "select * from d_account"
 EM1_SELECT_CONVERSATIONS = "select conversation.id,account as account1,stamp,data from user inner join conversation_event on ( user.id=conversation_event.id_user ) inner join conversation on(conversation.id=conversation_event.id_conversation) inner join event on(conversation_event.id_event=event.id)"
-EM1_SELECT_DEST_USER = "select account from (conversation_event inner join user on conversation_event.id_user = user.id) where conversation_event.id_conversation=%s and account <> '%s'"
+EM1_SELECT_DEST_USER = "select distinct account from (conversation_event inner join user on conversation_event.id_user = user.id) where conversation_event.id_conversation=%s and account <> '%s'"
 
 class emesenesynch(synch):
 
@@ -73,8 +73,9 @@ class emesenesynch(synch):
                 found=0
 
                 for dest_user in user_names:
-                    if(user[1].lower()==dest_user.lower()):
+                    if(user[1].lower() == dest_user.lower()):
                         found=1
+
                 if found == 0:
                     new_account = self.__user_to_account(user[1])
  
@@ -83,7 +84,6 @@ class emesenesynch(synch):
                         new_account = e3.Logger.Account.from_contact(new_account)
                         self._session.logger.log("status change", 0, new_account.nick, new_account)
                     else:
-                        new_account = e3.Logger.Account.from_contact(new_account)
                         self._session.logger.log("status change", 0, new_account.nick, new_account)
 
 
@@ -96,7 +96,14 @@ class emesenesynch(synch):
             conversations_attr=[]
 
             for conv in conversations:
-                conversations_attr.append({"user":self.__user_to_account(conv[1]),"dest": self.__user_to_account(self.__myuser) if (self.__myuser != conv[1]) else self.__dest_user(conv[0]),"time":conv[2],"data":self.__data_conversion(conv[3])})
+                users_fetched = []
+                if (self.__myuser != conv[1]):
+                    users_fetched.append(self.__user_to_account(self.__myuser))
+                else:
+                    users_fetched.extend(self.__dest_user(conv[0]))
+
+                for user_fetched in users_fetched:
+                    conversations_attr.append({"user" : self.__user_to_account(conv[1]), "dest" : user_fetched, "time" : conv[2], "data" : self.__data_conversion(conv[3])})
 
             """
             for conv in conversations_attr:
@@ -127,11 +134,15 @@ class emesenesynch(synch):
 
         def __dest_user(self,conv_id):
 
+             users = []
+
              users_dest = self.__conn_src.cursor()
              users_dest.execute(EM1_SELECT_DEST_USER % (conv_id,self.__myuser))
 
              for user_found in users_dest:
-                 return self.__user_to_account(user_found[0])
+                 users.append(self.__user_to_account(user_found[0]))
+
+             return users
 
 
         def __time_conversion(self,time):
