@@ -28,8 +28,6 @@ import hashlib
 import tempfile
 import xml.sax.saxutils
 
-import PreviewFactory
-
 import e3
 from e3 import cache
 from e3.base import *
