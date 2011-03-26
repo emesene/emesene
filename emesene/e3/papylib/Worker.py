@@ -1173,12 +1173,10 @@ class Worker(e3.base.Worker, papyon.Client):
         e3.Logger.log_message(self.session, members, message, True)
 
     # ft handlers
-    def _handle_action_ft_invite(self, cid, account, filename, completepath):
-
-        cnt=PreviewFactory.makePreview(completepath)
+    def _handle_action_ft_invite(self, cid, account, filename, completepath, preview_data):
 
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        papysession = self._ft_manager.send(papycontact, filename, os.path.getsize(completepath), cnt)
+        papysession = self._ft_manager.send(papycontact, filename, os.path.getsize(completepath), preview_data)
  
         tr = e3.base.FileTransfer(papysession, papysession.filename, \
         papysession.size, papysession.preview, sender='Me', completepath=completepath)

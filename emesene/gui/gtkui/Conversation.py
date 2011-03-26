@@ -19,6 +19,7 @@
 import gtk
 import glib
 
+import utils
 import gui
 import extension
 
@@ -426,6 +427,9 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         increment()
         return True
+
+    def get_preview(self, completepath):
+        return utils.makePreview(completepath)
 
     def on_user_typing(self, account):
         """

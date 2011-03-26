@@ -20,6 +20,8 @@
 import os
 import gtk
 import pango
+import hashlib
+import tempfile
 
 import e3
 
@@ -169,4 +171,19 @@ def simple_images_overlap(pixbuf_src,pixbuf_dest,x,y):
          ystart=pixbuf_src.props.height
 
     pixbuf_dest.composite(pixbuf_src, 0, 0, pixbuf_src.props.width, pixbuf_src.props.height, xstart+x, ystart+y, 1.0, 1.0, gtk.gdk.INTERP_HYPER, 255)
+    
+
+def makePreview(src):
+
+    pbf = gtk_pixbuf_load(src,(96,96))
+
+    filetmp = tempfile.mkstemp(prefix=hashlib.md5(src).hexdigest(), suffix=hashlib.md5(src).hexdigest())[1]
+
+    pbf.save(filetmp,"png")
+    
+    out_file = open(filetmp,"rb")
+    cnt = out_file.read()
+    out_file.close()
+
+    return cnt
 

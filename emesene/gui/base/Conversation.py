@@ -106,6 +106,9 @@ class Conversation(object):
         self.cstyle = e3.Style(font, color, font_bold, font_italic,
             font_underline, font_strike, font_size)
 
+    def get_preview(self, completepath):
+        return None
+
     def on_font_selected(self, style):
         '''called when a new font is selected'''
         self.cstyle = style
@@ -127,7 +130,7 @@ class Conversation(object):
     def on_filetransfer_invite(self, filename, completepath):
         '''called when a filetransfer is issued'''
         self.session.filetransfer_invite(self.cid, self.members[0],
-                filename, completepath)
+                filename, completepath, self.get_preview(completepath))
 
     def on_video_call(self):
         '''called when the user is requesting a video-only call'''

@@ -80,9 +80,9 @@ class Session(e3.Session):
         '''invite a contact to a conversation'''
         self.add_action(e3.Action.ACTION_CONV_INVITE, (cid, account))
 
-    def filetransfer_invite(self, cid, account, filename, completepath):
+    def filetransfer_invite(self, cid, account, filename, completepath, preview_data):
         '''send a file to the first user of the conversation'''
-        self.add_action(e3.Action.ACTION_FT_INVITE, (cid, account, filename, completepath))
+        self.add_action(e3.Action.ACTION_FT_INVITE, (cid, account, filename, completepath, preview_data))
 
     def call_invite(self, cid, account, a_v_both, surface_other, surface_self):
         '''try to start a call with the first user of the conversation'''
