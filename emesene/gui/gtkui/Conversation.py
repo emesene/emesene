@@ -179,10 +179,11 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_index = -1 # used to select an existing conversation
         self.index = 0 # used for the rotate picture function
         self.rotate_started = False
+        self.timer = 0
 
         if self.group_chat:
             self.rotate_started = True #to prevents more than one timeout_add
-            glib.timeout_add_seconds(5, self.rotate_picture)
+            self.timer = glib.timeout_add_seconds(5, self.rotate_picture)
 
     def _on_avatar_click(self, widget, data):
         '''method called when user click on his avatar
@@ -264,6 +265,10 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.on_filetransfer_completed)
         self.session.signals.call_invitation.unsubscribe(
                 self.on_call_invitation)
+
+        #stop the group chat image rotation timer, if it's started
+        if self.rotate_started:
+            glib.source_remove(self.timer)
 
         #stop the avatars animation...if any..
         self.avatar.stop()
@@ -350,7 +355,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         if not self.rotate_started:
             self.rotate_started = True
-            glib.timeout_add_seconds(5, self.rotate_picture)
+            self.timer = glib.timeout_add_seconds(5, self.rotate_picture)
 
         #TODO add plus support for nick to the tab label!
         members_nick = []
@@ -415,7 +420,14 @@ class Conversation(gtk.VBox, gui.Conversation):
             else:
                 self.index = 0
 
+        if len(self.members) == 1:
+            self.index = 0
+            glib.source_remove(self.timer)
+            self.rotate_started = False
+        elif self.index > len(self.members):
+            self.index = 0
         contact = self.session.contacts.get(self.members[self.index])
+
         if contact is None:
             increment()
             return True
