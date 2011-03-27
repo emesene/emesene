@@ -221,6 +221,7 @@ class Worker(e3.base.Worker, papyon.Client):
         avatars = self.caches.get_avatar_cache(papycontact.account)
         if 'last' in avatars:
             contact.picture = os.path.join(avatars.path, 'last')
+        self._on_contact_msnobject_changed(papycontact)
 
     def _add_group(self, papygroup):
         ''' method to add a group to the (gui) contact list '''
