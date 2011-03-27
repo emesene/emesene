@@ -637,13 +637,12 @@ class Worker(e3.base.Worker, papyon.Client):
             avatars = self.caches.get_avatar_cache(contact.account)
             avatar_hash = msn_object._data_sha.encode("hex")
             avatar_path = os.path.join(avatars.path, avatar_hash)
+            ctct = self.session.contacts.get(contact.account)
 
             if avatar_hash in avatars:
+                if ctct: ctct.picture = avatar_path
                 self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED,
                         contact.account, avatar_path)
-                self.session.add_event(Event.EVENT_CONTACT_ATTR_CHANGED,
-                        contact.account, 'picture', avatar_path)
-
                 return avatar_path
 
             def download_failed(reason):
@@ -651,22 +650,17 @@ class Worker(e3.base.Worker, papyon.Client):
 
             def download_ok(msnobj, callback):
                 avatars.insert_raw(msnobj._data)
-                ctct = self.session.contacts.get(contact.account)
-
-                if ctct:
-                    ctct.picture = avatar_path
-
+                if ctct: ctct.picture = avatar_path
                 self.session.add_event(Event.EVENT_PICTURE_CHANGE_SUCCEED,
                         contact.account, avatar_path)
 
             if msn_object._type not in (
                     papyon.p2p.MSNObjectType.DYNAMIC_DISPLAY_PICTURE,
-                        papyon.p2p.MSNObjectType.DISPLAY_PICTURE):
+                    papyon.p2p.MSNObjectType.DISPLAY_PICTURE):
                 return
 
-            if avatar_hash not in avatars:
-                self.msn_object_store.request(msn_object, \
-                    (download_ok, download_failed), peer=contact)
+            self.msn_object_store.request(msn_object, \
+                (download_ok, download_failed), peer=contact)
 
     # address book events
     def _on_addressbook_contact_pending(self, contact):
