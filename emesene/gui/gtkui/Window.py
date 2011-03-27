@@ -171,7 +171,6 @@ class Window(gtk.Window):
     def show(self):
         '''override the method to set the position
         '''
-        gtk.Window.deiconify(self)
         gtk.Window.show(self)
         self.set_location()
 

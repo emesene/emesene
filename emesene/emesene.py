@@ -549,8 +549,10 @@ class Controller(object):
 
                 if self.session.config.b_conv_minimized:
                     window.iconify()
-
-                window.show()
+                    window.show()
+                    window.iconify()
+                else:
+                    window.show()
 
             else:
                 conv_manager = self.conversations[0]
