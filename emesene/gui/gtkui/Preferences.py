@@ -724,7 +724,7 @@ class Extension(BaseTable):
         ext, identifier = self.extension_list[extension_index]
         if not extension.set_default_by_id(category, identifier):
             # TODO: revert the selection to the previous selected extension
-            log.warning(_('Could not set %s as default extension for %s') % \
+            log.warning(_('Could not set %1 as default extension for %2') % \
                 (extension_index, category))
             return
         else:
