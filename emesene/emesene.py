@@ -547,7 +547,7 @@ class Controller(object):
                 conv_manager = window.content
                 self.conversations.append(conv_manager)
 
-                if self.session.config.b_conv_minimized:
+                if self.session.config.b_conv_minimized and other_started:
                     window.iconify()
                     window.show()
                     window.iconify()
