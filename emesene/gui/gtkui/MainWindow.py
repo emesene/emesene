@@ -174,6 +174,10 @@ class MainWindow(gtk.VBox):
 
     def _on_contact_menu_selected(self, contact):
         '''callback for the contact-menu-selected signal'''
+        if contact.blocked:
+            self.contact_menu.set_blocked()
+        else:
+            self.contact_menu.set_unblocked()
         self.contact_menu.popup(None, None, None, 0, 0)
 
     def _on_group_menu_selected(self, group):

@@ -68,10 +68,20 @@ class ContactMenu(gtk.Menu):
         self.view_info.connect('activate',
             lambda *args: self.handler.on_view_information_selected())
 
+        self.set_unblocked()
+
         self.append(self.add)
         self.append(self.remove)
         self.append(self.block)
         self.append(self.unblock)
         self.append(self.set_alias)
         self.append(self.view_info)
+
+    def set_blocked(self):
+        self.unblock.set_sensitive(True)
+        self.block.set_sensitive(False)
+
+    def set_unblocked(self):
+        self.unblock.set_sensitive(False)
+        self.block.set_sensitive(True)
 
