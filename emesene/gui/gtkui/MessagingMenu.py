@@ -20,6 +20,7 @@ import os
 import time
 import utils
 import indicate
+import Renderers
 
 from BaseTray import BaseTray
 
@@ -111,7 +112,7 @@ class MessagingMenu(BaseTray):
                 if not (conv_manager.is_active() and \
                          conv.members == [account]):
 
-                    self._create_indicator("im", contact.nick, account, cid=cid)
+                    self._create_indicator("im", Renderers.msnplus_to_plain_text(contact.nick), account, cid=cid)
 
     def _on_message_read(self, conv):
         """
