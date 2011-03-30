@@ -22,6 +22,7 @@ import os
 import xml.sax.saxutils
 import re
 import base64
+import urllib
 
 import gui
 
@@ -118,6 +119,8 @@ def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
                 path = gui.theme.emote_to_path(shortcut)
             else:
                 path = os.path.join(cedir, cedict[shortcut])
+                if os.name == "nt":
+                    path = path_to_url(path)
 
             if path is not None:
                 # creating sort of uid for image name since different users
@@ -159,3 +162,14 @@ def urlify(strng):
     '''replace urls by an html link'''
     return re.sub(URL_REGEX, replace_urls, strng)
 
+def path_to_url(path):
+    if os.name == "nt":
+        # on windows os.path.join uses backslashes
+        path = path.replace("\\", "/")
+        #path = path[2:]
+        path = "localhost/" + path
+
+    path = urllib.quote(path)
+    path = "file://" + path
+
+    return path

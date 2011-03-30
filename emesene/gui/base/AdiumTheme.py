@@ -124,8 +124,8 @@ class AdiumTheme(object):
 
         msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir, msg.sender)
         msgtext = MarkupParser.urlify(msgtext)
-        image_path = escape(path_to_url(msg.image_path))
-        status_path = escape(path_to_url(msg.status_path))
+        image_path = escape(MarkupParser.path_to_url(msg.image_path))
+        status_path = escape(MarkupParser.path_to_url(msg.status_path))
 
         if style is not None:
             msgtext = style_message(msgtext, style)
@@ -185,7 +185,7 @@ class AdiumTheme(object):
         '''return the template to put as html content
         '''
         path = urljoin("gui", "base", "template.html")
-        resources_url = path_to_url(self.resources_path)
+        resources_url = MarkupParser.path_to_url(self.resources_path)
         template = read_file(path)
         css_path = urljoin(resources_url, "main.css")
         variant_name = self.info.get('DefaultVariant', None)
@@ -261,14 +261,3 @@ def replace_time(match):
 def style_message(msgtext, style):
     '''add html markupt to msgtext to format the style of the message'''
     return '<span style="%s">%s</span>' % (style.to_css(), msgtext)
-
-def path_to_url(path):
-    if os.name == "nt":
-        # on windows os.path.join uses backslashes
-        path = path.replace("\\", "/")
-        path = path[2:]
-
-    path = urllib.quote(path)
-    path = "file://" + path
-
-    return path
