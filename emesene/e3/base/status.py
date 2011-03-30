@@ -22,8 +22,8 @@ ORDERED = [ONLINE, BUSY, AWAY, IDLE, OFFLINE]
 ALL = ORDERED
 
 STATUS = {}
-STATUS[ONLINE] = "online"
-STATUS[OFFLINE] = "offline"
-STATUS[BUSY] = "busy"
-STATUS[AWAY] = "away"
-STATUS[IDLE] = "idle"
+STATUS[ONLINE] = _("online")
+STATUS[OFFLINE] = _("offline")
+STATUS[BUSY] = _("busy")
+STATUS[AWAY] = _("away")
+STATUS[IDLE] = _("idle")
