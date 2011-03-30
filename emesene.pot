@@ -8,13 +8,33 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-27 19:36+0200\n"
+"POT-Creation-Date: 2011-03-30 12:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: emesene/e3/base/status.py:25
+msgid "online"
+msgstr ""
+
+#: emesene/e3/base/status.py:26
+msgid "offline"
+msgstr ""
+
+#: emesene/e3/base/status.py:27
+msgid "busy"
+msgstr ""
+
+#: emesene/e3/base/status.py:28
+msgid "away"
+msgstr ""
+
+#: emesene/e3/base/status.py:29
+msgid "idle"
+msgstr ""
 
 #: emesene/gui/gtkui/AccountMenu.py:39 emesene/gui/gtkui/Dialog.py:824
 msgid "Change profile"

@@ -1,2 +1,2 @@
 How to create/update a pot (translation template) file:
-xgettext emesene/*.py emesene/gui/gtkui/*.py -o emesene.pot
+xgettext emesene/*.py emesene/e3/base/status.py emesene/gui/gtkui/*.py -o emesene.pot
