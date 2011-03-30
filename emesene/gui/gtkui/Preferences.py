@@ -436,17 +436,22 @@ class BaseTable(gtk.Table):
                 syn.start_synch(self.session)
                 self.session.config.logs_imported = True
                 self.session.config.get_or_set("synch_retry",False)
-                self.session.save_config()
 
             elif response == gui.stock.NO:
                 self.session.config.logs_imported = True
                 self.session.config.get_or_set("synch_retry",True)
-                self.session.save_config()
 
-        if not self.session.config.get_or_set("logs_imported",False) and syn.exists_source():
+        def show_dialog():
             dialog = extension.get_default('dialog')
             dialog.yes_no_cancel(
                 _("Do you want to synch with emesene 1?"), synch_cb)
+
+        if not self.session.config.get_or_set("logs_imported",False) and syn.exists_source():
+            show_dialog()
+            return
+        if self.session.config.get_or_set("synch_retry",False):
+            show_dialog()
+            return
 
 
 class Interface(BaseTable):
