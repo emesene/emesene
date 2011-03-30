@@ -606,6 +606,26 @@ class Theme(BaseTable):
 
         self.session.config.get_or_set('adium_theme', 'renkoo')
 
+        override_text_color = self.get_attr('session.config.b_override_text_color')
+        cb_override_text_color = gtk.CheckButton(_('Override incoming text color'))
+        cb_override_text_color.set_active(override_text_color)
+        cb_override_text_color.connect('toggled', self.on_toggled, 
+                                        'session.config.b_override_text_color')
+
+        def on_color_selected(cb):
+            col = cb.get_color()
+            col_e3 = e3.base.Color(col.red, col.green, col.blue)
+            self.set_attr('session.config.override_text_color', '#'+col_e3.to_hex())
+
+        b_text_color = gtk.ColorButton(color=gtk.gdk.color_parse(
+                            self.get_attr('session.config.override_text_color')))
+        b_text_color.set_use_alpha(False)
+        b_text_color.connect('color-set', on_color_selected)
+        h_color_box = gtk.HBox()
+        h_color_box.pack_start(cb_override_text_color)
+        h_color_box.pack_start(b_text_color)
+
+        self.append_row(h_color_box)
         self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
         self.append_combo(_('Sound theme'), gui.theme.get_sound_themes,

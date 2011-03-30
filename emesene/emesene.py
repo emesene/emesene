@@ -477,6 +477,8 @@ class Controller(object):
                 'renkoo.AdiumMessageStyle')
         self.session.config.get_or_set('b_enable_spell_check', False)
         self.session.config.get_or_set('b_download_folder_per_account', False)
+        self.session.config.get_or_set('b_override_text_color', False)
+        self.session.config.get_or_set('override_text_color', '#000000')
 
         self.timeout_id = glib.timeout_add(500,
                 self.session.signals._handle_events)

@@ -277,6 +277,9 @@ class Conversation(object):
             contact = e3.Contact(account)
 
         if message.type == e3.Message.TYPE_MESSAGE or message.type == e3.Message.TYPE_FLNMSG:
+            if self.session.config.b_override_text_color:
+                message.style.color = e3.base.Color.from_hex(self.session.config.override_text_color)
+
             user_emcache = self.caches.get_emoticon_cache(account)
             self.output.receive_message(self.formatter, contact, message,
                     received_custom_emoticons, user_emcache.path, self.first)
