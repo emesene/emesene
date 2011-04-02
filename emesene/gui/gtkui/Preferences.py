@@ -514,8 +514,13 @@ class Interface(BaseTable):
             'session.config.b_show_info')
         self.append_check(_('Show conversation toolbar'),
             'session.config.b_show_toolbar')
-        self.append_check(_('Small conversation toolbar'),
+        # small-toolbar sensitivity depends on conversation toolbar visibility
+        self.cb_small_toolbar = self.create_check(_('Small conversation toolbar'), 
             'session.config.b_toolbar_small')
+        self.session.config.subscribe(self._on_cb_show_toolbar_changed,
+            'b_show_toolbar')
+        self.append_row(self.cb_small_toolbar)
+
         # Avatar-on-left sensitivity depends on side panel visibility
         self.cb_avatar_left = self.create_check(_('Avatar on conversation left side'), 
             'session.config.b_avatar_on_left')
@@ -547,7 +552,16 @@ class Interface(BaseTable):
         self._on_spell_change(self.session.config.get_or_set('b_enable_spell_check', False))
         #update side-panel dependent options sensitivity
         self._on_cb_side_panel_changed(self.session.config.get_or_set('b_show_info', True))
+        #update small-toolbar sensitivity
+        self._on_cb_show_toolbar_changed(self.session.config.get_or_set('b_show_toolbar', True))
+
         self.show_all()
+
+    def _on_cb_show_toolbar_changed(self, value):
+        if value:
+            self.cb_small_toolbar.set_sensitive(True)
+        else:
+            self.cb_small_toolbar.set_sensitive(False)
 
     def _on_cb_side_panel_changed(self, value):
         if value:
