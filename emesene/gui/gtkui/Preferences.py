@@ -276,14 +276,21 @@ class BaseTable(gtk.Table):
 
         self.append_row(hbox, None)
 
-    def append_check(self, text, property_name, row=None):
-        """append a row with a check box with text as label and
+    def create_check(self, text, property_name):
+        """create a CheckButton and
         set the check state with default
         """
         default = self.get_attr(property_name)
         widget = gtk.CheckButton(text)
         widget.set_active(default)
         widget.connect('toggled', self.on_toggled, property_name)
+        return widget
+
+    def append_check(self, text, property_name, row=None):
+        """append a row with a check box with text as label and
+        set the check state with default
+        """
+        widget = self.create_check(text, property_name)
         self.append_row(widget, row)
         return widget
 
@@ -630,34 +637,26 @@ class Theme(BaseTable):
 
         self.session.config.get_or_set('adium_theme', 'renkoo')
 
-        override_text_color = self.get_attr('session.config.b_override_text_color')
-        def _on_cb_override_text_color_toggled(self, config):
-            if self.get_active():
-                b_text_color.set_sensitive(True)
-            else:
-                b_text_color.set_sensitive(False)
-            config.set_attr('session.config.b_override_text_color', self.get_active())
-
-        cb_override_text_color = gtk.CheckButton(_('Override incoming text color'))
-        cb_override_text_color.set_active(override_text_color)
-        cb_override_text_color.connect('toggled', _on_cb_override_text_color_toggled, self)
+        cb_override_text_color = self.create_check(_('Override incoming text color'), 'session.config.b_override_text_color')
+        self.session.config.subscribe(self._on_cb_override_text_color_toggled,
+            'b_override_text_color')
 
         def on_color_selected(cb):
             col = cb.get_color()
             col_e3 = e3.base.Color(col.red, col.green, col.blue)
             self.set_attr('session.config.override_text_color', '#'+col_e3.to_hex())
 
-        b_text_color = gtk.ColorButton(color=gtk.gdk.color_parse(
+        self.b_text_color = gtk.ColorButton(color=gtk.gdk.color_parse(
                             self.get_attr('session.config.override_text_color')))
-        b_text_color.set_use_alpha(False)
-        b_text_color.connect('color-set', on_color_selected)
+        self.b_text_color.set_use_alpha(False)
+        self.b_text_color.connect('color-set', on_color_selected)
         h_color_box = gtk.HBox()
         h_color_box.pack_start(cb_override_text_color)
-        h_color_box.pack_start(b_text_color)
+        h_color_box.pack_start(self.b_text_color)
 
         self.append_row(h_color_box)
         #update ColorButton sensitive
-        _on_cb_override_text_color_toggled(cb_override_text_color, self)
+        self._on_cb_override_text_color_toggled(self.session.config.get_or_set('b_override_text_color', False))
 
         self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
@@ -674,6 +673,12 @@ class Theme(BaseTable):
 
         self.add_button(_('Apply'), 0, 7,
                 self.on_redraw_main_screen, 0, 0)
+
+    def _on_cb_override_text_color_toggled(self, value):
+        if value:
+            self.b_text_color.set_sensitive(True)
+        else:
+            self.b_text_color.set_sensitive(False)
 
 class Extension(BaseTable):
     """the panel to display/modify the config related to the extensions
