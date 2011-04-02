@@ -531,6 +531,7 @@ class Interface(BaseTable):
             'b_conversation_tabs')
 
         self._on_conversation_tabs_change(self.session.config.get_or_set('b_conversation_tabs', True))
+        self._on_spell_change(self.session.config.get_or_set('b_enable_spell_check', False))
         self.show_all()
 
     def _on_spell_change(self, value):
