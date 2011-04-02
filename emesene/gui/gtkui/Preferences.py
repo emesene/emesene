@@ -612,10 +612,16 @@ class Theme(BaseTable):
         self.session.config.get_or_set('adium_theme', 'renkoo')
 
         override_text_color = self.get_attr('session.config.b_override_text_color')
+        def _on_cb_override_text_color_toggled(self, config):
+            if self.get_active():
+                b_text_color.set_sensitive(True)
+            else:
+                b_text_color.set_sensitive(False)
+            config.set_attr('session.config.b_override_text_color', self.get_active())
+
         cb_override_text_color = gtk.CheckButton(_('Override incoming text color'))
         cb_override_text_color.set_active(override_text_color)
-        cb_override_text_color.connect('toggled', self.on_toggled, 
-                                        'session.config.b_override_text_color')
+        cb_override_text_color.connect('toggled', _on_cb_override_text_color_toggled, self)
 
         def on_color_selected(cb):
             col = cb.get_color()
@@ -631,6 +637,9 @@ class Theme(BaseTable):
         h_color_box.pack_start(b_text_color)
 
         self.append_row(h_color_box)
+        #update ColorButton sensitive
+        _on_cb_override_text_color_toggled(cb_override_text_color, self)
+
         self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
         self.append_combo(_('Sound theme'), gui.theme.get_sound_themes,
