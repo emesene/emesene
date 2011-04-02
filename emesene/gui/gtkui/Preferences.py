@@ -516,8 +516,12 @@ class Interface(BaseTable):
             'session.config.b_show_toolbar')
         self.append_check(_('Small conversation toolbar'),
             'session.config.b_toolbar_small')
-        self.append_check(_('Avatar on conversation left side'),
+        # Avatar-on-left sensitivity depends on side panel visibility
+        self.cb_avatar_left = self.create_check(_('Avatar on conversation left side'), 
             'session.config.b_avatar_on_left')
+        self.session.config.subscribe(self._on_cb_side_panel_changed,
+            'b_show_info')
+        self.append_row(self.cb_avatar_left)
         self.append_check(_('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
         self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
@@ -537,9 +541,19 @@ class Interface(BaseTable):
         self.session.config.subscribe(self._on_conversation_tabs_change,
             'b_conversation_tabs')
 
+        #update tab_pos combo sensitivity
         self._on_conversation_tabs_change(self.session.config.get_or_set('b_conversation_tabs', True))
+        #update spell lang combo sensitivity
         self._on_spell_change(self.session.config.get_or_set('b_enable_spell_check', False))
+        #update side-panel dependent options sensitivity
+        self._on_cb_side_panel_changed(self.session.config.get_or_set('b_show_info', True))
         self.show_all()
+
+    def _on_cb_side_panel_changed(self, value):
+        if value:
+            self.cb_avatar_left.set_sensitive(True)
+        else:
+            self.cb_avatar_left.set_sensitive(False)
 
     def _on_spell_change(self, value):
         if value:
