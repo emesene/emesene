@@ -315,9 +315,8 @@ class BaseTable(gtk.Table):
 
         self.append_row(hbox, None)
 
-    def append_combo(self, text, getter, property_name,values=None):
-        """append a row with a check box with text as label and
-        set the check state with default
+    def create_combo_with_label(self, text, getter, property_name,values=None):
+        """creates and return a new ComboBox with a label and append values to the combo
         """      
         if values:
             default = getter()[values.index(self.get_attr(property_name))]
@@ -344,6 +343,13 @@ class BaseTable(gtk.Table):
         hbox.pack_start(combo, False)
 
         combo.connect('changed', self.on_combo_changed, property_name, values)
+
+        return hbox
+
+    def append_combo(self, text, getter, property_name,values=None):
+        """append a label and a combo and adds values to it
+        """
+        hbox = self.create_combo_with_label(text, getter, property_name,values)
         self.append_row(hbox, None)
 
     def append_markup(self, text):
@@ -461,7 +467,7 @@ class Interface(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 4, 2)
+        BaseTable.__init__(self, 17, 2)
         self.set_border_width(5)
         self.session = session
 
@@ -478,6 +484,9 @@ class Interface(BaseTable):
                 self.lang_menu.set_active(index)
             index += 1
 
+        self.tab_pos_cb = self.create_combo_with_label(_('Tab position'), self.get_tab_positions,
+                'session.config.i_tab_position',range(4))
+
         self.append_markup('<b>'+_('Main window:')+'</b>')
         self.append_check(_('Show user panel'),
             'session.config.b_show_userpanel')
@@ -488,8 +497,9 @@ class Interface(BaseTable):
         self.session.config.get_or_set('i_tab_position', 0)
         self.append_check(_('Tabbed Conversations'),
                 'session.config.b_conversation_tabs')
-        self.append_combo(_('Tab position'),self.get_tab_positions,
-                'session.config.i_tab_position',range(4))
+#        self.append_combo(_('Tab position'), self.get_tab_positions,
+#                'session.config.i_tab_position',range(4))
+        self.append_row(self.tab_pos_cb)
         self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
         self.append_check(_('Start minimized/iconified'), 'session.config.b_conv_minimized')
         self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
@@ -507,7 +517,7 @@ class Interface(BaseTable):
             'session.config.b_allow_auto_scroll')
         self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
             'session.config.b_enable_spell_check')
-        self.attach(self.lang_menu, 2, 3, 13, 14) 
+        self.attach(self.lang_menu, 2, 3, 13, 14)
         self.append_check(_('Show avatars in taskbar instead of status icons'), 
             'session.config.b_show_avatar_in_taskbar')
 
@@ -518,7 +528,7 @@ class Interface(BaseTable):
         
         self.session.config.subscribe(self._on_spell_change,
             'b_enable_spell_check')
-        
+
         self.show_all()
 
     def _on_spell_change(self, value):
