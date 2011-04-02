@@ -497,8 +497,6 @@ class Interface(BaseTable):
         self.session.config.get_or_set('i_tab_position', 0)
         self.append_check(_('Tabbed Conversations'),
                 'session.config.b_conversation_tabs')
-#        self.append_combo(_('Tab position'), self.get_tab_positions,
-#                'session.config.i_tab_position',range(4))
         self.append_row(self.tab_pos_cb)
         self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
         self.append_check(_('Start minimized/iconified'), 'session.config.b_conv_minimized')
@@ -529,6 +527,10 @@ class Interface(BaseTable):
         self.session.config.subscribe(self._on_spell_change,
             'b_enable_spell_check')
 
+        self.session.config.subscribe(self._on_conversation_tabs_change,
+            'b_conversation_tabs')
+
+        self._on_conversation_tabs_change(self.session.config.get_or_set('b_conversation_tabs', True))
         self.show_all()
 
     def _on_spell_change(self, value):
@@ -536,6 +538,12 @@ class Interface(BaseTable):
             self.lang_menu.set_sensitive(True)
         else:
             self.lang_menu.set_sensitive(False)
+
+    def _on_conversation_tabs_change(self, value):
+        if value:
+            self.tab_pos_cb.set_sensitive(True)
+        else:
+            self.tab_pos_cb.set_sensitive(False)
 
     def _on_lang_combo_change(self, combo):
         self.session.config.spell_lang = combo.get_active_text()
