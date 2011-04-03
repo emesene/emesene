@@ -253,6 +253,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         if group:
             self.group_selected.emit(group)
+            if self.row_expanded(path):
+                self.collapse_row(path)
+            else:
+                self.expand_row(path, False)
         elif contact:
             self.contact_selected.emit(contact)
         else:
