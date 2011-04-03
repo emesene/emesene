@@ -69,11 +69,9 @@ class Indicator(appindicator.Indicator):
             self.conversations = None
 
             self.menu = None
+            self.messaging_menu = None
             self.set_login()
             self.set_status(appindicator.STATUS_ACTIVE)
-
-            self.messaging_menu = None
-
 
     def set_visible(self, arg):
         """ dummy, indicators remove themselves automagically """
