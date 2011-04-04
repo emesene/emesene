@@ -38,6 +38,7 @@ def gtk_main(Controller):
     import config_gtk
     import ContactMenu
     import ContactList
+    import SyncTool
     import ContactInfo
     import Conversation
     import ConversationManager
@@ -131,6 +132,7 @@ def setup():
     extension.category_register('window frame', Window.Window)
     extension.category_register('main window', MainWindow.MainWindow)
     extension.category_register('contact list', ContactList.ContactList)
+    extension.category_register('synch tool', SyncTool.SyncTool)
     extension.category_register('nick renderer', Renderers.CellRendererPlus)
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
     extension.category_register('user panel', UserPanel.UserPanel)

@@ -20,7 +20,6 @@ import gtk
 import webbrowser
 
 import e3.common
-from e3.synch.synchronizer import *
 import gui
 import utils
 import extension
@@ -440,32 +439,9 @@ class BaseTable(gtk.Table):
 
     def on_synch_emesene1(self, button):
         """called when the Synch test button is clicked"""
-        syn = get_synchronizer("emesene")
-        syn.set_user(self.session._account.account)
-
-        def synch_cb(response):
-            '''callback for DialogManager.yes_no, asking to synch'''
-            if response == gui.stock.YES:
-                syn.start_synch(self.session)
-                self.session.config.logs_imported = True
-                self.session.config.get_or_set("synch_retry",False)
-
-            elif response == gui.stock.NO:
-                self.session.config.logs_imported = True
-                self.session.config.get_or_set("synch_retry",True)
-
-        def show_dialog():
-            dialog = extension.get_default('dialog')
-            dialog.yes_no_cancel(
-                _("Do you want to synch with emesene 1?"), synch_cb)
-
-        if not self.session.config.get_or_set("logs_imported",False) and syn.exists_source():
-            show_dialog()
-            return
-        if self.session.config.get_or_set("synch_retry",False):
-            show_dialog()
-            return
-
+        syn = extension.get_default('synch tool')
+        syn = syn(self.session, "emesene")
+        syn.show()
 
 class Interface(BaseTable):
     """the panel to display/modify the config related to the gui
