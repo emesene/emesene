@@ -259,8 +259,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 self.expand_row(path, False)
         elif contact:
             self.contact_selected.emit(contact)
-        else:
-            log.debug('nothing selected?')
+        else: # "no group"-group
+            if self.row_expanded(path):
+                self.collapse_row(path)
+            else:
+                self.expand_row(path, False)
 
     def _on_button_press_event(self, treeview, event):
         '''callback called when the user press a button over a row
