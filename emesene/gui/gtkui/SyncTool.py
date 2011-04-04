@@ -37,10 +37,10 @@ class SyncTool(object):
         '''callback for DialogManager.yes_no, asking to synch'''
         if response == gui.stock.YES:
             self._syn.start_synch(self._session)
-            self.session.config.logs_imported = True
-            self.session.config.get_or_set("synch_retry",False)
+            self._session.config.logs_imported = True
+            self._session.config.get_or_set("synch_retry",False)
 
         elif response == gui.stock.NO:
-            self.session.config.logs_imported = True
-            self.session.config.get_or_set("synch_retry",True)
+            self._session.config.logs_imported = True
+            self._session.config.get_or_set("synch_retry",True)
 
