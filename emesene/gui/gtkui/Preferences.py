@@ -323,7 +323,7 @@ class BaseTable(gtk.Table):
 
     def create_combo_with_label(self, text, getter, property_name,values=None):
         """creates and return a new ComboBox with a label and append values to the combo
-        """      
+        """
         if values:
             default = getter()[values.index(self.get_attr(property_name))]
         else:
@@ -467,6 +467,7 @@ class Interface(BaseTable):
                 self.lang_menu.set_active(index)
             index += 1
 
+        self.session.config.get_or_set('i_tab_position', 0)
         self.tab_pos_cb = self.create_combo_with_label(_('Tab position'), self.get_tab_positions,
                 'session.config.i_tab_position',range(4))
 
@@ -477,7 +478,6 @@ class Interface(BaseTable):
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
         self.session.config.get_or_set('b_conversation_tabs', True)
-        self.session.config.get_or_set('i_tab_position', 0)
         self.append_check(_('Tabbed Conversations'),
                 'session.config.b_conversation_tabs')
         self.append_row(self.tab_pos_cb)
