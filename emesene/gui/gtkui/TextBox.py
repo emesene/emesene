@@ -322,7 +322,7 @@ class InputText(TextBox):
 class OutputText(TextBox):
     '''a widget that is used to display the messages on the conversation'''
     NAME = 'Output Text'
-    DESCRIPTION = 'A widget to display the conversation messages'
+    DESCRIPTION = _('A widget to display the conversation messages')
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
