@@ -24,6 +24,7 @@ import glib
 import gtk
 import pango
 import os
+import Renderers
 
 import logging
 log = logging.getLogger('gui.gtkui.GtkNotification')
@@ -115,6 +116,10 @@ def gtkNotification(title, text, picturePath=None, const=None, callback=None):
 
     # TODO: we can have an option to use a queue or show notifications
     # like the oldNotification plugin of emesene1.6 (WLM-like)
+
+    if (const=='message-im'):
+        #In this case title is contact nick
+        title = Renderers.msnplus_to_plain_text(title)
 
     if actual_notification is None:
         actual_notification = Notification(title, text, picturePath, callback)

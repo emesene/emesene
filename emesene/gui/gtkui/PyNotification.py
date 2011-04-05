@@ -20,6 +20,7 @@ import pynotify
 if not pynotify.init("emesene"):
     raise ImportError
 
+import Renderers
 import logging
 log = logging.getLogger('gui.gtkui.PyNotification')
 
@@ -29,6 +30,9 @@ AUTHOR = 'arielj'
 WEBSITE = 'www.emesene.org'
 
 def pyNotification(title, text, picturePath=None,const=None):
+    if (const=='message-im'):
+        #In this case title is contact nick
+        title = Renderers.msnplus_to_plain_text(title)
     n = pynotify.Notification(title, text, picturePath)
     n.set_hint_string("append", "allowed")
     n.show()
