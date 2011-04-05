@@ -1211,6 +1211,24 @@ class EmotesWindow(gtk.Window):
             gobject.source_remove(self.tag)
             self.tag = None
 
+    def _get_emo_image(self, path, size):
+        '''try to return an image from path
+        '''
+        width, height = size
+        try:
+            animation = gtk.gdk.PixbufAnimation(path)
+        except gobject.GError:
+            return None
+
+        if animation.is_static_image():
+            pix = utils.gtk_pixbuf_load(path, (width, height))
+            picture = gtk.image_new_from_pixbuf(pix)
+        else:
+            myanimation = utils.simple_animation_scale(path, width, height)
+            picture = gtk.image_new_from_animation(myanimation)
+
+        return picture
+
     def _fill_emote_table(self, columns):
         '''fill the gtk.Table with the emoticons'''
         emotes = []
@@ -1233,7 +1251,7 @@ class EmotesWindow(gtk.Window):
                 log.debug(shortcut + ' has no path')
                 continue
 
-            button.set_image(utils.safe_gtk_image_load(path, (20, 20)))
+            button.set_image(self._get_emo_image(path, (20, 20)))
             button.set_tooltip_text(shortcut)
             button.set_relief(gtk.RELIEF_NONE)
             button.connect('clicked', self._on_emote_selected, shortcut)
@@ -1249,7 +1267,7 @@ class EmotesWindow(gtk.Window):
             button = gtk.Button()
             path = os.path.join(self.emcache.path, hash_)
 
-            button.set_image(utils.safe_gtk_image_load(path, (20, 20)))
+            button.set_image(self._get_emo_image(path, (20, 20)))
             button.set_tooltip_text(shortcut)
             button.set_relief(gtk.RELIEF_NONE)
             button.connect('clicked', self._on_emote_selected, shortcut)
