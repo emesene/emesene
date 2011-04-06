@@ -26,6 +26,18 @@ class SyncTool(object):
             return
 
 
+    def _show_finish(self):
+        '''called to show a message of finish'''
+        print "Sync has finished"
+        self._session.config.logs_imported = True
+        self._session.config.get_or_set("synch_retry",False)
+
+
+    def _show_progress(self, progress):
+        '''called everytime sync make a progress'''
+        print "Sync is at %d percent of its work" % progress
+
+
     def _show_dialog(self):
         '''called to show dialog'''
         dialog = extension.get_default('dialog')
@@ -36,9 +48,7 @@ class SyncTool(object):
     def _synch_cb(self, response):
         '''callback for DialogManager.yes_no, asking to synch'''
         if response == gui.stock.YES:
-            self._syn.start_synch(self._session)
-            self._session.config.logs_imported = True
-            self._session.config.get_or_set("synch_retry",False)
+            self._syn.start_synch(self._session, self._show_finish, self._show_progress)
 
         elif response == gui.stock.NO:
             self._session.config.logs_imported = True

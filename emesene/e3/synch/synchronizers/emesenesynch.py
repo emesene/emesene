@@ -43,8 +43,10 @@ class emesenesynch(synch):
 
             emesene1_usr_acc = (user_account.replace("@","_")).replace(".","_")
 
-            sourcedb = os.path.join(os.path.expanduser("~"),".config","emesene1.0",emesene1_usr_acc,"cache",user_account + ".db")
-            destdb = os.path.join(os.path.expanduser("~"),".config","emesene2","messenger.hotmail.com",user_account,"log","base.db")
+            sourcedb = os.path.join(os.path.expanduser("~"),".config","emesene1.0",
+                                    emesene1_usr_acc,"cache",user_account + ".db")
+            destdb = os.path.join(os.path.expanduser("~"),".config","emesene2",
+                                  "messenger.hotmail.com",user_account,"log","base.db")
 
             self.set_source_path(sourcedb)
             self.set_destination_path(destdb)
@@ -95,8 +97,11 @@ class emesenesynch(synch):
 
             id_conv = -1
             other_users_fetched = []
+            actual_conv = 0
+            conversations_list = conversations.fetchall()
+            total_conv = len(conversations_list)
 
-            for conv in conversations:
+            for conv in conversations_list:
 
                 users_fetched = []
                 
@@ -109,8 +114,15 @@ class emesenesynch(synch):
                 else:
                     users_fetched.extend(other_users_fetched)
 
+                actual_conv += 1.0
+
+                self._prog_callback( (actual_conv/total_conv) * 100.0 )
+
                 for user_fetched in users_fetched:
-                    conversations_attr.append({"user" : self.__user_to_account(conv[1]), "dest" : user_fetched, "time" : conv[2], "data" : self.__data_conversion(conv[3])})
+                    conversations_attr.append({"user" : self.__user_to_account(conv[1]), 
+                                               "dest" : user_fetched, 
+                                               "time" : conv[2], 
+                                               "data" : self.__data_conversion(conv[3])})
 
             """
             for conv in conversations_attr:
@@ -122,8 +134,11 @@ class emesenesynch(synch):
                 print "-------------"
                 #add the event in this form :: EVENT message 0 TEXT_OF_MESSAGE <account 'mail1'> <account 'mail2'> time
              """
+
             for conv in conversations_attr:
-                self._session.logger.log("message", 0, conv["data"], conv["user"], conv["dest"], conv["time"])
+                self._session.logger.log("message", 0, conv["data"], 
+                                         conv["user"], conv["dest"], conv["time"])
+
 
         def __user_to_account(self,user):
 

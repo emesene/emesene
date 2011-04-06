@@ -25,8 +25,10 @@ class synch(Thread):
         def __init__(self):
             Thread.__init__(self)
 
-        def start_synch(self, session):
+        def start_synch(self, session, end_callback, prog_callback):
             self._session = session
+            self._end_callback = end_callback
+            self._prog_callback = prog_callback
             self.start()
 
         def set_source_path(self,path):
@@ -37,6 +39,7 @@ class synch(Thread):
 
         def run(self):
             self._start_synch()
+            self._end_callback()
 
         def set_destination_path(self,path):
             self.__destpath=path
