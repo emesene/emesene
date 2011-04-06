@@ -49,9 +49,7 @@ class emesenesynch(synch):
             self.set_source_path(sourcedb)
             self.set_destination_path(destdb)
 
-        def start_synch(self, session, synch_function=None):
-
-            synch.start_synch(self, session, synch_function)
+        def _start_synch(self):
 
             #Get all old users
 

@@ -18,16 +18,25 @@
 #
 #    Module written by Andrea Stagi <stagi.andrea(at)gmail.com>
 
-class synch(object):
+from threading import Thread
+
+class synch(Thread):
 
         def __init__(self):
-            pass
+            Thread.__init__(self)
 
-        def start_synch(self, session, synch_function=None):
+        def start_synch(self, session):
             self._session = session
+            self.start()
 
         def set_source_path(self,path):
             self.__srcpath=path
+
+        def _start_synch(self):
+            pass
+
+        def run(self):
+            self._start_synch()
 
         def set_destination_path(self,path):
             self.__destpath=path
