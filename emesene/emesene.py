@@ -19,16 +19,38 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-from e3.common.utils import project_path
+import sys
+
+def we_are_frozen():
+    """Returns whether we are frozen via py2exe.
+    This will affect how we find out where we are located."""
+
+    return hasattr(sys, "frozen")
+
+def project_path():
+    """ This will get us the program's directory,
+    even if we are frozen using py2exe"""
+
+    if we_are_frozen():
+        return os.path.abspath(os.path.dirname(unicode(sys.executable, sys.getfilesystemencoding())))
+    this_module_path = os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))
+
+    return os.path.abspath(this_module_path)
 
 os.chdir(os.path.abspath(project_path()))
 
-import sys
-import glib
 import gettext
+# load translations
+if os.path.exists('default.mo'):
+    gettext.GNUTranslations(open('default.mo')).install()
+elif os.path.exists('po/'):
+    gettext.install('emesene', 'po/')
+else:
+    gettext.install('emesene')
+
+import glib
 import optparse
 import shutil
-
 import string
 
 import debugger
@@ -64,20 +86,11 @@ except Exception, exc:
 from pluginmanager import get_pluginmanager
 import extension
 import interfaces
-
 import gui
 
 # fix for gstreamer --help
 argv = sys.argv
 sys.argv = [argv[0]]
-
-# load translations
-if os.path.exists('default.mo'):
-    gettext.GNUTranslations(open('default.mo')).install()
-elif os.path.exists('po/'):
-    gettext.install('emesene', 'po/')
-else:
-    gettext.install('emesene')
 
 class SingleInstanceOption(object):
     '''option parser'''
