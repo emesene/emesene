@@ -382,6 +382,11 @@ class Controller(object):
         self.window.go_main(self.session,
             self.on_new_conversation, self.on_close, self.on_user_disconnect)
 
+    def _sync_emesene1(self):
+        syn = extension.get_default('synch tool')
+        syn = syn(self.session, "emesene")
+        syn.show()
+
     def _set_location(self, window, is_conv=False):
         '''get and set the location of the window'''
         if is_conv:
@@ -434,6 +439,7 @@ class Controller(object):
                         self.window.content)
 
         self.set_default_extensions_from_config()
+        self._sync_emesene1()
 
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):
