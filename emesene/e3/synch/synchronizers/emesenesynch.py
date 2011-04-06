@@ -93,12 +93,21 @@ class emesenesynch(synch):
 
             conversations_attr=[]
 
+            id_conv = -1
+            other_users_fetched = []
+
             for conv in conversations:
+
                 users_fetched = []
+                
+                if id_conv != conv[0]:
+                    other_users_fetched = self.__dest_user(conv[0])
+                    id_conv = conv[0]
+
                 if (self.__myuser != conv[1]):
                     users_fetched.append(self.__user_to_account(self.__myuser))
                 else:
-                    users_fetched.extend(self.__dest_user(conv[0]))
+                    users_fetched.extend(other_users_fetched)
 
                 for user_fetched in users_fetched:
                     conversations_attr.append({"user" : self.__user_to_account(conv[1]), "dest" : user_fetched, "time" : conv[2], "data" : self.__data_conversion(conv[3])})
