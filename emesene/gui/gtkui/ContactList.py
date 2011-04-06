@@ -494,10 +494,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
                             # we remove it from tree and from group.
                             del self._model[contact_row.iter]
                             del con
-                            if contact or group is None:
-                                return
-                            if group.contacts.count(contact.account) > 0:
-                                group.contacts.remove(contact.account)
+                            if obj.contacts.count(contact.account) > 0:
+                                obj.contacts.remove(contact.account)
                             self.update_group(obj)
 
                 # if it's a contact without group (at the root)
