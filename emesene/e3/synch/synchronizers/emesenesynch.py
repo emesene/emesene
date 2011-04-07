@@ -100,6 +100,7 @@ class emesenesynch(synch):
             actual_conv = 0
             conversations_list = conversations.fetchall()
             total_conv = len(conversations_list)
+            percent_work = 0
 
             for conv in conversations_list:
 
@@ -116,7 +117,11 @@ class emesenesynch(synch):
 
                 actual_conv += 1.0
 
-                self._prog_callback( (actual_conv/total_conv) * 100.0 )
+                aux_percent_work = (int)((actual_conv/total_conv) * 100.0)
+
+                if(percent_work != aux_percent_work):
+                    percent_work = aux_percent_work
+                    self._prog_callback(percent_work)
 
                 for user_fetched in users_fetched:
                     conversations_attr.append({"user" : self.__user_to_account(conv[1]), 
