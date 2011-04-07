@@ -99,6 +99,8 @@ def scale_nicely(pixbuf):
 
 def file_readable(path):
     '''return True if the file is readable'''
+    if path is None:
+        return False
     return os.access(path, os.R_OK) and os.path.isfile(path)
 
 def style_to_pango_font_description(style):
