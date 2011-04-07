@@ -23,6 +23,11 @@ import pango
 import hashlib
 import tempfile
 
+import glib
+import time
+import Queue
+import threading
+
 import e3
 
 pixbufs = {}
@@ -188,4 +193,57 @@ def makePreview(src):
     out_file.close()
 
     return cnt
+
+class GtkRunner(threading.Thread):
+
+    """
+    Module written by Mariano Guerra. 
+    Visit http://python.org.ar/pyar/Recetario/Gui/Gtk/Runner for more.
+    """
+
+    '''run *func* in a thread with *args* and *kwargs* as arguments, when
+    finished call callback with a two item tuple containing a boolean as first
+    item informing if the function returned correctly and the returned value or
+    the exception thrown as second item
+    '''
+
+    def __init__(self, callback, func, *args, **kwargs):
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
+
+        self.callback = callback
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+        self.result = Queue.Queue()
+
+        self.start()
+        glib.timeout_add_seconds(1, self.check)
+
+    def run(self):
+        '''
+        main function of the thread, run func with args and kwargs
+        and get the result, call callback with the (True, result)
+
+        if an exception is thrown call callback with (False, exception)
+        '''
+        try:
+            result = (True, self.func(*self.args, **self.kwargs))
+        except Exception, ex:
+            result = (False, ex)
+
+        self.result.put(result)
+
+    def check(self):
+        '''
+        check if func finished
+        '''
+        try:
+            result = self.result.get(False, 0.1)
+        except Queue.Empty:
+            return True
+
+        self.callback(result)
+        return False
 

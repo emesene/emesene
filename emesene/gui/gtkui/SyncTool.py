@@ -1,6 +1,7 @@
 from e3.synch.synchronizer import *
 import gui
 import extension
+import utils
 
 class SyncTool(object):
     '''a tool to call the synch procedure'''
@@ -25,9 +26,12 @@ class SyncTool(object):
                 self._show_dialog()
 
 
-    def _show_finish(self):
+    def _show_finish(self, result):
         '''called to show a message of finish'''
-        print "Sync has finished"
+        if result:
+            print "Sync has finished :)"
+        else:
+            print "Sync error :("
         self._session.config.logs_imported = True
         self._session.config.get_or_set("synch_retry",False)
 
@@ -48,6 +52,7 @@ class SyncTool(object):
         '''callback for DialogManager.yes_no, asking to synch'''
         if response == gui.stock.YES:
             self._syn.start_synch(self._session, self._show_finish, self._show_progress)
+            utils.GtkRunner(self._syn._end_callback, self._syn._start_synch)
 
         elif response == gui.stock.NO:
             self._session.config.logs_imported = True
