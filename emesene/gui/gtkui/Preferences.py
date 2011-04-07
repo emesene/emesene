@@ -441,7 +441,7 @@ class BaseTable(gtk.Table):
         """called when the Synch test button is clicked"""
         syn = extension.get_default('synch tool')
         syn = syn(self.session, "emesene")
-        syn.show()
+        syn.show(True)
 
 class Interface(BaseTable):
     """the panel to display/modify the config related to the gui

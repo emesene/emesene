@@ -16,14 +16,13 @@ class SyncTool(object):
         self._syn.set_user(self._session._account.account)
 
 
-    def show(self):
+    def show(self, show_second_time = False):
         '''called when you want to show synch dialog'''
         if not self._session.config.get_or_set("logs_imported",False) and self._syn.exists_source():
             self._show_dialog()
-            return
-        if self._session.config.get_or_set("synch_retry",False):
-            self._show_dialog()
-            return
+        elif self._session.config.get_or_set("synch_retry",False):
+            if show_second_time == True:
+                self._show_dialog()
 
 
     def _show_finish(self):
