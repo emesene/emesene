@@ -36,25 +36,34 @@ class SyncTool(object):
         self._session.config.get_or_set("synch_retry",False)
 
 
-    def _show_progress(self, progress):
+    def _update_progress(self, progress):
         '''called everytime sync make a progress'''
-        print "Sync is at %d percent of its work" % progress
+        self.progress.update(progress)
 
 
     def _show_dialog(self):
         '''called to show dialog'''
         dialog = extension.get_default('dialog')
         dialog.yes_no_cancel(
-            _("Do you want to synch with emesene 1?"), self._synch_cb)
+            _("Do you want to synchronize with emesene 1?"), self._synch_cb)
 
 
     def _synch_cb(self, response):
         '''callback for DialogManager.yes_no, asking to synch'''
         if response == gui.stock.YES:
-            self._syn.start_synch(self._session, self._show_finish, self._show_progress)
+            self.progress = 0
+            dialog = extension.get_default('dialog')
+            self.progress = dialog.sync_progress_window(_('Synchronization progress'),
+                                self._synch_progress_cb)
+            self._syn.start_synch(self._session, self._show_finish, self._update_progress)
             utils.GtkRunner(self._syn._end_callback, self._syn._start_synch)
 
         elif response == gui.stock.NO:
             self._session.config.logs_imported = True
             self._session.config.get_or_set("synch_retry",True)
+            
+    def _synch_progress_cb(self, response):
+        '''stop synch'''
+        #TODO: add a way to canel the sync process
+        pass
 

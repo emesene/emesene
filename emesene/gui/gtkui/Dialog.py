@@ -933,6 +933,13 @@ class Dialog(object):
         window.hbox.pack_start(content)
         window.show_all()
 
+    @classmethod
+    def sync_progress_window(cls, title, callback):
+        '''returns a progress window used for emesene 1 synch'''
+        dialog = ProgressWindow(title, callback)
+        dialog.show_all()
+        return dialog
+
 class ImageChooser(gtk.FileChooserDialog):
     '''a class to select images'''
 
@@ -1648,3 +1655,26 @@ class TinyArrow(gtk.DrawingArea):
             self.margin = margin
         self.set_size_request(*self.get_size())
         self.expose()
+
+class ProgressWindow(gtk.Window):
+    '''A class for a progressbar dialog'''
+
+    def __init__(self, title, callback):
+        '''Constructor. Packs widgets'''
+        gtk.Window.__init__(self)
+        self.set_title(title)
+        self.set_role("dialog")
+        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        self.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
+        self.set_default_size(300, 50)
+        self.set_position(gtk.WIN_POS_CENTER)
+        self.set_border_width(8)
+        vbox = gtk.VBox()
+        self.progressbar = gtk.ProgressBar()
+        vbox.pack_start(self.progressbar)
+        self.add(vbox)
+        
+    def update(self, progress):
+        '''called when the progress is updated'''
+        self.progressbar.set_fraction(progress / 100.0)
+        self.progressbar.set_text("%d %s" % (progress, "%"))
