@@ -68,6 +68,38 @@ class ContactMenu(gtk.Menu):
         self.view_info.connect('activate',
             lambda *args: self.handler.on_view_information_selected())
 
+        all_groups = self.handler.get_all_groups()
+        contact_groups = self.handler.get_contact_groups()
+        self.move_groups_submenu = gtk.Menu()
+        self.copy_groups_submenu = gtk.Menu()
+        for group in all_groups:
+            if group not in contact_groups:
+                item = gtk.MenuItem(group)
+                item.connect('activate', 
+                    lambda *args: self.handler.on_move_to_group_selected(group))
+                self.move_groups_submenu.append(item)
+                item_2 = gtk.MenuItem(group)
+                item_2.connect('activate', 
+                    lambda *args: self.handler.on_copy_to_group_selected(group))
+                self.copy_groups_submenu.append(item_2)
+
+        self.move_to_group = gtk.ImageMenuItem(_('Move to group'))
+        self.move_to_group.set_image(gtk.image_new_from_stock(gtk.STOCK_GO_FORWARD,
+            gtk.ICON_SIZE_MENU))
+        self.move_to_group.set_submenu(self.move_groups_submenu)
+
+        self.copy_to_group = gtk.ImageMenuItem(_('Copy to group'))
+        self.copy_to_group.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY,
+            gtk.ICON_SIZE_MENU))
+        self.copy_to_group.set_submenu(self.copy_groups_submenu)
+
+        if len(contact_groups) > 1:
+            self.remove_from_group = gtk.ImageMenuItem(_('Remove from group'))
+            self.remove_from_group.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
+                gtk.ICON_SIZE_MENU))
+            self.remove_from_group.connect('activate',
+                lambda *args: self.handler.on_remove_from_group_selected())
+
         self.set_unblocked()
 
         self.append(self.add)
@@ -76,6 +108,10 @@ class ContactMenu(gtk.Menu):
         self.append(self.unblock)
         self.append(self.set_alias)
         self.append(self.view_info)
+        #self.append(self.move_to_group)
+        #self.append(self.copy_to_group)
+        #if len(contact_groups) > 1:
+        #    self.append(self.remove_from_group)
 
     def set_blocked(self):
         self.unblock.set_sensitive(True)
