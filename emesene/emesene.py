@@ -260,7 +260,7 @@ class Controller(object):
         if self.dbus_ext is not None:
             self.dbus_ext.set_new_session(self.session)
 
-    def close_session(self, do_exit=True):
+    def close_session(self, do_exit=True, on_reconnect=False):
         '''close session'''
 
         self._remove_subscriptions()
@@ -279,7 +279,7 @@ class Controller(object):
         self.save_extensions_config()
         self._save_login_dimensions()
 
-        if self.session is not None:
+        if self.session is not None and on_reconnect is False:
             self.session.save_config()
             self.session = None
 
@@ -633,10 +633,11 @@ class Controller(object):
     def on_disconnected(self, reason, reconnect=0):
         '''called when the server disconnect us'''
         account = self.session.account
-        self.close_session(False)
         if reconnect:
+            self.close_session(False, True)
             self.on_reconnect(account)
         else:
+            self.close_session(False)
             self.go_login(cancel_clicked=True, no_autologin=True)
             if(reason != None):
                 self.window.content.clear_all()
