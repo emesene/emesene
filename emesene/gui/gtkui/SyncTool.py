@@ -1,3 +1,22 @@
+'''a tool to call the synch procedure'''
+# -*- coding: utf-8 -*-
+
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 from e3.synch.synchronizer import *
 import gui
 import extension
@@ -19,9 +38,10 @@ class SyncTool(object):
 
     def show(self, show_second_time = False):
         '''called when you want to show synch dialog'''
-        if not self._session.config.get_or_set("logs_imported",False) and self._syn.exists_source():
+        if not self._session.config.get_or_set("logs_imported", False) \
+           and self._syn.exists_source():
             self._show_dialog()
-        elif self._session.config.get_or_set("synch_retry",False):
+        elif self._session.config.get_or_set("synch_retry", False):
             if show_second_time == True:
                 self._show_dialog()
 
@@ -33,7 +53,7 @@ class SyncTool(object):
         else:
             print "Sync error :("
         self._session.config.logs_imported = True
-        self._session.config.get_or_set("synch_retry",False)
+        self._session.config.get_or_set("synch_retry", False)
 
 
     def _update_progress(self, progress):
@@ -51,19 +71,19 @@ class SyncTool(object):
     def _synch_cb(self, response):
         '''callback for DialogManager.yes_no, asking to synch'''
         if response == gui.stock.YES:
-            self.progress = 0
             dialog = extension.get_default('dialog')
-            self.progress = dialog.sync_progress_window(_('Synchronization progress'),
-                                self._synch_progress_cb)
-            self._syn.start_synch(self._session, self._show_finish, self._update_progress)
+            self.progress = dialog.sync_progress_window(
+                _('Synchronization progress'), self._synch_progress_cb)
+            self._syn.start_synch(self._session, self._show_finish,
+                                  self._update_progress)
             utils.GtkRunner(self._syn._end_callback, self._syn._start_synch)
 
         elif response == gui.stock.NO:
             self._session.config.logs_imported = True
-            self._session.config.get_or_set("synch_retry",True)
+            self._session.config.get_or_set("synch_retry", True)
             
     def _synch_progress_cb(self, response):
         '''stop synch'''
-        #TODO: add a way to canel the sync process
+        #TODO: add a way to cancel the sync process
         pass
 
