@@ -31,6 +31,7 @@ class SyncTool(object):
 
     def __init__(self, session, synch_type):
         '''class constructor'''
+        self.ENABLE = False # Disabled. Set True for enable.
         self._session = session
         self._syn = get_synchronizer(synch_type)
         self._syn.set_user(self._session._account.account)
@@ -68,6 +69,8 @@ class SyncTool(object):
 
     def _show_dialog(self):
         '''called to show dialog'''
+        if self.ENABLE == False:
+            return
         dialog = extension.get_default('dialog')
         dialog.yes_no_cancel(
             _("Do you want to synchronize with emesene 1?"), self._synch_cb)
