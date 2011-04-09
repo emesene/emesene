@@ -118,8 +118,7 @@ class ContactMenu(gtk.Menu):
 
         all_groups = self.handler.get_all_groups()
         contact_groups = self.handler.get_contact_groups()
-        print all_groups
-        print contact_groups
+
         for key, group in all_groups.iteritems():
             if key not in contact_groups:
                 item = gtk.MenuItem(group.name)
