@@ -30,6 +30,30 @@ EM2_SELECT_USER = "select * from d_account"
 EM1_SELECT_CONVERSATIONS = "select conversation.id,account as account1,stamp,data from user inner join conversation_event on ( user.id=conversation_event.id_user ) inner join conversation on(conversation.id=conversation_event.id_conversation) inner join event on(conversation_event.id_event=event.id)"
 EM1_SELECT_DEST_USER = "select distinct account from (conversation_event inner join user on conversation_event.id_user = user.id) where conversation_event.id_conversation=%s and account <> '%s'"
 
+class PercentDone(object):
+
+        def __init__(self, total):
+                self.__total = total
+                self.__current = 0
+
+        def set_total(self, total):
+                self.__total = total
+
+        def get_current(self):
+                return self.__current
+
+        def notify(self, q):
+
+                aux = (int)((q/self.__total) * 100.0)
+                if aux == self.__current:
+                    changed = False
+                else:
+                    changed = True
+
+                self.__current = aux
+                return changed
+         
+
 class emesenesynch(synch):
 
         def __init__(self):
@@ -55,24 +79,35 @@ class emesenesynch(synch):
             self.set_source_path(sourcedb)
             self.set_destination_path(destdb)
 
+        def __reset_progressbar(self):
+            self._prog_callback(0.0)
+
         def start_synch(self):
             self.__synch_my_avatars()
             self.__synch_other_avatars()
             self.__synch_conversations()
 
         def __synch_my_avatars(self):
+            self.__reset_progressbar()
 
             listing = os.listdir(os.path.join(self.__source_path, "avatars"))
+            percent = PercentDone(len(listing))
+            actual_avatar = 0.0
 
             for infile in listing:
                 shutil.copy (os.path.join(self.__source_path, "avatars", infile), 
                              os.path.join(self.__dest_path, "avatars", infile) )
 
+                actual_avatar += 1.0
+
+                if percent.notify(actual_avatar):
+                    self._prog_callback(percent.get_current())
+
         def __synch_other_avatars(self):
-            pass
+            self.__reset_progressbar()
 
         def __synch_conversations(self):
-
+            self.__reset_progressbar()
             #Get all old users
 
             self.__conn_src = sqlite.connect(self.src_path)
@@ -119,8 +154,8 @@ class emesenesynch(synch):
             other_users_fetched = []
             actual_conv = 0
             conversations_list = conversations.fetchall()
-            total_conv = len(conversations_list)
-            percent_work = 0
+           
+            percent = PercentDone(len(conversations_list))
 
             for conv in conversations_list:
 
@@ -137,11 +172,8 @@ class emesenesynch(synch):
 
                 actual_conv += 1.0
 
-                aux_percent_work = (int)((actual_conv/total_conv) * 100.0)
-
-                if(percent_work != aux_percent_work):
-                    percent_work = aux_percent_work
-                    self._prog_callback(percent_work)
+                if percent.notify(actual_conv):
+                    self._prog_callback(percent.get_current())
 
                 for user_fetched in users_fetched:
                     conversations_attr.append({"user" : self.__user_to_account(conv[1]), 
