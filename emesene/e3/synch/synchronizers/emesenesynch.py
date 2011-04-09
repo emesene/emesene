@@ -18,7 +18,7 @@
 #
 #    Module written by Andrea Stagi <stagi.andrea(at)gmail.com>
 
-from synch import synch
+from synch import Synch
 import sqlite3.dbapi2 as sqlite
 from datetime import date
 import os
@@ -31,13 +31,13 @@ EM1_SELECT_CONVERSATIONS = "select conversation.id,account as account1,stamp,dat
 EM1_SELECT_DEST_USER = "select distinct account from (conversation_event inner join user on conversation_event.id_user = user.id) where conversation_event.id_conversation=%s and account <> '%s'"
 
 
-class emesenesynch(synch):
+class EmeseneSynch(Synch):
 
         def __init__(self):
-                synch.__init__(self)
+            Synch.__init__(self)
 
         def exists_source(self):
-            return os.path.exists(self.src_path)
+            return os.path.exists(self.__src_db_path)
 
         def set_user(self, user_account):
 
@@ -50,11 +50,8 @@ class emesenesynch(synch):
             self.__dest_path = os.path.join(os.path.expanduser("~"),".config","emesene2",
                                   "messenger.hotmail.com",user_account)
 
-            sourcedb = os.path.join(self.__source_path, "cache",user_account + ".db")
-            destdb = os.path.join(self.__dest_path, "log","base.db")
-
-            self.set_source_path(sourcedb)
-            self.set_destination_path(destdb)
+            self.__src_db_path = os.path.join(self.__source_path, "cache",user_account + ".db")
+            self.__dest_db_path = os.path.join(self.__dest_path, "log","base.db")
 
         def __reset_progressbar(self):
             self._prog_callback(0.0)
@@ -66,6 +63,7 @@ class emesenesynch(synch):
 
         def __synch_my_avatars(self):
             self.__reset_progressbar()
+            self._action_callback(_("Importing your avatars..."))
 
             listing = os.listdir(os.path.join(self.__source_path, "avatars"))
             percent = e3.common.PercentDone(len(listing))
@@ -82,16 +80,18 @@ class emesenesynch(synch):
 
         def __synch_other_avatars(self):
             self.__reset_progressbar()
+            self._action_callback(_("Importing contact avatars..."))
 
         def __synch_conversations(self):
             self.__reset_progressbar()
+            self._action_callback(_("Importing conversations..."))
             #Get all old users
 
-            self.__conn_src = sqlite.connect(self.src_path)
+            self.__conn_src = sqlite.connect(self.__src_db_path)
             users = self.__conn_src.cursor()
             users.execute(EM1_SELECT_USER)
 
-            self.__conn_dest = sqlite.connect(self.dest_path)
+            self.__conn_dest = sqlite.connect(self.__dest_db_path)
             dest_users = self.__conn_dest.cursor()
             dest_users.execute(EM2_SELECT_USER)
 
@@ -178,7 +178,7 @@ class emesenesynch(synch):
                 return e3.Logger.Account.from_contact( e3.base.Contact(user) )
 
 
-        def __dest_user(self,conv_id):
+        def __dest_user(self, conv_id):
 
              users = []
 
@@ -191,11 +191,11 @@ class emesenesynch(synch):
              return users
 
 
-        def __time_conversion(self,time):
+        def __time_conversion(self, time):
             return date.fromtimestamp(time)
 
 
-        def __data_conversion(self,data):
+        def __data_conversion(self, data):
             d=data.partition("UTF-8\r\n")
             end=d[2].encode('UTF-8')
             return end

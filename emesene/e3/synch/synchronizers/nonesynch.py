@@ -18,20 +18,12 @@
 #
 #    Module written by Andrea Stagi <stagi.andrea(at)gmail.com>
 
-class Synch(object):
+from synch import Synch
+
+class NoneSynch(Synch):
 
         def __init__(self):
             pass
 
-        def initialize(self, session, end_callback, prog_callback, action_callback):
-            self._session = session
-            self._end_callback = end_callback
-            self._prog_callback = prog_callback
-            self._action_callback = action_callback
-
         def exists_source(self):
-            pass
-
-        def start_synch(self):
-            pass
-
+            return False

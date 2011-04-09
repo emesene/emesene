@@ -1671,6 +1671,8 @@ class ProgressWindow(gtk.Window):
         self.set_border_width(8)
         vbox = gtk.VBox()
         self.progressbar = gtk.ProgressBar()
+        self.desclabel = gtk.Label()
+        vbox.pack_start(self.desclabel)
         vbox.pack_start(self.progressbar)
         self.add(vbox)
         
@@ -1678,3 +1680,8 @@ class ProgressWindow(gtk.Window):
         '''called when the progress is updated'''
         self.progressbar.set_fraction(progress / 100.0)
         self.progressbar.set_text("%d %s" % (progress, "%"))
+
+    def set_action(self, action):
+        '''called when the action changes'''
+        self.desclabel.set_text(action)
+

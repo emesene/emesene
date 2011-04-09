@@ -41,6 +41,7 @@ class SyncTool(object):
         if not self._session.config.get_or_set("logs_imported", False) \
            and self._syn.exists_source():
             self._show_dialog()
+
         elif self._session.config.get_or_set("synch_retry", False):
             if show_second_time == True:
                 self._show_dialog()
@@ -49,16 +50,20 @@ class SyncTool(object):
     def _show_finish(self, result):
         '''called to show a message of finish'''
         if result:
-            print "Sync has finished :)"
+            self.progress.set_action(_("Synchronization finished"))
+            self._session.config.logs_imported = True
+            self._session.config.get_or_set("synch_retry", False)
         else:
-            print "Sync error :("
-        self._session.config.logs_imported = True
-        self._session.config.get_or_set("synch_retry", False)
+            self.progress.set_action(_("Synchronization ERROR"))
 
 
     def _update_progress(self, progress):
         '''called everytime sync make a progress'''
         self.progress.update(progress)
+
+    def _update_action(self, action):
+        '''called everytime sync changes action'''
+        self.progress.set_action(action)
 
 
     def _show_dialog(self):
@@ -72,10 +77,12 @@ class SyncTool(object):
         '''callback for DialogManager.yes_no, asking to synch'''
         if response == gui.stock.YES:
             dialog = extension.get_default('dialog')
+
             self.progress = dialog.sync_progress_window(
                 _('Synchronization progress'), self._synch_progress_cb)
+
             self._syn.initialize(self._session, self._show_finish,
-                                  self._update_progress)
+                                 self._update_progress, self._update_action)
             utils.GtkRunner(self._syn._end_callback, self._syn.start_synch)
 
         elif response == gui.stock.NO:
