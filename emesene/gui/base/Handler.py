@@ -289,10 +289,7 @@ class ContactHandler(object):
         contact = self.contact_list.get_contact_selected()
 
         if contact:
-            for group_to_find,group_obj in self.session.groups.iteritems():
-                if(group_obj.name == group):
-                    self.session.add_to_group(contact.account, group_obj.identifier)
-                    break
+            self.session.add_to_group(contact.account, group.identifier)
         else:
             self.dialog.error(_('No contact selected'))
 
