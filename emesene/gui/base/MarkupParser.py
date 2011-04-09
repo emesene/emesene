@@ -102,7 +102,7 @@ def replace_shortcut_with_tag(string, short, tag):
     escaped_result = re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)',
         extract, result)
     if re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)', extract, short) \
-        != escaped_result:
+        not in escaped_result:
         result = escaped_result
     result = result.replace(short, tag)
     irreplaceable.reverse()
