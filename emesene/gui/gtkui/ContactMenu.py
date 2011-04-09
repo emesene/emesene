@@ -101,7 +101,7 @@ class ContactMenu(gtk.Menu):
         self.append(self.set_alias)
         self.append(self.view_info)
         #self.append(self.move_to_group)
-        #self.append(self.copy_to_group)
+        self.append(self.copy_to_group)
         #self.append(self.remove_from_group)
 
     def on_move_to_group(self):
@@ -121,17 +121,23 @@ class ContactMenu(gtk.Menu):
         print all_groups
         print contact_groups
         for key, group in all_groups.iteritems():
-            if group.name not in contact_groups:
+            if key not in contact_groups:
                 item = gtk.MenuItem(group.name)
                 item.connect('activate', 
-                    lambda *args: self.handler.on_move_to_group_selected(group))
+                    self.on_move_to_group_selected, group)
                 self.move_groups_submenu.append(item)
                 item_2 = gtk.MenuItem(group.name)
                 item_2.connect('activate', 
-                    lambda *args: self.handler.on_copy_to_group_selected(group))
+                    self.on_copy_to_group_selected, group)
                 self.copy_groups_submenu.append(item_2)
         self.move_groups_submenu.show_all()
         self.copy_groups_submenu.show_all()
+
+    def on_copy_to_group_selected(self, widget, group):
+        self.handler.on_copy_to_group_selected(group)
+
+    def on_move_to_group_selected(self, widget, group):
+        self.handler.on_move_to_group_selected(group)
 
     def set_blocked(self):
         self.unblock.set_sensitive(True)
