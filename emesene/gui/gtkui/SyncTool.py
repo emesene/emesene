@@ -74,9 +74,9 @@ class SyncTool(object):
             dialog = extension.get_default('dialog')
             self.progress = dialog.sync_progress_window(
                 _('Synchronization progress'), self._synch_progress_cb)
-            self._syn.start_synch(self._session, self._show_finish,
+            self._syn.initialize(self._session, self._show_finish,
                                   self._update_progress)
-            utils.GtkRunner(self._syn._end_callback, self._syn._start_synch)
+            utils.GtkRunner(self._syn._end_callback, self._syn.start_synch)
 
         elif response == gui.stock.NO:
             self._session.config.logs_imported = True

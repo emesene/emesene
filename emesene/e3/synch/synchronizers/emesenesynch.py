@@ -23,6 +23,7 @@ import sqlite3.dbapi2 as sqlite
 from datetime import date
 import os
 import e3
+import shutil
 
 EM1_SELECT_USER = "select * from user"
 EM2_SELECT_USER = "select * from d_account"
@@ -43,15 +44,34 @@ class emesenesynch(synch):
 
             emesene1_usr_acc = (user_account.replace("@","_")).replace(".","_")
 
-            sourcedb = os.path.join(os.path.expanduser("~"),".config","emesene1.0",
-                                    emesene1_usr_acc,"cache",user_account + ".db")
-            destdb = os.path.join(os.path.expanduser("~"),".config","emesene2",
-                                  "messenger.hotmail.com",user_account,"log","base.db")
+            self.__source_path = os.path.join(os.path.expanduser("~"),".config","emesene1.0",
+                                    emesene1_usr_acc)
+            self.__dest_path = os.path.join(os.path.expanduser("~"),".config","emesene2",
+                                  "messenger.hotmail.com",user_account)
+
+            sourcedb = os.path.join(self.__source_path, "cache",user_account + ".db")
+            destdb = os.path.join(self.__dest_path, "log","base.db")
 
             self.set_source_path(sourcedb)
             self.set_destination_path(destdb)
 
-        def _start_synch(self):
+        def start_synch(self):
+            self.__synch_my_avatars()
+            self.__synch_other_avatars()
+            self.__synch_conversations()
+
+        def __synch_my_avatars(self):
+
+            listing = os.listdir(os.path.join(self.__source_path, "avatars"))
+
+            for infile in listing:
+                shutil.copy (os.path.join(self.__source_path, "avatars", infile), 
+                             os.path.join(self.__dest_path, "avatars", infile) )
+
+        def __synch_other_avatars(self):
+            pass
+
+        def __synch_conversations(self):
 
             #Get all old users
 
@@ -129,16 +149,6 @@ class emesenesynch(synch):
                                                "time" : conv[2], 
                                                "data" : self.__data_conversion(conv[3])})
 
-            """
-            for conv in conversations_attr:
-                print "-------------"
-                print conv["user"],
-                print conv["dest"],
-                print conv["data"],
-                print conv["time"],
-                print "-------------"
-                #add the event in this form :: EVENT message 0 TEXT_OF_MESSAGE <account 'mail1'> <account 'mail2'> time
-             """
 
             for conv in conversations_attr:
                 self._session.logger.log("message", 0, conv["data"], 

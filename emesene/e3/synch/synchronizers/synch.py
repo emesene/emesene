@@ -23,7 +23,7 @@ class synch():
         def __init__(self):
             pass
 
-        def start_synch(self, session, end_callback, prog_callback):
+        def initialize(self, session, end_callback, prog_callback):
             self._session = session
             self._end_callback = end_callback
             self._prog_callback = prog_callback
@@ -31,7 +31,7 @@ class synch():
         def set_source_path(self,path):
             self.__srcpath=path
 
-        def _start_synch(self):
+        def start_synch(self):
             pass
 
         def set_destination_path(self,path):
