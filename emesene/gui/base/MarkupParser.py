@@ -48,8 +48,8 @@ def unescape(string_):
     return xml.sax.saxutils.unescape(string_, dic_inv)
 
 def parse_emotes(message, cedict={}):
-    '''parser the emotes in a message, return a string with img tags
-    for the emotes acording to the theme'''
+    '''parse the emotes in a message, return a string with img tags
+    for the emotes according to the theme'''
 
     # Get the message body to parse emotes
     p = re.compile('<span.*?>(.*)</span>', re.DOTALL)
@@ -99,7 +99,11 @@ def replace_shortcut_with_tag(string, short, tag):
         return token
     irreplaceable = []
     result = re.sub(URL_REGEX, extract, string)
-    result = re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)', extract, result)
+    escaped_result = re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)',
+        extract, result)
+    if re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)', extract, short) \
+        != escaped_result:
+        result = escaped_result
     result = result.replace(short, tag)
     irreplaceable.reverse()
     result = re.sub(token, lambda m: irreplaceable.pop(), result)
