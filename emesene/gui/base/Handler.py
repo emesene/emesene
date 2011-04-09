@@ -311,7 +311,7 @@ class ContactHandler(object):
 
         if contact:
             print "removing contact from ???" #TODO: find out the correct group.
-            #self.session.remove_from_group(contact.account, gid)
+            #self.session.remove_from_group(contact.account, group.identifier)
         else:
             self.dialog.error(_('No contact selected'))
 
