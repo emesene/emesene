@@ -30,29 +30,6 @@ EM2_SELECT_USER = "select * from d_account"
 EM1_SELECT_CONVERSATIONS = "select conversation.id,account as account1,stamp,data from user inner join conversation_event on ( user.id=conversation_event.id_user ) inner join conversation on(conversation.id=conversation_event.id_conversation) inner join event on(conversation_event.id_event=event.id)"
 EM1_SELECT_DEST_USER = "select distinct account from (conversation_event inner join user on conversation_event.id_user = user.id) where conversation_event.id_conversation=%s and account <> '%s'"
 
-class PercentDone(object):
-
-        def __init__(self, total):
-                self.__total = total
-                self.__current = 0
-
-        def set_total(self, total):
-                self.__total = total
-
-        def get_current(self):
-                return self.__current
-
-        def notify(self, q):
-
-                aux = (int)((q/self.__total) * 100.0)
-                if aux == self.__current:
-                    changed = False
-                else:
-                    changed = True
-
-                self.__current = aux
-                return changed
-         
 
 class emesenesynch(synch):
 
@@ -91,7 +68,7 @@ class emesenesynch(synch):
             self.__reset_progressbar()
 
             listing = os.listdir(os.path.join(self.__source_path, "avatars"))
-            percent = PercentDone(len(listing))
+            percent = e3.common.PercentDone(len(listing))
             actual_avatar = 0.0
 
             for infile in listing:
@@ -155,7 +132,7 @@ class emesenesynch(synch):
             actual_conv = 0
             conversations_list = conversations.fetchall()
            
-            percent = PercentDone(len(conversations_list))
+            percent = e3.common.PercentDone(len(conversations_list))
 
             for conv in conversations_list:
 

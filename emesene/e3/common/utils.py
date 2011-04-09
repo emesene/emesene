@@ -55,3 +55,25 @@ def add_style_to_message(text, stl, escape=True):
 
     return style_start + text + style_end
 
+class PercentDone(object):
+
+        def __init__(self, total):
+                self.__total = total
+                self.__current = 0
+
+        def set_total(self, total):
+                self.__total = total
+
+        def get_current(self):
+                return self.__current
+
+        def notify(self, q):
+                aux = (int)((q/self.__total) * 100.0)
+                if aux == self.__current:
+                    changed = False
+                else:
+                    changed = True
+
+                self.__current = aux
+                return changed
+
