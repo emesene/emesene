@@ -18,7 +18,6 @@
 
 import gui
 import pynotify
-import os
 if not pynotify.init("emesene"):
     raise ImportError
 

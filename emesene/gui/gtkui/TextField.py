@@ -21,7 +21,6 @@ import pango
 import gobject
 
 import Renderers
-import extension
 
 class TextField(gtk.VBox):
     '''this class represent a widget that is a button and when clicked

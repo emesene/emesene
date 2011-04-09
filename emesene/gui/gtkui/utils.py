@@ -24,7 +24,6 @@ import hashlib
 import tempfile
 
 import glib
-import time
 import Queue
 import threading
 

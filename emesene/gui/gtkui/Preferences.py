@@ -26,8 +26,6 @@ import extension
 
 from gui.base import MarkupParser
 
-import os
-
 import PluginWindow
 
 import logging
