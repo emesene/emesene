@@ -69,8 +69,9 @@ class EmoticonCache(Cache.Cache):
 
         path = os.path.join(self.path, hash_)
         image.seek(0)
-        handle = file(path, 'w')
+        handle = file(path, 'w+b', 0700)
         handle.write(image.read())
+        handle.close()
 
         image.seek(position)
         return self.__add_entry(shortcut, hash_)
