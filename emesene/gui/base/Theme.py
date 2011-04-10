@@ -310,8 +310,9 @@ class Theme(object):
                 return path
             else:
                 if os.name == "nt":
-                    if path[1] == ":":
-                        path = path[2:]
+                    #if path[1] == ":":
+                    #    path = path[2:]
+                    path = "localhost/"+path
 
                 return 'file://' + path
 
