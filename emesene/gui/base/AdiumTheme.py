@@ -19,7 +19,6 @@
 
 import re
 import os
-import urllib
 import time, calendar
 import datetime
 import xml.sax.saxutils

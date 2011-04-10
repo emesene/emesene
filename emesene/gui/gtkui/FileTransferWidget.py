@@ -252,12 +252,17 @@ class FileTransferTooltip(gtk.Window):
 
         if self.transfer.preview is not None:
             if(self.__fileprev==None):
-                self.__fileprev=tempfile.mkstemp(prefix=hashlib.md5(self.transfer.preview).hexdigest(), suffix=hashlib.md5(self.transfer.preview).hexdigest())[1]
+                self.__fileprev=tempfile.mkstemp(prefix=hashlib.md5(self.transfer.preview).hexdigest(), 
+                                                 suffix=hashlib.md5(self.transfer.preview).hexdigest())[1]
 
             tmpPrev = open( self.__fileprev, 'wb' )
             tmpPrev.write(self.transfer.preview)
             tmpPrev.close()
-            pixbuf = gtk.gdk.pixbuf_new_from_file(self.__fileprev)
+
+            try:
+                pixbuf = gtk.gdk.pixbuf_new_from_file(self.__fileprev)
+            except:
+                pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.transfer_success) #sometime happens -.-
         else:
             pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.transfer_success)
         #amsn sends a big. black preview? :S

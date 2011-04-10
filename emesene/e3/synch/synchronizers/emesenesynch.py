@@ -18,24 +18,26 @@
 #
 #    Module written by Andrea Stagi <stagi.andrea(at)gmail.com>
 
-from synch import synch
+from synch import Synch
 import sqlite3.dbapi2 as sqlite
 from datetime import date
 import os
 import e3
+import shutil
 
 EM1_SELECT_USER = "select * from user"
 EM2_SELECT_USER = "select * from d_account"
 EM1_SELECT_CONVERSATIONS = "select conversation.id,account as account1,stamp,data from user inner join conversation_event on ( user.id=conversation_event.id_user ) inner join conversation on(conversation.id=conversation_event.id_conversation) inner join event on(conversation_event.id_event=event.id)"
 EM1_SELECT_DEST_USER = "select distinct account from (conversation_event inner join user on conversation_event.id_user = user.id) where conversation_event.id_conversation=%s and account <> '%s'"
 
-class emesenesynch(synch):
+
+class EmeseneSynch(Synch):
 
         def __init__(self):
-                synch.__init__(self)
+            Synch.__init__(self)
 
         def exists_source(self):
-            return os.path.exists(self.src_path)
+            return os.path.exists(self.__src_db_path)
 
         def set_user(self, user_account):
 
@@ -43,23 +45,53 @@ class emesenesynch(synch):
 
             emesene1_usr_acc = (user_account.replace("@","_")).replace(".","_")
 
-            sourcedb = os.path.join(os.path.expanduser("~"),".config","emesene1.0",
-                                    emesene1_usr_acc,"cache",user_account + ".db")
-            destdb = os.path.join(os.path.expanduser("~"),".config","emesene2",
-                                  "messenger.hotmail.com",user_account,"log","base.db")
+            self.__source_path = os.path.join(os.path.expanduser("~"),".config","emesene1.0",
+                                    emesene1_usr_acc)
+            self.__dest_path = os.path.join(os.path.expanduser("~"),".config","emesene2",
+                                  "messenger.hotmail.com",user_account)
 
-            self.set_source_path(sourcedb)
-            self.set_destination_path(destdb)
+            self.__src_db_path = os.path.join(self.__source_path, "cache",user_account + ".db")
+            self.__dest_db_path = os.path.join(self.__dest_path, "log","base.db")
 
-        def _start_synch(self):
+        def __reset_progressbar(self):
+            self._prog_callback(0.0)
 
+        def start_synch(self):
+            self.__synch_my_avatars()
+            self.__synch_other_avatars()
+            self.__synch_conversations()
+
+        def __synch_my_avatars(self):
+            self.__reset_progressbar()
+            self._action_callback(_("Importing your avatars..."))
+
+            listing = os.listdir(os.path.join(self.__source_path, "avatars"))
+            percent = e3.common.PercentDone(len(listing))
+            actual_avatar = 0.0
+
+            for infile in listing:
+                shutil.copy (os.path.join(self.__source_path, "avatars", infile), 
+                             os.path.join(self.__dest_path, "avatars", infile) )
+
+                actual_avatar += 1.0
+
+                if percent.notify(actual_avatar):
+                    self._prog_callback(percent.get_current())
+
+        def __synch_other_avatars(self):
+            self.__reset_progressbar()
+            self._action_callback(_("Importing contact avatars..."))
+
+        def __synch_conversations(self):
+            self.__reset_progressbar()
+            self._action_callback(_("Importing conversations..."))
             #Get all old users
 
-            self.__conn_src = sqlite.connect(self.src_path)
+            self.__conn_src = sqlite.connect(self.__src_db_path)
             users = self.__conn_src.cursor()
             users.execute(EM1_SELECT_USER)
 
-            self.__conn_dest = sqlite.connect(self.dest_path)
+            self.__conn_dest = sqlite.connect(self.__dest_db_path)
             dest_users = self.__conn_dest.cursor()
             dest_users.execute(EM2_SELECT_USER)
 
@@ -99,7 +131,8 @@ class emesenesynch(synch):
             other_users_fetched = []
             actual_conv = 0
             conversations_list = conversations.fetchall()
-            total_conv = len(conversations_list)
+           
+            percent = e3.common.PercentDone(len(conversations_list))
 
             for conv in conversations_list:
 
@@ -116,7 +149,8 @@ class emesenesynch(synch):
 
                 actual_conv += 1.0
 
-                self._prog_callback( (actual_conv/total_conv) * 100.0 )
+                if percent.notify(actual_conv):
+                    self._prog_callback(percent.get_current())
 
                 for user_fetched in users_fetched:
                     conversations_attr.append({"user" : self.__user_to_account(conv[1]), 
@@ -124,16 +158,6 @@ class emesenesynch(synch):
                                                "time" : conv[2], 
                                                "data" : self.__data_conversion(conv[3])})
 
-            """
-            for conv in conversations_attr:
-                print "-------------"
-                print conv["user"],
-                print conv["dest"],
-                print conv["data"],
-                print conv["time"],
-                print "-------------"
-                #add the event in this form :: EVENT message 0 TEXT_OF_MESSAGE <account 'mail1'> <account 'mail2'> time
-             """
 
             for conv in conversations_attr:
                 self._session.logger.log("message", 0, conv["data"], 
@@ -154,7 +178,7 @@ class emesenesynch(synch):
                 return e3.Logger.Account.from_contact( e3.base.Contact(user) )
 
 
-        def __dest_user(self,conv_id):
+        def __dest_user(self, conv_id):
 
              users = []
 
@@ -167,11 +191,11 @@ class emesenesynch(synch):
              return users
 
 
-        def __time_conversion(self,time):
+        def __time_conversion(self, time):
             return date.fromtimestamp(time)
 
 
-        def __data_conversion(self,data):
+        def __data_conversion(self, data):
             d=data.partition("UTF-8\r\n")
             end=d[2].encode('UTF-8')
             return end

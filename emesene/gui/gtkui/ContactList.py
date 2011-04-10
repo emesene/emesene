@@ -30,8 +30,6 @@ import logging
 import Tooltips
 import Renderers
 
-import time
-
 log = logging.getLogger('gtkui.ContactList')
 
 class ContactList(gui.ContactList, gtk.TreeView):

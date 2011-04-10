@@ -18,36 +18,20 @@
 #
 #    Module written by Andrea Stagi <stagi.andrea(at)gmail.com>
 
-from threading import Thread
-
-class synch(Thread):
+class Synch(object):
 
         def __init__(self):
-            Thread.__init__(self)
+            pass
 
-        def start_synch(self, session, end_callback, prog_callback):
+        def initialize(self, session, end_callback, prog_callback, action_callback):
             self._session = session
             self._end_callback = end_callback
             self._prog_callback = prog_callback
-            self.start()
+            self._action_callback = action_callback
 
-        def set_source_path(self,path):
-            self.__srcpath=path
-
-        def _start_synch(self):
+        def exists_source(self):
             pass
 
-        def run(self):
-            self._start_synch()
-            self._end_callback()
+        def start_synch(self):
+            pass
 
-        def set_destination_path(self,path):
-            self.__destpath=path
-
-        @property
-        def dest_path(self):
-            return self.__destpath
-
-        @property
-        def src_path(self):
-            return self.__srcpath

@@ -68,6 +68,30 @@ class ContactMenu(gtk.Menu):
         self.view_info.connect('activate',
             lambda *args: self.handler.on_view_information_selected())
 
+        self.move_groups_submenu = gtk.Menu()
+        self.copy_groups_submenu = gtk.Menu()
+
+        self.move_to_group = gtk.ImageMenuItem(_('Move to group'))
+        self.move_to_group.set_image(gtk.image_new_from_stock(gtk.STOCK_GO_FORWARD,
+            gtk.ICON_SIZE_MENU))
+        self.move_to_group.connect('activate', 
+                    lambda *args: self.on_move_to_group())
+        self.move_to_group.set_submenu(self.move_groups_submenu)
+
+        self.copy_to_group = gtk.ImageMenuItem(_('Copy to group'))
+        self.copy_to_group.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY,
+            gtk.ICON_SIZE_MENU))
+        self.copy_to_group.connect('activate', 
+                    lambda *args: self.on_copy_to_group())
+        self.copy_to_group.set_submenu(self.copy_groups_submenu)
+
+        #if len(contact_groups) > 1: just remove it from the contact list
+        self.remove_from_group = gtk.ImageMenuItem(_('Remove from group'))
+        self.remove_from_group.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
+            gtk.ICON_SIZE_MENU))
+        self.remove_from_group.connect('activate',
+            lambda *args: self.handler.on_remove_from_group_selected())
+
         self.set_unblocked()
 
         self.append(self.add)
@@ -76,6 +100,43 @@ class ContactMenu(gtk.Menu):
         self.append(self.unblock)
         self.append(self.set_alias)
         self.append(self.view_info)
+        #self.append(self.move_to_group)
+        self.append(self.copy_to_group)
+        #self.append(self.remove_from_group)
+
+    def on_move_to_group(self):
+        self.update_submenus()
+
+    def on_copy_to_group(self):
+        self.update_submenus()
+
+    def update_submenus(self):
+        for i in self.move_groups_submenu.get_children():
+            self.move_groups_submenu.remove(i)
+        for i in self.copy_groups_submenu.get_children():
+            self.copy_groups_submenu.remove(i)
+
+        all_groups = self.handler.get_all_groups()
+        contact_groups = self.handler.get_contact_groups()
+
+        for key, group in all_groups.iteritems():
+            if key not in contact_groups:
+                item = gtk.MenuItem(group.name)
+                item.connect('activate', 
+                    self.on_move_to_group_selected, group)
+                self.move_groups_submenu.append(item)
+                item_2 = gtk.MenuItem(group.name)
+                item_2.connect('activate', 
+                    self.on_copy_to_group_selected, group)
+                self.copy_groups_submenu.append(item_2)
+        self.move_groups_submenu.show_all()
+        self.copy_groups_submenu.show_all()
+
+    def on_copy_to_group_selected(self, widget, group):
+        self.handler.on_copy_to_group_selected(group)
+
+    def on_move_to_group_selected(self, widget, group):
+        self.handler.on_move_to_group_selected(group)
 
     def set_blocked(self):
         self.unblock.set_sensitive(True)

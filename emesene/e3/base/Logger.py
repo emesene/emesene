@@ -249,7 +249,7 @@ class Logger(object):
     SELECT_ACCOUNT_EVENT = '''
         SELECT status, tmstp, payload from fact_event
         WHERE id_event=? and id_src_acc=?
-        ORDER BY tmstp LIMIT ?;
+        ORDER BY tmstp DESC LIMIT ?;
     '''
 
     SELECT_ACCOUNT_BY_GROUP = '''
@@ -269,7 +269,7 @@ class Logger(object):
         FROM fact_event f
         WHERE f.id_event=? and f.id_src_acc=? and
             id_dest_acc=?
-        ORDER BY tmstp LIMIT ?;
+        ORDER BY tmstp DESC LIMIT ?;
     '''
 
     SELECT_CHATS = '''
@@ -279,7 +279,7 @@ class Logger(object):
             ((f.id_src_acc=? and id_dest_acc=?) or
             (f.id_dest_acc=? and id_src_acc=?)) and
             f.id_src_info = i.id_info and f.id_src_acc = a.id_account
-        ORDER BY tmstp LIMIT ?;
+        ORDER BY tmstp DESC LIMIT ?;
     '''
 
     SELECT_CHATS_BETWEEN = '''
@@ -290,7 +290,7 @@ class Logger(object):
             (f.id_dest_acc=? and id_src_acc=?)) and
             f.id_src_info = i.id_info and
             f.tmstp >= ? and f.tmstp <= ? and f.id_src_acc = a.id_account
-        ORDER BY tmstp LIMIT ?;
+        ORDER BY tmstp DESC LIMIT ?;
     '''
 
     def __init__(self, path, db_name="base.db"):
@@ -534,6 +534,13 @@ class Logger(object):
             self._count = 0
 
         self._count += 1
+        
+    def _fetch_sorted(self):
+        '''puts list from the query in the right order'''
+        query_list = self.cursor.fetchall()
+        query_list.reverse()
+
+        return query_list
 
     def execute(self, query, args=()):
         '''execute the query with optional args'''
@@ -589,7 +596,7 @@ class Logger(object):
 
         self.execute(Logger.SELECT_ACCOUNT_EVENT, (id_event, id_account, limit))
 
-        return self.cursor.fetchall()
+        return self._fetch_sorted()
 
     def get_nicks(self, account, limit):
         '''return the last # nicks from account, where # is the limit value'''
@@ -624,7 +631,7 @@ class Logger(object):
         self.execute(Logger.SELECT_SENT_MESSAGES, (id_event, id_src, id_dest,
             limit))
 
-        return self.cursor.fetchall()
+        return self._fetch_sorted()
 
     def get_chats(self, src, dest, limit):
         '''return the last # sent from src to dest or from dest to src ,
@@ -641,7 +648,7 @@ class Logger(object):
         self.execute(Logger.SELECT_CHATS, (id_event, id_src, id_dest, id_src,
             id_dest, limit))
 
-        return self.cursor.fetchall()
+        return self._fetch_sorted()
 
     def get_chats_between(self, src, dest, from_t, to_t, limit):
         '''return the last # sent from src to dest or from dest to src ,
@@ -658,7 +665,7 @@ class Logger(object):
         self.execute(Logger.SELECT_CHATS_BETWEEN, (id_event, id_src, id_dest, id_src,
             id_dest, from_t, to_t, limit))
 
-        return self.cursor.fetchall()
+        return self._fetch_sorted()
 
     def add_groups(self, groups):
         '''add all groups to the database'''

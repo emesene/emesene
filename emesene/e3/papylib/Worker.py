@@ -838,6 +838,8 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_FAILED, 0, 0) #gid, cid
         def add_to_group_succeed(*args):
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, args[1], args[0].account) #gid, cid
+        def copy_to_group_succeed(papygroup, papycontact, gid, account):
+            self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, gid, account)
 
         papygroupdest = None
         for group in self.address_book.groups:
@@ -846,7 +848,13 @@ class Worker(e3.base.Worker, papyon.Client):
         if papygroupdest is not None:
             group_vect = [papygroupdest]
             callback_vect = [add_to_group_succeed,gid,account]
-            self.address_book.add_messenger_contact(account, groups=group_vect, failed_cb=add_to_group_fail, done_cb=tuple(callback_vect))
+            papycontact = self.address_book.contacts.search_by('account', account)[0]
+            if papycontact is None:
+                self.address_book.add_messenger_contact(account, groups=group_vect, 
+                    done_cb=tuple(callback_vect), failed_cb=add_to_group_fail)
+            else:
+                self.address_book.add_contact_to_group(papygroupdest, papycontact,
+                    done_cb=tuple([copy_to_group_succeed, gid, account]), failed_cb=add_to_group_fail)
 
     def _handle_action_block_contact(self, account):
         ''' handle Action.ACTION_BLOCK_CONTACT '''

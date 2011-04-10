@@ -167,7 +167,8 @@ class HelpHandler(object):
               'Stefano Candori <stefanocandori@gmail.com>',
               '4ndreaSt4gi <stagi.andrea@gmail.com>',
               'Davide Lo Re <boyska@gmail.com>',
-              'dequis <dx@dxzone.com.ar>' ], _('translator-credits'),
+              'dequis <dx@dxzone.com.ar>',
+              'Sven (Sbte) <svenb.linux@gmail.com>' ], _('translator-credits'),
             gui.theme.logo)
 
     def on_website_selected(self):
@@ -190,6 +191,16 @@ class ContactHandler(object):
         self.session = session
         self.dialog = dialog
         self.contact_list = contact_list
+
+    def get_contact_groups(self):
+        contact = self.contact_list.get_contact_selected()
+        if contact is not None:
+            return contact.groups
+        else:
+            return []
+
+    def get_all_groups(self):
+        return self.session.groups
 
     def on_add_contact_selected(self):
         '''called when add contact is selected'''
@@ -272,6 +283,35 @@ class ContactHandler(object):
         if contact:
             self.dialog.contact_information_dialog(self.session,
                 contact.account)
+        else:
+            self.dialog.error(_('No contact selected'))
+
+    def on_copy_to_group_selected(self, group):
+        contact = self.contact_list.get_contact_selected()
+
+        if contact:
+            self.session.add_to_group(contact.account, group.identifier)
+        else:
+            self.dialog.error(_('No contact selected'))
+
+    def on_move_to_group_selected(self, group):
+        contact = self.contact_list.get_contact_selected()
+
+        if contact:
+            for group_to_find,group_obj in self.session.groups.iteritems():
+                if(group_obj.name == group):
+            #todo: find src_gid
+                    self.session.move_to_group(contact.account, src_gid, group_obj.identifier)
+                    break
+        else:
+            self.dialog.error(_('No contact selected'))
+
+    def on_remove_from_group_selected(self):
+        contact = self.contact_list.get_contact_selected()
+
+        if contact:
+            print "removing contact from ???" #TODO: find out the correct group.
+            #self.session.remove_from_group(contact.account, group.identifier)
         else:
             self.dialog.error(_('No contact selected'))
 
