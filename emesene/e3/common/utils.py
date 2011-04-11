@@ -61,11 +61,17 @@ class PercentDone(object):
                 self.__total = total
                 self.__current = 0
 
-        def set_total(self, total):
-                self.__total = total
-
-        def get_current(self):
+        @property
+        def current(self):
                 return self.__current
+
+        @property
+        def total(self):
+                return self.__total
+
+        @total.setter
+        def total(self, total):
+                self.__total = total
 
         def notify(self, q):
                 aux = (int)((q/self.__total) * 100.0)

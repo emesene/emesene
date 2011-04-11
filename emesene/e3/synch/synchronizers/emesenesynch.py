@@ -76,7 +76,7 @@ class EmeseneSynch(Synch):
                 actual_avatar += 1.0
 
                 if percent.notify(actual_avatar):
-                    self._prog_callback(percent.get_current())
+                    self._prog_callback(percent.current)
 
         def __synch_other_avatars(self):
             self.__reset_progressbar()
@@ -150,7 +150,7 @@ class EmeseneSynch(Synch):
                 actual_conv += 1.0
 
                 if percent.notify(actual_conv):
-                    self._prog_callback(percent.get_current())
+                    self._prog_callback(percent.current)
 
                 for user_fetched in users_fetched:
                     conversations_attr.append({"user" : self.__user_to_account(conv[1]), 
