@@ -202,6 +202,9 @@ class ContactHandler(object):
     def get_all_groups(self):
         return self.session.groups
 
+    def is_by_group_view(self):
+        return self.contact_list.order_by_group
+
     def on_add_contact_selected(self):
         '''called when add contact is selected'''
         def add_cb(response, account, group):
@@ -300,18 +303,17 @@ class ContactHandler(object):
         if contact:
             for group_to_find,group_obj in self.session.groups.iteritems():
                 if(group_obj.name == group):
-            #todo: find src_gid
+                    #todo: find src_gid
                     self.session.move_to_group(contact.account, src_gid, group_obj.identifier)
                     break
         else:
             self.dialog.error(_('No contact selected'))
 
-    def on_remove_from_group_selected(self):
+    def on_remove_from_group_selected(self, group):
         contact = self.contact_list.get_contact_selected()
 
         if contact:
-            print "removing contact from ???" #TODO: find out the correct group.
-            #self.session.remove_from_group(contact.account, group.identifier)
+            self.session.remove_from_group(contact.account, group.identifier)
         else:
             self.dialog.error(_('No contact selected'))
 
