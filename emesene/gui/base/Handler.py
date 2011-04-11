@@ -297,15 +297,13 @@ class ContactHandler(object):
         else:
             self.dialog.error(_('No contact selected'))
 
-    def on_move_to_group_selected(self, group):
+    def on_move_to_group_selected(self, group_dst):
         contact = self.contact_list.get_contact_selected()
+        group_src = self.contact_list.get_contact_selected_group()
 
-        if contact:
-            for group_to_find,group_obj in self.session.groups.iteritems():
-                if(group_obj.name == group):
-                    #todo: find src_gid
-                    self.session.move_to_group(contact.account, src_gid, group_obj.identifier)
-                    break
+        if contact and group_src and group_dst:
+            self.session.move_to_group(contact.account, 
+                                    group_src.identifier, group_dst.identifier)
         else:
             self.dialog.error(_('No contact selected'))
 

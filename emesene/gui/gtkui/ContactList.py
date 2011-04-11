@@ -347,6 +347,20 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         return None
 
+    def get_contact_selected_group(self):
+        '''return a group object for the selected contact, None otherwise
+        '''
+        selected = self._get_selected()
+
+        if selected is None:
+            return None
+
+        if self.is_contact_selected():
+            myiter = self._model.iter_parent(selected)
+            return self._model[myiter][1]
+
+        return None
+
     def add_group(self, group, special=False):
         '''add a group to the contact list'''
 

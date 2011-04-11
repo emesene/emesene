@@ -101,7 +101,7 @@ class ContactMenu(gtk.Menu):
         self.append(self.unblock)
         self.append(self.set_alias)
         self.append(self.view_info)
-        #self.append(self.move_to_group)
+        self.append(self.move_to_group)
         self.append(self.copy_to_group)
         self.append(self.remove_from_group)
 

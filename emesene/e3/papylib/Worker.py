@@ -819,7 +819,7 @@ class Worker(e3.base.Worker, papyon.Client):
         #TODO: support fancy stuff like: invite_display_name='',
         #    invite_message='', groups=[], network_id=NetworkID.MSN,
         #    auto_allow=True, done_cb=None, failed_cb=None
-        self.address_book.add_messenger_contact(account, failed_cb=add_contact_fail)
+        self.address_book.add_messenger_contact(account, failed_cb=tuple([add_contact_fail]))
 
     def _handle_action_add_group(self, name):
         '''handle Action.ACTION_ADD_GROUP '''
@@ -854,7 +854,8 @@ class Worker(e3.base.Worker, papyon.Client):
                     done_cb=tuple(callback_vect), failed_cb=add_to_group_fail)
             else:
                 self.address_book.add_contact_to_group(papygroupdest, papycontact,
-                    done_cb=tuple([copy_to_group_succeed, gid, account]), failed_cb=add_to_group_fail)
+                    done_cb=tuple([copy_to_group_succeed, gid, account]), 
+                    failed_cb=tuple([add_to_group_fail]))
 
     def _handle_action_block_contact(self, account):
         ''' handle Action.ACTION_BLOCK_CONTACT '''
@@ -862,7 +863,7 @@ class Worker(e3.base.Worker, papyon.Client):
             log.error("Error blocking a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_BLOCK_FAILED, '') #account
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        self.address_book.block_contact(papycontact, failed_cb=block_fail)
+        self.address_book.block_contact(papycontact, failed_cb=tuple([block_fail]))
 
     def _handle_action_unblock_contact(self, account):
         '''handle Action.ACTION_UNBLOCK_CONTACT '''
@@ -870,21 +871,20 @@ class Worker(e3.base.Worker, papyon.Client):
             log.error("Error unblocking a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_UNBLOCK_FAILED, '') #account
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        self.address_book.unblock_contact(papycontact, failed_cb=unblock_fail)
+        self.address_book.unblock_contact(papycontact, failed_cb=tuple([unblock_fail]))
 
     def _handle_action_move_to_group(self, account, src_gid, dest_gid):
         '''handle Action.ACTION_MOVE_TO_GROUP '''
         def move_to_group_fail(*args):
             log.error("Error moving a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_MOVE_FAILED, '') #account
-        def add_to_group_succeed(*args):
-            #delete from old group only if previuos contact-add succeed..
-            #TODO but if this fails?i've to remove the contact in the new group previosly added?
+        def add_to_group_succeed(group, contact):
+            self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, group.id, contact.account)
             self.address_book.delete_contact_from_group(papygroupsrc, papycontact,
-                done_cb=move_to_group_succeed, failed_cb=move_to_group_fail)
-        def move_to_group_succeed(*args):
-            self.session.add_event(Event.EVENT_CONTACT_MOVE_SUCCEED,
-                                    account, src_gid, dest_gid)
+                done_cb=tuple([move_to_group_succeed]), failed_cb=tuple([move_to_group_fail]))
+        def move_to_group_succeed(group, contact):
+            self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, group.id, contact.account)
+
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papygroupdest = None
         papygroupsrc = None
@@ -895,16 +895,20 @@ class Worker(e3.base.Worker, papyon.Client):
             if group.id == self.session.groups[dest_gid].identifier:
                 papygroupdest = group
         if papygroupdest is not None and papygroupsrc is not None:
-            self.address_book.add_contact_to_group(papygroupdest, papycontact,done_cb=add_to_group_succeed,
-                                                 failed_cb=move_to_group_fail)
+            self.address_book.add_contact_to_group(papygroupdest, 
+                papycontact,done_cb=tuple([add_to_group_succeed]), failed_cb=tuple([move_to_group_fail]))
 
     def _handle_action_remove_contact(self, account):
         '''handle Action.ACTION_REMOVE_CONTACT '''
         def remove_contact_fail(*args):
             log.error("Error when removing contact: %s" % args)
             self.session.add_event(e3.Event.EVENT_CONTACT_REMOVE_FAILED, '')
+        def remove_contact_succeed(contact):
+            self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, contact.account)
+
         papycontact = self.address_book.contacts.search_by('account', account)[0]
-        self.address_book.delete_contact(papycontact, failed_cb=remove_contact_fail)
+        self.address_book.delete_contact(papycontact, 
+            done_cb=tuple([remove_contact_succeed]), failed_cb=tuple([remove_contact_fail]))
 
     def _handle_action_reject_contact(self, account): #TODO: finish this
         '''handle Action.ACTION_REJECT_CONTACT '''
@@ -919,6 +923,9 @@ class Worker(e3.base.Worker, papyon.Client):
         def remove_from_group_fail(*args):
             log.error("Error when removing contact from group: %s" % args)
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_FAILED, '')
+        def remove_from_group_succeed(group, contact):
+            self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, group.id, contact.account)
+
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papygroup = None
         for group in self.address_book.groups:
@@ -926,7 +933,7 @@ class Worker(e3.base.Worker, papyon.Client):
                 papygroup = group
         if papygroup is not None:
             self.address_book.delete_contact_from_group(papygroup, papycontact,
-                                                        failed_cb=remove_from_group_fail)
+                done_cb=tuple([remove_from_group_succeed]), failed_cb=tuple([remove_from_group_fail]))
 
     def _handle_action_remove_group(self, gid):
         ''' handle Action.ACTION_REMOVE_GROUP '''
@@ -938,7 +945,7 @@ class Worker(e3.base.Worker, papyon.Client):
             if group.id == self.session.groups[gid].identifier:
                 papygroup = group
         if papygroup is not None: 
-            self.address_book.delete_group(papygroup, failed_cb=remove_group_fail)
+            self.address_book.delete_group(papygroup, failed_cb=tuple([remove_group_fail]))
 
     def _handle_action_rename_group(self, gid, name):
         ''' handle Action.ACTION_RENAME_GROUP '''
@@ -950,7 +957,7 @@ class Worker(e3.base.Worker, papyon.Client):
             if group.id == self.session.groups[gid].identifier:
                 papygroup = group
         if papygroup is not None:
-            self.address_book.rename_group(papygroup, name, failed_cb=rename_group_fail)
+            self.address_book.rename_group(papygroup, name, failed_cb=tuple([rename_group_fail]))
 
     def _handle_action_set_contact_alias(self, account, alias): #TODO: finish this
         ''' handle Action.ACTION_SET_CONTACT_ALIAS '''

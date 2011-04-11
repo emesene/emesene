@@ -423,6 +423,11 @@ class ContactList(object):
         '''
         raise NotImplementedError()
 
+    def get_contact_selected_group(self):
+        '''return a group object for the selected contact, None otherwise
+        '''
+        raise NotImplementedError()
+
     def add_group(self, group):
         '''add a group to the contact list'''
         raise NotImplementedError()
