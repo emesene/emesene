@@ -162,7 +162,7 @@ class ConversationManager(Notebook, gui.ConversationManager):
         """
         parent = self.get_parent()
 
-        if parent is not None:
+        if parent is not None and conversation in self.conversations.values():
             if (is_waiting and not parent.is_active()) or not is_waiting:
                 parent.set_urgency_hint(is_waiting)
                 conversation.message_waiting = is_waiting
