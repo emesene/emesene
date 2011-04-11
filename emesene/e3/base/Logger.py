@@ -801,6 +801,11 @@ class LoggerProcess(threading.Thread):
 
         return False
 
+
+    @property
+    def input_size(self):
+        return self.input.qsize()
+
     def check(self, sync=False):
         '''call this method from the main thread if you dont want to have
         problems with threads, it will extract the results and call the

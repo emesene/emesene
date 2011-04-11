@@ -21,6 +21,7 @@
 from synch import Synch
 import sqlite3.dbapi2 as sqlite
 from datetime import date
+from time import sleep
 import os
 import e3
 import shutil
@@ -29,6 +30,9 @@ EM1_SELECT_USER = "select * from user"
 EM2_SELECT_USER = "select * from d_account"
 EM1_SELECT_CONVERSATIONS = "select conversation.id,account as account1,stamp,data from user inner join conversation_event on ( user.id=conversation_event.id_user ) inner join conversation on(conversation.id=conversation_event.id_conversation) inner join event on(conversation_event.id_event=event.id)"
 EM1_SELECT_DEST_USER = "select distinct account from (conversation_event inner join user on conversation_event.id_user = user.id) where conversation_event.id_conversation=%s and account <> '%s'"
+
+LOGGER_MAXLIMIT = 500
+LOGGER_MINLIMIT = 30
 
 
 class EmeseneSynch(Synch):
@@ -85,6 +89,7 @@ class EmeseneSynch(Synch):
         def __synch_conversations(self):
             self.__reset_progressbar()
             self._action_callback(_("Importing conversations..."))
+
             #Get all old users
 
             self.__conn_src = sqlite.connect(self.__src_db_path)
@@ -159,10 +164,24 @@ class EmeseneSynch(Synch):
                                                "data" : self.__data_conversion(conv[3])})
 
 
+            actual_conv = 0  
+            percent = e3.common.PercentDone(len(conversations_attr))
+
+            self.__reset_progressbar()
+            self._action_callback(_("Storing conversations..."))
+
             for conv in conversations_attr:
                 self._session.logger.log("message", 0, conv["data"], 
                                          conv["user"], conv["dest"], conv["time"])
 
+                actual_conv += 1.0
+
+                if percent.notify(actual_conv):
+                    self._prog_callback(percent.current)
+
+                while (self._session.logger.input_size >= LOGGER_MAXLIMIT):
+                    while (self._session.logger.input_size > LOGGER_MINLIMIT):
+                        sleep(1)
 
         def __user_to_account(self,user):
 
