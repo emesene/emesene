@@ -413,6 +413,13 @@ class Controller(object):
             width = self.config.get_or_set('i_login_width', 250)
             height = self.config.get_or_set('i_login_height', 410)
 
+        screen = window.get_screen()
+        pwidth, pheight = screen.get_width(), screen.get_height()
+        if posx > pwidth:
+            posx = pwidth // 2
+        if posy > pheight:
+            posy = pheight // 2
+
         window.set_location(width, height, posx, posy)
 
     def on_preferences_changed(self, use_http, proxy, session_id, service):
