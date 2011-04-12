@@ -100,18 +100,12 @@ class ConversationManager(object):
         """
         raise NotImplementedError("Method not implemented")
 
-    def _on_message_send_failed(self, cid, message):
-        '''called when a message is received'''
+    def _on_message_send_failed(self, cid, error):
+        '''called when a message failes to be sent'''
         conversation = self.conversations.get(float(cid), None)
 
         if conversation is not None:
-            error = conversation.formatter.format_error(
-                'message couldn\'t be sent: ')
-            conversation.output.append(error, {},
-                self.session.config.b_allow_auto_scroll)
-            conversation.output.append(
-                self.format_from_message(message),
-                {}, self.session.config.b_allow_auto_scroll)
+            conversation.on_send_message_failed(error)
         else:
             log.debug('conversation %s not found' % cid)
 

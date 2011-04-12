@@ -292,6 +292,13 @@ class Conversation(object):
 
         self.first = False
 
+    def on_send_message_failed(self, errorCode):
+        '''method called when a message fails to be delivered'''
+        contact = self.session.contacts.me
+        self.output.information(self.formatter, contact, \
+                                _('Error delivering message'))
+        self.first = False
+
     def on_user_typing(self, account):
         '''method called when a someone is typing'''
         raise NotImplementedError
