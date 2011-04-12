@@ -67,6 +67,11 @@ except ImportError:
     DBusController = None
 
 try:
+    from e3.common.NetworkManagerHelper import DBusNetworkChecker
+except ImportError:
+    DBusNetworkChecker = None
+
+try:
     from gui import gtkui
 except Exception, exc:
     log.error('Cannot find/load (py)gtk: %s' % str(exc))
@@ -167,6 +172,13 @@ class Controller(object):
         else:
             self.dbus_ext = None
 
+        if DBusNetworkChecker is not None:
+            extension.category_register('network checker', DBusNetworkChecker)
+            extension.set_default('network checker', DBusNetworkChecker)
+            self.network_checker = extension.get_and_instantiate('network checker')
+        else:
+            self.network_checker = None
+
         extension.category_register('sound', e3.common.play_sound.play)
         extension.category_register('notification',
                 e3.common.notification.Notification)
@@ -259,6 +271,8 @@ class Controller(object):
         #let's start dbus
         if self.dbus_ext is not None:
             self.dbus_ext.set_new_session(self.session)
+        if self.network_checker is not None:
+            self.network_checker.set_new_session(self.session)
 
     def close_session(self, do_exit=True, on_reconnect=False):
         '''close session'''
