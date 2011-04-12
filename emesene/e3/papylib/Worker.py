@@ -519,7 +519,12 @@ class Worker(e3.base.Worker, papyon.Client):
         e3.Logger.log_message(self.session, None, msgobj, False)
 
     def _on_conversation_message_error(self, err_type, error, papyconversation):
-        #TODO: tell the user the sending failed, and the reason (err_type)
+        cid = self.rpapyconv[papyconversation]
+        msgobj = e3.base.Message(e3.base.Message.TYPE_MESSAGE, error, \
+                                 self.session.account, None)
+        self.session.add_event(\
+            Event.EVENT_CONV_MESSAGE_SEND_FAILED, cid, msgobj)
+        
         log.error("Error sending message: %s %s" % (err_type, error))
 
     def _on_conversation_user_joined(self, papycontact, pyconvevent):
