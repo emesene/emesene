@@ -125,7 +125,8 @@ class DBusNetworkChecker():
         if state == NetworkManagerHelper.NM_STATE_CONNECTING:
             self.connected = False
         # in doubt (STATE_UNKNOWN), assume connected
-        elif state in (NetworkManagerHelper.NM_STATE_CONNECTED,
+        elif state in (NetworkManagerHelper.NM_STATE_CONNECTED_GLOBAL,
+                       NetworkManagerHelper.NM_STATE_CONNECTED,
                        NetworkManagerHelper.NM_STATE_UNKNOWN):
             self.connected = True
         else:
@@ -232,6 +233,9 @@ class NetworkManagerHelper(object):
     NM_STATE_CONNECTING = 2
     NM_STATE_CONNECTED = 3
     NM_STATE_DISCONNECTED = 4
+
+    # NetworkManager 0.9
+    NM_STATE_CONNECTED_GLOBAL = 70
 
     # The device type is unknown. 
     NM_DEVICE_TYPE_UNKNOWN = 0
