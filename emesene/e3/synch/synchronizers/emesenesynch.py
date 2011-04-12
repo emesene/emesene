@@ -43,6 +43,15 @@ class EmeseneSynch(Synch):
         def exists_source(self):
             return os.path.exists(self.__src_db_path)
 
+        def clean(self):
+            os.remove(self.__dest_db_path_copy)
+
+        def is_clean(self):
+            return not os.path.exists(self.__dest_db_path_copy)
+
+        def __create_safe_copy(self):
+            shutil.copy (self.__dest_db_path, self.__dest_db_path_copy)
+
         def set_user(self, user_account):
 
             self.__myuser = user_account
@@ -57,10 +66,13 @@ class EmeseneSynch(Synch):
             self.__src_db_path = os.path.join(self.__source_path, "cache",user_account + ".db")
             self.__dest_db_path = os.path.join(self.__dest_path, "log","base.db")
 
+            self.__dest_db_path_copy = self.__dest_db_path + "copy"
+
         def __reset_progressbar(self):
             self._prog_callback(0.0)
 
         def start_synch(self):
+            self.__create_safe_copy()
             self.__synch_my_avatars()
             self.__synch_other_avatars()
             self.__synch_conversations()
@@ -182,6 +194,7 @@ class EmeseneSynch(Synch):
                 while (self._session.logger.input_size >= LOGGER_MAXLIMIT):
                     while (self._session.logger.input_size > LOGGER_MINLIMIT):
                         sleep(1)
+
 
         def __user_to_account(self,user):
 

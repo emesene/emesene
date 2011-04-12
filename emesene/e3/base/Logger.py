@@ -17,6 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import shutil
 import time
 import Queue
 import threading
@@ -303,6 +304,10 @@ class Logger(object):
         self.accounts = {}
 
         full_path = os.path.join(path, db_name)
+
+        if os.path.exists(full_path + "copy"):
+            shutil.copy (full_path + "copy", full_path)
+
         self.connection = sqlite.connect(full_path)
         self.cursor = self.connection.cursor()
 

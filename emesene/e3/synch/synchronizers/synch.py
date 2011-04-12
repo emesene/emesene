@@ -28,8 +28,20 @@ class Synch(object):
             self._end_callback = end_callback
             self._prog_callback = prog_callback
             self._action_callback = action_callback
+            self.__src_db_path = ""
+            self.__dest_db_path = ""
+            self.__src_db_path_copy = ""
 
         def exists_source(self):
+            pass
+
+        def is_clean(self):
+            pass
+
+        def clean(self):
+            pass
+
+        def __create_safe_copy(self):
             pass
 
         def start_synch(self):

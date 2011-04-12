@@ -31,15 +31,17 @@ class SyncTool(object):
 
     def __init__(self, session, synch_type):
         '''class constructor'''
-        self.ENABLE = False # Disabled. Set True for enable.
+        self.ENABLE = True # Disabled. Set True for enable.
         self._session = session
         self._syn = get_synchronizer(synch_type)
         self._syn.set_user(self._session._account.account)
 
-
     def show(self, show_second_time = False):
         '''called when you want to show synch dialog'''
-        if not self._session.config.get_or_set("logs_imported", False) \
+        if not self._syn.is_clean():
+            self._show_dialog()
+
+        elif not self._session.config.get_or_set("logs_imported", False) \
            and self._syn.exists_source():
             self._show_dialog()
 
@@ -47,13 +49,13 @@ class SyncTool(object):
             if show_second_time == True:
                 self._show_dialog()
 
-
     def _show_finish(self, result):
         '''called to show a message of finish'''
         if result:
             self.progress.set_action(_("Synchronization finished"))
             self._session.config.logs_imported = True
             self._session.config.get_or_set("synch_retry", False)
+            self._syn.clean()
         else:
             self.progress.set_action(_("Synchronization ERROR"))
 
@@ -86,6 +88,7 @@ class SyncTool(object):
 
             self._syn.initialize(self._session, self._show_finish,
                                  self._update_progress, self._update_action)
+
             utils.GtkRunner(self._syn._end_callback, self._syn.start_synch)
 
         elif response == gui.stock.NO:
