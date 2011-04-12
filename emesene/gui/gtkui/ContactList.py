@@ -57,8 +57,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.offline_group = None
         self.offline_group_iter = None
         self.enable_model_drag_source(gtk.gdk.BUTTON1_MASK,[
+            ('emesene-contact',0,0),
             ('text/html',0,1),
             ('text/plain',0,2)],gtk.gdk.ACTION_COPY)
+        self.enable_model_drag_dest([('emesene-contact',0,0)], gtk.gdk.ACTION_DEFAULT)
 
         if self.session.config.d_weights is None:
             self.session.config.d_weights = {}
@@ -121,6 +123,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.connect('row-expanded' , self._on_expand)
         self.connect('row-collapsed' , self._on_collapse)
         self.connect('drag-data-get', self._on_drag_data_get)
+        self.connect('drag-drop', self._on_drag_drop)
 
     def _on_expand(self, treeview, iter_, path):
         group = self.model[path][1]
@@ -739,3 +742,14 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     8, u'{0} &lt;<a href="mailto:{1}">{1}</a>&gt;'.format(''.join(display_name), account))
             elif selection.target == 'text/plain':
                 selection.set(selection.target, 8, u'%s <%s>' % (Renderers.msnplus_to_plain_text(display_name), account))
+    def _on_drag_drop(self, widget, drag_context, x, y, time):
+        drag_context.finish(True, False, time)
+        group_src = self.get_contact_selected_group()
+
+        pos = widget.get_dest_row_at_pos(x,y)[0][0]
+        group_des = self._model[pos][1]
+
+        if group_src and not self._model[pos][6]:
+            self.session.move_to_group(self.get_contact_selected().account,
+                                    group_src.identifier, group_des.identifier)
+        return True
