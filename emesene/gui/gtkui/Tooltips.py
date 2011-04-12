@@ -51,7 +51,8 @@ class Tooltips(gtk.Window):
 
         self.image = gtk.Image()
         self.data_string = '<span size="small">(%s)\n\n'
-        self.data_string += _('Blocked: ')+ '%s\n'
+        self.data_string += _('Status') + ': %s\n'
+        self.data_string += _('Blocked')+ ': %s\n'
         #self.data_string += _('Has you: %s')+ '\n'
         self.data_string += '</span>'
         
@@ -137,7 +138,7 @@ class Tooltips(gtk.Window):
         text = xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.display_name)) 
         text += '\n' + xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.message))
         text += '\n' + self.data_string % (\
-            obj.account, self.yes_no[bool(obj.blocked)])
+            obj.account, obj.status_string, self.yes_no[bool(obj.blocked)])
 
         self.label.set_markup(text)
 

@@ -22,8 +22,7 @@ import e3
 class ContactList(object):
     '''an abstract class that defines the api that the contact list should
     have'''
-    NICK_TPL = \
-        '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small][$NL][$small][$BLOCKED] ([$STATUS]) - [$MESSAGE][$/small]'
+    NICK_TPL = '[$DISPLAY_NAME][$NL][$small][C=c10ud][$MESSAGE][/C][$/small]'
 
     GROUP_TPL = '[$b][$NAME] ([$ONLINE_COUNT]/[$TOTAL_COUNT])[$/b]'
 
@@ -91,7 +90,7 @@ class ContactList(object):
         # [$s] [$/s] -> small
         # [$b] [$/b]
         # [$i] [$/i]
-        self.nick_template = self.session.config.get_or_set('nick_template',
+        self.nick_template = self.session.config.get_or_set('nick_template_clist',
             ContactList.NICK_TPL)
 
         # valid values:

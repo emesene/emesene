@@ -528,7 +528,7 @@ class MsnPlusMarkupMohrtutchy:
         elif code.lower() == 'mohr':
             return '#ff00de'
         elif code.lower() == 'c10ud' :
-            return '#313373'
+            return '#696969'
         else:
             return code
         

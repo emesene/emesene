@@ -77,6 +77,20 @@ class Dialog(object):
         return label
 
     @classmethod
+    def window_add_label_vbox(cls, window, text):
+        '''add a label with the text (as pango) on the window'''
+
+        label = gtk.Label()
+        label.set_selectable(True)
+        label.set_use_markup(True)
+        label.set_markup('<span>' + \
+            text + "</span>")
+        window.vbox.pack_start(label, True, True)
+        label.show()
+
+        return label
+
+    @classmethod
     def close_cb(cls, widget, event, window, response_cb, *args):
         '''default close callback, call response_cb with args if it's not
         None'''
@@ -899,6 +913,9 @@ class Dialog(object):
         content = gtk.Table(homogeneous=True)
         if format_type == 'nick':
             window = cls.new_window(_('Nick Format Help'))
+            cls.window_add_label_vbox(window, _('Example:'))
+            cls.window_add_label_vbox(window, \
+            '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small][$NL][$small][$BLOCKED] ([$STATUS]) - [$MESSAGE][$/small]')
             content.attach(TableText('[$NICK]'), 0, 1, 0, 1)
             content.attach(TableText(_('Nickname')), 1, 2, 0, 1)
             content.attach(TableText('[$ACCOUNT]'), 0, 1, 1, 2)

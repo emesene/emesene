@@ -670,7 +670,7 @@ class Theme(BaseTable):
         self.append_combo(_('Adium theme'), gui.theme.get_adium_themes,
             'session.config.adium_theme')
         self.append_entry_default(_('Nick format'), 'nick',
-                'session.config.nick_template', ContactList.NICK_TPL)
+                'session.config.nick_template_clist', ContactList.NICK_TPL)
         self.append_entry_default(_('Group format'), 'group',
                 'session.config.group_template', ContactList.GROUP_TPL)
 
