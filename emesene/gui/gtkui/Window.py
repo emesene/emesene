@@ -37,10 +37,7 @@ class Window(gtk.Window):
         self.set_title("emesene")
         self.set_icon(gui.theme.logo)
 
-        if cb_on_close is not None:
-            self.cb_on_close = cb_on_close
-        else: # we're the main window: close button only hides it
-            self.cb_on_close = lambda *args: self.hide_on_delete()
+        self.cb_on_close = cb_on_close
 
         self.connect('delete-event', self._on_delete_event)
         self.connect('key-press-event', self._on_key_press)
@@ -95,6 +92,13 @@ class Window(gtk.Window):
         self.add(self.content)
         self.content.show()
         self.content_type = 'main'
+
+        # hide the main window only when the user is connected
+        self.cb_on_close = lambda *args: self.hide_on_delete()
+
+    def on_disconnect(self, cb_on_close):
+        '''called when the user is disconnected'''
+        self.cb_on_close = cb_on_close
 
     def go_conversation(self, session):
         '''change to a conversation window'''

@@ -214,7 +214,7 @@ class Controller(object):
     def start(self, account=None):
         '''the entry point to the class'''
         windowcls = extension.get_default('window frame')
-        self.window = windowcls(None) # main window
+        self.window = windowcls(self.close_session) # main window
         self._set_location(self.window)
 
         if self.tray_icon is not None:
@@ -289,6 +289,8 @@ class Controller(object):
 
         if self.session is not None:
             self.session.quit()
+
+        self.window.on_disconnect(self.close_session)
 
         self.save_extensions_config()
         self._save_login_dimensions()
