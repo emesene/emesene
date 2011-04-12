@@ -744,12 +744,13 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 selection.set(selection.target, 8, u'%s <%s>' % (Renderers.msnplus_to_plain_text(display_name), account))
     def _on_drag_drop(self, widget, drag_context, x, y, time):
         drag_context.finish(True, False, time)
-        group_src = self.get_contact_selected_group()
+        if self.session.config.b_order_by_group:
+            group_src = self.get_contact_selected_group()
+        
+            pos = widget.get_dest_row_at_pos(x,y)[0][0]
+            group_des = self.model[pos][1]
 
-        pos = widget.get_dest_row_at_pos(x,y)[0][0]
-        group_des = self._model[pos][1]
-
-        if group_src and not self._model[pos][6]:
-            self.session.move_to_group(self.get_contact_selected().account,
+            if group_src and not self._model[pos][6]:
+                self.session.move_to_group(self.get_contact_selected().account,
                                     group_src.identifier, group_des.identifier)
         return True
