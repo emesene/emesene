@@ -61,7 +61,8 @@ class Preferences(gtk.Window):
         self.session = session
 
         self.set_default_size(600, 400)
-        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        # GNOME3 likes to break things..was WINDOW_TYPE_HINT_DIALOG
+        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_MENU)
 
         if utils.file_readable(gui.theme.logo):
             self.set_icon(
