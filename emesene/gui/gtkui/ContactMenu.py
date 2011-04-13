@@ -92,6 +92,7 @@ class ContactMenu(gtk.Menu):
         self.remove_from_group.connect('activate',
             lambda *args: self.on_remove_from_group())
         self.remove_from_group.set_submenu(self.remove_group_submenu)
+        self.groups_to_remove = 0
 
         self.set_unblocked()
 
@@ -121,6 +122,7 @@ class ContactMenu(gtk.Menu):
             self.copy_groups_submenu.remove(i)
         for i in self.remove_group_submenu.get_children():
             self.remove_group_submenu.remove(i)
+        self.groups_to_remove = 0
 
         if not self.handler.is_by_group_view(): return
 
@@ -138,6 +140,7 @@ class ContactMenu(gtk.Menu):
                     self.on_copy_to_group_selected, group)
                 self.copy_groups_submenu.append(item_2)
             else:
+                self.groups_to_remove = 1
                 item = gtk.MenuItem(group.name)
                 item.connect('activate', 
                     self.on_remove_from_group_selected, group)
@@ -146,6 +149,9 @@ class ContactMenu(gtk.Menu):
         self.move_groups_submenu.show_all()
         self.copy_groups_submenu.show_all()
         self.remove_group_submenu.show_all()
+
+        self.copy_to_group.set_sensitive(self.groups_to_remove)
+        self.remove_from_group.set_sensitive(self.groups_to_remove)
 
     def on_copy_to_group_selected(self, widget, group):
         self.handler.on_copy_to_group_selected(group)
