@@ -111,6 +111,13 @@ class PangoDataType( DefaultDataType ):
                             tags.append("i")
                         elif found == "s":
                             tags.append("small")
+                        elif found == "C":
+                            if len(aux) > index + 12:
+                                if aux[index+6] == "#":
+                                    hextag = aux[index+6:index+13]
+                                else:
+                                    hextag = "#" + aux[index+6:index+12]
+                            tags.append("COLOR=" + hextag)
                         elif found == "/":
                             if len(tags) > 0:
                                 tags.pop()
@@ -129,8 +136,10 @@ class PangoDataType( DefaultDataType ):
                     item.pixbuf = item.getPixbuf(False)
                 while len(tags) > 0:
                     tag = tags.pop()
-                    closed = closed+"[$/"+tag+"]"
                     opened = "[$"+tag+"]"+opened
+                    if tag[0] == "C":
+                        tag = "COLOR"
+                    closed = closed+"[$/"+tag+"]"
                 self.addstr(ret, closed)
                 closed = ""
                 ret.append(item)
