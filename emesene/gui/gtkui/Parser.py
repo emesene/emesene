@@ -96,7 +96,7 @@ class PangoDataType( DefaultDataType ):
         opened = ""
         for item in self.parser.parse( self, self.text ):
             if type(item) == Url:
-                item = item.getPango()
+                item = item.__str__() # don't parse urls
             if type(item) in (str, unicode, Url):
                 if item != "" and item != "</span>":
                     item = opened + item
@@ -400,9 +400,6 @@ class Url(object):
         elif self.url[:4] == 'ftp.':
             href  = 'ftp://'+self.url
         return '<a href="%s">%s</a>' % (escape(href), escape(self.url))
-
-    def getPango(self):
-        return '<span foreground="#0000ff"><u>'+escape(self.url)+'</u></span>'
 
     def __str__(self):
         return escape(self.url)
