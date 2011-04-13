@@ -519,6 +519,7 @@ class Worker(e3.base.Worker, papyon.Client):
         e3.Logger.log_message(self.session, None, msgobj, False)
 
     def _on_conversation_message_error(self, err_type, error, papyconversation):
+        # FIXME: KeyError: <e3.papylib.PapyEvents.ConversationEvent object at 0x3a91290>
         cid = self.rpapyconv[papyconversation]
         msgobj = e3.base.Message(e3.base.Message.TYPE_MESSAGE, error, \
                                  self.session.account, None)
@@ -1156,8 +1157,7 @@ class Worker(e3.base.Worker, papyon.Client):
         if len(papyconversation.total_participants) == 1:
             # XXX wariano: pop removes from the set, is that ok?
             first_dude = papyconversation.total_participants.pop()
-            if first_dude.presence == papyon.Presence.OFFLINE and \
-                len(papyconversation._pending_invites) != 0: #avoid fake-offline
+            if first_dude.presence == papyon.Presence.OFFLINE:
                 self.oim_box.send_message(first_dude, message.body)
                 message.type = e3.base.Message.TYPE_FLNMSG # don't process this.
 
