@@ -858,10 +858,13 @@ class Worker(e3.base.Worker, papyon.Client):
         if papygroupdest is not None:
             group_vect = [papygroupdest]
             callback_vect = [add_to_group_succeed,gid,account]
-            papycontact = self.address_book.contacts.search_by('account', account)[0]
+            try:
+                papycontact = self.address_book.contacts.search_by('account', account)[0]
+            except IndexError:
+                papycontact = None
             if papycontact is None:
                 self.address_book.add_messenger_contact(account, groups=group_vect, 
-                    done_cb=tuple(callback_vect), failed_cb=add_to_group_fail)
+                    done_cb=tuple(callback_vect), failed_cb=tuple([add_to_group_fail]))
             else:
                 self.address_book.add_contact_to_group(papygroupdest, papycontact,
                     done_cb=tuple([copy_to_group_succeed, gid, account]), 
@@ -919,7 +922,7 @@ class Worker(e3.base.Worker, papyon.Client):
             log.error("Error when removing contact: %s" % args)
             self.session.add_event(e3.Event.EVENT_CONTACT_REMOVE_FAILED, '')
         def remove_contact_succeed(contact):
-            self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, contact.account)
+            self.session.add_event(e3.Event.EVENT_CONTACT_REMOVE_SUCCEED, contact.account)
 
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         self.address_book.delete_contact(papycontact, 
