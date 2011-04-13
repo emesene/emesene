@@ -820,11 +820,16 @@ class Worker(e3.base.Worker, papyon.Client):
         def add_contact_fail(*args):
             log.error("Error adding a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_ADD_FAILED, '') #account
-            print "FAIL ADDEDD"
+
+        def add_contact_succeed(contact):
+            # Temporary workaround, add to No Group group.
+            self.session.add_event(e3.Event.EVENT_CONTACT_ADD_SUCCEED, contact.account)
+
         #TODO: support fancy stuff like: invite_display_name='',
         #    invite_message='', groups=[], network_id=NetworkID.MSN,
         #    auto_allow=True, done_cb=None, failed_cb=None
-        self.address_book.add_messenger_contact(account, failed_cb=tuple([add_contact_fail]))
+        self.address_book.add_messenger_contact(account, 
+            done_cb=tuple([add_contact_succeed]), failed_cb=tuple([add_contact_fail]))
 
     def _handle_action_add_group(self, name):
         '''handle Action.ACTION_ADD_GROUP '''
@@ -884,22 +889,27 @@ class Worker(e3.base.Worker, papyon.Client):
             log.error("Error moving a contact: %s", args)
             self.session.add_event(e3.Event.EVENT_CONTACT_MOVE_FAILED, '') #account
         def add_to_group_succeed(group, contact):
+            if papygroupsrc is not None:
+                self.address_book.delete_contact_from_group(papygroupsrc, papycontact,
+                    done_cb=tuple([move_to_group_succeed]), failed_cb=tuple([move_to_group_fail]))
+            else:
+                self.session.add_event(e3.Event.EVENT_CONTACT_REMOVE_SUCCEED, contact.account)
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, group.id, contact.account)
-            self.address_book.delete_contact_from_group(papygroupsrc, papycontact,
-                done_cb=tuple([move_to_group_succeed]), failed_cb=tuple([move_to_group_fail]))
+            
         def move_to_group_succeed(group, contact):
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, group.id, contact.account)
 
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papygroupdest = None
         papygroupsrc = None
-        for group in self.address_book.groups:
-            if group.id == self.session.groups[src_gid].identifier:
-                papygroupsrc = group
+        if src_gid != '0':
+            for group in self.address_book.groups:
+                if group.id == self.session.groups[src_gid].identifier:
+                    papygroupsrc = group
         for group in self.address_book.groups:
             if group.id == self.session.groups[dest_gid].identifier:
                 papygroupdest = group
-        if papygroupdest is not None and papygroupsrc is not None:
+        if papygroupdest is not None:
             self.address_book.add_contact_to_group(papygroupdest, 
                 papycontact,done_cb=tuple([add_to_group_succeed]), failed_cb=tuple([move_to_group_fail]))
 
@@ -930,6 +940,8 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_FAILED, '')
         def remove_from_group_succeed(group, contact):
             self.session.add_event(e3.Event.EVENT_GROUP_REMOVE_CONTACT_SUCCEED, group.id, contact.account)
+            if len(contact.groups) == 0: # Add to "No Group" group.
+                self.session.add_event(e3.Event.EVENT_CONTACT_ADD_SUCCEED, contact.account)
 
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papygroup = None
