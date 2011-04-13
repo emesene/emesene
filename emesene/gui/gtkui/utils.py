@@ -79,23 +79,19 @@ def safe_gtk_pixbuf_load(path, size=None, animated=False):
 def gtk_pixbuf_load(path, size=None, animated=False):
     '''try to return a gtk pixbuf from path, if fails, return None'''
     path = os.path.abspath(path)
-
     if animated:
         creator = gtk.gdk.PixbufAnimation
     else:
         creator = gtk.gdk.pixbuf_new_from_file
 
     if file_readable(path):
-
         pixbuf = creator(path)
-
         if size is not None:
             width, height = size
             pixbuf = pixbuf.scale_simple(width, height,gtk.gdk.INTERP_BILINEAR)
         return pixbuf
     else:
         return None
-
 
 def scale_nicely(pixbuf):
     '''scale a pixbuf'''
@@ -180,8 +176,10 @@ def simple_images_overlap(pixbuf_src,pixbuf_dest,x,y):
     
 
 def makePreview(src):
-
-    pbf = gtk_pixbuf_load(src,(96,96))
+    try:
+        pbf = gtk_pixbuf_load(src,(96,96))
+    except glib.GError:
+        return None
 
     filetmp = tempfile.mkstemp(prefix=hashlib.md5(src).hexdigest(), suffix=hashlib.md5(src).hexdigest())[1]
 
