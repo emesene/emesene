@@ -207,7 +207,7 @@ class ContactHandler(object):
 
     def on_add_contact_selected(self):
         '''called when add contact is selected'''
-        def add_cb(response, account, group):
+        def add_cb(response, account=None, group=None):
             '''callback to the add_dialog method, add the user and add him
             to the defined group'''
             if response == gui.stock.ADD:
