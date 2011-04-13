@@ -846,28 +846,26 @@ class Worker(e3.base.Worker, papyon.Client):
         def add_to_group_fail(*args):
             log.error("Error adding a contact to a group: %s", args)
             self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_FAILED, 0, 0) #gid, cid
-        def add_to_group_succeed(*args):
-            self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, args[1], args[0].account) #gid, cid
-        def copy_to_group_succeed(papygroup, papycontact, gid, account):
-            self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, gid, account)
+        def add_to_group_succeed(papycontact, gid):
+            self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, gid, papycontact.account)
+        def copy_to_group_succeed(papygroup, papycontact, gid):
+            self.session.add_event(e3.Event.EVENT_GROUP_ADD_CONTACT_SUCCEED, gid, papycontact.account)
 
         papygroupdest = None
         for group in self.address_book.groups:
             if group.id == self.session.groups[gid].identifier:
                 papygroupdest = group
         if papygroupdest is not None:
-            group_vect = [papygroupdest]
-            callback_vect = [add_to_group_succeed,gid,account]
             try:
                 papycontact = self.address_book.contacts.search_by('account', account)[0]
             except IndexError:
                 papycontact = None
-            if papycontact is None:
-                self.address_book.add_messenger_contact(account, groups=group_vect, 
-                    done_cb=tuple(callback_vect), failed_cb=tuple([add_to_group_fail]))
+            if papycontact is None: #We don't have it in the address book
+                self.address_book.add_messenger_contact(account, groups=[papygroupdest], 
+                    done_cb=tuple([add_to_group_succeed, gid]), failed_cb=tuple([add_to_group_fail]))
             else:
                 self.address_book.add_contact_to_group(papygroupdest, papycontact,
-                    done_cb=tuple([copy_to_group_succeed, gid, account]), 
+                    done_cb=tuple([copy_to_group_succeed, gid]), 
                     failed_cb=tuple([add_to_group_fail]))
 
     def _handle_action_block_contact(self, account):
