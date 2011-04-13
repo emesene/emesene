@@ -176,7 +176,7 @@ class Dialog(object):
     def entry_window(cls, message, text, response_cb, title, *args):
         '''create a window that contains a label and a entry with text set
         and selected, and two buttons, accept, cancel'''
-        window = cls.new_window(title, response_cb)
+        window = cls.new_window(title, response_cb, stock.CANCEL, *args)
         cls.window_add_label(window, message)
 
         entry = gtk.Entry()
