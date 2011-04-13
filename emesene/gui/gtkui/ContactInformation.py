@@ -32,6 +32,8 @@ import Renderers
 import logging
 log = logging.getLogger('gtkui.ContactInformation')
 
+from IconView import IconView
+
 class ContactInformation(gtk.Window, gui.base.ContactInformation):
     '''a window that displays information about a contact'''
 
@@ -58,12 +60,20 @@ class ContactInformation(gtk.Window, gui.base.ContactInformation):
         '''create all the tabs on the window'''
         self.info = InformationWidget(self.session, self.account)
         self.nicks = ListWidget(self.session, self.account)
+
+        self.avatar_manager = gui.base.AvatarManager(self.session)
+ 
+        account_path = self.avatar_manager.get_contact_avatars_dir(self.account)
+
+        self.avatars = IconView(_('Avatar history'), [account_path], 
+                        None, None, IconView.TYPE_SELF_PICS)
         self.messages = ListWidget(self.session, self.account)
         self.status = ListWidget(self.session, self.account)
         self.chats = ChatWidget(self.session, self.account)
 
         self.tabs.append_page(self.info, gtk.Label(_('Information')))
         self.tabs.append_page(self.nicks, gtk.Label(_('Nick history')))
+        self.tabs.append_page(self.avatars, gtk.Label(_('Avatar history')))
         self.tabs.append_page(self.messages, gtk.Label(_('Message history')))
         self.tabs.append_page(self.status, gtk.Label(_('Status history')))
         self.tabs.append_page(self.chats, gtk.Label(_('Chat history')))

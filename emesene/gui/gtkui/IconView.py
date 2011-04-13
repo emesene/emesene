@@ -171,7 +171,8 @@ class IconView(gtk.HBox):
 
     def _on_icon_activated(self, *args):
         '''method called when a picture is double clicked'''
-        self.on_accept_cb(None)
+        if self.on_accept_cb != None:
+            self.on_accept_cb(None)
     
     def get_selected_items(self):
         ''' gets the selected pictures '''

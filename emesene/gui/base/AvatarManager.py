@@ -35,6 +35,9 @@ class AvatarManager(object):
         self.config = session.config
         self.avatar_path = self.session.config.last_avatar
 
+        for contact in self.session.contacts.contacts:
+            self.session.config_dir.add_path(contact, os.path.join(contact, "avatars"), False)
+
     def get_avatars_dir(self):
         ''' gets the user's avatar directory '''
         # this path should be set while loging in
@@ -44,6 +47,11 @@ class AvatarManager(object):
         ''' gets the contacts' cached avatar directory '''
         # this path should be set while loging in
         return self.config_dir.get_path('cached_avatars')
+
+    def get_contact_avatars_dir(self, contact):
+        ''' gets the avatar directory of specified contact'''
+        # this path is set by AvatarManager on init
+        return self.config_dir.get_path(contact)
 
     def get_system_avatars_dirs(self):
         ''' gets the directories where avatars are availables '''
