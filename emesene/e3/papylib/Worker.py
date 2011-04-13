@@ -681,7 +681,9 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_addressbook_messenger_contact_added(self, contact):
         self._add_contact(contact)
-        self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, contact.account)
+        # We handle this in the respective callbacks.
+        #self.session.add_event(Event.EVENT_CONTACT_ADD_SUCCEED, contact.account)
+        return
 
     def _on_addressbook_contact_deleted(self, contact):
         self.session.add_event(Event.EVENT_CONTACT_REMOVE_SUCCEED, contact.account)
@@ -822,7 +824,6 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(e3.Event.EVENT_CONTACT_ADD_FAILED, '') #account
 
         def add_contact_succeed(contact):
-            # Temporary workaround, add to No Group group.
             self.session.add_event(e3.Event.EVENT_CONTACT_ADD_SUCCEED, contact.account)
 
         #TODO: support fancy stuff like: invite_display_name='',
