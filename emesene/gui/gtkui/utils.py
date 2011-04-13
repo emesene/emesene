@@ -52,7 +52,8 @@ def gtk_ico_image_load(path, icosize=None):
 
 def safe_gtk_pixbuf_load(path, size=None, animated=False):
     '''try to return a gtk pixbuf from path, if fails, return None'''
-    path = os.path.abspath(path)
+    if not os.path.isabs(path):
+        path = os.path.abspath(path)
 
     if animated:
         creator = gtk.gdk.PixbufAnimation
