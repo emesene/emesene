@@ -186,9 +186,9 @@ class Dialog(object):
         entry.connect('activate', cls.entry_cb, window, response_cb, *args)
 
         window.hbox.pack_start(entry, True, True)
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
-            cls.entry_cb, *args)
         cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
+            cls.entry_cb, *args)
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.entry_cb, *args)
 
         setattr(window, 'entry', entry)
