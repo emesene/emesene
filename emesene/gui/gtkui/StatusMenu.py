@@ -42,7 +42,10 @@ class StatusMenu(gtk.Menu):
         self.status = {}
 
         for stat in e3.status.ORDERED:
-            temp_item = gtk.ImageMenuItem(e3.status.STATUS[stat])
+            if stat == e3.status.OFFLINE:
+                temp_item = gtk.ImageMenuItem(_("Invisible"))
+            else:
+                temp_item = gtk.ImageMenuItem(e3.status.STATUS[stat])
             temp_item.set_image(utils.safe_gtk_image_load(
                 gui.theme.status_icons[stat]))
             temp_item.connect('activate', self._on_activate, stat)
