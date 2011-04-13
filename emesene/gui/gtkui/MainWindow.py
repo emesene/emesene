@@ -239,9 +239,13 @@ class MainWindow(gtk.VBox):
             self.entry.show()
             self.entry.grab_focus()
             self.contact_list.is_searching = True
+            # Using private member because i don't want to update config
+            self.contact_list._show_empty_groups = True
+            self.contact_list.refilter()
         else:
             self.entry.set_text('')
             self.entry.hide()
             self.contact_list.is_searching = False
+            self.contact_list.show_empty_groups = self.session.config.b_show_empty_groups
             self.contact_list.un_expand_groups()
 
