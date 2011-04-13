@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-04-13 14:33+0200\n"
+"POT-Creation-Date: 2011-04-13 19:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,6 +34,23 @@ msgstr ""
 
 #: emesene/e3/base/status.py:29
 msgid "Idle"
+msgstr ""
+
+#: emesene/e3/common/notification.py:68
+msgid "File transfer successful"
+msgstr ""
+
+#: emesene/e3/common/notification.py:71
+msgid "File transfer canceled"
+msgstr ""
+
+#: emesene/e3/common/notification.py:79
+msgid "File transfer invitation"
+msgstr ""
+
+#: emesene/e3/common/notification.py:83
+#, python-format
+msgid "New mail from %s"
 msgstr ""
 
 #: emesene/e3/common/notification.py:94
@@ -148,83 +165,88 @@ msgstr ""
 msgid "Call Manager"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:43
+#: emesene/gui/gtkui/ContactInformation.py:45
 #, python-format
 msgid "Contact information (%s)"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:65 emesene/gui/gtkui/Dialog.py:344
+#: emesene/gui/gtkui/ContactInformation.py:68
+#: emesene/gui/gtkui/ContactInformation.py:76
+msgid "Avatar history"
+msgstr ""
+
+#: emesene/gui/gtkui/ContactInformation.py:74 emesene/gui/gtkui/Dialog.py:344
 msgid "Information"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:66
+#: emesene/gui/gtkui/ContactInformation.py:75
 msgid "Nick history"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:67
+#: emesene/gui/gtkui/ContactInformation.py:77
 msgid "Message history"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:68
+#: emesene/gui/gtkui/ContactInformation.py:78
 msgid "Status history"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:69
+#: emesene/gui/gtkui/ContactInformation.py:79
 msgid "Chat history"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:121
+#: emesene/gui/gtkui/ContactInformation.py:131
 msgid "Image"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:123
+#: emesene/gui/gtkui/ContactInformation.py:133
 msgid "Nick"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:125
+#: emesene/gui/gtkui/ContactInformation.py:135
 msgid "E-Mail"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:127 emesene/gui/gtkui/Dialog.py:926
+#: emesene/gui/gtkui/ContactInformation.py:137 emesene/gui/gtkui/Dialog.py:926
 #: emesene/gui/gtkui/Login.py:67 emesene/gui/gtkui/MainMenu.py:86
 #: emesene/gui/gtkui/PluginWindow.py:29 emesene/gui/gtkui/Tooltips.py:54
 #: emesene/gui/gtkui/TrayIcon.py:179
 msgid "Status"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:129
+#: emesene/gui/gtkui/ContactInformation.py:139
 msgid "Message"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:131
+#: emesene/gui/gtkui/ContactInformation.py:141
 #: emesene/gui/gtkui/Tooltips.py:55
 msgid "Blocked"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:174
+#: emesene/gui/gtkui/ContactInformation.py:184
 #: emesene/gui/gtkui/Tooltips.py:59
 msgid "Yes"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:176
+#: emesene/gui/gtkui/ContactInformation.py:186
 #: emesene/gui/gtkui/Tooltips.py:59
 msgid "No"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:266
-#: emesene/gui/gtkui/ContactInformation.py:307
+#: emesene/gui/gtkui/ContactInformation.py:276
+#: emesene/gui/gtkui/ContactInformation.py:317
 msgid "Hide calendars"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:286
+#: emesene/gui/gtkui/ContactInformation.py:296
 msgid "Chats from"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:288
+#: emesene/gui/gtkui/ContactInformation.py:298
 msgid "Chats to"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:304
+#: emesene/gui/gtkui/ContactInformation.py:314
 msgid "Show calendars"
 msgstr ""
 
