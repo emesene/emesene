@@ -149,13 +149,13 @@ class ContactList(gui.ContactList, gtk.TreeView):
             if animation.is_static_image():
                 pix = utils.gtk_pixbuf_load(contact.picture,
                         (self.avatar_size, self.avatar_size))
-                if bool(contact.blocked)==True:
+                if bool(contact.blocked):
                     pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
                     utils.simple_images_overlap(pix,pixbufblock,-pixbufblock.props.width,-pixbufblock.props.width)
                 picture = gtk.image_new_from_pixbuf(pix)
             else:
                 myanimation = utils.simple_animation_scale(contact.picture, self.avatar_size, self.avatar_size)
-                if bool(contact.blocked)==True:
+                if bool(contact.blocked):
                     pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
                     static_image = myanimation.get_static_image()
                     pix = static_image.scale_simple(self.avatar_size, self.avatar_size, gtk.gdk.INTERP_BILINEAR)
@@ -166,7 +166,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         else:
             pix = utils.gtk_pixbuf_load(gui.theme.user,
                         (self.avatar_size, self.avatar_size))
-            if bool(contact.blocked)==True:
+            if bool(contact.blocked):
                 pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
                 utils.simple_images_overlap(pix,pixbufblock,-pixbufblock.props.width,-pixbufblock.props.width)
             picture = gtk.image_new_from_pixbuf(pix)

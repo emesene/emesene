@@ -61,7 +61,7 @@ class Signal(object):
                 continue
 
             try:
-                if callback(*args, **kwargs) == False:
+                if not callback(*args, **kwargs):
                     break
             except TypeError:
                 to_remove.append(callback)

@@ -293,7 +293,7 @@ class ConversationDataType( DefaultDataType ):
             return '<object type="application/x-emesene-ink" class="%s">' \
                 '</object>' % (self.text,)
 
-        if smileys == True and self.conversation:
+        if smileys and self.conversation:
             if self.username == self.conversation.switchboard.user:
                 sub = self.subOCE
                 msnOM = self.conversation.switchboard.msn.getMsnObjectsManager()

@@ -148,7 +148,7 @@ class Tooltips(gtk.Window):
         else:
             pixbuf = utils.gtk_pixbuf_load(gui.theme.user_def_image)
 
-        if bool(obj.blocked)==True:
+        if bool(obj.blocked):
             pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay_big)
             utils.simple_images_overlap(pixbuf,pixbufblock,-pixbufblock.props.width,-pixbufblock.props.width)
 

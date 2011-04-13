@@ -574,7 +574,7 @@ class SmileyLayout(pango.Layout):
             self.set_attributes(self._attrlist)
 
     def _update_layout(self):
-        if self._width >= 0 and self._ellipsize == False: # if true, then wrap
+        if self._width >= 0 and not self._ellipsize: # if true, then wrap
             pango.Layout.set_width(self, self._width)
         else:
             pango.Layout.set_width(self, -1)

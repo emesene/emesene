@@ -295,7 +295,7 @@ class Controller(object):
         self.save_extensions_config()
         self._save_login_dimensions()
 
-        if self.session is not None and on_reconnect is False:
+        if self.session is not None and not on_reconnect:
             self.session.save_config()
             self.session = None
 
