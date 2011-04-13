@@ -172,6 +172,8 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.on_filetransfer_progress)
         self.session.signals.filetransfer_completed.subscribe(
                 self.on_filetransfer_completed)
+        self.session.signals.filetransfer_rejected.subscribe(
+                self.on_filetransfer_rejected)
 
         self.session.signals.call_invitation.subscribe(
                 self.on_call_invitation)
@@ -480,6 +482,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         if transfer in self.transfers_bar.transfers:
             self.transfers_bar.accepted(transfer)
 
+        contact = self._member_to_contact(self.members[0])
+        self.output.information(self.formatter, contact,
+                _('File transfer accepted by %s') % (contact.display_name))
+
     def on_filetransfer_progress(self, transfer):
         ''' called every chunk received '''
         if transfer in self.transfers_bar.transfers:
@@ -489,11 +495,18 @@ class Conversation(gtk.VBox, gui.Conversation):
         ''' called when a file transfer is rejected '''
         if transfer in self.transfers_bar.transfers:
             self.transfers_bar.update(transfer)
+        contact = self._member_to_contact(self.members[0])
+        self.output.information(self.formatter, contact,
+                _('File transfer rejected by %s') % (contact.display_name))
 
     def on_filetransfer_completed(self, transfer):
         ''' called when a file transfer is completed '''
         if transfer in self.transfers_bar.transfers:
             self.transfers_bar.finished(transfer)
+
+        contact = self._member_to_contact(self.members[0])
+        self.output.information(self.formatter, contact,
+                _('File transfer completed!'))
 
     def on_call_invitation(self, call, cid):
         '''called when a new call is issued both from us or other party'''

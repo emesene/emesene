@@ -481,3 +481,6 @@ class Conversation(object):
     def reset_message_offset(self):
         self.message_offset = 0
 
+    def _member_to_contact(self,member):
+        return self.session.contacts.contacts[member]
+

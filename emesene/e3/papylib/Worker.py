@@ -1214,6 +1214,7 @@ class Worker(e3.base.Worker, papyon.Client):
         papysession.connect("accepted", self.papy_ft_accepted)
         papysession.connect("progressed", self.papy_ft_progressed)
         papysession.connect("completed", self.papy_ft_completed)
+        papysession.connect("rejected", self.papy_ft_rejected)
 
         self.session.add_event(Event.EVENT_FILETRANSFER_INVITATION, tr, cid)
     
