@@ -179,9 +179,11 @@ class ConversationManager(object):
 
             if old_cid in self.conversations:
                 del self.conversations[old_cid]
+                del self.session.conversations[old_cid]
 
             conversation.cid = cid
             self.conversations[cid] = conversation
+            self.session.conversations[cid] = conversation
             return conversation
 
         return None

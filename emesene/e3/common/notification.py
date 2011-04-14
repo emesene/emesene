@@ -82,12 +82,31 @@ class Notification():
         ''' called when a new mail is received '''
         self.notifier(_("New mail from %s") % (message.address), message._subject, 'notification-message-email','mail-received')
 
+    def has_similar_conversation(self, cid, members):
+        '''
+        try to find a conversation with the given cid, if not search for a
+        conversation with the same members and return it
+
+        if not found return None
+        '''
+        cid = float(cid)
+
+        if cid in self.session.conversations:
+            return self.session.conversations[cid]
+
+        elif members is not None:
+            for (key, conversation) in self.session.conversations.iteritems():
+                if conversation.members == members:
+                    return conversation
+
     def _on_message(self, cid, account, msgobj, cedict={}):
         """
         This is called when a new message arrives to a user.
         """
+        conversation = self.has_similar_conversation(cid, account)
+
         if self.session.config.b_notify_receive_message and \
-            not(self.session.conversations[cid].get_parent().is_active()):
+           conversation.message_waiting:
             contact = self.session.contacts.get(account)            
             if msgobj.type == Message.TYPE_NUDGE:
                 # The message needs to be translated.
