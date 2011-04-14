@@ -102,8 +102,8 @@ class MessagingMenu(BaseTray):
         This is fired when a new message arrives to a user.
         """
         contact = self.handler.session.contacts.get(account)
-        if cid not in self.indicator_dict.values():
 
+        if cid not in self.indicator_dict.values():
             conv_manager = self._get_conversation_manager(cid, account)
 
             if conv_manager:
@@ -174,6 +174,12 @@ class MessagingMenu(BaseTray):
                 self.indicator_dict[ind] = cid
                 self.r_indicator_dict[cid] = ind
 
+            for old_cid in self.indicator_dict.values():
+                if old_cid not in self.handler.session.conversations.keys():
+                    # workaround: kill the orphan indicator
+                    ind = self.r_indicator_dict[old_cid]
+                    del self.indicator_dict[ind]
+                    del self.r_indicator_dict[old_cid]
         else:
             return
 
