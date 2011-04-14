@@ -401,7 +401,8 @@ class MsnPlusMarkupMohrtutchy:
         '''remove the [b][/b] etc markup for pango and html markup'''
 
         # already unicode here
-        text = unicode(text,'utf8')
+        if type(text) != unicode:
+            text = unicode(text,'utf8')
 
         all = removeList 
 
