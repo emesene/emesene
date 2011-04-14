@@ -295,6 +295,7 @@ class Worker(e3.base.Worker, papyon.Client):
         ''' handle file transfer invites '''
 
         account = papysession.peer.account
+        papycontact = self.address_book.contacts.search_by('account', account)[0]
 
         if account in self.conversations:
             cid = self.conversations[account]
@@ -304,7 +305,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
 
-        tr = e3.base.FileTransfer(papysession, papysession.filename, account, \
+        tr = e3.base.FileTransfer(papysession, papysession.filename, papycontact, \
             papysession.size, papysession.preview, sender=papysession.peer)
         self.filetransfers[papysession] = tr
         self.rfiletransfers[tr] = papysession
