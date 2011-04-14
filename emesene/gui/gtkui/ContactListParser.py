@@ -28,8 +28,6 @@ class ContactListParser(gobject.GObject):
 
     def __init__(self):
         gobject.GObject.__init__(self)
-        self.tagsopen = []
-        self.tags_open = []
         self.regex = re.compile("<span([^>]*)>")
         self.regex_close = re.compile("</span>")
 
@@ -69,10 +67,10 @@ class ContactListParser(gobject.GObject):
                     path = gui.theme.emote_to_path(shortcut, remove_protocol=True)
 
                 if path is not None:
-                    pos = text.find(shortcut)
+                    pos = text.find(eshort)
                     while pos > -1:
-                        emoticon_list.append([pos, shortcut, path])
-                        pos = text.find(shortcut, pos + 1)
+                        emoticon_list.append([pos, eshort, path])
+                        pos = text.find(eshort, pos + 1)
         emoticon_list.sort()
         text_list = [text]
         for emoticon in emoticon_list:
@@ -82,12 +80,14 @@ class ContactListParser(gobject.GObject):
                 text_list = [text1]
                 text_list.append(utils.safe_gtk_pixbuf_load(emoticon[2]))
                 text_list.append(text2)
-            else:
+                old_emoticon = emoticon
+            elif emoticon[0] >= old_emoticon[0] + len(old_emoticon[1]):
                 temp_list = text_list[len(text_list) - 1].partition(emoticon[1])
                 text1, text2 = self.close_tags(temp_list[0], temp_list[2])
                 text_list[len(text_list) - 1] = text1
                 text_list.append(utils.safe_gtk_pixbuf_load(emoticon[2]))
                 text_list.append(text2)
+                old_emoticon = emoticon
 
         return text_list
 
