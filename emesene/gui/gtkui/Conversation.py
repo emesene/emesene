@@ -379,7 +379,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             members_nick.append(nick)
 
         self.header.information = \
-            ('%d members' % (len(self.members) + 1, ),
+            (_('%d members') % (len(self.members) + 1, ),
                     ", ".join(members_nick))
         self.update_tab()
 
