@@ -304,7 +304,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.add_event(Event.EVENT_CONV_FIRST_ACTION, cid,
                 [account])
 
-        tr = e3.base.FileTransfer(papysession, papysession.filename, \
+        tr = e3.base.FileTransfer(papysession, papysession.filename, account, \
             papysession.size, papysession.preview, sender=papysession.peer)
         self.filetransfers[papysession] = tr
         self.rfiletransfers[tr] = papysession
