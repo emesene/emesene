@@ -95,14 +95,16 @@ class IconView(gtk.HBox):
             path = self.iconview.get_path_at_pos(event.x, event.y)
             if path != None:
                 self.iconview.select_path(path)
-                remove_menu = gtk.Menu()
-                remove_item = gtk.ImageMenuItem(_('Delete'))
-                remove_item.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
-                                      gtk.ICON_SIZE_MENU))
-                remove_item.connect('activate', self.on_remove_cb)
-                remove_menu.append(remove_item)
-                remove_menu.popup(None, None, None, event.button, event.time)
-                remove_menu.show_all()
+
+                if self.on_remove_cb != None:
+                    remove_menu = gtk.Menu()
+                    remove_item = gtk.ImageMenuItem(_('Delete'))
+                    remove_item.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
+                                          gtk.ICON_SIZE_MENU))
+                    remove_item.connect('activate', self.on_remove_cb)
+                    remove_menu.append(remove_item)
+                    remove_menu.popup(None, None, None, event.button, event.time)
+                    remove_menu.show_all()
 
     def _drag_data_received(self, treeview, context, posx, posy, \
                             selection, info, timestamp):
