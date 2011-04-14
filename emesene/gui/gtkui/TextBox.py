@@ -170,20 +170,20 @@ class InputText(TextBox):
         self._buffer.connect('changed', self.on_changed_event)
 
         self.changed = False
-        gobject.timeout_add(500, self.parse_emotes)
+        self.parse_timeout = gobject.timeout_add(500, self.parse_emotes)
         self.invisible_tag = gtk.TextTag()
         self.invisible_tag.set_property('invisible', True)
         self._buffer.get_tag_table().add(self.invisible_tag)
 
         self.spell_checker = None
 
-        try:
-            import gtkspell
-            if self.config.b_enable_spell_check:
+        if self.config.b_enable_spell_check:
+            try:
+                import gtkspell
                 spell_lang = self.config.get_or_set("spell_lang", "en")
                 self.spell_checker = gtkspell.Spell(self._textbox, spell_lang)
-        except Exception, e:
-            log.warning("Could not load spell-check: %s" % e)
+            except Exception, e:
+                log.warning("Could not load spell-check: %s" % e)
 
         self._textbox.connect_after('message-send', self._on_message_send)
 
@@ -263,6 +263,10 @@ class InputText(TextBox):
 
         return True
 
+    def stop_parse_emotes(self):
+        if self.parse_timeout is not None:
+            gobject.source_remove(self.parse_timeout)
+        self.parse_timeout = None
 
     def update_style(self, style):
         '''update the global style of the widget'''

@@ -275,6 +275,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         #stop the avatars animation...if any..
         self.avatar.stop()
         self.his_avatar.stop()
+        
+        #stop the parse emotes timeout of the inputbox
+        self.input.stop_parse_emotes()
 
     def show(self):
         '''override the show method'''
