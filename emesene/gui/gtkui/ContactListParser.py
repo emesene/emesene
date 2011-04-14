@@ -94,6 +94,7 @@ class ContactListParser(gobject.GObject):
     def close_tags(self, text1, text2):
         '''make sure the plus and emesene tags are closed before an emoticon'''
         ret1 = ret2 = ""
+        opened = ""
         if text1 != "":
             opened = self.regex.findall(text1)
             closed = self.regex_close.findall(text1)
