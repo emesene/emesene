@@ -1155,12 +1155,12 @@ class Worker(e3.base.Worker, papyon.Client):
         papyconversation = self.papyconv[cid]
 
         if len(papyconversation.total_participants) == 1:
-            # XXX wariano: pop removes from the set, is that ok?
             first_dude = papyconversation.total_participants.pop()
-            if first_dude.presence == papyon.Presence.OFFLINE and \
-              len(papyconversation._pending_invites) != 0: #avoid fake-offline
-                self.oim_box.send_message(first_dude, message.body)
-                message.type = e3.base.Message.TYPE_FLNMSG # don't process this.
+            if first_dude.presence == papyon.Presence.OFFLINE:
+                if papyconversation.switchboard is None or \
+                   papyconversation.switchboard.state == papyon.msnp.ProtocolState.CLOSED:
+                    self.oim_box.send_message(first_dude, message.body)
+                    message.type = e3.base.Message.TYPE_FLNMSG # don't process this.
 
         if message.type == e3.base.Message.TYPE_NUDGE:
             papyconversation.send_nudge()
