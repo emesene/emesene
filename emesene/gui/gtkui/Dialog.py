@@ -154,9 +154,9 @@ class Dialog(object):
         response_cb(response, contact, group)
 
     @classmethod
-    def common_window(cls, message, stock_id, response_cb, title):
+    def common_window(cls, message, stock_id, response_cb, title, *args):
         '''create a window that displays a message with a stock image'''
-        window = cls.new_window(title, response_cb)
+        window = cls.new_window(title, response_cb, *args)
         cls.window_add_image(window, stock_id)
         cls.window_add_label(window, message)
 
@@ -368,7 +368,7 @@ class Dialog(object):
         Yes and No, return the response as stock.YES or stock.NO or
         stock.CLOSE if the user closes the window'''
         window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION,
-            response_cb, _("Confirm"))
+            response_cb, _("Confirm"), stock.NO)
         cls.add_button(window, gtk.STOCK_YES, stock.YES, response_cb,
             cls.default_cb, *args)
         cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb,
