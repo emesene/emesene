@@ -25,36 +25,14 @@ import pango
 import cairo
 import gobject
 
+import gui
 from gui.base import Plus
+import ContactListParser
 import extension
 import Parser
 
 import logging
 log = logging.getLogger('gtkui.Renderers')
-
-def replace_markup(markup, arg=None):
-    '''replace the tags defined in gui.base.ContactList'''
-    markup = markup.replace("[$nl]", "\n")
-
-    markup = markup.replace("[$small]", "<small>")
-    markup = markup.replace("[$/small]", "</small>")
-
-    if markup.count("[$COLOR=") > 0:
-        hexcolor = color = markup.split("[$COLOR=")[1].split("]")[0]
-        if color.count("#") == 0:
-            hexcolor = "#" + color
-
-        markup = markup.replace("[$COLOR=" + color + "]", \
-                "<span foreground='" + hexcolor + "'>")
-        markup = markup.replace("[$/COLOR]", "</span>")
-
-    markup = markup.replace("[$b]", "<b>")
-    markup = markup.replace("[$/b]", "</b>")
-
-    markup = markup.replace("[$i]", "<i>")
-    markup = markup.replace("[$/i]", "</i>")
-
-    return markup
 
 class CellRendererFunction(gtk.GenericCellRenderer):
     '''
@@ -166,6 +144,32 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         self._cached_layout = {}
         widget.queue_resize()
 
+plus_or_noplus = 1 # 1 means plus, 0 means noplus
+mohrtutchy_plus_parser = Plus.MsnPlusMarkupMohrtutchy()
+
+def plus_text_parse(item):
+    '''parse plus in the contact list'''
+    global plus_or_noplus
+    # get a plain string with objects
+    mohrtutchy_plus_parser.isHtml = False
+    if plus_or_noplus:
+        item = mohrtutchy_plus_parser.replaceMarkup(item)
+    else:
+        item = mohrtutchy_plus_parser.removeMarkup(item)
+    return item
+
+def msnplus_to_list(text):
+    '''parse text and return a list of strings and gtk.gdk.Pixbufs'''
+    parser = ContactListParser.ContactListParser()
+    text = plus_text_parse(text)
+    text_list = parser.replace_emoticons(text)
+    list_stuff = []
+    for item in text_list:
+        if type(item) in (str, unicode):
+            item = parser.replace_markup(item)
+        list_stuff.append(item)
+    return list_stuff
+
 ################################################################################
 # emesene1 parsers rock the streets, here they're instanciated and used
 # if you could fix the emesene2 one, you would be very welcome.
@@ -197,8 +201,7 @@ def plus_parse(obj, parser, filterdata):
         filterdata.list = filterdata.deserialize(format, objects)
 
 bigparser.connect('filter', plus_parse)
-
-def msnplus_to_list(txt, do_parse_emotes=True):
+def _msnplus_to_list(txt, do_parse_emotes=True):
     '''parte text to a DictObj and return a list of strings and
     gtk.gdk.Pixbufs'''
 
