@@ -24,6 +24,7 @@ import os
 import gtk
 import pango
 import gobject
+import webbrowser
 
 import e3
 import gui
@@ -555,8 +556,16 @@ class Dialog(object):
         * authors: a list or tuple of strings containing the contributors
         * translators: a string containing the translators
         '''
+        def on_website_hook(dialog, web):
+            '''called when the website item is selected'''
+            webbrowser.open(web)
+
+        def on_email_hook(dialog, mail):
+            webbrowser.open("mailto://"+mail)
 
         about = gtk.AboutDialog()
+        gtk.about_dialog_set_url_hook(on_website_hook)
+        gtk.about_dialog_set_email_hook(on_email_hook)
         about.set_name(name)
         about.set_version(version)
         about.set_copyright(copyright)
