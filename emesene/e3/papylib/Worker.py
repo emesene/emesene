@@ -1209,7 +1209,7 @@ class Worker(e3.base.Worker, papyon.Client):
         papycontact = self.address_book.contacts.search_by('account', account)[0]
         papysession = self._ft_manager.send(papycontact, filename, os.path.getsize(completepath), preview_data)
  
-        tr = e3.base.FileTransfer(papysession, papysession.filename, \
+        tr = e3.base.FileTransfer(papysession, papysession.filename, papycontact,\
         papysession.size, papysession.preview, sender='Me', completepath=completepath)
         self.filetransfers[papysession] = tr
         self.rfiletransfers[tr] = papysession

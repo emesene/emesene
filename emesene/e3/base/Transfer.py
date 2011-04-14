@@ -23,13 +23,14 @@ class FileTransfer(object):
     '''a class that represent a file transfer'''
     (WAITING, TRANSFERRING, RECEIVED, FAILED) = range(4)
 
-    def __init__(self, obj, filename, size, preview, sender='Me', completepath=''):
+    def __init__(self, obj, filename, contact, size, preview, sender='Me', completepath=''):
         self.filename = filename
         self.completepath = completepath
         self.size = size
         self.preview = preview
 
         self.object = obj
+        self.contact = contact
 
         self.state = FileTransfer.WAITING
         self.sender = sender
