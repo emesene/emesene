@@ -306,11 +306,14 @@ class Theme(object):
         if os.access(path, os.R_OK) and os.path.isfile(path):
             path = path.replace("\\", "/")
 
-            if os.name == "nt":
-                path = "localhost/"+path
             if remove_protocol:
                 return path
             else:
+                if os.name == "nt":
+                    #if path[1] == ":":
+                    #    path = path[2:]
+                    path = "localhost/"+path
+
                 return 'file://' + path
 
         return None
