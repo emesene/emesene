@@ -849,12 +849,11 @@ class DesktopTab(BaseTable):
             buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                      gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         fc_button = gtk.FileChooserButton(path_chooser)
-        fc_button.set_current_folder(self.session.config.get_or_set("download_folder", 
+        fc_button.set_current_folder(self.session.config.get_or_set("download_folder", \
                 e3.common.locations.downloads()))
         path_chooser.connect('selection-changed', on_path_selected)
         self.attach(fc_button, 2, 3, 2, 3, gtk.EXPAND|gtk.FILL, 0)
 
-        self.show_all()
 
 class MSNPapylib(BaseTable):
     """ This panel contains some msn-papylib specific settings """

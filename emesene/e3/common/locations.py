@@ -30,10 +30,12 @@ def downloads():
     '''
 
     if sys.platform.startswith('win'): # Windows
-        import ctypes
-        path = ctypes.c_wchar_p('')
-        ctypes.windll.shell32.SHGetFolderPathW(0, 0x0000, None, 0, path)
-        return path.value
+        #import ctypes
+        #path = ctypes.c_wchar_p('')
+        #ctypes.windll.shell32.SHGetFolderPathW(0, 0x0010, None, 0, path)
+        #TODO: find another way to get the Desktop folder that don't break
+        #things, see issue #417
+        return os.environ.get('USERPROFILE')
     elif sys.platform.startswith('darwin'): # Mac OS X
         return os.path.expanduser('~/Desktop')
     else: # Linux
