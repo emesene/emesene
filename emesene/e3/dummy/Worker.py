@@ -82,6 +82,7 @@ class Worker(e3.Worker):
                 '', False)
         self._add_contact('eight@hotmail.com', '[i][B][c=12]☆[/c=0][c=0]☆[/c=12][c=12]☆[/c=0] (W) [c=12]Bellamezz[/c=49] (F) [c=0]☆[/c=0][c=12]☆[/c=12][c=0]☆[/c=0][/B][/i]', e3.status.BUSY, '', False)
         self._add_contact('nine@hotmail.com', '[b](*) ... [c=12]Ricky[/c=33] ...(*)[/b]', e3.status.BUSY, '', False)
+        self._add_contact('ten@hotmail.com', '<:o)[c=yellow]Yellow:DYellow[/c][c=red]Red[c=blue]Blue:)Blue[c=green]Green[/c][/c][/c]', e3.status.BUSY, '', False)
 
         self._add_group('ninjas')
         self._add_group('pirates')
