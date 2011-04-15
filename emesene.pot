@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-04-14 17:41+0200\n"
+"POT-Creation-Date: 2011-04-15 14:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,7 +53,7 @@ msgstr ""
 msgid "New mail from %s"
 msgstr ""
 
-#: emesene/e3/common/notification.py:113
+#: emesene/e3/common/notification.py:113 emesene/gui/base/Conversation.py:290
 #, python-format
 msgid "%s just sent you a nudge!"
 msgstr ""
@@ -83,7 +83,7 @@ msgstr ""
 #: emesene/gui/base/Handler.py:257 emesene/gui/base/Handler.py:280
 #: emesene/gui/base/Handler.py:290 emesene/gui/base/Handler.py:298
 #: emesene/gui/base/Handler.py:308 emesene/gui/base/Handler.py:316
-#: emesene/gui/gtkui/Dialog.py:1439
+#: emesene/gui/gtkui/Dialog.py:1448
 msgid "No contact selected"
 msgstr ""
 
@@ -96,7 +96,15 @@ msgstr ""
 msgid "No group selected"
 msgstr ""
 
-#: emesene/gui/gtkui/AccountMenu.py:39 emesene/gui/gtkui/Dialog.py:838
+#: emesene/gui/base/Conversation.py:299
+msgid "Error delivering message"
+msgstr ""
+
+#: emesene/gui/base/Conversation.py:337
+msgid "Group chat"
+msgstr ""
+
+#: emesene/gui/gtkui/AccountMenu.py:39 emesene/gui/gtkui/Dialog.py:847
 msgid "Change profile"
 msgstr ""
 
@@ -144,8 +152,8 @@ msgstr ""
 msgid "Are you sure you want to remove all items?"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:273 emesene/gui/gtkui/Dialog.py:1062
-#: emesene/gui/gtkui/Dialog.py:1151 emesene/gui/gtkui/ImageChooser.py:145
+#: emesene/gui/gtkui/AvatarChooser.py:273 emesene/gui/gtkui/Dialog.py:1071
+#: emesene/gui/gtkui/Dialog.py:1160 emesene/gui/gtkui/ImageChooser.py:145
 msgid "No picture selected"
 msgstr ""
 
@@ -175,7 +183,7 @@ msgstr ""
 msgid "Avatar history"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:74 emesene/gui/gtkui/Dialog.py:344
+#: emesene/gui/gtkui/ContactInformation.py:74 emesene/gui/gtkui/Dialog.py:345
 msgid "Information"
 msgstr ""
 
@@ -207,7 +215,7 @@ msgstr ""
 msgid "E-Mail"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:137 emesene/gui/gtkui/Dialog.py:926
+#: emesene/gui/gtkui/ContactInformation.py:137 emesene/gui/gtkui/Dialog.py:935
 #: emesene/gui/gtkui/Login.py:67 emesene/gui/gtkui/MainMenu.py:86
 #: emesene/gui/gtkui/PluginWindow.py:29 emesene/gui/gtkui/Tooltips.py:54
 #: emesene/gui/gtkui/TrayIcon.py:179
@@ -266,7 +274,7 @@ msgstr ""
 msgid "Unblock"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactMenu.py:59 emesene/gui/gtkui/Dialog.py:531
+#: emesene/gui/gtkui/ContactMenu.py:59 emesene/gui/gtkui/Dialog.py:532
 msgid "Set alias"
 msgstr ""
 
@@ -294,22 +302,27 @@ msgstr ""
 msgid "Click to see informations"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:490
+#: emesene/gui/gtkui/Conversation.py:382
+#, python-format
+msgid "%d members"
+msgstr ""
+
+#: emesene/gui/gtkui/Conversation.py:491
 #, python-format
 msgid "File transfer accepted by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:503
+#: emesene/gui/gtkui/Conversation.py:506
 #, python-format
 msgid "File transfer rejected by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:512
+#: emesene/gui/gtkui/Conversation.py:516
 msgid "File transfer completed!"
 msgstr ""
 
 #: emesene/gui/gtkui/ConversationToolbar.py:88
-#: emesene/gui/gtkui/ConversationToolbar.py:89 emesene/gui/gtkui/Dialog.py:602
+#: emesene/gui/gtkui/ConversationToolbar.py:89 emesene/gui/gtkui/Dialog.py:611
 msgid "Select font"
 msgstr ""
 
@@ -367,273 +380,273 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:252
+#: emesene/gui/gtkui/Dialog.py:253
 msgid "Save as"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:270
+#: emesene/gui/gtkui/Dialog.py:271
 msgid "Choose file"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:289 emesene/gui/gtkui/Dialog.py:298
+#: emesene/gui/gtkui/Dialog.py:290 emesene/gui/gtkui/Dialog.py:299
 msgid "Error!"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:310 emesene/gui/gtkui/Dialog.py:317
+#: emesene/gui/gtkui/Dialog.py:311 emesene/gui/gtkui/Dialog.py:318
 msgid "Show details"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:314
+#: emesene/gui/gtkui/Dialog.py:315
 msgid "Hide details"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:333
+#: emesene/gui/gtkui/Dialog.py:334
 msgid "Warning"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:354
+#: emesene/gui/gtkui/Dialog.py:355
 msgid "Exception"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:371 emesene/gui/gtkui/Dialog.py:385
-#: emesene/gui/gtkui/Dialog.py:401
+#: emesene/gui/gtkui/Dialog.py:372 emesene/gui/gtkui/Dialog.py:386
+#: emesene/gui/gtkui/Dialog.py:402
 msgid "Confirm"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:411
+#: emesene/gui/gtkui/Dialog.py:412
 msgid "User invitation"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:429
+#: emesene/gui/gtkui/Dialog.py:430
 msgid "Add user"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:438 emesene/gui/gtkui/Login.py:57
+#: emesene/gui/gtkui/Dialog.py:439 emesene/gui/gtkui/Login.py:57
 msgid "Account"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:442
+#: emesene/gui/gtkui/Dialog.py:443
 msgid "Group"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:485
+#: emesene/gui/gtkui/Dialog.py:486
 msgid "Add group"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:493
+#: emesene/gui/gtkui/Dialog.py:494
 msgid "Group name"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:497
+#: emesene/gui/gtkui/Dialog.py:498
 msgid "Change nick"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:502
+#: emesene/gui/gtkui/Dialog.py:503
 msgid "New nick"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:508
+#: emesene/gui/gtkui/Dialog.py:509
 msgid "Change personal message"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:514
+#: emesene/gui/gtkui/Dialog.py:515
 msgid "New personal message"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:519
+#: emesene/gui/gtkui/Dialog.py:520
 msgid "Rename group"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:525
+#: emesene/gui/gtkui/Dialog.py:526
 msgid "New group name"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:538
+#: emesene/gui/gtkui/Dialog.py:539
 msgid "Contact alias"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:605
+#: emesene/gui/gtkui/Dialog.py:614
 msgid "This is a preview text!"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:635
+#: emesene/gui/gtkui/Dialog.py:644
 msgid "Select color"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:688
+#: emesene/gui/gtkui/Dialog.py:697
 msgid "Advanced"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:719
+#: emesene/gui/gtkui/Dialog.py:728
 msgid "Use HTTP method"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:720
+#: emesene/gui/gtkui/Dialog.py:729
 msgid "Use proxy"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:722
+#: emesene/gui/gtkui/Dialog.py:731
 msgid "Use authentication"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:741
+#: emesene/gui/gtkui/Dialog.py:750
 msgid "Session:"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:743
+#: emesene/gui/gtkui/Dialog.py:752
 msgid "Server"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:745 emesene/gui/gtkui/Dialog.py:749
+#: emesene/gui/gtkui/Dialog.py:754 emesene/gui/gtkui/Dialog.py:758
 msgid "Port"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:747
+#: emesene/gui/gtkui/Dialog.py:756
 msgid "Host"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:751
+#: emesene/gui/gtkui/Dialog.py:760
 msgid "User"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:753 emesene/gui/gtkui/Login.py:72
+#: emesene/gui/gtkui/Dialog.py:762 emesene/gui/gtkui/Login.py:72
 msgid "Password"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:809 emesene/gui/gtkui/Login.py:161
+#: emesene/gui/gtkui/Dialog.py:818 emesene/gui/gtkui/Login.py:161
 #: emesene/gui/gtkui/Preferences.py:60
 msgid "Preferences"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:845
+#: emesene/gui/gtkui/Dialog.py:854
 msgid "Picture"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:863
+#: emesene/gui/gtkui/Dialog.py:872
 msgid "Nick:"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:869
+#: emesene/gui/gtkui/Dialog.py:878
 msgid "PM:"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:915
+#: emesene/gui/gtkui/Dialog.py:924
 msgid "Nick Format Help"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:916
+#: emesene/gui/gtkui/Dialog.py:925
 msgid "Example:"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:920
+#: emesene/gui/gtkui/Dialog.py:929
 msgid "Nickname"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:922
+#: emesene/gui/gtkui/Dialog.py:931
 msgid "Mail"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:924
+#: emesene/gui/gtkui/Dialog.py:933
 msgid "Alias if available, or nick if available or mail"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:928
+#: emesene/gui/gtkui/Dialog.py:937
 msgid "Personal message"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:930
+#: emesene/gui/gtkui/Dialog.py:939
 msgid "Displays 'Blocked' if a contact is blocked"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:933
+#: emesene/gui/gtkui/Dialog.py:942
 msgid "Group Format Help"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:935
+#: emesene/gui/gtkui/Dialog.py:944
 msgid "The name of the group"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:937
+#: emesene/gui/gtkui/Dialog.py:946
 msgid "Contacts online"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:939
+#: emesene/gui/gtkui/Dialog.py:948
 msgid "Total amount of contacts"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:943
+#: emesene/gui/gtkui/Dialog.py:952
 msgid "Make text bold"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:945
+#: emesene/gui/gtkui/Dialog.py:954
 msgid "Make text italic"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:947
+#: emesene/gui/gtkui/Dialog.py:956
 msgid "Make text small"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:949
+#: emesene/gui/gtkui/Dialog.py:958
 msgid "Give text a color (in hex)"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:966 emesene/gui/gtkui/ImageChooser.py:40
+#: emesene/gui/gtkui/Dialog.py:975 emesene/gui/gtkui/ImageChooser.py:40
 msgid "Image Chooser"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1009 emesene/gui/gtkui/ImageChooser.py:92
+#: emesene/gui/gtkui/Dialog.py:1018 emesene/gui/gtkui/ImageChooser.py:92
 msgid "All files"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1014 emesene/gui/gtkui/ImageChooser.py:97
+#: emesene/gui/gtkui/Dialog.py:1023 emesene/gui/gtkui/ImageChooser.py:97
 msgid "All images"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1099
+#: emesene/gui/gtkui/Dialog.py:1108
 msgid "Small (16x16)"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1100
+#: emesene/gui/gtkui/Dialog.py:1109
 msgid "Big (50x50)"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1108
+#: emesene/gui/gtkui/Dialog.py:1117
 msgid "Shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1146 emesene/gui/gtkui/Dialog.py:1359
+#: emesene/gui/gtkui/Dialog.py:1155 emesene/gui/gtkui/Dialog.py:1368
 msgid "Empty shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1205
+#: emesene/gui/gtkui/Dialog.py:1214
 msgid "Add emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1330 emesene/gui/gtkui/Dialog.py:1362
+#: emesene/gui/gtkui/Dialog.py:1339 emesene/gui/gtkui/Dialog.py:1371
 msgid "Change shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1335 emesene/gui/gtkui/IconView.py:99
+#: emesene/gui/gtkui/Dialog.py:1344 emesene/gui/gtkui/IconView.py:101
 msgid "Delete"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1361
+#: emesene/gui/gtkui/Dialog.py:1370
 msgid "New shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1386
+#: emesene/gui/gtkui/Dialog.py:1395
 msgid "Invite friend"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1473
+#: emesene/gui/gtkui/Dialog.py:1482
 msgid "Add contact"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1515
+#: emesene/gui/gtkui/Dialog.py:1524
 msgid "Remind me later"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1583
+#: emesene/gui/gtkui/Dialog.py:1592
 msgid ""
 " has added you.\n"
 "Do you want to add him/her to your contact list?"
@@ -679,14 +692,14 @@ msgstr ""
 msgid "Copy mail to clipboard"
 msgstr ""
 
-#: emesene/gui/gtkui/IconView.py:123
+#: emesene/gui/gtkui/IconView.py:125
 #, python-format
 msgid ""
 "Could not add picture:\n"
 " %s"
 msgstr ""
 
-#: emesene/gui/gtkui/IconView.py:138
+#: emesene/gui/gtkui/IconView.py:140
 #, python-format
 msgid "image at %s could not be loaded"
 msgstr ""
@@ -839,11 +852,6 @@ msgstr ""
 
 #: emesene/gui/gtkui/MainMenu.py:238
 msgid "Debug"
-msgstr ""
-
-#: emesene/gui/gtkui/Parser.py:369
-#, python-format
-msgid "Can't find the smiley %s"
 msgstr ""
 
 #: emesene/gui/gtkui/PluginWindow.py:30 emesene/gui/gtkui/Preferences.py:717
