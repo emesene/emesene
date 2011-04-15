@@ -88,16 +88,26 @@ class ContactListParser(gobject.GObject):
                 text_list.append(utils.safe_gtk_pixbuf_load(emoticon[2]))
                 text_list.append(text2)
                 old_emoticon = emoticon
+        # make sure broken plus tags are parsed in the right way
+        text1, text2 = self.close_tags(text_list[len(text_list)-1])
+        text_list[len(text_list) - 1] = text1
 
         return text_list
 
-    def close_tags(self, text1, text2):
+    def close_tags(self, text1, text2=''):
         '''make sure the plus and emesene tags are closed before an emoticon'''
         ret1 = ret2 = ""
         opened = ""
+        # close the plus tags
         if text1 != "":
             opened = self.regex.findall(text1)
             closed = self.regex_close.findall(text1)
+            if len(closed) > len(opened):
+                # people use broken plus tags
+                leftover_tags = len(closed) - len(opened)
+                closed.pop(leftover_tags)
+                temp = text1.rsplit('</span>', leftover_tags)
+                text1 = ''.join(temp)
             for i in range(len(closed)):
                 opened.pop()
         ret1 = text1 + ('</span>' * len(opened))
@@ -105,6 +115,7 @@ class ContactListParser(gobject.GObject):
             ret2 += '<span' + i + '>'
         ret2 += text2
         tags = list()
+        # close our own tags
         if ret1 != "":
             aux = ret1
             pos = aux.find("[$")
