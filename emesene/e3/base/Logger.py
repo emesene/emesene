@@ -154,7 +154,7 @@ class Logger(object):
     CREATE_FACT_EVENT = '''
         CREATE TABLE fact_event
         (
-          id_time INTEGER PRIMARY KEY,
+          id_time INTEGER,
           id_event INTEGER,
           id_src_info INTEGER,
           id_dest_info INTEGER,
