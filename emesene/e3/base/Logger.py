@@ -953,7 +953,7 @@ def log_message(session, members, message, sent, error=False):
                 dest = e3.Logger.Account.from_contact(dst)
                 logs.append((event, status, message.body, src, dest))
 
-                session.logger.logs(logs)
+            session.logger.logs(logs)
     else:
         dest = e3.Logger.Account.from_contact(session.contacts.me)
         contact = session.contacts.get(message.account)
