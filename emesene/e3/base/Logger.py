@@ -553,7 +553,8 @@ class Logger(object):
 
     # utility methods
 
-    def add_event(self, event, status, payload, src, dest=None, ext_time=None):
+    def add_event(self, event, status, payload, src, dest=None, ext_time=None,
+            id_time=None):
         '''add an event on the fact and the dimensiones using the actual time'''
 
         id_event = self.insert_event(event)
@@ -567,17 +568,19 @@ class Logger(object):
             id_dest_info = None
             id_dest_acc = None
 
-        if ext_time:
-            timestamp = ext_time
-            (year, month, day, hour, minute, seconds, wday, yday, tm_isdst) = time.gmtime(ext_time)
-            id_time = self.insert_time(year, month, day, wday, hour, minute, seconds)
-        else: 
-            id_time = self.insert_time_now()
-            timestamp = time.time()
+        if id_time is None:
+            if ext_time:
+                (year, month, day, hour, minute, seconds, wday, yday, tm_isdst) = time.gmtime(ext_time)
+                id_time = self.insert_time(year, month, day, wday, hour, minute, seconds)
+            else:
+                id_time = self.insert_time_now()
+
+        timestamp = ext_time if ext_time else time.time()
 
         self.insert_fact_event(id_time, id_event, id_src_info, id_dest_info,
             id_src_acc, id_dest_acc, status, payload, timestamp)
         self._stat()
+        return id_time
 
     def close(self):
         '''call this method when you are closing the app'''
@@ -788,6 +791,13 @@ class LoggerProcess(threading.Thread):
         if action == 'log':
             event, status, payload, src, dest, new_time = args
             self.logger.add_event(event, status, payload, src, dest, new_time)
+        elif action == 'logs':
+            id_time = None
+
+            for event, status, payload, src, dest in args:
+                id_time = self.logger.add_event(event, status, payload, src,
+                        dest, None, id_time)
+
         elif action == 'quit':
             return True
         elif action in self.actions:
@@ -835,6 +845,10 @@ class LoggerProcess(threading.Thread):
     def log(self, event, status, payload, src, dest=None, new_time=None):
         '''add an event to the log database'''
         self.input.put(('log', (event, status, payload, src, dest, new_time)))
+
+    def logs(self, logs):
+        '''add a group of events to the log database with the same time_od'''
+        self.input.put(('logs', logs))
 
     def quit(self):
         '''stop the logger thread, and close the logger'''
@@ -926,15 +940,20 @@ def log_message(session, members, message, sent, error=False):
         if message.type == e3.Message.TYPE_NUDGE:
             message.body = _("you just sent a nudge!")
 
-        for dst_account in members:
-            dst = session.contacts.get(dst_account)
+        if len(members) == 1:
+            member = members[0]
+        else:
+            logs = []
+            for dst_account in members:
+                dst = session.contacts.get(dst_account)
 
-            if dst is None:
-                dst = e3.Contact(dst_account)
+                if dst is None:
+                    dst = e3.Contact(dst_account)
 
-            dest = e3.Logger.Account.from_contact(dst)
+                dest = e3.Logger.Account.from_contact(dst)
+                logs.append((event, status, message.body, src, dest))
 
-            session.logger.log(event, status, message.body, src, dest)
+                session.logger.logs(logs)
     else:
         dest = e3.Logger.Account.from_contact(session.contacts.me)
         contact = session.contacts.get(message.account)
