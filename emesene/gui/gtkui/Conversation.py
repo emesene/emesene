@@ -138,6 +138,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
             if contact and contact.picture:
                 his_picture = contact.picture
+            self.output.clear(account, contact.nick, contact.display_name,
+                    his_picture, my_picture)
 
         self.info.first = self.his_avatarBox
         self.his_avatar.set_from_file(his_picture)

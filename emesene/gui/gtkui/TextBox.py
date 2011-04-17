@@ -337,6 +337,11 @@ class OutputText(TextBox):
         self._textbox.set_editable(False)
         self._textbox.set_cursor_visible(False)
 
+    def clear(self, source="", target="", target_display="",
+            source_img="", target_img=""):
+        '''clear the content'''
+        TextBox.clear(self)
+    
     def append(self, text, cedict,scroll=True):
         '''append formatted text to the widget'''
         if self.config.b_show_emoticons:

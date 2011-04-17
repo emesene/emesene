@@ -174,11 +174,13 @@ class OutputText(gtk.ScrolledWindow):
         self.view.show()
         self.add(self.view)
 
-    def clear(self):
+    def clear(self, source="", target="", target_display="",
+            source_img="", target_img=""):
         '''clear the content'''
         self._texts = []
         self.loaded = False
-        self.view.clear()
+        self.view.clear(source, target, target_display,
+            source_img, target_img)
 
     def _error_cb(self, view, message, line, source_id):
         '''called when a message is sent to the console'''
