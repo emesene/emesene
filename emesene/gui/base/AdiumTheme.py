@@ -165,6 +165,7 @@ class AdiumTheme(object):
             target_display, source_img, target_img):
         '''replace the variables on template for the parameters
         '''
+
         template = template.replace('%chatName%', escape(target))
         template = template.replace('%sourceName%', escape(source))
         template = template.replace('%destinationName%', escape(target))
@@ -183,9 +184,12 @@ class AdiumTheme(object):
     def get_body(self, source, target, target_display, source_img, target_img):
         '''return the template to put as html content
         '''
-        path = urljoin("gui", "base", "template.html")
-        resources_url = MarkupParser.path_to_url(self.resources_path)
+        #first try load custom Template.html from theme
+        path = urljoin(self.resources_path, 'Template.html')
+        if not os.path.exists(path):
+            path = urljoin("gui", "base", "template.html")
         template = read_file(path)
+        resources_url = MarkupParser.path_to_url(self.resources_path)
         css_path = urljoin(resources_url, "main.css")
         variant_name = self.info.get('DefaultVariant', None)
         template = template.replace("%@", resources_url + "/", 1)
