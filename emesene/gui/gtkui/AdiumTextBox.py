@@ -29,6 +29,7 @@ import webbrowser
 
 import e3
 import gui
+import Renderers
 
 class OutputView(webkit.WebView):
     '''a class that represents the output widget of a conversation
@@ -179,7 +180,7 @@ class OutputText(gtk.ScrolledWindow):
         '''clear the content'''
         self._texts = []
         self.loaded = False
-        self.view.clear(source, target, target_display,
+        self.view.clear(source, Renderers.msnplus_to_plain_text(target), Renderers.msnplus_to_plain_text(target_display),
             source_img, target_img)
 
     def _error_cb(self, view, message, line, source_id):
