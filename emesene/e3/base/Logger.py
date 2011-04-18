@@ -316,9 +316,7 @@ class Logger(object):
         self.connection = sqlite.connect(full_path)
         self.cursor = self.connection.cursor()
 
-        try:
-            self.need_clean()
-        except:
+        if self.need_clean():
             os.remove(full_path)
 
         self.connection = sqlite.connect(full_path)
@@ -722,7 +720,11 @@ class Logger(object):
             self.update_account(account.id, False)
 
     def need_clean(self):
-        self.execute(Logger.SELECT_NEW_FIELDS)
+        try:
+            self.execute(Logger.SELECT_NEW_FIELDS)
+            return False
+        except sqlite.OperationalError:
+            return True
 
     def add_contact_by_group(self, accounts, groups):
         '''add all the contacts, all the groups and the relations, also
