@@ -276,6 +276,9 @@ class Controller(object):
 
     def close_session(self, do_exit=True, on_reconnect=False):
         '''close session'''
+        # prevent preference window from staying open and breaking things
+        pref = extension.get_and_instantiate('preferences', self.session)
+        pref.hide()
 
         self._remove_subscriptions()
 
