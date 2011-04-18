@@ -444,6 +444,7 @@ class Worker(e3.base.Worker, papyon.Client):
         account = papycontact.account
         conv = pyconvevent.conversation
 
+
         if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
         else:
@@ -493,7 +494,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.add_event(\
             Event.EVENT_CONV_MESSAGE, cid, account, msgobj, received_custom_emoticons)
-        e3.Logger.log_message(self.session, None, msgobj, False)
+        e3.Logger.log_message(self.session, None, msgobj, False, cid = cid)
 
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):
         ''' handle received nudges '''
@@ -1202,7 +1203,7 @@ class Worker(e3.base.Worker, papyon.Client):
             papyconversation.send_text_message(msg)
 
         members = [x.account for x in papyconversation.total_participants]
-        e3.Logger.log_message(self.session, members, message, True)
+        e3.Logger.log_message(self.session, members, message, True, cid = cid)
 
     # ft handlers
     def _handle_action_ft_invite(self, cid, account, filename, completepath, preview_data):

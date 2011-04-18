@@ -160,6 +160,7 @@ class Logger(object):
           id_dest_info INTEGER,
           id_src_acc INTEGER,
           id_dest_acc INTEGER,
+          cid INTEGER,
 
           status INTEGER,
           payload TEXT,
@@ -205,8 +206,8 @@ class Logger(object):
 
     INSERT_FACT_EVENT = '''
         INSERT INTO fact_event(id_time, id_event, id_src_info, id_dest_info,
-            id_src_acc, id_dest_acc, status, payload, tmstp)
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
+            id_src_acc, id_dest_acc, status, payload, tmstp, cid)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     '''
 
     INSERT_LAST_ACCOUNT = '''
@@ -473,11 +474,11 @@ class Logger(object):
         return id_event
 
     def insert_fact_event(self, id_time, id_event, id_src_info, id_dest_info,
-            id_src_acc, id_dest_acc, status, payload, timestamp):
+            id_src_acc, id_dest_acc, status, payload, timestamp, cid):
         '''insert a row into the fact_event table, returns the id'''
         self.execute(Logger.INSERT_FACT_EVENT,
             (id_time, id_event, id_src_info, id_dest_info, id_src_acc,
-                id_dest_acc, status, unicode(payload), timestamp))
+                id_dest_acc, status, unicode(payload), timestamp, cid))
 
         self._stat()
 
@@ -554,7 +555,7 @@ class Logger(object):
     # utility methods
 
     def add_event(self, event, status, payload, src, dest=None, ext_time=None,
-            id_time=None):
+            id_time=None, cid = 0):
         '''add an event on the fact and the dimensiones using the actual time'''
 
         id_event = self.insert_event(event)
@@ -578,7 +579,7 @@ class Logger(object):
         timestamp = ext_time if ext_time else time.time()
 
         self.insert_fact_event(id_time, id_event, id_src_info, id_dest_info,
-            id_src_acc, id_dest_acc, status, payload, timestamp)
+            id_src_acc, id_dest_acc, status, payload, timestamp, cid)
         self._stat()
         return id_time
 
@@ -787,16 +788,20 @@ class LoggerProcess(threading.Thread):
     def _process(self, data):
         '''process the received data'''
         action, args = data
+        cid = 0
 
         if action == 'log':
-            event, status, payload, src, dest, new_time = args
-            self.logger.add_event(event, status, payload, src, dest, new_time)
+            try:
+                event, status, payload, src, dest, new_time, cid = args
+            except:
+                event, status, payload, src, dest, new_time = args
+            self.logger.add_event(event, status, payload, src, dest, new_time, cid = cid)
         elif action == 'logs':
             id_time = None
 
-            for event, status, payload, src, dest in args:
+            for event, status, payload, src, dest, cid in args:
                 id_time = self.logger.add_event(event, status, payload, src,
-                        dest, None, id_time)
+                        dest, None, id_time, cid = cid)
 
         elif action == 'quit':
             return True
@@ -842,9 +847,9 @@ class LoggerProcess(threading.Thread):
 
         return True
 
-    def log(self, event, status, payload, src, dest=None, new_time=None):
+    def log(self, event, status, payload, src, dest = None, new_time = None, cid = None):
         '''add an event to the log database'''
-        self.input.put(('log', (event, status, payload, src, dest, new_time)))
+        self.input.put(('log', (event, status, payload, src, dest, new_time, cid)))
 
     def logs(self, logs):
         '''add a group of events to the log database with the same time_od'''
@@ -918,7 +923,7 @@ def save_logs_as_txt(results, handle):
         date_text = time.strftime('[%c]', time.gmtime(timestamp))
         handle.write("%s %s: %s\n" % (date_text, nick, message))
 
-def log_message(session, members, message, sent, error=False):
+def log_message(session, members, message, sent, error=False, cid = None):
     '''log a message, session is an e3.Session object, members is a list of
     members only used if sent is True, sent is True if we sent the message,
     False if we received the message. error is True if the message send
@@ -940,10 +945,22 @@ def log_message(session, members, message, sent, error=False):
         if message.type == e3.Message.TYPE_NUDGE:
             message.body = _("you just sent a nudge!")
 
+        logs = []
+
         if len(members) == 1:
             member = members[0]
+            dst = session.contacts.get(members[0])
+
+            if dst is None:
+                dst = e3.Contact(members[0])
+
+            dest = e3.Logger.Account.from_contact(dst)
+
+            logs.append((event, status, message.body, src, dest, cid))
+
+            session.logger.logs(logs)
         else:
-            logs = []
+
             for dst_account in members:
                 dst = session.contacts.get(dst_account)
 
@@ -951,7 +968,7 @@ def log_message(session, members, message, sent, error=False):
                     dst = e3.Contact(dst_account)
 
                 dest = e3.Logger.Account.from_contact(dst)
-                logs.append((event, status, message.body, src, dest))
+                logs.append((event, status, message.body, src, dest, cid))
 
             session.logger.logs(logs)
     else:
@@ -970,5 +987,5 @@ def log_message(session, members, message, sent, error=False):
         if message.type == e3.Message.TYPE_NUDGE:
             message.body = _("%s just sent you a nudge!" % display_name)
 
-        session.logger.log(event, status, message.body, src, dest)
+        session.logger.log(event, status, message.body, src, dest, cid = cid)
 
