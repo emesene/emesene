@@ -416,7 +416,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # special offline group
         if self.group_offline and offline:
             if not self.offline_group:
-                self.offline_group = e3.Group(_("Offline"), identifier=-1, type_ = e3.Group.OFFLINE)
+                self.session.config.d_weights['1'] = 0
+                self.offline_group = e3.Group(_("Offline"), identifier='1', type_ = e3.Group.OFFLINE)
                 self.offline_group_iter = self.add_group(self.offline_group, True)
 
             self.offline_group.contacts.append(contact.account)
@@ -427,7 +428,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # we add online contacts to their online group :)
         if self.order_by_status and is_online:
             if not self.online_group:
-                self.online_group = e3.Group(_("Online"), identifier=0, type_ = e3.Group.ONLINE)
+                self.session.config.d_weights['0'] = 1
+                self.online_group = e3.Group(_("Online"), identifier='0', type_ = e3.Group.ONLINE)
                 self.online_group_iter = self.add_group(self.online_group, True)
 
             self.online_group.contacts.append(contact.account)
