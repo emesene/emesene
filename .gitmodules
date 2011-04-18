@@ -1,3 +1,6 @@
 [submodule "emesene/e3/papylib/papyon"]
 	path = emesene/e3/papylib/papyon
 	url = git://anongit.freedesktop.org/papyon
+[submodule "emesene/e3/jabber/xmppy"]
+	path = emesene/e3/jabber/xmppy
+	url = git://xmpppy.git.sourceforge.net/gitroot/xmpppy/xmpppy

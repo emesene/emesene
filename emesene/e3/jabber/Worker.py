@@ -1,11 +1,18 @@
+import os
+import sys
 import time
-import xmpp
 import Queue
 
 import e3
 
 import logging
 log = logging.getLogger('jabber.Worker')
+
+xmpppypath = os.path.abspath("e3" + os.sep + "jabber" + os.sep + "xmppy")
+if os.path.exists(xmpppypath):
+    sys.path.insert(0, xmpppypath)
+
+import xmpp
 
 STATUS_MAP = {}
 STATUS_MAP[e3.status.BUSY] = 'dnd'
