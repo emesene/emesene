@@ -173,7 +173,8 @@ class EmeseneSynch(Synch):
                     conversations_attr.append({"user" : self.__user_to_account(conv[1]), 
                                                "dest" : user_fetched, 
                                                "time" : conv[2], 
-                                               "data" : self.__data_conversion(conv[3])})
+                                               "data" : self.__data_conversion(conv[3]),
+                                               "cid"  : conv[0]})
 
 
             actual_conv = 0  
@@ -184,7 +185,8 @@ class EmeseneSynch(Synch):
 
             for conv in conversations_attr:
                 self._session.logger.log("message", 0, conv["data"], 
-                                         conv["user"], conv["dest"], conv["time"])
+                                         conv["user"], conv["dest"], conv["time"],
+                                         cid = conv["cid"])
 
                 actual_conv += 1.0
 
