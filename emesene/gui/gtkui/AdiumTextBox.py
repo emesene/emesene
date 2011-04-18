@@ -60,8 +60,8 @@ class OutputView(webkit.WebView):
 
         for function in self.pending:
             self.execute_script(function)
-
-        self.execute_script("scrollToBottom()")
+        if self.pending:
+            self.execute_script("scrollToBottom()")
         self.pending = []
 
     def clear(self, source="", target="", target_display="",
