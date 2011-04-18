@@ -389,13 +389,19 @@ class ContactList(object):
         contacts = self.contacts.get_contacts(group.contacts)
         (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
+        maxtotal = len(self.contacts.contacts)
 
-        if group == self.offline_group or group == self.online_group:
+        if self.order_by_status:
             template = template.replace('[$ONLINE_COUNT]', str(total))
+            template = template.replace('[$TOTAL_COUNT]', str(maxtotal))
         else:
-            template = template.replace('[$ONLINE_COUNT]', str(online))
+            if group == self.offline_group:
+                template = template.replace('[$ONLINE_COUNT]', str(total))
+                template = template.replace('[$TOTAL_COUNT]', str(maxtotal))
+            else:
+                template = template.replace('[$ONLINE_COUNT]', str(online))
+                template = template.replace('[$TOTAL_COUNT]', str(total))
 
-        template = template.replace('[$TOTAL_COUNT]', str(total))
         template = template.replace('[$NAME]', self.escape_tags(escaped_name))
 
         return template
