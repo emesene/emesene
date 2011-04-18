@@ -295,6 +295,10 @@ class Logger(object):
         ORDER BY tmstp DESC LIMIT ?;
     '''
 
+    SELECT_NEW_FIELDS = '''
+        SELECT cid FROM fact_event;
+    '''
+
     def __init__(self, path, db_name="base.db"):
         '''constructor'''
         self.path = path
@@ -308,6 +312,14 @@ class Logger(object):
 
         if os.path.exists(full_path + "copy"):
             shutil.copy (full_path + "copy", full_path)
+
+        self.connection = sqlite.connect(full_path)
+        self.cursor = self.connection.cursor()
+
+        try:
+            self.need_clean()
+        except:
+            os.remove(full_path)
 
         self.connection = sqlite.connect(full_path)
         self.cursor = self.connection.cursor()
@@ -708,6 +720,9 @@ class Logger(object):
         for acc in removed:
             account = self.accounts[acc]
             self.update_account(account.id, False)
+
+    def need_clean(self):
+        self.execute(Logger.SELECT_NEW_FIELDS)
 
     def add_contact_by_group(self, accounts, groups):
         '''add all the contacts, all the groups and the relations, also
