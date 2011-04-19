@@ -78,7 +78,7 @@ class UserPanel(gtk.VBox):
         self.search.set_relief(gtk.RELIEF_NONE)
 
         self.message = TextField.TextField(session.contacts.me.message,
-            '<span style="italic">' + _("Click here to set your message") + '.</span>',
+            '[C=#969696][I]' + _("Click here to set your message") + '[/I][/C]',
             True)
         self.message.set_tooltip_text(_('Click here to set your message'))
         self.toolbar = gtk.HBox()

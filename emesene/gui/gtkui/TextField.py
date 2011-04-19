@@ -55,7 +55,7 @@ class TextField(gtk.VBox):
         self.pack_start(self.entry, True, True)
 
         self.button.add(self.label)
-        self.label.set_markup(self._text or self.empty_text)
+        self.text = self._text or self.empty_text
 
         self.button.connect('clicked', self.on_button_clicked)
         self.entry.connect('activate', self.on_entry_activate)
