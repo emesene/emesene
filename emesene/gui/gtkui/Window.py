@@ -35,7 +35,13 @@ class Window(gtk.Window):
 
         self.set_location(width, height, posx, posy)
         self.set_title("emesene")
-        self.set_icon(gui.theme.logo)
+        try:
+            self.set_icon_list(utils.safe_gtk_image_load(gui.theme.logo16).get_pixbuf(), \
+                            utils.safe_gtk_image_load(gui.theme.logo32).get_pixbuf(), \
+                            utils.safe_gtk_image_load(gui.theme.logo48).get_pixbuf(), \
+                            utils.safe_gtk_image_load(gui.theme.logo96).get_pixbuf())
+        except:
+            self.set_icon(gui.theme.logo)
 
         self.cb_on_close = cb_on_close
 

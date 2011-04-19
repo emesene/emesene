@@ -172,7 +172,7 @@ class Theme(object):
         'soccerball.png', 'star.png', 'sun.png', 'turtle.png', 
         'tv.png', 'umbrella.png', 'video.png']
     IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
-        'email.png','group-chat.png', 'idle.png', 'logo.png', 'new-message.gif','mailbox.png',
+        'email.png','group-chat.png', 'idle.png', 'logo.png', 'logo16.png', 'logo32.png', 'logo48.png', 'new-message.gif','mailbox.png',
         'offline.png', 'online.png', 'password.png', 'typing.png', 'transfer_success.png', 'user.png',
         'users.png', 'user_def_image.png', 'user_def_imagetool.png', 'video.png']
 
@@ -214,6 +214,10 @@ class Theme(object):
         self.users = os.path.join(self.theme_path, "users.png")
         self.password = os.path.join(self.theme_path, "password.png")
         self.logo = os.path.join(self.theme_path, "logo.png")
+        self.logo16 = os.path.join(self.theme_path, "logo16.png")
+        self.logo32 = os.path.join(self.theme_path, "logo32.png")
+        self.logo48 = os.path.join(self.theme_path, "logo48.png")
+        self.logo96 = self.logo
         self.throbber = os.path.join(self.theme_path, "throbber.gif")
         self.connect = os.path.join(self.theme_path, "connect.png")
         self.chat = os.path.join(self.theme_path, "chat.png")
