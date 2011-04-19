@@ -223,7 +223,6 @@ class Dialog(object):
         window.set_default_size(150, 100)
         window.set_position(gtk.WIN_POS_CENTER)
         window.set_border_width(8)
-        window.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
 
         vbox = gtk.VBox(spacing=4)
         hbox = gtk.HBox(spacing=4)
@@ -1390,7 +1389,6 @@ class InviteWindow(gtk.Window):
         """
         gtk.Window.__init__(self)
         self.set_border_width(1)
-        self.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
         self.set_title(_('Invite friend'))
         self.set_default_size(300, 250)
         self.session = session
@@ -1690,7 +1688,6 @@ class ProgressWindow(gtk.Window):
         self.set_title(title)
         self.set_role("dialog")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
-        self.set_icon(utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
         self.set_default_size(300, 50)
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_border_width(8)

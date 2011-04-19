@@ -42,7 +42,7 @@ class Window(gtk.Window):
                  utils.safe_gtk_image_load(gui.theme.logo48).get_pixbuf(), \
                  utils.safe_gtk_image_load(gui.theme.logo96).get_pixbuf())
         except:
-            self.set_icon(gui.theme.logo)
+            self.gtk.window_set_default_icon(gui.theme.logo)
 
         self.cb_on_close = cb_on_close
 
@@ -55,7 +55,7 @@ class Window(gtk.Window):
     def set_icon(self, icon):
         '''set the icon of the window'''
         if utils.file_readable(icon):
-            gtk.window_set_default_icon(
+            gtk.Window.set_icon(self, \
                         utils.safe_gtk_image_load(icon).get_pixbuf())
 
     def clear(self):
