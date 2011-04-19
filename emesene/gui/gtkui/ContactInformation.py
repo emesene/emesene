@@ -369,7 +369,11 @@ class ChatWidget(gtk.VBox):
             return
 
         for stat, timestamp, msg_text, nick, account in results:
-            contact = e3.Contact(account, nick=nick)
+
+            contact = founded_account = self.session.contacts.get(account)
+
+            if contact == None:
+                contact = e3.Contact(account, nick=nick)
 
             is_me = self.session.contacts.me.account == account
             datetimestamp = datetime.datetime.fromtimestamp(timestamp)

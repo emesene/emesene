@@ -289,7 +289,12 @@ class Logger(object):
         FROM fact_event f, d_info i, d_account a
         WHERE f.id_event=? and
             ((f.id_src_acc=? and id_dest_acc=?) or
-            (f.id_dest_acc=? and id_src_acc=?)) and
+            (f.id_dest_acc=? and id_src_acc=?)  or
+            (f.id_src_acc<>? and f.cid in 
+                ( SELECT f.cid FROM fact_event f 
+                  WHERE f.id_event=?  and  ((f.id_src_acc=? and id_dest_acc=?) 
+                  or  (f.id_dest_acc=? and id_src_acc=?)) )
+            )) and
             f.id_src_info = i.id_info and
             f.tmstp >= ? and f.tmstp <= ? and f.id_src_acc = a.id_account
         ORDER BY tmstp DESC LIMIT ?;
@@ -297,6 +302,14 @@ class Logger(object):
 
     SELECT_NEW_FIELDS = '''
         SELECT cid FROM fact_event;
+    '''
+
+    DROP_FACT_EVENT = '''
+        DROP TABLE fact_event;
+    '''
+
+    DROP_D_TIME = '''
+        DROP TABLE d_time;
     '''
 
     def __init__(self, path, db_name="base.db"):
@@ -316,8 +329,8 @@ class Logger(object):
         self.connection = sqlite.connect(full_path)
         self.cursor = self.connection.cursor()
 
-        if self.need_clean():
-            os.remove(full_path)
+        if self.__need_clean():
+            self.__clean()
 
         self.connection = sqlite.connect(full_path)
         self.cursor = self.connection.cursor()
@@ -335,12 +348,12 @@ class Logger(object):
     def _create(self):
         '''create the database'''
         self.execute(Logger.CREATE_D_TIME)
+        self.execute(Logger.CREATE_FACT_EVENT)
         self.execute(Logger.CREATE_D_INFO)
         self.execute(Logger.CREATE_D_EVENT)
         self.execute(Logger.CREATE_D_ACCOUNT)
         self.execute(Logger.CREATE_GROUP)
         self.execute(Logger.CREATE_ACCOUNT_BY_GROUP)
-        self.execute(Logger.CREATE_FACT_EVENT)
         self.execute(Logger.CREATE_LAST_ACCOUNT)
 
         for event in Logger.EVENTS:
@@ -682,7 +695,7 @@ class Logger(object):
         id_dest = self.accounts[dest].id_account
 
         self.execute(Logger.SELECT_CHATS_BETWEEN, (id_event, id_src, id_dest, id_src,
-            id_dest, from_t, to_t, limit))
+            id_dest, id_dest, id_event, id_src, id_dest, id_src, id_dest, from_t, to_t, limit))
 
         return self._fetch_sorted()
 
@@ -719,7 +732,14 @@ class Logger(object):
             account = self.accounts[acc]
             self.update_account(account.id, False)
 
-    def need_clean(self):
+    def __clean(self):
+        try:
+            self.execute(Logger.DROP_FACT_EVENT)
+            self.execute(Logger.DROP_D_TIME)
+        except sqlite.OperationalError:
+            pass
+
+    def __need_clean(self):
         try:
             self.execute(Logger.SELECT_NEW_FIELDS)
             return False
