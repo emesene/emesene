@@ -33,7 +33,6 @@ class ImageChooser(gtk.Window):
         dialog opens'''
         gtk.Window.__init__(self)
         self.set_modal(True)
-        self.set_icon(gui.theme.logo)
 
         self.response_cb = response_cb
 

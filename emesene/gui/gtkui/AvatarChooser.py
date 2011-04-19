@@ -38,7 +38,6 @@ class AvatarChooser(gtk.Window):
         '''
         gtk.Window.__init__(self)
         self.set_modal(True)
-        self.set_icon(gui.theme.logo)
 
         self.avatar_manager = gui.base.AvatarManager(session)
         

@@ -136,10 +136,6 @@ class PluginWindow(gtk.Window):
 
         self.session = session
 
-        if utils.file_readable(gui.theme.logo):
-            self.set_icon(
-                utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
-
         self.main_vbox = PluginMainVBox(session)
 
         self.add(self.main_vbox)
