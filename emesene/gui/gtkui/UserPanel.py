@@ -77,10 +77,11 @@ class UserPanel(gtk.VBox):
             gtk.ICON_SIZE_MENU))
         self.search.set_relief(gtk.RELIEF_NONE)
 
+        self.empty_message_text = _("Click here to set your message")
         self.message = TextField.TextField(session.contacts.me.message,
-            '[C=#969696][I]' + _("Click here to set your message") + '[/I][/C]',
+            '[I]' + self.empty_message_text + '[/I]',
             True)
-        self.message.set_tooltip_text(_('Click here to set your message'))
+        self.message.set_tooltip_text(self.empty_message_text)
         self.toolbar = gtk.HBox()
 
         hbox = gtk.HBox()

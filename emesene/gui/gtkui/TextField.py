@@ -64,6 +64,8 @@ class TextField(gtk.VBox):
 
     def on_button_clicked(self, button):
         '''method called when the button is clicked'''
+        if (self.entry.get_text() == self.empty_text):
+            self.entry.set_text("")
         self.button.hide()
         self.entry.show()
         self.entry.grab_focus()
