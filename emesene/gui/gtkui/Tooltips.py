@@ -136,7 +136,7 @@ class Tooltips(gtk.Window):
         self.tag = -1
 
         text = xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.display_name)) 
-        text += '<span size="small">\n' + xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.message)) + '</span>'
+        text += '\n<span size="small">' + xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.message)) + '</span>'
         text += '\n' + self.data_string % (\
             obj.account, obj.status_string, self.yes_no[bool(obj.blocked)])
 
