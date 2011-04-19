@@ -126,7 +126,7 @@ class Notification():
         if not contact:
             return
 
-        if contact.status == status.ONLINE:
+        if contact.status != status.OFFLINE and old_value == status.OFFLINE:
             if not self.notify_online:
                 # detects the first notification flood and enable the
                 # online notifications after it to prevent log in flood
