@@ -576,7 +576,6 @@ class Dialog(object):
         about.set_authors(authors)
         about.set_translator_credits(translators)
         icon = gtk.gdk.pixbuf_new_from_file(logo_path)
-        about.set_icon(icon)
         about.set_logo(icon)
         about.run()
         about.hide()

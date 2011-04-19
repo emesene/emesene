@@ -36,10 +36,11 @@ class Window(gtk.Window):
         self.set_location(width, height, posx, posy)
         self.set_title("emesene")
         try:
-            self.set_icon_list(utils.safe_gtk_image_load(gui.theme.logo16).get_pixbuf(), \
-                            utils.safe_gtk_image_load(gui.theme.logo32).get_pixbuf(), \
-                            utils.safe_gtk_image_load(gui.theme.logo48).get_pixbuf(), \
-                            utils.safe_gtk_image_load(gui.theme.logo96).get_pixbuf())
+            gtk.window_set_default_icon_list(\
+                 utils.safe_gtk_image_load(gui.theme.logo16).get_pixbuf(), \
+                 utils.safe_gtk_image_load(gui.theme.logo32).get_pixbuf(), \
+                 utils.safe_gtk_image_load(gui.theme.logo48).get_pixbuf(), \
+                 utils.safe_gtk_image_load(gui.theme.logo96).get_pixbuf())
         except:
             self.set_icon(gui.theme.logo)
 
@@ -54,8 +55,8 @@ class Window(gtk.Window):
     def set_icon(self, icon):
         '''set the icon of the window'''
         if utils.file_readable(icon):
-            gtk.Window.set_icon(self,
-                utils.safe_gtk_image_load(icon).get_pixbuf())
+            gtk.window_set_default_icon(
+                        utils.safe_gtk_image_load(icon).get_pixbuf())
 
     def clear(self):
         '''remove the content from the main window'''

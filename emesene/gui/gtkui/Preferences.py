@@ -64,10 +64,6 @@ class Preferences(gtk.Window):
         # GNOME3 likes to break things..was WINDOW_TYPE_HINT_DIALOG
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_MENU)
 
-        if utils.file_readable(gui.theme.logo):
-            self.set_icon(
-                utils.safe_gtk_image_load(gui.theme.logo).get_pixbuf())
-
         ''' TREE VIEW STUFF '''
         # Create the list store model for the treeview.
         listStore = gtk.ListStore(gtk.gdk.Pixbuf, str)
