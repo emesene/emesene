@@ -334,7 +334,12 @@ class ChatWidget(gtk.VBox):
     def refresh_history(self):
         '''refresh the history according to the values on the calendars
         '''
-        self.text.clear()
+        if self.contact:
+            his_picture = self.contact.picture or utils.path_to_url(os.path.abspath(gui.theme.user))
+            my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.user))
+            self.text.clear(self.account, self.contact.nick, self.contact.display_name, my_picture, his_picture)
+        else:
+            self.text.clear()
         self.request_chats_between(1000, self._on_chats_ready)
 
     def request_chats_between(self, limit, callback):
