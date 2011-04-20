@@ -232,6 +232,17 @@ class AdiumTheme(object):
 
         return template
 
+    def get_theme_variants(self):
+        variants = []
+        path_variants = os.path.join(self.resources_path, 'Variants')
+        print path_variants
+        for root, dirs, files in os.walk(path_variants):
+            for f in files:
+                basename, extension = os.path.splitext(str(f))
+                if extension == ".css":
+                    variants.append(basename)
+        return variants
+
 def read_file(*args):
     '''read file if exists and is readable, return None otherwise
     '''

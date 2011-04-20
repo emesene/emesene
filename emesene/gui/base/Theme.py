@@ -265,6 +265,10 @@ class Theme(object):
 
         return themes
 
+    def get_adium_theme_variants(self):
+        '''return a list of adium theme variants'''
+        return self.conv_theme.get_theme_variants()
+
     def get_child_dirs(self, dir_path):
         '''return a list of dirs inside a given path'''
         try:
