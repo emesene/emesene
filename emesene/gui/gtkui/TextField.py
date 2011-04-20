@@ -110,7 +110,8 @@ class TextField(gtk.VBox):
     def _set_text(self, value):
         '''set the value of text'''
         self._text = value
-        self.label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(self._text)) or self.empty_text)
+        self.label.set_markup(Renderers.msnplus_to_list(
+            gobject.markup_escape_text(self._text or self.empty_text)))
         self.entry.set_text(self._text)
 
     text = property(fget=_get_text, fset=_set_text)
