@@ -630,7 +630,7 @@ class Theme(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 5, 1)
+        BaseTable.__init__(self, 6, 1)
         self.set_border_width(5)
         self.session = session
 
@@ -667,12 +667,14 @@ class Theme(BaseTable):
             'session.config.emote_theme')
         self.append_combo(_('Adium theme'), gui.theme.get_adium_themes,
             'session.config.adium_theme')
+        self.append_combo(_('Adium theme variant'), gui.theme.get_adium_theme_variants,
+            'session.config.adium_theme_variant')
         self.append_entry_default(_('Nick format'), 'nick',
                 'session.config.nick_template_clist', ContactList.NICK_TPL)
         self.append_entry_default(_('Group format'), 'group',
                 'session.config.group_template', ContactList.GROUP_TPL)
 
-        self.add_button(_('Apply'), 0, 7,
+        self.add_button(_('Apply'), 0, 8,
                 self.on_redraw_main_screen, 0, 0)
 
     def _on_cb_override_text_color_toggled(self, value):
