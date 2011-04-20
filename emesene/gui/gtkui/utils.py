@@ -28,6 +28,7 @@ import Queue
 import threading
 
 import e3
+import urllib
 
 pixbufs = {}
 
@@ -192,6 +193,17 @@ def makePreview(src):
     out_file.close()
 
     return cnt
+
+def path_to_url(path):
+    if os.name == "nt":
+        # on windows os.path.join uses backslashes
+        path = path.replace("\\", "/")
+        path = path[2:]
+
+    path = urllib.quote(path)
+    path = "file://" + path
+
+    return path
 
 class GtkRunner(threading.Thread):
 

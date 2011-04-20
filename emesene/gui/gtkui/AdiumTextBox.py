@@ -18,7 +18,6 @@
 
 import os
 import gtk
-import urllib
 import logging
 log = logging.getLogger('gtkui.AdiumTextBox')
 import webkit
@@ -29,6 +28,7 @@ import webbrowser
 
 import e3
 import gui
+import utils
 import Renderers
 
 class OutputView(webkit.WebView):
@@ -70,7 +70,7 @@ class OutputView(webkit.WebView):
         body = self.theme.get_body(source, target, target_display, source_img,
                 target_img)
         self.load_string(body,
-                "text/html", "utf-8", path_to_url(self.theme.path))
+                "text/html", "utf-8", utils.path_to_url(self.theme.path))
         self.pending = []
         self.ready = False
 
@@ -165,7 +165,7 @@ class OutputText(gtk.ScrolledWindow):
         self.set_shadow_type(gtk.SHADOW_IN)
         self._texts = []
         self.loaded = False
-        picture = path_to_url(os.path.abspath(gui.theme.user))
+        picture = utils.path_to_url(os.path.abspath(gui.theme.user))
 
         self.view = OutputView(gui.theme.conv_theme, "", "", "", picture,
                 picture)
@@ -222,14 +222,3 @@ class OutputText(gtk.ScrolledWindow):
             _id = base64.b64encode(_creator+xml.sax.saxutils.unescape(_friendly)) #see gui/base/MarkupParser.py
             mystr = "var now=new Date();var x=document.images;for(var i=0;i<x.length;i++){if(x[i].name=='%s'){x[i].src='%s?'+now.getTime();}}" % (_id, path)
             self.view.execute_script(mystr)
-
-def path_to_url(path):
-    if os.name == "nt":
-        # on windows os.path.join uses backslashes
-        path = path.replace("\\", "/")
-        path = path[2:]
-
-    path = urllib.quote(path)
-    path = "file://" + path
-
-    return path
