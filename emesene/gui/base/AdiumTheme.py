@@ -25,6 +25,7 @@ import xml.sax.saxutils
 
 import parsers
 import MarkupParser
+import Plus
 
 class AdiumTheme(object):
     '''a class that contains information of a adium theme
@@ -129,7 +130,13 @@ class AdiumTheme(object):
         if style is not None:
             msgtext = style_message(msgtext, style)
 
-        template = template.replace('%sender%', escape(msg.alias))
+        plus_parser = Plus.MsnPlusMarkupMohrtutchy()
+
+        if msg.alias:
+            template = template.replace('%sender%', escape(plus_parser.removeMarkup(msg.alias)))
+        else:
+            template = template.replace('%sender%', escape(plus_parser.removeMarkup(msg.display_name)))
+
         template = template.replace('%senderScreenName%', escape(msg.sender))
         template = template.replace('%senderDisplayName%',
             escape(msg.display_name))
