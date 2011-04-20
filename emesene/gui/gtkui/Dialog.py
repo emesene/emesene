@@ -777,7 +777,10 @@ class Dialog(object):
         box.attach(l_server_port, 0, 1, 1, 2)
         box.attach(t_server_port, 1, 2, 1, 2)
         box.attach(c_use_http, 0, 2, 2, 3)
-        box.attach(c_use_proxy, 0, 2, 3, 4)
+        # TODO: FIXME: Temporary hack for 2.0 release.
+        # msn (papylib) automagically gets system proxies
+        if service != 'msn':
+            box.attach(c_use_proxy, 0, 2, 3, 4)
         box.attach(l_host, 0, 1, 4, 5)
         box.attach(t_proxy_host, 1, 2, 4, 5)
         box.attach(l_port, 0, 1, 5, 6)
