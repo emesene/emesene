@@ -46,7 +46,10 @@ class AvatarManager(object):
     def get_cached_avatars_dir(self):
         ''' gets the contacts' cached avatar directory '''
         # this path should be set while loging in
-        return self.config_dir.get_path('cached_avatars')
+        dirlist = [os.path.join(self.config_dir.base_dir, dir, "avatars") for dir in \
+                    os.listdir(self.config_dir.base_dir) if \
+                    (dir.find("@") != -1)]
+        return dirlist
 
     def get_contact_avatars_dir(self, contact):
         ''' gets the avatar directory of specified contact'''

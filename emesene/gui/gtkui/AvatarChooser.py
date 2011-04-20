@@ -55,7 +55,7 @@ class AvatarChooser(gtk.Window):
             self.on_remove, self.on_accept, IconView.TYPE_SELF_PICS))
         self.views.append(IconView(_('System pictures'), faces_paths,
             self.on_remove, self.on_accept, IconView.TYPE_SYSTEM_PICS))
-        self.views.append(IconView(_('Contact pictures'), [contact_cache_path],
+        self.views.append(IconView(_('Contact pictures'), contact_cache_path,
             self.on_remove, self.on_accept, IconView.TYPE_CONTACTS_PICS))
 
         vbox = gtk.VBox(spacing=4)
