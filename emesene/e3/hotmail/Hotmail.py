@@ -26,12 +26,29 @@ import webbrowser
 import tempfile
 
 class Hotmail:
+
+
     def __init__( self, session ):
         self.session=session
         self.user = self.session.account.account
         self.profile=self.session.get_profile()
         self.password = self.session.account.password
         self.MSPAuth = self.profile['MSPAuth']
+
+    def is_live_account(self):
+        account = self.user.split('@')[1]
+        account = account.split('.')[0]
+
+        if (account == "msn"):
+            return True
+
+        if (account == "live"):
+            return True
+
+        if (account == "hotmail"):
+            return True
+
+        return False
         
     def __getLoginPage( self, MessageURL=None , PostURL=None, id='2' ):
         if PostURL == None:
