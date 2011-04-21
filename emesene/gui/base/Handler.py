@@ -158,7 +158,7 @@ class HelpHandler(object):
 
     def on_about_selected(self):
         '''called when the about item is selected'''
-        self.dialog.about_dialog('emesene', '2.11.4-rc2', 'marianoguerra & c10ud',
+        self.dialog.about_dialog('emesene', '2.11.4-rc3', 'marianoguerra & c10ud',
             _('A simple yet powerful instant messaging client'), EMESENE_LICENSE,
             'http://www.emesene.org', 
             [ 'Riccardo (c10ud) <c10ud.dev@gmail.com>',
