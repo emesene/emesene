@@ -105,12 +105,10 @@ class MainWindow(gtk.VBox):
             'b_show_userpanel')
 
     def _on_mail_count_changed(self,count):
-        if self.__hotmail.is_live_account():
-            self.panel.mail.set_label("(%d)" % count)
+        self.panel.mail.set_label("(%d)" % count)
 
     def _on_mail_click(self, widget, data):
-        if self.__hotmail.is_live_account():	
-            self.__hotmail.openInBrowser()
+        self.__hotmail.openInBrowser()
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''

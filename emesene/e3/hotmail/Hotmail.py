@@ -25,27 +25,35 @@ from time import time
 import webbrowser
 import tempfile
 
+DOMAINS_ALLOWED = ["msn", "live", "hotmail", "windowslive"]
+
 class Hotmail:
 
 
     def __init__( self, session ):
         self.session=session
         self.user = self.session.account.account
+        self.allowed = False
+
+        current_service = self.session.config.d_user_service.get(self.user, 'msn')
+        
+        if current_service != 'msn':
+            return
+
+        if not self.__is_live_account():
+            return
+
+        self.allowed = True
+
         self.profile=self.session.get_profile()
         self.password = self.session.account.password
         self.MSPAuth = self.profile['MSPAuth']
 
-    def is_live_account(self):
+    def __is_live_account(self):
         account = self.user.split('@')[1]
         account = account.split('.')[0]
 
-        if (account == "msn"):
-            return True
-
-        if (account == "live"):
-            return True
-
-        if (account == "hotmail"):
+        if account in DOMAINS_ALLOWED:
             return True
 
         return False
@@ -96,4 +104,5 @@ class Hotmail:
         return 'file:///' + self.__file
 
     def openInBrowser(self):
-        webbrowser.open(self.__getLoginPage())
+        if self.allowed:
+            webbrowser.open(self.__getLoginPage())
