@@ -421,7 +421,9 @@ class Controller(object):
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
         conv_name = self.session.config.get_or_set('adium_theme',
                 'renkoo.AdiumMessagesStyle')
-        gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
+        conv_name_variant = self.session.config.get_or_set('adium_theme_variant',
+                '')
+        gui.theme.set_theme(image_name, emote_name, sound_name, conv_name, conv_name_variant)
 
         self.session.config.get_or_set('last_avatar', last_avatar_path)
 

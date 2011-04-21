@@ -82,7 +82,7 @@ class AdiumThemes(object):
 
         return items
 
-    def get(self, theme_path, timefmt="%H:%M"):
+    def get(self, theme_path, timefmt="%H:%M", variant=''):
         '''return a Theme object instance
         returs True, theme_instance if the validation was ok
         False, reason if some validation failed
@@ -92,7 +92,7 @@ class AdiumThemes(object):
         if not status:
             return status, message
 
-        return True, AdiumTheme.AdiumTheme(theme_path, timefmt)
+        return True, AdiumTheme.AdiumTheme(theme_path, timefmt, variant)
 
     def validate(self, theme_path):
         '''validate a Theme directory structure

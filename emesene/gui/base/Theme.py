@@ -41,17 +41,18 @@ class Theme(object):
         'users.png', 'user_def_image.png', 'user_def_imagetool.png', 'video.png']
 
     def __init__(self, image_name="default", emote_name="default",
-            sound_name="default", conv_name='renkoo.AdiumMessageStyle'):
+            sound_name="default", conv_name='renkoo.AdiumMessageStyle', conv_variant = ''):
         '''class constructor'''
-        self.set_theme(image_name, emote_name, sound_name, conv_name)
+        self.set_theme(image_name, emote_name, sound_name, conv_name, conv_variant)
 
-    def set_theme(self, image_name, emote_name, sound_name, conv_name):
+    def set_theme(self, image_name, emote_name, sound_name, conv_name, conv_variant=''):
         '''set the theme name and change all the paths to reflect the change'''
         self.image_name = image_name
         self.emote_name = emote_name
         self.sound_name = sound_name
         # conv_name is the name of the selected adium conversation theme
         self.conv_name = conv_name
+        self.adium_theme_variant= conv_variant
 
         self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
         self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
@@ -62,7 +63,7 @@ class Theme(object):
             if conv_name in elem:
                 self.adium_theme_path = elem
 
-        self.conv_theme = self.conv_themes.get(self.adium_theme_path)[1]
+        self.conv_theme = self.conv_themes.get(self.adium_theme_path, variant=self.adium_theme_variant)[1]
 
         self.sound_theme_path = os.path.join("themes", "sounds",
                 self.sound_name)
