@@ -316,19 +316,11 @@ class BaseTable(gtk.Table):
 
         self.append_row(hbox, None)
 
-    def create_combo_with_label(self, text, getter, property_name,values=None):
-        """creates and return a new ComboBox with a label and append values to the combo
-        """
+    def fill_combo(self, combo, getter, property_name, values=None):
         if values:
             default = getter()[values.index(self.get_attr(property_name))]
         else:
             default = self.get_attr(property_name)
-        hbox = gtk.HBox()
-        hbox.set_homogeneous(True)
-        label = gtk.Label(text)
-        label.set_alignment(0.0, 0.5)
-        combo = gtk.combo_box_new_text()
-
         count = 0
         default_count = 0
         for item in getter():
@@ -340,10 +332,26 @@ class BaseTable(gtk.Table):
 
         combo.set_active(default_count)
 
+    def create_combo (self, getter, property_name, values=None, changed_cb = None):
+        combo = gtk.combo_box_new_text()
+        self.fill_combo(combo, getter, property_name, values)
+        if changed_cb:
+            combo.connect('changed', changed_cb, property_name, values)
+        else:
+            combo.connect('changed', self.on_combo_changed, property_name, values)
+        return combo
+
+    def create_combo_with_label(self, text, getter, property_name,values=None, changed_cb = None):
+        """creates and return a new ComboBox with a label and append values to the combo
+        """
+        hbox = gtk.HBox()
+        hbox.set_homogeneous(True)
+        label = gtk.Label(text)
+        label.set_alignment(0.0, 0.5)
+        combo = self.create_combo(getter, property_name, values, changed_cb)
+
         hbox.pack_start(label, True, True)
         hbox.pack_start(combo, False)
-
-        combo.connect('changed', self.on_combo_changed, property_name, values)
 
         return hbox
 
