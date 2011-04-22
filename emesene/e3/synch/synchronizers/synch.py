@@ -32,11 +32,14 @@ class Synch(object):
             self.__dest_db_path = ""
             self.__src_db_path_copy = ""
 
-        def exists_source(self):
+        def set_user(self, user_account):
             pass
 
+        def exists_source(self):
+            return False
+
         def is_clean(self):
-            pass
+            return True
 
         def clean(self):
             pass

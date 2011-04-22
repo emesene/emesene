@@ -417,7 +417,9 @@ class Controller(object):
 
     def _sync_emesene1(self):
         syn = extension.get_default('synch tool')
-        syn = syn(self.session, "emesene")
+        user = self.session.account.account
+        current_service = self.session.config.d_user_service.get(user, 'msn')
+        syn = syn(self.session, current_service)
         syn.show()
 
     def _set_location(self, window, is_conv=False):

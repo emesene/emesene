@@ -31,6 +31,8 @@ import gui
 import utils
 import Renderers
 
+DISPLAY_NAME_LIMIT = 25
+
 class OutputView(webkit.WebView):
     '''a class that represents the output widget of a conversation
     '''
@@ -77,6 +79,11 @@ class OutputView(webkit.WebView):
     def add_message(self, msg, style=None, cedict={}, cedir=None):
         '''add a message to the conversation'''
 
+        if(len(msg.alias) > DISPLAY_NAME_LIMIT):
+            msg.alias = msg.alias[0:DISPLAY_NAME_LIMIT] + "..."
+        if(len(msg.display_name) > DISPLAY_NAME_LIMIT):
+            msg.display_name = msg.display_name[0:DISPLAY_NAME_LIMIT] + "..."
+
         if msg.incoming:
             if self.last_incoming is None:
                 self.last_incoming = False
@@ -94,6 +101,7 @@ class OutputView(webkit.WebView):
                 self.last_incoming = True
 
             msg.first = self.last_incoming
+
             html = self.theme.format_outgoing(msg, style, cedict, cedir)
             self.last_incoming = False
 

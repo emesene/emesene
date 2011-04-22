@@ -31,7 +31,7 @@ class SyncTool(object):
 
     def __init__(self, session, synch_type):
         '''class constructor'''
-        self.ENABLE = True # Disabled. Set True for enable.
+        self.ENABLE = True # Enabled. Set False for disable.
         self._session = session
         self._syn = get_synchronizer(synch_type)
         self._syn.set_user(self._session._account.account)
