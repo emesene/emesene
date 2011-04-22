@@ -582,6 +582,12 @@ class Worker(e3.base.Worker, papyon.Client):
         self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED,
                                    account, 'status', old_status)
 
+        acc = Logger.Account(contact.cid,\
+                    None, contact.account, contact.status, contact.nick, \
+                    contact.message, contact.picture)
+        self.session.logger.log('status change', contact.status, \
+                                                            old_status, acc)
+
     def _on_contact_nick_changed(self, papycontact):
         contact = self.session.contacts.contacts.get(papycontact.account, None)
         if not contact:
