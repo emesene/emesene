@@ -53,7 +53,7 @@ class Hotmail:
         account = self.user.split('@')[1]
         account = account.split('.')[0]
 
-        if account in DOMAINS_ALLOWED:
+        if account.lower() in DOMAINS_ALLOWED:
             return True
 
         return False
