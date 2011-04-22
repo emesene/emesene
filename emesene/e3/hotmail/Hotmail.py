@@ -16,7 +16,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-#    This file is taken from emesene1 and modified for 
+#    This file is taken from emesene1 and modified for
 #    emesene2 by Andrea Stagi <stagi.andrea(at)gmail.com>
 
 import os
@@ -24,19 +24,18 @@ import hashlib
 from time import time
 import webbrowser
 import tempfile
+import re
 
 DOMAINS_ALLOWED = ["msn", "live", "hotmail", "windowslive"]
 
 class Hotmail:
 
-
-    def __init__( self, session ):
+    def __init__(self, session):
         self.session=session
         self.user = self.session.account.account
         self.allowed = False
 
         current_service = self.session.config.d_user_service.get(self.user, 'msn')
-        
         if current_service != 'msn':
             return
 
@@ -45,11 +44,15 @@ class Hotmail:
 
         self.allowed = True
 
-        self.profile=self.session.get_profile()
+        self.profile = self.session.get_profile()
         self.password = self.session.account.password
         self.MSPAuth = self.profile['MSPAuth']
 
     def __is_live_account(self):
+        if not re.match('^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$',
+                        self.user, flags=re.IGNORECASE):
+            return False
+
         account = self.user.split('@')[1]
         account = account.split('.')[0]
 
@@ -57,17 +60,17 @@ class Hotmail:
             return True
 
         return False
-        
-    def __getLoginPage( self, MessageURL=None , PostURL=None, id='2' ):
+
+    def __getLoginPage(self, MessageURL=None , PostURL=None, id='2'):
         if PostURL == None:
             if self.user.split('@')[1] == 'msn.com':
                 PostURL = 'https://msnia.login.live.com/ppsecure/md5auth.srf?lc=' + self.profile['lang_preference']
             else:
                 PostURL = 'https://login.live.com/ppsecure/md5auth.srf?lc=' + self.profile['lang_preference']
-               
+
         if MessageURL == None:
             MessageURL = "/cgi-bin/HoTMaiL"
-           
+
         sl = str( int ( time() ) - int( self.profile['LoginTime'] ) )
         auth = self.MSPAuth
         sid = self.profile['sid']
@@ -85,22 +88,22 @@ class Hotmail:
         'auth':auth,
         'creds':cred
         }
-        
+
         return self.__parseTemplate( templateData )
-        
-    def __parseTemplate( self, data ):
+
+    def __parseTemplate(self, data):
         f = open(os.path.join(os.getcwd(), 'data','hotmlog.htm'))
         hotLogHtm = f.read()
         f.close()
         for key in data:
             hotLogHtm = hotLogHtm.replace( '$'+key, data[ key ] )
 
-        self.__file=tempfile.mkstemp(prefix=hashlib.md5(self.user+self.password).hexdigest(), suffix=hashlib.md5(self.password+self.user).hexdigest())[1]
-        
+        self.__file = tempfile.mkstemp(prefix=hashlib.md5(self.user+self.password).hexdigest(), suffix=hashlib.md5(self.password+self.user).hexdigest())[1]
+
         tmpHtml = open( self.__file, 'w' )
         tmpHtml.write( hotLogHtm )
         tmpHtml.close()
-        
+
         return 'file:///' + self.__file
 
     def openInBrowser(self):
