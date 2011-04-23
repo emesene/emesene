@@ -52,11 +52,11 @@ class AvatarChooser(gtk.Window):
         contact_cache_path = self.avatar_manager.get_cached_avatars_dir()
         self.views = []
         self.views.append(IconView(_('Used'), [cache_path],
-            self.on_remove, self.on_accept, IconView.TYPE_SELF_PICS))
+            self.on_remove, self.on_accept, IconView.TYPE_SELF_PICS, self._on_image_area_selector))
         self.views.append(IconView(_('System pictures'), faces_paths,
-            self.on_remove, self.on_accept, IconView.TYPE_SYSTEM_PICS))
+            self.on_remove, self.on_accept, IconView.TYPE_SYSTEM_PICS, None))
         self.views.append(IconView(_('Contact pictures'), contact_cache_path,
-            self.on_remove, self.on_accept, IconView.TYPE_CONTACTS_PICS))
+            self.on_remove, self.on_accept, IconView.TYPE_CONTACTS_PICS, None))
 
         vbox = gtk.VBox(spacing=4)
         side_vbox = gtk.VBox(spacing=4)

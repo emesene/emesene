@@ -24,21 +24,23 @@ import gobject
 import thread
 import time
 import gc
+from gui.base import MarkupParser
 
 # Class that holds the iconview from the avatar chooser dialog
 class IconView(gtk.HBox):
     ''' class representing a listview in icon mode
         (using gtk.IconView + gtk.ListStore)        '''
     TYPE_SYSTEM_PICS, TYPE_CONTACTS_PICS, TYPE_SELF_PICS = range(3)
-    def __init__(self, label, path_list, on_remove_cb, on_accept_cb, iconv_type):
+    def __init__(self, label, path_list, on_remove_cb, on_accept_cb, iconv_type, on_drag_data_accepted):
         gtk.HBox.__init__(self)
         self.set_spacing(4)
         
         self.on_remove_cb = on_remove_cb
         self.on_accept_cb = on_accept_cb
+        self.on_drag_data_accepted = on_drag_data_accepted
         self.iconv_type = iconv_type
 
-        self.model = gtk.ListStore(gtk.gdk.Pixbuf, str)   
+        self.model = gtk.ListStore(gtk.gdk.Pixbuf, str)
         self.iconview = gtk.IconView(self.model)
         self.iconview.enable_model_drag_dest([('text/uri-list', 0, 0)],
                                 gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_COPY)
@@ -116,13 +118,18 @@ class IconView(gtk.HBox):
 
             # the '\x00' value makes an error
             path = path.replace(chr(0), '')
+                       
+            path = MarkupParser.urllib.url2pathname(path)
 
             # this seems to be an error on ntpath but we take care :S
             try:
                 if os.path.exists(path):
-                    self.add_picture(path)
+                    self.on_drag_data_accepted(path,gtk.gdk.PixbufAnimation(path).is_static_image())
             except TypeError, error:
-                print _("Could not add picture:\n %s") % (str(error),)
+                if self.on_drag_data_accepted is None:
+                    print _("Could not add picture:\n %s") % _("Drag and drop to this IconView is not allowed.")
+                else:
+                    print _("Could not add picture:\n %s") % (str(error),)
 
     def add_picture(self, path):
         '''Adds an avatar into the IconView'''
