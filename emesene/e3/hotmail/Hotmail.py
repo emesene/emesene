@@ -98,7 +98,9 @@ class Hotmail:
         for key in data:
             hotLogHtm = hotLogHtm.replace( '$'+key, data[ key ] )
 
-        self.__file = tempfile.mkstemp(prefix=hashlib.md5(self.user+self.password).hexdigest(), suffix=hashlib.md5(self.password+self.user).hexdigest())[1]
+        name_suffix = hashlib.md5(self.password+self.user).hexdigest() + ".html"
+
+        self.__file = tempfile.mkstemp(suffix = name_suffix)[1]
 
         tmpHtml = open( self.__file, 'w' )
         tmpHtml.write( hotLogHtm )
