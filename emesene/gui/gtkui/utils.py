@@ -148,7 +148,7 @@ def pango_font_description_to_style(fdesc):
         font_italic, font_underline, font_strike, font_size)
 
 def simple_animation_scale(path,width, height):
-    f = open(path, 'r')
+    f = open(path, 'rb')
     pixloader = gtk.gdk.PixbufLoader('gif')
     pixloader.set_size(width, height)
     pixloader.write(f.read())
