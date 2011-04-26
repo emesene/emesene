@@ -127,23 +127,29 @@ class FileTransferWidget(gtk.HBox):
 
         if state == self.transfer.WAITING and self.transfer.sender != 'Me':        
             button = gtk.Button(None, None)
+            button.set_tooltip_text(_('Accept transfer'))            
             button.set_image(self.__get_button_img(gtk.STOCK_APPLY))
             button.connect('clicked', self._on_accept_clicked)
             self.buttons.append(button)
+
+        if state == self.transfer.WAITING or state == self.transfer.TRANSFERRING:        
+            b_cancel = gtk.Button(None, None)
+            if state == self.transfer.WAITING and self.transfer.sender != 'Me':
+                b_cancel.set_tooltip_text(_('Reject transfer'))
+            else:
+                b_cancel.set_tooltip_text(_('Cancel transfer'))
+            b_cancel.set_image(self.__get_button_img(gtk.STOCK_CANCEL))
+            b_cancel.connect('clicked', self._on_cancel_clicked)
+            self.buttons.append(b_cancel)
 
         if state in (self.transfer.RECEIVED, self.transfer.FAILED):
             self.transfer.time_finished = time.time()
 
             button = gtk.Button(None, None)
+            button.set_tooltip_text(_('Close transfer'))
             button.set_image(self.__get_button_img(gtk.STOCK_CLEAR))
             button.connect('clicked', self._on_close_clicked)
             self.buttons.append(button)
-
-        if state == self.transfer.WAITING or state == self.transfer.TRANSFERRING:
-            b_cancel = gtk.Button(None, None)
-            b_cancel.connect('clicked', self._on_cancel_clicked)
-            b_cancel.set_image(self.__get_button_img(gtk.STOCK_CANCEL))
-            self.buttons.append(b_cancel)
 
         for button in self.buttons:
             self.pack_start(button, False, False)
