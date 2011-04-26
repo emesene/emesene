@@ -392,7 +392,7 @@ class Login(LoginBase):
         do all the stuffs needed to connect
         '''
         self.nicebar.empty_queue()
-        user = self.cmb_account.get_active_text().strip()
+        user = self.cmb_account.get_active_text().strip().lower()
         password = self.txt_password.get_text()
         account = e3.Account(user, password, self.btn_status.status,
                 self.server_host)
