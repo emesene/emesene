@@ -36,8 +36,8 @@ class ContactListParser(gobject.GObject):
 
         markup = markup.replace("[$nl]", "\n")
 
-        markup = markup.replace("[$small]", "<small>")
-        markup = markup.replace("[$/small]", "</small>")
+        markup = markup.replace("[$small]", "<span size=\"small\">")
+        markup = markup.replace("[$/small]", "</span>")
 
         while markup.count("[$COLOR=") > 0:
             hexcolor = color = markup.split("[$COLOR=")[1].split("]")[0]
@@ -48,11 +48,11 @@ class ContactListParser(gobject.GObject):
                     "<span foreground='" + hexcolor + "'>")
         markup = markup.replace("[$/COLOR]", "</span>")
 
-        markup = markup.replace("[$b]", "<b>")
-        markup = markup.replace("[$/b]", "</b>")
+        markup = markup.replace("[$b]", "<span weight=\"bold\">")
+        markup = markup.replace("[$/b]", "</span>")
 
-        markup = markup.replace("[$i]", "<i>")
-        markup = markup.replace("[$/i]", "</i>")
+        markup = markup.replace("[$i]", "<span style=\"italic\">")
+        markup = markup.replace("[$/i]", "</span>")
 
         return markup
 
@@ -98,12 +98,12 @@ class ContactListParser(gobject.GObject):
         '''make sure the plus and emesene tags are closed before an emoticon'''
         ret1 = ret2 = ""
         opened = ""
-        # close the plus tags
         if text1 != "":
             opened = self.regex.findall(text1)
             closed = self.regex_close.findall(text1)
             if len(closed) > len(opened):
-                # people use broken plus tags
+                # FIXME: The plus parser doesn't parse (close) old plus
+                # tags in the right way. This just hacks around it
                 leftover_tags = len(closed) - len(opened)
                 closed.pop(leftover_tags)
                 temp = text1.rsplit('</span>', leftover_tags)
@@ -114,40 +114,4 @@ class ContactListParser(gobject.GObject):
         for i in opened:
             ret2 += '<span' + i + '>'
         ret2 += text2
-        tags = list()
-        # close our own tags
-        if ret1 != "":
-            aux = ret1
-            pos = aux.find("[$")
-            while pos != -1:
-                index = pos+2
-                found = aux[index]
-                if found == "b":
-                    tags.append("b")
-                elif found == "i":
-                    tags.append("i")
-                elif found == "s":
-                    tags.append("small")
-                elif found == "C":
-                    if len(aux) > index + 12:
-                        if aux[index+6] == "#":
-                            hextag = aux[index+6:index+13]
-                        else:
-                            hextag = "#" + aux[index+6:index+12]
-                    tags.append("COLOR=" + hextag)
-                elif found == "/":
-                    if len(tags) > 0:
-                        tags.pop()
-                aux = aux[index+1:]
-                pos = aux.find("[$")
-
-            opened = ""
-            closed = ""
-            while len(tags) > 0:
-                tag = tags.pop()
-                opened = "[$"+tag+"]"+opened
-                if tag[0] == "C":
-                    tag = "COLOR"
-                ret1 += "[$/"+tag+"]"
-            ret2 = opened + ret2
         return ret1, ret2

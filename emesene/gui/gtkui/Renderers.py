@@ -162,13 +162,9 @@ def msnplus_to_list(text):
     '''parse text and return a list of strings and gtk.gdk.Pixbufs'''
     parser = ContactListParser.ContactListParser()
     text = plus_text_parse(text)
+    text = parser.replace_markup(text)
     text_list = parser.replace_emoticons(text)
-    list_stuff = []
-    for item in text_list:
-        if type(item) in (str, unicode):
-            item = parser.replace_markup(item)
-        list_stuff.append(item)
-    return list_stuff
+    return text_list
 
 def msnplus_to_plain_text(txt):
     ''' from a nasty string, returns a nice plain text string without
