@@ -51,7 +51,7 @@ class Message(object):
     def from_contact(cls, contact, message, first, incomming, tstamp=None):
         picture = contact.picture
 
-        if not picture:
+        if not os.path.exists(picture):
             picture = os.path.abspath(gui.theme.user)
 
         return cls(incomming, first, contact.account,

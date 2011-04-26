@@ -370,6 +370,13 @@ class ChatWidget(gtk.VBox):
 
     def _on_chats_ready(self, results):
         '''called when the chat history is ready'''
+
+        account_colors = {}
+        style = e3.Style()
+        font_color_default = style.color.to_hex()
+        possible_colors = ["#0000FF", "#00FFFF", "#FF0000",
+                           "#FF00FF", font_color_default]
+
         if not results:
             return
 
@@ -380,6 +387,7 @@ class ChatWidget(gtk.VBox):
             if contact == None:
                 contact = e3.Contact(account, nick=nick)
 
+
             is_me = self.session.contacts.me.account == account
             datetimestamp = datetime.datetime.fromtimestamp(timestamp)
 
@@ -387,11 +395,34 @@ class ChatWidget(gtk.VBox):
                 self.text.send_message(self.formatter, contact,
                         msg_text, None, None, None, self.first)
             else:
+
+                try:
+                    account_colors[account]
+                except KeyError:
+                    if not len(possible_colors) == 0:
+                        account_colors[account] = possible_colors.pop()
+                    else:
+                        account_colors[account] = font_color_default
+
                 message = e3.Message(e3.Message.TYPE_MESSAGE, msg_text,
                             account, timestamp=datetimestamp)
+
+                message.style = self._get_style(account_colors[account])
 
                 self.text.receive_message(self.formatter, contact, message,
                         None, None, self.first)
 
             self.first = False
+
+    def _get_style(self, color):
+
+        try:
+            color = e3.Color.from_hex(color)
+        except ValueError:
+            color = self.session.config.font_color = '#000000'
+            color = e3.Color.from_hex(font_color)
+
+        cstyle = e3.Style(color = color)
+        
+        return cstyle
 
