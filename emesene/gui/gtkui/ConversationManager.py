@@ -18,30 +18,13 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
-import gobject
 
 import e3
 import gui
 import extension
 import Renderers
 
-class Notebook(gtk.Notebook):
-    """Notebook class to define a new signal to handle tab cycling a la firefox"""
-    __gsignals__ = {
-         "prev-page": (gobject.SIGNAL_RUN_LAST | gobject.SIGNAL_ACTION, None, ()),
-         "next-page": (gobject.SIGNAL_RUN_LAST | gobject.SIGNAL_ACTION, None, ())
-    }
-
-    def __init__(self):
-        gobject.GObject.__init__(self)
-        gtk.Notebook.__init__(self)
-
-        gtk.binding_entry_add_signal(self, gtk.keysyms.Tab, gtk.gdk.CONTROL_MASK | gtk.gdk.SHIFT_MASK, 'prev-page')
-        gtk.binding_entry_add_signal(self, gtk.keysyms.Tab, gtk.gdk.CONTROL_MASK, 'next-page')
-
-gobject.type_register(Notebook)
-
-class ConversationManager(Notebook, gui.ConversationManager):
+class ConversationManager(gtk.Notebook, gui.ConversationManager):
     '''the main conversation, it only contains other widgets'''
 
     NAME = 'Conversation Manager'
@@ -51,7 +34,7 @@ class ConversationManager(Notebook, gui.ConversationManager):
 
     def __init__(self, session, on_last_close):
         '''class constructor'''
-        Notebook.__init__(self)
+        gtk.Notebook.__init__(self)
         gui.ConversationManager.__init__(self, session, on_last_close)
 
         self.session = session;
@@ -68,19 +51,20 @@ class ConversationManager(Notebook, gui.ConversationManager):
         self.mozilla_tabs = session.config.get_or_set('b_conv_tab_mozilla_like', False)
 
         self.connect('switch-page', self._on_switch_page)
-        self.connect('next-page', self.on_next_page)
-        self.connect('prev-page', self.on_prev_page)
         self.connect('page-reordered', self._on_page_reordered)
         self.session.config.subscribe(self._on_tab_position_changed,
             'i_tab_position')
-    def on_next_page(self, widget):
-        '''called when ctrl+tab is pressed'''
-        self.cycle_tabs()
 
-    def on_prev_page(self, widget):
-        '''called when ctrl+tab is pressed'''
-        self.cycle_tabs(-1)
-    
+    def _on_key_press(self, widget, event):
+        '''Catches Ctrl+Tab and Ctrl+Shift+Tab for cycling through tabs'''
+        if (event.state & gtk.gdk.CONTROL_MASK) and \
+            event.keyval in [gtk.keysyms.Tab, gtk.keysyms.ISO_Left_Tab]:
+            if event.state & gtk.gdk.SHIFT_MASK:
+                self.cycle_tabs(True)
+            else:
+                self.cycle_tabs()
+            return True
+
     def _on_tab_position_changed(self,value):
         '''callback called when i_tab_position changes'''
         self.set_tab_pos(pos=self.get_tab_position())
@@ -126,10 +110,8 @@ class ConversationManager(Notebook, gui.ConversationManager):
     def on_key_cycle_tabs(self, accelGroup, window, keyval, modifier):
         '''Catches events like Ctrl+AvPag and consequently changes current
         tab'''
-
         if not modifier == gtk.gdk.CONTROL_MASK:
             return
-
 
         if keyval == gtk.keysyms.Page_Down:
             self.cycle_tabs()

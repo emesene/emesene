@@ -113,6 +113,7 @@ class Window(gtk.Window):
         self.content = ConversationManager(session, self._on_last_tab_close)
         self.add(self.content)
         self.connect('focus-in-event', self.content._on_focus)
+        self.connect('key-press-event', self.content._on_key_press)
         self.content.show()
         self.content_type = 'conversation'
         self.content._set_accels()
