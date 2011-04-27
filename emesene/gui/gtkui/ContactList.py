@@ -192,7 +192,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
                 # get a list of contact objects from a list of accounts
                 contacts = self.contacts.get_contacts(obj.contacts)
-                if  self.contacts.get_online_total_count(contacts)[0] == 0:
+                if self.contacts.get_online_total_count(contacts)[0] == 0:
                     return False
 
             return True
@@ -376,7 +376,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         group_data = (None, group, self.format_group(group, self._markup_escape_group(group)),
             False, None, False, weight, special)
-
+        
         for row in self._model:
             obj = row[1]
             if type(obj) == e3.Group:
@@ -445,7 +445,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 self.update_no_group()
                 return self._model.append(self.no_group_iter, contact_data)
             else:
-                self.no_group = e3.Group(_("No group"), type_ = e3.Group.NONE)
+                self.no_group = e3.Group(_("No group"), identifier='0', type_ = e3.Group.NONE)
                 self.no_group_iter = self.add_group(self.no_group, True)
                 self.no_group.contacts.append(contact.account)
                 self.update_no_group()
@@ -489,7 +489,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         del self._model[irow.iter]
 
                 return return_iter
-        else: #######WTF???
+        else: #######WTF??? where does this belong???
             self.add_group(group)
             result = self.add_contact(contact, group)
             self.update_group(group)
@@ -677,10 +677,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
                             self.collapse_row(path)
 
                 group.contacts = obj.contacts
-
                 group_data = (None, group,
                     self.format_group(group, self._markup_escape_group(group)),
-                    False, None, weight, row[6], False)
+                    False, None, weight, (group.type != e3.base.Group.STANDARD), False)
                 self._model[row.iter] = group_data
 
     def set_avatar_size(self, size):
@@ -744,6 +743,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     8, u'{0} &lt;<a href="mailto:{1}">{1}</a>&gt;'.format(''.join(display_name), account))
             elif selection.target == 'text/plain':
                 selection.set(selection.target, 8, u'%s <%s>' % (Renderers.msnplus_to_plain_text(display_name), account))
+
     def _on_drag_drop(self, widget, drag_context, x, y, time):
         drag_context.finish(True, False, time)
         if self.session.config.b_order_by_group:

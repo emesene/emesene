@@ -326,6 +326,9 @@ class GroupHandler(object):
         self.dialog = dialog
         self.contact_list = contact_list
 
+    def is_by_group_view(self):
+        return self.contact_list.order_by_group
+
     def on_add_group_selected(self):
         '''called when add group is selected'''
         def add_group_cb(response, group_name):
@@ -372,6 +375,22 @@ class GroupHandler(object):
 
         if group:
             self.dialog.rename_group(group, rename_group_cb)
+        else:
+            self.dialog.error(_('No group selected'))
+
+    def on_favorite_group_selected(self):
+        ''' called when set as favorite is selected '''
+        group = self.contact_list.get_group_selected()
+
+        if group:
+            # reset old group's weight
+            old_fav_group_id = self.session.config.favorite_group_id
+            if old_fav_group_id is not None:
+                self.session.config.d_weights[old_fav_group_id] = 0
+            # increase new group's weight
+            self.session.config.favorite_group_id = group.identifier
+            self.session.config.d_weights[group.identifier] = 1
+            self.contact_list.fill()
         else:
             self.dialog.error(_('No group selected'))
 

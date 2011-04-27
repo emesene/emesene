@@ -50,7 +50,19 @@ class GroupMenu(gtk.Menu):
         self.rename.connect('activate', 
             lambda *args: self.handler.on_rename_group_selected())
 
+        self.favorite = gtk.ImageMenuItem(_('Set as favorite'))
+        self.favorite.set_image(gtk.image_new_from_stock(gtk.STOCK_GO_UP,
+            gtk.ICON_SIZE_MENU))
+        self.favorite.connect('activate', 
+            lambda *args: self.on_favorite_group_selected())
 
         self.append(self.add)
         self.append(self.remove)
         self.append(self.rename)
+        self.append(self.favorite)
+
+    def on_favorite_group_selected(self):
+        ''' handle favorite group selection '''
+        if not self.handler.is_by_group_view(): return
+        self.handler.on_favorite_group_selected()
+
