@@ -17,13 +17,14 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import re
 import gtk
 import glib
+import urllib
 
 import utils
 import gui
 import extension
-from gui.base import MarkupParser
 
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
@@ -550,10 +551,29 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_drag_data_received(self, widget, context, posx, posy,\
                           selection, info, timestamp):
         '''called when a file is received by text input widget'''
-        for i in selection.get_uris():
-            if i.startswith("file://"):
-                filename = os.path.basename(i)
-                i = MarkupParser.urllib.url2pathname(i)[7:] # removes file://
+        uri = selection.data.strip()
+        uri_splitted = uri.split()
+        for uri in uri_splitted:
+            path = self.__get_file_path_from_dnd_dropped_uri(uri)
+            if os.path.isfile(path):
+                filename = os.path.basename(path)
+                self.on_filetransfer_invite(filename, path)
 
-                dialog = extension.get_default('dialog')
-                self.on_filetransfer_invite(filename, i)
+    def __get_file_path_from_dnd_dropped_uri(self, uri):
+        '''Parses an URI received from dnd and return the real path'''
+
+        if os.name != 'nt':
+            path = urllib.url2pathname(uri) # escape special chars
+        else:
+            path = urllib.unquote(uri) # escape special chars
+        path = path.strip('\r\n\x00') # remove \r\n and NULL
+
+        # get the path to file
+        if re.match('^file:///[a-zA-Z]:/', path): # windows
+            path = path[8:] # 8 is len('file:///')
+        elif path.startswith('file://'): # nautilus, rox
+            path = path[7:] # 7 is len('file://')
+        elif path.startswith('file:'): # xffm
+            path = path[5:] # 5 is len('file:')
+        return path
+
