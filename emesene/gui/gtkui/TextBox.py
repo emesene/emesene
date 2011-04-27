@@ -160,14 +160,17 @@ class InputText(TextBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, config, on_send_message, on_cycle_history):
+    def __init__(self, config, on_send_message, on_cycle_history, on_drag_data_received):
         '''constructor'''
         TextBox.__init__(self, config)
         self.on_send_message = on_send_message
         self.on_cycle_history = on_cycle_history
+        self.on_drag_data_received = on_drag_data_received
         self._tag = None
         self._textbox.connect('key-press-event', self._on_key_press_event)
         self._buffer.connect('changed', self.on_changed_event)
+        self._textbox.drag_dest_add_uri_targets()
+        self._textbox.connect('drag-data-received', self.on_drag_data_received)
 
         self.changed = False
         self.parse_timeout = gobject.timeout_add(500, self.parse_emotes)

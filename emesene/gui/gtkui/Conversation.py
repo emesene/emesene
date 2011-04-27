@@ -16,12 +16,14 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os
 import gtk
 import glib
 
 import utils
 import gui
 import extension
+from gui.base import MarkupParser
 
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
@@ -87,7 +89,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.output = OutputText(self.session.config)
         self.output.set_size_request(-1, 30)
         self.input = InputText(self.session.config, self._on_send_message,
-                self.cycle_history)
+                self.cycle_history, self.on_drag_data_received)
         self.output.set_size_request(-1, 25)
         self.input.set_size_request(-1, 25)
         self.info = ContactInfo()
@@ -545,3 +547,13 @@ class Conversation(gtk.VBox, gui.Conversation):
         x_other, x_self = self.call_widget.get_xids()
         self.session.call_invite(self.cid, account, 2, x_other, x_self) # 2 = Audio/Video
 
+    def on_drag_data_received(self, widget, context, posx, posy,\
+                          selection, info, timestamp):
+        '''called when a file is received by text input widget'''
+        for i in selection.get_uris():
+            if i.startswith("file://"):
+                filename = os.path.basename(i)
+                i = MarkupParser.urllib.url2pathname(i)[7:] # removes file://
+
+                dialog = extension.get_default('dialog')
+                self.on_filetransfer_invite(filename, i)
