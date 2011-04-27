@@ -65,7 +65,7 @@ class ContactInformation(gtk.Window, gui.base.ContactInformation):
         account_path = self.avatar_manager.get_contact_avatars_dir(self.account)
 
         self.avatars = IconView(_('Avatar history'), [account_path],
-                        None, None, IconView.TYPE_SELF_PICS)
+                        None, None, IconView.TYPE_SELF_PICS, None)
         self.messages = ListWidget(self.session, self.account)
         self.status = ListWidget(self.session, self.account)
         self.chats = ChatWidget(self.session, self.account)
