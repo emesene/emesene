@@ -200,8 +200,8 @@ class MessagingMenu(BaseTray):
 
         if self.indicator_dict[indicator] is not None:
             del self.indicator_dict[indicator]
-        if self.r_indicator_dict[conv.cid] is not None:
-            del self.r_indicator_dict[conv.cid]
+        if self.r_indicator_dict[cid] is not None:
+            del self.r_indicator_dict[cid]
 
         # Hide the indicator - user has clicked it so we've no use for it now.
         indicator.hide()
