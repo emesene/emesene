@@ -33,7 +33,7 @@ class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
     text in the widget'''
 
-    def __init__(self, config):
+    def __init__(self, config, on_drag_data_received=None):
         '''constructor'''
         gtk.ScrolledWindow.__init__(self)
 
@@ -47,6 +47,12 @@ class TextBox(gtk.ScrolledWindow):
         self._textbox.set_pixels_below_lines(4)
         self._textbox.set_wrap_mode(gtk.WRAP_WORD_CHAR)
         self._textbox.show()
+
+        if on_drag_data_received is not None:
+            self.on_drag_data_received = on_drag_data_received
+            self._textbox.drag_dest_add_uri_targets()
+            self._textbox.connect('drag-data-received', self.on_drag_data_received)
+
         self._buffer = RichBuffer.RichBuffer()
         self._textbox.set_buffer(self._buffer)
         self._textbox.connect_after('copy-clipboard', self._on_copy_clipboard)
@@ -162,15 +168,12 @@ class InputText(TextBox):
 
     def __init__(self, config, on_send_message, on_cycle_history, on_drag_data_received):
         '''constructor'''
-        TextBox.__init__(self, config)
+        TextBox.__init__(self, config, on_drag_data_received)
         self.on_send_message = on_send_message
         self.on_cycle_history = on_cycle_history
-        self.on_drag_data_received = on_drag_data_received
         self._tag = None
         self._textbox.connect('key-press-event', self._on_key_press_event)
         self._buffer.connect('changed', self.on_changed_event)
-        self._textbox.drag_dest_add_uri_targets()
-        self._textbox.connect('drag-data-received', self.on_drag_data_received)
 
         self.changed = False
         self.parse_timeout = gobject.timeout_add(500, self.parse_emotes)
