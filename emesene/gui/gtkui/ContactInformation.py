@@ -61,10 +61,10 @@ class ContactInformation(gtk.Window, gui.base.ContactInformation):
         self.nicks = ListWidget(self.session, self.account)
 
         self.avatar_manager = gui.base.AvatarManager(self.session)
- 
+
         account_path = self.avatar_manager.get_contact_avatars_dir(self.account)
 
-        self.avatars = IconView(_('Avatar history'), [account_path], 
+        self.avatars = IconView(_('Avatar history'), [account_path],
                         None, None, IconView.TYPE_SELF_PICS)
         self.messages = ListWidget(self.session, self.account)
         self.status = ListWidget(self.session, self.account)
@@ -382,14 +382,14 @@ class ChatWidget(gtk.VBox):
 
         for stat, timestamp, msg_text, nick, account in results:
 
-            contact = founded_account = self.session.contacts.get(account)
+            contact = self.session.contacts.get(account)
 
             if contact == None:
                 contact = e3.Contact(account, nick=nick)
 
 
             is_me = self.session.contacts.me.account == account
-            datetimestamp = datetime.datetime.fromtimestamp(timestamp)
+            datetimestamp = datetime.datetime.utcfromtimestamp(timestamp)
 
             if is_me:
                 self.text.send_message(self.formatter, contact,
