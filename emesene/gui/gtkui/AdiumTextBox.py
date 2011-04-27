@@ -204,13 +204,13 @@ class OutputText(gtk.ScrolledWindow):
 
         self._texts = []
 
-    def send_message(self, formatter, contact, text, cedict, cedir, style, is_first, type_=None):
+    def send_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''
-        if type_ is e3.Message.TYPE_NUDGE:
-            text = _('You just sent a nudge!')
+        if message.type is e3.Message.TYPE_NUDGE:
+            message.body = _('You just sent a nudge!')
 
-        msg = gui.Message.from_contact(contact, text, is_first, False)
-        self.view.add_message(msg, style, cedict, cedir)
+        msg = gui.Message.from_contact(contact, message.body, is_first, False, message.timestamp)
+        self.view.add_message(msg, message.style, cedict, cedir)
 
     def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''

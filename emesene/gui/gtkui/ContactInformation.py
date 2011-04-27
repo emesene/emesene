@@ -387,15 +387,16 @@ class ChatWidget(gtk.VBox):
             if contact == None:
                 contact = e3.Contact(account, nick=nick)
 
-
             is_me = self.session.contacts.me.account == account
             datetimestamp = datetime.datetime.utcfromtimestamp(timestamp)
 
+            message = e3.Message(e3.Message.TYPE_MESSAGE, msg_text,
+                        account, timestamp=datetimestamp)
+
             if is_me:
                 self.text.send_message(self.formatter, contact,
-                        msg_text, None, None, None, self.first)
+                        message, None, None, self.first)
             else:
-
                 try:
                     account_colors[account]
                 except KeyError:
@@ -403,9 +404,6 @@ class ChatWidget(gtk.VBox):
                         account_colors[account] = possible_colors.pop()
                     else:
                         account_colors[account] = font_color_default
-
-                message = e3.Message(e3.Message.TYPE_MESSAGE, msg_text,
-                            account, timestamp=datetimestamp)
 
                 message.style = self._get_style(account_colors[account])
 

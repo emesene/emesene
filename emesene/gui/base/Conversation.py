@@ -165,9 +165,9 @@ class Conversation(object):
     def on_notify_attention(self):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
+        message = e3.Message(e3.Message.TYPE_NUDGE, '', None, None)
         self.output.send_message(self.formatter, self.session.contacts.me,
-                                 '', {}, '', None, self.first,
-                                 e3.Message.TYPE_NUDGE)
+                                 message, {}, '', self.first)
 
         self.play_nudge()
 
@@ -263,8 +263,9 @@ class Conversation(object):
         custom_emoticons = gui.base.MarkupParser.get_custom_emotes(text, self.emcache.parse())
 
         self.session.send_message(self.cid, text, self.cstyle, self.emcache.parse(), custom_emoticons)
+        message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
         self.output.send_message(self.formatter, self.session.contacts.me,
-                                 text, self.emcache.parse(), self.emcache.path, self.cstyle, self.first)
+                                 message, self.emcache.parse(), self.emcache.path, self.first)
         self.messages.push(text)
         self.play_send()
         self.first = False

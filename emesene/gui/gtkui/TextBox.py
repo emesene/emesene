@@ -352,19 +352,19 @@ class OutputText(TextBox):
 
         TextBox.append(self, text, scroll)
 
-    def send_message(self, formatter, contact, text, cedict, cepath, style, is_first, type_=None):
+    def send_message(self, formatter, contact, message, cedict, cepath, is_first):
         '''add a message to the widget'''
         is_raw, consecutive, outgoing, first, last = \
-            formatter.format(contact, type_)
+            formatter.format(contact, message.type)
 
-        if type_ == e3.Message.TYPE_NUDGE:
+        if message.type == e3.Message.TYPE_NUDGE:
             middle = ''
         else:
             if is_raw:
-                middle = MarkupParser.escape(text)
+                middle = MarkupParser.escape(message.body)
             else:
-                middle = MarkupParser.escape(text)
-                middle = e3.common.add_style_to_message(middle, style, False)
+                middle = MarkupParser.escape(message.body)
+                middle = e3.common.add_style_to_message(middle, message.style, False)
 
         all_ = first + middle + last
         self.append(all_, cedict, self.config.b_allow_auto_scroll)
