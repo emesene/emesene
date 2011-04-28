@@ -433,13 +433,13 @@ class Controller(object):
             posy = self.session.config.get_or_set('i_conv_posy', 100)
             width = self.session.config.get_or_set('i_conv_width', 600)
             height = self.session.config.get_or_set('i_conv_height', 400)
-            maximized = self.session.config.get_or_set('b_conv_maximized', True)
+            maximized = self.session.config.get_or_set('b_conv_maximized', False)
         else:
             posx = self.config.get_or_set('i_login_posx', 100)
             posy = self.config.get_or_set('i_login_posy', 100)
             width = self.config.get_or_set('i_login_width', 250)
             height = self.config.get_or_set('i_login_height', 410)
-            maximized = self.config.get_or_set('b_login_maximized', True)
+            maximized = self.config.get_or_set('b_login_maximized', False)
 
         screen = window.get_screen()
         pwidth, pheight = screen.get_width(), screen.get_height()
