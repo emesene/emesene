@@ -381,15 +381,16 @@ class ChatWidget(gtk.VBox):
             return
 
         for stat, timestamp, msg_text, nick, account in results:
-
-            contact = self.session.contacts.get(account)
+            is_me = self.session.contacts.me.account == account
+            if is_me:
+                contact = self.session.contacts.me
+            else:
+                contact = self.session.contacts.get(account)
 
             if contact == None:
                 contact = e3.Contact(account, nick=nick)
 
-            is_me = self.session.contacts.me.account == account
             datetimestamp = datetime.datetime.utcfromtimestamp(timestamp)
-
             message = e3.Message(e3.Message.TYPE_MESSAGE, msg_text,
                         account, timestamp=datetimestamp)
 
@@ -421,6 +422,6 @@ class ChatWidget(gtk.VBox):
             color = e3.Color.from_hex(font_color)
 
         cstyle = e3.Style(color = color)
-        
+
         return cstyle
 
