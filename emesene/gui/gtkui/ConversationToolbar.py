@@ -159,13 +159,15 @@ class ConversationToolbar(gtk.Toolbar):
         self.add(gtk.SeparatorToolItem())
 
         self.add(self.invite)
-        self.add(self.invite_file_transfer)
+        if self.handler.session_filetransfer_supported():
+            self.add(self.invite_file_transfer)
         self.add(gtk.SeparatorToolItem())
 
-        #self.add(self.invite_video_call)
-        #self.add(self.invite_audio_call)
-        #self.add(self.invite_av_call)
-        #self.add(gtk.SeparatorToolItem())
+        if self.handler.session_call_supported():
+            self.add(self.invite_video_call)
+            self.add(self.invite_audio_call)
+            self.add(self.invite_av_call)
+            self.add(gtk.SeparatorToolItem())
 
         self.add(self.clean)
         self.add(self.ublock)

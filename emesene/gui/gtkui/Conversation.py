@@ -520,11 +520,11 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.output.information(self.formatter, contact,
                     _('File transfer completed!'))
 
-    def on_call_invitation(self, call, cid):
+    def on_call_invitation(self, call, cid, westart=False):
         '''called when a new call is issued both from us or other party'''
         if cid == self.cid:
-            self.call_widget.add_call(call)
-            self.call_widget.show_all()
+            self.call_widget.add_call(call, westart)
+            self.call_widget.show_all_widgets()
             self.call_widget.set_xids()
 
     def on_video_call(self):

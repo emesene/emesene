@@ -289,7 +289,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         call.ring() #Hello, we're waiting for user input
 
-        #self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid)
+        self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid, False)
 
     def _on_invite_file_transfer(self, papysession):
         ''' handle file transfer invites '''
@@ -1273,7 +1273,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.rcalls[ca] = papysession
 
         papysession.invite()
-        self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid)
+        self.session.add_event(Event.EVENT_CALL_INVITATION, ca, cid, True)
 
     def _handle_action_call_accept(self, c):
         session_handler = PapyConference.MediaSessionHandler(

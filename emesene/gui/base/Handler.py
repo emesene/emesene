@@ -437,6 +437,18 @@ class ConversationToolbarHandler(object):
         self.conversation = conversation
         self.theme = theme
 
+    def session_call_supported(self):
+        '''check if current session supports calls '''
+        user = self.session.account.account
+        current_service = self.session.config.d_user_service.get(user, 'msn')
+        return current_service in ['msn']
+
+    def session_filetransfer_supported(self):
+        '''check if current session supports file transfers '''
+        user = self.session.account.account
+        current_service = self.session.config.d_user_service.get(user, 'msn')
+        return current_service in ['msn']
+
     def on_font_selected(self):
         '''called when the Font button is selected'''
         self.dialog.select_font(self.conversation.cstyle,
@@ -567,8 +579,9 @@ class CallHandler(object):
 
     def accept(self):
         ''' accepts a call '''
-        self.call.state = e3.base.Call.ESTABLISHED
-        self.session.accept_call(self.call)
+        if self.call.state != e3.base.Call.ESTABLISHED:
+            self.call.state = e3.base.Call.ESTABLISHED
+            self.session.accept_call(self.call)
 
     def accepted(self):
         ''' when a call is accepted by the other party'''

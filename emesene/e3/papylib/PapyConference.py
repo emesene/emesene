@@ -329,6 +329,7 @@ def make_sink(media_name):
     func = globals()["make_%s_sink" % media_name]
     return func()
 
+# TODO: FIXME: Make this work, and then make a nice gui for configuration.
 def make_audio_source(name="pulsesrc"): #was: "audiotestsrc"
     element = gst.element_factory_make(name)
     #element.set_property("is-live", True)
@@ -337,6 +338,7 @@ def make_audio_source(name="pulsesrc"): #was: "audiotestsrc"
 def make_audio_sink(async=False):
     return gst.element_factory_make("autoaudiosink")
 
+# TODO: FIXME: Make this work, and then make a nice gui for configuration.
 def make_video_source(name="videotestsrc"):
     "Make a bin with a video source in it, defaulting to first webcamera "
     bin = gst.Bin("videosrc")
