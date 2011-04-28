@@ -45,9 +45,11 @@ class Window(gtk.Window):
             self.gtk.window_set_default_icon(gui.theme.logo)
 
         self.cb_on_close = cb_on_close
+        self._state = 0
 
         self.connect('delete-event', self._on_delete_event)
         self.connect('key-press-event', self._on_key_press)
+        self.connect('window-state-event', self._on_window_state_event)
         self.content = None
 
         self.content_type = 'empty'
@@ -186,3 +188,12 @@ class Window(gtk.Window):
         gtk.Window.show(self)
         self.set_location()
 
+    def _on_window_state_event(self, window, state):
+        '''callew when window state is changed
+        '''
+        self._state = state.new_window_state if state.new_window_state & gtk.gdk.WINDOW_STATE_WITHDRAWN == 0 else self._state
+
+    def is_maximized(self):
+        '''return True is window is maximized, False otherwise
+        '''
+        return self._state & gtk.gdk.WINDOW_STATE_MAXIMIZED == gtk.gdk.WINDOW_STATE_MAXIMIZED

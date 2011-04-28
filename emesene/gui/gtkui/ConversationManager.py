@@ -256,3 +256,9 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         return True if the conversation manager is active
         '''
         return self.get_parent().is_active()
+
+    def is_maximized(self):
+        '''
+        return True if the window is maximized
+        '''
+        return self.get_parent().is_maximized()

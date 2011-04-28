@@ -385,10 +385,14 @@ class Controller(object):
             if posy < (-height):
                 posy = 0
 
-        self.config.i_login_posx = posx
-        self.config.i_login_posy = posy
-        self.config.i_login_width = width
-        self.config.i_login_height = height
+        if not self.window.is_maximized():
+            self.config.i_login_posx = posx
+            self.config.i_login_posy = posy
+            self.config.i_login_width = width
+            self.config.i_login_height = height
+            self.config.b_login_maximized = False
+        else:
+            self.config.b_login_maximized = True
 
     def draw_main_screen(self):
         '''create and populate the main screen
@@ -429,11 +433,13 @@ class Controller(object):
             posy = self.session.config.get_or_set('i_conv_posy', 100)
             width = self.session.config.get_or_set('i_conv_width', 600)
             height = self.session.config.get_or_set('i_conv_height', 400)
+            maximized = self.session.config.get_or_set('b_conv_maximized', True)
         else:
             posx = self.config.get_or_set('i_login_posx', 100)
             posy = self.config.get_or_set('i_login_posy', 100)
             width = self.config.get_or_set('i_login_width', 250)
             height = self.config.get_or_set('i_login_height', 410)
+            maximized = self.config.get_or_set('b_login_maximized', True)
 
         screen = window.get_screen()
         pwidth, pheight = screen.get_width(), screen.get_height()
@@ -441,6 +447,8 @@ class Controller(object):
             posx = pwidth // 2
         if posy > pheight:
             posy = pheight // 2
+        if maximized:
+            window.maximize()
 
         window.set_location(width, height, posx, posy)
 
@@ -505,6 +513,7 @@ class Controller(object):
 
         # set default values if not already set
         self.session.config.get_or_set('b_conv_minimized', True)
+        self.session.config.get_or_set('b_conv_maximized', False)
         self.session.config.get_or_set('b_mute_sounds', False)
         self.session.config.get_or_set('b_play_send', True)
         self.session.config.get_or_set('b_play_nudge', True)
@@ -640,10 +649,14 @@ class Controller(object):
             if posy < (-height):
                 posy = 0
 
-        self.session.config.i_conv_width = width
-        self.session.config.i_conv_height = height
-        self.session.config.i_conv_posx = posx
-        self.session.config.i_conv_posy = posy
+        if not conv_manager.is_maximized():
+            self.session.config.i_conv_width = width
+            self.session.config.i_conv_height = height
+            self.session.config.i_conv_posx = posx
+            self.session.config.i_conv_posy = posy
+            self.session.config.b_conv_maximized = False
+        else:
+            self.session.config.b_conv_maximized = True
 
         conv_manager.close_all()
         self.conversations.remove(conv_manager)
