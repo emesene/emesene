@@ -393,6 +393,18 @@ class GroupHandler(object):
             self.contact_list.fill()
         else:
             self.dialog.error(_('No group selected'))
+    
+    def on_unset_favorite_group_selected(self):
+        ''' called when unset as favorite is selected in a favorite group '''
+        group = self.contact_list.get_group_selected()
+        
+        if group:
+            # reset group weight
+            self.session.config.d_weights[group.identifier] = 0
+            self.session.config.favorite_group_id = None
+            self.contact_list.fill()
+        else:
+            self.dialog.error(_('No favorite group selected'))
 
 class MyAccountHandler(object):
     '''this handler contains all the handlers needed to handle the my account

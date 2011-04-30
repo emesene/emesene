@@ -17,6 +17,8 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
+import utils
+import gui
 
 class GroupMenu(gtk.Menu):
     """
@@ -50,19 +52,54 @@ class GroupMenu(gtk.Menu):
         self.rename.connect('activate', 
             lambda *args: self.handler.on_rename_group_selected())
 
-        self.favorite = gtk.ImageMenuItem(_('Set as favorite'))
-        self.favorite.set_image(gtk.image_new_from_stock(gtk.STOCK_GO_UP,
-            gtk.ICON_SIZE_MENU))
-        self.favorite.connect('activate', 
-            lambda *args: self.on_favorite_group_selected())
 
+        self.set_favorite = gtk.ImageMenuItem(_('Set as favorite'))
+        self.set_favorite.set_image(utils.gtk_ico_image_load(gui.theme.favorite,
+                                                             gtk.ICON_SIZE_MENU))
+        self.set_favorite.connect('activate', 
+                              lambda *args: self.on_favorite_group_selected())
+        
+        
+        self.unset_favorite = gtk.ImageMenuItem(_('Unset as favorite'))
+        self.unset_favorite.set_image(gtk.image_new_from_stock(gtk.STOCK_CANCEL,
+                                                               gtk.ICON_SIZE_MENU))
+        self.unset_favorite.connect('activate', 
+                              lambda *args: self.on_unset_favorite_group_selected())
+        
+        if self.handler.contact_list.is_favorite_group_selected():
+            self.show_unset_favorite_item()
+        else:
+            self.show_set_favorite_item()
+            
         self.append(self.add)
         self.append(self.remove)
         self.append(self.rename)
-        self.append(self.favorite)
+        self.append(self.set_favorite)
+        self.append(self.unset_favorite)
 
     def on_favorite_group_selected(self):
         ''' handle favorite group selection '''
         if not self.handler.is_by_group_view(): return
         self.handler.on_favorite_group_selected()
+    
+    def on_unset_favorite_group_selected(self):
+        ''' handle unset group as favorite '''
+        if not self.handler.is_by_group_view(): return
+        self.handler.on_unset_favorite_group_selected()
+    
+    def show_set_favorite_item(self):
+        '''
+        Called when the user right clicks on a non favorite group.
+        It hides the unset option and shows the set option.
+        '''
+        self.unset_favorite.hide()
+        self.set_favorite.show()
+    
+    def show_unset_favorite_item(self):
+        '''
+        Called when the user right clicks on a favorite group.
+        It hides the set option and shows the unset option.
+        '''
+        self.set_favorite.hide()
+        self.unset_favorite.show()
 

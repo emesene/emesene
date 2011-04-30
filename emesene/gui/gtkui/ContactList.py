@@ -336,6 +336,13 @@ class ContactList(gui.ContactList, gtk.TreeView):
             return self._model[selected][1]
 
         return None
+    
+    def is_favorite_group_selected(self):
+        group = self.get_group_selected()
+        if group is not None and \
+            group.identifier == self.session.config.favorite_group_id:
+            return True
+        return False
 
     def get_contact_selected(self):
         '''return a contact object if there is a group selected, None otherwise
