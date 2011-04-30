@@ -686,7 +686,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         """set the size of the avatars on the contact list
         """
         self.avatar_size = size
-        self.pbr.set_fixed_size(size, size)
+        self.pbr.set_property('dimention', size)
 
     def compare_contacts(self, contact1, contact2, order1=0, order2=0):
         '''compare two contacts and return 1 if contact1 should go first, 0
