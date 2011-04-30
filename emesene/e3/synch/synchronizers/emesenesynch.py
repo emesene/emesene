@@ -74,6 +74,7 @@ class EmeseneSynch(Synch):
         def start_synch(self):
             self.__create_safe_copy()
             self.__synch_my_avatars()
+            self.__synch_my_emoticons()
             self.__synch_other_avatars()
             self.__synch_conversations()
 
@@ -93,6 +94,41 @@ class EmeseneSynch(Synch):
 
                 if percent.notify(actual_avatar):
                     self._prog_callback(percent.current)
+
+        def __synch_my_emoticons(self):
+            self.__reset_progressbar()
+            self._action_callback(_("Importing your emoticons..."))
+
+            listing = os.listdir(os.path.join(self.__source_path, "custom_emoticons"))
+            percent = e3.common.PercentDone(len(listing))
+            actual_emoticons = 0.0
+
+            emoticons_dir = os.path.join(self.__dest_path, self.__myuser, "emoticons")
+             
+            #try create emoticons directory
+            try:
+                os.mkdir(emoticons_dir)
+            except OSError:
+                pass
+
+            fconfig = open(os.path.join(emoticons_dir,"emoticons.info"), 'a')
+
+            for infile in listing:
+
+                if infile == "map":
+                    continue
+
+                shutil.copy (os.path.join(self.__source_path, "custom_emoticons", infile), 
+                             os.path.join(self.__dest_path, self.__myuser, "emoticons", infile[-44:]) )
+
+                fconfig.write("%s %s\n" % (infile[:-45],infile[-44:])) #write config
+
+                actual_emoticons += 1.0
+
+                if percent.notify(actual_emoticons):
+                    self._prog_callback(percent.current)
+
+            fconfig.close()
 
         def __synch_other_avatars(self):
             self.__reset_progressbar()
