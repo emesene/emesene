@@ -79,6 +79,8 @@ class OutputView(webkit.WebView):
     def add_message(self, msg, style=None, cedict={}, cedir=None):
         '''add a message to the conversation'''
 
+        msg.alias = Renderers.msnplus_to_plain_text(msg.alias)
+        msg.display_name = Renderers.msnplus_to_plain_text(msg.display_name)
         if(len(msg.alias) > DISPLAY_NAME_LIMIT):
             msg.alias = msg.alias[0:DISPLAY_NAME_LIMIT] + "..."
         if(len(msg.display_name) > DISPLAY_NAME_LIMIT):
@@ -109,7 +111,6 @@ class OutputView(webkit.WebView):
             function = "appendMessage('" + html + "')"
         else:
             function = "appendNextMessage('" + html + "')"
-
 
         self.append(function)
 
