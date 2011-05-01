@@ -75,6 +75,7 @@ class OutputView(webkit.WebView):
                 "text/html", "utf-8", utils.path_to_url(self.theme.path))
         self.pending = []
         self.ready = False
+        self.last_incoming = None
 
     def add_message(self, msg, style=None, cedict={}, cedir=None):
         '''add a message to the conversation'''
