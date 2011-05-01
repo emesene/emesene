@@ -183,6 +183,10 @@ class MainWindow(gtk.VBox):
 
     def _on_group_menu_selected(self, group):
         '''callback for the group-menu-selected signal'''
+        if self.contact_list.is_favorite_group_selected():
+            self.group_menu.show_unset_favorite_item()
+        else:
+            self.group_menu.show_set_favorite_item()
         self.group_menu.popup(None, None, None, 0, 0)
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
