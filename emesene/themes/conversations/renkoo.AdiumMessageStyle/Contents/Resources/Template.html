@@ -303,7 +303,7 @@
 			if(node.tagName == 'IMG' && node.alt && node.className!="avatar") {
 				a = document.createElement('a');
 				a.setAttribute('onclick', 'imageSwap(this)');
-				a.setAttribute('src', node.src);
+				a['src'] = node.src;
 				a.className = node.className;
 				text = document.createTextNode(node.alt);
 				a.appendChild(text);
