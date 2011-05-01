@@ -404,7 +404,7 @@ class GroupHandler(object):
             self.session.config.favorite_group_id = None
             self.contact_list.fill()
         else:
-            self.dialog.error(_('No favorite group selected'))
+            self.dialog.error(_('No group selected'))
 
 class MyAccountHandler(object):
     '''this handler contains all the handlers needed to handle the my account
