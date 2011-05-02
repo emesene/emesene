@@ -22,125 +22,128 @@ import re
 import AdiumThemes
 from e3 import status
 
+import plistlib
+
 class Theme(object):
     '''this class contains all the paths and information regarding a theme'''
     # if you add a smilie key twice you will have a nice stack overflow :D
     EMOTES = {}
-    EMOTES[':)'] = 'face-smile'
-    EMOTES[':-)'] = EMOTES[':)']
-    EMOTES[';)'] = 'face-wink'
-    EMOTES[';-)'] = EMOTES[';)']
-    EMOTES['|-)'] = 'face-tired'
-    EMOTES[':D'] = 'face-laugh'
-    EMOTES[':d'] = EMOTES[':D']
-    EMOTES[':-D'] = EMOTES[':D']
-    EMOTES[':S'] = 'face-worried'
-    EMOTES[':s'] = EMOTES[':S']
-    EMOTES[':('] = 'face-sad'
-    EMOTES[':-('] = EMOTES[':(']
-    EMOTES['(K)'] = 'face-kiss'
-    EMOTES['(k)'] = EMOTES['(K)']
-    EMOTES[':P'] = 'face-raspberry'
-    EMOTES[':p'] = EMOTES[':P']
-    EMOTES[':-P'] = EMOTES[':P']
-    EMOTES[':-p'] = EMOTES[':P']
-    EMOTES[':|'] = 'face-plain'
-    EMOTES[':-|'] = EMOTES[':|']
-    EMOTES['*-)'] = 'face-rolling'
-    EMOTES[':O'] = 'face-surprise'
-    EMOTES[':o'] = EMOTES[':O']
-    EMOTES[':-o'] = EMOTES[':O']
-    EMOTES[':-O'] = EMOTES[':O']
-    EMOTES[':$'] = 'face-embarrassed'
-    EMOTES[':\'('] = 'face-crying'
-    EMOTES[':@'] = 'face-angry'
-    EMOTES[':-@'] = EMOTES[':@']
-    EMOTES['(6)'] = 'face-devilish'
-    EMOTES['(A)'] = 'face-angel'
-    EMOTES['(a)'] = EMOTES['(A)']
-    EMOTES['<:o)'] = 'face-party'
-    EMOTES['(ap)'] = 'airplane'
-    EMOTES['(au)'] = 'car'
-    EMOTES['8o|'] = 'face-teeth'
-    EMOTES['+o('] = 'face-sick'
-    EMOTES['(b)'] = 'beer'
-    EMOTES['(B)'] = EMOTES['(b)']
-    EMOTES['(^)'] = 'cake'
-    EMOTES['(bah)'] = 'sheep'
-    EMOTES['(nah)'] = 'goat'
-    EMOTES['(||)'] = 'bowl'
-    EMOTES['(z)'] = 'boy'
-    EMOTES['(Z)'] = EMOTES['(z)']
-    EMOTES['(u)'] = 'love-over'
-    EMOTES['(U)'] = EMOTES['(u)']
-    EMOTES['(p)'] = 'camera'
-    EMOTES['(P)'] = EMOTES['(p)']
-    EMOTES['(@)'] = 'cat'
-    EMOTES['(ci)'] = 'cigarette'
-    EMOTES['(o)'] = 'clock'
-    EMOTES['(O)'] = EMOTES['(o)']
-    EMOTES['(c)'] = 'coffee'
-    EMOTES['(C)'] = EMOTES['(c)']
-    EMOTES['(co)'] = 'computer'
-    EMOTES['(&)'] = 'dog'
-    EMOTES[':-#'] = 'face-zipped'
-    EMOTES['(d)'] = 'drink'
-    EMOTES['(D)'] = EMOTES['(d)']
-    EMOTES['(e)'] = 'mail'
-    EMOTES['(E)'] = EMOTES['(e)']
-    EMOTES['8-)'] = 'face-glasses'
-    EMOTES['(~)'] = 'video'
-    EMOTES['(g)'] = 'present'
-    EMOTES['(G)'] = EMOTES['(g)']
-    EMOTES['(x)'] = 'girl'
-    EMOTES['(X)'] = EMOTES['(x)']
-    EMOTES['(%)'] = 'handcuffs'
-    EMOTES['(h5)'] = 'hifive'
-    EMOTES['(h)'] = 'face-cool'
-    EMOTES['(H)'] = EMOTES['(h)']
-    EMOTES[':^)'] = 'face-uncertain'
-    EMOTES['(ip)'] = 'island'
-    EMOTES['({)'] = 'hugleft'
-    EMOTES['(i)'] = 'lamp'
-    EMOTES['(I)'] = EMOTES['(i)']
-    EMOTES['(li)'] = 'c10ud'
-    EMOTES['(m)'] = 'msn'
-    EMOTES['(M)'] = EMOTES['(m)']
-    EMOTES['(mp)'] = 'mobile'
-    EMOTES['(mo)'] = 'coins'
-    EMOTES['(8)'] = 'music'
-    EMOTES['(pi)'] = 'pizza'
-    EMOTES['(pl)'] = 'plate'
-    EMOTES['(r)'] = 'rainbow'
-    EMOTES['(R)'] = EMOTES['(r)']
-    EMOTES['(st)'] = 'rain'
-    EMOTES['(l)'] = 'love'
-    EMOTES['(L)'] = EMOTES['(l)']
-    EMOTES['(k)'] = 'face-kiss'
-    EMOTES['(K)'] = EMOTES['(k)']
-    EMOTES['(f)'] = 'rose'
-    EMOTES['(F)'] = EMOTES['(f)']
-    EMOTES['(})'] = 'hugright'
-    EMOTES['^o)'] = 'face-sarcastic'
-    EMOTES[':-*'] = 'secret'
-    EMOTES['(S)'] = 'moon'
-    EMOTES['(sn)'] = 'snail'
-    EMOTES['(so)'] = 'soccerball'
-    EMOTES['(*)'] = 'star'
-    EMOTES['(#)'] = 'sun'
-    EMOTES['(t)'] = 'phone'
-    EMOTES['(T)'] = EMOTES['(t)']
-    EMOTES['(n)'] = 'bad'
-    EMOTES['(N)'] = EMOTES['(n)']
-    EMOTES['(y)'] = 'good'
-    EMOTES['(Y)'] = EMOTES['(y)']
-    EMOTES['(tu)'] = 'turtle'
-    EMOTES['(um)'] = 'umbrella'
-    EMOTES[':-['] = 'bat'
-    EMOTES[':['] = EMOTES[':-[']
-    EMOTES['(w)'] = 'rose-dead'
-    EMOTES['(W)'] = EMOTES['(w)']
-    EMOTES['(xx)'] = 'console'
+    LEGACY_EMOTES = {}
+    LEGACY_EMOTES[':)'] = 'face-smile'
+    LEGACY_EMOTES[':-)'] = LEGACY_EMOTES[':)']
+    LEGACY_EMOTES[';)'] = 'face-wink'
+    LEGACY_EMOTES[';-)'] = LEGACY_EMOTES[';)']
+    LEGACY_EMOTES['|-)'] = 'face-tired'
+    LEGACY_EMOTES[':D'] = 'face-laugh'
+    LEGACY_EMOTES[':d'] = LEGACY_EMOTES[':D']
+    LEGACY_EMOTES[':-D'] = LEGACY_EMOTES[':D']
+    LEGACY_EMOTES[':S'] = 'face-worried'
+    LEGACY_EMOTES[':s'] = LEGACY_EMOTES[':S']
+    LEGACY_EMOTES[':('] = 'face-sad'
+    LEGACY_EMOTES[':-('] = LEGACY_EMOTES[':(']
+    LEGACY_EMOTES['(K)'] = 'face-kiss'
+    LEGACY_EMOTES['(k)'] = LEGACY_EMOTES['(K)']
+    LEGACY_EMOTES[':P'] = 'face-raspberry'
+    LEGACY_EMOTES[':p'] = LEGACY_EMOTES[':P']
+    LEGACY_EMOTES[':-P'] = LEGACY_EMOTES[':P']
+    LEGACY_EMOTES[':-p'] = LEGACY_EMOTES[':P']
+    LEGACY_EMOTES[':|'] = 'face-plain'
+    LEGACY_EMOTES[':-|'] = LEGACY_EMOTES[':|']
+    LEGACY_EMOTES['*-)'] = 'face-rolling'
+    LEGACY_EMOTES[':O'] = 'face-surprise'
+    LEGACY_EMOTES[':o'] = LEGACY_EMOTES[':O']
+    LEGACY_EMOTES[':-o'] = LEGACY_EMOTES[':O']
+    LEGACY_EMOTES[':-O'] = LEGACY_EMOTES[':O']
+    LEGACY_EMOTES[':$'] = 'face-embarrassed'
+    LEGACY_EMOTES[':\'('] = 'face-crying'
+    LEGACY_EMOTES[':@'] = 'face-angry'
+    LEGACY_EMOTES[':-@'] = LEGACY_EMOTES[':@']
+    LEGACY_EMOTES['(6)'] = 'face-devilish'
+    LEGACY_EMOTES['(A)'] = 'face-angel'
+    LEGACY_EMOTES['(a)'] = LEGACY_EMOTES['(A)']
+    LEGACY_EMOTES['<:o)'] = 'face-party'
+    LEGACY_EMOTES['(ap)'] = 'airplane'
+    LEGACY_EMOTES['(au)'] = 'car'
+    LEGACY_EMOTES['8o|'] = 'face-teeth'
+    LEGACY_EMOTES['+o('] = 'face-sick'
+    LEGACY_EMOTES['(b)'] = 'beer'
+    LEGACY_EMOTES['(B)'] = LEGACY_EMOTES['(b)']
+    LEGACY_EMOTES['(^)'] = 'cake'
+    LEGACY_EMOTES['(bah)'] = 'sheep'
+    LEGACY_EMOTES['(nah)'] = 'goat'
+    LEGACY_EMOTES['(||)'] = 'bowl'
+    LEGACY_EMOTES['(z)'] = 'boy'
+    LEGACY_EMOTES['(Z)'] = LEGACY_EMOTES['(z)']
+    LEGACY_EMOTES['(u)'] = 'love-over'
+    LEGACY_EMOTES['(U)'] = LEGACY_EMOTES['(u)']
+    LEGACY_EMOTES['(p)'] = 'camera'
+    LEGACY_EMOTES['(P)'] = LEGACY_EMOTES['(p)']
+    LEGACY_EMOTES['(@)'] = 'cat'
+    LEGACY_EMOTES['(ci)'] = 'cigarette'
+    LEGACY_EMOTES['(o)'] = 'clock'
+    LEGACY_EMOTES['(O)'] = LEGACY_EMOTES['(o)']
+    LEGACY_EMOTES['(c)'] = 'coffee'
+    LEGACY_EMOTES['(C)'] = LEGACY_EMOTES['(c)']
+    LEGACY_EMOTES['(co)'] = 'computer'
+    LEGACY_EMOTES['(&)'] = 'dog'
+    LEGACY_EMOTES[':-#'] = 'face-zipped'
+    LEGACY_EMOTES['(d)'] = 'drink'
+    LEGACY_EMOTES['(D)'] = LEGACY_EMOTES['(d)']
+    LEGACY_EMOTES['(e)'] = 'mail'
+    LEGACY_EMOTES['(E)'] = LEGACY_EMOTES['(e)']
+    LEGACY_EMOTES['8-)'] = 'face-glasses'
+    LEGACY_EMOTES['(~)'] = 'video'
+    LEGACY_EMOTES['(g)'] = 'present'
+    LEGACY_EMOTES['(G)'] = LEGACY_EMOTES['(g)']
+    LEGACY_EMOTES['(x)'] = 'girl'
+    LEGACY_EMOTES['(X)'] = LEGACY_EMOTES['(x)']
+    LEGACY_EMOTES['(%)'] = 'handcuffs'
+    LEGACY_EMOTES['(h5)'] = 'hifive'
+    LEGACY_EMOTES['(h)'] = 'face-cool'
+    LEGACY_EMOTES['(H)'] = LEGACY_EMOTES['(h)']
+    LEGACY_EMOTES[':^)'] = 'face-uncertain'
+    LEGACY_EMOTES['(ip)'] = 'island'
+    LEGACY_EMOTES['({)'] = 'hugleft'
+    LEGACY_EMOTES['(i)'] = 'lamp'
+    LEGACY_EMOTES['(I)'] = LEGACY_EMOTES['(i)']
+    LEGACY_EMOTES['(li)'] = 'c10ud'
+    LEGACY_EMOTES['(m)'] = 'msn'
+    LEGACY_EMOTES['(M)'] = LEGACY_EMOTES['(m)']
+    LEGACY_EMOTES['(mp)'] = 'mobile'
+    LEGACY_EMOTES['(mo)'] = 'coins'
+    LEGACY_EMOTES['(8)'] = 'music'
+    LEGACY_EMOTES['(pi)'] = 'pizza'
+    LEGACY_EMOTES['(pl)'] = 'plate'
+    LEGACY_EMOTES['(r)'] = 'rainbow'
+    LEGACY_EMOTES['(R)'] = LEGACY_EMOTES['(r)']
+    LEGACY_EMOTES['(st)'] = 'rain'
+    LEGACY_EMOTES['(l)'] = 'love'
+    LEGACY_EMOTES['(L)'] = LEGACY_EMOTES['(l)']
+    LEGACY_EMOTES['(k)'] = 'face-kiss'
+    LEGACY_EMOTES['(K)'] = LEGACY_EMOTES['(k)']
+    LEGACY_EMOTES['(f)'] = 'rose'
+    LEGACY_EMOTES['(F)'] = LEGACY_EMOTES['(f)']
+    LEGACY_EMOTES['(})'] = 'hugright'
+    LEGACY_EMOTES['^o)'] = 'face-sarcastic'
+    LEGACY_EMOTES[':-*'] = 'secret'
+    LEGACY_EMOTES['(S)'] = 'moon'
+    LEGACY_EMOTES['(sn)'] = 'snail'
+    LEGACY_EMOTES['(so)'] = 'soccerball'
+    LEGACY_EMOTES['(*)'] = 'star'
+    LEGACY_EMOTES['(#)'] = 'sun'
+    LEGACY_EMOTES['(t)'] = 'phone'
+    LEGACY_EMOTES['(T)'] = LEGACY_EMOTES['(t)']
+    LEGACY_EMOTES['(n)'] = 'bad'
+    LEGACY_EMOTES['(N)'] = LEGACY_EMOTES['(n)']
+    LEGACY_EMOTES['(y)'] = 'good'
+    LEGACY_EMOTES['(Y)'] = LEGACY_EMOTES['(y)']
+    LEGACY_EMOTES['(tu)'] = 'turtle'
+    LEGACY_EMOTES['(um)'] = 'umbrella'
+    LEGACY_EMOTES[':-['] = 'bat'
+    LEGACY_EMOTES[':['] = LEGACY_EMOTES[':-[']
+    LEGACY_EMOTES['(w)'] = 'rose-dead'
+    LEGACY_EMOTES['(W)'] = LEGACY_EMOTES['(w)']
+    LEGACY_EMOTES['(xx)'] = 'console'
 
     EMOTE_REGEX_STR = ""
     for key in EMOTES:
@@ -149,7 +152,8 @@ class Theme(object):
 
     SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
             'send.wav', 'type.wav']
-    EMOTE_FILES = ['airplane.png', 'bad.png', 'bat.png', 'beer.png', 'bomb.png',
+    EMOTE_FILES = []
+    LEGACY_EMOTE_FILES = ['airplane.png', 'bad.png', 'bat.png', 'beer.png', 'bomb.png',
         'bowl.png', 'boy.png', 'bunny.png', 'c10ud.png', 'cake.png', 
         'camera.png', 'can.png', 'car.png', 'cat.png', 
         'cigarette.png', 'clock.png', 'clown.png', 'coffee.png', 
@@ -297,6 +301,23 @@ class Theme(object):
             self.tool_ublock = os.path.join(self.toolbar_path, "ublock.png")
 
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
+        self.emote_config_file = os.path.join(self.emote_path, "Emoticons.plist")
+
+        if os.path.isfile(self.emote_config_file):
+            emote_data=plistlib.readPlist(file(self.emote_config_file))
+            for key, val in emote_data['Emoticons'].iteritems():
+                Theme.EMOTE_FILES.append(key)
+                pointer_name = val['Name']
+                pointer_key = val['Equivalents'][0]
+                Theme.EMOTES[pointer_key] = pointer_name
+                for v in val['Equivalents'][1:]:
+                    if v != "":
+                        Theme.EMOTES[v] = Theme.EMOTES[pointer_key]
+        else:
+            for k, v in Theme.LEGACY_EMOTES.iteritems():
+                Theme.EMOTES[k] = v
+            for v in Theme.LEGACY_EMOTE_FILES:
+                Theme.EMOTE_FILES.append(v)
 
     def emote_to_path(self, shortcut, remove_protocol=False):
         '''return a string representing the path to load the emote if it exist
@@ -355,7 +376,9 @@ class Theme(object):
         themes = []
 
         for theme in self.get_child_dirs(os.path.join('themes', 'emotes')):
-            if self.is_valid_theme(Theme.EMOTE_FILES,
+            if os.path.isfile(os.path.join('themes','emotes',theme,'Emoticons.plist')):
+                themes.append(theme)
+            elif self.is_valid_theme(Theme.LEGACY_EMOTE_FILES,
                     os.path.join('themes', 'emotes', theme)):
                 themes.append(theme)
 
