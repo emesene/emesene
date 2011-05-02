@@ -35,6 +35,9 @@ try:
 except:
     pass
 
+if os.name == 'mac':
+    CLOSE_ON_LEFT = 1
+
 class TabWidget(gtk.HBox):
     '''a widget that is placed on the tab on a notebook'''
     NAME = 'Tab Widget'
