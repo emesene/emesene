@@ -38,7 +38,7 @@ class OutputView(webkit.WebView):
     '''
 
     def __init__(self, theme, source, target, target_display, source_img,
-            target_img):
+            target_img, add_emoticon_cb):
         webkit.WebView.__init__(self)
         # Trying to debug issue #232
         # https://github.com/emesene/emesene/issues/#issue/232
@@ -51,10 +51,11 @@ class OutputView(webkit.WebView):
         self.last_incoming_nickname = None
         self.ready = False
         self.pending = []
+        self.add_emoticon_cb = add_emoticon_cb
         self.connect('load-finished', self._loading_finished_cb)
         self.connect('populate-popup', self.on_populate_popup)
-        self.connect("navigation-requested", self.on_navigation_requested)
-
+        self.connect('navigation-requested', self.on_navigation_requested)
+        self.connect('download-requested', self.on_download_requested)
 
     def _loading_finished_cb(self, *args):
         '''callback called when the content finished loading
@@ -145,8 +146,34 @@ class OutputView(webkit.WebView):
 
     def on_populate_popup(self, view, menu):
         '''disables the right-click menu by removing the MenuItems'''
-        for child in menu.get_children():
-            menu.remove(child)
+        children = menu.get_children()
+        if len(children) == 3: #image menu
+            child1, child2, child3 = children
+            menu.remove(child1)
+            menu.remove(child3)
+            child1.destroy()
+            child3.destroy()
+
+            child2.set_use_stock(False)
+            child2.set_property("label", _("Save"))
+
+        elif len(children) == 4: #back/forward/stop/reload menu
+            for child in children:
+                menu.remove(child)
+                child.destroy()
+
+        select_all_item = gtk.MenuItem(label=_("Select All"))
+        select_all_item.connect('activate', lambda *args: self.select_all())
+        clear_item = gtk.MenuItem(label=_("Clear"))
+        clear_item.connect('activate', self.clear)
+        menu.append(select_all_item)
+        menu.append(clear_item)
+        menu.show_all()
+
+    def on_download_requested(self, webview, download):
+        if self.add_emoticon_cb is not None:
+            self.add_emoticon_cb(download.get_uri())
+        return False
 
     def on_navigation_requested(self, widget, WebKitWebFrame, WebKitNetworkRequest):
         '''callback called when a link is clicked'''
@@ -168,7 +195,7 @@ class OutputText(gtk.ScrolledWindow):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, config):
+    def __init__(self, config, add_emoticon_cb):
         '''constructor'''
         gtk.ScrolledWindow.__init__(self)
 
@@ -181,7 +208,7 @@ class OutputText(gtk.ScrolledWindow):
         picture = utils.path_to_url(os.path.abspath(gui.theme.user))
 
         self.view = OutputView(gui.theme.conv_theme, "", "", "", picture,
-                picture)
+                picture, add_emoticon_cb)
         self.view.connect('load-finished', self._loading_stop_cb)
         self.view.connect('console-message', self._error_cb)
         self.clear()

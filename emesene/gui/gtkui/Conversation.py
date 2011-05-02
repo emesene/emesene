@@ -25,6 +25,8 @@ import urllib
 import utils
 import gui
 import extension
+import e3
+import Dialog
 
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
@@ -87,7 +89,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             dialog, gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
         self.toolbar.set_property('can-focus', False)
-        self.output = OutputText(self.session.config)
+        self.output = OutputText(self.session.config, self.steal_emoticon_cb)
         self.output.set_size_request(-1, 30)
         self.input = InputText(self.session.config, self._on_send_message,
                 self.cycle_history, self.on_drag_data_received)
@@ -199,6 +201,36 @@ class Conversation(gtk.VBox, gui.Conversation):
         av_chooser = extension.get_default('avatar chooser')(self.session)
         av_chooser.set_modal(True)
         av_chooser.show()
+
+    def steal_emoticon_cb(self, path_uri):
+        '''receives the path or the uri for the emoticon to be added'''
+        if path_uri.startswith("file://"):
+            path_uri = path_uri[8:]
+            path_uri = urllib.url2pathname(path_uri)
+
+        directory = os.path.dirname(path_uri).lower()
+        caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+        emcache = caches.get_emoticon_cache(self.session.account.account)
+
+        if directory.endswith(gui.theme.emote_path.lower()):
+            Dialog.Dialog.information(_("Can't add, default emoticon"))
+        elif directory == emcache.path.lower():
+            Dialog.Dialog.information(_("Can't add, own emoticon"))
+        else:
+            def on_response(dialog,response):
+                if response == gtk.RESPONSE_ACCEPT:
+                    shortcut = dialog.entry.get_text()
+                    if shortcut not in emcache.list():
+                        self.emcache.insert((shortcut, path_uri))
+                    # TODO: check if the file's hash is not already on the cache
+                    else:
+                        Dialog.Dialog.information(_("Shorctut already in use"))
+
+            dialog = Dialog.Dialog.entry_window(
+                        _("Type emoticon's shortcut: "), "", on_response, \
+                        _("Choose custom emoticon's shortcut"))
+            dialog.entry.set_max_length(7)
+            dialog.show()
 
     def _on_his_avatar_click(self, widget, data):
         '''method called when user click on the other avatar

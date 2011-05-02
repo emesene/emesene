@@ -336,7 +336,7 @@ class OutputText(TextBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, config):
+    def __init__(self, config, add_emoticon_cb):
         '''constructor'''
         TextBox.__init__(self, config)
         self.set_shadow_type(gtk.SHADOW_IN)
