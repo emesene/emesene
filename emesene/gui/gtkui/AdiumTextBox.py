@@ -48,6 +48,7 @@ class OutputView(webkit.WebView):
         self.theme = theme
         self.last_incoming = None
         self.last_incoming_account = None
+        self.last_incoming_nickname = None
         self.ready = False
         self.pending = []
         self.connect('load-finished', self._loading_finished_cb)
@@ -93,12 +94,14 @@ class OutputView(webkit.WebView):
 
             msg.first = not self.last_incoming
 
-            if self.last_incoming_account != msg.sender:
+            if self.last_incoming_account != msg.sender or \
+               self.last_incoming_nickname != msg.display_name: # fix for groups.im
                 msg.first = True
 
             html = self.theme.format_incoming(msg, style, cedict, cedir)
             self.last_incoming = True
             self.last_incoming_account = msg.sender
+            self.last_incoming_nickname = msg.display_name
         else:
             if self.last_incoming is None:
                 self.last_incoming = True
