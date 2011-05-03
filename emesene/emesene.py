@@ -51,6 +51,7 @@ else:
 import glib
 import optparse
 import shutil
+import signal
 import string
 
 import debugger
@@ -147,6 +148,9 @@ class Controller(object):
         self.cur_service = None
         self._parse_commandline()
         self._setup()
+
+        signal.signal(signal.SIGINT, lambda *args: glib.idle_add(self.close_session()))
+        signal.signal(signal.SIGTERM, lambda *args: glib.idle_add(self.close_session()))
 
     def _setup(self):
         '''register core extensions'''
