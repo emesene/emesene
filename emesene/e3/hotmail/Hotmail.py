@@ -39,8 +39,7 @@ class Hotmail:
         if current_service != 'msn':
             return
 
-        if not self.__is_live_account():
-            return
+        #if not self.__is_live_account(): return
 
         self.allowed = True
 
