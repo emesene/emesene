@@ -22,155 +22,19 @@ import re
 import AdiumThemes
 from e3 import status
 
+import plistlib
+
 class Theme(object):
     '''this class contains all the paths and information regarding a theme'''
     # if you add a smilie key twice you will have a nice stack overflow :D
-    EMOTES = {}
-    EMOTES[':)'] = 'face-smile'
-    EMOTES[':-)'] = EMOTES[':)']
-    EMOTES[';)'] = 'face-wink'
-    EMOTES[';-)'] = EMOTES[';)']
-    EMOTES['|-)'] = 'face-tired'
-    EMOTES[':D'] = 'face-laugh'
-    EMOTES[':d'] = EMOTES[':D']
-    EMOTES[':-D'] = EMOTES[':D']
-    EMOTES[':S'] = 'face-worried'
-    EMOTES[':s'] = EMOTES[':S']
-    EMOTES[':('] = 'face-sad'
-    EMOTES[':-('] = EMOTES[':(']
-    EMOTES['(K)'] = 'face-kiss'
-    EMOTES['(k)'] = EMOTES['(K)']
-    EMOTES[':P'] = 'face-raspberry'
-    EMOTES[':p'] = EMOTES[':P']
-    EMOTES[':-P'] = EMOTES[':P']
-    EMOTES[':-p'] = EMOTES[':P']
-    EMOTES[':|'] = 'face-plain'
-    EMOTES[':-|'] = EMOTES[':|']
-    EMOTES['*-)'] = 'face-rolling'
-    EMOTES[':O'] = 'face-surprise'
-    EMOTES[':o'] = EMOTES[':O']
-    EMOTES[':-o'] = EMOTES[':O']
-    EMOTES[':-O'] = EMOTES[':O']
-    EMOTES[':$'] = 'face-embarrassed'
-    EMOTES[':\'('] = 'face-crying'
-    EMOTES[':@'] = 'face-angry'
-    EMOTES[':-@'] = EMOTES[':@']
-    EMOTES['(6)'] = 'face-devilish'
-    EMOTES['(A)'] = 'face-angel'
-    EMOTES['(a)'] = EMOTES['(A)']
-    EMOTES['<:o)'] = 'face-party'
-    EMOTES['(ap)'] = 'airplane'
-    EMOTES['(au)'] = 'car'
-    EMOTES['8o|'] = 'face-teeth'
-    EMOTES['+o('] = 'face-sick'
-    EMOTES['(b)'] = 'beer'
-    EMOTES['(B)'] = EMOTES['(b)']
-    EMOTES['(^)'] = 'cake'
-    EMOTES['(bah)'] = 'sheep'
-    EMOTES['(nah)'] = 'goat'
-    EMOTES['(||)'] = 'bowl'
-    EMOTES['(z)'] = 'boy'
-    EMOTES['(Z)'] = EMOTES['(z)']
-    EMOTES['(u)'] = 'love-over'
-    EMOTES['(U)'] = EMOTES['(u)']
-    EMOTES['(p)'] = 'camera'
-    EMOTES['(P)'] = EMOTES['(p)']
-    EMOTES['(@)'] = 'cat'
-    EMOTES['(ci)'] = 'cigarette'
-    EMOTES['(o)'] = 'clock'
-    EMOTES['(O)'] = EMOTES['(o)']
-    EMOTES['(c)'] = 'coffee'
-    EMOTES['(C)'] = EMOTES['(c)']
-    EMOTES['(co)'] = 'computer'
-    EMOTES['(&)'] = 'dog'
-    EMOTES[':-#'] = 'face-zipped'
-    EMOTES['(d)'] = 'drink'
-    EMOTES['(D)'] = EMOTES['(d)']
-    EMOTES['(e)'] = 'mail'
-    EMOTES['(E)'] = EMOTES['(e)']
-    EMOTES['8-)'] = 'face-glasses'
-    EMOTES['(~)'] = 'video'
-    EMOTES['(g)'] = 'present'
-    EMOTES['(G)'] = EMOTES['(g)']
-    EMOTES['(x)'] = 'girl'
-    EMOTES['(X)'] = EMOTES['(x)']
-    EMOTES['(%)'] = 'handcuffs'
-    EMOTES['(h5)'] = 'hifive'
-    EMOTES['(h)'] = 'face-cool'
-    EMOTES['(H)'] = EMOTES['(h)']
-    EMOTES[':^)'] = 'face-uncertain'
-    EMOTES['(ip)'] = 'island'
-    EMOTES['({)'] = 'hugleft'
-    EMOTES['(i)'] = 'lamp'
-    EMOTES['(I)'] = EMOTES['(i)']
-    EMOTES['(li)'] = 'c10ud'
-    EMOTES['(m)'] = 'msn'
-    EMOTES['(M)'] = EMOTES['(m)']
-    EMOTES['(mp)'] = 'mobile'
-    EMOTES['(mo)'] = 'coins'
-    EMOTES['(8)'] = 'music'
-    EMOTES['(pi)'] = 'pizza'
-    EMOTES['(pl)'] = 'plate'
-    EMOTES['(r)'] = 'rainbow'
-    EMOTES['(R)'] = EMOTES['(r)']
-    EMOTES['(st)'] = 'rain'
-    EMOTES['(l)'] = 'love'
-    EMOTES['(L)'] = EMOTES['(l)']
-    EMOTES['(k)'] = 'face-kiss'
-    EMOTES['(K)'] = EMOTES['(k)']
-    EMOTES['(f)'] = 'rose'
-    EMOTES['(F)'] = EMOTES['(f)']
-    EMOTES['(})'] = 'hugright'
-    EMOTES['^o)'] = 'face-sarcastic'
-    EMOTES[':-*'] = 'secret'
-    EMOTES['(S)'] = 'moon'
-    EMOTES['(sn)'] = 'snail'
-    EMOTES['(so)'] = 'soccerball'
-    EMOTES['(*)'] = 'star'
-    EMOTES['(#)'] = 'sun'
-    EMOTES['(t)'] = 'phone'
-    EMOTES['(T)'] = EMOTES['(t)']
-    EMOTES['(n)'] = 'bad'
-    EMOTES['(N)'] = EMOTES['(n)']
-    EMOTES['(y)'] = 'good'
-    EMOTES['(Y)'] = EMOTES['(y)']
-    EMOTES['(tu)'] = 'turtle'
-    EMOTES['(um)'] = 'umbrella'
-    EMOTES[':-['] = 'bat'
-    EMOTES[':['] = EMOTES[':-[']
-    EMOTES['(w)'] = 'rose-dead'
-    EMOTES['(W)'] = EMOTES['(w)']
-    EMOTES['(xx)'] = 'console'
+    EMOTES = {} # Emotes defined under set_theme by the Emoticons.plist file found in the theme folder
+    EMOTE_FILES = []
 
     EMOTE_REGEX_STR = ""
-    for key in EMOTES:
-        EMOTE_REGEX_STR += re.escape(key) + "|"
-    EMOTE_REGEX = re.compile("("+EMOTE_REGEX_STR+")")
+    EMOTE_REGEX = None
 
     SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
             'send.wav', 'type.wav']
-    EMOTE_FILES = ['airplane.png', 'bad.png', 'bat.png', 'beer.png', 'bomb.png',
-        'bowl.png', 'boy.png', 'bunny.png', 'c10ud.png', 'cake.png', 
-        'camera.png', 'can.png', 'car.png', 'cat.png', 
-        'cigarette.png', 'clock.png', 'clown.png', 'coffee.png', 
-        'coins.png', 'computer.png', 'console.png', 'cow.png', 
-        'dog.png', 'drink.png', 'face-angel.png', 'face-angry.png', 
-        'face-cool.png', 'face-crying.png', 'face-devilish.png', 
-        'face-embarrassed.png', 'face-glasses.png', 'face-kiss.png', 
-        'face-laugh.png', 'face-party.png', 'face-plain.png', 
-        'face-raspberry.png', 'face-rolling.png', 'face-sad.png', 
-        'face-sarcastic.png', 'face-sick.png', 'face-smile.png', 
-        'face-surprise.png', 'face-teeth.png', 'face-tired.png', 
-        'face-uncertain.png', 'face-wink.png', 'face-worried.png', 
-        'face-zipped.png', 'ghost.png', 'girl.png', 'goat.png', 
-        'good.png', 'handcuffs.png', 'hifive.png', 'hugleft.png', 
-        'hugright.png', 'island.png', 'lamp.png', 'love-over.png', 
-        'love.png', 'mail.png', 'mobile.png', 'moon.png', 'msn.png', 
-        'music.png', 'phone.png', 'pizza.png', 'plate.png', 
-        'present.png', 'rainbow.png', 'rain.png', 'rose-dead.png', 
-        'rose.png', 'secret.png', 'sheep.png', 'snail.png', 
-        'soccerball.png', 'star.png', 'sun.png', 'turtle.png', 
-        'tv.png', 'umbrella.png', 'video.png']
     IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
         'email.png','group-chat.png', 'idle.png', 'logo.png', 'logo16.png', 'logo32.png', 'logo48.png', 'new-message.gif','mailbox.png',
         'offline.png', 'online.png', 'password.png', 'typing.png', 'transfer_success.png', 'user.png',
@@ -297,6 +161,21 @@ class Theme(object):
             self.tool_ublock = os.path.join(self.toolbar_path, "ublock.png")
 
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
+        self.emote_config_file = os.path.join(self.emote_path, "Emoticons.plist")
+
+        if os.path.isfile(self.emote_config_file):
+            emote_data=plistlib.readPlist(file(self.emote_config_file))
+            for key, val in emote_data['Emoticons'].iteritems():
+                Theme.EMOTE_FILES.append(key)
+                pointer_name = val['Name']
+                pointer_key = val['Equivalents'][0]
+                Theme.EMOTES[pointer_key] = pointer_name
+                for v in val['Equivalents'][1:]:
+                    if v != "":
+                        Theme.EMOTES[v] = Theme.EMOTES[pointer_key]
+            for key2 in Theme.EMOTES:
+                Theme.EMOTE_REGEX_STR += re.escape(key2) + "|"
+            Theme.EMOTE_REGEX = re.compile("("+Theme.EMOTE_REGEX_STR+")")
 
     def emote_to_path(self, shortcut, remove_protocol=False):
         '''return a string representing the path to load the emote if it exist
@@ -355,8 +234,7 @@ class Theme(object):
         themes = []
 
         for theme in self.get_child_dirs(os.path.join('themes', 'emotes')):
-            if self.is_valid_theme(Theme.EMOTE_FILES,
-                    os.path.join('themes', 'emotes', theme)):
+            if os.path.isfile(os.path.join('themes','emotes',theme,'Emoticons.plist')):
                 themes.append(theme)
 
         return themes
