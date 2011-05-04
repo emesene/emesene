@@ -19,6 +19,7 @@ nothing more'''
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import extension
 import e3
 import gui
 import MarkupParser
@@ -63,6 +64,7 @@ class Conversation(object):
         self.info = None
         self.input = None
         self.output = None
+        self.soundPlayer = extension.get_default('sound')(session)
 
     def _get_style(self):
         '''return the value of style'''
@@ -444,21 +446,21 @@ class Conversation(object):
         play the nudge sound
         """
         if self.session.config.b_play_nudge:
-            gui.play(self.session, gui.theme.sound_nudge)
+            self.soundPlayer.play(gui.theme.sound_nudge)
 
     def play_send(self):
         """
         play the send sound
         """
         if self.session.config.b_play_send:
-            gui.play(self.session, gui.theme.sound_send)
+            self.soundPlayer.play(gui.theme.sound_send)
 
     def play_type(self):
         """
         play the receive sound
         """
-        if self.session.config.b_play_type and self.message_waiting:
-            gui.play(self.session, gui.theme.sound_type)
+        if self.session.config.b_play_type:
+            self.soundPlayer.play(gui.theme.sound_type)
 
     def cycle_history(self, change=-1):
         """
@@ -484,4 +486,3 @@ class Conversation(object):
 
     def _member_to_contact(self,member):
         return self.session.contacts.contacts[member]
-

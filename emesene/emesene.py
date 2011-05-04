@@ -183,7 +183,7 @@ class Controller(object):
         else:
             self.network_checker = None
 
-        extension.category_register('sound', e3.common.play_sound.play)
+        extension.category_register('sound', e3.common.Sounds.SoundPlayer, None, True)
         extension.category_register('notification',
                 e3.common.notification.Notification)
         extension.category_register('history exporter',
@@ -584,6 +584,7 @@ class Controller(object):
 
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
+        self.soundPlayer = extension.get_default('sound')(self.session)
 
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
@@ -638,7 +639,7 @@ class Controller(object):
            self.session.contacts.me.status != e3.status.BUSY and \
            self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
-            gui.play(self.session, gui.theme.sound_send)
+            self.soundPlayer(gui.theme.sound_send)
 
     def _on_conversation_window_close(self, conv_manager):
         '''method called when the conversation window is closed'''

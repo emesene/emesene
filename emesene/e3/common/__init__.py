@@ -19,7 +19,6 @@
 import sys
 sys.path.append('..')
 import locations
-import play_sound
 import notification
 
 import XmlParser
@@ -31,5 +30,4 @@ from Signals import Signals
 from ConfigDir import ConfigDir
 from RingBuffer import RingBuffer
 from MessageFormatter import MessageFormatter
-
-
+from Sounds import SoundPlayer
