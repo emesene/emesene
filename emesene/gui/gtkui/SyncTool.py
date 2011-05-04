@@ -39,11 +39,13 @@ class SyncTool(object):
     def show(self, show_second_time = False):
         '''called when you want to show synch dialog'''
 
+        if not self._syn.exists_source():
+            return
+
         if not self._syn.is_clean():
             self._show_dialog()
 
-        elif not self._session.config.get_or_set("logs_imported", False) \
-           and self._syn.exists_source():
+        elif not self._session.config.get_or_set("logs_imported", False):
             self._show_dialog()
 
         elif show_second_time == True:
