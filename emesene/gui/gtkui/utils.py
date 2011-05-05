@@ -200,6 +200,7 @@ def path_to_url(path):
         path = path.replace("\\", "/")
         path = path[2:]
 
+    path = path.encode("iso-8859-1")
     path = urllib.quote(path)
     path = "file://" + path
 
