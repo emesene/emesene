@@ -182,7 +182,8 @@ class MainMenu(gtk.Menu):
         self.status_menu = StatusMenu(handler.on_status_selected)
         self.status.set_submenu(self.status_menu)
 
-        self.list = gtk.MenuItem(_('Contacts'))
+        self.list = gtk.ImageMenuItem(_('Contacts'))
+        self.list.set_image(utils.safe_gtk_image_load(gui.theme.chat))
         self.list_contacts = ContactsMenu(handler, main_window)
         self.list.set_submenu(self.list_contacts)
 
