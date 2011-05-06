@@ -52,6 +52,7 @@ class TabWidget(gtk.HBox):
         self.set_border_width(0)
         self.set_spacing(4)
 
+        self.session = conversation.session
         self.mozilla_like = mozilla_like
         self.image = gtk.Image()
         self.label = Renderers.SmileyLabel()
@@ -70,6 +71,13 @@ class TabWidget(gtk.HBox):
             self.pack_start(self.image, False, False, 0)
             self.pack_start(self.label, True, True, 0)
             self.pack_start(self.close, False, False, 0)
+
+        if self.session.config.i_tab_position > 1:
+            self.set_orientation(gtk.ORIENTATION_VERTICAL)
+        else:
+            self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
+
+        self.session.config.subscribe(self.on_tab_position_change,'i_tab_position')
 
         self.image.show()
         self.label.show()
@@ -91,3 +99,8 @@ class TabWidget(gtk.HBox):
         if self.mozilla_like:
             self.set_size_request(235, 18) # Empiric measures.
 
+    def on_tab_position_change(self, position):
+        if self.session.config.i_tab_position > 1:
+            self.set_orientation(gtk.ORIENTATION_VERTICAL)
+        else:
+            self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
