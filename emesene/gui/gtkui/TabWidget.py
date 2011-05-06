@@ -74,8 +74,10 @@ class TabWidget(gtk.HBox):
 
         if self.session.config.i_tab_position > 1:
             self.set_orientation(gtk.ORIENTATION_VERTICAL)
+            self.label.set_angle(90)
         else:
             self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
+            self.label.set_angle(0)
 
         self.session.config.subscribe(self.on_tab_position_change,'i_tab_position')
 
@@ -102,5 +104,7 @@ class TabWidget(gtk.HBox):
     def on_tab_position_change(self, position):
         if self.session.config.i_tab_position > 1:
             self.set_orientation(gtk.ORIENTATION_VERTICAL)
+            self.label.set_angle(90)
         else:
             self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
+            self.label.set_angle(0)
