@@ -348,10 +348,10 @@ class OutputText(TextBox):
         '''clear the content'''
         TextBox.clear(self)
     
-    def append(self, text, cedict,scroll=True):
+    def append(self, text, cedict, cepath, scroll=True):
         '''append formatted text to the widget'''
         if self.config.b_show_emoticons:
-            text = MarkupParser.replace_emotes(text, cedict)
+            text = MarkupParser.replace_emotes(text, cedict, cepath)
 
         #Parse links
         text = MarkupParser.urlify(text)
@@ -373,7 +373,7 @@ class OutputText(TextBox):
                 middle = e3.common.add_style_to_message(middle, message.style, False)
 
         all_ = first + middle + last
-        self.append(all_, cedict, self.config.b_allow_auto_scroll)
+        self.append(all_, cedict, cepath, self.config.b_allow_auto_scroll)
 
     def receive_message(self, formatter, contact, message, cedict, cepath, is_first):
         '''add a message to the widget'''
@@ -384,11 +384,12 @@ class OutputText(TextBox):
         else:
             middle = MarkupParser.escape(message.body)
 
-        self.append(first + middle + last, cedict, self.config.b_allow_auto_scroll)
+        self.append(first + middle + last, cedict, cepath,
+                    self.config.b_allow_auto_scroll)
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
-        self.append(formatter.format_information(message), None,
+        self.append(formatter.format_information(message), None, None,
                 self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
