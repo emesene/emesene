@@ -19,6 +19,7 @@
 
 import gtk
 import pango
+import urllib
 
 import RichWidget
 
@@ -65,7 +66,11 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         '''insert an image at the current position
         tip it's the alt text on mouse over
         and the text copied to the clipboard'''
-        if path.startswith("file://"):
+        if path.startswith("file://localhost/"):
+            if path.count("@") == 0: #if quoted, @ is %40, not @
+                path = urllib.unquote(path)
+            pixbuf = gtk.gdk.PixbufAnimation(path[17:])
+        elif path.startswith("file://"):
             pixbuf = gtk.gdk.PixbufAnimation(path[7:])
         else:
             pixbuf = gtk.gdk.PixbufAnimation(path)
