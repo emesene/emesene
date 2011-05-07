@@ -612,6 +612,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_contact_left(self, account):
         '''called when a contact lefts the conversation'''
+        gui.Conversation.on_contact_left(self,account)
         contact = self.session.contacts.get(account)
         if contact:
             self.output.information(self.formatter, contact,
@@ -619,6 +620,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_contact_joined(self, account):
         '''called when a contact joins the conversation'''
+        gui.Conversation.on_contact_joined(self,account)
         contact = self.session.contacts.get(account)
         if contact:
             self.output.information(self.formatter, contact,
