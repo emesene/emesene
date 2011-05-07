@@ -610,3 +610,16 @@ class Conversation(gtk.VBox, gui.Conversation):
             path = path[5:] # 5 is len('file:')
         return path
 
+    def on_contact_left(self, account):
+        '''called when a contact lefts the conversation'''
+        contact = self.session.contacts.get(account)
+        if contact:
+            self.output.information(self.formatter, contact,
+                _('%s has left the conversation') % (contact.display_name))
+
+    def on_contact_joined(self, account):
+        '''called when a contact joins the conversation'''
+        contact = self.session.contacts.get(account)
+        if contact:
+            self.output.information(self.formatter, contact,
+                _('%s has joined the conversation') % (contact.display_name))
