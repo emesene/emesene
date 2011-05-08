@@ -149,6 +149,7 @@ class MainWindow(gtk.VBox):
         self.below_menu.show()
         self.below_panel.show()
         self.below_userlist.show()
+        self.contact_list._set_accels(self.get_parent())
 
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
