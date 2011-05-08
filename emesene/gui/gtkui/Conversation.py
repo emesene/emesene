@@ -614,7 +614,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''called when a contact lefts the conversation'''
         gui.Conversation.on_contact_left(self,account)
         contact = self.session.contacts.get(account)
-        if contact:
+        if contact and len(self.members) > 1:
             self.output.information(self.formatter, contact,
                 _('%s has left the conversation') % (contact.display_name))
 
@@ -622,6 +622,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''called when a contact joins the conversation'''
         gui.Conversation.on_contact_joined(self,account)
         contact = self.session.contacts.get(account)
-        if contact:
+        if contact and len(self.members) > 1:
             self.output.information(self.formatter, contact,
                 _('%s has joined the conversation') % (contact.display_name))
