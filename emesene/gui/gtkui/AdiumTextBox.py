@@ -84,6 +84,9 @@ class OutputView(webkit.WebView):
 
         msg.alias = Renderers.msnplus_to_plain_text(msg.alias)
         msg.display_name = Renderers.msnplus_to_plain_text(msg.display_name)
+        b_nick_check = bool(self.last_incoming_nickname != msg.display_name)
+        if b_nick_check:
+            self.last_incoming_nickname = msg.display_name
         if(len(msg.alias) > DISPLAY_NAME_LIMIT):
             msg.alias = msg.alias[0:DISPLAY_NAME_LIMIT] + "..."
         if(len(msg.display_name) > DISPLAY_NAME_LIMIT):
@@ -95,14 +98,12 @@ class OutputView(webkit.WebView):
 
             msg.first = not self.last_incoming
 
-            if self.last_incoming_account != msg.sender or \
-               self.last_incoming_nickname != msg.display_name: # fix for groups.im
+            if self.last_incoming_account != msg.sender or b_nick_check:
                 msg.first = True
 
             html = self.theme.format_incoming(msg, style, cedict, cedir)
             self.last_incoming = True
             self.last_incoming_account = msg.sender
-            self.last_incoming_nickname = msg.display_name
         else:
             if self.last_incoming is None:
                 self.last_incoming = True
@@ -240,14 +241,14 @@ class OutputText(gtk.ScrolledWindow):
         '''add a message to the widget'''
         if message.type is e3.Message.TYPE_NUDGE:
             message.body = _('You just sent a nudge!')
-            msg = gui.Message.from_information(contact, message.body, message.timestamp)
+            msg = gui.Message.from_information(contact, message, message.timestamp)
         else:
-            msg = gui.Message.from_contact(contact, message.body.rstrip(), is_first, False, message.timestamp)
+            msg = gui.Message.from_contact(contact, message, is_first, False, message.timestamp)
         self.view.add_message(msg, message.style, cedict, cedir)
 
     def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''
-        msg = gui.Message.from_contact(contact, message.body.rstrip(), is_first, True, message.timestamp)
+        msg = gui.Message.from_contact(contact, message, is_first, True, message.timestamp)
         self.view.add_message(msg, message.style, cedict, cedir)
 
     def information(self, formatter, contact, message):

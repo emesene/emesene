@@ -56,8 +56,9 @@ class Message(object):
             picture = os.path.abspath(gui.theme.user)
 
         return cls(incomming, first, contact.account,
-                contact.display_name, contact.alias, picture,
-                gui.theme.status_icons[contact.status], message,
+                message.display_name if message.display_name else contact.display_name,
+                contact.alias, picture,
+                gui.theme.status_icons[contact.status], message.body.rstrip(),
                 e3.status.STATUS[contact.status], timestamp=tstamp)
 
     @classmethod
@@ -68,7 +69,8 @@ class Message(object):
             picture = os.path.abspath(gui.theme.user)
 
         return cls(True, False, contact.account,
-                contact.display_name, contact.alias, picture,
-                gui.theme.status_icons[contact.status], message,
+                message.display_name if message.display_name else contact.display_name,
+                contact.alias, picture,
+                gui.theme.status_icons[contact.status], message.body,
                 e3.status.STATUS[contact.status], timestamp=tstamp, msgtype="status")
 
