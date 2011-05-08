@@ -19,8 +19,8 @@
 import os
 import time
 import utils
-import indicate
 import Renderers
+import indicate
 
 from BaseTray import BaseTray
 

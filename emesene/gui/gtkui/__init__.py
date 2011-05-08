@@ -22,6 +22,7 @@ WEBKITERROR = False
 INDICATORERROR = False
 INFOBARERROR = False
 PYNOTIFYERROR = False
+MESSAGINGMENUERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
@@ -64,6 +65,10 @@ def gtk_main(Controller):
         import Indicator
     except ImportError:
         INDICATORERROR = True
+    try:
+        import MessagingMenu
+    except ImportError:
+        MESSAGINGMENUERROR = True
 
     import Login
     import MainMenu
@@ -137,7 +142,12 @@ def setup():
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
     extension.category_register('user panel', UserPanel.UserPanel)
 
-    if not INDICATORERROR:
+    if not MESSAGINGMENUERROR:
+        extension.category_register('tray icon', MessagingMenu.MessagingMenu)
+        if not INDICATORERROR:
+            extension.register('tray icon', Indicator.Indicator)
+        extension.register('tray icon', TrayIcon.TrayIcon)
+    elif not INDICATORERROR:
         extension.category_register('tray icon', Indicator.Indicator)
         extension.register('tray icon', TrayIcon.TrayIcon)
     else:
