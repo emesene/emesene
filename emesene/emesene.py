@@ -448,9 +448,9 @@ class Controller(object):
         screen = window.get_screen()
         pwidth, pheight = screen.get_width(), screen.get_height()
         if posx > pwidth:
-            posx = pwidth // 2
+            posx = (pwidth - width) // 2
         if posy > pheight:
-            posy = pheight // 2
+            posy = (pheight - height) // 2
         if maximized:
             window.maximize()
 
