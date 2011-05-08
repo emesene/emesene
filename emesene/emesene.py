@@ -221,13 +221,7 @@ class Controller(object):
         self.window = windowcls(self.close_session) # main window
         self._set_location(self.window)
 
-        if self.tray_icon is not None:
-            self.tray_icon.set_visible(False)
-
-        trayiconcls = extension.get_default('tray icon')
-        handler = gui.base.TrayIconHandler(self.session, gui.theme,
-            self.on_user_disconnect, self.on_close)
-        self.tray_icon = trayiconcls(handler, self.window)
+        self._draw_tray_icon()
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
@@ -402,7 +396,6 @@ class Controller(object):
         '''create and populate the main screen
         '''
         self.window.clear()
-        self.tray_icon.set_main(self.session)
 
         last_avatar_path = self.session.config_dir.get_path("last_avatar")
 
@@ -420,8 +413,21 @@ class Controller(object):
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
 
+        self._draw_tray_icon()
+        self.tray_icon.set_main(self.session)
+
         self.window.go_main(self.session,
             self.on_new_conversation, self.on_close, self.on_user_disconnect)
+
+    def _draw_tray_icon(self):
+        '''draws the tray icon'''
+        if self.tray_icon is not None:
+            self.tray_icon.set_visible(False)
+
+        trayiconcls = extension.get_default('tray icon')
+        handler = gui.base.TrayIconHandler(self.session, gui.theme,
+            self.on_user_disconnect, self.on_close)
+        self.tray_icon = trayiconcls(handler, self.window)
 
     def _sync_emesene1(self):
         syn = extension.get_default('synch tool')
