@@ -27,7 +27,7 @@ MESSAGINGMENUERROR = False
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR
 
     import gtk
     import gobject
@@ -119,7 +119,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR
 
     import gtk
     gtk.settings_get_default().set_property("gtk-error-bell", False)
