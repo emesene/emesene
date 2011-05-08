@@ -31,11 +31,12 @@ DOMAINS_ALLOWED = ["msn", "live", "hotmail", "windowslive"]
 class Hotmail:
 
     def __init__(self, session):
+
         self.session=session
         self.user = self.session.account.account
         self.allowed = False
 
-        current_service = self.session.config.d_user_service.get(self.user, 'msn')
+        current_service = self.session.config.service
         if current_service != 'msn':
             return
 
