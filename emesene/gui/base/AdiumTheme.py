@@ -62,6 +62,7 @@ class AdiumTheme(object):
         self.outgoing_path = os.path.join(self.resources_path, 'Outgoing')
 
         self.content = read_file(self.resources_path, 'Content.html')
+        self.status = read_file(self.resources_path, 'Status.html')
 
         self.incoming = read_file(self.incoming_path, 'Content.html')
         self.incoming_next = read_file(self.incoming_path,
@@ -87,7 +88,10 @@ class AdiumTheme(object):
         elif self.incoming is None:
             template = self.content
         else:
-            template = self.incoming
+            if (msg.type=="status" and self.status):
+                template = self.status
+            else:
+                template = self.incoming
 
         return self.replace(template, msg, style, cedict, cedir)
 
@@ -113,7 +117,10 @@ class AdiumTheme(object):
             else:
                 template = self.incoming
         else:
-            template = self.outgoing
+            if (msg.type=="status" and self.status):
+                template = self.status
+            else:
+                template = self.outgoing
 
         return self.replace(template, msg, style, cedict, cedir)
 
