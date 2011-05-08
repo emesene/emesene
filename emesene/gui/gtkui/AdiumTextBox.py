@@ -242,12 +242,12 @@ class OutputText(gtk.ScrolledWindow):
             message.body = _('You just sent a nudge!')
             msg = gui.Message.from_information(contact, message.body, message.timestamp)
         else:
-            msg = gui.Message.from_contact(contact, message.body, is_first, False, message.timestamp)
+            msg = gui.Message.from_contact(contact, message.body.rstrip(), is_first, False, message.timestamp)
         self.view.add_message(msg, message.style, cedict, cedir)
 
     def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''
-        msg = gui.Message.from_contact(contact, message.body, is_first, True, message.timestamp)
+        msg = gui.Message.from_contact(contact, message.body.rstrip(), is_first, True, message.timestamp)
         self.view.add_message(msg, message.style, cedict, cedir)
 
     def information(self, formatter, contact, message):
