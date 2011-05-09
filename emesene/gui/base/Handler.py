@@ -274,8 +274,8 @@ class ContactHandler(object):
         contact = self.contact_list.get_contact_selected()
 
         if contact:
-            self.dialog.set_contact_alias(contact.account, contact.alias,
-                 set_alias_cb)
+            self.dialog.set_contact_alias(contact.account,
+                    contact.alias if contact.alias != '' else contact.display_name, set_alias_cb)
         else:
             self.dialog.error(_('No contact selected'))
 
