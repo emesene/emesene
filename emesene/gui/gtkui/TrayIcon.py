@@ -319,3 +319,21 @@ class ContactsMenu(gtk.Menu):
 
         return picture
 
+
+class NoTrayIcon(BaseTray):
+    """
+    A widget that implements a no tray icon option
+    """
+    NAME = 'No Tray Icon'
+    DESCRIPTION = 'No tray icon at all'
+    AUTHOR = 'Sbte'
+    WEBSITE = 'www.emesene.org'
+
+    def __init__(self, handler, main_window=None):
+        """
+        constructor
+
+        handler -- a e3common.Handler.TrayIconHandler object
+        """
+        BaseTray.__init__(self)
+        self.quit_on_close = True

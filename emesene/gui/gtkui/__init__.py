@@ -152,6 +152,7 @@ def setup():
         extension.register('tray icon', TrayIcon.TrayIcon)
     else:
         extension.category_register('tray icon', TrayIcon.TrayIcon)
+    extension.register('tray icon', TrayIcon.NoTrayIcon)
 
     extension.category_register('debug window', DebugWindow.DebugWindow)
 

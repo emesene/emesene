@@ -61,10 +61,6 @@ class Indicator(appindicator.Indicator):
         self.set_login()
         self.set_status(appindicator.STATUS_ACTIVE)
 
-    def set_visible(self, arg):
-        """ dummy, indicators remove themselves automagically """
-        pass
-
     def set_login(self):
         """
         method called to set the state to the login window
