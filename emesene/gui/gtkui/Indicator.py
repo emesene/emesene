@@ -81,7 +81,7 @@ class Indicator(appindicator.Indicator):
         self.menu = TrayIcon.MainMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_menu(self.menu)
-
+        self._on_change_status(self.handler.session.account.status)
 
     def set_conversations(self, convs):
         """
@@ -94,7 +94,7 @@ class Indicator(appindicator.Indicator):
         sets the contacts
         """
 
-    def _on_change_status(self,stat):
+    def _on_change_status(self, stat):
         """
         change the icon in the tray according to user's state
         """

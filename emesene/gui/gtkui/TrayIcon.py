@@ -82,6 +82,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
         self.menu = MainMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_tooltip("emesene - " + self.handler.session.account.account)
+        self._on_change_status(self.handler.session.account.status)
 
     def _on_message(self, cid, account, msgobj, cedict={}):
         """
@@ -118,7 +119,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
         else:
             self.handler.on_hide_show_mainwindow(self.main_window)
 
-    def _on_change_status(self,stat):
+    def _on_change_status(self, stat):
         """
         change the icon in the tray according to user's state
         """
@@ -156,7 +157,7 @@ class LoginMenu(gtk.Menu):
         self.quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit.connect('activate',
             lambda *args: self.handler.on_quit_selected())
-            
+
         self.append(self.hide_show_mainwindow)
         self.append(self.quit)
 
@@ -200,7 +201,7 @@ class MainMenu(gtk.Menu):
 
         self.append(self.hide_show_mainwindow)
         self.append(self.status)
-        self.append(self.list)        
+        self.append(self.list)
         self.append(self.disconnect)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)
@@ -226,7 +227,7 @@ class ContactsMenu(gtk.Menu):
         self.avatar_size = 32
 
         self.contactmanager = self.handler.session.contacts
-        
+
         for contact in self.contactmanager.get_online_list():
             self.__append_contact(contact)
 
@@ -243,13 +244,13 @@ class ContactsMenu(gtk.Menu):
         item.set_label(Renderers.msnplus_to_plain_text(contact.nick))
         #pict = self.__get_contact_pixbuf_or_default(contact)
         #item.set_image(pict)
-        item.connect('activate', self._on_contact_clicked)    
+        item.connect('activate', self._on_contact_clicked)
         self.item_to_contacts[item] = contact
         self.contacts_to_item[contact.account] = item
 
         item.show()
         self.add(item)
-                
+
     def _on_contact_change_something(self, *args):
         """
         update the menu when contacts change something
@@ -258,7 +259,7 @@ class ContactsMenu(gtk.Menu):
             account, type_change, value_change = args
         elif len(args) == 4:
             account, type_change, value_change, do_notify = args
-        
+
         if type_change == 'status':
             if value_change > 0:
                 if account in self.contacts_to_item:
