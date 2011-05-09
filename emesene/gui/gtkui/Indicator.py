@@ -23,6 +23,7 @@ import logging
 log = logging.getLogger('gui.gtkui.Indicator')
 
 import TrayIcon
+from BaseTray import BaseTray
 
 # This line will except with too old version of appindicator
 # so you'll get your nice gtk trayicon
@@ -33,7 +34,7 @@ try:
 except AttributeError:
     raise ImportError
 
-class Indicator(appindicator.Indicator):
+class Indicator(appindicator.Indicator, BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
     """
@@ -48,6 +49,7 @@ class Indicator(appindicator.Indicator):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
+        BaseTray.__init__(self)
         appindicator.Indicator.__init__(self, "emesene", "logo", \
             appindicator.CATEGORY_APPLICATION_STATUS, \
             os.path.join(os.getcwd(), handler.theme.panel_path))
@@ -55,7 +57,6 @@ class Indicator(appindicator.Indicator):
         self.handler = handler
 
         self.main_window = main_window
-        self.conversations = None
 
         self.menu = None
         self.set_login()
@@ -82,17 +83,6 @@ class Indicator(appindicator.Indicator):
         self.menu.show_all()
         self.set_menu(self.menu)
         self._on_change_status(self.handler.session.account.status)
-
-    def set_conversations(self, convs):
-        """
-        Sets the conversations manager
-        """
-        self.conversations = convs
-
-    def set_contacts(self, contacts):
-        """
-        sets the contacts
-        """
 
     def _on_change_status(self, stat):
         """
