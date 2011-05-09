@@ -422,10 +422,13 @@ class Controller(object):
 
     def _draw_tray_icon(self):
         '''draws the tray icon'''
+        trayiconcls = extension.get_default('tray icon')
+
         if self.tray_icon is not None:
+            if trayiconcls == self.tray_icon.__class__:
+                return
             self.tray_icon.set_visible(False)
 
-        trayiconcls = extension.get_default('tray icon')
         handler = gui.base.TrayIconHandler(self.session, gui.theme,
             self.on_user_disconnect, self.on_close)
         self.tray_icon = trayiconcls(handler, self.window)
