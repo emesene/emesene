@@ -168,7 +168,9 @@ class HelpHandler(object):
               '4ndreaSt4gi <stagi.andrea@gmail.com>',
               'Davide Lo Re <boyska@gmail.com>',
               'dequis <dx@dxzone.com.ar>',
-              'Sven (Sbte) <svenb.linux@gmail.com>' ], _('translator-credits'),
+              'Sven (Sbte) <svenb.linux@gmail.com>',
+              'Jose Rostagno <joserostagno@vijona.com.ar>',
+              'nenemfromhell <sniper3000@gmail.com>' ], _('translator-credits'),
             gui.theme.logo)
 
     def on_website_selected(self):
