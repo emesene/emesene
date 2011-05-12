@@ -183,7 +183,7 @@ class Controller(object):
         else:
             self.network_checker = None
 
-        extension.category_register('sound', e3.common.play_sound.play)
+        extension.category_register('sound', e3.common.Sounds.SoundPlayer, None, True)
         extension.category_register('notification',
                 e3.common.notification.Notification)
         extension.category_register('history exporter',
@@ -221,13 +221,7 @@ class Controller(object):
         self.window = windowcls(self.close_session) # main window
         self._set_location(self.window)
 
-        if self.tray_icon is not None:
-            self.tray_icon.set_visible(False)
-
-        trayiconcls = extension.get_default('tray icon')
-        handler = gui.base.TrayIconHandler(self.session, gui.theme,
-            self.on_user_disconnect, self.on_close)
-        self.tray_icon = trayiconcls(handler, self.window)
+        self._draw_tray_icon()
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
@@ -402,7 +396,6 @@ class Controller(object):
         '''create and populate the main screen
         '''
         self.window.clear()
-        self.tray_icon.set_main(self.session)
 
         last_avatar_path = self.session.config_dir.get_path("last_avatar")
 
@@ -420,13 +413,30 @@ class Controller(object):
         self.config.save(self.config_path)
         self.set_default_extensions_from_config()
 
-        self.window.go_main(self.session,
-            self.on_new_conversation, self.on_close, self.on_user_disconnect)
+        self._draw_tray_icon()
+        self.tray_icon.set_main(self.session)
+
+        self.window.go_main(self.session, self.on_new_conversation,
+            self.on_close, self.on_user_disconnect,
+            self.tray_icon.quit_on_close)
+
+    def _draw_tray_icon(self):
+        '''draws the tray icon'''
+        trayiconcls = extension.get_default('tray icon')
+
+        if self.tray_icon is not None:
+            if trayiconcls == self.tray_icon.__class__:
+                return
+            self.tray_icon.set_visible(False)
+
+        handler = gui.base.TrayIconHandler(self.session, gui.theme,
+            self.on_user_disconnect, self.on_close)
+        self.tray_icon = trayiconcls(handler, self.window)
 
     def _sync_emesene1(self):
         syn = extension.get_default('synch tool')
         user = self.session.account.account
-        current_service = self.session.config.d_user_service.get(user, 'msn')
+        current_service = self.session.config.service
         syn = syn(self.session, current_service)
         syn.show()
 
@@ -448,9 +458,9 @@ class Controller(object):
         screen = window.get_screen()
         pwidth, pheight = screen.get_width(), screen.get_height()
         if posx > pwidth:
-            posx = pwidth // 2
+            posx = (pwidth - width) // 2
         if posy > pheight:
-            posy = pheight // 2
+            posy = (pheight - height) // 2
         if maximized:
             window.maximize()
 
@@ -584,6 +594,7 @@ class Controller(object):
 
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
+        self.soundPlayer = extension.get_default('sound')(self.session)
 
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
@@ -638,7 +649,7 @@ class Controller(object):
            self.session.contacts.me.status != e3.status.BUSY and \
            self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
-            gui.play(self.session, gui.theme.sound_send)
+            self.soundPlayer.play(gui.theme.sound_type)
 
     def _on_conversation_window_close(self, conv_manager):
         '''method called when the conversation window is closed'''

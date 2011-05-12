@@ -62,12 +62,6 @@ class ContactMenu(gtk.Menu):
         self.set_alias.connect('activate',
             lambda *args: self.handler.on_set_alias_contact_selected())
 
-        self.view_info = gtk.ImageMenuItem(_('View information'))
-        self.view_info.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
-            gtk.ICON_SIZE_MENU))
-        self.view_info.connect('activate',
-            lambda *args: self.handler.on_view_information_selected())
-
         self.move_groups_submenu = gtk.Menu()
         self.copy_groups_submenu = gtk.Menu()
         self.remove_group_submenu = gtk.Menu()
@@ -94,6 +88,12 @@ class ContactMenu(gtk.Menu):
         self.remove_from_group.set_submenu(self.remove_group_submenu)
         self.groups_to_remove = 0
 
+        self.view_info = gtk.ImageMenuItem(_('View information'))
+        self.view_info.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
+            gtk.ICON_SIZE_MENU))
+        self.view_info.connect('activate',
+            lambda *args: self.handler.on_view_information_selected())
+
         self.set_unblocked()
 
         self.append(self.add)
@@ -101,10 +101,10 @@ class ContactMenu(gtk.Menu):
         self.append(self.block)
         self.append(self.unblock)
         self.append(self.set_alias)
-        self.append(self.view_info)
         self.append(self.move_to_group)
         self.append(self.copy_to_group)
         self.append(self.remove_from_group)
+        self.append(self.view_info)
 
     def on_move_to_group(self):
         self.update_submenus()

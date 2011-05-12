@@ -45,6 +45,7 @@ class Window(gtk.Window):
             self.gtk.window_set_default_icon(gui.theme.logo)
 
         self.cb_on_close = cb_on_close
+        self.cb_on_quit = cb_on_close
         self._state = 0
 
         self.connect('delete-event', self._on_delete_event)
@@ -93,7 +94,7 @@ class Window(gtk.Window):
         self.content_type = 'connecting'
 
     def go_main(self, session, on_new_conversation,
-            on_close, on_disconnect):
+            on_close, on_disconnect, quit_on_close=False):
         '''change to the main window'''
         MainWindow = extension.get_default('main window')
         self.content = MainWindow(session, on_new_conversation,
@@ -103,7 +104,10 @@ class Window(gtk.Window):
         self.content_type = 'main'
 
         # hide the main window only when the user is connected
-        self.cb_on_close = lambda *args: self.hide_on_delete()
+        if quit_on_close:
+            self.cb_on_close = self.cb_on_quit
+        else:
+            self.cb_on_close = lambda *args: self.hide_on_delete()
 
     def on_disconnect(self, cb_on_close):
         '''called when the user is disconnected'''

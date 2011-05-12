@@ -1,4 +1,3 @@
-'''emesene's notification system'''
 # -*- coding: utf-8 -*-
 
 #    This file is part of emesene.
@@ -20,10 +19,11 @@
 from e3 import status
 from e3 import Message
 import extension
+import gui
 
 import time
 import logging
-log = logging.getLogger('gui.gtkui.Notification')
+log = logging.getLogger('e3.common.notification')
 
 #TODO add config
 #TODO update multiple message on notification
@@ -44,6 +44,7 @@ class Notification():
         self.session.config.get_or_set('b_notify_receive_message', True)
 
         self.notifier = extension.get_default('notificationGUI')
+        self.sound_player = extension.get_default('sound')(session)
 
         if self.session:
             self.session.signals.conv_message.subscribe(
@@ -58,8 +59,6 @@ class Notification():
                 self._on_filetransfer_canceled)
             self.session.signals.filetransfer_invitation.subscribe(
                 self._on_filetransfer_invitation)
-
-      
 
         self.notify_online = False
         self.last_online = None
@@ -105,14 +104,18 @@ class Notification():
         """
         conversation = self.has_similar_conversation(cid, account)
 
+        contact = self.session.contacts.get(account)
+        text = None
+        sound = None #played sound is handled inside conversation.py
         if self.session.config.b_notify_receive_message and \
            conversation.message_waiting:
-            contact = self.session.contacts.get(account)            
             if msgobj.type == Message.TYPE_NUDGE:
-                # The message needs to be translated.
-                self._notify(contact, contact.nick , _('%s just sent you a nudge!') % (contact.nick,))
+                # TODO: unplus contact.nick, so we don't display weird tags
+                text = _('%s just sent you a nudge!') % (contact.nick,)
             else:
-                self._notify(contact, contact.nick , msgobj.body)
+                text = msgobj.body
+
+        self._notify(contact, contact.nick , text, None)
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):
@@ -127,25 +130,39 @@ class Notification():
             return
 
         if contact.status != status.OFFLINE and old_value == status.OFFLINE:
+            def _do_notify_online():
+                text = None
+                sound = None
+                if self.session.config.b_notify_contact_online:
+                    text = _('is online')
+                if self.session.config.b_play_contact_online:
+                    sound = gui.theme.sound_online
+                self._notify(contact, contact.nick, text, sound)
+
             if not self.notify_online:
                 # detects the first notification flood and enable the
                 # online notifications after it to prevent log in flood
                 if self.last_online is not None:
                     t = time.time()
-                    self.notify_online = (t - self.last_online > 1)
+                    if (t - self.last_online > 2):
+                        self.notify_online = True
+                        _do_notify_online()
                     self.last_online = t
                 else:
                     self.last_online = time.time()
             else:
-                if self.session.config.b_notify_contact_online:
-                    text = _('is online')
-                    self._notify(contact, contact.nick, text)
+                _do_notify_online()
         elif contact.status == status.OFFLINE:
+            text = None
+            sound = None
             if self.session.config.b_notify_contact_offline:
                 text = _('is offline')
-                self._notify(contact, contact.nick, text)
+            if self.session.config.b_play_contact_offline:
+                sound = gui.theme.sound_offline
 
-    def _notify(self, contact, title, text):
+            self._notify(contact, contact.nick, text, sound)
+
+    def _notify(self, contact, title, text, sound=None):
         """
         This creates and shows the nofification
         """
@@ -154,5 +171,7 @@ class Notification():
         else:
             uri = 'notification-message-im'
 
-        self.notifier(title, text, uri,'message-im')
-
+        if text is not None:
+            self.notifier(title, text, uri,'message-im')
+        if sound is not None:
+            self.sound_player.play(sound)

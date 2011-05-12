@@ -43,7 +43,7 @@ class ContactInfo(gtk.VBox):
 
         self._first = first
         self._first_alig = gtk.Alignment(xalign=0.5, yalign=0.0, xscale=1.0,
-            yscale=0.1)
+            yscale=0.0)
         self._first_alig.add(self._first)
         self.pack_start(self._first_alig)
         self._first_alig.show_all()
@@ -62,7 +62,7 @@ class ContactInfo(gtk.VBox):
 
         self._last = last
         self._last_alig = gtk.Alignment(xalign=0.5, yalign=1.0, xscale=1.0,
-            yscale=0.1)
+            yscale=0.0)
         self._last_alig.add(self._last)
         self.pack_end(self._last_alig)
         self._last_alig.show_all()

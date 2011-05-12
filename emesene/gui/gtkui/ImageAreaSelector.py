@@ -84,6 +84,7 @@ class ImageAreaSelectorDialog(gtk.Dialog):
         box.pack_start(image, False, False, 5)
         box.pack_start(self.label, True, True, 5)
 
+        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
         self.vbox.pack_start(self.selector)
         self.vbox.pack_end(self.eventBox)
         self.vbox.show_all()
@@ -385,7 +386,7 @@ class ImageAreaSelector(gtk.DrawingArea):
 
         maxw = int(0.75 * gtk.gdk.screen_width())
         maxh = int(0.75 * gtk.gdk.screen_height())
-        if w > maxw or h > maxh:
+        if edge >= maxw or edge >= maxh:
             wscale = float(maxw) / edge
             hscale = float(maxh) / edge
             scale = min(wscale, hscale)

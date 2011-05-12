@@ -220,6 +220,7 @@ class SmileyLayout(pango.Layout):
         self._base_attrlist = None # no color
         self._attrlist = None # with color
         self._override_attrlist = None # with override color
+        self.angle = 0
 
         if color is None:
             self._color = gtk.gdk.Color()
@@ -452,11 +453,14 @@ class SmileyLayout(pango.Layout):
         else:
             ctx.translate(x, y)
 
+            if self.angle == 90:
+                ctx.translate(width,0)
+                ctx.rotate(3.14/2)
             #Clipping and ellipsation
             if self._width >= 0:
                 inline, byte = 0, 1
                 X, Y, W, H = 0, 1, 2, 3
-                layout_width = self._width
+                layout_width = height*1024 if (self.angle == 90) else self._width
                 lst = self.get_attributes()
                 e_ascent = pango.ASCENT(
                         self._elayout.get_line(0).get_pixel_extents()[1])
@@ -545,12 +549,17 @@ class SmileyLabel(gtk.Label):
 
     def __init__(self):
         gtk.Widget.__init__(self)
+        self.angle = 0
         self._text = ['']
         self._ellipsize = True
         self._wrap = True
         self._smiley_layout = None
         self.set_flags(self.flags() | gtk.NO_WINDOW)
         self._smiley_layout = SmileyLayout(self.create_pango_context())
+
+    def set_angle(self, angle):
+        self.angle = angle
+        self._smiley_layout.angle = self.angle
 
     def set_ellipsize(self, ellipsize):
         ''' Sets the ellipsize behavior '''

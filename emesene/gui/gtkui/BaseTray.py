@@ -7,6 +7,7 @@ class BaseTray(object):
 
     def __init__(self):
         self.conversations = None
+        self.quit_on_close = False
 
     def set_conversations(self, convs):
         """
@@ -26,6 +27,13 @@ class BaseTray(object):
         """
         pass
 
+    def set_visible(self, arg):
+        """ dummy, indicators remove themselves automagically """
+        pass
+
+    def set_main(self, session):
+        """ dummy, not needed if there is no tray icon """
+        pass
 
     def _get_conversation_manager(self, cid, account=None):
         '''

@@ -23,13 +23,7 @@ import logging
 log = logging.getLogger('gui.gtkui.Indicator')
 
 import TrayIcon
-
-HASMESSAGINGMENU = True
-try:
-    import MessagingMenu
-except ImportError:
-    HASMESSAGINGMENU = False
-    log.exception(_('Could not import python-indicate: please install via your package manager.'))
+from BaseTray import BaseTray
 
 # This line will except with too old version of appindicator
 # so you'll get your nice gtk trayicon
@@ -38,10 +32,9 @@ except ImportError:
 try:
     func = getattr(appindicator.Indicator, "set_icon_theme_path")
 except AttributeError:
-    if not HASMESSAGINGMENU:
-        raise ImportError
+    raise ImportError
 
-class Indicator(appindicator.Indicator):
+class Indicator(appindicator.Indicator, BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
     """
@@ -56,33 +49,23 @@ class Indicator(appindicator.Indicator):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        if HASMESSAGINGMENU:
-            self.messaging_menu = MessagingMenu.MessagingMenu(handler, main_window)
-        else:
-            appindicator.Indicator.__init__(self, "emesene", "logo", \
-                appindicator.CATEGORY_APPLICATION_STATUS, \
-                os.path.join(os.getcwd(), handler.theme.panel_path))
+        BaseTray.__init__(self)
+        appindicator.Indicator.__init__(self, "emesene", "logo", \
+            appindicator.CATEGORY_APPLICATION_STATUS, \
+            os.path.join(os.getcwd(), handler.theme.panel_path))
 
-            self.handler = handler
+        self.handler = handler
 
-            self.main_window = main_window
-            self.conversations = None
+        self.main_window = main_window
 
-            self.menu = None
-            self.messaging_menu = None
-            self.set_login()
-            self.set_status(appindicator.STATUS_ACTIVE)
-
-    def set_visible(self, arg):
-        """ dummy, indicators remove themselves automagically """
-        if self.messaging_menu:
-            self.messaging_menu.set_visible(arg)
+        self.menu = None
+        self.set_login()
+        self.set_status(appindicator.STATUS_ACTIVE)
 
     def set_login(self):
         """
         method called to set the state to the login window
         """
-        if self.messaging_menu: return
         icon_name = self.handler.theme.logo.split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)
@@ -94,37 +77,17 @@ class Indicator(appindicator.Indicator):
         """
         method called to set the state to the main window
         """
-        if self.messaging_menu:
-            self.messaging_menu.set_main(session)
-            return
         self.handler.session = session
         self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
         self.menu = TrayIcon.MainMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_menu(self.menu)
+        self._on_change_status(self.handler.session.account.status)
 
-
-    def set_conversations(self, convs):
-        """
-        Sets the conversations manager
-        """
-        if self.messaging_menu:
-            self.messaging_menu.set_conversations(convs)
-            return
-
-        self.conversations = convs
-
-    def set_contacts(self, contacts):
-        """
-        sets the contacts
-        """
-
-    def _on_change_status(self,stat):
+    def _on_change_status(self, stat):
         """
         change the icon in the tray according to user's state
         """
-        if self.messaging_menu:
-            return
         path = os.path.join(os.getcwd(), self.handler.theme.panel_path)
         self.set_icon_theme_path(path)
         #the appindicator takes a 'name' of an icon and NOT a filename.

@@ -33,11 +33,3 @@ theme = Theme()
 import stock
 import extension
 import e3
-
-def play(session, sound):
-    """play a sound if the contact is not busy"""
-    play = extension.get_default('sound')
-    if session.contacts.me.status != e3.status.BUSY and not \
-       session.config.b_mute_sounds:
-        play(sound)
-

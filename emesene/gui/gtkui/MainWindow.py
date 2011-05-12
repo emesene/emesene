@@ -149,6 +149,7 @@ class MainWindow(gtk.VBox):
         self.below_menu.show()
         self.below_panel.show()
         self.below_userlist.show()
+        self.contact_list._set_accels(self.get_parent())
 
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
@@ -195,16 +196,6 @@ class MainWindow(gtk.VBox):
         contact = self.session.contacts.get(account)
         if not contact:
             log.debug('account %s not found on contacts' % account)
-
-        if change_type == 'status' and do_notify:
-            if old_value == e3.base.status.OFFLINE and \
-              contact.status != e3.base.status.OFFLINE and \
-              self.session.config.b_play_contact_online:
-                gui.play(self.session, gui.theme.sound_online)
-            elif old_value != e3.base.status.OFFLINE and \
-              contact.status == e3.base.status.OFFLINE and \
-              self.session.config.b_play_contact_offline:
-                gui.play(self.session, gui.theme.sound_offline)
 
     def _on_nick_changed(self, textfield, old_text, new_text):
         '''method called when the nick is changed on the panel'''

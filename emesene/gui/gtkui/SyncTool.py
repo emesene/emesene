@@ -38,15 +38,17 @@ class SyncTool(object):
 
     def show(self, show_second_time = False):
         '''called when you want to show synch dialog'''
+
+        if not self._syn.exists_source():
+            return
+
         if not self._syn.is_clean():
             self._show_dialog()
 
-        elif not self._session.config.get_or_set("logs_imported", False) \
-           and self._syn.exists_source():
+        elif not self._session.config.get_or_set("logs_imported", False):
             self._show_dialog()
 
-        elif self._session.config.get_or_set("synch_retry", False):
-            if show_second_time == True:
+        elif show_second_time == True:
                 self._show_dialog()
 
     def _show_finish(self, result):
@@ -54,7 +56,7 @@ class SyncTool(object):
         if result:
             self.progress.set_action(_("Synchronization finished"))
             self._session.config.logs_imported = True
-            self._session.config.get_or_set("synch_retry", False)
+            self.progress.update(100.0)
             self._syn.clean()
         else:
             self.progress.set_action(_("Synchronization ERROR"))
@@ -93,7 +95,6 @@ class SyncTool(object):
 
         elif response == gui.stock.NO:
             self._session.config.logs_imported = True
-            self._session.config.get_or_set("synch_retry", True)
             
     def _synch_progress_cb(self, response):
         '''stop synch'''

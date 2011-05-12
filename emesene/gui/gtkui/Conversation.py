@@ -235,7 +235,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def _on_his_avatar_click(self, widget, data):
         '''method called when user click on the other avatar
         '''
-        account = self.members[0]
+        account = self.members[self.index - 1]
         contact = self.session.contacts.get(account)
         dialog = extension.get_default('dialog')
         dialog.contact_information_dialog(self.session, contact.account)
@@ -610,3 +610,18 @@ class Conversation(gtk.VBox, gui.Conversation):
             path = path[5:] # 5 is len('file:')
         return path
 
+    def on_contact_left(self, account):
+        '''called when a contact lefts the conversation'''
+        gui.Conversation.on_contact_left(self,account)
+        contact = self.session.contacts.get(account)
+        if contact and len(self.members) > 1:
+            self.output.information(self.formatter, contact,
+                _('%s has left the conversation') % (contact.display_name))
+
+    def on_contact_joined(self, account):
+        '''called when a contact joins the conversation'''
+        gui.Conversation.on_contact_joined(self,account)
+        contact = self.session.contacts.get(account)
+        if contact and len(self.members) > 1:
+            self.output.information(self.formatter, contact,
+                _('%s has joined the conversation') % (contact.display_name))

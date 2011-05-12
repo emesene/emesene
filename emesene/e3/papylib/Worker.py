@@ -444,7 +444,6 @@ class Worker(e3.base.Worker, papyon.Client):
         account = papycontact.account
         conv = pyconvevent.conversation
 
-
         if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
         else:
@@ -460,7 +459,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
         msgobj = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             papymessage.content, account, \
-            formatting_papy_to_e3(papymessage.formatting, self.session.config.i_font_size))
+            formatting_papy_to_e3(papymessage.formatting, self.session.config.i_font_size),
+            display_name = papymessage.display_name) #support p4-context names
         # convert papyon msnobjects to a simple dict {shortcut:identifier}
         received_custom_emoticons = {}
 

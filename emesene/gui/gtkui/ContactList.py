@@ -61,6 +61,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
             ('text/html',0,1),
             ('text/plain',0,2)],gtk.gdk.ACTION_COPY)
         self.enable_model_drag_dest([('emesene-contact',0,0)], gtk.gdk.ACTION_DEFAULT)
+        self.contact_handler = gui.base.ContactHandler(session, dialog, self)
+        self.group_handler = gui.base.GroupHandler(session, dialog, self)
 
         if self.session.config.d_weights is None:
             self.session.config.d_weights = {}
@@ -124,6 +126,22 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.connect('row-collapsed' , self._on_collapse)
         self.connect('drag-data-get', self._on_drag_data_get)
         self.connect('drag-drop', self._on_drag_drop)
+
+    def _set_accels(self, mainwindow):
+        """set the keyboard shortcuts
+        """
+        accel_group = gtk.AccelGroup()
+        mainwindow.add_accel_group(accel_group)
+        self.accel_group = accel_group
+        accel_group.connect_group(gtk.keysyms.Delete, \
+                                  0, gtk.ACCEL_LOCKED, \
+                                  self._on_key_delete_item)
+
+    def _on_key_delete_item(self, accel_group, window, keyval, mod):
+        if self.is_contact_selected():
+            self.contact_handler.on_remove_contact_selected()
+        elif self.is_group_selected() and self.group_handler.is_by_group_view():
+            self.group_handler.on_remove_group_selected()
 
     def _on_expand(self, treeview, iter_, path):
         group = self.model[path][1]

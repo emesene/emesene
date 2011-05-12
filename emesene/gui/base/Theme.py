@@ -235,6 +235,7 @@ class Theme(object):
 
         for theme in self.get_child_dirs(os.path.join('themes', 'emotes')):
             if os.path.isfile(os.path.join('themes','emotes',theme,'Emoticons.plist')):
+                theme = theme.replace('.AdiumEmoticonset', '')
                 themes.append(theme)
 
         return themes

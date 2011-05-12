@@ -22,11 +22,12 @@ WEBKITERROR = False
 INDICATORERROR = False
 INFOBARERROR = False
 PYNOTIFYERROR = False
+MESSAGINGMENUERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR
 
     import gtk
     import gobject
@@ -64,6 +65,10 @@ def gtk_main(Controller):
         import Indicator
     except ImportError:
         INDICATORERROR = True
+    try:
+        import MessagingMenu
+    except ImportError:
+        MESSAGINGMENUERROR = True
 
     import Login
     import MainMenu
@@ -114,7 +119,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR
 
     import gtk
     gtk.settings_get_default().set_property("gtk-error-bell", False)
@@ -137,11 +142,17 @@ def setup():
     extension.register('nick renderer', Renderers.CellRendererNoPlus)
     extension.category_register('user panel', UserPanel.UserPanel)
 
-    if not INDICATORERROR:
+    if not MESSAGINGMENUERROR:
+        extension.category_register('tray icon', MessagingMenu.MessagingMenu)
+        if not INDICATORERROR:
+            extension.register('tray icon', Indicator.Indicator)
+        extension.register('tray icon', TrayIcon.TrayIcon)
+    elif not INDICATORERROR:
         extension.category_register('tray icon', Indicator.Indicator)
         extension.register('tray icon', TrayIcon.TrayIcon)
     else:
         extension.category_register('tray icon', TrayIcon.TrayIcon)
+    extension.register('tray icon', TrayIcon.NoTrayIcon)
 
     extension.category_register('debug window', DebugWindow.DebugWindow)
 

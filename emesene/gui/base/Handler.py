@@ -168,7 +168,9 @@ class HelpHandler(object):
               '4ndreaSt4gi <stagi.andrea@gmail.com>',
               'Davide Lo Re <boyska@gmail.com>',
               'dequis <dx@dxzone.com.ar>',
-              'Sven (Sbte) <svenb.linux@gmail.com>' ], _('translator-credits'),
+              'Sven (Sbte) <svenb.linux@gmail.com>',
+              'Jose Rostagno <joserostagno@vijona.com.ar>',
+              'nenemfromhell <sniper3000@gmail.com>' ], _('translator-credits'),
             gui.theme.logo)
 
     def on_website_selected(self):
@@ -274,8 +276,8 @@ class ContactHandler(object):
         contact = self.contact_list.get_contact_selected()
 
         if contact:
-            self.dialog.set_contact_alias(contact.account, contact.alias,
-                 set_alias_cb)
+            self.dialog.set_contact_alias(contact.account,
+                    contact.alias if contact.alias != '' else contact.display_name, set_alias_cb)
         else:
             self.dialog.error(_('No contact selected'))
 

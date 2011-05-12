@@ -28,6 +28,7 @@ import shutil
 
 EM1_SELECT_USER = "select * from user"
 EM2_SELECT_USER = "select * from d_account"
+EM2_SELECT_CONVERSATIONS = "select payload, tmstp from fact_event"
 EM1_SELECT_CONVERSATIONS = "select conversation.id,account as account1,stamp,data from user inner join conversation_event on ( user.id=conversation_event.id_user ) inner join conversation on(conversation.id=conversation_event.id_conversation) inner join event on(conversation_event.id_event=event.id)"
 EM1_SELECT_DEST_USER = "select distinct account from (conversation_event inner join user on conversation_event.id_user = user.id) where conversation_event.id_conversation=%s and account <> '%s'"
 
@@ -75,7 +76,6 @@ class EmeseneSynch(Synch):
             self.__create_safe_copy()
             self.__synch_my_avatars()
             self.__synch_my_emoticons()
-            self.__synch_other_avatars()
             self.__synch_conversations()
 
         def __synch_my_avatars(self):
@@ -87,8 +87,12 @@ class EmeseneSynch(Synch):
             actual_avatar = 0.0
 
             for infile in listing:
-                shutil.copy (os.path.join(self.__source_path, "avatars", infile), 
-                             os.path.join(self.__dest_path, "avatars", infile) )
+
+                dest_avatar = os.path.join(self.__dest_path, "avatars", infile)
+
+                if not os.path.exists(dest_avatar):
+                    shutil.copy (os.path.join(self.__source_path, "avatars", infile), 
+                                 dest_avatar )
 
                 actual_avatar += 1.0
 
@@ -118,10 +122,13 @@ class EmeseneSynch(Synch):
                 if infile == "map":
                     continue
 
-                shutil.copy (os.path.join(self.__source_path, "custom_emoticons", infile), 
-                             os.path.join(self.__dest_path, self.__myuser, "emoticons", infile[-44:]) )
+                dest_emoticon = os.path.join(self.__dest_path, self.__myuser, 
+                                             "emoticons", infile[-44:])
 
-                fconfig.write("%s %s\n" % (infile[:-45],infile[-44:])) #write config
+                if not os.path.exists(dest_emoticon):
+                    shutil.copy (os.path.join(self.__source_path, "custom_emoticons", infile), 
+                             dest_emoticon)
+                    fconfig.write("%s %s\n" % (infile[:-45],infile[-44:])) #write config
 
                 actual_emoticons += 1.0
 
@@ -129,10 +136,6 @@ class EmeseneSynch(Synch):
                     self._prog_callback(percent.current)
 
             fconfig.close()
-
-        def __synch_other_avatars(self):
-            self.__reset_progressbar()
-            self._action_callback(_("Importing contact avatars..."))
 
         def __synch_conversations(self):
             self.__reset_progressbar()
@@ -219,10 +222,18 @@ class EmeseneSynch(Synch):
             self.__reset_progressbar()
             self._action_callback(_("Storing conversations..."))
 
+            conversations = self.__conn_dest.cursor()
+
+            conversations.execute(EM2_SELECT_CONVERSATIONS)
+
+            conversation2_list = conversations.fetchall()
+
             for conv in conversations_attr:
-                self._session.logger.log("message", 0, conv["data"], 
-                                         conv["user"], conv["dest"], conv["time"],
-                                         cid = conv["cid"])
+
+                if not self.__verify_duplicate(conv, conversation2_list):
+                    self._session.logger.log("message", 0, conv["data"], 
+                                             conv["user"], conv["dest"], conv["time"],
+                                             cid = conv["cid"])
 
                 actual_conv += 1.0
 
@@ -232,6 +243,14 @@ class EmeseneSynch(Synch):
                 while (self._session.logger.input_size >= LOGGER_MAXLIMIT):
                     while (self._session.logger.input_size > LOGGER_MINLIMIT):
                         sleep(1)
+
+        def __verify_duplicate(self, conv, conversation2_list):
+
+            for conv2 in conversation2_list:
+                if conv2[0] == conv["data"] and conv2[1] == conv["time"]:
+                    return True
+
+            return False
 
 
         def __user_to_account(self,user):
@@ -269,6 +288,4 @@ class EmeseneSynch(Synch):
             d=data.partition("UTF-8\r\n")
             end=d[2].encode('UTF-8')
             return end
-
-
 

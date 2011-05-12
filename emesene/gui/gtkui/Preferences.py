@@ -436,7 +436,7 @@ class BaseTable(gtk.Table):
         """called when the Synch test button is clicked"""
         syn = extension.get_default('synch tool')
         user = self.session.account.account
-        current_service = self.session.config.d_user_service.get(user, 'msn')
+        current_service = self.session.config.service
         syn = syn(self.session, current_service)
         syn.show(True)
 
