@@ -22,6 +22,7 @@ import pango
 import urllib
 
 import RichWidget
+from gui import MarkupParser
 
 class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
     '''a buffer that makes it easy to manipulate a gtk textview with
@@ -91,7 +92,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
     def put_link(self, link):
         '''insert a link at the current position'''
         lnk = gtk.Label()
-        lnk.set_markup("<a href='" + link +"'>" + link + "</a>")
+        lnk.set_markup(MarkupParser.urlify(MarkupParser.escape(link)))
         lnk.show()
         self.put_widget(lnk)
 
