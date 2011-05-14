@@ -47,6 +47,15 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._load_style()
         self._widget_d['chat_input'].e3_style = self.cstyle
         
+        self.session.signals.filetransfer_invitation.subscribe(
+                self.on_filetransfer_invitation)
+        self.session.signals.filetransfer_accepted.subscribe(
+                self.on_filetransfer_accepted)
+        self.session.signals.filetransfer_progress.subscribe(
+                self.on_filetransfer_progress)
+        self.session.signals.filetransfer_completed.subscribe(
+                self.on_filetransfer_completed)
+        
         
     def __del__(self):
         print "conversation adieeeeeeeuuuu ;______;"
@@ -225,6 +234,33 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             return
         self._widget_d['chat_input'].clear()
         gui.base.Conversation._on_send_message(self, message_string)
+        
+        
+        
+    def on_filetransfer_invitation(self, transfer, conv_id):
+        ''' called when a new file transfer is issued '''
+        if self._conv_id != conv_id:
+            return
+            
+        self.transferw = extension.get_and_instantiate('filetransfer widget', 
+                                                       self._session, transfer)
+        self.transferw.show()
+
+    def on_filetransfer_accepted(self, transfer):
+        ''' called when the file transfer is accepted '''
+        pass
+
+    def on_filetransfer_progress(self, transfer):
+        ''' called every chunk received '''
+        self.transferw.update()
+
+    def on_filetransfer_rejected(self, transfer):
+        ''' called when a file transfer is rejected '''
+        pass
+        
+    def on_filetransfer_completed(self, transfer):
+        ''' called when a file transfer is completed '''
+        pass
         
     
 

@@ -108,6 +108,7 @@ def setup():
     extension.category_register('smiley chooser',   widgets.SmileyPopupChooser)
     extension.category_register('status combo',        widgets.StatusCombo)
     extension.category_register('info panel',          widgets.UserInfoPanel)
+    extension.category_register('filetransfer widget', widgets.FileTransfer)
     try:
         import PyQt4.QtWebKit
         extension.category_register('conversation output',

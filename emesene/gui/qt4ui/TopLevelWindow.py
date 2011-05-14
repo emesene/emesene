@@ -60,6 +60,20 @@ class TopLevelWindow (QtGui.QMainWindow):
         size = self.size()
         position = self.pos()
         return size.width(), size.height(), position.x(), position.y()
+    
+    def get_screen(self):
+        ''' Mimics Gtk's built-in method. Necessary because emesene.py relies
+        on this.
+        '''
+        # TODO: change emesene.py
+        class Screen(object):
+            def __init__(self, size):
+                self._size = size
+            def get_width(self):
+                return self._size.width()
+            def get_height(self):
+                return self._size.height()
+        return Screen(self.size())
 
     def go_connect(self, on_cancel_login, avatar_path, config):
         '''Adds a 'connecting' page to the top level window and shows it'''
@@ -111,6 +125,13 @@ class TopLevelWindow (QtGui.QMainWindow):
         self._setup_main_menu(session, main_page.contact_list, 
                               on_close, on_disconnect)
         
+    def is_maximized(self):
+        print 'is_maximized is a fake method' 
+        return False
+        
+    def on_disconnect(self, cb_on_close):
+        '''called when the user is disconnected'''
+        self._cb_on_close = cb_on_close
     
     def _get_content(self):
         '''Getter method for propery "content"'''
@@ -128,7 +149,7 @@ class TopLevelWindow (QtGui.QMainWindow):
     def _on_last_tab_close(self):
         '''Slot called when the user closes the last tab in 
         a conversation window'''
-        self._cb_on_close()
+        self._cb_on_close(self._content)
         self.hide()
         
     def _setup_main_menu(self, session, contact_list, on_close, on_disconnect):
@@ -179,7 +200,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         ''' Overrides QMainWindow's close event '''
         print 'TopLevelWindow\'s close event: %s, %s' % (
                                     self.content, str(self._cb_on_close))
-        self._cb_on_close()
+        self._cb_on_close(self._content)
         # FIXME: dirty HACK. when we close the conversation window, 
         # self._cb_on_close closes each conversation tab without checking 
         # if it isclosing the last tab, so _on_last_tab_close doesn't get 

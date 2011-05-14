@@ -39,10 +39,10 @@ class AdiumChatOutput (QtGui.QScrollArea):
         self._qwebview.setHtml(body)
                             
                             
-    def _append_message(self, contact, text, cedict,
-                        cedir, style, is_incoming, timestamp=None):
+    def _append_message(self, contact, message, cedict,
+                        cedir, is_incoming, timestamp=None):
         
-        msg = gui.Message.from_contact(contact, text, first=True,
+        msg = gui.Message.from_contact(contact, message.body, first=True,
                                        incomming=is_incoming, tstamp=timestamp)
         if msg.sender != self._last_sender:
             function = "appendMessage('%s')"
@@ -53,10 +53,10 @@ class AdiumChatOutput (QtGui.QScrollArea):
             msg.first = False
             
         if is_incoming:
-            html = gui.theme.conv_theme.format_incoming(msg, style, 
+            html = gui.theme.conv_theme.format_incoming(msg, message.style, 
                                                         cedict, cedir)
         else:
-            html = gui.theme.conv_theme.format_outgoing(msg, style, 
+            html = gui.theme.conv_theme.format_outgoing(msg, message.style, 
                                                         cedict, cedir)
             
         self._qwebview.page().mainFrame().evaluateJavaScript(function % html)
@@ -69,13 +69,13 @@ class AdiumChatOutput (QtGui.QScrollArea):
                              cedir='', style=None, is_incoming=True)
         
         
-    def send_message(self, formatter, contact, text, 
-                     cedict, cedir, style, is_first, type_=None):
+    def send_message(self, formatter, contact, message, 
+                     cedict, cedir, is_first):
         '''add a message to the widget'''
-        if type_ is e3.Message.TYPE_NUDGE:
-            text = _('You just sent a nudge!')        
-        self._append_message(contact, text, cedict, 
-                             cedir, style, is_incoming=False)
+        if message.type is e3.Message.TYPE_NUDGE:
+            message.body = _('You just sent a nudge!')        
+        self._append_message(contact, message, cedict, 
+                             cedir, is_incoming=False)
         
         
     def receive_message(self, formatter, contact, 
@@ -83,8 +83,8 @@ class AdiumChatOutput (QtGui.QScrollArea):
         '''add a message to the widget'''
         # WARNING: this is a hack to keep out config from backend libraries
         #message.style.size = self.config.i_font_size
-        self._append_message(contact, message.body, cedict, cedir, 
-                             message.style, is_incoming=True, 
+        self._append_message(contact, message, cedict, cedir, 
+                             is_incoming=True, 
                              timestamp=message.timestamp)
 
         

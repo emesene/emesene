@@ -59,6 +59,30 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
                         QtGui.QIcon(gui.theme.status_icons[account.status]))
         return conversation
         
+    def get_dimensions(self):
+        '''
+        Returns a tuple containing width, height, x coordinate, y coordinate
+        '''
+        # FIXME: Why is this method called on this?? this a conversation
+        # manager, this sould be called on the toplevelwindow containing this
+        # but emesene.py calls this in _on_converastion_window_closed. WROOONG!
+        size = self.size()
+        position = self.pos()
+        return size.width(), size.height(), position.x(), position.y()
+        
+    def hide_all(self):
+        '''Hides the window'''
+        # FIXME: shouldn't this be called on something else??
+        self.get_parent().hide()
+    
+    def is_maximized(self):
+        # FIXME: again, why is this heeeeeeeeeereeeeeeeeeee????
+        return False
+        
+    def present(self, conversation): # emesene's
+        '''Raises the tab containing the given conversation'''
+        self.setCurrentIndex(conversation.tab_index)
+        
     def remove_conversation(self, conversation):
         '''Removes the chat tab. This implements base's class 
         abstract method.'''

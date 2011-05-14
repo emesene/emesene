@@ -58,7 +58,12 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             display_role = display_role.replace('[$ONLINE_COUNT]', str(online))
             display_role = display_role.replace('[$TOTAL_COUNT]', str(total))
         else:
-            display_role = self._format_nick(data_role)
+            # TODO: consider changing how data is stored inside the model, 
+            # if useful
+            display_role = self._format_nick(data_role, 
+                (str(model.data(index, Role.DisplayRole).toPyObject()),
+                 data_role.nick,
+                 str(model.data(index, Role.MessageRole).toPyObject())))
             display_role = _format_contact_display_role(display_role)
     #        message = model.data(index, Role.MessageRole).toString()
     #        if not message.isEmpty():

@@ -47,12 +47,11 @@ class ChatOutput (QtGui.QTextBrowser):
             
     # emesene's
     def send_message(self, formatter, my_account,
-                     text, cedict, cedir, cstyle, first):
+                     text, cedict, cedir, first):
         '''This method is called from the core, when a message is sent by us.
         It shows the message'''
         self._append_to_chat('<b>ME:</b>')
-        self._append_to_chat(Utils.parse_emotes(Utils.escape(unicode(text))), 
-                             cstyle)
+        self._append_to_chat(Utils.parse_emotes(Utils.escape(unicode(text))))
         self._append_to_chat('<br/>')
         
     

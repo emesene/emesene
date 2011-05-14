@@ -39,12 +39,14 @@ class AvatarChooser(Dialog.OkCancelDialog):
         self._setup_ui()
         used_path    = self._avatar_manager.get_avatars_dir()
         system_paths = self._avatar_manager.get_system_avatars_dirs()
-        cached_path  = self._avatar_manager.get_cached_avatars_dir()
+        # TODO: update get_cached_avatars_dir's name (should be plural)
+        cached_paths  = self._avatar_manager.get_cached_avatars_dir()
         
         self._populate_list(self._vn[0], used_path)
         for path in system_paths:
             self._populate_list(self._vn[1], path)
-        self._populate_list(self._vn[2], cached_path)
+        for path in cached_paths:
+            self._populate_list(self._vn[2], path)
         
             
         

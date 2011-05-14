@@ -39,6 +39,8 @@ class Preferences(QtGui.QWidget):
         self.resize(600, 400)
         
         self._session = session
+        #TODO: check
+        self.session = session
         self.interface    = Interface(session)
         self.desktop      = Desktop(session)
         self.sound        = Sound(session)
@@ -241,7 +243,7 @@ class BaseTable(QtGui.QWidget):
         row.setLayout(hlay)
         self.append_row(row)
         
-        text = self.get_attr(property_name)
+        text = self.get_attr(property_name) or default
         line_edit.setText(text)
         
         reset.clicked.connect(

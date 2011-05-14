@@ -17,6 +17,8 @@ X remove "reverse_smiley_dict" in ChatTextEdit and add a list of recognized
 X refactor class structure
 X use emesene's extensions system to retrieve classes
 
+- is_maximized in conversation_page..... ouffff.....
+
 X Implement menus
 X Remove the empty space on the left in contact list
 
@@ -41,6 +43,8 @@ X Support for animated avatars
 - Fix transparency and off-screen selection in ImageAreaSelector 
   (and selected pixmap's size shouldn't be affected by zoom -> don't grab the widget!)
 X No need for case-insensitive smiley shortcuts search
+
+- Watch at the FIXMEs in ConversationPage.py
 
 - Think about KDE4 integration
 - Smooth transitions between  TopLevel window's pages

@@ -5,7 +5,7 @@ this class is just a placeholder.'''
 
 import PyQt4.QtGui      as QtGui
 
-class Notifier (QtGui.QLabel):
+class Notifier (object):
     ''' Class representing the notifications '''
     # pylint: disable=W0612
     NAME = 'Notifier'
@@ -14,14 +14,17 @@ class Notifier (QtGui.QLabel):
     WEBSITE = ''
     # pylint: enable=W0612
     
-    def __init__(self, title, text, uri):
-        QtGui.QLabel.__init__(self, unicode(title) + 
-                                    unicode(text)  +
-                                    unicode(uri)    )
+    def __init__(self, title, text, picturePath=None, const=None):
+        #QtGui.QLabel.__init__(self, unicode(title) + 
+        #                            unicode(text)  +
+        #                            unicode(picturePath)    )
                                     
         print (unicode(title) + 
                unicode(text)  +
-               unicode(uri)    )
+               unicode(picturePath)    )
         self.show()
+        
+    def show(self):
+        pass
 
 
