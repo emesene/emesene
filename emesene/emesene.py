@@ -144,6 +144,7 @@ class Controller(object):
             self.config.d_remembers = {}
 
         self.session = None
+        self.logged_in = False
         self.timeout_id = None
         self.cur_service = None
         self._parse_commandline()
@@ -272,7 +273,7 @@ class Controller(object):
         if self.network_checker is not None:
             self.network_checker.set_new_session(self.session)
 
-    def close_session(self, do_exit=True, on_reconnect=False):
+    def close_session(self, do_exit=True):
         '''close session'''
         # prevent preference window from staying open and breaking things
         pref = extension.get_instance('preferences')
@@ -297,9 +298,10 @@ class Controller(object):
         self.save_extensions_config()
         self._save_login_dimensions()
 
-        if self.session is not None and not on_reconnect:
+        if self.session is not None and self.logged_in:
             self.session.save_config()
             self.session = None
+            self.logged_in = False
 
         self.config.save(self.config_path)
 
@@ -504,6 +506,7 @@ class Controller(object):
 
         self.set_default_extensions_from_config()
         self._sync_emesene1()
+        self.logged_in = True
 
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):
@@ -690,11 +693,10 @@ class Controller(object):
     def on_disconnected(self, reason, reconnect=0):
         '''called when the server disconnect us'''
         account = self.session.account
+        self.close_session(False)
         if reconnect:
-            self.close_session(False, True)
             self.on_reconnect(account)
         else:
-            self.close_session(False)
             self.go_login(cancel_clicked=True, no_autologin=True)
             if(reason != None):
                 self.window.content.clear_all()
