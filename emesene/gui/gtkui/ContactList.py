@@ -138,10 +138,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
                                   self._on_key_delete_item)
 
     def _on_key_delete_item(self, accel_group, window, keyval, mod):
-        if self.is_contact_selected():
-            self.contact_handler.on_remove_contact_selected()
-        elif self.is_group_selected() and self.group_handler.is_by_group_view():
-            self.group_handler.on_remove_group_selected()
+        if self.is_focus():
+            if self.is_contact_selected():
+                self.contact_handler.on_remove_contact_selected()
+            elif self.is_group_selected() and self.group_handler.is_by_group_view():
+                self.group_handler.on_remove_group_selected()
 
     def _on_expand(self, treeview, iter_, path):
         group = self.model[path][1]
