@@ -29,6 +29,10 @@ class LoginPage(QtGui.QWidget):
                  parent=None):
         '''Constructor'''
         # pylint: disable=R0913
+        
+        # NOTE: a 'session' is an object like e3.jabber.Session.Session, so, representing a protocol
+        # a 'service' is a service using a given protocol.
+         
         # instance variables:
         QtGui.QWidget.__init__(self, parent)
 
@@ -72,6 +76,7 @@ class LoginPage(QtGui.QWidget):
 
     def _setup_config(self):
         '''Adds missing options to config file'''
+        print " *** _setup_config"
         default_session = extension.get_default('session')
         service = default_session.SERVICES.keys()[0]
         self._host = default_session.SERVICES[service]['host']
@@ -286,6 +291,7 @@ class LoginPage(QtGui.QWidget):
                 # to trigger eventual update of dp:
             self._on_account_combo_text_changed(account_email)
     
+            # TODO: investigate on what does the following do:
             self._on_preferences_changed(use_http, self._proxy, session_id,
                     service)
             
@@ -313,7 +319,7 @@ class LoginPage(QtGui.QWidget):
             service_name = self._config.d_user_service[user]
             session_id = self._service2id[service_name]
         else:
-            service_name = self._config.d_service
+            service_name = self._config.service
             session_id = self._config.session
         self._config.d_user_service[user] = service_name
         
