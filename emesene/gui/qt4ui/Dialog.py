@@ -44,6 +44,7 @@ class Dialog(object):
         
         
         dialog.setWindowTitle(title)
+        dialog.set_accept_response(gui.stock.ADD)
         text_label.setAlignment(Qt.AlignRight |
                                 Qt.AlignVCenter)
         group_label.setAlignment(Qt.AlignRight |
@@ -60,12 +61,6 @@ class Dialog(object):
             group_combo.addItem(group.name, group.name)
         
         response = dialog.exec_()
-        
-        if response == QtGui.QDialog.Accepted:
-            response = gui.stock.ACCEPT
-        elif response == QtGui.QDialog.Rejected:
-            response = gui.stock.CANCEL
-        print response
         
         email = unicode(text_edit.text())
         group = group_combo.itemData(group_combo.currentIndex()).toPyObject()
@@ -96,12 +91,6 @@ class Dialog(object):
         dialog.setMinimumWidth(380)
         
         response = dialog.exec_()
-        
-        if response == QtGui.QDialog.Accepted:
-            response = gui.stock.ACCEPT
-        elif response == QtGui.QDialog.Rejected:
-            response = gui.stock.CANCEL
-        print response
         
         group_name = unicode(group_edit.text())
         
@@ -176,15 +165,42 @@ class Dialog(object):
         # Dialog execution:
         response = dialog.exec_()
         
-        if response == QtGui.QDialog.Accepted:
-            response = gui.stock.ACCEPT
-        elif response == QtGui.QDialog.Rejected:
-            response = gui.stock.CANCEL
-        print response
-        
         selected_pixmap = area_selector.get_selected_pixmap()
         
         response_cb(response, selected_pixmap)
+        
+        
+    @classmethod
+    def error(cls, message, response_cb=None, title=_("Error!")):
+        '''show an error dialog displaying the message, this dialog should
+        have only the option to close and the response callback is optional
+        since in few cases one want to know when the error dialog was closed,
+        but it can happen, so return stock.CLOSE to the callback if its set'''
+        # TODO: Consider an error notification like dolphin's notifications
+        # and or consider desktop integration with windows.
+        # TODO: Consider making a more abstract class to use as a base for 
+        # every kind of message box: error, info, attention, etc...
+        dialog  = StandardButtonDialog()
+        icon    = QtGui.QLabel()
+        message = QtGui.QLabel(message)
+        
+        lay = QtGui.QHBoxLayout()
+        lay.addWidget(icon)
+        lay.addWidget(message)
+        dialog.setLayout(lay)
+        
+        dialog.add_button(QtGui.QDialogButtonBox.Ok)
+        dialog.setMinimumWidth(250)
+#        dialog.setSizeGripEnabled(False)
+#        dialog.setSizePolicy(QtGui.QSizePolicy.Fixed,
+#                             QtGui.QSizePolicy.Fixed)
+        #dialog.setModal(True)
+#        dialog.setWindowModality(Qt.WindowModal)
+        icon.setPixmap(QtGui.QIcon.fromTheme('dialog-error').pixmap(64, 64))
+        message.setAlignment(Qt.AlignCenter)
+        
+        dialog.exec_()
+        
         
 
     @classmethod
@@ -356,7 +372,62 @@ class Dialog(object):
         print response
         
         response_cb(response)
+        
+        
+    @classmethod
+    def set_contact_alias(cls, account, alias, response_cb,
+                            title=_("Set alias")):
+        '''show a dialog showing the current alias and asking for the new
+        one, the response callback receives,  the response
+        (stock.ACCEPT, stock.CANCEL, stock.CLEAR <- to remove the alias
+        or stock.CLOSE), the account, the old and the new alias.
+        cb args: response, account, old_alias, new_alias'''
+        def reset_cb():
+            dialog.done(gui.stock.CLEAR)
+            
+        alias = alias or ''
+        
+        dialog = OkCancelDialog()
+        label = QtGui.QLabel("New alias: ")
+        edit = QtGui.QLineEdit()
+        
+        lay = QtGui.QHBoxLayout()
+        lay.addWidget(label, 100)
+        lay.addWidget(edit)
+        dialog.setLayout(lay)
+        
+        reset = dialog.add_button(QtGui.QDialogButtonBox.Reset)
+        dialog.setMinimumWidth(310)
+        edit.setText(alias)
+        
+        reset.clicked.connect(reset_cb)
+        
+        response = dialog.exec_()
+        response_cb(response, account, alias, unicode(edit.text()))
+        
 
+        
+    @classmethod
+    def yes_no(cls, message, response_cb, *args):
+        '''show a confirm dialog displaying a question and two buttons:
+        Yes and No, return the response as stock.YES or stock.NO or
+        stock.CLOSE if the user closes the window'''
+        print response_cb
+        print args
+        dialog  = YesNoDialog()
+        icon    = QtGui.QLabel()
+        message = QtGui.QLabel(message)
+        
+        lay = QtGui.QHBoxLayout()
+        lay.addWidget(icon)
+        lay.addWidget(message)
+        dialog.setLayout(lay)
+        
+        icon.setPixmap(QtGui.QIcon.fromTheme('dialog-warning').pixmap(64, 64))
+        
+        response = dialog.exec_()
+            
+        response_cb(response, *args)
         
         
         
@@ -370,36 +441,31 @@ class Dialog(object):
         
 
         
-
-        
-
-
-
-
-class OkCancelDialog (QtGui.QDialog):
-    '''Skeleton for a dialog window having Ok and Cancel buttons'''
+class StandardButtonDialog (QtGui.QDialog):
+    '''Skeleton for a dialog window with standard buttons'''
     def __init__(self, expanding=False, parent=None):
         '''Constructor'''
 
         QtGui.QDialog.__init__(self, parent)
 
         self.central_widget = QtGui.QWidget()
-        button_box  = QtGui.QDialogButtonBox()
+        self.button_box  = QtGui.QDialogButtonBox()
 
         vlay = QtGui.QVBoxLayout()
         vlay.addWidget(self.central_widget)
         vlay.addSpacing(10)
-        vlay.addWidget(button_box)
+        vlay.addWidget(self.button_box)
         if not expanding:
             vlay.addStretch()
         QtGui.QDialog.setLayout(self, vlay)
 
-        button_box.addButton(QtGui.QDialogButtonBox.Cancel)
-        button_box.addButton(QtGui.QDialogButtonBox.Ok)
 
-        button_box.accepted.connect(self._on_accept)
-        button_box.rejected.connect(self._on_reject)
+        self.button_box.accepted.connect(self._on_accept)
+        self.button_box.rejected.connect(self._on_reject)
         
+    def add_button(self, button):
+        return self.button_box.addButton(button)
+    
     def _on_accept(self):
         '''Slot called when Ok is clicked'''
         self.done(QtGui.QDialog.Accepted)
@@ -408,6 +474,22 @@ class OkCancelDialog (QtGui.QDialog):
         '''Slot called when Cancel is clicked'''
         self.done(QtGui.QDialog.Rejected)
         
+    def exec_(self):
+        response = QtGui.QDialog.exec_(self)
+        
+        if response == QtGui.QDialog.Accepted:
+            response = self.accept_response()
+        elif response == QtGui.QDialog.Rejected:
+            response = self.reject_response()
+            
+        return response
+        
+    def accept_response(self):
+        raise NotImplementedError()
+        
+    def reject_response(self):
+        raise NotImplementedError()
+        
 # -------------------- QT_OVERRIDE
         
     def setLayout(self, layout):
@@ -415,4 +497,62 @@ class OkCancelDialog (QtGui.QDialog):
         this dialog's central widget.'''
         # pylint: disable=C0103
         self.central_widget.setLayout(layout)
+        
+
+
+
+
+class OkCancelDialog (StandardButtonDialog):
+    '''Skeleton for a dialog window having Ok and Cancel buttons'''
+    def __init__(self, expanding=False, parent=None):
+        '''Constructor'''
+        StandardButtonDialog.__init__(self, expanding, parent)
+
+        self.add_button(QtGui.QDialogButtonBox.Cancel)
+        self.add_button(QtGui.QDialogButtonBox.Ok)
+        self._accept_response = gui.stock.ACCEPT
+        self._reject_response = gui.stock.CANCEL
+        
+    def accept_response(self):
+        return self._accept_response
+    
+    def set_accept_response(self, response):
+        self._accept_response = response
+        
+    def reject_response(self):
+        return self._reject_response
+        
+    def set_reject_response(self, response):
+        self._reject_response = response
+
+
+
+
+
+class YesNoDialog (StandardButtonDialog):
+    '''Skeleton for a dialog window having Ok and Cancel buttons'''
+    def __init__(self, expanding=False, parent=None):
+        '''Constructor'''
+        StandardButtonDialog.__init__(self, expanding, parent)
+
+        self.add_button(QtGui.QDialogButtonBox.No)
+        self.add_button(QtGui.QDialogButtonBox.Yes)
+        self._accept_response = gui.stock.OK
+        self._reject_response = gui.stock.NO
+        
+    def accept_response(self):
+        return self._accept_response
+    
+    def set_accept_response(self, response):
+        self._accept_response = response
+        
+    def reject_response(self):
+        return self._reject_response
+        
+    def set_reject_response(self, response):
+        self._reject_response = response
+    
+
+
+ 
         

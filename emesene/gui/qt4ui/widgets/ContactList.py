@@ -67,6 +67,11 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         '''Update a contact in the view. Resent to model'''
         self._model.update_contact(contact)
         
+    def remove_contact(self, contact, group=None):
+        '''remove a contact from the specified group, if group is None
+        then remove him from all groups'''
+        print 'remove contact: [%s,%s]' % (contact, group)
+        
     def add_group(self, group):
         '''Add a group to the view. Resent to model.'''
         self._model.add_group(group)
@@ -104,7 +109,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
             print "Returning None because of contact."
             return None
         print 'Returning %s' % self._pmodel.data(index, Role.DataRole).toPyObject()
-        return None#self._pmodel.data(index, Role.DataRole).toPyObject()
+        return self._pmodel.data(index, Role.DataRole).toPyObject()
     
     def clear(self):
         '''Clears the contact list. Resent to model.'''
