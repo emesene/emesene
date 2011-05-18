@@ -30,11 +30,18 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         self._main_window = main_window
         self._menu = None
         self._conversations = None
+        self._quit_on_close = False
         
         self.setIcon(QtGui.QIcon(gui.theme.logo))
         
         self.activated.connect(self._on_tray_icon_clicked)
         self.show()
+        
+    def _get_quit_on_close(self):
+        '''Getter method for property "quit_on_close"'''
+        return self._quit_on_close
+        
+    quit_on_close = property(_get_quit_on_close)
         
         
     def set_login(self):    # emesene's

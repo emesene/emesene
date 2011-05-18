@@ -65,15 +65,15 @@ class TopLevelWindow (QtGui.QMainWindow):
         ''' Mimics Gtk's built-in method. Necessary because emesene.py relies
         on this.
         '''
-        # TODO: change emesene.py
+        # TODO: change emesene.py or update base class
         class Screen(object):
-            def __init__(self, size):
-                self._size = size
+            def __init__(self):
+                pass
             def get_width(self):
-                return self._size.width()
+                return QtGui.QApplication.instance().desktop().availableGeometry().width()
             def get_height(self):
-                return self._size.height()
-        return Screen(self.size())
+                return QtGui.QApplication.instance().desktop().availableGeometry().height()
+        return Screen()
 
     def go_connect(self, on_cancel_login, avatar_path, config):
         '''Adds a 'connecting' page to the top level window and shows it'''
@@ -113,10 +113,12 @@ class TopLevelWindow (QtGui.QMainWindow):
         self.menuBar().hide()
 
     def go_main(self, session, on_new_conversation,
-            on_close, on_disconnect):
+            on_close, on_disconnect, quit_on_close=False):
         '''Adds a main page (the one with the contact list) to the top
         level window and shows it'''
         print "GO MAIN! ^_^"
+        # TODO: handle quit_on_close (??) [consider creating a base class and 
+        # moving code there.] 
         main_window_cls = extension.get_default('main window')
         main_page = main_window_cls(session, on_new_conversation, on_close, 
                                     on_disconnect, self.setMenuBar)
