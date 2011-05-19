@@ -266,6 +266,7 @@ class Conversation(object):
 
         self.session.send_message(self.cid, text, self.cstyle, self.emcache.parse(), custom_emoticons)
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
+        print self.output.send_message
         self.output.send_message(self.formatter, self.session.contacts.me,
                                  message, self.emcache.parse(), self.emcache.path, self.first)
         self.messages.push(text)

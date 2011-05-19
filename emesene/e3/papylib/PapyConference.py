@@ -339,15 +339,13 @@ def make_audio_sink(async=False):
     return gst.element_factory_make("autoaudiosink")
 
 # TODO: FIXME: Make this work, and then make a nice gui for configuration.
-def make_video_source(name="videotestsrc"):
+def make_video_source(name="v4l2src"):
     "Make a bin with a video source in it, defaulting to first webcamera "
     bin = gst.Bin("videosrc")
     src = gst.element_factory_make(name, name)
-    src.set_property("is-live", True)
-    src.set_property("pattern", 0)
     bin.add(src)
     filter = gst.element_factory_make("capsfilter")
-    filter.set_property("caps", gst.Caps("video/x-raw-yuv , width=[300,500] , height=[200,500], framerate=[20/1,30/1]"))
+    filter.set_property("caps", gst.Caps("video/x-raw-yuv , width=[300,1000] , height=[200,500], framerate=[20/1,100/1]"))
     bin.add(filter)
     src.link(filter)
     videoscale = gst.element_factory_make("videoscale")
@@ -359,9 +357,8 @@ def make_video_source(name="videotestsrc"):
 def make_video_sink(async=False):
     "Make a bin with a video sink in it, that will be displayed on xid."
     bin = gst.Bin("videosink")
-    sink = gst.element_factory_make("ximagesink", "imagesink")
-    sink.set_property("sync", async)
-    sink.set_property("async", async)
+    sink = gst.element_factory_make("autovideosink", "videosink")
+    #sink.set_property("sync", async)
     bin.add(sink)
     colorspace = gst.element_factory_make("ffmpegcolorspace")
     bin.add(colorspace)
@@ -372,4 +369,3 @@ def make_video_sink(async=False):
     bin.add_pad(gst.GhostPad("sink", videoscale.get_pad("sink")))
 
     return bin
-

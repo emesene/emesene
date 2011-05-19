@@ -1,0 +1,26 @@
+if True:
+#Session Signals:
+        session.signals.message_change_succeed
+        session.signals.media_change_succeed
+        session.signals.status_change_succeed
+        session.signals.contact_list_ready
+        session.signals.picture_change_succeed
+        session.signals.profile_get_succeed
+        session.signals.profile_set_succeed
+        session.signals.contact_attr_changed
+        session.signals.conv_message
+        session.signals.conv_ended
+        session.signals.message_read
+        session.signals.filetransfer_invitation
+        self.session.signals.filetransfer_accepted
+        self.session.signals.filetransfer_progress
+        
+#Session Fields:
+        session.contacts    (ContactList)
+        session.contacts.me (Contact)
+        session.account     (Contact, Account) #(?,?)
+        
+#Session Methods:
+        session.new_conversation(acc, cid)
+        session.add_event(e3.Event.EVENT_MESSAGE_READ, page_num)
+        
