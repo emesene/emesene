@@ -525,8 +525,10 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if transfer.contact.account == self.members[0]:
             contact = self._member_to_contact(self.members[0])
-            self.output.information(self.formatter, contact,
-                    _('File transfer accepted by %s') % (contact.display_name))
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('File transfer accepted by %s') % (contact.display_name), \
+            transfer.contact.account)
+            self.output.information(self.formatter, contact, message)
 
     def on_filetransfer_progress(self, transfer):
         ''' called every chunk received '''
@@ -540,8 +542,10 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if transfer.contact.account == self.members[0]:
             contact = self._member_to_contact(self.members[0])
-            self.output.information(self.formatter, contact,
-                    _('File transfer rejected by %s') % (contact.display_name))
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('File transfer rejected by %s') % (contact.display_name), \
+            transfer.contact.account)
+            self.output.information(self.formatter, contact, message)
 
     def on_filetransfer_completed(self, transfer):
         ''' called when a file transfer is completed '''
@@ -550,8 +554,9 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if transfer.contact.account == self.members[0]:
             contact = self._member_to_contact(self.members[0])
-            self.output.information(self.formatter, contact,
-                    _('File transfer completed!'))
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('File transfer completed!'), transfer.contact.account)
+            self.output.information(self.formatter, contact, message)
 
     def on_call_invitation(self, call, cid, westart=False):
         '''called when a new call is issued both from us or other party'''
@@ -615,13 +620,17 @@ class Conversation(gtk.VBox, gui.Conversation):
         gui.Conversation.on_contact_left(self,account)
         contact = self.session.contacts.get(account)
         if contact and len(self.members) > 1:
-            self.output.information(self.formatter, contact,
-                _('%s has left the conversation') % (contact.display_name))
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('%s has left the conversation') % (contact.display_name), \
+            account)
+            self.output.information(self.formatter, contact, message)
 
     def on_contact_joined(self, account):
         '''called when a contact joins the conversation'''
         gui.Conversation.on_contact_joined(self,account)
         contact = self.session.contacts.get(account)
         if contact and len(self.members) > 1:
-            self.output.information(self.formatter, contact,
-                _('%s has joined the conversation') % (contact.display_name))
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('%s has joined the conversation') % (contact.display_name), \
+            account)
+            self.output.information(self.formatter, contact, message)
