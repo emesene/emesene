@@ -212,7 +212,10 @@ class LoginPage(QtGui.QWidget):
             emails[0], emails[index] = emails[index], emails[0]
             
         for email in emails:
-            service = service_d[email]
+            try:
+                service = service_d[email]
+            except KeyError:
+                continue
             remember_lvl = remember_lvl_d[email]
             if remember_lvl >= 1: # we have at least a status
                 status = status_d[email]
