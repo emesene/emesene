@@ -29,7 +29,7 @@ DESCRIPTION = 'Wrapper around pynotify for the notification system'
 AUTHOR = 'arielj'
 WEBSITE = 'www.emesene.org'
 
-def pyNotification(title, text, picturePath=None,const=None):
+def pyNotification(title, text, picturePath=None, const=None, callback=None, tootltip=None):
     if (const=='message-im'):
         #In this case title is contact nick
         title = Renderers.msnplus_to_plain_text(title)
