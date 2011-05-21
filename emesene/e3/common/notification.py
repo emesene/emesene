@@ -75,12 +75,12 @@ class Notification():
             return
 
         contact = self.session.contacts.get(arg1.sender.account)
-        self._notify(contact, contact.nick, _("File transfer invitation"))
+        self._notify(contact, contact.nick, _("File transfer invitation"), arg1.sender.account)
         
     def _on_mail_received(self, message):
         ''' called when a new mail is received '''
-        self.notifier(_("New mail from %s") % (message.address), message._subject, 'notification-message-email','mail-received')
-
+        self.notifier(_("New mail from %s") % (message.address), message._subject, 'notification-message-email','mail-received', None, message.address)
+ 
     def has_similar_conversation(self, cid, members):
         '''
         try to find a conversation with the given cid, if not search for a
@@ -115,7 +115,7 @@ class Notification():
             else:
                 text = msgobj.body
 
-        self._notify(contact, contact.nick , text, None)
+        self._notify(contact, contact.nick , text, contact.account, None)
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):
@@ -137,7 +137,7 @@ class Notification():
                     text = _('is online')
                 if self.session.config.b_play_contact_online:
                     sound = gui.theme.sound_online
-                self._notify(contact, contact.nick, text, sound)
+                self._notify(contact, contact.nick, text, contact.account, sound)
 
             if not self.notify_online:
                 # detects the first notification flood and enable the
@@ -160,9 +160,9 @@ class Notification():
             if self.session.config.b_play_contact_offline:
                 sound = gui.theme.sound_offline
 
-            self._notify(contact, contact.nick, text, sound)
+            self._notify(contact, contact.nick, text, contact.account, sound)
 
-    def _notify(self, contact, title, text, sound=None):
+    def _notify(self, contact, title, text, tooltip, sound=None):
         """
         This creates and shows the nofification
         """
@@ -172,6 +172,6 @@ class Notification():
             uri = 'notification-message-im'
 
         if text is not None:
-            self.notifier(title, text, uri,'message-im')
+            self.notifier(title, text, uri, 'message-im', None, tooltip)
         if sound is not None:
             self.sound_player.play(sound)

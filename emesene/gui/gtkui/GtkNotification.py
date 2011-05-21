@@ -110,7 +110,7 @@ if os.name == "nt":
 queue = list()
 actual_notification = None
 
-def gtkNotification(title, text, picturePath=None, const=None, callback=None):
+def gtkNotification(title, text, picturePath=None, const=None, callback=None, tooltip=None):
     global actual_notification
     global queue
 
@@ -122,7 +122,7 @@ def gtkNotification(title, text, picturePath=None, const=None, callback=None):
         title = Renderers.msnplus_to_plain_text(title)
 
     if actual_notification is None:
-        actual_notification = Notification(title, text, picturePath, callback)
+        actual_notification = Notification(title, text, picturePath, callback, tooltip)
         actual_notification.show()
     else:
         # Append text to the actual notification
@@ -131,11 +131,11 @@ def gtkNotification(title, text, picturePath=None, const=None, callback=None):
         else:
             found = False
             auxqueue = list()
-            for _title, _text, _picturePath, _callback in queue:
+            for _title, _text, _picturePath, _callback, _tooltip in queue:
                 if _title == title:
                     _text = _text + "\n" + text
                     found = True
-                auxqueue.append([_title,_text,_picturePath, _callback])
+                auxqueue.append([_title,_text,_picturePath, _callback, _tooltip])
 
             if found:
                 # append text to another notification
@@ -143,10 +143,10 @@ def gtkNotification(title, text, picturePath=None, const=None, callback=None):
                 queue = auxqueue
             else:
                 # or queue a new notification
-                queue.append([title, text, picturePath, callback])
+                queue.append([title, text, picturePath, callback, tooltip])
 
 class Notification(gtk.Window):
-    def __init__(self, title, text, picturePath, callback):
+    def __init__(self, title, text, picturePath, callback, tooltip):
 
         gtk.Window.__init__(self, type=gtk.WINDOW_POPUP)
 
@@ -199,6 +199,9 @@ class Notification(gtk.Window):
         lboxEventBox.connect("button_press_event", self.onClick)
         lboxEventBox.add(lbox)
         self.connect("button_press_event", self.onClick)
+
+        if tooltip is not None:
+            lboxEventBox.set_tooltip_text(tooltip)
 
         # pack everything
         self.messageVbox.pack_start(titleLabel, False, False)
@@ -306,9 +309,9 @@ class Notification(gtk.Window):
         if self.timerId is not None:
             glib.source_remove(self.timerId)
         if len(queue) != 0:
-            title, text, picturePath, callback = queue.pop(0)
+            title, text, picturePath, callback, tooltip = queue.pop(0)
             actual_notification = Notification(title, text, picturePath, \
-                                               callback)
+                                               callback, tooltip)
             actual_notification.show()
         else:
             actual_notification = None
