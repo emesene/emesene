@@ -179,7 +179,8 @@ class Worker(e3.base.Worker, papyon.Client):
             if cr.personal_message is not None:
                 self.profile.personal_message = str(cr.personal_message)
 
-            self.session.profile_get_succeed(str(cr.display_name), self.profile.personal_message)
+            self.session.profile_get_succeed(str(cr.display_name),
+                    self.profile.personal_message)
 
             if not picfail:
                 self._handle_action_set_picture(path, True)
@@ -506,7 +507,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
             mo_fr = msnobj._friendly.replace("\x00", "")
             emotes.insert_raw((mo_fr, msnobj._data))
-            self.session.p2p_finished(account, 'emoticon', msnobj._creator, mo_fr, em_path)
+            self.session.p2p_finished(account, 'emoticon', msnobj._creator,
+                    mo_fr, em_path)
 
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
             if shortcut in received_custom_emoticons:
@@ -522,7 +524,8 @@ class Worker(e3.base.Worker, papyon.Client):
                 self.msn_object_store.request(msn_object,
                     (download_ok, emoticon_path, download_failed))
 
-        self.session.conv_message(cid, account, msgobj, received_custom_emoticons)
+        self.session.conv_message(cid, account, msgobj,
+                received_custom_emoticons)
         e3.Logger.log_message(self.session, None, msgobj, False, cid = cid)
 
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):
@@ -594,7 +597,8 @@ class Worker(e3.base.Worker, papyon.Client):
             self._add_contact(papycontact)
             self.session.contact_add_succeed(papycontact.account)
         else:
-            self.session.contact_attr_changed(papycontact.account, 'membership', None)
+            self.session.contact_attr_changed(papycontact.account,
+                    'membership', None)
 
     def _on_contact_status_changed(self, papycontact):
         status_ = STATUS_PAPY_TO_E3[papycontact.presence]
@@ -682,8 +686,12 @@ class Worker(e3.base.Worker, papyon.Client):
             ctct = self.session.contacts.get(contact.account)
 
             if avatar_hash in avatars:
-                if ctct: ctct.picture = avatar_path
-                self.session.picture_change_succeed(contact.account, avatar_path)
+                if ctct:
+                    ctct.picture = avatar_path
+
+                self.session.picture_change_succeed(contact.account,
+                        avatar_path)
+
                 return avatar_path
 
             def download_failed(reason):
@@ -691,8 +699,12 @@ class Worker(e3.base.Worker, papyon.Client):
 
             def download_ok(msnobj, callback):
                 avatars.insert_raw(msnobj._data)
-                if ctct: ctct.picture = avatar_path
-                self.session.picture_change_succeed(contact.account, avatar_path)
+
+                if ctct:
+                    ctct.picture = avatar_path
+
+                self.session.picture_change_succeed(contact.account,
+                        avatar_path)
 
             if msn_object._type not in (
                     papyon.p2p.MSNObjectType.DYNAMIC_DISPLAY_PICTURE,
@@ -1141,10 +1153,12 @@ class Worker(e3.base.Worker, papyon.Client):
         avatar_path = os.path.join(self.my_avatars.path, avatar_hash)
 
         if avatar_hash in self.my_avatars:
-            self.session.picture_change_succeed(self.session.account.account, avatar_path)
+            self.session.picture_change_succeed(self.session.account.account,
+                    avatar_path)
         else:
             self.my_avatars.insert_raw(msn_object._data)
-            self.session.picture_change_succeed(self.session.account.account, avatar_path)
+            self.session.picture_change_succeed(self.session.account.account,
+                    avatar_path)
 
         self.session.contacts.me.picture = avatar_path
 
