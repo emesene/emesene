@@ -96,6 +96,18 @@ class Dialog(object):
         
         response_cb(response, group_name)
         
+        
+    @classmethod
+    def rename_group(cls, group, response_cb, title=_("Rename group")):
+        '''show a dialog with the group name and ask to rename it, the
+        response callback receives stock.ACCEPT, stock.CANCEL or stock.CLOSE
+        the old and the new name.
+        cb args: response, old_name, new_name
+        '''
+        window = cls.entry_window(_("New group name"), group.name, response_cb,
+            title, group)
+        window.show()
+        
     @classmethod
     def crop_image(cls, response_cb, filename, title='Select image area'):
         '''Shows a dialog to select a portion of an image.'''
@@ -382,30 +394,16 @@ class Dialog(object):
         (stock.ACCEPT, stock.CANCEL, stock.CLEAR <- to remove the alias
         or stock.CLOSE), the account, the old and the new alias.
         cb args: response, account, old_alias, new_alias'''
-        def reset_cb():
+        def _on_reset():
             dialog.done(gui.stock.CLEAR)
             
-        alias = alias or ''
-        
-        dialog = OkCancelDialog()
-        label = QtGui.QLabel("New alias: ")
-        edit = QtGui.QLineEdit()
-        
-        lay = QtGui.QHBoxLayout()
-        lay.addWidget(label, 100)
-        lay.addWidget(edit)
-        dialog.setLayout(lay)
-        
-        reset = dialog.add_button(QtGui.QDialogButtonBox.Reset)
-        dialog.setMinimumWidth(310)
-        edit.setText(alias)
-        
-        reset.clicked.connect(reset_cb)
+        dialog = EntryDialog(label='New alias:', text=alias)
+        reset_btn = dialog.add_button(QtGui.QDialogButtonBox.Reset)
+        reset_btn.clicked.connect(_on_reset)
         
         response = dialog.exec_()
-        response_cb(response, account, alias, unicode(edit.text()))
+        response_cb(response, account, alias, dialog.text())
         
-
         
     @classmethod
     def yes_no(cls, message, response_cb, *args):
@@ -500,8 +498,6 @@ class StandardButtonDialog (QtGui.QDialog):
         
 
 
-
-
 class OkCancelDialog (StandardButtonDialog):
     '''Skeleton for a dialog window having Ok and Cancel buttons'''
     def __init__(self, expanding=False, parent=None):
@@ -528,7 +524,6 @@ class OkCancelDialog (StandardButtonDialog):
 
 
 
-
 class YesNoDialog (StandardButtonDialog):
     '''Skeleton for a dialog window having Ok and Cancel buttons'''
     def __init__(self, expanding=False, parent=None):
@@ -551,7 +546,26 @@ class YesNoDialog (StandardButtonDialog):
         
     def set_reject_response(self, response):
         self._reject_response = response
+        
+        
+        
     
+class EntryDialog (OkCancelDialog):
+    '''Dialog window with a text entry.'''
+    def __init__(self, label, text, expanding=True, parent=None):
+        OkCancelDialog.__init__(self, expanding, parent)
+        
+        label = QtGui.QLabel(label)
+        self.edit = QtGui.QLineEdit(text)
+        
+        lay = QtGui.QHBoxLayout()
+        lay.addWidget(label, 100)
+        lay.addWidget(self.edit)
+        self.setLayout(lay)
+    
+    def text(self):
+        return unicode(self.edit.text())
+        
 
 
  
