@@ -537,7 +537,7 @@ class YesNoDialog (StandardButtonDialog):
 
         self.add_button(QtGui.QDialogButtonBox.No)
         self.add_button(QtGui.QDialogButtonBox.Yes)
-        self._accept_response = gui.stock.OK
+        self._accept_response = gui.stock.YES
         self._reject_response = gui.stock.NO
         
     def accept_response(self):
