@@ -32,8 +32,11 @@ def project_path():
     even if we are frozen using py2exe"""
 
     if we_are_frozen():
-        return os.path.abspath(os.path.dirname(unicode(sys.executable, sys.getfilesystemencoding())))
-    this_module_path = os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))
+        return os.path.abspath(os.path.dirname(unicode(sys.executable,
+            sys.getfilesystemencoding())))
+
+    this_module_path = os.path.dirname(unicode(__file__,
+        sys.getfilesystemencoding()))
 
     return os.path.abspath(this_module_path)
 
@@ -52,7 +55,6 @@ import glib
 import optparse
 import shutil
 import signal
-import string
 
 import debugger
 debugger.init()
@@ -75,25 +77,25 @@ except ImportError:
 
 try:
     from gui import gtkui
-except Exception, exc:
-    log.error('Cannot find/load (py)gtk: %s' % str(exc))
+except ImportError, exc:
+    log.error('Cannot import gtkui: %s' % str(exc))
 
 try:
     from e3 import jabber
-except Exception, exc:
+except ImportError, exc:
     jabber = None
-    log.warning('Errors occurred while importing python-xmpp: %s' % str(exc))
+    log.warning('Errors occurred while importing jabber backend: %s' % str(exc))
 
 try:
     from gui import qt4ui
-except Exception, e:
-    log.error('Cannot find/load PyQt4: %s' % str(e))
+except ImportError, exc:
+    log.error('Cannot import qtui: %s' % str(exc))
 
 try:
     from e3 import papylib
-except Exception, exc:
+except ImportError, exc:
     papylib = None
-    log.warning('Errors occurred while importing python-papyon: %s' % str(exc))
+    log.warning('Errors occurred while importing msn backend: %s' % str(exc))
 
 from pluginmanager import get_pluginmanager
 import extension
@@ -156,12 +158,15 @@ class Controller(object):
         self._parse_commandline()
         self._setup()
 
-        signal.signal(signal.SIGINT, lambda *args: glib.idle_add(self.close_session()))
-        signal.signal(signal.SIGTERM, lambda *args: glib.idle_add(self.close_session()))
+        signal.signal(signal.SIGINT,
+                lambda *args: glib.idle_add(self.close_session()))
+        signal.signal(signal.SIGTERM,
+                lambda *args: glib.idle_add(self.close_session()))
 
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', dummy.Session, single_instance=True)
+        extension.category_register('session', dummy.Session,
+                single_instance=True)
         #extension.category_register('session', msn.Session,
         #        single_instance=True)
         if jabber is not None:
@@ -186,11 +191,13 @@ class Controller(object):
         if DBusNetworkChecker is not None:
             extension.category_register('network checker', DBusNetworkChecker)
             extension.set_default('network checker', DBusNetworkChecker)
-            self.network_checker = extension.get_and_instantiate('network checker')
+            self.network_checker = extension.get_and_instantiate(
+                    'network checker')
         else:
             self.network_checker = None
 
-        extension.category_register('sound', e3.common.Sounds.SoundPlayer, None, True)
+        extension.category_register('sound', e3.common.Sounds.SoundPlayer,
+                None, True)
         extension.category_register('notification',
                 e3.common.notification.Notification)
         extension.category_register('history exporter',
@@ -458,7 +465,8 @@ class Controller(object):
             posy = self.session.config.get_or_set('i_conv_posy', 100)
             width = self.session.config.get_or_set('i_conv_width', 600)
             height = self.session.config.get_or_set('i_conv_height', 400)
-            maximized = self.session.config.get_or_set('b_conv_maximized', False)
+            maximized = self.session.config.get_or_set('b_conv_maximized',
+                    False)
         else:
             posx = self.config.get_or_set('i_login_posx', 100)
             posy = self.config.get_or_set('i_login_posy', 100)
@@ -745,7 +753,8 @@ class ExtensionDefault(object):
     def set_default(self, option, opt, value, parser):
         '''set default extensions'''
         for couple in value.split(';'):
-            category_name, ext_name = map(string.strip, couple.split(':', 2))
+            category_name, ext_name = [strng.strip()\
+                    for strng in couple.split(':', 2)]
 
             if not extension.get_category(category_name)\
                     .set_default_by_name(ext_name):

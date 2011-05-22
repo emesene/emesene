@@ -65,10 +65,11 @@ except Exception, e:
 from PapyEvents import *
 from PapyConvert import *
 PAPY_HAS_AUDIOVIDEO = 1
+
 try:
     import PapyConference
     import papyon.media.constants
-except Exception, e:
+except ImportError, e:
     PAPY_HAS_AUDIOVIDEO = 0
     log.exception("You need gstreamer to use the Audio/Video calls support")
 
