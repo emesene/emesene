@@ -237,3 +237,16 @@ class Session(object):
     def cancel_call(self, call):
         self.add_action(Action.ACTION_CALL_CANCEL, (call,))
 
+for event_name in EVENTS:
+    fname = event_name.replace(" ", "_")
+    ename = "EVENT_%s" % fname.upper()
+    event = getattr(Event, ename)
+
+    if event is None:
+        raise Exception("Event %s not found fixme right now" % ename)
+
+    if getattr(Session, fname, None) is not None:
+        raise Exception("function collision %s fixme right now" % fname)
+
+    setattr(Session, fname, lambda self, *args: Session.add_event(self, event, *args))
+
