@@ -60,7 +60,7 @@ class Worker(e3.Worker):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        while self._continue==True:
+        while self._continue == True:
 
             if hasattr(self.client, 'Process'):
                 self.client.Process(1)
@@ -117,14 +117,13 @@ class Worker(e3.Worker):
             do_notify = (self.start_time + Worker.NOTIFICATION_DELAY) < \
                     time.time()
 
-            self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
-                change_type, old_status, do_notify)
+            self.session.contact_attr_changed(account, change_type, old_status,
+                    do_notify)
             self.session.logger.log('status change', stat, str(stat),
                 log_account)
 
         if old_message != contact.message:
-            self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
-                'message', old_message)
+            self.session.contact_attr_changed(account, 'message', old_message)
             self.session.logger.log('message change', contact.status,
                 contact.message, log_account)
 
@@ -139,8 +138,7 @@ class Worker(e3.Worker):
             cid = time.time()
             self.conversations[account] = cid
             self.rconversations[cid] = [account]
-            self.session.add_event(e3.Event.EVENT_CONV_FIRST_ACTION, cid,
-                [account])
+            self.session.conv_first_action(cid, [account])
 
         if body is None:
             type_ = e3.Message.TYPE_TYPING
@@ -148,7 +146,7 @@ class Worker(e3.Worker):
             type_ = e3.Message.TYPE_MESSAGE
 
         msgobj = e3.Message(type_, body, account)
-        self.session.add_event(e3.Event.EVENT_CONV_MESSAGE, cid, account, msgobj)
+        self.session.conv_message(cid, account, msgobj)
 
         # log message
         e3.Logger.log_message(self.session, None, msgobj, False)
@@ -162,8 +160,8 @@ class Worker(e3.Worker):
         self.session.events.queue.clear()
         self.session.logger.quit()
         self.client.disconnect()
-        self._continue=False
-        self.session.add_event(e3.Event.EVENT_DISCONNECTED, None,False)
+        self._continue = False
+        self.session.disconnected(None, False)
 
     def _handle_action_add_contact(self, account):
         '''handle Action.ACTION_ADD_CONTACT
@@ -200,17 +198,15 @@ class Worker(e3.Worker):
         '''
         if self.client.connect((host, int(port)),
                 proxy=self.proxy_data) == "":
-            self.session.add_event(e3.Event.EVENT_LOGIN_FAILED,
-                'Connection error')
+            self.session.login_failed('Connection error')
             return
 
         if self.client.auth(self.jid.getNode(),
             self.session.account.password) == None:
-            self.session.add_event(e3.Event.EVENT_LOGIN_FAILED,
-                'Authentication error')
+            self.session.login_failed('Authentication error')
             return
 
-        self.session.add_event(e3.Event.EVENT_LOGIN_SUCCEED)
+        self.session.login_succeed()
         self.start_time = time.time()
 
         self.client.RegisterHandler('message', self._on_message)
@@ -229,8 +225,7 @@ class Worker(e3.Worker):
             if account == self.session.account.account:
                 if name is not None:
                     self.session.contacts.me.nick = name
-                    self.session.add_event(e3.Event.EVENT_NICK_CHANGE_SUCCEED,
-                        name)
+                    self.session.nick_change_succeed(name)
 
                 continue
 
@@ -243,7 +238,7 @@ class Worker(e3.Worker):
             if name is not None:
                 contact.nick = name
 
-        self.session.add_event(e3.Event.EVENT_CONTACT_LIST_READY)
+        self.session.contact_list_ready()
         self._change_status(status_)
 
     def _handle_action_logout(self):
