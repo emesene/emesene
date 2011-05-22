@@ -520,7 +520,7 @@ class Dialog(object):
         '''show a dialog with the group name and ask to rename it, the
         response callback receives stock.ACCEPT, stock.CANCEL or stock.CLOSE
         the old and the new name.
-        cb args: response, old_name, new_name
+        cb args: response, group, new_name
         '''
         window = cls.entry_window(_("New group name"), group.name, response_cb,
             title, group)
