@@ -49,3 +49,5 @@ X No need for case-insensitive smiley shortcuts search
 - Think about KDE4 integration
 - Smooth transitions between  TopLevel window's pages
 - Fix Windows problems
+
+- group.name -> group
