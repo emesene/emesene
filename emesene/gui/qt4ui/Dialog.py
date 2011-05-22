@@ -29,7 +29,7 @@ class Dialog(object):
         the controls are made by the callback, you just ask for the email,
         don't make any control, you are just implementing a GUI! :P'''
         print response_cb
-        dialog      = OkCancelDialog()
+        dialog      = OkCancelDialog(title)
         text_label  = QtGui.QLabel("E-mail:")
         text_edit   = QtGui.QLineEdit()
         group_label = QtGui.QLabel("Group:")
@@ -42,8 +42,6 @@ class Dialog(object):
         lay.addWidget(group_combo,  1, 1)
         dialog.setLayout(lay)
         
-        
-        dialog.setWindowTitle(title)
         dialog.set_accept_response(gui.stock.ADD)
         text_label.setAlignment(Qt.AlignRight |
                                 Qt.AlignVCenter)
@@ -78,7 +76,7 @@ class Dialog(object):
         GUI logic on your code and not client logic
         cb args: response, group_name'''
         print response_cb
-        dialog = OkCancelDialog()
+        dialog = OkCancelDialog(title)
         group_label = QtGui.QLabel('New group\'s name:')
         group_edit  = QtGui.QLineEdit()
         
@@ -104,14 +102,14 @@ class Dialog(object):
         the old and the new name.
         cb args: response, group, new_name
         '''
-        dialog = EntryDialog('New group name:', group.name)
+        dialog = EntryDialog('New group name:', group.name, title)
         response = dialog.exec_()
         response_cb(response, group, dialog.text())
         
     @classmethod
     def crop_image(cls, response_cb, filename, title='Select image area'):
         '''Shows a dialog to select a portion of an image.'''
-        dialog = OkCancelDialog(expanding=True)
+        dialog = OkCancelDialog(title, expanding=True)
         
         # Actions
         act_dict = {}
@@ -136,7 +134,6 @@ class Dialog(object):
         dialog.setLayout(lay)
         
         # widget setup
-        dialog.setWindowTitle(title)
         toolbar.addAction(act_dict['rotate_left'])
         toolbar.addAction(act_dict['rotate_right'])
         toolbar.addSeparator()
@@ -192,7 +189,7 @@ class Dialog(object):
         # and or consider desktop integration with windows.
         # TODO: Consider making a more abstract class to use as a base for 
         # every kind of message box: error, info, attention, etc...
-        dialog  = StandardButtonDialog()
+        dialog  = StandardButtonDialog(title)
         icon    = QtGui.QLabel()
         message = QtGui.QLabel(message)
         
@@ -397,7 +394,7 @@ class Dialog(object):
         def _on_reset():
             dialog.done(gui.stock.CLEAR)
             
-        dialog = EntryDialog(label='New alias:', text=alias)
+        dialog = EntryDialog(label='New alias:', text=alias, title=title)
         reset_btn = dialog.add_button(QtGui.QDialogButtonBox.Reset)
         reset_btn.clicked.connect(_on_reset)
         
@@ -412,7 +409,7 @@ class Dialog(object):
         stock.CLOSE if the user closes the window'''
         print response_cb
         print args
-        dialog  = YesNoDialog()
+        dialog  = YesNoDialog('')
         icon    = QtGui.QLabel()
         message = QtGui.QLabel(message)
         
@@ -441,7 +438,7 @@ class Dialog(object):
         
 class StandardButtonDialog (QtGui.QDialog):
     '''Skeleton for a dialog window with standard buttons'''
-    def __init__(self, expanding=False, parent=None):
+    def __init__(self, title, expanding=False, parent=None):
         '''Constructor'''
 
         QtGui.QDialog.__init__(self, parent)
@@ -456,7 +453,8 @@ class StandardButtonDialog (QtGui.QDialog):
         if not expanding:
             vlay.addStretch()
         QtGui.QDialog.setLayout(self, vlay)
-
+        
+        self.setWindowTitle(title)
 
         self.button_box.accepted.connect(self._on_accept)
         self.button_box.rejected.connect(self._on_reject)
@@ -500,9 +498,9 @@ class StandardButtonDialog (QtGui.QDialog):
 
 class OkCancelDialog (StandardButtonDialog):
     '''Skeleton for a dialog window having Ok and Cancel buttons'''
-    def __init__(self, expanding=False, parent=None):
+    def __init__(self, title,expanding=False, parent=None):
         '''Constructor'''
-        StandardButtonDialog.__init__(self, expanding, parent)
+        StandardButtonDialog.__init__(self, title, expanding, parent)
 
         self.add_button(QtGui.QDialogButtonBox.Cancel)
         self.add_button(QtGui.QDialogButtonBox.Ok)
@@ -526,9 +524,9 @@ class OkCancelDialog (StandardButtonDialog):
 
 class YesNoDialog (StandardButtonDialog):
     '''Skeleton for a dialog window having Ok and Cancel buttons'''
-    def __init__(self, expanding=False, parent=None):
+    def __init__(self, title, expanding=False, parent=None):
         '''Constructor'''
-        StandardButtonDialog.__init__(self, expanding, parent)
+        StandardButtonDialog.__init__(self, title, expanding, parent)
 
         self.add_button(QtGui.QDialogButtonBox.No)
         self.add_button(QtGui.QDialogButtonBox.Yes)
@@ -552,8 +550,8 @@ class YesNoDialog (StandardButtonDialog):
     
 class EntryDialog (OkCancelDialog):
     '''Dialog window with a text entry.'''
-    def __init__(self, label, text, expanding=True, parent=None):
-        OkCancelDialog.__init__(self, expanding, parent)
+    def __init__(self, label, text, title, expanding=True, parent=None):
+        OkCancelDialog.__init__(self, title, expanding, parent)
         
         label = QtGui.QLabel(label)
         self.edit = QtGui.QLineEdit(text)
