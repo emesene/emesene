@@ -1248,18 +1248,8 @@ class EmotesWindow(gtk.Window):
     def _get_emo_image(self, path, size):
         '''try to return an image from path
         '''
-        width, height = size
-        try:
-            animation = gtk.gdk.PixbufAnimation(path)
-        except gobject.GError:
-            return None
-
-        if animation.is_static_image():
-            pix = utils.gtk_pixbuf_load(path, (width, height))
-            picture = gtk.image_new_from_pixbuf(pix)
-        else:
-            myanimation = utils.simple_animation_scale(path, width, height)
-            picture = gtk.image_new_from_animation(myanimation)
+        pix = utils.safe_gtk_pixbuf_load(path, size)
+        picture = gtk.image_new_from_pixbuf(pix)
 
         return picture
 
