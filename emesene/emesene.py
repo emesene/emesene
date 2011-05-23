@@ -443,10 +443,13 @@ class Controller(object):
 
     def _sync_emesene1(self):
         syn = extension.get_default('synch tool')
-        user = self.session.account.account
-        current_service = self.session.config.service
-        syn = syn(self.session, current_service)
-        syn.show()
+        # Check if a synch tool is present. Synch tool is only in the gtk gui.
+        # Remove the following 'if' when it will be in the qt4 gui too.
+        if syn: 
+            user = self.session.account.account
+            current_service = self.session.config.service
+            syn = syn(self.session, current_service)
+            syn.show()
 
     def _set_location(self, window, is_conv=False):
         '''get and set the location of the window'''
