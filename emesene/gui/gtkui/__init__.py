@@ -200,8 +200,8 @@ def setup():
         extension.category_register('conversation output', TextBox.OutputText)
 
     if not PYNOTIFYERROR:
-        extension.category_register(('notificationGUI'), ThemeNotification.themeNotification)
-        extension.register(('notificationGUI'), PyNotification.pyNotification)
+        extension.category_register(('notificationGUI'), ThemeNotification.ThemeNotification)
+        extension.register(('notificationGUI'), PyNotification.PyNotification)
         extension.register(('notificationGUI'), GtkNotification.gtkNotification)
     else: #leave this here for Windows users!
         extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)

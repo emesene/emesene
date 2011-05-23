@@ -29,10 +29,11 @@ DESCRIPTION = 'Wrapper around pynotify for the notification system'
 AUTHOR = 'arielj'
 WEBSITE = 'www.emesene.org'
 
-def pyNotification(title, text, picturePath=None, const=None, callback=None, tootltip=None):
-    if (const=='message-im'):
+def PyNotification(title, text, picture_path=None, const=None,
+                   callback=None, tooltip=None):
+    if const == 'message-im':
         #In this case title is contact nick
         title = Renderers.msnplus_to_plain_text(title)
-    n = pynotify.Notification(title, text, picturePath)
-    n.set_hint_string("append", "allowed")
-    n.show()
+    notification = pynotify.Notification(title, text, picture_path)
+    notification.set_hint_string("append", "allowed")
+    notification.show()

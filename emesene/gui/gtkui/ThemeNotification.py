@@ -26,33 +26,35 @@ import logging
 log = logging.getLogger('gui.gtkui.ThemeNotification')
 
 NAME = 'ThemeNotification'
-DESCRIPTION = 'Wrapper around pynotify for the notification system. Notifier depends by the current theme'
+DESCRIPTION = 'Wrapper around pynotify for the notification system. \
+               Notifier depends by the current theme'
 AUTHOR = 'Andrea Stagi'
 WEBSITE = 'www.emesene.org'
 
-def themeNotification(title, text, picturePath=None,const=None):
-    
-    def pictureFactory(picture,constValue):
+def ThemeNotification(title, text, picture_path=None, const=None,
+                      callback=None, tooltip=None):
 
-        if(picture):
+    def picture_factory(picture, const_value):
+        ''' decides which theme picture to use '''
+
+        if picture:
             if(picture[:7]=="file://"):
                 return picture
-        if(constValue=='mail-received'):
+        if const_value == 'mail-received':
             return "file://" + gui.theme.email
-        elif(constValue=='file-transf-completed'):
+        elif const_value == 'file-transf-completed':
             return "file://" + gui.theme.transfer_success
-        elif(constValue=='file-transf-canceled'):
+        elif const_value == 'file-transf-canceled':
             return "file://" + gui.theme.transfer_unsuccess
-        elif(constValue=='message-im'):
+        elif const_value == 'message-im':
             return "file://" + gui.theme.user_def_imagetool
         else:
             return "file://" + gui.theme.user_def_imagetool
 
-    if (const=='message-im'):
+    if const == 'message-im':
         #In this case title is contact nick
         title = Renderers.msnplus_to_plain_text(title)
-    n = pynotify.Notification(title, text, pictureFactory(picturePath,const)) 
-    n.set_hint_string("append", "allowed")
-    n.show()
-
-
+    notification = pynotify.Notification(title, text,
+                            picture_factory(picture_path, const))
+    notification.set_hint_string("append", "allowed")
+    notification.show()
