@@ -242,11 +242,15 @@ for event_name in EVENTS:
     ename = "EVENT_%s" % fname.upper()
     event = getattr(Event, ename)
 
+    def make_cb(event):
+        '''avoid being bitten by the lambda/closure bug'''
+        return lambda self, *args: Session.add_event(self, event, *args)
+
     if event is None:
         raise Exception("Event %s not found fixme right now" % ename)
 
     if getattr(Session, fname, None) is not None:
         raise Exception("function collision %s fixme right now" % fname)
 
-    setattr(Session, fname, lambda self, *args: Session.add_event(self, event, *args))
+    setattr(Session, fname, make_cb(event))
 

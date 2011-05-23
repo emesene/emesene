@@ -41,6 +41,8 @@ class Signals(object):
                 if event.id_ < len(self.event_names):
                     event_name = self.event_names[event.id_].replace(' ', '_')
                     signal = getattr(self, event_name)
+                    # uncomment this to get the signals that are being fired
+                    # print event_name, event.args
                     signal.emit(*event.args)
             except Queue.Empty:
                 break
