@@ -89,6 +89,8 @@ class TextBox(gtk.ScrolledWindow):
 
     def scroll_to_end(self):
         '''scroll to the end of the content'''
+        end_iter = self._buffer.get_end_iter()
+        self._buffer.place_cursor(end_iter)
         self._textbox.scroll_mark_onscreen(self._buffer.get_insert())
 
     def _set_text(self, text):
