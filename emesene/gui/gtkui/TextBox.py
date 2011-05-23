@@ -89,8 +89,7 @@ class TextBox(gtk.ScrolledWindow):
 
     def scroll_to_end(self):
         '''scroll to the end of the content'''
-        end_iter = self._buffer.get_end_iter()
-        self._textbox.scroll_to_iter(end_iter, 0.0, yalign=1.0)
+        self._textbox.scroll_mark_onscreen(self._buffer.get_insert())
 
     def _set_text(self, text):
         '''set the text on the widget'''
