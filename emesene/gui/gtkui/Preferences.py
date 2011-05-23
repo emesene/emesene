@@ -700,7 +700,13 @@ class Theme(BaseTable):
     def _on_adium_theme_combo_changed(self, combo, property_name, values=None):
         #update adium variants combo
         self.on_combo_changed(combo, property_name, values)
-        self.on_redraw_main_screen(None)
+
+        image_name = self.session.config.get_or_set('image_theme', 'default')
+        emote_name = self.session.config.get_or_set('emote_theme', 'default')
+        sound_name = self.session.config.get_or_set('sound_theme', 'default')
+        conv_name = self.session.config.get_or_set('adium_theme',
+                'renkoo.AdiumMessagesStyle')
+        gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
         #clear combo
         self.adium_variant_combo.get_model().clear()
         self.fill_combo(self.adium_variant_combo,
