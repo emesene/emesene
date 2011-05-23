@@ -23,7 +23,7 @@ import cairo
 import gobject
 
 import gui
-
+import extension
 
 class Avatar(gtk.Widget):
     """AvatarWidget """
@@ -53,12 +53,14 @@ class Avatar(gtk.Widget):
         gtk.Widget.__init__(self)
         self.set_flags(self.flags() | gtk.NO_WINDOW)
 
+        avatar_manager = extension.get_default('avatar manager')
+        self.avatar_manager = avatar_manager()
+
         self.filename = ''
         self._pixbuf = None
         self._dimention = cellDimention
         self._radius_factor = cellRadius
         self._keyPosition = cellKeyPosition
-
 
         # variables related to animation
         self._crossFade = crossFade
@@ -236,10 +238,12 @@ class Avatar(gtk.Widget):
         scale_width = pix_width* scale_factor
         scale_height = pix_height* scale_factor
 
-        self.__translate_keyPostion(ctx, self._keyPosition,cell_width,cell_height,scale_width,scale_height)
+        self.avatar_manager.translate_key_postion(ctx, self._keyPosition,
+                cell_width, cell_height, scale_width, scale_height)
 
         scale_radius = self._dimention * self._radius_factor
-        self.__roundedrecMoonlight(ctx,0,0,scale_width,scale_height, scale_radius)
+        self.avatar_manager.rounded_rectangle(ctx, 0, 0, scale_width,
+                scale_height, scale_radius)
 
         ctx.clip()
         ctx.scale(scale_factor,scale_factor)
@@ -248,46 +252,5 @@ class Avatar(gtk.Widget):
         ctx.paint_with_alpha(alpha)
 
         ctx.restore()
-
-    def __translate_keyPostion(self,cr, key, w, h ,sw, sh):
-        if key in [gtk.ANCHOR_NORTH_WEST,gtk.ANCHOR_WEST,gtk.ANCHOR_SOUTH_WEST]:
-            x = 0
-        elif key in [gtk.ANCHOR_NORTH,gtk.ANCHOR_CENTER,gtk.ANCHOR_SOUTH]:
-            x = (w // 2) - (sw // 2)
-        else:
-            x = w - sw
-
-        if key in [gtk.ANCHOR_NORTH_WEST,gtk.ANCHOR_NORTH,gtk.ANCHOR_NORTH_EAST]:
-            y = 0
-        elif key in [gtk.ANCHOR_EAST,gtk.ANCHOR_CENTER,gtk.ANCHOR_WEST]:
-            y = (h // 2) - (sh // 2)
-        else:
-            y = h - sh
-
-        cr.translate(x, y)
-
-    def __roundedrecMoonlight(self, cr,x,y,w,h,radius=5):
-        # http://cairographics.org/cookbook/roundedrectangles/
-        # modified from mono moonlight aka mono silverlight
-        # test limits (without using multiplications)
-        # http://graphics.stanford.edu/courses/cs248-98-fall/Final/q1.html
-
-        ARC_TO_BEZIER = 0.55228475
-        if radius > (min(w,h)/2):
-            radius = (min(w,h)/2)
-        #approximate (quite close) the arc using a bezier curve
-        c = ARC_TO_BEZIER * radius
-
-        cr.new_path();
-        cr.move_to(x + radius, y)
-        cr.rel_line_to(w - 2 * radius, 0.0)
-        cr.rel_curve_to(c, 0.0, radius, c, radius, radius)
-        cr.rel_line_to(0, h - 2 * radius)
-        cr.rel_curve_to(0.0, c, c - radius, radius, -radius, radius)
-        cr.rel_line_to(-w + 2 * radius, 0)
-        cr.rel_curve_to(-c, 0, -radius, -c, -radius, -radius)
-        cr.rel_line_to(0, -h + 2 * radius)
-        cr.rel_curve_to(0.0, -c, radius - c, -radius, radius, -radius)
-        cr.close_path()
 
 gobject.type_register(Avatar)

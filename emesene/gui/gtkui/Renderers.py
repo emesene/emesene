@@ -654,6 +654,8 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         self._dimention = cellDimention
         self._radius_factor = cellRadius
         self._offline = False
+        avatar_manager = extension.get_default('avatar manager')
+        self.avatar_manager = avatar_manager()
 
         #icon source used to render grayed out offline avatar
         self._icon_source = gtk.IconSource()
@@ -800,56 +802,17 @@ class AvatarRenderer(gtk.GenericCellRenderer):
         scale_height = pix_height* scale_factor
 
         #tranlate position
-        if position in (gtk.ANCHOR_NW, gtk.ANCHOR_W, gtk.ANCHOR_SW):
-            x = 0
-        elif position in (gtk.ANCHOR_N, gtk.ANCHOR_CENTER, gtk.ANCHOR_S):
-            x = (dimention // 2) - (scale_width // 2)
-        else:
-            x = dimention - scale_width
-        if position in (gtk.ANCHOR_NW, gtk.ANCHOR_N, gtk.ANCHOR_NE):
-            y = 0
-        elif position in (gtk.ANCHOR_E, gtk.ANCHOR_CENTER, gtk.ANCHOR_W):
-            y = (dimention // 2) - (scale_height // 2)
-        else:
-            y = dimention - scale_height
-
-        ctx.translate(x, y)
+        self.avatar_manager.translate_key_postion(ctx, position, dimention,
+                dimention, scale_width, scale_height)
 
         if radius > 0 :
-            self._rounded_rectangle(ctx, 0, 0, scale_width, scale_height,
-                self._dimention * radius)
+            self.avatar_manager.rounded_rectangle(ctx, 0, 0, scale_width,
+                    scale_height, self._dimention * radius)
             ctx.clip()
 
         ctx.scale(scale_factor,scale_factor)
         ctx.set_source_pixbuf(pixbuf, 0, 0)
         ctx.paint_with_alpha(alpha)
         ctx.restore()
-
-    def _rounded_rectangle(self, cr, x, y, w, h, radius=5):
-        """Create rounded rectangle path"""
-        # http://cairographics.org/cookbook/roundedrectangles/
-        # modified from mono moonlight aka mono silverlight
-        # test limits (without using multiplications)
-        # http://graphics.stanford.edu/courses/cs248-98-fall/Final/q1.html
-
-        ARC_TO_BEZIER = 0.55228475
-
-        if radius > (min(w,h)/2):
-            radius = (min(w,h)/2)
-
-        #approximate (quite close) the arc using a bezier curve
-        c = ARC_TO_BEZIER * radius
-
-        cr.new_path();
-        cr.move_to ( x + radius, y)
-        cr.rel_line_to ( w - 2 * radius, 0.0)
-        cr.rel_curve_to ( c, 0.0, radius, c, radius, radius)
-        cr.rel_line_to ( 0, h - 2 * radius)
-        cr.rel_curve_to ( 0.0, c, c - radius, radius, -radius, radius)
-        cr.rel_line_to ( -w + 2 * radius, 0)
-        cr.rel_curve_to ( -c, 0, -radius, -c, -radius, -radius)
-        cr.rel_line_to (0, -h + 2 * radius)
-        cr.rel_curve_to (0.0, -c, radius - c, -radius, radius, -radius)
-        cr.close_path ()
 
 gobject.type_register(AvatarRenderer)

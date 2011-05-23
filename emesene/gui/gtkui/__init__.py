@@ -35,6 +35,7 @@ def gtk_main(Controller):
     import AccountMenu
     import Avatar
     import AvatarChooser
+    import AvatarManager
     import CallWidget
     import config_gtk
     import ContactMenu
@@ -129,6 +130,7 @@ def setup():
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
     extension.category_register('avatar', Avatar.Avatar)
     extension.category_register('avatar renderer', Renderers.AvatarRenderer)
+    extension.category_register('avatar manager', AvatarManager.AvatarManager)
 
     extension.category_register('preferences', Preferences.Preferences,
             single_instance=True)
