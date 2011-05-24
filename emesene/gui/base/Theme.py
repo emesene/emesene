@@ -233,10 +233,11 @@ class Theme(object):
     def get_emote_themes(self):
         '''return a list of names for the emote themes'''
         themes = []
+        pattern = re.compile(".AdiumEmoticonset", re.IGNORECASE)
 
         for theme in self.get_child_dirs(os.path.join('themes', 'emotes')):
             if os.path.isfile(os.path.join('themes','emotes',theme,'Emoticons.plist')):
-                theme = theme.replace('.AdiumEmoticonset', '')
+                theme = pattern.sub('', theme)
                 themes.append(theme)
 
         return themes
@@ -257,11 +258,12 @@ class Theme(object):
         themes = []
         AdiumThemesM = AdiumThemes.AdiumThemes()
         path_conv = os.path.join('themes', 'conversations')
+        pattern = re.compile(".AdiumMessageStyle", re.IGNORECASE)
 
         for theme in self.get_child_dirs(path_conv):
             if AdiumThemesM.validate(
                                 os.path.join(os.path.abspath(path_conv), theme))[0]:
-                theme = theme.replace('.AdiumMessageStyle', '')
+                theme = pattern.sub('', theme)
                 themes.append(theme)
 
         return themes
