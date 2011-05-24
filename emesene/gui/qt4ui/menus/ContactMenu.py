@@ -21,22 +21,22 @@ class ContactMenu(QtGui.QMenu):
 
         handler -- a e3common.Handler.ContactHandler
         '''
-        QtGui.QMenu.__init__(self, 'Contact', parent)
+        QtGui.QMenu.__init__(self, _('Contact'), parent)
         self._handler = handler
 
         
         self._action_d = {}
         action_d = self._action_d
-        action_d['add']     = QtGui.QAction(ICON('list-add'),       'Add',     self)
-        action_d['remove']  = QtGui.QAction(ICON('list-remove'),    'Remove',  self)
-        action_d['block']   = QtGui.QAction(ICON('dialog-cancel'),  'Block',   self)
+        action_d['add']     = QtGui.QAction(ICON('list-add'),       _('Add'),     self)
+        action_d['remove']  = QtGui.QAction(ICON('list-remove'),    _('Remove'),  self)
+        action_d['block']   = QtGui.QAction(ICON('dialog-cancel'),  _('Block'),   self)
         action_d['unblock'] = QtGui.QAction(ICON('dialog-ok-apply'), 
-                                       'Unblock', self)
-        action_d['move_to']     = QtGui.QMenu('Move to group',      self)
-        action_d['copy_to']     = QtGui.QMenu('Copy to group',      self)
-        action_d['remove_from'] = QtGui.QMenu('Remove from group',  self)
-        action_d['set_alias']   = QtGui.QAction('Set alias...',       self)
-        action_d['view_info']   = QtGui.QAction('View info...',       self)
+                                       _('Unblock'), self)
+        action_d['move_to']     = QtGui.QMenu(_('Move to group'),      self)
+        action_d['copy_to']     = QtGui.QMenu(_('Copy to group'),      self)
+        action_d['remove_from'] = QtGui.QMenu(_('Remove from group'),  self)
+        action_d['set_alias']   = QtGui.QAction(_('Set alias...'),       self)
+        action_d['view_info']   = QtGui.QAction(_('View info...'),       self)
         
         self.addActions( (action_d['add'],
                           action_d['remove'],

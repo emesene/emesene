@@ -22,7 +22,7 @@ class StatusMenu (QtGui.QMenu):
 
         on_status_selected -- a callback that receives the status when changed
         '''
-        QtGui.QMenu.__init__(self, 'Status', parent)
+        QtGui.QMenu.__init__(self, _('Status'), parent)
         self._on_status_selected = on_status_selected
         self._status_actions = {}
 

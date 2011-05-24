@@ -21,12 +21,12 @@ class GroupMenu(QtGui.QMenu):
 
         handler -- a e3common.Handler.GroupHandler
         """
-        QtGui.QMenu.__init__(self, 'Group', parent)
+        QtGui.QMenu.__init__(self, _('Group'), parent)
         self._handler = handler
 
-        self.add    = QtGui.QAction(ICON('list-add'),      'Add',    self)
-        self.remove = QtGui.QAction(ICON('list-remove'),   'Remove', self)
-        self.rename = QtGui.QAction(ICON('document-edit'), 'Rename', self)
+        self.add    = QtGui.QAction(ICON('list-add'),      _('Add'),    self)
+        self.remove = QtGui.QAction(ICON('list-remove'),   _('Remove'), self)
+        self.rename = QtGui.QAction(ICON('document-edit'), _('Rename'), self)
         
         self.addAction(self.add)
         self.addAction(self.remove)

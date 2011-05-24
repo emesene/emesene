@@ -53,15 +53,15 @@ class FileMenu(QtGui.QMenu):
 
         handler -- e3common.Handler.FileHandler
         '''
-        QtGui.QMenu.__init__(self, 'File', parent)
+        QtGui.QMenu.__init__(self, _('File'), parent)
         print 'Menu Bar'
         self._handler = handler
         status_menu_cls = extension.get_default('menu status')
         
         self.status_menu = status_menu_cls(handler.on_status_selected)
         disconnect_action = QtGui.QAction(ICON('network-disconnect'),
-                                          'Disconnect', self)
-        quit_action = QtGui.QAction(ICON('application-exit'), 'Quit', self)
+                                          _('Disconnect'), self)
+        quit_action = QtGui.QAction(ICON('application-exit'), _('Quit'), self)
         
         self.addMenu(self.status_menu)
         self.addAction(disconnect_action)
@@ -87,7 +87,7 @@ class ActionsMenu(QtGui.QMenu):
 
         handler -- e3common.Handler.ActionsHandler
         '''
-        QtGui.QMenu.__init__(self, 'Actions', parent)
+        QtGui.QMenu.__init__(self, _('Actions'), parent)
         print 'Actions Menu'
         self._handler = handler
 

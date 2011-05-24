@@ -20,10 +20,10 @@ class ProfileMenu(QtGui.QMenu):
 
         handler -- a e3common.Handler.AccountHandler
         '''
-        QtGui.QMenu.__init__(self, 'Profile', parent)
+        QtGui.QMenu.__init__(self, _('Profile'), parent)
         self._handler = handler
 
-        self.change_profile = QtGui.QAction('Change profile', self)
+        self.change_profile = QtGui.QAction(_('Change profile'), self)
         self.addAction(self.change_profile)
         
         self.setIcon(ICON('document-properties'))
