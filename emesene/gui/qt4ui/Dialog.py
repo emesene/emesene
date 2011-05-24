@@ -278,7 +278,7 @@ class Dialog(object):
                     
 
         
-        dialog           = OkCancelDialog()
+        dialog           = OkCancelDialog(_('Connection preferences'))
         session_lbl      = QtGui.QLabel(_('Session'))
         session_cmb      = QtGui.QComboBox()
         server_host_lbl  = QtGui.QLabel(_('Server'))
