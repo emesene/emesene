@@ -42,9 +42,11 @@ class ContactMenu(QtGui.QMenu):
                           action_d['remove'],
                           action_d['block'],
                           action_d['unblock']) )
+        self.addSeparator()
         self.addMenu(     action_d['move_to'])
         self.addMenu(     action_d['copy_to'])
         self.addMenu(     action_d['remove_from'])
+        self.addSeparator()
         self.addActions( (action_d['set_alias'],
                           action_d['view_info']) )
         
@@ -65,7 +67,7 @@ class ContactMenu(QtGui.QMenu):
         action_d['view_info'].triggered.connect(
             lambda *args: self._handler.on_view_information_selected())
         
-        
+
         
     def _update_groups(self):
         '''Updates the three submenus whenever ContactMenu is shown'''
