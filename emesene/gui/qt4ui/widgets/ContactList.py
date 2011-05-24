@@ -82,14 +82,14 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         gui.ContactList.fill(self, clear)
         
     def get_contact_selected(self):
-        idx_list = self.selectedIndexes()
-        index = idx_list[0]
         print '*** GET CONTACT SELECTED ***'
+        idx_list = self.selectedIndexes()
+        if len(idx_list) != 1 :
+            print 'Returning None because of len!=1'
+            return None
+        index = idx_list[0]
         print index
         print ' --> (%d, %d)[%s]' % (index.row(), index.column(), index.isValid())
-        if len(idx_list) > 1 :
-            print 'Returning None because of len>1'
-            return None
         if not index.parent().isValid():
             print "Returning None because of group."
             return None
