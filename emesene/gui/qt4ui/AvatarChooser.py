@@ -31,9 +31,11 @@ class AvatarChooser(Dialog.OkCancelDialog):
         self._session = session
         self._avatar_manager = gui.base.AvatarManager(session)
         # view names:
-        self._vn = ['Used pictures', 'System pictures', 'Contact pictures']
+        self._vn = [ _('Used pictures'   ), 
+                     _('System pictures' ), 
+                     _('Contact pictures')  ]
         self._view_with_selection = None
-        self._current_avatar = session.config_dir.get_path("last_avatar")
+        self._current_avatar = session.config_dir.get_path('last_avatar')
         self._widget_d = {}
         
         self._setup_ui()
@@ -58,8 +60,8 @@ class AvatarChooser(Dialog.OkCancelDialog):
         widget_d['group_box']    = QtGui.QGroupBox()
         widget_d['preview_dpic'] = widgets.DisplayPic(self._session,
                                                              clickable=False)
-        widget_d['add_btn']      = QtGui.QPushButton('Add...')
-        widget_d['remove_btn']   = QtGui.QPushButton('Remove')
+        widget_d['add_btn']      = QtGui.QPushButton(_('Add...'))
+        widget_d['remove_btn']   = QtGui.QPushButton(_('Remove'))
         widget_d[self._vn[0]]    = QtGui.QListView()
         widget_d[self._vn[1]]    = QtGui.QListView()
         widget_d[self._vn[2]]    = QtGui.QListView()
@@ -93,7 +95,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
             listview.setModel         (model)
             listview.setSelectionModel(selection_model)
             listview.setItemDelegate  (delegate)
-        widget_d['group_box'].setTitle('Preview')
+        widget_d['group_box'].setTitle(_('Preview'))
         widget_d['preview_dpic'].set_display_pic_of_account()
         widget_d['add_btn'].setIcon(QtGui.QIcon.fromTheme('list-add'))
         widget_d['remove_btn'].setIcon(QtGui.QIcon.fromTheme('list-remove'))
@@ -176,7 +178,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
                 add_and_select(filename)
         
         filename = QtGui.QFileDialog.getOpenFileName(
-                                         self, 'Select an image', 
+                                         self, _('Select an image'), 
                                          QtCore.QString(),
                                          'Images (*.jpeg *.jpg *.png *.gif')
         if filename.isEmpty():
@@ -216,7 +218,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
             if os.path.exists(filename):
                 self._avatar_manager.set_as_avatar(filename)
             else:
-                print "Error"
+                print 'Error'
         Dialog.OkCancelDialog._on_accept(self)
         
 

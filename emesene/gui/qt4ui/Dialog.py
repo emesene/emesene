@@ -30,9 +30,9 @@ class Dialog(object):
         don't make any control, you are just implementing a GUI! :P'''
         print response_cb
         dialog      = OkCancelDialog(title)
-        text_label  = QtGui.QLabel("E-mail:")
+        text_label  = QtGui.QLabel(_('E-mail:'))
         text_edit   = QtGui.QLineEdit()
-        group_label = QtGui.QLabel("Group:")
+        group_label = QtGui.QLabel(_('Group:'))
         group_combo = QtGui.QComboBox()
         
         lay = QtGui.QGridLayout()
@@ -54,7 +54,7 @@ class Dialog(object):
         print groups
         groups.sort()
         
-        group_combo.addItem('<i>No Group</i>', '')
+        group_combo.addItem('<i>' + _('No Group') + '</i>', '')
         for group in groups:
             group_combo.addItem(group.name, group.name)
         
@@ -67,7 +67,7 @@ class Dialog(object):
         
         
     @classmethod
-    def add_group(cls, response_cb, title="Add group"):
+    def add_group(cls, response_cb, title=_('Add group')):
         '''show a dialog asking for a group name, the response callback
         receives the response (stock.ADD, stock.CANCEL, stock.CLOSE)
         and the name of the group, the control for a valid group is made
@@ -77,7 +77,7 @@ class Dialog(object):
         cb args: response, group_name'''
         print response_cb
         dialog = OkCancelDialog(title)
-        group_label = QtGui.QLabel('New group\'s name:')
+        group_label = QtGui.QLabel(_('New group\'s name:'))
         group_edit  = QtGui.QLineEdit()
         
         lay = QtGui.QHBoxLayout()
@@ -96,30 +96,30 @@ class Dialog(object):
         
         
     @classmethod
-    def rename_group(cls, group, response_cb, title=_("Rename group")):
+    def rename_group(cls, group, response_cb, title=_('Rename group')):
         '''show a dialog with the group name and ask to rename it, the
         response callback receives stock.ACCEPT, stock.CANCEL or stock.CLOSE
         the old and the new name.
         cb args: response, group, new_name
         '''
-        dialog = EntryDialog('New group name:', group.name, title)
+        dialog = EntryDialog(_('New group name:'), group.name, title)
         response = dialog.exec_()
         response_cb(response, group, dialog.text())
         
     @classmethod
-    def crop_image(cls, response_cb, filename, title='Select image area'):
+    def crop_image(cls, response_cb, filename, title=_('Select image area')):
         '''Shows a dialog to select a portion of an image.'''
         dialog = OkCancelDialog(title, expanding=True)
         
         # Actions
         act_dict = {}
-        act_dict['rotate_left' ] = QtGui.QAction('Rotate Left'    , dialog)
-        act_dict['rotate_right'] = QtGui.QAction('Rotate right'   , dialog)
-        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit'    , dialog)
-        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit'    , dialog)
-        act_dict['reset_zoom']   = QtGui.QAction('Reset zoom'     , dialog)
-        act_dict['select_all']   = QtGui.QAction('Select All'     , dialog)
-        act_dict['select_unsc']  = QtGui.QAction('Select Unscaled', dialog)
+        act_dict['rotate_left' ] = QtGui.QAction( _('Rotate Left'    ), dialog)
+        act_dict['rotate_right'] = QtGui.QAction( _('Rotate right'   ), dialog)
+        act_dict['fit_zoom']     = QtGui.QAction( _('Zoom to fit'    ), dialog)
+        act_dict['fit_zoom']     = QtGui.QAction( _('Zoom to fit'    ), dialog)
+        act_dict['reset_zoom']   = QtGui.QAction( _('Reset zoom'     ), dialog)
+        act_dict['select_all']   = QtGui.QAction( _('Select All'     ), dialog)
+        act_dict['select_unsc']  = QtGui.QAction( _('Select Unscaled'), dialog)
         
         # widgets
         toolbar = QtGui.QToolBar()
@@ -180,7 +180,7 @@ class Dialog(object):
         
         
     @classmethod
-    def error(cls, message, response_cb=None, title=_("Error!")):
+    def error(cls, message, response_cb=None, title=_('Error!')):
         '''show an error dialog displaying the message, this dialog should
         have only the option to close and the response callback is optional
         since in few cases one want to know when the error dialog was closed,
@@ -319,7 +319,7 @@ class Dialog(object):
         grid_lay.addWidget(pwd_edit, 9, 2)
         dialog.setLayout(grid_lay)
         
-        dialog.setWindowTitle('Preferences')
+        dialog.setWindowTitle(_('Preferences'))
         server_host_edit.setText(service_host)
         server_port_edit.setText(service_port)
         proxy_host_edit.setText(proxy.host or '')
@@ -385,7 +385,7 @@ class Dialog(object):
         
     @classmethod
     def set_contact_alias(cls, account, alias, response_cb,
-                            title=_("Set alias")):
+                            title=_('Set alias')):
         '''show a dialog showing the current alias and asking for the new
         one, the response callback receives,  the response
         (stock.ACCEPT, stock.CANCEL, stock.CLEAR <- to remove the alias
@@ -394,7 +394,7 @@ class Dialog(object):
         def _on_reset():
             dialog.done(gui.stock.CLEAR)
             
-        dialog = EntryDialog(label='New alias:', text=alias, title=title)
+        dialog = EntryDialog(label=_('New alias:'), text=alias, title=title)
         reset_btn = dialog.add_button(QtGui.QDialogButtonBox.Reset)
         reset_btn.clicked.connect(_on_reset)
         

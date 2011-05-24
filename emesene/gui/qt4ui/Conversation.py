@@ -75,14 +75,14 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # Actions
         icon_path = gui.theme.emote_to_path(':)')[6:]
         action_dict['add_smiley']   = QtGui.QAction(
-                            QtGui.QIcon(icon_path), "Add Smiley", self)
+                            QtGui.QIcon(icon_path), _('Add Smiley'), self)
         icon_path = gui.theme.emote_to_path(':S')[6:]
         action_dict['send_nudge']   = QtGui.QAction(
-                            QtGui.QIcon(icon_path),"Send Nudge", self)
+                            QtGui.QIcon(icon_path), _('Send Nudge'), self)
         action_dict['change_font']  = QtGui.QAction(
-                            QtGui.QIcon(""),  "Change Font", self)
+                            QtGui.QIcon(""),  _('Change Font'), self)
         action_dict['change_color'] = QtGui.QAction(
-                            QtGui.QIcon(""), "Change Color", self) 
+                            QtGui.QIcon(""), _('Change Color'), self) 
     
         
         # TOP LEFT
@@ -95,7 +95,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d['toolbar'] = QtGui.QToolBar(self)
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         widget_d['chat_input'] = Widgets.ChatInput()
-        widget_d['send_btn'] = QtGui.QPushButton("Send")
+        widget_d['send_btn'] = QtGui.QPushButton(_('Send'))
         
         text_edit_lay = QtGui.QHBoxLayout()
         text_edit_lay.addWidget(widget_d['chat_input'])
