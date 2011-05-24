@@ -17,7 +17,7 @@ class StatusCombo(QtGui.QComboBox):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to select the status'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
 

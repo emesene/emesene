@@ -20,7 +20,7 @@ class ChatInput (QtGui.QTextEdit):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'A widget used to to edit chat lines'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     

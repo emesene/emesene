@@ -18,7 +18,7 @@ class DisplayPic (QtGui.QLabel):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to display avatars, aka display pictures'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
 

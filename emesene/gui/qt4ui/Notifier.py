@@ -10,7 +10,7 @@ class Notifier (object):
     # pylint: disable=W0612
     NAME = 'Notifier'
     DESCRIPTION = 'The notifier to notify the notified user :)'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     

@@ -13,7 +13,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to display the conversation screen'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     

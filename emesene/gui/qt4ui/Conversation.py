@@ -18,7 +18,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to display a single conversation'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     

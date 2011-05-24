@@ -14,7 +14,7 @@ class TrayIcon (QtGui.QSystemTrayIcon):
     # pylint: disable=W0612
     NAME = 'TrayIcon'
     DESCRIPTION = 'Qt4 Tray Icon'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     

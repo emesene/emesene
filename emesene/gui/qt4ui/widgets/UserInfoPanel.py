@@ -13,7 +13,7 @@ class UserInfoPanel (QtGui.QWidget):
     other contact's info in a conversation window'''
     # pylint: disable=W0612
     NAME = 'MainPage'
-    DESCRIPTION = 'The widget used to to display tcontact\'s info in ' \
+    DESCRIPTION = 'The widget used to to display contact\'s info in ' \
                   'the conversation widget'
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''

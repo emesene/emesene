@@ -19,7 +19,7 @@ class LoginPage(QtGui.QWidget):
     # pylint: disable=W0612
     NAME = 'LoginPage'
     DESCRIPTION = 'The widget used to to dislay the login screen'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     

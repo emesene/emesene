@@ -13,7 +13,7 @@ class TopLevelWindow (QtGui.QMainWindow):
     # pylint: disable=W0612
     NAME = 'TopLevelWindow'
     DESCRIPTION = 'The window used to contain all the _content of emesene'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
 

@@ -17,7 +17,7 @@ class ImageAreaSelector (QtGui.QWidget):
      # pylint: disable=W0612
     NAME = 'ImageAreaSelector'
     DESCRIPTION = 'A widget used to select part of an image'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     

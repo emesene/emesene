@@ -15,7 +15,7 @@ class MainPage (QtGui.QWidget):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to dislay the main screen'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     

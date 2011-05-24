@@ -15,7 +15,7 @@ class ChatOutput (QtGui.QTextBrowser):
     # pylint: disable=W0612
     NAME = 'ChatOutput'
     DESCRIPTION = 'A widget to display the conversation messages'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     
