@@ -346,9 +346,9 @@ class ContactListModel (QtGui.QStandardItemModel):
         if uid in [self.NO_GRP_UID, 
                    self.ONL_GRP_UID, 
                    self.OFF_GRP_UID]:
-            group_name = {self.NO_GRP_UID  : u'No Group',
-                          self.OFF_GRP_UID : u'Offline' ,
-                          self.ONL_GRP_UID : u'Online'  }
+            group_name = {self.NO_GRP_UID  : _(u'No Group'),
+                          self.OFF_GRP_UID : _(u'Offline' ),
+                          self.ONL_GRP_UID : _(u'Online'  ) }
             new_group_item = QtGui.QStandardItem(group_name[uid])
             new_group_item.setData(uid, Role.UidRole)
             new_group_item.setData(0, Role.TotalCountRole)

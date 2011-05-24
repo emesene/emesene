@@ -23,7 +23,7 @@ class SmileyPopupChooser (QtGui.QDockWidget):
     # pylint: enable=W0612
     
     _FADE_TIME = 200
-    emoticon_selected = QtCore.pyqtSignal("QString")
+    emoticon_selected = QtCore.pyqtSignal('QString')
     
     def __init__(self, parent=None):
         '''Constructor'''
@@ -146,11 +146,11 @@ class SmileyButton (QtGui.QPushButton):
     smiley chooser panel.
     This is a KPushButton with the shortcut as tooltip, and 
     fixed dimension.'''
-    selected = QtCore.pyqtSignal("QString")
+    selected = QtCore.pyqtSignal('QString')
     def __init__(self, icon, tooltip, shortcut,  parent=None):
         '''Constructor'''
         QtGui.QPushButton.__init__(self, icon, QtCore.QString(), )
-        self.setToolTip("<b>%s</b> %s" % (shortcut, tooltip) )
+        self.setToolTip('<b>%s</b> %s' % (shortcut, tooltip) )
         self.shortcut = QtCore.QString(shortcut)
         self.clicked.connect(self._emit_signal)
         
