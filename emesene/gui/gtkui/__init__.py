@@ -37,7 +37,6 @@ def gtk_main(Controller):
     import AvatarChooser
     import AvatarManager
     import CallWidget
-    import config_gtk
     import ContactMenu
     import ContactList
     import SyncTool
@@ -190,7 +189,6 @@ def setup():
         ConversationToolbar.ConversationToolbar)
     extension.category_register('plugin window', \
         PluginWindow.PluginWindow)
-    extension.category_register('preferences dialog', config_gtk.build_window)
     extension.category_register('image area selector', ImageAreaSelector.ImageAreaSelectorDialog)
     extension.category_register('filetransfer pool', FileTransferBarWidget.FileTransferBarWidget)
     extension.category_register('filetransfer widget', FileTransferWidget.FileTransferWidget)
