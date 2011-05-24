@@ -24,18 +24,17 @@ class StatusMenu (QtGui.QMenu):
         '''
         QtGui.QMenu.__init__(self, _('Status'), parent)
         self._on_status_selected = on_status_selected
-        self._status_actions = {}
 
-        for stat in e3.status.ORDERED:
-            temp_item = QtGui.QAction(
-                    QtGui.QIcon(QtGui.QPixmap(gui.theme.status_icons[stat])),
-                    e3.status.STATUS[stat].capitalize(),
+        for status in e3.status.ORDERED:
+            action = QtGui.QAction(
+                    QtGui.QIcon(QtGui.QPixmap(gui.theme.status_icons[status])),
+                    e3.status.STATUS[status].capitalize(),
                     self)
-            temp_item.triggered.connect(self._on_activate)
-            self._status_actions[stat] = temp_item
-            self.addAction(temp_item)
+            action.setData(status)
+            self.triggered.connect(self._on_activate)
+            self.addAction(action)
 
-    def _on_activate(self):
+    def _on_activate(self, action):
         '''method called when a status menu item is called'''
-
-        self._on_status_selected(e3.status.ONLINE)
+        status = action.data().toPyObject()
+        self._on_status_selected(status)
