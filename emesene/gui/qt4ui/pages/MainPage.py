@@ -50,6 +50,8 @@ class MainPage (QtGui.QWidget):
         # Session's Signals: [Remember to unsubscribe! O_O]
         session.signals.profile_get_succeed.subscribe(
                                 self._on_ss_profile_get_succeed)
+        session.signals.status_change_succeed.subscribe(
+                                self._widget_dict['status_combo'].set_status)
         
         
         
