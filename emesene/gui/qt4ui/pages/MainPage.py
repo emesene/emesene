@@ -65,7 +65,7 @@ class MainPage (QtGui.QWidget):
         widget_dict['nick_edit'] = nick_edit_cls()
         widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True, 
             empty_message=QtCore.QString(
-                "<u>Click here to set a personal message...</u>"))
+                _('<u>Click here to set a personal message...</u>')))
         widget_dict['current_media'] = QtGui.QLabel()
         widget_dict['status_combo'] = status_combo_cls()
         widget_dict['display_pic'] = avatar_cls(self._session)

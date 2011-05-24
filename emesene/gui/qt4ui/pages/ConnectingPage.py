@@ -30,7 +30,7 @@ class ConnectingPage(QtGui.QWidget):
         self._on_cancel_login = on_cancel_login
         self._avatar_path = avatar_path
         self._config = config
-        self._reconnect_txt = u'Reconnecting in %d seconds'
+        self._reconnect_txt = _(u'Reconnecting in %d seconds')
         self._reconnect_time = None
         self._timer = QtCore.QTimer(self)
         
@@ -52,7 +52,7 @@ class ConnectingPage(QtGui.QWidget):
                                              clickable=False)
         widget_d['label']        = QtGui.QLabel()
         widget_d['progress_bar'] = QtGui.QProgressBar()
-        widget_d['cancel_btn']   = QtGui.QPushButton('Cancel login')
+        widget_d['cancel_btn']   = QtGui.QPushButton(_('Cancel login'))
         
         lay = QtGui.QVBoxLayout()
         lay.addSpacing(40)
@@ -94,8 +94,8 @@ class ConnectingPage(QtGui.QWidget):
     
     def clear_connect(self):
         self._timer.stop()
-        self._widget_d['label'].setText(u'Please wait while signing in...')
-        self._widget_d['cancel_btn'].setText(u'Cancel login')
+        self._widget_d['label'].setText(_(u'Please wait while signing in...'))
+        self._widget_d['cancel_btn'].setText(_(u'Cancel login'))
         try:
             self._widget_d['cancel_btn'].clicked.disconnect()
         except TypeError:
@@ -107,7 +107,7 @@ class ConnectingPage(QtGui.QWidget):
                      proxy, use_http, service):
         print callback
         self._widget_d['label'].setText(self._reconnect_txt % 30)
-        self._widget_d['cancel_btn'].setText(u'Reconnect now')
+        self._widget_d['cancel_btn'].setText(_(u'Reconnect now'))
         self._widget_d['cancel_btn'].clicked.disconnect()
         self._widget_d['cancel_btn'].clicked.connect(self._on_reconnect_now)
         

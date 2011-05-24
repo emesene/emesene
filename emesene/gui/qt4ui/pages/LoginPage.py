@@ -105,13 +105,13 @@ class LoginPage(QtGui.QWidget):
         widget_d['password_edit'] = QtGui.QLineEdit()
         widget_d['status_combo']  = status_combo_cls()
         widget_d['save_account_chk'] =    \
-                QtGui.QCheckBox("Remember this account")
+                QtGui.QCheckBox(_('Remember this account'))
         widget_d['save_password_chk'] =   \
-                QtGui.QCheckBox("Save password")
+                QtGui.QCheckBox(_('Save password'))
         widget_d['auto_login_chk'] =  \
-                QtGui.QCheckBox("Login automagically")
+                QtGui.QCheckBox(_('Login automagically'))
         widget_d['advanced_btn']  = QtGui.QToolButton() 
-        widget_d['login_btn'] = QtGui.QPushButton("Login")
+        widget_d['login_btn'] = QtGui.QPushButton(_('Login'))
 
         lay = QtGui.QVBoxLayout()
         lay.addSpacing(40)
