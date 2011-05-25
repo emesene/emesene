@@ -44,13 +44,12 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.setSortingEnabled(True)
-        self.viewport().setStyleSheet( "QWidget{                    \
+        self.viewport().setStyleSheet( 'QWidget{                    \
             background-attachment: fixed;           \
             background-origin: content;             \
             background-position: bottom left;       \
             background-repeat: no-repeat;           \
-            background-clip: content;               \
-            background-image: url(amsn2/ui/front_ends/kde4/background.png);}" )
+            background-clip: content;}')
             # background-color: rgb(178, 216, 255);   \
         #self.verticalScrollBar().setStyleSheet("QScrollBar:vertical{}")
         self.setIndentation(0)
