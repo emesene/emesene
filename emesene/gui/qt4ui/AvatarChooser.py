@@ -26,7 +26,8 @@ class AvatarChooser(Dialog.OkCancelDialog):
         '''Constructor, response_cb receive the response number, the new file
         selected and a list of the paths on the icon view.
         picture_path is the path of the current display picture'''
-        Dialog.OkCancelDialog.__init__(self, expanding=True, parent=parent)
+        Dialog.OkCancelDialog.__init__(self, _('Avatar chooser'), 
+                                       expanding=True, parent=parent)
         
         self._session = session
         self._avatar_manager = gui.base.AvatarManager(session)
