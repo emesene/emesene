@@ -123,11 +123,11 @@ class OptionsMenu(QtGui.QMenu):
         self.handler = handler
 
         # "Show" submenu
-        self.show_menu = QtGui.QMenu('Show...')
+        self.show_menu = QtGui.QMenu(_('Show...'))
 
-        show_offline =      QtGui.QAction('Show _offline contacts', self)
-        show_empty_groups = QtGui.QAction('Show _empty groups', self)
-        show_blocked =      QtGui.QAction('Show _blocked contacts', self)
+        show_offline =      QtGui.QAction(_('Show offline contacts'), self)
+        show_empty_groups = QtGui.QAction(_('Show empty groups'), self)
+        show_blocked =      QtGui.QAction(_('Show blocked contacts'), self)
         
         show_offline.setCheckable(True)
         show_empty_groups.setCheckable(True)
@@ -149,11 +149,11 @@ class OptionsMenu(QtGui.QMenu):
         # ----
         
         order_action_group = QtGui.QActionGroup(self)
-        by_status = QtGui.QAction('Order by _status', self)
-        by_group  = QtGui.QAction('Order by _group', self)
-        group_offline = QtGui.QAction('G_roup offline contacts', self)
+        by_status = QtGui.QAction(_('Order by status'), self)
+        by_group  = QtGui.QAction(_('Order by group'), self)
+        group_offline = QtGui.QAction(_('Group offline contacts'), self)
         preferences = QtGui.QAction(ICON('preferences-other'),
-                                    'Preferences...', self)
+                                    _('Preferences...'), self)
         
         self.addAction(by_status)
         self.addAction(by_group)
@@ -198,9 +198,9 @@ class HelpMenu(QtGui.QMenu):
         print 'Help Menu'
         self.handler = handler
 
-        self.website = QtGui.QAction('_Website', self)
-        self.about =   QtGui.QAction('About',    self)
-        self.debug =   QtGui.QAction('Debug',    self)
+        self.website = QtGui.QAction(_('Website'), self)
+        self.about =   QtGui.QAction(_('About'),    self)
+        self.debug =   QtGui.QAction(_('Debug'),    self)
         
         self.addAction(self.website)
         self.addAction(self.about)
