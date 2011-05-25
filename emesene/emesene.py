@@ -283,8 +283,6 @@ class Controller(object):
         #let's start dbus
         if self.dbus_ext is not None:
             self.dbus_ext.set_new_session(self.session)
-        if self.network_checker is not None:
-            self.network_checker.set_new_session(self.session)
 
     def close_session(self, do_exit=True):
         '''close session'''
@@ -526,6 +524,9 @@ class Controller(object):
         self.set_default_extensions_from_config()
         self._sync_emesene1()
         self.logged_in = True
+
+        if self.network_checker is not None:
+            self.network_checker.set_new_session(self.session)
 
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):
