@@ -311,7 +311,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         '''Add a group.'''
         if not self._config.b_order_by_group:
             return
-        new_group_item = QtGui.QStandardItem( QtCore.QString( 
+        new_group_item = QtGui.QStandardItem(unicode( 
                     xml.sax.saxutils.escape(group.name)))
         new_group_item.setData(group.identifier, Role.UidRole)
         new_group_item.setData(0, Role.TotalCountRole)
