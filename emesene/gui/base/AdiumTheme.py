@@ -78,7 +78,9 @@ class AdiumTheme(object):
         with the vars replaced
         '''
         # fallback madness, some repetition but well..
-        if not msg.first:
+        if (msg.type == "status" and self.status):
+            template = self.status
+        elif not msg.first:
             if self.incoming_next is None:
                 if self.incoming is None:
                     template = self.content
@@ -89,10 +91,7 @@ class AdiumTheme(object):
         elif self.incoming is None:
             template = self.content
         else:
-            if (msg.type=="status" and self.status):
-                template = self.status
-            else:
-                template = self.incoming
+            template = self.incoming
 
         return self.replace(template, msg, style, cedict, cedir)
 
@@ -101,7 +100,9 @@ class AdiumTheme(object):
         with the vars replaced
         '''
         # fallback madness, some repetition but well..
-        if not msg.first:
+        if (msg.type == "status" and self.status):
+            template = self.status
+        elif not msg.first:
             if self.outgoing_next is None:
                 if self.outgoing is None:
                     if self.incoming is None:
@@ -118,10 +119,7 @@ class AdiumTheme(object):
             else:
                 template = self.incoming
         else:
-            if (msg.type=="status" and self.status):
-                template = self.status
-            else:
-                template = self.outgoing
+            template = self.outgoing
 
         return self.replace(template, msg, style, cedict, cedir)
 

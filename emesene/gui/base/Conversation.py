@@ -289,8 +289,8 @@ class Conversation(object):
             self.play_type()
 
         elif message.type == e3.Message.TYPE_NUDGE:
-            self.output.information(self.formatter, contact,
-                    _('%s just sent you a nudge!') % (contact.display_name,))
+            message.body = _('%s just sent you a nudge!') % (contact.display_name,)
+            self.output.information(self.formatter, contact, message)
             self.play_nudge()
 
         self.first = False

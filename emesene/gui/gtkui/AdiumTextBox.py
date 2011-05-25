@@ -113,6 +113,10 @@ class OutputView(webkit.WebView):
             html = self.theme.format_outgoing(msg, style, cedict, cedir)
             self.last_incoming = False
 
+        if msg.type == "status":
+            self.last_incoming = None
+            msg.first = True
+
         if msg.first:
             function = "appendMessage('" + html + "')"
         else:
