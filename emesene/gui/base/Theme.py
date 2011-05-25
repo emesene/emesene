@@ -20,18 +20,13 @@ import os
 import re
 
 import AdiumThemes
+import AdiumEmoteTheme
 from e3 import status
 
 import plistlib
 
 class Theme(object):
     '''this class contains all the paths and information regarding a theme'''
-    # if you add a smilie key twice you will have a nice stack overflow :D
-    EMOTES = {} # Emotes defined under set_theme by the Emoticons.plist file found in the theme folder
-    EMOTE_FILES = []
-
-    EMOTE_REGEX_STR = ""
-    EMOTE_REGEX = None
 
     SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
             'send.wav', 'type.wav']
@@ -43,6 +38,7 @@ class Theme(object):
     def __init__(self, image_name="default", emote_name="default",
             sound_name="default", conv_name='renkoo.AdiumMessageStyle', conv_variant = ''):
         '''class constructor'''
+        self.emote_theme = None
         self.set_theme(image_name, emote_name, sound_name, conv_name, conv_variant)
 
     def set_theme(self, image_name, emote_name, sound_name, conv_name, conv_variant=''):
@@ -164,49 +160,15 @@ class Theme(object):
         self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
         self.emote_config_file = os.path.join(self.emote_path, "Emoticons.plist")
 
-        if os.path.isfile(self.emote_config_file):
-            emote_data=plistlib.readPlist(file(self.emote_config_file))
-            for key, val in emote_data['Emoticons'].iteritems():
-                Theme.EMOTE_FILES.append(key)
-                pointer_name = val['Name']
-                pointer_key = val['Equivalents'][0]
-                Theme.EMOTES[pointer_key] = pointer_name
-                for v in val['Equivalents'][1:]:
-                    if v != "":
-                        Theme.EMOTES[v] = Theme.EMOTES[pointer_key]
-            for key2 in Theme.EMOTES:
-                Theme.EMOTE_REGEX_STR += re.escape(key2) + "|"
-            Theme.EMOTE_REGEX = re.compile("("+Theme.EMOTE_REGEX_STR+")")
+        if not os.path.isfile(self.emote_config_file):
+            #Fallback to default theme
+            self.emote_path = os.path.join('themes', 'emotes', 'default')
 
-    def emote_to_path(self, shortcut, remove_protocol=False):
-        '''return a string representing the path to load the emote if it exist
-        None otherwise'''
+        self.emote_theme = AdiumEmoteTheme.AdiumEmoteTheme(self.emote_path)
 
-        if shortcut not in Theme.EMOTES:
-            return None
-
-        path = os.path.join(self.emote_path, Theme.EMOTES[shortcut]) + '.png'
-        path = os.path.abspath(path)
-
-        if os.access(path, os.R_OK) and os.path.isfile(path):
-            path = path.replace("\\", "/")
-
-            if remove_protocol:
-                return path
-            else:
-                if os.name == "nt":
-                    #if path[1] == ":":
-                    #    path = path[2:]
-                    path = "localhost/"+path
-
-                return 'file://' + path
-
-        return None
-
-    def get_emotes_count(self):
-        '''return the number of emoticons registered'''
-        return len(set(Theme.EMOTES.values()))
-
+    def get_emote_theme(self):
+        ''' return the current emote theme '''
+        return self.emote_theme
 
     def is_valid_theme(self, file_list, path):
         """
@@ -278,14 +240,4 @@ class Theme(object):
             return os.walk(dir_path).next()[1]
         except StopIteration:
             return ()
-
-    def split_smilies(self, text):
-        '''split text in smilies, return a list of tuples that contain
-        a boolean as first item indicating if the text is an emote or not
-        and the text as second item.
-        example : [(False, "hi! "), (True, ":)")]
-        '''
-        keys = Theme.EMOTES.keys()
-        return [(item in keys, item) for item in Theme.EMOTE_REGEX.split(text)
-                if item is not None]
 

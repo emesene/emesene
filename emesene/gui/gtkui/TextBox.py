@@ -237,10 +237,11 @@ class InputText(TextBox):
             return True
 
         self.changed = False
+        emote_theme = gui.theme.get_emote_theme()
 
-        for code in gui.Theme.EMOTES:
+        for code in emote_theme.get_emotes():
             start = self._buffer.get_start_iter()
-            path = gui.theme.emote_to_path(code, True)
+            path = emote_theme.emote_to_path(code, True)
             result = start.forward_search(code,
                     gtk.TEXT_SEARCH_VISIBLE_ONLY)
 

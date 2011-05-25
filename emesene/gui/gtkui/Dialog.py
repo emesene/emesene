@@ -1207,7 +1207,7 @@ class EmotesWindow(gtk.Window):
         self.max_width = max_width
         self.emote_selected = emote_selected
 
-        emotes_count = gui.theme.get_emotes_count() # TODO: remove me
+        emotes_count = gui.theme.get_emote_theme().get_emotes_count() # TODO: remove me
         rows = emotes_count/max_width
 
         self.table = gtk.Table(max_width, rows)
@@ -1260,7 +1260,10 @@ class EmotesWindow(gtk.Window):
         count = 0
         column = 0
         row = 0
-        for shortcut, name in gui.theme.EMOTES.iteritems():
+
+        emote_theme = gui.theme.get_emote_theme()
+
+        for shortcut, name in emote_theme.get_emotes().iteritems():
             if name in emotes:
                 continue
             self.shortcut_list.append(shortcut)
@@ -1269,7 +1272,7 @@ class EmotesWindow(gtk.Window):
             column = count % columns
             row = count / columns
             button = gtk.Button()
-            path = gui.theme.emote_to_path(shortcut, True)
+            path = emote_theme.emote_to_path(shortcut, True)
 
             if path is None:
                 log.debug(shortcut + ' has no path')
