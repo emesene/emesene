@@ -2,11 +2,16 @@
 
 ''' This module contains the top level window class '''
 
+import logging
+
 import PyQt4.QtGui as QtGui
 from PyQt4.QtCore import Qt
 
 import extension
 import gui
+
+
+log = logging.getLogger('qt4ui.TopLevelWindow')
 
 class TopLevelWindow (QtGui.QMainWindow):
     ''' Class representing the main window '''
@@ -18,7 +23,7 @@ class TopLevelWindow (QtGui.QMainWindow):
     # pylint: enable=W0612
 
     def __init__(self, cb_on_close):
-        print 'Creating a new main window!'
+        log.debug('Creating a new main window!')
         QtGui.QMainWindow.__init__(self)
         self._content_type = 'empty'
         if cb_on_close:
@@ -33,7 +38,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         self.setCentralWidget(self._page_stack)
         
     def __del__(self):
-        print "adieu TLW!!!"
+        log.debug('adieu TLW!!!')
 
     def clear(self): #emesene's
         '''remove the content from the main window'''
@@ -77,7 +82,7 @@ class TopLevelWindow (QtGui.QMainWindow):
 
     def go_connect(self, on_cancel_login, avatar_path, config):
         '''Adds a 'connecting' page to the top level window and shows it'''
-        print "GO CONNECT! ^_^"
+        log.debug('GO CONNECT! ^_^')
         connecting_window_cls = extension.get_default('connecting window')
         connecting_page = connecting_window_cls(on_cancel_login, 
                                                 avatar_path, config)
@@ -87,7 +92,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         
     def go_conversation(self, session):
         '''Adds a conversation page to the top level window and shows it'''
-        print "GO CONVERSATION! ^_^"
+        log.debug('GO CONVERSATION! ^_^')
         conversation_window_cls = extension.get_default('conversation window')
         conversation_page = conversation_window_cls(session, 
                             on_last_close=self._on_last_tab_close, parent=self)
@@ -102,7 +107,7 @@ class TopLevelWindow (QtGui.QMainWindow):
                #emesene's
         # pylint: disable=R0913
         '''Adds a login page to the top level window and shows it'''
-        print "GO LOGIN! ^_^"
+        log.debug('GO LOGIN! ^_^')
         login_window_cls = extension.get_default('login window')
         login_page = login_window_cls(callback, on_preferences_changed, config,
                                       config_dir, config_path, proxy,use_http, 
@@ -116,7 +121,7 @@ class TopLevelWindow (QtGui.QMainWindow):
             on_close, on_disconnect, quit_on_close=False):
         '''Adds a main page (the one with the contact list) to the top
         level window and shows it'''
-        print "GO MAIN! ^_^"
+        log.debug('GO MAIN! ^_^')
         # TODO: handle quit_on_close (??) [consider creating a base class and 
         # moving code there.] 
         main_window_cls = extension.get_default('main window')
@@ -128,7 +133,7 @@ class TopLevelWindow (QtGui.QMainWindow):
                               on_close, on_disconnect)
         
     def is_maximized(self):
-        print 'is_maximized is a fake method' 
+        log.warning('is_maximized is a fake method')
         return False
         
     def on_disconnect(self, cb_on_close):
@@ -137,7 +142,7 @@ class TopLevelWindow (QtGui.QMainWindow):
     
     def _get_content(self):
         '''Getter method for propery "content"'''
-        print "Getting 'content'"
+        log.debug('Getting \'content\'')
         return self._content
         
     content = property(_get_content)
@@ -200,8 +205,8 @@ class TopLevelWindow (QtGui.QMainWindow):
     def closeEvent(self, event):
         # pylint: disable=C0103
         ''' Overrides QMainWindow's close event '''
-        print 'TopLevelWindow\'s close event: %s, %s' % (
-                                    self.content, str(self._cb_on_close))
+        log.debug('TopLevelWindow\'s close event: %s, %s' % (
+                                    self.content, str(self._cb_on_close)))
         self._cb_on_close(self._content)
         # FIXME: dirty HACK. when we close the conversation window, 
         # self._cb_on_close closes each conversation tab without checking 

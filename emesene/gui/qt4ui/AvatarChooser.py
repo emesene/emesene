@@ -202,13 +202,14 @@ class AvatarChooser(Dialog.OkCancelDialog):
         Currently it doesn't anything useful nor interesting :P'''
         if current_idx.isValid():
             self._view_with_selection = view_name
-            print 'Valid: [%d:%d]' % (previous_idx.row(), current_idx.row()),
+            log_debug_msg = 'Valid: [%d:%d]' % (previous_idx.row(), current_idx.row())
             listview = self._widget_d[self._view_with_selection]
             filename = unicode(listview.model().data(current_idx).toString())
             self._widget_d['preview_dpic'].set_display_pic_from_file(filename)
         else:
-            print 'Invalid',
-        print '\t%s' % view_name
+            log_debug_msg = 'Invalid',
+        log_debug_msg += '   %s' % view_name
+        log.debug(log_debug_msg)
         
     
     # OVERRIDE
@@ -218,11 +219,11 @@ class AvatarChooser(Dialog.OkCancelDialog):
         as the user's avatar'''
         filename = self._get_selection()
         if filename:
-            print 'fn[%s]' % filename
+            log.info('Avatar Choosed: [%s]' % filename)
             if os.path.exists(filename):
                 self._avatar_manager.set_as_avatar(filename)
             else:
-                print 'Error'
+                log.info('Avatar Choosed: [Cancel]')
         Dialog.OkCancelDialog._on_accept(self)
         
 

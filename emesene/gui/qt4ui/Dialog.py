@@ -2,6 +2,7 @@
 
 '''a module that defines the api of objects that display dialogs'''
 
+import logging
 
 from PyQt4  import QtGui
 from PyQt4.QtCore  import Qt
@@ -11,6 +12,8 @@ from gui.qt4ui.Utils import tr
 import gui
 import extension
 
+
+log = logging.getLogger('qt4ui.Dialog')
 
 class Dialog(object):
     '''a class full of static methods to handle dialogs, dont instantiate it'''
@@ -30,7 +33,7 @@ class Dialog(object):
         added (give a empty tuple if you don't implement this feature,
         the controls are made by the callback, you just ask for the email,
         don't make any control, you are just implementing a GUI! :P'''
-        print response_cb
+        log.info(str(response_cb))
         dialog      = OkCancelDialog(title)
         text_label  = QtGui.QLabel(tr('E-mail:'))
         text_edit   = QtGui.QLineEdit()
@@ -51,9 +54,9 @@ class Dialog(object):
                                  Qt.AlignVCenter)
         dialog.setMinimumWidth(300)
         
-        print groups
+        log.debug(str(groups))
         groups = list(groups)
-        print groups
+        log.debug(groups)
         groups.sort()
         
         group_combo.addItem('<i>' + tr('No Group') + '</i>', '')
@@ -64,7 +67,7 @@ class Dialog(object):
         
         email = unicode(text_edit.text())
         group = group_combo.itemData(group_combo.currentIndex()).toPyObject()
-        print '[%s,%s]' % (email, group)
+        log.debug('[%s,%s]' % (email, group))
         response_cb(response, email, group )
         
         
@@ -77,7 +80,7 @@ class Dialog(object):
         callback, to make a unified behaviour, and also, to only implement
         GUI logic on your code and not client logic
         cb args: response, group_name'''
-        print response_cb
+        log.debug(str(response_cb))
         dialog = OkCancelDialog(title)
         group_label = QtGui.QLabel(tr('New group\'s name:'))
         group_edit  = QtGui.QLineEdit()
@@ -251,7 +254,7 @@ class Dialog(object):
             enables or disables widgets to insert proxy settings accordingly'''
             proxy_settings = (host_lbl, proxy_host_edit, port_lbl, 
                               proxy_port_edit, auth_chk)
-            print 'upt'
+            log.info('upt')
             for widget in proxy_settings:
                 widget.setEnabled(is_checked)
             on_use_auth_toggled(is_checked, auth_chk.isChecked())
@@ -272,7 +275,7 @@ class Dialog(object):
 
                 service = str(session_cmb.currentText())
                 session_id, ext = name_to_ext[service]
-                print session_id
+                log.debug(str(session_id))
                 callback(use_http, use_proxy, proxy_host, proxy_port, 
                          use_auth, user, passwd, session_id, service, 
                          server_host, server_port)
@@ -380,7 +383,7 @@ class Dialog(object):
             response = gui.stock.ACCEPT
         elif response == QtGui.QDialog.Rejected:
             response = gui.stock.CANCEL
-        print response
+        log.debug(str(response))
         
         response_cb(response)
         

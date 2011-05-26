@@ -2,6 +2,7 @@
 
 '''This module contains classes used to build up a Preferences window'''
 
+import logging
 import webbrowser
 
 from PyQt4  import QtGui
@@ -14,6 +15,8 @@ import e3.common
 import extension
 import gui
 
+
+log = logging.getLogger('qt4ui.Preferences')
 
 LIST = [
     {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Interface')},
@@ -610,7 +613,7 @@ class Extension(BaseTable):
         
         categories = self._get_categories()
         for item in categories:
-            print 'category item: %s' % item
+            log.info('category item: %s' % item)
             self.categories_cmb.addItem(item)
         self.categories_cmb.setCurrentIndex(0)
         self._on_category_changed(self.categories_cmb)

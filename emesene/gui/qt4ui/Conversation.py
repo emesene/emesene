@@ -2,6 +2,8 @@
 
 '''This module contains classes to represent the conversation tab.'''
 
+import logging
+
 import PyQt4.QtGui      as QtGui
 from PyQt4.QtCore   import Qt
 
@@ -12,7 +14,7 @@ import gui
 import gui.qt4ui.widgets as Widgets
 
 
-
+log = logging.getLogger('qt4ui.Conversation')
 
 class Conversation (gui.base.Conversation, QtGui.QWidget):
     '''This widget represents the contents of a chat tab in the conversations
@@ -60,7 +62,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         
     def __del__(self):
-        print "conversation adieeeeeeeuuuu ;______;"
+        log.debug('conversation adieeeeeeeuuuu ;______;')
         
         
     def _setup_ui(self):
@@ -202,7 +204,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # account is a string containing the email
         # does this have to update the picture too?
         status = self._session.contacts.get(account).status
-        print 'USI: [%s], [%s], [%s], [%s]' % (status, nick, message, account)
+        log.debug('UpSingInfo: [%s], [%s], [%s], [%s]' % (status, nick, message, account))
         self._widget_d['info_panel'].update(status, nick, message, account)
         
         

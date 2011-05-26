@@ -75,7 +75,6 @@ def parse_emotes(text, include_table_tags=True):
     parser = MyHTMLParser(include_table_tags)
     parser.feed(text)
     text2 = parser.get_data()
-    #print '***\n%s\n%s\n***' % (text, text2)
     return text2
 
 
@@ -153,8 +152,6 @@ class MyHTMLParser (HTMLParser):
     
     def handle_data(self, data):
         '''Handle data sequences'''
-        #print "DATA :",
-        #print data
         if self._italic:
             data = u'<i>%s</i>' % data
         if self._bold:
