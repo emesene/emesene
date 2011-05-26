@@ -2,11 +2,14 @@
 
 '''This module contains classes to represent the conversation page.'''
 
+import logging
+
 import PyQt4.QtGui      as QtGui
 
 import gui
 import extension
 
+log = logging.getLogger('qt4ui.ConversationPage')
 
 class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     '''The Conversation Page'''
@@ -32,7 +35,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         
         
     def __del__(self):
-        print "conversation manager adieeeeeeeuuuu ;______;"
+        log.debug('conversation manager adieeeeeeeuuuu ;______;')
         
     def get_parent(self): # emesene's
         '''Return a reference to the top level window containing this page'''
@@ -91,8 +94,8 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     
     def set_message_waiting(self, conversation, is_waiting): # emesene's
         '''Not Sure what to do here....'''
-        print conversation,
-        print is_waiting
+        log.info('Conversation: %s; is_waiting: %s' % 
+                 (conversation, is_waiting))
         
         
     def _on_contact_attr_changed(self, account, change_type, old_value,

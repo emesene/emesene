@@ -28,7 +28,6 @@ class MainPage (QtGui.QWidget):
 
         self._session = session
         # callbacks:
-        print on_new_conversation
         self._on_new_conversation = on_new_conversation
         self._on_close = on_close
         self._on_disconnect = on_disconnect
@@ -126,7 +125,6 @@ class MainPage (QtGui.QWidget):
     def _on_new_conversation_requested(self, account):
         '''Slot called when the user doubleclicks 
         an entry in the contact list'''
-        print account
         conv_id = time.time()
         self._on_new_conversation(conv_id, [account], False) 
         # TODO: shouldn't this go somewhere else?!
