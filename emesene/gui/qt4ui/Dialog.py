@@ -6,6 +6,8 @@
 from PyQt4  import QtGui
 from PyQt4.QtCore  import Qt
 
+from gui.qt4ui.Utils import tr
+
 import gui
 import extension
 
@@ -30,9 +32,9 @@ class Dialog(object):
         don't make any control, you are just implementing a GUI! :P'''
         print response_cb
         dialog      = OkCancelDialog(title)
-        text_label  = QtGui.QLabel(_('E-mail:'))
+        text_label  = QtGui.QLabel(tr('E-mail:'))
         text_edit   = QtGui.QLineEdit()
-        group_label = QtGui.QLabel(_('Group:'))
+        group_label = QtGui.QLabel(tr('Group:'))
         group_combo = QtGui.QComboBox()
         
         lay = QtGui.QGridLayout()
@@ -54,7 +56,7 @@ class Dialog(object):
         print groups
         groups.sort()
         
-        group_combo.addItem('<i>' + _('No Group') + '</i>', '')
+        group_combo.addItem('<i>' + tr('No Group') + '</i>', '')
         for group in groups:
             group_combo.addItem(group.name, group.name)
         
@@ -67,7 +69,7 @@ class Dialog(object):
         
         
     @classmethod
-    def add_group(cls, response_cb, title=_('Add group')):
+    def add_group(cls, response_cb, title=tr('Add group')):
         '''show a dialog asking for a group name, the response callback
         receives the response (stock.ADD, stock.CANCEL, stock.CLOSE)
         and the name of the group, the control for a valid group is made
@@ -77,7 +79,7 @@ class Dialog(object):
         cb args: response, group_name'''
         print response_cb
         dialog = OkCancelDialog(title)
-        group_label = QtGui.QLabel(_('New group\'s name:'))
+        group_label = QtGui.QLabel(tr('New group\'s name:'))
         group_edit  = QtGui.QLineEdit()
         
         lay = QtGui.QHBoxLayout()
@@ -96,30 +98,30 @@ class Dialog(object):
         
         
     @classmethod
-    def rename_group(cls, group, response_cb, title=_('Rename group')):
+    def rename_group(cls, group, response_cb, title=tr('Rename group')):
         '''show a dialog with the group name and ask to rename it, the
         response callback receives stock.ACCEPT, stock.CANCEL or stock.CLOSE
         the old and the new name.
         cb args: response, group, new_name
         '''
-        dialog = EntryDialog(_('New group name:'), group.name, title)
+        dialog = EntryDialog(tr('New group name:'), group.name, title)
         response = dialog.exec_()
         response_cb(response, group, dialog.text())
         
     @classmethod
-    def crop_image(cls, response_cb, filename, title=_('Select image area')):
+    def crop_image(cls, response_cb, filename, title=tr('Select image area')):
         '''Shows a dialog to select a portion of an image.'''
         dialog = OkCancelDialog(title, expanding=True)
         
         # Actions
         act_dict = {}
-        act_dict['rotate_left' ] = QtGui.QAction( _('Rotate Left'    ), dialog)
-        act_dict['rotate_right'] = QtGui.QAction( _('Rotate right'   ), dialog)
-        act_dict['fit_zoom']     = QtGui.QAction( _('Zoom to fit'    ), dialog)
-        act_dict['fit_zoom']     = QtGui.QAction( _('Zoom to fit'    ), dialog)
-        act_dict['reset_zoom']   = QtGui.QAction( _('Reset zoom'     ), dialog)
-        act_dict['select_all']   = QtGui.QAction( _('Select All'     ), dialog)
-        act_dict['select_unsc']  = QtGui.QAction( _('Select Unscaled'), dialog)
+        act_dict['rotate_left' ] = QtGui.QAction( tr('Rotate Left'    ), dialog)
+        act_dict['rotate_right'] = QtGui.QAction( tr('Rotate right'   ), dialog)
+        act_dict['fit_zoom']     = QtGui.QAction( tr('Zoom to fit'    ), dialog)
+        act_dict['fit_zoom']     = QtGui.QAction( tr('Zoom to fit'    ), dialog)
+        act_dict['reset_zoom']   = QtGui.QAction( tr('Reset zoom'     ), dialog)
+        act_dict['select_all']   = QtGui.QAction( tr('Select All'     ), dialog)
+        act_dict['select_unsc']  = QtGui.QAction( tr('Select Unscaled'), dialog)
         
         # widgets
         toolbar = QtGui.QToolBar()
@@ -180,7 +182,7 @@ class Dialog(object):
         
         
     @classmethod
-    def error(cls, message, response_cb=None, title=_('Error!')):
+    def error(cls, message, response_cb=None, title=tr('Error!')):
         '''show an error dialog displaying the message, this dialog should
         have only the option to close and the response callback is optional
         since in few cases one want to know when the error dialog was closed,
@@ -191,7 +193,7 @@ class Dialog(object):
         # every kind of message box: error, info, attention, etc...
         dialog  = StandardButtonDialog(title)
         icon    = QtGui.QLabel()
-        message = QtGui.QLabel(message)
+        message = QtGui.QLabel(unicode(message))
         
         lay = QtGui.QHBoxLayout()
         lay.addWidget(icon)
@@ -278,23 +280,23 @@ class Dialog(object):
                     
 
         
-        dialog           = OkCancelDialog(_('Connection preferences'))
-        session_lbl      = QtGui.QLabel(_('Session'))
+        dialog           = OkCancelDialog(unicode(tr('Connection preferences')))
+        session_lbl      = QtGui.QLabel(unicode(tr('Session:')))
         session_cmb      = QtGui.QComboBox()
-        server_host_lbl  = QtGui.QLabel(_('Server'))
+        server_host_lbl  = QtGui.QLabel(unicode(tr('Server')))
         server_host_edit = QtGui.QLineEdit()
-        server_port_lbl  = QtGui.QLabel(_('Port'))
+        server_port_lbl  = QtGui.QLabel(unicode(tr('Port')))
         server_port_edit = QtGui.QLineEdit()
-        http_chk         = QtGui.QCheckBox(_('Use HTTP method'))
-        proxy_chk        = QtGui.QCheckBox(_('Use proxy'))
-        host_lbl         = QtGui.QLabel(_('Host'))
+        http_chk         = QtGui.QCheckBox(unicode(tr('Use HTTP method')))
+        proxy_chk        = QtGui.QCheckBox(unicode(tr('Use proxy')))
+        host_lbl         = QtGui.QLabel(unicode(tr('Host')))
         proxy_host_edit  = QtGui.QLineEdit()
-        port_lbl         = QtGui.QLabel(_('Port'))
+        port_lbl         = QtGui.QLabel(unicode(tr('Port')))
         proxy_port_edit  = QtGui.QLineEdit()
-        auth_chk         = QtGui.QCheckBox(_('Use authentication'))
-        user_lbl         = QtGui.QLabel(_('User'))
+        auth_chk         = QtGui.QCheckBox(unicode(tr('Use authentication')))
+        user_lbl         = QtGui.QLabel(unicode(tr('User')))
         user_edit        = QtGui.QLineEdit()
-        pwd_lbl          = QtGui.QLabel(_('Password'))
+        pwd_lbl          = QtGui.QLabel(unicode(tr('Password')))
         pwd_edit         = QtGui.QLineEdit()
         
         grid_lay = QtGui.QGridLayout()
@@ -319,7 +321,7 @@ class Dialog(object):
         grid_lay.addWidget(pwd_edit, 9, 2)
         dialog.setLayout(grid_lay)
         
-        dialog.setWindowTitle(_('Preferences'))
+        dialog.setWindowTitle(tr('Preferences'))
         server_host_edit.setText(service_host)
         server_port_edit.setText(service_port)
         proxy_host_edit.setText(proxy.host or '')
@@ -385,7 +387,7 @@ class Dialog(object):
         
     @classmethod
     def set_contact_alias(cls, account, alias, response_cb,
-                            title=_('Set alias')):
+                            title=tr('Set alias')):
         '''show a dialog showing the current alias and asking for the new
         one, the response callback receives,  the response
         (stock.ACCEPT, stock.CANCEL, stock.CLEAR <- to remove the alias
@@ -394,7 +396,7 @@ class Dialog(object):
         def _on_reset():
             dialog.done(gui.stock.CLEAR)
             
-        dialog = EntryDialog(label=_('New alias:'), text=alias, title=title)
+        dialog = EntryDialog(label=tr('New alias:'), text=alias, title=title)
         reset_btn = dialog.add_button(QtGui.QDialogButtonBox.Reset)
         reset_btn.clicked.connect(_on_reset)
         
@@ -411,7 +413,7 @@ class Dialog(object):
         print args
         dialog  = YesNoDialog('')
         icon    = QtGui.QLabel()
-        message = QtGui.QLabel(message)
+        message = QtGui.QLabel(unicode(message))
         
         lay = QtGui.QHBoxLayout()
         lay.addWidget(icon)
