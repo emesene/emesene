@@ -77,6 +77,14 @@ def parse_emotes(text, include_table_tags=True):
     text2 = parser.get_data()
     #print '***\n%s\n%s\n***' % (text, text2)
     return text2
+
+
+
+def tr(string):
+    '''Returns the given string translated by gettext, and converted
+    explicitly to unicode. Needed for compatibility issues between 
+    PyQt and gettext. See issue #586'''
+    return unicode(_(string))
     
     
     
