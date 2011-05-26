@@ -15,6 +15,8 @@ import debugger
 #from gui.qt4ui import Dialog
 #from gui.qt4ui import widgets
 
+log = logging.getLogger('qt4ui.DebugWindow')
+
 class DebugWindow(QtGui.QWidget):
     '''A Window which shows debug messages'''
     NAME = 'Debug Window'
@@ -99,6 +101,12 @@ class DebugTextView(QtGui.QTextEdit, logging.Handler):
         self._list.append(record)
         time_string = time.localtime(float(record.created))
         time_string = time.strftime("%H:%M:%S", time_string)
-        html = u'<small>(%s): [<b>%s</b>] : %s</small><br />' % (
-             time_string, record.name, record.msg.strip() )
+        html = u'<small>(%s): [<b>%s</b>] : '
+        html = html % (time_string, record.name)
+        try:
+            html = html + '%s</small><br />' % record.msg.strip()
+        except AttributeError as detail:
+            log.error('Wrong type: %s | value: %s' % (detail, str(record.msg)))
+            html = html + '<small><i>&lt;&lt;message insertion failed&gt;&gt;</i></small><br>'
         self._cursor.insertHtml(html)
+        
