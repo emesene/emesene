@@ -8,19 +8,21 @@ from PyQt4  import QtGui
 from PyQt4  import QtCore
 from PyQt4.QtCore import Qt
 
+from gui.qt4ui.Utils import tr
+
 import e3.common
 import extension
 import gui
 
 
 LIST = [
-    {'stock_id' : 'preferences-desktop-accessibility', 'text' : _('Interface')},
-    {'stock_id' : 'preferences-desktop',               'text' : _('Desktop'  )},
-    {'stock_id' : 'preferences-desktop-multimedia',    'text' : _('Sounds'   )},
-    {'stock_id' : 'window-new',                    'text' : _('Notifications')},
-    {'stock_id' : 'preferences-desktop-theme',         'text' : _('Theme'    )},
-    {'stock_id' : 'network-disconnect',            'text' : _('Extensions'   )},
-    {'stock_id' : 'network-disconnect',                'text' : _('Plugins'  )},
+    {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Interface')},
+    {'stock_id' : 'preferences-desktop',               'text' : tr('Desktop'  )},
+    {'stock_id' : 'preferences-desktop-multimedia',    'text' : tr('Sounds'   )},
+    {'stock_id' : 'window-new',                    'text' : tr('Notifications')},
+    {'stock_id' : 'preferences-desktop-theme',         'text' : tr('Theme'    )},
+    {'stock_id' : 'network-disconnect',            'text' : tr('Extensions'   )},
+    {'stock_id' : 'network-disconnect',                'text' : tr('Plugins'  )},
 ]
 
 class Preferences(QtGui.QWidget):
@@ -34,7 +36,7 @@ class Preferences(QtGui.QWidget):
         '''constructor'''
         QtGui.QWidget.__init__(self, parent)
         
-        self.setWindowTitle(_('Preferences'))
+        self.setWindowTitle(tr('Preferences'))
         self.setWindowIcon(QtGui.QIcon(gui.theme.logo))
         self.resize(600, 400)
         
@@ -52,7 +54,7 @@ class Preferences(QtGui.QWidget):
         if 'msn' in self._session.SERVICES: # only when session is papylib.	
             self.msn_papylib = MSNPapylib(session)
             LIST.append({'stock_id' : 'network-disconnect',
-                         'text' : _('Live Messeger')})
+                         'text' : u'Live Messenger'})
     
         list_view          = QListViewMod()
         self.widget_stack = QtGui.QStackedWidget()
@@ -401,35 +403,35 @@ class Interface(BaseTable):
         '''
         BaseTable.__init__(self, 4, 1)
         self.session = session
-        self.append_markup('<b>'+_('Main window:')+'</b>')
-        self.append_check(_('Show user panel'),
+        self.append_markup('<b>'+tr('Main window:')+'</b>')
+        self.append_check(tr('Show user panel'),
             'session.config.b_show_userpanel')
-        self.append_markup('<b>'+_('Conversation window:')+'</b>')
+        self.append_markup('<b>'+tr('Conversation window:')+'</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
-        self.append_check(_('Start minimized/iconified'), 
+        self.append_check(tr('Start minimized/iconified'), 
                            'session.config.b_conv_minimized')
-        self.append_check(_('Show emoticons'), 
+        self.append_check(tr('Show emoticons'), 
                            'session.config.b_show_emoticons')
-        self.append_check(_('Show conversation header'),
+        self.append_check(tr('Show conversation header'),
             'session.config.b_show_header')
-        self.append_check(_('Show conversation side panel'),
+        self.append_check(tr('Show conversation side panel'),
             'session.config.b_show_info')
-        self.append_check(_('Show conversation toolbar'),
+        self.append_check(tr('Show conversation toolbar'),
             'session.config.b_show_toolbar')
-        self.append_check(_('Small conversation toolbar'),
+        self.append_check(tr('Small conversation toolbar'),
             'session.config.b_toolbar_small')
-        self.append_check(_('Avatar on conversation left side'),
+        self.append_check(tr('Avatar on conversation left side'),
             'session.config.b_avatar_on_left')
-        self.append_check(_('Allow auto scroll in conversation'),
+        self.append_check(tr('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
-        self.append_check(_('Enable spell check if available (requires %s)') % \
+        self.append_check(tr('Enable spell check if available (requires %s)') % \
                                                             'python-gtkspell',
             'session.config.b_enable_spell_check')
 
-        self.append_range(_('Contact list avatar size'),
+        self.append_range(tr('Contact list avatar size'),
             'session.config.i_avatar_size', 18, 64)
-        self.append_range(_('Conversation avatar size'),
+        self.append_range(tr('Conversation avatar size'),
             'session.config.i_conv_avatar_size', 18, 128)
 
 
@@ -445,10 +447,10 @@ class Desktop(BaseTable):
         BaseTable.__init__(self, 3, 2)
         self._session = session
 
-        self.append_markup('<b>'+_('File transfers')+'</b>')
-        self.append_check(_('Sort received files by sender'), 
+        self.append_markup('<b>'+tr('File transfers')+'</b>')
+        self.append_check(tr('Sort received files by sender'), 
                           '_session.config.b_download_folder_per_account')
-        self.add_text(_('Save files to:'), 0, 2, True)
+        self.add_text(tr('Save files to:'), 0, 2, True)
 
         def on_path_button_clicked():
             ''' updates the download dir config value '''
@@ -490,22 +492,22 @@ class Sound(BaseTable):
         '''
         BaseTable.__init__(self, 6, 1)
         self.session = session
-        self.append_markup('<b>'+_('Messages events:')+'</b>')
-        self.append_check(_('Mute sounds'),
+        self.append_markup('<b>'+tr('Messages events:')+'</b>')
+        self.append_check(tr('Mute sounds'),
             'session.config.b_mute_sounds')
-        self.append_check(_('Play sound on sent message'),
+        self.append_check(tr('Play sound on sent message'),
             'session.config.b_play_send')
-        self.append_check(_('Play sound on first received message'),
+        self.append_check(tr('Play sound on first received message'),
             'session.config.b_play_first_send')
-        self.append_check(_('Play sound on received message'),
+        self.append_check(tr('Play sound on received message'),
             'session.config.b_play_type')
-        self.append_check(_('Play sound on nudge'),
+        self.append_check(tr('Play sound on nudge'),
             'session.config.b_play_nudge')
 
-        self.append_markup('<b>'+_('Users events:')+'</b>')
-        self.append_check(_('Play sound on contact online'),
+        self.append_markup('<b>'+tr('Users events:')+'</b>')
+        self.append_check(tr('Play sound on contact online'),
             'session.config.b_play_contact_online')
-        self.append_check(_('Play sound on contact offline'),
+        self.append_check(tr('Play sound on contact offline'),
             'session.config.b_play_contact_offline')
 
 
@@ -521,11 +523,11 @@ class Notification(BaseTable):
         '''
         BaseTable.__init__(self, 2, 1)
         self.session = session
-        self.append_check(_('Notify on contact online'),
+        self.append_check(tr('Notify on contact online'),
             'session.config.b_notify_contact_online')
-        self.append_check(_('Notify on contact offline'),
+        self.append_check(tr('Notify on contact offline'),
             'session.config.b_notify_contact_offline')
-        self.append_check(_('Notify on received message'),
+        self.append_check(tr('Notify on received message'),
             'session.config.b_notify_receive_message')
 
 
@@ -546,17 +548,17 @@ class Theme(BaseTable):
 
         adium_theme = self.session.config.get_or_set('adium_theme', 'renkoo')
 
-        self.append_combo(_('Image theme'), gui.theme.get_image_themes,
+        self.append_combo(tr('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
-        self.append_combo(_('Sound theme'), gui.theme.get_sound_themes,
+        self.append_combo(tr('Sound theme'), gui.theme.get_sound_themes,
             'session.config.sound_theme')
-        self.append_combo(_('Emote theme'), gui.theme.get_emote_themes,
+        self.append_combo(tr('Emote theme'), gui.theme.get_emote_themes,
             'session.config.emote_theme')
-        self.append_combo(_('Adium theme'), gui.theme.get_adium_themes,
+        self.append_combo(tr('Adium theme'), gui.theme.get_adium_themes,
             'session.config.adium_theme')
-        self.append_entry_default(_('Nick format'),
+        self.append_entry_default(tr('Nick format'),
                 'session.config.nick_template', contact_list_cls.NICK_TPL)
-        self.append_entry_default(('Group format'),
+        self.append_entry_default(tr('Group format'),
                 'session.config.group_template', contact_list_cls.GROUP_TPL)
 
 
@@ -590,18 +592,18 @@ class Extension(BaseTable):
         extension category and the selected extension and widgets 
         to display the extensions'''
         
-        self.add_text(_('Categories'),  0, 0, True)
-        self.add_text(_('Selected'),    0, 1, True)
+        self.add_text(tr('Categories'),  0, 0, True)
+        self.add_text(tr('Selected'),    0, 1, True)
         self.add_text('',              0, 2, True)
-        self.add_text(_('Name'),        0, 3, True)
-        self.add_text(_('Description'), 0, 4, True)
-        self.add_text(_('Author'),      0, 5, True)
-        self.add_text(_('Website'),     0, 6, True)
+        self.add_text(tr('Name'),        0, 3, True)
+        self.add_text(tr('Description'), 0, 4, True)
+        self.add_text(tr('Author'),      0, 5, True)
+        self.add_text(tr('Website'),     0, 6, True)
         self.add_label(self.name_info,        1, 3, True)
         self.add_label(self.description_info, 1, 4, True)
         self.add_label(self.author_info,      1, 5, True)
         self.add_label(self.website_info,     1, 6, True)
-        self.add_button(_('Redraw main screen'), 1, 7,
+        self.add_button(tr('Redraw main screen'), 1, 7,
                 self._on_redraw_main_screen)
         self.attach(self.categories_cmb, 1, 2, 0, 1)
         self.attach(self.extensions_cmb, 1, 2, 1, 2)
@@ -661,7 +663,7 @@ class Extension(BaseTable):
         ext, identifier = self.extension_list[extension_index]
         if not extension.set_default_by_id(category, identifier):
             # TODO: revert the selection to the previous selected extension
-            log.warning(_('Could not set %s as default extension for %s') % \
+            log.warning(('Could not set %s as default extension for %s') % \
                 (extension_id, category))
             return
 
@@ -712,11 +714,11 @@ class MSNPapylib(BaseTable):
         BaseTable.__init__(self, 8, 2)
         self.session = session
 
-        self.add_text(_('If you have problems with your nickname/message/\n'
+        self.add_text(tr('If you have problems with your nickname/message/\n'
                         'picture just click on this button, sign in with \n'
                         'your account and load a picture in your Live Profile.'
                         '\nThen restart emesene and have fun.'), 0, 0, True)
-        self.add_button(_('Open Live Profile'), 1, 0, 
+        self.add_button(tr('Open Live Profile'), 1, 0, 
                         self._on_live_profile_clicked, 0, 0)
 
 
