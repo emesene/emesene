@@ -24,17 +24,17 @@ class DebugWindow(QtGui.QWidget):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
 
-    def __init__(self, parent=None):
+    def __init__(self, on_close_cb, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        
+        self._on_close_cb = on_close_cb
         self._widget_d = {}
         self._setup_ui()
         
         logging.getLogger().addHandler(self._widget_d['text_view'])
         
         
-        # FIXME: dangerous circular reference!
-        self._myself = self
+        print (QtGui.QApplication.activeWindow())
+        
     
     def _setup_ui(self):
         self._widget_d['filter_edit'] = QtGui.QLineEdit()
@@ -58,7 +58,9 @@ class DebugWindow(QtGui.QWidget):
     def closeEvent(self, event):
         # pylint: disable=C0103
         logging.getLogger().removeHandler(self._widget_d['text_view'])
-        event.ignore()
+        QtGui.QWidget.closeEvent(self, event)
+        self._on_close_cb()
+        #event.ignore()
         
     
     def show(self):
@@ -67,6 +69,7 @@ class DebugWindow(QtGui.QWidget):
     
     def __del__(self):
         print 'CLOSING DEBUG WINDOW'
+        self._on_close_cb()
         
         
         
@@ -106,7 +109,7 @@ class DebugTextView(QtGui.QTextEdit, logging.Handler):
         try:
             html = html + '%s</small><br />' % record.msg.strip()
         except AttributeError as detail:
-            log.error('Wrong type: %s | value: %s' % (detail, str(record.msg)))
-            html = html + '<small><i>&lt;&lt;message insertion failed&gt;&gt;</i></small><br>'
+            #log.error('Wrong type: %s | value: %s' % (detail, str(record.msg)))
+            html = html + '<small><i>&lt;&lt;message insertion failed [%s:%s]&gt;&gt;</i></small><br>' % (type(record.msg), str(record.msg))
         self._cursor.insertHtml(html)
         

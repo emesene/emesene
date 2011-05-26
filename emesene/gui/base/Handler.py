@@ -155,6 +155,7 @@ class HelpHandler(object):
     def __init__(self, dialog):
         '''constructor'''
         self.dialog = dialog
+        self.debug_window = None
 
     def on_about_selected(self):
         '''called when the about item is selected'''
@@ -179,8 +180,13 @@ class HelpHandler(object):
 
     def on_debug_selected(self):
         '''called when the preference button is selected'''
-        DebugWindow = extension.get_default('debug window')
-        DebugWindow().show()
+        def debug_close_cb():
+            print 'resetting debug window'
+            self.debug_window = None
+        if not self.debug_window:
+            DebugWindow = extension.get_default('debug window')
+            self.debug_window = DebugWindow(debug_close_cb)
+            self.debug_window.show()
 
 
 class ContactHandler(object):

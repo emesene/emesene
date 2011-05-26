@@ -27,8 +27,9 @@ import logging
 
 class DebugWindow(gtk.Window):
     '''The window containing the debug info'''
-    def __init__(self):
+    def __init__(self, on_close_cb):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
+        self.on_close_cb = on_close_cb
         self.set_title("debug")
         self.connect("delete_event", self.on_delete)
         self.resize(800, 600)
@@ -91,6 +92,8 @@ class DebugWindow(gtk.Window):
     def safely_close(self):
         self.hide()
         logging.getLogger().removeHandler(self.store)
+        self.on_close_cb()
+        
 
     def on_add(self, button, data=None):
         caller = self.test_entry.get_text()
