@@ -4,6 +4,9 @@
 
 import PyQt4.QtGui      as QtGui
 
+from gui.qt4ui.Utils import tr
+
+
 import gui
 
 ICON = QtGui.QIcon.fromTheme
@@ -21,12 +24,12 @@ class GroupMenu(QtGui.QMenu):
 
         handler -- a e3common.Handler.GroupHandler
         """
-        QtGui.QMenu.__init__(self, _('Group'), parent)
+        QtGui.QMenu.__init__(self, tr('Group'), parent)
         self._handler = handler
 
-        self.add    = QtGui.QAction(ICON('list-add'),      _('Add'),    self)
-        self.remove = QtGui.QAction(ICON('list-remove'),   _('Remove'), self)
-        self.rename = QtGui.QAction(ICON('document-edit'), _('Rename'), self)
+        self.add    = QtGui.QAction(ICON('list-add'),      tr('Add')+'...',    self)
+        self.remove = QtGui.QAction(ICON('list-remove'),   tr('Remove'), self)
+        self.rename = QtGui.QAction(ICON('document-edit'), tr('Rename')+'...', self)
         
         self.addAction(self.add)
         self.addAction(self.remove)

@@ -4,6 +4,8 @@
 
 import PyQt4.QtGui      as QtGui
 
+from gui.qt4ui.Utils import tr
+
 import extension
 
 ICON = QtGui.QIcon.fromTheme
@@ -53,15 +55,15 @@ class FileMenu(QtGui.QMenu):
 
         handler -- e3common.Handler.FileHandler
         '''
-        QtGui.QMenu.__init__(self, _('File'), parent)
+        QtGui.QMenu.__init__(self, tr('File'), parent)
         print 'Menu Bar'
         self._handler = handler
         status_menu_cls = extension.get_default('menu status')
         
         self.status_menu = status_menu_cls(handler.on_status_selected)
         disconnect_action = QtGui.QAction(ICON('network-disconnect'),
-                                          _('Disconnect'), self)
-        quit_action = QtGui.QAction(ICON('application-exit'), _('Quit'), self)
+                                          tr('Disconnect'), self)
+        quit_action = QtGui.QAction(ICON('application-exit'), tr('Quit'), self)
         
         self.addMenu(self.status_menu)
         self.addAction(disconnect_action)
@@ -87,7 +89,7 @@ class ActionsMenu(QtGui.QMenu):
 
         handler -- e3common.Handler.ActionsHandler
         '''
-        QtGui.QMenu.__init__(self, _('Actions'), parent)
+        QtGui.QMenu.__init__(self, tr('Actions'), parent)
         print 'Actions Menu'
         self._handler = handler
 
@@ -118,16 +120,16 @@ class OptionsMenu(QtGui.QMenu):
 
         handler -- e3common.Handler.OptionsHandler
         '''
-        QtGui.QMenu.__init__(self, 'Options', parent)
+        QtGui.QMenu.__init__(self, tr('Options'), parent)
         print 'Options Menu'
         self.handler = handler
 
         # "Show" submenu
-        self.show_menu = QtGui.QMenu(_('Show...'))
+        self.show_menu = QtGui.QMenu(tr('Show...'))
 
-        show_offline =      QtGui.QAction(_('Show offline contacts'), self)
-        show_empty_groups = QtGui.QAction(_('Show empty groups'), self)
-        show_blocked =      QtGui.QAction(_('Show blocked contacts'), self)
+        show_offline =      QtGui.QAction(tr('Show offline contacts'), self)
+        show_empty_groups = QtGui.QAction(tr('Show empty groups'), self)
+        show_blocked =      QtGui.QAction(tr('Show blocked contacts'), self)
         
         show_offline.setCheckable(True)
         show_empty_groups.setCheckable(True)
@@ -149,11 +151,11 @@ class OptionsMenu(QtGui.QMenu):
         # ----
         
         order_action_group = QtGui.QActionGroup(self)
-        by_status = QtGui.QAction(_('Order by status'), self)
-        by_group  = QtGui.QAction(_('Order by group'), self)
-        group_offline = QtGui.QAction(_('Group offline contacts'), self)
+        by_status = QtGui.QAction(tr('Order by status'), self)
+        by_group  = QtGui.QAction(tr('Order by group'), self)
+        group_offline = QtGui.QAction(tr('Group offline contacts'), self)
         preferences = QtGui.QAction(ICON('preferences-other'),
-                                    _('Preferences...'), self)
+                                    tr('Preferences...'), self)
         
         self.addAction(by_status)
         self.addAction(by_group)
@@ -194,13 +196,13 @@ class HelpMenu(QtGui.QMenu):
 
         handler -- e3common.Handler.HelpHandler
         '''
-        QtGui.QMenu.__init__(self, 'Help', parent)
+        QtGui.QMenu.__init__(self, tr('Help'), parent)
         print 'Help Menu'
         self.handler = handler
 
-        self.website = QtGui.QAction(_('Website'), self)
-        self.about =   QtGui.QAction(_('About'),    self)
-        self.debug =   QtGui.QAction(_('Debug'),    self)
+        self.website = QtGui.QAction(tr('Website'), self)
+        self.about =   QtGui.QAction(tr('About'),    self)
+        self.debug =   QtGui.QAction(tr('Debug'),    self)
         
         self.addAction(self.website)
         self.addAction(self.about)

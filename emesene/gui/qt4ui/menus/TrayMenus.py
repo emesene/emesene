@@ -4,6 +4,8 @@
 
 import PyQt4.QtGui      as QtGui
 
+from gui.qt4ui.Utils import tr
+
 import extension
 
 ICON = QtGui.QIcon.fromTheme
@@ -25,13 +27,13 @@ class TrayMainMenu (QtGui.QMenu):
 
         status_menu_cls = extension.get_default('menu status')
         
-        self.hide_show_mainwindow = QtGui.QAction(_('Hide/Show emesene'), self)
+        self.hide_show_mainwindow = QtGui.QAction(tr('Hide/Show emesene'), self)
         self.status_menu = status_menu_cls(handler.on_status_selected)
         #self.list_contacts_menu = ContactsMenu(handler, main_window)
         self.disconnect = QtGui.QAction(ICON('network-disconnect'),
-                                        _('Disconnect'), self)
+                                        tr('Disconnect'), self)
         self.quit = QtGui.QAction(ICON('application-exit'),
-                                 _('Quit'), self)
+                                 tr('Quit'), self)
         
 
         self.addAction(self.hide_show_mainwindow)
@@ -62,8 +64,8 @@ class TrayLoginMenu (QtGui.QMenu):
         '''
         QtGui.QMenu.__init__(self, parent)
         self._handler = handler
-        self.hide_show_mainwindow = QtGui.QAction(_('Hide/Show emesene'), self)
-        self.quit = QtGui.QAction(ICON('application-exit'), _('Quit'), self)
+        self.hide_show_mainwindow = QtGui.QAction(tr('Hide/Show emesene'), self)
+        self.quit = QtGui.QAction(ICON('application-exit'), tr('Quit'), self)
             
         self.addAction(self.hide_show_mainwindow)
         self.addSeparator()

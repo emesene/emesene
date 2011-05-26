@@ -4,6 +4,8 @@
 
 import PyQt4.QtGui      as QtGui
 
+from gui.qt4ui.Utils import tr
+
 import gui
 
 ICON = QtGui.QIcon.fromTheme
@@ -21,22 +23,22 @@ class ContactMenu(QtGui.QMenu):
 
         handler -- a e3common.Handler.ContactHandler
         '''
-        QtGui.QMenu.__init__(self, _('Contact'), parent)
+        QtGui.QMenu.__init__(self, tr('Contact'), parent)
         self._handler = handler
 
         
         self._action_d = {}
         action_d = self._action_d
-        action_d['add']     = QtGui.QAction(ICON('list-add'),       _('Add'),     self)
-        action_d['remove']  = QtGui.QAction(ICON('list-remove'),    _('Remove'),  self)
-        action_d['block']   = QtGui.QAction(ICON('dialog-cancel'),  _('Block'),   self)
+        action_d['add']     = QtGui.QAction(ICON('list-add'),       tr('Add'),     self)
+        action_d['remove']  = QtGui.QAction(ICON('list-remove'),    tr('Remove'),  self)
+        action_d['block']   = QtGui.QAction(ICON('dialog-cancel'),  tr('Block'),   self)
         action_d['unblock'] = QtGui.QAction(ICON('dialog-ok-apply'), 
-                                       _('Unblock'), self)
-        action_d['move_to']     = QtGui.QMenu(_('Move to group'),      self)
-        action_d['copy_to']     = QtGui.QMenu(_('Copy to group'),      self)
-        action_d['remove_from'] = QtGui.QMenu(_('Remove from group'),  self)
-        action_d['set_alias']   = QtGui.QAction(_('Set alias...'),       self)
-        action_d['view_info']   = QtGui.QAction(_('View info...'),       self)
+                                       tr('Unblock'), self)
+        action_d['move_to']     = QtGui.QMenu(tr('Move to group'),      self)
+        action_d['copy_to']     = QtGui.QMenu(tr('Copy to group'),      self)
+        action_d['remove_from'] = QtGui.QMenu(tr('Remove from group'),  self)
+        action_d['set_alias']   = QtGui.QAction(tr('Set alias')+'...',       self)
+        action_d['view_info']   = QtGui.QAction(tr('View information')+'...',       self)
         
         self.addActions( (action_d['add'],
                           action_d['remove'],
@@ -87,8 +89,8 @@ class ContactMenu(QtGui.QMenu):
            handler.contact_list.get_contact_selected() is not None:
             for uid, group in groups_d.iteritems():
                 if uid not in contact_groups_uids:
-                    action1 = QtGui.QAction(group.name, self)
-                    action2 = QtGui.QAction(group.name, self)
+                    action1 = QtGui.QAction(unicode(group.name), self)
+                    action2 = QtGui.QAction(unicode(group.name), self)
                     action1.setData(group)
                     action2.setData(group)
                     move_to.addAction(action1)
@@ -96,7 +98,7 @@ class ContactMenu(QtGui.QMenu):
                     move_to.triggered.connect(self._on_move_to_group)
                     copy_to.triggered.connect(self._on_copy_to_group)
                 else:
-                    action = QtGui.QAction(group.name, self)
+                    action = QtGui.QAction(unicode(group.name), self)
                     action.triggered.connect(
                         lambda *args: handler.on_remove_from_group_selected(group))
                     remove_from.addAction(action)

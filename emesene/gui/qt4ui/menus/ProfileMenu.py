@@ -5,6 +5,9 @@
 
 import PyQt4.QtGui      as QtGui
 
+from gui.qt4ui.Utils import tr
+
+
 ICON = QtGui.QIcon.fromTheme
 
 class ProfileMenu(QtGui.QMenu):
@@ -20,10 +23,10 @@ class ProfileMenu(QtGui.QMenu):
 
         handler -- a e3common.Handler.AccountHandler
         '''
-        QtGui.QMenu.__init__(self, _('Profile'), parent)
+        QtGui.QMenu.__init__(self, tr('Profile'), parent)
         self._handler = handler
 
-        self.change_profile = QtGui.QAction(_('Change profile'), self)
+        self.change_profile = QtGui.QAction(tr('Change profile'), self)
         self.addAction(self.change_profile)
         
         self.setIcon(ICON('document-properties'))

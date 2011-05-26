@@ -5,6 +5,8 @@
 
 import PyQt4.QtGui      as QtGui
 
+from gui.qt4ui.Utils import tr
+
 import e3
 import gui
 
@@ -22,13 +24,13 @@ class StatusMenu (QtGui.QMenu):
 
         on_status_selected -- a callback that receives the status when changed
         '''
-        QtGui.QMenu.__init__(self, _('Status'), parent)
+        QtGui.QMenu.__init__(self, tr('Status'), parent)
         self._on_status_selected = on_status_selected
 
         for status in e3.status.ORDERED:
             action = QtGui.QAction(
                     QtGui.QIcon(QtGui.QPixmap(gui.theme.status_icons[status])),
-                    e3.status.STATUS[status].capitalize(),
+                    unicode(e3.status.STATUS[status]).capitalize(),
                     self)
             action.setData(status)
             self.triggered.connect(self._on_activate)
