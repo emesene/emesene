@@ -33,11 +33,11 @@ class SmileyPopupChooser (QtGui.QDockWidget):
         self._fade_timer = QtCore.QTimer()
         self._fade_timer.setSingleShot(False)
 
-        smiley_dict = gui.theme.EMOTES
+        smiley_dict = gui.theme.get_emote_theme().get_emotes()
         smiley_button_list = []
     
         for i in smiley_dict.keys():
-            icon_path = gui.theme.emote_to_path(i)
+            icon_path = gui.theme.get_emote_theme().emote_to_path(i)
             if not icon_path:
                 continue
             icon_path = icon_path[6:]

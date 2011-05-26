@@ -54,7 +54,7 @@ class ChatInput (QtGui.QTextEdit):
         shortcuts = smiley_dict.keys()
         
         for shortcut in shortcuts:
-            path = unicode(gui.theme.emote_to_path(shortcut))
+            path = unicode(gui.theme.get_emote_theme().emote_to_path(shortcut))
             if not path:
                 login.warning('No image path for: \t%s, %s' 
                               % (shortcut, smiley_dict[shortcut]))
