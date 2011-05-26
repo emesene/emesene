@@ -110,7 +110,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         self._content_type = 'login'
         if not login_page.autologin_started:
             self._switch_to_page(login_page)
-        self.menuBar().hide()
+        self.setMenuBar(None)
 
     def go_main(self, session, on_new_conversation,
             on_close, on_disconnect, quit_on_close=False):
