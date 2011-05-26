@@ -25,13 +25,13 @@ import pango
 import debugger
 import logging
 
-class DebugWindow(object):
+class DebugWindow(gtk.Window):
     '''The window containing the debug info'''
     def __init__(self):
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.window.set_title("debug")
-        self.window.connect("delete_event", self.on_delete)
-        self.window.resize(800, 600)
+        gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
+        self.set_title("debug")
+        self.connect("delete_event", self.on_delete)
+        self.resize(800, 600)
         self.store = DebugStore()
         self.view = DebugView(self.store)
         
@@ -66,18 +66,18 @@ class DebugWindow(object):
         self.buttons_box.pack_end(self.close_btn, False)
         self.vbox.pack_start(self.buttons_box, False)
         
-        self.window.add(self.vbox)
+        self.add(self.vbox)
 
         self.filter_btn.connect("clicked", self.on_filter_clicked)
         self.filter_entry.connect("activate", self.on_filter_clicked)
         self.filter_level.connect("changed", self.on_filter_clicked)
         self.close_btn.connect("clicked", self.on_close)
 
-        self.window.set_default_size(*self.view.size_request())
+        self.set_default_size(*self.view.size_request())
 
-    def show( self ):
+    def show(self):
         '''shows the window'''
-        self.window.show_all()
+        self.show_all()
 
     def on_filter_clicked(self, widget, data=None):
         '''used when the filter button is clicked'''
@@ -89,8 +89,9 @@ class DebugWindow(object):
         self.view.filter_caller(pattern, levelno)
 
     def safely_close(self):
-        self.window.hide()
+        self.hide()
         logging.getLogger().removeHandler(self.store)
+
     def on_add(self, button, data=None):
         caller = self.test_entry.get_text()
         #self.store.append([caller, "just a test"])
@@ -101,6 +102,7 @@ class DebugWindow(object):
         return False
 
     def on_delete(self, widget, event, data=None):
+        self.safely_close()
         return False
 
 class DebugView( gtk.TextView ):
@@ -110,7 +112,6 @@ class DebugView( gtk.TextView ):
         self.store = store
         self.buffer = DebugBuffer(store)
         self.set_buffer(self.buffer)
-
         self.set_editable(False)
 
     def filter_caller(self, pattern, level):
@@ -180,7 +181,7 @@ class DebugStore( gtk.ListStore, logging.Handler ):
         del self.custom_filter
         self.custom_filter = self.filter_new()
         self.custom_filter.set_visible_func(filter_func, (name, level))
-    
+
 def filter_func(model, iter, (name, required_level)):
     '''returns true if the caller column matches name
     AND level is at least required_level'''
