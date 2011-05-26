@@ -97,7 +97,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         painter.setClipping(True)
         # -> Draw the skeleton of a ItemView widget: highlighting, selection...
         QtGui.QApplication.style().drawControl(QtGui.QStyle.CE_ItemViewItem, 
-                                               option, painter, option.widget)
+                                               option, painter, self.parent())
         status = model.data(index, Role.StatusRole).toPyObject()
         text_doc = QtGui.QTextDocument()
         
