@@ -6,6 +6,8 @@ from PyQt4          import QtGui
 from PyQt4          import QtCore
 from PyQt4.QtCore   import Qt
 
+from gui.qt4ui.Utils import tr
+
 import base64
 
 import extension
@@ -105,13 +107,13 @@ class LoginPage(QtGui.QWidget):
         widget_d['password_edit'] = QtGui.QLineEdit()
         widget_d['status_combo']  = status_combo_cls()
         widget_d['save_account_chk'] =    \
-                QtGui.QCheckBox(_('Remember this account'))
+                QtGui.QCheckBox(tr('Remember me'))
         widget_d['save_password_chk'] =   \
-                QtGui.QCheckBox(_('Save password'))
+                QtGui.QCheckBox(tr('Remember password'))
         widget_d['auto_login_chk'] =  \
-                QtGui.QCheckBox(_('Login automagically'))
+                QtGui.QCheckBox(tr('Auto-login'))
         widget_d['advanced_btn']  = QtGui.QToolButton() 
-        widget_d['login_btn'] = QtGui.QPushButton(_('Login'))
+        widget_d['login_btn'] = QtGui.QPushButton(tr('Connect'))
 
         lay = QtGui.QVBoxLayout()
         lay.addSpacing(40)
