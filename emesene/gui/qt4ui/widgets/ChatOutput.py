@@ -2,6 +2,8 @@
 
 '''This module contains the ChatTextEdit class'''
 
+import logging
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
@@ -9,6 +11,8 @@ import e3
 
 from gui.qt4ui  import Utils
 
+
+log = logging.getLogger('qt4ui.widgets.ChatOutput')
 
 class ChatOutput (QtGui.QTextBrowser):
     '''A widget which displays various messages of a conversation'''
@@ -30,12 +34,9 @@ class ChatOutput (QtGui.QTextBrowser):
                         message, cedict, cedir, first):
         '''This method is called from the core (e3 or base class or whatever
         when a new message arrives. It shows the new message'''
-        print formatter,
-        print contact,
-        print message.type,
-        print message.account
-        print cedict,
-        print first
+        log.debug('%s, %s, %s, %s, %s, %s' % (formatter,contact, 
+                                              message.type, message.account, 
+                                              cedict, first) )
         
         self._append_to_chat(
                 Utils.parse_emotes(u'<b>' + contact.display_name + u':</b>'))

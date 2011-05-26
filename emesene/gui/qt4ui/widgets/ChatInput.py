@@ -2,6 +2,7 @@
 
 '''This module contains the ChatInput class'''
 
+import logging
 import os
 
 import PyQt4.QtGui      as QtGui
@@ -13,6 +14,8 @@ import gui
 
 from gui.qt4ui import Utils
 
+
+log = logging.getLogger('qt4ui.widgets.ChatInput')
 
 class ChatInput (QtGui.QTextEdit):
     '''A widget suited for editing chat lines. Provides as-you-type
@@ -53,7 +56,8 @@ class ChatInput (QtGui.QTextEdit):
         for shortcut in shortcuts:
             path = unicode(gui.theme.emote_to_path(shortcut))
             if not path:
-                print "\t%s, %s" % (shortcut, smiley_dict[shortcut])
+                login.warning('No image path for: \t%s, %s' 
+                              % (shortcut, smiley_dict[shortcut]))
                 continue
             shortcut = unicode(shortcut)
             path = os.path.abspath(path[7:])
@@ -91,18 +95,13 @@ class ChatInput (QtGui.QTextEdit):
                 last_char = QtCore.QString(last_char)
                 text_search = unicode(last_char) + text_search
             i += 1
-            #print "parsing",
-            #print [text_search],
             length = len(text_search)
-            #print " (%d)" % length
             if text_search in shortcuts:
-                #print "\t FOUND"
                 for i in range(length-1):
                     cursor.deletePreviousChar()
                 self._insert_image_resource(text_search)
                 cursor.insertImage(text_search)
                 return True
-        #print "\t No smiley Found"
         return False
         
         
@@ -119,10 +118,8 @@ class ChatInput (QtGui.QTextEdit):
     def _swap_to_chat_line(self, idx):
         '''Swaps to the given chat line in the history'''
         if idx < 0 or idx > len(self._chat_lines)-1:
-            #print "(%d) doing nothing" % idx
             return
         else:
-            #print "switching to %d" % idx
             self._chat_lines[self._current_chat_line_idx] = self.toHtml()
             QtGui.QTextEdit.setHtml(self, self._chat_lines[idx])
             cur = self.textCursor()
@@ -136,10 +133,10 @@ class ChatInput (QtGui.QTextEdit):
         qt_font = self._get_qt_font()
         new_qt_font, result = QtGui.QFontDialog.getFont(qt_font)
         if result:
-            print "accepted"
+            log.info('font chooser: accepted')
             self._set_qt_font(new_qt_font)
         else:
-            print "canceled"
+            log.info('font chooser: canceled')
             
             
     def show_color_chooser(self):
@@ -159,16 +156,16 @@ class ChatInput (QtGui.QTextEdit):
         e3_color.alpha = qt_color.alpha()
         
         font = unicode(qt_font.family())
-        print "Font's raw Name: " + font
-        print "Font default family: " + qt_font.defaultFamily()
+        log.info('Font\'s raw Name: ' + font +
+                 'Font default family: ' + qt_font.defaultFamily())
         
         e3_style = e3.Style(font, e3_color, qt_font.bold(), 
                                             qt_font.italic(),
                                             qt_font.underline(), 
                                             qt_font.strikeOut(), 
                                             qt_font.pointSize())
-        print qt_font.toString()
-        print e3_style
+        log.info(qt_font.toString())
+        log.info(e3_style)
         return e3_style
         
     
@@ -210,8 +207,8 @@ class ChatInput (QtGui.QTextEdit):
         self._qt_color = new_color
         self.setStyleSheet("QTextEdit{color: %s;}"    \
                            "QMenu{color: palette(text);}" % new_color.name() )
-        print type(self.viewport())
-        print str(self.viewport().objectName())
+        log.debug(type(self.viewport()))
+        log.debug(str(self.viewport().objectName()))
         if old_color != new_color:
             self.style_changed.emit()
 
@@ -340,8 +337,6 @@ class MyHTMLParser (HTMLParser):
 
     def handle_data(self, data):
         '''Handle data sequences'''
-        #print "DATA :",
-        #print data
         if self._in_body:
             self._data += data
     

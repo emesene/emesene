@@ -56,7 +56,6 @@ class FileMenu(QtGui.QMenu):
         handler -- e3common.Handler.FileHandler
         '''
         QtGui.QMenu.__init__(self, tr('File'), parent)
-        print 'Menu Bar'
         self._handler = handler
         status_menu_cls = extension.get_default('menu status')
         
@@ -90,7 +89,6 @@ class ActionsMenu(QtGui.QMenu):
         handler -- e3common.Handler.ActionsHandler
         '''
         QtGui.QMenu.__init__(self, tr('Actions'), parent)
-        print 'Actions Menu'
         self._handler = handler
 
         contacts_menu_cls = extension.get_default('menu contact')
@@ -121,7 +119,6 @@ class OptionsMenu(QtGui.QMenu):
         handler -- e3common.Handler.OptionsHandler
         '''
         QtGui.QMenu.__init__(self, tr('Options'), parent)
-        print 'Options Menu'
         self.handler = handler
 
         # "Show" submenu
@@ -197,7 +194,6 @@ class HelpMenu(QtGui.QMenu):
         handler -- e3common.Handler.HelpHandler
         '''
         QtGui.QMenu.__init__(self, tr('Help'), parent)
-        print 'Help Menu'
         self.handler = handler
 
         self.website = QtGui.QAction(tr('Website'), self)
