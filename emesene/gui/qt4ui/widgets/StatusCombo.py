@@ -2,6 +2,8 @@
 
 ''' This module contains the PreseceCombo class'''
 
+import logging
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
@@ -11,6 +13,8 @@ import gui
 #Maybe we need another class which makes status info more abstract?
 #(a Qt Delegate?! Does KComboBox support them?)
 #TODO: put inizialization out of constructor, add setstatusValues method.
+
+log = logging.getLogger('qt4ui.widgets.StatusCombo')
 
 class StatusCombo(QtGui.QComboBox):
     '''A presence selection widget'''
@@ -71,8 +75,8 @@ class StatusCombo(QtGui.QComboBox):
     def setCurrentIndex(self, index):
         '''sets the status by the index'''
         # pylint: disable=C0103
-        print "Oh, boy.... what an ugly way to set the displayed status!<br>\
-                    Come on, use set_status() instead! :("
+        log.warning('Oh, boy.... what an ugly way to set the displayed status!<br>\
+                    Come on, use set_status() instead! :(')
         #the personalinfoview holds a string... so this is necessary...
         #maybe this will be removed in the future... I hope...
         QtGui.QComboBox.setCurrentIndex(self, index)

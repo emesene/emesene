@@ -171,7 +171,7 @@ class ImageAreaSelector (QtGui.QWidget):
         new_image_origin = QPoint(dx, dy)
         self._selection_rect.translate(new_image_origin - self._image_origin)
         self._image_origin = new_image_origin
-        print 'image origin: %s' % new_image_origin
+        log.info('image origin: %s' % new_image_origin)
         
     def select_unscaled(self):
         '''Selects, if possible, a 96 x 96 square centered around the original

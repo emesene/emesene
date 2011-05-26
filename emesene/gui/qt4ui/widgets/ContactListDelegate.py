@@ -2,6 +2,8 @@
 
 '''This module contains the ContactList class'''
 
+import logging
+
 from PyQt4      import QtCore
 from PyQt4      import QtGui
 
@@ -11,6 +13,8 @@ from gui.qt4ui import Utils
 from gui.qt4ui.widgets.ContactListModel import Role
 from gui.qt4ui.widgets.ContactListModel import ContactListModel
 
+
+log = logging.getLogger('qt4ui.widgets.ContactListDelegate')
 
 class ContactListDelegate (QtGui.QStyledItemDelegate):
     '''A Qt Delegate to paint an item of the contact list'''
@@ -40,7 +44,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         self.parent().update()
         
     def _on_template_change(self, *args):
-        print "template changed"
+        log.info('template changed')
         self.parent().repaint()
     
     def _build_display_role(self, index, is_group=False):

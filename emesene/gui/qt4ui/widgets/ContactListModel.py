@@ -2,6 +2,7 @@
 
 '''This module constains the ContactListModel class'''
 
+import logging
 import xml
 
 import PyQt4.QtGui      as QtGui
@@ -11,8 +12,10 @@ from PyQt4.QtCore   import Qt
 from gui.qt4ui  import Utils
 from gui.qt4ui.Utils import tr
 
-
 import e3
+
+
+log = logging.getLogger('qt4ui.widgets.ContactListModel')
 
 class ContactListModel (QtGui.QStandardItemModel):
     '''Item model which represents a contact list'''
@@ -53,13 +56,11 @@ class ContactListModel (QtGui.QStandardItemModel):
     def add_contact(self, contact, group=None):
         '''Add a contact'''
         # TODO: check adding an existing contact
-        print 'add ',
-        print contact.display_name,
         if group:
             gname = group.name
         else:
             gname = 'NONE'
-        print ' to group: %s' % gname
+        log.info('add %s to group %s' % (contact.display_name, gname))
         
         # decide in which group we have to add the contact:
         if self._config.b_order_by_group:
@@ -111,9 +112,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         '''Update a contact'''
         # TODO: Keep a {contact uid:group item} dict... maybe..
         # btw this method is horrible...
-        print 'UPDATING ',
-        print contact.display_name
-        print contact.identifier
+        log.debug('UPDATING %s, %s' % (contact.display_name, contact.identifier))
         if self._config.b_order_by_group:
             for index in range(self.rowCount()):
                 group_item = self.item(index, 0)
@@ -125,7 +124,7 @@ class ContactListModel (QtGui.QStandardItemModel):
                     break
                     
             if not contact_item:
-                print '***** NOT FOUND: %s' % (contact)
+                log.debug('***** NOT FOUND: %s' % (contact))
                 return
                     
             old_status = contact_item.data(Role.StatusRole)
@@ -185,7 +184,7 @@ class ContactListModel (QtGui.QStandardItemModel):
                                                  self._off_grp)
                 
                 if not contact_item:
-                    print '***** NOT FOUND: %s' % (contact)
+                    log.debug('***** NOT FOUND: %s' % (contact))
                     return
                 
                 new_status = contact.status
