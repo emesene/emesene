@@ -7,10 +7,13 @@ import os
 from PyQt4  import QtGui
 from PyQt4  import QtCore
 
-import extension
-import gui
 from gui.qt4ui import Dialog
 from gui.qt4ui import widgets
+from gui.qt4ui.Utils import tr
+
+import extension
+import gui
+
 
 class AvatarChooser(Dialog.OkCancelDialog):
     '''A dialog to choose an avatar'''
@@ -26,15 +29,15 @@ class AvatarChooser(Dialog.OkCancelDialog):
         '''Constructor, response_cb receive the response number, the new file
         selected and a list of the paths on the icon view.
         picture_path is the path of the current display picture'''
-        Dialog.OkCancelDialog.__init__(self, _('Avatar chooser'), 
+        Dialog.OkCancelDialog.__init__(self, tr('Avatar chooser'), 
                                        expanding=True, parent=parent)
         
         self._session = session
         self._avatar_manager = gui.base.AvatarManager(session)
         # view names:
-        self._vn = [ _('Used pictures'   ), 
-                     _('System pictures' ), 
-                     _('Contact pictures')  ]
+        self._vn = [ tr('Used pictures'   ), 
+                     tr('System pictures' ), 
+                     tr('Contact pictures')  ]
         self._view_with_selection = None
         self._current_avatar = session.config_dir.get_path('last_avatar')
         self._widget_d = {}
@@ -61,8 +64,8 @@ class AvatarChooser(Dialog.OkCancelDialog):
         widget_d['group_box']    = QtGui.QGroupBox()
         widget_d['preview_dpic'] = widgets.DisplayPic(self._session,
                                                              clickable=False)
-        widget_d['add_btn']      = QtGui.QPushButton(_('Add...'))
-        widget_d['remove_btn']   = QtGui.QPushButton(_('Remove'))
+        widget_d['add_btn']      = QtGui.QPushButton(tr('Add...'))
+        widget_d['remove_btn']   = QtGui.QPushButton(tr('Remove'))
         widget_d[self._vn[0]]    = QtGui.QListView()
         widget_d[self._vn[1]]    = QtGui.QListView()
         widget_d[self._vn[2]]    = QtGui.QListView()
@@ -96,7 +99,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
             listview.setModel         (model)
             listview.setSelectionModel(selection_model)
             listview.setItemDelegate  (delegate)
-        widget_d['group_box'].setTitle(_('Preview'))
+        widget_d['group_box'].setTitle(tr('Preview'))
         widget_d['preview_dpic'].set_display_pic_of_account()
         widget_d['add_btn'].setIcon(QtGui.QIcon.fromTheme('list-add'))
         widget_d['remove_btn'].setIcon(QtGui.QIcon.fromTheme('list-remove'))
@@ -179,7 +182,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
                 add_and_select(filename)
         
         filename = QtGui.QFileDialog.getOpenFileName(
-                                         self, _('Select an image'), 
+                                         self, tr('Select an image'), 
                                          QtCore.QString(),
                                          'Images (*.jpeg *.jpg *.png *.gif')
         if filename.isEmpty():
