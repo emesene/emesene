@@ -11,6 +11,7 @@ import e3
 import gui
 
 from gui.qt4ui  import Utils
+from gui.qt4ui.Utils import tr
 
 
 class AdiumChatOutput (QtGui.QScrollArea):
@@ -73,7 +74,7 @@ class AdiumChatOutput (QtGui.QScrollArea):
                      cedict, cedir, is_first):
         '''add a message to the widget'''
         if message.type is e3.Message.TYPE_NUDGE:
-            message.body = _('You just sent a nudge!')        
+            message.body = tr('You just sent a nudge!')        
         self._append_message(contact, message, cedict, 
                              cedir, is_incoming=False)
         

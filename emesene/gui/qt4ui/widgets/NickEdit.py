@@ -7,6 +7,8 @@ import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 from gui.qt4ui import Utils
+from gui.qt4ui.Utils import tr
+
 
 
 # important: at the moment emits "str" not "unicode"
@@ -24,14 +26,12 @@ class NickEdit(QtGui.QStackedWidget):
     
     nick_changed = QtCore.pyqtSignal(basestring)
     def __init__(self, allow_empty=False, 
-                 empty_message=QtCore.QString(_('Click here to write')),
+                 empty_message=tr('Click here to write'),
                  parent=None):
         QtGui.QStackedWidget.__init__(self, parent)
 
         self._allow_empty = allow_empty
-        self._empty_message = QtCore.QString('<u>') + \
-                              empty_message + \
-                              QtCore.QString('</u>')
+        self._empty_message = u'<u>' + empty_message + u'</u>'
         self._is_empty_message_displayed = False
 
         self._text = ''

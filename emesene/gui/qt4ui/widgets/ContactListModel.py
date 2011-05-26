@@ -9,6 +9,8 @@ import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 from gui.qt4ui  import Utils
+from gui.qt4ui.Utils import tr
+
 
 import e3
 
@@ -311,8 +313,8 @@ class ContactListModel (QtGui.QStandardItemModel):
         '''Add a group.'''
         if not self._config.b_order_by_group:
             return
-        new_group_item = QtGui.QStandardItem(unicode( 
-                    xml.sax.saxutils.escape(group.name)))
+        new_group_item = QtGui.QStandardItem( 
+                    xml.sax.saxutils.escape(unicode(group.name)))
         new_group_item.setData(group.identifier, Role.UidRole)
         new_group_item.setData(0, Role.TotalCountRole)
         new_group_item.setData(0, Role.OnlCountRole)
@@ -346,9 +348,9 @@ class ContactListModel (QtGui.QStandardItemModel):
         if uid in [self.NO_GRP_UID, 
                    self.ONL_GRP_UID, 
                    self.OFF_GRP_UID]:
-            group_name = {self.NO_GRP_UID  : _(u'No Group'),
-                          self.OFF_GRP_UID : _(u'Offline' ),
-                          self.ONL_GRP_UID : _(u'Online'  ) }
+            group_name = {self.NO_GRP_UID  : tr(u'No Group'),
+                          self.OFF_GRP_UID : tr(u'Offline' ),
+                          self.ONL_GRP_UID : tr(u'Online'  ) }
             new_group_item = QtGui.QStandardItem(group_name[uid])
             new_group_item.setData(uid, Role.UidRole)
             new_group_item.setData(0, Role.TotalCountRole)

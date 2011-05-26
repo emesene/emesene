@@ -32,7 +32,7 @@ class StatusCombo(QtGui.QComboBox):
 
         for status_key in self._status_values:
             self._status_strings[status_key] = \
-                                    e3.status.STATUS[status_key].capitalize()
+                        unicode(e3.status.STATUS[status_key]).capitalize()
 
         #status_key is of e3.status.ALL type
         #statusValue is a dict wich associates a e3.status with a string
