@@ -8,6 +8,8 @@ import time
 from PyQt4  import QtGui
 #from PyQt4  import QtCore
 
+from gui.qt4ui.Utils import tr
+
 import debugger
 #import gui
 #from gui.qt4ui import Dialog
@@ -35,7 +37,7 @@ class DebugWindow(QtGui.QWidget):
     def _setup_ui(self):
         self._widget_d['filter_edit'] = QtGui.QLineEdit()
         self._widget_d['msg_level_combo'] = QtGui.QComboBox()
-        self._widget_d['filter_btn'] = QtGui.QPushButton(_('Filter'))
+        self._widget_d['filter_btn'] = QtGui.QPushButton(tr('Filter'))
         hlay = QtGui.QHBoxLayout()
         hlay.addWidget(self._widget_d['filter_edit'])
         hlay.addWidget(self._widget_d['msg_level_combo'])
@@ -47,7 +49,7 @@ class DebugWindow(QtGui.QWidget):
         lay.addWidget(self._widget_d['text_view'])
         self.setLayout(lay)
         
-        self.setWindowTitle(_('Debug'))
+        self.setWindowTitle(tr('Debug'))
         self.resize(800, 600)
         
         
