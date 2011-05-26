@@ -53,9 +53,14 @@ class SmileyPopupChooser (QtGui.QDockWidget):
         # constraints: x*y = len(smiley_dict) = r AND  x/y = 1.6
         # which gives: y = sqrt(num_elems/r) AND x = sqrt(r*num_elems)
         num_elems = len(smiley_button_list)
+        # number of columns:
         self.num_columns = math.ceil(
-                            math.sqrt(1.6 * num_elems)) #numero di colonne
-        self.num_rows = num_elems / self.num_columns #numero di righe
+                            math.sqrt(1.6 * num_elems))
+        # number of rows:
+        self.num_rows = math.ceil(num_elems / self.num_columns)
+        # convert these two float numbers into integers:
+        self.num_columns = math.trunc(self.num_columns)
+        self.num_rows    = math.trunc(self.num_rows)
         
         grid = QtGui.QGridLayout()
         grid.setSpacing(0)
