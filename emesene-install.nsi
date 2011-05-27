@@ -10,12 +10,15 @@ InstallDirRegKey HKLM "Software\emesene2" "Install_Dir"
 Section "Install"  
     SectionIn RO
     SetOutPath $INSTDIR
-    File /r dist\*.*
+    File /r "dist\*.*"
     WriteRegStr HKLM "Software\emesene2" "Install_Dir" "$INSTDIR"
     WriteUninstaller "$INSTDIR\uninstall.exe"
 SectionEnd
 
 Section "Shortcuts"
+    /* Shortcut icons currently dont work on x64 Windows 7 and possible Vista.
+       lnkX64IconFix.nsh is a macro file that suppose to fix the problem, but it doesnt seem to.
+       All lines related to lnkX64IconFix are commented out. */
     CreateDirectory "$SMPROGRAMS\emesene2"
     CreateShortCut "$SMPROGRAMS\emesene2\emesene2.lnk" "$INSTDIR\emesene.exe" "" "$INSTDIR\emesene.exe"
     ;${lnkX64IconFix} "$SMPROGRAMS\emesene2\emesene2.lnk"
