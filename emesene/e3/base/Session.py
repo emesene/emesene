@@ -75,6 +75,15 @@ class Session(object):
         self.config_dir.add_path("log", "log")
         self.logger = Logger.LoggerProcess(self.config_dir.get_path('log'))
         self.logger.start()
+        self.config.get_or_set('b_log_enabled', True)
+
+    def log(self, event, status, payload, src, dest = None, new_time = None, cid = None):
+        if self.config.get_or_set('b_log_enabled', True):
+            self.logger.log(event,status,payload,src,dest,new_time,cid)
+
+    def logs(self, logs):
+        if self.config.get_or_set('b_log_enabled', True):
+            self.logger.logs(logs)
 
     def _get_account(self):
         '''return the value of account'''

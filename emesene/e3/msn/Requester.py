@@ -493,7 +493,7 @@ class ChangeNick(Requester):
             self.session.contacts.me.nick = self.nick
             self.session.add_event(e3.Event.EVENT_NICK_CHANGE_SUCCEED,
                self.nick)
-            self.session.logger.log('nick change', self.account.status,
+            self.session.log('nick change', self.account.status,
                 self.nick, self.account)
         else:
             log.debug(response.body + '\n' + request.body)
