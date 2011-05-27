@@ -22,6 +22,7 @@ import gtk
 import glib
 import urllib
 
+import stock
 import utils
 import gui
 import extension
@@ -207,7 +208,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         if path_uri.startswith("file://"):
             path_uri = path_uri[8:]
             path_uri = urllib.url2pathname(path_uri)
-
         directory = os.path.dirname(path_uri).lower()
         caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         emcache = caches.get_emoticon_cache(self.session.account.account)
@@ -217,8 +217,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         elif directory == emcache.path.lower():
             Dialog.Dialog.information(_("Can't add, own emoticon"))
         else:
-            def on_response(dialog,response):
-                if response == gtk.RESPONSE_ACCEPT:
+            def on_response(response, shortcut):
+                if response == stock.ACCEPT:
                     shortcut = dialog.entry.get_text()
                     if shortcut not in emcache.list():
                         self.emcache.insert((shortcut, path_uri))
