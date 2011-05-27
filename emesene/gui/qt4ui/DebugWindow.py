@@ -6,14 +6,11 @@ import logging
 import time
 
 from PyQt4  import QtGui
-#from PyQt4  import QtCore
 
 from gui.qt4ui.Utils import tr
 
 import debugger
-#import gui
-#from gui.qt4ui import Dialog
-#from gui.qt4ui import widgets
+
 
 log = logging.getLogger('qt4ui.DebugWindow')
 
@@ -25,37 +22,62 @@ class DebugWindow(QtGui.QWidget):
     WEBSITE = ''
 
     def __init__(self, on_close_cb, parent=None):
+        '''Constructor'''
         QtGui.QWidget.__init__(self, parent)
         self._on_close_cb = on_close_cb
         self._widget_d = {}
         self._setup_ui()
-        
         logging.getLogger().addHandler(self._widget_d['text_view'])
         
         
-        print (QtGui.QApplication.activeWindow())
-        
-    
     def _setup_ui(self):
-        self._widget_d['filter_edit'] = QtGui.QLineEdit()
-        self._widget_d['msg_level_combo'] = QtGui.QComboBox()
-        self._widget_d['filter_btn'] = QtGui.QPushButton(tr('Filter'))
+        '''Instantiates the widgets, and sets the layout'''
+        widget_d = self._widget_d
+        widget_d['filter_edit'] = QtGui.QLineEdit()
+        widget_d['msg_level_combo'] = QtGui.QComboBox()
+        widget_d['filter_btn'] = QtGui.QPushButton(tr('Filter'))
         hlay = QtGui.QHBoxLayout()
-        hlay.addWidget(self._widget_d['filter_edit'])
-        hlay.addWidget(self._widget_d['msg_level_combo'])
-        hlay.addWidget(self._widget_d['filter_btn'])
+        hlay.addWidget(widget_d['filter_edit'])
+        hlay.addWidget(widget_d['msg_level_combo'])
+        hlay.addWidget(widget_d['filter_btn'])
         
-        self._widget_d['text_view'] = DebugTextView()
+        widget_d['text_view'] = DebugTextView()
         lay = QtGui.QVBoxLayout()
         lay.addLayout(hlay)
-        lay.addWidget(self._widget_d['text_view'])
+        lay.addWidget(widget_d['text_view'])
         self.setLayout(lay)
         
+        combo = widget_d['msg_level_combo']
+        combo.addItem('Debug'   , logging.DEBUG   )
+        combo.addItem('Info'    , logging.INFO    )
+        combo.addItem('Warning' , logging.WARNING )
+        combo.addItem('Error'   , logging.ERROR   )
+        combo.addItem('Critical', logging.CRITICAL)
         self.setWindowTitle(tr('Debug'))
         self.resize(800, 600)
         
+        combo.currentIndexChanged.connect(
+                    lambda *args :self._on_filter_changed())
+        widget_d['filter_btn'].clicked.connect(
+                    lambda *args: self._on_filter_changed())
+        widget_d['filter_edit'].returnPressed.connect(
+                    lambda *args: self._on_filter_changed())
+        
+        
+        
+    def _on_filter_changed(self):
+        '''Called when the user tries to set a new filter'''
+        widget_d = self._widget_d
+        i     = widget_d['msg_level_combo'].currentIndex()
+        level = widget_d['msg_level_combo'].itemData(i).toPyObject()
+        name  = widget_d['filter_edit'].text()
+        new_filter = Filter(level, name)
+        widget_d['text_view'].set_filter(new_filter)
+       
+         
         
     def closeEvent(self, event):
+        '''Overrides base's class method'''
         # pylint: disable=C0103
         logging.getLogger().removeHandler(self._widget_d['text_view'])
         QtGui.QWidget.closeEvent(self, event)
@@ -64,13 +86,14 @@ class DebugWindow(QtGui.QWidget):
         
     
     def show(self):
+        '''Show the window'''
         QtGui.QWidget.show(self)
         
     
     def __del__(self):
+        '''Destrusctor'''
         print 'CLOSING DEBUG WINDOW'
         self._on_close_cb()
-        
         
         
         
@@ -80,40 +103,50 @@ class DebugTextView(QtGui.QTextEdit, logging.Handler):
     '''Debug messages visualization widget'''
     
     def __init__(self, filter=None, parent=None):
+        '''Constructor'''
         QtGui.QTextBrowser.__init__(self, parent)
         logging.Handler.__init__(self)
+        if not filter:
+            filter = Filter(0, '')
         self._list = []
         self._filter = filter
+        self.setReadOnly(True)
         self._cursor = QtGui.QTextCursor(self.document())
         queue_handler = debugger.QueueHandler.get()
         for record in queue_handler.get_all():
             self.on_record_added(record)
         
     
-    
     def emit(self, record):
         self.on_record_added(record)
         
-    def _should_be_shown(self, record):
-        if not self._filter:
-            return True
-        if record.levelno < self._filter.level:
-            return False
-        if str(record.name.find(name)) == -1:
-            return False
-        return True
         
     def handle(self, record):
         '''To send the handle message to logging.Handler base class
         instead of QTextEdit'''  
         logging.Handler.handle(self, record)
         
+        
     def on_record_added(self, record):
+        '''This methos is called whenever we need to add a record'''
         self._list.append(record)
-        if self._should_be_shown(record):
+        if self._filter.is_matched_by(record):
             self._show_record(record)
+            
+    
+    def set_filter(self, filter):
+        '''Sets a new filter, and refilters, if needed'''
+        refilter = False
+        if (self._filter.name  != filter.name ) or \
+             (self._filter.level != filter.level):
+            refilter = True
+        self._filter = filter
+        if refilter:
+            self._refilter()
+            
         
     def _show_record(self, record):
+        '''Appends a record in the view'''
         time_string = time.localtime(float(record.created))
         time_string = time.strftime("%H:%M:%S", time_string)
         html = u'<small>(%s): [<b>%s</b>] : '
@@ -121,30 +154,34 @@ class DebugTextView(QtGui.QTextEdit, logging.Handler):
         try:
             html = html + '%s</small><br />' % record.msg.strip()
         except AttributeError as detail:
-            #log.error('Wrong type: %s | value: %s' % (detail, str(record.msg)))
             html = html + '<small><i>&lt;&lt;message insertion failed [%s:%s]&gt;&gt;</i></small><br>' % (type(record.msg), str(record.msg))
         self._cursor.insertHtml(html)
         
+        
     def _refilter(self):
+        '''Recalculates the view from scratch'''
         self._cursor.document().clear()
         for record in self._list:
-            if self._should_be_shown(record):
+            if self._filter.is_matched_by(record):
                 self._show_record(record)
         
         
-    def set_filter(self, filter):
-        refilter = False
-        if (not self._filter) or (not filter):
-            refilter = True
-        elif (self._filter.name  != filter.name ) or \
-             (self._filter.level != filter.level):
-            refilter = True
-        self._filter = filter
-        if refilter:
-            self._refilter()
         
         
+    
 class Filter(object):
-    def __init__(self, level, text):
+    '''Convenience class to represent a filter'''
+    def __init__(self, level, name):
+        '''Constructor'''
         self.level = level
-        self.stext = text
+        self.name = name
+        
+    def is_matched_by(self, record):
+        '''Determines if the given record matches the given
+        filter'''
+        if record.levelno < self.level:
+            return False
+        if str(record.name).find(self.name) == -1:
+            return False
+        return True
+        
