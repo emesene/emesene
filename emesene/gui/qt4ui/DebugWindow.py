@@ -79,10 +79,11 @@ class DebugWindow(QtGui.QWidget):
 class DebugTextView(QtGui.QTextEdit, logging.Handler):
     '''Debug messages visualization widget'''
     
-    def __init__(self, parent=None):
+    def __init__(self, filter=None, parent=None):
         QtGui.QTextBrowser.__init__(self, parent)
         logging.Handler.__init__(self)
         self._list = []
+        self._filter = filter
         self._cursor = QtGui.QTextCursor(self.document())
         queue_handler = debugger.QueueHandler.get()
         for record in queue_handler.get_all():
@@ -93,7 +94,14 @@ class DebugTextView(QtGui.QTextEdit, logging.Handler):
     def emit(self, record):
         self.on_record_added(record)
         
-        
+    def _should_be_shown(self, record):
+        if not self._filter:
+            return True
+        if record.levelno < self._filter.level:
+            return False
+        if str(record.name.find(name)) == -1:
+            return False
+        return True
         
     def handle(self, record):
         '''To send the handle message to logging.Handler base class
@@ -102,6 +110,10 @@ class DebugTextView(QtGui.QTextEdit, logging.Handler):
         
     def on_record_added(self, record):
         self._list.append(record)
+        if self._should_be_shown(record):
+            self._show_record(record)
+        
+    def _show_record(self, record):
         time_string = time.localtime(float(record.created))
         time_string = time.strftime("%H:%M:%S", time_string)
         html = u'<small>(%s): [<b>%s</b>] : '
@@ -113,3 +125,26 @@ class DebugTextView(QtGui.QTextEdit, logging.Handler):
             html = html + '<small><i>&lt;&lt;message insertion failed [%s:%s]&gt;&gt;</i></small><br>' % (type(record.msg), str(record.msg))
         self._cursor.insertHtml(html)
         
+    def _refilter(self):
+        self._cursor.document().clear()
+        for record in self._list:
+            if self._should_be_shown(record):
+                self._show_record(record)
+        
+        
+    def set_filter(self, filter):
+        refilter = False
+        if (not self._filter) or (not filter):
+            refilter = True
+        elif (self._filter.name  != filter.name ) or \
+             (self._filter.level != filter.level):
+            refilter = True
+        self._filter = filter
+        if refilter:
+            self._refilter()
+        
+        
+class Filter(object):
+    def __init__(self, level, text):
+        self.level = level
+        self.stext = text
