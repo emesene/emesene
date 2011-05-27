@@ -615,7 +615,7 @@ class Worker(e3.base.Worker, papyon.Client):
         acc = Logger.Account(contact.cid,
                     None, contact.account, contact.status, contact.nick,
                     contact.message, contact.picture)
-        self.session.logger.log('status change', contact.status,
+        self.session.log('status change', contact.status,
                     old_status, acc)
 
     def _on_contact_nick_changed(self, papycontact):
@@ -636,7 +636,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         if old_nick != nick:
             self.session.contact_attr_changed(account, 'nick', old_nick)
-            self.session.logger.log('nick change', status_, nick,
+            self.session.log('nick change', status_, nick,
                 log_account)
 
     def _on_contact_pm_changed(self, papycontact):
@@ -654,7 +654,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         if old_message != contact.message:
             self.session.contact_attr_changed(account, 'message', old_message)
-            self.session.logger.log('message change', contact.status,
+            self.session.log('message change', contact.status,
                 contact.message, Logger.Account(contact.cid,
                     None, contact.account, contact.status, contact.nick,
                     contact.message, contact.picture))
@@ -772,7 +772,7 @@ class Worker(e3.base.Worker, papyon.Client):
         account = Logger.Account(contact.cid, None, contact.account, stat,
                 contact.nick, contact.message, contact.picture)
 
-        self.session.logger.log('status change', stat, str(stat), account)
+        self.session.log('status change', stat, str(stat), account)
         self.session.status_change_succeed(stat)
 
     def _on_profile_display_name_changed(self):
@@ -784,7 +784,7 @@ class Worker(e3.base.Worker, papyon.Client):
         account = Logger.Account(contact.cid, None, contact.account,
                 contact.status, display_name, contact.message, contact.picture)
 
-        self.session.logger.log('nick change', contact.status, display_name,
+        self.session.log('nick change', contact.status, display_name,
                 account)
         self.session.nick_change_succeed(display_name)
 
@@ -798,7 +798,7 @@ class Worker(e3.base.Worker, papyon.Client):
         account = Logger.Account(contact.cid, None, contact.account,
                 contact.status, contact.nick, contact.message, contact.picture)
 
-        self.session.logger.log(
+        self.session.log(
             'message change', contact.status, message, account)
         self.session.message_change_succeed(message)
 
@@ -813,8 +813,7 @@ class Worker(e3.base.Worker, papyon.Client):
             contact.account, contact.status, contact.nick, contact.message,
             contact.picture)
 
-        self.session.logger.log(
-            'message change', contact.status, message, account)
+        self.session.log('message change', contact.status, message, account)
         self.session.message_change_succeed(message)
 
     def _on_profile_msn_object_changed(self):

@@ -966,6 +966,9 @@ def log_message(session, members, message, sent, error=False, cid = None):
     False if we received the message. error is True if the message send
     failed'''
 
+    if not session.config.get_or_set('b_log_enabled', True):
+        return
+    
     if message.type == e3.Message.TYPE_TYPING:
         return
 
@@ -1024,5 +1027,5 @@ def log_message(session, members, message, sent, error=False, cid = None):
         if message.type == e3.Message.TYPE_NUDGE:
             message.body = _("%s just sent you a nudge!" % display_name)
 
-        session.logger.log(event, status, message.body, src, dest, cid = cid)
+        session.log(event, status, message.body, src, dest, cid = cid)
 
