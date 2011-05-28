@@ -181,7 +181,6 @@ class HelpHandler(object):
     def on_debug_selected(self):
         '''called when the preference button is selected'''
         def debug_close_cb():
-            print 'resetting debug window'
             self.debug_window = None
         if not self.debug_window:
             DebugWindow = extension.get_default('debug window')

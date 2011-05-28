@@ -119,12 +119,12 @@ class Worker(e3.Worker):
 
             self.session.contact_attr_changed(account, change_type, old_status,
                     do_notify)
-            self.session.logger.log('status change', stat, str(stat),
+            self.session.log('status change', stat, str(stat),
                 log_account)
 
         if old_message != contact.message:
             self.session.contact_attr_changed(account, 'message', old_message)
-            self.session.logger.log('message change', contact.status,
+            self.session.log('message change', contact.status,
                 contact.message, log_account)
 
     def _on_message(self, client, message):

@@ -226,7 +226,7 @@ class Worker(threading.Thread):
         account = Logger.Account.from_contact(contact)
         account.status = status_
 
-        self.session.logger.log('status change', status_, str(status_), account)
+        self.session.log('status change', status_, str(status_), account)
 
     def _handle_action_login(self, account, password, status_):
         '''handle Action.ACTION_LOGIN
@@ -283,7 +283,7 @@ class Worker(threading.Thread):
         contact = self.session.contacts.me
         account = Logger.Account.from_contact(contact)
 
-        self.session.logger.log('message change', contact.status, message,
+        self.session.log('message change', contact.status, message,
             account)
 
     def _handle_action_set_nick(self, nick):
@@ -306,7 +306,7 @@ class Worker(threading.Thread):
         # log the change
         account = Logger.Account.from_contact(contact)
 
-        self.session.logger.log('media change', contact.status, message,
+        self.session.log('media change', contact.status, message,
             account)
 
     def _handle_action_set_preferences(self, preferences):
