@@ -16,6 +16,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import sys
 import os
 
 class ConfigDir(object):
@@ -59,8 +60,14 @@ class ConfigDir(object):
 
     def _get_default_base_dir(self):
         '''return the default base dir for configuration according to the OS'''
-        if os.name == 'posix' or os.name == 'nt' or os.name == 'mac':
+        if sys.platform == 'linux2':
             return os.path.expanduser(os.path.join('~', '.config',
+                self.app_name))
+        elif sys.platform == 'win32':
+            return os.path.expanduser(os.path.join(os.environ['APPDATA'], 'emesene',
+                self.app_name))
+        elif sys.platform == 'darwin':
+            return os.path.expanduser(os.path.join('~', 'Library/Application Support',
                 self.app_name))
         else:
             return os.path.abspath(self.app_name)
