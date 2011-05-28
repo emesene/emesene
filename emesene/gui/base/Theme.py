@@ -20,7 +20,7 @@ import os
 import re
 
 import AdiumThemes
-import AdiumEmoteTheme
+import AdiumEmoteThemes
 from e3 import status
 
 import plistlib
@@ -44,7 +44,6 @@ class Theme(object):
     def set_theme(self, image_name, emote_name, sound_name, conv_name, conv_variant=''):
         '''set the theme name and change all the paths to reflect the change'''
         self.image_name = image_name
-        self.emote_name = emote_name
         self.sound_name = sound_name
         # conv_name is the name of the selected adium conversation theme
         self.conv_name = conv_name
@@ -157,14 +156,17 @@ class Theme(object):
             self.tool_file_transfer = os.path.join(self.toolbar_path, "file-transfer.png")
             self.tool_ublock = os.path.join(self.toolbar_path, "ublock.png")
 
-        self.emote_path = os.path.join('themes', 'emotes', self.emote_name)
-        self.emote_config_file = os.path.join(self.emote_path, "Emoticons.plist")
+        self.emote_path = os.path.join('themes', 'emotes', 'default.AdiumEmoticonset')
 
-        if not os.path.isfile(self.emote_config_file):
-            #Fallback to default theme
-            self.emote_path = os.path.join('themes', 'emotes', 'default')
+        self.emotes_themes_path = os.path.join(os.getcwd(), "themes", "emotes")
+        self.emotes_themes = AdiumEmoteThemes.get_instance()
+        self.emotes_themes.add_themes_path(self.emotes_themes_path)
 
-        self.emote_theme = AdiumEmoteTheme.AdiumEmoteTheme(self.emote_path)
+        for elem in self.emotes_themes.list():
+            if emote_name in elem:
+                self.emote_path = elem
+
+        self.emote_theme = self.emotes_themes.get(self.emote_path)[1]
 
     def get_emote_theme(self):
         ''' return the current emote theme '''
@@ -194,15 +196,12 @@ class Theme(object):
 
     def get_emote_themes(self):
         '''return a list of names for the emote themes'''
-        themes = []
-        pattern = re.compile(".AdiumEmoticonset", re.IGNORECASE)
+        AdiumThemesM = AdiumEmoteThemes.AdiumEmoteThemes()
+        path_theme = os.path.join(os.getcwd(), "themes", "emotes")
 
-        for theme in self.get_child_dirs(os.path.join('themes', 'emotes')):
-            if os.path.isfile(os.path.join('themes','emotes',theme,'Emoticons.plist')):
-                theme = pattern.sub('', theme)
-                themes.append(theme)
+        AdiumThemesM.add_themes_path(path_theme)
 
-        return themes
+        return AdiumThemesM.get_name_list()
 
     def get_sound_themes(self):
         '''return a list of names for the sound themes'''
