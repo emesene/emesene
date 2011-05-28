@@ -32,8 +32,8 @@ SectionEnd
 
 Section "Uninstall"
     Delete "$INSTDIR\uninstall.exe"
-    RMDir /r $INSTDIR
-    RMDir /r "$PROFILE\emesene2\"
+    RMDir /r "$INSTDIR"
+    ;RMDir /r "$PROFILE\emesene2\"
     RMDir /r "$SMPROGRAMS\emesene2"
     Delete "$DESKTOP\emesene2.lnk"
     DeleteRegKey HKLM "Software\emesene2"
