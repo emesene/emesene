@@ -7,6 +7,7 @@ import time
 
 from PyQt4  import QtGui
 
+from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
 
 import debugger
@@ -152,7 +153,7 @@ class DebugTextView(QtGui.QTextEdit, logging.Handler):
         html = u'<small>(%s): [<b>%s</b>] : '
         html = html % (time_string, record.name)
         try:
-            html = html + '%s</small><br />' % record.msg.strip()
+            html = html + '%s</small><br />' % Utils.escape(record.msg.strip())
         except AttributeError as detail:
             html = html + '<small><i>&lt;&lt;message insertion failed [%s:%s]&gt;&gt;</i></small><br>' % (type(record.msg), str(record.msg))
         self._cursor.insertHtml(html)

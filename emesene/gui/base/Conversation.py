@@ -168,8 +168,8 @@ class Conversation(object):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
         message = e3.Message(e3.Message.TYPE_NUDGE, '', None, None)
-        self.output.send_message(self.formatter, self.session.contacts.me,
-                                 message, {}, '', self.first)
+        message.body = _('You just sent a nudge!')
+        self.output.information(self.formatter, self.session.contacts.me, message)
 
         self.play_nudge()
 

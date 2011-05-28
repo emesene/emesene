@@ -8,6 +8,7 @@ from PyQt4      import QtCore
 from PyQt4      import QtGui
 
 import gui
+from gui.base import Plus
 
 from gui.qt4ui import Utils
 from gui.qt4ui.widgets.ContactListModel import Role
@@ -53,7 +54,8 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         data_role = model.data(index, Role.DataRole).toPyObject()
         if is_group:
             name = model.data(index, Role.DisplayRole).toPyObject()
-            name = Utils.escape(name)
+            
+            #name = Utils.escape(name)
             online = model.data(index, Role.OnlCountRole).toPyObject()
             total = model.data(index, Role.TotalCountRole).toPyObject()
             display_role = self._config.group_template
@@ -65,9 +67,9 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             # TODO: consider changing how data is stored inside the model, 
             # if useful
             display_role = self._format_nick(data_role, 
-                (str(model.data(index, Role.DisplayRole).toPyObject()),
+                (unicode(model.data(index, Role.DisplayRole).toPyObject()),
                  data_role.nick,
-                 str(model.data(index, Role.MessageRole).toPyObject())))
+                 unicode(model.data(index, Role.MessageRole).toPyObject())))
             display_role = _format_contact_display_role(display_role)
     #        message = model.data(index, Role.MessageRole).toString()
     #        if not message.isEmpty():
@@ -213,16 +215,22 @@ def _format_contact_display_role(text):
     scales them.'''
     # TODO: calculate smiley size from text's size.
     smiley_size = 16
-    text = Utils.escape(text)
+    #text = Utils.escape(text)
+    #log.debug(text)
     text = replace_markup(text)
+    # temporary stuff:
+    text = Plus.msnplus_strip(text)
+    text = text.replace('[C=c10ud]', '')
     text = Utils.parse_emotes(unicode(text))
     text = text.replace('<img src', '<img width="%d" height="%d" src' % 
                  (smiley_size, smiley_size))
+    #log.debug(text)
     return text
     
 def replace_markup(markup):
     '''replace the tags defined in gui.base.ContactList'''
     markup = markup.replace("[$NL]", "<br />")
+    markup = markup.replace("\n",    "<br />")
 
     markup = markup.replace("[$small]", "<small>")
     markup = markup.replace("[$/small]", "</small>")
