@@ -17,7 +17,6 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-import re
 
 import AdiumThemes
 import AdiumEmoteThemes
@@ -216,18 +215,12 @@ class Theme(object):
 
     def get_adium_themes(self):
         '''return a list of validated adium themes'''
-        themes = []
         AdiumThemesM = AdiumThemes.AdiumThemes()
         path_conv = os.path.join('themes', 'conversations')
-        pattern = re.compile(".AdiumMessageStyle", re.IGNORECASE)
 
-        for theme in self.get_child_dirs(path_conv):
-            if AdiumThemesM.validate(
-                                os.path.join(os.path.abspath(path_conv), theme))[0]:
-                theme = pattern.sub('', theme)
-                themes.append(theme)
+        AdiumThemesM.add_themes_path(path_conv)
 
-        return themes
+        return AdiumThemesM.get_name_list()
 
     def get_adium_theme_variants(self):
         '''return a list of adium theme variants'''

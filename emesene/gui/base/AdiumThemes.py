@@ -19,6 +19,7 @@
 
 import os
 import glob
+import re
 
 import AdiumTheme
 
@@ -79,6 +80,20 @@ class AdiumThemes(object):
 
         for path in self.paths:
             items += glob.glob(os.path.join(path, "*.AdiumMessageStyle"))
+
+        return items
+
+    def get_name_list(self):
+        '''return a list with the name of all the available themes
+        '''
+        items = []
+
+        pattern = re.compile(".AdiumMessageStyle", re.IGNORECASE)
+
+        for item in self.list():
+            item = os.path.basename(item)
+            item = pattern.sub('', item)
+            items.append(item)
 
         return items
 
