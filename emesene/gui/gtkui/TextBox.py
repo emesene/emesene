@@ -365,14 +365,11 @@ class OutputText(TextBox):
         is_raw, consecutive, outgoing, first, last = \
             formatter.format(contact, message.type)
 
-        if message.type == e3.Message.TYPE_NUDGE:
-            middle = ''
+        if is_raw:
+            middle = MarkupParser.escape(message.body)
         else:
-            if is_raw:
-                middle = MarkupParser.escape(message.body)
-            else:
-                middle = MarkupParser.escape(message.body)
-                middle = e3.common.add_style_to_message(middle, message.style, False)
+            middle = MarkupParser.escape(message.body)
+            middle = e3.common.add_style_to_message(middle, message.style, False)
 
         all_ = first + middle + last
         self.append(all_, cedict, cepath, self.config.b_allow_auto_scroll)
@@ -391,7 +388,7 @@ class OutputText(TextBox):
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
-        self.append(formatter.format_information(message), None, None,
+        self.append(formatter.format_information(message.body), None, None,
                 self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
