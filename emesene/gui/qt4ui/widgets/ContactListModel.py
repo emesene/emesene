@@ -313,7 +313,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         if not self._config.b_order_by_group:
             return
         new_group_item = QtGui.QStandardItem( 
-                    xml.sax.saxutils.escape(unicode(group.name)))
+                    Utils.escape(unicode(group.name)))
         new_group_item.setData(group.identifier, Role.UidRole)
         new_group_item.setData(0, Role.TotalCountRole)
         new_group_item.setData(0, Role.OnlCountRole)
