@@ -76,11 +76,11 @@ class Notification():
 
         contact = self.session.contacts.get(arg1.sender.account)
         self._notify(contact, contact.nick, _("File transfer invitation"), arg1.sender.account)
-        
+
     def _on_mail_received(self, message):
         ''' called when a new mail is received '''
         self.notifier(_("New mail from %s") % (message.address), message._subject, 'notification-message-email','mail-received', None, message.address)
- 
+
     def has_similar_conversation(self, cid, members):
         '''
         try to find a conversation with the given cid, if not search for a
@@ -111,11 +111,11 @@ class Notification():
            conversation.message_waiting:
             if msgobj.type == Message.TYPE_NUDGE:
                 # TODO: unplus contact.nick, so we don't display weird tags
-                text = _('%s just sent you a nudge!') % (contact.nick,)
+                text = _('%s just sent you a nudge!') % (msgobj.display_name,)
             else:
                 text = msgobj.body
 
-        self._notify(contact, contact.nick , text, contact.account, None)
+        self._notify(contact, msgobj.display_name, text, msgobj.account, None)
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):
@@ -166,7 +166,7 @@ class Notification():
         """
         This creates and shows the nofification
         """
-        if contact.picture is not None and contact.picture != "":
+        if contact is not None and contact.picture is not None and contact.picture != "":
             uri = "file://" + contact.picture
         else:
             uri = 'notification-message-im'
