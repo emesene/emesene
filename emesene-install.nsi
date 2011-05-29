@@ -28,6 +28,7 @@ InstallDir $PROGRAMFILES\${PROGRAM_DIRECTORY}
 InstallDirRegKey HKLM "Software\${PROGRAM_DIRECTORY}" "Install_Dir"
 
 ; Pages
+Page license 
 Page components
 Page directory
 Page instfiles
