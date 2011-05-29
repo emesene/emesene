@@ -2,6 +2,7 @@
 
 '''This module contains the AdiumChatOutput class'''
 import base64
+import webbrowser
 
 from PyQt4      import QtGui
 from PyQt4      import QtCore
@@ -30,14 +31,20 @@ class AdiumChatOutput (QtGui.QScrollArea):
         QtGui.QScrollArea.__init__(self, parent)
         
         self._qwebview = QtWebKit.QWebView(self)
-        self._qwebview.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
         self._last_sender = None
         
         self.setWidget(self._qwebview)
         self.setWidgetResizable(True)
+        self._qwebview.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
+        self._qwebview.page().setLinkDelegationPolicy(
+                                    QtWebKit.QWebPage.DelegateAllLinks)
+        
         pic = gui.theme.user
         body = gui.theme.conv_theme.get_body('', '', '', pic, pic)
         self._qwebview.setHtml(body)
+        
+        self._qwebview.linkClicked.connect(
+                        lambda qt_url: webbrowser.open(qt_url.toString()) )
                             
                             
     def _append_message(self, contact, message, cedict,
