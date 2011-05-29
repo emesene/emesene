@@ -20,7 +20,7 @@ def escape(string, add_dic=None):
         add_dic = {}
     add_dic.update(MarkupParser.dic)
     add_dic.update(dic)
-    return xml.sax.saxutils.escape(string, dic)
+    return xml.sax.saxutils.escape(string, add_dic)
     
 
 def unescape(string, add_dic_inv=None):
@@ -30,7 +30,7 @@ def unescape(string, add_dic_inv=None):
         add_dic_inv = {}
     add_dic_inv.update(MarkupParser.dic_inv)
     add_dic_inv.update(dic_inv)
-    return xml.sax.saxutils.unescape(string, dic_inv)
+    return xml.sax.saxutils.unescape(string, add_dic_inv)
 
 
 def pixmap_rounder(qpixmap, perc_radius=16.7):
