@@ -5,6 +5,7 @@
 import logging
 
 import PyQt4.QtGui      as QtGui
+import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 from gui.qt4ui.Utils import tr
@@ -34,6 +35,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._session = session
         self._conv_id = conv_id
         self._members = members
+        self._on_typing_timer = QtCore.QTimer()
         
         # a widget dic to avoid proliferation of instance variables:
         self._widget_d = {}
@@ -51,7 +53,15 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._load_style()
         self._widget_d['chat_input'].e3_style = self.cstyle
         
-        
+        # not a particularly nice lambda....
+        # FIXME: This will have to be changed when groups will be
+        #        implemented
+        self._on_typing_timer.setSingleShot(True)
+        self._on_typing_timer.timeout.connect(
+            lambda *args: self._widget_d['info_panel'].set_icon(
+                gui.theme.status_icons[
+                    self._session.contacts.get(
+                        self._members[0]).status]))
         self.session.signals.contact_attr_changed.subscribe(
             self.on_contact_attr_changed_succeed)
         self.session.signals.filetransfer_invitation.subscribe(
@@ -265,6 +275,14 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             elif what == 'message':
                 message = self._session.contacts.get(account).message
                 self._widget_d['info_panel'].set_message(message)
+                
+    def on_user_typing(self, account):
+        '''method called when a someone is typing'''
+        # TODO: this should update the tabs' icon, not this one.
+        # updating the tab icon should be done here, not in the Conversation
+        # page class. 
+        self._widget_d['info_panel'].set_icon(gui.theme.typing)
+        self._on_typing_timer.start(3000)
             
             
         
