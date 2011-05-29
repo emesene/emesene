@@ -16,6 +16,10 @@ Icon "emesene.ico"
 ; The file to write
 OutFile "${PROGRAM_NAME} ${PROGRAM_VERSION} - ${PROGRAM_TYPE}.exe"
 
+; License information
+LicenseText "GNU General Public License"
+LicenseData "GPL"
+
 ; The default installation directory
 InstallDir $PROGRAMFILES\${PROGRAM_DIRECTORY}
 
