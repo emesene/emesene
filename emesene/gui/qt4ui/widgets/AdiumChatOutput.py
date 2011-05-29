@@ -67,14 +67,12 @@ class AdiumChatOutput (QtGui.QScrollArea):
         '''add an information message to the widget'''
         # TODO: make it with a status message
         self._append_message(contact, message, cedict={}, 
-                             cedir='', style=None, is_incoming=True)
+                             cedir='', is_incoming=True)
         
         
     def send_message(self, formatter, contact, message, 
                      cedict, cedir, is_first):
-        '''add a message to the widget'''
-        if message.type is e3.Message.TYPE_NUDGE:
-            message.body = tr('You just sent a nudge!')        
+        '''add a message to the widget'''       
         self._append_message(contact, message, cedict, 
                              cedir, is_incoming=False)
         
