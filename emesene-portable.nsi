@@ -1,13 +1,34 @@
-SetCompressor lzma
+;SetCompressor lzma
 
-Name "emesene2-portable.exe"
+!define PROGRAM_NAME "emesene"
+!define PROGRAM_VERSION "2.11.5-devel"
+!define PROGRAM_TYPE "portable"
+!define PROGRAM_DIRECTORY "emesene2"
+
+;--------------------------------
+
+; The name of the installer
+Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
+
+; The icon used
 Icon "emesene.ico"
-OutFile "emesene2-portable.exe"
+
+; The file to write
+OutFile "${PROGRAM_NAME} ${PROGRAM_VERSION} - ${PROGRAM_TYPE}.exe"
+
+; No user interaction required
 SilentInstall silent
 
 Section
-    SetOutPath "$EXEDIR\Portable"
-    File /r dist\*.*
-    SetOutPath "$EXEDIR\Portable"
+    ; Set output path to the installation directory.
+    SetOutPath $EXEDIR\Portable
+    
+    ; Put file there
+    File /r "dist\*.*"
+    
+    ; Set output path to the installation directory.
+    SetOutPath $EXEDIR\Portable
+    
+    ; Launch program
     nsExec::Exec "$EXEDIR\Portable\emesene.exe"
 SectionEnd
