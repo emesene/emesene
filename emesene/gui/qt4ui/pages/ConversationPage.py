@@ -32,7 +32,10 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         self.qt_parent = parent
         
         self.tabCloseRequested.connect(self._on_tab_close_request)
-        
+        # this was sbuscribed in base class' constructor. Now it's not
+        self.session.signals.contact_attr_changed.subscribe(
+                                    self._on_contact_attr_changed)
+
         
     def __del__(self):
         log.debug('conversation manager adieeeeeeeuuuu ;______;')
@@ -102,10 +105,11 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
             do_notify=True):
         '''called when an attribute of a contact changes.
         Overridden to update tabs'''
-        gui.base.ConversationManager._on_contact_attr_changed(self, account, 
-                                                              change_type, 
-                                                              old_value, 
-                                                              do_notify)
+        # it's not subscribed in base class anymore, so don't invoke this
+        #gui.base.ConversationManager._on_contact_attr_changed(self, account, 
+        #                                                      change_type, 
+        #                                                      old_value, 
+        #                                                      do_notify)
         for conversation in self.conversations.values():
             if account in conversation.members:
                 index = self.indexOf(conversation)
