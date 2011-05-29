@@ -209,7 +209,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         log.debug('UPSingInfo Start')
         status = self._session.contacts.get(account).status
         log.debug('UpSingInfo: [%s], [%s], [%s], [%s]' % (status, nick, message, account))
-        self._widget_d['info_panel'].update(status, nick, message, account)
+        self._widget_d['info_panel'].set_all(status, nick, message, account)
         log.debug('UPSingInfo Stop')
         
     def show(self):
@@ -250,12 +250,22 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def on_contact_attr_changed_succeed(self, account, what, old,
             do_notify=True):
         ''' called when contacts change their attributes'''
-        print 'what: %s' % what
         if account in self._members:
-           if what  == 'status':
-               self._widget_d['info_panel'].update_icon(self.icon)
-           elif what =='nick':
-               self._widget_d['info_panel'].update_nick(self.text)
+            if what  == 'status':
+                # FIXME: self.icon doesn't beahave correctly at the 
+                # moment. That's probably because 'set message
+                # waiting' stuff is still not implemented (in fact
+                # self.icon returns that icon.)
+                #self._widget_d['info_panel'].set_icon(self.icon)
+                status = self._session.contacts.get(account).status
+                icon =  gui.theme.status_icons[status]
+                self._widget_d['info_panel'].set_icon(icon)
+            elif what == 'nick':
+                self._widget_d['info_panel'].set_nick(self.text)
+            elif what == 'message':
+                message = self._session.contacts.get(account).message
+                self._widget_d['info_panel'].set_message(message)
+            
             
         
     def on_filetransfer_invitation(self, transfer, conv_id):
