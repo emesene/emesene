@@ -1,11 +1,11 @@
-;SetCompressor lzma
+; This creats a portable version
+
+SetCompressor lzma
 
 !define PROGRAM_NAME "emesene"
 !define PROGRAM_VERSION "2.11.5-devel"
 !define PROGRAM_TYPE "portable"
 !define PROGRAM_DIRECTORY "emesene2"
-
-;--------------------------------
 
 ; The name of the installer
 Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
