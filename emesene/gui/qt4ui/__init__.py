@@ -109,6 +109,7 @@ def setup():
     extension.category_register('nick edit',           widgets.NickEdit)
     extension.category_register('smiley chooser',   widgets.SmileyPopupChooser)
     extension.category_register('status combo',        widgets.StatusCombo)
+    # TODO: change this extension's name to 'conversation header' ??
     extension.category_register('info panel',          widgets.UserInfoPanel)
     #extension.category_register('filetransfer widget', widgets.FileTransfer)
     try:

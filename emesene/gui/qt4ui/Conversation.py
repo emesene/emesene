@@ -51,6 +51,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._load_style()
         self._widget_d['chat_input'].e3_style = self.cstyle
         
+        
+        self.session.signals.contact_attr_changed.subscribe(
+            self.on_contact_attr_changed_succeed)
         self.session.signals.filetransfer_invitation.subscribe(
                 self.on_filetransfer_invitation)
         self.session.signals.filetransfer_accepted.subscribe(
@@ -203,10 +206,11 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         to update the contacts infos'''
         # account is a string containing the email
         # does this have to update the picture too?
+        log.debug('UPSingInfo Start')
         status = self._session.contacts.get(account).status
         log.debug('UpSingInfo: [%s], [%s], [%s], [%s]' % (status, nick, message, account))
         self._widget_d['info_panel'].update(status, nick, message, account)
-        
+        log.debug('UPSingInfo Stop')
         
     def show(self):
         '''Shows the widget'''
@@ -240,6 +244,19 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         gui.base.Conversation._on_send_message(self, message_string)
         
         
+    # TODO: use self.icon extensively
+    # TODO: could we handle this directly in UserInfoPanel (but I think that
+    #       this wouldn't make self.icon usable :/)
+    def on_contact_attr_changed_succeed(self, account, what, old,
+            do_notify=True):
+        ''' called when contacts change their attributes'''
+        print 'what: %s' % what
+        if account in self._members:
+           if what  == 'status':
+               self._widget_d['info_panel'].update_icon(self.icon)
+           elif what =='nick':
+               self._widget_d['info_panel'].update_nick(self.text)
+            
         
     def on_filetransfer_invitation(self, transfer, conv_id):
         ''' called when a new file transfer is issued '''
