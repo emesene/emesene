@@ -26,10 +26,8 @@ class TopLevelWindow (QtGui.QMainWindow):
         log.debug('Creating a new main window!')
         QtGui.QMainWindow.__init__(self)
         self._content_type = 'empty'
-        if cb_on_close:
-            self._cb_on_close = cb_on_close
-        else: # we're the main window
-            self._cb_on_close = self.hide
+        self._cb_on_close = cb_on_close
+        self._give_cb_on_close = cb_on_close
         self._content = None
 
         self.setObjectName('mainwindow')
@@ -131,6 +129,10 @@ class TopLevelWindow (QtGui.QMainWindow):
         self._switch_to_page(main_page)
         self._setup_main_menu(session, main_page.contact_list, 
                               on_close, on_disconnect)
+        if quit_on_close:
+            self._cb_on_close = self._given_cb_on_close
+        else:
+            self._cb_on_close = lambda *args: self.hide()
         
     def is_maximized(self):
         log.warning('is_maximized is a fake method')
@@ -207,7 +209,9 @@ class TopLevelWindow (QtGui.QMainWindow):
         ''' Overrides QMainWindow's close event '''
         log.debug('TopLevelWindow\'s close event: %s, %s' % (
                                     self.content, str(self._cb_on_close)))
-        self._cb_on_close(self._content)
+        cb_result = self._cb_on_close(self._content)
+        if (cb_result is None) or (cb_result is True):
+            event.ignore()
         # FIXME: dirty HACK. when we close the conversation window, 
         # self._cb_on_close closes each conversation tab without checking 
         # if it isclosing the last tab, so _on_last_tab_close doesn't get 
@@ -215,5 +219,4 @@ class TopLevelWindow (QtGui.QMainWindow):
         if str(self._cb_on_close).find(
                 'Controller._on_conversation_window_close') > -1:
             self.hide()
-        event.ignore()
         
