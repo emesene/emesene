@@ -13,6 +13,7 @@ from gui.qt4ui.Utils import tr
 import extension
 import gui
 import gui.qt4ui.widgets as Widgets
+from   gui.qt4ui     import Utils
 
 
 log = logging.getLogger('qt4ui.Conversation')
@@ -219,7 +220,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         log.debug('UPSingInfo Start')
         status = self._session.contacts.get(account).status
         log.debug('UpSingInfo: [%s], [%s], [%s], [%s]' % (status, nick, message, account))
-        self._widget_d['info_panel'].set_all(status, nick, message, account)
+        self._widget_d['info_panel'].set_all(status, Utils.unescape(nick), Utils.unescape(message), account)
         log.debug('UPSingInfo Stop')
         
     def show(self):
