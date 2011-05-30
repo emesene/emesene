@@ -6,6 +6,7 @@ SetCompressor lzma
 !define PROGRAM_VERSION "2.11.5-devel"
 !define PROGRAM_TYPE "portable"
 !define PROGRAM_DIRECTORY "emesene2"
+!define PROGRAM_SHORTCUT "emesene2"
 
 ; The name of the installer
 Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
