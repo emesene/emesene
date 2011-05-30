@@ -10,3 +10,8 @@ otherwise try with the web ui.
 Currently we are adding to the about box people with commits >= 50, until someone provides better metrics or different reasons
 git log --all --format='%aN <%aE>' | sort | uniq -c -i -d | sort -n -r
 
+* How to tag a release with git:
+See http://learn.github.com/p/tagging.html - tl;dr:
+git tag -s v2.xx.y -m 'my signed 2.xx.y tag'
+git push --tags
+You will automagically have a https://github.com/emesene/emesene/{tar,zip}ball/v2.xx.y link pointing to the {tar,zip} archive with the tagged code
