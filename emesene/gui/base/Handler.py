@@ -43,7 +43,7 @@ EMESENE_LICENSE = '''    emesene is free software; you can redistribute it and/o
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''
 
-EMESENE_VERSION = "2.11.5-rc1"
+EMESENE_VERSION = "2.11.5"
 EMESENE_WEBSITE = "http://www.emesene.org"
 EMESENE_AUTHORS = "marianoguerra & c10ud"
 EMESENE_CONTRIBUTORS = [
@@ -467,7 +467,7 @@ class ConversationToolbarHandler(object):
         '''check if current session supports calls '''
         user = self.session.account.account
         current_service = self.session.config.d_user_service.get(user, 'msn')
-        return current_service in ['msn']
+        return current_service in ['msn-release'] #Disabled for release
 
     def session_filetransfer_supported(self):
         '''check if current session supports file transfers '''
