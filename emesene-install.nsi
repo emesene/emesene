@@ -6,6 +6,7 @@ SetCompressor lzma
 !define PROGRAM_VERSION "2.11.5-devel"
 !define PROGRAM_TYPE "install"
 !define PROGRAM_DIRECTORY "emesene2"
+!define PROGRAM_SHORTCUT "emesene2"
 
 ; The name of the installer
 Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
@@ -59,15 +60,15 @@ SectionEnd
 ; Optional section (can be disabled by the user)
 Section "Start Menu Shortcuts"
     CreateDirectory "$SMPROGRAMS\${PROGRAM_DIRECTORY}"
-    CreateShortCut "$SMPROGRAMS\${PROGRAM_DIRECTORY}\emesene2.lnk" "$INSTDIR\emesene.exe" "" "$INSTDIR\emesene.exe" 0
-    CreateShortCut "$SMPROGRAMS\${PROGRAM_DIRECTORY}\emesene2 (Debug).lnk" "$INSTDIR\emesene_debug.exe" "" "$INSTDIR\emesene_debug.exe" 0
+    CreateShortCut "$SMPROGRAMS\${PROGRAM_DIRECTORY}\${PROGRAM_SHORTCUT}.lnk" "$INSTDIR\emesene.exe" "" "$INSTDIR\emesene.exe" 0
+    CreateShortCut "$SMPROGRAMS\${PROGRAM_DIRECTORY}\${PROGRAM_SHORTCUT} (Debug).lnk" "$INSTDIR\emesene_debug.exe" "" "$INSTDIR\emesene_debug.exe" 0
     CreateShortCut "$SMPROGRAMS\${PROGRAM_DIRECTORY}\Report Issue.lnk" "https://github.com/emesene/emesene/issues"
     CreateShortCut "$SMPROGRAMS\${PROGRAM_DIRECTORY}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 SectionEnd
 
 ; Optional section (can be disabled by the user)
 Section "Desktop Shortcuts"
-    CreateShortCut "$DESKTOP\emesene2.lnk" "$INSTDIR\emesene.exe" "" "$INSTDIR\emesene.exe" 0
+    CreateShortCut "$DESKTOP\${PROGRAM_SHORTCUT}.lnk" "$INSTDIR\emesene.exe" "" "$INSTDIR\emesene.exe" 0
 SectionEnd
 
 ; Uninstall
