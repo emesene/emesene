@@ -1347,7 +1347,7 @@ class Worker(e3.base.Worker, papyon.Client):
     # call handlers
     def _handle_action_call_invite(self, cid, account, a_v_both, surface_other,
             surface_self):
-        return # Disabled for release
+
         papycontact = self.contact_by_account(account)
         papysession = self.call_manager.create_call(papycontact)
         call_handler = CallEvent(papysession, self)

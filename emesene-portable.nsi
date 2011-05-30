@@ -3,7 +3,7 @@
 SetCompressor lzma
 
 !define PROGRAM_NAME "emesene"
-!define PROGRAM_VERSION "2.11.5"
+!define PROGRAM_VERSION "2.11.6-devel"
 !define PROGRAM_TYPE "portable"
 !define PROGRAM_DIRECTORY "emesene2"
 !define PROGRAM_SHORTCUT "emesene2"
