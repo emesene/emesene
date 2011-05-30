@@ -105,7 +105,7 @@ if os.name == "nt":
 else:
     # Data files to be installed to the system
     _data_files = [
-        ("share/icons/scalable/apps", ["emesene/data/icons/scalable/apps/emesene.svg"]),
+        ("share/icons/hicolor/scalable/apps", ["emesene/data/icons/hicolor/scalable/apps/emesene.svg"]),
         ("share/icons/hicolor/16x16/apps", ["emesene/data/icons/hicolor/16x16/apps/emesene.png"]),
         ("share/icons/hicolor/22x22/apps", ["emesene/data/icons/hicolor/22x22/apps/emesene.png"]),
         ("share/icons/hicolor/24x24/apps", ["emesene/data/icons/hicolor/24x24/apps/emesene.png"]),
