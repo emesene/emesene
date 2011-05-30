@@ -43,6 +43,23 @@ EMESENE_LICENSE = '''    emesene is free software; you can redistribute it and/o
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''
 
+EMESENE_VERSION = "2.11.5-rc1"
+EMESENE_WEBSITE = "http://www.emesene.org"
+EMESENE_AUTHORS = "marianoguerra & c10ud"
+EMESENE_CONTRIBUTORS = [
+'Riccardo (c10ud) <c10ud.dev@gmail.com>',
+'Mariano Guerra <luismarianoguerra@gmail.com>',
+'arielj <arieljuod@gmail.com>',
+'Stefano Candori <stefanocandori@gmail.com>',
+'4ndreaSt4gi <stagi.andrea@gmail.com>',
+'Davide Lo Re <boyska@gmail.com>',
+'dequis <dx@dxzone.com.ar>',
+'Sven (Sbte) <svenb.linux@gmail.com>',
+'Jose Rostagno <joserostagno@vijona.com.ar>',
+'nenemfromhell <sniper3000@gmail.com>',
+'Gabriele "Whisky" Visconti <visconti.gabriele@gmail.com>',
+]
+
 class MenuHandler(object):
     '''this handler contains all the handlers needed to handle all the
     menu items
@@ -159,24 +176,14 @@ class HelpHandler(object):
 
     def on_about_selected(self):
         '''called when the about item is selected'''
-        self.dialog.about_dialog('emesene', '2.11.5-devel', 'marianoguerra & c10ud',
+        self.dialog.about_dialog('emesene', EMESENE_VERSION, EMESENE_AUTHORS,
             _('A simple yet powerful instant messaging client'), EMESENE_LICENSE,
-            'http://www.emesene.org', 
-            [ 'Riccardo (c10ud) <c10ud.dev@gmail.com>',
-              'Mariano Guerra <luismarianoguerra@gmail.com>',
-              'arielj <arieljuod@gmail.com>',
-              'Stefano Candori <stefanocandori@gmail.com>',
-              '4ndreaSt4gi <stagi.andrea@gmail.com>',
-              'Davide Lo Re <boyska@gmail.com>',
-              'dequis <dx@dxzone.com.ar>',
-              'Sven (Sbte) <svenb.linux@gmail.com>',
-              'Jose Rostagno <joserostagno@vijona.com.ar>',
-              'nenemfromhell <sniper3000@gmail.com>' ], _('translator-credits'),
+            EMESENE_WEBSITE, EMESENE_CONTRIBUTORS, _('translator-credits'),
             gui.theme.logo)
 
     def on_website_selected(self):
         '''called when the website item is selected'''
-        webbrowser.open("http://www.emesene.org")
+        webbrowser.open(EMESENE_WEBSITE)
 
     def on_debug_selected(self):
         '''called when the preference button is selected'''
