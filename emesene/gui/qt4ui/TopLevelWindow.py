@@ -135,8 +135,12 @@ class TopLevelWindow (QtGui.QMainWindow):
             self._cb_on_close = lambda *args: self.hide()
         
     def is_maximized(self):
-        log.warning('is_maximized is a fake method')
-        return False
+        '''Checks wether the window is maximized'''
+        return QtGui.QMainWindow.isMaximized(self)
+    
+    def maximize(self):
+        '''Tries to maximize the window'''
+        QtGui.QMainWindow.showMaximized()
         
     def on_disconnect(self, cb_on_close):
         '''called when the user is disconnected'''
