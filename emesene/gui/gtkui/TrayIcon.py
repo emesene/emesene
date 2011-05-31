@@ -17,6 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import sys
 import gtk
 import time
 import gobject
@@ -133,7 +134,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
         (usually through right-clicking the status icon)
         """
         position = None
-        if os.name == 'posix':
+        if os.name == 'mac' or sys.platform == 'linux2':
             position = gtk.status_icon_position_menu
         self.menu.popup(None, None, position, button, activate_time, trayicon)
 
