@@ -2,6 +2,8 @@
 
 ''' This module contains the tray icon's class'''
 
+import sys
+
 #import PyKDE4.kdeui     as KdeGui
 import PyQt4.QtGui      as QtGui
 
@@ -35,8 +37,19 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         self.setIcon(QtGui.QIcon(gui.theme.logo))
         
         self.activated.connect(self._on_tray_icon_clicked)
-        self.show()
         
+        # TODO: this is for mac os, and should be changed in the 
+        # future (probably no tray icon at all, just the dock icon)
+        if sys.platform == 'darwin':
+            print 'Here'
+            icon = QtGui.QIcon(gui.theme.logo)
+            qt_app = QtGui.QApplication.instance()
+            qt_app.setWindowIcon(icon)
+            qt_app.setApplicationName('BHAWH')
+        else:
+            self.show()
+            
+            
     def _get_quit_on_close(self):
         '''Getter method for property "quit_on_close"'''
         return self._quit_on_close
@@ -49,8 +62,12 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         context menu un the Tray Icon.'''
         tray_login_menu_cls = extension.get_default('tray login menu')
         self._menu = tray_login_menu_cls(self._handler)
-        self.setContextMenu(self._menu)
         self.setIcon(QtGui.QIcon(gui.theme.logo))
+        if sys.platform == 'darwin':
+            QtGui.qt_mac_set_dock_menu(self._menu)
+        else:
+            self.setContextMenu(self._menu)
+        
         
         
     def set_main(self, session):
@@ -61,7 +78,10 @@ class TrayIcon (QtGui.QSystemTrayIcon):
                                                     self._on_status_changed)
         tray_main_menu_cls = extension.get_default('tray main menu')
         self._menu = tray_main_menu_cls(self._handler)
-        self.setContextMenu(self._menu)
+        if sys.platform == 'darwin':
+            QtGui.qt_mac_set_dock_menu(self._menu)
+        else:
+            self.setContextMenu(self._menu)
                                                     
     def set_conversations(self, conversations):     # emesene's
         '''Store a reference to the conversation page'''
