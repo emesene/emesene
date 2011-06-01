@@ -44,7 +44,7 @@ class Session(e3.Session):
     def request_attention(self, cid):
         '''request the attention of the contact'''
         account = self.account.account
-        message = e3.Message(e3.Message.TYPE_MESSAGE,
+        message = e3.Message(e3.Message.TYPE_NUDGE,
             '%s requests your attention' % (account, ), account)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
 
