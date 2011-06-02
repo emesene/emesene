@@ -59,7 +59,7 @@ try:
 except ImportError, ie:
     print ie
 except Exception, e:
-    log.exception("python-papyon(>=%s.%s.%s) required"
+    log.exception("python-papyon(>=%s.%s.%s) required "
         "in order to use this extension" % REQ_VER)
 
 from PapyEvents import *
