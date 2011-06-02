@@ -72,7 +72,7 @@
 
     ; Installer pages
     !insertmacro MUI_PAGE_WELCOME
-    !insertmacro MUI_PAGE_LICENSE "windows\gpl-3.0.txt"
+    !insertmacro MUI_PAGE_LICENSE "GPL"
     !insertmacro MUI_PAGE_COMPONENTS
     !insertmacro MUI_PAGE_DIRECTORY
     !insertmacro MUI_PAGE_INSTFILES
