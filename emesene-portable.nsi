@@ -15,7 +15,7 @@ Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
 Icon "emesene.ico"
 
 ; The file to write
-OutFile "${PROGRAM_NAME} ${PROGRAM_VERSION} - ${PROGRAM_TYPE}.exe"
+OutFile "${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_TYPE}.exe"
 
 ; No user interaction required
 SilentInstall silent

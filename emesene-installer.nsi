@@ -4,7 +4,7 @@ SetCompressor lzma
 
 !define PROGRAM_NAME "emesene"
 !define PROGRAM_VERSION "2.11.6-devel"
-!define PROGRAM_TYPE "install"
+!define PROGRAM_TYPE "installer"
 !define PROGRAM_DIRECTORY "emesene2"
 !define PROGRAM_SHORTCUT "emesene2"
 
@@ -15,7 +15,7 @@ Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
 Icon "emesene.ico"
 
 ; The file to write
-OutFile "${PROGRAM_NAME} ${PROGRAM_VERSION} - ${PROGRAM_TYPE}.exe"
+OutFile "${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_TYPE}.exe"
 
 ; License information
 LicenseText "GNU General Public License"
