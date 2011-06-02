@@ -59,7 +59,7 @@ try:
 except ImportError, ie:
     print ie
 except Exception, e:
-    log.exception("python-papyon(>=%s.%s.%s) required"
+    log.exception("python-papyon(>=%s.%s.%s) required "
         "in order to use this extension" % REQ_VER)
 
 from PapyEvents import *
@@ -546,7 +546,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.conv_first_action(cid, [account])
 
         msgobj = e3.base.Message(e3.base.Message.TYPE_NUDGE, None,
-            account, None)
+            account, None, None, papycontact.display_name)
 
         self.session.conv_message(cid, account, msgobj)
         e3.Logger.log_message(self.session, None, msgobj, False)

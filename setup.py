@@ -94,7 +94,7 @@ if os.name == "nt":
     setup(
         requires   = ["gtk"],
         windows    = [{"script": "emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene"}],
-        console    = [{"script": "emesene.py", "dest_base": "emesene_debug"}],
+        console    = [{"script": "emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_debug"}],
         options    = opts,
         data_files = _data_files,
         **setup_info

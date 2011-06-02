@@ -111,6 +111,7 @@ class AvatarManager(object):
         PictureHandler = extension.get_default('picture handler')
         pix = PictureHandler.from_toolkit(toolkit_pix)
         pix.save(fn)
+        os.close(fd)
         results = self.add_new_avatar(fn)
         os.remove(fn)
         return results

@@ -66,16 +66,12 @@ class Preferences(gtk.Window):
 
         ''' TREE VIEW STUFF '''
         # Create the list store model for the treeview.
-        listStore = gtk.ListStore(gtk.gdk.Pixbuf, str)
+        self.listStore = gtk.ListStore(gtk.gdk.Pixbuf, str)
 
-        for i in LIST:
-            # we should use always the same icon size,
-            # we can remove that field in LIST
-            listStore.append([self.render_icon(i['stock_id'],
-                             gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
+
 
         # Create the TreeView
-        treeView = gtk.TreeView(listStore)
+        treeView = gtk.TreeView(self.listStore)
 
         # Create the renders
         cellText = gtk.CellRendererText()
@@ -135,6 +131,29 @@ class Preferences(gtk.Window):
         self.extensions_page = self.extension
         self.plugins_page = self.plugins
 
+        self.__init_list()
+
+        self.connect('delete_event', self.hide_on_delete)
+        self.add(vbox)
+        vbox.show_all()
+
+    def remove_from_list(self, icon, text, page):
+
+        LIST.remove({'stock_id' : icon,'text' : text})
+        self.page_dict.remove(page)
+        num = self.notebook.page_num(page)
+        self.notebook.remove_page(num)
+        self.__refresh_list()    
+
+    def add_to_list(self, icon, text, page):
+
+        LIST.append({'stock_id' : icon,'text' : text})
+        self.page_dict.append(page)
+        self.notebook.append_page(page)
+        self.__refresh_list()
+
+    def __init_list(self):
+
         # Whack the pages into a dict for future reference
 
         self.page_dict.append(self.interface_page)
@@ -145,19 +164,32 @@ class Preferences(gtk.Window):
         self.page_dict.append(self.extensions_page)
         self.page_dict.append(self.plugins_page)
 
+        for i in LIST:
+            # we should use always the same icon size,
+            # we can remove that field in LIST
+            self.listStore.append([self.render_icon(i['stock_id'],
+                             gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
+
         if 'msn' in self.session.SERVICES: # only when session is papylib.
-            listStore.append([self.render_icon(gtk.STOCK_NETWORK,
+            LIST.append({'stock_id' : gtk.STOCK_NETWORK,'text' : _('Live Messenger')})
+            self.listStore.append([self.render_icon(gtk.STOCK_NETWORK,
                              gtk.ICON_SIZE_LARGE_TOOLBAR), _('Live Messenger')])
-            self.msn_papylib = MSNPapylib(session)
+            self.msn_papylib = MSNPapylib(self.session)
             self.msn_papylib_page = self.msn_papylib
             self.page_dict.append(self.msn_papylib_page)
 
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
 
-        self.connect('delete_event', self.hide_on_delete)
-        self.add(vbox)
-        vbox.show_all()
+    def __refresh_list(self):
+
+        self.listStore.clear()
+
+        for i in LIST:
+            # we should use always the same icon size,
+            # we can remove that field in LIST
+            self.listStore.append([self.render_icon(i['stock_id'],
+                             gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
 
     def _on_row_activated(self,treeview):
         # Get information about the row that has been selected
