@@ -298,8 +298,10 @@ class Conversation(object):
     def on_send_message_failed(self, errorCode):
         '''method called when a message fails to be delivered'''
         contact = self.session.contacts.me
-        self.output.information(self.formatter, contact, \
-                                _('Error delivering message'))
+        message = e3.Message(e3.Message.TYPE_MESSAGE, '', None, None)
+        message.body = _('Error delivering message')
+        self.output.information(self.formatter, contact, message)
+
         self.first = False
 
     def on_user_typing(self, account):
