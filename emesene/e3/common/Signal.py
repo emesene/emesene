@@ -42,8 +42,10 @@ class Signal(object):
         '''remove the callback from the subscribers dict, raise KeyError if
         the callback is not registered (made this way to avoid abuse of the api)
         '''
-        if callback in self._subscribers:
-            del(self._subscribers[callback])
+        for key, item in enumerate(self._subscribers):
+            if WeakMethod(callback).f == item.f:
+                del(self._subscribers[item])
+                return
 
     def emit(self, *args, **kwargs):
         '''emit the signal with args and kwargs, if a callback returns False
