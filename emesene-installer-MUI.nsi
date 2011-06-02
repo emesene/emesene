@@ -13,7 +13,7 @@
 
     ;Program info
     !define PROGRAM_NAME "emesene" ; emesene
-    !define PROGRAM_VERSION "2.11.6devel"
+    !define PROGRAM_VERSION "2.11.6-devel"
     !define PROGRAM_TYPE "installer"
     !define PROGRAM_PUBLISHER "emesene team"
     !define PROGRAM_WEBSITE "http://www.emesene.org"
@@ -50,7 +50,7 @@
     ; Get installation folder from registry if available
     InstallDirRegKey ${REG_HIVE} "${REG_INSTALL}" "Install_Dir"
 
-    ;Request application privileges for Windows Vista/7
+    ; Request application privileges for Windows Vista/7
     RequestExecutionLevel admin
 
 ;--------------------------------
@@ -132,7 +132,7 @@
         SectionIn RO
 
         SetOutPath "$INSTDIR"
-        ;SetOverwrite on
+        SetOverwrite on
         File /r "dist\*.*" ; dist\*.*
 
         ; Store installation folder
