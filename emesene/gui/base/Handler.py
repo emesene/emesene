@@ -47,6 +47,7 @@ EMESENE_LICENSE = '''    emesene is free software; you can redistribute it and/o
 '''
 
 EMESENE_VERSION = "2.11.6-devel"
+EMESENE_LAST_STABLE = "2.11.5"
 EMESENE_WEBSITE = "http://www.emesene.org"
 EMESENE_AUTHORS = "marianoguerra & c10ud"
 EMESENE_CONTRIBUTORS = [
@@ -208,7 +209,7 @@ class HelpHandler(object):
             f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/gui/base/Handler.py")
             s = f.read()
             f.close()
-            s = re.findall(r'EMESENE_VERSION = "(([^"\\]+|\\.)*)"', s)
+            s = re.findall(r'EMESENE_LAST_STABLE = "(([^"\\]+|\\.)*)"', s)
             try:
                 loc_ver = EMESENE_VERSION.split(".")
                 rem_ver = s[0][0].split(".") # [("version","version")]
