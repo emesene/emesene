@@ -39,13 +39,13 @@
     !define SHORTCUT_UNINSTALL "Uninstall.lnk" ; Include ".lnk"
 
     ; Registry info
-    !define REG_HIVE "HKCU" ; HKLM = HKEY_LOCAL_MACHINE | HKCU = HKEY_CURRENT_USER
+    !define REG_HIVE "HKLM" ; Sets registry time to local computer, all users
     !define REG_INSTALL "Software\${FILE_DIRECTORY}"
     !define REG_UNINSTALL "Software\Microsoft\Windows\CurrentVersion\Uninstall\${FILE_DIRECTORY}"
 
     ; User info
     !define USER_LEVEL "admin" ; "admin" required to write to 'Program Files'
-    !define USER_SHELLCONTEXT "current" ; "current" will write to current user not all
+    !define USER_SHELLCONTEXT "all" ; "all" will write to all, not just current
 
 #--------------------------------
 # General
@@ -107,6 +107,7 @@
 #--------------------------------
 # Languages
 
+    ; List of installer languages
     !insertmacro MUI_LANGUAGE "English"
     !insertmacro MUI_LANGUAGE "French"
     !insertmacro MUI_LANGUAGE "Italian"
@@ -160,7 +161,10 @@
 
         ; StartMenu Shortcuts
         !insertmacro MUI_STARTMENU_WRITE_BEGIN "Application"
+            ; Sets the context of shell folders
             SetShellVarContext ${USER_SHELLCONTEXT}
+
+            ; Creates shortcut in the StartMenu
             CreateDirectory "${SHORTCUT_STARTMENU}"
             CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_EXE}" "$INSTDIR\${FILE_EXE}"
             CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_DEBUG}" "$INSTDIR\${FILE_DEBUG}"
@@ -182,6 +186,10 @@
 
     ; Desktop Shortcuts (Optional)
     Section "Desktop Shortcuts"  secDesktop
+        ; Sets the context of shell folders
+        SetShellVarContext ${USER_SHELLCONTEXT}
+
+        ; Creates shortcut on desktop
         CreateShortCut "$DESKTOP\${SHORTCUT_EXE}" "$INSTDIR\${FILE_EXE}"
     SectionEnd
 
@@ -209,15 +217,17 @@
 # Uninstaller Sections
 
     Section "Uninstall"
+        ; Sets the context of shell folders
+        SetShellVarContext ${USER_SHELLCONTEXT}
+
         ; Removes install directory (no data is stored there anyway)
         Delete "$INSTDIR\${FILE_UNINSTALL}"
         RMDir /r "$INSTDIR"
 
         ; Removes Desktop shortcuts
-        Delete $DESKTOP\${SHORTCUT_EXE}"
+        Delete "$DESKTOP\${SHORTCUT_EXE}"
 
         ; Removes StartMenu shortcuts
-        SetShellVarContext ${USER_SHELLCONTEXT}
         !insertmacro MUI_STARTMENU_GETFOLDER "Application" $StartMenuDir
         Delete "${SHORTCUT_STARTMENU}\*.*"
         RMDir /r "${SHORTCUT_STARTMENU}"
