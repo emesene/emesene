@@ -1,19 +1,19 @@
-;--------------------------------
+#--------------------------------
 # Compressor Type
     SetCompressor /SOLID lzma
 
-;--------------------------------
+#--------------------------------
 # Includes
 
     ; Modern UI
     !include "MUI2.nsh"
 
-;--------------------------------
+#--------------------------------
 ;Variables
 
-    Var StartMenuFolder
+    Var StartMenuDir
 
-;--------------------------------
+#--------------------------------
 # Defines
 
     ;Program info
@@ -32,7 +32,7 @@
     !define FILE_UNINSTALL "uninstall.exe" ; Include ".exe"
 
     ; Shortcut info
-    !define SHORTCUT_STARTMENU "$SMPROGRAMS\$StartMenuFolder"
+    !define SHORTCUT_STARTMENU "$SMPROGRAMS\$StartMenuDir"
     !define SHORTCUT_EXE "emesene2.lnk" ; Include ".lnk"
     !define SHORTCUT_DEBUG "emesene2 (Debug).lnk" ; Include ".lnk"
     !define SHORTCUT_REPORT "Report Issue.lnk" ; Include ".lnk"
@@ -47,7 +47,7 @@
     !define USER_LEVEL "admin" ; "admin" required to write to 'Program Files'
     !define USER_SHELLCONTEXT "current" ; "current" will write to current user not all
 
-;--------------------------------
+#--------------------------------
 # General
 
     ; Name and output file
@@ -63,7 +63,7 @@
     ; Request application privileges for Windows Vista/7
     RequestExecutionLevel ${USER_LEVEL}
 
-;--------------------------------
+#--------------------------------
 # MUI Settings
 
     !define MUI_ABORTWARNING
@@ -77,13 +77,16 @@
     !define MUI_LANGDLL_REGISTRY_KEY "${REG_INSTALL}" 
     !define MUI_LANGDLL_REGISTRY_VALUENAME "Install_Lang"
 
-    ; StartMenu Folder Page Configuration
+    ; StartMenu page configuration
     !define MUI_STARTMENUPAGE_DEFAULTFOLDER "${FILE_DIRECTORY}"
     !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${REG_HIVE}"
     !define MUI_STARTMENUPAGE_REGISTRY_KEY "${REG_INSTALL}"
     !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "StartMenu_Dir"
 
-;--------------------------------
+    ; Finish page configuration
+    !define MUI_FINISHPAGE_RUN "$INSTDIR\${FILE_EXE}"
+
+#--------------------------------
 # Pages
 
     ; Installer pages
@@ -91,7 +94,7 @@
     !insertmacro MUI_PAGE_LICENSE "GPL"
     !insertmacro MUI_PAGE_COMPONENTS
     !insertmacro MUI_PAGE_DIRECTORY
-    !insertmacro MUI_PAGE_STARTMENU "Application" $StartMenuFolder
+    !insertmacro MUI_PAGE_STARTMENU "Application" $StartMenuDir
     !insertmacro MUI_PAGE_INSTFILES
     !insertmacro MUI_PAGE_FINISH
 
@@ -101,7 +104,7 @@
     !insertmacro MUI_UNPAGE_INSTFILES
     !insertmacro MUI_UNPAGE_FINISH
 
-;--------------------------------
+#--------------------------------
 # Languages
 
     !insertmacro MUI_LANGUAGE "English"
@@ -109,12 +112,12 @@
     !insertmacro MUI_LANGUAGE "Italian"
     !insertmacro MUI_LANGUAGE "Spanish"
 
-;--------------------------------
-;Reserve Files
+#--------------------------------
+# Reserve Files
 
     !insertmacro MUI_RESERVEFILE_LANGDLL
 
-;--------------------------------
+#--------------------------------
 # Functions
     
     Function .onInit
@@ -141,7 +144,7 @@
         DeleteRegKey ${REG_HIVE} "${REG_UNINSTALL}"
     FunctionEnd
 
-;--------------------------------
+#--------------------------------
 # Installer Sections
 
     ; Main installation (Required)
@@ -182,7 +185,7 @@
         CreateShortCut "$DESKTOP\${SHORTCUT_EXE}" "$INSTDIR\${FILE_EXE}"
     SectionEnd
 
-;--------------------------------
+#--------------------------------
 # Descriptions
 
     ; Language strings
@@ -202,7 +205,7 @@
         !insertmacro MUI_DESCRIPTION_TEXT ${secDesktop} $(DESC_secDesktop)
     !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
-;--------------------------------
+#--------------------------------
 # Uninstaller Sections
 
     Section "Uninstall"
@@ -215,7 +218,7 @@
 
         ; Removes StartMenu shortcuts
         SetShellVarContext ${USER_SHELLCONTEXT}
-        !insertmacro MUI_STARTMENU_GETFOLDER "Application" $StartMenuFolder
+        !insertmacro MUI_STARTMENU_GETFOLDER "Application" $StartMenuDir
         Delete "${SHORTCUT_STARTMENU}\*.*"
         RMDir /r "${SHORTCUT_STARTMENU}"
 
