@@ -9,28 +9,34 @@
     !include "MUI2.nsh"
 
 ;--------------------------------
+;Variables
+
+    Var StartMenuFolder
+
+;--------------------------------
 # Defines
 
     ;Program info
-    !define PROGRAM_NAME "emesene" ; emesene
-    !define PROGRAM_VERSION "2.11.6devel"
+    !define PROGRAM_NAME "emesene"
+    !define PROGRAM_VERSION "2.11.6-devel"
+    !define /date PROGRAM_BUILDTIME "%Y%m%d_%H%M"
     !define PROGRAM_TYPE "installer"
     !define PROGRAM_PUBLISHER "emesene team"
     !define PROGRAM_WEBSITE "http://www.emesene.org"
     !define PROGRAM_ISSUE "https://github.com/emesene/emesene/issues/"
 
     ; File info
-    !define FILE_DIRECTORY "emesene2" ; emesene2
-    !define FILE_EXE "emesene.exe" ; emesene.exe
-    !define FILE_DEBUG "emesene_debug.exe" ; emesene_debug.exe
-    !define FILE_UNINSTALL "uninstall.exe"
+    !define FILE_DIRECTORY "emesene2"
+    !define FILE_EXE "emesene.exe" ; Include ".exe"
+    !define FILE_DEBUG "emesene_debug.exe" ; Include ".exe"
+    !define FILE_UNINSTALL "uninstall.exe" ; Include ".exe"
 
     ; Shortcut info
-    !define SHORTCUT_STARTMENU "$SMPROGRAMS\${FILE_DIRECTORY}"
-    !define SHORTCUT_EXE "emesene2.lnk" ; emesene2
-    !define SHORTCUT_DEBUG "emesene2 (Debug).lnk" ; emesene2 (Debug).lnk
-    !define SHORTCUT_REPORT "Report Issue.lnk"
-    !define SHORTCUT_UNINSTALL "Uninstall.lnk"
+    !define SHORTCUT_STARTMENU "$SMPROGRAMS\$StartMenuFolder"
+    !define SHORTCUT_EXE "emesene2.lnk" ; Include ".lnk"
+    !define SHORTCUT_DEBUG "emesene2 (Debug).lnk" ; Include ".lnk"
+    !define SHORTCUT_REPORT "Report Issue.lnk" ; Include ".lnk"
+    !define SHORTCUT_UNINSTALL "Uninstall.lnk" ; Include ".lnk"
 
     ; Registry info
     !define REG_HIVE "HKCU" ; HKLM = HKEY_LOCAL_MACHINE | HKCU = HKEY_CURRENT_USER
@@ -42,7 +48,7 @@
 
     ; Name and output file
     Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
-    OutFile "${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_TYPE}.exe"
+    OutFile "${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}.exe"
 
     ; The default installation directory
     InstallDir "$PROGRAMFILES\${FILE_DIRECTORY}"
@@ -50,7 +56,7 @@
     ; Get installation folder from registry if available
     InstallDirRegKey ${REG_HIVE} "${REG_INSTALL}" "Install_Dir"
 
-    ;Request application privileges for Windows Vista/7
+    ; Request application privileges for Windows Vista/7
     RequestExecutionLevel admin
 
 ;--------------------------------
@@ -62,10 +68,16 @@
     !define MUI_ICON "windows\emesene.ico"
     !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
-    ;Remember the installer language
+    ; Remember the installer language
     !define MUI_LANGDLL_REGISTRY_ROOT "${REG_HIVE}" 
     !define MUI_LANGDLL_REGISTRY_KEY "${REG_INSTALL}" 
-    !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
+    !define MUI_LANGDLL_REGISTRY_VALUENAME "Install_Lang"
+
+    ; StartMenu Folder Page Configuration
+    !define MUI_STARTMENUPAGE_DEFAULTFOLDER "${FILE_DIRECTORY}"
+    !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${REG_HIVE}"
+    !define MUI_STARTMENUPAGE_REGISTRY_KEY "${REG_INSTALL}"
+    !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "StartMenu_Dir"
 
 ;--------------------------------
 # Pages
@@ -75,6 +87,7 @@
     !insertmacro MUI_PAGE_LICENSE "GPL"
     !insertmacro MUI_PAGE_COMPONENTS
     !insertmacro MUI_PAGE_DIRECTORY
+    !insertmacro MUI_PAGE_STARTMENU "Application" $StartMenuFolder
     !insertmacro MUI_PAGE_INSTFILES
     !insertmacro MUI_PAGE_FINISH
 
@@ -132,11 +145,21 @@
         SectionIn RO
 
         SetOutPath "$INSTDIR"
-        ;SetOverwrite on
-        File /r "dist\*.*" ; dist\*.*
+        SetOverwrite on
+        File /r "dist\*.*"
 
         ; Store installation folder
         WriteRegStr ${REG_HIVE} "${REG_INSTALL}" "Install_Dir" "$INSTDIR"
+
+        ; StartMenu Shortcuts
+        !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+            SetShellVarContext current
+            CreateDirectory "${SHORTCUT_STARTMENU}"
+            CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_EXE}" "$INSTDIR\${FILE_EXE}"
+            CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_DEBUG}" "$INSTDIR\${FILE_DEBUG}"
+            CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_REPORT}" "${PROGRAM_ISSUE}"
+            CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_UNINSTALL}" "$INSTDIR\${FILE_UNINSTALL}"
+        !insertmacro MUI_STARTMENU_WRITE_END
 
         ; Create uninstaller
         Call RegisterApplication
@@ -152,20 +175,8 @@
 
     ; Desktop Shortcuts (Optional)
     Section "Desktop Shortcuts"  secDesktop
-        CreateShortCut "$DESKTOP\${SHORTCUT_EXE}" "$INSTDIR\${FILE_EXE}" "" "$INSTDIR\${FILE_EXE}" 0
+        CreateShortCut "$DESKTOP\${SHORTCUT_EXE}" "$INSTDIR\${FILE_EXE}"
     SectionEnd
-
-    ;/*
-    ; StartMenu Shortcuts (Optional)
-    Section "StartMenu Shortcuts" secStartMenu
-        SetShellVarContext current
-        CreateDirectory "${SHORTCUT_STARTMENU}"
-        CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_EXE}" "$INSTDIR\${FILE_EXE}" "" "$INSTDIR\${FILE_EXE}" 0
-        CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_DEBUG}" "$INSTDIR\${FILE_DEBUG}" "" "$INSTDIR\${FILE_DEBUG}" 0
-        CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_REPORT}" "${PROGRAM_ISSUE}"
-        CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_UNINSTALL}" "$INSTDIR\${FILE_UNINSTALL}" "" "$INSTDIR\${FILE_UNINSTALL}" 0
-    SectionEnd
-    ;*/
 
 ;--------------------------------
 # Descriptions
@@ -181,16 +192,10 @@
     LangString DESC_secDesktop ${LANG_ITALIAN} "Desktop (Italian)"
     LangString DESC_secDesktop ${LANG_SPANISH} "Desktop (Spanish)"
 
-    LangString DESC_secStartMenu ${LANG_ENGLISH} "StartMenu Shortcuts"
-    LangString DESC_secStartMenu ${LANG_FRENCH} "StartMenu (French)"
-    LangString DESC_secStartMenu ${LANG_ITALIAN} "StartMenu (Italian)"
-    LangString DESC_secStartMenu ${LANG_SPANISH} "StartMenu (Spanish)"
-
     ; Assign language strings to sections
     !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
         !insertmacro MUI_DESCRIPTION_TEXT ${secInstall} $(DESC_secInstall)
         !insertmacro MUI_DESCRIPTION_TEXT ${secDesktop} $(DESC_secDesktop)
-        !insertmacro MUI_DESCRIPTION_TEXT ${secStartMenu} $(DESC_secStartMenu)
     !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
@@ -206,9 +211,13 @@
 
         ; Removes StartMenu shortcuts
         SetShellVarContext current
+        !insertmacro MUI_STARTMENU_GETFOLDER "Application" $StartMenuFolder
         Delete "${SHORTCUT_STARTMENU}\*.*"
         RMDir /r "${SHORTCUT_STARTMENU}"
 
-        ;Remove uninstaller
+        ; Remove uninstaller
         Call un.DeregisterApplication
+
+        ; Removes install registry files
+        DeleteRegKey /ifempty ${REG_HIVE} "${REG_INSTALL}"
     SectionEnd

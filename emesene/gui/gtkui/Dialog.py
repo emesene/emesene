@@ -1391,11 +1391,16 @@ class InviteWindow(gtk.Window):
         self.callback = callback
         ContactList = extension.get_default('contact list')
         self.contact_list = ContactList(session)
+        self.contact_list.hide_on_filtering = True
         self.contact_list.nick_template = \
             '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
+
         order_by_group = self.contact_list.session.config.b_order_by_group
+        show_blocked = self.contact_list.session.config.b_show_blocked
         self.contact_list.order_by_group = False
+        self.contact_list.show_blocked = False
         self.contact_list.session.config.b_order_by_group = order_by_group
+        self.contact_list.session.config.b_show_blocked = show_blocked
 
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -1429,9 +1434,14 @@ class InviteWindow(gtk.Window):
         badd.connect('clicked', self._on_add_clicked)
         bclose.connect('clicked', lambda *args: self.hide())
         search.connect('changed', self._on_search_changed)
+        self.connect('key-press-event', self._on_key_press)
         self.connect('delete-event', lambda *args: self.hide())
         self.contact_list.contact_selected.subscribe(self._on_contact_selected)
         self.contact_list.fill()
+
+    def _on_key_press(self, widget, event):
+        if event.keyval == gtk.keysyms.Escape:
+            self.hide()
 
     def _on_add_clicked(self, button):
         """
