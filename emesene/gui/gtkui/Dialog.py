@@ -1432,9 +1432,14 @@ class InviteWindow(gtk.Window):
         badd.connect('clicked', self._on_add_clicked)
         bclose.connect('clicked', lambda *args: self.hide())
         search.connect('changed', self._on_search_changed)
+        self.connect('key-press-event', self._on_key_press)
         self.connect('delete-event', lambda *args: self.hide())
         self.contact_list.contact_selected.subscribe(self._on_contact_selected)
         self.contact_list.fill()
+
+    def _on_key_press(self, widget, event):
+        if event.keyval == gtk.keysyms.Escape:
+            self.hide()
 
     def _on_add_clicked(self, button):
         """
