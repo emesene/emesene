@@ -43,6 +43,10 @@
     !define REG_INSTALL "Software\${FILE_DIRECTORY}"
     !define REG_UNINSTALL "Software\Microsoft\Windows\CurrentVersion\Uninstall\${FILE_DIRECTORY}"
 
+    ; User info
+    !define USER_LEVEL "admin" ; "admin" required to write to 'Program Files'
+    !define USER_SHELLCONTEXT "current" ; "current" will write to current user not all
+
 ;--------------------------------
 # General
 
@@ -57,7 +61,7 @@
     InstallDirRegKey ${REG_HIVE} "${REG_INSTALL}" "Install_Dir"
 
     ; Request application privileges for Windows Vista/7
-    RequestExecutionLevel admin
+    RequestExecutionLevel ${USER_LEVEL}
 
 ;--------------------------------
 # MUI Settings
@@ -152,8 +156,8 @@
         WriteRegStr ${REG_HIVE} "${REG_INSTALL}" "Install_Dir" "$INSTDIR"
 
         ; StartMenu Shortcuts
-        !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-            SetShellVarContext current
+        !insertmacro MUI_STARTMENU_WRITE_BEGIN "Application"
+            SetShellVarContext ${USER_SHELLCONTEXT}
             CreateDirectory "${SHORTCUT_STARTMENU}"
             CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_EXE}" "$INSTDIR\${FILE_EXE}"
             CreateShortCut "${SHORTCUT_STARTMENU}\${SHORTCUT_DEBUG}" "$INSTDIR\${FILE_DEBUG}"
@@ -210,7 +214,7 @@
         Delete $DESKTOP\${SHORTCUT_EXE}"
 
         ; Removes StartMenu shortcuts
-        SetShellVarContext current
+        SetShellVarContext ${USER_SHELLCONTEXT}
         !insertmacro MUI_STARTMENU_GETFOLDER "Application" $StartMenuFolder
         Delete "${SHORTCUT_STARTMENU}\*.*"
         RMDir /r "${SHORTCUT_STARTMENU}"
