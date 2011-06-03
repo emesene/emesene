@@ -14,6 +14,7 @@
     ;Program info
     !define PROGRAM_NAME "emesene" ; emesene
     !define PROGRAM_VERSION "2.11.6-devel"
+    !define /date PROGRAM_BUILDTIME "%Y%m%d_%H%M"
     !define PROGRAM_TYPE "portable"
     !define PROGRAM_PUBLISHER "emesene team"
     !define PROGRAM_WEBSITE "http://www.emesene.org"
@@ -24,7 +25,7 @@
 
     ; Name and output file
     Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
-    OutFile "${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_TYPE}.exe"
+    OutFile "${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}.exe"
 
     ; No user interaction required
     SilentInstall silent
