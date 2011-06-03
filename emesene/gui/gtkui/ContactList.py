@@ -56,6 +56,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.no_group_iter = None
         self.offline_group = None
         self.offline_group_iter = None
+        self.hide_on_filtering = False
 
         self.enable_model_drag_source(gtk.gdk.BUTTON1_MASK,[
             ('emesene-contact',0,0),
@@ -231,6 +232,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # and searching on one string is faster (and the user cant add
         # a new line to the entry so..)
         if self._filter_text:
+            if self.hide_on_filtering:
+                if not self.show_offline and obj.status == e3.status.OFFLINE:
+                    return False
+                if not self.show_blocked and obj.blocked:
+                    return False
             if '\n'.join((obj.account, obj.alias, obj.nick, obj.message,
                 obj.account)).lower().find(self._filter_text) == -1:
                 return False

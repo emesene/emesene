@@ -1391,8 +1391,10 @@ class InviteWindow(gtk.Window):
         self.callback = callback
         ContactList = extension.get_default('contact list')
         self.contact_list = ContactList(session)
+        self.contact_list.hide_on_filtering = True
         self.contact_list.nick_template = \
             '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
+
         order_by_group = self.contact_list.session.config.b_order_by_group
         show_blocked = self.contact_list.session.config.b_show_blocked
         self.contact_list.order_by_group = False
