@@ -4,6 +4,7 @@
 
 import logging
 
+from PyQt4  import QtCore
 from PyQt4  import QtGui
 from PyQt4.QtCore  import Qt
 
@@ -110,6 +111,26 @@ class Dialog(object):
         dialog = EntryDialog(tr('New group name:'), group.name, title)
         response = dialog.exec_()
         response_cb(response, group, dialog.text())
+        
+        
+    @classmethod
+    def contact_added_you(cls, accounts, response_cb,
+                                title=tr("User invitation")):
+        '''show a dialog displaying information about users
+        that added you to their userlists, the accounts parameter is
+        a tuple of mail, nick that represent all the users that added you,
+        the way you confirm (one or more dialogs) doesn't matter, but
+        you should call the response callback only once with a dict
+        with two keys 'accepted' and 'rejected' and a list of mail
+        addresses as values
+        '''
+        def debug_response_cb(results):
+            '''Simply prints the results instead of invocating the
+            real response_cb'''
+            print results
+        dialog = ContactAddedYouDialog(accounts, response_cb, title)
+
+        
         
     @classmethod
     def crop_image(cls, response_cb, filename, title=tr('Select image area')):
@@ -465,8 +486,14 @@ class StandardButtonDialog (QtGui.QDialog):
         self.button_box.rejected.connect(self._on_reject)
         
     def add_button(self, button):
-        return self.button_box.addButton(button)
-    
+            return self.button_box.addButton(button)
+        
+    def add_button_by_text_and_role(self, text, role):
+        print '*'
+        r = self.button_box.addButton(text, role)
+        print '*'
+        return r
+        
     def _on_accept(self):
         '''Slot called when Ok is clicked'''
         self.done(QtGui.QDialog.Accepted)
@@ -549,6 +576,109 @@ class YesNoDialog (StandardButtonDialog):
         
     def set_reject_response(self, response):
         self._reject_response = response
+
+
+
+
+class ContactAddedYouDialog (QtCore.QObject):
+    '''Dialog window asking wether to add to the contact list
+    a contact which has just added you'''
+    
+    class Page(QtGui.QDialog):
+        '''This is the actual dialog window'''
+        AddRole   = QtGui.QDialog.Accepted
+        DontRole  = QtGui.QDialog.Accepted + 1
+        LaterRole = QtGui.QDialog.Rejected
+        
+        def __init__(self, mail, nick, title, parent=None):
+            QtGui.QDialog.__init__(self, parent)
+            
+            text_lbl = QtGui.QLabel()
+            icon_lbl = QtGui.QLabel()
+            button_box = QtGui.QDialogButtonBox()
+            
+            hlay = QtGui.QHBoxLayout()
+            hlay.addWidget(icon_lbl)
+            hlay.addWidget(text_lbl)
+            lay = QtGui.QVBoxLayout()
+            lay.addLayout(hlay)
+            lay.addSpacing(10)
+            lay.addWidget(button_box)
+            lay.addStretch()
+            QtGui.QDialog.setLayout(self, lay)
+            
+            icon = QtGui.QIcon.fromTheme('dialog-information')
+            if nick != mail:
+                text = '<b>%s</b>\n<b>(%s)</b>' % (nick, mail)
+            else:
+                text = '<b>%s</b>' % mail
+            text += tr(' has added you.\nDo you want to add '
+                             'him/her to your contact list?')
+            text = text.replace('\n','<br />')
+            
+            txt = tr('Remind me later')
+            add_btn   = button_box.addButton(tr('Yes'), QtGui.QDialogButtonBox.AcceptRole)
+            dont_btn  = button_box.addButton(tr('No'),  QtGui.QDialogButtonBox.RejectRole)
+            later_btn = button_box.addButton(txt,       QtGui.QDialogButtonBox.ResetRole )
+                
+            self.setWindowTitle(title)
+            icon_lbl.setPixmap(icon.pixmap(64, 64))
+            text_lbl.setText(text)
+            
+            add_btn.clicked.connect(  lambda *args: self.done(self.AddRole))
+            dont_btn.clicked.connect( lambda *args: self.done(self.DontRole))  
+            later_btn.clicked.connect(lambda *args: self.done(self.LaterRole))    
+            
+        
+        def exec_(self):
+            log.debug('Don\'t call \'exec_\' on a Page')
+            return None
+            
+
+    def __init__(self, accounts, done_cb, title, expanding=False, parent=None):
+        '''Constructor'''
+        QtCore.QObject.__init__(self, parent)
+        
+        self._done_cb  = done_cb
+        self._accounts = accounts
+        self._dialogs  = {}
+        self._results  = {'accepted': [],
+                          'rejected': []}
+        i = 0
+        for account in accounts:
+            mail, nick = account
+            page = self.Page(mail, nick, title)
+            self._dialogs[mail] = page
+            page.finished.connect(self._create_slot(mail))
+
+            page.show()
+            pos = page.pos()
+            x   = pos.x()
+            y   = pos.y()
+            page.move(x+i*40, y+i*40)
+            i += 1
+
+        
+    def _create_slot(self, mail):
+        return lambda result: self._on_finished(mail, result)
+    
+    def _on_finished(self, mail, result):
+        if   result == self.Page.AddRole:
+            self._results['accepted'].append(mail)
+        elif result == self.Page.DontRole:
+            self._results['rejected'].append(mail)
+        elif result != self.Page.LaterRole:
+            raise TypeError('Dialog returned wrong result code: %s' %
+                            result)
+        del self._dialogs[mail]
+        if len(self._dialogs) == 0:
+            self._done_cb(self._results)
+    
+    def __del__(self):
+        log.debug('ContactAddedYouDialog destroyed')
+            
+        
+        
         
         
         
@@ -568,8 +698,3 @@ class EntryDialog (OkCancelDialog):
     
     def text(self):
         return unicode(self.edit.text())
-        
-
-
- 
-        

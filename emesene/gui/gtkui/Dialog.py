@@ -414,9 +414,9 @@ class Dialog(object):
         a tuple of mail, nick that represent all the users that added you,
         the way you confirm (one or more dialogs) doesn't matter, but
         you should call the response callback only once with a dict
-        with two keys 'accepted' and 'rejected' and a tuple of accounts as
-        values
-        '''
+        with two keys 'accepted' and 'rejected' and a list of mail
+        addresses as values
+        '''    
         dialog = AddBuddy(response_cb)
 
         for account, nick in accounts:
