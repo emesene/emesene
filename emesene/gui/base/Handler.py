@@ -17,7 +17,10 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import sys
+import re
 import time
+import urllib
 import webbrowser
 
 import e3.base
@@ -194,6 +197,35 @@ class HelpHandler(object):
             self.debug_window = DebugWindow(debug_close_cb)
             self.debug_window.show()
 
+    def notify_update(self, ver):
+        self.dialog.information(_("New version available: %s\nVisit the <a href=\"%s\">emesene website</a> for the latest informations about it." % (ver, EMESENE_WEBSITE)))
+
+    def on_check_update_selected(self):
+        ''' checks if a new stable version of emesene is available '''
+        if sys.platform == "darwin":
+            os.system("open -a /Applications/emesene.app/Contents/Resources/emesene_updater.app")
+        else:
+            f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/gui/base/Handler.py")
+            s = f.read()
+            f.close()
+            s = re.findall(r'EMESENE_VERSION = "(([^"\\]+|\\.)*)"', s)
+            try:
+                loc_ver = EMESENE_VERSION.split(".")
+                rem_ver = s[0][0].split(".") # [("version","version")]
+                if len(rem_ver[2]) > 2:
+                    return # no RCs, BETAs or DEVELs
+                if int(loc_ver[0]) == int(rem_ver[0]):
+                    if int(loc_ver[1]) < int(rem_ver[1]):
+                        self.notify_update(s[0][0])
+                        return
+                    elif int(loc_ver[1]) == int(rem_ver[1]):
+                        if int(loc_ver[2]) < int(rem_ver[2]):
+                            self.notify_update(s[0][0])
+                            return
+            except IndexError:
+                pass # Silently fail
+
+            self.dialog.information(_("No update available"))
 
 class ContactHandler(object):
     '''this handler contains all the handlers needed to handle the contact

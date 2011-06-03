@@ -217,9 +217,6 @@ class HelpMenu(gtk.Menu):
     """
     A widget that represents the Help popup menu located on the main menu
     """
-    
-    def launch_updatechecker(self, widget):
-        os.system("open -a /Applications/emesene.app/Contents/Resources/emesene_updater.app")
 
     def __init__(self, handler):
         """
@@ -246,10 +243,11 @@ class HelpMenu(gtk.Menu):
         self.updatecheck = gtk.ImageMenuItem(_('Check for updates'))
         self.updatecheck.set_image(gtk.image_new_from_stock(gtk.STOCK_REFRESH,
             gtk.ICON_SIZE_MENU))
-        self.updatecheck.connect('activate', self.launch_updatechecker)
+        self.updatecheck.connect('activate', lambda *args: self.handler.on_check_update_selected())
 
         self.append(self.website)
         self.append(self.about)
         self.append(self.debug)
         self.append(gtk.SeparatorMenuItem())
-        self.append(self.updatecheck) #Check for updates menu item
+        self.append(self.updatecheck)
+
