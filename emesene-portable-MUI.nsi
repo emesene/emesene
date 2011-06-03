@@ -40,20 +40,29 @@
     !define MUI_HEADERIMAGE_BITMAP "windows\header.bmp"
     !define MUI_ICON "windows\emesene.ico"
     !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
-    
+
+;--------------------------------
+# Languages
+
+    !insertmacro MUI_LANGUAGE "English"
+    !insertmacro MUI_LANGUAGE "French"
+    !insertmacro MUI_LANGUAGE "Italian"
+    !insertmacro MUI_LANGUAGE "Spanish"
+
 ;--------------------------------
 # Installer Sections
 
     ; Main installation (Required)
     Section "${PROGRAM_NAME} ${PROGRAM_VERSION}" secInstall
-        SetOutPath "$$EXEDIR\Portable"
+        SetOutPath "$EXEDIR\Portable"
         SetOverwrite on
-        File /r "dist\*.*" ; dist\*.*
+        File /r "dist\*.*"
 
-        SetOutPath "$$EXEDIR\Portable"
-        ExecWait "$EXEDIR\Portable\emesene.exe" 
+        SetOutPath "$EXEDIR\Portable"
+        ExecWait "$EXEDIR\Portable\emesene.exe"
+        ;nsExec::Exec "$EXEDIR\Portable\emesene.exe"
     SectionEnd
-    
+
     /*
     ; Plug-ins (Optional)
     Section "Plug-ins" SecPlugins

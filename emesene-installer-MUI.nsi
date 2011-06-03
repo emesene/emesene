@@ -12,7 +12,7 @@
 # Defines
 
     ;Program info
-    !define PROGRAM_NAME "emesene" ; emesene
+    !define PROGRAM_NAME "emesene"
     !define PROGRAM_VERSION "2.11.6-devel"
     !define PROGRAM_TYPE "installer"
     !define PROGRAM_PUBLISHER "emesene team"
@@ -20,17 +20,17 @@
     !define PROGRAM_ISSUE "https://github.com/emesene/emesene/issues/"
 
     ; File info
-    !define FILE_DIRECTORY "emesene2" ; emesene2
-    !define FILE_EXE "emesene.exe" ; emesene.exe
-    !define FILE_DEBUG "emesene_debug.exe" ; emesene_debug.exe
-    !define FILE_UNINSTALL "uninstall.exe"
+    !define FILE_DIRECTORY "emesene2"
+    !define FILE_EXE "emesene.exe" ; Include ".exe"
+    !define FILE_DEBUG "emesene_debug.exe" ; Include ".exe"
+    !define FILE_UNINSTALL "uninstall.exe" ; Include ".exe"
 
     ; Shortcut info
     !define SHORTCUT_STARTMENU "$SMPROGRAMS\${FILE_DIRECTORY}"
-    !define SHORTCUT_EXE "emesene2.lnk" ; emesene2
-    !define SHORTCUT_DEBUG "emesene2 (Debug).lnk" ; emesene2 (Debug).lnk
-    !define SHORTCUT_REPORT "Report Issue.lnk"
-    !define SHORTCUT_UNINSTALL "Uninstall.lnk"
+    !define SHORTCUT_EXE "emesene2.lnk" ; Include ".lnk"
+    !define SHORTCUT_DEBUG "emesene2 (Debug).lnk" ; Include ".lnk"
+    !define SHORTCUT_REPORT "Report Issue.lnk" ; Include ".lnk"
+    !define SHORTCUT_UNINSTALL "Uninstall.lnk" ; Include ".lnk"
 
     ; Registry info
     !define REG_HIVE "HKCU" ; HKLM = HKEY_LOCAL_MACHINE | HKCU = HKEY_CURRENT_USER
@@ -65,7 +65,7 @@
     ;Remember the installer language
     !define MUI_LANGDLL_REGISTRY_ROOT "${REG_HIVE}" 
     !define MUI_LANGDLL_REGISTRY_KEY "${REG_INSTALL}" 
-    !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
+    !define MUI_LANGDLL_REGISTRY_VALUENAME "Install_Lang"
 
 ;--------------------------------
 # Pages
@@ -133,7 +133,7 @@
 
         SetOutPath "$INSTDIR"
         SetOverwrite on
-        File /r "dist\*.*" ; dist\*.*
+        File /r "dist\*.*"
 
         ; Store installation folder
         WriteRegStr ${REG_HIVE} "${REG_INSTALL}" "Install_Dir" "$INSTDIR"
