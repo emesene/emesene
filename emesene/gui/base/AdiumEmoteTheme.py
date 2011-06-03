@@ -51,7 +51,7 @@ class AdiumEmoteTheme(object):
             self.emote_files.append(key)
             pointer_name = val['Name']
             pointer_key = val['Equivalents'][0]
-            self.emotes[pointer_key] = pointer_name
+            self.emotes[pointer_key] = key
             for v in val['Equivalents'][1:]:
                 if v != "":
                     self.emotes[v] = self.emotes[pointer_key]
@@ -69,7 +69,7 @@ class AdiumEmoteTheme(object):
         if shortcut not in self.emotes:
             return None
 
-        path = os.path.join(self.path, self.emotes[shortcut]) + '.png'
+        path = os.path.join(self.path, self.emotes[shortcut])
         path = os.path.abspath(path)
 
         if os.access(path, os.R_OK) and os.path.isfile(path):
