@@ -508,6 +508,10 @@ class Controller(object):
         self.config.save(self.config_path)
         plugin_manager = get_pluginmanager()
         plugin_manager.scan_directory('plugins')
+        plugin_dir = self.config_dir.join('plugins')
+        if not os.path.exists(plugin_dir):
+            os.makedirs(plugin_dir)
+        plugin_manager.scan_directory(plugin_dir)
 
         self.draw_main_screen()
 
