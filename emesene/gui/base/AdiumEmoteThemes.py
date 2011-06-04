@@ -66,7 +66,6 @@ class AdiumEmoteThemes(ThemesManager.ThemesManager):
 
         return self.get(emote_path)[1]
 
-
     def validate(self, theme_path):
         '''validate a Theme directory structure
         '''

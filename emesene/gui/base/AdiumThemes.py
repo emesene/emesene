@@ -68,6 +68,18 @@ class AdiumThemes(ThemesManager.ThemesManager):
 
         return True, AdiumTheme.AdiumTheme(theme_path, timefmt, variant)
 
+    def get_conv_theme (self, conv_name, theme_variant):
+        ''' return the instance of AdiumTheme corresponding to the
+            conv_name or the default theme if isn't found
+        '''
+        conv_path = os.path.join('themes', 'conversations', 'renkoo.AdiumMessageStyle')
+
+        for elem in self.list():
+            if conv_name in elem:
+                conv_path = elem
+
+        return self.get(conv_path, variant=theme_variant)[1]
+
     def validate(self, theme_path):
         '''validate a Theme directory structure
         '''

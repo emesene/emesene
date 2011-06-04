@@ -44,20 +44,15 @@ class Theme(object):
         '''set the theme name and change all the paths to reflect the change'''
         self.image_name = image_name
         self.sound_name = sound_name
-        # conv_name is the name of the selected adium conversation theme
-        self.conv_name = conv_name
-        self.adium_theme_variant= conv_variant
 
         self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
+
         self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
         self.conv_themes = AdiumThemes.get_instance()
         self.conv_themes.add_themes_path(self.conv_themes_path)
 
-        for elem in self.conv_themes.list():
-            if conv_name in elem:
-                self.adium_theme_path = elem
-
-        self.conv_theme = self.conv_themes.get(self.adium_theme_path, variant=self.adium_theme_variant)[1]
+        # conv_name is the name of the selected adium conversation theme
+        self.conv_theme = self.conv_themes.get_conv_theme (conv_name, conv_variant)
 
         self.sound_theme_path = os.path.join("themes", "sounds",
                 self.sound_name)
