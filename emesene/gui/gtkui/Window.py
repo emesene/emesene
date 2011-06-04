@@ -43,7 +43,7 @@ class Window(gtk.Window):
                  utils.safe_gtk_image_load(image_theme.logo48).get_pixbuf(), \
                  utils.safe_gtk_image_load(image_theme.logo96).get_pixbuf())
         except:
-            self.gtk.window_set_default_icon(image_theme.logo)
+            gtk.window_set_default_icon(image_theme.logo)
 
         self.cb_on_close = cb_on_close
         self.cb_on_quit = cb_on_close

@@ -21,18 +21,10 @@ import os
 import AdiumThemes
 import AdiumEmoteThemes
 import SoundThemes
-
-import ImageTheme
-
-from e3 import status
+import ImagesThemes
 
 class Theme(object):
     '''this class contains all the paths and information regarding a theme'''
-
-    IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
-        'email.png','group-chat.png', 'idle.png', 'logo.png', 'logo16.png', 'logo32.png', 'logo48.png', 'new-message.gif','mailbox.png',
-        'offline.png', 'online.png', 'password.png', 'typing.png', 'transfer_success.png', 'user.png',
-        'users.png', 'user_def_image.png', 'user_def_imagetool.png', 'video.png']
 
     def __init__(self, image_name="default", emote_name="default",
             sound_name="default", conv_name='renkoo.AdiumMessageStyle', conv_variant = ''):
@@ -55,9 +47,11 @@ class Theme(object):
 
         self.sound_theme = self.sound_themes.get_sound_theme (sound_name)
 
-        self.image_name = image_name
-        self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
-        self.image_theme = ImageTheme.ImageTheme(self.theme_path)
+        self.image_path = os.path.join(os.getcwd(),"themes", "images")
+        self.image_themes = ImagesThemes.get_instance()
+        self.image_themes.add_themes_path(self.image_path)
+
+        self.image_theme = self.image_themes.get_image_theme (image_name)
 
         self.emotes_themes_path = os.path.join(os.getcwd(), "themes", "emotes")
         self.emotes_themes = AdiumEmoteThemes.get_instance()
@@ -77,27 +71,9 @@ class Theme(object):
         ''' return the current emote theme '''
         return self.image_theme
 
-    def is_valid_theme(self, file_list, path):
-        """
-        return True if the path contains a valid theme
-        """
-
-        for file_name in file_list:
-            if not os.path.isfile(os.path.join(path, file_name)):
-                return False
-
-        return True
-
     def get_image_themes(self):
         '''return a list of names for the image themes'''
-        themes = []
-
-        for theme in self.get_child_dirs(os.path.join('themes', 'images')):
-            if self.is_valid_theme(Theme.IMAGE_FILES,
-                    os.path.join('themes', 'images', theme)):
-                themes.append(theme)
-
-        return themes
+        return self.image_themes.get_name_list()
 
     def get_emote_themes(self):
         '''return a list of names for the emote themes'''
@@ -114,11 +90,4 @@ class Theme(object):
     def get_adium_theme_variants(self):
         '''return a list of adium theme variants'''
         return self.conv_theme.get_theme_variants()
-
-    def get_child_dirs(self, dir_path):
-        '''return a list of dirs inside a given path'''
-        try:
-            return os.walk(dir_path).next()[1]
-        except StopIteration:
-            return ()
 
