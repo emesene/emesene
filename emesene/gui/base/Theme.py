@@ -155,17 +155,11 @@ class Theme(object):
             self.tool_file_transfer = os.path.join(self.toolbar_path, "file-transfer.png")
             self.tool_ublock = os.path.join(self.toolbar_path, "ublock.png")
 
-        self.emote_path = os.path.join('themes', 'emotes', 'default.AdiumEmoticonset')
-
         self.emotes_themes_path = os.path.join(os.getcwd(), "themes", "emotes")
         self.emotes_themes = AdiumEmoteThemes.get_instance()
         self.emotes_themes.add_themes_path(self.emotes_themes_path)
 
-        for elem in self.emotes_themes.list():
-            if emote_name in elem:
-                self.emote_path = elem
-
-        self.emote_theme = self.emotes_themes.get(self.emote_path)[1]
+        self.emote_theme = self.emotes_themes.get_emote_theme (emote_name)
 
     def get_emote_theme(self):
         ''' return the current emote theme '''

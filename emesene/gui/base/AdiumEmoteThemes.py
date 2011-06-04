@@ -54,6 +54,19 @@ class AdiumEmoteThemes(ThemesManager.ThemesManager):
 
         return True, AdiumEmoteTheme.AdiumEmoteTheme(theme_path)
 
+    def get_emote_theme (self, emote_name):
+        ''' return the instance of AdiumEmoteTheme corresponding to the
+            emote_name or the default theme if isn't found
+        '''
+        emote_path = os.path.join('themes', 'emotes', 'default.AdiumEmoticonset')
+
+        for elem in self.list():
+            if emote_name in elem:
+                emote_path = elem
+
+        return self.get(emote_path)[1]
+
+
     def validate(self, theme_path):
         '''validate a Theme directory structure
         '''
