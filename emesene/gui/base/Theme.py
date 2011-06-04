@@ -189,12 +189,7 @@ class Theme(object):
 
     def get_emote_themes(self):
         '''return a list of names for the emote themes'''
-        AdiumThemesM = AdiumEmoteThemes.AdiumEmoteThemes()
-        path_theme = os.path.join(os.getcwd(), "themes", "emotes")
-
-        AdiumThemesM.add_themes_path(path_theme)
-
-        return AdiumThemesM.get_name_list()
+        return self.emotes_themes.get_name_list()
 
     def get_sound_themes(self):
         '''return a list of names for the sound themes'''
@@ -209,12 +204,7 @@ class Theme(object):
 
     def get_adium_themes(self):
         '''return a list of validated adium themes'''
-        AdiumThemesM = AdiumThemes.AdiumThemes()
-        path_conv = os.path.join('themes', 'conversations')
-
-        AdiumThemesM.add_themes_path(path_conv)
-
-        return AdiumThemesM.get_name_list()
+        return self.conv_themes.get_name_list()
 
     def get_adium_theme_variants(self):
         '''return a list of adium theme variants'''
