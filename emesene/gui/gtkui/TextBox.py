@@ -132,7 +132,7 @@ class TextBox(gtk.ScrolledWindow):
             text = self._replace_emo_with_shortcut()
 
             # replace clipboard content
-            gtk.clipboard_get().set_text(text, len(text))
+            gtk.clipboard_get().set_text(text, len(text.encode('utf8')))
             gtk.clipboard_get().store()
 
     def _get_text(self):
