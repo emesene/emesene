@@ -164,7 +164,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             try:
                 animation = gtk.gdk.PixbufAnimation(contact.picture)
             except gobject.GError:
-                pix = utils.gtk_pixbuf_load(gui.theme.user,
+                pix = utils.gtk_pixbuf_load(gui.theme.get_image_theme().user,
                         (self.avatar_size, self.avatar_size))
                 picture = gtk.image_new_from_pixbuf(pix)
                 return picture
@@ -174,7 +174,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         (self.avatar_size, self.avatar_size))
 
                 if bool(contact.blocked):
-                    pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
+                    pixbufblock=utils.gtk_pixbuf_load(gui.theme.get_image_theme().blocked_overlay)
                     utils.simple_images_overlap(pix, pixbufblock,
                             -pixbufblock.props.width, -pixbufblock.props.width)
 
@@ -184,7 +184,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         self.avatar_size, self.avatar_size)
 
                 if bool(contact.blocked):
-                    pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
+                    pixbufblock=utils.gtk_pixbuf_load(gui.theme.get_image_theme().blocked_overlay)
                     static_image = myanimation.get_static_image()
                     pix = static_image.scale_simple(self.avatar_size,
                             self.avatar_size, gtk.gdk.INTERP_BILINEAR)
@@ -194,11 +194,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 else:
                     picture = gtk.image_new_from_animation(myanimation)
         else:
-            pix = utils.gtk_pixbuf_load(gui.theme.user,
+            pix = utils.gtk_pixbuf_load(gui.theme.get_image_theme().user,
                         (self.avatar_size, self.avatar_size))
 
             if bool(contact.blocked):
-                pixbufblock=utils.gtk_pixbuf_load(gui.theme.blocked_overlay)
+                pixbufblock=utils.gtk_pixbuf_load(gui.theme.get_image_theme().blocked_overlay)
                 utils.simple_images_overlap(pix, pixbufblock,
                         -pixbufblock.props.width, -pixbufblock.props.width)
 
@@ -459,7 +459,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         contact_data = (self._get_contact_pixbuf_or_default(contact),
             contact, self.format_nick(contact, self._markup_escape_contact(contact)), True,
-            utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
+            utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().status_icons[contact.status]),
             weight, False, offline)
 
         # if group_offline is set and the contact is offline then put it on the
@@ -630,7 +630,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         contact_data = (self._get_contact_pixbuf_or_default(contact),
             contact, self.format_nick(contact, self._markup_escape_contact(contact)), True,
-            utils.safe_gtk_pixbuf_load(gui.theme.status_icons[contact.status]),
+            utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().status_icons[contact.status]),
             weight, False, offline)
 
         found = False

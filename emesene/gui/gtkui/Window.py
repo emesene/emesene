@@ -35,14 +35,15 @@ class Window(gtk.Window):
 
         self.set_location(width, height, posx, posy)
         self.set_title("emesene")
+        image_theme = gui.theme.get_image_theme()
         try:
             gtk.window_set_default_icon_list(\
-                 utils.safe_gtk_image_load(gui.theme.logo16).get_pixbuf(), \
-                 utils.safe_gtk_image_load(gui.theme.logo32).get_pixbuf(), \
-                 utils.safe_gtk_image_load(gui.theme.logo48).get_pixbuf(), \
-                 utils.safe_gtk_image_load(gui.theme.logo96).get_pixbuf())
+                 utils.safe_gtk_image_load(image_theme.logo16).get_pixbuf(), \
+                 utils.safe_gtk_image_load(image_theme.logo32).get_pixbuf(), \
+                 utils.safe_gtk_image_load(image_theme.logo48).get_pixbuf(), \
+                 utils.safe_gtk_image_load(image_theme.logo96).get_pixbuf())
         except:
-            self.gtk.window_set_default_icon(gui.theme.logo)
+            self.gtk.window_set_default_icon(image_theme.logo)
 
         self.cb_on_close = cb_on_close
         self.cb_on_quit = cb_on_close

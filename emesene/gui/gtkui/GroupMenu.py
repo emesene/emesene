@@ -54,7 +54,7 @@ class GroupMenu(gtk.Menu):
 
 
         self.set_favorite = gtk.ImageMenuItem(_('Set as favorite'))
-        self.set_favorite.set_image(utils.gtk_ico_image_load(gui.theme.favorite,
+        self.set_favorite.set_image(utils.gtk_ico_image_load(gui.theme.get_image_theme().favorite,
                                                              gtk.ICON_SIZE_MENU))
         self.set_favorite.connect('activate', 
                               lambda *args: self.on_favorite_group_selected())

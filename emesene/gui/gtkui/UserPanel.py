@@ -54,7 +54,7 @@ class UserPanel(gtk.VBox):
         self.avatar_path = self.config_dir.get_path("last_avatar")
 
         if not self.session.config_dir.file_readable(self.avatar_path):
-            path = gui.theme.user
+            path = gui.theme.get_image_theme().user
         else:
             path = self.avatar_path
         self.avatar.set_from_file(path)
@@ -71,7 +71,7 @@ class UserPanel(gtk.VBox):
 
         self.mail.get_settings().set_property( "gtk-button-images", True )
 
-        self.mail.set_image(gtk.image_new_from_file(gui.theme.mailbox))
+        self.mail.set_image(gtk.image_new_from_file(gui.theme.get_image_theme().mailbox))
         self.mail.set_relief(gtk.RELIEF_NONE)
         self.search.set_image(gtk.image_new_from_stock(gtk.STOCK_FIND,
             gtk.ICON_SIZE_MENU))

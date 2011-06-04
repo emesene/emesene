@@ -208,7 +208,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         conversation = Conversation(self.session, cid, self.update_window, None, members)
         label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close,
             conversation, self.mozilla_tabs)
-        label.set_image(gui.theme.connect)
+        label.set_image(gui.theme.get_image_theme().connect)
         conversation.tab_label = label
         conversation.tab_index=self.append_page_menu(conversation, label)
         self.set_tab_label_packing(conversation, not self.mozilla_tabs, True, gtk.PACK_START)

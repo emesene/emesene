@@ -210,7 +210,7 @@ class OutputText(gtk.ScrolledWindow):
         self.set_shadow_type(gtk.SHADOW_IN)
         self._texts = []
         self.loaded = False
-        picture = utils.path_to_url(os.path.abspath(gui.theme.user))
+        picture = utils.path_to_url(os.path.abspath(gui.theme.get_image_theme().user))
 
         self.view = OutputView(gui.theme.conv_theme, "", "", "", picture,
                 picture, add_emoticon_cb)

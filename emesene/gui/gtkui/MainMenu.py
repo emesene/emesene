@@ -121,19 +121,19 @@ class ActionsMenu(gtk.Menu):
         AccountMenu = extension.get_default('menu account')
 
         self.contact = gtk.ImageMenuItem(_('_Contact'))
-        self.contact.set_image(utils.safe_gtk_image_load(gui.theme.chat))
+        self.contact.set_image(utils.safe_gtk_image_load(gui.theme.get_image_theme().chat))
         self.contact_menu = ContactsMenu(self.handler.contact_handler)
         self.contact.set_submenu(self.contact_menu)
         self.group = gtk.ImageMenuItem(_('_Group'))
-        self.group.set_image(utils.safe_gtk_image_load(gui.theme.group_chat))
+        self.group.set_image(utils.safe_gtk_image_load(gui.theme.get_image_theme().group_chat))
         self.group_menu = GroupsMenu(self.handler.group_handler)
         self.group.set_submenu(self.group_menu)
         self.account = gtk.ImageMenuItem(_('_Account'))
-        self.account.set_image(utils.safe_gtk_image_load(gui.theme.chat))
+        self.account.set_image(utils.safe_gtk_image_load(gui.theme.get_image_theme().chat))
 
         self.account_menu = AccountMenu(self.handler.my_account_handler)
         self.myaccount = gtk.ImageMenuItem(_('_Profile'))
-        self.myaccount.set_image(utils.safe_gtk_image_load(gui.theme.chat))
+        self.myaccount.set_image(utils.safe_gtk_image_load(gui.theme.get_image_theme().chat))
         self.myaccount.set_submenu(self.account_menu)
 
         self.append(self.contact)
