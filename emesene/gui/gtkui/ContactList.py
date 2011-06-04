@@ -159,6 +159,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         picture
         '''
         if contact.picture:
+            # TODO: This could be handled in AvatarManager in the same
+            # way as avatars from the Avatar class
             try:
                 animation = gtk.gdk.PixbufAnimation(contact.picture)
             except gobject.GError:
@@ -749,7 +751,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         """set the size of the avatars on the contact list
         """
         self.avatar_size = size
-        self.pbr.set_property('dimention', size)
+        self.pbr.set_property('dimension', size)
 
     def compare_contacts(self, contact1, contact2, order1=0, order2=0):
         '''compare two contacts and return 1 if contact1 should go first, 0

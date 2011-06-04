@@ -42,7 +42,7 @@ class UserPanel(gtk.VBox):
 
         Avatar = extension.get_default('avatar')
         
-        self.avatar = Avatar(cellDimention=48)
+        self.avatar = Avatar(cell_dimension=48)
 
         self.avatarBox = gtk.EventBox()
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
