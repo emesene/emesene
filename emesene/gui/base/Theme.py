@@ -20,6 +20,9 @@ import os
 
 import AdiumThemes
 import AdiumEmoteThemes
+
+import SoundTheme
+
 from e3 import status
 
 import plistlib
@@ -43,8 +46,6 @@ class Theme(object):
     def set_theme(self, image_name, emote_name, sound_name, conv_name, conv_variant=''):
         '''set the theme name and change all the paths to reflect the change'''
         self.image_name = image_name
-        self.sound_name = sound_name
-
         self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
 
         self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
@@ -54,8 +55,10 @@ class Theme(object):
         # conv_name is the name of the selected adium conversation theme
         self.conv_theme = self.conv_themes.get_conv_theme (conv_name, conv_variant)
 
+        self.sound_name = sound_name
         self.sound_theme_path = os.path.join("themes", "sounds",
                 self.sound_name)
+        self.sound_theme = SoundTheme.SoundTheme(self.sound_theme_path)
 
         self.av = os.path.join(self.theme_path, "audiovideo.png")
         self.video = os.path.join(self.theme_path, "video.png")
@@ -87,13 +90,6 @@ class Theme(object):
         self.service_gtalk = os.path.join(self.theme_path, "gtalk.png")
         self.service_dummy = os.path.join(self.theme_path, "dummy.png")
         self.favorite = os.path.join(self.theme_path, "favorite.png")
-
-        self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
-        self.sound_nudge = os.path.join(self.sound_theme_path, "nudge.wav")
-        self.sound_offline = os.path.join(self.sound_theme_path, "offline.wav")
-        self.sound_online = os.path.join(self.sound_theme_path, "online.wav")
-        self.sound_send = os.path.join(self.sound_theme_path, "send.wav")
-        self.sound_type = os.path.join(self.sound_theme_path, "type.wav")
 
         self.status_icons = {}
         self.status_icons[status.ONLINE] = \
@@ -159,6 +155,10 @@ class Theme(object):
     def get_emote_theme(self):
         ''' return the current emote theme '''
         return self.emote_theme
+
+    def get_sound_theme(self):
+        ''' return the current emote theme '''
+        return self.sound_theme
 
     def is_valid_theme(self, file_list, path):
         """
