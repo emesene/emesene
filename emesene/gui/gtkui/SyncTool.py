@@ -53,7 +53,7 @@ class SyncTool(object):
 
     def _show_finish(self, result):
         '''called to show a message of finish'''
-        if result:
+        if result[0]:
             self.progress.set_action(_("Synchronization finished"))
             self._session.config.logs_imported = True
             self.progress.update(100.0)
@@ -69,7 +69,6 @@ class SyncTool(object):
     def _update_action(self, action):
         '''called everytime sync changes action'''
         self.progress.set_action(action)
-
 
     def _show_dialog(self):
         '''called to show dialog'''
@@ -95,9 +94,9 @@ class SyncTool(object):
 
         elif response == gui.stock.NO:
             self._session.config.logs_imported = True
+
             
-    def _synch_progress_cb(self, response):
+    def _synch_progress_cb(self, event, response = None):
         '''stop synch'''
-        #TODO: add a way to cancel the sync process
-        pass
+        self._syn.stop_synch()
 

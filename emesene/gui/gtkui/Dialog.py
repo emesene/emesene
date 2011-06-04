@@ -1695,6 +1695,11 @@ class ProgressWindow(gtk.Window):
         gtk.Window.__init__(self)
         self.set_title(title)
         self.set_role("dialog")
+        self.set_modal(True)
+        self.buttoncancel = gtk.Button()
+        self.buttoncancel.set_label(_("Cancel"))
+        self.buttoncancel.connect('clicked', callback)
+        self.connect('delete-event', callback)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_default_size(300, 50)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -1704,6 +1709,7 @@ class ProgressWindow(gtk.Window):
         self.desclabel = gtk.Label()
         vbox.pack_start(self.desclabel)
         vbox.pack_start(self.progressbar)
+        vbox.pack_start(self.buttoncancel)
         self.add(vbox)
         
     def update(self, progress):
