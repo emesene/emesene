@@ -94,6 +94,9 @@ class SyncTool(object):
 
         elif response == gui.stock.NO:
             self._session.config.logs_imported = True
+            
+            if not self._syn.is_clean():
+                self._syn.clean()
 
             
     def _synch_progress_cb(self, event, response = None):
