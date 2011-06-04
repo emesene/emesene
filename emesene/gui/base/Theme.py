@@ -20,18 +20,13 @@ import os
 
 import AdiumThemes
 import AdiumEmoteThemes
-
-import SoundTheme
+import SoundThemes
 
 from e3 import status
-
-import plistlib
 
 class Theme(object):
     '''this class contains all the paths and information regarding a theme'''
 
-    SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
-            'send.wav', 'type.wav']
     IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
         'email.png','group-chat.png', 'idle.png', 'logo.png', 'logo16.png', 'logo32.png', 'logo48.png', 'new-message.gif','mailbox.png',
         'offline.png', 'online.png', 'password.png', 'typing.png', 'transfer_success.png', 'user.png',
@@ -45,9 +40,6 @@ class Theme(object):
 
     def set_theme(self, image_name, emote_name, sound_name, conv_name, conv_variant=''):
         '''set the theme name and change all the paths to reflect the change'''
-        self.image_name = image_name
-        self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
-
         self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
         self.conv_themes = AdiumThemes.get_instance()
         self.conv_themes.add_themes_path(self.conv_themes_path)
@@ -55,10 +47,14 @@ class Theme(object):
         # conv_name is the name of the selected adium conversation theme
         self.conv_theme = self.conv_themes.get_conv_theme (conv_name, conv_variant)
 
-        self.sound_name = sound_name
-        self.sound_theme_path = os.path.join("themes", "sounds",
-                self.sound_name)
-        self.sound_theme = SoundTheme.SoundTheme(self.sound_theme_path)
+        self.sound_theme_path = os.path.join("themes", "sounds")
+        self.sound_themes = SoundThemes.get_instance()
+        self.sound_themes.add_themes_path(self.sound_theme_path)
+
+        self.sound_theme = self.sound_themes.get_sound_theme (sound_name)
+
+        self.image_name = image_name
+        self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
 
         self.av = os.path.join(self.theme_path, "audiovideo.png")
         self.video = os.path.join(self.theme_path, "video.png")
@@ -188,14 +184,7 @@ class Theme(object):
 
     def get_sound_themes(self):
         '''return a list of names for the sound themes'''
-        themes = []
-
-        for theme in self.get_child_dirs(os.path.join('themes', 'sounds')):
-            if self.is_valid_theme(Theme.SOUND_FILES,
-                    os.path.join('themes', 'sounds', theme)):
-                themes.append(theme)
-
-        return themes
+        return self.sound_themes.get_name_list()
 
     def get_adium_themes(self):
         '''return a list of validated adium themes'''
