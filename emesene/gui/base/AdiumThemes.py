@@ -18,9 +18,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-import glob
-import re
-
+import ThemesManager
 import AdiumTheme
 
 DIRECTORY, FILE = range(2)
@@ -50,52 +48,13 @@ def get_instance():
     return __instance
 
 
-class AdiumThemes(object):
+class AdiumThemes(ThemesManager.ThemesManager):
     '''a class to handle adium themes
     '''
 
     def __init__(self):
         '''constructor'''
-
-        # the paths to look for themes
-        self.paths = []
-
-    def add_themes_path(self, path):
-        '''add a path to look for themes
-
-        returns True if the path was added, False otherwise (the path doesn't
-        exists or it isn't a directory)
-        '''
-
-        if path not in self.paths and os.path.isdir(path):
-            self.paths.append(path)
-            return True
-
-        return False
-
-    def list(self):
-        '''return a list of all the available themes
-        '''
-        items = []
-
-        for path in self.paths:
-            items += glob.glob(os.path.join(path, "*.AdiumMessageStyle"))
-
-        return items
-
-    def get_name_list(self):
-        '''return a list with the name of all the available themes
-        '''
-        items = []
-
-        pattern = re.compile(".AdiumMessageStyle", re.IGNORECASE)
-
-        for item in self.list():
-            item = os.path.basename(item)
-            item = pattern.sub('', item)
-            items.append(item)
-
-        return items
+        ThemesManager.ThemesManager.__init__(self, ".AdiumMessageStyle")
 
     def get(self, theme_path, timefmt="%H:%M", variant=''):
         '''return a Theme object instance
