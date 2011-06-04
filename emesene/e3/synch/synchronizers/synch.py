@@ -18,6 +18,14 @@
 #
 #    Module written by Andrea Stagi <stagi.andrea(at)gmail.com>
 
+class SynchStopByUser(Exception):
+
+	def __init__(self, expr):
+		self.expr = expr
+
+	def __str__(self):
+		return self.expr
+
 class Synch(object):
 
         def __init__(self):
@@ -31,6 +39,7 @@ class Synch(object):
             self.__src_db_path = ""
             self.__dest_db_path = ""
             self.__src_db_path_copy = ""
+            self.__stop = False
 
         def set_user(self, user_account):
             pass
@@ -44,9 +53,16 @@ class Synch(object):
         def clean(self):
             pass
 
-        def __create_safe_copy(self):
+        def _create_safe_copy(self):
             pass
 
         def start_synch(self):
             pass
+
+        def stop_synch(self):
+            self.__stop = True
+
+        def _is_stop(self):
+            if self.__stop:
+                raise SynchStopByUser("Synch status: stop")
 
