@@ -29,6 +29,7 @@ import gui
 from gui.base import Plus
 import ContactListParser
 import extension
+from AvatarManager import AvatarManager
 
 import logging
 log = logging.getLogger('gtkui.Renderers')
@@ -634,28 +635,27 @@ gobject.type_register(SmileyLabel)
 #TODO add transformation field in configuration
 #TODO signals in configuration for transformation changes????
 
-class AvatarRenderer(gtk.GenericCellRenderer):
+class AvatarRenderer(gtk.GenericCellRenderer, AvatarManager):
     """Renderer for avatar """
 
     __gproperties__ = {
-        'image': (gobject.TYPE_OBJECT, 'The contact image', '', gobject.PARAM_READWRITE),
-        'blocked': (bool, 'Contact Blocked', '', False, gobject.PARAM_READWRITE),
-        'dimention': (gobject.TYPE_INT, 'cell dimentions',
-                    'height width of cell', 0, 96, 32, gobject.PARAM_READWRITE),
-        'offline': (bool, 'Contact is offline', '', False, gobject.PARAM_READWRITE),
-        'radius_factor': (gobject.TYPE_FLOAT,'radius of pixbuf',
-                          '0.0 to 0.5 with 0.1 = 10% of dimention',
-                          0.0, 0.5,0.11, gobject.PARAM_READWRITE),
+        'image': (gobject.TYPE_OBJECT, 'The contact image', '',
+            gobject.PARAM_READWRITE),
+        'blocked': (bool, 'Contact Blocked', '', False,
+            gobject.PARAM_READWRITE),
+        'dimension': (gobject.TYPE_INT, 'cell dimensions',
+            'height width of cell', 0, 96, 32,
+            gobject.PARAM_READWRITE),
+        'offline': (bool, 'Contact is offline', '', False,
+            gobject.PARAM_READWRITE),
+        'radius-factor': (gobject.TYPE_FLOAT, 'radius of pixbuf',
+            '0.0 to 0.5 with 0.1 = 10% of dimension', 0.0, 0.5, 0.11,
+            gobject.PARAM_READWRITE),
          }
 
-    def __init__(self, cellDimention = 32, cellRadius = 0.11):
+    def __init__(self, cell_dimension = 32, cell_radius = 0.11):
         self.__gobject_init__()
-        self._image = None
-        self._dimention = cellDimention
-        self._radius_factor = cellRadius
-        self._offline = False
-        avatar_manager = extension.get_default('avatar manager')
-        self.avatar_manager = avatar_manager()
+        AvatarManager.__init__(self, cell_dimension, cell_radius)
 
         #icon source used to render grayed out offline avatar
         self._icon_source = gtk.IconSource()
@@ -685,42 +685,18 @@ class AvatarRenderer(gtk.GenericCellRenderer):
     def _transformation_callback(self, config, newvalue, oldvalue):
         self._set_transformation(newvalue)
 
-    def do_get_property(self, property):
-        if property.name == 'image':
-            return self._image
-        elif property.name == 'dimention':
-            return self._dimention
-        elif property.name == 'radius-factor':
-            return self._radius_factor
-        elif property.name == 'offline':
-            return self._offline
-        else:
-            raise AttributeError, 'unknown property %s' % property.name
-
-    def do_set_property(self, property, value):
-        if property.name == 'image':
-            self._image = value
-        elif property.name == 'dimention':
-            self._dimention = value
-        elif property.name == 'radius-factor':
-            self._radius_factor = value
-        elif property.name == 'offline':
-            self._offline = value
-        else:
-            raise AttributeError, 'unknown property %s' % property.name
-
     def on_get_size(self, widget, cell_area=None):
         """Requisition size"""
         xpad, ypad = self._get_padding()
 
-        if self._dimention >= 32:
-            width = self._dimention
+        if self._dimension >= 32:
+            width = self._dimension
         elif self._corner:
-            width = self._dimention * 2
+            width = self._dimension * 2
         else:
-            width = self._dimention
+            width = self._dimension
 
-        height = self._dimention + (ypad * 2)
+        height = self._dimension + (ypad * 2)
 
         return (0, 0,  width, height)
 
@@ -755,7 +731,7 @@ class AvatarRenderer(gtk.GenericCellRenderer):
 
         avatar = None
         alpha = 1
-        dim = self._dimention
+        dim = self._dimension
 
         if self._image.get_storage_type() == gtk.IMAGE_ANIMATION:
             if not self._image.get_data('iter'):
@@ -779,40 +755,7 @@ class AvatarRenderer(gtk.GenericCellRenderer):
                 gtk.STATE_INSENSITIVE, -1, widget, "gtk-image")
 
         if avatar:
-            self._draw_avatar(ctx, avatar, width - dim, ypad, dim,
+            self.draw_avatar(ctx, avatar, width - dim, ypad, dim,
                 gtk.ANCHOR_CENTER, self._radius_factor, alpha)
-
-    def _draw_avatar(self, ctx, pixbuf, x, y, dimention,
-                         position = gtk.ANCHOR_CENTER,
-                         radius = 0, alpha = 1):
-        """Render avatar"""
-        ctx.save()
-        ctx.set_antialias(cairo.ANTIALIAS_SUBPIXEL)
-        ctx.translate(x, y)
-
-        pix_width = pixbuf.get_width()
-        pix_height = pixbuf.get_height()
-
-        if (pix_width > dimention) or (pix_height > dimention):
-            scale_factor = float(dimention) / max (pix_width,pix_height)
-        else:
-            scale_factor = 1
-
-        scale_width = pix_width* scale_factor
-        scale_height = pix_height* scale_factor
-
-        #tranlate position
-        self.avatar_manager.translate_key_postion(ctx, position, dimention,
-                dimention, scale_width, scale_height)
-
-        if radius > 0 :
-            self.avatar_manager.rounded_rectangle(ctx, 0, 0, scale_width,
-                    scale_height, self._dimention * radius)
-            ctx.clip()
-
-        ctx.scale(scale_factor,scale_factor)
-        ctx.set_source_pixbuf(pixbuf, 0, 0)
-        ctx.paint_with_alpha(alpha)
-        ctx.restore()
 
 gobject.type_register(AvatarRenderer)

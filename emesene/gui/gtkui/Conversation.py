@@ -69,7 +69,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.avatarBox.connect('button-press-event', self._on_avatar_click)
 
-        self.avatar = Avatar(cellDimention=avatar_size)
+        self.avatar = Avatar(cell_dimension=avatar_size)
         self.avatarBox.add(self.avatar)
 
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
@@ -79,7 +79,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.his_avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.his_avatarBox.connect('button-press-event', self._on_his_avatar_click)
 
-        self.his_avatar = Avatar(cellDimention=avatar_size)
+        self.his_avatar = Avatar(cell_dimension=avatar_size)
         self.his_avatarBox.add(self.his_avatar)
 
         self.his_avatarBox.set_tooltip_text(_('Click to see informations'))
@@ -250,8 +250,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.avatarBox.remove(self.avatar)
         self.his_avatarBox.remove(self.his_avatar)
 
-        self.avatar.set_property('dimention',value)
-        self.his_avatar.set_property('dimention',value)
+        self.avatar.set_property('dimension',value)
+        self.his_avatar.set_property('dimension',value)
 
         self.avatarBox.add(self.avatar)
         self.his_avatarBox.add(self.his_avatar)
