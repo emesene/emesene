@@ -34,7 +34,7 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         self._conversations = None
         self._quit_on_close = False
         
-        self.setIcon(QtGui.QIcon(gui.theme.logo))
+        self.setIcon(QtGui.QIcon(gui.theme.get_image_theme().logo))
         
         self.activated.connect(self._on_tray_icon_clicked)
         
@@ -42,7 +42,7 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         # future (probably no tray icon at all, just the dock icon)
         if sys.platform == 'darwin':
             print 'Here'
-            icon = QtGui.QIcon(gui.theme.logo)
+            icon = QtGui.QIcon(gui.theme.get_image_theme().logo)
             qt_app = QtGui.QApplication.instance()
             qt_app.setWindowIcon(icon)
             qt_app.setApplicationName('BHAWH')
@@ -62,7 +62,7 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         context menu un the Tray Icon.'''
         tray_login_menu_cls = extension.get_default('tray login menu')
         self._menu = tray_login_menu_cls(self._handler)
-        self.setIcon(QtGui.QIcon(gui.theme.logo))
+        self.setIcon(QtGui.QIcon(gui.theme.get_image_theme().logo))
         if sys.platform == 'darwin':
             QtGui.qt_mac_set_dock_menu(self._menu)
         else:
@@ -100,7 +100,7 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         '''This slot is called when the status changes. Update the tray
         icon'''
         self.setIcon(QtGui.QIcon(QtGui.QPixmap(
-                                        gui.theme.status_icons_panel[status])))
+                                        gui.theme.get_image_theme().status_icons_panel[status])))
         
         
     def _on_tray_icon_clicked(self, reason):

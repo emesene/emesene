@@ -35,7 +35,7 @@ class GroupMenu(QtGui.QMenu):
         self.addAction(self.remove)
         self.addAction(self.rename)
         
-        self.setIcon(QtGui.QIcon(gui.theme.users))
+        self.setIcon(QtGui.QIcon(gui.theme.get_image_theme().users))
 
         self.add.triggered.connect(
             lambda *args: self._handler.on_add_group_selected())

@@ -62,7 +62,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         conversation.tab_index = self.addTab(conversation, 
                     (unicode(account.display_name)))
         self.setTabIcon(conversation.tab_index, 
-                        QtGui.QIcon(gui.theme.status_icons[account.status]))
+                        QtGui.QIcon(gui.theme.get_image_theme().status_icons[account.status]))
         return conversation
         
     def get_dimensions(self):
@@ -114,7 +114,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
             if account in conversation.members:
                 index = self.indexOf(conversation)
                 account = self.session.contacts.get(conversation.members[0])
-                icon = QtGui.QIcon(gui.theme.status_icons[account.status])
+                icon = QtGui.QIcon(gui.theme.get_image_theme().status_icons[account.status])
                 self.setTabIcon(index, icon)
                 self.setTabText(index, unicode(account.display_name))
                 

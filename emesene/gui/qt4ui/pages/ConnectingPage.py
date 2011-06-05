@@ -47,10 +47,10 @@ class ConnectingPage(QtGui.QWidget):
         # FIXME: ok, this should be substituted with the picture handler
         # too lazy to do it now -.-'
         if not os.path.exists(self._avatar_path):
-            self._avatar_path = gui.theme.logo
+            self._avatar_path = gui.theme.get_image_theme().logo
         avatar_cls = extension.get_default('avatar')
 
-        widget_d['display_pic']  = avatar_cls(default_pic=gui.theme.logo,
+        widget_d['display_pic']  = avatar_cls(default_pic=gui.theme.get_image_theme().logo,
                                              clickable=False)
         widget_d['label']        = QtGui.QLabel()
         widget_d['progress_bar'] = QtGui.QProgressBar()

@@ -52,7 +52,7 @@ class ContactMenu(QtGui.QMenu):
         self.addActions( (action_d['set_alias'],
                           action_d['view_info']) )
         
-        self.setIcon(QtGui.QIcon(gui.theme.user))
+        self.setIcon(QtGui.QIcon(gui.theme.get_image_theme().user))
         
         self.aboutToShow.connect(
             lambda *args: self._update_groups())
