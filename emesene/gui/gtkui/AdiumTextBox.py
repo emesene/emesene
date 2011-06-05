@@ -254,6 +254,7 @@ class OutputText(gtk.ScrolledWindow):
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
         msg = gui.Message.from_information(contact, message)
+        msg.message = Renderers.msnplus_to_plain_text(msg.message)
         self.view.add_message(msg, None, None, None)
 
     def update_p2p(self, account, _type, *what):
