@@ -8,9 +8,13 @@
     ; Modern UI
     !include "MUI2.nsh"
 
+    ; Logic Lib (select and if statements)
+    !include "LogicLib.nsh"
+
 #--------------------------------
 ;Variables
 
+    ; Holds user-selected StartMenu Directory
     Var StartMenuDir
 
 #--------------------------------
@@ -26,6 +30,7 @@
     !define PROGRAM_ISSUE "https://github.com/emesene/emesene/issues/"
 
     ; File info
+    !define FILE_CONFIG "$APPDATA\${PROGRAM_NAME}\${FILE_DIRECTORY}"
     !define FILE_DIRECTORY "emesene2"
     !define FILE_EXE "emesene.exe" ; Include ".exe"
     !define FILE_DEBUG "emesene_debug.exe" ; Include ".exe"
@@ -44,8 +49,12 @@
     !define REG_UNINSTALL "Software\Microsoft\Windows\CurrentVersion\Uninstall\${FILE_DIRECTORY}"
 
     ; User info
-    !define USER_LEVEL "admin" ; "admin" required to write to 'Program Files'
+    !define USER_PRIVILEGES "admin" ; "admin" required to write to 'Program Files'
     !define USER_SHELLCONTEXT "all" ; "all" will write to all, not just current
+
+    ; Window info
+    !define WINDOW_CLASS "gdkWindowToplevel"
+    !define WINDOW_TITLE "emesene"
 
 #--------------------------------
 # General
@@ -61,11 +70,12 @@
     InstallDirRegKey ${REG_HIVE} "${REG_INSTALL}" "Install_Dir"
 
     ; Request application privileges for Windows Vista/7
-    RequestExecutionLevel ${USER_LEVEL}
+    RequestExecutionLevel ${USER_PRIVILEGES}
 
 #--------------------------------
 # MUI Settings
 
+    ; Abort warning, header image, and icons
     !define MUI_ABORTWARNING
     !define MUI_HEADERIMAGE
     !define MUI_HEADERIMAGE_BITMAP "windows\header.bmp"
@@ -101,6 +111,7 @@
     ; Uninstaller pages
     !insertmacro MUI_UNPAGE_WELCOME
     !insertmacro MUI_UNPAGE_CONFIRM
+    !insertmacro MUI_UNPAGE_COMPONENTS
     !insertmacro MUI_UNPAGE_INSTFILES
     !insertmacro MUI_UNPAGE_FINISH
 
@@ -116,18 +127,27 @@
 #--------------------------------
 # Reserve Files
 
+    ; Reserves language files
     !insertmacro MUI_RESERVEFILE_LANGDLL
 
 #--------------------------------
 # Functions
     
-    Function .onInit
+    ; Runs before before everything else during installation
+    Function ".onInit"
+        ; Detects if the program is running and asks user to close it
+        FindWindow $0 "${WINDOW_CLASS}" "${WINDOW_TITLE}"
+        StrCmp $0 0 notRunning
+            MessageBox MB_OK|MB_ICONEXCLAMATION "${PROGRAM_NAME} is currently running. Please close it and try again." /SD IDOK
+            Abort
+        notRunning:
+
         ; Select language on installer start
         !insertmacro MUI_LANGDLL_DISPLAY
     FunctionEnd
 
     ; Register uninstaller into Add/Remove panel (for local user only)
-    Function RegisterApplication
+    Function "RegisterApplication"
         WriteRegStr ${REG_HIVE} "${REG_UNINSTALL}" "DisplayName" "${PROGRAM_NAME}"
         WriteRegStr ${REG_HIVE} "${REG_UNINSTALL}" "DisplayIcon" "$\"$INSTDIR\${FILE_EXE}$\""
         WriteRegStr ${REG_HIVE} "${REG_UNINSTALL}" "Publisher" "${PROGRAM_PUBLISHER}"
@@ -140,8 +160,18 @@
         WriteRegStr ${REG_HIVE} "${REG_UNINSTALL}" "UninstallString" "$\"$INSTDIR\${FILE_UNINSTALL}$\""
     FunctionEnd
 
+    ; Runs before before everything else during uninstallation
+    Function "un.onInit"
+        ; Detects if the program is running and asks user to close it
+        FindWindow $0 "${WINDOW_CLASS}" "${WINDOW_TITLE}"
+        StrCmp $0 0 notRunning
+            MessageBox MB_OK|MB_ICONEXCLAMATION "${PROGRAM_NAME} is currently running. Please close it and try again." /SD IDOK
+            Abort
+        notRunning:
+    FunctionEnd
+
     ; Deregister uninstaller from Add/Remove panel
-    Function un.DeregisterApplication
+    Function "un.DeregisterApplication"
         DeleteRegKey ${REG_HIVE} "${REG_UNINSTALL}"
     FunctionEnd
 
@@ -179,7 +209,7 @@
 
     /*
     ; Plug-ins (Optional)
-    Section "Plug-ins" SecPlugins
+    Section "Plug-ins" secPlugins
         ;Plug-ins here :)
     SectionEnd
     */
@@ -194,29 +224,10 @@
     SectionEnd
 
 #--------------------------------
-# Descriptions
-
-    ; Language strings
-    LangString DESC_secInstall ${LANG_ENGLISH} "Install"
-    LangString DESC_secInstall ${LANG_FRENCH} "Install (French)"
-    LangString DESC_secInstall ${LANG_ITALIAN} "Install (Italian)"
-    LangString DESC_secInstall ${LANG_SPANISH} "Install (Spanish)"
-
-    LangString DESC_secDesktop ${LANG_ENGLISH} "Desktop Shortcuts"
-    LangString DESC_secDesktop ${LANG_FRENCH} "Desktop (French)"
-    LangString DESC_secDesktop ${LANG_ITALIAN} "Desktop (Italian)"
-    LangString DESC_secDesktop ${LANG_SPANISH} "Desktop (Spanish)"
-
-    ; Assign language strings to sections
-    !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-        !insertmacro MUI_DESCRIPTION_TEXT ${secInstall} $(DESC_secInstall)
-        !insertmacro MUI_DESCRIPTION_TEXT ${secDesktop} $(DESC_secDesktop)
-    !insertmacro MUI_FUNCTION_DESCRIPTION_END
-
-#--------------------------------
 # Uninstaller Sections
 
-    Section "Uninstall"
+    ; Main uninstallation
+    Section "un.${PROGRAM_NAME} ${PROGRAM_VERSION}" secUninstall
         ; Sets the context of shell folders
         SetShellVarContext ${USER_SHELLCONTEXT}
 
@@ -238,3 +249,69 @@
         ; Removes install registry files
         DeleteRegKey /ifempty ${REG_HIVE} "${REG_INSTALL}"
     SectionEnd
+
+    ; Configuration directory (Optional)
+    Section "un.Profile/Settings" secConfig
+        ; Removes config folder
+        RMDir /r "${FILE_CONFIG}"
+    SectionEnd
+
+    ; Cleans up old registry files
+    Section "un.Registry Clean-up" secRegistry
+        ${If} ${REG_HIVE} == "HKLM"
+            DeleteRegKey HKCU "${REG_UNINSTALL}"
+            DeleteRegKey /ifempty HKCU "${REG_INSTALL}"
+        ${ElseIf} ${REG_HIVE} == "HKCU"
+            DeleteRegKey HKLM "${REG_UNINSTALL}"
+            DeleteRegKey /ifempty HKLM "${REG_INSTALL}"
+        ${EndIf}
+    SectionEnd
+
+#--------------------------------
+# Descriptions
+
+    ; English Language strings
+    LangString DESC_secInstall ${LANG_ENGLISH} "Install"
+    ;LangString DESC_secPlugins ${LANG_ENGLISH} "Plug-ins"
+    LangString DESC_secDesktop ${LANG_ENGLISH} "Desktop Shortcuts"
+    LangString DESC_secUninstall ${LANG_ENGLISH} "Uninstall"
+    LangString DESC_secConfig ${LANG_ENGLISH} "Profile/Settings"
+    LangString DESC_secRegistry ${LANG_ENGLISH} "Registry Clean-up"
+
+    ; French Language strings
+    LangString DESC_secInstall ${LANG_FRENCH} "Install (French)"
+    ;LangString DESC_secPlugins ${LANG_FRENCH} "Plug-ins (French)"
+    LangString DESC_secDesktop ${LANG_FRENCH} "Desktop (French)"
+    LangString DESC_secUninstall ${LANG_FRENCH} "Uninstall (French)"
+    LangString DESC_secConfig ${LANG_FRENCH} "Profile/Settings (French)"
+    LangString DESC_secRegistry ${LANG_FRENCH} "Registry Clean-up (French)"
+
+    ; Italian Language strings
+    LangString DESC_secInstall ${LANG_ITALIAN} "Install (Italian)"
+    ;LangString DESC_secPlugins ${LANG_ITALIAN} "Plug-ins (Italian)"
+    LangString DESC_secDesktop ${LANG_ITALIAN} "Desktop (Italian)"
+    LangString DESC_secUninstall ${LANG_ITALIAN} "Uninstall (Italian)"
+    LangString DESC_secConfig ${LANG_ITALIAN} "Profile/Settings (Italian)"
+    LangString DESC_secRegistry ${LANG_ITALIAN} "Registry Clean-up (Italian)"
+
+    ; Spanish Language strings
+    LangString DESC_secInstall ${LANG_SPANISH} "Install (Spanish)"
+    ;LangString DESC_secPlugins ${LANG_SPANISH} "Plug-ins (Spanish)"
+    LangString DESC_secDesktop ${LANG_SPANISH} "Desktop (Spanish)"
+    LangString DESC_secUninstall ${LANG_SPANISH} "Uninstall (Spanish)"
+    LangString DESC_secConfig ${LANG_SPANISH} "Profile/Settings (Spanish)"
+    LangString DESC_secRegistry ${LANG_SPANISH} "Registry Clean-up (Spanish)"
+
+    ; Assign language strings to install sections
+    !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+        !insertmacro MUI_DESCRIPTION_TEXT ${secInstall} $(DESC_secInstall)
+        ;!insertmacro MUI_DESCRIPTION_TEXT ${secPlugins} $(DESC_secPlugins)
+        !insertmacro MUI_DESCRIPTION_TEXT ${secDesktop} $(DESC_secDesktop)
+    !insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+    ; Assign language strings to uninstall sections
+    !insertmacro MUI_UNFUNCTION_DESCRIPTION_BEGIN
+        !insertmacro MUI_DESCRIPTION_TEXT ${secUninstall} $(DESC_secUninstall)
+        !insertmacro MUI_DESCRIPTION_TEXT ${secConfig} $(DESC_secConfig)
+        !insertmacro MUI_DESCRIPTION_TEXT ${secRegistry} $(DESC_secRegistry)
+    !insertmacro MUI_UNFUNCTION_DESCRIPTION_END
