@@ -20,15 +20,13 @@ import os
 
 import AdiumThemes
 import AdiumEmoteThemes
-from e3 import status
+import SoundThemes
 
-import plistlib
+from e3 import status
 
 class Theme(object):
     '''this class contains all the paths and information regarding a theme'''
 
-    SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
-            'send.wav', 'type.wav']
     IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'call.png', 'chat.png', 'connect.png',
         'email.png','group-chat.png', 'idle.png', 'logo.png', 'logo16.png', 'logo32.png', 'logo48.png', 'new-message.gif','mailbox.png',
         'offline.png', 'online.png', 'password.png', 'typing.png', 'transfer_success.png', 'user.png',
@@ -42,25 +40,21 @@ class Theme(object):
 
     def set_theme(self, image_name, emote_name, sound_name, conv_name, conv_variant=''):
         '''set the theme name and change all the paths to reflect the change'''
-        self.image_name = image_name
-        self.sound_name = sound_name
-        # conv_name is the name of the selected adium conversation theme
-        self.conv_name = conv_name
-        self.adium_theme_variant= conv_variant
-
-        self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
         self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
         self.conv_themes = AdiumThemes.get_instance()
         self.conv_themes.add_themes_path(self.conv_themes_path)
 
-        for elem in self.conv_themes.list():
-            if conv_name in elem:
-                self.adium_theme_path = elem
+        # conv_name is the name of the selected adium conversation theme
+        self.conv_theme = self.conv_themes.get_conv_theme (conv_name, conv_variant)
 
-        self.conv_theme = self.conv_themes.get(self.adium_theme_path, variant=self.adium_theme_variant)[1]
+        self.sound_theme_path = os.path.join("themes", "sounds")
+        self.sound_themes = SoundThemes.get_instance()
+        self.sound_themes.add_themes_path(self.sound_theme_path)
 
-        self.sound_theme_path = os.path.join("themes", "sounds",
-                self.sound_name)
+        self.sound_theme = self.sound_themes.get_sound_theme (sound_name)
+
+        self.image_name = image_name
+        self.theme_path = os.path.join(os.getcwd(),"themes", "images", self.image_name)
 
         self.av = os.path.join(self.theme_path, "audiovideo.png")
         self.video = os.path.join(self.theme_path, "video.png")
@@ -92,13 +86,6 @@ class Theme(object):
         self.service_gtalk = os.path.join(self.theme_path, "gtalk.png")
         self.service_dummy = os.path.join(self.theme_path, "dummy.png")
         self.favorite = os.path.join(self.theme_path, "favorite.png")
-
-        self.sound_alert = os.path.join(self.sound_theme_path, "alert.wav")
-        self.sound_nudge = os.path.join(self.sound_theme_path, "nudge.wav")
-        self.sound_offline = os.path.join(self.sound_theme_path, "offline.wav")
-        self.sound_online = os.path.join(self.sound_theme_path, "online.wav")
-        self.sound_send = os.path.join(self.sound_theme_path, "send.wav")
-        self.sound_type = os.path.join(self.sound_theme_path, "type.wav")
 
         self.status_icons = {}
         self.status_icons[status.ONLINE] = \
@@ -155,21 +142,19 @@ class Theme(object):
             self.tool_file_transfer = os.path.join(self.toolbar_path, "file-transfer.png")
             self.tool_ublock = os.path.join(self.toolbar_path, "ublock.png")
 
-        self.emote_path = os.path.join('themes', 'emotes', 'default.AdiumEmoticonset')
-
         self.emotes_themes_path = os.path.join(os.getcwd(), "themes", "emotes")
         self.emotes_themes = AdiumEmoteThemes.get_instance()
         self.emotes_themes.add_themes_path(self.emotes_themes_path)
 
-        for elem in self.emotes_themes.list():
-            if emote_name in elem:
-                self.emote_path = elem
-
-        self.emote_theme = self.emotes_themes.get(self.emote_path)[1]
+        self.emote_theme = self.emotes_themes.get_emote_theme (emote_name)
 
     def get_emote_theme(self):
         ''' return the current emote theme '''
         return self.emote_theme
+
+    def get_sound_theme(self):
+        ''' return the current emote theme '''
+        return self.sound_theme
 
     def is_valid_theme(self, file_list, path):
         """
@@ -195,32 +180,15 @@ class Theme(object):
 
     def get_emote_themes(self):
         '''return a list of names for the emote themes'''
-        AdiumThemesM = AdiumEmoteThemes.AdiumEmoteThemes()
-        path_theme = os.path.join(os.getcwd(), "themes", "emotes")
-
-        AdiumThemesM.add_themes_path(path_theme)
-
-        return AdiumThemesM.get_name_list()
+        return self.emotes_themes.get_name_list()
 
     def get_sound_themes(self):
         '''return a list of names for the sound themes'''
-        themes = []
-
-        for theme in self.get_child_dirs(os.path.join('themes', 'sounds')):
-            if self.is_valid_theme(Theme.SOUND_FILES,
-                    os.path.join('themes', 'sounds', theme)):
-                themes.append(theme)
-
-        return themes
+        return self.sound_themes.get_name_list()
 
     def get_adium_themes(self):
         '''return a list of validated adium themes'''
-        AdiumThemesM = AdiumThemes.AdiumThemes()
-        path_conv = os.path.join('themes', 'conversations')
-
-        AdiumThemesM.add_themes_path(path_conv)
-
-        return AdiumThemesM.get_name_list()
+        return self.conv_themes.get_name_list()
 
     def get_adium_theme_variants(self):
         '''return a list of adium theme variants'''

@@ -676,7 +676,7 @@ class Controller(object):
            self.session.contacts.me.status != e3.status.BUSY and \
            self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
-            self.soundPlayer.play(gui.theme.sound_type)
+            self.soundPlayer.play(gui.theme.get_sound_theme().sound_type)
 
     def _on_conversation_window_close(self, conv_manager):
         '''method called when the conversation window is closed'''

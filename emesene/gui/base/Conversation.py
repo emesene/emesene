@@ -448,21 +448,21 @@ class Conversation(object):
         play the nudge sound
         """
         if self.session.config.b_play_nudge:
-            self.soundPlayer.play(gui.theme.sound_nudge)
+            self.soundPlayer.play(gui.theme.get_sound_theme().sound_nudge)
 
     def play_send(self):
         """
         play the send sound
         """
         if self.session.config.b_play_send:
-            self.soundPlayer.play(gui.theme.sound_send)
+            self.soundPlayer.play(gui.theme.get_sound_theme().sound_send)
 
     def play_type(self):
         """
         play the receive sound
         """
         if self.session.config.b_play_type:
-            self.soundPlayer.play(gui.theme.sound_type)
+            self.soundPlayer.play(gui.theme.get_sound_theme().sound_type)
 
     def cycle_history(self, change=-1):
         """
