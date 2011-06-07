@@ -47,7 +47,7 @@ class StatusMenu(gtk.Menu):
             else:
                 temp_item = gtk.ImageMenuItem(e3.status.STATUS[stat])
             temp_item.set_image(utils.safe_gtk_image_load(
-                gui.theme.status_icons[stat]))
+                gui.theme.get_image_theme().status_icons[stat]))
             temp_item.connect('activate', self._on_activate, stat)
             self.status[stat] = temp_item
             self.append(temp_item)

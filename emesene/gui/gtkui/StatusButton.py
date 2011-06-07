@@ -67,7 +67,7 @@ class StatusButton(gtk.Button):
 
         if stat not in self.cache_imgs:
             gtk_img = utils.safe_gtk_image_load(\
-                gui.theme.status_icons[stat])
+                gui.theme.get_image_theme().status_icons[stat])
             self.cache_imgs[stat] = gtk_img
         else:
             gtk_img = self.cache_imgs[stat]

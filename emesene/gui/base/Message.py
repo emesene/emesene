@@ -53,12 +53,12 @@ class Message(object):
         picture = contact.picture
 
         if not os.path.exists(picture):
-            picture = os.path.abspath(gui.theme.user)
+            picture = os.path.abspath(gui.theme.get_image_theme().user)
 
         return cls(incomming, first, contact.account,
                 message.display_name if message.display_name else contact.display_name,
                 contact.alias, picture,
-                gui.theme.status_icons[contact.status], message.body.rstrip(),
+                gui.theme.get_image_theme().status_icons[contact.status], message.body.rstrip(),
                 e3.status.STATUS[contact.status], timestamp=tstamp)
 
     @classmethod
@@ -66,11 +66,11 @@ class Message(object):
         picture = contact.picture
 
         if not os.path.exists(picture):
-            picture = os.path.abspath(gui.theme.user)
+            picture = os.path.abspath(gui.theme.get_image_theme().user)
 
         return cls(True, False, contact.account,
                 message.display_name if message.display_name else contact.display_name,
                 contact.alias, picture,
-                gui.theme.status_icons[contact.status], message.body,
+                gui.theme.get_image_theme().status_icons[contact.status], message.body,
                 e3.status.STATUS[contact.status], timestamp=tstamp, msgtype="status")
 

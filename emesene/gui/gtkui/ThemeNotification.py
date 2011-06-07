@@ -41,15 +41,15 @@ def ThemeNotification(title, text, picture_path=None, const=None,
             if(picture[:7]=="file://"):
                 return picture
         if const_value == 'mail-received':
-            return "file://" + gui.theme.email
+            return "file://" + gui.theme.get_image_theme().email
         elif const_value == 'file-transf-completed':
-            return "file://" + gui.theme.transfer_success
+            return "file://" + gui.theme.get_image_theme().transfer_success
         elif const_value == 'file-transf-canceled':
-            return "file://" + gui.theme.transfer_unsuccess
+            return "file://" + gui.theme.get_image_theme().transfer_unsuccess
         elif const_value == 'message-im':
-            return "file://" + gui.theme.user_def_imagetool
+            return "file://" + gui.theme.get_image_theme().user_def_imagetool
         else:
-            return "file://" + gui.theme.user_def_imagetool
+            return "file://" + gui.theme.get_image_theme().user_def_imagetool
 
     if const == 'message-im':
         #In this case title is contact nick
