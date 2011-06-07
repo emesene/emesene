@@ -252,7 +252,11 @@
 
     ; Configuration directory (Optional)
     Section "un.Profile/Settings" secConfig
+        ; Sets the context of shell folders
+        SetShellVarContext current
+
         ; Removes config folder
+        ; Only effects current user
         RMDir /r "${FILE_CONFIG}"
     SectionEnd
 
