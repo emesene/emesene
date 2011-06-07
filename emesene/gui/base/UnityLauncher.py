@@ -16,8 +16,6 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
-import utils
 from gi.repository import Unity, Dbusmenu
 
 class UnityLauncher(object):
@@ -39,7 +37,7 @@ class UnityLauncher(object):
         # Also add a quicklist
         ql = Dbusmenu.Menuitem.new()
         ql_quit = Dbusmenu.Menuitem.new()
-        ql_quit.property_set(Dbusmenu.MENUITEM_PROP_LABEL, "Quit")
+        ql_quit.property_set(Dbusmenu.MENUITEM_PROP_LABEL, _('Quit'))
         ql_quit.connect('item-activated', self._close_session)
         ql.child_append(ql_quit)
         self.launcher.set_property("quicklist", ql)

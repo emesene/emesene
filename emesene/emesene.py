@@ -76,7 +76,7 @@ except ImportError:
     DBusNetworkChecker = None
 
 try:
-    from gui.gtkui.UnityLauncher import UnityLauncher
+    from gui.base.UnityLauncher import UnityLauncher
 except ImportError:
     UnityLauncher = None
 
