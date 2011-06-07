@@ -86,8 +86,8 @@ class UnityLauncher(object):
     def _hide_count(self, cid):
         ''' Hide the message count if nessecary '''
         if cid in self.cid_dict.keys():
-            self.count -= self.cid_dict[conv.cid]
-            del self.cid_dict[conv.cid]
+            self.count -= self.cid_dict[cid]
+            del self.cid_dict[cid]
         self.launcher.set_property("count", self.count)
         if self.cid_dict == {}:
             self.count = 0
