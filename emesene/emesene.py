@@ -76,6 +76,11 @@ except ImportError:
     DBusNetworkChecker = None
 
 try:
+    from gui.gtkui.UnityLauncher import UnityLauncher
+except ImportError:
+    UnityLauncher = None
+
+try:
     from gui import gtkui
 except ImportError, exc:
     log.error('Cannot import gtkui: %s' % str(exc))
@@ -196,6 +201,14 @@ class Controller(object):
         else:
             self.network_checker = None
 
+        if UnityLauncher is not None:
+            extension.category_register('unity launcher', UnityLauncher)
+            extension.set_default('unity launcher', UnityLauncher)
+            self.unity_launcher = extension.get_and_instantiate(
+                    'unity launcher', self.close_session)
+        else:
+            self.unity_launcher = None
+
         extension.category_register('sound', e3.common.Sounds.SoundPlayer,
                 None, True)
         extension.category_register('notification',
@@ -280,9 +293,11 @@ class Controller(object):
         signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
         signals.contact_added_you.subscribe(self.on_pending_contacts)
 
-        #let's start dbus
+        #let's start dbus and unity launcher
         if self.dbus_ext is not None:
             self.dbus_ext.set_new_session(self.session)
+        if self.unity_launcher is not None:
+            self.unity_launcher.set_session(self.session)
 
     def close_session(self, do_exit=True):
         '''close session'''
@@ -336,6 +351,8 @@ class Controller(object):
             signals.picture_change_succeed.unsubscribe(
                     self.on_picture_change_succeed)
             signals.contact_added_you.unsubscribe(self.on_pending_contacts)
+            if self.unity_launcher is not None:
+                self.unity_launcher.remove_session()
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
