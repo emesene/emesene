@@ -175,6 +175,6 @@ class Notification():
             uri = 'notification-message-im'
 
         if text is not None:
-			os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t "+title+" -m "+text)
+	    os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t "+title+" -m "+text)
         if sound is not None:
             self.sound_player.play(sound)
