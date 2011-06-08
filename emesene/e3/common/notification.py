@@ -16,10 +16,13 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+#Requires growlnotify in /usr/local/bin/
+
 from e3 import status
 from e3 import Message
 import extension
 import gui
+import os
 
 import time
 import logging
@@ -64,10 +67,10 @@ class Notification():
         self.last_online = None
 
     def _on_filetransfer_completed(self,args):
-        self.notifier(_("File transfer successful"), "", 'notification-message-email', 'file-transf-completed')
+        self.notifier(_("File\ transfer\ successful"), "", 'notification-message-email', 'file-transf-completed')
 
     def _on_filetransfer_canceled(self,args):
-        self.notifier(_("File transfer canceled"), "", 'notification-message-email', 'file-transf-canceled')
+        self.notifier(_("File\ transfer\ canceled"), "", 'notification-message-email', 'file-transf-canceled')
 
     def _on_filetransfer_invitation(self, arg1, arg2):
 
@@ -75,11 +78,11 @@ class Notification():
             return
 
         contact = self.session.contacts.get(arg1.sender.account)
-        self._notify(contact, contact.nick, _("File transfer invitation"), arg1.sender.account)
+        self._notify(contact, contact.nick, _("File\ transfer\ invitation"), arg1.sender.account)
 
     def _on_mail_received(self, message):
         ''' called when a new mail is received '''
-        self.notifier(_("New mail from %s") % (message.address), message._subject, 'notification-message-email','mail-received', None, message.address)
+        self.notifier(_("New\ mail\ from\ %s") % (message.address), message._subject, 'notification-message-email','mail-received', None, message.address)
 
     def has_similar_conversation(self, cid, members):
         '''
@@ -111,7 +114,7 @@ class Notification():
            conversation.message_waiting:
             if msgobj.type == Message.TYPE_NUDGE:
                 # TODO: unplus contact.nick, so we don't display weird tags
-                text = _('%s just sent you a nudge!') % (msgobj.display_name,)
+                text = _('%s\ just\ sent\ you\ a\ nudge!') % (msgobj.display_name,)
             else:
                 text = msgobj.body
 
@@ -134,7 +137,7 @@ class Notification():
                 text = None
                 sound = None
                 if self.session.config.b_notify_contact_online:
-                    text = _('is online')
+                    text = _('is\ online')
                 if self.session.config.b_play_contact_online:
                     sound = gui.theme.get_sound_theme().sound_online
                 self._notify(contact, contact.nick, text, contact.account, sound)
@@ -156,7 +159,7 @@ class Notification():
             text = None
             sound = None
             if self.session.config.b_notify_contact_offline:
-                text = _('is offline')
+                text = _('is\ offline')
             if self.session.config.b_play_contact_offline:
                 sound = gui.theme.get_sound_theme().sound_offline
 
@@ -172,6 +175,6 @@ class Notification():
             uri = 'notification-message-im'
 
         if text is not None:
-            self.notifier(title, text, uri, 'message-im', None, tooltip)
+			os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t "+title+" -m "+text)
         if sound is not None:
             self.sound_player.play(sound)
