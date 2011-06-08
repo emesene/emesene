@@ -42,6 +42,7 @@
 				<string>:D</string>
 				<string>:d</string>
 				<string>:-D</string>
+				<string>:-d</string>
 			</array>
 			<key>Name</key>
 			<string>face-laugh</string>
@@ -52,6 +53,8 @@
 			<array>
 				<string>:S</string>
 				<string>:s</string>
+				<string>:-S</string>
+				<string>:-s</string>
 			</array>
 			<key>Name</key>
 			<string>face-worried</string>
@@ -102,7 +105,7 @@
 		<dict>
 			<key>Equivalents</key>
 			<array>
-				<string>*-)</string>
+				<string>8-)</string>
 			</array>
 			<key>Name</key>
 			<string>face-rolling</string>
@@ -119,7 +122,7 @@
 			<key>Name</key>
 			<string>face-surprise</string>
 		</dict>
-		<key>face-embarassed.png</key>
+		<key>face-embarrassed.png</key>
 		<dict>
 			<key>Equivalents</key>
 			<array>
@@ -347,6 +350,7 @@
 		<dict>
 			<key>Equivalents</key>
 			<array>
+				<string>:-#</string>
 				<string>(:-#)</string>
 			</array>
 			<key>Name</key>
@@ -376,7 +380,7 @@
 		<dict>
 			<key>Equivalents</key>
 			<array>
-				<string>8-)</string>
+				<string>8-|</string>
 			</array>
 			<key>Name</key>
 			<string>face-glasses</string>
@@ -736,6 +740,15 @@
 			</array>
 			<key>Name</key>
 			<string>console</string>
+		</dict>
+		<key>bunny.png</key>
+		<dict>
+			<key>Equivalents</key>
+			<array>
+				<string>('.')</string>
+			</array>
+			<key>Name</key>
+			<string>bunny</string>
 		</dict>
 	</dict>
 </dict>
