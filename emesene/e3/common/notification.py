@@ -16,8 +16,6 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#Requires growlnotify in /usr/local/bin/
-
 from e3 import status
 from e3 import Message
 import extension
@@ -114,9 +112,9 @@ class Notification():
            conversation.message_waiting:
             if msgobj.type == Message.TYPE_NUDGE:
                 # TODO: unplus contact.nick, so we don't display weird tags
-                text = _('%s\ just\ sent\ you\ a\ nudge!') % (msgobj.display_name,)
+                text = 'just\ sent\ you\ a\ nudge!'
             else:
-                text = msgobj.body
+                text = 'says:\ ' + msgobj.body
 
         self._notify(contact, msgobj.display_name, text, msgobj.account, None)
 
@@ -175,6 +173,6 @@ class Notification():
             uri = 'notification-message-im'
 
         if text is not None:
-	   		os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t emesene\ messenger -m "+title+"\ "+text)
+            os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t emesene\ messenger -m "+title+"\ "+text)
         if sound is not None:
             self.sound_player.play(sound)
