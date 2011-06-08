@@ -40,6 +40,7 @@ class ChatInput (QtGui.QTextEdit):
         self._smiley_dict = {}
         self._max_shortcut_len = 0
         
+        self._emote_theme = gui.theme.get_emote_theme()
         self._qt_color = QtGui.QColor(Qt.black)
         
     # emesene's
@@ -54,7 +55,7 @@ class ChatInput (QtGui.QTextEdit):
         shortcuts = smiley_dict.keys()
         
         for shortcut in shortcuts:
-            path = unicode(gui.theme.get_emote_theme().emote_to_path(shortcut))
+            path = unicode(self._emote_theme.emote_to_path(shortcut))
             if not path:
                 login.warning('No image path for: \t%s, %s' 
                               % (shortcut, smiley_dict[shortcut]))
@@ -82,17 +83,17 @@ class ChatInput (QtGui.QTextEdit):
         '''Inserts a single char, checking for smileys'''
         # this method uses python's builtin string type, not QString
         
-        cursor = self.textCursor()
         max_shortcut_len = self._max_shortcut_len
         shortcuts = self._smiley_dict.keys()
 
+        cursor = self.textCursor()
         text_search = unicode(char)
         i = 0
         while i < max_shortcut_len-1:
             # TODO: check if the returned QChar is valid
             last_char = self.document().characterAt(cursor.position()-1-i)
             if last_char.isPrint():
-                last_char = QtCore.QString(last_char)
+                last_char   = QtCore.QString(last_char)
                 text_search = unicode(last_char) + text_search
             i += 1
             length = len(text_search)
@@ -101,6 +102,8 @@ class ChatInput (QtGui.QTextEdit):
                     cursor.deletePreviousChar()
                 self._insert_image_resource(text_search)
                 cursor.insertImage(text_search)
+                # Prevent the color from changing:
+                self.setTextColor(self._qt_color)
                 return True
         return False
         
@@ -110,8 +113,7 @@ class ChatInput (QtGui.QTextEdit):
         QTextDocument'''
         image = QtGui.QImage(self._smiley_dict[shortcut])
         self.document().addResource(QtGui.QTextDocument.ImageResource, 
-                                    QtCore.QUrl(shortcut),
-                                    image)
+                                   QtCore.QUrl(shortcut), image)
 
 
 
@@ -203,14 +205,29 @@ class ChatInput (QtGui.QTextEdit):
 
     def _set_qt_color(self, new_color):
         '''Sets the color'''
+        if not new_color.isValid():
+            return
+        
         old_color = self._qt_color
         self._qt_color = new_color
-        self.setStyleSheet("QTextEdit{color: %s;}"    \
-                           "QMenu{color: palette(text);}" % new_color.name() )
-        log.debug(type(self.viewport()))
-        log.debug(str(self.viewport().objectName()))
+        
         if old_color != new_color:
             self.style_changed.emit()
+        
+        cursor = self.textCursor() 
+        cursor_position = cursor.position()
+        cursor.select(QtGui.QTextCursor.Document)
+        char_format = QtGui.QTextCharFormat()
+        char_format.setForeground(QtGui.QBrush(new_color))
+        cursor.mergeCharFormat(char_format)
+        cursor.setPosition(cursor_position)
+        
+        # We need this beacause the previous stuff doesn't work for the last
+        # block, if the block is empty. (i.e.: empty QTextEdit, QTextEdit's
+        # document ends with an image (so there's an empty block after it))
+        # Oh, and obviously this is not enough (and we need the previous part
+        # because it just changes current block's format! 
+        self.setTextColor(new_color) 
 
 
     def _get_qt_color(self):
