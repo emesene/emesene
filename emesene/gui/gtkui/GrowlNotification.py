@@ -26,20 +26,11 @@ NAME = 'GrowlNotification'
 DESCRIPTION = 'Wrapper around growlnotify for the notification system'
 AUTHOR = 'joshf'
 WEBSITE = 'www.sidhosting.co.uk'
+VERSION = '0.2'
 
 def GrowlNotification(title, text, picture_path=None, const=None,
                    callback=None, tooltip=None):
-    if const == 'message-im':
         titlestripped = Renderers.msnplus_to_plain_text(title)
-        titlereplaced= titlestripped.replace( " ", "\ " )
-        title = titlereplaced + ':'
+        title = titlestripped.replace( " ", "\ " )
         text = text.replace( " ", "\ " )
-    if const == 'mail-received':
-        text = text.replace( " ", "\ " )
-    if const == 'file-transf-completed':
-        title = title.replace( " ", "\ " )
-        text = text.replace( " ", "\ " )
-    if const == 'file-transf-cancelled':
-        title = title.replace( " ", "\ " )
-        text = text.replace( " ", "\ " )
-    os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t emesene\ messenger -m """+title+"""\ """+text+"""""")
+        os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t emesene:\ """+title+""" -m """+text+"""""")
