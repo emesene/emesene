@@ -33,5 +33,5 @@ def GrowlNotification(title, text, picture_path=None, const=None,
         #In this case title is contact nick
         titlestripped = Renderers.msnplus_to_plain_text(title)
         title = titlestripped + ':'
-        text = Renderers.msnplus_to_plain_text(text)
-    os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t emesene\ messenger -m "+title+"\ "+text)
+        text = text.replace( " ", "\ " )
+    os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t emesene\ messenger -m """+title+"""\ """+text+"""""")
