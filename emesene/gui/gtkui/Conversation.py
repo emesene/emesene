@@ -192,7 +192,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.rotate_started = False
         self.timer = 0
 
-        if self.group_chat:
+        if self.is_group_chat:
             self.rotate_started = True #to prevents more than one timeout_add
             self.timer = glib.timeout_add_seconds(5, self.rotate_picture)
 
@@ -615,22 +615,3 @@ class Conversation(gtk.VBox, gui.Conversation):
             path = path[5:] # 5 is len('file:')
         return path
 
-    def on_contact_left(self, account):
-        '''called when a contact lefts the conversation'''
-        gui.Conversation.on_contact_left(self,account)
-        contact = self.session.contacts.get(account)
-        if contact and len(self.members) > 1:
-            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
-            _('%s has left the conversation') % (contact.display_name), \
-            account)
-            self.output.information(self.formatter, contact, message)
-
-    def on_contact_joined(self, account):
-        '''called when a contact joins the conversation'''
-        gui.Conversation.on_contact_joined(self,account)
-        contact = self.session.contacts.get(account)
-        if contact and len(self.members) > 1:
-            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
-            _('%s has joined the conversation') % (contact.display_name), \
-            account)
-            self.output.information(self.formatter, contact, message)
