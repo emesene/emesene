@@ -30,8 +30,16 @@ WEBSITE = 'www.sidhosting.co.uk'
 def GrowlNotification(title, text, picture_path=None, const=None,
                    callback=None, tooltip=None):
     if const == 'message-im':
-        #In this case title is contact nick
         titlestripped = Renderers.msnplus_to_plain_text(title)
-        title = titlestripped + ':'
+        titlereplaced= titlestripped.replace( " ", "\ " )
+        title = titlereplaced + ':'
+        text = text.replace( " ", "\ " )
+    if const == 'mail-received':
+        text = text.replace( " ", "\ " )
+    if const == 'file-transf-completed':
+        title = title.replace( " ", "\ " )
+        text = text.replace( " ", "\ " )
+    if const == 'file-transf-cancelled':
+        title = title.replace( " ", "\ " )
         text = text.replace( " ", "\ " )
     os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t emesene\ messenger -m """+title+"""\ """+text+"""""")
