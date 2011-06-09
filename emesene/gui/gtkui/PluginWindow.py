@@ -59,6 +59,7 @@ class PluginMainVBox(gtk.VBox):
         self.plugin_list_store = PluginListStore()
         self.plugin_list_store.update_list()
         self.plugin_list_view = PluginListView(self.plugin_list_store)
+        self.plugin_list_view.connect("cursor_changed", self.on_cursor_changed)
 
         scroll = gtk.ScrolledWindow()
         scroll.add(self.plugin_list_view)
@@ -70,26 +71,28 @@ class PluginMainVBox(gtk.VBox):
         button_hbox.set_layout(gtk.BUTTONBOX_END)
         button_hbox.set_border_width(2)
 
-        button_start = gtk.Button(stock=gtk.STOCK_EXECUTE)
-        button_start.connect('clicked', self.on_start)
+        self.button_start = gtk.Button(stock=gtk.STOCK_EXECUTE)
+        self.button_start.connect('clicked', self.on_start)
 
-        button_stop = gtk.Button(stock=gtk.STOCK_STOP)
-        button_stop.connect('clicked', self.on_stop)
+        self.button_stop = gtk.Button(stock=gtk.STOCK_STOP)
+        self.button_stop.connect('clicked', self.on_stop)
+        self.button_stop.hide()
 
         button_config = gtk.Button(stock=gtk.STOCK_PREFERENCES)
         button_config.connect('clicked', self.on_config)
 
         self.pack_start(scroll)
         button_hbox.pack_start(button_config, fill=False)
-        button_hbox.pack_start(button_start, fill=False)
-        button_hbox.pack_start(button_stop, fill=False)
+        button_hbox.pack_start(self.button_start, fill=False)
+        button_hbox.pack_start(self.button_stop, fill=False)
         self.pack_start(button_hbox, False)
+        self.on_cursor_changed(self.plugin_list_view)
 
     def on_start(self, *args):
         '''start the selected plugin'''
         sel = self.plugin_list_view.get_selection()
         model, iter = sel.get_selected()
-        if iter != None:
+        if iter is not None:
             name = model.get_value(iter, 2)
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_start(name, self.session)
@@ -103,7 +106,7 @@ class PluginMainVBox(gtk.VBox):
         '''stop the selected plugin'''
         sel = self.plugin_list_view.get_selection()
         model, iter = sel.get_selected()
-        if iter != None:
+        if iter is not None:
             name = model.get_value(iter, 2)
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_stop(name)
@@ -117,7 +120,7 @@ class PluginMainVBox(gtk.VBox):
         '''stop the selected plugin'''
         sel = self.plugin_list_view.get_selection()
         model, iter = sel.get_selected()
-        if iter != None:
+        if iter is not None:
             name = model.get_value(iter, 2)
             pluginmanager = get_pluginmanager()
 
@@ -126,6 +129,17 @@ class PluginMainVBox(gtk.VBox):
 
     def on_update(self):
         pass
+
+    def on_cursor_changed(self, plugin_list_view):
+        model, iter = plugin_list_view.get_selection().get_selected()
+        if iter is not None:
+          value = model.get_value(iter,0)
+          if value:
+              self.button_stop.show()
+              self.button_start.hide()
+          else:
+              self.button_stop.hide()
+              self.button_start.show()
 
 class PluginWindow(gtk.Window):
     def __init__(self, session):
@@ -140,5 +154,3 @@ class PluginWindow(gtk.Window):
 
         self.add(self.main_vbox)
         self.show_all()
-
-
