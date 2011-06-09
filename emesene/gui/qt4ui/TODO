@@ -35,7 +35,10 @@ X Implement Preferences
 
 > Honour options
 - Implement file transfer
-- Implement multiple conversations
+- Implement multiple conversations:
+	- contact's display pic (smooth transitions)
+	- User Info
+	- various stuff
 
 X Support for animated avatars
 

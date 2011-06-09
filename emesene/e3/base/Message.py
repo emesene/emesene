@@ -91,7 +91,7 @@ class Style(object):
 class Color(object):
     '''a class representing a RGBA color'''
 
-    def __init__(self, red=0, green=0, blue=0, alpha=0):
+    def __init__(self, red=0, green=0, blue=0, alpha=255):
         '''class contructor'''
 
         self.red = red
