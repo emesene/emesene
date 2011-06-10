@@ -22,9 +22,9 @@ import utils
 import Renderers
 import indicate
 
-from BaseTray import BaseTray
+import gui
 
-class MessagingMenu(BaseTray):
+class MessagingMenu(gui.BaseTray):
     """
     A widget that implements the messaging menu for ubuntu
     """
@@ -35,7 +35,7 @@ class MessagingMenu(BaseTray):
 
     def __init__ (self, handler, main_window=None):
         '''constructor'''
-        BaseTray.__init__(self)
+        gui.BaseTray.__init__(self)
         self.handler = handler
         self.main_window = main_window
         self.signals_have_been_connected = False

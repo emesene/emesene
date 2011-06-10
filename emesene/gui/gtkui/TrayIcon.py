@@ -30,9 +30,7 @@ import utils
 
 import Renderers
 
-from BaseTray import BaseTray
-
-class TrayIcon(gtk.StatusIcon, BaseTray):
+class TrayIcon(gtk.StatusIcon, gui.BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
     """
@@ -47,7 +45,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        BaseTray.__init__(self)
+        gui.BaseTray.__init__(self)
 
         gtk.StatusIcon.__init__(self)
         self.handler = handler
@@ -322,7 +320,7 @@ class ContactsMenu(gtk.Menu):
         return picture
 
 
-class NoTrayIcon(BaseTray):
+class NoTrayIcon(gui.BaseTray):
     """
     A widget that implements a no tray icon option
     """
@@ -337,5 +335,5 @@ class NoTrayIcon(BaseTray):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        BaseTray.__init__(self)
+        gui.BaseTray.__init__(self)
         self.quit_on_close = True

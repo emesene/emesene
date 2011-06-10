@@ -17,8 +17,9 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from gi.repository import Unity, Dbusmenu
+from BaseTray import BaseTray
 
-class UnityLauncher(object):
+class UnityLauncher(BaseTray):
     ''' A widget that implements fancy unity launcher actions '''
     NAME = 'Unity Launcher'
     DESCRIPTION = 'Unity message count and quicklist'
@@ -27,6 +28,7 @@ class UnityLauncher(object):
 
     def __init__ (self, close_session):
         '''constructor'''
+        BaseTray.__init__(self)
         self.count = 0
         self.session = None
         self.close_session = close_session
@@ -68,6 +70,12 @@ class UnityLauncher(object):
         if cid in self.cid_dict.keys():
             self.cid_dict[cid] += 1
         else:
+            conv_manager = self._get_conversation_manager(cid, account)
+            if not conv_manager:
+                return
+            conv = conv_manager.conversations[cid]
+            if conv_manager.is_active():
+                return
             self.cid_dict[cid] = 1
         self.count += 1
         self.launcher.set_property("count", self.count)

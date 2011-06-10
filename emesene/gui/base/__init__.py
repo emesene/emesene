@@ -27,6 +27,7 @@ from ConversationManager import ConversationManager
 from AvatarManager  import AvatarManager
 from PictureHandler import PictureHandler
 from ContactInformation import ContactInformation
+from BaseTray import BaseTray
 
 theme = Theme()
 
