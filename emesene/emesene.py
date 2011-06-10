@@ -677,6 +677,8 @@ class Controller(object):
 
 
         self.tray_icon.set_conversations(self.conversations)
+        if self.unity_launcher is not None:
+            self.unity_launcher.set_conversations(self.conversations)
 
         conversation = conv_manager.new_conversation(cid, members)
 

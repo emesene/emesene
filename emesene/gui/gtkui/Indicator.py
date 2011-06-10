@@ -23,7 +23,7 @@ import logging
 log = logging.getLogger('gui.gtkui.Indicator')
 
 import TrayIcon
-from BaseTray import BaseTray
+import gui
 
 # This line will except with too old version of appindicator
 # so you'll get your nice gtk trayicon
@@ -34,7 +34,7 @@ try:
 except AttributeError:
     raise ImportError
 
-class Indicator(appindicator.Indicator, BaseTray):
+class Indicator(appindicator.Indicator, gui.BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
     """
@@ -49,7 +49,7 @@ class Indicator(appindicator.Indicator, BaseTray):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        BaseTray.__init__(self)
+        gui.BaseTray.__init__(self)
         appindicator.Indicator.__init__(self, "emesene", "logo", \
             appindicator.CATEGORY_APPLICATION_STATUS, \
             os.path.join(os.getcwd(), handler.theme.get_image_theme().panel_path))

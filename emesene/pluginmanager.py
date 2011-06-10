@@ -109,7 +109,7 @@ class PluginHandler(object):
         '''
         inst = self.instanciate()
 
-        if not inst:
+        if not inst or self.is_active():
             return False
 
         try:
