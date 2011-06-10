@@ -258,7 +258,7 @@ class Conversation(object):
 
         return len(self.members) > 1
 
-    group_chat = property(fget=_get_group_chat)
+    is_group_chat = property(fget=_get_group_chat)
 
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
@@ -315,7 +315,7 @@ class Conversation(object):
         '''
         if self.message_waiting:
             icon = gui.theme.get_image_theme().new_message
-        elif self.group_chat:
+        elif self.is_group_chat:
             icon = gui.theme.get_image_theme().group_chat
         elif len(self.members) == 1:
             contact = self.session.contacts.get(self.members[0])
@@ -338,7 +338,7 @@ class Conversation(object):
 
     def _get_text(self):
         '''return the text that represent the conversation title'''
-        if self.group_chat:
+        if self.is_group_chat:
             text = _('Group chat')
         elif len(self.members) == 1:
             contact = self.session.contacts.get(self.members[0])
@@ -372,14 +372,26 @@ class Conversation(object):
         '''called when a contact joins the conversation'''
         if account not in self.members:
             self.members.append(account)
-
+            contact = self.session.contacts.get(account)
+            if contact and len(self.members) > 1:
+                message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+                _('%s has joined the conversation') % (contact.display_name), \
+                account)
+                self.output.information(self.formatter, contact, message)
         self.update_data()
+        
 
     def on_contact_left(self, account):
-        '''called when a contact lefts the conversation'''
-        if account in self.members and len(self.members) > 1:
+        '''called when a contact leaves the conversation'''
+        if len(self.members) > 1 and account in self.members:
             self.members.remove(account)
             self.update_data()
+            contact = self.session.contacts.get(account)
+            if contact:
+                message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+                _('%s has left the conversation') % (contact.display_name), \
+                account)
+                self.output.information(self.formatter, contact, message)
 
     def on_group_started(self):
         '''called when a group conversation starts'''
