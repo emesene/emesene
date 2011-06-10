@@ -16,7 +16,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
+import subprocess
 
 import Renderers
 import logging
@@ -26,11 +26,9 @@ NAME = 'GrowlNotification'
 DESCRIPTION = 'Wrapper around growlnotify for the notification system'
 AUTHOR = 'joshf'
 WEBSITE = 'www.sidhosting.co.uk'
-VERSION = '0.2'
+VERSION = '0.3'
 
 def GrowlNotification(title, text, picture_path=None, const=None,
                    callback=None, tooltip=None):
-        titlestripped = Renderers.msnplus_to_plain_text(title)
-        title = titlestripped.replace( " ", "\ " )
-        text = text.replace( " ", "\ " )
-        os.system("/usr/local/bin/growlnotify -n emesene -a emesene -t emesene:\ """+title+""" -m """+text+"""""")
+        title = Renderers.msnplus_to_plain_text(title)
+        subprocess.call(['/usr/local/bin/growlnotify', '-n',  'emesene', '-a', 'emesene', '-t', title, '-m', text])
