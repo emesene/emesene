@@ -61,7 +61,7 @@ class ConversationToolbar(gtk.Toolbar):
 
         # check if we have theme-specific toolbar-icons
 
-        image_theme = gui.theme.get_image_theme()
+        image_theme = gui.theme.image_theme
         if image_theme.has_custom_toolbar_icons():
             theme_tool_font = utils.gtk_ico_image_load(image_theme.tool_font, size)
             theme_tool_font_color = utils.gtk_ico_image_load(image_theme.tool_font_color, size)

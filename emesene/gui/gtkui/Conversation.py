@@ -135,9 +135,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         if self.session.config_dir.file_readable(last_avatar):
             my_picture = last_avatar
         else:
-            my_picture = gui.theme.get_image_theme().user
+            my_picture = gui.theme.image_theme.user
 
-        his_picture = gui.theme.get_image_theme().user
+        his_picture = gui.theme.image_theme.user
         if members:
             account = members[0]
             contact = self.session.contacts.get(account)
@@ -491,7 +491,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         inform that the other user has started typing
         """
         if account in self.members:
-            self.tab_label.set_image(gui.theme.get_image_theme().typing)
+            self.tab_label.set_image(gui.theme.image_theme.typing)
             glib.timeout_add_seconds(3, self.update_tab)
 
     def on_emote(self, emote):

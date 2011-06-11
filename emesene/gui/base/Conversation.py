@@ -314,9 +314,9 @@ class Conversation(object):
             conversation, a group icon on group chat or a waiting icon)
         '''
         if self.message_waiting:
-            icon = gui.theme.get_image_theme().new_message
+            icon = gui.theme.image_theme.new_message
         elif self.is_group_chat:
-            icon = gui.theme.get_image_theme().group_chat
+            icon = gui.theme.image_theme.group_chat
         elif len(self.members) == 1:
             contact = self.session.contacts.get(self.members[0])
 
@@ -327,10 +327,10 @@ class Conversation(object):
             else:
                 stat = e3.status.ONLINE
 
-            icon = gui.theme.get_image_theme().status_icons.get(stat, e3.status.OFFLINE)
+            icon = gui.theme.image_theme.status_icons.get(stat, e3.status.OFFLINE)
         else:
             log.debug('unknown state on Conversation._get_icon')
-            return gui.theme.get_image_theme().connect
+            return gui.theme.image_theme.connect
 
         return icon
 

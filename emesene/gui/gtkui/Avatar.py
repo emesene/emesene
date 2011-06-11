@@ -87,12 +87,12 @@ class Avatar(AvatarManager):
     def set_from_file(self, filename):
         self.filename = filename
         if not gui.gtkui.utils.file_readable(filename):
-            self.filename = gui.theme.get_image_theme().logo
+            self.filename = gui.theme.image_theme.logo
 
         try:
             animation = gtk.gdk.PixbufAnimation(filename)
         except gobject.GError:
-            animation = gtk.gdk.PixbufAnimation(gui.theme.get_image_theme().logo)
+            animation = gtk.gdk.PixbufAnimation(gui.theme.image_theme.logo)
 
         if animation.is_static_image():
             self.__set_from_pixbuf(animation.get_static_image())

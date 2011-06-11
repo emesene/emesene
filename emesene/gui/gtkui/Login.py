@@ -51,7 +51,7 @@ class LoginBase(gtk.Alignment):
         completion.set_text_column(0)
         completion.set_inline_selection(True)
 
-        self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().user)
+        self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user)
 
         self.cmb_account = gtk.ComboBoxEntry(self.liststore, 0)
         self.cmb_account.set_tooltip_text(_('Account'))
@@ -76,8 +76,8 @@ class LoginBase(gtk.Alignment):
         self.txt_password.connect('changed', self._on_password_changed)
         self.txt_password.set_sensitive(False)
 
-        pix_account = utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().user)
-        pix_password = utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().password)
+        pix_account = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user)
+        pix_password = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.password)
 
         self.avatar = Avatar()
 
@@ -188,7 +188,7 @@ class LoginBase(gtk.Alignment):
 
         self.nicebar = NiceBar()
 
-        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().throbber, None,
+        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.throbber, None,
                 animated=True)
         self.throbber = gtk.image_new_from_animation(th_pix)
         self.label_timer = gtk.Label()
@@ -356,7 +356,7 @@ class Login(LoginBase):
                     session_found = True
 
                 try:
-                    s_name = getattr(gui.theme.get_image_theme(), "service_" + service_name) 
+                    s_name = getattr(gui.theme.image_theme, "service_" + service_name) 
                     image = utils.safe_gtk_pixbuf_load(s_name)
                 except:
                     image = None
@@ -510,7 +510,7 @@ class Login(LoginBase):
                 self._clear_all()
 
         else:
-           self.avatar.set_from_file(gui.theme.get_image_theme().logo)
+           self.avatar.set_from_file(gui.theme.image_theme.logo)
 
     def _clear_all(self):
         '''

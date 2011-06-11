@@ -35,7 +35,7 @@ class Window(gtk.Window):
 
         self.set_location(width, height, posx, posy)
         self.set_title("emesene")
-        image_theme = gui.theme.get_image_theme()
+        image_theme = gui.theme.image_theme
         try:
             gtk.window_set_default_icon_list(\
                  utils.safe_gtk_image_load(image_theme.logo16).get_pixbuf(), \
