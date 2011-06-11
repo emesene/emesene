@@ -66,10 +66,10 @@ class ImagesThemes(ThemesManager.ThemesManager):
         '''
 
         if not os.path.isdir(theme_path):
-            return False, "%s is not a directory" % theme_path
+            return False, _("%s is not a directory") % theme_path
 
         if not self.is_valid_theme(IMAGE_FILES, theme_path):
-            return False, "Image theme incomplete"
+            return False, _("image theme incomplete")
         return True, "ok"
 
     def is_valid_theme(self, file_list, path):

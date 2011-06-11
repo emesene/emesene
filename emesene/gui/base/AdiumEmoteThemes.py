@@ -58,9 +58,9 @@ class AdiumEmoteThemes(ThemesManager.ThemesManager):
         '''
 
         if not os.path.isdir(theme_path):
-            return False, "%s is not a directory" % theme_path
+            return False, _("%s is not a directory") % theme_path
 
         emote_config_file = os.path.join(theme_path, "Emoticons.plist")
         if not os.path.isfile(emote_config_file):
-            return False, "Emoticons.plist not found"
+            return False, _("Emoticons.plist not found")
         return True, "ok"
