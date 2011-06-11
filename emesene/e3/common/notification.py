@@ -136,7 +136,7 @@ class Notification():
                 if self.session.config.b_notify_contact_online:
                     text = _('is online')
                 if self.session.config.b_play_contact_online:
-                    sound = gui.theme.get_sound_theme().sound_online
+                    sound = gui.theme.sound_theme.sound_online
                 self._notify(contact, contact.nick, text, contact.account, sound)
 
             if not self.notify_online:
@@ -158,7 +158,7 @@ class Notification():
             if self.session.config.b_notify_contact_offline:
                 text = _('is offline')
             if self.session.config.b_play_contact_offline:
-                sound = gui.theme.get_sound_theme().sound_offline
+                sound = gui.theme.sound_theme.sound_offline
 
             self._notify(contact, contact.nick, text, contact.account, sound)
 

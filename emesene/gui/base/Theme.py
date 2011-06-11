@@ -86,10 +86,6 @@ class Theme(object):
         ''' return the current emote theme '''
         return self.emote_theme
 
-    def get_sound_theme(self):
-        ''' return the current emote theme '''
-        return self.sound_theme
-
     def get_image_theme(self):
         ''' return the current emote theme '''
         return self.image_theme
@@ -109,10 +105,6 @@ class Theme(object):
     def get_adium_themes(self):
         '''return a list of validated adium themes'''
         return self.conv_themes.get_name_list()
-
-    def get_adium_theme_variants(self):
-        '''return a list of adium theme variants'''
-        return self.conv_theme.get_theme_variants()
 
     def ensure_dir_path(self, dir_path):
         ''' check for a dir in .config and
