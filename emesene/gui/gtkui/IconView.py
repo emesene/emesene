@@ -31,10 +31,11 @@ class IconView(gtk.HBox):
     ''' class representing a listview in icon mode
         (using gtk.IconView + gtk.ListStore)        '''
     TYPE_SYSTEM_PICS, TYPE_CONTACTS_PICS, TYPE_SELF_PICS = range(3)
-    def __init__(self, label, path_list, on_remove_cb, on_accept_cb, iconv_type, on_drag_data_accepted):
+    def __init__(self, label, path_list, on_remove_cb, on_accept_cb,
+                 iconv_type, on_drag_data_accepted):
         gtk.HBox.__init__(self)
         self.set_spacing(4)
-        
+
         self.on_remove_cb = on_remove_cb
         self.on_accept_cb = on_accept_cb
         self.on_drag_data_accepted = on_drag_data_accepted
@@ -50,7 +51,7 @@ class IconView(gtk.HBox):
         self.iconview.connect("button_press_event", self.pop_up)
 
         self.label = gtk.Label(label)
-        
+
         self.scroll = gtk.ScrolledWindow()
         self.scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         self.scroll.set_shadow_type(gtk.SHADOW_IN)
@@ -83,29 +84,30 @@ class IconView(gtk.HBox):
                         self.add_picture(full_path)
                         # make update the iconview
                         self.iconview.queue_draw()
-                        gtk.gdk.threads_leave()        
-                        
+                        gtk.gdk.threads_leave()
+
                         # give some time to the main thread (for GUI updates)
                         time.sleep(0.001)
         # Force Garbage Collector to tidy objects
         # see http://faq.pygtk.org/index.py?req=show&file=faq08.004.htp
         gc.collect()
-    
+
     def pop_up(self, iconview, event):
         ''' manage the context menu (?) '''
         if event.button == 3 and self.iconv_type != IconView.TYPE_SYSTEM_PICS:
-            path = self.iconview.get_path_at_pos(event.x, event.y)
+            path = self.iconview.get_path_at_pos(int(event.x), int(event.y))
             if path != None:
                 self.iconview.select_path(path)
 
                 if self.on_remove_cb != None:
                     remove_menu = gtk.Menu()
                     remove_item = gtk.ImageMenuItem(_('Delete'))
-                    remove_item.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
-                                          gtk.ICON_SIZE_MENU))
+                    remove_item.set_image(gtk.image_new_from_stock(\
+                        gtk.STOCK_REMOVE, gtk.ICON_SIZE_MENU))
                     remove_item.connect('activate', self.on_remove_cb)
                     remove_menu.append(remove_item)
-                    remove_menu.popup(None, None, None, event.button, event.time)
+                    remove_menu.popup(None, None, None, event.button,
+                        event.time)
                     remove_menu.show_all()
 
     def _drag_data_received(self, treeview, context, posx, posy, \
@@ -118,16 +120,18 @@ class IconView(gtk.HBox):
 
             # the '\x00' value makes an error
             path = path.replace(chr(0), '')
-                       
+
             path = MarkupParser.urllib.url2pathname(path)
 
             # this seems to be an error on ntpath but we take care :S
             try:
                 if os.path.exists(path):
-                    self.on_drag_data_accepted(path,gtk.gdk.PixbufAnimation(path).is_static_image())
+                    self.on_drag_data_accepted(path,
+                        gtk.gdk.PixbufAnimation(path).is_static_image())
             except TypeError, error:
                 if self.on_drag_data_accepted is None:
-                    print _("Could not add picture:\n %s") % _("Drag and drop to this IconView is not allowed.")
+                    print _("Could not add picture:\n %s") % \
+                        _("Drag and drop to this IconView is not allowed.")
                 else:
                     print _("Could not add picture:\n %s") % (str(error),)
 
@@ -145,15 +149,16 @@ class IconView(gtk.HBox):
                                     64, 64, gtk.gdk.INTERP_BILINEAR)
                 except gobject.GError:
                     print _('image at %s could not be loaded') % (path, )
-                    print gobject.GError                      
+                    print gobject.GError
                     return
- 
+
                 # On nt images are 128x128 (48x48 on xp)
                 # On kde, images are 64x64
                 if (self.iconv_type == IconView.TYPE_SYSTEM_PICS or \
                  self.iconv_type == IconView.TYPE_CONTACTS_PICS) and \
                  (pixbuf.get_width() != 96 or pixbuf.get_height() != 96):
-                    pixbuf = pixbuf.scale_simple(96, 96, gtk.gdk.INTERP_BILINEAR)
+                    pixbuf = pixbuf.scale_simple(96, 96,
+                                        gtk.gdk.INTERP_BILINEAR)
 
                 if self.model != None and not self.stop:
                     self.model.append([pixbuf, path])
@@ -169,7 +174,7 @@ class IconView(gtk.HBox):
         if os.name == 'nt':
             # nt doesn't include os.path.samefile
             return False
-        
+
         for (pixbuf, path) in self.model:
             if os.path.samefile(filename, path):
                 return True
@@ -182,7 +187,7 @@ class IconView(gtk.HBox):
         '''method called when a picture is double clicked'''
         if self.on_accept_cb != None:
             self.on_accept_cb(None)
-    
+
     def get_selected_items(self):
         ''' gets the selected pictures '''
         return self.iconview.get_selected_items()
