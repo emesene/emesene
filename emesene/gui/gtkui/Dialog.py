@@ -1397,10 +1397,13 @@ class InviteWindow(gtk.Window):
 
         order_by_group = self.contact_list.session.config.b_order_by_group
         show_blocked = self.contact_list.session.config.b_show_blocked
+        show_offline = self.contact_list.session.config.b_show_offline
         self.contact_list.order_by_group = False
         self.contact_list.show_blocked = False
+        self.contact_list.show_offline = False
         self.contact_list.session.config.b_order_by_group = order_by_group
         self.contact_list.session.config.b_show_blocked = show_blocked
+        self.contact_list.session.config.b_show_offline = show_offline
 
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_position(gtk.WIN_POS_CENTER)
