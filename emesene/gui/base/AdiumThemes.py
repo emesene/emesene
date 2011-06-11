@@ -72,7 +72,7 @@ class AdiumThemes(ThemesManager.ThemesManager):
         '''
 
         if not os.path.isdir(theme_path):
-            return False, _("%s is not a directory") % (theme_path,)
+            return False, _("%s is not a directory") % theme_path
 
         return self.validate_structure(theme_path, REQUIRED_FILES)
 
@@ -85,12 +85,12 @@ class AdiumThemes(ThemesManager.ThemesManager):
 
             if item['type'] == FILE:
                 if not os.path.isfile(name):
-                    return False, _("%s is not a file") % (name, )
+                    return False, _("%s is not a file") % name
                 if not os.access(name, os.R_OK):
-                    return False, _("%s is not readable") % (name, )
+                    return False, _("%s is not readable") % name
             elif item['type'] == DIRECTORY:
                 if not os.path.isdir(name):
-                    return False, _("%s is not a directory") % (name, )
+                    return False, _("%s is not a directory") % name
 
                 return self.validate_structure(name, item['childs'])
 
