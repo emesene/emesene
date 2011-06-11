@@ -183,7 +183,7 @@ class HelpHandler(object):
         self.dialog.about_dialog('emesene', EMESENE_VERSION, EMESENE_AUTHORS,
             _('A simple yet powerful instant messaging client'), EMESENE_LICENSE,
             EMESENE_WEBSITE, EMESENE_CONTRIBUTORS, _('translator-credits'),
-            gui.theme.logo)
+            gui.theme.image_theme.logo)
 
     def on_website_selected(self):
         '''called when the website item is selected'''
