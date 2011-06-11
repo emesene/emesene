@@ -104,7 +104,7 @@ class LoginPage(QtGui.QWidget):
         widget_d = self._widget_d
         avatar_cls          = extension.get_default('avatar')
         status_combo_cls    = extension.get_default('status combo') 
-        widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.get_image_theme().logo,
+        widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.image_theme.logo,
                                                 clickable=False)
         widget_d['account_combo'] = QtGui.QComboBox()
         widget_d['password_edit'] = QtGui.QLineEdit()

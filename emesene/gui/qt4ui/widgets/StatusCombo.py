@@ -41,7 +41,7 @@ class StatusCombo(QtGui.QComboBox):
         #status_key is of e3.status.ALL type
         #statusValue is a dict wich associates a e3.status with a string
         for status_key in self._status_values:
-            icon_path = gui.theme.get_image_theme().status_icons[status_key]
+            icon_path = gui.theme.image_theme.status_icons[status_key]
             self.addItem(QtGui.QIcon(icon_path),
                          self._status_strings[status_key], status_key)
 
