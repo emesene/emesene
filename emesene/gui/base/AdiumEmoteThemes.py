@@ -21,19 +21,6 @@ import os
 import ThemesManager
 import AdiumEmoteTheme
 
-__instance = None
-
-def get_instance():
-    '''singleton for Themes class
-    '''
-    global __instance
-
-    if __instance is None:
-        __instance = AdiumEmoteThemes()
-
-    return __instance
-
-
 class AdiumEmoteThemes(ThemesManager.ThemesManager):
     '''a class to handle adium themes
     '''
@@ -71,7 +58,7 @@ class AdiumEmoteThemes(ThemesManager.ThemesManager):
         '''
 
         if not os.path.isdir(theme_path):
-            return False, "%s is not a directory" % (theme_path,)
+            return False, "%s is not a directory" % theme_path
 
         emote_config_file = os.path.join(theme_path, "Emoticons.plist")
         if not os.path.isfile(emote_config_file):

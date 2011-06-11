@@ -24,19 +24,6 @@ import SoundTheme
 SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
             'send.wav', 'type.wav']
 
-__instance = None
-
-def get_instance():
-    '''singleton for Themes class
-    '''
-    global __instance
-
-    if __instance is None:
-        __instance = SoundThemes()
-
-    return __instance
-
-
 class SoundThemes(ThemesManager.ThemesManager):
     '''a class to handle sound themes
     '''
@@ -74,7 +61,7 @@ class SoundThemes(ThemesManager.ThemesManager):
         '''
 
         if not os.path.isdir(theme_path):
-            return False, "%s is not a directory" % (theme_path,)
+            return False, "%s is not a directory" % theme_path
 
         if not self.is_valid_theme(SOUND_FILES, theme_path):
             return False, "Sound theme incomplete"

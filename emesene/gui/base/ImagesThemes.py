@@ -29,20 +29,7 @@ IMAGE_FILES = ['audiovideo.png', 'away.png', 'busy.png', 'blocked-overlay.png',
     'transfer_unsuccess.png','throbber.gif', 'user.png', 'users.png',
     'user_def_image.png', 'user_def_imagetool.png', 'video.png']
 
-__instance = None
-
-def get_instance():
-    '''singleton for Themes class
-    '''
-    global __instance
-
-    if __instance is None:
-        __instance = ImageThemes()
-
-    return __instance
-
-
-class ImageThemes(ThemesManager.ThemesManager):
+class ImagesThemes(ThemesManager.ThemesManager):
     '''a class to handle image themes
     '''
 
@@ -79,7 +66,7 @@ class ImageThemes(ThemesManager.ThemesManager):
         '''
 
         if not os.path.isdir(theme_path):
-            return False, "%s is not a directory" % (theme_path,)
+            return False, "%s is not a directory" % theme_path
 
         if not self.is_valid_theme(IMAGE_FILES, theme_path):
             return False, "Image theme incomplete"

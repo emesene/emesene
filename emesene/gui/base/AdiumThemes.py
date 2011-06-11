@@ -35,19 +35,6 @@ REQUIRED_FILES = [
             ]}
         ]}]
 
-__instance = None
-
-def get_instance():
-    '''singleton for Themes class
-    '''
-    global __instance
-
-    if __instance is None:
-        __instance = AdiumThemes()
-
-    return __instance
-
-
 class AdiumThemes(ThemesManager.ThemesManager):
     '''a class to handle adium themes
     '''

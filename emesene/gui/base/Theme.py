@@ -42,7 +42,7 @@ class Theme(object):
         self.ensure_dir_path(self.config_conv_themes_path)
 
         self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
-        self.conv_themes = AdiumThemes.get_instance()
+        self.conv_themes = AdiumThemes.AdiumThemes()
         self.conv_themes.add_themes_path(self.conv_themes_path)
         self.conv_themes.add_themes_path(self.config_conv_themes_path)
 
@@ -51,7 +51,7 @@ class Theme(object):
         self.ensure_dir_path(self.config_sound_themes_path)
 
         self.sound_theme_path = os.path.join("themes", "sounds")
-        self.sound_themes = SoundThemes.get_instance()
+        self.sound_themes = SoundThemes.SoundThemes()
         self.sound_themes.add_themes_path(self.sound_theme_path)
         self.sound_themes.add_themes_path(self.config_sound_themes_path)
 
@@ -59,7 +59,7 @@ class Theme(object):
         self.ensure_dir_path(self.config_emotes_themes_path)
 
         self.emotes_themes_path = os.path.join(os.getcwd(), "themes", "emotes")
-        self.emotes_themes = AdiumEmoteThemes.get_instance()
+        self.emotes_themes = AdiumEmoteThemes.AdiumEmoteThemes()
         self.emotes_themes.add_themes_path(self.emotes_themes_path)
         self.emotes_themes.add_themes_path(self.config_emotes_themes_path)
 
@@ -67,7 +67,7 @@ class Theme(object):
         self.ensure_dir_path(self.config_images_themes_path)
 
         self.image_path = os.path.join(os.getcwd(),"themes", "images")
-        self.image_themes = ImagesThemes.get_instance()
+        self.image_themes = ImagesThemes.ImagesThemes()
         self.image_themes.add_themes_path(self.image_path)
         self.image_themes.add_themes_path(self.config_images_themes_path)
 
