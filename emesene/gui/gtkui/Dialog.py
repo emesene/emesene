@@ -1207,7 +1207,7 @@ class EmotesWindow(gtk.Window):
         self.max_width = max_width
         self.emote_selected = emote_selected
 
-        emotes_count = gui.theme.get_emote_theme().get_emotes_count() # TODO: remove me
+        emotes_count = gui.theme.emote_theme.get_emotes_count() # TODO: remove me
         rows = emotes_count/max_width
 
         self.table = gtk.Table(max_width, rows)
@@ -1261,7 +1261,7 @@ class EmotesWindow(gtk.Window):
         column = 0
         row = 0
 
-        emote_theme = gui.theme.get_emote_theme()
+        emote_theme = gui.theme.emote_theme
 
         for shortcut, name in emote_theme.get_emotes().iteritems():
             if name in emotes:

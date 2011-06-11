@@ -75,7 +75,7 @@ class ConversationToolbar(gtk.Toolbar):
             theme_tool_font = gtk.STOCK_SELECT_FONT
             theme_tool_font_color = gtk.STOCK_SELECT_COLOR
 
-            emote_theme = gui.theme.get_emote_theme()
+            emote_theme = gui.theme.emote_theme
 
             theme_tool_emotes = utils.gtk_ico_image_load(emote_theme.emote_to_path(':D', True), size)
             theme_tool_nudge = utils.gtk_ico_image_load(emote_theme.emote_to_path(':S', True), size)

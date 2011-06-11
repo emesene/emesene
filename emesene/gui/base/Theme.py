@@ -82,10 +82,6 @@ class Theme(object):
         self.image_theme = self.image_themes.get_image_theme (image_name)
         self.emote_theme = self.emotes_themes.get_emote_theme (emote_name)
 
-    def get_emote_theme(self):
-        ''' return the current emote theme '''
-        return self.emote_theme
-
     def get_image_theme(self):
         ''' return the current emote theme '''
         return self.image_theme

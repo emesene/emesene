@@ -91,10 +91,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         info_panel_cls      = extension.get_default('info panel')
         
         # Actions
-        icon_path = gui.theme.get_emote_theme().emote_to_path(':)')[6:]
+        icon_path = gui.theme.emote_theme.emote_to_path(':)')[6:]
         action_dict['add_smiley']   = QtGui.QAction(
                             QtGui.QIcon(icon_path), tr('Add Smiley'), self)
-        icon_path = gui.theme.get_emote_theme().emote_to_path(':S')[6:]
+        icon_path = gui.theme.emote_theme.emote_to_path(':S')[6:]
         action_dict['send_nudge']   = QtGui.QAction(
                             QtGui.QIcon(icon_path), tr('Send Nudge'), self)
         action_dict['change_font']  = QtGui.QAction(
@@ -131,7 +131,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         toolbar.addAction(action_dict['change_font'])
         toolbar.addAction(action_dict['change_color'])
         
-        widget_d['chat_input'].set_smiley_dict(gui.theme.get_emote_theme().get_emotes())
+        widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.get_emotes())
 
         widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)

@@ -237,7 +237,7 @@ class InputText(TextBox):
             return True
 
         self.changed = False
-        emote_theme = gui.theme.get_emote_theme()
+        emote_theme = gui.theme.emote_theme
 
         for code in emote_theme.get_emotes():
             start = self._buffer.get_start_iter()

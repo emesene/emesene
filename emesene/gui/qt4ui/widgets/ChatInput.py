@@ -40,7 +40,7 @@ class ChatInput (QtGui.QTextEdit):
         self._smiley_dict = {}
         self._max_shortcut_len = 0
         
-        self._emote_theme = gui.theme.get_emote_theme()
+        self._emote_theme = gui.theme.emote_theme
         self._qt_color = QtGui.QColor(Qt.black)
         
     # emesene's
