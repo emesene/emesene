@@ -29,7 +29,7 @@ class StatusMenu (QtGui.QMenu):
 
         for status in e3.status.ORDERED:
             action = QtGui.QAction(
-                    QtGui.QIcon(QtGui.QPixmap(gui.theme.get_image_theme().status_icons[status])),
+                    QtGui.QIcon(QtGui.QPixmap(gui.theme.image_theme.status_icons[status])),
                     unicode(e3.status.STATUS[status]).capitalize(),
                     self)
             action.setData(status)

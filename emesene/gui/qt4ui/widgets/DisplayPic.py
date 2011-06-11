@@ -24,7 +24,7 @@ class DisplayPic (QtGui.QLabel):
 
     clicked = QtCore.pyqtSignal()
     
-    def __init__(self, session=None, default_pic=gui.theme.get_image_theme().user, 
+    def __init__(self, session=None, default_pic=gui.theme.image_theme.user, 
                  size=None, clickable=True, parent=None):
         '''constructor'''
         QtGui.QLabel.__init__(self, parent)

@@ -35,19 +35,6 @@ REQUIRED_FILES = [
             ]}
         ]}]
 
-__instance = None
-
-def get_instance():
-    '''singleton for Themes class
-    '''
-    global __instance
-
-    if __instance is None:
-        __instance = AdiumThemes()
-
-    return __instance
-
-
 class AdiumThemes(ThemesManager.ThemesManager):
     '''a class to handle adium themes
     '''
@@ -85,7 +72,7 @@ class AdiumThemes(ThemesManager.ThemesManager):
         '''
 
         if not os.path.isdir(theme_path):
-            return False, "%s is not a directory" % (theme_path,)
+            return False, _("%s is not a directory") % (theme_path,)
 
         return self.validate_structure(theme_path, REQUIRED_FILES)
 

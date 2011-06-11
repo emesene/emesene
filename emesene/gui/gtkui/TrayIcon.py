@@ -67,7 +67,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         """
         self.menu = LoginMenu(self.handler, self.main_window)
         self.menu.show_all()
-        self.set_from_file(self.handler.theme.get_image_theme().logo)
+        self.set_from_file(self.handler.theme.image_theme.logo)
 
     def set_main(self, session):
         """
@@ -124,7 +124,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         """
         if stat not in status.ALL or stat == -1:
             return
-        self.set_from_file(self.handler.theme.get_image_theme().status_icons_panel[stat])
+        self.set_from_file(self.handler.theme.image_theme.status_icons_panel[stat])
 
     def _on_popup(self, trayicon, button, activate_time):
         """
@@ -183,7 +183,7 @@ class MainMenu(gtk.Menu):
         self.status.set_submenu(self.status_menu)
 
         self.list = gtk.ImageMenuItem(_('Contacts'))
-        self.list.set_image(utils.safe_gtk_image_load(gui.theme.get_image_theme().chat))
+        self.list.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
         self.list_contacts = ContactsMenu(handler, main_window)
         self.list.set_submenu(self.list_contacts)
 
@@ -300,7 +300,7 @@ class ContactsMenu(gtk.Menu):
             try:
                 animation = gtk.gdk.PixbufAnimation(contact.picture)
             except gobject.GError:
-                pix = utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().user,
+                pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
                         (self.avatar_size, self.avatar_size))
                 picture = gtk.image_new_from_pixbuf(pix)
                 return picture
@@ -313,7 +313,7 @@ class ContactsMenu(gtk.Menu):
                 picture = gtk.image_new_from_animation(animation)
 
         else:
-            pix = utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().user,
+            pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
                         (self.avatar_size, self.avatar_size))
             picture = gtk.image_new_from_pixbuf(pix)
 

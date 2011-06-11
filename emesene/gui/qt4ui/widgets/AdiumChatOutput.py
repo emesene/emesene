@@ -39,7 +39,7 @@ class AdiumChatOutput (QtGui.QScrollArea):
         self._qwebview.page().setLinkDelegationPolicy(
                                     QtWebKit.QWebPage.DelegateAllLinks)
         
-        pic = gui.theme.get_image_theme().user
+        pic = gui.theme.image_theme.user
         body = gui.theme.conv_theme.get_body('', '', '', pic, pic)
         self._qwebview.setHtml(body)
         

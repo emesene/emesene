@@ -60,7 +60,7 @@ def parse_emotes(message, cedict={}):
         plain_text = ''
 
     chunks = [plain_text]
-    emote_theme = gui.theme.get_emote_theme()
+    emote_theme = gui.theme.emote_theme
 
     shortcuts = emote_theme.get_emotes_shortcuts()
     if cedict is not None:
@@ -113,7 +113,7 @@ def replace_shortcut_with_tag(string, short, tag):
 
 def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
     '''replace emotes with img tags to the images'''
-    emote_theme = gui.theme.get_emote_theme()
+    emote_theme = gui.theme.emote_theme
 
     shortcuts = emote_theme.get_emotes_shortcuts()
     if cedict is not None:

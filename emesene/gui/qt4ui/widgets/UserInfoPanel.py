@@ -45,7 +45,7 @@ class UserInfoPanel (QtGui.QWidget):
     def set_all(self, status, nick, message, account):
         '''Updates the infos shown in the panel'''
         self._account = account
-        icon          = gui.theme.get_image_theme().status_icons[status]
+        icon          = gui.theme.image_theme.status_icons[status]
         self.set_icon(icon)
         self.set_nick(nick)
         self.set_message(message)

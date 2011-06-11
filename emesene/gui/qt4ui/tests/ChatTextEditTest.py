@@ -40,7 +40,7 @@ class Test (QtGui.QMainWindow):
         self.setCentralWidget(central_widget)
 
         tabbar.setTabsClosable(True)
-        tabbar.addTab(QtGui.QIcon(gui.theme.get_image_theme().status_icons[e3.status.ONLINE]), 
+        tabbar.addTab(QtGui.QIcon(gui.theme.image_theme.status_icons[e3.status.ONLINE]), 
                       '')
         lay2 = QtGui.QVBoxLayout()
         #lay2.addWidget(self.te1)

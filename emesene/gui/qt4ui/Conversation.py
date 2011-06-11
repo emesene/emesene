@@ -60,7 +60,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._on_typing_timer.setSingleShot(True)
         self._on_typing_timer.timeout.connect(
             lambda *args: self._widget_d['info_panel'].set_icon(
-                gui.theme.get_image_theme().status_icons[
+                gui.theme.image_theme.status_icons[
                     self._session.contacts.get(
                         self._members[0]).status]))
         self.session.signals.contact_attr_changed.subscribe(
@@ -91,10 +91,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         info_panel_cls      = extension.get_default('info panel')
         
         # Actions
-        icon_path = gui.theme.get_emote_theme().emote_to_path(':)')[6:]
+        icon_path = gui.theme.emote_theme.emote_to_path(':)')[6:]
         action_dict['add_smiley']   = QtGui.QAction(
                             QtGui.QIcon(icon_path), tr('Add Smiley'), self)
-        icon_path = gui.theme.get_emote_theme().emote_to_path(':S')[6:]
+        icon_path = gui.theme.emote_theme.emote_to_path(':S')[6:]
         action_dict['send_nudge']   = QtGui.QAction(
                             QtGui.QIcon(icon_path), tr('Send Nudge'), self)
         action_dict['change_font']  = QtGui.QAction(
@@ -131,7 +131,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         toolbar.addAction(action_dict['change_font'])
         toolbar.addAction(action_dict['change_color'])
         
-        widget_d['chat_input'].set_smiley_dict(gui.theme.get_emote_theme().get_emotes())
+        widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.get_emotes())
 
         widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
@@ -269,7 +269,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                 # self.icon returns that icon.)
                 #self._widget_d['info_panel'].set_icon(self.icon)
                 status = self._session.contacts.get(account).status
-                icon =  gui.theme.get_image_theme().status_icons[status]
+                icon =  gui.theme.image_theme.status_icons[status]
                 self._widget_d['info_panel'].set_icon(icon)
             elif what == 'nick':
                 self._widget_d['info_panel'].set_nick(self.text)
@@ -282,7 +282,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # TODO: this should update the tabs' icon, not this one.
         # updating the tab icon should be done here, not in the Conversation
         # page class. 
-        self._widget_d['info_panel'].set_icon(gui.theme.get_image_theme().typing)
+        self._widget_d['info_panel'].set_icon(gui.theme.image_theme.typing)
         self._on_typing_timer.start(3000)
             
             

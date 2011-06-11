@@ -126,7 +126,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             picture_path = model.data(index, Role.DecorationRole).toString()
             picture = QtGui.QPixmap(picture_path)
             if picture.isNull():
-                picture = QtGui.QPixmap(gui.theme.get_image_theme().user)
+                picture = QtGui.QPixmap(gui.theme.image_theme.user)
             else:
                 picture = Utils.pixmap_rounder(picture)
             # calculate the target position
@@ -138,7 +138,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             painter.drawPixmap(target, picture, source)
     
             # -> start drawing the status emblem
-            picture_path  = gui.theme.get_image_theme().status_icons[
+            picture_path  = gui.theme.image_theme.status_icons[
                             model.data(index, Role.StatusRole).toPyObject()]
             picture = QtGui.QPixmap(picture_path)
             source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
@@ -153,7 +153,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             
             # -> start drawing the 'blocked' emblem
             if model.data(index, Role.BlockedRole).toPyObject():
-                picture_path = gui.theme.get_image_theme().blocked_overlay
+                picture_path = gui.theme.image_theme.blocked_overlay
                 picture = QtGui.QPixmap(picture_path)
                 source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0),
                                         QtCore.QSizeF(picture.size()) )

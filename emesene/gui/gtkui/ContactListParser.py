@@ -58,7 +58,7 @@ class ContactListParser(gobject.GObject):
 
     def replace_emoticons(self, text):
         '''replace emotes with pixbufs'''
-        emote_theme = gui.theme.get_emote_theme()
+        emote_theme = gui.theme.emote_theme
         shortcuts = emote_theme.get_emotes_shortcuts()
         emoticon_list = []
         for shortcut in shortcuts:

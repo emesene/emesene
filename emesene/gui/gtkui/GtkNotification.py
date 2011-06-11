@@ -183,7 +183,7 @@ class Notification(gtk.Window):
             userPixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
                                   picturePath[7:], avatar_size, avatar_size)
         except:
-            userPixbuf = utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().user,
+            userPixbuf = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
                                                  (avatar_size, avatar_size))
         avatarImage.set_from_pixbuf(userPixbuf)
 

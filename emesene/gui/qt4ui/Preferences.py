@@ -40,7 +40,7 @@ class Preferences(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         
         self.setWindowTitle(tr('Preferences'))
-        self.setWindowIcon(QtGui.QIcon(gui.theme.get_image_theme().logo))
+        self.setWindowIcon(QtGui.QIcon(gui.theme.image_theme.logo))
         self.resize(600, 400)
         
         self._session = session

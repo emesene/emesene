@@ -174,11 +174,11 @@ class InformationWidget(gtk.VBox):
             self.message.set_markup(Renderers.msnplus_to_list(
                     gobject.markup_escape_text(self.contact.message)))
             self.status.set_from_file(
-                gui.theme.get_image_theme().status_icons[self.contact.status])
+                gui.theme.image_theme.status_icons[self.contact.status])
             if (self.contact.picture):
                 self.image.set_from_file(self.contact.picture)
             else:
-                self.image.set_from_file(gui.theme.get_image_theme().user)
+                self.image.set_from_file(gui.theme.image_theme.user)
             if (self.contact.blocked):
                 self.blocked.set_markup(_('Yes'))
             else:
@@ -235,7 +235,7 @@ class ListWidget(gtk.VBox):
 
     def add(self, stat, timestamp, text):
         '''add a row to the widget'''
-        pix = utils.safe_gtk_pixbuf_load(gui.theme.get_image_theme().status_icons[stat])
+        pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.status_icons[stat])
         date_text = time.strftime('%c', time.gmtime(timestamp))
         self.model.append((pix, date_text, text))
 
@@ -335,8 +335,8 @@ class ChatWidget(gtk.VBox):
         '''refresh the history according to the values on the calendars
         '''
         if self.contact:
-            his_picture = self.contact.picture or utils.path_to_url(os.path.abspath(gui.theme.get_image_theme().user))
-            my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.get_image_theme().user))
+            his_picture = self.contact.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+            my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
             self.text.clear(self.account, self.contact.nick, self.contact.display_name, my_picture, his_picture)
         else:
             self.text.clear()

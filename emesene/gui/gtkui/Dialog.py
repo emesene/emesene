@@ -698,7 +698,7 @@ class Dialog(object):
         box.set_property('column-spacing', 4)
 
         try:
-            s_name = getattr(gui.theme.get_image_theme(), "service_" + service)
+            s_name = getattr(gui.theme.image_theme, "service_" + service)
             session_pixbuf = utils.safe_gtk_pixbuf_load(s_name)
         except:
             session_pixbuf = None
@@ -861,7 +861,7 @@ class Dialog(object):
         if utils.file_readable(last_avatar):
             pixbuf = gtk.gdk.pixbuf_new_from_file(last_avatar)
         else:
-            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.get_image_theme().logo)
+            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.image_theme.logo)
 
         avatar.set_from_pixbuf(pixbuf)
         avatarEventBox = gtk.EventBox()
@@ -1207,7 +1207,7 @@ class EmotesWindow(gtk.Window):
         self.max_width = max_width
         self.emote_selected = emote_selected
 
-        emotes_count = gui.theme.get_emote_theme().get_emotes_count() # TODO: remove me
+        emotes_count = gui.theme.emote_theme.get_emotes_count() # TODO: remove me
         rows = emotes_count/max_width
 
         self.table = gtk.Table(max_width, rows)
@@ -1261,7 +1261,7 @@ class EmotesWindow(gtk.Window):
         column = 0
         row = 0
 
-        emote_theme = gui.theme.get_emote_theme()
+        emote_theme = gui.theme.emote_theme
 
         for shortcut, name in emote_theme.get_emotes().iteritems():
             if name in emotes:

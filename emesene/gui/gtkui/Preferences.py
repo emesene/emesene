@@ -715,7 +715,7 @@ class Theme(BaseTable):
         hbox.set_homogeneous(True)
         label = gtk.Label(_('Adium theme variant'))
         label.set_alignment(0.0, 0.5)
-        self.adium_variant_combo = self.create_combo(gui.theme.get_adium_theme_variants,
+        self.adium_variant_combo = self.create_combo(gui.theme.conv_theme.get_theme_variants,
                 'session.config.adium_theme_variant')
         hbox.pack_start(label, True, True)
         hbox.pack_start(self.adium_variant_combo, False)
@@ -742,7 +742,7 @@ class Theme(BaseTable):
         #clear combo
         self.adium_variant_combo.get_model().clear()
         self.fill_combo(self.adium_variant_combo,
-            gui.theme.get_adium_theme_variants, 'session.config.adium_theme_variant')
+            gui.theme.conv_theme.get_theme_variants, 'session.config.adium_theme_variant')
 
     def _on_cb_override_text_color_toggled(self, value):
         if value:
