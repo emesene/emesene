@@ -31,4 +31,4 @@ VERSION = '0.3'
 def GrowlNotification(title, text, picture_path=None, const=None,
                    callback=None, tooltip=None):
         title = Renderers.msnplus_to_plain_text(title)
-        subprocess.call(['/usr/local/bin/growlnotify', '-n',  'emesene', '-a', 'emesene', '-t', title, '-m', text])
+        subprocess.call(['/usr/local/bin/growlnotify', '-n', 'emesene', '-a', 'emesene', '-t', title, '-m', text])
