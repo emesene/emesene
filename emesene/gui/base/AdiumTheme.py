@@ -286,4 +286,5 @@ def replace_time(match):
 
 def style_message(msgtext, style):
     '''add html markupt to msgtext to format the style of the message'''
-    return '<span style="%s">%s</span>' % (style.to_css(), msgtext)
+    message = '<span style="display: inline; white-space: pre-wrap; %s">%s</span>' % (style.to_css(), msgtext)
+    return message
