@@ -136,7 +136,8 @@ def setup():
     extension.category_register('login window', Login.Login)
     extension.category_register('connecting window', Login.ConnectingWindow)
     extension.category_register('window frame', Window.Window)
-    extension.category_register('main window', MainWindow.MainWindow)
+    extension.category_register('main window', MainWindow.MainWindow, None,
+                                True) #single instance
     extension.category_register('contact list', ContactList.ContactList)
     extension.category_register('synch tool', SyncTool.SyncTool)
     extension.category_register('nick renderer', Renderers.CellRendererPlus)
