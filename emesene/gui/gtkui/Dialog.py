@@ -948,6 +948,17 @@ class Dialog(object):
             content.attach(TableText('[$TOTAL_COUNT]'), 0, 1, 2, 3)
             content.attach(TableText(_('Total amount of contacts')), 1, 2, 2, 3)
             last = 4
+        elif format_type == 'music':
+            window = cls.new_window(_('Group Format Help'))
+            content.attach(TableText('%ARTIST%'), 0, 1, 0, 1)
+            content.attach(TableText(_('The name of the artist')), 1, 2, 0, 1)
+            content.attach(TableText('%ALBUM%'), 0, 1, 1, 2)
+            content.attach(TableText(_('The name of the album')), 1, 2, 1, 2)
+            content.attach(TableText('%TITLE%'), 0, 1, 2, 3)
+            content.attach(TableText(_('The name of the song')), 1, 2, 2, 3)
+            content.attach(TableText('%FILE%'), 0, 1, 3, 4)
+            content.attach(TableText(_('The file name of the song')), 1, 2, 3, 4)
+            last = 5
         else:
             window = cls.new_window(_('Format Help Sepecific To This Help Does Not Exist'))
             content.attach(TableText('Help for this format is not yet implemented'), 0, 1, 0, 1)
