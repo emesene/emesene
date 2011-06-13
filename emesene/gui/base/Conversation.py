@@ -64,7 +64,7 @@ class Conversation(object):
         self.info = None
         self.input = None
         self.output = None
-        self.soundPlayer = extension.get_default('sound')(session)
+        self.soundPlayer = extension.get_and_instantiate('sound', session)
 
     def _get_style(self):
         '''return the value of style'''

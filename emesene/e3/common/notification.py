@@ -44,7 +44,7 @@ class Notification():
         self.session.config.get_or_set('b_notify_receive_message', True)
 
         self.notifier = extension.get_default('notificationGUI')
-        self.sound_player = extension.get_default('sound')(session)
+        self.sound_player = extension.get_and_instantiate('sound',session)
 
         if self.session:
             self.session.signals.conv_message.subscribe(

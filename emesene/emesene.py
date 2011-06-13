@@ -638,7 +638,7 @@ class Controller(object):
 
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
-        self.soundPlayer = extension.get_default('sound')(self.session)
+        self.soundPlayer = extension.get_and_instantiate('sound',self.session)
 
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
