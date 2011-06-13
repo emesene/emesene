@@ -281,8 +281,9 @@ class Category(object):
         '''
         #check if we have a ref, and if is still valid
         #(remember: it's a weakref!)
-        if self.get_instance():
-            return self.get_instance()
+        inst = self.get_instance()
+        if inst:
+            return inst
         cls = self.default
         if not cls:
             return cls
