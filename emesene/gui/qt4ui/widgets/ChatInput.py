@@ -2,6 +2,7 @@
 
 '''This module contains the ChatInput class'''
 
+import logging
 import os
 
 import PyQt4.QtGui      as QtGui
@@ -14,13 +15,15 @@ import gui
 from gui.qt4ui import Utils
 
 
+log = logging.getLogger('qt4ui.widgets.ChatInput')
+
 class ChatInput (QtGui.QTextEdit):
     '''A widget suited for editing chat lines. Provides as-you-type
     smileys, color settings and font settings, chat line history'''
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'A widget used to to edit chat lines'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     
@@ -37,6 +40,7 @@ class ChatInput (QtGui.QTextEdit):
         self._smiley_dict = {}
         self._max_shortcut_len = 0
         
+        self._emote_theme = gui.theme.emote_theme
         self._qt_color = QtGui.QColor(Qt.black)
         
     # emesene's
@@ -51,9 +55,10 @@ class ChatInput (QtGui.QTextEdit):
         shortcuts = smiley_dict.keys()
         
         for shortcut in shortcuts:
-            path = unicode(gui.theme.emote_to_path(shortcut))
+            path = unicode(self._emote_theme.emote_to_path(shortcut))
             if not path:
-                print "\t%s, %s" % (shortcut, smiley_dict[shortcut])
+                login.warning('No image path for: \t%s, %s' 
+                              % (shortcut, smiley_dict[shortcut]))
                 continue
             shortcut = unicode(shortcut)
             path = os.path.abspath(path[7:])
@@ -78,31 +83,28 @@ class ChatInput (QtGui.QTextEdit):
         '''Inserts a single char, checking for smileys'''
         # this method uses python's builtin string type, not QString
         
-        cursor = self.textCursor()
         max_shortcut_len = self._max_shortcut_len
         shortcuts = self._smiley_dict.keys()
 
+        cursor = self.textCursor()
         text_search = unicode(char)
         i = 0
         while i < max_shortcut_len-1:
             # TODO: check if the returned QChar is valid
             last_char = self.document().characterAt(cursor.position()-1-i)
             if last_char.isPrint():
-                last_char = QtCore.QString(last_char)
+                last_char   = QtCore.QString(last_char)
                 text_search = unicode(last_char) + text_search
             i += 1
-            #print "parsing",
-            #print [text_search],
             length = len(text_search)
-            #print " (%d)" % length
             if text_search in shortcuts:
-                #print "\t FOUND"
                 for i in range(length-1):
                     cursor.deletePreviousChar()
                 self._insert_image_resource(text_search)
                 cursor.insertImage(text_search)
+                # Prevent the color from changing:
+                self.setTextColor(self._qt_color)
                 return True
-        #print "\t No smiley Found"
         return False
         
         
@@ -111,18 +113,15 @@ class ChatInput (QtGui.QTextEdit):
         QTextDocument'''
         image = QtGui.QImage(self._smiley_dict[shortcut])
         self.document().addResource(QtGui.QTextDocument.ImageResource, 
-                                    QtCore.QUrl(shortcut),
-                                    image)
+                                   QtCore.QUrl(shortcut), image)
 
 
 
     def _swap_to_chat_line(self, idx):
         '''Swaps to the given chat line in the history'''
         if idx < 0 or idx > len(self._chat_lines)-1:
-            #print "(%d) doing nothing" % idx
             return
         else:
-            #print "switching to %d" % idx
             self._chat_lines[self._current_chat_line_idx] = self.toHtml()
             QtGui.QTextEdit.setHtml(self, self._chat_lines[idx])
             cur = self.textCursor()
@@ -136,10 +135,10 @@ class ChatInput (QtGui.QTextEdit):
         qt_font = self._get_qt_font()
         new_qt_font, result = QtGui.QFontDialog.getFont(qt_font)
         if result:
-            print "accepted"
+            log.info('font chooser: accepted')
             self._set_qt_font(new_qt_font)
         else:
-            print "canceled"
+            log.info('font chooser: canceled')
             
             
     def show_color_chooser(self):
@@ -159,16 +158,16 @@ class ChatInput (QtGui.QTextEdit):
         e3_color.alpha = qt_color.alpha()
         
         font = unicode(qt_font.family())
-        print "Font's raw Name: " + font
-        print "Font default family: " + qt_font.defaultFamily()
+        log.info('Font\'s raw Name: ' + font +
+                 'Font default family: ' + qt_font.defaultFamily())
         
         e3_style = e3.Style(font, e3_color, qt_font.bold(), 
                                             qt_font.italic(),
                                             qt_font.underline(), 
                                             qt_font.strikeOut(), 
                                             qt_font.pointSize())
-        print qt_font.toString()
-        print e3_style
+        log.info(qt_font.toString())
+        log.info(e3_style)
         return e3_style
         
     
@@ -206,14 +205,29 @@ class ChatInput (QtGui.QTextEdit):
 
     def _set_qt_color(self, new_color):
         '''Sets the color'''
+        if not new_color.isValid():
+            return
+        
         old_color = self._qt_color
         self._qt_color = new_color
-        self.setStyleSheet("QTextEdit{color: %s;}"    \
-                           "QMenu{color: palette(text);}" % new_color.name() )
-        print type(self.viewport())
-        print str(self.viewport().objectName())
+        
         if old_color != new_color:
             self.style_changed.emit()
+        
+        cursor = self.textCursor() 
+        cursor_position = cursor.position()
+        cursor.select(QtGui.QTextCursor.Document)
+        char_format = QtGui.QTextCharFormat()
+        char_format.setForeground(QtGui.QBrush(new_color))
+        cursor.mergeCharFormat(char_format)
+        cursor.setPosition(cursor_position)
+        
+        # We need this beacause the previous stuff doesn't work for the last
+        # block, if the block is empty. (i.e.: empty QTextEdit, QTextEdit's
+        # document ends with an image (so there's an empty block after it))
+        # Oh, and obviously this is not enough (and we need the previous part
+        # because it just changes current block's format! 
+        self.setTextColor(new_color) 
 
 
     def _get_qt_color(self):
@@ -340,8 +354,6 @@ class MyHTMLParser (HTMLParser):
 
     def handle_data(self, data):
         '''Handle data sequences'''
-        #print "DATA :",
-        #print data
         if self._in_body:
             self._data += data
     

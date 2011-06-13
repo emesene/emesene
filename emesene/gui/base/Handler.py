@@ -17,7 +17,10 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import sys
+import re
 import time
+import urllib
 import webbrowser
 
 import e3.base
@@ -42,6 +45,24 @@ EMESENE_LICENSE = '''    emesene is free software; you can redistribute it and/o
     along with emesene; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''
+
+EMESENE_VERSION = "2.11.6-devel"
+EMESENE_LAST_STABLE = "2.11.5"
+EMESENE_WEBSITE = "http://www.emesene.org"
+EMESENE_AUTHORS = "marianoguerra & c10ud"
+EMESENE_CONTRIBUTORS = [
+'Riccardo (c10ud) <c10ud.dev@gmail.com>',
+'Mariano Guerra <luismarianoguerra@gmail.com>',
+'arielj <arieljuod@gmail.com>',
+'Stefano Candori <stefanocandori@gmail.com>',
+'4ndreaSt4gi <stagi.andrea@gmail.com>',
+'Davide Lo Re <boyska@gmail.com>',
+'dequis <dx@dxzone.com.ar>',
+'Sven (Sbte) <svenb.linux@gmail.com>',
+'Jose Rostagno <joserostagno@vijona.com.ar>',
+'nenemfromhell <sniper3000@gmail.com>',
+'Gabriele "Whisky" Visconti <visconti.gabriele@gmail.com>',
+]
 
 class MenuHandler(object):
     '''this handler contains all the handlers needed to handle all the
@@ -155,33 +176,64 @@ class HelpHandler(object):
     def __init__(self, dialog):
         '''constructor'''
         self.dialog = dialog
+        self.debug_window = None
 
     def on_about_selected(self):
         '''called when the about item is selected'''
-        self.dialog.about_dialog('emesene', '2.11.5-devel', 'marianoguerra & c10ud',
+        self.dialog.about_dialog('emesene', EMESENE_VERSION, EMESENE_AUTHORS,
             _('A simple yet powerful instant messaging client'), EMESENE_LICENSE,
-            'http://www.emesene.org', 
-            [ 'Riccardo (c10ud) <c10ud.dev@gmail.com>',
-              'Mariano Guerra <luismarianoguerra@gmail.com>',
-              'arielj <arieljuod@gmail.com>',
-              'Stefano Candori <stefanocandori@gmail.com>',
-              '4ndreaSt4gi <stagi.andrea@gmail.com>',
-              'Davide Lo Re <boyska@gmail.com>',
-              'dequis <dx@dxzone.com.ar>',
-              'Sven (Sbte) <svenb.linux@gmail.com>',
-              'Jose Rostagno <joserostagno@vijona.com.ar>',
-              'nenemfromhell <sniper3000@gmail.com>' ], _('translator-credits'),
-            gui.theme.logo)
+            EMESENE_WEBSITE, EMESENE_CONTRIBUTORS, _('translator-credits'),
+            gui.theme.image_theme.logo)
 
     def on_website_selected(self):
         '''called when the website item is selected'''
-        webbrowser.open("http://www.emesene.org")
+        webbrowser.open(EMESENE_WEBSITE)
 
     def on_debug_selected(self):
         '''called when the preference button is selected'''
-        DebugWindow = extension.get_default('debug window')
-        DebugWindow().show()
+        def debug_close_cb():
+            self.debug_window = None
+        if not self.debug_window:
+            DebugWindow = extension.get_default('debug window')
+            self.debug_window = DebugWindow(debug_close_cb)
+            self.debug_window.show()
 
+    def notify_update(self, ver):
+        self.dialog.information(_("New version available: %s\nVisit the "
+                                  " <a href=\"%s\">emesene website</a> for the "
+                                  "latest informations about it." % (ver, EMESENE_WEBSITE)))
+
+    def on_check_update_selected(self):
+        ''' checks if a new stable version of emesene is available '''
+        if sys.platform == "darwin":
+            os.system("open -a /Applications/emesene.app/Contents/Resources/emesene_updater.app")
+        else:
+            f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/gui/base/Handler.py")
+            s = f.read()
+            f.close()
+            s = re.findall(r'EMESENE_LAST_STABLE = "(([^"\\]+|\\.)*)"', s)
+            try:
+                loc_ver = EMESENE_VERSION.split(".")
+                rem_ver = s[0][0].split(".") # [("version","version")]
+                if len(rem_ver[2]) > 2:
+                    return # no RCs, BETAs or DEVELs
+                if len(loc_ver[2]) > 2:
+                    self.dialog.information(_("You're running a development version of emesene, "
+                                              "you might want to use the latest stable version "
+                                              "(%s) unless you know what you're doing" % (s[0][0])))
+                    return
+                if int(loc_ver[0]) == int(rem_ver[0]):
+                    if int(loc_ver[1]) < int(rem_ver[1]):
+                        self.notify_update(s[0][0])
+                        return
+                    elif int(loc_ver[1]) == int(rem_ver[1]):
+                        if int(loc_ver[2]) < int(rem_ver[2]):
+                            self.notify_update(s[0][0])
+                            return
+            except IndexError:
+                pass # Silently fail
+
+            self.dialog.information(_("No update available"))
 
 class ContactHandler(object):
     '''this handler contains all the handlers needed to handle the contact

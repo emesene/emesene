@@ -2,15 +2,21 @@
 
 '''This module contains classes to represent the conversation tab.'''
 
+import logging
+
 import PyQt4.QtGui      as QtGui
+import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
+
+from gui.qt4ui.Utils import tr
 
 import extension
 import gui
 import gui.qt4ui.widgets as Widgets
+from   gui.qt4ui     import Utils
 
 
-
+log = logging.getLogger('qt4ui.Conversation')
 
 class Conversation (gui.base.Conversation, QtGui.QWidget):
     '''This widget represents the contents of a chat tab in the conversations
@@ -18,7 +24,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to display a single conversation'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     
@@ -30,6 +36,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._session = session
         self._conv_id = conv_id
         self._members = members
+        self._on_typing_timer = QtCore.QTimer()
         
         # a widget dic to avoid proliferation of instance variables:
         self._widget_d = {}
@@ -47,6 +54,17 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._load_style()
         self._widget_d['chat_input'].e3_style = self.cstyle
         
+        # not a particularly nice lambda....
+        # FIXME: This will have to be changed when groups will be
+        #        implemented
+        self._on_typing_timer.setSingleShot(True)
+        self._on_typing_timer.timeout.connect(
+            lambda *args: self._widget_d['info_panel'].set_icon(
+                gui.theme.image_theme.status_icons[
+                    self._session.contacts.get(
+                        self._members[0]).status]))
+        self.session.signals.contact_attr_changed.subscribe(
+            self.on_contact_attr_changed_succeed)
         self.session.signals.filetransfer_invitation.subscribe(
                 self.on_filetransfer_invitation)
         self.session.signals.filetransfer_accepted.subscribe(
@@ -58,7 +76,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         
     def __del__(self):
-        print "conversation adieeeeeeeuuuu ;______;"
+        log.debug('conversation adieeeeeeeuuuu ;______;')
         
         
     def _setup_ui(self):
@@ -73,16 +91,16 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         info_panel_cls      = extension.get_default('info panel')
         
         # Actions
-        icon_path = gui.theme.emote_to_path(':)')[6:]
+        icon_path = gui.theme.emote_theme.emote_to_path(':)')[6:]
         action_dict['add_smiley']   = QtGui.QAction(
-                            QtGui.QIcon(icon_path), "Add Smiley", self)
-        icon_path = gui.theme.emote_to_path(':S')[6:]
+                            QtGui.QIcon(icon_path), tr('Add Smiley'), self)
+        icon_path = gui.theme.emote_theme.emote_to_path(':S')[6:]
         action_dict['send_nudge']   = QtGui.QAction(
-                            QtGui.QIcon(icon_path),"Send Nudge", self)
+                            QtGui.QIcon(icon_path), tr('Send Nudge'), self)
         action_dict['change_font']  = QtGui.QAction(
-                            QtGui.QIcon(""),  "Change Font", self)
+                            QtGui.QIcon(""),  tr('Change Font'), self)
         action_dict['change_color'] = QtGui.QAction(
-                            QtGui.QIcon(""), "Change Color", self) 
+                            QtGui.QIcon(""), tr('Change Color'), self) 
     
         
         # TOP LEFT
@@ -95,7 +113,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d['toolbar'] = QtGui.QToolBar(self)
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         widget_d['chat_input'] = Widgets.ChatInput()
-        widget_d['send_btn'] = QtGui.QPushButton("Send")
+        widget_d['send_btn'] = QtGui.QPushButton(tr('Send'))
         
         text_edit_lay = QtGui.QHBoxLayout()
         text_edit_lay.addWidget(widget_d['chat_input'])
@@ -113,7 +131,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         toolbar.addAction(action_dict['change_font'])
         toolbar.addAction(action_dict['change_color'])
         
-        widget_d['chat_input'].set_smiley_dict(gui.theme.EMOTES)
+        widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.get_emotes())
 
         widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
@@ -199,10 +217,11 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         to update the contacts infos'''
         # account is a string containing the email
         # does this have to update the picture too?
+        log.debug('UPSingInfo Start')
         status = self._session.contacts.get(account).status
-        print 'USI: [%s], [%s], [%s], [%s]' % (status, nick, message, account)
-        self._widget_d['info_panel'].update(status, nick, message, account)
-        
+        log.debug('UpSingInfo: [%s], [%s], [%s], [%s]' % (status, nick, message, account))
+        self._widget_d['info_panel'].set_all(status, Utils.unescape(nick), Utils.unescape(message), account)
+        log.debug('UPSingInfo Stop')
         
     def show(self):
         '''Shows the widget'''
@@ -236,6 +255,37 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         gui.base.Conversation._on_send_message(self, message_string)
         
         
+    # TODO: use self.icon extensively
+    # TODO: could we handle this directly in UserInfoPanel (but I think that
+    #       this wouldn't make self.icon usable :/)
+    def on_contact_attr_changed_succeed(self, account, what, old,
+            do_notify=True):
+        ''' called when contacts change their attributes'''
+        if account in self._members:
+            if what  == 'status':
+                # FIXME: self.icon doesn't beahave correctly at the 
+                # moment. That's probably because 'set message
+                # waiting' stuff is still not implemented (in fact
+                # self.icon returns that icon.)
+                #self._widget_d['info_panel'].set_icon(self.icon)
+                status = self._session.contacts.get(account).status
+                icon =  gui.theme.image_theme.status_icons[status]
+                self._widget_d['info_panel'].set_icon(icon)
+            elif what == 'nick':
+                self._widget_d['info_panel'].set_nick(self.text)
+            elif what == 'message':
+                message = self._session.contacts.get(account).message
+                self._widget_d['info_panel'].set_message(message)
+                
+    def on_user_typing(self, account):
+        '''method called when a someone is typing'''
+        # TODO: this should update the tabs' icon, not this one.
+        # updating the tab icon should be done here, not in the Conversation
+        # page class. 
+        self._widget_d['info_panel'].set_icon(gui.theme.image_theme.typing)
+        self._on_typing_timer.start(3000)
+            
+            
         
     def on_filetransfer_invitation(self, transfer, conv_id):
         ''' called when a new file transfer is issued '''

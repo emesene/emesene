@@ -20,7 +20,7 @@ def escape(string, add_dic=None):
         add_dic = {}
     add_dic.update(MarkupParser.dic)
     add_dic.update(dic)
-    return xml.sax.saxutils.escape(string, dic)
+    return xml.sax.saxutils.escape(string, add_dic)
     
 
 def unescape(string, add_dic_inv=None):
@@ -30,7 +30,7 @@ def unescape(string, add_dic_inv=None):
         add_dic_inv = {}
     add_dic_inv.update(MarkupParser.dic_inv)
     add_dic_inv.update(dic_inv)
-    return xml.sax.saxutils.unescape(string, dic_inv)
+    return xml.sax.saxutils.unescape(string, add_dic_inv)
 
 
 def pixmap_rounder(qpixmap, perc_radius=16.7):
@@ -75,8 +75,15 @@ def parse_emotes(text, include_table_tags=True):
     parser = MyHTMLParser(include_table_tags)
     parser.feed(text)
     text2 = parser.get_data()
-    #print '***\n%s\n%s\n***' % (text, text2)
     return text2
+
+
+
+def tr(string):
+    '''Returns the given string translated by gettext, and converted
+    explicitly to unicode. Needed for compatibility issues between 
+    PyQt and gettext. See issue #586'''
+    return unicode(_(string))
     
     
     
@@ -145,8 +152,6 @@ class MyHTMLParser (HTMLParser):
     
     def handle_data(self, data):
         '''Handle data sequences'''
-        #print "DATA :",
-        #print data
         if self._italic:
             data = u'<i>%s</i>' % data
         if self._bold:

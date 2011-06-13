@@ -73,6 +73,7 @@ def setup():
     # pylint: disable=W0403
     import AvatarChooser
     import Conversation
+    import DebugWindow
     import Dialog
     import Notifier
     import PictureHandler
@@ -87,6 +88,7 @@ def setup():
     extension.category_register('avatar chooser',  AvatarChooser.AvatarChooser)
     extension.category_register('conversation',    Conversation.Conversation)
     extension.category_register('dialog',          Dialog.Dialog)
+    extension.category_register('debug window',    DebugWindow.DebugWindow)
     extension.category_register('notificationGUI', Notifier.Notifier)
     extension.category_register('preferences',     Preferences.Preferences,
                                                    single_instance=True)
@@ -107,6 +109,7 @@ def setup():
     extension.category_register('nick edit',           widgets.NickEdit)
     extension.category_register('smiley chooser',   widgets.SmileyPopupChooser)
     extension.category_register('status combo',        widgets.StatusCombo)
+    # TODO: change this extension's name to 'conversation header' ??
     extension.category_register('info panel',          widgets.UserInfoPanel)
     #extension.category_register('filetransfer widget', widgets.FileTransfer)
     try:

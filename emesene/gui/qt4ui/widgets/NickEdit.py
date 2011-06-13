@@ -7,6 +7,8 @@ import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
 
 from gui.qt4ui import Utils
+from gui.qt4ui.Utils import tr
+
 
 
 # important: at the moment emits "str" not "unicode"
@@ -18,27 +20,25 @@ class NickEdit(QtGui.QStackedWidget):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to edit a nick or a personal message'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     
     nick_changed = QtCore.pyqtSignal(basestring)
     def __init__(self, allow_empty=False, 
-                 empty_message=QtCore.QString("Click here to write"),
+                 empty_message=tr('Click here to write'),
                  parent=None):
         QtGui.QStackedWidget.__init__(self, parent)
 
         self._allow_empty = allow_empty
-        self._empty_message = QtCore.QString("<u>") + \
-                              empty_message + \
-                              QtCore.QString("</u>")
+        self._empty_message = u'<u>' + empty_message + u'</u>'
         self._is_empty_message_displayed = False
 
         self._text = ''
         
         self.line_edit = QtGui.QLineEdit()
-        self.label = QLabelEmph(QtCore.QString("If you see this, " \
-                            "please invoke setText on QNickEdit."))
+        self.label = QLabelEmph(QtCore.QString('If you see this, " \
+                            "please invoke setText on NickEdit.'))
 
         self.set_text(QtCore.QString())
 
@@ -102,8 +102,8 @@ class NickEdit(QtGui.QStackedWidget):
 
 class QLabelEmph(QtGui.QLabel):
     '''Convenience class for a more interesting QLabel behaviour'''
-    _LE = QtCore.QString("<u><em>")
-    _RI = QtCore.QString("</em></u>")
+    _LE = QtCore.QString('<u><em>')
+    _RI = QtCore.QString('</em></u>')
     
     clicked = QtCore.pyqtSignal()
     def __init__(self, text=QtCore.QString(), parent = None):

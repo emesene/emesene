@@ -17,6 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import sys
 import gtk
 import time
 import gobject
@@ -29,9 +30,7 @@ import utils
 
 import Renderers
 
-from BaseTray import BaseTray
-
-class TrayIcon(gtk.StatusIcon, BaseTray):
+class TrayIcon(gtk.StatusIcon, gui.BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
     """
@@ -46,7 +45,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        BaseTray.__init__(self)
+        gui.BaseTray.__init__(self)
 
         gtk.StatusIcon.__init__(self)
         self.handler = handler
@@ -68,7 +67,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
         """
         self.menu = LoginMenu(self.handler, self.main_window)
         self.menu.show_all()
-        self.set_from_file(self.handler.theme.logo)
+        self.set_from_file(self.handler.theme.image_theme.logo)
 
     def set_main(self, session):
         """
@@ -125,7 +124,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
         """
         if stat not in status.ALL or stat == -1:
             return
-        self.set_from_file(self.handler.theme.status_icons_panel[stat])
+        self.set_from_file(self.handler.theme.image_theme.status_icons_panel[stat])
 
     def _on_popup(self, trayicon, button, activate_time):
         """
@@ -133,7 +132,7 @@ class TrayIcon(gtk.StatusIcon, BaseTray):
         (usually through right-clicking the status icon)
         """
         position = None
-        if os.name == 'posix':
+        if os.name == 'mac' or sys.platform == 'linux2':
             position = gtk.status_icon_position_menu
         self.menu.popup(None, None, position, button, activate_time, trayicon)
 
@@ -184,7 +183,7 @@ class MainMenu(gtk.Menu):
         self.status.set_submenu(self.status_menu)
 
         self.list = gtk.ImageMenuItem(_('Contacts'))
-        self.list.set_image(utils.safe_gtk_image_load(gui.theme.chat))
+        self.list.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
         self.list_contacts = ContactsMenu(handler, main_window)
         self.list.set_submenu(self.list_contacts)
 
@@ -301,7 +300,7 @@ class ContactsMenu(gtk.Menu):
             try:
                 animation = gtk.gdk.PixbufAnimation(contact.picture)
             except gobject.GError:
-                pix = utils.safe_gtk_pixbuf_load(gui.theme.user,
+                pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
                         (self.avatar_size, self.avatar_size))
                 picture = gtk.image_new_from_pixbuf(pix)
                 return picture
@@ -314,14 +313,14 @@ class ContactsMenu(gtk.Menu):
                 picture = gtk.image_new_from_animation(animation)
 
         else:
-            pix = utils.safe_gtk_pixbuf_load(gui.theme.user,
+            pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
                         (self.avatar_size, self.avatar_size))
             picture = gtk.image_new_from_pixbuf(pix)
 
         return picture
 
 
-class NoTrayIcon(BaseTray):
+class NoTrayIcon(gui.BaseTray):
     """
     A widget that implements a no tray icon option
     """
@@ -336,5 +335,5 @@ class NoTrayIcon(BaseTray):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        BaseTray.__init__(self)
+        gui.BaseTray.__init__(self)
         self.quit_on_close = True

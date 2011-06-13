@@ -2,13 +2,19 @@
 
 '''a module that defines the api of objects that display dialogs'''
 
+import logging
 
+from PyQt4  import QtCore
 from PyQt4  import QtGui
 from PyQt4.QtCore  import Qt
+
+from gui.qt4ui.Utils import tr
 
 import gui
 import extension
 
+
+log = logging.getLogger('qt4ui.Dialog')
 
 class Dialog(object):
     '''a class full of static methods to handle dialogs, dont instantiate it'''
@@ -28,11 +34,11 @@ class Dialog(object):
         added (give a empty tuple if you don't implement this feature,
         the controls are made by the callback, you just ask for the email,
         don't make any control, you are just implementing a GUI! :P'''
-        print response_cb
-        dialog      = OkCancelDialog()
-        text_label  = QtGui.QLabel("E-mail:")
+        log.info(str(response_cb))
+        dialog      = OkCancelDialog(title)
+        text_label  = QtGui.QLabel(tr('E-mail:'))
         text_edit   = QtGui.QLineEdit()
-        group_label = QtGui.QLabel("Group:")
+        group_label = QtGui.QLabel(tr('Group:'))
         group_combo = QtGui.QComboBox()
         
         lay = QtGui.QGridLayout()
@@ -42,8 +48,6 @@ class Dialog(object):
         lay.addWidget(group_combo,  1, 1)
         dialog.setLayout(lay)
         
-        
-        dialog.setWindowTitle(title)
         dialog.set_accept_response(gui.stock.ADD)
         text_label.setAlignment(Qt.AlignRight |
                                 Qt.AlignVCenter)
@@ -51,12 +55,12 @@ class Dialog(object):
                                  Qt.AlignVCenter)
         dialog.setMinimumWidth(300)
         
-        print groups
+        log.debug(str(groups))
         groups = list(groups)
-        print groups
+        log.debug(groups)
         groups.sort()
         
-        group_combo.addItem('<i>No Group</i>', '')
+        group_combo.addItem('<i>' + tr('No Group') + '</i>', '')
         for group in groups:
             group_combo.addItem(group.name, group.name)
         
@@ -64,12 +68,12 @@ class Dialog(object):
         
         email = unicode(text_edit.text())
         group = group_combo.itemData(group_combo.currentIndex()).toPyObject()
-        print '[%s,%s]' % (email, group)
+        log.debug('[%s,%s]' % (email, group))
         response_cb(response, email, group )
         
         
     @classmethod
-    def add_group(cls, response_cb, title="Add group"):
+    def add_group(cls, response_cb, title=tr('Add group')):
         '''show a dialog asking for a group name, the response callback
         receives the response (stock.ADD, stock.CANCEL, stock.CLOSE)
         and the name of the group, the control for a valid group is made
@@ -77,9 +81,9 @@ class Dialog(object):
         callback, to make a unified behaviour, and also, to only implement
         GUI logic on your code and not client logic
         cb args: response, group_name'''
-        print response_cb
-        dialog = OkCancelDialog()
-        group_label = QtGui.QLabel('New group\'s name:')
+        log.debug(str(response_cb))
+        dialog = OkCancelDialog(title)
+        group_label = QtGui.QLabel(tr('New group\'s name:'))
         group_edit  = QtGui.QLineEdit()
         
         lay = QtGui.QHBoxLayout()
@@ -96,20 +100,52 @@ class Dialog(object):
         
         response_cb(response, group_name)
         
+        
     @classmethod
-    def crop_image(cls, response_cb, filename, title='Select image area'):
+    def rename_group(cls, group, response_cb, title=tr('Rename group')):
+        '''show a dialog with the group name and ask to rename it, the
+        response callback receives stock.ACCEPT, stock.CANCEL or stock.CLOSE
+        the old and the new name.
+        cb args: response, group, new_name
+        '''
+        dialog = EntryDialog(tr('New group name:'), group.name, title)
+        response = dialog.exec_()
+        response_cb(response, group, dialog.text())
+        
+        
+    @classmethod
+    def contact_added_you(cls, accounts, response_cb,
+                                title=tr("User invitation")):
+        '''show a dialog displaying information about users
+        that added you to their userlists, the accounts parameter is
+        a tuple of mail, nick that represent all the users that added you,
+        the way you confirm (one or more dialogs) doesn't matter, but
+        you should call the response callback only once with a dict
+        with two keys 'accepted' and 'rejected' and a list of mail
+        addresses as values
+        '''
+        def debug_response_cb(results):
+            '''Simply prints the results instead of invocating the
+            real response_cb'''
+            print results
+        dialog = ContactAddedYouDialog(accounts, response_cb, title)
+
+        
+        
+    @classmethod
+    def crop_image(cls, response_cb, filename, title=tr('Select image area')):
         '''Shows a dialog to select a portion of an image.'''
-        dialog = OkCancelDialog(expanding=True)
+        dialog = OkCancelDialog(title, expanding=True)
         
         # Actions
         act_dict = {}
-        act_dict['rotate_left' ] = QtGui.QAction('Rotate Left'    , dialog)
-        act_dict['rotate_right'] = QtGui.QAction('Rotate right'   , dialog)
-        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit'    , dialog)
-        act_dict['fit_zoom']     = QtGui.QAction('Zoom to fit'    , dialog)
-        act_dict['reset_zoom']   = QtGui.QAction('Reset zoom'     , dialog)
-        act_dict['select_all']   = QtGui.QAction('Select All'     , dialog)
-        act_dict['select_unsc']  = QtGui.QAction('Select Unscaled', dialog)
+        act_dict['rotate_left' ] = QtGui.QAction( tr('Rotate Left'    ), dialog)
+        act_dict['rotate_right'] = QtGui.QAction( tr('Rotate right'   ), dialog)
+        act_dict['fit_zoom']     = QtGui.QAction( tr('Zoom to fit'    ), dialog)
+        act_dict['fit_zoom']     = QtGui.QAction( tr('Zoom to fit'    ), dialog)
+        act_dict['reset_zoom']   = QtGui.QAction( tr('Reset zoom'     ), dialog)
+        act_dict['select_all']   = QtGui.QAction( tr('Select All'     ), dialog)
+        act_dict['select_unsc']  = QtGui.QAction( tr('Select Unscaled'), dialog)
         
         # widgets
         toolbar = QtGui.QToolBar()
@@ -124,7 +160,6 @@ class Dialog(object):
         dialog.setLayout(lay)
         
         # widget setup
-        dialog.setWindowTitle(title)
         toolbar.addAction(act_dict['rotate_left'])
         toolbar.addAction(act_dict['rotate_right'])
         toolbar.addSeparator()
@@ -171,7 +206,7 @@ class Dialog(object):
         
         
     @classmethod
-    def error(cls, message, response_cb=None, title=_("Error!")):
+    def error(cls, message, response_cb=None, title=tr('Error!')):
         '''show an error dialog displaying the message, this dialog should
         have only the option to close and the response callback is optional
         since in few cases one want to know when the error dialog was closed,
@@ -180,9 +215,9 @@ class Dialog(object):
         # and or consider desktop integration with windows.
         # TODO: Consider making a more abstract class to use as a base for 
         # every kind of message box: error, info, attention, etc...
-        dialog  = StandardButtonDialog()
+        dialog  = StandardButtonDialog(title)
         icon    = QtGui.QLabel()
-        message = QtGui.QLabel(message)
+        message = QtGui.QLabel(unicode(message))
         
         lay = QtGui.QHBoxLayout()
         lay.addWidget(icon)
@@ -240,7 +275,7 @@ class Dialog(object):
             enables or disables widgets to insert proxy settings accordingly'''
             proxy_settings = (host_lbl, proxy_host_edit, port_lbl, 
                               proxy_port_edit, auth_chk)
-            print 'upt'
+            log.info('upt')
             for widget in proxy_settings:
                 widget.setEnabled(is_checked)
             on_use_auth_toggled(is_checked, auth_chk.isChecked())
@@ -261,7 +296,7 @@ class Dialog(object):
 
                 service = str(session_cmb.currentText())
                 session_id, ext = name_to_ext[service]
-                print session_id
+                log.debug(str(session_id))
                 callback(use_http, use_proxy, proxy_host, proxy_port, 
                          use_auth, user, passwd, session_id, service, 
                          server_host, server_port)
@@ -269,23 +304,23 @@ class Dialog(object):
                     
 
         
-        dialog           = OkCancelDialog()
-        session_lbl      = QtGui.QLabel(_('Session'))
+        dialog           = OkCancelDialog(unicode(tr('Connection preferences')))
+        session_lbl      = QtGui.QLabel(unicode(tr('Session:')))
         session_cmb      = QtGui.QComboBox()
-        server_host_lbl  = QtGui.QLabel(_('Server'))
+        server_host_lbl  = QtGui.QLabel(unicode(tr('Server')))
         server_host_edit = QtGui.QLineEdit()
-        server_port_lbl  = QtGui.QLabel(_('Port'))
+        server_port_lbl  = QtGui.QLabel(unicode(tr('Port')))
         server_port_edit = QtGui.QLineEdit()
-        http_chk         = QtGui.QCheckBox(_('Use HTTP method'))
-        proxy_chk        = QtGui.QCheckBox(_('Use proxy'))
-        host_lbl         = QtGui.QLabel(_('Host'))
+        http_chk         = QtGui.QCheckBox(unicode(tr('Use HTTP method')))
+        proxy_chk        = QtGui.QCheckBox(unicode(tr('Use proxy')))
+        host_lbl         = QtGui.QLabel(unicode(tr('Host')))
         proxy_host_edit  = QtGui.QLineEdit()
-        port_lbl         = QtGui.QLabel(_('Port'))
+        port_lbl         = QtGui.QLabel(unicode(tr('Port')))
         proxy_port_edit  = QtGui.QLineEdit()
-        auth_chk         = QtGui.QCheckBox(_('Use authentication'))
-        user_lbl         = QtGui.QLabel(_('User'))
+        auth_chk         = QtGui.QCheckBox(unicode(tr('Use authentication')))
+        user_lbl         = QtGui.QLabel(unicode(tr('User')))
         user_edit        = QtGui.QLineEdit()
-        pwd_lbl          = QtGui.QLabel(_('Password'))
+        pwd_lbl          = QtGui.QLabel(unicode(tr('Password')))
         pwd_edit         = QtGui.QLineEdit()
         
         grid_lay = QtGui.QGridLayout()
@@ -310,7 +345,7 @@ class Dialog(object):
         grid_lay.addWidget(pwd_edit, 9, 2)
         dialog.setLayout(grid_lay)
         
-        dialog.setWindowTitle('Preferences')
+        dialog.setWindowTitle(tr('Preferences'))
         server_host_edit.setText(service_host)
         server_port_edit.setText(service_port)
         proxy_host_edit.setText(proxy.host or '')
@@ -369,43 +404,29 @@ class Dialog(object):
             response = gui.stock.ACCEPT
         elif response == QtGui.QDialog.Rejected:
             response = gui.stock.CANCEL
-        print response
+        log.debug(str(response))
         
         response_cb(response)
         
         
     @classmethod
     def set_contact_alias(cls, account, alias, response_cb,
-                            title=_("Set alias")):
+                            title=tr('Set alias')):
         '''show a dialog showing the current alias and asking for the new
         one, the response callback receives,  the response
         (stock.ACCEPT, stock.CANCEL, stock.CLEAR <- to remove the alias
         or stock.CLOSE), the account, the old and the new alias.
         cb args: response, account, old_alias, new_alias'''
-        def reset_cb():
+        def _on_reset():
             dialog.done(gui.stock.CLEAR)
             
-        alias = alias or ''
-        
-        dialog = OkCancelDialog()
-        label = QtGui.QLabel("New alias: ")
-        edit = QtGui.QLineEdit()
-        
-        lay = QtGui.QHBoxLayout()
-        lay.addWidget(label, 100)
-        lay.addWidget(edit)
-        dialog.setLayout(lay)
-        
-        reset = dialog.add_button(QtGui.QDialogButtonBox.Reset)
-        dialog.setMinimumWidth(310)
-        edit.setText(alias)
-        
-        reset.clicked.connect(reset_cb)
+        dialog = EntryDialog(label=tr('New alias:'), text=alias, title=title)
+        reset_btn = dialog.add_button(QtGui.QDialogButtonBox.Reset)
+        reset_btn.clicked.connect(_on_reset)
         
         response = dialog.exec_()
-        response_cb(response, account, alias, unicode(edit.text()))
+        response_cb(response, account, alias, dialog.text())
         
-
         
     @classmethod
     def yes_no(cls, message, response_cb, *args):
@@ -414,9 +435,9 @@ class Dialog(object):
         stock.CLOSE if the user closes the window'''
         print response_cb
         print args
-        dialog  = YesNoDialog()
+        dialog  = YesNoDialog('')
         icon    = QtGui.QLabel()
-        message = QtGui.QLabel(message)
+        message = QtGui.QLabel(unicode(message))
         
         lay = QtGui.QHBoxLayout()
         lay.addWidget(icon)
@@ -443,7 +464,7 @@ class Dialog(object):
         
 class StandardButtonDialog (QtGui.QDialog):
     '''Skeleton for a dialog window with standard buttons'''
-    def __init__(self, expanding=False, parent=None):
+    def __init__(self, title, expanding=False, parent=None):
         '''Constructor'''
 
         QtGui.QDialog.__init__(self, parent)
@@ -458,14 +479,21 @@ class StandardButtonDialog (QtGui.QDialog):
         if not expanding:
             vlay.addStretch()
         QtGui.QDialog.setLayout(self, vlay)
-
+        
+        self.setWindowTitle(title)
 
         self.button_box.accepted.connect(self._on_accept)
         self.button_box.rejected.connect(self._on_reject)
         
     def add_button(self, button):
-        return self.button_box.addButton(button)
-    
+            return self.button_box.addButton(button)
+        
+    def add_button_by_text_and_role(self, text, role):
+        print '*'
+        r = self.button_box.addButton(text, role)
+        print '*'
+        return r
+        
     def _on_accept(self):
         '''Slot called when Ok is clicked'''
         self.done(QtGui.QDialog.Accepted)
@@ -500,13 +528,11 @@ class StandardButtonDialog (QtGui.QDialog):
         
 
 
-
-
 class OkCancelDialog (StandardButtonDialog):
     '''Skeleton for a dialog window having Ok and Cancel buttons'''
-    def __init__(self, expanding=False, parent=None):
+    def __init__(self, title,expanding=False, parent=None):
         '''Constructor'''
-        StandardButtonDialog.__init__(self, expanding, parent)
+        StandardButtonDialog.__init__(self, title, expanding, parent)
 
         self.add_button(QtGui.QDialogButtonBox.Cancel)
         self.add_button(QtGui.QDialogButtonBox.Ok)
@@ -528,16 +554,15 @@ class OkCancelDialog (StandardButtonDialog):
 
 
 
-
 class YesNoDialog (StandardButtonDialog):
     '''Skeleton for a dialog window having Ok and Cancel buttons'''
-    def __init__(self, expanding=False, parent=None):
+    def __init__(self, title, expanding=False, parent=None):
         '''Constructor'''
-        StandardButtonDialog.__init__(self, expanding, parent)
+        StandardButtonDialog.__init__(self, title, expanding, parent)
 
         self.add_button(QtGui.QDialogButtonBox.No)
         self.add_button(QtGui.QDialogButtonBox.Yes)
-        self._accept_response = gui.stock.OK
+        self._accept_response = gui.stock.YES
         self._reject_response = gui.stock.NO
         
     def accept_response(self):
@@ -551,8 +576,125 @@ class YesNoDialog (StandardButtonDialog):
         
     def set_reject_response(self, response):
         self._reject_response = response
+
+
+
+
+class ContactAddedYouDialog (QtCore.QObject):
+    '''Dialog window asking wether to add to the contact list
+    a contact which has just added you'''
     
-
-
- 
+    class Page(QtGui.QDialog):
+        '''This is the actual dialog window'''
+        AddRole   = QtGui.QDialog.Accepted
+        DontRole  = QtGui.QDialog.Accepted + 1
+        LaterRole = QtGui.QDialog.Rejected
         
+        def __init__(self, mail, nick, title, parent=None):
+            QtGui.QDialog.__init__(self, parent)
+            
+            text_lbl = QtGui.QLabel()
+            icon_lbl = QtGui.QLabel()
+            button_box = QtGui.QDialogButtonBox()
+            
+            hlay = QtGui.QHBoxLayout()
+            hlay.addWidget(icon_lbl)
+            hlay.addWidget(text_lbl)
+            lay = QtGui.QVBoxLayout()
+            lay.addLayout(hlay)
+            lay.addSpacing(10)
+            lay.addWidget(button_box)
+            lay.addStretch()
+            QtGui.QDialog.setLayout(self, lay)
+            
+            icon = QtGui.QIcon.fromTheme('dialog-information')
+            if nick != mail:
+                text = '<b>%s</b>\n<b>(%s)</b>' % (nick, mail)
+            else:
+                text = '<b>%s</b>' % mail
+            text += tr(' has added you.\nDo you want to add '
+                             'him/her to your contact list?')
+            text = text.replace('\n','<br />')
+            
+            txt = tr('Remind me later')
+            add_btn   = button_box.addButton(tr('Yes'), QtGui.QDialogButtonBox.AcceptRole)
+            dont_btn  = button_box.addButton(tr('No'),  QtGui.QDialogButtonBox.RejectRole)
+            later_btn = button_box.addButton(txt,       QtGui.QDialogButtonBox.ResetRole )
+                
+            self.setWindowTitle(title)
+            icon_lbl.setPixmap(icon.pixmap(64, 64))
+            text_lbl.setText(text)
+            
+            add_btn.clicked.connect(  lambda *args: self.done(self.AddRole))
+            dont_btn.clicked.connect( lambda *args: self.done(self.DontRole))  
+            later_btn.clicked.connect(lambda *args: self.done(self.LaterRole))    
+            
+        
+        def exec_(self):
+            log.debug('Don\'t call \'exec_\' on a Page')
+            return None
+            
+
+    def __init__(self, accounts, done_cb, title, expanding=False, parent=None):
+        '''Constructor'''
+        QtCore.QObject.__init__(self, parent)
+        
+        self._done_cb  = done_cb
+        self._accounts = accounts
+        self._dialogs  = {}
+        self._results  = {'accepted': [],
+                          'rejected': []}
+        i = 0
+        for account in accounts:
+            mail, nick = account
+            page = self.Page(mail, nick, title)
+            self._dialogs[mail] = page
+            page.finished.connect(self._create_slot(mail))
+
+            page.show()
+            pos = page.pos()
+            x   = pos.x()
+            y   = pos.y()
+            page.move(x+i*40, y+i*40)
+            i += 1
+
+        
+    def _create_slot(self, mail):
+        return lambda result: self._on_finished(mail, result)
+    
+    def _on_finished(self, mail, result):
+        if   result == self.Page.AddRole:
+            self._results['accepted'].append(mail)
+        elif result == self.Page.DontRole:
+            self._results['rejected'].append(mail)
+        elif result != self.Page.LaterRole:
+            raise TypeError('Dialog returned wrong result code: %s' %
+                            result)
+        del self._dialogs[mail]
+        if len(self._dialogs) == 0:
+            self._done_cb(self._results)
+    
+    def __del__(self):
+        log.debug('ContactAddedYouDialog destroyed')
+            
+        
+        
+        
+        
+        
+    
+class EntryDialog (OkCancelDialog):
+    '''Dialog window with a text entry.'''
+    def __init__(self, label, text, title, expanding=True, parent=None):
+        OkCancelDialog.__init__(self, title, expanding, parent)
+        
+        label = QtGui.QLabel(label)
+        self.edit = QtGui.QLineEdit(text)
+        
+        lay = QtGui.QHBoxLayout()
+        lay.addWidget(label, 100)
+        lay.addWidget(self.edit)
+        self.setLayout(lay)
+    
+    def text(self):
+        return unicode(self.edit.text())

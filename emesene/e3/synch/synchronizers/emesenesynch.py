@@ -50,7 +50,7 @@ class EmeseneSynch(Synch):
         def is_clean(self):
             return not os.path.exists(self.__dest_db_path_copy)
 
-        def __create_safe_copy(self):
+        def _create_safe_copy(self):
             shutil.copy (self.__dest_db_path, self.__dest_db_path_copy)
 
         def set_user(self, user_account):
@@ -73,7 +73,7 @@ class EmeseneSynch(Synch):
             self._prog_callback(0.0)
 
         def start_synch(self):
-            self.__create_safe_copy()
+            self._create_safe_copy()
             self.__synch_my_avatars()
             self.__synch_my_emoticons()
             self.__synch_conversations()
@@ -87,6 +87,8 @@ class EmeseneSynch(Synch):
             actual_avatar = 0.0
 
             for infile in listing:
+
+                self._is_stop()
 
                 dest_avatar = os.path.join(self.__dest_path, "avatars", infile)
 
@@ -118,6 +120,8 @@ class EmeseneSynch(Synch):
             fconfig = open(os.path.join(emoticons_dir,"emoticons.info"), 'a')
 
             for infile in listing:
+
+                self._is_stop()
 
                 if infile == "map":
                     continue
@@ -192,6 +196,8 @@ class EmeseneSynch(Synch):
 
             for conv in conversations_list:
 
+                self._is_stop()
+
                 users_fetched = []
                 
                 if id_conv != conv[0]:
@@ -229,6 +235,8 @@ class EmeseneSynch(Synch):
             conversation2_list = conversations.fetchall()
 
             for conv in conversations_attr:
+
+                self._is_stop()
 
                 if not self.__verify_duplicate(conv, conversation2_list):
                     self._session.logger.log("message", 0, conv["data"], 

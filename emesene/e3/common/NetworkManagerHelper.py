@@ -106,14 +106,16 @@ class DBusNetworkChecker():
     def __init__(self):
         self.__session = None
         self.connected = True
+        self.alert_watcher = None
 
     #Public methods
     def set_new_session(self, session):
         self.__session = session
 
-        self.alert_watcher = AlertWatcher ()
-        self.alert_watcher.connect("network-alert", self._on_network_alert)
-        self.alert_watcher.check_alert_state()
+        if self.alert_watcher is None:
+            self.alert_watcher = AlertWatcher ()
+            self.alert_watcher.connect("network-alert", self._on_network_alert)
+            self.alert_watcher.check_alert_state()
 
     def stop(self):
         pass

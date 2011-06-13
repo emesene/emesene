@@ -7,6 +7,8 @@ import time
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
+from gui.qt4ui.Utils import tr
+
 import extension
 
 
@@ -15,7 +17,7 @@ class MainPage (QtGui.QWidget):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to dislay the main screen'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     
@@ -26,7 +28,6 @@ class MainPage (QtGui.QWidget):
 
         self._session = session
         # callbacks:
-        print on_new_conversation
         self._on_new_conversation = on_new_conversation
         self._on_close = on_close
         self._on_disconnect = on_disconnect
@@ -50,6 +51,8 @@ class MainPage (QtGui.QWidget):
         # Session's Signals: [Remember to unsubscribe! O_O]
         session.signals.profile_get_succeed.subscribe(
                                 self._on_ss_profile_get_succeed)
+        session.signals.status_change_succeed.subscribe(
+                                self._widget_dict['status_combo'].set_status)
         
         
         
@@ -65,7 +68,7 @@ class MainPage (QtGui.QWidget):
         widget_dict['nick_edit'] = nick_edit_cls()
         widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True, 
             empty_message=QtCore.QString(
-                "<u>Click here to set a personal message...</u>"))
+                tr('<u>Click here to set a personal message...</u>')))
         widget_dict['current_media'] = QtGui.QLabel()
         widget_dict['status_combo'] = status_combo_cls()
         widget_dict['display_pic'] = avatar_cls(self._session)
@@ -122,7 +125,6 @@ class MainPage (QtGui.QWidget):
     def _on_new_conversation_requested(self, account):
         '''Slot called when the user doubleclicks 
         an entry in the contact list'''
-        print account
         conv_id = time.time()
         self._on_new_conversation(conv_id, [account], False) 
         # TODO: shouldn't this go somewhere else?!

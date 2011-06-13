@@ -32,8 +32,11 @@ def project_path():
     even if we are frozen using py2exe"""
 
     if we_are_frozen():
-        return os.path.abspath(os.path.dirname(unicode(sys.executable, sys.getfilesystemencoding())))
-    this_module_path = os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))
+        return os.path.abspath(os.path.dirname(unicode(sys.executable,
+            sys.getfilesystemencoding())))
+
+    this_module_path = os.path.dirname(unicode(__file__,
+        sys.getfilesystemencoding()))
 
     return os.path.abspath(this_module_path)
 
@@ -52,7 +55,6 @@ import glib
 import optparse
 import shutil
 import signal
-import string
 
 import debugger
 debugger.init()
@@ -74,26 +76,31 @@ except ImportError:
     DBusNetworkChecker = None
 
 try:
+    from gui.base.UnityLauncher import UnityLauncher
+except ImportError:
+    UnityLauncher = None
+
+try:
     from gui import gtkui
-except Exception, exc:
-    log.error('Cannot find/load (py)gtk: %s' % str(exc))
+except ImportError, exc:
+    log.error('Cannot import gtkui: %s' % str(exc))
 
 try:
     from e3 import jabber
-except Exception, exc:
+except ImportError, exc:
     jabber = None
-    log.warning('Errors occurred while importing python-xmpp: %s' % str(exc))
+    log.warning('Errors occurred while importing jabber backend: %s' % str(exc))
 
 try:
     from gui import qt4ui
-except Exception, e:
-    log.error('Cannot find/load PyQt4: %s' % str(e))
+except ImportError, exc:
+    log.error('Cannot import qtui: %s' % str(exc))
 
 try:
     from e3 import papylib
-except Exception, exc:
+except ImportError, exc:
     papylib = None
-    log.warning('Errors occurred while importing python-papyon: %s' % str(exc))
+    log.warning('Errors occurred while importing msn backend: %s' % str(exc))
 
 from pluginmanager import get_pluginmanager
 import extension
@@ -156,12 +163,15 @@ class Controller(object):
         self._parse_commandline()
         self._setup()
 
-        signal.signal(signal.SIGINT, lambda *args: glib.idle_add(self.close_session()))
-        signal.signal(signal.SIGTERM, lambda *args: glib.idle_add(self.close_session()))
+        signal.signal(signal.SIGINT,
+                lambda *args: glib.idle_add(self.close_session()))
+        signal.signal(signal.SIGTERM,
+                lambda *args: glib.idle_add(self.close_session()))
 
     def _setup(self):
         '''register core extensions'''
-        extension.category_register('session', dummy.Session, single_instance=True)
+        extension.category_register('session', dummy.Session,
+                single_instance=True)
         #extension.category_register('session', msn.Session,
         #        single_instance=True)
         if jabber is not None:
@@ -186,11 +196,21 @@ class Controller(object):
         if DBusNetworkChecker is not None:
             extension.category_register('network checker', DBusNetworkChecker)
             extension.set_default('network checker', DBusNetworkChecker)
-            self.network_checker = extension.get_and_instantiate('network checker')
+            self.network_checker = extension.get_and_instantiate(
+                    'network checker')
         else:
             self.network_checker = None
 
-        extension.category_register('sound', e3.common.Sounds.SoundPlayer, None, True)
+        if UnityLauncher is not None:
+            extension.category_register('unity launcher', UnityLauncher)
+            extension.set_default('unity launcher', UnityLauncher)
+            self.unity_launcher = extension.get_and_instantiate(
+                    'unity launcher', self.close_session)
+        else:
+            self.unity_launcher = None
+
+        extension.category_register('sound', e3.common.Sounds.SoundPlayer,
+                None, True)
         extension.category_register('notification',
                 e3.common.notification.Notification)
         extension.category_register('history exporter',
@@ -273,11 +293,11 @@ class Controller(object):
         signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
         signals.contact_added_you.subscribe(self.on_pending_contacts)
 
-        #let's start dbus
+        #let's start dbus and unity launcher
         if self.dbus_ext is not None:
             self.dbus_ext.set_new_session(self.session)
-        if self.network_checker is not None:
-            self.network_checker.set_new_session(self.session)
+        if self.unity_launcher is not None:
+            self.unity_launcher.set_session(self.session)
 
     def close_session(self, do_exit=True):
         '''close session'''
@@ -331,6 +351,8 @@ class Controller(object):
             signals.picture_change_succeed.unsubscribe(
                     self.on_picture_change_succeed)
             signals.contact_added_you.unsubscribe(self.on_pending_contacts)
+            if self.unity_launcher is not None:
+                self.unity_launcher.remove_session()
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -414,7 +436,9 @@ class Controller(object):
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
         conv_name = self.session.config.get_or_set('adium_theme',
                 'renkoo.AdiumMessagesStyle')
-        gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
+        conv_name_variant = self.session.config.get_or_set('adium_theme_variant',
+                '')
+        gui.theme.set_theme(image_name, emote_name, sound_name, conv_name, conv_name_variant)
 
         self.session.config.get_or_set('last_avatar', last_avatar_path)
 
@@ -443,10 +467,13 @@ class Controller(object):
 
     def _sync_emesene1(self):
         syn = extension.get_default('synch tool')
-        user = self.session.account.account
-        current_service = self.session.config.service
-        syn = syn(self.session, current_service)
-        syn.show()
+        # Check if a synch tool is present. Synch tool is only in the gtk gui.
+        # Remove the following 'if' when it will be in the qt4 gui too.
+        if syn: 
+            user = self.session.account.account
+            current_service = self.session.config.service
+            syn = syn(self.session, current_service)
+            syn.show()
 
     def _set_location(self, window, is_conv=False):
         '''get and set the location of the window'''
@@ -455,7 +482,8 @@ class Controller(object):
             posy = self.session.config.get_or_set('i_conv_posy', 100)
             width = self.session.config.get_or_set('i_conv_width', 600)
             height = self.session.config.get_or_set('i_conv_height', 400)
-            maximized = self.session.config.get_or_set('b_conv_maximized', False)
+            maximized = self.session.config.get_or_set('b_conv_maximized',
+                    False)
         else:
             posx = self.config.get_or_set('i_login_posx', 100)
             posy = self.config.get_or_set('i_login_posy', 100)
@@ -497,6 +525,10 @@ class Controller(object):
         self.config.save(self.config_path)
         plugin_manager = get_pluginmanager()
         plugin_manager.scan_directory('plugins')
+        plugin_dir = self.config_dir.join('plugins')
+        if not os.path.exists(plugin_dir):
+            os.makedirs(plugin_dir)
+        plugin_manager.scan_directory(plugin_dir)
 
         self.draw_main_screen()
 
@@ -513,6 +545,9 @@ class Controller(object):
         self.set_default_extensions_from_config()
         self._sync_emesene1()
         self.logged_in = True
+
+        if self.network_checker is not None:
+            self.network_checker.set_new_session(self.session)
 
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):
@@ -642,6 +677,8 @@ class Controller(object):
 
 
         self.tray_icon.set_conversations(self.conversations)
+        if self.unity_launcher is not None:
+            self.unity_launcher.set_conversations(self.conversations)
 
         conversation = conv_manager.new_conversation(cid, members)
 
@@ -658,7 +695,7 @@ class Controller(object):
            self.session.contacts.me.status != e3.status.BUSY and \
            self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
-            self.soundPlayer.play(gui.theme.sound_type)
+            self.soundPlayer.play(gui.theme.sound_theme.sound_type)
 
     def _on_conversation_window_close(self, conv_manager):
         '''method called when the conversation window is closed'''
@@ -742,7 +779,8 @@ class ExtensionDefault(object):
     def set_default(self, option, opt, value, parser):
         '''set default extensions'''
         for couple in value.split(';'):
-            category_name, ext_name = map(string.strip, couple.split(':', 2))
+            category_name, ext_name = [strng.strip()\
+                    for strng in couple.split(':', 2)]
 
             if not extension.get_category(category_name)\
                     .set_default_by_name(ext_name):

@@ -8,6 +8,8 @@ from PyQt4          import QtGui
 from PyQt4          import QtCore
 from PyQt4.QtCore   import Qt
 
+from gui.qt4ui.Utils import tr
+
 import extension
 import e3
 import gui
@@ -30,7 +32,7 @@ class ConnectingPage(QtGui.QWidget):
         self._on_cancel_login = on_cancel_login
         self._avatar_path = avatar_path
         self._config = config
-        self._reconnect_txt = u'Reconnecting in %d seconds'
+        self._reconnect_txt = tr('Reconnecting in %d seconds')
         self._reconnect_time = None
         self._timer = QtCore.QTimer(self)
         
@@ -45,14 +47,14 @@ class ConnectingPage(QtGui.QWidget):
         # FIXME: ok, this should be substituted with the picture handler
         # too lazy to do it now -.-'
         if not os.path.exists(self._avatar_path):
-            self._avatar_path = gui.theme.logo
+            self._avatar_path = gui.theme.image_theme.logo
         avatar_cls = extension.get_default('avatar')
 
-        widget_d['display_pic']  = avatar_cls(default_pic=gui.theme.logo,
+        widget_d['display_pic']  = avatar_cls(default_pic=gui.theme.image_theme.logo,
                                              clickable=False)
         widget_d['label']        = QtGui.QLabel()
         widget_d['progress_bar'] = QtGui.QProgressBar()
-        widget_d['cancel_btn']   = QtGui.QPushButton('Cancel login')
+        widget_d['cancel_btn']   = QtGui.QPushButton(tr('Cancel'))
         
         lay = QtGui.QVBoxLayout()
         lay.addSpacing(40)
@@ -94,8 +96,8 @@ class ConnectingPage(QtGui.QWidget):
     
     def clear_connect(self):
         self._timer.stop()
-        self._widget_d['label'].setText(u'Please wait while signing in...')
-        self._widget_d['cancel_btn'].setText(u'Cancel login')
+        self._widget_d['label'].setText(tr('Please wait while signing in...'))
+        self._widget_d['cancel_btn'].setText(tr('Cancel login'))
         try:
             self._widget_d['cancel_btn'].clicked.disconnect()
         except TypeError:
@@ -105,9 +107,8 @@ class ConnectingPage(QtGui.QWidget):
         
     def on_reconnect(self, callback, account, session_id,
                      proxy, use_http, service):
-        print callback
         self._widget_d['label'].setText(self._reconnect_txt % 30)
-        self._widget_d['cancel_btn'].setText(u'Reconnect now')
+        self._widget_d['cancel_btn'].setText(tr(u'Reconnect now'))
         self._widget_d['cancel_btn'].clicked.disconnect()
         self._widget_d['cancel_btn'].clicked.connect(self._on_reconnect_now)
         

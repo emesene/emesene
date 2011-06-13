@@ -168,8 +168,8 @@ class Conversation(object):
         '''called when the nudge button is clicked'''
         self.session.request_attention(self.cid)
         message = e3.Message(e3.Message.TYPE_NUDGE, '', None, None)
-        self.output.send_message(self.formatter, self.session.contacts.me,
-                                 message, {}, '', self.first)
+        message.body = _('You just sent a nudge!')
+        self.output.information(self.formatter, self.session.contacts.me, message)
 
         self.play_nudge()
 
@@ -258,7 +258,7 @@ class Conversation(object):
 
         return len(self.members) > 1
 
-    group_chat = property(fget=_get_group_chat)
+    is_group_chat = property(fget=_get_group_chat)
 
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
@@ -266,7 +266,6 @@ class Conversation(object):
 
         self.session.send_message(self.cid, text, self.cstyle, self.emcache.parse(), custom_emoticons)
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
-        print self.output.send_message
         self.output.send_message(self.formatter, self.session.contacts.me,
                                  message, self.emcache.parse(), self.emcache.path, self.first)
         self.messages.push(text)
@@ -290,8 +289,8 @@ class Conversation(object):
             self.play_type()
 
         elif message.type == e3.Message.TYPE_NUDGE:
-            self.output.information(self.formatter, contact,
-                    _('%s just sent you a nudge!') % (contact.display_name,))
+            message.body = _('%s just sent you a nudge!') % (contact.display_name,)
+            self.output.information(self.formatter, contact, message)
             self.play_nudge()
 
         self.first = False
@@ -299,8 +298,10 @@ class Conversation(object):
     def on_send_message_failed(self, errorCode):
         '''method called when a message fails to be delivered'''
         contact = self.session.contacts.me
-        self.output.information(self.formatter, contact, \
-                                _('Error delivering message'))
+        message = e3.Message(e3.Message.TYPE_MESSAGE, '', None, None)
+        message.body = _('Error delivering message')
+        self.output.information(self.formatter, contact, message)
+
         self.first = False
 
     def on_user_typing(self, account):
@@ -313,9 +314,9 @@ class Conversation(object):
             conversation, a group icon on group chat or a waiting icon)
         '''
         if self.message_waiting:
-            icon = gui.theme.new_message
-        elif self.group_chat:
-            icon = gui.theme.group_chat
+            icon = gui.theme.image_theme.new_message
+        elif self.is_group_chat:
+            icon = gui.theme.image_theme.group_chat
         elif len(self.members) == 1:
             contact = self.session.contacts.get(self.members[0])
 
@@ -326,10 +327,10 @@ class Conversation(object):
             else:
                 stat = e3.status.ONLINE
 
-            icon = gui.theme.status_icons.get(stat, e3.status.OFFLINE)
+            icon = gui.theme.image_theme.status_icons.get(stat, e3.status.OFFLINE)
         else:
             log.debug('unknown state on Conversation._get_icon')
-            return gui.theme.connect
+            return gui.theme.image_theme.connect
 
         return icon
 
@@ -337,7 +338,7 @@ class Conversation(object):
 
     def _get_text(self):
         '''return the text that represent the conversation title'''
-        if self.group_chat:
+        if self.is_group_chat:
             text = _('Group chat')
         elif len(self.members) == 1:
             contact = self.session.contacts.get(self.members[0])
@@ -371,14 +372,26 @@ class Conversation(object):
         '''called when a contact joins the conversation'''
         if account not in self.members:
             self.members.append(account)
-
+            contact = self.session.contacts.get(account)
+            if contact and len(self.members) > 1:
+                message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+                _('%s has joined the conversation') % (contact.display_name), \
+                account)
+                self.output.information(self.formatter, contact, message)
         self.update_data()
+        
 
     def on_contact_left(self, account):
-        '''called when a contact lefts the conversation'''
-        if account in self.members and len(self.members) > 1:
+        '''called when a contact leaves the conversation'''
+        if len(self.members) > 1 and account in self.members:
             self.members.remove(account)
             self.update_data()
+            contact = self.session.contacts.get(account)
+            if contact:
+                message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+                _('%s has left the conversation') % (contact.display_name), \
+                account)
+                self.output.information(self.formatter, contact, message)
 
     def on_group_started(self):
         '''called when a group conversation starts'''
@@ -447,21 +460,21 @@ class Conversation(object):
         play the nudge sound
         """
         if self.session.config.b_play_nudge:
-            self.soundPlayer.play(gui.theme.sound_nudge)
+            self.soundPlayer.play(gui.theme.sound_theme.sound_nudge)
 
     def play_send(self):
         """
         play the send sound
         """
         if self.session.config.b_play_send:
-            self.soundPlayer.play(gui.theme.sound_send)
+            self.soundPlayer.play(gui.theme.sound_theme.sound_send)
 
     def play_type(self):
         """
         play the receive sound
         """
         if self.session.config.b_play_type:
-            self.soundPlayer.play(gui.theme.sound_type)
+            self.soundPlayer.play(gui.theme.sound_theme.sound_type)
 
     def cycle_history(self, change=-1):
         """

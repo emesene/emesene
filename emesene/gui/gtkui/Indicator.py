@@ -23,7 +23,7 @@ import logging
 log = logging.getLogger('gui.gtkui.Indicator')
 
 import TrayIcon
-from BaseTray import BaseTray
+import gui
 
 # This line will except with too old version of appindicator
 # so you'll get your nice gtk trayicon
@@ -34,7 +34,7 @@ try:
 except AttributeError:
     raise ImportError
 
-class Indicator(appindicator.Indicator, BaseTray):
+class Indicator(appindicator.Indicator, gui.BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
     """
@@ -49,10 +49,10 @@ class Indicator(appindicator.Indicator, BaseTray):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        BaseTray.__init__(self)
+        gui.BaseTray.__init__(self)
         appindicator.Indicator.__init__(self, "emesene", "logo", \
             appindicator.CATEGORY_APPLICATION_STATUS, \
-            os.path.join(os.getcwd(), handler.theme.panel_path))
+            os.path.join(os.getcwd(), handler.theme.image_theme.panel_path))
 
         self.handler = handler
 
@@ -66,7 +66,7 @@ class Indicator(appindicator.Indicator, BaseTray):
         """
         method called to set the state to the login window
         """
-        icon_name = self.handler.theme.logo.split("/")[-1]
+        icon_name = self.handler.theme.image_theme.logo.split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)
         self.menu = TrayIcon.LoginMenu(self.handler, self.main_window)
@@ -88,10 +88,10 @@ class Indicator(appindicator.Indicator, BaseTray):
         """
         change the icon in the tray according to user's state
         """
-        path = os.path.join(os.getcwd(), self.handler.theme.panel_path)
+        path = os.path.join(os.getcwd(), self.handler.theme.image_theme.panel_path)
         self.set_icon_theme_path(path)
         #the appindicator takes a 'name' of an icon and NOT a filename.
         #that means that we have to strip the file extension
-        icon_name = self.handler.theme.status_icons_panel[stat].split("/")[-1]
+        icon_name = self.handler.theme.image_theme.status_icons_panel[stat].split("/")[-1]
         icon_name = icon_name[:icon_name.rfind(".")]
         self.set_icon(icon_name)

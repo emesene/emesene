@@ -22,6 +22,7 @@ import gtk
 import glib
 import urllib
 
+import stock
 import utils
 import gui
 import extension
@@ -68,7 +69,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.avatarBox.connect('button-press-event', self._on_avatar_click)
 
-        self.avatar = Avatar(cellDimention=avatar_size)
+        self.avatar = Avatar(cell_dimension=avatar_size)
         self.avatarBox.add(self.avatar)
 
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
@@ -78,7 +79,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.his_avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.his_avatarBox.connect('button-press-event', self._on_his_avatar_click)
 
-        self.his_avatar = Avatar(cellDimention=avatar_size)
+        self.his_avatar = Avatar(cell_dimension=avatar_size)
         self.his_avatarBox.add(self.his_avatar)
 
         self.his_avatarBox.set_tooltip_text(_('Click to see informations'))
@@ -134,9 +135,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         if self.session.config_dir.file_readable(last_avatar):
             my_picture = last_avatar
         else:
-            my_picture = gui.theme.user
+            my_picture = gui.theme.image_theme.user
 
-        his_picture = gui.theme.user
+        his_picture = gui.theme.image_theme.user
         if members:
             account = members[0]
             contact = self.session.contacts.get(account)
@@ -191,7 +192,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.rotate_started = False
         self.timer = 0
 
-        if self.group_chat:
+        if self.is_group_chat:
             self.rotate_started = True #to prevents more than one timeout_add
             self.timer = glib.timeout_add_seconds(5, self.rotate_picture)
 
@@ -207,18 +208,17 @@ class Conversation(gtk.VBox, gui.Conversation):
         if path_uri.startswith("file://"):
             path_uri = path_uri[8:]
             path_uri = urllib.url2pathname(path_uri)
-
         directory = os.path.dirname(path_uri).lower()
         caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         emcache = caches.get_emoticon_cache(self.session.account.account)
 
-        if directory.endswith(gui.theme.emote_path.lower()):
+        if directory.endswith(gui.theme.get_emote_theme().emote_path.lower()):
             Dialog.Dialog.information(_("Can't add, default emoticon"))
         elif directory == emcache.path.lower():
             Dialog.Dialog.information(_("Can't add, own emoticon"))
         else:
-            def on_response(dialog,response):
-                if response == gtk.RESPONSE_ACCEPT:
+            def on_response(response, shortcut):
+                if response == stock.ACCEPT:
                     shortcut = dialog.entry.get_text()
                     if shortcut not in emcache.list():
                         self.emcache.insert((shortcut, path_uri))
@@ -250,8 +250,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.avatarBox.remove(self.avatar)
         self.his_avatarBox.remove(self.his_avatar)
 
-        self.avatar.set_property('dimention',value)
-        self.his_avatar.set_property('dimention',value)
+        self.avatar.set_property('dimension',value)
+        self.his_avatar.set_property('dimension',value)
 
         self.avatarBox.add(self.avatar)
         self.his_avatarBox.add(self.his_avatar)
@@ -491,7 +491,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         inform that the other user has started typing
         """
         if account in self.members:
-            self.tab_label.set_image(gui.theme.typing)
+            self.tab_label.set_image(gui.theme.image_theme.typing)
             glib.timeout_add_seconds(3, self.update_tab)
 
     def on_emote(self, emote):
@@ -525,8 +525,10 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if transfer.contact.account == self.members[0]:
             contact = self._member_to_contact(self.members[0])
-            self.output.information(self.formatter, contact,
-                    _('File transfer accepted by %s') % (contact.display_name))
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('File transfer accepted by %s') % (contact.display_name), \
+            transfer.contact.account)
+            self.output.information(self.formatter, contact, message)
 
     def on_filetransfer_progress(self, transfer):
         ''' called every chunk received '''
@@ -540,8 +542,10 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if transfer.contact.account == self.members[0]:
             contact = self._member_to_contact(self.members[0])
-            self.output.information(self.formatter, contact,
-                    _('File transfer rejected by %s') % (contact.display_name))
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('File transfer rejected by %s') % (contact.display_name), \
+            transfer.contact.account)
+            self.output.information(self.formatter, contact, message)
 
     def on_filetransfer_completed(self, transfer):
         ''' called when a file transfer is completed '''
@@ -550,8 +554,9 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if transfer.contact.account == self.members[0]:
             contact = self._member_to_contact(self.members[0])
-            self.output.information(self.formatter, contact,
-                    _('File transfer completed!'))
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('File transfer completed!'), transfer.contact.account)
+            self.output.information(self.formatter, contact, message)
 
     def on_call_invitation(self, call, cid, westart=False):
         '''called when a new call is issued both from us or other party'''
@@ -610,18 +615,3 @@ class Conversation(gtk.VBox, gui.Conversation):
             path = path[5:] # 5 is len('file:')
         return path
 
-    def on_contact_left(self, account):
-        '''called when a contact lefts the conversation'''
-        gui.Conversation.on_contact_left(self,account)
-        contact = self.session.contacts.get(account)
-        if contact and len(self.members) > 1:
-            self.output.information(self.formatter, contact,
-                _('%s has left the conversation') % (contact.display_name))
-
-    def on_contact_joined(self, account):
-        '''called when a contact joins the conversation'''
-        gui.Conversation.on_contact_joined(self,account)
-        contact = self.session.contacts.get(account)
-        if contact and len(self.members) > 1:
-            self.output.information(self.formatter, contact,
-                _('%s has joined the conversation') % (contact.display_name))

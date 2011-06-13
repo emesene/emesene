@@ -18,13 +18,13 @@ class DisplayPic (QtGui.QLabel):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to display avatars, aka display pictures'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
 
     clicked = QtCore.pyqtSignal()
     
-    def __init__(self, session=None, default_pic=gui.theme.user, 
+    def __init__(self, session=None, default_pic=gui.theme.image_theme.user, 
                  size=None, clickable=True, parent=None):
         '''constructor'''
         QtGui.QLabel.__init__(self, parent)

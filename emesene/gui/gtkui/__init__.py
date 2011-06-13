@@ -35,8 +35,8 @@ def gtk_main(Controller):
     import AccountMenu
     import Avatar
     import AvatarChooser
+    import AvatarManager
     import CallWidget
-    import config_gtk
     import ContactMenu
     import ContactList
     import SyncTool
@@ -129,6 +129,7 @@ def setup():
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
     extension.category_register('avatar', Avatar.Avatar)
     extension.category_register('avatar renderer', Renderers.AvatarRenderer)
+    extension.category_register('avatar manager', AvatarManager.AvatarManager)
 
     extension.category_register('preferences', Preferences.Preferences,
             single_instance=True)
@@ -188,7 +189,6 @@ def setup():
         ConversationToolbar.ConversationToolbar)
     extension.category_register('plugin window', \
         PluginWindow.PluginWindow)
-    extension.category_register('preferences dialog', config_gtk.build_window)
     extension.category_register('image area selector', ImageAreaSelector.ImageAreaSelectorDialog)
     extension.category_register('filetransfer pool', FileTransferBarWidget.FileTransferBarWidget)
     extension.category_register('filetransfer widget', FileTransferWidget.FileTransferWidget)
@@ -200,8 +200,8 @@ def setup():
         extension.category_register('conversation output', TextBox.OutputText)
 
     if not PYNOTIFYERROR:
-        extension.category_register(('notificationGUI'), ThemeNotification.themeNotification)
-        extension.register(('notificationGUI'), PyNotification.pyNotification)
+        extension.category_register(('notificationGUI'), ThemeNotification.ThemeNotification)
+        extension.register(('notificationGUI'), PyNotification.PyNotification)
         extension.register(('notificationGUI'), GtkNotification.gtkNotification)
     else: #leave this here for Windows users!
         extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)

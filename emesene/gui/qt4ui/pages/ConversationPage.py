@@ -2,18 +2,21 @@
 
 '''This module contains classes to represent the conversation page.'''
 
+import logging
+
 import PyQt4.QtGui      as QtGui
 
 import gui
 import extension
 
+log = logging.getLogger('qt4ui.ConversationPage')
 
 class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     '''The Conversation Page'''
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to display the conversation screen'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     
@@ -29,10 +32,13 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         self.qt_parent = parent
         
         self.tabCloseRequested.connect(self._on_tab_close_request)
-        
+        # this was sbuscribed in base class' constructor. Now it's not
+        self.session.signals.contact_attr_changed.subscribe(
+                                    self._on_contact_attr_changed)
+
         
     def __del__(self):
-        print "conversation manager adieeeeeeeuuuu ;______;"
+        log.debug('conversation manager adieeeeeeeuuuu ;______;')
         
     def get_parent(self): # emesene's
         '''Return a reference to the top level window containing this page'''
@@ -56,7 +62,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         conversation.tab_index = self.addTab(conversation, 
                     (unicode(account.display_name)))
         self.setTabIcon(conversation.tab_index, 
-                        QtGui.QIcon(gui.theme.status_icons[account.status]))
+                        QtGui.QIcon(gui.theme.image_theme.status_icons[account.status]))
         return conversation
         
     def get_dimensions(self):
@@ -91,23 +97,24 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     
     def set_message_waiting(self, conversation, is_waiting): # emesene's
         '''Not Sure what to do here....'''
-        print conversation,
-        print is_waiting
+        log.info('Conversation: %s; is_waiting: %s' % 
+                 (conversation, is_waiting))
         
         
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):
         '''called when an attribute of a contact changes.
         Overridden to update tabs'''
-        gui.base.ConversationManager._on_contact_attr_changed(self, account, 
-                                                              change_type, 
-                                                              old_value, 
-                                                              do_notify)
+        # it's not subscribed in base class anymore, so don't invoke this
+        #gui.base.ConversationManager._on_contact_attr_changed(self, account, 
+        #                                                      change_type, 
+        #                                                      old_value, 
+        #                                                      do_notify)
         for conversation in self.conversations.values():
             if account in conversation.members:
                 index = self.indexOf(conversation)
                 account = self.session.contacts.get(conversation.members[0])
-                icon = QtGui.QIcon(gui.theme.status_icons[account.status])
+                icon = QtGui.QIcon(gui.theme.image_theme.status_icons[account.status])
                 self.setTabIcon(index, icon)
                 self.setTabText(index, unicode(account.display_name))
                 

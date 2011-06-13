@@ -113,6 +113,10 @@ class OutputView(webkit.WebView):
             html = self.theme.format_outgoing(msg, style, cedict, cedir)
             self.last_incoming = False
 
+        if msg.type == "status":
+            self.last_incoming = None
+            msg.first = True
+
         if msg.first:
             function = "appendMessage('" + html + "')"
         else:
@@ -206,7 +210,7 @@ class OutputText(gtk.ScrolledWindow):
         self.set_shadow_type(gtk.SHADOW_IN)
         self._texts = []
         self.loaded = False
-        picture = utils.path_to_url(os.path.abspath(gui.theme.user))
+        picture = utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
 
         self.view = OutputView(gui.theme.conv_theme, "", "", "", picture,
                 picture, add_emoticon_cb)
@@ -239,11 +243,7 @@ class OutputText(gtk.ScrolledWindow):
 
     def send_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''
-        if message.type is e3.Message.TYPE_NUDGE:
-            message.body = _('You just sent a nudge!')
-            msg = gui.Message.from_information(contact, message, message.timestamp)
-        else:
-            msg = gui.Message.from_contact(contact, message, is_first, False, message.timestamp)
+        msg = gui.Message.from_contact(contact, message, is_first, False, message.timestamp)
         self.view.add_message(msg, message.style, cedict, cedir)
 
     def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
@@ -254,6 +254,7 @@ class OutputText(gtk.ScrolledWindow):
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
         msg = gui.Message.from_information(contact, message)
+        msg.message = Renderers.msnplus_to_plain_text(msg.message)
         self.view.add_message(msg, None, None, None)
 
     def update_p2p(self, account, _type, *what):

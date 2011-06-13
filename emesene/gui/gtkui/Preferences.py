@@ -66,16 +66,12 @@ class Preferences(gtk.Window):
 
         ''' TREE VIEW STUFF '''
         # Create the list store model for the treeview.
-        listStore = gtk.ListStore(gtk.gdk.Pixbuf, str)
+        self.listStore = gtk.ListStore(gtk.gdk.Pixbuf, str)
 
-        for i in LIST:
-            # we should use always the same icon size,
-            # we can remove that field in LIST
-            listStore.append([self.render_icon(i['stock_id'],
-                             gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
+
 
         # Create the TreeView
-        treeView = gtk.TreeView(listStore)
+        treeView = gtk.TreeView(self.listStore)
 
         # Create the renders
         cellText = gtk.CellRendererText()
@@ -135,6 +131,29 @@ class Preferences(gtk.Window):
         self.extensions_page = self.extension
         self.plugins_page = self.plugins
 
+        self.__init_list()
+
+        self.connect('delete_event', self.hide_on_delete)
+        self.add(vbox)
+        vbox.show_all()
+
+    def remove_from_list(self, icon, text, page):
+
+        LIST.remove({'stock_id' : icon,'text' : text})
+        self.page_dict.remove(page)
+        num = self.notebook.page_num(page)
+        self.notebook.remove_page(num)
+        self.__refresh_list()    
+
+    def add_to_list(self, icon, text, page):
+
+        LIST.append({'stock_id' : icon,'text' : text})
+        self.page_dict.append(page)
+        self.notebook.append_page(page)
+        self.__refresh_list()
+
+    def __init_list(self):
+
         # Whack the pages into a dict for future reference
 
         self.page_dict.append(self.interface_page)
@@ -145,19 +164,32 @@ class Preferences(gtk.Window):
         self.page_dict.append(self.extensions_page)
         self.page_dict.append(self.plugins_page)
 
+        for i in LIST:
+            # we should use always the same icon size,
+            # we can remove that field in LIST
+            self.listStore.append([self.render_icon(i['stock_id'],
+                             gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
+
         if 'msn' in self.session.SERVICES: # only when session is papylib.
-            listStore.append([self.render_icon(gtk.STOCK_NETWORK,
+            LIST.append({'stock_id' : gtk.STOCK_NETWORK,'text' : _('Live Messenger')})
+            self.listStore.append([self.render_icon(gtk.STOCK_NETWORK,
                              gtk.ICON_SIZE_LARGE_TOOLBAR), _('Live Messenger')])
-            self.msn_papylib = MSNPapylib(session)
+            self.msn_papylib = MSNPapylib(self.session)
             self.msn_papylib_page = self.msn_papylib
             self.page_dict.append(self.msn_papylib_page)
 
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
 
-        self.connect('delete_event', self.hide_on_delete)
-        self.add(vbox)
-        vbox.show_all()
+    def __refresh_list(self):
+
+        self.listStore.clear()
+
+        for i in LIST:
+            # we should use always the same icon size,
+            # we can remove that field in LIST
+            self.listStore.append([self.render_icon(i['stock_id'],
+                             gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
 
     def _on_row_activated(self,treeview):
         # Get information about the row that has been selected
@@ -316,19 +348,11 @@ class BaseTable(gtk.Table):
 
         self.append_row(hbox, None)
 
-    def create_combo_with_label(self, text, getter, property_name,values=None):
-        """creates and return a new ComboBox with a label and append values to the combo
-        """
+    def fill_combo(self, combo, getter, property_name, values=None):
         if values:
             default = getter()[values.index(self.get_attr(property_name))]
         else:
             default = self.get_attr(property_name)
-        hbox = gtk.HBox()
-        hbox.set_homogeneous(True)
-        label = gtk.Label(text)
-        label.set_alignment(0.0, 0.5)
-        combo = gtk.combo_box_new_text()
-
         count = 0
         default_count = 0
         for item in getter():
@@ -340,10 +364,26 @@ class BaseTable(gtk.Table):
 
         combo.set_active(default_count)
 
+    def create_combo (self, getter, property_name, values=None, changed_cb = None):
+        combo = gtk.combo_box_new_text()
+        self.fill_combo(combo, getter, property_name, values)
+        if changed_cb:
+            combo.connect('changed', changed_cb, property_name, values)
+        else:
+            combo.connect('changed', self.on_combo_changed, property_name, values)
+        return combo
+
+    def create_combo_with_label(self, text, getter, property_name,values=None, changed_cb = None):
+        """creates and return a new ComboBox with a label and append values to the combo
+        """
+        hbox = gtk.HBox()
+        hbox.set_homogeneous(True)
+        label = gtk.Label(text)
+        label.set_alignment(0.0, 0.5)
+        combo = self.create_combo(getter, property_name, values, changed_cb)
+
         hbox.pack_start(label, True, True)
         hbox.pack_start(combo, False)
-
-        combo.connect('changed', self.on_combo_changed, property_name, values)
 
         return hbox
 
@@ -630,7 +670,7 @@ class Theme(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 5, 1)
+        BaseTable.__init__(self, 6, 1)
         self.set_border_width(5)
         self.session = session
 
@@ -638,7 +678,8 @@ class Theme(BaseTable):
 
         self.session.config.get_or_set('adium_theme', 'renkoo')
 
-        cb_override_text_color = self.create_check(_('Override incoming text color'), 'session.config.b_override_text_color')
+        cb_override_text_color = self.create_check(_('Override incoming text color'),
+            'session.config.b_override_text_color')
         self.session.config.subscribe(self._on_cb_override_text_color_toggled,
             'b_override_text_color')
 
@@ -657,7 +698,8 @@ class Theme(BaseTable):
 
         self.append_row(h_color_box)
         #update ColorButton sensitive
-        self._on_cb_override_text_color_toggled(self.session.config.get_or_set('b_override_text_color', False))
+        self._on_cb_override_text_color_toggled(
+                self.session.config.get_or_set('b_override_text_color', False))
 
         self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
@@ -665,15 +707,42 @@ class Theme(BaseTable):
             'session.config.sound_theme')
         self.append_combo(_('Emote theme'), gui.theme.get_emote_themes,
             'session.config.emote_theme')
-        self.append_combo(_('Adium theme'), gui.theme.get_adium_themes,
-            'session.config.adium_theme')
+        self.adium_theme_combo = self.create_combo_with_label(_('Adium theme'),
+                gui.theme.get_adium_themes, 'session.config.adium_theme',
+                changed_cb = self._on_adium_theme_combo_changed)
+        self.append_row(self.adium_theme_combo)
+        hbox = gtk.HBox()
+        hbox.set_homogeneous(True)
+        label = gtk.Label(_('Adium theme variant'))
+        label.set_alignment(0.0, 0.5)
+        self.adium_variant_combo = self.create_combo(gui.theme.conv_theme.get_theme_variants,
+                'session.config.adium_theme_variant')
+        hbox.pack_start(label, True, True)
+        hbox.pack_start(self.adium_variant_combo, False)
+        self.append_row(hbox, None)
+
         self.append_entry_default(_('Nick format'), 'nick',
                 'session.config.nick_template_clist', ContactList.NICK_TPL)
         self.append_entry_default(_('Group format'), 'group',
                 'session.config.group_template', ContactList.GROUP_TPL)
 
-        self.add_button(_('Apply'), 0, 7,
+        self.add_button(_('Apply'), 0, 8,
                 self.on_redraw_main_screen, 0, 0)
+
+    def _on_adium_theme_combo_changed(self, combo, property_name, values=None):
+        #update adium variants combo
+        self.on_combo_changed(combo, property_name, values)
+
+        image_name = self.session.config.get_or_set('image_theme', 'default')
+        emote_name = self.session.config.get_or_set('emote_theme', 'default')
+        sound_name = self.session.config.get_or_set('sound_theme', 'default')
+        conv_name = self.session.config.get_or_set('adium_theme',
+                'renkoo.AdiumMessagesStyle')
+        gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
+        #clear combo
+        self.adium_variant_combo.get_model().clear()
+        self.fill_combo(self.adium_variant_combo,
+            gui.theme.conv_theme.get_theme_variants, 'session.config.adium_theme_variant')
 
     def _on_cb_override_text_color_toggled(self, value):
         if value:
@@ -830,10 +899,13 @@ class DesktopTab(BaseTable):
         self.set_border_width(5)
         self.session = session
 
+        self.append_markup('<b>'+_('Logger')+'</b>')
+        self.append_check(_('Enable logger'), 
+                          'session.config.b_log_enabled')
         self.append_markup('<b>'+_('File transfers')+'</b>')
         self.append_check(_('Sort received files by sender'), 
                           'session.config.b_download_folder_per_account')
-        self.add_text(_('Save files to:'), 0, 2, True)
+        self.add_text(_('Save files to:'), 0, 4, True)
 
         def on_path_selected(f_chooser):
             ''' updates the download dir config value '''
@@ -849,8 +921,7 @@ class DesktopTab(BaseTable):
         fc_button.set_current_folder(self.session.config.get_or_set("download_folder", \
                 e3.common.locations.downloads()))
         path_chooser.connect('selection-changed', on_path_selected)
-        self.attach(fc_button, 2, 3, 2, 3, gtk.EXPAND|gtk.FILL, 0)
-
+        self.attach(fc_button, 2, 3, 4, 5, gtk.EXPAND|gtk.FILL, 0)
 
 class MSNPapylib(BaseTable):
     """ This panel contains some msn-papylib specific settings """

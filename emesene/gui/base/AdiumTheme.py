@@ -30,7 +30,7 @@ class AdiumTheme(object):
     '''a class that contains information of a adium theme
     '''
 
-    def __init__(self, path, timefmt):
+    def __init__(self, path, timefmt, variant):
         '''constructor
 
         get information from the theme located in path
@@ -47,6 +47,7 @@ class AdiumTheme(object):
         self.outgoing_next  = None
         self.info           = None
 
+        self.variant        = variant
         self.load_information(path)
 
     def load_information(self, path):
@@ -77,7 +78,9 @@ class AdiumTheme(object):
         with the vars replaced
         '''
         # fallback madness, some repetition but well..
-        if not msg.first:
+        if (msg.type == "status" and self.status):
+            template = self.status
+        elif not msg.first:
             if self.incoming_next is None:
                 if self.incoming is None:
                     template = self.content
@@ -88,10 +91,7 @@ class AdiumTheme(object):
         elif self.incoming is None:
             template = self.content
         else:
-            if (msg.type=="status" and self.status):
-                template = self.status
-            else:
-                template = self.incoming
+            template = self.incoming
 
         return self.replace(template, msg, style, cedict, cedir)
 
@@ -100,7 +100,9 @@ class AdiumTheme(object):
         with the vars replaced
         '''
         # fallback madness, some repetition but well..
-        if not msg.first:
+        if (msg.type == "status" and self.status):
+            template = self.status
+        elif not msg.first:
             if self.outgoing_next is None:
                 if self.outgoing is None:
                     if self.incoming is None:
@@ -117,10 +119,7 @@ class AdiumTheme(object):
             else:
                 template = self.incoming
         else:
-            if (msg.type=="status" and self.status):
-                template = self.status
-            else:
-                template = self.outgoing
+            template = self.outgoing
 
         return self.replace(template, msg, style, cedict, cedir)
 
@@ -201,12 +200,16 @@ class AdiumTheme(object):
         template = read_file(path)
         resources_url = MarkupParser.path_to_url(self.resources_path)
         css_path = urljoin(resources_url, "main.css")
-        variant_name = self.info.get('DefaultVariant', None)
+
+        if self.variant:
+            variant_name = self.variant
+        else:
+            variant_name = self.info.get('DefaultVariant', None)
         template = template.replace("%@", resources_url + "/", 1)
         template = template.replace("%@", css_path, 1)
 
         if variant_name is not None:
-            variant_css_path = "file://" + urljoin(resources_url,
+            variant_css_path = urljoin(resources_url,
                     "Variants", variant_name + ".css")
             variant_tag = '<style id="mainStyle" type="text/css"' + \
                 'media="screen,print">	@import url( "' + variant_css_path + '" ); </style>'
@@ -231,6 +234,16 @@ class AdiumTheme(object):
         template = template.replace("%@", footer, 1)
 
         return template
+
+    def get_theme_variants(self):
+        variants = []
+        path_variants = os.path.join(self.resources_path, 'Variants')
+        for root, dirs, files in os.walk(path_variants):
+            for f in files:
+                basename, extension = os.path.splitext(str(f))
+                if extension == ".css":
+                    variants.append(basename)
+        return variants
 
 def read_file(*args):
     '''read file if exists and is readable, return None otherwise
@@ -273,4 +286,5 @@ def replace_time(match):
 
 def style_message(msgtext, style):
     '''add html markupt to msgtext to format the style of the message'''
-    return '<span style="%s">%s</span>' % (style.to_css(), msgtext)
+    message = '<span style="display: inline; white-space: pre-wrap; %s">%s</span>' % (style.to_css(), msgtext)
+    return message

@@ -18,12 +18,12 @@ class SmileyPopupChooser (QtGui.QDockWidget):
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to select an emoticon'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     
     _FADE_TIME = 200
-    emoticon_selected = QtCore.pyqtSignal("QString")
+    emoticon_selected = QtCore.pyqtSignal('QString')
     
     def __init__(self, parent=None):
         '''Constructor'''
@@ -33,16 +33,22 @@ class SmileyPopupChooser (QtGui.QDockWidget):
         self._fade_timer = QtCore.QTimer()
         self._fade_timer.setSingleShot(False)
 
-        smiley_dict = gui.theme.EMOTES
+        emote_theme = gui.theme.emote_theme
+        smiley_dict = emote_theme.get_emotes()
         smiley_button_list = []
+        added_smileys = []
     
-        for i in smiley_dict.keys():
-            icon_path = gui.theme.emote_to_path(i)
+        for shortcut, name in smiley_dict.iteritems():
+            # avoid doubled smileys:
+            if name in added_smileys:
+                continue
+            added_smileys.append(name)
+            icon_path = emote_theme.emote_to_path(shortcut)
             if not icon_path:
                 continue
             icon_path = icon_path[6:]
             icon = QtGui.QIcon(icon_path)
-            button = SmileyButton(icon, smiley_dict[i],  i)
+            button = SmileyButton(icon, name, shortcut)
             button.setFlat(True)
             width, height = button.size().width(), button.size().height()
             button.resize(min(width, height), min(width, height))
@@ -53,9 +59,14 @@ class SmileyPopupChooser (QtGui.QDockWidget):
         # constraints: x*y = len(smiley_dict) = r AND  x/y = 1.6
         # which gives: y = sqrt(num_elems/r) AND x = sqrt(r*num_elems)
         num_elems = len(smiley_button_list)
+        # number of columns:
         self.num_columns = math.ceil(
-                            math.sqrt(1.6 * num_elems)) #numero di colonne
-        self.num_rows = num_elems / self.num_columns #numero di righe
+                            math.sqrt(1.6 * num_elems))
+        # number of rows:
+        self.num_rows = math.ceil(num_elems / self.num_columns)
+        # convert these two float numbers into integers:
+        self.num_columns = math.trunc(self.num_columns)
+        self.num_rows    = math.trunc(self.num_rows)
         
         grid = QtGui.QGridLayout()
         grid.setSpacing(0)
@@ -146,11 +157,11 @@ class SmileyButton (QtGui.QPushButton):
     smiley chooser panel.
     This is a KPushButton with the shortcut as tooltip, and 
     fixed dimension.'''
-    selected = QtCore.pyqtSignal("QString")
+    selected = QtCore.pyqtSignal('QString')
     def __init__(self, icon, tooltip, shortcut,  parent=None):
         '''Constructor'''
         QtGui.QPushButton.__init__(self, icon, QtCore.QString(), )
-        self.setToolTip("<b>%s</b> %s" % (shortcut, tooltip) )
+        self.setToolTip('<b>%s</b> %s' % (shortcut, tooltip) )
         self.shortcut = QtCore.QString(shortcut)
         self.clicked.connect(self._emit_signal)
         

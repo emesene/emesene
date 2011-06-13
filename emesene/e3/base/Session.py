@@ -75,6 +75,15 @@ class Session(object):
         self.config_dir.add_path("log", "log")
         self.logger = Logger.LoggerProcess(self.config_dir.get_path('log'))
         self.logger.start()
+        self.config.get_or_set('b_log_enabled', True)
+
+    def log(self, event, status, payload, src, dest = None, new_time = None, cid = None):
+        if self.config.get_or_set('b_log_enabled', True):
+            self.logger.log(event,status,payload,src,dest,new_time,cid)
+
+    def logs(self, logs):
+        if self.config.get_or_set('b_log_enabled', True):
+            self.logger.logs(logs)
 
     def _get_account(self):
         '''return the value of account'''
@@ -236,4 +245,21 @@ class Session(object):
 
     def cancel_call(self, call):
         self.add_action(Action.ACTION_CALL_CANCEL, (call,))
+
+for event_name in EVENTS:
+    fname = event_name.replace(" ", "_")
+    ename = "EVENT_%s" % fname.upper()
+    event = getattr(Event, ename)
+
+    def make_cb(event):
+        '''avoid being bitten by the lambda/closure bug'''
+        return lambda self, *args: Session.add_event(self, event, *args)
+
+    if event is None:
+        raise Exception("Event %s not found fixme right now" % ename)
+
+    if getattr(Session, fname, None) is not None:
+        raise Exception("function collision %s fixme right now" % fname)
+
+    setattr(Session, fname, make_cb(event))
 

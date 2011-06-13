@@ -414,9 +414,9 @@ class Dialog(object):
         a tuple of mail, nick that represent all the users that added you,
         the way you confirm (one or more dialogs) doesn't matter, but
         you should call the response callback only once with a dict
-        with two keys 'accepted' and 'rejected' and a tuple of accounts as
-        values
-        '''
+        with two keys 'accepted' and 'rejected' and a list of mail
+        addresses as values
+        '''    
         dialog = AddBuddy(response_cb)
 
         for account, nick in accounts:
@@ -520,7 +520,7 @@ class Dialog(object):
         '''show a dialog with the group name and ask to rename it, the
         response callback receives stock.ACCEPT, stock.CANCEL or stock.CLOSE
         the old and the new name.
-        cb args: response, old_name, new_name
+        cb args: response, group, new_name
         '''
         window = cls.entry_window(_("New group name"), group.name, response_cb,
             title, group)
@@ -698,7 +698,7 @@ class Dialog(object):
         box.set_property('column-spacing', 4)
 
         try:
-            s_name = getattr(gui.theme, "service_" + service)
+            s_name = getattr(gui.theme.image_theme, "service_" + service)
             session_pixbuf = utils.safe_gtk_pixbuf_load(s_name)
         except:
             session_pixbuf = None
@@ -861,7 +861,7 @@ class Dialog(object):
         if utils.file_readable(last_avatar):
             pixbuf = gtk.gdk.pixbuf_new_from_file(last_avatar)
         else:
-            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.logo)
+            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.image_theme.logo)
 
         avatar.set_from_pixbuf(pixbuf)
         avatarEventBox = gtk.EventBox()
@@ -1207,7 +1207,7 @@ class EmotesWindow(gtk.Window):
         self.max_width = max_width
         self.emote_selected = emote_selected
 
-        emotes_count = gui.theme.get_emotes_count() # TODO: remove me
+        emotes_count = gui.theme.emote_theme.get_emotes_count() # TODO: remove me
         rows = emotes_count/max_width
 
         self.table = gtk.Table(max_width, rows)
@@ -1248,18 +1248,8 @@ class EmotesWindow(gtk.Window):
     def _get_emo_image(self, path, size):
         '''try to return an image from path
         '''
-        width, height = size
-        try:
-            animation = gtk.gdk.PixbufAnimation(path)
-        except gobject.GError:
-            return None
-
-        if animation.is_static_image():
-            pix = utils.gtk_pixbuf_load(path, (width, height))
-            picture = gtk.image_new_from_pixbuf(pix)
-        else:
-            myanimation = utils.simple_animation_scale(path, width, height)
-            picture = gtk.image_new_from_animation(myanimation)
+        pix = utils.safe_gtk_pixbuf_load(path, size)
+        picture = gtk.image_new_from_pixbuf(pix)
 
         return picture
 
@@ -1270,7 +1260,10 @@ class EmotesWindow(gtk.Window):
         count = 0
         column = 0
         row = 0
-        for shortcut, name in gui.theme.EMOTES.iteritems():
+
+        emote_theme = gui.theme.emote_theme
+
+        for shortcut, name in emote_theme.get_emotes().iteritems():
             if name in emotes:
                 continue
             self.shortcut_list.append(shortcut)
@@ -1279,7 +1272,7 @@ class EmotesWindow(gtk.Window):
             column = count % columns
             row = count / columns
             button = gtk.Button()
-            path = gui.theme.emote_to_path(shortcut, True)
+            path = emote_theme.emote_to_path(shortcut, True)
 
             if path is None:
                 log.debug(shortcut + ' has no path')
@@ -1398,9 +1391,19 @@ class InviteWindow(gtk.Window):
         self.callback = callback
         ContactList = extension.get_default('contact list')
         self.contact_list = ContactList(session)
+        self.contact_list.hide_on_filtering = True
         self.contact_list.nick_template = \
             '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
+
+        order_by_group = self.contact_list.session.config.b_order_by_group
+        show_blocked = self.contact_list.session.config.b_show_blocked
+        show_offline = self.contact_list.session.config.b_show_offline
         self.contact_list.order_by_group = False
+        self.contact_list.show_blocked = False
+        self.contact_list.show_offline = False
+        self.contact_list.session.config.b_order_by_group = order_by_group
+        self.contact_list.session.config.b_show_blocked = show_blocked
+        self.contact_list.session.config.b_show_offline = show_offline
 
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -1434,9 +1437,14 @@ class InviteWindow(gtk.Window):
         badd.connect('clicked', self._on_add_clicked)
         bclose.connect('clicked', lambda *args: self.hide())
         search.connect('changed', self._on_search_changed)
+        self.connect('key-press-event', self._on_key_press)
         self.connect('delete-event', lambda *args: self.hide())
         self.contact_list.contact_selected.subscribe(self._on_contact_selected)
         self.contact_list.fill()
+
+    def _on_key_press(self, widget, event):
+        if event.keyval == gtk.keysyms.Escape:
+            self.hide()
 
     def _on_add_clicked(self, button):
         """
@@ -1690,6 +1698,11 @@ class ProgressWindow(gtk.Window):
         gtk.Window.__init__(self)
         self.set_title(title)
         self.set_role("dialog")
+        self.set_modal(True)
+        self.buttoncancel = gtk.Button()
+        self.buttoncancel.set_label(_("Cancel"))
+        self.buttoncancel.connect('clicked', callback)
+        self.connect('delete-event', callback)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_default_size(300, 50)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -1699,6 +1712,7 @@ class ProgressWindow(gtk.Window):
         self.desclabel = gtk.Label()
         vbox.pack_start(self.desclabel)
         vbox.pack_start(self.progressbar)
+        vbox.pack_start(self.buttoncancel)
         self.add(vbox)
         
     def update(self, progress):

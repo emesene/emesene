@@ -2,6 +2,8 @@
 
 ''' This module contains the PreseceCombo class'''
 
+import logging
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
@@ -12,12 +14,14 @@ import gui
 #(a Qt Delegate?! Does KComboBox support them?)
 #TODO: put inizialization out of constructor, add setstatusValues method.
 
+log = logging.getLogger('qt4ui.widgets.StatusCombo')
+
 class StatusCombo(QtGui.QComboBox):
     '''A presence selection widget'''
     # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to select the status'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
 
@@ -32,12 +36,12 @@ class StatusCombo(QtGui.QComboBox):
 
         for status_key in self._status_values:
             self._status_strings[status_key] = \
-                                    e3.status.STATUS[status_key].capitalize()
+                        unicode(e3.status.STATUS[status_key]).capitalize()
 
         #status_key is of e3.status.ALL type
         #statusValue is a dict wich associates a e3.status with a string
         for status_key in self._status_values:
-            icon_path = gui.theme.status_icons[status_key]
+            icon_path = gui.theme.image_theme.status_icons[status_key]
             self.addItem(QtGui.QIcon(icon_path),
                          self._status_strings[status_key], status_key)
 
@@ -71,8 +75,8 @@ class StatusCombo(QtGui.QComboBox):
     def setCurrentIndex(self, index):
         '''sets the status by the index'''
         # pylint: disable=C0103
-        print "Oh, boy.... what an ugly way to set the displayed status!<br>\
-                    Come on, use set_status() instead! :("
+        log.warning('Oh, boy.... what an ugly way to set the displayed status!<br>\
+                    Come on, use set_status() instead! :(')
         #the personalinfoview holds a string... so this is necessary...
         #maybe this will be removed in the future... I hope...
         QtGui.QComboBox.setCurrentIndex(self, index)

@@ -2,6 +2,7 @@
 
 '''This module contains the AdiumChatOutput class'''
 import base64
+import webbrowser
 
 from PyQt4      import QtGui
 from PyQt4      import QtCore
@@ -11,6 +12,7 @@ import e3
 import gui
 
 from gui.qt4ui  import Utils
+from gui.qt4ui.Utils import tr
 
 
 class AdiumChatOutput (QtGui.QScrollArea):
@@ -29,20 +31,26 @@ class AdiumChatOutput (QtGui.QScrollArea):
         QtGui.QScrollArea.__init__(self, parent)
         
         self._qwebview = QtWebKit.QWebView(self)
-        self._qwebview.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
         self._last_sender = None
         
         self.setWidget(self._qwebview)
         self.setWidgetResizable(True)
-        pic = gui.theme.user
+        self._qwebview.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
+        self._qwebview.page().setLinkDelegationPolicy(
+                                    QtWebKit.QWebPage.DelegateAllLinks)
+        
+        pic = gui.theme.image_theme.user
         body = gui.theme.conv_theme.get_body('', '', '', pic, pic)
         self._qwebview.setHtml(body)
+        
+        self._qwebview.linkClicked.connect(
+                        lambda qt_url: webbrowser.open(qt_url.toString()) )
                             
                             
     def _append_message(self, contact, message, cedict,
                         cedir, is_incoming, timestamp=None):
         
-        msg = gui.Message.from_contact(contact, message.body, first=True,
+        msg = gui.Message.from_contact(contact, message, first=True,
                                        incomming=is_incoming, tstamp=timestamp)
         if msg.sender != self._last_sender:
             function = "appendMessage('%s')"
@@ -66,14 +74,12 @@ class AdiumChatOutput (QtGui.QScrollArea):
         '''add an information message to the widget'''
         # TODO: make it with a status message
         self._append_message(contact, message, cedict={}, 
-                             cedir='', style=None, is_incoming=True)
+                             cedir='', is_incoming=True)
         
         
     def send_message(self, formatter, contact, message, 
                      cedict, cedir, is_first):
-        '''add a message to the widget'''
-        if message.type is e3.Message.TYPE_NUDGE:
-            message.body = _('You just sent a nudge!')        
+        '''add a message to the widget'''       
         self._append_message(contact, message, cedict, 
                              cedir, is_incoming=False)
         

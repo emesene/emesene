@@ -5,6 +5,8 @@
 
 import PyQt4.QtGui      as QtGui
 
+from gui.qt4ui.Utils import tr
+
 import e3
 import gui
 
@@ -22,20 +24,19 @@ class StatusMenu (QtGui.QMenu):
 
         on_status_selected -- a callback that receives the status when changed
         '''
-        QtGui.QMenu.__init__(self, 'Status', parent)
+        QtGui.QMenu.__init__(self, tr('Status'), parent)
         self._on_status_selected = on_status_selected
-        self._status_actions = {}
 
-        for stat in e3.status.ORDERED:
-            temp_item = QtGui.QAction(
-                    QtGui.QIcon(QtGui.QPixmap(gui.theme.status_icons[stat])),
-                    e3.status.STATUS[stat].capitalize(),
+        for status in e3.status.ORDERED:
+            action = QtGui.QAction(
+                    QtGui.QIcon(QtGui.QPixmap(gui.theme.image_theme.status_icons[status])),
+                    unicode(e3.status.STATUS[status]).capitalize(),
                     self)
-            temp_item.triggered.connect(self._on_activate)
-            self._status_actions[stat] = temp_item
-            self.addAction(temp_item)
+            action.setData(status)
+            self.triggered.connect(self._on_activate)
+            self.addAction(action)
 
-    def _on_activate(self):
+    def _on_activate(self, action):
         '''method called when a status menu item is called'''
-
-        self._on_status_selected(e3.status.ONLINE)
+        status = action.data().toPyObject()
+        self._on_status_selected(status)

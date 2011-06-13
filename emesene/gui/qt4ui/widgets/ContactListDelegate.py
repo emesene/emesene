@@ -2,15 +2,20 @@
 
 '''This module contains the ContactList class'''
 
+import logging
+
 from PyQt4      import QtCore
 from PyQt4      import QtGui
 
 import gui
+from gui.base import Plus
 
 from gui.qt4ui import Utils
 from gui.qt4ui.widgets.ContactListModel import Role
 from gui.qt4ui.widgets.ContactListModel import ContactListModel
 
+
+log = logging.getLogger('qt4ui.widgets.ContactListDelegate')
 
 class ContactListDelegate (QtGui.QStyledItemDelegate):
     '''A Qt Delegate to paint an item of the contact list'''
@@ -40,7 +45,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         self.parent().update()
         
     def _on_template_change(self, *args):
-        print "template changed"
+        log.info('template changed')
         self.parent().repaint()
     
     def _build_display_role(self, index, is_group=False):
@@ -49,7 +54,8 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         data_role = model.data(index, Role.DataRole).toPyObject()
         if is_group:
             name = model.data(index, Role.DisplayRole).toPyObject()
-            name = Utils.escape(name)
+            
+            #name = Utils.escape(name)
             online = model.data(index, Role.OnlCountRole).toPyObject()
             total = model.data(index, Role.TotalCountRole).toPyObject()
             display_role = self._config.group_template
@@ -61,9 +67,9 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             # TODO: consider changing how data is stored inside the model, 
             # if useful
             display_role = self._format_nick(data_role, 
-                (str(model.data(index, Role.DisplayRole).toPyObject()),
+                (unicode(model.data(index, Role.DisplayRole).toPyObject()),
                  data_role.nick,
-                 str(model.data(index, Role.MessageRole).toPyObject())))
+                 unicode(model.data(index, Role.MessageRole).toPyObject())))
             display_role = _format_contact_display_role(display_role)
     #        message = model.data(index, Role.MessageRole).toString()
     #        if not message.isEmpty():
@@ -93,7 +99,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         painter.setClipping(True)
         # -> Draw the skeleton of a ItemView widget: highlighting, selection...
         QtGui.QApplication.style().drawControl(QtGui.QStyle.CE_ItemViewItem, 
-                                               option, painter, option.widget)
+                                               option, painter, self.parent())
         status = model.data(index, Role.StatusRole).toPyObject()
         text_doc = QtGui.QTextDocument()
         
@@ -120,7 +126,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             picture_path = model.data(index, Role.DecorationRole).toString()
             picture = QtGui.QPixmap(picture_path)
             if picture.isNull():
-                picture = QtGui.QPixmap(gui.theme.user)
+                picture = QtGui.QPixmap(gui.theme.image_theme.user)
             else:
                 picture = Utils.pixmap_rounder(picture)
             # calculate the target position
@@ -132,7 +138,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             painter.drawPixmap(target, picture, source)
     
             # -> start drawing the status emblem
-            picture_path  = gui.theme.status_icons[
+            picture_path  = gui.theme.image_theme.status_icons[
                             model.data(index, Role.StatusRole).toPyObject()]
             picture = QtGui.QPixmap(picture_path)
             source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
@@ -147,7 +153,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             
             # -> start drawing the 'blocked' emblem
             if model.data(index, Role.BlockedRole).toPyObject():
-                picture_path = gui.theme.blocked_overlay
+                picture_path = gui.theme.image_theme.blocked_overlay
                 picture = QtGui.QPixmap(picture_path)
                 source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0),
                                         QtCore.QSizeF(picture.size()) )
@@ -209,16 +215,22 @@ def _format_contact_display_role(text):
     scales them.'''
     # TODO: calculate smiley size from text's size.
     smiley_size = 16
-    text = Utils.escape(text)
+    #text = Utils.escape(text)
+    #log.debug(text)
     text = replace_markup(text)
+    # temporary stuff:
+    text = Plus.msnplus_strip(text)
+    text = text.replace('[C=c10ud]', '')
     text = Utils.parse_emotes(unicode(text))
     text = text.replace('<img src', '<img width="%d" height="%d" src' % 
                  (smiley_size, smiley_size))
+    #log.debug(text)
     return text
     
 def replace_markup(markup):
     '''replace the tags defined in gui.base.ContactList'''
     markup = markup.replace("[$NL]", "<br />")
+    markup = markup.replace("\n",    "<br />")
 
     markup = markup.replace("[$small]", "<small>")
     markup = markup.replace("[$/small]", "</small>")

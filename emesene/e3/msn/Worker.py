@@ -467,13 +467,13 @@ class Worker(e3.Worker):
         if old_status != status_:
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 'status', old_status)
-            self.session.logger.log('status change', status_, str(status_),
+            self.session.log('status change', status_, str(status_),
                 log_account)
 
         if old_nick != nick:
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 'nick', old_nick)
-            self.session.logger.log('nick change', status_, nick,
+            self.session.log('nick change', status_, nick,
                 log_account)
 
     def _on_information_change(self, message):
@@ -501,7 +501,7 @@ class Worker(e3.Worker):
         if old_message != contact.message:
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 'message', old_message)
-            self.session.logger.log('message change', contact.status,
+            self.session.log('message change', contact.status,
                 contact.message, e3.Logger.Account.from_contact(contact))
 
         if old_media == contact.media:
@@ -551,13 +551,13 @@ class Worker(e3.Worker):
 
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 change_type, old_status, do_notify)
-            self.session.logger.log('status change', status_, str(status_),
+            self.session.log('status change', status_, str(status_),
                 log_account)
 
         if old_nick != nick:
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 'nick', old_nick)
-            self.session.logger.log('nick change', status_, nick,
+            self.session.log('nick change', status_, nick,
                 log_account)
 
         # TODO: here we should check the old and the new msnobj and request the
@@ -578,7 +578,7 @@ class Worker(e3.Worker):
         if old_status != contact.status:
             self.session.add_event(e3.Event.EVENT_CONTACT_ATTR_CHANGED, account,
                 'offline', old_status)
-            self.session.logger.log('status change', e3.status.OFFLINE,
+            self.session.log('status change', e3.status.OFFLINE,
                 str(e3.status.OFFLINE),
                 e3.Logger.Account.from_contact(contact))
 

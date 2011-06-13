@@ -35,7 +35,10 @@ X Implement Preferences
 
 > Honour options
 - Implement file transfer
-- Implement multiple conversations
+- Implement multiple conversations:
+	- contact's display pic (smooth transitions)
+	- User Info
+	- various stuff
 
 X Support for animated avatars
 
@@ -49,3 +52,4 @@ X No need for case-insensitive smiley shortcuts search
 - Think about KDE4 integration
 - Smooth transitions between  TopLevel window's pages
 - Fix Windows problems
+

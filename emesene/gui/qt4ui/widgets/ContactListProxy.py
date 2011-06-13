@@ -2,6 +2,8 @@
 
 '''This module constains the ContactListProxy class'''
 
+import logging
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 from PyQt4.QtCore   import Qt
@@ -26,7 +28,7 @@ from gui.qt4ui.widgets.ContactListModel import Role
 #                              index.isValid())
 #        return self.data(index, Role.FilterRole).toPyObject()
             
-    
+log = logging.getLogger('qt4ui.widgets.ContactListProxy')
 
 class ContactListProxy (QtGui.QSortFilterProxyModel):
     '''This class provides a proxy to access the contact list
@@ -63,29 +65,29 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
             uid = model.data(index, Role.UidRole).toPyObject()
             if self._config.b_order_by_group and \
                 uid == ContactListModel.ONL_GRP_UID :
-                    print '*** Group %s filtered because of _order_by_group=%s' % (
-                            model.data(index, Role.DisplayRole).toString(), self._config.b_order_by_group)
+                    log.debug('*** Group %s filtered because of _order_by_group=%s' % (
+                            model.data(index, Role.DisplayRole).toString(), self._config.b_order_by_group))
                     return False
             if not self._config.b_group_offline and \
                uid == ContactListModel.OFF_GRP_UID:
-                   print '*** Group %s filtered because of _group_offline=%s' % (
-                        model.data(index, Role.DisplayRole).toString(), self._group_offline)
+                   log.debug('*** Group %s filtered because of _group_offline=%s' % (
+                        model.data(index, Role.DisplayRole).toString(), self._group_offline))
                    return False
                    
             if not self._config.b_show_empty_groups and \
                 model.rowCount(index) == 0:
                     # well here we should effectively /count/ the items...
-                    print '*** Group %s filtered because of _show_empty = %s [%d]' % (
-                        model.data(index, Role.DisplayRole).toString(), self._config.b_show_empty_groups, model.rowCount(index))
+                    log.debug('*** Group %s filtered because of _show_empty = %s [%d]' % (
+                        model.data(index, Role.DisplayRole).toString(), self._config.b_show_empty_groups, model.rowCount(index)))
                     return False
                     
                    
-        print '*** Showing group: %s [%d]' % (model.data(index, Role.DisplayRole).toString(), model.rowCount(index))
+        log.debug('*** Showing group: %s [%d]' % (model.data(index, Role.DisplayRole).toString(), model.rowCount(index)))
         return True
             
         
     def sort(self, column, order):
-        print 'About to Sort'
+        log.info('About to Sort')
         QtGui.QSortFilterProxyModel.sort(self, 0, Qt.AscendingOrder)  
        
     # cc = configchange       
@@ -95,11 +97,10 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
            
     def _on_cc_show_empty_groups(self, value):
         self._show_empty = value
-        print '*'
         self.invalidateFilter()
     
     def _on_cc_show_offline(self, value):
-        print '----------> SHOW OFFLINE: %s' % value
+        log.debug('----------> SHOW OFFLINE: %s' % value)
         self._show_offline = value
         self._config.b_show_empty_groups = not self._config.b_show_empty_groups
         self._config.b_show_empty_groups = not self._config.b_show_empty_groups
@@ -139,8 +140,8 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
             
             if not self._config.b_show_offline and \
                model.data(index, Role.StatusRole) == e3.status.OFFLINE:
-                   print '****** Contact %s filtered because of _show_offline=%s' % (
-                        model.data(index, Role.DisplayRole).toString(), self._show_offline)
+                   log.debug('****** Contact %s filtered because of _show_offline=%s' % (
+                        model.data(index, Role.DisplayRole).toString(), self._show_offline))
                    self.dataChanged.emit(self.mapFromSource(index.parent()),
                                          self.mapFromSource(index.parent()))
                    return False
@@ -148,13 +149,13 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
             if self._config.b_group_offline and \
                 model.data(index, Role.StatusRole) == e3.status.OFFLINE and \
                 model.data(index.parent(), Role.UidRole) != ContactListModel.OFF_GRP_UID:
-                    print '****** Contact %s filtered because of _group_offline=%s' % (
-                        model.data(index, Role.DisplayRole).toString(), self._group_offline)
+                    log.debug('****** Contact %s filtered because of _group_offline=%s' % (
+                        model.data(index, Role.DisplayRole).toString(), self._group_offline))
                     self.dataChanged.emit(self.mapFromSource(index.parent()),
                                           self.mapFromSource(index.parent()))
                     return False
                    
-        print '****** Showing contact: %s' % model.data(index, Role.DisplayRole).toString()          
+        log.debug('****** Showing contact: %s' % model.data(index, Role.DisplayRole).toString())          
         self.dataChanged.emit(self.mapFromSource(index.parent()),
                               self.mapFromSource(index.parent()))
         return True
@@ -169,7 +170,7 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
         self.invalidateFilter()
     
     def _on_cc_show_offline(self, value):
-        print '----------> SHOW OFFLINE: %s' % value
+        log.debug('----------> SHOW OFFLINE: %s' % value)
         self._show_offline = value
         self.invalidateFilter()
        

@@ -17,7 +17,7 @@ class ImageAreaSelector (QtGui.QWidget):
      # pylint: disable=W0612
     NAME = 'ImageAreaSelector'
     DESCRIPTION = 'A widget used to select part of an image'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     
@@ -171,7 +171,7 @@ class ImageAreaSelector (QtGui.QWidget):
         new_image_origin = QPoint(dx, dy)
         self._selection_rect.translate(new_image_origin - self._image_origin)
         self._image_origin = new_image_origin
-        print 'image origin: %s' % new_image_origin
+        log.info('image origin: %s' % new_image_origin)
         
     def select_unscaled(self):
         '''Selects, if possible, a 96 x 96 square centered around the original

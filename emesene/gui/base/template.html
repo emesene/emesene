@@ -224,16 +224,15 @@
 			var range = document.createRange();
 			range.selectNode(chat);
 			var documentFragment = range.createContextualFragment(html);
-            var myFrag = chat.appendChild(documentFragment);
-            var frag = document.getElementById("insert").parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
-            
-            try {
-                var fader = new Fadomatic(frag, 9, 0, 0, 95);
-            } catch(e) {
-                trace(e);
-            }
-            fader.fadeIn();
-            
+      var myFrag = chat.appendChild(documentFragment);
+      //var frag = insert.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+
+      try {
+          var fader = new Fadomatic(myFrag, 9, 0, 0, 95);
+          fader.fadeIn();
+      } catch(e) {
+          trace(e);
+      }
 			alignChat(true);
 		}
 		
@@ -304,7 +303,7 @@
 				a = document.createElement('a');
 				a.setAttribute('onclick', 'imageSwap(this)');
 				a['src'] = node.src;
-                a['alt'] = node.alt;
+        a['alt'] = node.alt;
 				a['name'] = node.name;
 				a.className = node.className;
 				text = document.createTextNode(node.alt);

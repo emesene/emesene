@@ -180,8 +180,7 @@ class Worker(threading.Thread):
             try:
                 self.action_handlers[action.id_](*action.args)
             except TypeError:
-                self.session.add_event(Event.EVENT_ERROR,
-                    'Error calling action handler', action.id_)
+                self.session.error('Error calling action handler', action.id_)
                 traceback.print_exc()
 
 
@@ -220,14 +219,14 @@ class Worker(threading.Thread):
         '''
         self.session.account.status = status_
         self.session.contacts.me.status = status_
-        self.session.add_event(Event.EVENT_STATUS_CHANGE_SUCCEED, status_)
+        self.session.status_change_succeed(status_)
 
         # log the status
         contact = self.session.contacts.me
         account = Logger.Account.from_contact(contact)
         account.status = status_
 
-        self.session.logger.log('status change', status_, str(status_), account)
+        self.session.log('status change', status_, str(status_), account)
 
     def _handle_action_login(self, account, password, status_):
         '''handle Action.ACTION_LOGIN
@@ -277,14 +276,14 @@ class Worker(threading.Thread):
     def _handle_action_set_message(self, message):
         '''handle Action.ACTION_SET_MESSAGE
         '''
-        self.session.add_event(Event.EVENT_MESSAGE_CHANGE_SUCCEED, message)
+        self.session.message_change_succeed(message)
         self.session.contacts.me.message = message
 
         # log the change
         contact = self.session.contacts.me
         account = Logger.Account.from_contact(contact)
 
-        self.session.logger.log('message change', contact.status, message,
+        self.session.log('message change', contact.status, message,
             account)
 
     def _handle_action_set_nick(self, nick):
@@ -301,13 +300,13 @@ class Worker(threading.Thread):
         '''handle Action.ACTION_SET_MEDIA
         '''
         contact = self.session.contacts.me
-        self.session.add_event(Event.EVENT_MEDIA_CHANGE_SUCCEED, message)
+        self.session.media_change_succeed(message)
         self.session.contacts.me.media = message
 
         # log the change
         account = Logger.Account.from_contact(contact)
 
-        self.session.logger.log('media change', contact.status, message,
+        self.session.log('media change', contact.status, message,
             account)
 
     def _handle_action_set_preferences(self, preferences):

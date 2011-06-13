@@ -2,9 +2,13 @@
 
 ''' This module contains classes to represent the login page '''
 
+import logging
+
 from PyQt4          import QtGui
 from PyQt4          import QtCore
 from PyQt4.QtCore   import Qt
+
+from gui.qt4ui.Utils import tr
 
 import base64
 
@@ -13,13 +17,14 @@ import e3
 import gui
 
 
+log = logging.getLogger('qt4ui.LoginPage')
 
 class LoginPage(QtGui.QWidget):
     ''' The Login Page '''
     # pylint: disable=W0612
     NAME = 'LoginPage'
     DESCRIPTION = 'The widget used to to dislay the login screen'
-    AUTHOR = 'Gabriele Whisky Visconti'
+    AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
     
@@ -76,7 +81,7 @@ class LoginPage(QtGui.QWidget):
 
     def _setup_config(self):
         '''Adds missing options to config file'''
-        print " *** _setup_config"
+        log.info('*** _setup_config')
         default_session = extension.get_default('session')
         service = default_session.SERVICES.keys()[0]
         self._host = default_session.SERVICES[service]['host']
@@ -99,19 +104,19 @@ class LoginPage(QtGui.QWidget):
         widget_d = self._widget_d
         avatar_cls          = extension.get_default('avatar')
         status_combo_cls    = extension.get_default('status combo') 
-        widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.logo,
+        widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.image_theme.logo,
                                                 clickable=False)
         widget_d['account_combo'] = QtGui.QComboBox()
         widget_d['password_edit'] = QtGui.QLineEdit()
         widget_d['status_combo']  = status_combo_cls()
         widget_d['save_account_chk'] =    \
-                QtGui.QCheckBox("Remember this account")
+                QtGui.QCheckBox(tr('Remember me'))
         widget_d['save_password_chk'] =   \
-                QtGui.QCheckBox("Save password")
+                QtGui.QCheckBox(tr('Remember password'))
         widget_d['auto_login_chk'] =  \
-                QtGui.QCheckBox("Login automagically")
+                QtGui.QCheckBox(tr('Auto-login'))
         widget_d['advanced_btn']  = QtGui.QToolButton() 
-        widget_d['login_btn'] = QtGui.QPushButton("Login")
+        widget_d['login_btn'] = QtGui.QPushButton(tr('Connect'))
 
         lay = QtGui.QVBoxLayout()
         lay.addSpacing(40)
@@ -212,7 +217,10 @@ class LoginPage(QtGui.QWidget):
             emails[0], emails[index] = emails[index], emails[0]
             
         for email in emails:
-            service = service_d[email]
+            try:
+                service = service_d[email]
+            except KeyError:
+                continue
             remember_lvl = remember_lvl_d[email]
             if remember_lvl >= 1: # we have at least a status
                 status = status_d[email]
@@ -230,7 +238,7 @@ class LoginPage(QtGui.QWidget):
 
     def _on_account_combo_text_changed(self, new_text): #new text is a QString
         ''' Slot executed when the text in the account combo changes '''
-        print " *** _on_account_combo_text_changed"
+        log.info('*** _on_account_combo_text_changed')
         index = self._widget_d['account_combo'].findText(new_text)
         if index > -1:
             self._on_chosen_account_changed(index)
@@ -242,7 +250,7 @@ class LoginPage(QtGui.QWidget):
     def _on_chosen_account_changed(self, acc_index):
         ''' Slot executed when the user select another account from the drop
         down menu of the account combo'''
-        print " *** _on_chosen_account_changed"
+        log.info('*** _on_chosen_account_changed')
         widget_d = self._widget_d
         account_combo  = widget_d['account_combo']
         password_edit  = widget_d['password_edit']
@@ -405,7 +413,7 @@ class LoginPage(QtGui.QWidget):
 
     def clear_login_form(self, clear_pic=False):
         ''' Resets the login form '''
-        print " *** clear_login_form"
+        log.info('*** clear_login_form')
         widget_dic = self._widget_d
         if clear_pic:
             widget_dic['display_pic'].set_default_pic()
@@ -421,7 +429,6 @@ class LoginPage(QtGui.QWidget):
         ''' Checks wether each checkbox in the login page should be
         enabled or disabled, checked or unchecked and changes its
         state accordingly'''
-        #print " *** _widget_status_refresh"
         widget_dict = self._widget_d
         account_combo       = widget_dict['account_combo']
         password_edit       = widget_dict['password_edit']

@@ -104,7 +104,7 @@ class MainWindow(gtk.VBox):
         self.session.config.subscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
 
-    def _on_mail_count_changed(self,count):
+    def _on_mail_count_changed(self, count):
         self.panel.mail.set_label("(%d)" % count)
 
     def _on_mail_click(self, widget, data):

@@ -90,7 +90,8 @@ class TextBox(gtk.ScrolledWindow):
     def scroll_to_end(self):
         '''scroll to the end of the content'''
         end_iter = self._buffer.get_end_iter()
-        self._textbox.scroll_to_iter(end_iter, 0.0, yalign=1.0)
+        self._buffer.place_cursor(end_iter)
+        self._textbox.scroll_mark_onscreen(self._buffer.get_insert())
 
     def _set_text(self, text):
         '''set the text on the widget'''
@@ -131,7 +132,7 @@ class TextBox(gtk.ScrolledWindow):
             text = self._replace_emo_with_shortcut()
 
             # replace clipboard content
-            gtk.clipboard_get().set_text(text, len(text))
+            gtk.clipboard_get().set_text(text, len(text.encode('utf8')))
             gtk.clipboard_get().store()
 
     def _get_text(self):
@@ -236,10 +237,11 @@ class InputText(TextBox):
             return True
 
         self.changed = False
+        emote_theme = gui.theme.emote_theme
 
-        for code in gui.Theme.EMOTES:
+        for code in emote_theme.get_emotes():
             start = self._buffer.get_start_iter()
-            path = gui.theme.emote_to_path(code, True)
+            path = emote_theme.emote_to_path(code, True)
             result = start.forward_search(code,
                     gtk.TEXT_SEARCH_VISIBLE_ONLY)
 
@@ -363,14 +365,11 @@ class OutputText(TextBox):
         is_raw, consecutive, outgoing, first, last = \
             formatter.format(contact, message.type)
 
-        if message.type == e3.Message.TYPE_NUDGE:
-            middle = ''
+        if is_raw:
+            middle = MarkupParser.escape(message.body)
         else:
-            if is_raw:
-                middle = MarkupParser.escape(message.body)
-            else:
-                middle = MarkupParser.escape(message.body)
-                middle = e3.common.add_style_to_message(middle, message.style, False)
+            middle = MarkupParser.escape(message.body)
+            middle = e3.common.add_style_to_message(middle, message.style, False)
 
         all_ = first + middle + last
         self.append(all_, cedict, cepath, self.config.b_allow_auto_scroll)
@@ -389,7 +388,7 @@ class OutputText(TextBox):
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
-        self.append(formatter.format_information(message), None, None,
+        self.append(formatter.format_information(message.body), None, None,
                 self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
