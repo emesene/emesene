@@ -939,7 +939,7 @@ class Dialog(object):
             content.attach(TableText('[$BLOCKED]'), 0, 1, 5, 6)
             content.attach(TableText(_('Displays \'Blocked\' if a contact is blocked')), 1, 2, 5, 6)
             last = 7
-        else:
+        elif format_type == 'group':
             window = cls.new_window(_('Group Format Help'))
             content.attach(TableText('[$NAME]'), 0, 1, 0, 1)
             content.attach(TableText(_('The name of the group')), 1, 2, 0, 1)
@@ -948,6 +948,10 @@ class Dialog(object):
             content.attach(TableText('[$TOTAL_COUNT]'), 0, 1, 2, 3)
             content.attach(TableText(_('Total amount of contacts')), 1, 2, 2, 3)
             last = 4
+        else:
+            window = cls.new_window(_('Format Help Sepecific To This Help Does Not Exist'))
+            content.attach(TableText('Help for this format is not yet implemented'), 0, 1, 0, 1)
+            last = 2
 
         content.attach(TableText('[$b][$/b]'), 0, 1, last, last + 1)
         content.attach(TableText(_('Make text bold')), 1, 2, last, last + 1)
@@ -957,6 +961,7 @@ class Dialog(object):
         content.attach(TableText(_('Make text small')), 1, 2, last + 2, last + 3)
         content.attach(TableText('[$COLOR=][$/COLOR]'), 0, 1, last + 3, last + 4)
         content.attach(TableText(_('Give text a color (in hex)')), 1, 2, last + 3, last + 4)
+        content.attach(TableText('Hit ALT+F4 to close this window'), 0, 1, last + 5, last + 6)
         window.hbox.pack_start(content)
         window.show_all()
 
