@@ -814,13 +814,15 @@ class Extension(BaseTable):
             self.categories.append_text(item)
 
         self.categories.connect('changed', self._on_category_changed)
-        self.extensions.connect('changed', self._on_extension_changed)
+        self.ext_id = self.extensions.connect('changed',
+                                              self._on_extension_changed)
         self.attach(self.categories, 1, 2, 0, 1, yoptions=0)
         self.attach(self.extensions, 1, 2, 1, 2, yoptions=0)
         self.categories.set_active(0)
 
     def _on_category_changed(self, combo):
         """callback called when the category on the combo changes"""
+        self.extensions.disconnect(self.ext_id)
         self.extensions.get_model().clear()
         self.extension_list = []
         category = combo.get_active_text()
@@ -839,6 +841,9 @@ class Extension(BaseTable):
             count += 1
 
         self.extensions.set_active(selected)
+        self.ext_id = self.extensions.connect('changed',
+                                              self._on_extension_changed)
+        self._on_extension_changed(self.extensions)
 
     def _on_extension_changed(self, combo):
         """callback called when the extension on the combo changes"""

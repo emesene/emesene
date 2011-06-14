@@ -97,9 +97,10 @@ class Window(gtk.Window):
     def go_main(self, session, on_new_conversation,
             on_close, on_disconnect, quit_on_close=False):
         '''change to the main window'''
-        MainWindow = extension.get_default('main window')
-        self.content = MainWindow(session, on_new_conversation,
-            on_close, on_disconnect)
+        self.content = extension.get_and_instantiate('main window',
+                                                     session,
+                                                     on_new_conversation,
+                                                     on_close, on_disconnect)
         self.add(self.content)
         self.content.show()
         self.content_type = 'main'
