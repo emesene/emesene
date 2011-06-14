@@ -939,7 +939,7 @@ class Dialog(object):
             content.attach(TableText('[$BLOCKED]'), 0, 1, 5, 6)
             content.attach(TableText(_('Displays \'Blocked\' if a contact is blocked')), 1, 2, 5, 6)
             last = 7
-        else:
+        elif format_type == 'group':
             window = cls.new_window(_('Group Format Help'))
             content.attach(TableText('[$NAME]'), 0, 1, 0, 1)
             content.attach(TableText(_('The name of the group')), 1, 2, 0, 1)
@@ -948,6 +948,21 @@ class Dialog(object):
             content.attach(TableText('[$TOTAL_COUNT]'), 0, 1, 2, 3)
             content.attach(TableText(_('Total amount of contacts')), 1, 2, 2, 3)
             last = 4
+        elif format_type == 'music':
+            window = cls.new_window(_('Music Format Help'))
+            content.attach(TableText('%ARTIST%'), 0, 1, 0, 1)
+            content.attach(TableText(_('The name of the artist')), 1, 2, 0, 1)
+            content.attach(TableText('%ALBUM%'), 0, 1, 1, 2)
+            content.attach(TableText(_('The name of the album')), 1, 2, 1, 2)
+            content.attach(TableText('%TITLE%'), 0, 1, 2, 3)
+            content.attach(TableText(_('The name of the song')), 1, 2, 2, 3)
+            content.attach(TableText('%FILE%'), 0, 1, 3, 4)
+            content.attach(TableText(_('The file name of the song')), 1, 2, 3, 4)
+            last = 5
+        else:
+            window = cls.new_window(_('Help for this Format Does Not Exist'))
+            content.attach(TableText(_('Help for this format is not yet implemented')), 0, 1, 0, 1)
+            last = 2
 
         content.attach(TableText('[$b][$/b]'), 0, 1, last, last + 1)
         content.attach(TableText(_('Make text bold')), 1, 2, last, last + 1)
