@@ -20,7 +20,7 @@
 #--------------------------------
 # Defines
 
-    ;Program info
+    ; Program info
     !define PROGRAM_NAME "emesene"
     !define PROGRAM_VERSION "2.11.6-devel"
     !define /date PROGRAM_BUILDTIME "%Y%m%d_%H%M"
@@ -79,7 +79,7 @@
     !define MUI_ABORTWARNING
     !define MUI_HEADERIMAGE
     !define MUI_HEADERIMAGE_BITMAP "windows\header.bmp"
-    !define MUI_ICON "windows\emesene.ico"
+    !define MUI_ICON "emesene.ico"
     !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
     ; Remember the installer language
@@ -252,6 +252,9 @@
 
     ; Configuration directory (Optional)
     Section "un.Profile/Settings" secConfig
+        ; Sets the context of shell folders
+        SetShellVarContext ${USER_SHELLCONTEXT}
+
         ; Removes config folder
         RMDir /r "${FILE_CONFIG}"
     SectionEnd
