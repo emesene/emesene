@@ -101,6 +101,7 @@ class PluginMainVBox(gtk.VBox):
                 self.session.config.l_active_plugins.append(name)
 
             model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
+        self.on_cursor_changed(self.plugin_list_view)
 
     def on_stop(self, *args):
         '''stop the selected plugin'''
@@ -115,6 +116,7 @@ class PluginMainVBox(gtk.VBox):
                 self.session.config.l_active_plugins.remove(name)
 
             model.set_value(iter, 0, pluginmanager.plugin_is_active(name))
+        self.on_cursor_changed(self.plugin_list_view)
 
     def on_config(self, *args):
         '''stop the selected plugin'''
