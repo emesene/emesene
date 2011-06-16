@@ -41,7 +41,7 @@ class SoundTheme(object):
     def load_information(self, path):
         '''load the information of the theme on path
         '''
-        self.path = path
+        self.path           = path
 
         self.sound_alert    = os.path.join(self.path, "alert.wav")
         self.sound_nudge    = os.path.join(self.path, "nudge.wav")
@@ -50,5 +50,3 @@ class SoundTheme(object):
         self.sound_send     = os.path.join(self.path, "send.wav")
         self.sound_type     = os.path.join(self.path, "type.wav")
 
-    def get_sound_theme_path(self):
-        return self.path
