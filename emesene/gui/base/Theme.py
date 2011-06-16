@@ -31,45 +31,45 @@ class Theme(object):
             sound_name="default", conv_name='renkoo.AdiumMessageStyle', conv_variant = ''):
         '''class constructor'''
         self.emote_theme = None
-        self.config_dir = ConfigDir.ConfigDir('emesene2')
-        self.config_path = self.config_dir.join('')
+        config_dir = ConfigDir.ConfigDir('emesene2')
+        config_path = config_dir.join('')
 
         #check for themes in .config dir
-        self.config_themes_path = os.path.join(self.config_path, "themes")
-        self.ensure_dir_path(self.config_themes_path)
+        config_themes_path = os.path.join(config_path, "themes")
+        ensure_dir_path(config_themes_path)
 
-        self.config_conv_themes_path = os.path.join(self.config_themes_path, "conversations")
-        self.ensure_dir_path(self.config_conv_themes_path)
+        config_conv_themes_path = os.path.join(config_themes_path, "conversations")
+        ensure_dir_path(config_conv_themes_path)
 
-        self.conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
+        conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
         self.conv_themes = AdiumThemes.AdiumThemes()
-        self.conv_themes.add_themes_path(self.conv_themes_path)
-        self.conv_themes.add_themes_path(self.config_conv_themes_path)
+        self.conv_themes.add_themes_path(conv_themes_path)
+        self.conv_themes.add_themes_path(config_conv_themes_path)
 
 
-        self.config_sound_themes_path = os.path.join(self.config_themes_path, "sounds")
-        self.ensure_dir_path(self.config_sound_themes_path)
+        config_sound_themes_path = os.path.join(config_themes_path, "sounds")
+        ensure_dir_path(config_sound_themes_path)
 
-        self.sound_theme_path = os.path.join("themes", "sounds")
+        sound_theme_path = os.path.join("themes", "sounds")
         self.sound_themes = SoundThemes.SoundThemes()
-        self.sound_themes.add_themes_path(self.sound_theme_path)
-        self.sound_themes.add_themes_path(self.config_sound_themes_path)
+        self.sound_themes.add_themes_path(sound_theme_path)
+        self.sound_themes.add_themes_path(config_sound_themes_path)
 
-        self.config_emotes_themes_path = os.path.join(self.config_themes_path, "emotes")
-        self.ensure_dir_path(self.config_emotes_themes_path)
+        config_emotes_themes_path = os.path.join(config_themes_path, "emotes")
+        ensure_dir_path(config_emotes_themes_path)
 
-        self.emotes_themes_path = os.path.join(os.getcwd(), "themes", "emotes")
+        emotes_themes_path = os.path.join(os.getcwd(), "themes", "emotes")
         self.emotes_themes = AdiumEmoteThemes.AdiumEmoteThemes()
-        self.emotes_themes.add_themes_path(self.emotes_themes_path)
-        self.emotes_themes.add_themes_path(self.config_emotes_themes_path)
+        self.emotes_themes.add_themes_path(emotes_themes_path)
+        self.emotes_themes.add_themes_path(config_emotes_themes_path)
 
-        self.config_images_themes_path = os.path.join(self.config_themes_path, "images")
-        self.ensure_dir_path(self.config_images_themes_path)
+        config_images_themes_path = os.path.join(config_themes_path, "images")
+        ensure_dir_path(config_images_themes_path)
 
-        self.image_path = os.path.join(os.getcwd(),"themes", "images")
+        image_path = os.path.join(os.getcwd(),"themes", "images")
         self.image_themes = ImagesThemes.ImagesThemes()
-        self.image_themes.add_themes_path(self.image_path)
-        self.image_themes.add_themes_path(self.config_images_themes_path)
+        self.image_themes.add_themes_path(image_path)
+        self.image_themes.add_themes_path(config_images_themes_path)
 
         self.set_theme(image_name, emote_name, sound_name, conv_name, conv_variant)
 
@@ -98,10 +98,10 @@ class Theme(object):
         '''return a list of validated adium themes'''
         return self.conv_themes.get_name_list()
 
-    def ensure_dir_path(self, dir_path):
-        ''' check for a dir in .config and
-        creates it if doesn't exist
-        '''
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+def ensure_dir_path(dir_path):
+    ''' check for a dir in .config and
+    creates it if doesn't exist
+    '''
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
 
