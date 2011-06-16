@@ -156,9 +156,6 @@ class ImageTheme(object):
             self.tool_file_transfer = os.path.join(toolbar_path, "file-transfer.png")
             self.tool_ublock = os.path.join(toolbar_path, "ublock.png")
 
-    def get_image_theme_path(self):
-        return self.path
-
     def has_custom_toolbar_icons(self):
         return self.toolbar_path != None
 
