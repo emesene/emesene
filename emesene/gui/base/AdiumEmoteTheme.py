@@ -96,10 +96,6 @@ class AdiumEmoteTheme(object):
 
     emotes_count = property(fget=_get_emotes_count, fset=None)
 
-    def get_emotes(self):
-        '''return the list of emoticons registered'''
-        return self.emotes
-
     def split_smilies(self, text):
         '''split text in smilies, return a list of tuples that contain
         a boolean as first item indicating if the text is an emote or not
