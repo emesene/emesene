@@ -1207,8 +1207,7 @@ class EmotesWindow(gtk.Window):
         self.max_width = max_width
         self.emote_selected = emote_selected
 
-        emotes_count = gui.theme.emote_theme.get_emotes_count() # TODO: remove me
-        rows = emotes_count/max_width
+        rows = gui.theme.emote_theme.emotes_count/max_width # TODO: remove me
 
         self.table = gtk.Table(max_width, rows)
         self._fill_emote_table(max_width)
