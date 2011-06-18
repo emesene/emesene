@@ -87,9 +87,11 @@ class AdiumEmoteTheme(object):
 
         return None
 
-    def get_emotes_shortcuts(self):
+    def _get_emotes_shortcuts(self):
         '''return the list of shortcuts'''
         return self.emotes.keys()
+
+    shortcuts = property(fget=_get_emotes_shortcuts, fset=None)
 
     def get_emotes_count(self):
         '''return the number of emoticons registered'''

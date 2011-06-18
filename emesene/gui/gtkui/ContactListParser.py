@@ -59,12 +59,12 @@ class ContactListParser(gobject.GObject):
     def replace_emoticons(self, text):
         '''replace emotes with pixbufs'''
         emote_theme = gui.theme.emote_theme
-        shortcuts = emote_theme.get_emotes_shortcuts()
+        shortcuts = emote_theme.shortcuts
         emoticon_list = []
         for shortcut in shortcuts:
             eshort = gui.base.MarkupParser.escape(shortcut)
             if eshort in text:
-                if shortcut in emote_theme.get_emotes_shortcuts():
+                if shortcut in emote_theme.shortcuts:
                     path = emote_theme.emote_to_path(shortcut, remove_protocol=True)
 
                 if path is not None:

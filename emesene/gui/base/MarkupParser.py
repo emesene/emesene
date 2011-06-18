@@ -62,7 +62,7 @@ def parse_emotes(message, cedict={}):
     chunks = [plain_text]
     emote_theme = gui.theme.emote_theme
 
-    shortcuts = emote_theme.get_emotes_shortcuts()
+    shortcuts = emote_theme.shortcuts
     if cedict is not None:
         shortcuts.extend(cedict.keys())
     temp = []
@@ -75,7 +75,7 @@ def parse_emotes(message, cedict={}):
             parts = chunk.split(shortcut)
 
             if len(parts) > 1:
-                if shortcut in emote_theme.get_emotes_shortcuts():
+                if shortcut in emote_theme.shortcuts:
                     path = emote_theme.emote_to_path(shortcut)
                 else:
                     path = cedict[shortcut]
@@ -115,7 +115,7 @@ def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
     '''replace emotes with img tags to the images'''
     emote_theme = gui.theme.emote_theme
 
-    shortcuts = emote_theme.get_emotes_shortcuts()
+    shortcuts = emote_theme.shortcuts
     if cedict is not None:
         l_cedict = cedict.keys()
         l_cedict.sort(key=lambda x: len(x), reverse=True)
@@ -123,7 +123,7 @@ def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
     for shortcut in shortcuts:
         eshort = escape(shortcut)
         if eshort in msgtext:
-            if shortcut in emote_theme.get_emotes_shortcuts():
+            if shortcut in emote_theme.shortcuts:
                 path = emote_theme.emote_to_path(shortcut)
             else:
                 path = os.path.join(cedir, cedict[shortcut])
