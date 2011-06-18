@@ -47,6 +47,16 @@ def unescape(string_):
     '''replace the values on dic_inv keys with the values'''
     return xml.sax.saxutils.unescape(string_, dic_inv)
 
+def get_full_shortcuts_list(cedict):
+    '''return a list of shortcuts from current emoticon theme
+    and ce shortcuts'''
+    shortcuts = gui.theme.emote_theme.shortcuts
+    if cedict is not None:
+        l_cedict = cedict.keys()
+        l_cedict.sort(key=lambda x: len(x), reverse=True)
+        shortcuts.extend(l_cedict)
+    return shortcuts
+
 def parse_emotes(message, cedict={}):
     '''parse the emotes in a message, return a string with img tags
     for the emotes according to the theme'''
@@ -61,10 +71,7 @@ def parse_emotes(message, cedict={}):
 
     chunks = [plain_text]
     emote_theme = gui.theme.emote_theme
-
-    shortcuts = emote_theme.shortcuts
-    if cedict is not None:
-        shortcuts.extend(cedict.keys())
+    shortcuts = get_full_shortcuts_list(cedict)
     temp = []
 
     while len(shortcuts) > 0:
@@ -114,12 +121,8 @@ def replace_shortcut_with_tag(string, short, tag):
 def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
     '''replace emotes with img tags to the images'''
     emote_theme = gui.theme.emote_theme
+    shortcuts = get_full_shortcuts_list(cedict)
 
-    shortcuts = emote_theme.shortcuts
-    if cedict is not None:
-        l_cedict = cedict.keys()
-        l_cedict.sort(key=lambda x: len(x), reverse=True)
-        shortcuts.extend(l_cedict)
     for shortcut in shortcuts:
         eshort = escape(shortcut)
         if eshort in msgtext:
