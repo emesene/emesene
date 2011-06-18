@@ -59,9 +59,6 @@ class AdiumEmoteTheme(object):
             self.emote_regex_str += re.escape(key2) + "|"
         self.emote_regex = re.compile("("+self.emote_regex_str+")")
 
-    def get_emote_theme_path(self):
-        return self.path
-
     def emote_to_path(self, shortcut, remove_protocol=False):
         '''return a string representing the path to load the emote if it exist
         None otherwise'''
