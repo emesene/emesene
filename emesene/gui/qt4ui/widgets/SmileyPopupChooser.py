@@ -34,7 +34,7 @@ class SmileyPopupChooser (QtGui.QDockWidget):
         self._fade_timer.setSingleShot(False)
 
         emote_theme = gui.theme.emote_theme
-        smiley_dict = emote_theme.get_emotes()
+        smiley_dict = emote_theme.emotes
         smiley_button_list = []
         added_smileys = []
     

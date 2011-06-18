@@ -1262,7 +1262,7 @@ class EmotesWindow(gtk.Window):
 
         emote_theme = gui.theme.emote_theme
 
-        for shortcut, name in emote_theme.get_emotes().iteritems():
+        for shortcut, name in emote_theme.emotes.iteritems():
             if name in emotes:
                 continue
             self.shortcut_list.append(shortcut)

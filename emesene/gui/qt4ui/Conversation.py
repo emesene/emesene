@@ -131,7 +131,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         toolbar.addAction(action_dict['change_font'])
         toolbar.addAction(action_dict['change_color'])
         
-        widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.get_emotes())
+        widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.emotes)
 
         widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)

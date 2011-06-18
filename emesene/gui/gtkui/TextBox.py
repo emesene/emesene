@@ -239,7 +239,7 @@ class InputText(TextBox):
         self.changed = False
         emote_theme = gui.theme.emote_theme
 
-        for code in emote_theme.get_emotes():
+        for code in emote_theme.emotes:
             start = self._buffer.get_start_iter()
             path = emote_theme.emote_to_path(code, True)
             result = start.forward_search(code,
