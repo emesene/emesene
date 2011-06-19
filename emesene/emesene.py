@@ -428,7 +428,6 @@ class Controller(object):
         self.window.clear()
 
         last_avatar_path = self.session.config_dir.get_path("last_avatar")
-
         self.session.load_config()
 
         image_name = self.session.config.get_or_set('image_theme', 'default')
@@ -443,10 +442,11 @@ class Controller(object):
         self.session.config.get_or_set('last_avatar', last_avatar_path)
 
         self.config.save(self.config_path)
-        self.set_default_extensions_from_config()
 
         self._draw_tray_icon()
         self.tray_icon.set_main(self.session)
+
+        self._setup_plugins()
 
         self.window.go_main(self.session, self.on_new_conversation,
             self.on_close, self.on_user_disconnect,
@@ -519,10 +519,7 @@ class Controller(object):
         self.window.content.clear_all()
         self.window.content.show_error(reason)
 
-    def on_login_succeed(self):
-        '''callback called on login succeed'''
-        self._save_login_dimensions()
-        self.config.save(self.config_path)
+    def _setup_plugins(self):
         plugin_manager = get_pluginmanager()
         plugin_manager.scan_directory('plugins')
         plugin_dir = self.config_dir.join('plugins')
@@ -530,19 +527,25 @@ class Controller(object):
             os.makedirs(plugin_dir)
         plugin_manager.scan_directory(plugin_dir)
 
-        self.draw_main_screen()
-
         self.session.config.get_or_set('l_active_plugins', [])
 
         for plugin in self.session.config.l_active_plugins:
             plugin_manager.plugin_start(plugin, self.session)
             # hack: where do we start this? how do we generalize for other
             # extensions?
-            if plugin == "music":
+            if plugin == "music" and self.window.content != None:
                 extension.get_and_instantiate('listening to',
                         self.window.content)
-
         self.set_default_extensions_from_config()
+
+    def on_login_succeed(self):
+        '''callback called on login succeed'''
+        self._save_login_dimensions()
+        self.config.save(self.config_path)
+
+        self.draw_main_screen()
+        self._setup_plugins()
+
         self._sync_emesene1()
         self.logged_in = True
 
