@@ -1110,6 +1110,14 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_CHANGE_STATUS '''
         self._set_status(status_)
 
+    def _handle_action_set_media(self, message):
+        '''handle Action.ACTION_SET_MEDIA
+        '''
+        contact = self.session.contacts.me
+        self.session.media_change_succeed(message)
+        self.session.contacts.me.media = message
+        self.profile.personal_message_current_media = self.profile.personal_message, message
+
     def _handle_action_set_message(self, message):
         ''' handle Action.ACTION_SET_MESSAGE '''
         if message is None:
