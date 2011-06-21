@@ -51,6 +51,7 @@ def gtk_main(Controller):
     import FileTransferWidget
     import GroupMenu
     import GtkNotification
+    import GrowlNotification
     try:
         import PyNotification
         import ThemeNotification
@@ -204,8 +205,10 @@ def setup():
         extension.category_register(('notificationGUI'), ThemeNotification.ThemeNotification)
         extension.register(('notificationGUI'), PyNotification.PyNotification)
         extension.register(('notificationGUI'), GtkNotification.gtkNotification)
+        extension.register(('notificationGUI'), GrowlNotification.GrowlNotification)
     else: #leave this here for Windows users!
         extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
+        extension.register(('notificationGUI'), GrowlNotification.GrowlNotification)
     
     extension.category_register('picture handler', PictureHandler.PictureHandler)
 
