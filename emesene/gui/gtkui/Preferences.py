@@ -62,7 +62,7 @@ class Preferences(gtk.Window):
 
         self.set_default_size(600, 400)
         # GNOME3 likes to break things..was WINDOW_TYPE_HINT_DIALOG
-        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_MENU)
+        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
         ''' TREE VIEW STUFF '''
         # Create the list store model for the treeview.
