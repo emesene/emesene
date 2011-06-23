@@ -1114,8 +1114,9 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_SET_MEDIA
         '''
         contact = self.session.contacts.me
-        self.session.media_change_succeed(message)
-        self.session.contacts.me.media = message
+        if message is not None:
+            self.session.media_change_succeed(message[0] + " - " + message[1])
+        self.session.contacts.me.media = message[0] + " - " + message[1]
         self.profile.personal_message_current_media = self.profile.personal_message, message
 
     def _handle_action_set_message(self, message):
