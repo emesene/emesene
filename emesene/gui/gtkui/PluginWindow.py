@@ -24,11 +24,14 @@ import utils
 from pluginmanager import get_pluginmanager
 
 class PluginListView(gtk.TreeView):
-    def __init__(self, store):
+    def __init__(self, store, toggle_func=None):
         gtk.TreeView.__init__(self, store)
-        self.append_column(gtk.TreeViewColumn(_('Status'), gtk.CellRendererToggle(), active=0))
+        self.toggle_renderer = gtk.CellRendererToggle()
+        self.append_column(gtk.TreeViewColumn(_('Status'), self.toggle_renderer, active=0))
         self.append_column(gtk.TreeViewColumn(_('Name'), gtk.CellRendererText(), text=1))
         self.set_rules_hint(True)
+        if toggle_func:
+            self.toggle_renderer.connect("toggled", toggle_func)
 
 class PluginListStore(gtk.ListStore):
     def __init__(self):
@@ -58,7 +61,8 @@ class PluginMainVBox(gtk.VBox):
 
         self.plugin_list_store = PluginListStore()
         self.plugin_list_store.update_list()
-        self.plugin_list_view = PluginListView(self.plugin_list_store)
+        self.plugin_list_view = PluginListView(self.plugin_list_store, self.toggle_func)
+        self.plugin_list_view.connect("cursor_changed", self.on_cursor_changed)
         self.plugin_list_view.connect("cursor_changed", self.on_cursor_changed)
 
         scroll = gtk.ScrolledWindow()
@@ -87,6 +91,13 @@ class PluginMainVBox(gtk.VBox):
         button_hbox.pack_start(self.button_stop, fill=False)
         self.pack_start(button_hbox, False)
         self.on_cursor_changed(self.plugin_list_view)
+
+    def toggle_func(self, path, data):
+        '''called when the toggle button in list view is pressed'''
+        if not path.get_active():
+            self.on_start()
+        else:
+            self.on_stop()
 
     def on_start(self, *args):
         '''start the selected plugin'''
