@@ -804,7 +804,10 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_profile_current_media_changed(self):
         """Called when the current media changes."""
-        message = self.profile.current_media
+        if(self.profile.current_media is not None):
+            message = "♫ " + self.profile.current_media[0] + " - " + self.profile.current_media[1]
+        else:
+            message = self.profile.personal_message
         # set the message in emesene
         self.session.contacts.me.message = message
         # log the change
@@ -1116,7 +1119,10 @@ class Worker(e3.base.Worker, papyon.Client):
         contact = self.session.contacts.me
         if message is not None:
             self.session.media_change_succeed(message[0] + " - " + message[1])
-        self.session.contacts.me.media = message[0] + " - " + message[1]
+            self.session.contacts.me.media = message[0] + " - " + message[1]
+        else:
+            self.session.contacts.me.media = None
+            self.session.media_change_succeed(None)
         self.profile.personal_message_current_media = self.profile.personal_message, message
 
     def _handle_action_set_message(self, message):
