@@ -23,11 +23,12 @@ INDICATORERROR = False
 INFOBARERROR = False
 PYNOTIFYERROR = False
 MESSAGINGMENUERROR = False
+GROWLERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR, GROWLERROR
 
     import gtk
     import gobject
@@ -56,7 +57,13 @@ def gtk_main(Controller):
         import ThemeNotification
     except ImportError:
         PYNOTIFYERROR = True
-
+    
+    try:
+        fsock = open("/usr/local/bin/growlnotify") 
+        import GrowlNotification
+    except IOError:
+        GROWLERROR = True
+        
     import Header
     import ImageAreaSelector
     import ImageChooser
@@ -119,7 +126,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR
+    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR, GROWLERROR
 
     import gtk
     gtk.settings_get_default().set_property("gtk-error-bell", False)
@@ -203,6 +210,9 @@ def setup():
     if not PYNOTIFYERROR:
         extension.category_register(('notificationGUI'), ThemeNotification.ThemeNotification)
         extension.register(('notificationGUI'), PyNotification.PyNotification)
+        extension.register(('notificationGUI'), GtkNotification.gtkNotification)
+    elif not GROWLERROR:
+        extension.category_register(('notificationGUI'), GrowlNotification.GrowlNotification)
         extension.register(('notificationGUI'), GtkNotification.gtkNotification)
     else: #leave this here for Windows users!
         extension.category_register(('notificationGUI'), GtkNotification.gtkNotification)
