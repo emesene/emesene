@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-06-28 00:46+0200\n"
+"POT-Creation-Date: 2011-06-28 00:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -103,7 +103,7 @@ msgstr ""
 #: emesene/gui/base/Handler.py:312 emesene/gui/base/Handler.py:335
 #: emesene/gui/base/Handler.py:345 emesene/gui/base/Handler.py:353
 #: emesene/gui/base/Handler.py:363 emesene/gui/base/Handler.py:371
-#: emesene/gui/gtkui/Dialog.py:1456
+#: emesene/gui/gtkui/Dialog.py:1455
 msgid "No contact selected"
 msgstr ""
 
@@ -260,7 +260,7 @@ msgstr ""
 
 #: emesene/gui/gtkui/ContactInformation.py:136 emesene/gui/gtkui/Dialog.py:936
 #: emesene/gui/gtkui/Login.py:67 emesene/gui/gtkui/MainMenu.py:87
-#: emesene/gui/gtkui/PluginWindow.py:29 emesene/gui/gtkui/Tooltips.py:54
+#: emesene/gui/gtkui/PluginWindow.py:30 emesene/gui/gtkui/Tooltips.py:54
 #: emesene/gui/gtkui/TrayIcon.py:179
 msgid "Status"
 msgstr ""
@@ -677,45 +677,45 @@ msgstr ""
 msgid "Shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1156 emesene/gui/gtkui/Dialog.py:1362
+#: emesene/gui/gtkui/Dialog.py:1156 emesene/gui/gtkui/Dialog.py:1361
 msgid "Empty shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1215
+#: emesene/gui/gtkui/Dialog.py:1214
 msgid "Add emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1333 emesene/gui/gtkui/Dialog.py:1365
+#: emesene/gui/gtkui/Dialog.py:1332 emesene/gui/gtkui/Dialog.py:1364
 msgid "Change shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1338 emesene/gui/gtkui/IconView.py:104
+#: emesene/gui/gtkui/Dialog.py:1337 emesene/gui/gtkui/IconView.py:104
 msgid "Delete"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1364
+#: emesene/gui/gtkui/Dialog.py:1363
 msgid "New shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1388
+#: emesene/gui/gtkui/Dialog.py:1387
 msgid "Invite friend"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1490
+#: emesene/gui/gtkui/Dialog.py:1489
 msgid "Add contact"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1532
+#: emesene/gui/gtkui/Dialog.py:1531
 msgid "Remind me later"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1600
+#: emesene/gui/gtkui/Dialog.py:1599
 msgid ""
 " has added you.\n"
 "Do you want to add him/her to your contact list?"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1703
+#: emesene/gui/gtkui/Dialog.py:1702
 msgid "Cancel"
 msgstr ""
 
@@ -948,11 +948,11 @@ msgstr ""
 msgid "Check for updates"
 msgstr ""
 
-#: emesene/gui/gtkui/PluginWindow.py:30 emesene/gui/gtkui/Preferences.py:783
+#: emesene/gui/gtkui/PluginWindow.py:31 emesene/gui/gtkui/Preferences.py:783
 msgid "Name"
 msgstr ""
 
-#: emesene/gui/gtkui/PluginWindow.py:150 emesene/gui/gtkui/Preferences.py:48
+#: emesene/gui/gtkui/PluginWindow.py:161 emesene/gui/gtkui/Preferences.py:48
 msgid "Plugins"
 msgstr ""
 
