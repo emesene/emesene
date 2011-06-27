@@ -199,9 +199,10 @@ class HelpHandler(object):
             self.debug_window.show()
 
     def notify_update(self, ver):
-        self.dialog.information(_("New version available: %s\nVisit the "
-                                  " <a href=\"%s\">emesene website</a> for the "
-                                  "latest informations about it." % (ver, EMESENE_WEBSITE)))
+        self.dialog.information(_("New version available: %(ver)s\nVisit the "
+                    "<a href=\"%(web)s\">emesene website</a> for the "
+                    "latest informations about it.") % {"ver" : ver,
+                    "web" : EMESENE_WEBSITE})
 
     def on_check_update_selected(self):
         ''' checks if a new stable version of emesene is available '''
@@ -220,7 +221,7 @@ class HelpHandler(object):
                 if len(loc_ver[2]) > 2:
                     self.dialog.information(_("You're running a development version of emesene, "
                                               "you might want to use the latest stable version "
-                                              "(%s) unless you know what you're doing" % (s[0][0])))
+                                              "(%s) unless you know what you're doing") % (s[0][0]))
                     return
                 if int(loc_ver[0]) == int(rem_ver[0]):
                     if int(loc_ver[1]) < int(rem_ver[1]):
