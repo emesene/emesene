@@ -99,7 +99,6 @@ class FileTransferBarWidget(gtk.HBox):
         tr = self.transfers[transfer]
         tr.finished()
         tr.do_update_progress()
-        self.num_transfers -= 1
 
     def _on_left_button_clicked(self, widget):
         ''' when the user click on the go-left button '''
