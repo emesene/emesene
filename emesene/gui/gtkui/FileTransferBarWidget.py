@@ -100,6 +100,12 @@ class FileTransferBarWidget(gtk.HBox):
         tr.finished()
         tr.do_update_progress()
 
+    def canceled(self, transfer):
+        ''' called when the bar needs to be updated '''
+        tr = self.transfers[transfer]
+        tr.canceled()
+        tr.do_update_progress()
+
     def _on_left_button_clicked(self, widget):
         ''' when the user click on the go-left button '''
         self.twidth = self.new_transfer_bar.get_allocation().width

@@ -103,6 +103,10 @@ class FileTransferWidget(gtk.HBox):
     def finished(self):
         ''' sets the transfer state to finished '''
         self.transfer.state = self.transfer.RECEIVED
+
+    def canceled(self):
+        ''' sets the transfer state to canceled '''
+        self.transfer.state = self.transfer.CANCELED
         
     def do_update_progress(self):
         ''' updates the progress bar status '''
@@ -112,7 +116,6 @@ class FileTransferWidget(gtk.HBox):
             self.progress.set_fraction(self.transfer.get_fraction())
         self.progress.set_text(self.transfer.filename)
         self.tooltip.update()
-    
         self.on_transfer_state_changed()
 
     def on_transfer_state_changed(self):
@@ -125,14 +128,14 @@ class FileTransferWidget(gtk.HBox):
 
         self.buttons = []
 
-        if state == self.transfer.WAITING and self.transfer.sender != 'Me':        
+        if state == self.transfer.WAITING and self.transfer.sender != 'Me':
             button = gtk.Button(None, None)
             button.set_tooltip_text(_('Accept transfer'))            
             button.set_image(self.__get_button_img(gtk.STOCK_APPLY))
             button.connect('clicked', self._on_accept_clicked)
             self.buttons.append(button)
 
-        if state == self.transfer.WAITING or state == self.transfer.TRANSFERRING:        
+        if state == self.transfer.WAITING or state == self.transfer.TRANSFERRING:
             b_cancel = gtk.Button(None, None)
             if state == self.transfer.WAITING and self.transfer.sender != 'Me':
                 b_cancel.set_tooltip_text(_('Reject transfer'))
@@ -150,6 +153,9 @@ class FileTransferWidget(gtk.HBox):
             button.set_image(self.__get_button_img(gtk.STOCK_CLEAR))
             button.connect('clicked', self._on_close_clicked)
             self.buttons.append(button)
+
+        if state == self.transfer.CANCELED:
+            self._on_close_clicked(None)
 
         for button in self.buttons:
             self.pack_start(button, False, False)

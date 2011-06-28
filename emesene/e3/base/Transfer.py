@@ -21,7 +21,7 @@ import time
 
 class FileTransfer(object):
     '''a class that represent a file transfer'''
-    (WAITING, TRANSFERRING, RECEIVED, FAILED) = range(4)
+    (WAITING, TRANSFERRING, RECEIVED, FAILED, CANCELED) = range(5)
 
     def __init__(self, obj, filename, contact, size, preview, sender='Me', completepath=''):
         self.filename = filename

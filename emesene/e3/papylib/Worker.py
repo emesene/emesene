@@ -344,8 +344,13 @@ class Worker(e3.base.Worker, papyon.Client):
         papysession.connect("progressed", self.papy_ft_progressed)
         papysession.connect("completed", self.papy_ft_completed)
         papysession.connect("rejected", self.papy_ft_rejected)
+        papysession.connect("canceled", self.papy_ft_canceled)
 
         self.session.filetransfer_invitation(tr, cid)
+
+    def papy_ft_canceled(self, ftsession):
+        tr = self.filetransfers[ftsession]
+        self.session.filetransfer_canceled(tr)
 
     def papy_ft_accepted(self, ftsession):
         tr = self.filetransfers[ftsession]
@@ -1341,6 +1346,7 @@ class Worker(e3.base.Worker, papyon.Client):
         papysession.connect("progressed", self.papy_ft_progressed)
         papysession.connect("completed", self.papy_ft_completed)
         papysession.connect("rejected", self.papy_ft_rejected)
+        papysession.connect("canceled", self.papy_ft_canceled)
 
         self.session.filetransfer_invitation(tr, cid)
 
@@ -1355,6 +1361,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_ft_cancel(self, t):
         self.rfiletransfers[t].cancel()
+
+        self.session.cancel_filetransfer(t)
 
         del self.filetransfers[self.rfiletransfers[t]]
         del self.rfiletransfers[t]

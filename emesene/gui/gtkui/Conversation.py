@@ -183,6 +183,8 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.on_filetransfer_completed)
         self.session.signals.filetransfer_rejected.subscribe(
                 self.on_filetransfer_rejected)
+        self.session.signals.filetransfer_canceled.subscribe(
+                self.on_filetransfer_canceled)
 
         self.session.signals.call_invitation.subscribe(
                 self.on_call_invitation)
@@ -544,6 +546,18 @@ class Conversation(gtk.VBox, gui.Conversation):
             contact = self._member_to_contact(self.members[0])
             message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             _('File transfer rejected by %s') % (contact.display_name), \
+            transfer.contact.account)
+            self.output.information(self.formatter, contact, message)
+
+    def on_filetransfer_canceled(self, transfer):
+        ''' called when a file transfer is canceled '''
+        if transfer in self.transfers_bar.transfers:
+            self.transfers_bar.canceled(transfer)
+
+        if transfer.contact.account == self.members[0]:
+            contact = self._member_to_contact(self.members[0])
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('File transfer canceled by %s') % (contact.display_name), \
             transfer.contact.account)
             self.output.information(self.formatter, contact, message)
 
