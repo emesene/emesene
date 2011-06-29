@@ -63,7 +63,6 @@ class PluginMainVBox(gtk.VBox):
         self.plugin_list_store.update_list()
         self.plugin_list_view = PluginListView(self.plugin_list_store, self.toggle_func)
         self.plugin_list_view.connect("cursor_changed", self.on_cursor_changed)
-        self.plugin_list_view.connect("cursor_changed", self.on_cursor_changed)
 
         scroll = gtk.ScrolledWindow()
         scroll.add(self.plugin_list_view)
