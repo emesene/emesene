@@ -119,6 +119,8 @@ class Preferences(gtk.Window):
         self.close.connect('clicked', lambda *args: self.hide())
         self.buttons.pack_start(self.close)
 
+        vbox.pack_start(self.buttons, False, False)
+
         # Create a dict that stores each page
         self.page_dict = []
 
