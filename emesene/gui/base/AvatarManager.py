@@ -70,7 +70,7 @@ class AvatarManager(object):
             unicodepath = u"%s" % faces_path
             faces_paths = [unicodepath]
         elif sys.platform == 'darwin':
-              faces_paths = ['/Library/User Pictures/Animals', \
+            faces_paths = ['/Library/User Pictures/Animals', \
                              '/Library/User Pictures/Flowers', \
                              '/Library/User Pictures/Fun', \
                              '/Library/User Pictures/Instruments', \
@@ -78,8 +78,8 @@ class AvatarManager(object):
                              '/Library/User Pictures/Nature']
         else:
             faces_paths = ['/usr/share/kde/apps/faces', \
-                           '/usr/share/kde4/apps/kdm/pics/users', \
-                           '/usr/share/pixmaps/faces']
+                            '/usr/share/kde4/apps/kdm/pics/users', \
+                            '/usr/share/pixmaps/faces']
         return faces_paths
 
     def is_cached(self, filename):
