@@ -20,8 +20,10 @@ methods.'''
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import sys
 import hashlib
 import shutil
+import sys
 import tempfile
 
 import extension
@@ -59,7 +61,7 @@ class AvatarManager(object):
     def get_system_avatars_dirs(self):
         ''' gets the directories where avatars are availables '''
         faces_paths = []
-        if os.name == 'nt':
+        if sys.platform == 'win32':
             app_data_folder = os.path.split(os.environ['APPDATA'])[1]
             faces_path = os.path.join(os.environ['ALLUSERSPROFILE'], \
                             app_data_folder, "Microsoft", \
@@ -67,10 +69,17 @@ class AvatarManager(object):
             # little hack to fix problems with encoding
             unicodepath = u"%s" % faces_path
             faces_paths = [unicodepath]
+        elif sys.platform == 'darwin':
+              faces_paths = ['/Library/User Pictures/Animals', \
+                             '/Library/User Pictures/Flowers', \
+                             '/Library/User Pictures/Fun', \
+                             '/Library/User Pictures/Instruments', \
+                             '/Library/User Pictures/Sports', \
+                             '/Library/User Pictures/Nature']
         else:
             faces_paths = ['/usr/share/kde/apps/faces', \
-                            '/usr/share/kde4/apps/kdm/pics/users', \
-                            '/usr/share/pixmaps/faces']
+                           '/usr/share/kde4/apps/kdm/pics/users', \
+                           '/usr/share/pixmaps/faces']
         return faces_paths
 
     def is_cached(self, filename):
