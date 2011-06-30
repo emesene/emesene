@@ -91,9 +91,11 @@ class PluginMainVBox(gtk.VBox):
         self.pack_start(button_hbox, False)
         self.on_cursor_changed(self.plugin_list_view)
 
-    def toggle_func(self, path, data):
+    def toggle_func(self, toggle, path):
         '''called when the toggle button in list view is pressed'''
-        if not path.get_active():
+        sel = self.plugin_list_view.get_selection()
+        sel.select_path(path)
+        if not toggle.get_active():
             self.on_start()
         else:
             self.on_stop()
