@@ -442,6 +442,7 @@ class Controller(object):
         self.session.config.get_or_set('last_avatar', last_avatar_path)
 
         self.config.save(self.config_path)
+        self.set_default_extensions_from_config()
 
         self._draw_tray_icon()
         self.tray_icon.set_main(self.session)
