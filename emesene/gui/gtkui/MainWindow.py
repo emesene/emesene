@@ -227,6 +227,7 @@ class MainWindow(gtk.VBox):
             self._on_group_menu_selected)
         self.session.config.unsubscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
+        self.panel.remove_subscriptions()
         self.on_disconnect_cb()
 
     def _on_search_toggled(self, button):

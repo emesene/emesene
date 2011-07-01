@@ -109,20 +109,7 @@ class UserPanel(gtk.VBox):
         message_hbox.show()
         vbox.show()
 
-        session.signals.message_change_succeed.subscribe(
-            self.on_message_change_succeed)
-        session.signals.media_change_succeed.subscribe(
-            self.on_media_change_succeed)
-        session.signals.status_change_succeed.subscribe(
-            self.on_status_change_succeed)
-        session.signals.contact_list_ready.subscribe(
-            self.on_contact_list_ready)
-        session.signals.picture_change_succeed.subscribe(
-            self.on_picture_change_succeed)
-        session.signals.profile_get_succeed.subscribe(
-                self.on_profile_update_succeed)
-        session.signals.profile_set_succeed.subscribe(
-                self.on_profile_update_succeed)
+        self._add_subscriptions()
 
     def show(self):
         '''override show'''
@@ -192,3 +179,36 @@ class UserPanel(gtk.VBox):
         av_chooser.set_modal(True)
         av_chooser.show()
 
+    def _add_subscriptions(self):
+        '''subscribe all signals'''
+        self.session.signals.message_change_succeed.subscribe(
+            self.on_message_change_succeed)
+        self.session.signals.media_change_succeed.subscribe(
+            self.on_media_change_succeed)
+        self.session.signals.status_change_succeed.subscribe(
+            self.on_status_change_succeed)
+        self.session.signals.contact_list_ready.subscribe(
+            self.on_contact_list_ready)
+        self.session.signals.picture_change_succeed.subscribe(
+            self.on_picture_change_succeed)
+        self.session.signals.profile_get_succeed.subscribe(
+            self.on_profile_update_succeed)
+        self.session.signals.profile_set_succeed.subscribe(
+            self.on_profile_update_succeed)
+
+    def remove_subscriptions(self):
+        '''unsubscribe all signals'''
+        self.session.signals.message_change_succeed.unsubscribe(
+            self.on_message_change_succeed)
+        self.session.signals.media_change_succeed.unsubscribe(
+            self.on_media_change_succeed)
+        self.session.signals.status_change_succeed.unsubscribe(
+            self.on_status_change_succeed)
+        self.session.signals.contact_list_ready.unsubscribe(
+            self.on_contact_list_ready)
+        self.session.signals.picture_change_succeed.unsubscribe(
+            self.on_picture_change_succeed)
+        self.session.signals.profile_get_succeed.unsubscribe(
+            self.on_profile_update_succeed)
+        self.session.signals.profile_set_succeed.unsubscribe(
+            self.on_profile_update_succeed)
