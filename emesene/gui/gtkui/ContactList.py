@@ -817,7 +817,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             pos = widget.get_dest_row_at_pos(x,y)[0][0]
             group_des = self.model[pos][1]
 
-            if group_src and not self._model[pos][6]:
+            if group_src and group_src != group_des and not self._model[pos][6]:
                 self.session.move_to_group(self.get_contact_selected().account,
                     group_src.identifier, group_des.identifier)
 
