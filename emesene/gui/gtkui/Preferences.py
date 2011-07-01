@@ -925,7 +925,7 @@ class DesktopTab(BaseTable):
         fc_button = gtk.FileChooserButton(path_chooser)
         fc_button.set_current_folder(self.session.config.get_or_set("download_folder", \
                 e3.common.locations.downloads()))
-        path_chooser.connect('selection-changed', on_path_selected)
+        fc_button.connect('selection-changed', on_path_selected)
         self.attach(fc_button, 2, 3, 4, 5, gtk.EXPAND|gtk.FILL, 0)
 
 class MSNPapylib(BaseTable):
