@@ -214,7 +214,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         emcache = caches.get_emoticon_cache(self.session.account.account)
 
-        if directory.endswith(gui.theme.get_emote_theme().emote_path.lower()):
+        if directory.endswith(gui.theme.emote_theme.path.lower()):
             Dialog.Dialog.information(_("Can't add, default emoticon"))
         elif directory == emcache.path.lower():
             Dialog.Dialog.information(_("Can't add, own emoticon"))
