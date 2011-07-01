@@ -465,6 +465,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # if group_offline is set and the contact is offline then put it on the
         # special offline group
         if self.group_offline and offline:
+            duplicate = self._duplicate_check(contact)
+            if duplicate is not None:
+                return duplicate
             if not self.offline_group:
                 self.session.config.d_weights['1'] = 0
                 self.offline_group = e3.Group(_("Offline"), identifier='1', type_=e3.Group.OFFLINE)
@@ -478,6 +481,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # if we are in order by status mode and contact is online,
         # we add online contacts to their online group :)
         if self.order_by_status and is_online:
+            duplicate = self._duplicate_check(contact)
+            if duplicate is not None:
+                return duplicate
             if not self.online_group:
                 self.session.config.d_weights['0'] = 1
                 self.online_group = e3.Group(_("Online"), identifier='0', type_=e3.Group.ONLINE)
@@ -487,7 +493,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
             self.update_online_group()
 
             return self._model.append(self.online_group_iter, contact_data)
-
 
         # if it has no group and we are in order by group then add it to the
         # special group "No group"
@@ -786,6 +791,18 @@ class ContactList(gui.ContactList, gtk.TreeView):
             return 1
 
         return 0
+
+    def _duplicate_check(self, contact):
+        '''check if the contact isn't there already'''
+        for row in self._model:
+            obj = row[1]
+            if type(obj) == e3.Group:
+                for contact_row in row.iterchildren():
+                    con = contact_row[1]
+                    if con.account == contact.account:
+                        return contact_row.iter
+
+        return None
 
     def _on_drag_data_get(self, widget, context, selection, target_id, etime):
         if self.is_contact_selected():
