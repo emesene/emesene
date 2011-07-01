@@ -73,24 +73,30 @@ class Header(gtk.HBox):
         return self._information.get_markup()
 
     def copy_nick(self, data, widget=None):
-        account = self.members[0]
-        contact = self.session.contacts.get(account)
+        nick_list = []
+        for member in self.members:
+            contact = self.session.contacts.get(member)
+            nick_list.append(contact.nick)
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
-        clipboard.set_text(contact.nick)
+        clipboard.set_text(', '.join(nick_list))
 
     def copy_pm(self, data, widget=None):
-        account = self.members[0]
-        contact = self.session.contacts.get(account)
+        pm_list = []
+        for member in self.members:
+            contact = self.session.contacts.get(member)
+            pm_list.append(contact.message)
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
-        clipboard.set_text(contact.message)
+        clipboard.set_text(', '.join(pm_list))
 
     def copy_mail(self, data, widget=None):
-        account = self.members[0]
+        mail_list = []
+        for member in self.members:
+            mail_list.append(member)
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
-        clipboard.set_text(account)
+        clipboard.set_text(', '.join(mail_list))
 
     def on_clicked(self, widget, event):
         '''called when the header clicked'''
