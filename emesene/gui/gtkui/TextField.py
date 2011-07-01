@@ -46,6 +46,7 @@ class TextField(gtk.VBox):
         self.button.set_relief(gtk.RELIEF_NONE)
 
         self._enabled = True
+        self.dont_focus_out = False
 
         self._text = text
         self.empty_text = empty_text
@@ -60,6 +61,7 @@ class TextField(gtk.VBox):
         self.button.connect('clicked', self.on_button_clicked)
         self.entry.connect('activate', self.on_entry_activate)
         self.entry.connect('focus-out-event', self._on_focus_out)
+        self.entry.connect('button-press-event', self._on_button_pressed)
         self.entry.connect('key-press-event', self._on_key_press)
 
     def on_button_clicked(self, button):
@@ -87,9 +89,16 @@ class TextField(gtk.VBox):
         self.entry.hide()
         self.button.show()
 
+    def _on_button_pressed(self, widget, event):
+        if event.button == 3:
+            self.dont_focus_out = True
+
     def _on_focus_out(self, widget, event):
         '''called when the widget lost the focus'''
-        self.on_entry_activate(self.entry)
+        if not self.dont_focus_out:
+            self.on_entry_activate(self.entry)
+        else:
+            self.dont_focus_out = False
 
     def show(self):
         '''override show'''
@@ -134,7 +143,7 @@ class TextField(gtk.VBox):
         ''' if escape key is pressed put old text in the entry and cancel edit
         '''
         if event.keyval == gtk.keysyms.Escape:
-          self.entry.set_text(self._text)
-          self.on_entry_activate(self.entry)
-          return True
+            self.entry.set_text(self._text)
+            self.on_entry_activate(self.entry)
+            return True
         return False
