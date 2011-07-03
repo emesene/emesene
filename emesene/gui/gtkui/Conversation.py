@@ -290,8 +290,18 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_close(self):
         '''called when the conversation is closed'''
+        self.session.config.unsubscribe(self._on_avatarsize_changed,
+            'i_conv_avatar_size')
         self.session.config.unsubscribe(self._on_show_toolbar_changed,
             'b_show_toolbar')
+        self.session.config.unsubscribe(self._on_show_header_changed,
+            'b_show_header')
+        self.session.config.unsubscribe(self._on_show_info_changed,
+            'b_show_info')
+        self.session.config.unsubscribe(self._on_show_avatar_onleft,
+            'b_avatar_on_left')
+        self.session.config.unsubscribe(self._on_icon_size_change,
+            'b_toolbar_small')
         self.session.signals.picture_change_succeed.unsubscribe(
             self.on_picture_change_succeed)
         self.session.signals.contact_attr_changed.unsubscribe(
@@ -305,6 +315,11 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.on_filetransfer_progress)
         self.session.signals.filetransfer_completed.unsubscribe(
                 self.on_filetransfer_completed)
+        self.session.signals.filetransfer_rejected.unsubscribe(
+                self.on_filetransfer_rejected)
+        self.session.signals.filetransfer_canceled.unsubscribe(
+                self.on_filetransfer_canceled)
+
         self.session.signals.call_invitation.unsubscribe(
                 self.on_call_invitation)
 

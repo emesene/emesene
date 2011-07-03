@@ -1438,12 +1438,13 @@ class InviteWindow(gtk.Window):
         search.connect('changed', self._on_search_changed)
         self.connect('key-press-event', self._on_key_press)
         self.connect('delete-event', lambda *args: self.hide())
-        self.contact_list.contact_selected.subscribe(self._on_contact_selected)
+        self.contact_list.contact_selected.subscribe(
+            self._on_contact_selected)
         self.contact_list.fill()
 
     def _on_key_press(self, widget, event):
         if event.keyval == gtk.keysyms.Escape:
-            self.hide()
+            self._hide()
 
     def _on_add_clicked(self, button):
         """
@@ -1456,7 +1457,7 @@ class InviteWindow(gtk.Window):
             return
 
         self.callback(contact.account)
-        self.hide()
+        self._hide()
 
     def _on_search_changed(self, entry):
         """
@@ -1469,6 +1470,14 @@ class InviteWindow(gtk.Window):
         method called when the contact is selected
         """
         self.callback(contact.account)
+        self._hide()
+
+    def _hide(self):
+        """
+        unsubscribe the signal, and hide the dialog
+        """
+        self.contact_list.contact_selected.unsubscribe(
+            self._on_contact_selected)
         self.hide()
 
 class AddBuddy(gtk.Window):

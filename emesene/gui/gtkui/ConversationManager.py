@@ -249,6 +249,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         '''
         hide all conversations
         '''
+        self.session.config.unsubscribe(self._on_tab_position_changed,
+            'i_tab_position')
         self.get_parent().hide()
 
     def is_active(self):
