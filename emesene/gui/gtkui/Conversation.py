@@ -469,7 +469,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.index = 0
             glib.source_remove(self.timer)
             self.rotate_started = False
-        elif self.index > len(self.members):
+        elif self.index >= len(self.members):
             self.index = 0
         contact = self.session.contacts.get(self.members[self.index])
 
