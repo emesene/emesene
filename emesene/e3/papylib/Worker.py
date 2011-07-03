@@ -371,8 +371,12 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def papy_ft_progressed(self, ftsession, len_chunk):
         tr = self.filetransfers[ftsession]
-        tr.received_data += len_chunk
 
+        #FIXME: remove this once papyon is fixed
+        #here we ask if transfer is completed because papyon send duplicate
+        #progress events
+        if tr.is_partially_received():
+            tr.received_data += len_chunk
         self.session.filetransfer_progress(tr)
 
     def papy_ft_completed(self, ftsession, data):

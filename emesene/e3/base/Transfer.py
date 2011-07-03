@@ -44,6 +44,10 @@ class FileTransfer(object):
         return '<e3.base.filetransfer filename="%s" len="%i">' % (self.filename,
                                                             self.received_data)
 
+    #FIXME: remove this once papyon is fixed. see comment in e3/papylib/worker.py
+    def is_partially_received(self):
+        return self.received_data < self.size
+
     def get_progress(self):
         ''' returns the lenght of the received data '''
         return self.received_data
@@ -54,9 +58,12 @@ class FileTransfer(object):
 
     def get_eta(self):
         ''' returns the estimated time left to finish the transfer '''
+        if self.state in (FileTransfer.RECEIVED, FileTransfer.FAILED):
+            return 0
+
         if self.received_data:
             return ((self.size - self.received_data) / (self.get_speed() or 0.1))
-        return 0    
+        return 0
 
     def get_speed(self):
         ''' returns the average speed of the transfer '''
