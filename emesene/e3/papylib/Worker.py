@@ -1362,8 +1362,6 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_ft_cancel(self, t):
         self.rfiletransfers[t].cancel()
 
-        self.session.cancel_filetransfer(t)
-
         del self.filetransfers[self.rfiletransfers[t]]
         del self.rfiletransfers[t]
 
