@@ -16,7 +16,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
+import subprocess
 import sys
 import re
 import time
@@ -207,7 +207,7 @@ class HelpHandler(object):
     def on_check_update_selected(self):
         ''' checks if a new stable version of emesene is available '''
         if sys.platform == "darwin":
-            os.system("open -a /Applications/emesene.app/Contents/Resources/emesene_updater.app")
+            subprocess.call(['open', '-a', '/Applications/emesene.app/Contents/Resources/emesene_updater.app'])
         else:
             f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/gui/base/Handler.py")
             s = f.read()
