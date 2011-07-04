@@ -20,7 +20,6 @@ import gtk
 
 import gui
 import utils
-import os
 
 import extension
 
