@@ -447,8 +447,6 @@ class Controller(object):
         self._draw_tray_icon()
         self.tray_icon.set_main(self.session)
 
-        self._setup_plugins()
-
         self.window.go_main(self.session, self.on_new_conversation,
             self.on_close, self.on_user_disconnect,
             self.tray_icon.quit_on_close)
