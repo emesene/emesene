@@ -208,7 +208,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def steal_emoticon_cb(self, path_uri):
         '''receives the path or the uri for the emoticon to be added'''
         if path_uri.startswith("file://"):
-            path_uri = path_uri[8:]
+            path_uri = path_uri[7:]
             path_uri = urllib.url2pathname(path_uri)
         directory = os.path.dirname(path_uri).lower()
         caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
