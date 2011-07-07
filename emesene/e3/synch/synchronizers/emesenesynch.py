@@ -118,21 +118,23 @@ class EmeseneSynch(Synch):
                 pass
 
             fconfig = open(os.path.join(emoticons_dir,"emoticons.info"), 'a')
+            fmap1 = open(os.path.join(self.__source_path, "custom_emoticons", "map"), 'r')                
 
-            for infile in listing:
-
+            while True:
                 self._is_stop()
-
-                if infile == "map":
-                    continue
+                emot_sign = fmap1.readline().strip('\n\r')
+                if not emot_sign:
+                    break
+                emot_path = fmap1.readline().strip('\n\r')
+                aux_name = emot_path.split("/")
+                emot_name = aux_name[len(aux_name) - 1]
 
                 dest_emoticon = os.path.join(self.__dest_path, self.__myuser, 
-                                             "emoticons", infile[-44:])
+                                             "emoticons", emot_name)
 
                 if not os.path.exists(dest_emoticon):
-                    shutil.copy (os.path.join(self.__source_path, "custom_emoticons", infile), 
-                             dest_emoticon)
-                    fconfig.write("%s %s\n" % (infile[:-45],infile[-44:])) #write config
+                    shutil.copy (emot_path, dest_emoticon)
+                    fconfig.write("%s %s\n" % (emot_sign, emot_name)) #write config
 
                 actual_emoticons += 1.0
 
@@ -140,6 +142,7 @@ class EmeseneSynch(Synch):
                     self._prog_callback(percent.current)
 
             fconfig.close()
+            fmap1.close()
 
         def __synch_conversations(self):
             self.__reset_progressbar()
