@@ -152,18 +152,13 @@ class OutputView(webkit.WebView):
     def on_populate_popup(self, view, menu):
         '''disables the right-click menu by removing the MenuItems'''
         children = menu.get_children()
-        if len(children) == 3: #image menu
-            child1, child2, child3 = children
-            menu.remove(child1)
-            menu.remove(child3)
-            child1.destroy()
-            child3.destroy()
-
-            child2.set_use_stock(False)
-            child2.set_property("label", _("Save"))
-
-        elif len(children) == 4: #back/forward/stop/reload menu
-            for child in children:
+        for i, child in enumerate(children):
+            # Ditry hack. The first 3 buttons of the non-image menu
+            # are insensitive
+            if i == 1 and child.get_property('sensitive'):
+                child.set_use_stock(False)
+                child.set_property("label", _("Save"))
+            else:
                 menu.remove(child)
                 child.destroy()
 
