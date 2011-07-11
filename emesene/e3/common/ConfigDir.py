@@ -60,7 +60,7 @@ class ConfigDir(object):
 
     def _get_default_base_dir(self):
         '''return the default base dir for configuration according to the OS'''
-        if sys.platform == 'linux2':
+        if sys.platform == 'linux2' or sys.platform == 'linux3':
             return os.path.expanduser(os.path.join('~', '.config',
                 self.app_name))
         elif sys.platform == 'win32':

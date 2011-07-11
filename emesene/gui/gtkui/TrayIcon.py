@@ -132,7 +132,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         (usually through right-clicking the status icon)
         """
         position = None
-        if os.name == 'mac' or sys.platform == 'linux2':
+        if os.name == 'mac' or sys.platform == 'linux2' or sys.platform == 'linux3':
             position = gtk.status_icon_position_menu
         self.menu.popup(None, None, position, button, activate_time, trayicon)
 
