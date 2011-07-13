@@ -57,7 +57,8 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         self.connect('popup-menu', self._on_popup)
 
         self.set_login()
-        self.set_visible(True)
+        gui.BaseTray.set_visible(True)
+        gui.StatusIcon.set_visible(True)
 
         self.set_tooltip("emesene")
 
@@ -73,17 +74,13 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         """
         method called to set the state to the main window
         """
-        self.handler.session = session
-        self.handler.session.signals.status_change_succeed.subscribe(
-                                                      self._on_change_status)
-        self.handler.session.signals.conv_message.subscribe(self._on_message)
-        self.handler.session.signals.message_read.subscribe(self._on_read)
+        gui.BaseTray.set_main(self, session)
         self.menu = MainMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_tooltip("emesene - " + self.handler.session.account.account)
         self._on_change_status(self.handler.session.account.status)
 
-    def _on_message(self, cid, account, msgobj, cedict={}):
+    def _on_conv_message(self, cid, account, msgobj, cedict=None):
         """
         Blink tray icon and save newest unread message
         """
@@ -94,7 +91,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
             self.set_blinking(True)
             self.last_new_message = cid
 
-    def _on_read(self, conv):
+    def _on_message_read(self, conv):
         """
         Stop tray blinking and resets the newest unread message reference
         """
@@ -118,7 +115,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         else:
             self.handler.on_hide_show_mainwindow(self.main_window)
 
-    def _on_change_status(self, stat):
+    def _on_status_change_succeed(self, stat):
         """
         change the icon in the tray according to user's state
         """

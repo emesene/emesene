@@ -8,6 +8,7 @@ class BaseTray(object):
     def __init__(self):
         self.conversations = None
         self.quit_on_close = False
+        self.signals_have_been_connected = False
 
     def set_conversations(self, convs):
         """
@@ -29,10 +30,54 @@ class BaseTray(object):
 
     def set_visible(self, arg):
         """ dummy, indicators remove themselves automagically """
-        pass
+        if self.signals_have_been_connected:
+            self.handler.session.signals.status_change_succeed.unsubscribe(
+                                                 self._on_status_change_succeed)
+            self.handler.session.signals.conv_message.unsubscribe(
+                self._on_conv_message)
+            self.handler.session.signals.conv_ended.unsubscribe(
+                self._on_conv_ended)
+            self.handler.session.signals.message_read.unsubscribe(
+                self._on_message_read)
 
     def set_main(self, session):
-        """ dummy, not needed if there is no tray icon """
+        """
+        method called to set the state to the main window
+        """
+        self.handler.session = session
+        self.handler.session.signals.status_change_succeed.subscribe(
+                                                 self._on_status_change_succeed)
+        self.handler.session.signals.conv_message.subscribe(
+            self._on_conv_message)
+        self.handler.session.signals.conv_ended.subscribe(
+            self._on_conv_ended)
+        self.handler.session.signals.message_read.subscribe(
+            self._on_message_read)
+
+        self.signals_have_been_connected = True
+
+    def _on_conv_message(self, cid, account, msgobj, cedict=None):
+        """
+        This is fired when a new message arrives to a user.
+        """
+        pass
+
+    def _on_message_read(self, conv):
+        """
+        This is called when the user read the message.
+        """
+        pass
+
+    def _on_conv_ended(self, cid):
+        """
+        This is called when the conversation ends
+        """
+        pass
+
+    def _on_status_change_succeed(self, *args):
+        """
+        This is called when status is successfully changed
+        """
         pass
 
     def _get_conversation_manager(self, cid, account=None):

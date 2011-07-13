@@ -58,6 +58,7 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
 
         self.main_window = main_window
 
+        gui.BaseTray.set_visible(True)
         self.menu = None
         self.set_login()
         self.set_status(appindicator.STATUS_ACTIVE)
@@ -77,14 +78,13 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         """
         method called to set the state to the main window
         """
-        self.handler.session = session
-        self.handler.session.signals.status_change_succeed.subscribe(self._on_change_status)
+        gui.BaseTray.set_main(self, session)
         self.menu = TrayIcon.MainMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_menu(self.menu)
         self._on_change_status(self.handler.session.account.status)
 
-    def _on_change_status(self, stat):
+    def _on_status_change_succeed(self, stat):
         """
         change the icon in the tray according to user's state
         """

@@ -56,20 +56,6 @@ class MessagingMenu(gui.BaseTray):
         self.sid = self.server.connect("server-display", self._server_display)
         self.server.show()
 
-    def set_main(self, session):
-        """
-        method called to set the state to the main window
-        """
-        self.handler.session = session
-        self.handler.session.signals.conv_message.subscribe(
-            self._on_message)
-        self.handler.session.signals.conv_ended.subscribe(
-            self._on_conv_ended)
-        self.handler.session.signals.message_read.subscribe(
-            self._on_message_read)
-
-        self.signals_have_been_connected = True
-
     def set_visible(self, arg):
         """ we are exiting from emesene: disconnect all signals """
         if arg:
@@ -84,20 +70,14 @@ class MessagingMenu(gui.BaseTray):
             if self.r_indicator_dict[key] is not None:
                 del self.r_indicator_dict[key]
 
-        if self.signals_have_been_connected:
-            self.handler.session.signals.conv_message.unsubscribe(
-                self._on_message)
-            self.handler.session.signals.conv_ended.unsubscribe(
-                self._on_conv_ended)
-            self.handler.session.signals.message_read.unsubscribe(
-                self._on_message_read)
+        gui.BaseTray.set_visible(True)
 
         self.server.disconnect(self.sid)
         self.server.hide()
         self.server = None
         self.sid = None
 
-    def _on_message(self, cid, account, msgobj, cedict=None):
+    def _on_conv_message(self, cid, account, msgobj, cedict=None):
         """
         This is fired when a new message arrives to a user.
         """
