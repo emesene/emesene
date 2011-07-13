@@ -58,7 +58,7 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
 
         self.main_window = main_window
 
-        gui.BaseTray.set_visible(True)
+        gui.BaseTray.set_visible(self, True)
         self.menu = None
         self.set_login()
         self.set_status(appindicator.STATUS_ACTIVE)

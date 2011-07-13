@@ -70,7 +70,7 @@ class MessagingMenu(gui.BaseTray):
             if self.r_indicator_dict[key] is not None:
                 del self.r_indicator_dict[key]
 
-        gui.BaseTray.set_visible(True)
+        gui.BaseTray.set_visible(self, True)
 
         self.server.disconnect(self.sid)
         self.server.hide()
