@@ -20,6 +20,7 @@
 import gtk
 import pango
 import urllib
+import webbrowser
 
 import RichWidget
 from gui import MarkupParser
@@ -91,7 +92,13 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
 
     def put_link(self, link):
         '''insert a link at the current position'''
+        
+        def on_activate_link(label, uri):
+            webbrowser.open_new_tab(uri)
+            return True
+    
         lnk = gtk.Label()
+        lnk.connect('activate-link', on_activate_link)
         lnk.set_markup(MarkupParser.urlify(MarkupParser.escape(link)))
         lnk.show()
         self.put_widget(lnk)
