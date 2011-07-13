@@ -133,6 +133,12 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
             position = gtk.status_icon_position_menu
         self.menu.popup(None, None, position, button, activate_time, trayicon)
 
+    def _on_contact_attr_changed(self, *args):
+        """
+        This is called when a contact changes something
+        """
+        self.menu.list_contacts._on_contact_change_something(*args)
+
 class LoginMenu(gtk.Menu):
     """
     a widget that represents the menu displayed on the trayicon on the
@@ -226,8 +232,6 @@ class ContactsMenu(gtk.Menu):
 
         for contact in self.contactmanager.get_online_list():
             self.__append_contact(contact)
-
-        self.handler.session.signals.contact_attr_changed.subscribe(self._on_contact_change_something)
 
         # TODO: find out why gtk ImageMenuItem does not work as expected
 

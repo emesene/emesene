@@ -31,6 +31,8 @@ class BaseTray(object):
     def set_visible(self, arg):
         """ dummy, indicators remove themselves automagically """
         if self.signals_have_been_connected:
+            self.handler.session.signals.contact_attr_changed.unsubscribe(
+                                            self._on_contact_attr_changed)
             self.handler.session.signals.status_change_succeed.unsubscribe(
                                                  self._on_status_change_succeed)
             self.handler.session.signals.conv_message.unsubscribe(
@@ -45,6 +47,8 @@ class BaseTray(object):
         method called to set the state to the main window
         """
         self.handler.session = session
+        self.handler.session.signals.contact_attr_changed.subscribe(
+                                            self._on_contact_attr_changed)
         self.handler.session.signals.status_change_succeed.subscribe(
                                                  self._on_status_change_succeed)
         self.handler.session.signals.conv_message.subscribe(
@@ -77,6 +81,12 @@ class BaseTray(object):
     def _on_status_change_succeed(self, *args):
         """
         This is called when status is successfully changed
+        """
+        pass
+
+    def _on_contact_attr_changed(self, *args):
+        """
+        This is called when a contact changes something
         """
         pass
 
