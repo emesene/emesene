@@ -236,7 +236,7 @@ class ListWidget(gtk.VBox):
     def add(self, stat, timestamp, text):
         '''add a row to the widget'''
         pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.status_icons[stat])
-        date_text = time.strftime('%c', time.gmtime(timestamp))
+        date_text = time.strftime('%c', time.localtime(timestamp))
         self.model.append((pix, date_text, text))
 
 class ChatWidget(gtk.VBox):
