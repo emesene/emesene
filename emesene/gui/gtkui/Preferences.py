@@ -778,6 +778,10 @@ class Extension(BaseTable):
         """add the widgets that will display the information of the extension
         category and the selected extension
         """
+        def on_activate_link(label, uri):
+            webbrowser.open_new_tab(uri)
+            return True
+        
         self.add_text(_('Categories'), 0, 0, True)
         self.add_text(_('Selected'), 0, 1, True)
         self.add_text('', 0, 2, True)
@@ -790,6 +794,7 @@ class Extension(BaseTable):
         self.description_info.set_width_chars(40)
         self.add_label(self.description_info, 1, 4, True)
         self.add_label(self.author_info, 1, 5, True)
+        self.website_info.connect('activate-link', on_activate_link)
         self.add_label(self.website_info, 1, 6, True)
 
         self.add_text('', 0, 7, True)
