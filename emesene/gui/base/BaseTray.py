@@ -41,6 +41,7 @@ class BaseTray(object):
                 self._on_conv_ended)
             self.handler.session.signals.message_read.unsubscribe(
                 self._on_message_read)
+            self.signals_have_been_connected = False
 
     def set_main(self, session):
         """
