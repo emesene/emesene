@@ -82,7 +82,7 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         self.menu = TrayIcon.MainMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_menu(self.menu)
-        self._on_change_status(self.handler.session.account.status)
+        self._on_status_change_succeed(self.handler.session.account.status)
 
     def _on_status_change_succeed(self, stat):
         """
