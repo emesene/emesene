@@ -126,6 +126,32 @@ class ContactList(object):
             self._on_update_group)
         #TODO fix offline group on connection e add fail signals
 
+    def remove_subscriptions(self):
+        '''disconnect signals subscriptions'''
+        self.session.signals.contact_attr_changed.unsubscribe(
+            self._on_contact_attr_changed)
+        self.session.signals.picture_change_succeed.unsubscribe(
+            self._on_contact_attr_changed)
+        self.session.signals.contact_add_succeed.unsubscribe(
+            self._on_add_contact)
+        self.session.signals.contact_remove_succeed.unsubscribe(
+            self._on_remove_contact)
+        self.session.signals.group_add_contact_succeed.unsubscribe(
+            self._on_add_contact_group)
+        self.session.signals.group_remove_contact_succeed.unsubscribe(
+            self._on_remove_contact_group)
+        self.session.signals.contact_block_succeed.unsubscribe(
+            self._on_contact_attr_changed)
+        self.session.signals.contact_unblock_succeed.unsubscribe(
+            self._on_contact_attr_changed)
+        #group signals
+        self.session.signals.group_add_succeed.unsubscribe(
+            self._on_add_group)
+        self.session.signals.group_remove_succeed.unsubscribe(
+            self._on_remove_group)
+        self.session.signals.group_rename_succeed.unsubscribe(
+            self._on_update_group)
+
     def _on_avatarssize_changed(self, value):
         '''callback called when config.i_avatar_size changes'''
         self.set_avatar_size(value)
