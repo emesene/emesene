@@ -63,6 +63,21 @@ class Notification():
         self.notify_online = False
         self.last_online = None
 
+    def remove_subscriptions(self):
+        if self.session:
+            self.session.signals.conv_message.unsubscribe(
+                self._on_message)
+            self.session.signals.contact_attr_changed.unsubscribe(
+                self._on_contact_attr_changed)
+            self.session.signals.mail_received.unsubscribe(
+                self._on_mail_received)
+            self.session.signals.filetransfer_completed.unsubscribe(
+                self._on_filetransfer_completed)
+            self.session.signals.filetransfer_canceled.unsubscribe(
+                self._on_filetransfer_canceled)
+            self.session.signals.filetransfer_invitation.unsubscribe(
+                self._on_filetransfer_invitation)
+
     def _on_filetransfer_completed(self,args):
         self.notifier(_("File transfer successful"), "", 'notification-message-email', 'file-transf-completed')
 

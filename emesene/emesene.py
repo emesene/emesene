@@ -353,6 +353,10 @@ class Controller(object):
             signals.contact_added_you.unsubscribe(self.on_pending_contacts)
             if self.unity_launcher is not None:
                 self.unity_launcher.remove_session()
+            # unsubscribe notifications signals
+            self.notification.remove_subscriptions()
+            self.notification = None
+
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
