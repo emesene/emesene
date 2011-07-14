@@ -194,6 +194,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         conversation -- the conversation instance
         """
         page_num = self.page_num(conversation)
+        conversation.tab_label.remove_subscriptions()
         self.remove_page(page_num)
         #FIXME: Dirty hack, why conversation is still alive when it's closed?
         #       Signals are being unsubscribed (see gtkui.Conversation) but...

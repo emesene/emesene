@@ -85,6 +85,9 @@ class TabWidget(gtk.HBox):
         self.label.show()
         self.close.show()
 
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self.on_tab_position_change,'i_tab_position')
+
     def set_image(self, path):
         '''set the image from path'''
         if utils.file_readable(path):
