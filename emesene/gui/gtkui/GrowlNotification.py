@@ -34,7 +34,6 @@ def GrowlNotification(title, text, uri, picture_path=None, const=None,
     if uri == 'notification-message-im':
         subprocess.call(['/usr/local/bin/growlnotify', '-n', 'emesene', '-a', 'emesene', '-t', title, '-m', text])
     else:
-        originalpath = uri.strip('file:///')
-        imagepath = '/' + originalpath
+        imagepath = uri.replace( "file:///", "/" )
         #BUG: In growl prefs, the emesene ticket will take on the last shown contact's picture
         subprocess.call(['/usr/local/bin/growlnotify', '-n', 'emesene', '--image', imagepath, '-t', title, '-m', text])
