@@ -227,6 +227,10 @@ class MainWindow(gtk.VBox):
             self._on_group_menu_selected)
         self.session.config.unsubscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
+        self.session.signals.mail_count_changed.unsubscribe(
+            self._on_mail_count_changed)
+        self.session.signals.contact_attr_changed.unsubscribe(
+            self._on_contact_attr_changed)
         self.panel.remove_subscriptions()
         self.on_disconnect_cb()
 
