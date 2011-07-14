@@ -58,7 +58,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
 
         self.set_login()
         gui.BaseTray.set_visible(self, True)
-        gui.StatusIcon.set_visible(True)
+        gtk.StatusIcon.set_visible(self, True)
 
         self.set_tooltip("emesene")
 
