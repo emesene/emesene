@@ -45,18 +45,22 @@ class AdiumTheme(object):
         self.incoming_next  = None
         self.outgoing       = None
         self.outgoing_next  = None
-        self.info           = None
 
-        self.variant        = variant
-        self.load_information(path)
+        self.variant        = None
+        self.load_information(path, variant)
 
-    def load_information(self, path):
+    def load_information(self, path, variant):
         '''load the information of the theme on path
         '''
         self.path = path
 
         info_file = file(os.path.join(path, 'Contents', 'Info.plist'))
-        self.info = parsers.Plist(info_file).info
+
+        if not variant:
+            info = parsers.Plist(info_file).info
+            variant_name = info.get('DefaultVariant', None)
+
+        self.variant = variant
 
         self.resources_path = os.path.join(path, 'Contents', 'Resources')
         self.incoming_path = os.path.join(self.resources_path, 'Incoming')
@@ -201,16 +205,12 @@ class AdiumTheme(object):
         resources_url = MarkupParser.path_to_url(self.resources_path)
         css_path = urljoin(resources_url, "main.css")
 
-        if self.variant:
-            variant_name = self.variant
-        else:
-            variant_name = self.info.get('DefaultVariant', None)
         template = template.replace("%@", resources_url + "/", 1)
         template = template.replace("%@", css_path, 1)
 
-        if variant_name is not None:
+        if self.variant is not None:
             variant_css_path = urljoin(resources_url,
-                    "Variants", variant_name + ".css")
+                    "Variants", self.variant + ".css")
             variant_tag = '<style id="mainStyle" type="text/css"' + \
                 'media="screen,print">	@import url( "' + variant_css_path + '" ); </style>'
         else:

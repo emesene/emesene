@@ -28,7 +28,7 @@ class SoundTheme(object):
 
         get information from the theme located in path
         '''
-        self.path           = None
+
         self.sound_alert    = None
         self.sound_nudge    = None
         self.sound_offline  = None
@@ -41,12 +41,10 @@ class SoundTheme(object):
     def load_information(self, path):
         '''load the information of the theme on path
         '''
-        self.path           = path
-
-        self.sound_alert    = os.path.join(self.path, "alert.wav")
-        self.sound_nudge    = os.path.join(self.path, "nudge.wav")
-        self.sound_offline  = os.path.join(self.path, "offline.wav")
-        self.sound_online   = os.path.join(self.path, "online.wav")
-        self.sound_send     = os.path.join(self.path, "send.wav")
-        self.sound_type     = os.path.join(self.path, "type.wav")
+        self.sound_alert    = os.path.join(path, "alert.wav")
+        self.sound_nudge    = os.path.join(path, "nudge.wav")
+        self.sound_offline  = os.path.join(path, "offline.wav")
+        self.sound_online   = os.path.join(path, "online.wav")
+        self.sound_send     = os.path.join(path, "send.wav")
+        self.sound_type     = os.path.join(path, "type.wav")
 
