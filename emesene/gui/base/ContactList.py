@@ -128,6 +128,8 @@ class ContactList(object):
 
     def remove_subscriptions(self):
         '''disconnect signals subscriptions'''
+        self.session.config.unsubscribe(self._on_avatarssize_changed,
+            'i_avatar_size')
         self.session.signals.contact_attr_changed.unsubscribe(
             self._on_contact_attr_changed)
         self.session.signals.picture_change_succeed.unsubscribe(
