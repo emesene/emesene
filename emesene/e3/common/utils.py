@@ -47,7 +47,7 @@ def add_style_to_message(text, stl, escape=True):
         style_end = '</s>' + style_end
 
     if stl.font:
-        style += "font-family: '%s'; " % (stl.font, )
+        style += "font-family: %s; " % (stl.font, )
 
     style_start += '<span style="%s">' % (style, )
     style_end = '</span>' + style_end
