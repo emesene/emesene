@@ -71,11 +71,11 @@ class AvatarManager(object):
             faces_paths = [unicodepath]
         elif sys.platform == 'darwin':
             faces_paths = ['/Library/User Pictures/Animals', \
-                             '/Library/User Pictures/Flowers', \
-                             '/Library/User Pictures/Fun', \
-                             '/Library/User Pictures/Instruments', \
-                             '/Library/User Pictures/Sports', \
-                             '/Library/User Pictures/Nature']
+                            '/Library/User Pictures/Flowers', \
+                            '/Library/User Pictures/Fun', \
+                            '/Library/User Pictures/Instruments', \
+                            '/Library/User Pictures/Sports', \
+                            '/Library/User Pictures/Nature']
         else:
             faces_paths = ['/usr/share/kde/apps/faces', \
                             '/usr/share/kde4/apps/kdm/pics/users', \
