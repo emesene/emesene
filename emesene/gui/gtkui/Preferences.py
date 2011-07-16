@@ -138,10 +138,10 @@ class Preferences(gtk.Window):
         self.add(vbox)
         vbox.show_all()
 
-    def remove_subscritions(self):
-        self.interface.remove_subscritions
-        self.sound.remove_subscritions
-        self.theme.remove_subscritions
+    def remove_subscriptions(self):
+        self.interface.remove_subscriptions()
+        self.sound.remove_subscriptions()
+        self.theme.remove_subscriptions()
 
     def remove_from_list(self, icon, text, page):
 
@@ -606,7 +606,7 @@ class Interface(BaseTable):
     def get_tab_positions(self):
         return [_("Top"),_("Bottom"),_("Left"),_("Right")]
 
-    def remove_subscritions(self):
+    def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_cb_show_toolbar_changed,
             'b_show_toolbar')
         self.session.config.unsubscribe(self._on_cb_side_panel_changed,
@@ -659,7 +659,7 @@ class Sound(BaseTable):
             else:
                 i.set_sensitive(True)
 
-    def remove_subscritions(self):
+    def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_mute_sounds_changed,
             'b_mute_sounds')
 
@@ -770,7 +770,7 @@ class Theme(BaseTable):
         else:
             self.b_text_color.set_sensitive(False)
 
-    def remove_subscritions(self):
+    def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_cb_override_text_color_toggled,
             'b_override_text_color')
 

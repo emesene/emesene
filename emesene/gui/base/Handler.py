@@ -158,7 +158,7 @@ class OptionsHandler(object):
         '''called when the preference button is selected'''
         instance = extension.get_and_instantiate('preferences', self.session)
         if self.session is not instance.session:
-            instance.remove_subscritions
+            instance.remove_subscriptions()
             extension.delete_instance('preferences')
             instance = extension.get_and_instantiate('preferences', self.session)
         instance.show()
