@@ -333,6 +333,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         
         #stop the parse emotes timeout of the inputbox
         self.input.stop_parse_emotes()
+        self.destroy()
 
     def show(self):
         '''override the show method'''
