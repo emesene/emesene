@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Default</key>
+	<integer>1</integer>
+	<key>Info</key>
+	<string>
+	default emesene soundset
+	</string>
+	<key>Sounds</key>
+	<dict>
+	   <key>Contact Signed Off</key>
+	   <string>offline.wav</string>
+	   <key>Contact Signed On</key>
+	   <string>online.wav</string>
+	   <key>Contact Invites You to Chat</key>
+	   <string>typing.wav</string>
+	   <key>Notification received</key>
+	   <string>nudge.wav</string>
+	   <key>Message Sent</key>
+	   <string>send.wav</string>
+	   <key>Error</key>
+	   <string>alert.wav</string>
+	</dict>
+</dict>
+</plist>

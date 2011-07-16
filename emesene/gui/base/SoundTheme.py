@@ -18,6 +18,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import plistlib
 
 class SoundTheme(object):
     '''a class that contains information of a sound theme
@@ -41,10 +42,27 @@ class SoundTheme(object):
     def load_information(self, path):
         '''load the information of the theme on path
         '''
-        self.sound_alert    = os.path.join(path, "alert.wav")
-        self.sound_nudge    = os.path.join(path, "nudge.wav")
-        self.sound_offline  = os.path.join(path, "offline.wav")
-        self.sound_online   = os.path.join(path, "online.wav")
-        self.sound_send     = os.path.join(path, "send.wav")
-        self.sound_type     = os.path.join(path, "type.wav")
+
+        sound_config_file = os.path.join(path, "Sounds.plist")
+
+        sound_data = plistlib.readPlist(file(sound_config_file))
+        alert = sound_data['Sounds']['Error']
+        try:
+            nudge = sound_data['Sounds']['Notification received']
+        except KeyError, exc:
+            nudge = sound_data['Sounds']['Message Received']
+        offline = sound_data['Sounds']['Contact Signed Off']
+        online = sound_data['Sounds']['Contact Signed On']
+        send = sound_data['Sounds']['Message Sent']
+        try:
+            typing = sound_data['Sounds']['Contact Invites You to Chat']
+        except KeyError, exc:
+            typing = sound_data['Sounds']['Connected']
+
+        self.sound_alert    = os.path.join(path, alert)
+        self.sound_nudge    = os.path.join(path, nudge)
+        self.sound_offline  = os.path.join(path, offline)
+        self.sound_online   = os.path.join(path, online)
+        self.sound_send     = os.path.join(path, send)
+        self.sound_type     = os.path.join(path, typing)
 

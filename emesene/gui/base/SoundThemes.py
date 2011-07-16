@@ -21,16 +21,13 @@ import os
 import ThemesManager
 import SoundTheme
 
-SOUND_FILES = ['alert.wav', 'nudge.wav', 'offline.wav', 'online.wav',
-            'send.wav', 'type.wav']
-
 class SoundThemes(ThemesManager.ThemesManager):
     '''a class to handle sound themes
     '''
 
     def __init__(self):
         '''constructor'''
-        ThemesManager.ThemesManager.__init__(self, "")
+        ThemesManager.ThemesManager.__init__(self, ".AdiumSoundset")
 
     def get(self, theme_path):
         '''return a Theme object instance
@@ -48,7 +45,7 @@ class SoundThemes(ThemesManager.ThemesManager):
         ''' return the instance of SoundThemes corresponding to the
             sound_name or the default theme if isn't found
         '''
-        sound_path = os.path.join('themes', 'sounds', 'default')
+        sound_path = os.path.join('themes', 'sounds', 'default.AdiumSoundset')
 
         for elem in self.list():
             if sound_name in elem:
@@ -59,20 +56,10 @@ class SoundThemes(ThemesManager.ThemesManager):
     def validate(self, theme_path):
         '''validate a Theme directory structure
         '''
-
         if not os.path.isdir(theme_path):
             return False, _("%s is not a directory") % theme_path
 
-        if not self.is_valid_theme(SOUND_FILES, theme_path):
-            return False, _("sound theme incomplete")
+        sound_config_file = os.path.join(theme_path, "Sounds.plist")
+        if not os.path.isfile(sound_config_file):
+            return False, _("Sounds.plist not found")
         return True, "ok"
-
-    def is_valid_theme(self, file_list, path):
-        """
-        return True if the path contains a valid theme
-        """
-
-        for file_name in file_list:
-            if not os.path.isfile(os.path.join(path, file_name)):
-                return False
-        return True
