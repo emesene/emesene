@@ -138,6 +138,11 @@ class Preferences(gtk.Window):
         self.add(vbox)
         vbox.show_all()
 
+    def remove_subscritions(self):
+        self.interface.remove_subscritions
+        self.sound.remove_subscritions
+        self.theme.remove_subscritions
+
     def remove_from_list(self, icon, text, page):
 
         LIST.remove({'stock_id' : icon,'text' : text})
@@ -601,6 +606,16 @@ class Interface(BaseTable):
     def get_tab_positions(self):
         return [_("Top"),_("Bottom"),_("Left"),_("Right")]
 
+    def remove_subscritions(self):
+        self.session.config.unsubscribe(self._on_cb_show_toolbar_changed,
+            'b_show_toolbar')
+        self.session.config.unsubscribe(self._on_cb_side_panel_changed,
+            'b_show_info')
+        self.session.config.unsubscribe(self._on_spell_change,
+            'b_enable_spell_check')
+        self.session.config.unsubscribe(self._on_conversation_tabs_change,
+            'b_conversation_tabs')
+
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
     """
@@ -643,6 +658,10 @@ class Sound(BaseTable):
                 i.set_sensitive(False)
             else:
                 i.set_sensitive(True)
+
+    def remove_subscritions(self):
+        self.session.config.unsubscribe(self._on_mute_sounds_changed,
+            'b_mute_sounds')
 
 class Notification(BaseTable):
     """the panel to display/modify the config related to the notifications
@@ -750,6 +769,10 @@ class Theme(BaseTable):
             self.b_text_color.set_sensitive(True)
         else:
             self.b_text_color.set_sensitive(False)
+
+    def remove_subscritions(self):
+        self.session.config.unsubscribe(self._on_cb_override_text_color_toggled,
+            'b_override_text_color')
 
 class Extension(BaseTable):
     """the panel to display/modify the config related to the extensions

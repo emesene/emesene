@@ -357,7 +357,6 @@ class Controller(object):
             self.notification.remove_subscriptions()
             self.notification = None
 
-
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
         if self.session is None:
