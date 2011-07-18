@@ -52,6 +52,7 @@ STATUS_MAP_REVERSE['unavailable'] = e3.status.OFFLINE
 
 PHOTO_TYPES = {
     'image/png': '.png',
+    'image/jpg': '.jpg',
     'image/jpeg': '.jpg',
     'image/gif': '.gif',
     'image/bmp': '.bmp',
