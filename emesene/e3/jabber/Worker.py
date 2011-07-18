@@ -2,9 +2,10 @@ import os
 import sys
 import time
 import Queue
-
+import base64
+import sha
 import e3
-
+import tempfile
 import logging
 log = logging.getLogger('jabber.Worker')
 
@@ -27,6 +28,13 @@ STATUS_MAP_REVERSE['away'] = e3.status.AWAY
 STATUS_MAP_REVERSE['xa'] = e3.status.IDLE
 STATUS_MAP_REVERSE['chat'] = e3.status.ONLINE
 STATUS_MAP_REVERSE['unavailable'] = e3.status.OFFLINE
+
+PHOTO_TYPES = {
+    'image/png': '.png',
+    'image/jpeg': '.jpg',
+    'image/gif': '.gif',
+    'image/bmp': '.bmp',
+    }
 
 class Worker(e3.Worker):
     '''wrapper of xmpppy to make it work like e3.Worker'''
@@ -56,6 +64,7 @@ class Worker(e3.Worker):
         self.rconversations = {}
         self.roster = None
         self.start_time = None
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
 
     def run(self):
         '''main method, block waiting for data, process it, and send data back
@@ -151,8 +160,50 @@ class Worker(e3.Worker):
         # log message
         e3.Logger.log_message(self.session, None, msgobj, False)
 
-    # action handlers
 
+    def _on_photo_update(self, session, stanza):
+
+        account = stanza.getFrom().getStripped()
+        vupdate = stanza.getTag('x', namespace='vcard-temp:x:update')
+        if not vupdate:
+            return
+        photo = vupdate.getTag('photo')
+        if not photo:
+            return
+        photo = photo.getData()
+        if not photo:
+            return
+        #request the photo only if we don't have it already
+        n = xmpp.Node('vCard', attrs={'xmlns': xmpp.NS_VCARD})
+        iq = xmpp.Protocol('iq', account, 'get', payload=[n])
+        return session.SendAndCallForResponse(iq, self._on_contact_jabber_changed)
+
+    def _on_contact_jabber_changed(self, session, stanza):
+        photo = stanza.getTag('vCard').getTag('PHOTO')
+        account = stanza.getFrom().getStripped()
+
+        if not photo:
+            return
+
+        photo_type = photo.getTag('TYPE').getData()
+        photo_bin = photo.getTag('BINVAL').getData()
+        photo_bin = base64.b64decode(photo_bin)
+        ext = PHOTO_TYPES[photo_type]
+        photo_hash = sha.new()
+        photo_hash.update(photo_bin)
+        photo_hash = photo_hash.hexdigest()
+
+        temp_file = tempfile.mkstemp(suffix = photo_hash)[1]
+        file(temp_file, 'wb').write(photo_bin)
+
+        ctct = self.session.contacts.get(account)
+        avatars = self.caches.get_avatar_cache(account)
+        avatar_path = os.path.join(avatars.path, photo_hash)
+        avatars.insert_raw(file(temp_file, 'rb'))
+        ctct.picture = avatar_path
+        self.session.picture_change_succeed(account, avatar_path)
+    
+    # action handlers
     def _handle_action_quit(self):
         '''handle Action.ACTION_QUIT
         '''
@@ -211,6 +262,7 @@ class Worker(e3.Worker):
 
         self.client.RegisterHandler('message', self._on_message)
         self.client.RegisterHandler('presence', self._on_presence)
+        self.client.RegisterHandler('presence', self._on_photo_update)
 
         self.client.sendInitPresence()
 
