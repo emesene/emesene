@@ -1,8 +1,6 @@
 ''' Jabber's worker '''
 # -*- coding: utf-8 -*-
 #
-# papylib - an emesene extension for papyon
-#
 # Copyright (C) 2009-2010 Emesene
 #
 # Code for contacts' picture inspired by Collin Anderson examples
