@@ -354,8 +354,9 @@ class Controller(object):
             if self.unity_launcher is not None:
                 self.unity_launcher.remove_session()
             # unsubscribe notifications signals
-            self.notification.remove_subscriptions()
-            self.notification = None
+            if self.notification:
+                self.notification.remove_subscriptions()
+                self.notification = None
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
