@@ -160,6 +160,7 @@ class Controller(object):
         self.logged_in = False
         self.timeout_id = None
         self.cur_service = None
+        self.notification = None
         self._parse_commandline()
         self._setup()
 
