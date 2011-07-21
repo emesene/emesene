@@ -893,6 +893,8 @@ class Extension(BaseTable):
                 (extension_index, category))
             return
         else:
+            if self.session.config.d_extensions is None:
+                self.session.config.d_extensions = {}
             self.session.config.d_extensions[category] = identifier
 
         ext = extension.get_default(category)
