@@ -465,6 +465,9 @@ class BaseTable(gtk.Table):
         """try to get the value of the attribute 'name' from obj, if it
         doesn't exist return default"""
         if not hasattr(obj, name):
+            if hasattr(obj, 'func_globals') and name in obj.func_globals.keys():
+                return obj.func_globals[name]
+
             return default
 
         return getattr(obj, name)
