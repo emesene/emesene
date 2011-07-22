@@ -37,7 +37,8 @@ class EmoticonCache(Cache.Cache):
         (emoticon, hash), duplicated shortcuts will be removed and the last
         appearance of the shortcut will be returned
         '''
-        return self.parse().items()
+        sorted_list = sorted(self.parse().items())
+        return sorted_list
 
     def insert(self, item):
         '''insert a new item into the cache
