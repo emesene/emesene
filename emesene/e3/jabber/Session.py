@@ -1,4 +1,5 @@
 from Worker import Worker
+from MailClients import *
 import e3
 
 class Session(e3.Session):
@@ -26,7 +27,13 @@ class Session(e3.Session):
     def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
         self.account = e3.Account(account, password, status, host)
-        self.__worker = Worker('emesene2', self, proxy, use_http)
+
+        if host == "talk.google.com":
+            mail_client = GMail(account, password)
+        else:
+            mail_client = NullMail(account, password)
+
+        self.__worker = Worker('emesene2', self, proxy, mail_client, use_http)
         self.__worker.start()
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
