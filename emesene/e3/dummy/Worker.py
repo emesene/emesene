@@ -42,8 +42,9 @@ class Worker(e3.Worker):
                 '', True)
         self._add_contact('pochu@emesene.org', '<3 debian', e3.status.BUSY,
                 '', False)
-        self._add_contact('cloud@emesene.org', 'nube', e3.status.BUSY,
-                '', False)
+        self._add_contact('cloud@emesene.org',
+        '·$,32·$59«·$,41·$50«·$,50·$41«·$,59·$32«·$,66·$23«·$32,1« :: nube ::»·$,66·$23»·$,59·$32»·$,50·$41»·$,41·$50»·$,32·$59»·0 ·$0',
+        e3.status.BUSY, '', False)
         self._add_contact('otacon@emesene.org', 'Otacon', e3.status.BUSY,
                 '', True)
         self._add_contact('federico@emesene.org', 'federico..', e3.status.AWAY,
