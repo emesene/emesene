@@ -386,7 +386,7 @@ getTagDict = {
 class MsnPlusMarkupMohrtutchy:
 
     def removeMarkup( self, text ):
-        '''remove the [b][/b] etc markup for pango and html markup'''
+        '''remove the [b][/b] etc markup for pango markup'''
 
         # already unicode here
         text = unicode(text,'utf8') if type(text) is not unicode else text
@@ -409,7 +409,7 @@ class MsnPlusMarkupMohrtutchy:
 
     def replaceMarkup( self, text ):
 
-        '''replace the [b][/b] etc markup for pango and html markup'''
+        '''replace the [b][/b] etc markup for pango markup'''
 
         text = unicode(text,'utf8') if type(text) is not unicode else text
 
