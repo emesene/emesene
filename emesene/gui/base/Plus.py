@@ -355,8 +355,6 @@ for i in range(4):
     formatIrc[bb] = re.compile("\xb7(\%s)(.*?)(\xb7\%s|$)" % doubleIrc)
 del bb, irc, doubleCase, doubleIrc
 
-span = re.compile('(<span.*?>)|(</span>)')
-
 colorTags = re.compile('\[[cC]=#[0-9A-Fa-f]{6}\]|\[[cC]=[0-9]{1,2}\]|'\
     '\[/[cC]\]|\[/[cC]=[0-9]{1,2}\]|\[/[cC]=#[0-9A-Fa-f]{6}\]|'\
     '\[[cC]=[0-9A-Za-z]{1,6}\]|\[/[cC]=[0-9A-Za-z]{1,6}\]')
@@ -381,17 +379,6 @@ getTagDict = {
     'i': ('style="italic"', 'font-style: italic'),
     's': ('strikethrough="true"', 'text-decoration: line-through'),
 }
-
-#\xc2 is for utf-8..
-customStatus = re.compile("^(.*)\xa0{([^}]*)}$")
-
-def getCustomStatus(nick):
-    '''parse custom status, return tuple (nick, status)'''
-    result = unicode(customStatus.search(nick),'utf8')
-    if result:
-        return result.groups()
-    else:
-        return (nick, '')
 
 class MsnPlusMarkupMohrtutchy:
     def __init__( self ):
