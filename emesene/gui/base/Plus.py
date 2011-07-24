@@ -294,7 +294,7 @@ def msnplus_strip(msnplus, useless_arg=None):
     compatibility with msnplus
     '''
     tag_re = re.compile('(\[\w(\=\d+)?\])|(\[\w\=\w+\])|(\[\/\w+(\=\d+)?\])')
-    tag_plus_old = re.compile('\·\@|\·\#|\·\$(\d+)?(\,\d+)?|\·0')
+    tag_plus_old = re.compile('\·(\&|\@|\#|0)|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
     res = tag_re.sub('', msnplus)
     res = tag_plus_old.sub('', res)
     return res
