@@ -297,6 +297,7 @@ def msnplus_strip(msnplus, useless_arg=None):
     tag_plus_old = re.compile('\·(\&|\@|\#|0)|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
     res = tag_re.sub('', msnplus)
     res = tag_plus_old.sub('', res)
+    res = res.replace("no-more-color",'')
     return res
 
 ################################################################################
