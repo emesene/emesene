@@ -122,6 +122,12 @@ class Worker(e3.Worker):
         show = presence.getShow()
         account = presence.getFrom().getStripped()
 
+        if show == None:
+            try:
+                show = presence.getAttrs()['type']
+            except KeyError:
+                show = 'chat'
+
         stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
 
         contact = self.session.contacts.contacts.get(account, None)
