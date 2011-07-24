@@ -152,7 +152,6 @@ def plus_text_parse(item):
     '''parse plus in the contact list'''
     global plus_or_noplus
     # get a plain string with objects
-    plus_parser.isHtml = False
     if plus_or_noplus:
         item = plus_parser.replaceMarkup(item)
     else:

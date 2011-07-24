@@ -372,17 +372,15 @@ IrcTags = re.compile("\xb7\#|\xb7&[a-zA-Z]+\d{0,3};|\xb7\@|\xb70")
 removeList = (colorTags,backColorTags,colorIrcTags,BbTags,IrcTags)
 
 getTagDict = {
-    'background': ('background="#%s"','background-color: #%s;'),
-    'foreground': ('foreground="#%s"','color: #%s;'),
-    'b': ('weight="bold"', 'font-weight: bold'), 
-    'u': ('underline="single"', 'text-decoration:underline'),
-    'i': ('style="italic"', 'font-style: italic'),
-    's': ('strikethrough="true"', 'text-decoration: line-through'),
+    'background': ('background="#%s"'),
+    'foreground': ('foreground="#%s"'),
+    'b': ('weight="bold"'),
+    'u': ('underline="single"'),
+    'i': ('style="italic"'),
+    's': ('strikethrough="true"'),
 }
 
 class MsnPlusMarkupMohrtutchy:
-    def __init__( self ):
-        self.isHtml = False
 
     def removeMarkup( self, text ):
         '''remove the [b][/b] etc markup for pango and html markup'''
@@ -708,19 +706,13 @@ class MsnPlusMarkupMohrtutchy:
         attrs = []
         for key in attrdict.keys():
             if key in getTagDict:
-                attr = getTagDict[key][int(self.isHtml)]
+                attr = getTagDict[key]
             attr = attr.replace("%s", attrdict[key])
             attrs.append(attr)
 
-        if self.isHtml:
-            tagattr = 'style="'
-            for attr in attrs:
-                tagattr += attr
-            tagattr += '"'
-        else:
-            tagattr = ''
-            for attr in attrs:
-                tagattr += attr
+        tagattr = ''
+        for attr in attrs:
+            tagattr += attr
         
         if text == None:
             return '<span ' + tagattr + '>'
