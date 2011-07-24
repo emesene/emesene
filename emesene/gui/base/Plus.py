@@ -293,8 +293,11 @@ def msnplus_strip(msnplus, useless_arg=None):
     @param useless_arg This is actually useless, and is mantained just for
     compatibility with msnplus
     '''
-    tag_re = re.compile('\[/?\w(=\d+)?\]')
-    return tag_re.sub('', msnplus)
+    tag_re = re.compile('(\[\w(\=\d+)?\])|(\[\w\=\w+\])|(\[\/\w+(\=\d+)?\])')
+    tag_plus_old = re.compile('\·\@|\·\#|\·\$(\d+)?(\,\d+)?|\·0')
+    res = tag_re.sub('', msnplus)
+    res = tag_plus_old.sub('', res)
+    return res
 
 ################################################################################
 # WARNING: Good ol' emesene1 code from mohrtutchy, roger et. al.
