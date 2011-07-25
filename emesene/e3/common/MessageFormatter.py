@@ -96,15 +96,6 @@ class MessageFormatter(object):
         self.last_message_sender = None
         return self.format_message(self.information, message)
 
-    def format_history(self, timestamp, nick, message):
-        '''format a history message from the templage'''
-        template = self.history
-        template = template.replace('%NL%', self.new_line)
-        template = template.replace('%NICK%', nick)
-        template = template.replace('%TIME%', timestamp)
-        template = template.replace('%MESSAGE%', message)
-        return template
-
     def format(self, contact, message_type=None, timestamp_override=None):
         '''format the message according to the template'''
         if message_type is None:
