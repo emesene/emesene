@@ -363,7 +363,7 @@ class OutputText(TextBox):
     def send_message(self, formatter, contact, message, cedict, cepath, is_first):
         '''add a message to the widget'''
         is_raw, consecutive, outgoing, first, last = \
-            formatter.format(contact, message.type)
+            formatter.format(contact, message.type, message.timestamp)
 
         if is_raw:
             middle = MarkupParser.escape(message.body)
@@ -376,7 +376,8 @@ class OutputText(TextBox):
 
     def receive_message(self, formatter, contact, message, cedict, cepath, is_first):
         '''add a message to the widget'''
-        is_raw, consecutive, outgoing, first, last = formatter.format(contact)
+        is_raw, consecutive, outgoing, first, last = \
+            formatter.format(contact, None, message.timestamp)
 
         if not is_raw:
             middle = e3.common.add_style_to_message(message.body, message.style)

@@ -17,6 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import time
+import calendar
 import xml.sax.saxutils
 
 import e3
@@ -119,7 +120,10 @@ class MessageFormatter(object):
             self.last_message_sender.account == contact.account:
             consecutive = True
 
-        timestamp = time.time()
+        if not timestamp_override==None:
+            timestamp = calendar.timegm(timestamp_override.timetuple())
+        else:
+            timestamp = time.time()
         self.last_message_sender = contact
         self.last_message_time = timestamp
 
