@@ -386,8 +386,6 @@ BbTags = re.compile\
     '\[/[bB]\]|\[/[iI]\]|\[/[uU]\]|\[/[ss]\]')
 IrcTags = re.compile("\xb7\#|\xb7&[a-zA-Z]+\d{0,3};|\xb7\@|\xb70")
 
-removeList = (colorTags,backColorTags,colorIrcTags,BbTags,IrcTags)
-
 getTagDict = {
     'background': ('background="#%s"'),
     'foreground': ('foreground="#%s"'),
@@ -398,28 +396,6 @@ getTagDict = {
 }
 
 class MsnPlusMarkupMohrtutchy:
-
-    def removeMarkup( self, text ):
-        '''remove the [b][/b] etc markup for pango markup'''
-
-        # already unicode here
-        text = unicode(text,'utf8') if type(text) is not unicode else text
-
-        all = removeList
-
-        for i in all:
-            text = re.sub( i, '', text)
-        all =tuple(formatBb.values() + formatIrc.values())
-        for i in all:
-            text = re.sub( i, lambda x:x.groups()[1], text)
-             
-        text = re.sub( colorIrcCode, '', text )
-
-        pos = text.find("no-more-color")
-        if pos != -1:
-            text = text.replace("no-more-color",'')
-
-        return text
 
     def replaceMarkup( self, text ):
 

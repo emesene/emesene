@@ -155,7 +155,7 @@ def plus_text_parse(item):
     if plus_or_noplus:
         item = plus_parser.replaceMarkup(item)
     else:
-        item = plus_parser.removeMarkup(item)
+        item = Plus.msnplus_strip(item)
     return item
 
 def msnplus_to_list(text):
@@ -169,7 +169,7 @@ def msnplus_to_list(text):
 def msnplus_to_plain_text(txt):
     ''' from a nasty string, returns a nice plain text string without
     bells and whistles, just text '''
-    return plus_parser.removeMarkup(txt)
+    return Plus.msnplus_strip(txt)
 
 class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
