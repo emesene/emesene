@@ -51,6 +51,8 @@ class ContactInformation(gtk.Window, gui.base.ContactInformation):
         self._create_tabs()
         self.tabs.show_all()
 
+        self.chats.nicebar.hide()
+
         self.add(self.tabs)
 
         self.fill_all()
@@ -262,6 +264,9 @@ class ChatWidget(gtk.VBox):
         if self.session:
             self.contact = self.session.contacts.get(account)
 
+        NiceBar = extension.get_default('nice bar')
+        self.nicebar = NiceBar()
+
         OutputText = extension.get_default('conversation output')
         self.text = OutputText(session.config, None)
         self.formatter = e3.common.MessageFormatter(session.contacts.me)
@@ -297,6 +302,7 @@ class ChatWidget(gtk.VBox):
         self.calendars.pack_start(gtk.Label(_('Chats to')), False)
         self.calendars.pack_start(self.to_calendar, True, True)
 
+        chat_box.pack_start(self.nicebar, False)
         chat_box.pack_start(self.text, True, True)
 
         all.pack_start(self.calendars, False)
@@ -334,6 +340,7 @@ class ChatWidget(gtk.VBox):
     def refresh_history(self):
         '''refresh the history according to the values on the calendars
         '''
+        self.nicebar.empty_queue()
         if self.contact:
             his_picture = self.contact.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
             my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
@@ -412,6 +419,10 @@ class ChatWidget(gtk.VBox):
                         None, None, self.first)
 
             self.first = False
+
+        if len(results) >= 1000:
+            self.nicebar.new_message(_('Too many messages to display'),
+                gtk.STOCK_DIALOG_WARNING)
 
     def _get_style(self, color):
 
