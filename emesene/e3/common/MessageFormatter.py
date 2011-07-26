@@ -70,11 +70,6 @@ class MessageFormatter(object):
         self.offline_incoming = \
             '<i>(offline message)</i><b>%DISPLAYNAME%</b>:%NL%    [%SHORTTIME%] %MESSAGE%%NL%'
         self.information = '<i>%MESSAGE%</i>%NL%'
-        self.error = \
-            '<span style="color: #A52A2A;"><b>%MESSAGE%</b></span>%NL%'
-        self.history = '<div class="message-history">'\
-            '<b>%TIME% %NICK%</b>: %MESSAGE%%NL%</div>'
-
 
     def format_message(self, template, message):
         '''format a message from the template, include new line
@@ -83,12 +78,6 @@ class MessageFormatter(object):
         template = template.replace('%MESSAGE%', message)
 
         return template
-
-    def format_error(self, message):
-        '''format an error message from the template, include new line
-        if new_line is True'''
-        self.last_message_sender = None
-        return self.format_message(self.error, message)
 
     def format_information(self, message):
         '''format an info message from the template, include new line
