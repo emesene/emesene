@@ -33,7 +33,7 @@ try:
     bus = gst_player.get_bus()
     bus.enable_sync_message_emission()
     bus.add_signal_watch()
-    bus.connect('message', gst_on_message, gst_player)           
+    bus.connect('message', gst_on_message, gst_player)
 except ImportError:
     HAVE_GSTREAMER = False
 
@@ -74,6 +74,8 @@ class SoundPlayer(object):
                 self._play = self.play_play
             elif is_on_path('aplay'):
                 self._play = self.aplay_play
+            else:
+                self._play = self.dummy_play
         else:
             self._play = self.dummy_play
 
