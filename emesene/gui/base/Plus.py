@@ -39,6 +39,10 @@ COLOR_MAP = (
 
 open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
 
+#regex used to remove plus markup
+tag_plus_strip_re = re.compile('(\[\w(\=\d+)?\])|(\[\w\=\w+\])|(\[\/\w+(\=\d+)?\])')
+tag_plus_old_strip_re = re.compile('\·(\&|\@|\#|0)|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
+
 def parse_emotes(markup):
     '''search for emotes on markup and return a list of items with chunks of
     test and Emote instances'''
@@ -293,12 +297,21 @@ def msnplus_strip(msnplus, useless_arg=None):
     @param useless_arg This is actually useless, and is mantained just for
     compatibility with msnplus
     '''
-    tag_re = re.compile('(\[\w(\=\d+)?\])|(\[\w\=\w+\])|(\[\/\w+(\=\d+)?\])')
-    tag_plus_old = re.compile('\·(\&|\@|\#|0)|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
-    res = tag_re.sub('', msnplus)
-    res = tag_plus_old.sub('', res)
-    res = res.replace("no-more-color",'')
-    return res
+    #escape special chars
+    msnplus = msnplus.replace ('\xc2\xb7&amp;','\xc2\xb7&')
+    msnplus = msnplus.replace('\xc2\xb7&quot;','\xc2\xb7"')
+    msnplus = msnplus.replace('\xc2\xb7&apos;','\xc2\xb7\'')
+
+    msnplus = tag_plus_strip_re.sub('', msnplus)
+    msnplus = tag_plus_old_strip_re.sub('', msnplus)
+    msnplus = msnplus.replace("no-more-color",'')
+
+    #unescape special chars
+    msnplus = msnplus.replace('\xc2\xb7&','\xc2\xb7&amp;')
+    msnplus = msnplus.replace('\xc2\xb7"','\xc2\xb7&quot;')
+    msnplus = msnplus.replace('\xc2\xb7\'','\xc2\xb7&apos;')
+
+    return msnplus
 
 ################################################################################
 # WARNING: Good ol' emesene1 code from mohrtutchy, roger et. al.
