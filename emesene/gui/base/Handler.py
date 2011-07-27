@@ -510,7 +510,7 @@ class ConversationToolbarHandler(object):
         '''check if current session supports calls '''
         user = self.session.account.account
         current_service = self.session.config.d_user_service.get(user, 'msn')
-        return current_service in ['msn']
+        return current_service in ['']
 
     def session_filetransfer_supported(self):
         '''check if current session supports file transfers '''
