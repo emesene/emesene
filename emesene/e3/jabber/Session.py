@@ -29,7 +29,7 @@ class Session(e3.Session):
         self.account = e3.Account(account, password, status, host)
 
         if host == "talk.google.com":
-            mail_client = GMail(account, password)
+            mail_client = IMAPMail("imap.gmail.com", 993, account, password)
         else:
             mail_client = NullMail(account, password)
 

@@ -59,10 +59,12 @@ class MailMessage(object):
 
 class MailClient(Thread):
 
-    def __init__(self, username, password):
+    def __init__(self, server, port, username, password):
         Thread.__init__(self)
         self._username = username
         self._password = password
+        self._server = server
+        self._port = port
         self._handlers = {}
         self._onrun = True
         self._used_times = 5
@@ -103,17 +105,17 @@ class MailClient(Thread):
 class NullMail(MailClient):
 
     def __init__(self, username, password):
-        MailClient.__init__(self, username, password)
+        MailClient.__init__(self, "", "", username, password)
 
     def run(self):
         pass
 
 
-class GMail(MailClient):
+class IMAPMail(MailClient):
 
-    def __init__(self, username, password):
-        MailClient.__init__(self, username, password)
-        self._imap_server = imaplib.IMAP4_SSL("imap.gmail.com", 993)
+    def __init__(self, server, port, username, password):
+        MailClient.__init__(self, server, port, username, password)
+        self._imap_server = imaplib.IMAP4_SSL(self._server, self._port)
         self._count = 0
 
     def on_run(self):
