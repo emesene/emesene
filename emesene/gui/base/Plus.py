@@ -47,10 +47,10 @@ def parse_emotes(markup):
     '''search for emotes on markup and return a list of items with chunks of
     test and Emote instances'''
     accum = []
-    for is_emote, text in gui.theme.split_smilies(markup):
+    for is_emote, text in gui.theme.emote_theme.split_smilies(markup):
         if is_emote:
             accum.append({'tag': 'img', 'src':
-                gui.theme.emote_to_path(text, True), 'alt': text, 'childs': []})
+                gui.theme.emote_theme.emote_to_path(text, True), 'alt': text, 'childs': []})
         else:
             accum.append(text)
 
