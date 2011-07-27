@@ -23,7 +23,7 @@ import os
 import sys
 import time
 import Queue
-import gobject
+import glib
 import hashlib
 import tempfile
 import xml.sax.saxutils
@@ -118,7 +118,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        self._mainloop = gobject.MainLoop(is_running=True)
+        self._mainloop = glib.MainLoop(is_running=True)
         while self._mainloop.is_running():
             try:
                 action = self.session.actions.get(True, 0.1)
@@ -237,7 +237,15 @@ class Worker(e3.base.Worker, papyon.Client):
         if 'last' in avatars:
             contact.picture = os.path.join(avatars.path, 'last')
 
+        glib.timeout_add_seconds(5, lambda *arg: 
+            self._lazy_msnobj_checker(papycontact))
+
+    def _lazy_msnobj_checker(self, papycontact):
+        ''' ugly hack because of https://github.com/emesene/emesene/issues/602 
+            aka papyon doesn't tell us msnobjects changed (and if we check
+            too soon, they're None) '''
         self._on_contact_msnobject_changed(papycontact)
+        return False
 
     def _add_group(self, papygroup):
         ''' method to add a group to the (gui) contact list '''
