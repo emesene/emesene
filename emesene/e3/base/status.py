@@ -16,7 +16,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-(ONLINE, OFFLINE, BUSY, AWAY, IDLE) = range(5)
+(ONLINE, OFFLINE, BUSY, AWAY, IDLE, DISCONNECTED) = range(6)
 
 ORDERED = [ONLINE, BUSY, AWAY, IDLE, OFFLINE]
 ALL = ORDERED

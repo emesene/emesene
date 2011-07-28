@@ -21,6 +21,7 @@ import logging
 log = logging.getLogger("emesene.e3.common.DBus")
 
 import extension
+import e3
 from e3.base import Action
 
 ERROR = False
@@ -117,7 +118,10 @@ if not ERROR:
 
         @dbus.service.method(BUS_NAME, 'i')
         def set_status(self, status):
-            self.session.add_action(Action.ACTION_CHANGE_STATUS, (status,))
+            if status == e3.status.DISCONNECTED:
+                self.session.add_action(Action.ACTION_LOGOUT, ())
+            else:
+                self.session.add_action(Action.ACTION_CHANGE_STATUS, (status,))
 
         #Signals
         @dbus.service.signal(BUS_NAME, 'i')
