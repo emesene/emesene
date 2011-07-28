@@ -31,30 +31,53 @@ class ConversationManager(object):
         
         self.conversations = {}
         if self.session:
-            self.session.signals.conv_message.subscribe(
-                self._on_message)
-            self.session.signals.user_typing.subscribe(
-                self._on_user_typing)
-            self.session.signals.conv_contact_joined.subscribe(
-                self._on_contact_joined)
-            self.session.signals.conv_contact_left.subscribe(
-                self._on_contact_left)
-            self.session.signals.conv_group_started.subscribe(
-                self._on_group_started)
-            self.session.signals.conv_group_ended.subscribe(
-                self._on_group_ended)
-            self.session.signals.conv_message_send_failed.subscribe(
-                self._on_message_send_failed)
-            #self.session.signals.contact_attr_changed.subscribe(
-            #    self._on_contact_attr_changed)
-            self.session.signals.p2p_finished.subscribe(
-                self._on_p2p_finished)
+            self.subscribe_signals()
 
         conversation_tabs = self.session.config.get_or_set(
                 'b_conversation_tabs', True)
 
         if self.session.conversations is None or conversation_tabs:
             self.session.conversations = {}
+
+    def subscribe_signals(self):
+        self.session.signals.conv_message.subscribe(
+            self._on_message)
+        self.session.signals.user_typing.subscribe(
+            self._on_user_typing)
+        self.session.signals.conv_contact_joined.subscribe(
+            self._on_contact_joined)
+        self.session.signals.conv_contact_left.subscribe(
+            self._on_contact_left)
+        self.session.signals.conv_group_started.subscribe(
+            self._on_group_started)
+        self.session.signals.conv_group_ended.subscribe(
+            self._on_group_ended)
+        self.session.signals.conv_message_send_failed.subscribe(
+            self._on_message_send_failed)
+        #self.session.signals.contact_attr_changed.subscribe(
+        #    self._on_contact_attr_changed)
+        self.session.signals.p2p_finished.subscribe(
+            self._on_p2p_finished)
+
+    def unsubscribe_signals(self):
+        self.session.signals.conv_message.unsubscribe(
+            self._on_message)
+        self.session.signals.user_typing.unsubscribe(
+            self._on_user_typing)
+        self.session.signals.conv_contact_joined.unsubscribe(
+            self._on_contact_joined)
+        self.session.signals.conv_contact_left.unsubscribe(
+            self._on_contact_left)
+        self.session.signals.conv_group_started.unsubscribe(
+            self._on_group_started)
+        self.session.signals.conv_group_ended.unsubscribe(
+            self._on_group_ended)
+        self.session.signals.conv_message_send_failed.unsubscribe(
+            self._on_message_send_failed)
+        #self.session.signals.contact_attr_changed.unsubscribe(
+        #    self._on_contact_attr_changed)
+        self.session.signals.p2p_finished.unsubscribe(
+            self._on_p2p_finished)
 
     def add_new_conversation(self, session, cid, members):
         """
@@ -243,24 +266,7 @@ class ConversationManager(object):
 
     def close_all(self):
         '''close and finish all conversations'''
-        self.session.signals.conv_message.unsubscribe(
-            self._on_message)
-        self.session.signals.user_typing.unsubscribe(
-            self._on_user_typing)
-        self.session.signals.conv_contact_joined.unsubscribe(
-            self._on_contact_joined)
-        self.session.signals.conv_contact_left.unsubscribe(
-            self._on_contact_left)
-        self.session.signals.conv_group_started.unsubscribe(
-            self._on_group_started)
-        self.session.signals.conv_group_ended.unsubscribe(
-            self._on_group_ended)
-        self.session.signals.conv_message_send_failed.unsubscribe(
-            self._on_message_send_failed)
-        #self.session.signals.contact_attr_changed.unsubscribe(
-        #    self._on_contact_attr_changed)
-        self.session.signals.p2p_finished.unsubscribe(
-            self._on_p2p_finished)
+        self.unsubscribe_signals()
         for conversation in self.conversations.values():
             self.close(conversation)
 

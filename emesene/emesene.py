@@ -161,6 +161,7 @@ class Controller(object):
         self.timeout_id = None
         self.cur_service = None
         self.notification = None
+        self.conv_manager_available = False
         self._parse_commandline()
         self._setup()
 
@@ -299,8 +300,18 @@ class Controller(object):
             self.dbus_ext.set_new_session(self.session)
         if self.unity_launcher is not None:
             self.unity_launcher.set_session(self.session)
+        if self.conv_manager_available: #and if new login == old login 
+            self.conv_manager_available = False
+            print "New session, updating conv managers"
+            for conv_manager in self.conversations:
+                print "%s %s" % (conv_manager, conv_manager.conversations)
+                conv_manager.session = self.session
+                conv_manager.subscribe_signals()
+                for cid, conv in conv_manager.conversations:
+                    conv.session = self.session
+                    conv.subscribe_signals()
 
-    def close_session(self, do_exit=True):
+    def close_session(self, do_exit=True, server_disconnected=False):
         '''close session'''
         # prevent preference window from staying open and breaking things
         pref = extension.get_instance('preferences')
@@ -309,9 +320,18 @@ class Controller(object):
 
         self._remove_subscriptions()
 
-        for conv_manager in self.conversations:
-            conv_manager.hide_all()
-            self._on_conversation_window_close(conv_manager)
+        if server_disconnected:
+            for conv_manager in self.conversations:
+                print "%s %s" % (conv_manager, conv_manager.conversations)
+                for cid, conv in conv_manager.conversations:
+                    conv.unsubscribe_signals()
+                conv_manager.unsubscribe_signals() # but keep alive conversations
+            self.conv_manager_available = True # update with new session
+            print "keepalive the conversation managers"
+        else:
+            for conv_manager in self.conversations:
+                conv_manager.hide_all()
+                self._on_conversation_window_close(conv_manager)
 
         if self.timeout_id:
             glib.source_remove(self.timeout_id)
@@ -743,12 +763,12 @@ class Controller(object):
     def on_disconnected(self, reason, reconnect=0):
         '''called when the server disconnect us'''
         account = self.session.account
-        self.close_session(False)
+        self.close_session(False, True)
         if reconnect:
             self.on_reconnect(account)
         else:
             self.go_login(cancel_clicked=True, no_autologin=True)
-            if(reason != None):
+            if reason is not None:
                 self.window.content.clear_all()
                 self.window.content.show_error(reason)
 

@@ -156,38 +156,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self._load_style()
 
-        self.session.config.subscribe(self._on_avatarsize_changed,
-            'i_conv_avatar_size')
-        self.session.config.subscribe(self._on_show_toolbar_changed,
-            'b_show_toolbar')
-        self.session.config.subscribe(self._on_show_header_changed,
-            'b_show_header')
-        self.session.config.subscribe(self._on_show_info_changed,
-            'b_show_info')
-        self.session.config.subscribe(self._on_show_avatar_onleft,
-            'b_avatar_on_left')
-        self.session.config.subscribe(self._on_icon_size_change,
-            'b_toolbar_small')
-        self.session.signals.picture_change_succeed.subscribe(
-            self.on_picture_change_succeed)
-        self.session.signals.contact_attr_changed.subscribe(
-            self.on_contact_attr_changed_succeed)
-
-        self.session.signals.filetransfer_invitation.subscribe(
-                self.on_filetransfer_invitation)
-        self.session.signals.filetransfer_accepted.subscribe(
-                self.on_filetransfer_accepted)
-        self.session.signals.filetransfer_progress.subscribe(
-                self.on_filetransfer_progress)
-        self.session.signals.filetransfer_completed.subscribe(
-                self.on_filetransfer_completed)
-        self.session.signals.filetransfer_rejected.subscribe(
-                self.on_filetransfer_rejected)
-        self.session.signals.filetransfer_canceled.subscribe(
-                self.on_filetransfer_canceled)
-
-        self.session.signals.call_invitation.subscribe(
-                self.on_call_invitation)
+        self.subscribe_signals()
 
         self.tab_index = -1 # used to select an existing conversation
         self.index = 0 # used for the rotate picture function
@@ -290,38 +259,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_close(self):
         '''called when the conversation is closed'''
-        self.session.config.unsubscribe(self._on_avatarsize_changed,
-            'i_conv_avatar_size')
-        self.session.config.unsubscribe(self._on_show_toolbar_changed,
-            'b_show_toolbar')
-        self.session.config.unsubscribe(self._on_show_header_changed,
-            'b_show_header')
-        self.session.config.unsubscribe(self._on_show_info_changed,
-            'b_show_info')
-        self.session.config.unsubscribe(self._on_show_avatar_onleft,
-            'b_avatar_on_left')
-        self.session.config.unsubscribe(self._on_icon_size_change,
-            'b_toolbar_small')
-        self.session.signals.picture_change_succeed.unsubscribe(
-            self.on_picture_change_succeed)
-        self.session.signals.contact_attr_changed.unsubscribe(
-            self.on_contact_attr_changed_succeed)
-
-        self.session.signals.filetransfer_invitation.unsubscribe(
-                self.on_filetransfer_invitation)
-        self.session.signals.filetransfer_accepted.unsubscribe(
-                self.on_filetransfer_accepted)
-        self.session.signals.filetransfer_progress.unsubscribe(
-                self.on_filetransfer_progress)
-        self.session.signals.filetransfer_completed.unsubscribe(
-                self.on_filetransfer_completed)
-        self.session.signals.filetransfer_rejected.unsubscribe(
-                self.on_filetransfer_rejected)
-        self.session.signals.filetransfer_canceled.unsubscribe(
-                self.on_filetransfer_canceled)
-
-        self.session.signals.call_invitation.unsubscribe(
-                self.on_call_invitation)
+        self.unsubscribe_signals()
 
         #stop the group chat image rotation timer, if it's started
         if self.rotate_started:

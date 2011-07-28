@@ -93,6 +93,15 @@ class UserPanel(gtk.VBox):
         nick_hbox.pack_start(self.nick, True, True)
         nick_hbox.pack_start(self.mail, False)
         nick_hbox.pack_start(self.search, False)
+
+        def do_something_weird(item):
+            from e3.base.Event import Event
+            session.add_event(Event.EVENT_DISCONNECTED, 'Tested disconnection', 0)
+        test_btn=gtk.Button(label="(!)")
+        test_btn.connect('clicked', do_something_weird)
+        test_btn.show()
+        nick_hbox.pack_start(test_btn, False)
+
         vbox.pack_start(nick_hbox, False)
         message_hbox = gtk.HBox()
         message_hbox.pack_start(self.message, True, True)
