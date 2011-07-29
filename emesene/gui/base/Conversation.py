@@ -276,6 +276,14 @@ class Conversation(object):
         """
         raise NotImplementedError("Method not implemented")
 
+    def set_sensitive(self, is_sensitive):
+        """
+        used to make the conversation insensitive while the conversation
+        is still open while the user is disconnected and to set it back to
+        sensitive when the user is reconnected
+        """
+        raise NotImplementedError("Method not implemented")
+
     def set_image_visible(self, is_visible):
         """
         set the visibility of the widget that displays the images of the members

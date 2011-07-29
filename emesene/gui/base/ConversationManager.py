@@ -233,6 +233,24 @@ class ConversationManager(object):
 
         return conversation
 
+    def renew_session(self, session):
+        '''reopen all conversations when the user reconnects'''
+        self.session = session
+        self.subscribe_signals()
+        for cid, conversation in self.conversations.iteritems():
+            conversation.session = session
+            conversation.subscribe_signals()
+            conversation.set_sensitive(True)
+            self.new_conversation(cid, conversation.members)
+
+    def close_session(self):
+        '''unsubscribe all signals when the user gets disconnected
+        and make the conversations insensitive'''
+        for conversation in self.conversations.itervalues():
+            conversation.unsubscribe_signals()
+            conversation.input.set_sensitive(False)
+        self.unsubscribe_signals() # but keep alive conversations
+
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):
         '''called when an attribute of a contact changes'''

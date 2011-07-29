@@ -300,19 +300,13 @@ class Controller(object):
             self.dbus_ext.set_new_session(self.session)
         if self.unity_launcher is not None:
             self.unity_launcher.set_session(self.session)
-        if self.conv_manager_available: #and if new login == old login 
+        if self.conv_manager_available: #and if new login == old login
             self.conv_manager_available = False
             print "New session, updating conv managers"
             self.session.conversations = {}
             for conv_manager in self.conversations:
                 print "%s %s" % (conv_manager, conv_manager.conversations)
-                conv_manager.session = self.session
-                conv_manager.subscribe_signals()
-                for cid, conv in conv_manager.conversations.iteritems():
-                    conv.session = self.session
-                    conv.subscribe_signals()
-                    conv_manager.new_conversation(cid, conv.members)
-                    print self.session.conversations
+                conv_manager.renew_session(self.session)
             self.tray_icon.set_conversations(self.conversations)
             if self.unity_launcher is not None:
                 self.unity_launcher.set_conversations(self.conversations)
@@ -329,9 +323,7 @@ class Controller(object):
         if server_disconnected:
             for conv_manager in self.conversations:
                 print "%s %s" % (conv_manager, conv_manager.conversations)
-                for cid, conv in conv_manager.conversations.iteritems():
-                    conv.unsubscribe_signals()
-                conv_manager.unsubscribe_signals() # but keep alive conversations
+                conv_manager.close_session()
             self.conv_manager_available = True # update with new session
             print "keepalive the conversation managers"
         else:
