@@ -102,7 +102,7 @@ class BaseTray(object):
             if account:
                 if convman.has_similar_conversation(cid, [account]):
                     return convman
-            elif cid in convman.conversations:
+            elif convman.has_similar_conversation(cid):
                 return convman
 
         return None
@@ -118,7 +118,7 @@ class BaseTray(object):
             if account:
                 conversation = convman.has_similar_conversation(cid, [account])
             else:
-                conversation = convman.conversations.get(cid, None)
+                conversation = convman.has_similar_conversation(cid)
 
             if conversation:
                 return conversation

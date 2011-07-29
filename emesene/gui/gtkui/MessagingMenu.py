@@ -82,24 +82,22 @@ class MessagingMenu(gui.BaseTray):
         This is fired when a new message arrives to a user.
         """
         contact = self.handler.session.contacts.get(account)
+        conv_manager = self._get_conversation_manager(cid, account)
+        conv = self._get_conversation(cid, account)
+        icid = conv.icid
 
-        if cid not in self.indicator_dict.values():
-            conv_manager = self._get_conversation_manager(cid, account)
+        if icid not in self.indicator_dict.values() and conv_manager and \
+            not (conv_manager.is_active() and conv.members == [account]):
 
-            if conv_manager:
-                conv = conv_manager.conversations[cid]
-
-                if not (conv_manager.is_active() and \
-                         conv.members == [account]):
-
-                    self._create_indicator("im", Renderers.msnplus_to_plain_text(contact.nick), account, cid=cid)
+            self._create_indicator("im", Renderers.msnplus_to_plain_text(
+                contact.nick), account, icid=icid)
 
     def _on_message_read(self, conv):
         """
         This is called when the user read the message.
         """
-        if conv and conv.cid in self.r_indicator_dict.keys():
-            ind = self.r_indicator_dict[conv.cid]
+        if conv and conv.icid in self.r_indicator_dict.keys():
+            ind = self.r_indicator_dict[conv.icid]
 
             if ind is not None:
                 ind.hide()
@@ -107,20 +105,21 @@ class MessagingMenu(gui.BaseTray):
                 if self.indicator_dict[ind] is not None:
                     del self.indicator_dict[ind]
 
-                if self.r_indicator_dict[conv.cid] is not None:
-                    del self.r_indicator_dict[conv.cid]
+                if self.r_indicator_dict[conv.icid] is not None:
+                    del self.r_indicator_dict[conv.icid]
 
     def _on_conv_ended(self, cid):
         """
         Called when the user close the conversation.
         """
-        if cid in self.r_indicator_dict.keys():
-            ind = self.r_indicator_dict[cid]
+        conv = self._get_conversation(cid)
+        if conv and conv.icid in self.r_indicator_dict.keys():
+            ind = self.r_indicator_dict[conv.icid]
             ind.hide()
-            del self.r_indicator_dict[cid]
+            del self.r_indicator_dict[conv.icid]
 
     def _create_indicator(self, subtype, sender, body,
-                          extra_text = '', cid=None):
+                          extra_text = '', icid=None):
         """
         This creates a new indicator item, called by on_message, online & offline.
         """
@@ -140,8 +139,8 @@ class MessagingMenu(gui.BaseTray):
 
             ind.set_property("subtype", subtype)
             ind.set_property("sender", sender + extra_text)
-            if cid is not None:
-                ind.set_property("body", str(cid))
+            if icid is not None:
+                ind.set_property("body", str(icid))
             else:
                 ind.set_property("body", body)
             ind.set_property_time("time", time.time())
@@ -151,15 +150,15 @@ class MessagingMenu(gui.BaseTray):
 
             # Add indicator to the dictionary
             if subtype == "im":
-                self.indicator_dict[ind] = cid
-                self.r_indicator_dict[cid] = ind
+                self.indicator_dict[ind] = icid
+                self.r_indicator_dict[icid] = ind
 
-            for old_cid in self.indicator_dict.values():
-                if old_cid not in self.handler.session.conversations.keys():
+            for old_icid in self.indicator_dict.values():
+                if old_icid not in self.handler.session.conversations.keys():
                     # workaround: kill the orphan indicator
-                    ind = self.r_indicator_dict[old_cid]
+                    ind = self.r_indicator_dict[old_icid]
                     del self.indicator_dict[ind]
-                    del self.r_indicator_dict[old_cid]
+                    del self.r_indicator_dict[old_icid]
         else:
             return
 
@@ -170,18 +169,18 @@ class MessagingMenu(gui.BaseTray):
         subtype = indicator.get_property("subtype")
 
         if subtype == "im":
-            cid = self.indicator_dict[indicator]
+            icid = self.indicator_dict[indicator]
 
-            convman = self._get_conversation_manager(cid)
+            convman = self._get_conversation_manager(icid)
 
             if convman:
-                conv = self._get_conversation(cid)
+                conv = self._get_conversation(icid)
                 convman.present(conv)
 
         if self.indicator_dict[indicator] is not None:
             del self.indicator_dict[indicator]
-        if self.r_indicator_dict[cid] is not None:
-            del self.r_indicator_dict[cid]
+        if self.r_indicator_dict[icid] is not None:
+            del self.r_indicator_dict[icid]
 
         # Hide the indicator - user has clicked it so we've no use for it now.
         indicator.hide()

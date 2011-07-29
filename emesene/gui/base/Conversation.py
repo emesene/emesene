@@ -40,6 +40,7 @@ class Conversation(object):
         self.emcache = self.caches.get_emoticon_cache(self.session.account.account)
 
         self.cid = float(cid)
+        self.icid = self.cid
         self.formatter = e3.common.MessageFormatter(session.contacts.me)
         self.first = True
 

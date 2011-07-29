@@ -145,7 +145,7 @@ class ConversationManager(object):
         '''return a markup text representing the format on the message'''
         return e3.common.add_style_to_message(message.body, message.style)
 
-    def has_similar_conversation(self, cid, members):
+    def has_similar_conversation(self, cid, members=None):
         '''
         try to find a conversation with the given cid, if not search for a
         conversation with the same members and return it
@@ -158,8 +158,13 @@ class ConversationManager(object):
             return self.conversations[cid]
 
         elif members is not None:
-            for (key, conversation) in self.conversations.iteritems():
+            for conversation in self.conversations.itervalues():
                 if conversation.members == members:
+                    return conversation
+
+        else:
+            for conversation in self.conversations.itervalues():
+                if conversation.icid == cid:
                     return conversation
 
     def reuse_conversation(self, cid, members):

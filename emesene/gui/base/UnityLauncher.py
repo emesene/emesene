@@ -43,7 +43,7 @@ class UnityLauncher(BaseTray):
         ql_quit.connect('item-activated', self._close_session)
         ql.child_append(ql_quit)
         self.launcher.set_property("quicklist", ql)
-        self.cid_dict = {}
+        self.icid_dict = {}
 
     def set_session(self, session):
         ''' Method called upon login '''
@@ -67,37 +67,41 @@ class UnityLauncher(BaseTray):
 
     def _on_message(self, cid, account, msgobj, cedict=None):
         ''' This is fired when a new message arrives '''
-        if cid in self.cid_dict.keys():
-            self.cid_dict[cid] += 1
-        else:
-            conv_manager = self._get_conversation_manager(cid, account)
-            if not conv_manager:
-                return
-            conv = conv_manager.conversations[cid]
-            if conv_manager.is_active():
-                return
-            self.cid_dict[cid] = 1
-        self.count += 1
-        self.launcher.set_property("count", self.count)
-        self.launcher.set_property("count_visible", True)
-        self.launcher.set_property("urgent", True)
+        conv = self._get_conversation(cid, account)
+        if conv:
+            icid = conv.icid
+            if icid in self.icid_dict.keys():
+                self.icid_dict[icid] += 1
+            else:
+                conv_manager = self._get_conversation_manager(cid, account)
+                if not conv_manager:
+                    return
+                if conv_manager.is_active():
+                    return
+                self.icid_dict[icid] = 1
+            self.count += 1
+            self.launcher.set_property("count", self.count)
+            self.launcher.set_property("count_visible", True)
+            self.launcher.set_property("urgent", True)
 
     def _on_message_read(self, conv):
         ''' This is called when the user read the message '''
         if conv:
-            self._hide_count(conv.cid)
+            self._hide_count(conv.icid)
 
     def _on_conv_ended(self, cid):
         ''' This is called when the conversation is closed '''
-        self._hide_count(cid)
+        conv = self._get_conversation(cid)
+        if conv:
+            self._hide_count(conv.icid)
 
-    def _hide_count(self, cid):
+    def _hide_count(self, icid):
         ''' Hide the message count if nessecary '''
-        if cid in self.cid_dict.keys():
-            self.count -= self.cid_dict[cid]
-            del self.cid_dict[cid]
+        if icid in self.icid_dict.keys():
+            self.count -= self.icid_dict[icid]
+            del self.icid_dict[icid]
         self.launcher.set_property("count", self.count)
-        if self.cid_dict == {}:
+        if self.icid_dict == {}:
             self.count = 0
         if self.count == 0:
             self.launcher.set_property("count_visible", False)
