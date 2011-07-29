@@ -303,6 +303,7 @@ class Controller(object):
         if self.conv_manager_available: #and if new login == old login 
             self.conv_manager_available = False
             print "New session, updating conv managers"
+            self.session.conversations = {}
             for conv_manager in self.conversations:
                 print "%s %s" % (conv_manager, conv_manager.conversations)
                 conv_manager.session = self.session
@@ -310,6 +311,11 @@ class Controller(object):
                 for cid, conv in conv_manager.conversations.iteritems():
                     conv.session = self.session
                     conv.subscribe_signals()
+                    conv_manager.new_conversation(cid, conv.members)
+                    print self.session.conversations
+            self.tray_icon.set_conversations(self.conversations)
+            if self.unity_launcher is not None:
+                self.unity_launcher.set_conversations(self.conversations)
 
     def close_session(self, do_exit=True, server_disconnected=False):
         '''close session'''
