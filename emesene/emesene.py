@@ -307,7 +307,7 @@ class Controller(object):
                 print "%s %s" % (conv_manager, conv_manager.conversations)
                 conv_manager.session = self.session
                 conv_manager.subscribe_signals()
-                for cid, conv in conv_manager.conversations:
+                for cid, conv in conv_manager.conversations.iteritems():
                     conv.session = self.session
                     conv.subscribe_signals()
 
@@ -323,7 +323,7 @@ class Controller(object):
         if server_disconnected:
             for conv_manager in self.conversations:
                 print "%s %s" % (conv_manager, conv_manager.conversations)
-                for cid, conv in conv_manager.conversations:
+                for cid, conv in conv_manager.conversations.iteritems():
                     conv.unsubscribe_signals()
                 conv_manager.unsubscribe_signals() # but keep alive conversations
             self.conv_manager_available = True # update with new session
