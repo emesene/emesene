@@ -734,25 +734,26 @@ class Controller(object):
 
     def _on_conversation_window_close(self, conv_manager):
         '''method called when the conversation window is closed'''
-        width, height, posx, posy = \
-                conv_manager.get_dimensions()
+        if self.session:
+            width, height, posx, posy = \
+                    conv_manager.get_dimensions()
 
-        # when window is minimized, posx and posy are -32000 on Windows
-        if os.name == "nt":
-            # make sure that the saved dimensions are visible
-            if posx < (-width):
-                posx = 0
-            if posy < (-height):
-                posy = 0
+            # when window is minimized, posx and posy are -32000 on Windows
+            if os.name == "nt":
+                # make sure that the saved dimensions are visible
+                if posx < (-width):
+                    posx = 0
+                if posy < (-height):
+                    posy = 0
 
-        if not conv_manager.is_maximized():
-            self.session.config.i_conv_width = width
-            self.session.config.i_conv_height = height
-            self.session.config.i_conv_posx = posx
-            self.session.config.i_conv_posy = posy
-            self.session.config.b_conv_maximized = False
-        else:
-            self.session.config.b_conv_maximized = True
+            if not conv_manager.is_maximized():
+                self.session.config.i_conv_width = width
+                self.session.config.i_conv_height = height
+                self.session.config.i_conv_posx = posx
+                self.session.config.i_conv_posy = posy
+                self.session.config.b_conv_maximized = False
+            else:
+                self.session.config.b_conv_maximized = True
 
         conv_manager.close_all()
         self.conversations.remove(conv_manager)
