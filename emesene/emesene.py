@@ -162,6 +162,9 @@ class Controller(object):
         self.cur_service = None
         self.notification = None
         self.conv_manager_available = False
+        self.last_session_account = None
+        self.last_session_service = None
+
         self._parse_commandline()
         self._setup()
 
@@ -277,7 +280,7 @@ class Controller(object):
         self.tray_icon.set_login()
         self.window.show()
 
-    def _new_session(self):
+    def _new_session(self, account=None):
         '''create a new session object'''
 
         if self.session is not None:
@@ -300,14 +303,25 @@ class Controller(object):
             self.dbus_ext.set_new_session(self.session)
         if self.unity_launcher is not None:
             self.unity_launcher.set_session(self.session)
-        if self.conv_manager_available: #and if new login == old login
-            self.conv_manager_available = False
-            self.session.conversations = {}
-            for conv_manager in self.conversations:
-                conv_manager.renew_session(self.session)
-            self.tray_icon.set_conversations(self.conversations)
-            if self.unity_launcher is not None:
-                self.unity_launcher.set_conversations(self.conversations)
+        if self.conv_manager_available:
+            if account and self.last_session_account == account.account and \
+               self.last_session_service == account.service:
+                self.conv_manager_available = False
+                self.session.conversations = {}
+                for conv_manager in self.conversations:
+                    conv_manager.renew_session(self.session)
+                self.tray_icon.set_conversations(self.conversations)
+                if self.unity_launcher is not None:
+                    self.unity_launcher.set_conversations(self.conversations)
+            else:
+                for conv_manager in self.conversations:
+                    conv_manager.hide_all()
+                    # _on_conversation_window_close, without saving settings
+                    #conv_manager.close_all()
+                    self.conversations.remove(conv_manager)
+
+        self.last_session_account = account.account
+        self.last_session_service = account.service
 
     def close_session(self, do_exit=True, server_disconnected=False):
         '''close session'''
@@ -588,7 +602,7 @@ class Controller(object):
         else:
             self.window.content.clear_connect()
 
-        self._new_session()
+        self._new_session(account)
 
         # set default values if not already set
         self.session.config.get_or_set('b_conv_minimized', True)
