@@ -28,7 +28,7 @@ import extension
 import logging
 
 import Tooltips
-import Renderers
+from gui.base import Plus
 
 log = logging.getLogger('gtkui.ContactList')
 
@@ -770,8 +770,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
             return override
 
         if self.order_by_name:
-            return cmp(Renderers.msnplus_to_plain_text(contact1.display_name),
-                       Renderers.msnplus_to_plain_text(contact2.display_name))
+            return cmp(Plus.msnplus_strip(contact1.display_name),
+                       Plus.msnplus_strip(contact2.display_name))
 
         result = cmp(e3.status.ORDERED.index(contact1.status),
             e3.status.ORDERED.index(contact2.status))
@@ -824,11 +824,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 selection.set(selection.target,
                     8, u'{0} &lt;<a href="mailto:{1}">{1}</a>&gt;'.format(''.join(display_name), account))
             elif selection.target == 'text/plain':
-                selection.set(selection.target, 8, u'%s <%s>' % (Renderers.msnplus_to_plain_text(display_name), account))
+                selection.set(selection.target, 8, u'%s <%s>' % (Plus.msnplus_strip(display_name), account))
 
     def _on_drag_drop(self, widget, drag_context, x, y, time):
         drag_context.finish(True, False, time)
-        if self.session.config.b_order_by_group:
+        if self.session.config.b_order_by_group:    
             group_src = self.get_contact_selected_group()
 
             pos = widget.get_dest_row_at_pos(x,y)[0][0]
