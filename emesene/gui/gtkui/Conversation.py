@@ -385,6 +385,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         self.input.set_sensitive(is_sensitive)
         self.toolbar.set_sensitive(is_sensitive)
+        self.avatarBox.set_sensitive(is_sensitive)
+        self.his_avatarBox.set_sensitive(is_sensitive)
 
     def set_image_visible(self, is_visible):
         """
