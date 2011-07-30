@@ -18,8 +18,7 @@
 
 import os
 import time
-import utils
-import Renderers
+import gui.gtkui.utils as utils
 import indicate
 
 import gui
@@ -89,7 +88,7 @@ class MessagingMenu(gui.BaseTray):
         if icid not in self.indicator_dict.values() and conv_manager and \
             not (conv_manager.is_active() and conv.members == [account]):
 
-            self._create_indicator("im", Renderers.msnplus_to_plain_text(
+            self._create_indicator("im", gui.Plus.msnplus_strip(
                 contact.nick), account, icid=icid)
 
     def _on_message_read(self, conv):

@@ -16,6 +16,11 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+try:
+    open("/usr/local/bin/growlnotify")
+except IOError:
+    raise ImportError
+
 import subprocess
 
 from gui.base import Plus

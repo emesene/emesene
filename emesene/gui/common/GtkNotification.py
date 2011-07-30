@@ -18,13 +18,13 @@
 
 import gui
 from gui.base import MarkupParser
-import utils
+from gui.base import Plus
+import gui.gtkui.utils as utils
 
 import glib
 import gtk
 import pango
 import os
-from gui.base import Plus
 
 import logging
 log = logging.getLogger('gui.gtkui.GtkNotification')
@@ -110,7 +110,7 @@ if os.name == "nt":
 queue = list()
 actual_notification = None
 
-def gtkNotification(title, text, picturePath=None, const=None, callback=None, tooltip=None):
+def GtkNotification(title, text, picturePath=None, const=None, callback=None, tooltip=None):
     global actual_notification
     global queue
 

@@ -26,9 +26,7 @@ import extension
 from e3 import status
 
 import gui
-import utils
-
-import Renderers
+import gui.gtkui.utils as utils
 
 class TrayIcon(gtk.StatusIcon, gui.BaseTray):
     """
@@ -241,7 +239,7 @@ class ContactsMenu(gtk.Menu):
         """
         #item = gtk.ImageMenuItem()
         item = gtk.MenuItem()
-        item.set_label(Renderers.msnplus_to_plain_text(contact.nick))
+        item.set_label(gui.Plus.msnplus_strip(contact.nick))
         #pict = self.__get_contact_pixbuf_or_default(contact)
         #item.set_image(pict)
         item.connect('activate', self._on_contact_clicked)
@@ -319,22 +317,3 @@ class ContactsMenu(gtk.Menu):
             picture = gtk.image_new_from_pixbuf(pix)
 
         return picture
-
-
-class NoTrayIcon(gui.BaseTray):
-    """
-    A widget that implements a no tray icon option
-    """
-    NAME = 'No Tray Icon'
-    DESCRIPTION = 'No tray icon at all'
-    AUTHOR = 'Sbte'
-    WEBSITE = 'www.emesene.org'
-
-    def __init__(self, handler, main_window=None):
-        """
-        constructor
-
-        handler -- a e3common.Handler.TrayIconHandler object
-        """
-        gui.BaseTray.__init__(self)
-        self.quit_on_close = True
