@@ -22,7 +22,7 @@ import gtk
 import e3
 import gui
 import extension
-import Renderers
+import Plus
 
 class ConversationManager(gtk.Notebook, gui.ConversationManager):
     '''the main conversation, it only contains other widgets'''
@@ -224,7 +224,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             win = self.get_parent() # gtk.Window, not a nice hack.
             if win is None:
                 return
-            win.set_title(Renderers.msnplus_to_plain_text(text))
+            win.set_title(Plus.msnplus_strip(text))
             win.set_icon(icon)
 
     def present(self, conversation):
