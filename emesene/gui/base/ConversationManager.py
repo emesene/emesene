@@ -241,7 +241,9 @@ class ConversationManager(object):
             conversation.session = session
             conversation.subscribe_signals()
             conversation.set_sensitive(True)
-            self.new_conversation(cid, conversation.members)
+            account = conversation.members[0]
+            self.new_conversation(cid, [account])
+            self.session.new_conversation(account, cid)
 
     def close_session(self):
         '''unsubscribe all signals when the user gets disconnected

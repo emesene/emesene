@@ -303,6 +303,9 @@ class Controller(object):
             self.dbus_ext.set_new_session(self.session)
         if self.unity_launcher is not None:
             self.unity_launcher.set_session(self.session)
+
+    def _restore_session(self):
+        account = self.session.account
         if self.conv_manager_available:
             if account and self.last_session_account == account.account and \
                self.last_session_service == account.service:
@@ -577,6 +580,8 @@ class Controller(object):
 
         self.draw_main_screen()
         self._setup_plugins()
+
+        self._restore_session()
 
         self._sync_emesene1()
         self.logged_in = True
