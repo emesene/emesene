@@ -82,8 +82,6 @@ class OutputView(webkit.WebView):
     def add_message(self, msg, style=None, cedict={}, cedir=None):
         '''add a message to the conversation'''
 
-        msg.alias = Plus.msnplus_strip(msg.alias)
-        msg.display_name = Plus.msnplus_strip(msg.display_name)
         b_nick_check = bool(self.last_incoming_nickname != msg.display_name)
         if b_nick_check:
             self.last_incoming_nickname = msg.display_name
@@ -220,8 +218,6 @@ class OutputText(gtk.ScrolledWindow):
         '''clear the content'''
         self._texts = []
         self.loaded = False
-        target = Plus.msnplus_strip(target)
-        target_display = Plus.msnplus_strip(target_display)
         self.view.clear(source, target, target_display, source_img, target_img)
 
     def _error_cb(self, view, message, line, source_id):

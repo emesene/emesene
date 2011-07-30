@@ -25,6 +25,7 @@ import xml.sax.saxutils
 
 import parsers
 import MarkupParser
+import Plus
 
 class AdiumTheme(object):
     '''a class that contains information of a adium theme
@@ -131,6 +132,9 @@ class AdiumTheme(object):
         '''replace the variables on template for the values on msg
         '''
 
+        msg.alias = Plus.msnplus_strip(msg.alias)
+        msg.display_name = Plus.msnplus_strip(msg.display_name)
+
         msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir, msg.sender)
         msgtext = MarkupParser.urlify(msgtext)
         image_path = escape(MarkupParser.path_to_url(msg.image_path))
@@ -217,6 +221,9 @@ class AdiumTheme(object):
             variant_tag = ""
 
         template = template.replace("%@", variant_tag, 1)
+
+        target = Plus.msnplus_strip(target)
+        target_display = Plus.msnplus_strip(target_display)
 
         header = read_file(self.resources_path, 'Header.html') or ""
 
