@@ -302,10 +302,8 @@ class Controller(object):
             self.unity_launcher.set_session(self.session)
         if self.conv_manager_available: #and if new login == old login
             self.conv_manager_available = False
-            print "New session, updating conv managers"
             self.session.conversations = {}
             for conv_manager in self.conversations:
-                print "%s %s" % (conv_manager, conv_manager.conversations)
                 conv_manager.renew_session(self.session)
             self.tray_icon.set_conversations(self.conversations)
             if self.unity_launcher is not None:
@@ -322,10 +320,8 @@ class Controller(object):
 
         if server_disconnected:
             for conv_manager in self.conversations:
-                print "%s %s" % (conv_manager, conv_manager.conversations)
                 conv_manager.close_session()
             self.conv_manager_available = True # update with new session
-            print "keepalive the conversation managers"
         else:
             for conv_manager in self.conversations:
                 conv_manager.hide_all()

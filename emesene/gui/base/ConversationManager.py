@@ -248,7 +248,7 @@ class ConversationManager(object):
         and make the conversations insensitive'''
         for conversation in self.conversations.itervalues():
             conversation.unsubscribe_signals()
-            conversation.input.set_sensitive(False)
+            conversation.set_sensitive(False)
         self.unsubscribe_signals() # but keep alive conversations
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
