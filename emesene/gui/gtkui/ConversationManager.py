@@ -22,7 +22,7 @@ import gtk
 import e3
 import gui
 import extension
-import Plus
+from gui.base import Plus
 
 class ConversationManager(gtk.Notebook, gui.ConversationManager):
     '''the main conversation, it only contains other widgets'''

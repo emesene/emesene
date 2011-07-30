@@ -26,8 +26,7 @@ from glib import timeout_add, source_remove
 import xml.sax.saxutils
 
 import gui
-
-import Renderers
+from gui.base import Plus
 
 class Tooltips(gtk.Window):
     ''' Class that implements the tooltips shown in the user list '''
@@ -135,8 +134,8 @@ class Tooltips(gtk.Window):
         ''' shows the tooltip of an e3.Contact '''
         self.tag = -1
 
-        text = xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.display_name)) 
-        text += '\n<span size="small">' + xml.sax.saxutils.escape(Renderers.msnplus_to_plain_text(obj.message)) + '</span>'
+        text = xml.sax.saxutils.escape(Plus.msnplus_strip(obj.display_name))
+        text += '\n<span size="small">' + xml.sax.saxutils.escape(Plus.msnplus_strip(obj.message)) + '</span>'
         text += '\n' + self.data_string % (\
             obj.account, obj.status_string, self.yes_no[bool(obj.blocked)])
 
