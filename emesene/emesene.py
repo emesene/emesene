@@ -317,7 +317,7 @@ class Controller(object):
                 for conv_manager in self.conversations:
                     conv_manager.hide_all()
                     # _on_conversation_window_close, without saving settings
-                    #conv_manager.close_all()
+                    conv_manager.close_all()
                     self.conversations.remove(conv_manager)
 
         self.last_session_account = account.account
