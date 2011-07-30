@@ -40,7 +40,7 @@ COLOR_MAP = (
 open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
 
 #regex used to remove plus markup
-tag_plus_strip_re = re.compile('(\[\w(\=\d+)?\])|(\[\w\=\w+\])|(\[\/\w+(\=\d+)?\])')
+tag_plus_strip_re = re.compile('(\[\w(\=#?[0-9A-Fa-f]+|\=\w+)?\])|(\[\/\w+(\=#?[0-9A-Fa-f]+|\=\w+)?\])')
 tag_plus_old_strip_re = re.compile('\·(\&|\@|\#|0)|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
 
 def parse_emotes(markup):
