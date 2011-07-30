@@ -28,8 +28,8 @@ import webbrowser
 
 import e3
 import gui
+from gui.base import Plus
 import utils
-import Renderers
 
 DISPLAY_NAME_LIMIT = 25
 
@@ -82,8 +82,8 @@ class OutputView(webkit.WebView):
     def add_message(self, msg, style=None, cedict={}, cedir=None):
         '''add a message to the conversation'''
 
-        msg.alias = Renderers.msnplus_to_plain_text(msg.alias)
-        msg.display_name = Renderers.msnplus_to_plain_text(msg.display_name)
+        msg.alias = Plus.msnplus_strip(msg.alias)
+        msg.display_name = Plus.msnplus_strip(msg.display_name)
         b_nick_check = bool(self.last_incoming_nickname != msg.display_name)
         if b_nick_check:
             self.last_incoming_nickname = msg.display_name
@@ -220,8 +220,9 @@ class OutputText(gtk.ScrolledWindow):
         '''clear the content'''
         self._texts = []
         self.loaded = False
-        self.view.clear(source, Renderers.msnplus_to_plain_text(target), Renderers.msnplus_to_plain_text(target_display),
-            source_img, target_img)
+        target = Plus.msnplus_strip(target)
+        target_display = Plus.msnplus_strip(target_display)
+        self.view.clear(source, target, target_display, source_img, target_img)
 
     def _error_cb(self, view, message, line, source_id):
         '''called when a message is sent to the console'''
@@ -249,7 +250,7 @@ class OutputText(gtk.ScrolledWindow):
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
         msg = gui.Message.from_information(contact, message)
-        msg.message = Renderers.msnplus_to_plain_text(msg.message)
+        msg.message = Plus.msnplus_strip(msg.message)
         self.view.add_message(msg, None, None, None)
 
     def update_p2p(self, account, _type, *what):
