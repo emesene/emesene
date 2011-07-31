@@ -253,14 +253,14 @@
     ; Configuration directory (Optional)
     Section "un.Profile/Settings" secConfig
         ; Sets the context of shell folders
-        SetShellVarContext ${USER_SHELLCONTEXT}
+        SetShellVarContext current
 
         ; Removes config folder
         RMDir /r "${FILE_CONFIG}"
     SectionEnd
 
     ; Cleans up old registry files
-    Section "un.Registry Clean-up" secRegistry
+    Section "un.Old Registry Files" secRegistry
         ${If} ${REG_HIVE} == "HKLM"
             DeleteRegKey HKCU "${REG_UNINSTALL}"
             DeleteRegKey /ifempty HKCU "${REG_INSTALL}"
@@ -278,32 +278,32 @@
     ;LangString DESC_secPlugins ${LANG_ENGLISH} "Plug-ins"
     LangString DESC_secDesktop ${LANG_ENGLISH} "Desktop Shortcuts"
     LangString DESC_secUninstall ${LANG_ENGLISH} "Uninstall"
-    LangString DESC_secConfig ${LANG_ENGLISH} "Profile/Settings"
-    LangString DESC_secRegistry ${LANG_ENGLISH} "Registry Clean-up"
+    LangString DESC_secConfig ${LANG_ENGLISH} "Configurations"
+    LangString DESC_secRegistry ${LANG_ENGLISH} "Old Registry Files"
 
     ; French Language strings
-    LangString DESC_secInstall ${LANG_FRENCH} "Install (French)"
+    LangString DESC_secInstall ${LANG_FRENCH} "Installer"
     ;LangString DESC_secPlugins ${LANG_FRENCH} "Plug-ins (French)"
-    LangString DESC_secDesktop ${LANG_FRENCH} "Desktop (French)"
-    LangString DESC_secUninstall ${LANG_FRENCH} "Uninstall (French)"
-    LangString DESC_secConfig ${LANG_FRENCH} "Profile/Settings (French)"
-    LangString DESC_secRegistry ${LANG_FRENCH} "Registry Clean-up (French)"
+    LangString DESC_secDesktop ${LANG_FRENCH} "Raccourcis Bureau"
+    LangString DESC_secUninstall ${LANG_FRENCH} "Desinstaller"
+    LangString DESC_secConfig ${LANG_FRENCH} "Configurations"
+    LangString DESC_secRegistry ${LANG_FRENCH} "Anciens fichiers du Registre"
 
     ; Italian Language strings
-    LangString DESC_secInstall ${LANG_ITALIAN} "Install (Italian)"
+    LangString DESC_secInstall ${LANG_ITALIAN} "Installa"
     ;LangString DESC_secPlugins ${LANG_ITALIAN} "Plug-ins (Italian)"
-    LangString DESC_secDesktop ${LANG_ITALIAN} "Desktop (Italian)"
-    LangString DESC_secUninstall ${LANG_ITALIAN} "Uninstall (Italian)"
-    LangString DESC_secConfig ${LANG_ITALIAN} "Profile/Settings (Italian)"
-    LangString DESC_secRegistry ${LANG_ITALIAN} "Registry Clean-up (Italian)"
+    LangString DESC_secDesktop ${LANG_ITALIAN} "Collegamenti sul desktop"
+    LangString DESC_secUninstall ${LANG_ITALIAN} "Disinstalla"
+    LangString DESC_secConfig ${LANG_ITALIAN} "Configurazioni"
+    LangString DESC_secRegistry ${LANG_ITALIAN} "Vecchi file di registro"
 
     ; Spanish Language strings
-    LangString DESC_secInstall ${LANG_SPANISH} "Install (Spanish)"
+    LangString DESC_secInstall ${LANG_SPANISH} "Instalar"
     ;LangString DESC_secPlugins ${LANG_SPANISH} "Plug-ins (Spanish)"
-    LangString DESC_secDesktop ${LANG_SPANISH} "Desktop (Spanish)"
-    LangString DESC_secUninstall ${LANG_SPANISH} "Uninstall (Spanish)"
-    LangString DESC_secConfig ${LANG_SPANISH} "Profile/Settings (Spanish)"
-    LangString DESC_secRegistry ${LANG_SPANISH} "Registry Clean-up (Spanish)"
+    LangString DESC_secDesktop ${LANG_SPANISH} "Accesos directos de escritorio"
+    LangString DESC_secUninstall ${LANG_SPANISH} "Desinstalar"
+    LangString DESC_secConfig ${LANG_SPANISH} "Configuraciones"
+    LangString DESC_secRegistry ${LANG_SPANISH} "Antiguo archivos de registro"
 
     ; Assign language strings to install sections
     !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
