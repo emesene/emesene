@@ -20,11 +20,6 @@ Linux               ``~/.config/emesene2/themes (OR /home/USERNAME/.config/emese
 Mac                 ``~/Library/Application Support/emesene2/themes``
 ================  ============
 
-.. rubric:: Notes
-
-.. [1] replace **USERNAME** with your username on your computer
-.. [2] for |2.11.4| and |2.11.5| ~/.config/emesene2/themes does not work, instead use /usr/share/emesene/emesene/themes
-
 Conversations
 ~~~~~~~~~~~~~
 
@@ -60,11 +55,24 @@ Sounds
 This directory contains themes to change the sounds that are played when 
 different events happen.
 
-Sound themes should contains following files:
+`Emesene <http://blog.emesene.org/>`_ uses `adium sounds themes <http://trac.adium.im/wiki/CreatingSoundSets>`_,
+witch consist in files mapping to sounds acording to a **.AdiumSoundSet** file.
 
-* alert.wav
-* nudge.wav
-* offline.wav
-* online.wav
-* send.wav
-* type.wav
+Many Sounds sets are available at the `Adium Xtras site <http://www.adiumxtras.com>`_.
+
+Emesene only support some keys:
+
+* Error
+* Notification received [3]_
+* Contact Signed Off
+* Contact Signed On
+* Message Sent
+* Message Received [4]_
+
+
+.. rubric:: Notes
+
+.. [1] replace **USERNAME** with your username on your computer
+.. [2] for |2.11.4| and |2.11.5| ~/.config/emesene2/themes does not work, instead use /usr/share/emesene/emesene/themes
+.. [3] if not found "Message Received" key will be used as fallback
+.. [4] if not found "Contact Invites You to Chat" key will be used as fallback
