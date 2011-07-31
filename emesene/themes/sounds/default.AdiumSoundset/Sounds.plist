@@ -14,7 +14,7 @@
 	   <string>offline.wav</string>
 	   <key>Contact Signed On</key>
 	   <string>online.wav</string>
-	   <key>Contact Invites You to Chat</key>
+	   <key>Message Received</key>
 	   <string>type.wav</string>
 	   <key>Notification received</key>
 	   <string>nudge.wav</string>

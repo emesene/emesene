@@ -55,9 +55,9 @@ class SoundTheme(object):
         online = sound_data['Sounds']['Contact Signed On']
         send = sound_data['Sounds']['Message Sent']
         try:
-            typing = sound_data['Sounds']['Contact Invites You to Chat']
+            typing = sound_data['Sounds']['Message Received']
         except KeyError, exc:
-            typing = sound_data['Sounds']['Connected']
+            typing = sound_data['Sounds']['Contact Invites You to Chat']
 
         self.sound_alert    = os.path.join(path, alert)
         self.sound_nudge    = os.path.join(path, nudge)
