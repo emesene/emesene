@@ -151,6 +151,15 @@ class MainWindow(gtk.VBox):
         self.below_userlist.show()
         self.contact_list._set_accels(self.get_parent())
 
+    def replace_below_userlist(self):
+        self.remove(self.below_userlist)
+        self.below_userlist = extension.get_and_instantiate('below userlist', self)
+        self.pack_start(self.below_userlist, False)
+        pos = len(self.get_children()) - 2
+        self.reorder_child(self.below_userlist, pos)
+        self.below_userlist.show()
+
+
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
         self.contact_list.filter_text = entry.get_text().lower()

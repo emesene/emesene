@@ -572,6 +572,7 @@ class Controller(object):
                 extension.get_and_instantiate('listening to',
                         self.window.content)
         self.set_default_extensions_from_config()
+        self.window.content.replace_below_userlist()
 
     def on_login_succeed(self):
         '''callback called on login succeed'''
