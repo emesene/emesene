@@ -1,6 +1,11 @@
+import socket
+
 from Worker import Worker
 from MailClients import *
 import e3
+
+import logging
+log = logging.getLogger('jabber.Session')
 
 class Session(e3.Session):
     '''a specialization of e3.Session'''
@@ -29,7 +34,16 @@ class Session(e3.Session):
         self.account = e3.Account(account, password, status, host)
 
         if host == "talk.google.com":
-            mail_client = IMAPMail("imap.gmail.com", 993, account, password)
+            try:
+                mail_client = IMAPMail("imap.gmail.com", 993, account, password)
+            except socket.error, sockerr:
+                log.warn("couldn't connect to mail server " + str(sockerr))
+                mail_client = NullMail(account, password)
+
+            # gtalk allows to connect on port 80, it's not HTTP protocol but
+            # the port is HTTP so it will pass through firewalls (yay!)
+            if use_http:
+                port = 80
         else:
             mail_client = NullMail(account, password)
 
