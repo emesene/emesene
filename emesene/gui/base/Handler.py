@@ -47,7 +47,7 @@ EMESENE_LICENSE = '''    emesene is free software; you can redistribute it and/o
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''
 
-EMESENE_VERSION = "2.11.7"
+EMESENE_VERSION = "2.11.8-devel"
 EMESENE_LAST_STABLE = "2.11.7"
 EMESENE_WEBSITE = "http://www.emesene.org"
 EMESENE_AUTHORS = "marianoguerra & c10ud"
