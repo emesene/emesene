@@ -24,7 +24,7 @@ import glib
 import gtk
 import pango
 import os
-import Renderers
+from gui.base import Plus
 
 import logging
 log = logging.getLogger('gui.gtkui.GtkNotification')
@@ -119,7 +119,7 @@ def gtkNotification(title, text, picturePath=None, const=None, callback=None, to
 
     if (const=='message-im'):
         #In this case title is contact nick
-        title = Renderers.msnplus_to_plain_text(title)
+        title = Plus.msnplus_strip(title)
 
     if actual_notification is None:
         actual_notification = Notification(title, text, picturePath, callback, tooltip)

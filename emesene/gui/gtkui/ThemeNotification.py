@@ -21,7 +21,7 @@ import pynotify
 if not pynotify.init("emesene"):
     raise ImportError
 
-import Renderers
+from gui.base import Plus
 import logging
 log = logging.getLogger('gui.gtkui.ThemeNotification')
 
@@ -53,7 +53,7 @@ def ThemeNotification(title, text, picture_path=None, const=None,
 
     if const == 'message-im':
         #In this case title is contact nick
-        title = Renderers.msnplus_to_plain_text(title)
+        title = Plus.msnplus_strip(title)
     notification = pynotify.Notification(title, text,
                             picture_factory(picture_path, const))
     notification.set_hint_string("append", "allowed")

@@ -18,7 +18,7 @@
 
 import subprocess
 
-import Renderers
+from gui.base import Plus
 import logging
 log = logging.getLogger('gui.gtkui.GrowlNotification')
 
@@ -30,7 +30,7 @@ VERSION = '0.4'
 
 def GrowlNotification(title, text, uri, picture_path=None, const=None, 
                       callback=None, tooltip=None):
-    title = Renderers.msnplus_to_plain_text(title)
+    title = Plus.msnplus_strip(title)
     if uri == 'notification-message-im':
         subprocess.call(['/usr/local/bin/growlnotify', '-n', 'emesene', '-a', 'emesene', '-t', title, '-m', text])
     else:
