@@ -27,7 +27,6 @@ import utils
 import gui
 import extension
 import e3
-import Dialog
 
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
@@ -182,11 +181,12 @@ class Conversation(gtk.VBox, gui.Conversation):
         directory = os.path.dirname(path_uri).lower()
         caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         emcache = caches.get_emoticon_cache(self.session.account.account)
+        dialog = extension.get_default('dialog')
 
         if directory.endswith(gui.theme.emote_theme.path.lower()):
-            Dialog.Dialog.information(_("Can't add, default emoticon"))
+            dialog.information(_("Can't add, default emoticon"))
         elif directory == emcache.path.lower():
-            Dialog.Dialog.information(_("Can't add, own emoticon"))
+            dialog.information(_("Can't add, own emoticon"))
         else:
             def on_response(response, shortcut):
                 if response == stock.ACCEPT:
@@ -195,9 +195,9 @@ class Conversation(gtk.VBox, gui.Conversation):
                         self.emcache.insert((shortcut, path_uri))
                     # TODO: check if the file's hash is not already on the cache
                     else:
-                        Dialog.Dialog.information(_("Shorctut already in use"))
+                        dialog.information(_("Shorctut already in use"))
 
-            dialog = Dialog.Dialog.entry_window(
+            dialog = dialog.entry_window(
                         _("Type emoticon's shortcut: "), "", on_response, \
                         _("Choose custom emoticon's shortcut"))
             dialog.entry.set_max_length(7)
