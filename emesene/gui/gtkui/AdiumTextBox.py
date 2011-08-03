@@ -134,15 +134,15 @@ class OutputView(webkit.WebView):
 
     def _set_text(self, text):
         '''set the text on the widget'''
-        self._textbox.load_string(text, "text/html", "utf-8", "")
+        self.load_string(text, "text/html", "utf-8", "")
         self.pending = []
         self.ready = False
 
     def _get_text(self):
         '''return the text of the widget'''
-        self._textbox.execute_script('oldtitle=document.title;document.title=document.documentElement.innerHTML;')
-        html = self._textbox.get_main_frame().get_title()
-        self._textbox.execute_script('document.title=oldtitle;')
+        self.execute_script('oldtitle=document.title;document.title=document.documentElement.innerHTML;')
+        html = self.get_main_frame().get_title()
+        self.execute_script('document.title=oldtitle;')
         return html
 
     text = property(fget=_get_text, fset=_set_text)

@@ -195,11 +195,15 @@ class Conversation(gtk.VBox, gui.Conversation):
                         self.emcache.insert((shortcut, path_uri))
                     # TODO: check if the file's hash is not already on the cache
                     else:
-                        dialog.information(_("Shorctut already in use"))
+                        dialog.information(_("Shortcut already in use"))
 
+            matches = re.search(r'<img src="' + path_uri + \
+                '" alt="(?P<alt>\w*)" name="(?P<name>\w*)"',
+                self.output.view.text)
+            groupdict = matches.groupdict({'alt': ''})
             dialog = dialog.entry_window(
-                        _("Type emoticon's shortcut: "), "", on_response, \
-                        _("Choose custom emoticon's shortcut"))
+                        _("Type emoticon's shortcut: "), groupdict['alt'],
+                        on_response, _("Choose custom emoticon's shortcut"))
             dialog.entry.set_max_length(7)
             dialog.show()
 
@@ -268,7 +272,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         #stop the avatars animation...if any..
         self.avatar.stop()
         self.his_avatar.stop()
-        
+
         #stop the parse emotes timeout of the inputbox
         self.input.stop_parse_emotes()
         self.destroy()
