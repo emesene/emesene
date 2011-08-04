@@ -198,7 +198,7 @@ class Conversation(gtk.VBox, gui.Conversation):
                         dialog.information(_("Shortcut already in use"))
 
             matches = re.search(r'<img src="' + path_uri + \
-                '" alt="(?P<alt>\w*)" name="(?P<name>\w*)"',
+                '" alt="(?P<alt>\S*)" name="(?P<name>\w*)"',
                 self.output.view.text)
             groupdict = matches.groupdict({'alt': ''})
             dialog = dialog.entry_window(
