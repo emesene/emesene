@@ -151,13 +151,32 @@ class MainWindow(gtk.VBox):
         self.below_userlist.show()
         self.contact_list._set_accels(self.get_parent())
 
-    def replace_below_userlist(self):
+    def _replace_below_userlist(self):
         self.remove(self.below_userlist)
         self.below_userlist = extension.get_and_instantiate('below userlist', self)
         self.pack_start(self.below_userlist, False)
         pos = len(self.get_children()) - 2
         self.reorder_child(self.below_userlist, pos)
         self.below_userlist.show()
+
+    def _replace_below_menu(self):
+        self.remove(self.below_menu)
+        self.below_menu = extension.get_and_instantiate('below menu', self)
+        self.pack_start(self.below_menu, False)
+        self.reorder_child(self.below_menu, 1)
+        self.below_menu.show()
+
+    def _replace_below_panel(self):
+        self.remove(self.below_panel)
+        self.below_panel = extension.get_and_instantiate('below panel', self)
+        self.pack_start(self.below_panel, False)
+        self.reorder_child(self.below_panel, 3)
+        self.below_panel.show()
+
+    def replace_extensions(self):
+        self._replace_below_userlist()
+        self._replace_below_menu()
+        self._replace_below_panel()
 
 
     def _on_entry_changed(self, entry, *args):
