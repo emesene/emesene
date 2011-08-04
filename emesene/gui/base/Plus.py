@@ -360,9 +360,7 @@ colorIrcCode = re.compile("\xb7\$([0-9]{1,2})?,?([0-9]{1,2})?")
 colorIrcCodeFG = re.compile("(?<=\xb7\$)[0-9]{1,2}")
 colorIrcCodeBG = re.compile("(?<=\xb7\$,)[0-9]{1,2}")
 colorIrcCodeFGBG = re.compile("(?<=\xb7\$#[0-9a-fA-F]{6},)[0-9]{1,2}")
-#colorIrcCode = re.compile("\xb7\$([0-9]{1,2})?,?([0-9]{1,2})?")
 colorIrcHex = re.compile("\xb7\$(#[0-9a-fA-F]{6})?,?(#[0-9a-fA-F]{6})?")
-#colorIrcRGB = re.compile("\xb7\$\(([0-9]{3}),([0-9]{3}),([0-9]{3})\)")
 
 #don't try to pack them into one regexp. please.
 
@@ -413,7 +411,6 @@ class MsnPlusMarkupMohrtutchy:
         text = unicode(text,'utf8') if type(text) is not unicode else text
         text = escape_special_chars(text)
 
-        self.more = 0
         self.backgroundColor = self.frontColor = ''
                 
         self.openSpan = None
