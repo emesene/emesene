@@ -289,6 +289,20 @@ def msnplus(msnplus, do_parse_emotes=True):
     _dict_translate_tags(dictlike)
     return DictObj(dictlike)
 
+def escape_special_chars(msnplus):
+    #escape special chars
+    msnplus = msnplus.replace ('\xc2\xb7&amp;','\xc2\xb7&')
+    msnplus = msnplus.replace('\xc2\xb7&quot;','\xc2\xb7"')
+    msnplus = msnplus.replace('\xc2\xb7&apos;','\xc2\xb7\'')
+    return msnplus
+
+def deescape_special_chars(msnplus):
+    #unescape special chars
+    msnplus = msnplus.replace('\xc2\xb7&','\xc2\xb7&amp;')
+    msnplus = msnplus.replace('\xc2\xb7"','\xc2\xb7&quot;')
+    msnplus = msnplus.replace('\xc2\xb7\'','\xc2\xb7&apos;')
+    return msnplus
+
 def msnplus_strip(msnplus, useless_arg=None):
     '''
     given a string with msn+ formatting, give a string with same text but
@@ -297,19 +311,14 @@ def msnplus_strip(msnplus, useless_arg=None):
     @param useless_arg This is actually useless, and is mantained just for
     compatibility with msnplus
     '''
-    #escape special chars
-    msnplus = msnplus.replace ('\xc2\xb7&amp;','\xc2\xb7&')
-    msnplus = msnplus.replace('\xc2\xb7&quot;','\xc2\xb7"')
-    msnplus = msnplus.replace('\xc2\xb7&apos;','\xc2\xb7\'')
+
+    msnplus = escape_special_chars(msnplus)
 
     msnplus = tag_plus_strip_re.sub('', msnplus)
     msnplus = tag_plus_old_strip_re.sub('', msnplus)
     msnplus = msnplus.replace("no-more-color",'')
 
-    #unescape special chars
-    msnplus = msnplus.replace('\xc2\xb7&','\xc2\xb7&amp;')
-    msnplus = msnplus.replace('\xc2\xb7"','\xc2\xb7&quot;')
-    msnplus = msnplus.replace('\xc2\xb7\'','\xc2\xb7&apos;')
+    msnplus = deescape_special_chars(msnplus)
 
     return msnplus
 
@@ -402,13 +411,8 @@ class MsnPlusMarkupMohrtutchy:
         '''replace the [b][/b] etc markup for pango markup'''
 
         text = unicode(text,'utf8') if type(text) is not unicode else text
+        text = escape_special_chars(text)
 
-        text = text.replace\
-            ('\xc2\xb7&amp;','\xc2\xb7&').replace('\xc2\xb7&quot;','\xc2\xb7"')\
-            .replace('\xc2\xb7&apos;','\xc2\xb7\'')
-            #@ROGER: i hate this, i hate it too..
-            #@ROGER: me too... mohrtutchy
-        
         self.more = 0
         self.backgroundColor = self.frontColor = ''
                 
@@ -454,9 +458,7 @@ class MsnPlusMarkupMohrtutchy:
             else:
                 text += '</span>'
 
-        return text.replace('\xc2\xb7&','\xc2\xb7&amp;').replace\
-            ('\xc2\xb7"','\xc2\xb7&quot;')\
-            .replace('\xc2\xb7\'','\xc2\xb7&apos;')
+        return deescape_special_chars(text)
         
 
     def codeToHex( self, data ):
