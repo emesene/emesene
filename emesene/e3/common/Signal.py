@@ -69,6 +69,7 @@ class Signal(object):
                 to_remove.append(callback)
                 log.warning('Method called on dead object: %s' %
                         format_callback_name(callback))
+                traceback.print_exc()
             except Exception, error:
                 log.warning('Signal handler (%s) error: %s' %
                         (format_callback_name(callback), str(error)))
