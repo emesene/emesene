@@ -54,6 +54,13 @@ class ContactListParser(gobject.GObject):
         markup = markup.replace("[$i]", "<span style=\"italic\">")
         markup = markup.replace("[$/i]", "</span>")
 
+        # Close all tags before a new line
+        markup_lines = markup.split('\n')
+        for i, line in enumerate(markup_lines):
+            closed_line = self.close_tags(line)
+            markup_lines[i] = closed_line[0]
+        markup = '\n'.join(markup_lines)
+
         return markup
 
     def replace_emoticons(self, text):
