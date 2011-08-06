@@ -119,7 +119,7 @@ class LoggerTestCase(unittest.TestCase):
         }
 
         logger.add_contacts(accounts)
-        time.sleep(1)
+        time.sleep(2)
         self.assertEquals(len(logger.logger.accounts), 2)
 
     def test_add_groups(self):
@@ -280,6 +280,14 @@ class LoggerTestCase(unittest.TestCase):
         logger.start()
 
     def __del__(self):
+        logger.quit()
+        logger.join()
+
+        if os.path.exists(full_path):
+            os.remove(full_path)
+
+    @classmethod
+    def tearDownClass(cls):
         logger.quit()
         logger.join()
 

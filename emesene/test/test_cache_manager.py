@@ -6,7 +6,6 @@ import cStringIO
 sys.path.append(os.path.abspath('.'))
 
 from e3 import cache
-import testutils
 
 class CacheManagerTestCase(unittest.TestCase):
     def setUp(self):
