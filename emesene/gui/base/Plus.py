@@ -402,6 +402,29 @@ getTagDict = {
     's': ('strikethrough="true"'),
 }
 
+# color dict used to retreive common color codes from their names
+hexColorNameDict = {
+    'white': ('#ffffff'),
+    'black': ('#000000'),
+    'marine': ('#00007F'),
+    'white': ('#ffffff'),
+    'green': ('#009300'),
+    'red': ('#FF0000'),
+    'brown': ('#7F0000'),
+    'purple': ('#9C009C'),
+    'orange': ('#FC7F00'),
+    'yellow': ('#FFFF00'),
+    'lime': ('#00FC00'),
+    'teal': ('#009393'),
+    'aqua': ('#00FFFF'),
+    'blue': ('#0000FC'),
+    'pink': ('#FF00FF'),
+    'gray': ('#7F7F7F'),
+    'silver': ('#D2D2D2'),
+    'mohr': ('#ff00de'),
+    'c10ud': ('#696969')
+}
+
 class MsnPlusMarkupMohrtutchy:
 
     def replaceMarkup( self, text ):
@@ -470,43 +493,9 @@ class MsnPlusMarkupMohrtutchy:
 
     def nameToHex( self, data ):
         code=data.group()
-        if code.lower() == 'white':
-            return '#ffffff'
-        elif code.lower() == 'black':
-            return '#000000'
-        elif code.lower() == 'marine':
-            return '#00007F'
-        elif code.lower() == 'green':
-            return '#009300'
-        elif code.lower() == 'red':
-            return '#FF0000'
-        elif code.lower() == 'brown':
-            return '#7F0000'
-        elif code.lower() == 'purple':
-            return '#9C009C'
-        elif code.lower() == 'orange' :
-            return '#FC7F00'
-        elif code.lower() == 'yellow':
-            return '#FFFF00'
-        elif code.lower() == 'lime':
-            return '#00FC00'
-        elif code.lower() == 'teal' :
-            return '#009393'
-        elif code.lower() == 'aqua' :
-            return '#00FFFF'
-        elif code.lower() == 'blue' :
-            return '#0000FC'
-        elif code.lower() == 'pink' :
-            return '#FF00FF'
-        elif code.lower() == 'gray' :
-            return '#7F7F7F'
-        elif code.lower() == 'silver':
-            return '#D2D2D2'
-        elif code.lower() == 'mohr':
-            return '#ff00de'
-        elif code.lower() == 'c10ud' :
-            return '#696969'
-        else:
+        try:
+            return hexColorNameDict[code.lower()]
+        except Exception, error:
             return code
         
     def ircHexToTag( self, data ):
