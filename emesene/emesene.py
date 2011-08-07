@@ -57,7 +57,6 @@ import shutil
 import signal
 
 import debugger
-debugger.init()
 import logging
 log = logging.getLogger('emesene')
 
