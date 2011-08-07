@@ -277,7 +277,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.input.stop_parse_emotes()
         self.destroy()
 
-    def show(self):
+    def show(self, other_started=False):
         '''override the show method'''
         gtk.VBox.show(self)
 
@@ -291,7 +291,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.hbox.show()
         self.panel.show_all()
 
-        self.input_grab_focus()
+        if not other_started:
+            self.input_grab_focus()
 
         if not self.session.config.b_show_toolbar:
             self.toolbar.hide()
