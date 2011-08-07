@@ -202,3 +202,8 @@ class Window(gtk.Window):
         '''return True is window is maximized, False otherwise
         '''
         return self._state & gtk.gdk.WINDOW_STATE_MAXIMIZED == gtk.gdk.WINDOW_STATE_MAXIMIZED
+
+    def iconify(self):
+        ''' yes, we want to iconify the window, really '''
+        gtk.Window.iconify(self)
+
