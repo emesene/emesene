@@ -237,11 +237,11 @@ class Worker(e3.base.Worker, papyon.Client):
         if 'last' in avatars:
             contact.picture = os.path.join(avatars.path, 'last')
 
-        glib.timeout_add_seconds(5, lambda *arg: 
+        glib.timeout_add_seconds(5, lambda *arg:
             self._lazy_msnobj_checker(papycontact))
 
     def _lazy_msnobj_checker(self, papycontact):
-        ''' ugly hack because of https://github.com/emesene/emesene/issues/602 
+        ''' ugly hack because of https://github.com/emesene/emesene/issues/602
             aka papyon doesn't tell us msnobjects changed (and if we check
             too soon, they're None) '''
         self._on_contact_msnobject_changed(papycontact)
@@ -399,7 +399,11 @@ class Worker(e3.base.Worker, papyon.Client):
             download_path = self.session.config.get_or_set("download_folder",
                 e3.common.locations.downloads())
             if self.session.config.b_download_folder_per_account:
-                full_path = os.path.join(download_path, tr.sender, tr.filename)
+                full_path = os.path.join(download_path, tr.sender.account,
+                    tr.filename)
+                file_dir = os.path.join(download_path, tr.sender.account)
+                if not os.path.isdir(file_dir):
+                    os.mkdir(file_dir)
             else:
                 full_path = os.path.join(download_path, tr.filename)
             try:
