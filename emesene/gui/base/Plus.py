@@ -655,20 +655,6 @@ class MsnPlusMarkupMohrtutchy:
             else:
                 return text
     
-    def RGBToHTMLColor( self, rgb_tuple ):
-        '''convert an (R, G, B) tuple to #RRGGBB'''
-        return '#%02x%02x%02x' % rgb_tuple
-       
-    def HTMLColorToRGB( self, colorstring ):
-        '''convert #RRGGBB to an (R, G, B) tuple'''
-        colorstring = colorstring.strip()
-        if colorstring.startswith('#'): 
-            colorstring = colorstring[1:]
-            
-        r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
-        r, g, b = [int(n, 16) for n in (r, g, b)]
-        return (r, g, b)
-
     def getTag( self, attrdict, text ):
         attrs = []
         for key in attrdict.keys():
