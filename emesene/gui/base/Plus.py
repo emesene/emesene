@@ -327,17 +327,6 @@ def msnplus_strip(msnplus, useless_arg=None):
 # It might not be perfect or nice to see, but hell if it works, m3n.
 ################################################################################
 
-colorCodes = (
-'ffffff','000000','00007F','009300','FF0000','7F0000','9C009C','FC7F00',
-'FFFF00','00FC00','009393','00FFFF','0000FC','FF00FF','7F7F7F','D2D2D2',
-'E7E6E4','CFCDD0','FFDEA4','FFAEB9','FFA8FF','B4B4FC','BAFBE5','C1FFA3',
-'FAFDA2','B6B4B7','A2A0A1','F9C152','FF6D66','FF62FF','6C6CFF','68FFC3',
-'8EFF67','F9FF57','858482','6E6D7B','FFA01E','F92611','FF20FF','202BFF',
-'1EFFA5','60F913','FFF813','5E6464','4B494C','D98812','EB0505','DE00DE',
-'0000D3','03CC88','59D80D','D4C804','333335','18171C','944E00','9B0008',
-'980299','01038C','01885F','389600','9A9E15','473400','4D0000','5F0162',
-'000047','06502F','1C5300','544D05')
-
 colorCodesHexGradient = re.compile\
     ('\[[cC]=#([0-9A-Fa-f]{6})\](.*?)\[/[cC]=#([0-9A-Fa-f]{6}|#{6})\]')
 backColorCodesHexGradient = re.compile\
@@ -483,8 +472,8 @@ class MsnPlusMarkupMohrtutchy:
 
     def codeToHex( self, data ):
         code=data.group()
-        if int(code) < len(colorCodes):
-            hex = '#'+colorCodes[int(code)].lower()
+        if int(code) < len(COLOR_MAP):
+            hex = '#'+COLOR_MAP[int(code)].lower()
             return hex
         elif int(code) > 67 and int(code) < 100:
             return '#000000'
