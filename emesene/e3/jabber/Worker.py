@@ -26,7 +26,7 @@ import Queue
 import base64
 import sha
 import e3
-import tempfile
+import StringIO
 import logging
 log = logging.getLogger('jabber.Worker')
 
@@ -224,14 +224,14 @@ class Worker(e3.Worker):
         photo_hash.update(photo_bin)
         photo_hash = photo_hash.hexdigest()
 
-        temp_file = tempfile.mkstemp(suffix = photo_hash)[1]
-        file(temp_file, 'wb').write(photo_bin)
-
         ctct = self.session.contacts.get(account)
         avatars = self.caches.get_avatar_cache(account)
         avatar_path = os.path.join(avatars.path, photo_hash)
-        avatars.insert_raw(file(temp_file, 'rb'))
         ctct.picture = avatar_path
+
+        if photo_hash not in avatars:
+            avatars.insert_raw(StringIO.StringIO(photo_bin))
+
         self.session.picture_change_succeed(account, avatar_path)
 
     # mailbox handlers
