@@ -493,10 +493,7 @@ class MsnPlusMarkupMohrtutchy:
 
     def nameToHex( self, data ):
         code=data.group()
-        try:
-            return hexColorNameDict[code.lower()]
-        except Exception, error:
-            return code
+        return hexColorNameDict.get(code.lower(), code)
         
     def ircHexToTag( self, data ):
         text = ''
