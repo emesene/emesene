@@ -27,7 +27,7 @@ import gobject
 
 import gui
 from gui.base import Plus
-import ContactListParser
+import MarkupParser
 import extension
 from AvatarManager import AvatarManager
 
@@ -160,10 +160,9 @@ def plus_text_parse(item):
 
 def msnplus_to_list(text):
     '''parse text and return a list of strings and gtk.gdk.Pixbufs'''
-    parser = ContactListParser.ContactListParser()
     text = plus_text_parse(text)
-    text = parser.replace_markup(text)
-    text_list = parser.replace_emoticons(text)
+    text = MarkupParser.replace_markup(text)
+    text_list = MarkupParser.replace_emoticons(text)
     return text_list
 
 def msnplus_to_plain_text(txt):

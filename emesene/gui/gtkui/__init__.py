@@ -80,6 +80,7 @@ def gtk_main(Controller):
     import Login
     import MainMenu
     import MainWindow
+    import MarkupParser
 
     try:
         import InfoBar
