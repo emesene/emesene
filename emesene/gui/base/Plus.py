@@ -377,10 +377,6 @@ backColorTags = re.compile('\[[aA]=#[0-9A-Fa-f]{6}\]|\[[aA]=[0-9]{1,2}\]|'\
 colorIrcTags = re.compile('\xb7\$[0-9]{1,2},[0-9]{1,2}|'\
     '\xb7\$[0-9]{1,2}|\xb7\$,[0-9]{1,2}|\xb7\$#[a-fA-F0-9]{6},#[a-fA-F0-9]{6}|'\
     '\xb7\$#[a-fA-F0-9]{6}|\xb7\$,#[a-fA-F0-9]{6}')
-BbTags = re.compile\
-    ('\[[bB]\]|\[[iI]\]|\[[uU]\]|\[[ss]\]|'\
-    '\[/[bB]\]|\[/[iI]\]|\[/[uU]\]|\[/[ss]\]')
-IrcTags = re.compile("\xb7\#|\xb7&[a-zA-Z]+\d{0,3};|\xb7\@|\xb70")
 
 getTagDict = {
     'background': ('background="#%s"'),
