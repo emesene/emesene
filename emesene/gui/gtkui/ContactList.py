@@ -225,8 +225,14 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
                 # get a list of contact objects from a list of accounts
                 contacts = self.contacts.get_contacts(obj.contacts)
-                if self.contacts.get_online_total_count(contacts)[0] == 0:
+                con_on, con_tot = self.contacts.get_online_total_count(contacts)
+                if con_on == 0:
                     return False
+
+                if not self.show_blocked:
+                    if len([contact for contact in contacts \
+                       if contact.blocked]) == con_on:
+                        return False
 
             return True
 
