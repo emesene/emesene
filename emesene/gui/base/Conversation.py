@@ -36,6 +36,7 @@ class Conversation(object):
         '''constructor'''
         self.update_window = update_window
         self.session = session
+        self.avatar_box_is_hidden = False
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         self.emcache = self.caches.get_emoticon_cache(self.session.account.account)
 
@@ -231,6 +232,18 @@ class Conversation(object):
         else:
             self.session.block(account)
 
+    def on_toggle_avatar(self):
+        '''hide or show the avatar bar'''
+		
+        if self.avatar_box_is_hidden:
+            self.avatar_box_is_hidden = False;
+            self.avatarBox.show()
+            self.his_avatarBox.show()
+        else:
+            self.avatar_box_is_hidden = True;
+            self.avatarBox.hide()
+            self.his_avatarBox.hide()
+	
     def on_emote(self, emote):
         '''called when a emote is selected on the emote window'''
         self.input.append(emote)
