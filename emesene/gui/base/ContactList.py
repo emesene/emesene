@@ -385,7 +385,6 @@ class ContactList(object):
             return escaped + tail
 
         template = self.nick_template
-        template = template.replace('[$NL]', '\n')
         template = template.replace('[$NICK]',
                 fix_plus(nick))
         template = template.replace('[$ACCOUNT]',
@@ -396,6 +395,9 @@ class ContactList(object):
                 self.escape_tags(e3.status.STATUS[contact.status]))
         template = template.replace('[$DISPLAY_NAME]',
                 fix_plus(display_name))
+        #people shouldn't be allowed to have \n in their name/pm
+        template = template.replace('\n', ' ')
+        template = template.replace('[$NL]', '\n')
 
         blocked_text = ''
 
