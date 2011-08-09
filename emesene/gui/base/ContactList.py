@@ -529,7 +529,7 @@ class ContactList(object):
         self.group_state[group.name] = False
         if self.is_searching or len(group.contacts) == 0:
             return
-        self.session.config.d_group_state[group.name] = "0"
+        self.session.config.d_group_state[group.name.decode("utf_8")] = "0"
 
     def on_group_expanded(self, group):
         '''called when a group is expanded, update the status of the
@@ -537,7 +537,7 @@ class ContactList(object):
         self.group_state[group.name] = True
         if self.is_searching:
             return
-        self.session.config.d_group_state[group.name] = "1"
+        self.session.config.d_group_state[group.name.decode("utf_8")] = "1"
 
     def compare_groups(self, group1, group2, order1=0, order2=0):
         '''compare two groups and return 1 if group1 should go first, 0
