@@ -66,16 +66,11 @@ class Preferences(gtk.Window):
         ''' TREE VIEW STUFF '''
         # Create the list store model for the treeview.
         self.listStore = gtk.ListStore(gtk.gdk.Pixbuf, str)
-
-
-
         # Create the TreeView
         treeView = gtk.TreeView(self.listStore)
-
         # Create the renders
         cellText = gtk.CellRendererText()
         cellPix = gtk.CellRendererPixbuf()
-
         # Create the single Tree Column
         treeViewColumn = gtk.TreeViewColumn(_('Categories'))
 
@@ -115,7 +110,7 @@ class Preferences(gtk.Window):
         self.buttons.set_border_width(2)
         self.buttons.set_layout(gtk.BUTTONBOX_END)
         self.close = gtk.Button(stock=gtk.STOCK_CLOSE)
-        self.close.connect('clicked', lambda *args: self.hide())
+        self.close.connect('clicked', self.save_and_hide)
         self.buttons.pack_start(self.close)
 
         vbox.pack_start(self.buttons, False, False)
@@ -137,6 +132,10 @@ class Preferences(gtk.Window):
         self.connect('delete_event', self.hide_on_delete)
         self.add(vbox)
         vbox.show_all()
+
+    def save_and_hide(self, widget):
+        self.hide()
+        self.session.save_config()
 
     def remove_subscriptions(self):
         self.interface.remove_subscriptions()
