@@ -72,5 +72,5 @@ class Config(BaseConfig.Config):
         values = [(key, value) for (key, value) in self.__dict__.iteritems()\
                 if not key.startswith("_")]
 
-        json.dump(values, file(path, "w"), indent=1)
+        json.dump(values, file(path, "w"), ensure_ascii=False, indent=1)
 
