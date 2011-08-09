@@ -71,6 +71,7 @@ class ConversationToolbar(gtk.Toolbar):
             theme_tool_clean = utils.gtk_ico_image_load(image_theme.tool_clean, size)
             theme_tool_file_transfer = utils.gtk_ico_image_load(image_theme.tool_file_transfer, size)
             theme_tool_ublock = utils.gtk_ico_image_load(image_theme.tool_ublock, size)
+            theme_tool_toggle_avatar = gtk.STOCK_GO_FORWARD
         else:
             theme_tool_font = gtk.STOCK_SELECT_FONT
             theme_tool_font_color = gtk.STOCK_SELECT_COLOR
@@ -83,6 +84,7 @@ class ConversationToolbar(gtk.Toolbar):
             theme_tool_clean = gtk.STOCK_CLEAR
             theme_tool_file_transfer = gtk.STOCK_GO_UP
             theme_tool_ublock = gtk.STOCK_STOP
+            theme_tool_toggle_avatar = gtk.STOCK_GO_FORWARD
 
         theme_tool_call = utils.gtk_ico_image_load(image_theme.call, size)
         theme_tool_video = utils.gtk_ico_image_load(image_theme.video, size)
@@ -135,6 +137,12 @@ class ConversationToolbar(gtk.Toolbar):
         self.ublock.set_tooltip_text(_('Block/Unblock contact')) 
         self.ublock.connect('clicked',
             lambda *args: self.handler.on_ublock_selected())
+			
+        self.toggle_avatar = gtk.ToolButton(theme_tool_toggle_avatar)
+        self.toggle_avatar.set_label(_('Hide/Show avatar'))
+        self.toggle_avatar.set_tooltip_text(_('Hide/Show avatar')) 
+        self.toggle_avatar.connect('clicked',
+            lambda *args: self.handler.on_toggle_avatar_selected())
 
         self.invite_video_call = gtk.ToolButton(theme_tool_video)
         self.invite_video_call.set_label(_('Video Call'))
@@ -176,4 +184,5 @@ class ConversationToolbar(gtk.Toolbar):
         self.add(self.clean)
         self.add(self.ublock)
         self.add(gtk.SeparatorToolItem())
+        self.add(self.toggle_avatar)
 

@@ -46,6 +46,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self._header_visible = session.config.b_show_header
         self._image_visible = session.config.b_show_info
         self._toolbar_visible = session.config.b_show_toolbar
+        self.avatar_box_is_hidden = False
 
         self.panel = gtk.VPaned()
 
@@ -478,6 +479,18 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.avatar.set_from_file(path)
         elif account in self.members:
             self.his_avatar.set_from_file(path)
+
+    def on_toggle_avatar(self):
+        '''hide or show the avatar bar'''
+		
+        if self.avatar_box_is_hidden:
+            self.avatar_box_is_hidden = False;
+            self.avatarBox.show()
+            self.his_avatarBox.show()
+        else:
+            self.avatar_box_is_hidden = True;
+            self.avatarBox.hide()
+            self.his_avatarBox.hide()
 
     def on_contact_attr_changed_succeed(self, account, what, old,
             do_notify=True):

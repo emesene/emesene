@@ -565,6 +565,9 @@ class ConversationToolbarHandler(object):
         '''called when block/unblock button is selected'''
         self.conversation.on_block_user()
 
+    def on_toggle_avatar_selected(self):
+        self.conversation.on_toggle_avatar()
+		
     def on_invite_video_call_selected(self):
         '''called when the user is requesting a video-only call'''
         self.conversation.on_video_call()
