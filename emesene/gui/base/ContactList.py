@@ -53,6 +53,7 @@ class ContactList(object):
 
         self.group_state = {}
         for (group, state) in group_state.iteritems():
+            group = group.encode("utf_8")
             try:
                 self.group_state[group] = bool(int(state))
             except ValueError:
