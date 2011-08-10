@@ -21,6 +21,16 @@
 import os
 import sys
 
+
+# Extract any non-GStreamer arguments, and leave the GStreamer arguments for
+# processing by GStreamer. This needs to be done before GStreamer is imported,
+# so that GStreamer doesn't hijack e.g. ``--help``.
+# NOTE This naive fix does not support values like ``bar`` in
+# ``--gst-foo bar``. Use equals to pass values, like ``--gst-foo=bar``.
+gstreamer_args = [arg for arg in sys.argv[1:] if arg.startswith('--gst')]
+emesene_args = [arg for arg in sys.argv[1:] if not arg.startswith('--gst')]
+sys.argv[1:] = gstreamer_args
+
 def we_are_frozen():
     """Returns whether we are frozen via py2exe.
     This will affect how we find out where we are located."""
@@ -105,10 +115,6 @@ from pluginmanager import get_pluginmanager
 import extension
 import interfaces
 import gui
-
-# fix for gstreamer --help
-argv = sys.argv
-sys.argv = [argv[0]]
 
 class SingleInstanceOption(object):
     '''option parser'''
@@ -863,7 +869,7 @@ def main():
             interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
     extension.get_category('option provider').activate(ExtensionDefault)
-    options = PluggableOptionParser(argv)
+    options = PluggableOptionParser(args=emesene_args)
     options.read_options()
     main_method = extension.get_default('main')
     main_method(Controller)
