@@ -51,7 +51,7 @@ here are listed the links to the installers of all the components used in the ex
 installation order
 ------------------
 
-some installers are independent from the others, but to avoid posible problems I recommend the installation in this order.
+some installers are independent from the others, but to avoid possible problems I recommend the installation in this order.
 
 * python
 * gtk-runtime
