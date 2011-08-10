@@ -169,15 +169,15 @@ class Category(object):
         if system_default:
             self.system_default = system_default
 
-        if interfaces is None:
-            self.interfaces = ()
-        else:
-            self.interfaces = tuple(interfaces)
+        self.interfaces = ()
 
         # id: class
         self.classes = {}
         # class: id
         self.ids = {}
+
+        if interfaces is not None:
+            self.set_interface(interfaces)
 
         self.is_single = single_instance
         self.multi_extension = False
