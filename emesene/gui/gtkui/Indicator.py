@@ -34,6 +34,8 @@ try:
 except AttributeError:
     raise ImportError
 
+import uuid
+
 class Indicator(appindicator.Indicator, gui.BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
@@ -50,7 +52,7 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         handler -- a e3common.Handler.TrayIconHandler object
         """
         gui.BaseTray.__init__(self)
-        app_name_hax = "emesene-%s" % handler.session._account
+        app_name_hax = "emesene-%s" % uuid.uuid1()
         appindicator.Indicator.__init__(
             self, app_name_hax, "logo",
             appindicator.CATEGORY_APPLICATION_STATUS,
