@@ -391,7 +391,7 @@ class ContactList(object):
         template = template.replace('[$ACCOUNT]',
                 self.escape_tags(contact.account))
         template = template.replace('[$MESSAGE]',
-                fix_plus(message))
+                fix_plus(message) if contact.media == '' else contact.media)
         template = template.replace('[$STATUS]',
                 self.escape_tags(e3.status.STATUS[contact.status]))
         template = template.replace('[$DISPLAY_NAME]',

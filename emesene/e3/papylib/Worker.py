@@ -686,14 +686,14 @@ class Worker(e3.base.Worker, papyon.Client):
             return
         account = contact.account
         old_media = contact.media
-        contact.media = papycontact.current_media
+        contact.media = ''.join(papycontact.current_media) \
+                            if papycontact.current_media else ''
 
         if old_media == contact.media:
             return
 
-        if old_media == contact.media:
-            self.session.contact_attr_changed(account, 'media', old_media)
-            # TODO: log the media change
+        self.session.contact_attr_changed(account, 'media', old_media)
+        # TODO: log the media change
 
     def _on_contact_msnobject_changed(self, contact):
         '''called when a contact changes his display picture'''
