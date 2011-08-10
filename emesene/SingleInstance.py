@@ -25,8 +25,8 @@ import getpass
 class SingleInstance:
     def __init__(self):
 
-        self._bus_name = 'org.emesene.dbus'
-        self._object_path = '/org/emesene/dbus'
+        self._bus_name = 'org.emesene.Service'
+        self._object_path = '/org/emesene/Service'
 
         self.new_dbus = False
         self.have_dbus = False
@@ -90,7 +90,7 @@ class SingleInstance:
             try:
                 emesene_bus = self.dbus.SessionBus()
                 emesene_object = emesene_bus.get_object(self._bus_name, self._object_path)
-                emesene_object.show()
+                emesene_object.show_window()
             except self.dbus.DBusException, error:
                 print "%s" % error
         else:

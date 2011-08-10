@@ -325,7 +325,7 @@ class Controller(object):
 
         #let's start dbus and unity launcher
         if self.dbus_ext is not None:
-            self.dbus_ext.set_new_session(self.session)
+            self.dbus_ext.set_new_session(self.session, self.window)
         if self.unity_launcher is not None:
             self.unity_launcher.set_session(self.session)
 

@@ -207,3 +207,7 @@ class Window(gtk.Window):
         ''' yes, we want to iconify the window, really '''
         gtk.Window.iconify(self)
 
+    def present(self):
+        ''' raise the window '''
+        gtk.Window.present(self)
+

@@ -49,12 +49,15 @@ if not ERROR:
         def __init__(self):
             self.__session = None
             self.__dbus_object = None
+            self.__window = None
 
         #Public methods
-        def set_new_session(self, session):
+        def set_new_session(self, session, window):
             self.__session = session
+            self.__window = window
             if self.__dbus_object:
                 self.__dbus_object.session = session
+                self.__dbus_object.window = window
             else:
                 self.__setup()
 
@@ -72,8 +75,10 @@ if not ERROR:
             '''Start dbus session'''
             self.__destroy_dbus_session()
             self.__session_bus = dbus.SessionBus()
-            self.__bus_name = dbus.service.BusName(BUS_NAME, bus=self.__session_bus)
-            self.__dbus_object = EmeseneObject(self.__bus_name, OBJECT_PATH, self.__session)
+            self.__bus_name = dbus.service.BusName(BUS_NAME, \
+                                                   bus=self.__session_bus)
+            self.__dbus_object = EmeseneObject(self.__bus_name, OBJECT_PATH, \
+                                               self.__session, self.__window)
 
         def __destroy_dbus_session(self):
             '''Destroy current dbus session'''
@@ -95,13 +100,14 @@ if not ERROR:
         """
         The object that is exported via DBUS
         """
-        def __init__(self, bus_name, object_path, session):
+        def __init__(self, bus_name, object_path, session, window):
             try:
                 dbus.service.Object.__init__(self, bus_name, object_path)
             except Exception, ex:
                 print 'Emesene DBUS error: %s' % str(ex)
 
             self.__session = session
+            self.__window = window
 
         def get_session(self):
             return self.__session
@@ -112,6 +118,10 @@ if not ERROR:
         session = property(get_session, set_session)
 
         #Methods
+        @dbus.service.method(BUS_NAME)
+        def show_window(self):
+            self.__window.present()
+
         @dbus.service.method(BUS_NAME)
         def get_status(self):
             return self.session.account.status
@@ -133,7 +143,7 @@ else: #ERROR
         provides=('external api', )
         def __init__(self):
             pass
-        def set_new_session(self, session):
+        def set_new_session(self, session, window):
             pass
 
     extension.register('external api', DummyExternalAPI)
