@@ -1263,7 +1263,8 @@ class Worker(e3.base.Worker, papyon.Client):
         '''
         conv = self.papyconv[cid]
         papycontact = self.contact_by_account(account)
-        conv._invite_user(papycontact)
+        if papycontact not in conv.participants:
+            conv._invite_user(papycontact)
 
     def _handle_action_send_message(self, cid, message,
             cedict=None, l_custom_emoticons=None):
