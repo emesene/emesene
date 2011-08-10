@@ -25,6 +25,7 @@ import time
 import Queue
 import base64
 import sha
+import hashlib
 import e3
 import StringIO
 import logging
@@ -290,6 +291,9 @@ class Worker(e3.Worker):
     def _handle_action_login(self, account, password, status_, host, port):
         '''handle Action.ACTION_LOGIN
         '''
+        self.my_avatars = self.caches.get_avatar_cache(
+                self.session.account.account)
+
         if self.client.connect((host, int(port)),
                 proxy=self.proxy_data) == "":
             self.session.login_failed('Connection error')
@@ -409,7 +413,38 @@ class Worker(e3.Worker):
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE
         '''
-        pass
+        try:
+            f = open(picture_name, 'rb')
+            avatar_data = f.read()
+            f.close()
+        except Exception:
+            log.error("Loading of picture %s failed" % picture_name)
+            return
+
+        if not isinstance(avatar_data, str):
+            avatar = "".join([chr(b) for b in avatar])
+
+        n = xmpp.Node('vCard', attrs={'xmlns': xmpp.NS_VCARD})
+        iq_vcard = xmpp.Protocol('iq', self.session.account.account, 'set', payload=[n])
+        vcard = iq_vcard.addChild(name='vCard', namespace=xmpp.NS_VCARD)
+        #vcard.addChild(name='NICKNAME', payload=[nick])
+        photo = vcard.addChild(name='PHOTO')
+        #photo.setTagData(tag='TYPE', val=mime_type)
+        photo.setTagData(tag='BINVAL', val=avatar.encode('base64'))
+        self.client.send(iq_vcard)
+
+        avatar_hash = hashlib.sha1(avatar).hexdigest().encode("hex")
+        avatar_path = os.path.join(self.my_avatars.path, avatar_hash)
+
+        if avatar_hash in self.my_avatars:
+            self.session.picture_change_succeed(self.session.account.account,
+                    avatar_path)
+        else:
+            self.my_avatars.insert_raw(avatar_data)
+            self.session.picture_change_succeed(self.session.account.account,
+                    avatar_path)
+
+        self.session.contacts.me.picture = avatar_path
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES
