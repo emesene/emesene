@@ -686,8 +686,10 @@ class Worker(e3.base.Worker, papyon.Client):
             return
         account = contact.account
         old_media = contact.media
+
         contact.media = ' - '.join(papycontact.current_media) \
-                            if papycontact.current_media else ''
+                            if papycontact.current_media and \
+                            papycontact.current_media != ('', '') else ''
 
         if contact.media != '':
             contact.media = '♫ ' + contact.media
