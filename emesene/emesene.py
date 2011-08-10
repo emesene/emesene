@@ -116,6 +116,19 @@ import extension
 import interfaces
 import gui
 
+class MinimizedOption(object):
+    '''option parser'''
+
+    def option_register(self):
+        '''register the options to parse by the command line option parser'''
+        option = optparse.Option("-m", "--minimized",
+            action="count", dest="minimized", default=False,
+            help="Minimize emesene at start")
+        return option
+
+extension.implements('option provider')(MinimizedOption)
+extension.get_category('option provider').activate(MinimizedOption)
+
 class SingleInstanceOption(object):
     '''option parser'''
 
@@ -150,6 +163,7 @@ class Controller(object):
         self.window = None
         self.tray_icon = None
         self.conversations = []
+        self.minimize = False
         self.single_instance = None
         self.config = e3.common.Config()
         self.config_dir = e3.common.ConfigDir('emesene2')
@@ -252,6 +266,9 @@ class Controller(object):
             except ImportError:
                 pass
 
+        if options.minimized:
+            self.minimize = True
+
     def start(self, account=None):
         '''the entry point to the class'''
         windowcls = extension.get_default('window frame')
@@ -263,6 +280,9 @@ class Controller(object):
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
         self.go_login(proxy, use_http)
+
+        if self.minimize:
+            self.window.iconify()
 
     def go_login(self, proxy=None, use_http=None, cancel_clicked=False,
             no_autologin=False):
