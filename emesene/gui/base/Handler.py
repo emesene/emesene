@@ -566,6 +566,7 @@ class ConversationToolbarHandler(object):
         self.conversation.on_block_user()
 
     def on_toggle_avatar_selected(self):
+        '''hide or show the avatar bar'''
         self.conversation.on_toggle_avatar()
 		
     def on_invite_video_call_selected(self):

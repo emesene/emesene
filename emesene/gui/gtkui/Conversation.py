@@ -484,11 +484,11 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''hide or show the avatar bar'''
 		
         if self.avatar_box_is_hidden:
-            self.avatar_box_is_hidden = False;
+            self.avatar_box_is_hidden = False
             self.avatarBox.show()
             self.his_avatarBox.show()
         else:
-            self.avatar_box_is_hidden = True;
+            self.avatar_box_is_hidden = True
             self.avatarBox.hide()
             self.his_avatarBox.hide()
 

@@ -208,6 +208,10 @@ class Conversation(object):
     def on_video_call(self):
         '''called when the user is requesting a video-only call'''
         raise NotImplementedError
+		
+    def on_toggle_avatar(self):
+        '''hide or show the avatar bar'''
+        raise NotImplementedError
 
     def on_voice_call(self):
         '''called when the user is requesting an audio-only call'''
