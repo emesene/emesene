@@ -272,13 +272,37 @@ class Login(LoginBase):
         self.config.get_or_set('service', 'msn')
         self.remembers = self.config.get_or_set('d_remembers', {})
         self.config.get_or_set('d_user_service', {})
-        self.status = self.config.get_or_set('d_status',{})
+        self.status = self.config.get_or_set('d_status', {})
+
+        #convert old configs to the new format
+        if len(account.split('|')) == 1:
+            config_keys = self.config.d_remembers.keys()
+            for _account in config_keys:
+                account_and_service = \
+                    _account + '|' + \
+                    self.config.d_user_service.get(_account, 'msn')
+                if _account == account:
+                    self.config.last_logged_account = account_and_service
+                    account = account_and_service
+                self.config.d_remembers[account_and_service] = \
+                    self.config.d_remembers.get(_account)
+                self.config.d_remembers.pop(_account, None)
+                self.config.d_status[account_and_service] = \
+                    self.config.d_status.get(_account)
+                self.config.d_status.pop(_account, None)
+                _value = self.config.d_accounts.get(_account)
+                if _value:
+                    self.config.d_accounts[account_and_service] = _value
+                self.config.d_accounts.pop(_account, None)
+            self.remembers = self.config.d_remembers
+            self.status = self.config.d_status
         self.accounts = self.config.d_accounts
 
         self.b_connect.connect('clicked', self._on_connect_clicked)
 
+        self._combo_session_list = []
+        self.new_combo_session()
         self._reload_account_list()
-        self.__combo_session_list=[]
 
         if proxy is None:
             self.proxy = e3.Proxy()
@@ -305,7 +329,9 @@ class Login(LoginBase):
             self.server_host = 'messenger.hotmail.com'
             self.server_port = '1863'
 
-        avatar_path = self.config_dir.join(self.server_host, account, 'avatars', 'last')
+        avatar_path = self.config_dir.join(
+                        self.server_host, account.rpartition('|')[0],
+                        'avatars', 'last')
         self.avatar.set_from_file(avatar_path)
 
         self.nicebar.hide()
@@ -314,35 +340,40 @@ class Login(LoginBase):
         self.b_cancel.hide()
 
         if account != '':
-            self.cmb_account.get_children()[0].set_text(account)
+            self.cmb_account.get_children()[0].set_text(
+                account.rpartition('|')[0])
 
         if not self.cancel_clicked:
             self._check_autologin()
 
-        self._show_sessions()
-
-    def __on_session_changed(self, session_combo, name_to_ext):
-
-        active = session_combo.get_active()
-        model = session_combo.get_model()
+    def _get_active_service(self):
+        '''fetch the active service from the session combo box'''
+        active = self.session_combo.get_active()
+        model = self.session_combo.get_model()
         service = model[active][1]
-        session_id, ext = name_to_ext[service]
-        self._on_new_preferences(self.use_http, self.proxy.use_proxy, self.proxy.host, self.proxy.port,self.proxy.use_auth, self.proxy.user, self.proxy.passwd, session_id, service, ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
+        return service
 
-    def _show_sessions(self):
+    def _on_session_changed(self, session_combo):
+        service = self._get_active_service()
+        session_id, ext = self.session_name_to_ext[service]
+        self._on_new_preferences(
+            self.use_http, self.proxy.use_proxy, self.proxy.host,
+            self.proxy.port, self.proxy.use_auth, self.proxy.user,
+            self.proxy.passwd, session_id, service,
+            ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
 
-        self.new_combo_session(self.session_combo, self.__on_session_changed)
-
-    def new_combo_session(self, session_combo, on_session_changed):
+    def new_combo_session(self):
         account = self.config.get_or_set('last_logged_account', '')
         default_session = extension.get_default('session')
-        count=0
+        count = 0
         session_found = False
 
-        name_to_ext = {}
+        self.session_name_to_ext = {}
+        self.session_name_to_index = {}
 
         if account in self.accounts:
-            service = self.config.d_user_service.get(account, 'msn')
+            service = self.config.d_user_service.get(
+                            account.rpartition('|')[0], 'msn')
         else:
             service = self.config.service
 
@@ -356,26 +387,25 @@ class Login(LoginBase):
                     session_found = True
 
                 try:
-                    s_name = getattr(gui.theme.image_theme, "service_" + service_name) 
+                    s_name = getattr(gui.theme.image_theme, "service_" + service_name)
                     image = utils.safe_gtk_pixbuf_load(s_name)
                 except:
                     image = None
 
-                session_combo.get_model().append([image, service_name])
-                name_to_ext[service_name] = (ext_id, ext)
+                self.session_combo.get_model().append([image, service_name])
+                self.session_name_to_ext[service_name] = (ext_id, ext)
+                self.session_name_to_index[service_name] = count
                 count += 1
 
         if session_found:
-            session_combo.set_active(index)
+            self.session_combo.set_active(index)
         else:
-            session_combo.set_active(default_session_index)
+            self.session_combo.set_active(default_session_index)
 
-        session_combo.connect('changed', on_session_changed, name_to_ext)
+        self.session_combo.connect('changed', self._on_session_changed)
 
-        self.__combo_session_list.append(session_combo)
+        self._combo_session_list.append(self.session_combo)
 
-        return name_to_ext
-        
     def _check_autologin(self):
         '''check if autologin is set and can be started'''
         account = self.config.get_or_set('last_logged_account', '')
@@ -383,7 +413,7 @@ class Login(LoginBase):
         if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
             password = base64.b64decode(self.config.d_accounts[account])
 
-            self.cmb_account.get_children()[0].set_text(account)
+            self.cmb_account.get_children()[0].set_text(account.rpartition('|')[0])
             self.txt_password.set_text(password)
 
             if not self.no_autologin:
@@ -418,21 +448,23 @@ class Login(LoginBase):
         modify the config for the current account before login
         '''
 
+        account_and_session = account.account + '|' + self._get_active_service()
+
         if auto_login or remember_account or remember_password:
-            self.status[account.account] = account.status
-            self.config.last_logged_account = account.account
+            self.status[account_and_session] = account.status
+            self.config.last_logged_account = account_and_session
 
         if auto_login:#+1 account,+1 password,+1 autologin =  3
-            self.accounts[account.account] = base64.b64encode(account.password)
-            self.remembers[account.account] = 3
+            self.accounts[account_and_session] = base64.b64encode(account.password)
+            self.remembers[account_and_session] = 3
 
         elif remember_password:#+1 account,+1 password = 2
-            self.accounts[account.account] = base64.b64encode(account.password)
-            self.remembers[account.account] = 2
+            self.accounts[account_and_session] = base64.b64encode(account.password)
+            self.remembers[account_and_session] = 2
 
         elif remember_account:#+1 account = 1
-            self.accounts[account.account] = ''
-            self.remembers[account.account] = 1
+            self.accounts[account_and_session] = ''
+            self.remembers[account_and_session] = 1
 
         else:#means i have logged with nothing checked
             self.config.last_logged_account = ''
@@ -453,7 +485,7 @@ class Login(LoginBase):
         if event.keyval == gtk.keysyms.Tab:
             self.txt_password.grab_focus()
 
-    def _update_fields(self, account):
+    def _update_fields(self, account, from_preferences=False):
         '''
         update the different fields according to the account that is
         on the account entry
@@ -472,23 +504,33 @@ class Login(LoginBase):
 
         self.remember_account.set_sensitive(True)
 
-        if account in self.config.d_user_service:
-            service = self.config.d_user_service[account]
+        service = self.config.d_user_service.get(account, 'msn')
 
-            if service in self.services:
-                service_data = self.services[service]
-                self.server_host = service_data['host']
-                self.server_port = service_data['port']
-                self.config.service = service
+        if not from_preferences:
+            self.session_combo.set_active(
+                self.session_name_to_index.get(service, 0))
+        else:
+            service = self._get_active_service()
 
-        if account in self.accounts:
-            attr = int(self.remembers[account])
+        if service in self.services:
+            service_data = self.services[service]
+            self.server_host = service_data['host']
+            self.server_port = service_data['port']
+            self.config.service = service
+            session_id, ext = self.session_name_to_ext[service]
+            self.session_id = session_id
+
+        if account + '|' + service in self.accounts:
+            account_and_service = account + '|' + service
+            attr = int(self.remembers[account_and_service])
             self.remember_account.set_sensitive(False)
             self.forget_me.set_sensitive(True)
-            self.btn_status.set_status(int(self.status[account]))
+            self.btn_status.set_status(int(self.status[account_and_service]))
+            self.config.d_user_service[account] = service
 
-            passw = self.accounts[account]
-            avatar_path = self.config_dir.join(self.server_host, account, 'avatars', 'last')
+            passw = self.accounts[account_and_service]
+            avatar_path = self.config_dir.join(self.server_host, account,
+                                               'avatars', 'last')
             self.avatar.set_from_file(avatar_path)
 
             if attr == 3:#autologin,password,account checked
@@ -508,9 +550,8 @@ class Login(LoginBase):
                 self.show_error(_(
                           'Error while reading user config'))
                 self._clear_all()
-
         else:
-           self.avatar.set_from_file(gui.theme.image_theme.logo)
+            self.avatar.set_from_file(gui.theme.image_theme.logo)
 
     def _clear_all(self):
         '''
@@ -543,8 +584,12 @@ class Login(LoginBase):
         reload the account list in the combobox
         '''
         self.liststore.clear()
-        for mail in sorted(self.accounts):
-            self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
+        mail_list = []
+        for account in sorted(self.accounts):
+            mail = account.rpartition('|')[0]
+            if mail not in mail_list:
+                mail_list.append(mail)
+                self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
 
         #this resolves a small bug
         if not len(self.liststore):
@@ -587,19 +632,22 @@ class Login(LoginBase):
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
             account = self.cmb_account.get_active_text()
+            account_and_service =  account + '|' + self._get_active_service()
             if response == stock.YES:
                 try: # Delete user's folder
                     rmtree(self.config_dir.join(self.server_host, account))
                 except:
                     self.show_error(_('Error while deleting user'))
 
-                if account in self.accounts:
-                    del self.accounts[account]
-                if account in self.remembers:
-                    del self.remembers[account]
-                if account in self.status:
-                    del self.status[account]
-                if account == self.config.last_logged_account:
+                if account_and_service in self.accounts:
+                    del self.accounts[account_and_service]
+                if account_and_service in self.remembers:
+                    del self.remembers[account_and_service]
+                if account_and_service in self.status:
+                    del self.status[account_and_service]
+                if account in self.config.d_user_service:
+                    del self.config.d_user_service[account]
+                if account_and_service == self.config.last_logged_account:
                     self.config.last_logged_account = ''
 
                 self.config.save(self.config_path)
@@ -694,14 +742,9 @@ class Login(LoginBase):
         self.server_host = server_host
         self.server_port = server_port
 
-        account = self.cmb_account.get_active_text()
-
-        if account in self.accounts:
-            self.config.d_user_service[account] = service
-
         self.on_preferences_changed(self.use_http, self.proxy, self.session_id,
                 service)
-        self._on_account_changed(None)
+        self._update_fields(self.cmb_account.get_active_text(), True)
 
         def searchService(model, path, iter, user_data):
             if(model.get(iter,0)[0]==user_data[0]):
@@ -710,10 +753,10 @@ class Login(LoginBase):
             user_data[1]+=1
             return False
 
-        i=0
+        i = 0
 
-        for combo in self.__combo_session_list:
-                combo.get_model().foreach(searchService,[service,i,combo])
+        for combo in self._combo_session_list:
+            combo.get_model().foreach(searchService, [service, i, combo])
 
 class ConnectingWindow(Login):
     '''
@@ -741,7 +784,7 @@ class ConnectingWindow(Login):
                 self.remember_account.set_active(True)
 
             password = base64.b64decode(config.d_accounts.get(account, ""))
-            self.cmb_account.get_children()[0].set_text(account)
+            self.cmb_account.get_children()[0].set_text(account.rpartition('|')[0])
             self.txt_password.set_text(password)
 
         #FIXME: If not account remembered, txt_password & cmb_account, left without text.
