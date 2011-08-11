@@ -295,6 +295,11 @@ def msnplus(msnplus, do_parse_emotes=True):
     _dict_translate_tags(dictlike)
     return DictObj(dictlike)
 
+def msnplus_parse(nick):
+    '''from a plus nick returns a pango markup'''
+    dictlike = msnplus(nick)
+    return dictlike.to_xml()
+
 def _escape_special_chars(msnplus):
     #escape special chars
     msnplus = msnplus.replace ('\xc2\xb7&amp;','\xc2\xb7&')
