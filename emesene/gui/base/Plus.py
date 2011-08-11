@@ -182,7 +182,7 @@ def _color_gradient(col1, col2, length):
 
     return colors
 
-def nameToHex(name):
+def _name_to_hex(name):
     return hexColorNameDict.get(name.lower(), name)
 
 def _hex_colors(msgdict):
@@ -207,7 +207,7 @@ def _hex_colors(msgdict):
                     msgdict[tag] = param[1:]
                 else:
                     #color from name
-                    code = nameToHex(param)
+                    code = _name_to_hex(param)
                     msgdict[tag] = code[1:]
 
     for child in msgdict['childs']:
@@ -295,14 +295,14 @@ def msnplus(msnplus, do_parse_emotes=True):
     _dict_translate_tags(dictlike)
     return DictObj(dictlike)
 
-def escape_special_chars(msnplus):
+def _escape_special_chars(msnplus):
     #escape special chars
     msnplus = msnplus.replace ('\xc2\xb7&amp;','\xc2\xb7&')
     msnplus = msnplus.replace('\xc2\xb7&quot;','\xc2\xb7"')
     msnplus = msnplus.replace('\xc2\xb7&apos;','\xc2\xb7\'')
     return msnplus
 
-def deescape_special_chars(msnplus):
+def _deescape_special_chars(msnplus):
     #unescape special chars
     msnplus = msnplus.replace('\xc2\xb7&','\xc2\xb7&amp;')
     msnplus = msnplus.replace('\xc2\xb7"','\xc2\xb7&quot;')
@@ -318,13 +318,13 @@ def msnplus_strip(msnplus, useless_arg=None):
     compatibility with msnplus
     '''
 
-    msnplus = escape_special_chars(msnplus)
+    msnplus = _escape_special_chars(msnplus)
 
     msnplus = tag_plus_strip_re.sub('', msnplus)
     msnplus = tag_plus_old_strip_re.sub('', msnplus)
     msnplus = msnplus.replace("no-more-color",'')
 
-    msnplus = deescape_special_chars(msnplus)
+    msnplus = _deescape_special_chars(msnplus)
 
     return msnplus
 
@@ -423,7 +423,7 @@ class MsnPlusMarkupMohrtutchy:
         '''replace the [b][/b] etc markup for pango markup'''
 
         text = unicode(text,'utf8') if type(text) is not unicode else text
-        text = escape_special_chars(text)
+        text = _escape_special_chars(text)
 
         self.backgroundColor = self.frontColor = ''
                 
@@ -469,7 +469,7 @@ class MsnPlusMarkupMohrtutchy:
             else:
                 text += '</span>'
 
-        return deescape_special_chars(text)
+        return _deescape_special_chars(text)
         
 
     def codeToHex( self, data ):
