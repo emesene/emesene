@@ -37,7 +37,7 @@ COLOR_MAP = (
     '980299','01038C','01885F','389600','9A9E15','473400','4D0000','5F0162',
     '000047','06502F','1C5300','544D05')
 
-open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-f]+))?\]''', re.IGNORECASE)
+open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]''', re.IGNORECASE)
 
 #regex used to remove plus markup
 tag_plus_strip_re = re.compile('(\[\w(\=#?[0-9A-Fa-f]+|\=\w+)?\])|(\[\/\w+(\=#?[0-9A-Fa-f]+|\=\w+)?\])')
@@ -73,6 +73,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
     text_before = match.group(1)
     open_ = (match.group(2) == '') #and not '/'
     tag = match.group(3)
+    tag = tag.lower()
     arg = match.group(5)
 
     if open_:
@@ -91,9 +92,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
                 message_stack[-1]['childs'] += text_before
             else:
                 message_stack[-1]['childs'].append(text_before)
-
         tag_we_re_closing = message_stack.pop() #-1
-
         if type(message_stack[-1]) == dict:
             message_stack[-1]['childs'].append(tag_we_re_closing)
         else:
@@ -183,6 +182,9 @@ def _color_gradient(col1, col2, length):
 
     return colors
 
+def nameToHex(name):
+    return hexColorNameDict.get(name.lower(), name)
+
 def _hex_colors(msgdict):
     '''convert colors to hex'''
     if msgdict['tag']:
@@ -203,6 +205,10 @@ def _hex_colors(msgdict):
                     msgdict[tag] = COLOR_MAP[int(param)]
                 elif param.startswith('#'):
                     msgdict[tag] = param[1:]
+                else:
+                    #color from name
+                    code = nameToHex(param)
+                    msgdict[tag] = code[1:]
 
     for child in msgdict['childs']:
         if child and type(child) not in (str, unicode):
@@ -269,7 +275,7 @@ def _dict_translate_tags(msgdict):
         del msgdict['c']
     elif tag == 'img':
         pass
-    elif tag not in ('span', '', 'i', 'b', 'small'):
+    elif tag not in ('span', '', 'i', 'b', 'small', 'u'):
         del msgdict[tag]
         msgdict['tag'] = ''
         msgdict['childs'].insert(0, '[%s]' % (tag, ))
