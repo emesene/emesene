@@ -290,9 +290,9 @@ class Logger(object):
         WHERE f.id_event=? and
             ((f.id_src_acc=? and id_dest_acc=?) or
             (f.id_dest_acc=? and id_src_acc=?)  or
-            (f.id_src_acc<>? and f.cid in 
-                ( SELECT f.cid FROM fact_event f 
-                  WHERE f.id_event=?  and  ((f.id_src_acc=? and id_dest_acc=?) 
+            (f.id_src_acc<>? and f.cid in
+                ( SELECT f.cid FROM fact_event f
+                  WHERE f.id_event=?  and  ((f.id_src_acc=? and id_dest_acc=?)
                   or  (f.id_dest_acc=? and id_src_acc=?)) )
             )) and
             f.id_src_info = i.id_info and
@@ -563,7 +563,7 @@ class Logger(object):
             self._count = 0
 
         self._count += 1
-        
+
     def _fetch_sorted(self):
         '''puts list from the query in the right order'''
         query_list = self.cursor.fetchall()
@@ -578,7 +578,7 @@ class Logger(object):
     # utility methods
 
     def add_event(self, event, status, payload, src, dest=None, ext_time=None,
-            id_time=None, cid = 0):
+            id_time=None, cid=0):
         '''add an event on the fact and the dimensiones using the actual time'''
 
         id_event = self.insert_event(event)
@@ -594,8 +594,10 @@ class Logger(object):
 
         if id_time is None:
             if ext_time:
-                (year, month, day, hour, minute, seconds, wday, yday, tm_isdst) = time.gmtime(ext_time)
-                id_time = self.insert_time(year, month, day, wday, hour, minute, seconds)
+                (year, month, day, hour, minute, seconds, wday, yday,
+                 tm_isdst) = time.gmtime(ext_time)
+                id_time = self.insert_time(year, month, day, wday,
+                                           hour, minute, seconds)
             else:
                 id_time = self.insert_time_now()
 
@@ -694,8 +696,10 @@ class Logger(object):
         id_src = self.accounts[src].id_account
         id_dest = self.accounts[dest].id_account
 
-        self.execute(Logger.SELECT_CHATS_BETWEEN, (id_event, id_src, id_dest, id_src,
-            id_dest, id_dest, id_event, id_src, id_dest, id_src, id_dest, from_t, to_t, limit))
+        self.execute(Logger.SELECT_CHATS_BETWEEN,
+                     (id_event, id_src, id_dest, id_src, id_dest, id_dest,
+                      id_event, id_src, id_dest, id_src, id_dest,
+                      from_t, to_t, limit))
 
         return self._fetch_sorted()
 
@@ -769,12 +773,14 @@ class Logger(object):
                 local_group = self.groups[gid]
 
                 if gid not in local_account.groups:
-                    self.insert_account_by_group(local_account.id_account, local_group.id)
+                    self.insert_account_by_group(local_account.id_account,
+                                                 local_group.id)
 
             for gid in removed:
                 local_group = self.groups[gid]
                 local_account.groups.remove(gid)
-                self.delete_account_by_group(local_account.id_account, local_group.id)
+                self.delete_account_by_group(local_account.id_account,
+                                             local_group.id)
 
 class LoggerProcess(threading.Thread):
     '''a process that exposes a thread safe api to log events of a session'''
@@ -832,7 +838,8 @@ class LoggerProcess(threading.Thread):
                 event, status, payload, src, dest, new_time, cid = args
             except:
                 event, status, payload, src, dest, new_time = args
-            self.logger.add_event(event, status, payload, src, dest, new_time, cid = cid)
+            self.logger.add_event(event, status, payload, src, dest, new_time,
+                                  cid=cid)
         elif action == 'logs':
             id_time = None
 
@@ -884,9 +891,11 @@ class LoggerProcess(threading.Thread):
 
         return True
 
-    def log(self, event, status, payload, src, dest = None, new_time = None, cid = None):
+    def log(self, event, status, payload, src, dest=None, new_time=None,
+            cid=None):
         '''add an event to the log database'''
-        self.input.put(('log', (event, status, payload, src, dest, new_time, cid)))
+        self.input.put(('log', (event, status, payload, src, dest, new_time,
+                                cid)))
 
     def logs(self, logs):
         '''add a group of events to the log database with the same time_od'''
@@ -935,7 +944,8 @@ class LoggerProcess(threading.Thread):
         '''return the last # sent from src to dest or from dest to src ,
         between two timestamps from_t and to_t, where # is the limit value
         '''
-        self.input.put(('get_chats_between', (src, dest, from_t, to_t, limit, callback)))
+        self.input.put(('get_chats_between', (src, dest, from_t, to_t, limit,
+                                              callback)))
 
     def add_groups(self, groups):
         '''add all groups to the database'''
@@ -960,7 +970,7 @@ def save_logs_as_txt(results, handle):
         date_text = time.strftime('[%c]', time.gmtime(timestamp))
         handle.write("%s %s: %s\n" % (date_text, nick, message))
 
-def log_message(session, members, message, sent, error=False, cid = None):
+def log_message(session, members, message, sent, error=False, cid=None):
     '''log a message, session is an e3.Session object, members is a list of
     members only used if sent is True, sent is True if we sent the message,
     False if we received the message. error is True if the message send
@@ -968,7 +978,7 @@ def log_message(session, members, message, sent, error=False, cid = None):
 
     if not session.config.get_or_set('b_log_enabled', True):
         return
-    
+
     if message.type == e3.Message.TYPE_TYPING:
         return
 
@@ -1027,5 +1037,4 @@ def log_message(session, members, message, sent, error=False, cid = None):
         if message.type == e3.Message.TYPE_NUDGE:
             message.body = _("%s just sent you a nudge!" % display_name)
 
-        session.log(event, status, message.body, src, dest, cid = cid)
-
+        session.log(event, status, message.body, src, dest, cid=cid)

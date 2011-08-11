@@ -63,7 +63,7 @@ md5_data = {
     'setuptools-0.6c11-py2.7.egg': 'fe1f997bc722265116870bc7919059ea',
 }
 
-import sys, os
+import os
 try: from hashlib import md5
 except ImportError: from md5 import md5
 
@@ -101,7 +101,7 @@ def use_setuptools(
     try:
         import pkg_resources
     except ImportError:
-        return do_download()       
+        return do_download()
     try:
         pkg_resources.require("setuptools>="+version); return
     except pkg_resources.VersionConflict, e:
@@ -166,41 +166,6 @@ and place it in this directory before rerunning this script.)
             if dst: dst.close()
     return os.path.realpath(saveto)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def main(argv, version=DEFAULT_VERSION):
     """Install or upgrade setuptools and EasyInstall"""
     try:
@@ -209,7 +174,7 @@ def main(argv, version=DEFAULT_VERSION):
         egg = None
         try:
             egg = download_setuptools(version, delay=0)
-            sys.path.insert(0,egg)
+            sys.path.insert(0, egg)
             from setuptools.command.easy_install import main
             return main(list(argv)+[egg])   # we're done here
         finally:
@@ -217,7 +182,7 @@ def main(argv, version=DEFAULT_VERSION):
                 os.unlink(egg)
     else:
         if setuptools.__version__ == '0.0.1':
-            print >>sys.stderr, (
+            print >> sys.stderr, (
             "You have an obsolete version of setuptools installed.  Please\n"
             "remove it from your system entirely before rerunning this script."
             )
@@ -239,7 +204,7 @@ def main(argv, version=DEFAULT_VERSION):
             from setuptools.command.easy_install import main
             main(argv)
         else:
-            print "Setuptools version",version,"or greater has been installed."
+            print "Setuptools version", version, "or greater has been installed."
             print '(Run "ez_setup.py -U setuptools" to reinstall or upgrade.)'
 
 def update_md5(filenames):
@@ -272,13 +237,8 @@ def update_md5(filenames):
     f.close()
 
 
-if __name__=='__main__':
-    if len(sys.argv)>2 and sys.argv[1]=='--md5update':
+if __name__ == '__main__':
+    if len(sys.argv) > 2 and sys.argv[1] == '--md5update':
         update_md5(sys.argv[2:])
     else:
         main(sys.argv[1:])
-
-
-
-
-

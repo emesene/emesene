@@ -21,8 +21,8 @@ class Proxy(object):
     This class represents the information of a proxy
     """
 
-    def __init__(self, use_proxy=False, host='', port='', use_auth=False, 
-        user='', passwd=''):
+    def __init__(self, use_proxy=False, host='', port='', use_auth=False,
+                 user='', passwd=''):
         """
         Constructor.
         use_proxy -- boolean that indicates if the proxy should be used

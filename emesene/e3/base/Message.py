@@ -18,9 +18,11 @@
 
 class Message(object):
     '''a class that represent a msn message'''
-    (TYPE_MESSAGE, TYPE_TYPING, TYPE_NUDGE, TYPE_P2P, TYPE_UNK, TYPE_FLNMSG) = range(6)
+    (TYPE_MESSAGE, TYPE_TYPING, TYPE_NUDGE, TYPE_P2P, TYPE_UNK,
+     TYPE_FLNMSG) = range(6)
 
-    def __init__(self, type_, body, account, style=None, timestamp=None, display_name=None):
+    def __init__(self, type_, body, account, style=None, timestamp=None,
+                 display_name=None):
         self.type = type_
         self.body = body
         self.account = account
@@ -165,4 +167,3 @@ class Color(object):
         blue = int(hex_str[4:6], 16)
 
         return Color(red, green, blue)
-
