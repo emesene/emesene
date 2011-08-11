@@ -469,7 +469,7 @@ class Worker(e3.base.Worker, papyon.Client):
                 [account])
 
         msgobj = e3.base.Message(e3.base.Message.TYPE_FLNMSG,
-            msg, account, flnmsg.sender.display_name, flnmsg.date)
+            msg, account, None, flnmsg.date, flnmsg.sender.display_name)
         # override font size!
         msgobj.style.size = self.session.config.i_font_size
         self.session.conv_message(cid, account, msgobj, {})
