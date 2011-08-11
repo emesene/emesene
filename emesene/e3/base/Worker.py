@@ -102,7 +102,7 @@ class Worker(threading.Thread):
     def __init__(self, app_name, session):
         '''class constructor'''
         threading.Thread.__init__(self)
-        self._continue=True
+        self._continue = True
         self.setDaemon(True)
 
         self.app_name = app_name
@@ -367,7 +367,7 @@ class Worker(threading.Thread):
     # ft handlers
     def _handle_action_ft_invite(self, t):
         pass
-    
+
     def _handle_action_ft_accept(self, t):
         pass
 
@@ -378,9 +378,10 @@ class Worker(threading.Thread):
         pass
 
     # call handlers
-    def _handle_action_call_invite(self, cid, account, a_v_both, surface_other, surface_self):
+    def _handle_action_call_invite(self, cid, account, a_v_both, surface_other,
+                                   surface_self):
         pass
-    
+
     def _handle_action_call_accept(self, c):
         pass
 
@@ -389,4 +390,3 @@ class Worker(threading.Thread):
 
     def _handle_action_call_cancel(self, c):
         pass
-

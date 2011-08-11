@@ -23,7 +23,8 @@ class FileTransfer(object):
     '''a class that represent a file transfer'''
     (WAITING, TRANSFERRING, RECEIVED, FAILED, CANCELED) = range(5)
 
-    def __init__(self, obj, filename, contact, size, preview, sender='Me', completepath=''):
+    def __init__(self, obj, filename, contact, size, preview,
+                 sender='Me', completepath=''):
         self.filename = filename
         self.completepath = completepath
         self.size = size
@@ -62,7 +63,8 @@ class FileTransfer(object):
             return 0
 
         if self.received_data:
-            return ((self.size - self.received_data) / (self.get_speed() or 0.1))
+            return ((self.size - self.received_data) /
+                    (self.get_speed() or 0.1))
         return 0
 
     def get_speed(self):

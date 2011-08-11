@@ -209,5 +209,3 @@ class ContactManager(object):
             if contact.status != status.OFFLINE])
 
         return (online, total)
-
-
