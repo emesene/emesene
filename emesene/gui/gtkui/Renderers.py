@@ -165,11 +165,6 @@ def msnplus_to_list(text):
     text_list = MarkupParser.replace_emoticons(text)
     return text_list
 
-def msnplus_to_plain_text(txt):
-    ''' from a nasty string, returns a nice plain text string without
-    bells and whistles, just text '''
-    return Plus.msnplus_strip(txt)
-
 class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
