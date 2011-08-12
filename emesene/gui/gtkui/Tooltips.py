@@ -135,7 +135,10 @@ class Tooltips(gtk.Window):
         self.tag = -1
 
         text = xml.sax.saxutils.escape(Plus.msnplus_strip(obj.display_name))
-        text += '\n<span size="small">' + xml.sax.saxutils.escape(Plus.msnplus_strip(obj.message)) + '</span>'
+        message = Plus.msnplus_strip(obj.message) \
+                    if obj.media == '' else obj.media
+        text += '\n<span size="small">' \
+                + xml.sax.saxutils.escape(message) + '</span>'
         text += '\n' + self.data_string % (\
             obj.account, obj.status_string, self.yes_no[bool(obj.blocked)])
 
@@ -148,8 +151,10 @@ class Tooltips(gtk.Window):
             pixbuf = utils.gtk_pixbuf_load(gui.theme.image_theme.user_def_image)
 
         if bool(obj.blocked):
-            pixbufblock=utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay_big)
-            utils.simple_images_overlap(pixbuf,pixbufblock,-pixbufblock.props.width,-pixbufblock.props.width)
+            pixbufblock = utils.gtk_pixbuf_load(
+                                    gui.theme.image_theme.blocked_overlay_big)
+            utils.simple_images_overlap(pixbuf, pixbufblock, \
+                            -pixbufblock.props.width, -pixbufblock.props.width)
 
         self.image.set_from_pixbuf(pixbuf)
         self.image.show()
