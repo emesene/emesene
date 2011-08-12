@@ -271,7 +271,7 @@ def msnplus(msnplus, do_parse_emotes=True):
 
 def msnplus_parse(nick):
     '''from a plus nick returns a pango markup'''
-    dictlike = msnplus(nick)
+    dictlike = msnplus(nick, False)
     return dictlike.to_xml()
 
 def _escape_special_chars(msnplus):
