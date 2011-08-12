@@ -47,16 +47,17 @@ TAG_DICT = {
     '$': 'foreground',
     '#': ('weight', 'bold'),
     '@': ('underline', 'single'),
-    '&': ('style', 'italic'),
+    '&amp;': ('style', 'italic'),
     '\'': ('strikethrough', 'true')
 }
 
 COLOR_TAGS = ('a', 'c', '$')
 
-open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]''',
+open_tag_re = re.compile('''(.*?)\[(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]''',
                          re.IGNORECASE | re.DOTALL)
-open_tag_old_re = re.compile('(.*?)\xb7(0?)(\$|#|&|\'|@)?((\#?[0-9a-fA-F]+)?),?((\#?[0-9a-fA-F]+)?)',
+open_tag_old_re = re.compile('(.*?)\xb7(\$|#|(&amp;)|\'|@)((\#?[0-9a-fA-F]{6}|\d{1,2})?),?((\#?[0-9a-fA-F]{6}|\d{1,2})?)',
                          re.IGNORECASE | re.DOTALL)
+close_tag_old_re = re.compile('(.*?)\xb7(0)', re.IGNORECASE | re.DOTALL)
 #TODO: I think the other 'InGradient' regexes from the old parser have to be used too
 special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
 
@@ -85,8 +86,9 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
     #STATUS: seems to work! (with gradients too)
     match = open_tag_re.match(msnplus)
     match_old = open_tag_old_re.match(msnplus)
+    match_close_old = close_tag_old_re.match(msnplus)
 
-    if not match and not match_old: #only text
+    if not match and not match_old and not match_close_old: #only text
         if do_parse_emotes:
             parsed_markup = parse_emotes(msnplus)
         else:
@@ -94,11 +96,22 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
 
         message_stack.append(msnplus)
         return {'tag': 'span', 'childs': parsed_markup}
-    elif match and match_old:
+    if match and match_old:
         if len(match.group(1)) > len(match_old.group(1)):
             match = None
         else:
             match_old = None
+    if match and match_close_old:
+        if len(match.group(1)) > len(match_close_old.group(1)):
+            match = None
+        else:
+            match_close_old = None
+    if match_old and match_close_old:
+        if len(match_old.group(1)) > len(match_close_old.group(1)):
+            match_old = None
+        else:
+            match_close_old = None
+    
 
     is_double_color = False
 
@@ -111,8 +124,8 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         arg = match.group(5)
     elif match_old:
         text_before = match_old.group(1)
-        open_ = match_old.group(2) == '' #and not '0'
-        tag = match_old.group(3)
+        open_ = True
+        tag = match_old.group(2)
         arg = match_old.group(4)
         arg2 = match_old.group(6)
         is_double_color = arg2 and arg and not was_double_color
@@ -122,17 +135,24 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
             if not arg and arg2:
                 was_double_color = True
             entire_match_len = len(match_old.group(0))
+    elif match_close_old:
+        entire_match_len = len(match_close_old.group(0))
+        text_before = match_close_old.group(1)
+        open_ = False
+        tag = match_close_old.group(2)
+        arg = ''
 
     if open_:
+        print 'open'
+        if text_before.strip(' '): #just to avoid useless items (we could put it anyway, if we like)
+            message_stack[-1]['childs'].append(text_before)
         if was_double_color:
             msgdict = {'tag': 'a', 'a': arg2, 'childs': []}
         else:
-            if text_before.strip(' '): #just to avoid useless items (we could put it anyway, if we like)
-                message_stack[-1]['childs'].append(text_before)
-
             msgdict = {'tag': tag, tag: arg, 'childs': []}
         message_stack.append(msgdict)
     else: #closing tags
+        print 'close'
         if arg:
             start_tag = message_stack[-1][tag]
             message_stack[-1][tag] = (start_tag, arg)
@@ -307,7 +327,7 @@ def _dict_translate_tags(msgdict):
         del msgdict[tag]
     elif tag == 'img':
         pass
-    elif tag not in ('span', '', 'small'):
+    elif tag not in ('span', ''):
         del msgdict[tag]
         msgdict['tag'] = ''
         msgdict['childs'].insert(0, '[%s]' % (tag, ))

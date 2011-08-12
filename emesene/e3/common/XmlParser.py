@@ -107,9 +107,6 @@ class DictObj(dict):
 
         xml += "".join(childs)
 
-        if self.tag:
-            xml += '</%s>' % self.tag
-
         return xml
 
 
