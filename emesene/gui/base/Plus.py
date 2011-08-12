@@ -100,7 +100,8 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
             message_stack.append(tag_we_re_closing)
 
     #go recursive!
-    _msnplus_to_dict(msnplus[len(match.group(0)):], message_stack)
+    _msnplus_to_dict(msnplus[len(match.group(0)):], message_stack,
+                     do_parse_emotes)
 
     return {'tag': 'span', 'childs': message_stack}
 
