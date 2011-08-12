@@ -86,7 +86,7 @@ class Worker(e3.Worker):
                 '[c=5]((_...sdsdf..._))..)_<(_))(°.°)(...][/c=48][u][/u]',
                 e3.status.BUSY, '', False)
         self._add_contact('eight@hotmail.com',
-                '[i][B][c=12]☆[/c=0][c=0]☆[/c=12][c=12]☆[/c=0] (W) [c=12]Bellamezz[/c=49] (F) [c=0]☆[/c=0][c=12]☆[/c=12][c=0]☆[/c=0][/B][/i]',
+                '[i][B][C=12]☆[/C=0][C=0]☆[/C=12][c=12]☆[/c=0] (W) [C=12]Bellamezz[/c=49] (F) [c=0]☆[/c=0][c=12]☆[/c=12][c=0]☆[/c=0][/B][/i]',
                 e3.status.BUSY, '', False)
         self._add_contact('nine@hotmail.com',
                 '[b](*) ... [c=12]Ricky[/c=33] ...(*)[/b]',
