@@ -44,9 +44,18 @@ TAG_DICT = {
     'u': ('underline', 'single'),
     'i': ('style', 'italic'),
     's': ('strikethrough', 'true'),
+    '$': 'foreground',
+    '#': ('weight', 'bold'),
+    '@': ('underline', 'single'),
+    '&': ('style', 'italic'),
+    '\'': ('strikethrough', 'true')
 }
 
+COLOR_TAGS = ('a', 'c', '$')
+
 open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]''',
+                         re.IGNORECASE | re.DOTALL)
+open_tag_old_re = re.compile('(.*?)\xb7(0?)(\$|#|&|\'|@)?((\#?[0-9a-fA-F]+)?),?((\#?[0-9a-fA-F]+)?)',
                          re.IGNORECASE | re.DOTALL)
 #TODO: I think the other 'InGradient' regexes from the old parser have to be used too
 special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
@@ -70,12 +79,14 @@ def parse_emotes(markup):
 
     return accum
 
-def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
+def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
+                     was_double_color=False):
     '''convert it into a dict, as the one used by XmlParser'''
     #STATUS: seems to work! (with gradients too)
     match = open_tag_re.match(msnplus)
+    match_old = open_tag_old_re.match(msnplus)
 
-    if not match: #only text
+    if not match and not match_old: #only text
         if do_parse_emotes:
             parsed_markup = parse_emotes(msnplus)
         else:
@@ -83,18 +94,43 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
 
         message_stack.append(msnplus)
         return {'tag': 'span', 'childs': parsed_markup}
+    elif match and match_old:
+        if len(match.group(1)) > len(match_old.group(1)):
+            match = None
+        else:
+            match_old = None
 
-    text_before = match.group(1)
-    open_ = match.group(2) == '' #and not '/'
-    tag = match.group(3)
-    tag = tag.lower()
-    arg = match.group(5)
+    is_double_color = False
+
+    if match:
+        entire_match_len = len(match.group(0))
+        text_before = match.group(1)
+        open_ = match.group(2) == '' #and not '/'
+        tag = match.group(3)
+        tag = tag.lower()
+        arg = match.group(5)
+    elif match_old:
+        text_before = match_old.group(1)
+        open_ = match_old.group(2) == '' #and not '0'
+        tag = match_old.group(3)
+        arg = match_old.group(4)
+        arg2 = match_old.group(6)
+        is_double_color = arg2 and arg and not was_double_color
+        if is_double_color:
+            entire_match_len = 0
+        else:
+            if not arg and arg2:
+                was_double_color = True
+            entire_match_len = len(match_old.group(0))
 
     if open_:
-        if text_before.strip(' '): #just to avoid useless items (we could put it anyway, if we like)
-            message_stack[-1]['childs'].append(text_before)
+        if was_double_color:
+            msgdict = {'tag': 'a', 'a': arg2, 'childs': []}
+        else:
+            if text_before.strip(' '): #just to avoid useless items (we could put it anyway, if we like)
+                message_stack[-1]['childs'].append(text_before)
 
-        msgdict = {'tag': tag, tag: arg, 'childs': []}
+            msgdict = {'tag': tag, tag: arg, 'childs': []}
         message_stack.append(msgdict)
     else: #closing tags
         if arg:
@@ -113,8 +149,8 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
             message_stack.append(tag_we_re_closing)
 
     #go recursive!
-    _msnplus_to_dict(msnplus[len(match.group(0)):], message_stack,
-                     do_parse_emotes)
+    _msnplus_to_dict(msnplus[entire_match_len:], message_stack,
+                     do_parse_emotes, is_double_color)
 
     return {'tag': 'span', 'childs': message_stack}
 
@@ -179,7 +215,7 @@ def _hex_colors(msgdict):
     if msgdict['tag']:
         tag = msgdict['tag']
 
-        if tag in ['a', 'c']: #bg-color, color
+        if tag in COLOR_TAGS:
             param = msgdict[tag]
 
             if type(param) == tuple: #gradient
@@ -264,7 +300,7 @@ def _dict_translate_tags(msgdict):
     tag = msgdict['tag']
     if tag in TAG_DICT:
         msgdict['tag'] = 'span'
-        if tag in ('a', 'c'):
+        if tag in COLOR_TAGS:
             msgdict[TAG_DICT[tag]] = '#%s' % msgdict[tag].upper()
         else:
             msgdict[TAG_DICT[tag][0]] = TAG_DICT[tag][1]

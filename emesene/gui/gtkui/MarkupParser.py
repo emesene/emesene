@@ -107,7 +107,8 @@ def close_tags(text1, text2=''):
             # FIXME: The plus parser doesn't parse (close) old plus
             # tags in the right way. This just hacks around it
             leftover_tags = len(closed) - len(opened)
-            closed.pop(leftover_tags)
+            for i in range(leftover_tags):
+                closed.pop()
             temp = text1.rsplit('</span>', leftover_tags)
             text1 = ''.join(temp)
         for i in range(len(closed)):
