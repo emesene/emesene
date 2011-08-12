@@ -48,6 +48,8 @@ TAG_DICT = {
 
 open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]''',
                          re.IGNORECASE | re.DOTALL)
+#TODO: I think the other 'InGradient' regexes from the old parser have to be used too
+special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
 
 #regex used to remove plus markup
 tag_plus_strip_re = re.compile('(\[\w(\=#?[0-9A-Fa-f]+|\=\w+)?\])|(\[\/\w+(\=#?[0-9A-Fa-f]+|\=\w+)?\])')
@@ -59,8 +61,10 @@ def parse_emotes(markup):
     accum = []
     for is_emote, text in gui.theme.emote_theme.split_smilies(markup):
         if is_emote:
-            accum.append({'tag': 'img', 'src':
-                gui.theme.emote_theme.emote_to_path(text, True), 'alt': text, 'childs': []})
+            accum.append(
+                {'tag': 'img',
+                 'src': gui.theme.emote_theme.emote_to_path(text, True),
+                 'alt': text, 'childs': []})
         else:
             accum.append(text)
 
@@ -81,7 +85,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
         return {'tag': 'span', 'childs': parsed_markup}
 
     text_before = match.group(1)
-    open_ = (match.group(2) == '') #and not '/'
+    open_ = match.group(2) == '' #and not '/'
     tag = match.group(3)
     tag = tag.lower()
     arg = match.group(5)
@@ -90,7 +94,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
         if text_before.strip(' '): #just to avoid useless items (we could put it anyway, if we like)
             message_stack[-1]['childs'].append(text_before)
 
-        msgdict = {'tag': tag, tag: arg, 'childs':[]}
+        msgdict = {'tag': tag, tag: arg, 'childs': []}
         message_stack.append(msgdict)
     else: #closing tags
         if arg:
@@ -119,7 +123,7 @@ def _nchars_dict(msgdict):
     nchars = 0
     for child in msgdict['childs']:
         if type(child) in (str, unicode):
-            nchars += len(child)
+            nchars += len(special_character_re.sub('a', child))
         else:
             nchars += _nchars_dict(child)
 
@@ -201,11 +205,20 @@ def _hex_colors(msgdict):
 
 def _gradientify_string(msg, attr, colors):
     '''apply sequence "colors" of colors (type attr) to msg'''
-    result = {'tag':'', 'childs':[]}
+    result = {'tag': '', 'childs': []}
 
-    for char in msg:
-        color = colors.pop(0)
-        result['childs'].append({'tag': attr, attr:color, 'childs':[char]})
+    split_msg = special_character_re.split(msg)
+
+    for text in split_msg:
+        if special_character_re.match(text):
+            color = colors.pop(0)
+            result['childs'].append({'tag': attr, attr: color,
+                                     'childs': [text]})
+            continue
+        for char in text:
+            color = colors.pop(0)
+            result['childs'].append({'tag': attr, attr: color,
+                                     'childs': [char]})
 
     return result
 
@@ -219,7 +232,7 @@ def _gradientify(msgdict, attr=None, colors=None):
         #param_from = COLOR_MAP[int(param_from)]
         #param_to = COLOR_MAP[int(param_to)]
         length = _nchars_dict(msgdict)
-        if (length != 1):
+        if length != 1:
             colors = _color_gradient(param_from, param_to, length)
         msgdict['tag'] = ''
         del msgdict[attr]
@@ -268,11 +281,12 @@ def _dict_translate_tags(msgdict):
         if type(child) == dict:
             _dict_translate_tags(child)
 
-def msnplus(msnplus, do_parse_emotes=True):
+def msnplus(text, do_parse_emotes=True):
     '''given a string with msn+ formatting, give a DictObj
     representing its formatting.'''
     message_stack = [{'tag':'', 'childs':[]}]
-    dictlike = _msnplus_to_dict(msnplus, message_stack, do_parse_emotes)
+    text = unicode(text, 'utf8') if type(text) is not unicode else text
+    dictlike = _msnplus_to_dict(text, message_stack, do_parse_emotes)
     _hex_colors(dictlike)
     _dict_gradients(dictlike)
     _dict_translate_tags(dictlike)
@@ -283,38 +297,38 @@ def msnplus_parse(nick):
     dictlike = msnplus(nick, False)
     return dictlike.to_xml()
 
-def _escape_special_chars(msnplus):
+def _escape_special_chars(text):
     #escape special chars
-    msnplus = msnplus.replace ('\xc2\xb7&amp;','\xc2\xb7&')
-    msnplus = msnplus.replace('\xc2\xb7&quot;','\xc2\xb7"')
-    msnplus = msnplus.replace('\xc2\xb7&apos;','\xc2\xb7\'')
-    return msnplus
+    text = text.replace('\xc2\xb7&amp;', '\xc2\xb7&')
+    text = text.replace('\xc2\xb7&quot;', '\xc2\xb7"')
+    text = text.replace('\xc2\xb7&apos;', '\xc2\xb7\'')
+    return text
 
-def _deescape_special_chars(msnplus):
+def _deescape_special_chars(text):
     #unescape special chars
-    msnplus = msnplus.replace('\xc2\xb7&','\xc2\xb7&amp;')
-    msnplus = msnplus.replace('\xc2\xb7"','\xc2\xb7&quot;')
-    msnplus = msnplus.replace('\xc2\xb7\'','\xc2\xb7&apos;')
-    return msnplus
+    text = text.replace('\xc2\xb7&', '\xc2\xb7&amp;')
+    text = text.replace('\xc2\xb7"', '\xc2\xb7&quot;')
+    text = text.replace('\xc2\xb7\'', '\xc2\xb7&apos;')
+    return text
 
-def msnplus_strip(msnplus, useless_arg=None):
+def msnplus_strip(text, useless_arg=None):
     '''
     given a string with msn+ formatting, give a string with same text but
     without MSN+ markup
-    @param msnplus The original string
+    @param text The original string
     @param useless_arg This is actually useless, and is mantained just for
-    compatibility with msnplus
+    compatibility with text
     '''
 
-    msnplus = _escape_special_chars(msnplus)
+    text = _escape_special_chars(text)
 
-    msnplus = tag_plus_strip_re.sub('', msnplus)
-    msnplus = tag_plus_old_strip_re.sub('', msnplus)
-    msnplus = msnplus.replace("no-more-color",'')
+    text = tag_plus_strip_re.sub('', text)
+    text = tag_plus_old_strip_re.sub('', text)
+    text = text.replace("no-more-color", '')
 
-    msnplus = _deescape_special_chars(msnplus)
+    text = _deescape_special_chars(text)
 
-    return msnplus
+    return text
 
 ################################################################################
 # WARNING: Good ol' emesene1 code from mohrtutchy, roger et. al.
