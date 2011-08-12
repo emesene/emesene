@@ -27,6 +27,8 @@ import parsers
 import MarkupParser
 import Plus
 
+DISPLAY_NAME_LIMIT = 25
+
 class AdiumTheme(object):
     '''a class that contains information of a adium theme
     '''
@@ -134,6 +136,11 @@ class AdiumTheme(object):
 
         msg.alias = Plus.msnplus_strip(msg.alias)
         msg.display_name = Plus.msnplus_strip(msg.display_name)
+
+        if(len(msg.alias) > DISPLAY_NAME_LIMIT):
+            msg.alias = msg.alias[0:DISPLAY_NAME_LIMIT] + "..."
+        if(len(msg.display_name) > DISPLAY_NAME_LIMIT):
+            msg.display_name = msg.display_name[0:DISPLAY_NAME_LIMIT] + "..."
 
         msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir, msg.sender)
         msgtext = MarkupParser.urlify(msgtext)

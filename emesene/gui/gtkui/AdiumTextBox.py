@@ -31,8 +31,6 @@ import gui
 from gui.base import Plus
 import utils
 
-DISPLAY_NAME_LIMIT = 25
-
 class OutputView(webkit.WebView):
     '''a class that represents the output widget of a conversation
     '''
@@ -85,10 +83,6 @@ class OutputView(webkit.WebView):
         b_nick_check = bool(self.last_incoming_nickname != msg.display_name)
         if b_nick_check:
             self.last_incoming_nickname = msg.display_name
-        if(len(msg.alias) > DISPLAY_NAME_LIMIT):
-            msg.alias = msg.alias[0:DISPLAY_NAME_LIMIT] + "..."
-        if(len(msg.display_name) > DISPLAY_NAME_LIMIT):
-            msg.display_name = msg.display_name[0:DISPLAY_NAME_LIMIT] + "..."
 
         if msg.incoming:
             if self.last_incoming is None:
