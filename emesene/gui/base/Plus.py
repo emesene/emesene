@@ -78,7 +78,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
     arg = match.group(5)
 
     if open_:
-        if text_before.strip(): #just to avoid useless items (we could put it anyway, if we like)
+        if text_before.strip(' '): #just to avoid useless items (we could put it anyway, if we like)
             message_stack[-1]['childs'].append(text_before)
 
         msgdict = {'tag': tag, tag: arg, 'childs':[]}
@@ -87,7 +87,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True):
         if arg:
             start_tag = message_stack[-1][tag]
             message_stack[-1][tag] = (start_tag, arg)
-        if text_before.strip(): #just to avoid useless items (we could put it anyway, if we like)
+        if text_before.strip(' '): #just to avoid useless items (we could put it anyway, if we like)
             if do_parse_emotes:
                 text_before = parse_emotes(text_before)
                 message_stack[-1]['childs'] += text_before
