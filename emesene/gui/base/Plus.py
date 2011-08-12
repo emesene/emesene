@@ -114,15 +114,12 @@ def _nchars_dict(msgdict):
 
     return nchars
 
-#stolen from mohrtutchy: ty!
-def _color_gradient(col1, col2, length):
+def _color_gradient(color1, color2, length):
     '''returns a list of colors. Its length is length'''
-    col1 = col1.strip()
-    col2 = col2.strip()
 
     def dec2hex(n):
         """return the hexadecimal string representation of integer n"""
-        if n<16:
+        if n < 16:
             return '0' + "%X" % n
         else:
             return "%X" % n
@@ -131,54 +128,31 @@ def _color_gradient(col1, col2, length):
         """return the integer value of a hexadecimal string s"""
         return int('0x' + s, 16)
 
-    hex3tohex6 = lambda col: col[0] * 2 + col[1] * 2 + col[2] * 2
+    def full_hex2dec(colorstring):
+        """return a tuple containing the integer values of the rgb colors"""
+        hex3tohex6 = lambda col: col[0] * 2 + col[1] * 2 + col[2] * 2
 
+        colorstring = colorstring.strip()
 
-    if col1.startswith('#'):
-        col1 = col1[1:]
+        if colorstring.startswith('#'):
+            colorstring = colorstring[1:]
 
-    if len(col1) == 3:
-        col1 = hex3tohex6(col1)
+        if len(colorstring) == 3:
+            colorstring = hex3tohex6(colorstring)
 
-    if col2.startswith('#'):
-        col2 = col2[1:]
+        r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
+        r, g, b = [hex2dec(i.upper()) for i in (r, g, b)]
+        return (r, g, b)
 
-    if len(col2) == 3:
-        col2 = hex3tohex6(col2)
+    rgb_tuple1 = full_hex2dec(color1)
+    rgb_tuple2 = full_hex2dec(color2)
 
-    R1hex=col1[:2]
-    G1hex=col1[2:4]
-    B1hex=col1[4:6]
-    R2hex=col2[:2]
-    G2hex=col2[2:4]
-    B2hex=col2[4:6]
-    R1dec=hex2dec(R1hex.upper())
-    G1dec=hex2dec(G1hex.upper())
-    B1dec=hex2dec(B1hex.upper())
-    R2dec=hex2dec(R2hex.upper())
-    G2dec=hex2dec(G2hex.upper())
-    B2dec=hex2dec(B2hex.upper())
-    stepR = (R2dec-R1dec)/(length-1.0)
-    stepG = (G2dec-G1dec)/(length-1.0)
-    stepB = (B2dec-B1dec)/(length-1.0)
-    R = [0] * length
-    R[0]=dec2hex(R1dec)
-    R[length-1]=dec2hex(R2dec)
-    G = [0] * length
-    G[0]=dec2hex(G1dec)
-    G[length-1]=dec2hex(G2dec)
-    B = [0] * length
-    B[0]=dec2hex(B1dec)
-    B[length-1]=dec2hex(B2dec)
-    for i in range(1, length-1):
-        R[i] = dec2hex(int(R1dec+stepR * i))
-    for i in range(1, length-1):
-        G[i] = dec2hex(int(G1dec+stepG * i))
-    for i in range(1, length-1):
-        B[i] = dec2hex(int(B1dec+stepB * i))
-    colors = [0] * length
-    for i in range(0,length):
-       colors[i] = R[i] + G[i] + B[i]
+    colors = [''] * length
+    for color_part in zip(rgb_tuple1, rgb_tuple2):
+        step = (color_part[1] - color_part[0]) / (length - 1.0)
+        for i in range(length - 1):
+            colors[i] += dec2hex(int(color_part[0] + step * i))
+        colors[length - 1] += dec2hex(color_part[1])
 
     return colors
 
@@ -233,9 +207,9 @@ def _gradientify(msgdict, attr=None, colors=None):
         param_from, param_to = msgdict[attr]
         #param_from = COLOR_MAP[int(param_from)]
         #param_to = COLOR_MAP[int(param_to)]
-        lenght = _nchars_dict(msgdict)
-        if (lenght != 1):
-            colors = _color_gradient(param_from, param_to, lenght)
+        length = _nchars_dict(msgdict)
+        if (length != 1):
+            colors = _color_gradient(param_from, param_to, length)
         msgdict['tag'] = ''
         del msgdict[attr]
 
