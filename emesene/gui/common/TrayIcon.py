@@ -224,24 +224,21 @@ class ContactsMenu(gtk.Menu):
         self.main_window = main_window
         self.item_to_contacts = {}
         self.contacts_to_item = {}
-        self.avatar_size = 32
+        self.avatar_size = 20
 
         self.contactmanager = self.handler.session.contacts
 
         for contact in self.contactmanager.get_online_list():
             self.__append_contact(contact)
 
-        # TODO: find out why gtk ImageMenuItem does not work as expected
-
     def __append_contact(self, contact):
         """
         appends a contact to our submenu
         """
-        #item = gtk.ImageMenuItem()
-        item = gtk.MenuItem()
+        item = gtk.ImageMenuItem()
         item.set_label(gui.Plus.msnplus_strip(contact.nick))
-        #pict = self.__get_contact_pixbuf_or_default(contact)
-        #item.set_image(pict)
+        pict = self.__get_contact_pixbuf_or_default(contact)
+        item.set_image(pict)
         item.connect('activate', self._on_contact_clicked)
         self.item_to_contacts[item] = contact
         self.contacts_to_item[contact.account] = item
