@@ -37,6 +37,15 @@ COLOR_MAP = (
     '980299','01038C','01885F','389600','9A9E15','473400','4D0000','5F0162',
     '000047','06502F','1C5300','544D05')
 
+TAG_DICT = {
+    'a': 'background',
+    'c': 'foreground',
+    'b': ('weight', 'bold'),
+    'u': ('underline', 'single'),
+    'i': ('style', 'italic'),
+    's': ('strikethrough', 'true'),
+}
+
 open_tag_re = re.compile('''(.*?)\[\$?(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]''',
                          re.IGNORECASE | re.DOTALL)
 
@@ -240,18 +249,16 @@ def _dict_translate_tags(msgdict):
     '''translate 'a' to 'span' etc...'''
     #Work on this
     tag = msgdict['tag']
-    if  tag == 'a':
+    if tag in TAG_DICT:
         msgdict['tag'] = 'span'
-        #msgdict['style'] = 'background-color: #%s;' % (msgdict['a'].upper(),) NON-PANGO
-        msgdict['bgcolor'] = '#%s' % msgdict['a'].upper()
-        del msgdict['a']
-    elif tag == 'c':
-        msgdict['tag'] = 'span'
-        msgdict['color'] = '#%s' % msgdict['c'].upper()
-        del msgdict['c']
+        if tag in ('a', 'c'):
+            msgdict[TAG_DICT[tag]] = '#%s' % msgdict[tag].upper()
+        else:
+            msgdict[TAG_DICT[tag][0]] = TAG_DICT[tag][1]
+        del msgdict[tag]
     elif tag == 'img':
         pass
-    elif tag not in ('span', '', 'i', 'b', 'small', 'u'):
+    elif tag not in ('span', '', 'small'):
         del msgdict[tag]
         msgdict['tag'] = ''
         msgdict['childs'].insert(0, '[%s]' % (tag, ))
