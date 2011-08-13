@@ -22,8 +22,8 @@ import re
 import utils
 import gui
 
-TAG_REGEX = re.compile("<span([^>]*)>")
-CLOSE_TAG_REGEX = re.compile("</span>")
+TAG_REGEX = re.compile("(.*?)<span([^>]*)>", re.IGNORECASE | re.DOTALL)
+CLOSE_TAG_REGEX = re.compile("(.*?)</span>", re.IGNORECASE | re.DOTALL)
 
 def replace_markup(markup):
     '''replace the tags defined in gui.base.ContactList'''
@@ -50,9 +50,10 @@ def replace_markup(markup):
 
     # Close all tags before a new line
     markup_lines = markup.split('\n')
-    for i, line in enumerate(markup_lines):
-        closed_line = close_tags(line)
+    for i in range(len(markup_lines) - 1):
+        closed_line = close_tags(markup_lines[i], markup_lines[i + 1])
         markup_lines[i] = closed_line[0]
+        markup_lines[i + 1] = closed_line[1]
     markup = '\n'.join(markup_lines)
 
     return markup
@@ -99,20 +100,27 @@ def replace_emoticons(text):
 def close_tags(text1, text2=''):
     '''make sure the plus and emesene tags are closed before an emoticon'''
     ret1 = ret2 = ""
-    opened = ""
+    opened = []
+    closed = []
     if text1 != "":
-        opened = TAG_REGEX.findall(text1)
-        closed = CLOSE_TAG_REGEX.findall(text1)
-        if len(closed) > len(opened):
-            # FIXME: The plus parser doesn't parse (close) old plus
-            # tags in the right way. This just hacks around it
-            leftover_tags = len(closed) - len(opened)
-            for i in range(leftover_tags):
-                closed.pop()
-            temp = text1.rsplit('</span>', leftover_tags)
-            text1 = ''.join(temp)
-        for i in range(len(closed)):
-            opened.pop()
+        text = text1
+        print text
+        while text != '':
+            opened_match = TAG_REGEX.match(text)
+            closed_match = CLOSE_TAG_REGEX.match(text)
+            if closed_match and opened_match:
+                if len(closed_match.group(1)) > len(opened_match.group(1)):
+                    closed_match = None
+                else:
+                    opened_match = None
+            if closed_match:
+                opened.pop()
+                text = text[len(closed_match.group(0)):]
+            elif opened_match:
+                opened.append(opened_match.group(2))
+                text = text[len(opened_match.group(0)):]
+            else:
+                text = ''
     ret1 = text1 + ('</span>' * len(opened))
     for i in opened:
         ret2 += '<span' + i + '>'
