@@ -744,7 +744,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     state = self.group_state[group.name]
                     childpath = self._model.get_path(row.iter)
                     path = self.model.convert_child_path_to_path(childpath)
-
                     if path:
                         if state:
                             self.expand_row(path, False)
@@ -757,6 +756,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     False, None, weight, (group.type != e3.base.Group.STANDARD), False)
 
                 self._model[row.iter] = group_data
+
+                if path is None:
+                    path = self.model.convert_child_path_to_path(childpath)
+                    if path and state:
+                        self.expand_row(path, False)
 
     def set_avatar_size(self, size):
         """set the size of the avatars on the contact list
