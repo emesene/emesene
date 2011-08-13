@@ -104,7 +104,6 @@ def close_tags(text1, text2=''):
     closed = []
     if text1 != "":
         text = text1
-        print text
         while text != '':
             opened_match = TAG_REGEX.match(text)
             closed_match = CLOSE_TAG_REGEX.match(text)
