@@ -42,9 +42,8 @@ class Worker(e3.Worker):
                 '', True)
         self._add_contact('pochu@emesene.org', '<3 debian', e3.status.BUSY,
                 '', False)
-        self._add_contact('cloud@emesene.org',
-        '·$,32·$59«·$,41·$50«·$,50·$41«·$,59·$32«·$,66·$23«·$32,1« :: nube ::»·$,66·$23»·$,59·$32»·$,50·$41»·$,41·$50»·$,32·$59»·0 ·$0',
-        e3.status.BUSY, '', False)
+        self._add_contact('cloud@emesene.org', 'nube', e3.status.BUSY,
+                '', False)
         self._add_contact('otacon@emesene.org', 'Otacon', e3.status.BUSY,
                 '', True)
         self._add_contact('federico@emesene.org', 'federico..', e3.status.AWAY,
@@ -75,11 +74,11 @@ class Worker(e3.Worker):
                 '[c=29]•°o.Orandom εïз stuff O.o°•[/c=36]·$28',
                 e3.status.BUSY, '', False)
         self._add_contact('four@hotmail.com',
-            '[c=48][b]hy[/b][/c=11] ·#·$3,3\'_·$#fcfcfc,#fcfcfc\'_·$4,4\'_·0·$28',
-            e3.status.BUSY, '', False)
+                '[c=48][b]hy[/b][/c=11] ·#·$3,3\'_·$#fcfcfc,#fcfcfc\'_·$4,4\'_·0·$28',
+                e3.status.BUSY, '', False)
         self._add_contact('five@hotmail.com',
-            '·&·#·$9X.|̲̅·$10X·$9̲̅·$10x·$9̲̅·$10x·$9̲̅·$10x·$9̲̅·$10x·$9̲̅|·$10·#',
-            e3.status.BUSY, '', False)
+                '·&·#·$9X.|̲̅·$10X·$9̲̅·$10x·$9̲̅·$10x·$9̲̅·$10x·$9̲̅·$10x·$9̲̅|·$10·#',
+                e3.status.BUSY, '', False)
         self._add_contact('six@hotmail.com', '[c=46][u][b]xafd! [/b][/u][/c]',
                 e3.status.BUSY, '', False)
         self._add_contact('seven@hotmail.com',
@@ -92,8 +91,11 @@ class Worker(e3.Worker):
                 '[b](*) ... [c=12]Ricky[/c=33] ...(*)[/b]',
                 e3.status.BUSY, '', False)
         self._add_contact('ten@hotmail.com',
-            '<:o)[c=yellow]Yellow:DYellow[/c][c=red]Red[c=blue]Blue:)Blue[c=green]Green[/c][/c][/c]',
-            e3.status.BUSY, '', False)
+                '<:o)[c=yellow]Yellow:DYellow[/c][c=red]Red[c=blue]Blue:)Blue[c=green]Green[/c][/c][/c]',
+                e3.status.BUSY, '', False)
+        self._add_contact('eleven@hotmail.com',
+                '·$,32·$59«·$,41·$50«·$,50·$41«·$,59·$32«·$,66·$23«·$32,1« :: nube ::»·$,66·$23»·$,59·$32»·$,50·$41»·$,41·$50»·$,32·$59»·0 ·$0',
+                e3.status.BUSY, '', False)
 
         self._add_group('ninjas')
         self._add_group('pirätes')
@@ -125,6 +127,8 @@ class Worker(e3.Worker):
         self._add_contact_to_group('seven@hotmail.com', 'strange nicks')
         self._add_contact_to_group('eight@hotmail.com', 'strange nicks')
         self._add_contact_to_group('nine@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('ten@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('eleven@hotmail.com', 'strange nicks')
 
     def _add_contact(self, mail, nick, status_, alias, blocked):
         """
