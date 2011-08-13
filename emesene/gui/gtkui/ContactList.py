@@ -740,6 +740,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         for row in self._model:
             obj = row[1]
             if type(obj) == e3.Group and obj.identifier == group.identifier:
+                path = None
+                childpath = None
                 if group.name in self.group_state:
                     state = self.group_state[group.name]
                     childpath = self._model.get_path(row.iter)
@@ -757,7 +759,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
                 self._model[row.iter] = group_data
 
-                if path is None:
+                if path is None and childpath is not None:
                     path = self.model.convert_child_path_to_path(childpath)
                     if path and state:
                         self.expand_row(path, False)
