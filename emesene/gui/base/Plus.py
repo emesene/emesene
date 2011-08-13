@@ -111,9 +111,9 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
             match_old = None
         else:
             match_close_old = None
-    
 
     is_double_color = False
+    is_background = False
 
     if match:
         entire_match_len = len(match.group(0))
@@ -133,7 +133,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
             entire_match_len = 0
         else:
             if not arg and arg2:
-                was_double_color = True
+                is_background = True
             entire_match_len = len(match_old.group(0))
     elif match_close_old:
         entire_match_len = len(match_close_old.group(0))
@@ -143,16 +143,14 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         arg = ''
 
     if open_:
-        print 'open'
-        if text_before.strip(' '): #just to avoid useless items (we could put it anyway, if we like)
+        if text_before.strip(' ') and not was_double_color: #just to avoid useless items (we could put it anyway, if we like)
             message_stack[-1]['childs'].append(text_before)
-        if was_double_color:
+        if was_double_color or is_background:
             msgdict = {'tag': 'a', 'a': arg2, 'childs': []}
         else:
             msgdict = {'tag': tag, tag: arg, 'childs': []}
         message_stack.append(msgdict)
     else: #closing tags
-        print 'close'
         if arg:
             start_tag = message_stack[-1][tag]
             message_stack[-1][tag] = (start_tag, arg)
