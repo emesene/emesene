@@ -153,7 +153,7 @@ def plus_text_parse(item):
     global plus_or_noplus
     # get a plain string with objects
     if plus_or_noplus:
-        item = plus_parser.replaceMarkup(item)
+        item = Plus.msnplus_parse(item)
     else:
         item = Plus.msnplus_strip(item)
     return item

@@ -80,6 +80,22 @@ def parse_emotes(markup):
 
     return accum
 
+def _close_tags(message_stack, text_before, tag, arg, do_parse_emotes):
+    if arg:
+        start_tag = message_stack[-1][tag]
+        message_stack[-1][tag] = (start_tag, arg)
+    if text_before.strip(' '):
+        if do_parse_emotes:
+            text_before = parse_emotes(text_before)
+            message_stack[-1]['childs'] += text_before
+        else:
+            message_stack[-1]['childs'].append(text_before)
+    tag_we_re_closing = message_stack.pop() #-1
+    if type(message_stack[-1]) == dict:
+        message_stack[-1]['childs'].append(tag_we_re_closing)
+    else:
+        message_stack.append(tag_we_re_closing)
+
 def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
                      was_double_color=False):
     '''convert it into a dict, as the one used by XmlParser'''
@@ -95,6 +111,9 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
             parsed_markup = [msnplus]
 
         message_stack.append(msnplus)
+        tags_to_close = len(message_stack)
+        for i in range(tags_to_close-1):
+            _close_tags(message_stack, '', '', '', do_parse_emotes)
         return {'tag': 'span', 'childs': parsed_markup}
     if match and match_old:
         if len(match.group(1)) > len(match_old.group(1)):
@@ -142,8 +161,18 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         tag = match_close_old.group(2)
         arg = ''
 
+    if '\n' in text_before:
+        splitted_text = text_before.partition('\n')
+        if splitted_text[0].strip(' '):
+            message_stack[-1]['childs'].append(splitted_text[0])
+        text_before = splitted_text[2]
+        tags_to_close = len(message_stack)
+        for i in range(tags_to_close - 1):
+            _close_tags(message_stack, '', '', '', do_parse_emotes)
+        message_stack[-1]['childs'].append('\n')
+
     if open_:
-        if text_before.strip(' ') and not was_double_color: #just to avoid useless items (we could put it anyway, if we like)
+        if text_before.strip(' ') and not was_double_color:
             message_stack[-1]['childs'].append(text_before)
         if was_double_color or is_background:
             msgdict = {'tag': 'a', 'a': arg2, 'childs': []}
@@ -151,20 +180,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
             msgdict = {'tag': tag, tag: arg, 'childs': []}
         message_stack.append(msgdict)
     else: #closing tags
-        if arg:
-            start_tag = message_stack[-1][tag]
-            message_stack[-1][tag] = (start_tag, arg)
-        if text_before.strip(' '): #just to avoid useless items (we could put it anyway, if we like)
-            if do_parse_emotes:
-                text_before = parse_emotes(text_before)
-                message_stack[-1]['childs'] += text_before
-            else:
-                message_stack[-1]['childs'].append(text_before)
-        tag_we_re_closing = message_stack.pop() #-1
-        if type(message_stack[-1]) == dict:
-            message_stack[-1]['childs'].append(tag_we_re_closing)
-        else:
-            message_stack.append(tag_we_re_closing)
+        _close_tags(message_stack, text_before, tag, arg, do_parse_emotes)
 
     #go recursive!
     _msnplus_to_dict(msnplus[entire_match_len:], message_stack,

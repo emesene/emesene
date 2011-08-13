@@ -364,38 +364,15 @@ class ContactList(object):
         '''
         display_name, nick, message = escaped_information
 
-        #TODO: fix those "no-more-color" with msgplus codes, '&#173;'?
-        def fix_plus(text):
-            escaped = self.escape_tags(text)
-            pos = escaped.find("\xc2\xb7")
-            tail = ""
-            irc = "#&@'"
-            flag = False
-            while pos != -1:
-                try:
-                    char = escaped[pos+2]
-                    if char in irc and escaped.count("\xc2\xb7"+char)%2 != 0:
-                        tail = "\xc2\xb7" + char + tail
-                        irc = irc.replace(char,"")
-                    flag = flag or char == "$"
-                except:
-                    pos = pos+1
-                pos = escaped.find("\xc2\xb7",pos+2)
-            if flag:
-                tail += "no-more-color"
-            return escaped + tail
-
         template = self.nick_template
-        template = template.replace('[$NICK]',
-                fix_plus(nick))
+        template = template.replace('[$NICK]', nick)
         template = template.replace('[$ACCOUNT]',
                 self.escape_tags(contact.account))
         template = template.replace('[$MESSAGE]',
-                fix_plus(message) if contact.media == '' else contact.media)
+                message if contact.media == '' else contact.media)
         template = template.replace('[$STATUS]',
                 self.escape_tags(e3.status.STATUS[contact.status]))
-        template = template.replace('[$DISPLAY_NAME]',
-                fix_plus(display_name))
+        template = template.replace('[$DISPLAY_NAME]', display_name)
         #people shouldn't be allowed to have \n in their name/pm
         template = template.replace('\n', ' ')
         template = template.replace('[$NL]', '\n')
