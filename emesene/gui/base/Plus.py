@@ -47,7 +47,7 @@ TAG_DICT = {
     '$': 'foreground',
     '#': ('weight', 'bold'),
     '@': ('underline', 'single'),
-    '&amp;': ('style', 'italic'),
+    '&': ('style', 'italic'),
     '\'': ('strikethrough', 'true')
 }
 
@@ -55,7 +55,7 @@ COLOR_TAGS = ('a', 'c', '$')
 
 open_tag_re = re.compile('''(.*?)\[(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]''',
                          re.IGNORECASE | re.DOTALL)
-open_tag_old_re = re.compile('(.*?)\xb7(\$|#|(&amp;)|\'|@)((\#?[0-9a-fA-F]{6}|\d{1,2})?),?((\#?[0-9a-fA-F]{6}|\d{1,2})?)',
+open_tag_old_re = re.compile('(.*?)\xb7(\$|#|&|\'|@)((\#?[0-9a-fA-F]{6}|\d{1,2})?),?((\#?[0-9a-fA-F]{6}|\d{1,2})?)',
                          re.IGNORECASE | re.DOTALL)
 close_tag_old_re = re.compile('(.*?)\xb7(0)', re.IGNORECASE | re.DOTALL)
 #TODO: I think the other 'InGradient' regexes from the old parser have to be used too
@@ -126,8 +126,8 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         text_before = match_old.group(1)
         open_ = True
         tag = match_old.group(2)
-        arg = match_old.group(4)
-        arg2 = match_old.group(6)
+        arg = match_old.group(3)
+        arg2 = match_old.group(5)
         is_double_color = arg2 and arg and not was_double_color
         if is_double_color:
             entire_match_len = 0
@@ -346,9 +346,11 @@ def msnplus(text, do_parse_emotes=True):
     _dict_translate_tags(dictlike)
     return DictObj(dictlike)
 
-def msnplus_parse(nick):
+def msnplus_parse(text):
     '''from a plus nick returns a pango markup'''
-    dictlike = msnplus(nick, False)
+    text = _escape_special_chars(text)
+    dictlike = msnplus(text, False)
+    text = _deescape_special_chars(dictlike.to_xml())
     return dictlike.to_xml()
 
 def _escape_special_chars(text):
