@@ -169,8 +169,6 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
             _close_tags(message_stack, '', '', '', do_parse_emotes)
         return {'tag': 'span', 'childs': parsed_markup}
 
-    is_background = False
-
     text_before = match.group(1)
     open_ = match.group(2) == '' #and not '/'
     tag = match.group(3)
@@ -178,12 +176,12 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
     arg = match.group(5)
     arg2 = match.group(7)
     is_double_color = arg2 and arg and not was_double_color
+    entire_match_len = len(match.group(0))
     if is_double_color:
         entire_match_len = 0
-    else:
-        if not arg and arg2:
-            is_background = True
-        entire_match_len = len(match.group(0))
+    elif arg2:
+        arg = arg2
+        tag = 'a'
 
     if '\n' in text_before:
         splitted_text = text_before.partition('\n')
@@ -198,10 +196,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
     if open_:
         if text_before.strip(' ') and not was_double_color:
             message_stack[-1]['childs'].append(text_before)
-        if was_double_color or is_background:
-            msgdict = {'tag': 'a', 'a': arg2, 'childs': []}
-        else:
-            msgdict = {'tag': tag, tag: arg, 'childs': []}
+        msgdict = {'tag': tag, tag: arg, 'childs': []}
         message_stack.append(msgdict)
     else: #closing tags
         _close_tags(message_stack, text_before, tag, arg, do_parse_emotes)
