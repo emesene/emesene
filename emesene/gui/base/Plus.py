@@ -17,13 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import re
-
-################################################################################
-# WARNING: This stuff is unused, unless you plan to write a better parser
-# you should jump to the used code somewhere down here.
-################################################################################
 from e3.common.XmlParser import DictObj
-
 import gui
 
 COLOR_MAP = (
@@ -129,6 +123,12 @@ def _close_tags(message_stack, text_before, tag, arg, do_parse_emotes):
     else:
         message_stack.append(tag_we_re_closing)
 
+def _close_stack_tags(message_stack, do_parse_emotes=True):
+    '''Closes all open tags in stack'''
+    tags_to_close = len(message_stack)
+    for i in range(tags_to_close-1):
+        _close_tags(message_stack, '', '', '', do_parse_emotes)
+
 def _get_shortest_match(match1, match2):
     '''get the match that comes earliest'''
     if match1 and match2:
@@ -153,7 +153,6 @@ def _get_best_match(msnplus):
 def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
                      was_double_color=False):
     '''convert it into a dict, as the one used by XmlParser'''
-    #STATUS: seems to work! (with gradients too)
 
     match = _get_best_match(msnplus)
 
@@ -164,9 +163,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
             parsed_markup = [msnplus]
 
         message_stack.append(msnplus)
-        tags_to_close = len(message_stack)
-        for i in range(tags_to_close-1):
-            _close_tags(message_stack, '', '', '', do_parse_emotes)
+        _close_stack_tags(message_stack, do_parse_emotes)
         return {'tag': 'span', 'childs': parsed_markup}
 
     text_before = match.group(1)
@@ -188,9 +185,7 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         if splitted_text[0].strip(' '):
             message_stack[-1]['childs'].append(splitted_text[0])
         text_before = splitted_text[2]
-        tags_to_close = len(message_stack)
-        for i in range(tags_to_close - 1):
-            _close_tags(message_stack, '', '', '', do_parse_emotes)
+        _close_stack_tags(message_stack, do_parse_emotes)
         message_stack[-1]['childs'].append('\n')
 
     if open_:
@@ -261,6 +256,10 @@ def _color_gradient(color1, color2, length):
     return colors
 
 def _name_to_hex(name):
+    '''
+    from a color name returns its hex number.
+    If color isn't found, returns name.
+    '''
     return COLOR_NAME_DICT.get(name.lower(), name)
 
 def _hex_colors(msgdict):
@@ -349,7 +348,6 @@ def _dict_gradients(msgdict):
 
 def _dict_translate_tags(msgdict):
     '''translate 'a' to 'span' etc...'''
-    #Work on this
     tag = msgdict['tag']
     if tag in TAG_DICT:
         msgdict['tag'] = 'span'
@@ -382,7 +380,11 @@ def msnplus(text, do_parse_emotes=True):
     return DictObj(dictlike)
 
 def msnplus_parse(text):
-    '''from a plus nick returns a pango markup'''
+    '''
+    given a string with msn+ formatting, give a string with same text but
+    with Pango Markup
+    @param text The original string
+    '''
     text = _escape_special_chars(text)
     dictlike = msnplus(text, False)
     text = _deescape_special_chars(dictlike.to_xml())
