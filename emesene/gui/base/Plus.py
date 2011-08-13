@@ -169,23 +169,21 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
             _close_tags(message_stack, '', '', '', do_parse_emotes)
         return {'tag': 'span', 'childs': parsed_markup}
 
-    is_double_color = False
     is_background = False
 
-    if match:
-        text_before = match.group(1)
-        open_ = match.group(2) == '' #and not '/'
-        tag = match.group(3)
-        tag = tag.lower()
-        arg = match.group(5)
-        arg2 = match.group(7)
-        is_double_color = arg2 and arg and not was_double_color
-        if is_double_color:
-            entire_match_len = 0
-        else:
-            if not arg and arg2:
-                is_background = True
-            entire_match_len = len(match.group(0))
+    text_before = match.group(1)
+    open_ = match.group(2) == '' #and not '/'
+    tag = match.group(3)
+    tag = tag.lower()
+    arg = match.group(5)
+    arg2 = match.group(7)
+    is_double_color = arg2 and arg and not was_double_color
+    if is_double_color:
+        entire_match_len = 0
+    else:
+        if not arg and arg2:
+            is_background = True
+        entire_match_len = len(match.group(0))
 
     if '\n' in text_before:
         splitted_text = text_before.partition('\n')
