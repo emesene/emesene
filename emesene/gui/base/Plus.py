@@ -37,6 +37,29 @@ COLOR_MAP = (
     '980299','01038C','01885F','389600','9A9E15','473400','4D0000','5F0162',
     '000047','06502F','1C5300','544D05')
 
+# color dict used to retreive common color codes from their names
+COLOR_NAME_DICT = {
+    'white': '#ffffff',
+    'black': '#000000',
+    'marine': '#00007F',
+    'white': '#ffffff',
+    'green': '#009300',
+    'red': '#FF0000',
+    'brown': '#7F0000',
+    'purple': '#9C009C',
+    'orange': '#FC7F00',
+    'yellow': '#FFFF00',
+    'lime': '#00FC00',
+    'teal': '#009393',
+    'aqua': '#00FFFF',
+    'blue': '#0000FC',
+    'pink': '#FF00FF',
+    'gray': '#7F7F7F',
+    'silver': '#D2D2D2',
+    'mohr': '#ff00de',
+    'c10ud': '#696969'
+}
+
 TAG_DICT = {
     'a': 'background',
     'c': 'foreground',
@@ -242,7 +265,7 @@ def _color_gradient(color1, color2, length):
     return colors
 
 def _name_to_hex(name):
-    return hexColorNameDict.get(name.lower(), name)
+    return COLOR_NAME_DICT.get(name.lower(), name)
 
 def _hex_colors(msgdict):
     '''convert colors to hex'''
@@ -467,29 +490,6 @@ getTagDict = {
     's': ('strikethrough="true"'),
 }
 
-# color dict used to retreive common color codes from their names
-hexColorNameDict = {
-    'white': ('#ffffff'),
-    'black': ('#000000'),
-    'marine': ('#00007F'),
-    'white': ('#ffffff'),
-    'green': ('#009300'),
-    'red': ('#FF0000'),
-    'brown': ('#7F0000'),
-    'purple': ('#9C009C'),
-    'orange': ('#FC7F00'),
-    'yellow': ('#FFFF00'),
-    'lime': ('#00FC00'),
-    'teal': ('#009393'),
-    'aqua': ('#00FFFF'),
-    'blue': ('#0000FC'),
-    'pink': ('#FF00FF'),
-    'gray': ('#7F7F7F'),
-    'silver': ('#D2D2D2'),
-    'mohr': ('#ff00de'),
-    'c10ud': ('#696969')
-}
-
 class MsnPlusMarkupMohrtutchy:
 
     def replaceMarkup( self, text ):
@@ -558,7 +558,7 @@ class MsnPlusMarkupMohrtutchy:
 
     def nameToHex( self, data ):
         code=data.group()
-        return hexColorNameDict.get(code.lower(), code)
+        return COLOR_NAME_DICT.get(code.lower(), code)
         
     def ircHexToTag( self, data ):
         text = ''
