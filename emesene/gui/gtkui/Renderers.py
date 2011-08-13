@@ -145,8 +145,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         widget.queue_resize()
 
 plus_or_noplus = 1 # 1 means plus, 0 means noplus
-# We still use the Plus parser from emesene 1
-plus_parser = Plus.MsnPlusMarkupMohrtutchy()
 
 def plus_text_parse(item):
     '''parse plus in the contact list'''
