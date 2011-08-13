@@ -71,11 +71,11 @@ TAG_DICT = {
 COLOR_TAGS = ('a', 'c', '$')
 
 open_tag_re = re.compile(
-    '''(.*?)\[(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]()()''',
+    '''(.*?)\[(/?)(\w+)(\=(\#?[0-9a-f]+|\w+))?\]()()''',
     re.IGNORECASE | re.DOTALL)
 
 open_tag_old_re = re.compile(
-    '(.*?)\xb7()(\$|#|&|\'|@)()((\#?[0-9a-fA-F]{6}|\d{1,2})?),?((\#?[0-9a-fA-F]{6}|\d{1,2})?)',
+    '(.*?)\xb7()(\$|#|&|\'|@)()((\#?[0-9a-f]{6}|\d{1,2})?),?((\#?[0-9a-f]{6}|\d{1,2})?)',
     re.IGNORECASE | re.DOTALL)
 
 close_tag_old_re = re.compile(
@@ -87,7 +87,8 @@ special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
 
 #regex used to remove plus markup
 tag_plus_strip_re = re.compile(
-    '(\[\w(\=#?[0-9A-Fa-f]+|\=\w+)?\])|(\[\/\w+(\=#?[0-9A-Fa-f]+|\=\w+)?\])')
+    '(\[\w(\=#?[0-9a-f]+|\=\w+)?\])|(\[\/\w+(\=#?[0-9a-f]+|\=\w+)?\])',
+    re.IGNORECASE)
 tag_plus_old_strip_re = re.compile(
     '\·(\&|\@|\#|0)|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
 
