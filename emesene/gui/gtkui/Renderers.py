@@ -167,6 +167,11 @@ class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
 
+    NAME = 'Cell Renderer Plus'
+    DESCRIPTION = _('Parse MSN+ markup, showing colors, gradients and effects')
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
+
     def __init__(self):
         global plus_or_noplus
         plus_or_noplus = 1
@@ -179,6 +184,12 @@ gobject.type_register(CellRendererPlus)
 class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
     but improving the readability'''
+
+    NAME = 'Cell Renderer No Plus'
+    DESCRIPTION = _('Strip MSN+ markup, not showing any effect/color, but improving the readability')
+    AUTHOR = 'Mariano Guerra'
+    WEBSITE = 'www.emesene.org'
+
 
     def __init__(self):
         global plus_or_noplus
