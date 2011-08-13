@@ -388,7 +388,7 @@ def msnplus_parse(text):
     '''
     text = _escape_special_chars(text)
     dictlike = msnplus(text, False)
-    text = _deescape_special_chars(dictlike.to_xml())
+    text = _unescape_special_chars(dictlike.to_xml())
     return dictlike.to_xml()
 
 def _escape_special_chars(text):
@@ -398,7 +398,7 @@ def _escape_special_chars(text):
     text = text.replace('\xc2\xb7&apos;', '\xc2\xb7\'')
     return text
 
-def _deescape_special_chars(text):
+def _unescape_special_chars(text):
     #unescape special chars
     text = text.replace('\xc2\xb7&', '\xc2\xb7&amp;')
     text = text.replace('\xc2\xb7"', '\xc2\xb7&quot;')
@@ -420,7 +420,7 @@ def msnplus_strip(text, useless_arg=None):
     text = tag_plus_old_strip_re.sub('', text)
     text = text.replace("no-more-color", '')
 
-    text = _deescape_special_chars(text)
+    text = _unescape_special_chars(text)
 
     return text
 
@@ -542,7 +542,7 @@ class MsnPlusMarkupMohrtutchy:
             else:
                 text += '</span>'
 
-        return _deescape_special_chars(text)
+        return _unescape_special_chars(text)
         
 
     def codeToHex( self, data ):
