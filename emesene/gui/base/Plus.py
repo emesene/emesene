@@ -76,17 +76,26 @@ TAG_DICT = {
 
 COLOR_TAGS = ('a', 'c', '$')
 
-open_tag_re = re.compile('''(.*?)\[(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]''',
-                         re.IGNORECASE | re.DOTALL)
-open_tag_old_re = re.compile('(.*?)\xb7(\$|#|&|\'|@)((\#?[0-9a-fA-F]{6}|\d{1,2})?),?((\#?[0-9a-fA-F]{6}|\d{1,2})?)',
-                         re.IGNORECASE | re.DOTALL)
-close_tag_old_re = re.compile('(.*?)\xb7(0)', re.IGNORECASE | re.DOTALL)
+open_tag_re = re.compile(
+    '''(.*?)\[(/?)(\w+)(\=(\#?[0-9a-fA-F]+|\w+))?\]()()''',
+    re.IGNORECASE | re.DOTALL)
+
+open_tag_old_re = re.compile(
+    '(.*?)\xb7()(\$|#|&|\'|@)()((\#?[0-9a-fA-F]{6}|\d{1,2})?),?((\#?[0-9a-fA-F]{6}|\d{1,2})?)',
+    re.IGNORECASE | re.DOTALL)
+
+close_tag_old_re = re.compile(
+    '(.*?)\xb7(0)()()()()()',
+    re.IGNORECASE | re.DOTALL)
+
 #TODO: I think the other 'InGradient' regexes from the old parser have to be used too
 special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
 
 #regex used to remove plus markup
-tag_plus_strip_re = re.compile('(\[\w(\=#?[0-9A-Fa-f]+|\=\w+)?\])|(\[\/\w+(\=#?[0-9A-Fa-f]+|\=\w+)?\])')
-tag_plus_old_strip_re = re.compile('\·(\&|\@|\#|0)|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
+tag_plus_strip_re = re.compile(
+    '(\[\w(\=#?[0-9A-Fa-f]+|\=\w+)?\])|(\[\/\w+(\=#?[0-9A-Fa-f]+|\=\w+)?\])')
+tag_plus_old_strip_re = re.compile(
+    '\·(\&|\@|\#|0)|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
 
 def parse_emotes(markup):
     '''search for emotes on markup and return a list of items with chunks of
@@ -104,6 +113,7 @@ def parse_emotes(markup):
     return accum
 
 def _close_tags(message_stack, text_before, tag, arg, do_parse_emotes):
+    '''close all tags left open'''
     if arg:
         start_tag = message_stack[-1][tag]
         message_stack[-1][tag] = (start_tag, arg)
@@ -119,15 +129,35 @@ def _close_tags(message_stack, text_before, tag, arg, do_parse_emotes):
     else:
         message_stack.append(tag_we_re_closing)
 
+def _get_shortest_match(match1, match2):
+    '''get the match that comes earliest'''
+    if match1 and match2:
+        if len(match1.group(1)) > len(match2.group(1)):
+            return match2
+        else:
+            return match1
+    elif match1:
+        return match1
+    else:
+        return match2
+
+def _get_best_match(msnplus):
+    '''get the best match out of all regexes'''
+    match = open_tag_re.match(msnplus)
+    match_old = open_tag_old_re.match(msnplus)
+    match_close_old = close_tag_old_re.match(msnplus)
+    match = _get_shortest_match(match, match_old)
+    match = _get_shortest_match(match, match_close_old)
+    return match
+
 def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
                      was_double_color=False):
     '''convert it into a dict, as the one used by XmlParser'''
     #STATUS: seems to work! (with gradients too)
-    match = open_tag_re.match(msnplus)
-    match_old = open_tag_old_re.match(msnplus)
-    match_close_old = close_tag_old_re.match(msnplus)
 
-    if not match and not match_old and not match_close_old: #only text
+    match = _get_best_match(msnplus)
+
+    if not match: #only text
         if do_parse_emotes:
             parsed_markup = parse_emotes(msnplus)
         else:
@@ -138,51 +168,24 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         for i in range(tags_to_close-1):
             _close_tags(message_stack, '', '', '', do_parse_emotes)
         return {'tag': 'span', 'childs': parsed_markup}
-    if match and match_old:
-        if len(match.group(1)) > len(match_old.group(1)):
-            match = None
-        else:
-            match_old = None
-    if match and match_close_old:
-        if len(match.group(1)) > len(match_close_old.group(1)):
-            match = None
-        else:
-            match_close_old = None
-    if match_old and match_close_old:
-        if len(match_old.group(1)) > len(match_close_old.group(1)):
-            match_old = None
-        else:
-            match_close_old = None
 
     is_double_color = False
     is_background = False
 
     if match:
-        entire_match_len = len(match.group(0))
         text_before = match.group(1)
         open_ = match.group(2) == '' #and not '/'
         tag = match.group(3)
         tag = tag.lower()
         arg = match.group(5)
-    elif match_old:
-        text_before = match_old.group(1)
-        open_ = True
-        tag = match_old.group(2)
-        arg = match_old.group(3)
-        arg2 = match_old.group(5)
+        arg2 = match.group(7)
         is_double_color = arg2 and arg and not was_double_color
         if is_double_color:
             entire_match_len = 0
         else:
             if not arg and arg2:
                 is_background = True
-            entire_match_len = len(match_old.group(0))
-    elif match_close_old:
-        entire_match_len = len(match_close_old.group(0))
-        text_before = match_close_old.group(1)
-        open_ = False
-        tag = match_close_old.group(2)
-        arg = ''
+            entire_match_len = len(match.group(0))
 
     if '\n' in text_before:
         splitted_text = text_before.partition('\n')
