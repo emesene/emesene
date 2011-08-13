@@ -75,7 +75,7 @@ open_tag_re = re.compile(
     re.IGNORECASE | re.DOTALL)
 
 open_tag_old_re = re.compile(
-    '(.*?)\xb7()(\$|#|&|\'|@)()((\#?[0-9a-f]{6}|\d{1,2})?),?((\#?[0-9a-f]{6}|\d{1,2})?)',
+    '(.*?)\xb7()([\$#&\'@])()((\#?[0-9a-f]{6}|\d{1,2})?),?((\#?[0-9a-f]{6}|\d{1,2})?)',
     re.IGNORECASE | re.DOTALL)
 
 close_tag_old_re = re.compile(
@@ -90,7 +90,7 @@ tag_plus_strip_re = re.compile(
     '(\[\w(\=#?[0-9a-f]+|\=\w+)?\])|(\[\/\w+(\=#?[0-9a-f]+|\=\w+)?\])',
     re.IGNORECASE)
 tag_plus_old_strip_re = re.compile(
-    '\·(\&|\@|\#|0)|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
+    '\·([#&\'@0])|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
 
 def parse_emotes(markup):
     '''search for emotes on markup and return a list of items with chunks of
