@@ -163,10 +163,10 @@ class ContactMenu(gtk.Menu):
         self.handler.on_remove_from_group_selected(group)
 
     def set_blocked(self):
-        self.unblock.set_sensitive(True)
-        self.block.set_sensitive(False)
+        self.unblock.show()
+        self.block.hide()
 
     def set_unblocked(self):
-        self.unblock.set_sensitive(False)
-        self.block.set_sensitive(True)
+        self.unblock.hide()
+        self.block.show()
 
