@@ -415,11 +415,8 @@ def msnplus_strip(text, useless_arg=None):
     '''
 
     text = _escape_special_chars(text)
-
     text = tag_plus_strip_re.sub('', text)
     text = tag_plus_old_strip_re.sub('', text)
-    text = text.replace("no-more-color", '')
-
     text = _unescape_special_chars(text)
 
     return text
