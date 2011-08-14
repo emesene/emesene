@@ -168,7 +168,8 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         return {'tag': 'span', 'childs': parsed_markup}
 
     text_before = match.group(1)
-    open_ = match.group(2) == '' #and not '/'
+    open_ = match.group(2) == ''
+    close_all_tags = match.group(2) == '0'
     tag = match.group(3)
     tag = tag.lower()
     arg = match.group(5)
@@ -196,6 +197,8 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         message_stack.append(msgdict)
     else: #closing tags
         _close_tags(message_stack, text_before, tag, arg, do_parse_emotes)
+        if close_all_tags:
+            _close_stack_tags(message_stack, do_parse_emotes)
 
     #go recursive!
     _msnplus_to_dict(msnplus[entire_match_len:], message_stack,
