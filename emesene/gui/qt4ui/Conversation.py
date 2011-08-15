@@ -113,11 +113,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d['toolbar'] = QtGui.QToolBar(self)
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         widget_d['chat_input'] = Widgets.ChatInput()
-        widget_d['send_btn'] = QtGui.QPushButton(tr('Send'))
         
         text_edit_lay = QtGui.QHBoxLayout()
         text_edit_lay.addWidget(widget_d['chat_input'])
-        text_edit_lay.addWidget(widget_d['send_btn'])
         
         bottom_left_lay = QtGui.QVBoxLayout()
         bottom_left_lay.addWidget(widget_d['toolbar'])
@@ -139,8 +137,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             self._on_send_btn_clicked)
         widget_d['chat_input'].style_changed.connect(
                             self._on_new_style_selected)
-        widget_d['send_btn'].clicked.connect(
-                            self._on_send_btn_clicked)
                             
         action_dict['add_smiley'].triggered.connect(
                             self._on_show_smiley_chooser)
