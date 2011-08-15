@@ -117,5 +117,5 @@ class Cache(object):
                 log.debug("Error while resizing animated image: %s" % value)
             return value == 0
         else:
-            log.warning("Can't resize animated gifs, install ImageMaick")
+            log.warning("Can't resize animated gifs, install ImageMagick")
             return false
