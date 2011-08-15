@@ -25,6 +25,7 @@ import gtk
 import pango
 import gobject
 import webbrowser
+import tempfile
 
 import e3
 import gui
@@ -1309,12 +1310,45 @@ class EmotesWindow(gtk.Window):
             if response != stock.ACCEPT:
                 return
             if size == CEChooser.SMALL:
-                size = 0
+                size = 16
             else:
-                size = 1
+                size = 50
 
-            #TODO: resize, etc. before inserting path, maybe use insert_raw.
-            self.emcache.insert((shortcut, path))
+            image = gtk.gdk.PixbufAnimation(path)
+            static = image.get_static_image()
+            width = static.get_width()
+            height = static.get_height()
+            if width <= size and height <= size:
+                #don't resize if less than size
+                resized_path = path
+            else:
+                if width > height:
+                    ratio = float(size)/width
+                else:
+                    ratio = float(size)/height
+                width = int(width*ratio)
+                height = int(height*ratio)
+
+                fd, resized_path = tempfile.mkstemp()
+                os.close(fd)
+
+                if image.is_static_image():
+                    #if static, resize using gtk
+                    image = static.scale_simple(width, height,
+                                                gtk.gdk.INTERP_NEAREST)
+
+                    if gtk.gdk.pixbuf_get_file_info(path)[0]['name'] == 'jpeg':
+                        format = 'jpeg'
+                    else:
+                        format = 'png'
+                    image.save(resized_path, format)
+                else:
+                    #resize animated images using imagemagick
+                    if not self.emcache.resize_animated_gif(path, resized_path, 
+                                                            width, height):
+                        resized_path = path
+
+            self.emcache.insert((shortcut, resized_path))
 
         CEChooser(os.path.expanduser("~"), _on_ce_choosed, self.shortcut_list)
 
