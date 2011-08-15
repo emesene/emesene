@@ -44,6 +44,7 @@ class Notification():
         self.session.config.get_or_set('b_notify_receive_message', True)
 
         self.notifier = extension.get_default('notificationGUI')
+        self.picture_factory = extension.get_default('notificationImage')
         self.sound_player = extension.get_and_instantiate('sound',session)
 
         if self.session:
@@ -79,10 +80,14 @@ class Notification():
                 self._on_filetransfer_invitation)
 
     def _on_filetransfer_completed(self,args):
-        self.notifier(_("File transfer successful"), "", 'notification-message-email', 'file-transf-completed')
+        uri = self.picture_factory('notification-message-email','mail-received')
+        self.notifier(_("File transfer successful"), "", uri,
+                      'file-transf-completed')
 
     def _on_filetransfer_canceled(self,args):
-        self.notifier(_("File transfer canceled"), "", 'notification-message-email', 'file-transf-canceled')
+        uri = self.picture_factory('notification-message-email','mail-received')
+        self.notifier(_("File transfer canceled"), "", uri,
+                      'file-transf-canceled')
 
     def _on_filetransfer_invitation(self, arg1, arg2):
 
@@ -94,7 +99,10 @@ class Notification():
 
     def _on_mail_received(self, message):
         ''' called when a new mail is received '''
-        self.notifier(_("New mail from %s") % (message.address), message._subject, 'notification-message-email','mail-received', None, message.address)
+        uri = self.picture_factory('notification-message-email','mail-received')
+        self.notifier(_("New mail from %s") % (message.address),
+                      message._subject, uri,'mail-received', None,
+                      message.address)
 
     def has_similar_conversation(self, cid, members):
         '''
@@ -185,7 +193,9 @@ class Notification():
             uri = "file://" + contact.picture
         else:
             uri = 'notification-message-im'
-
+        
+        uri = self.picture_factory(uri,'message-im')
+        
         if text is not None:
             self.notifier(title, text, uri, 'message-im', None, tooltip)
         if sound is not None:
