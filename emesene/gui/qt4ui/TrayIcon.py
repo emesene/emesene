@@ -11,7 +11,7 @@ import gui
 import extension
 
 
-class TrayIcon (QtGui.QSystemTrayIcon):
+class TrayIcon (QtGui.QSystemTrayIcon, gui.BaseTray):
     '''A class that implements the tray icon  of emesene fot Qt4'''
     # pylint: disable=W0612
     NAME = 'TrayIcon'
@@ -26,6 +26,7 @@ class TrayIcon (QtGui.QSystemTrayIcon):
 
         handler -- a e3common.Handler.TrayIconHandler object
         '''
+        gui.BaseTray.__init__(self, handler)
         QtGui.QSystemTrayIcon.__init__(self)
         
         self._handler = handler
@@ -38,6 +39,9 @@ class TrayIcon (QtGui.QSystemTrayIcon):
         
         self.activated.connect(self._on_tray_icon_clicked)
         
+        self.set_login()
+        gui.BaseTray.set_visible(self, True)
+
         # TODO: this is for mac os, and should be changed in the 
         # future (probably no tray icon at all, just the dock icon)
         if sys.platform == 'darwin':
@@ -53,8 +57,12 @@ class TrayIcon (QtGui.QSystemTrayIcon):
     def _get_quit_on_close(self):
         '''Getter method for property "quit_on_close"'''
         return self._quit_on_close
+
+    def _set_quit_on_close(self, value):
+        '''Setter method for property "quit_on_close"'''
+        self._quit_on_close = value
         
-    quit_on_close = property(_get_quit_on_close)
+    quit_on_close = property(_get_quit_on_close, _set_quit_on_close)
         
         
     def set_login(self):    # emesene's

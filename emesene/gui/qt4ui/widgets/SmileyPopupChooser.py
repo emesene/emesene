@@ -149,9 +149,6 @@ class SmileyPopupChooser (QtGui.QDockWidget):
         QtGui.QDockWidget.show(self)
     
 
-
-
-
 class SmileyButton (QtGui.QPushButton):
     '''This class represents a single smiley button in the 
     smiley chooser panel.

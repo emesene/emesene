@@ -117,11 +117,11 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         toolbar = widget_d['toolbar']
         toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
-        toolbar.addAction(action_dict['add_smiley'])
-        toolbar.addAction(action_dict['send_nudge'])
-        toolbar.addSeparator()
         toolbar.addAction(action_dict['change_font'])
         toolbar.addAction(action_dict['change_color'])
+        toolbar.addSeparator()
+        toolbar.addAction(action_dict['add_smiley'])
+        toolbar.addAction(action_dict['send_nudge'])
         toolbar.addSeparator()
         toolbar.addAction(action_dict['toggle_avatars'])
         
@@ -133,16 +133,20 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             self._on_send_btn_clicked)
         widget_d['chat_input'].style_changed.connect(
                             self._on_new_style_selected)
-                            
+
+        dialog = extension.get_default('dialog')
+        self.toolbar_handler = gui.base.ConversationToolbarHandler(self._session,
+            dialog, gui.theme, self)
         action_dict['add_smiley'].triggered.connect(
                             self._on_show_smiley_chooser)
         action_dict['send_nudge'].triggered.connect(
-                            self.on_notify_attention)
+                            self.toolbar_handler.on_notify_attention_selected)
         action_dict['change_font'].triggered.connect(
                             widget_d['chat_input'].show_font_chooser)
         action_dict['change_color'].triggered.connect(
                             widget_d['chat_input'].show_color_chooser)
-        action_dict['toggle_avatars'].triggered.connect(self._on_show_info_changed)
+        action_dict['toggle_avatars'].triggered.connect(
+                            self.toolbar_handler.on_toggle_avatar_selected)
         
         # LEFT (TOP & BOTTOM)
         left_widget = QtGui.QSplitter(Qt.Vertical)
@@ -221,8 +225,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
     def _on_show_info_changed(self, value):
         '''callback called when config.b_show_info changes'''
-        self.set_image_visible(self.avatar_box_is_hidden)
-        self.avatar_box_is_hidden = not self.avatar_box_is_hidden
+        self.on_toggle_avatar()
 
     def _on_show_avatar_onleft(self,value):
         '''callback called when config.b_avatar_on_left changes'''
@@ -369,7 +372,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
-        pass
+        self.set_image_visible(self.avatar_box_is_hidden)
+        self.avatar_box_is_hidden = not self.avatar_box_is_hidden
         
     def on_filetransfer_invitation(self, transfer, conv_id):
         ''' called when a new file transfer is issued '''
