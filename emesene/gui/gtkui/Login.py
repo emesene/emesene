@@ -260,7 +260,7 @@ class Login(LoginBase):
         self.config_dir = config_dir
         self.config_path = config_path
         self.callback = callback
-        self.cancel_clicked=cancel_clicked
+        self.cancel_clicked = cancel_clicked
         self.on_preferences_changed = on_preferences_changed
         self.no_autologin = no_autologin
         # the id of the default extension that handles the session
