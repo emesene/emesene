@@ -94,6 +94,8 @@ def setup():
                                                    single_instance=True)
     extension.category_register('window frame',  TopLevelWindow.TopLevelWindow)
     extension.category_register('tray icon',       TrayIcon.TrayIcon)
+    #FIXME:
+    extension.set_default('tray icon', TrayIcon.TrayIcon)
 
     extension.category_register('connecting window',   pages.ConnectingPage)
     extension.category_register('conversation window', pages.ConversationPage)
@@ -136,12 +138,6 @@ def setup():
     
     extension.category_register('picture handler', 
                                 PictureHandler.PictureHandler)
-    
-
-    
-    
-    
-
 
 def on_idle():
     '''When there's nothing to do in the Qt event loop
