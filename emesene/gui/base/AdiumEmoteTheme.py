@@ -20,6 +20,11 @@
 import re
 import os
 import plistlib
+try:
+    import OrderedDict
+except:
+    from e3.common.OrderedDict import OrderedDict
+plistlib._InternalDict = OrderedDict
 
 class AdiumEmoteTheme(object):
     '''a class that contains information of a adium emote theme
@@ -32,7 +37,7 @@ class AdiumEmoteTheme(object):
         '''
         self.path           = None
         # if you add a smilie key twice you will have a nice stack overflow :D
-        self.emotes         = {} # Emotes defined under set_theme by the Emoticons.plist file found in the theme folder
+        self.emotes         = OrderedDict()
         self.emote_files    = []
         self.emote_regex_str= ""
         self.emote_regex    = None
@@ -46,7 +51,7 @@ class AdiumEmoteTheme(object):
 
         emote_config_file = os.path.join(self.path, "Emoticons.plist")
 
-        emote_data=plistlib.readPlist(file(emote_config_file))
+        emote_data=plistlib.readPlist(emote_config_file)
         for key, val in emote_data['Emoticons'].iteritems():
             self.emote_files.append(key)
             pointer_name = val['Name']
