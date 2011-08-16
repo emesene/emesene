@@ -1,3 +1,4 @@
+'''defines base class for configuration'''
 # -*- coding: utf-8 -*-
 
 #    This file is part of emesene.
@@ -39,6 +40,8 @@ class Config(object):
     def __init__(self, **kwargs):
         '''constructor'''
         self.__dict__ = kwargs
+        self._item_callbacks = None
+        self._callbacks = None
 
     def __getattr__(self, name):
         if name in self.__dict__:
