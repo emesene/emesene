@@ -36,6 +36,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._session = session
         self._conv_id = conv_id
         self._members = members
+        self.avatar_box_is_hidden = False
         self._on_typing_timer = QtCore.QTimer()
         
         # a widget dic to avoid proliferation of instance variables:
@@ -92,7 +93,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             QtGui.QIcon.fromTheme("preferences-desktop-font"),  tr('Change Font'), self)
         action_dict['change_color'] = QtGui.QAction(
                             QtGui.QIcon(""), tr('Change Color'), self) 
-    
+        action_dict['toggle_avatars'] = QtGui.QAction(
+                            QtGui.QIcon.fromTheme("go-next"), tr('Toggle Avatars'), self) 
+   
         
         # TOP LEFT
         widget_d['chat_output'] = conv_output_cls()
@@ -119,6 +122,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         toolbar.addSeparator()
         toolbar.addAction(action_dict['change_font'])
         toolbar.addAction(action_dict['change_color'])
+        toolbar.addSeparator()
+        toolbar.addAction(action_dict['toggle_avatars'])
         
         widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.emotes)
 
@@ -137,6 +142,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             widget_d['chat_input'].show_font_chooser)
         action_dict['change_color'].triggered.connect(
                             widget_d['chat_input'].show_color_chooser)
+        action_dict['toggle_avatars'].triggered.connect(self._on_show_info_changed)
         
         # LEFT (TOP & BOTTOM)
         left_widget = QtGui.QSplitter(Qt.Vertical)
@@ -215,7 +221,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
     def _on_show_info_changed(self, value):
         '''callback called when config.b_show_info changes'''
-        self.set_image_visible(value)
+        self.set_image_visible(self.avatar_box_is_hidden)
+        self.avatar_box_is_hidden = not self.avatar_box_is_hidden
 
     def _on_show_avatar_onleft(self,value):
         '''callback called when config.b_avatar_on_left changes'''
@@ -245,7 +252,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         log.debug('UPSingInfo Start')
         status = self._session.contacts.get(account).status
         log.debug('UpSingInfo: [%s], [%s], [%s], [%s]' % (status, nick, message, account))
-        self._widget_d['info_panel'].set_all(status, Utils.unescape(nick), Utils.unescape(message), account)
+        self._widget_d['info_panel'].set_all(Utils.unescape(message), account)
         log.debug('UPSingInfo Stop')
         
     def show(self, other_started=False):
@@ -331,7 +338,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         """
-        pass
+        if is_visible:
+            self._widget_d['his_display_pic'].show()
+            self._widget_d['my_display_pic'].show()
+        else:
+            self._widget_d['his_display_pic'].hide()
+            self._widget_d['my_display_pic'].hide()
 
     def set_header_visible(self, is_visible):
         '''
