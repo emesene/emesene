@@ -5,10 +5,11 @@ class BaseTray(object):
     a base tray icon class to reuse code
     '''
 
-    def __init__(self):
+    def __init__(self, handler=None):
         self.conversations = None
         self.quit_on_close = False
         self.signals_have_been_connected = False
+        self.handler = handler
 
     def set_conversations(self, convs):
         """

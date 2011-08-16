@@ -43,10 +43,8 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        gui.BaseTray.__init__(self)
-
+        gui.BaseTray.__init__(self, handler)
         gtk.StatusIcon.__init__(self)
-        self.handler = handler
 
         self.main_window = main_window
         self.last_new_message = None

@@ -51,14 +51,12 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        gui.BaseTray.__init__(self)
+        gui.BaseTray.__init__(self, handler)
         app_name_hax = "emesene-%s" % uuid.uuid1()
         appindicator.Indicator.__init__(
             self, app_name_hax, "logo",
             appindicator.CATEGORY_APPLICATION_STATUS,
             os.path.join(os.getcwd(), handler.theme.image_theme.panel_path))
-
-        self.handler = handler
 
         self.main_window = main_window
 

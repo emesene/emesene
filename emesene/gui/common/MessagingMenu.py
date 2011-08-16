@@ -34,8 +34,7 @@ class MessagingMenu(gui.BaseTray):
 
     def __init__ (self, handler, main_window=None):
         '''constructor'''
-        gui.BaseTray.__init__(self)
-        self.handler = handler
+        gui.BaseTray.__init__(self, handler)
         self.main_window = main_window
         self.signals_have_been_connected = False
         # if system-wide desktop file is not present

@@ -33,5 +33,5 @@ class NoTrayIcon(gui.BaseTray):
 
         handler -- a e3common.Handler.TrayIconHandler object
         """
-        gui.BaseTray.__init__(self)
+        gui.BaseTray.__init__(self, handler)
         self.quit_on_close = True
