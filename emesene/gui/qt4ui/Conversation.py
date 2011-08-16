@@ -63,16 +63,19 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                 gui.theme.image_theme.status_icons[
                     self._session.contacts.get(
                         self._members[0]).status]))
-        self.session.signals.contact_attr_changed.subscribe(
-            self.on_contact_attr_changed_succeed)
-        self.session.signals.filetransfer_invitation.subscribe(
-                self.on_filetransfer_invitation)
-        self.session.signals.filetransfer_accepted.subscribe(
-                self.on_filetransfer_accepted)
-        self.session.signals.filetransfer_progress.subscribe(
-                self.on_filetransfer_progress)
-        self.session.signals.filetransfer_completed.subscribe(
-                self.on_filetransfer_completed)
+
+        self.subscribe_signals()
+
+#        self.session.signals.contact_attr_changed.subscribe(
+#            self.on_contact_attr_changed_succeed)
+#        self.session.signals.filetransfer_invitation.subscribe(
+#                self.on_filetransfer_invitation)
+#        self.session.signals.filetransfer_accepted.subscribe(
+#                self.on_filetransfer_accepted)
+#        self.session.signals.filetransfer_progress.subscribe(
+#                self.on_filetransfer_progress)
+#        self.session.signals.filetransfer_completed.subscribe(
+#                self.on_filetransfer_completed)
         
         
     def __del__(self):
@@ -196,18 +199,56 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def input_grab_focus(self):
         '''sets the focus on the input widget'''
         self._widget_d['chat_input'].setFocus(Qt.OtherFocusReason)
-        
-        
+
     # TODO: put this (and maybe the following) in the base 
     # class as abstract methods
     def on_close(self):
         '''Method called when this chat widget is about to be closed'''
+        self.unsubscribe_signals()
         pass
         
     # emesene's
+
+    def iconify(self):
+        '''override the iconify method'''
+        pass
     
-    
-    
+    def _on_avatarsize_changed(self, value):
+        '''callback called when config.i_conv_avatar_size changes'''
+        pass
+
+    def _on_show_toolbar_changed(self, value):
+        '''callback called when config.b_show_toolbar changes'''
+        self.set_toolbar_visible(value)
+
+    def _on_show_header_changed(self, value):
+        '''callback called when config.b_show_header changes'''
+        self.set_header_visible(value)
+
+    def _on_show_info_changed(self, value):
+        '''callback called when config.b_show_info changes'''
+        self.set_image_visible(value)
+
+    def _on_show_avatar_onleft(self,value):
+        '''callback called when config.b_avatar_on_left changes'''
+        pass
+
+    def _on_icon_size_change(self, value):
+        '''callback called when config.b_toolbar_small changes'''
+        pass
+
+    def on_picture_change_succeed(self, account, path):
+        '''callback called when the picture of an account is changed'''
+        pass
+
+    def update_message_waiting(self, is_waiting):
+        """
+        update the information on the conversation to inform if a message is waiting
+
+        is_waiting -- boolean value that indicates if a message is waiting
+        """
+        pass
+
     def update_single_information(self, nick, message, account): # emesene's
         '''This method is called from the core (e3 or base class or whatever
         to update the contacts infos'''
@@ -219,7 +260,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._widget_d['info_panel'].set_all(status, Utils.unescape(nick), Utils.unescape(message), account)
         log.debug('UPSingInfo Stop')
         
-    def show(self):
+    def show(self, other_started=False):
         '''Shows the widget'''
         QtGui.QWidget.show(self)
     
@@ -280,8 +321,55 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # page class. 
         self._widget_d['info_panel'].set_icon(gui.theme.image_theme.typing)
         self._on_typing_timer.start(3000)
-            
-            
+
+    def update_group_information(self):
+        """
+        update the information for a conversation with multiple users
+        """
+        pass
+
+
+    def set_sensitive(self, is_sensitive):
+        """
+        used to make the conversation insensitive while the conversation
+        is still open while the user is disconnected and to set it back to
+        sensitive when the user is reconnected
+        """
+        pass
+
+    def set_image_visible(self, is_visible):
+        """
+        set the visibility of the widget that displays the images of the members
+
+        is_visible -- boolean that says if the widget should be shown or hidden
+        """
+        pass
+
+    def set_header_visible(self, is_visible):
+        '''
+        hide or show the widget according to is_visible
+
+        is_visible -- boolean that says if the widget should be shown or hidden
+        '''
+        if is_visible:
+            self._widget_d['info_panel'].show()
+        else:
+            self._widget_d['info_panel'].hide()
+
+    def set_toolbar_visible(self, is_visible):
+        '''
+        hide or show the widget according to is_visible
+
+        is_visible -- boolean that says if the widget should be shown or hidden
+        '''
+        if is_visible:
+            self._widget_d['toolbar'].show()
+        else:
+            self._widget_d['toolbar'].hide()
+
+    def on_toggle_avatar(self):
+        '''hide or show the avatar bar'''
+        pass
         
     def on_filetransfer_invitation(self, transfer, conv_id):
         ''' called when a new file transfer is issued '''
@@ -307,9 +395,26 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def on_filetransfer_completed(self, transfer):
         ''' called when a file transfer is completed '''
         pass
-        
-    
 
+    def on_filetransfer_canceled(self, transfer):
+        ''' called when a file transfer is canceled '''
+        pass
+
+    def on_call_invitation(self, call, cid, westart=False):
+        '''called when a new call is issued both from us or other party'''
+        pass
+
+    def on_video_call(self):
+        '''called when the user is requesting a video-only call'''
+        pass
+
+    def on_voice_call(self):
+        '''called when the user is requesting an audio-only call'''
+        pass
+
+    def on_av_call(self):
+        '''called when the user is requesting an audio-video call'''
+        pass
    
 
 
