@@ -63,19 +63,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                 gui.theme.image_theme.status_icons[
                     self._session.contacts.get(
                         self._members[0]).status]))
-
         self.subscribe_signals()
-
-#        self.session.signals.contact_attr_changed.subscribe(
-#            self.on_contact_attr_changed_succeed)
-#        self.session.signals.filetransfer_invitation.subscribe(
-#                self.on_filetransfer_invitation)
-#        self.session.signals.filetransfer_accepted.subscribe(
-#                self.on_filetransfer_accepted)
-#        self.session.signals.filetransfer_progress.subscribe(
-#                self.on_filetransfer_progress)
-#        self.session.signals.filetransfer_completed.subscribe(
-#                self.on_filetransfer_completed)
         
         
     def __del__(self):
@@ -101,7 +89,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         action_dict['send_nudge']   = QtGui.QAction(
                             QtGui.QIcon(icon_path), tr('Send Nudge'), self)
         action_dict['change_font']  = QtGui.QAction(
-                            QtGui.QIcon(""),  tr('Change Font'), self)
+                            QtGui.QIcon.fromTheme("preferences-desktop-font"),  tr('Change Font'), self)
         action_dict['change_color'] = QtGui.QAction(
                             QtGui.QIcon(""), tr('Change Color'), self) 
     
@@ -415,12 +403,4 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def on_av_call(self):
         '''called when the user is requesting an audio-video call'''
         pass
-   
 
-
-        
-        
-        
-        
-        
-        
