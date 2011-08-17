@@ -39,12 +39,12 @@ except:
 
 # TODO: consider moving to nicer icons than stock ones.
 LIST = [
-    {'stock_id' : gtk.STOCK_FULLSCREEN,'text' : _('Interface')},
+    {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Interface')},
     {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('Desktop')},
-    {'stock_id' : gtk.STOCK_MEDIA_NEXT,'text' : _('Sounds')},
+    {'stock_id' : gtk.STOCK_MEDIA_PLAY,'text' : _('Sounds')},
     {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
     {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
-    {'stock_id' : gtk.STOCK_DIALOG_WARNING,'text' : _('Extensions')},
+    {'stock_id' : gtk.STOCK_EXECUTE,'text' : _('Extensions')},
     {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
 ]
 
