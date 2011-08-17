@@ -49,8 +49,10 @@ class Dialog(object):
     def window_add_image(cls, window, stock_id):
         '''add a stock image as the first element of the window.hbox'''
         image = gtk.image_new_from_stock(stock_id, gtk.ICON_SIZE_DIALOG)
-        window.hbox.pack_start(image, False)
-        image.show()
+        alignment = gtk.Alignment(xalign=0.0, yalign=0.1)
+        alignment.add(image)
+        window.hbox.pack_start(alignment, False)
+        alignment.show_all()
 
         return image
 
@@ -967,6 +969,36 @@ class Dialog(object):
         dialog = ProgressWindow(title, callback)
         dialog.show_all()
         return dialog
+
+    @classmethod
+    def broken_profile(cls, close_cb):
+        '''a dialog that asks you to fix your profile'''
+        message = _('''\
+Your live profile seems to be broken,
+which will cause you to experience issues
+with you display name, picture
+or personal message.
+
+You can fix it now by re-uploading
+your profile picture on the
+Live Messenger website that will open,
+or you can choose to fix it later.
+To fix your profile, emesene must be closed.
+Clicking Yes will close emesene.
+
+Do you want to fix your profile now?''')
+        def fix_profile(button, close_cb):
+            webbrowser.open("http://profile.live.com/details/Edit/Pic")
+            close_cb()
+
+        window = cls.common_window(message, gtk.STOCK_DIALOG_WARNING,
+            None, _("You have a broken profile"))
+        cls.add_button(window, gtk.STOCK_YES, stock.YES, fix_profile,
+            cls.default_cb, close_cb)
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, None,
+            cls.default_cb)
+
+        window.show()
 
 class ImageChooser(gtk.FileChooserDialog):
     '''a class to select images'''

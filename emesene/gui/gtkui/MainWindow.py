@@ -94,6 +94,7 @@ class MainWindow(gtk.VBox):
             self._on_group_menu_selected)
 
         self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
+        self.session.signals.broken_profile.subscribe(self._on_broken_profile)
 
         scroll.add(self.contact_list)
         scroll.show_all()
@@ -103,6 +104,11 @@ class MainWindow(gtk.VBox):
 
         self.session.config.subscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
+
+    def _on_broken_profile(self):
+        '''called when a person has a broken profile'''
+        dialog = extension.get_default('dialog')
+        dialog.broken_profile(self.on_close)
 
     def _on_mail_count_changed(self, count):
         self.panel.mail.set_label("(%d)" % count)
@@ -260,6 +266,7 @@ class MainWindow(gtk.VBox):
             self._on_mail_count_changed)
         self.session.signals.contact_attr_changed.unsubscribe(
             self._on_contact_attr_changed)
+        self.session.signals.broken_profile.unsubscribe(self._on_broken_profile)
         self.panel.remove_subscriptions()
         self.on_disconnect_cb()
 
