@@ -50,7 +50,7 @@ class Message(object):
 
     @classmethod
     def from_contact(cls, contact, message, first, incomming, tstamp=None):
-        picture = contact.picture
+        picture = contact.picture or ''
 
         if not os.path.exists(picture):
             picture = os.path.abspath(gui.theme.image_theme.user)

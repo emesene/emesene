@@ -828,7 +828,13 @@ class Controller(object):
         '''save the avatar change as the last avatar'''
         if account == self.session.account.account:
             last_avatar_path = self.session.config_dir.get_path("last_avatar")
-            shutil.copy(path, last_avatar_path)
+            if path:
+                shutil.copy(path, last_avatar_path)
+            else:
+                try:
+                    os.remove(last_avatar_path)
+                except OSError, e:
+                    log.warning("Cannot remove file: %s" % e)
 
 class ExtensionDefault(object):
     '''extension to register options for extensions'''

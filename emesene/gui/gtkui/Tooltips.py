@@ -145,7 +145,7 @@ class Tooltips(gtk.Window):
         self.label.set_markup(text)
 
         # Sets tooltip image
-        if obj.picture!="":
+        if obj.picture and obj.picture != "":
             pixbuf = utils.gtk_pixbuf_load(obj.picture, (96,96))
         else:
             pixbuf = utils.gtk_pixbuf_load(gui.theme.image_theme.user_def_image)

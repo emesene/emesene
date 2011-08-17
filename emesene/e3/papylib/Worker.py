@@ -1183,6 +1183,12 @@ class Worker(e3.base.Worker, papyon.Client):
             #TODO: check if this can happen, and prevent it (!)
             return
 
+        if picture_name == '':
+            self.profile.msn_object = None
+            self.session.contacts.me.picture = None
+            self.session.picture_change_succeed(self.session.account.account, None)
+            return
+
         try:
             f = open(picture_name, 'rb')
             avatar = f.read()
