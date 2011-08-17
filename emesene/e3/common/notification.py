@@ -126,12 +126,15 @@ class Notification():
         This is called when a new message arrives to a user.
         """
         conversation = self.has_similar_conversation(cid, account)
-
         contact = self.session.contacts.get(account)
+        
         text = None
         sound = None #played sound is handled inside conversation.py
-        if self.session.config.b_notify_receive_message and \
-           conversation.message_waiting:
+        check = False
+        if conversation:
+            check = conversation.message_waiting
+
+        if self.session.config.b_notify_receive_message and check:
             if msgobj.type == Message.TYPE_NUDGE:
                 # TODO: unplus contact.nick, so we don't display weird tags
                 text = _('%s just sent you a nudge!') % (msgobj.display_name,)
