@@ -703,7 +703,17 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_contact_msnobject_changed(self, contact):
         '''called when a contact changes his display picture'''
         msn_object = contact.msn_object
-        if msn_object is None: #sometimes, happens.
+        if msn_object is None:
+            if STATUS_PAPY_TO_E3[contact.presence] != status.OFFLINE:
+                ctct = self.session.contacts.get(contact.account)
+                ctct.picture = None
+                avatars = self.caches.get_avatar_cache(contact.account)
+                if 'last' in avatars:
+                    try:
+                        os.remove(os.path.join(avatars.path, 'last'))
+                    except OSError, e:
+                        log.warning("Last picture remove failed: %s" % e)
+                self.session.picture_change_succeed(contact.account, None)
             return
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
             avatars = self.caches.get_avatar_cache(contact.account)
