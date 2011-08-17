@@ -8,8 +8,10 @@ Assuming you have the proper rights on sf.net, just type (example)
 scp emesene1.6.3-install.exe c10ud,emesene@frs.sourceforge.net:/home/frs/project/e/em/emesene/emesene-1.6.3/
 otherwise try with the web ui.
 
-* How to check which people contributed most (git commits):
-Currently we are adding to the about box people with commits >= 50, until someone provides better metrics or different reasons
+* How to check which people contributed (git commits) ordered by number of commits:
+Currently we are adding to the about box people with commits >= 50 
+until someone provides better metrics or different reasons or we can load
+CONTRIBUTORS at runtime (we must find a way to get it packaged)
 git log --all --format='%aN <%aE>' | sort | uniq -c -i -d | sort -n -r
 
 * How to tag a release with git:
