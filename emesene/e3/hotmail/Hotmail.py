@@ -110,4 +110,7 @@ class Hotmail:
 
     def openInBrowser(self):
         if self.allowed:
-            webbrowser.open(self.__getLoginPage())
+            if os.name == "nt":
+                os.startfile(self.__getLoginPage())
+            else:
+                webbrowser.open_new_tab(self.__getLoginPage())
