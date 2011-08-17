@@ -129,6 +129,9 @@ class AvatarManager(object):
     def set_as_avatar(self, filename):
         ''' set a picture as the current avatar 
         and make a copy in the cache '''
+        if filename == '':
+            self.session.set_picture('')
+            return
         # Control if the filename is a already in cache
         if self.is_cached(filename):
             self.session.set_picture(filename)

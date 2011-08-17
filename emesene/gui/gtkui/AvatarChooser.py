@@ -280,6 +280,7 @@ class AvatarChooser(gtk.Window):
         '''method called when the user clicks the button'''
         self.hide()
         self.stop_and_clear()
+        self.avatar_manager.set_as_avatar('')
 
     def _on_close(self, window, event):
         '''called when the user click on close'''
