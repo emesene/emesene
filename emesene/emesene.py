@@ -115,45 +115,7 @@ from pluginmanager import get_pluginmanager
 import extension
 import interfaces
 import gui
-
-class MinimizedOption(object):
-    '''option parser'''
-
-    def option_register(self):
-        '''register the options to parse by the command line option parser'''
-        option = optparse.Option("-m", "--minimized",
-            action="count", dest="minimized", default=False,
-            help="Minimize emesene at start")
-        return option
-
-extension.implements('option provider')(MinimizedOption)
-extension.get_category('option provider').activate(MinimizedOption)
-
-class SingleInstanceOption(object):
-    '''option parser'''
-
-    def option_register(self):
-        '''register the options to parse by the command line option parser'''
-        option = optparse.Option("-s", "--single",
-            action="count", dest="single_instance", default=False,
-            help="Allow only one instance of emesene")
-        return option
-
-extension.implements('option provider')(SingleInstanceOption)
-extension.get_category('option provider').activate(SingleInstanceOption)
-
-class VerboseOption(object):
-    '''option parser'''
-
-    def option_register(self):
-        '''register the options to parse by the command line option parser'''
-        option = optparse.Option("-v", "--verbose",
-            action="count", dest="debuglevel", default=0,
-            help="Enable debug in console (add another -v to show debug)")
-        return option
-
-extension.implements('option provider')(VerboseOption)
-extension.get_category('option provider').activate(VerboseOption)
+import optionprovider
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -836,34 +798,6 @@ class Controller(object):
                 except OSError, e:
                     log.warning("Cannot remove file: %s" % e)
 
-class ExtensionDefault(object):
-    '''extension to register options for extensions'''
-
-    def option_register(self):
-        '''register options'''
-        option = optparse.Option('--ext-default', '-e')
-        option.type = 'string' #well, it's a extName:defaultValue string
-        option.action = 'callback'
-        option.callback = self.set_default
-        option.help = 'Set the default extension by name'
-        option.nargs = 1
-        return option
-
-    def set_default(self, option, opt, value, parser):
-        '''set default extensions'''
-        for couple in value.split(';'):
-            category_name, ext_name = [strng.strip()\
-                    for strng in couple.split(':', 2)]
-
-            if not extension.get_category(category_name)\
-                    .set_default_by_name(ext_name):
-                print 'Error setting extension "%s" default session to "%s"'\
-                        % (category_name, ext_name)
-
-extension.implements('option provider')(ExtensionDefault)
-extension.get_category('option provider').activate(ExtensionDefault)
-
-
 class PluggableOptionParser(object):
 
     results = ()
@@ -885,7 +819,6 @@ class PluggableOptionParser(object):
     def get_parsing(cls):
         return cls.results
 
-
 def main():
     """
     the main method of emesene
@@ -894,7 +827,7 @@ def main():
     extension.category_register('option provider', None,
             interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
-    extension.get_category('option provider').activate(ExtensionDefault)
+    extension.get_category('option provider').activate(optionprovider.ExtensionDefault)
     options = PluggableOptionParser(args=emesene_args)
     options.read_options()
     main_method = extension.get_default('main')
