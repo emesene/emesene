@@ -26,6 +26,7 @@ log = logging.getLogger('pluginmanager')
 
 BLACKLIST = ["lint.py", "__init__.py"]
 
+
 class PackageResource(object):
     '''Handle various files that could be put in the package'''
     def __init__(self, base_dir, directory):
@@ -51,6 +52,7 @@ class PackageResource(object):
                 return open(file_path)
             except IOError:
                 return
+
 
 class PluginHandler(object):
     '''Abstraction over a plugin.
@@ -143,6 +145,10 @@ class PluginHandler(object):
             return False
         return self._instance.is_active()
 
+    def get_description(self):
+        '''@return plugin description from Plugin class'''
+        return self.module.Plugin._description
+
 
 class PluginManager(object):
     '''Scan directories and manage plugins loading/unloading/control'''
@@ -211,6 +217,16 @@ class PluginManager(object):
     def get_plugins(self):
         '''return the list of plugin names'''
         return self._plugins.keys()
+
+    def plugin_description(self, name):
+        '''Get the plugin description.
+        @param name The name of the plugin. See plugin_base.PluginBase.name.
+        @return plugin description if loaded, else False.
+        '''
+        if not name in self._plugins:
+            return False
+        return self._plugins[name].get_description()
+
 
 _instance = None
 def get_pluginmanager():

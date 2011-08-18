@@ -29,13 +29,15 @@ class PluginListView(gtk.TreeView):
         self.toggle_renderer = gtk.CellRendererToggle()
         self.append_column(gtk.TreeViewColumn(_('Status'), self.toggle_renderer, active=0))
         self.append_column(gtk.TreeViewColumn(_('Name'), gtk.CellRendererText(), text=1))
+        self.append_column(gtk.TreeViewColumn(_('Description'), gtk.CellRendererText(), text=3))
         self.set_rules_hint(True)
         if toggle_func:
             self.toggle_renderer.connect("toggled", toggle_func)
 
 class PluginListStore(gtk.ListStore):
     def __init__(self):
-        gtk.ListStore.__init__(self, bool, str, str)
+        # running, pretty name, name, description
+        gtk.ListStore.__init__(self, bool, str, str, str)
 
     def update_list(self):
         pluginmanager = get_pluginmanager()
@@ -43,7 +45,8 @@ class PluginListStore(gtk.ListStore):
 
         for name in pluginmanager.get_plugins():
             self.append((pluginmanager.plugin_is_active(name),
-                self.prettify_name(name), name))
+                self.prettify_name(name), name,
+                pluginmanager.plugin_description(name)))
 
     def prettify_name(self, name):
         '''return a prettier name for the plugin'''
