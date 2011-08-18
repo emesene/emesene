@@ -976,8 +976,8 @@ class Dialog(object):
         message = _('''\
 Your live profile seems to be broken,
 which will cause you to experience issues
-with you display name, picture
-or personal message.
+with your display name, picture
+and/or personal message.
 
 You can fix it now by re-uploading
 your profile picture on the
