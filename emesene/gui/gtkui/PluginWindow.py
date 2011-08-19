@@ -28,16 +28,15 @@ class PluginListView(gtk.TreeView):
         gtk.TreeView.__init__(self, store)
         self.toggle_renderer = gtk.CellRendererToggle()
         self.append_column(gtk.TreeViewColumn(_('Status'), self.toggle_renderer, active=0))
-        self.append_column(gtk.TreeViewColumn(_('Name'), gtk.CellRendererText(), text=1))
-        self.append_column(gtk.TreeViewColumn(_('Description'), gtk.CellRendererText(), text=3))
+        self.append_column(gtk.TreeViewColumn(_('Name'), gtk.CellRendererText(), markup=1))
         self.set_rules_hint(True)
         if toggle_func:
             self.toggle_renderer.connect("toggled", toggle_func)
 
 class PluginListStore(gtk.ListStore):
     def __init__(self):
-        # running, pretty name, name, description
-        gtk.ListStore.__init__(self, bool, str, str, str)
+        # running, pretty name and description, name
+        gtk.ListStore.__init__(self, bool, str, str)
 
     def update_list(self):
         pluginmanager = get_pluginmanager()
@@ -45,13 +44,16 @@ class PluginListStore(gtk.ListStore):
 
         for name in pluginmanager.get_plugins():
             self.append((pluginmanager.plugin_is_active(name),
-                self.prettify_name(name), name,
-                pluginmanager.plugin_description(name)))
+                self.prettify_name(name, pluginmanager.plugin_description(name)),
+                name))
 
-    def prettify_name(self, name):
-        '''return a prettier name for the plugin'''
+    def prettify_name(self, name, description):
+        '''return a prettier name for the plugin with its description in a new
+        line, using Pango markup.
+        '''
         name = name.replace('_', ' ')
-        return name[0].upper() + name[1:]
+        pretty_name = '<span><b>%s</b>\n<small>%s</small></span>'
+        return pretty_name % (name[0].upper() + name[1:], description)
 
 class PluginMainVBox(gtk.VBox):
     def __init__(self, session):
