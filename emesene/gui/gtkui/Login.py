@@ -278,6 +278,8 @@ class Login(LoginBase):
         if len(account.split('|')) == 1:
             config_keys = self.config.d_remembers.keys()
             for _account in config_keys:
+                if len(_account.split('|')) != 1:
+                    continue
                 account_and_service = \
                     _account + '|' + \
                     self.config.d_user_service.get(_account, 'msn')
