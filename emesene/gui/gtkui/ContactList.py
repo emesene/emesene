@@ -330,15 +330,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
             else:
                 log.debug('empty paths?')
 
-    def _markup_escape_group(self, group):
-        '''return group with escaped markup'''
-        return gobject.markup_escape_text(group.name)
-
-    def _markup_escape_contact(self, contact):
-        '''return contact with escaped markup'''
-        escape = gobject.markup_escape_text
-        return (escape(contact.display_name), escape(contact.nick),
-                escape(contact.message))
+    def escaper(self, text):
+        ''' escape the text, this is a toolkit dependant method '''
+        return gobject.markup_escape_text(text)
 
     # overrided methods
     def refilter(self):
@@ -429,7 +423,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.session.config.d_weights[group.identifier] = weight
 
         group_data = (None, group,
-            self.format_group(group, self._markup_escape_group(group)),
+            self.format_group(group),
             False, None, False, weight, special)
 
         for row in self._model:
@@ -464,7 +458,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         is_online  = not offline
 
         contact_data = (self._get_contact_pixbuf_or_default(contact),
-            contact, self.format_nick(contact, self._markup_escape_contact(contact)), True,
+            contact, self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.image_theme.status_icons[contact.status]),
             weight, False, offline)
 
@@ -640,7 +634,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         online  = not offline
 
         contact_data = (self._get_contact_pixbuf_or_default(contact),
-            contact, self.format_nick(contact, self._markup_escape_contact(contact)), True,
+            contact, self.format_nick(contact), True,
             utils.safe_gtk_pixbuf_load(gui.theme.image_theme.status_icons[contact.status]),
             weight, False, offline)
 
@@ -696,7 +690,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             return
 
         group_data = (None, self.no_group,
-            self.format_group(self.no_group, self._markup_escape_group(self.no_group)),
+            self.format_group(self.no_group),
             False, None, 0, True, False)
 
         self._model[self.no_group_iter] = group_data
@@ -705,7 +699,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def update_online_group(self):
         '''update the special "Online" group '''
         group_data = (None, self.online_group,
-            self.format_group(self.online_group, self._markup_escape_group(self.online_group)),
+            self.format_group(self.online_group),
             False, None, 0, True, False)
 
         self._model[self.online_group_iter] = group_data
@@ -714,7 +708,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def update_offline_group(self):
         '''update the special "Offline" group'''
         group_data = (None, self.offline_group,
-            self.format_group(self.offline_group, self._markup_escape_group(self.offline_group)),
+            self.format_group(self.offline_group),
             False, None, 0, True, False)
 
         self._model[self.offline_group_iter] = group_data
@@ -754,7 +748,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
                 group.contacts = obj.contacts
                 group_data = (None, group,
-                    self.format_group(group, self._markup_escape_group(group)),
+                    self.format_group(group),
                     False, None, weight, (group.type != e3.base.Group.STANDARD), False)
 
                 self._model[row.iter] = group_data

@@ -68,7 +68,7 @@ class Window(gtk.Window):
             self.remove(self.get_child())
             self.content = None
 
-    def go_login(self, callback,on_preferences_changed,
+    def go_login(self, callback, on_preferences_changed,
            config=None, config_dir=None, config_path=None,
            proxy=None, use_http=None, session_id=None, cancel_clicked=False,
            no_autologin=False):

@@ -13,6 +13,8 @@ Currently we are adding to the about box people with commits >= 50
 until someone provides better metrics or different reasons or we can load
 CONTRIBUTORS at runtime (we must find a way to get it packaged)
 git log --all --format='%aN <%aE>' | sort | uniq -c -i -d | sort -n -r
+or in emesene/ just run the python script (that will update CONTRIBUTORS):
+python codestats.py
 
 * How to tag a release with git:
 See http://learn.github.com/p/tagging.html - tl;dr:

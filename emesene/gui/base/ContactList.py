@@ -350,7 +350,11 @@ class ContactList(object):
         '''
         return value.replace("[$", "[ $")
 
-    def format_nick(self, contact, escaped_information):
+    def escaper(self, text):
+        ''' escape the text, this is a toolkit dependant method '''
+        raise NotImplementedError
+
+    def format_nick(self, contact):
         '''replace the appearance of the template vars using the values of
         the contact
         # valid values:
@@ -362,17 +366,16 @@ class ContactList(object):
         # + BLOCKED
         # + NL
         '''
-        display_name, nick, message = escaped_information
 
         template = self.nick_template
-        template = template.replace('[$NICK]', nick)
+        template = template.replace('[$NICK]', self.escaper(contact.nick))
         template = template.replace('[$ACCOUNT]',
                 self.escape_tags(contact.account))
         template = template.replace('[$MESSAGE]',
-                message if contact.media == '' else contact.media)
+                self.escaper(contact.message) if contact.media == '' else self.escaper(contact.media))
         template = template.replace('[$STATUS]',
                 self.escape_tags(e3.status.STATUS[contact.status]))
-        template = template.replace('[$DISPLAY_NAME]', display_name)
+        template = template.replace('[$DISPLAY_NAME]', self.escaper(contact.display_name))
         #people shouldn't be allowed to have \n in their name/pm
         template = template.replace('\n', ' ')
         template = template.replace('[$NL]', '\n')
@@ -386,7 +389,7 @@ class ContactList(object):
 
         return template
 
-    def format_group(self, group, escaped_name):
+    def format_group(self, group):
         '''replace the appearance of the template vars using the values of
         the group
         # valid values:
@@ -410,7 +413,7 @@ class ContactList(object):
                 template = template.replace('[$ONLINE_COUNT]', str(online))
                 template = template.replace('[$TOTAL_COUNT]', str(total))
 
-        template = template.replace('[$NAME]', self.escape_tags(escaped_name))
+        template = template.replace('[$NAME]', self.escape_tags(self.escaper(group.name)))
 
         return template
 
