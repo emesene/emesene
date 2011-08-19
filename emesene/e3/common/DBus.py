@@ -129,7 +129,7 @@ if not ERROR:
         @dbus.service.method(BUS_NAME, 'i')
         def set_status(self, status):
             if status == e3.status.DISCONNECTED:
-                self.session.add_action(Action.ACTION_LOGOUT, ())
+                self.session.quit()
             else:
                 self.session.add_action(Action.ACTION_CHANGE_STATUS, (status,))
 
