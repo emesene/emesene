@@ -31,10 +31,7 @@ class ContactManager(object):
 
     def exists(self, account):
         '''check if the account is on self.contacts, return True if exists'''
-        if account in self.contacts:
-            return True
-        else:
-            return False
+        return account in self.contacts
 
     def get(self, account):
         '''return a contact from an account'''
@@ -209,3 +206,19 @@ class ContactManager(object):
             if contact.status != status.OFFLINE])
 
         return (online, total)
+
+    def is_pending(self, account):
+        '''return True if the account is on self.pending; otherwise, False'''
+        return account in self.pending
+
+    def get_blocked_list(self, contacts=None):
+        '''return a list of all blocked contacts'''
+        contacts = contacts or (self.contacts.values() + self.reverse.values())
+
+        return [contact for contact in contacts if contact.blocked]
+
+    def get_allowed_list(self, contacts=None):
+        '''return a list of all allowed contacts'''
+        contacts = contacts or (self.contacts.values() + self.reverse.values())
+
+        return [contact for contact in contacts if not contact.blocked]
