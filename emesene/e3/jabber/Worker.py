@@ -124,10 +124,7 @@ class Worker(e3.Worker):
         account = presence.getFrom().getStripped()
 
         if show == None:
-            try:
-                show = presence.getAttrs()['type']
-            except KeyError:
-                show = 'chat'
+            show = presence.getAttrs().get('type', 'chat')
 
         stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
 
