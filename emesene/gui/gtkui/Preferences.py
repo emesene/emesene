@@ -27,6 +27,8 @@ import extension
 from gui.base import MarkupParser
 
 import PluginWindow
+import Dialog
+import stock
 
 import logging
 log = logging.getLogger('gtkui.Preferences')
@@ -995,9 +997,231 @@ class MSNPapylib(BaseTable):
 
         self.attach(align_prin, 0, 1, 0, 1)
 
+        # lists to manage contacts
+        vbox.pack_start(PrivacySettings(self.session), True, True)
+
         self.show_all()
 
     def _on_live_profile_clicked(self, arg):
         ''' called when live profile button is clicked '''
         webbrowser.open("http://profile.live.com/details/Edit/Pic")
 
+
+class PrivacySettings(gtk.VBox):
+    ''' A panel to manage contacts for MSN '''
+    
+    def __init__(self, session):
+        ''' constructor '''
+        gtk.VBox.__init__(self)
+        self.config = session.config
+        self.session = session
+        self.set_spacing(8)
+        self.set_border_width(10)
+
+        # box with help message
+        eventBox = gtk.EventBox()
+        eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))       
+        self.pack_start(eventBox, False, False, 0)
+        
+        # icon
+        box = gtk.HBox(False, 0)
+        box.set_size_request(40, 40)
+        image = gtk.image_new_from_stock(gtk.STOCK_DIALOG_INFO,
+                                         gtk.ICON_SIZE_LARGE_TOOLBAR)
+        box.pack_start(image, False, False, 10)
+        eventBox.add(box)
+        
+        # tooltip labels
+        labels_box = gtk.VBox(False, 0)
+        markup = '<span foreground="black"> %s </span>'
+        firstLabel = gtk.Label()
+        text = 'Red contacts are not in your contact list.'
+        firstLabel.set_markup(markup % text)
+        secondLabel = gtk.Label()
+        text = 'Yellow contacts don\'t have you in their contact list.'
+        secondLabel.set_markup(markup % text)
+
+        labels_box.pack_start(firstLabel, True, True, 2)
+        labels_box.pack_start(secondLabel, False, True, 2)
+        box.pack_start(labels_box, False, False, 50)        
+
+        hbox = gtk.HBox()
+        self.add(hbox)
+
+        # allow list
+        scroll1 = gtk.ScrolledWindow()
+        scroll1.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        scroll1.set_shadow_type(gtk.SHADOW_OUT)
+        hbox.add(scroll1)
+
+        self.allow_model = gtk.ListStore(str)
+        self.allow_view = gtk.TreeView(self.allow_model)
+        self.allow_view.connect("key-press-event", self._on_key_press)
+        self.allow_view.connect('button-press-event',
+                                self._on_right_click, self.allow_model)        
+        self.allow_view.set_border_width(1)
+        scroll1.add(self.allow_view)
+
+        render1 = gtk.CellRendererText()
+        col1 = gtk.TreeViewColumn(_('Allow list:'), render1, text=0)
+        col1.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+        col1.set_cell_data_func(render1, self._render_lists)
+        self.allow_view.append_column(col1)
+
+        # buttons
+        vbox = gtk.VBox()
+        button1 = gtk.Button()
+        image1 = gtk.image_new_from_stock(gtk.STOCK_GO_BACK,
+                                          gtk.ICON_SIZE_BUTTON)
+        button1.set_image(image1)
+        button1.connect('clicked', self.unblock)
+        vbox.pack_start(button1, True, False)
+        
+        button2 = gtk.Button()
+        image2 = gtk.image_new_from_stock(gtk.STOCK_GO_FORWARD,
+                                          gtk.ICON_SIZE_BUTTON)
+        button2.set_image(image2)
+        button2.connect('clicked', self.block)        
+        vbox.pack_start(button2, True, False)
+
+        hbox.pack_start(vbox, False)
+
+        # block list
+        scroll2 = gtk.ScrolledWindow()
+        scroll2.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        scroll2.set_shadow_type(gtk.SHADOW_OUT)
+        hbox.add(scroll2)
+
+        self.block_model = gtk.ListStore(str)
+        self.block_view = gtk.TreeView(self.block_model)
+        self.block_view.connect("key-press-event", self._on_key_press)
+        self.block_view.connect('button-press-event',
+                                self._on_right_click, self.block_model)
+        scroll2.add(self.block_view)
+
+        render2 = gtk.CellRendererText()
+        col2 = gtk.TreeViewColumn(_('Block list:'), render2, text=0)
+        col2.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+        col2.set_cell_data_func(render2, self._render_lists)
+        self.block_view.append_column(col2)
+
+        # append contacts to the models
+        for contact in self.session.contacts.get_allowed_list():
+            self.allow_model.append([contact.account])
+        for contact in self.session.contacts.get_blocked_list():
+            self.block_model.append([contact.account])
+
+    def _on_right_click(self, view, event, model):
+        ''' shows a popup menu when a list is clicked '''
+        if event.button != 3:
+            return
+
+        # deselect the other view
+        if view is self.allow_view:
+            selection = self.block_view.get_selection()
+            selection.unselect_all()
+        else:
+            selection = self.allow_view.get_selection()
+            selection.unselect_all()
+        
+        path = view.get_path_at_pos(int(event.x),int(event.y))
+        if not path:
+            selection = view.get_selection()
+            selection.unselect_all()
+            return
+
+        iter = model.get_iter(path[0])
+        contact = model.get_value(iter, 0)
+        
+        menu = gtk.Menu()
+        item1 = gtk.MenuItem(_('Add to contacts'))
+        item1.connect('activate', self.add_contact, contact)
+        menu.append(item1)
+
+        # desactive this item if you already have the contact in your list
+        if self.session.contacts.exists(contact):
+            item1.set_sensitive(False)
+
+        if model is self.allow_model:
+            item2 = gtk.MenuItem(_('Move to block list'))
+            item2.connect('activate', self.block, iter)
+        else:
+            item2 = gtk.MenuItem(_('Move to allow list'))
+            item2.connect('activate', self.unblock, iter)
+        menu.append(item2)
+
+        item3 = gtk.MenuItem(_('Delete'))
+        item3.connect('activate', self._delete_confirmation, iter, model)
+
+        # desactive this item if you dont have the contact in your list
+        if self.session.contacts.is_pending(contact):
+            item3.set_sensitive(False)
+
+        menu.append(item3)
+        menu.popup(None, None, None, event.button, event.time)
+        menu.show_all()
+
+    def add_contact(self, item, contact):
+        ''' adds a contact to the session account '''
+        self.session.add_contact(contact)
+        
+    def block(self, button, _iter=None):
+        ''' blocks the selected contact '''
+        iter = _iter or self.allow_view.get_selection().get_selected()[1]
+        if not iter:
+            return
+
+        contact = self.allow_model.get_value(iter, 0)
+        self.allow_model.remove(iter)
+        self.block_model.append([contact])
+
+        self.session.block(contact)
+        
+    def unblock(self, button, _iter=None):
+        ''' unblocks the selected contact '''
+        iter = _iter or self.block_view.get_selection().get_selected()[1]
+        if not iter:
+            return
+
+        contact = self.block_model.get_value(iter, 0)
+        self.block_model.remove(iter)
+        self.allow_model.append([contact])
+
+        self.session.unblock(contact)
+        
+    def _render_lists(self, column, render, model, iter):
+        ''' changes the cell background according to the contact condition '''
+        # it seems to dont work correctly..
+        contact = model.get_value(iter, 0)
+
+        if self.session.contacts.is_pending(contact):
+            render.set_property('background', '#E7E711')
+        elif not self.session.contacts.exists(contact):
+            render.set_property('background', '#DC1415')
+        else:
+            render.set_property('background', None)
+
+    def _on_key_press(self, widget, event):
+        ''' handles the keyboard events '''
+        if widget is self.allow_view and \
+            event.keyval in [gtk.keysyms.Right, gtk.keysyms.Return]:
+
+            self.block(None)
+
+        elif widget is self.block_view and \
+            event.keyval in [gtk.keysyms.Left, gtk.keysyms.Return]:
+
+            self.unblock(None)
+
+    def _delete_confirmation(self, item, iter, model):
+        ''' shows a confirmation dialog before delete the contact '''
+        message = 'Are you sure you want to delete %s ' \
+                  'from your authorized contacts?' % model.get_value(iter, 0)
+                  
+        Dialog.Dialog.yes_no(message, self._delete_response, iter, model)
+
+    def _delete_response(self, action, iter=None, model=None):
+        ''' called when the delete is confirmed '''
+        if action == stock.YES:
+            self.session.remove_contact(model.get_value(iter, 0))
+            model.remove(iter)
