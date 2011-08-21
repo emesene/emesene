@@ -47,17 +47,15 @@ class SoundTheme(object):
 
         sound_data = plistlib.readPlist(file(sound_config_file))
         alert = sound_data['Sounds']['Error']
-        try:
-            nudge = sound_data['Sounds']['Notification received']
-        except KeyError, exc:
-            nudge = sound_data['Sounds']['Message Received']
+        nudge = sound_data['Sounds'].get('Notification received', None)
+        if nudge == None:
+            nudge = sound_data['Sounds'].get('Message Received', None)
         offline = sound_data['Sounds']['Contact Signed Off']
         online = sound_data['Sounds']['Contact Signed On']
         send = sound_data['Sounds']['Message Sent']
-        try:
-            typing = sound_data['Sounds']['Message Received']
-        except KeyError, exc:
-            typing = sound_data['Sounds']['Contact Invites You to Chat']
+        typing = sound_data['Sounds'].get('Message Received', None)
+        if typing == None:
+            typing = sound_data['Sounds'].get('Contact Invites You to Chat', None)
 
         self.sound_alert    = os.path.join(path, alert)
         self.sound_nudge    = os.path.join(path, nudge)
