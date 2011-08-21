@@ -54,6 +54,7 @@ class OutputView(webkit.WebView):
         self.connect('populate-popup', self.on_populate_popup)
         self.connect('navigation-requested', self.on_navigation_requested)
         self.connect('download-requested', self.on_download_requested)
+        self.connect('console-message', self._error_cb)
 
     def _loading_finished_cb(self, *args):
         '''callback called when the content finished loading
@@ -65,6 +66,11 @@ class OutputView(webkit.WebView):
         if self.pending:
             self.execute_script("scrollToBottom()")
         self.pending = []
+
+    def _error_cb(self, view, message, line, source_id):
+        '''called when a message is sent to the console'''
+        message = "Webkit message: %s %s %s" % (message, line, source_id)
+        log.debug(message)
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
@@ -200,7 +206,6 @@ class OutputText(gtk.ScrolledWindow):
 
         self.view = OutputView(gui.theme.conv_theme, "", "", "", picture,
                 picture, add_emoticon_cb)
-        self.view.connect('console-message', self._error_cb)
         self.clear()
         self.view.show()
         self.add(self.view)
@@ -209,11 +214,6 @@ class OutputText(gtk.ScrolledWindow):
             source_img="", target_img=""):
         '''clear the content'''
         self.view.clear(source, target, target_display, source_img, target_img)
-
-    def _error_cb(self, view, message, line, source_id):
-        '''called when a message is sent to the console'''
-        message = "Webkit message: %s %s %s" % (message, line, source_id)
-        log.debug(message)
 
     def send_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''
