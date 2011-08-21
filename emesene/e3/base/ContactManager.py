@@ -207,9 +207,9 @@ class ContactManager(object):
 
         return (online, total)
 
-    def is_pending(self, account):
-        '''return True if the account is on self.pending; otherwise, False'''
-        return account in self.pending
+    def is_reverse(self, account):
+        '''return True if the account is on self.reverse; otherwise, False'''
+        return account in self.reverse
 
     def get_blocked_list(self, contacts=None):
         '''return a list of all blocked contacts'''

@@ -1154,7 +1154,7 @@ class PrivacySettings(gtk.VBox):
         item3.connect('activate', self._delete_confirmation, iter, model)
 
         # desactive this item if you dont have the contact in your list
-        if self.session.contacts.is_pending(contact):
+        if self.session.contacts.is_reverse(contact):
             item3.set_sensitive(False)
 
         menu.append(item3)
@@ -1194,7 +1194,7 @@ class PrivacySettings(gtk.VBox):
         # it seems to dont work correctly..
         contact = model.get_value(iter, 0)
 
-        if self.session.contacts.is_pending(contact):
+        if self.session.contacts.is_reverse(contact):
             render.set_property('background', '#E7E711')
         elif not self.session.contacts.exists(contact):
             render.set_property('background', '#DC1415')
