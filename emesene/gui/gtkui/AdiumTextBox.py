@@ -195,13 +195,11 @@ class OutputText(gtk.ScrolledWindow):
 
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
-        self._texts = []
         self.loaded = False
         picture = utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
 
         self.view = OutputView(gui.theme.conv_theme, "", "", "", picture,
                 picture, add_emoticon_cb)
-        self.view.connect('load-finished', self._loading_stop_cb)
         self.view.connect('console-message', self._error_cb)
         self.clear()
         self.view.show()
@@ -210,22 +208,12 @@ class OutputText(gtk.ScrolledWindow):
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
         '''clear the content'''
-        self._texts = []
-        self.loaded = False
         self.view.clear(source, target, target_display, source_img, target_img)
 
     def _error_cb(self, view, message, line, source_id):
         '''called when a message is sent to the console'''
         message = "Webkit message: %s %s %s" % (message, line, source_id)
         log.debug(message)
-
-    def _loading_stop_cb(self, view, frame):
-        '''method called when the page finish loading'''
-        self.loaded = True
-        for text in self._texts:
-            self.append(text)
-
-        self._texts = []
 
     def send_message(self, formatter, contact, message, cedict, cedir, is_first):
         '''add a message to the widget'''
