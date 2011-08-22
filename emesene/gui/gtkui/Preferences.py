@@ -1035,10 +1035,10 @@ class PrivacySettings(gtk.VBox):
         labels_box = gtk.VBox(False, 0)
         markup = '<span foreground="black"> %s </span>'
         firstLabel = gtk.Label()
-        text = 'Red contacts are not in your contact list.'
+        text = _('Red contacts are not in your contact list.')
         firstLabel.set_markup(markup % text)
         secondLabel = gtk.Label()
-        text = 'Yellow contacts don\'t have you in their contact list.'
+        text = _('Yellow contacts don\'t have you in their contact list.')
         secondLabel.set_markup(markup % text)
 
         labels_box.pack_start(firstLabel, True, True, 2)
