@@ -22,7 +22,7 @@ if not pynotify.init("emesene"):
 
 from gui.base import Plus
 import logging
-log = logging.getLogger('gui.gtkui.PyNotification')
+log = logging.getLogger('gui.common.PyNotification')
 
 NAME = 'PyNotification'
 DESCRIPTION = 'Wrapper around pynotify for the notification system'

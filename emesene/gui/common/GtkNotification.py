@@ -27,7 +27,7 @@ import pango
 import os
 
 import logging
-log = logging.getLogger('gui.gtkui.GtkNotification')
+log = logging.getLogger('gui.common.GtkNotification')
 
 NAME = 'GtkNotification'
 DESCRIPTION = 'emesene\'s notification system\'s gtk ui'
@@ -110,7 +110,8 @@ if os.name == "nt":
 queue = list()
 actual_notification = None
 
-def GtkNotification(title, text, picturePath=None, const=None, callback=None, tooltip=None):
+def GtkNotification(title, text, picture_path=None, const=None,
+                    callback=None, tooltip=None):
     global actual_notification
     global queue
 
@@ -122,7 +123,8 @@ def GtkNotification(title, text, picturePath=None, const=None, callback=None, to
         title = Plus.msnplus_strip(title)
 
     if actual_notification is None:
-        actual_notification = Notification(title, text, picturePath, callback, tooltip)
+        actual_notification = Notification(title, text, picture_path, callback,
+                                           tooltip)
         actual_notification.show()
     else:
         # Append text to the actual notification
@@ -131,11 +133,12 @@ def GtkNotification(title, text, picturePath=None, const=None, callback=None, to
         else:
             found = False
             auxqueue = list()
-            for _title, _text, _picturePath, _callback, _tooltip in queue:
+            for _title, _text, _picture_path, _callback, _tooltip in queue:
                 if _title == title:
                     _text = _text + "\n" + text
                     found = True
-                auxqueue.append([_title,_text,_picturePath, _callback, _tooltip])
+                auxqueue.append([_title,_text,_picture_path, _callback,
+                                 _tooltip])
 
             if found:
                 # append text to another notification
@@ -143,18 +146,18 @@ def GtkNotification(title, text, picturePath=None, const=None, callback=None, to
                 queue = auxqueue
             else:
                 # or queue a new notification
-                queue.append([title, text, picturePath, callback, tooltip])
+                queue.append([title, text, picture_path, callback, tooltip])
 
 class Notification(gtk.Window):
-    def __init__(self, title, text, picturePath, callback, tooltip):
+    def __init__(self, title, text, picture_path, callback, tooltip):
 
         gtk.Window.__init__(self, type=gtk.WINDOW_POPUP)
 
         # constants
         self.FColor = "white"
         BColor = gtk.gdk.Color()
-        avatar_size = 48;
-        max_width = 300;
+        avatar_size = 48
+        max_width = 300
         self.callback = callback
 
         # window attributes
@@ -171,7 +174,7 @@ class Notification(gtk.Window):
 
         self.text = text #status, message, etc...
         self.markup2 = '<span foreground="%s">%s</span>'
-        self.messageLabel = gtk.Label(self.markup2 % (self.FColor, \
+        self.messageLabel = gtk.Label(self.markup2 % (self.FColor,
                                       MarkupParser.escape(self.text)))
         self.messageLabel.set_use_markup(True)
         self.messageLabel.set_justify(gtk.JUSTIFY_CENTER)
@@ -181,7 +184,7 @@ class Notification(gtk.Window):
         avatarImage = gtk.Image()
         try:
             userPixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
-                                  picturePath[7:], avatar_size, avatar_size)
+                                  picture_path[7:], avatar_size, avatar_size)
         except:
             userPixbuf = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
                                                  (avatar_size, avatar_size))
@@ -230,7 +233,7 @@ class Notification(gtk.Window):
         adds text at the end of the actual text
         '''
         self.text = self.text + "\n" + text
-        self.messageLabel.set_text(self.markup2 % (self.FColor, \
+        self.messageLabel.set_text(self.markup2 % (self.FColor,
                                    MarkupParser.escape(self.text)))
         self.messageLabel.set_use_markup(True)
         self.messageLabel.show()
@@ -309,8 +312,8 @@ class Notification(gtk.Window):
         if self.timerId is not None:
             glib.source_remove(self.timerId)
         if len(queue) != 0:
-            title, text, picturePath, callback, tooltip = queue.pop(0)
-            actual_notification = Notification(title, text, picturePath, \
+            title, text, picture_path, callback, tooltip = queue.pop(0)
+            actual_notification = Notification(title, text, picture_path,
                                                callback, tooltip)
             actual_notification.show()
         else:

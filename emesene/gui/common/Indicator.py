@@ -20,7 +20,7 @@ import os
 import appindicator
 
 import logging
-log = logging.getLogger('gui.gtkui.Indicator')
+log = logging.getLogger('gui.common.Indicator')
 
 import TrayIcon
 import gui
