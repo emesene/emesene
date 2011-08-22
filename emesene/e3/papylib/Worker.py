@@ -64,14 +64,16 @@ except Exception, e:
 
 from PapyEvents import *
 from PapyConvert import *
-PAPY_HAS_AUDIOVIDEO = 1
 
-try:
-    import PapyConference
-    import papyon.media.constants
-except ImportError, e:
-    PAPY_HAS_AUDIOVIDEO = 0
-    log.exception("You need gstreamer to use the Audio/Video calls support")
+PAPY_HAS_AUDIOVIDEO = 0
+
+# We don't currently support audio/video conversations
+#try:
+#    import PapyConference
+#    import papyon.media.constants
+#    PAPY_HAS_AUDIOVIDEO = 1
+#except ImportError, e:
+#    log.exception("You need gstreamer to use the Audio/Video calls support")
 
 class Worker(e3.base.Worker, papyon.Client):
     ''' papylib's worker - an emesene extension for papyon library '''
