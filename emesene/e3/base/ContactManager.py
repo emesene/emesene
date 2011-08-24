@@ -206,19 +206,3 @@ class ContactManager(object):
             if contact.status != status.OFFLINE])
 
         return (online, total)
-
-    def is_reverse(self, account):
-        '''return True if the account is on self.reverse; otherwise, False'''
-        return account in self.reverse
-
-    def get_blocked_list(self, contacts=None):
-        '''return a list of all blocked contacts'''
-        contacts = contacts or (self.contacts.values() + self.reverse.values())
-
-        return [contact for contact in contacts if contact.blocked]
-
-    def get_allowed_list(self, contacts=None):
-        '''return a list of all allowed contacts'''
-        contacts = contacts or (self.contacts.values() + self.reverse.values())
-
-        return [contact for contact in contacts if not contact.blocked]

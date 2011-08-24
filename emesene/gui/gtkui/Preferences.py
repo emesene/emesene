@@ -23,12 +23,11 @@ import e3.common
 import gui
 import utils
 import extension
+import stock
 
 from gui.base import MarkupParser
 
 import PluginWindow
-import Dialog
-import stock
 
 import logging
 log = logging.getLogger('gtkui.Preferences')
@@ -1106,10 +1105,24 @@ class PrivacySettings(gtk.VBox):
         self.block_view.append_column(col2)
 
         # append contacts to the models
-        for contact in self.session.contacts.get_allowed_list():
-            self.allow_model.append([contact.account])
-        for contact in self.session.contacts.get_blocked_list():
-            self.block_model.append([contact.account])
+        self._update_lists()
+
+        # subscribe to signals
+        self.session.signals.contact_add_succeed.subscribe(self._update_lists)
+        self.session.signals.contact_remove_succeed.subscribe(self._update_lists)
+        self.session.signals.contact_block_succeed.subscribe(self._update_lists)
+        self.session.signals.contact_unblock_succeed.subscribe(self._update_lists)
+        self.session.signals.contact_added_you.subscribe(self._update_lists)
+
+    def _update_lists(self, contact=None):
+        ''' clears all the values of the models and fill them again '''
+        self.allow_model.clear()
+        self.block_model.clear()
+
+        for contact in self.session.get_allowed_contacts():
+            self.allow_model.append([contact])
+        for contact in self.session.get_blocked_contacts():
+            self.block_model.append([contact])
 
     def _on_right_click(self, view, event, model):
         ''' shows a popup menu when a list is clicked '''
@@ -1135,69 +1148,60 @@ class PrivacySettings(gtk.VBox):
         
         menu = gtk.Menu()
         item1 = gtk.MenuItem(_('Add to contacts'))
-        item1.connect('activate', self.add_contact, contact)
-        menu.append(item1)
-
+        item1.connect('activate', lambda x: self.session.add_contact(contact))
+        
         # desactive this item if you already have the contact in your list
-        if self.session.contacts.exists(contact):
+        if self.session.is_forward(contact):
             item1.set_sensitive(False)
 
         if model is self.allow_model:
             item2 = gtk.MenuItem(_('Move to block list'))
-            item2.connect('activate', self.block, iter)
+            item2.connect('activate', lambda x: self.session.block(contact))
         else:
             item2 = gtk.MenuItem(_('Move to allow list'))
-            item2.connect('activate', self.unblock, iter)
-        menu.append(item2)
-
+            item2.connect('activate', lambda x: self.session.unblock(contact))
+        
         item3 = gtk.MenuItem(_('Delete'))
         item3.connect('activate', self._delete_confirmation, iter, model)
 
-        # desactive this item if you dont have the contact in your list
-        if self.session.contacts.is_reverse(contact):
+        # desactive these items if you don't have the contact in your list
+        if self.session.is_only_reverse(contact):
             item3.set_sensitive(False)
+            # you can't block/unblock the contact either
+            item2.set_sensitive(False)
 
+        menu.append(item1)
+        menu.append(item2)
         menu.append(item3)
         menu.popup(None, None, None, event.button, event.time)
         menu.show_all()
-
-    def add_contact(self, item, contact):
-        ''' adds a contact to the session account '''
-        self.session.add_contact(contact)
-        
-    def block(self, button, _iter=None):
+       
+    def block(self, button):
         ''' blocks the selected contact '''
-        iter = _iter or self.allow_view.get_selection().get_selected()[1]
+        iter = self.allow_view.get_selection().get_selected()[1]
         if not iter:
             return
 
         contact = self.allow_model.get_value(iter, 0)
-        self.allow_model.remove(iter)
-        self.block_model.append([contact])
-
         self.session.block(contact)
         
-    def unblock(self, button, _iter=None):
+    def unblock(self, button):
         ''' unblocks the selected contact '''
-        iter = _iter or self.block_view.get_selection().get_selected()[1]
+        iter = self.block_view.get_selection().get_selected()[1]
         if not iter:
             return
 
         contact = self.block_model.get_value(iter, 0)
-        self.block_model.remove(iter)
-        self.allow_model.append([contact])
-
         self.session.unblock(contact)
         
     def _render_lists(self, column, render, model, iter):
         ''' changes the cell background according to the contact condition '''
-        # it seems to dont work correctly..
         contact = model.get_value(iter, 0)
 
-        if self.session.contacts.is_reverse(contact):
-            render.set_property('background', '#E7E711')
-        elif not self.session.contacts.exists(contact):
-            render.set_property('background', '#DC1415')
+        if self.session.is_only_reverse(contact):
+            render.set_property('background', '#DC1415') #red
+        elif self.session.is_only_forward(contact):
+            render.set_property('background', '#E7E711') #yellow
         else:
             render.set_property('background', None)
 
@@ -1215,13 +1219,16 @@ class PrivacySettings(gtk.VBox):
 
     def _delete_confirmation(self, item, iter, model):
         ''' shows a confirmation dialog before delete the contact '''
-        message = 'Are you sure you want to delete %s ' \
-                  'from your authorized contacts?' % model.get_value(iter, 0)
-                  
-        Dialog.Dialog.yes_no(message, self._delete_response, iter, model)
+        message = _('Are you sure you want to delete %s from your authorized contacts?') % \
+                    model.get_value(iter, 0)
+       
+        dialog = extension.get_default('dialog')
+        dialog.yes_no(message, self._delete_response, iter, model)
 
     def _delete_response(self, action, iter=None, model=None):
         ''' called when the delete is confirmed '''
-        if action == stock.YES:
-            self.session.remove_contact(model.get_value(iter, 0))
-            model.remove(iter)
+        try:
+            if action == stock.YES:
+                self.session.remove_contact(model.get_value(iter, 0))
+        except TypeError:
+            pass

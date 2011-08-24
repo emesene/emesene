@@ -22,6 +22,7 @@ import e3
 from Worker import Worker
 
 import extension
+from papyon.profile import Membership
 
 AUTHOR_LIST = ['Riccardo (C10uD)', 'Orfeo (Otacon)', 'Stefano (cando)']
 
@@ -94,3 +95,52 @@ class Session(e3.Session):
     def get_profile(self):
         return self.__worker.profile.profile
 
+    # methods for the privacy tab
+    def get_blocked_contacts(self):
+        '''return a list containing the contacts in the address book with the
+        BLOCK flag set'''
+        contacts = self.__worker.address_book.contacts
+        return [c.account for c in contacts if (Membership.BLOCK & c.memberships) and \
+                ((Membership.FORWARD & c.memberships) or (Membership.REVERSE & c.memberships))]
+    
+    def get_allowed_contacts(self):
+        '''return a list containing the contacts in the address book with the
+        ALLOW flag set'''
+        contacts = self.__worker.address_book.contacts
+        return [c.account for c in contacts if (Membership.ALLOW & c.memberships) and \
+                ((Membership.REVERSE & c.memberships) or (Membership.FORWARD & c.memberships))]
+
+    def is_only_reverse(self, account):
+        '''return True if the contact has set the REVERSE flag and not the
+        FORWARD flag; otherwise False.
+        This means, contacts that are not in your contact list but they do have
+        you'''
+        contacts = self.__worker.address_book.contacts.search_by('account', account)
+
+        if len(contacts) == 0:
+            return False
+
+        return (Membership.REVERSE & contacts[0].memberships) and \
+                not (Membership.FORWARD & contacts[0].memberships)
+        
+    def is_only_forward(self, account):
+        '''return True if the contact has set the FORWARD flag and not the
+        REVERSE flag; otherwise False.
+        This means, contacts that are in your contact list but they don't have
+        you'''
+        contacts = self.__worker.address_book.contacts.search_by('account', account)
+
+        if len(contacts) == 0:
+            return False
+        
+        return (Membership.FORWARD & contacts[0].memberships) and \
+                not (Membership.REVERSE & contacts[0].memberships)
+
+    def is_forward(self, account):
+        '''return True if the contact has set the FORWARD flag; otherwise False'''
+        contacts = self.__worker.address_book.contacts.search_by('account', account)
+
+        if len(contacts) == 0:
+            return False
+            
+        return (Membership.FORWARD & contacts[0].memberships)
