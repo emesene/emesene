@@ -142,6 +142,8 @@ class Preferences(gtk.Window):
         self.interface.remove_subscriptions()
         self.sound.remove_subscriptions()
         self.theme.remove_subscriptions()
+        if getattr(self, 'msn_papylib'):
+            self.msn_papylib.privacy.remove_subscriptions()
 
     def remove_from_list(self, icon, text, page):
 
@@ -997,7 +999,8 @@ class MSNPapylib(BaseTable):
         self.attach(align_prin, 0, 1, 0, 1)
 
         # lists to manage contacts
-        vbox.pack_start(PrivacySettings(self.session), True, True)
+        self.privacy = PrivacySettings(self.session)
+        vbox.pack_start(self.privacy, True, True)
 
         self.show_all()
 
@@ -1113,6 +1116,13 @@ class PrivacySettings(gtk.VBox):
         self.session.signals.contact_block_succeed.subscribe(self._update_lists)
         self.session.signals.contact_unblock_succeed.subscribe(self._update_lists)
         self.session.signals.contact_added_you.subscribe(self._update_lists)
+
+    def remove_subscriptions(self):
+        self.session.signals.contact_add_succeed.unsubscribe(self._update_lists)
+        self.session.signals.contact_remove_succeed.unsubscribe(self._update_lists)
+        self.session.signals.contact_block_succeed.unsubscribe(self._update_lists)
+        self.session.signals.contact_unblock_succeed.unsubscribe(self._update_lists)
+        self.session.signals.contact_added_you.unsubscribe(self._update_lists)
 
     def _update_lists(self, contact=None):
         ''' clears all the values of the models and fill them again '''
