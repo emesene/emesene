@@ -142,7 +142,7 @@ class Preferences(gtk.Window):
         self.interface.remove_subscriptions()
         self.sound.remove_subscriptions()
         self.theme.remove_subscriptions()
-        if getattr(self, 'msn_papylib'):
+        if hasattr(self, 'msn_papylib'):
             self.msn_papylib.privacy.remove_subscriptions()
 
     def remove_from_list(self, icon, text, page):
