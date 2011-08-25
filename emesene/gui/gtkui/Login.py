@@ -30,7 +30,7 @@ import StatusButton
 import stock
 
 import logging
-log = logging.getLogger('gtkui.Login')
+LOG = logging.getLogger('gtkui.Login')
 
 class LoginBase(gtk.Alignment):
     ''' base widget that holds the visual stuff '''
@@ -39,8 +39,8 @@ class LoginBase(gtk.Alignment):
             yscale=1.0)
 
         self.dialog = extension.get_default('dialog')
-        Avatar = extension.get_default('avatar')
-        NiceBar = extension.get_default('nice bar')
+        avatar = extension.get_default('avatar')
+        nicebar = extension.get_default('nice bar')
 
         self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         completion = gtk.EntryCompletion()
@@ -79,7 +79,7 @@ class LoginBase(gtk.Alignment):
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.password)
 
-        self.avatar = Avatar()
+        self.avatar = avatar()
 
         self.remember_account = gtk.CheckButton(_('Remember me'))
         self.remember_password = gtk.CheckButton(_('Remember password'))
@@ -186,7 +186,7 @@ class LoginBase(gtk.Alignment):
         vbox_entries.pack_start(hbox_password)
         vbox_entries.pack_start(hbox_session)
 
-        self.nicebar = NiceBar()
+        self.nicebar = nicebar()
 
         th_pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.throbber, None,
                 animated=True)
@@ -370,8 +370,8 @@ class Login(LoginBase):
         count = 0
         session_found = False
 
-        self.session_name_to_ext = {}
-        self.session_name_to_index = {}
+        self.session_name_to_ext._init_ = {}
+        self.session_name_to_index._init_ = {}
 
         if account in self.accounts:
             service = self.config.d_user_service.get(
@@ -672,7 +672,7 @@ class Login(LoginBase):
         close emesene
         '''
         while gtk.events_pending():
-                gtk.main_iteration(False)
+            gtk.main_iteration(False)
 
         sys.exit(0)
 
@@ -748,17 +748,17 @@ class Login(LoginBase):
                 service)
         self._update_fields(self.cmb_account.get_active_text(), True)
 
-        def searchService(model, path, iter, user_data):
-            if(model.get(iter,0)[0]==user_data[0]):
+        def searchservice(model, path, iter, user_data):
+            if(model.get(iter, 0)[0]==user_data[0]):
                 user_data[2].set_active(user_data[1])
                 return True
-            user_data[1]+=1
+            user_data[1] += 1
             return False
 
         i = 0
 
         for combo in self._combo_session_list:
-            combo.get_model().foreach(searchService, [service, i, combo])
+            combo.get_model().foreach(searchservice, [service, i, combo])
 
 class ConnectingWindow(Login):
     '''
@@ -818,7 +818,7 @@ class ConnectingWindow(Login):
         '''
         cause the return to login window
         '''
-        self.cancel_clicked=True
+        self.cancel_clicked = True
         self.avatar.stop()
         if self.reconnect_timer_id is not None:
             gobject.source_remove(self.reconnect_timer_id)
@@ -834,7 +834,7 @@ class ConnectingWindow(Login):
         self.avatar.stop()
         gobject.source_remove(self.reconnect_timer_id)
         self.reconnect_timer_id = None
-        callback(account, session_id, proxy, use_http,\
+        callback(account, session_id, proxy, use_http, \
                  service[0], service[1], on_reconnect=True)
 
     def clear_connect(self):
@@ -854,7 +854,7 @@ class ConnectingWindow(Login):
         self.b_connect.connect('clicked', self._on_connect_now_clicked, callback, \
                                account, session_id, proxy, use_http, service)
         self.throbber.hide()
-        self.reconnect_after = 30
+        self.reconnect_after._init_ = 30  
         if self.reconnect_timer_id is None:
             self.reconnect_timer_id = gobject.timeout_add_seconds(1, \
                 self.update_reconnect_timer, callback, account, session_id,
@@ -863,8 +863,7 @@ class ConnectingWindow(Login):
         self.update_reconnect_timer(callback, account, session_id,
                                     proxy, use_http, service)
 
-    def update_reconnect_timer(self, callback, account, session_id,
-                               proxy, use_http, service):
+    def update_reconnect_timer(self, callback, account, session_id, proxy, use_http, service):
         '''
         updates reconnect label and launches login if counter is 0
         '''
@@ -876,7 +875,7 @@ class ConnectingWindow(Login):
             self.reconnect_timer_id = None
             self.b_connect.hide()
             #do login
-            callback(account, session_id, proxy, use_http,\
+            callback(account, session_id, proxy, use_http, \
                      service[0], service[1], on_reconnect=True)
             return False
         else:
