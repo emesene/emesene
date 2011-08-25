@@ -64,7 +64,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         """
         self.menu = LoginMenu(self.handler, self.main_window)
         self.menu.show_all()
-        self.set_from_file(self.handler.theme.image_theme.logo)
+        self.set_from_file(self.handler.theme.image_theme.logo_panel)
 
     def set_main(self, session):
         """

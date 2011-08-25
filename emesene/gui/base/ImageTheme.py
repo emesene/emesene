@@ -126,6 +126,7 @@ class ImageTheme(object):
         panel_path = os.path.join(path, "panel")
         if os.path.exists(panel_path):
             self.panel_path = panel_path
+            self.logo_panel = os.path.join(panel_path, "logo.png")
             self.status_icons_panel[status.ONLINE] = \
                 os.path.join(panel_path, "online.png")
             self.status_icons_panel[status.OFFLINE] = \
@@ -138,6 +139,7 @@ class ImageTheme(object):
                 os.path.join(panel_path, "idle.png")
         else:
             self.status_icons_panel = self.status_icons.copy()
+            self.logo_panel = self.logo.copy()
 
         # allow theme-specific toolbar icons
         self.toolbar_path = None
