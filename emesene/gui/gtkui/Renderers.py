@@ -129,11 +129,15 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         if self.markup:
             try:
                 decorated_markup = self.function(self.markup)
-            except Exception, error:
+            except Exception, error: #We really want to catch all exceptions
                 log.error("this nick: '%s' made the parser go crazy, striping. Error: %s" % (
                         self.markup, error))
+                try:
+                    decorated_markup = self.function(self.markup, False)
+                except Exception, error: #We really want to catch all exceptions
+                    log.error("Even stripping plus markup doesn't help. Error: %s" % error)
 
-                decorated_markup = Plus.msnplus_strip(self.markup)
+                    decorated_markup = self.markup
 
             layout.set_text(decorated_markup)
             return layout
@@ -146,19 +150,19 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
 plus_or_noplus = 1 # 1 means plus, 0 means noplus
 
-def plus_text_parse(item):
+def plus_text_parse(item, plus):
     '''parse plus in the contact list'''
     global plus_or_noplus
     # get a plain string with objects
-    if plus_or_noplus:
+    if plus_or_noplus and plus:
         item = Plus.msnplus_parse(item)
     else:
         item = Plus.msnplus_strip(item)
     return item
 
-def msnplus_to_list(text):
+def msnplus_to_list(text, plus=True):
     '''parse text and return a list of strings and gtk.gdk.Pixbufs'''
-    text = plus_text_parse(text)
+    text = plus_text_parse(text, plus)
     text = MarkupParser.replace_markup(text)
     text_list = MarkupParser.replace_emoticons(text)
     return text_list

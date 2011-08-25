@@ -92,6 +92,8 @@ tag_plus_strip_re = re.compile(
 tag_plus_old_strip_re = re.compile(
     '\·([#&\'@0])|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
 
+hex_tag_re = re.compile('([0-9a-f]{3}|[0-9a-f]{6})$', re.IGNORECASE)
+
 def parse_emotes(markup):
     '''search for emotes on markup and return a list of items with chunks of
     test and Emote instances'''
@@ -108,19 +110,24 @@ def parse_emotes(markup):
     return accum
 
 def _close_tags(message_stack, text_before, tag, arg, do_parse_emotes):
-    '''close all tags left open'''
+    '''close tags that are open'''
+    stack_index = -1
+    for i, message in enumerate(reversed(message_stack)):
+        if tag in message:
+            stack_index = -i - 1
+            break
     if arg:
-        start_tag = message_stack[-1][tag]
-        message_stack[-1][tag] = (start_tag, arg)
+        start_tag = message_stack[stack_index][tag]
+        message_stack[stack_index][tag] = (start_tag, arg)
     if text_before.strip(' '):
         if do_parse_emotes:
             text_before = parse_emotes(text_before)
-            message_stack[-1]['childs'] += text_before
+            message_stack[stack_index]['childs'] += text_before
         else:
-            message_stack[-1]['childs'].append(text_before)
-    tag_we_re_closing = message_stack.pop() #-1
-    if type(message_stack[-1]) == dict:
-        message_stack[-1]['childs'].append(tag_we_re_closing)
+            message_stack[stack_index]['childs'].append(text_before)
+    tag_we_re_closing = message_stack.pop(stack_index)
+    if type(message_stack[stack_index]) == dict:
+        message_stack[stack_index]['childs'].append(tag_we_re_closing)
     else:
         message_stack.append(tag_we_re_closing)
 
@@ -190,15 +197,19 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         _close_stack_tags(message_stack, do_parse_emotes)
         message_stack[-1]['childs'].append('\n')
 
-    if open_:
-        if text_before.strip(' ') and not was_double_color:
-            message_stack[-1]['childs'].append(text_before)
-        msgdict = {'tag': tag, tag: arg, 'childs': []}
-        message_stack.append(msgdict)
-    else: #closing tags
-        _close_tags(message_stack, text_before, tag, arg, do_parse_emotes)
-        if close_all_tags:
-            _close_stack_tags(message_stack, do_parse_emotes)
+    if close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
+       (tag in COLOR_TAGS and (arg or not open_)))):
+        if open_:
+            if text_before.strip(' ') and not was_double_color:
+                message_stack[-1]['childs'].append(text_before)
+            msgdict = {'tag': tag, tag: arg, 'childs': []}
+            message_stack.append(msgdict)
+        else: #closing tags
+            _close_tags(message_stack, text_before, tag, arg, do_parse_emotes)
+            if close_all_tags:
+                _close_stack_tags(message_stack, do_parse_emotes)
+    else:
+        message_stack[-1]['childs'].append(match.group(0))
 
     #go recursive!
     _msnplus_to_dict(msnplus[entire_match_len:], message_stack,
@@ -259,12 +270,19 @@ def _color_gradient(color1, color2, length):
 
     return colors
 
-def _name_to_hex(name):
+def _color_to_hex(color):
     '''
-    from a color name returns its hex number.
-    If color isn't found, returns name.
+    convert non-hex colors like names or plus codes to hex colors
     '''
-    return COLOR_NAME_DICT.get(name.lower(), name)
+    color = COLOR_NAME_DICT.get(color.lower(), color)
+    if color.startswith('#'):
+        color = color[1:]
+    if len(color) <= 2 and int(color) < len(COLOR_MAP):
+        color = COLOR_MAP[int(color)]
+    elif not hex_tag_re.match(color):
+        color = COLOR_MAP[1]
+
+    return color
 
 def _hex_colors(msgdict):
     '''convert colors to hex'''
@@ -276,20 +294,10 @@ def _hex_colors(msgdict):
 
             if type(param) == tuple: #gradient
                 param1, param2 = param
+                msgdict[tag] = (_color_to_hex(param1), _color_to_hex(param2))
 
-                if len(param1) <= 2: #is not already hex
-                    msgdict[tag] = (COLOR_MAP[int(param1)], msgdict[tag][1])
-                if len(param2) <= 2: #is not already hex
-                    msgdict[tag] = (msgdict[tag][0], COLOR_MAP[int(param2)])
             else: #normal color
-                if len(param) <= 2: #is not already hex
-                    msgdict[tag] = COLOR_MAP[int(param)]
-                elif param.startswith('#'):
-                    msgdict[tag] = param[1:]
-                else:
-                    #color from name
-                    code = _name_to_hex(param)
-                    msgdict[tag] = code[1:]
+                msgdict[tag] = _color_to_hex(param)
 
     for child in msgdict['childs']:
         if child and type(child) not in (str, unicode):

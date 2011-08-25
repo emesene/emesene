@@ -99,6 +99,9 @@ class Worker(e3.Worker):
         self._add_contact('twelve@hotmail.com',
                 '·$4Red·$11Aqua·$6,8PurpleOnYellow·$14GrayOnYellow·0Black·$9Lime',
                 e3.status.BUSY, '', False)
+        self._add_contact('thirteen@hotmail.com',
+                '[c=7][b][I am][/c=yellow][/b][c=89] so [A]wesome that [I] only use invalid tags [/c]',
+                e3.status.BUSY, '', False)
 
         self._add_group('ninjas')
         self._add_group('pirätes')
@@ -133,6 +136,7 @@ class Worker(e3.Worker):
         self._add_contact_to_group('ten@hotmail.com', 'strange nicks')
         self._add_contact_to_group('eleven@hotmail.com', 'strange nicks')
         self._add_contact_to_group('twelve@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('thirteen@hotmail.com', 'strange nicks')
 
     def _add_contact(self, mail, nick, status_, alias, blocked):
         """
