@@ -964,7 +964,7 @@ class Dialog(object):
         window.show_all()
 
     @classmethod
-    def sync_progress_window(cls, title, callback):
+    def progress_window(cls, title, callback):
         '''returns a progress window used for emesene 1 synch'''
         dialog = ProgressWindow(title, callback)
         dialog.show_all()

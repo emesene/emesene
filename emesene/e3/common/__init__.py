@@ -20,6 +20,7 @@ import sys
 sys.path.append('..')
 import locations
 import notification
+import Collections
 
 import XmlParser
 

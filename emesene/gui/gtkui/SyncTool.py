@@ -84,7 +84,7 @@ class SyncTool(object):
         if response == gui.stock.YES:
             dialog = extension.get_default('dialog')
 
-            self.progress = dialog.sync_progress_window(
+            self.progress = dialog.progress_window(
                 _('Synchronization progress'), self._synch_progress_cb)
 
             self._syn.initialize(self._session, self._show_finish,

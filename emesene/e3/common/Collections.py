@@ -1,10 +1,26 @@
-try:
-	from urllib2 import urlopen
-	from simplejson import loads
-        import string
+# -*- coding: utf-8 -*-
 
-except ImportError, e:
-	raise Exception('Required module missing: %s' % e.args[0])
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+from urllib2 import urlopen
+try:
+    from json import loads
+except ImportError:
+    from simplejson import loads
 
 API_GITHUB_FETCHBLOB = "http://github.com/api/v2/json/blob/all/emesene/%s/master"
 
@@ -14,7 +30,7 @@ class ExtensionDescriptor(object):
         self.files = {}
         self.todownload = False
 
-    def addFile(self, file_name, blob):
+    def add_file(self, file_name, blob):
         self.files[file_name] = blob
 
 class Collection(object):
@@ -34,7 +50,7 @@ class Collection(object):
 class PluginsCollection(Collection):
 
     def plugin_name_from_file(self, file_name):
-        ps = string.find(file_name, "/")
+        ps = file_name.find( "/")
 
         if ps != -1:
             return file_name[:ps]
@@ -66,15 +82,15 @@ class PluginsCollection(Collection):
             except KeyError:
                 pl = extype[plugin] = ExtensionDescriptor()
 
-            pl.addFile(k, j["blobs"][k])
+            pl.add_file(k, j["blobs"][k])
 
 
 class ThemesCollection(Collection):
 
     def plugin_name_from_file(self, file_name):
 
-        ps = string.find(file_name, "/")
-        ps = string.find(file_name, "/", ps + 1)
+        ps = file_name.find( "/")
+        ps = file_name.find( "/", ps + 1)
 
         if ps != -1:
             return file_name[:ps]
@@ -107,5 +123,5 @@ class ThemesCollection(Collection):
             except KeyError:
                 pl = extype[name] = ExtensionDescriptor()
 
-            pl.addFile(k, j["blobs"][k])
+            pl.add_file(k, j["blobs"][k])
 
