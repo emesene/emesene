@@ -523,29 +523,40 @@ class Worker(e3.base.Worker, papyon.Client):
         def download_failed(reason):
             log.error("Custom emoticon download failed: %s" % reason)
 
-        def download_ok(msnobj, em_path, download_failed_func):
+        def download_ok(msnobj, download_failed_func, received, filename):
             if msnobj._data is None:
                 log.warning("downloaded msnobj is None")
                 return
 
             mo_fr = msnobj._friendly.replace("\x00", "")
-            emotes.insert_raw((mo_fr, msnobj._data))
+            
+            # save the incoming file so we can resize it using imagemagick
+            path = os.path.join(tempfile.gettempdir(),"emote")
+            handle = file(path, 'w+b', 0700)
+            msnobj._data.seek(0)
+            handle.write(msnobj._data.read())
+            handle.close()
+
+            emotes.resize_with_imagemagick(path, path, 50, 50)
+
+            shortcut, hash_ = emotes.insert_with_filename((mo_fr, path), filename)
+            path = os.path.join(emotes.path, hash_)
+            received[mo_fr] = path
             self.session.p2p_finished(account, 'emoticon', msnobj._creator,
-                    mo_fr, em_path)
+                                      mo_fr, path)
 
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
             if shortcut in received_custom_emoticons:
                 break # avoid multi p2p
-            received_custom_emoticons[shortcut] = None
 
             emoticon_hash = msn_object._data_sha.encode("hex")
             emoticon_path = os.path.join(emotes.path, emoticon_hash)
-
             received_custom_emoticons[shortcut] = emoticon_path
 
-            if emoticon_hash not in emotes:
+            if shortcut not in [x[0] for x in emotes.list()]:
                 self.msn_object_store.request(msn_object,
-                    (download_ok, emoticon_path, download_failed))
+                    (download_ok, download_failed,
+                     received_custom_emoticons, emoticon_hash))
 
         self.session.conv_message(cid, account, msgobj,
                 received_custom_emoticons)

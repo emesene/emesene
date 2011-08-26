@@ -101,20 +101,20 @@ class Cache(object):
         '''
         pass
 
-    def resize_animated_gif(self, image_path, new_path, new_width, new_height):
+    def resize_with_imagemagick(self, image_path, new_path, new_width, new_height):
         convert_installed = False
         for path in os.environ["PATH"].split(os.pathsep):
             exe = os.path.join(path, "convert")
             if os.path.exists(exe) and os.access(exe, os.X_OK):
                 convert_installed = True
         if convert_installed:
-            command = "convert -resize %sx%s \"%s\" \"%s\"" % (new_width,
+            command = "convert -resize %sx%s< \"%s\" \"%s\"" % (new_width,
                                                                new_height,
                                                                image_path,
                                                                new_path)
             value = subprocess.call(command, shell=True)
             if value != 0:
-                log.debug("Error while resizing animated image: %s" % value)
+                log.debug("Error while resizing image: %s" % value)
             return value == 0
         else:
             log.warning("Can't resize animated gifs, install ImageMagick")

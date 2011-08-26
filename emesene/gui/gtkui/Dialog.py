@@ -1376,8 +1376,9 @@ class EmotesWindow(gtk.Window):
                     image.save(resized_path, format)
                 else:
                     #resize animated images using imagemagick
-                    if not self.emcache.resize_animated_gif(path, resized_path, 
-                                                            width, height):
+                    if not self.emcache.resize_with_imagemagick(path,
+                                                                resized_path, 
+                                                                width, height):
                         resized_path = path
 
             self.emcache.insert((shortcut, resized_path))

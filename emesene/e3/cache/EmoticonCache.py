@@ -24,11 +24,14 @@ class EmoticonCache(Cache.Cache):
         if an emoticon is more than once on the file the last will be returned
         '''
         emotes = {}
-        with file(self.info_path) as handle:
-            for line in handle.readlines():
-                shortcut, hash_ = line.split(' ', 1)
-                shortcut = urllib.unquote(shortcut)
-                emotes[shortcut] = hash_.strip()
+        try:
+            with file(self.info_path) as handle:
+                for line in handle.readlines():
+                    shortcut, hash_ = line.split(' ', 1)
+                    shortcut = urllib.unquote(shortcut)
+                    emotes[shortcut] = hash_.strip()
+        except:
+            pass
 
         return emotes
 
@@ -76,6 +79,21 @@ class EmoticonCache(Cache.Cache):
 
         image.seek(position)
         return self.__add_entry(shortcut, hash_)
+
+    def insert_with_filename(self, item, filename):
+        '''insert a new item into the cache with the specified filename
+        return the shortcut and the hash on success None otherwise
+        item -- a tuple containing the shortcut and the path to an image
+        '''
+        shortcut, path = item
+        hash_ = Cache.get_file_path_hash(path)
+
+        if hash_ is None:
+            return None
+
+        new_path = os.path.join(self.path, filename)
+        shutil.copy2(path, new_path)
+        return self.__add_entry(shortcut, filename)
 
     def __add_entry(self, shortcut, hash_):
         '''add an entry to the information file with the current timestamp
