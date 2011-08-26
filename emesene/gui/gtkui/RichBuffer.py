@@ -21,6 +21,7 @@ import gtk
 import pango
 import urllib
 import webbrowser
+import gobject
 
 import RichWidget
 from gui import MarkupParser
@@ -71,19 +72,27 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         if path.startswith("file://localhost/"):
             if path.count("@") == 0: #if quoted, @ is %40, not @
                 path = urllib.unquote(path)
-            pixbuf = gtk.gdk.PixbufAnimation(path[17:])
+            path = path[17:]
         elif path.startswith("file://"):
-            pixbuf = gtk.gdk.PixbufAnimation(path[7:])
-        else:
+            path = path[7:]
+            
+        anchor = self.create_child_anchor(self.get_end_iter())
+        gobject.timeout_add(200, self.delayed_put_widget, path, anchor, tip)
+
+    def delayed_put_widget(self, path, anchor, tip):
+        try:
             pixbuf = gtk.gdk.PixbufAnimation(path)
-        img = gtk.Image()
-        img.set_from_animation(pixbuf)
-        img.show()
+            img = gtk.Image()
+            img.set_from_animation(pixbuf)
+            img.show()
 
-        if tip is not None:
-            img.set_tooltip_text(tip)
+            if tip is not None:
+                img.set_tooltip_text(tip)
 
-        self.put_widget(img)
+            self.widgets[anchor] = img
+            return False
+        except Exception as e:
+            return True
 
     def new_line(self):
         '''insert a new_line on the text'''

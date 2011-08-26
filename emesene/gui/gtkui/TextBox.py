@@ -394,5 +394,12 @@ class OutputText(TextBox):
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
-        return # NotImplemented
+        if _type == 'emoticon':
+          for anchor in self._buffer.widgets.keys():
+              widget = self._buffer.widgets[anchor]
+              if anchor in self.widgets:
+                  if self.widgets[anchor] == widget:
+                      continue
+              self._textbox.add_child_at_anchor(widget, anchor)
+              self.widgets[anchor] = widget
 
