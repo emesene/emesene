@@ -131,10 +131,12 @@ class ExtensionDownloadList(ExtensionListTab):
 
         self.download_list = []
 
-        refresh_button = gtk.Button("Refresh")
+        refresh_button = gtk.Button(stock=gtk.STOCK_REFRESH)
         refresh_button.connect('clicked', self.on_update, True)
 
-        self.download_button = gtk.Button("Download")
+        self.download_button = gtk.Button(_('Download'))
+        self.download_button.set_image(gtk.image_new_from_stock(
+                                       gtk.STOCK_GO_DOWN, gtk.ICON_SIZE_MENU))
         self.download_button.connect('clicked', self.start_download)
 
         source_combo = gtk.ComboBox()
