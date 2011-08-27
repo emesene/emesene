@@ -107,6 +107,11 @@ class EmoticonCache(Cache.Cache):
         shutil.copy2(path, new_path)
         return self.__add_entry(shortcut, filename)
 
+    def has_emote(self, shortcut):
+        '''Search an emote into cache.
+        '''
+        return shortcut in self.parse().keys()
+
     def __add_entry(self, shortcut, hash_):
         '''add an entry to the information file with the current timestamp
         and the hash_ of the file that was saved
