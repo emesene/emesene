@@ -530,16 +530,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
             mo_fr = msnobj._friendly.replace("\x00", "")
             
-            # save the incoming file so we can resize it using imagemagick
-            path = os.path.join(tempfile.gettempdir(),"emote")
-            handle = file(path, 'w+b', 0700)
-            msnobj._data.seek(0)
-            handle.write(msnobj._data.read())
-            handle.close()
-
-            emotes.resize_with_imagemagick(path, path, 50, 50)
-
-            shortcut, hash_ = emotes.insert_with_filename((mo_fr, path), filename)
+            shortcut, hash_ = emotes.insert_resized((mo_fr, msnobj._data),
+                                                    filename)
             path = os.path.join(emotes.path, hash_)
             received[mo_fr] = path
             self.session.p2p_finished(account, 'emoticon', msnobj._creator,

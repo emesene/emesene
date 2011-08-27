@@ -58,6 +58,14 @@ class EmoticonCache(Cache.Cache):
         shutil.copy2(path, new_path)
         return self.__add_entry(shortcut, hash_)
 
+    def _create_file(self, path, data):
+        '''saves data to path
+        '''
+        data.seek(0)
+        handle = file(path, 'w+b', 0700)
+        handle.write(data.read())
+        handle.close()
+
     def insert_raw(self, item):
         '''insert a new item into the cache
         return the information (stamp, hash) on success None otherwise
@@ -72,20 +80,23 @@ class EmoticonCache(Cache.Cache):
             return None
 
         path = os.path.join(self.path, hash_)
-        image.seek(0)
-        handle = file(path, 'w+b', 0700)
-        handle.write(image.read())
-        handle.close()
+        self._create_file(path, image)
 
         image.seek(position)
         return self.__add_entry(shortcut, hash_)
 
-    def insert_with_filename(self, item, filename):
+    def insert_resized(self, item, filename, height = 50, width = 50):
         '''insert a new item into the cache with the specified filename
+        resizing it if posible.
         return the shortcut and the hash on success None otherwise
         item -- a tuple containing the shortcut and the path to an image
         '''
-        shortcut, path = item
+        shortcut, image = item
+        path = os.path.join(tempfile.gettempdir(), "emote")
+        # save the incoming file so we can resize it using imagemagick
+        self._create_file(path, image)
+        self.resize_with_imagemagick(path, path, height, width)
+
         hash_ = Cache.get_file_path_hash(path)
 
         if hash_ is None:
