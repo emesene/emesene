@@ -32,15 +32,16 @@ class PluginMainVBox(ExtensionDownloadList):
             'emesene-supported-plugins', 1,
             e3.common.Collections.PluginsCollection, init_path)
 
-        button_config = gtk.Button(stock=gtk.STOCK_PREFERENCES)
-        button_config.connect('clicked', self.on_config)
+        self.config_button = gtk.Button(stock=gtk.STOCK_PREFERENCES)
+        self.config_button.connect('clicked', self.on_config)
 
-        self.buttonbox.pack_start(button_config, fill=False)
+        self.buttonbox.pack_start(self.config_button, fill=False)
         self.on_cursor_changed(self.list_view)
 
     def on_update(self, widget=None, download=False, clear=False):
         if self.first or download or clear:
             self.clear_all()
+            self.append(False, '<b>Installed</b>', 'installed', True, False)
             pluginmanager = get_pluginmanager()
 
             for name in pluginmanager.get_plugins():
@@ -57,6 +58,19 @@ class PluginMainVBox(ExtensionDownloadList):
             self.on_start()
         else:
             self.on_stop()
+
+    def on_cursor_changed(self, list_view):
+        '''called when a row is selected'''
+        model, iter_ = list_view.get_selection().get_selected()
+        if iter_ is not None:
+            value = model.get_value(iter_, 2)
+            if value in self.download_list:
+                self.download_item = value
+                self.config_button.hide()
+                self.download_button.show()
+            else:
+                self.download_button.hide()
+                self.config_button.show()
 
     def on_start(self, *args):
         '''start the selected plugin'''

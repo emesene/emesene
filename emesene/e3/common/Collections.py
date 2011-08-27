@@ -38,24 +38,30 @@ class Collection(object):
         self.extensions_descs = {}
         self.theme = theme
         self.github = Github("emesene")
+
+    def save_files(self, element, label):
+        for el, k in element[label].files.items():
+            els = el.split("/")
+            path_to_create = ""
+            for i in range(len(els) - 1):
+                path_to_create = os.path.join(path_to_create, els[i])
+            try:
+                os.makedirs(os.path.join(self.dest_folder , path_to_create))
+            except OSError:
+                pass
+            rq = self.github.get_raw(self.theme, k)
+            f = open(os.path.join(self.dest_folder, el), "wb")
+            f.write(rq)
     
-    def download(self):
+    def download(self, download_item=None):
         for key in self.extensions_descs:
             element = self.extensions_descs[key]
-            for label in element:
-                if element[label].todownload:
-                    for el, k in element[label].files.items():
-                        els = el.split("/")
-                        path_to_create = ""
-                        for i in range(len(els) - 1):
-                            path_to_create = os.path.join(path_to_create, els[i])
-                        try:
-                            os.makedirs(os.path.join(self.dest_folder , path_to_create))
-                        except OSError:
-                            pass
-                        rq = self.github.get_raw(self.theme, k)
-                        f = open(os.path.join(self.dest_folder, el), "wb")
-                        f.write(rq)
+            if download_item is not None:
+                self.save_files(element, download_item)
+            else:
+                for label in element:
+                    if element[label].todownload:
+                        self.save_files(element, label)
 
     def plugin_name_from_file(self, file_name):
         pass

@@ -25,14 +25,14 @@ class ExtensionListView(gtk.TreeView):
     def __init__(self, store):
         gtk.TreeView.__init__(self, store)
         self.toggle_renderer = gtk.CellRendererToggle()
-        self.append_column(gtk.TreeViewColumn(_('Status'), self.toggle_renderer, active=0, activatable=3))
+        self.append_column(gtk.TreeViewColumn(_('Status'), self.toggle_renderer, active=0, activatable=3, visible=4))
         self.append_column(gtk.TreeViewColumn(_('Name'), gtk.CellRendererText(), markup=1))
         self.set_rules_hint(True)
 
 class ExtensionListStore(gtk.ListStore):
     def __init__(self):
         # running, pretty name and description, name
-        gtk.ListStore.__init__(self, bool, str, str, bool)
+        gtk.ListStore.__init__(self, bool, str, str, bool, bool)
 
     def prettify_name(self, name, description):
         '''return a prettier name for the plugin with its description in a new
@@ -70,12 +70,12 @@ class ExtensionList(gtk.VBox):
         self.list_store.clear()
         self.extension_list = []
 
-    def append(self, is_active, label, name, sensitive=True):
+    def append(self, is_active, label, name, sensitive=True, visible=True):
         '''append an item'''
         if not sensitive:
             label = '<span foreground="#696969">%s</span>' % label
         if name not in self.extension_list:
-            self.list_store.append((is_active, label, name, sensitive))
+            self.list_store.append((is_active, label, name, sensitive, visible))
             self.extension_list.append(name)
 
 class ExtensionListTab(gtk.VBox):
@@ -131,11 +131,11 @@ class ExtensionDownloadList(ExtensionListTab):
 
         self.download_list = []
 
-        self.download_button = gtk.Button("Download")
-        self.download_button.connect('clicked', self.start_download)
-
         refresh_button = gtk.Button("Refresh")
         refresh_button.connect('clicked', self.on_update, True)
+
+        self.download_button = gtk.Button("Download")
+        self.download_button.connect('clicked', self.start_download)
 
         source_combo = gtk.ComboBox()
         cmb_model_sources = gtk.ListStore(str)
@@ -154,8 +154,8 @@ class ExtensionDownloadList(ExtensionListTab):
 
         source_combo.connect('changed', self.on_change_source)
         self.buttonbox.pack_start(source_combo, fill=False)
-        self.buttonbox.pack_start(self.download_button, fill=False)
         self.buttonbox.pack_start(refresh_button, fill=False)
+        self.buttonbox.pack_start(self.download_button, fill=False)
 
     def on_cursor_changed(self, list_view):
         '''called when a row is selected'''
@@ -190,9 +190,7 @@ class ExtensionDownloadList(ExtensionListTab):
     def start_download(self, widget=None):
         '''start the download of an extension'''
         thc_cur = self.thc_com[self.thc_cur_name]
-        for key in thc_cur.extensions_descs:
-            element = thc_cur.extensions_descs[key]
-            print element[self.download_item].files
+        thc_cur.download(self.download_item)
 
     def update(self):
         '''update the collections'''
@@ -209,7 +207,7 @@ class ExtensionDownloadList(ExtensionListTab):
 
         for box, key in enumerate(thc_cur.extensions_descs):
             element = thc_cur.extensions_descs[key]
-
+            self.boxes[box].append(False, '<b>Available for download</b>', 'installable', True, False)
             for label in element:
                 if label not in self.boxes[box].extension_list:
                     self.download_list.append(label)

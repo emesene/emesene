@@ -1292,7 +1292,7 @@ class ExtensionMainVBox(gtk.VBox):
 
 
     def append_element(self, label):
-        self.ext_list_store.append((self.__element[label].todownload, label, label, True))
+        self.ext_list_store.append((self.__element[label].todownload, label, label, True, True))
 
 
     def clearAll(self):
