@@ -93,7 +93,7 @@ class ExtensionListTab(gtk.VBox):
         self.clear_all = self.boxes[0].clear_all
 
         self.buttonbox = gtk.HButtonBox()
-        self.buttonbox.set_layout(gtk.BUTTONBOX_END)
+        self.buttonbox.set_layout(gtk.BUTTONBOX_EDGE)
         self.buttonbox.set_border_width(2)
 
         self.pack_start(self.lists)
@@ -151,10 +151,12 @@ class ExtensionDownloadList(ExtensionListTab):
         source_combo.pack_start(cell, True)
         source_combo.add_attribute(cell, 'text', 0)
         source_combo.set_active(0)
+        hbox = gtk.HBox()
 
         source_combo.connect('changed', self.on_change_source)
         self.buttonbox.pack_start(source_combo, fill=False)
         self.buttonbox.pack_start(refresh_button, fill=False)
+        self.buttonbox.pack_start(hbox)
         self.buttonbox.pack_start(self.download_button, fill=False)
 
     def on_cursor_changed(self, list_view):

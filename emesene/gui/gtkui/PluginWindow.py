@@ -34,6 +34,7 @@ class PluginMainVBox(ExtensionDownloadList):
 
         self.config_button = gtk.Button(stock=gtk.STOCK_PREFERENCES)
         self.config_button.connect('clicked', self.on_config)
+        self.download_button.set_property('no-show-all', True)
 
         self.buttonbox.pack_start(self.config_button, fill=False)
         self.on_cursor_changed(self.list_view)
