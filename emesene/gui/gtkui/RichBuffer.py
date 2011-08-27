@@ -77,7 +77,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
             path = path[7:]
             
         anchor = self.create_child_anchor(self.get_end_iter())
-        gobject.timeout_add(200, self.delayed_put_widget, path, anchor, tip)
+        gobject.timeout_add_seconds(1, self.delayed_put_widget, path, anchor, tip)
 
     def delayed_put_widget(self, path, anchor, tip):
         try:
