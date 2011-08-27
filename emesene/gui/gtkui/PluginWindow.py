@@ -26,11 +26,11 @@ from pluginmanager import get_pluginmanager
 from ExtensionList import ExtensionDownloadList
 
 class PluginMainVBox(ExtensionDownloadList):
-    def __init__(self, session):
+    def __init__(self, session, init_path):
         ExtensionDownloadList.__init__(
             self, session, 'emesene-community-plugins',
             'emesene-supported-plugins', 1,
-            e3.common.Collections.PluginsCollection)
+            e3.common.Collections.PluginsCollection, init_path)
 
         button_config = gtk.Button(stock=gtk.STOCK_PREFERENCES)
         button_config.connect('clicked', self.on_config)
@@ -108,7 +108,7 @@ class PluginWindow(gtk.Window):
 
         self.session = session
 
-        self.main_vbox = PluginMainVBox(session)
+        self.main_vbox = PluginMainVBox(session, os.path.join(os.getcwd(), "plugins"))
 
         self.add(self.main_vbox)
         self.show_all()

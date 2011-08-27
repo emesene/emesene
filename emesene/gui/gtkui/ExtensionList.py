@@ -115,7 +115,7 @@ class ExtensionListTab(gtk.VBox):
 
 class ExtensionDownloadList(ExtensionListTab):
     def __init__(self, session, community_name, supported_name, boxes,
-                 collection_class):
+                 collection_class, init_path):
         '''constructor'''
         ExtensionListTab.__init__(self, session)
         self.first = True
@@ -126,8 +126,8 @@ class ExtensionDownloadList(ExtensionListTab):
         self.thc_com = {}
         self.thc_cur_name = 'Supported'
 
-        self.thc_com['Community'] = collection_class(community_name)
-        self.thc_com['Supported'] = collection_class(supported_name)
+        self.thc_com['Community'] = collection_class(community_name, init_path)
+        self.thc_com['Supported'] = collection_class(supported_name, init_path)
 
         self.download_list = []
 

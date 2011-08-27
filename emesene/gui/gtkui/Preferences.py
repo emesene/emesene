@@ -31,6 +31,8 @@ import PluginWindow
 import ExtensionList
 
 import logging
+import os
+
 log = logging.getLogger('gtkui.Preferences')
 
 try:
@@ -107,10 +109,11 @@ class Preferences(gtk.Window):
         self.notification = Notification(session)
         self.theme = Theme(session)
         self.extension = Extension(session)
-        self.plugins = PluginWindow.PluginMainVBox(session)
+        self.plugins = PluginWindow.PluginMainVBox(session, os.path.join(os.getcwd(), "plugins"))
         self.themes_down = DownloadExtension(
             self.session, 'emesene-community-themes',
-            'emesene-supported-themes', 4, e3.common.Collections.ThemesCollection)
+            'emesene-supported-themes', 4, e3.common.Collections.ThemesCollection,
+            os.path.join(os.getcwd(), "themes"))
 
         self.buttons = gtk.HButtonBox()
         self.buttons.set_border_width(2)
@@ -1312,7 +1315,7 @@ class DownloadExtension(BaseTable):
     """the panel to download extensions
     """
 
-    def __init__(self, session, community_name, supported_name, n_boxes, collection_class):
+    def __init__(self, session, community_name, supported_name, n_boxes, collection_class, init_path):
         """constructor
         """
         BaseTable.__init__(self, 4, 1)
@@ -1328,8 +1331,8 @@ class DownloadExtension(BaseTable):
         self.thc_com = {}
         self.thc_cur_name = 'Supported'
 
-        self.thc_com['Community'] = collection_class(community_name)
-        self.thc_com['Supported'] = collection_class(supported_name)
+        self.thc_com['Community'] = collection_class(community_name, init_path)
+        self.thc_com['Supported'] = collection_class(supported_name, init_path)
 
         self.exts_hbox = gtk.VBox()
 
@@ -1393,13 +1396,8 @@ class DownloadExtension(BaseTable):
 
 
     def start_download(self, widget = None):
-        print "FILES TO DOWNLOAD"
         thc_cur = self.thc_com[self.thc_cur_name]
-        for key in thc_cur.extensions_descs:
-            element = thc_cur.extensions_descs[key]
-            for label in element:
-                if element[label].todownload:
-                    print element[label].files
+        thc_cur.download()
 
 
     def update(self):
