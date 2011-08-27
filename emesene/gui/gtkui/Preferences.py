@@ -28,6 +28,7 @@ import stock
 from gui.base import MarkupParser
 
 import PluginWindow
+import ExtensionList
 
 import logging
 log = logging.getLogger('gtkui.Preferences')
@@ -48,7 +49,6 @@ LIST = [
     {'stock_id' : gtk.STOCK_EXECUTE,'text' : _('Extensions')},
     {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
     {'stock_id' : gtk.STOCK_NETWORK,'text' : _('Download themes')},
-    {'stock_id' : gtk.STOCK_NETWORK,'text' : _('Download plugins')},
 ]
 
 class Preferences(gtk.Window):
@@ -111,9 +111,6 @@ class Preferences(gtk.Window):
         self.themes_down = DownloadExtension(
             self.session, 'emesene-community-themes',
             'emesene-supported-themes', 4, e3.common.Collections.ThemesCollection)
-        self.plugins_down = DownloadExtension(
-            self.session, 'emesene-community-plugins',
-            'emesene-supported-plugins', 1, e3.common.Collections.PluginsCollection)
 
         self.buttons = gtk.HButtonBox()
         self.buttons.set_border_width(2)
@@ -136,7 +133,6 @@ class Preferences(gtk.Window):
         self.extensions_page = self.extension
         self.plugins_page = self.plugins
         self.themes_down_page = self.themes_down
-        self.plugins_down_page = self.plugins_down
 
         self.__init_list()
 
@@ -182,7 +178,6 @@ class Preferences(gtk.Window):
         self.page_dict.append(self.extensions_page)
         self.page_dict.append(self.plugins_page)
         self.page_dict.append(self.themes_down_page)
-        self.page_dict.append(self.plugins_down_page)
 
         for i in LIST:
             # we should use always the same icon size,
@@ -1265,8 +1260,8 @@ class ExtensionMainVBox(gtk.VBox):
         self.session = session
         self.session.config.get_or_set('l_active_plugins', [])
 
-        self.ext_list_store = PluginWindow.PluginListStore()
-        self.ext_list_view = PluginWindow.PluginListView(self.ext_list_store)
+        self.ext_list_store = ExtensionList.ExtensionListStore()
+        self.ext_list_view = ExtensionList.ExtensionListView(self.ext_list_store)
         self.ext_list_view.toggle_renderer.connect('toggled', self._cell_toggled, self.ext_list_store)
 
         scroll = gtk.ScrolledWindow()
@@ -1294,7 +1289,7 @@ class ExtensionMainVBox(gtk.VBox):
 
 
     def append_element(self, label):
-        self.ext_list_store.append((self.__element[label].todownload, label, label))
+        self.ext_list_store.append((self.__element[label].todownload, label, label, True))
 
 
     def clearAll(self):
