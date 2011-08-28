@@ -123,7 +123,7 @@ class PluginWindow(gtk.Window):
 
         self.session = session
 
-        self.main_vbox = PluginMainVBox(session, os.path.join(os.getcwd(), "plugins"))
+        self.main_vbox = PluginMainVBox(session, self.session.config_dir.join('plugins'))
 
         self.add(self.main_vbox)
         self.show_all()

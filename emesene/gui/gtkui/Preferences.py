@@ -109,11 +109,11 @@ class Preferences(gtk.Window):
         self.notification = Notification(session)
         self.theme = Theme(session)
         self.extension = Extension(session)
-        self.plugins = PluginWindow.PluginMainVBox(session, os.path.join(os.getcwd(), "plugins"))
+        self.plugins = PluginWindow.PluginMainVBox(session, self.session.config_dir.join('plugins'))
         self.themes_down = DownloadExtension(
             self.session, 'emesene-community-themes',
             'emesene-supported-themes', 4, e3.common.Collections.ThemesCollection,
-            os.path.join(os.getcwd(), "themes"))
+            self.session.config_dir.join('themes'))
 
         self.buttons = gtk.HButtonBox()
         self.buttons.set_border_width(2)
