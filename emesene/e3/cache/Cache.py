@@ -101,6 +101,14 @@ class Cache(object):
         '''
         pass
 
+    def create_file(self, path, data):
+        '''saves data to path
+        '''
+        data.seek(0)
+        handle = file(path, 'w+b', 0700)
+        handle.write(data.read())
+        handle.close()
+
     def resize_with_imagemagick(self, image_path, new_path, new_width, new_height):
         convert_installed = False
         for path in os.environ["PATH"].split(os.pathsep):

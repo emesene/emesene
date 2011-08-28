@@ -70,10 +70,7 @@ class AvatarCache(Cache.Cache):
 
         path = os.path.join(self.path, hash_)
         last_path = os.path.join(self.path, 'last')
-        item.seek(0)
-        handle = file(path, 'w+b', 0700)
-        handle.write(item.read())
-        handle.close()
+        self.create_file(path, item)
 
         shutil.copy2(path, last_path)
 

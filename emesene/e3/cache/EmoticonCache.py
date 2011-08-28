@@ -59,14 +59,6 @@ class EmoticonCache(Cache.Cache):
         shutil.copy2(path, new_path)
         return self.__add_entry(shortcut, hash_)
 
-    def _create_file(self, path, data):
-        '''saves data to path
-        '''
-        data.seek(0)
-        handle = file(path, 'w+b', 0700)
-        handle.write(data.read())
-        handle.close()
-
     def insert_raw(self, item):
         '''insert a new item into the cache
         return the information (stamp, hash) on success None otherwise
@@ -81,7 +73,7 @@ class EmoticonCache(Cache.Cache):
             return None
 
         path = os.path.join(self.path, hash_)
-        self._create_file(path, image)
+        self.create_file(path, image)
 
         image.seek(position)
         return self.__add_entry(shortcut, hash_)
