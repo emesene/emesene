@@ -24,18 +24,18 @@ class AvatarCache(Cache.Cache):
         return a list of tuples containing (stamp, hash) in the order found
         on the file
         '''
-        lines = []
+        lines = {}
         with file(self.info_path) as handle:
             for line in handle.readlines():
                 stamp, hash_ = line.split(' ', 1)
-                lines.append((int(stamp), hash_.strip()))
+                lines[int(stamp)] = hash_.strip()
 
         return lines
 
     def list(self):
         '''return a list of tuples (stamp, hash) of the elements on cache
         '''
-        return self.parse()
+        return self.parse().items()
 
     def insert(self, item):
         '''insert a new item into the cache
