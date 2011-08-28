@@ -154,9 +154,12 @@ class PluginManager(object):
     '''Scan directories and manage plugins loading/unloading/control'''
     def __init__(self):
         self._plugins = {} #'name': Plugin/Package
+        self._plugin_dirs = []
 
     def scan_directory(self, dir_):
         '''Find plugins and packages inside dir_'''
+        if dir_ not in self._plugin_dirs:
+            self._plugin_dirs.append(dir_)
         for filename in os.listdir(dir_):
             path = os.path.join(dir_, filename)
             if filename.startswith(".") or \
@@ -172,6 +175,10 @@ class PluginManager(object):
                     filename, reason))
 
         log.debug('Imported plugins: %s' % ', '.join(self._plugins.keys()))
+
+    def rescan_directories(self):
+        for dir_ in self._plugin_dirs:
+            self.scan_directory(dir_)
 
     def plugin_start(self, name, session):
         '''Starts a plugin.
@@ -216,6 +223,7 @@ class PluginManager(object):
 
     def get_plugins(self):
         '''return the list of plugin names'''
+        self.rescan_directories()
         return self._plugins.keys()
 
     def plugin_description(self, name):

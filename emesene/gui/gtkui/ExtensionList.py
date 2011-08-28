@@ -195,6 +195,7 @@ class ExtensionDownloadList(ExtensionListTab):
         '''start the download of an extension'''
         thc_cur = self.thc_com[self.thc_cur_name]
         thc_cur.download(self.download_item)
+        self.on_update(clear=True)
 
     def update(self):
         '''update the collections'''

@@ -122,8 +122,9 @@ class PluginWindow(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
 
         self.session = session
+        config_dir = e3.common.ConfigDir('emesene2')
 
-        self.main_vbox = PluginMainVBox(session, self.session.config_dir.join('plugins'))
+        self.main_vbox = PluginMainVBox(session, config_dir.join('plugins'))
 
         self.add(self.main_vbox)
         self.show_all()

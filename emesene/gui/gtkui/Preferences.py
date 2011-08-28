@@ -103,17 +103,20 @@ class Preferences(gtk.Window):
         hbox.pack_start(self.notebook, True, True)
         vbox.pack_start(hbox, True,True) # hbox, True, True
 
+        config_dir = e3.common.ConfigDir('emesene2')
+
         self.interface = Interface(session)
         self.desktop = DesktopTab(session)
         self.sound = Sound(session)
         self.notification = Notification(session)
         self.theme = Theme(session)
         self.extension = Extension(session)
-        self.plugins = PluginWindow.PluginMainVBox(session, self.session.config_dir.join('plugins'))
+        self.plugins = PluginWindow.PluginMainVBox(
+            session, config_dir.join('plugins'))
         self.themes_down = DownloadExtension(
             self.session, 'emesene-community-themes',
             'emesene-supported-themes', 4, e3.common.Collections.ThemesCollection,
-            self.session.config_dir.join('themes'))
+            config_dir.join('themes'))
 
         self.buttons = gtk.HButtonBox()
         self.buttons.set_border_width(2)
