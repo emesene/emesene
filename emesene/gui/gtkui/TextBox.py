@@ -78,11 +78,13 @@ class TextBox(gtk.ScrolledWindow):
         '''append formatted text to the widget'''
         self._buffer.put_formatted(text)
         for anchor in self._buffer.widgets.keys():
-            widget = self._buffer.widgets[anchor]
-            self._textbox.add_child_at_anchor(widget, anchor)
-            self.widgets[anchor] = widget
-
-        self._buffer.widgets = {}
+            path = self._buffer.widgets[anchor]
+            if path is not None:
+                try:
+                    self.add_image_at_anchor(anchor, path)
+                except gobject.GError:
+                    #custom emoticon not yet downloaded
+                    pass
 
         if scroll:
             self.scroll_to_end()
@@ -395,11 +397,18 @@ class OutputText(TextBox):
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
         if _type == 'emoticon':
-          for anchor in self._buffer.widgets.keys():
-              widget = self._buffer.widgets[anchor]
-              if anchor in self.widgets:
-                  if self.widgets[anchor] == widget:
-                      continue
-              self._textbox.add_child_at_anchor(widget, anchor)
-              self.widgets[anchor] = widget
+            for anchor in self._buffer.widgets.keys():
+                path = self._buffer.widgets[anchor]
+                if path == what[2]:
+                    self.add_image_at_anchor(anchor, path)
+
+    def add_image_at_anchor(self, anchor, path):
+        ''' Reads path as image and adds the image in anchor '''
+        pixbuf = gtk.gdk.PixbufAnimation(path)
+        widget = gtk.Image()
+        widget.set_from_animation(pixbuf)
+        self._textbox.add_child_at_anchor(widget, anchor)
+        self.widgets[anchor] = widget
+        del self._buffer.widgets[anchor]
+        widget.show()
 

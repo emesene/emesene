@@ -3,6 +3,7 @@
 import Cache
 
 import os
+import tempfile
 import shutil
 import urllib
 

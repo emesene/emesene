@@ -523,19 +523,18 @@ class Worker(e3.base.Worker, papyon.Client):
         def download_failed(reason):
             log.error("Custom emoticon download failed: %s" % reason)
 
-        def download_ok(msnobj, download_failed_func, received, filename):
+        def download_ok(msnobj, download_failed_func, received, filename, short):
             if msnobj._data is None:
                 log.warning("downloaded msnobj is None")
                 return
 
-            mo_fr = msnobj._friendly.replace("\x00", "")
-            
-            shortcut, hash_ = emotes.insert_resized((mo_fr, msnobj._data),
+            shortcut, hash_ = emotes.insert_resized((short, msnobj._data),
                                                     filename)
+
             path = os.path.join(emotes.path, hash_)
-            received[mo_fr] = path
+            received[short] = path
             self.session.p2p_finished(account, 'emoticon', msnobj._creator,
-                                      mo_fr, path)
+                                      shortcut, path)
 
         for shortcut, msn_object in papymessage.msn_objects.iteritems():
             if shortcut in received_custom_emoticons:
@@ -548,7 +547,7 @@ class Worker(e3.base.Worker, papyon.Client):
             if shortcut not in [x[0] for x in emotes.list()]:
                 self.msn_object_store.request(msn_object,
                     (download_ok, download_failed,
-                     received_custom_emoticons, emoticon_hash))
+                     received_custom_emoticons, emoticon_hash, shortcut))
 
         self.session.conv_message(cid, account, msgobj,
                 received_custom_emoticons)

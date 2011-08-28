@@ -108,10 +108,10 @@ class Cache(object):
             if os.path.exists(exe) and os.access(exe, os.X_OK):
                 convert_installed = True
         if convert_installed:
-            command = "convert -resize %sx%s< \"%s\" \"%s\"" % (new_width,
-                                                               new_height,
-                                                               image_path,
-                                                               new_path)
+            command = "convert -resize '%sx%s>' '%s' '%s'" % (new_width,
+                                                              new_height,
+                                                              image_path,
+                                                              new_path)
             value = subprocess.call(command, shell=True)
             if value != 0:
                 log.debug("Error while resizing image: %s" % value)
