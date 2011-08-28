@@ -544,7 +544,7 @@ class Worker(e3.base.Worker, papyon.Client):
             emoticon_path = os.path.join(emotes.path, emoticon_hash)
             received_custom_emoticons[shortcut] = emoticon_path
 
-            if emotes.has_emote(shortcut):
+            if not emotes.has_emote(shortcut):
                 self.msn_object_store.request(msn_object,
                     (download_ok, download_failed,
                      received_custom_emoticons, emoticon_hash, shortcut))
