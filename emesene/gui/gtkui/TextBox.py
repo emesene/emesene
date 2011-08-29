@@ -78,16 +78,34 @@ class TextBox(gtk.ScrolledWindow):
         '''append formatted text to the widget'''
         self._buffer.put_formatted(text)
         for anchor in self._buffer.widgets.keys():
-            path = self._buffer.widgets[anchor]
-            if path is not None:
-                try:
-                    self.add_image_at_anchor(anchor, path)
-                except gobject.GError:
-                    #custom emoticon not yet downloaded
-                    pass
+            obj = self._buffer.widgets[anchor]
+            if obj is not None:
+                if isinstance(obj, gtk.Widget):
+                    self.add_widget_at_anchor(anchor, obj)
+                else:
+                    path, tip = obj
+                    try:
+                        self.add_image_at_anchor(anchor, path, tip)
+                    except gobject.GError:
+                        #custom emoticon not yet downloaded
+                        pass
 
         if scroll:
             self.scroll_to_end()
+
+    def add_image_at_anchor(self, anchor, path, tip):
+        ''' Reads path as image and adds the image in anchor '''
+        pixbuf = gtk.gdk.PixbufAnimation(path)
+        widget = gtk.Image()
+        widget.set_from_animation(pixbuf)
+        widget.set_tooltip_text(tip)
+        self.add_widget_at_anchor(anchor,widget)
+
+    def add_widget_at_anchor(self, anchor, widget):
+        self._textbox.add_child_at_anchor(widget, anchor)
+        self.widgets[anchor] = widget
+        del self._buffer.widgets[anchor]
+        widget.show()
 
     def scroll_to_end(self):
         '''scroll to the end of the content'''
@@ -398,17 +416,9 @@ class OutputText(TextBox):
         ''' new p2p data has been received (custom emoticons) '''
         if _type == 'emoticon':
             for anchor in self._buffer.widgets.keys():
-                path = self._buffer.widgets[anchor]
-                if path == what[2]:
-                    self.add_image_at_anchor(anchor, path)
-
-    def add_image_at_anchor(self, anchor, path):
-        ''' Reads path as image and adds the image in anchor '''
-        pixbuf = gtk.gdk.PixbufAnimation(path)
-        widget = gtk.Image()
-        widget.set_from_animation(pixbuf)
-        self._textbox.add_child_at_anchor(widget, anchor)
-        self.widgets[anchor] = widget
-        del self._buffer.widgets[anchor]
-        widget.show()
+                obj = self._buffer.widgets[anchor]
+                if not isinstance(obj, gtk.Widget):
+                    path, tip = obj
+                    if path == what[2]:
+                        self.add_image_at_anchor(anchor, path, tip)
 

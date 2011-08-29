@@ -87,7 +87,7 @@ class EmoticonCache(Cache.Cache):
         shortcut, image = item
         path = os.path.join(tempfile.gettempdir(), "emote")
         # save the incoming file so we can resize it using imagemagick
-        self._create_file(path, image)
+        self.create_file(path, image)
         self.resize_with_imagemagick(path, path, height, width)
 
         hash_ = Cache.get_file_path_hash(path)

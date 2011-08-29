@@ -59,9 +59,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
 
     def put_widget(self, widget):
         '''insert a widget at the current position'''
-
-        iterator = self.get_end_iter()
-        anchor = self.create_child_anchor(iterator)
+        anchor = self.create_child_anchor(self.get_end_iter())
         self.widgets[anchor] = widget
 
     def put_image(self, path, tip=None):
@@ -74,8 +72,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
             path = path[17:]
         elif path.startswith("file://"):
             path = path[7:]
-        anchor = self.create_child_anchor(self.get_end_iter())
-        self.widgets[anchor] = path
+        self.put_widget([path,tip])
 
     def new_line(self):
         '''insert a new_line on the text'''
