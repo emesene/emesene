@@ -103,6 +103,8 @@ class AdiumEmoteTheme(object):
         
         return aux[6]+aux[5]+aux[4]+aux[3]+aux[2]+aux[1]+aux[0]
 
+    shortcuts_by_length = property(fget=_get_emotes_shortcuts_by_length)
+
     def _get_emotes_count(self):
         '''return the number of emoticons registered'''
         return len(set(self.emotes.values()))
