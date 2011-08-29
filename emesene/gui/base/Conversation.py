@@ -345,12 +345,13 @@ class Conversation(object):
 
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
-        custom_emoticons = gui.base.MarkupParser.get_custom_emotes(text, self.emcache.parse())
+        cedict = self.emcache.parse()
+        custom_emoticons = gui.base.MarkupParser.get_custom_emotes(text, cedict)
 
-        self.session.send_message(self.cid, text, self.cstyle, self.emcache.parse(), custom_emoticons)
+        self.session.send_message(self.cid, text, self.cstyle, cedict, custom_emoticons)
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
         self.output.send_message(self.formatter, self.session.contacts.me,
-                                 message, self.emcache.parse(), self.emcache.path, self.first)
+                                 message, cedict, self.emcache.path, self.first)
         self.messages.push(text)
         self.play_send()
         self.first = False
