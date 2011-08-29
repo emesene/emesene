@@ -209,7 +209,7 @@ class HelpHandler(object):
     def on_check_update_selected(self):
         ''' checks if a new stable version of emesene is available '''
         if sys.platform == "darwin":
-            subprocess.call(['open', '-a', '/Applications/emesene.app/Contents/Resources/emesene_updater.app'])
+            subprocess.call(['open', '/Applications/emesene.app/Contents/Resources/emesene_updater.app'])
         else:
             f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/gui/base/Handler.py")
             s = f.read()
