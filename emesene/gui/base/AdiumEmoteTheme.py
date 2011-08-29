@@ -95,6 +95,14 @@ class AdiumEmoteTheme(object):
 
     shortcuts = property(fget=_get_emotes_shortcuts, fset=None)
 
+    def _get_emotes_shortcuts_by_length(self):
+        '''return the list of shortcuts ordered from longest to shortest'''
+        aux = [[],[],[],[],[],[],[]]
+        for code in self.emotes.keys():
+            aux[len(code)-1].append(code)
+        
+        return aux[6]+aux[5]+aux[4]+aux[3]+aux[2]+aux[1]+aux[0]
+
     def _get_emotes_count(self):
         '''return the number of emoticons registered'''
         return len(set(self.emotes.values()))
