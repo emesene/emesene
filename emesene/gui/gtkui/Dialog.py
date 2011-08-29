@@ -1240,9 +1240,7 @@ class EmotesWindow(gtk.Window):
         self.max_width = max_width
         self.emote_selected = emote_selected
 
-        rows = gui.theme.emote_theme.emotes_count/max_width # TODO: remove me
-
-        self.table = gtk.Table(max_width, rows)
+        self.table = gtk.Table(max_width)
         self._fill_emote_table(max_width)
         button = gtk.Button(_("Add emoticon"))
         button.set_image(gtk.image_new_from_stock(gtk.STOCK_ADD,
@@ -1252,7 +1250,6 @@ class EmotesWindow(gtk.Window):
         self.box = gtk.VBox()
         self.box.pack_start(self.table)
         self.box.pack_start(button)
-
 
         self.add(self.box)
         self.box.show_all()
