@@ -296,11 +296,6 @@ class InputText(TextBox):
         self.parse_timeout = None
         return False
 
-    def stop_parse_emotes(self):
-        if self.parse_timeout is not None:
-            gobject.source_remove(self.parse_timeout)
-        self.parse_timeout = None
-
     def update_style(self, style):
         '''update the global style of the widget'''
         if style is None:
