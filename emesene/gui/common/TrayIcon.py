@@ -299,12 +299,10 @@ class ContactsMenu(gtk.Menu):
                 picture = gtk.image_new_from_pixbuf(pix)
                 return picture
 
-            if animation.is_static_image():
-                pix = utils.safe_gtk_pixbuf_load(contact.picture,
-                        (self.avatar_size, self.avatar_size))
-                picture = gtk.image_new_from_pixbuf(pix)
-            else:
-                picture = gtk.image_new_from_animation(animation)
+            pix = animation.get_static_image()
+            pix = pix.scale_simple(self.avatar_size, self.avatar_size,
+                                   gtk.gdk.INTERP_BILINEAR)
+            picture = gtk.image_new_from_pixbuf(pix)
 
         else:
             pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
