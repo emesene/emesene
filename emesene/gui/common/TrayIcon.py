@@ -235,7 +235,7 @@ class ContactsMenu(gtk.Menu):
         """
         item = gtk.ImageMenuItem()
         item.set_label(gui.Plus.msnplus_strip(contact.nick))
-        pict = self.__get_contact_pixbuf_or_default(contact)
+        pict = self.__get_contact_pixbuf_or_default(contact.picture)
         item.set_image(pict)
         item.connect('activate', self._on_contact_clicked)
         self.item_to_contacts[item] = contact
@@ -248,10 +248,14 @@ class ContactsMenu(gtk.Menu):
         """
         update the menu when contacts change something
         """
+        type_change = None
         if len(args) == 3:
             account, type_change, value_change = args
         elif len(args) == 4:
             account, type_change, value_change, do_notify = args
+        elif len(args) == 2:
+            account, filepath = args
+            type_change = 'picture'
 
         if type_change == 'status':
             if value_change > 0:
@@ -270,11 +274,8 @@ class ContactsMenu(gtk.Menu):
                 self.contacts_to_item[account].set_label(nick)
 
         if type_change == 'picture':
-        #TODO: fixme
-            return
             if account in self.contacts_to_item:
-                contact = self.item_to_contacts[self.contacts_to_item[account]]
-                pict = self.__get_contact_pixbuf_or_default(contact)
+                pict = self.__get_contact_pixbuf_or_default(filepath)
                 self.contacts_to_item[account].set_image(pict)
 
     def _on_contact_clicked(self, menu_item):
@@ -286,13 +287,13 @@ class ContactsMenu(gtk.Menu):
         self.main_window.content.on_new_conversation(cid, [acc], other_started=False)
         self.handler.session.new_conversation(acc, cid)
 
-    def __get_contact_pixbuf_or_default(self, contact):
+    def __get_contact_pixbuf_or_default(self, path):
         '''try to return a pixbuf of the user picture or the default
         picture
         '''
-        if contact.picture:
+        if path is not None:
             try:
-                animation = gtk.gdk.PixbufAnimation(contact.picture)
+                animation = gtk.gdk.PixbufAnimation(path)
             except gobject.GError:
                 pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
                         (self.avatar_size, self.avatar_size))

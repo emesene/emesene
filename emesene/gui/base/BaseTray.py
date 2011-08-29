@@ -51,6 +51,8 @@ class BaseTray(object):
         self.handler.session = session
         self.handler.session.signals.contact_attr_changed.subscribe(
                                             self._on_contact_attr_changed)
+        self.handler.session.signals.picture_change_succeed.subscribe(
+                                            self._on_contact_attr_changed)
         self.handler.session.signals.status_change_succeed.subscribe(
                                                  self._on_status_change_succeed)
         self.handler.session.signals.conv_message.subscribe(
