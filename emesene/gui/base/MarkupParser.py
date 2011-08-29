@@ -38,6 +38,7 @@ dic_inv = {
 
 URL_REGEX_STR = '(http[s]?://|www\.)(?:[a-zA-Z]|[0-9]|[$\-_@\.&+]|[!*\"\'\(\),]|[=;/#?:]|(?:%[0-9a-fA-F][0-9a-fA-F])|[\{\}\|\[\]\\\^~])+'
 URL_REGEX = re.compile(URL_REGEX_STR)
+IMAGE_TAG = re.compile('(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)')
 
 def escape(string_):
     '''replace the values on dic keys with the values'''
@@ -57,61 +58,15 @@ def get_full_shortcuts_list(cedict):
         shortcuts.extend(l_cedict)
     return shortcuts
 
-def parse_emotes(message, cedict={}):
-    '''parse the emotes in a message, return a string with img tags
-    for the emotes according to the theme'''
-
-    # Get the message body to parse emotes
-    p = re.compile('<span.*?>(.*)</span>', re.DOTALL)
-    plain_find = p.search(message)
-    if plain_find:
-        plain_text = plain_find.group(1)
-    else:
-        plain_text = ''
-
-    chunks = [plain_text]
-    emote_theme = gui.theme.emote_theme
-    shortcuts = get_full_shortcuts_list(cedict)
-    temp = []
-
-    while len(shortcuts) > 0:
-        shortcut = shortcuts.pop()
-        temp = []
-
-        for chunk in chunks:
-            parts = chunk.split(shortcut)
-
-            if len(parts) > 1:
-                if shortcut in emote_theme.shortcuts:
-                    path = emote_theme.emote_to_path(shortcut)
-                else:
-                    path = cedict[shortcut]
-                tag = '<img src="%s" alt="%s"/>' % (path, shortcut)
-
-                for part in parts:
-                    temp.append(part)
-                    temp.append(tag)
-
-                temp.pop()
-            else:
-                temp.append(chunk)
-
-        chunks = temp
-
-    # return the markup with plan text
-    return message.replace(plain_text, ''.join(chunks))
-
 def replace_shortcut_with_tag(string, short, tag):
     token = '#IRREPLACEABLE#'
     def extract(m):
         irreplaceable.append(m.group(0))
         return token
     irreplaceable = []
-    result = re.sub(URL_REGEX, extract, string)
-    escaped_result = re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)',
-        extract, result)
-    if re.sub(r'(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)', extract, short) \
-        not in escaped_result:
+    result = URL_REGEX.sub(extract, string)
+    escaped_result = IMAGE_TAG.sub(extract, result)
+    if IMAGE_TAG.sub(extract, short) not in escaped_result:
         result = escaped_result
     result = result.replace(short, tag)
     irreplaceable.reverse()
@@ -171,7 +126,7 @@ def replace_urls(match):
 
 def urlify(strng):
     '''replace urls by an html link'''
-    return re.sub(URL_REGEX, replace_urls, strng)
+    return URL_REGEX.sub(replace_urls, strng)
 
 def path_to_url(path):
     if os.name == "nt":
