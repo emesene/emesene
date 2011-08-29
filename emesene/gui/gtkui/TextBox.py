@@ -128,7 +128,7 @@ class TextBox(gtk.ScrolledWindow):
             return ""
 
         if start.get_offset() > end.get_offset():
-            start = end #set the right begining
+            start, end = end, start #set the right begining
 
         selection = self._buffer.get_slice(start,end)
         char = u"\uFFFC" #it means "widget or pixbuf here"
@@ -138,8 +138,11 @@ class TextBox(gtk.ScrolledWindow):
             if part == char:
                 anchor = start.get_child_anchor()
                 if anchor is not None:
-                    alt = self.widgets[anchor].get_property("tooltip-text")
-                    part = alt
+                    widget = self.widgets[anchor]
+                    if isinstance(widget, gtk.Image):
+                        part = widget.get_tooltip_text()
+                    elif isinstance(widget, gtk.Label):
+                        part = widget.get_text()
             return_string += part #new string with replacements
             start.forward_char()
         return return_string
