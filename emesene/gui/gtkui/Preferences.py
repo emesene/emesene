@@ -596,6 +596,7 @@ class ConversationWindow(BaseTable):
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
         self.session.config.get_or_set('b_conversation_tabs', True)
+        self.session.config.get_or_set('b_conv_tab_popup', False)
         self.append_check(_('Tabbed Conversations'),
                 'session.config.b_conversation_tabs')
         self.append_row(self.tab_pos_cb)
@@ -608,6 +609,8 @@ class ConversationWindow(BaseTable):
             'session.config.b_show_info')
         self.append_check(_('Show conversation toolbar'),
             'session.config.b_show_toolbar')
+        self.append_check(_('Show tabs popup menu'),
+            'session.config.b_conv_tab_popup')
         # small-toolbar sensitivity depends on conversation toolbar visibility
         self.cb_small_toolbar = self.create_check(_('Small conversation toolbar'), 
             'session.config.b_toolbar_small')
