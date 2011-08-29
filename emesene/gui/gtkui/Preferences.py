@@ -43,7 +43,8 @@ except:
 
 # TODO: consider moving to nicer icons than stock ones.
 LIST = [
-    {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Interface')},
+    {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Main Window')},
+    {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Conversation Window')},
     {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('Desktop')},
     {'stock_id' : gtk.STOCK_MEDIA_PLAY,'text' : _('Sounds')},
     {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
@@ -105,7 +106,8 @@ class Preferences(gtk.Window):
 
         config_dir = e3.common.ConfigDir('emesene2')
 
-        self.interface = Interface(session)
+        self.main = MainWindow(session)
+        self.conversation = ConversationWindow(session)
         self.desktop = DesktopTab(session)
         self.sound = Sound(session)
         self.notification = Notification(session)
@@ -131,7 +133,8 @@ class Preferences(gtk.Window):
         self.page_dict = []
 
         # Keep local copies of the objects
-        self.interface_page = self.interface
+        self.main_page = self.main
+        self.conversation_page = self.conversation
         self.desktop_page = self.desktop
         self.sound_page = self.sound
         self.notifications_page = self.notification
@@ -151,9 +154,8 @@ class Preferences(gtk.Window):
         self.session.save_config()
 
     def remove_subscriptions(self):
-        self.interface.remove_subscriptions()
+        self.conversation.remove_subscriptions()
         self.sound.remove_subscriptions()
-        self.theme.remove_subscriptions()
         if hasattr(self, 'msn_papylib'):
             self.msn_papylib.privacy.remove_subscriptions()
 
@@ -176,7 +178,8 @@ class Preferences(gtk.Window):
 
         # Whack the pages into a dict for future reference
 
-        self.page_dict.append(self.interface_page)
+        self.page_dict.append(self.main_page)
+        self.page_dict.append(self.conversation_page)
         self.page_dict.append(self.desktop_page)
         self.page_dict.append(self.sound_page)
         self.page_dict.append(self.notifications_page)
@@ -504,7 +507,7 @@ class BaseTable(gtk.Table):
         syn = syn(self.session, current_service)
         syn.show(True)
 
-class Interface(BaseTable):
+class MainWindow(BaseTable):
     """the panel to display/modify the config related to the gui
     """
 
@@ -514,6 +517,34 @@ class Interface(BaseTable):
         BaseTable.__init__(self, 17, 2)
         self.set_border_width(5)
         self.session = session
+
+        ContactList = extension.get_default('contact list')
+
+        self.append_check(_('Show user panel'),
+            'session.config.b_show_userpanel')
+
+        self.append_range(_('Contact list avatar size'),
+            'session.config.i_avatar_size', 18, 64)
+
+        self.append_entry_default(_('Nick format'), 'nick',
+                'session.config.nick_template_clist', ContactList.NICK_TPL)
+        self.append_entry_default(_('Group format'), 'group',
+                'session.config.group_template', ContactList.GROUP_TPL)
+
+        self.show_all()
+
+class ConversationWindow(BaseTable):
+    """the panel to display/modify the config related to the gui
+    """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 17, 1)
+        self.set_border_width(5)
+        self.session = session
+
+        #language option
 
         langs = list_dicts()
 
@@ -528,14 +559,40 @@ class Interface(BaseTable):
                 self.lang_menu.set_active(index)
             index += 1
 
-        self.session.config.get_or_set('i_tab_position', 0)
-        self.tab_pos_cb = self.create_combo_with_label(_('Tab position'), self.get_tab_positions,
-                'session.config.i_tab_position',range(4))
+        cb_check_spelling = self.create_check(
+            _('Enable spell check if available (requires %s)') % 'python-gtkspell',
+            'session.config.b_enable_spell_check')
 
-        self.append_markup('<b>'+_('Main window:')+'</b>')
-        self.append_check(_('Show user panel'),
-            'session.config.b_show_userpanel')
-        self.append_markup('<b>'+_('Conversation window:')+'</b>')
+        h_lang_box = gtk.HBox()
+        h_lang_box.pack_start(cb_check_spelling)
+        h_lang_box.pack_start(self.lang_menu)
+
+        # override text color option
+
+        cb_override_text_color = self.create_check(_('Override incoming text color'),
+            'session.config.b_override_text_color')
+        self.session.config.subscribe(self._on_cb_override_text_color_toggled,
+            'b_override_text_color')
+
+        def on_color_selected(cb):
+            col = cb.get_color()
+            col_e3 = e3.base.Color(col.red, col.green, col.blue)
+            self.set_attr('session.config.override_text_color', '#'+col_e3.to_hex())
+
+        self.b_text_color = gtk.ColorButton(color=gtk.gdk.color_parse(
+                            self.get_attr('session.config.override_text_color')))
+        self.b_text_color.set_use_alpha(False)
+        self.b_text_color.connect('color-set', on_color_selected)
+        h_color_box = gtk.HBox()
+        h_color_box.pack_start(cb_override_text_color)
+        h_color_box.pack_start(self.b_text_color)
+
+        # preference list
+
+        self.session.config.get_or_set('i_tab_position', 0)
+        self.tab_pos_cb = self.create_combo_with_label(_('Tab position'),
+            self.get_tab_positions, 'session.config.i_tab_position',range(4))
+
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
         self.session.config.get_or_set('b_conversation_tabs', True)
@@ -566,14 +623,15 @@ class Interface(BaseTable):
         self.append_row(self.cb_avatar_left)
         self.append_check(_('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
-        self.append_check(_('Enable spell check if available (requires %s)') % 'python-gtkspell',
-            'session.config.b_enable_spell_check')
-        self.attach(self.lang_menu, 2, 3, 13, 14)
+        self.append_row(h_lang_box)
         self.append_check(_('Show avatars in taskbar instead of status icons'), 
             'session.config.b_show_avatar_in_taskbar')
 
-        self.append_range(_('Contact list avatar size'),
-            'session.config.i_avatar_size', 18, 64)
+        self.append_row(h_color_box)
+        #update ColorButton sensitive
+        self._on_cb_override_text_color_toggled(
+                self.session.config.get_or_set('b_override_text_color', False))
+
         self.append_range(_('Conversation avatar size'),
             'session.config.i_conv_avatar_size', 18, 128)
         
@@ -633,6 +691,14 @@ class Interface(BaseTable):
             'b_enable_spell_check')
         self.session.config.unsubscribe(self._on_conversation_tabs_change,
             'b_conversation_tabs')
+        self.session.config.unsubscribe(self._on_cb_override_text_color_toggled,
+            'b_override_text_color')
+
+    def _on_cb_override_text_color_toggled(self, value):
+        if value:
+            self.b_text_color.set_sensitive(True)
+        else:
+            self.b_text_color.set_sensitive(False)
 
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
@@ -712,32 +778,7 @@ class Theme(BaseTable):
         self.set_border_width(5)
         self.session = session
 
-        ContactList = extension.get_default('contact list')
-
         self.session.config.get_or_set('adium_theme', 'renkoo')
-
-        cb_override_text_color = self.create_check(_('Override incoming text color'),
-            'session.config.b_override_text_color')
-        self.session.config.subscribe(self._on_cb_override_text_color_toggled,
-            'b_override_text_color')
-
-        def on_color_selected(cb):
-            col = cb.get_color()
-            col_e3 = e3.base.Color(col.red, col.green, col.blue)
-            self.set_attr('session.config.override_text_color', '#'+col_e3.to_hex())
-
-        self.b_text_color = gtk.ColorButton(color=gtk.gdk.color_parse(
-                            self.get_attr('session.config.override_text_color')))
-        self.b_text_color.set_use_alpha(False)
-        self.b_text_color.connect('color-set', on_color_selected)
-        h_color_box = gtk.HBox()
-        h_color_box.pack_start(cb_override_text_color)
-        h_color_box.pack_start(self.b_text_color)
-
-        self.append_row(h_color_box)
-        #update ColorButton sensitive
-        self._on_cb_override_text_color_toggled(
-                self.session.config.get_or_set('b_override_text_color', False))
 
         self.append_combo(_('Image theme'), gui.theme.get_image_themes,
             'session.config.image_theme')
@@ -759,11 +800,6 @@ class Theme(BaseTable):
         hbox.pack_start(self.adium_variant_combo, False)
         self.append_row(hbox, None)
 
-        self.append_entry_default(_('Nick format'), 'nick',
-                'session.config.nick_template_clist', ContactList.NICK_TPL)
-        self.append_entry_default(_('Group format'), 'group',
-                'session.config.group_template', ContactList.GROUP_TPL)
-
         self.add_button(_('Apply'), 0, 8,
                 self.on_redraw_main_screen, 0, 0)
 
@@ -781,16 +817,6 @@ class Theme(BaseTable):
         self.adium_variant_combo.get_model().clear()
         self.fill_combo(self.adium_variant_combo,
             gui.theme.conv_theme.get_theme_variants, 'session.config.adium_theme_variant')
-
-    def _on_cb_override_text_color_toggled(self, value):
-        if value:
-            self.b_text_color.set_sensitive(True)
-        else:
-            self.b_text_color.set_sensitive(False)
-
-    def remove_subscriptions(self):
-        self.session.config.unsubscribe(self._on_cb_override_text_color_toggled,
-            'b_override_text_color')
 
 class Extension(BaseTable):
     """the panel to display/modify the config related to the extensions
