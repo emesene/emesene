@@ -77,7 +77,7 @@ class RichWidget(object):
             return
 
         for child in dct.childs:
-            if type(child) == str or type(child) == unicode:
+            if isinstance(child, basestring):
                 self.put_text(child, fg_color, bg_color, font, size,
                     bold, italic, underline, strike)
             elif child.tag == 'img':

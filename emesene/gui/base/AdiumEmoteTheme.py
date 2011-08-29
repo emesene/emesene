@@ -98,15 +98,11 @@ class AdiumEmoteTheme(object):
     def shortcuts_by_length(self, celist=None):
         '''return the list of shortcuts ordered from longest to shortest with
         it's corresponding path or hash '''
-        aux = [[],[],[],[],[],[],[]]
-        for code in self.emotes.keys():
-            aux[len(code)-1].append((code, self.emote_to_path(code, True)))
-        
+        l = [(x, self.emote_to_path(x, True)) for x in self.emotes.keys()]
         if celist is not None:
-           for code, hash_ in celist:
-               aux[len(code)-1].append((code, hash_))
+            l += celist
         
-        return aux[6]+aux[5]+aux[4]+aux[3]+aux[2]+aux[1]+aux[0]
+        return sorted(l, key=lambda pair: len(pair[0]), reverse=True)
 
     def _get_emotes_count(self):
         '''return the number of emoticons registered'''
