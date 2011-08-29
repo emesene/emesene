@@ -201,7 +201,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             matches = re.search(r'<img src="' + path_uri + \
                 '" alt="(?P<alt>\S*)" name="(?P<name>\w*)"',
                 self.output.view.text)
-            groupdict = matches.groupdict({'alt': ''})
+            groupdict = {'alt': ''} if not matches else matches.groupdict()
             dialog = dialog.entry_window(
                         _("Type emoticon's shortcut: "), groupdict['alt'],
                         on_response, _("Choose custom emoticon's shortcut"))
