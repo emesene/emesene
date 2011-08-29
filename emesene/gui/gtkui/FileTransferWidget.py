@@ -62,11 +62,9 @@ class FileTransferWidget(gtk.HBox):
 
         self.menu.add(m_open_file)
         self.menu.add(m_open_dir)
-        self.menu.show_all()
 
         self.event_box.add(self.progress)
         self.pack_start(self.event_box, False, False)
-        self.pack_start(self.menu)
 
         self.buttons = []
         self.show_all()
@@ -88,6 +86,7 @@ class FileTransferWidget(gtk.HBox):
         if event.type == gtk.gdk.BUTTON_PRESS:
             if self.transfer.state == self.transfer.RECEIVED:
                 if event.button == 3:
+                    self.menu.show_all()
                     self.menu.popup(None, None, None, event.button, event.time)
 
     def _on_menu_file_clicked(self, widget):
