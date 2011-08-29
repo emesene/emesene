@@ -18,6 +18,7 @@
 
 import gtk
 import gobject
+import os
 
 import e3
 import gui
@@ -104,7 +105,8 @@ class TextBox(gtk.ScrolledWindow):
     def add_widget_at_anchor(self, anchor, widget):
         self._textbox.add_child_at_anchor(widget, anchor)
         self.widgets[anchor] = widget
-        del self._buffer.widgets[anchor]
+        if anchor in self._buffer.widgets.keys():
+            del self._buffer.widgets[anchor]
         widget.show()
 
     def scroll_to_end(self):
@@ -190,14 +192,15 @@ class InputText(TextBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, config, on_send_message, on_cycle_history, on_drag_data_received):
+    def __init__(self, session, on_send_message, on_cycle_history, on_drag_data_received):
         '''constructor'''
-        TextBox.__init__(self, config, on_drag_data_received)
+        TextBox.__init__(self, session.config, on_drag_data_received)
         self.on_send_message = on_send_message
         self.on_cycle_history = on_cycle_history
         self._tag = None
         self._textbox.connect('key-press-event', self._on_key_press_event)
         self._buffer.connect('changed', self.on_changed_event)
+        self.session = session
 
         self.changed = False
         self.parse_timeout = None
@@ -263,9 +266,14 @@ class InputText(TextBox):
           self.changed = False
           emote_theme = gui.theme.emote_theme
 
-          for code in emote_theme.shortcuts_by_length:
+          caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
+          emcache = caches.get_emoticon_cache(self.session.account.account)
+
+          for code, path in emote_theme.shortcuts_by_length(emcache.list()):
+              if not path.startswith(emote_theme.path):
+                  path = os.path.join(emcache.path, path)
+
               start = self._buffer.get_start_iter()
-              path = emote_theme.emote_to_path(code, True)
               result = start.forward_search(code,
                       gtk.TEXT_SEARCH_VISIBLE_ONLY)
 
@@ -276,16 +284,12 @@ class InputText(TextBox):
                   position, end = result
                   mark_begin = self._buffer.create_mark(None, start, False)
                   mark_end = self._buffer.create_mark(None, end, False)
-                  image = utils.safe_gtk_image_load(path)
-                  image.set_tooltip_text(code)
-                  image.show()
-
+                  
                   self._buffer.delete(position, end)
                   pos = self._buffer.get_iter_at_mark(mark_end)
                   anchor = self._buffer.create_child_anchor(pos)
-                  self._textbox.add_child_at_anchor(image, anchor)
 
-                  self.widgets[anchor] = image
+                  self.add_image_at_anchor(anchor, path, code)
 
                   start = self._buffer.get_iter_at_mark(mark_end)
                   result = start.forward_search(code,

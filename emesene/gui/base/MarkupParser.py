@@ -51,12 +51,9 @@ def unescape(string_):
 def get_full_shortcuts_list(cedict):
     '''return a list of shortcuts from current emoticon theme
     and ce shortcuts'''
-    shortcuts = gui.theme.emote_theme.shortcuts_by_length
-    if cedict is not None:
-        l_cedict = cedict.keys()
-        l_cedict.sort(key=lambda x: len(x), reverse=True)
-        shortcuts.extend(l_cedict)
-    return shortcuts
+    celist = [(x, y) for x, y in cedict.iteritems()]
+    shortcuts = gui.theme.emote_theme.shortcuts_by_length(celist)
+    return [x[0] for x in shortcuts]
 
 def replace_shortcut_with_tag(string, short, tag):
     token = '#IRREPLACEABLE#'
