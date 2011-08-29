@@ -1295,41 +1295,33 @@ class EmotesWindow(gtk.Window):
 
         emote_theme = gui.theme.emote_theme
 
-        for shortcut, name in emote_theme.emotes.iteritems():
-            if name in emotes:
-                continue
+        def button_and_coords(shortcut, path):
             self.shortcut_list.append(shortcut)
-            emotes.append(name)
-
             column = count % columns
             row = count / columns
             button = gtk.Button()
-            path = emote_theme.emote_to_path(shortcut, True)
-
-            if path is None:
-                log.debug(shortcut + ' has no path')
-                continue
-
             button.set_image(self._get_emo_image(path, (20, 20)))
             button.set_tooltip_text(shortcut)
             button.set_relief(gtk.RELIEF_NONE)
             button.connect('clicked', self._on_emote_selected, shortcut)
-            self.table.attach(button, column, column + 1, row, row + 1)
+            return (column, row, button)
 
+        for shortcut, name in emote_theme.emotes.iteritems():
+            path = emote_theme.emote_to_path(shortcut, True)
+            
+            if path is None or name in emotes:
+                continue
+            emotes.append(name)
+            
+            column, row, button = button_and_coords(shortcut, path)
+            self.table.attach(button, column, column + 1, row, row + 1)
+            
             count += 1
 
         for shortcut, hash_ in self.emcache.list():
-            self.shortcut_list.append(shortcut)
-
-            column = count % columns
-            row = count / columns
-            button = gtk.Button()
             path = os.path.join(self.emcache.path, hash_)
 
-            button.set_image(self._get_emo_image(path, (20, 20)))
-            button.set_tooltip_text(shortcut)
-            button.set_relief(gtk.RELIEF_NONE)
-            button.connect('clicked', self._on_emote_selected, shortcut)
+            column, row, button = button_and_coords(shortcut, path)
             button.connect('button-release-event', self._on_emote_clicked, shortcut)
             self.table.attach(button, column, column + 1, row, row + 1)
 

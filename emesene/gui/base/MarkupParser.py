@@ -51,7 +51,9 @@ def unescape(string_):
 def get_full_shortcuts_list(cedict):
     '''return a list of shortcuts from current emoticon theme
     and ce shortcuts'''
-    celist = [(x, y) for x, y in cedict.iteritems()]
+    celist = None
+    if cedict is not None:
+        celist = [(x, y) for x, y in cedict.iteritems()]
     shortcuts = gui.theme.emote_theme.shortcuts_by_length(celist)
     return [x[0] for x in shortcuts]
 
