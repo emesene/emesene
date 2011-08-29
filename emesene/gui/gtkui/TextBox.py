@@ -200,7 +200,7 @@ class InputText(TextBox):
         self._buffer.connect('changed', self.on_changed_event)
 
         self.changed = False
-        self.parse_timeout = gobject.timeout_add(500, self.parse_emotes)
+        self.parse_timeout = None
         self.invisible_tag = gtk.TextTag()
         self.invisible_tag.set_property('invisible', True)
         self._buffer.get_tag_table().add(self.invisible_tag)
@@ -251,48 +251,50 @@ class InputText(TextBox):
 
             self.on_cycle_history(1)
 
+        if self.parse_timeout is None:
+            self.parse_timeout = gobject.timeout_add(500, self.parse_emotes)        
+
     def parse_emotes(self):
         """
         parse the emoticons in the widget and replace them with
         images
         """
-        if not self.changed:
-            return True
+        if self.changed:
+          self.changed = False
+          emote_theme = gui.theme.emote_theme
 
-        self.changed = False
-        emote_theme = gui.theme.emote_theme
+          for code in emote_theme.emotes:
+              start = self._buffer.get_start_iter()
+              path = emote_theme.emote_to_path(code, True)
+              result = start.forward_search(code,
+                      gtk.TEXT_SEARCH_VISIBLE_ONLY)
 
-        for code in emote_theme.emotes:
-            start = self._buffer.get_start_iter()
-            path = emote_theme.emote_to_path(code, True)
-            result = start.forward_search(code,
-                    gtk.TEXT_SEARCH_VISIBLE_ONLY)
+              if result is None:
+                  continue
 
-            if result is None:
-                continue
+              while result is not None:
+                  position, end = result
+                  mark_begin = self._buffer.create_mark(None, start, False)
+                  mark_end = self._buffer.create_mark(None, end, False)
+                  image = utils.safe_gtk_image_load(path)
+                  image.set_tooltip_text(code)
+                  image.show()
 
-            while result is not None:
-                position, end = result
-                mark_begin = self._buffer.create_mark(None, start, False)
-                mark_end = self._buffer.create_mark(None, end, False)
-                image = utils.safe_gtk_image_load(path)
-                image.set_tooltip_text(code)
-                image.show()
+                  self._buffer.delete(position, end)
+                  pos = self._buffer.get_iter_at_mark(mark_end)
+                  anchor = self._buffer.create_child_anchor(pos)
+                  self._textbox.add_child_at_anchor(image, anchor)
 
-                self._buffer.delete(position, end)
-                pos = self._buffer.get_iter_at_mark(mark_end)
-                anchor = self._buffer.create_child_anchor(pos)
-                self._textbox.add_child_at_anchor(image, anchor)
+                  self.widgets[anchor] = image
 
-                self.widgets[anchor] = image
+                  start = self._buffer.get_iter_at_mark(mark_end)
+                  result = start.forward_search(code,
+                          gtk.TEXT_SEARCH_VISIBLE_ONLY)
+                  self._buffer.delete_mark(mark_begin)
+                  self._buffer.delete_mark(mark_end)
 
-                start = self._buffer.get_iter_at_mark(mark_end)
-                result = start.forward_search(code,
-                        gtk.TEXT_SEARCH_VISIBLE_ONLY)
-                self._buffer.delete_mark(mark_begin)
-                self._buffer.delete_mark(mark_end)
-
-        return True
+        self.parse_timeout = None
+        return False
 
     def stop_parse_emotes(self):
         if self.parse_timeout is not None:
