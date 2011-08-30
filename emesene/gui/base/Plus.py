@@ -126,7 +126,7 @@ def _close_tags(message_stack, text_before, tag, arg, do_parse_emotes):
         else:
             message_stack[stack_index]['childs'].append(text_before)
     tag_we_re_closing = message_stack.pop(stack_index)
-    if type(message_stack[stack_index]) == dict:
+    if isinstance(message_stack[stack_index], dict):
         message_stack[stack_index]['childs'].append(tag_we_re_closing)
     else:
         message_stack.append(tag_we_re_closing)
@@ -221,7 +221,7 @@ def _nchars_dict(msgdict):
     '''count how many character are there'''
     nchars = 0
     for child in msgdict['childs']:
-        if type(child) in (str, unicode):
+        if isinstance(child, basestring):
             nchars += len(special_character_re.sub('a', child))
         else:
             nchars += _nchars_dict(child)
@@ -292,7 +292,7 @@ def _hex_colors(msgdict):
         if tag in COLOR_TAGS:
             param = msgdict[tag]
 
-            if type(param) == tuple: #gradient
+            if isinstance(param, tuple): #gradient
                 param1, param2 = param
                 msgdict[tag] = (_color_to_hex(param1), _color_to_hex(param2))
 
@@ -300,7 +300,7 @@ def _hex_colors(msgdict):
                 msgdict[tag] = _color_to_hex(param)
 
     for child in msgdict['childs']:
-        if child and type(child) not in (str, unicode):
+        if child and not isinstance(child, basestring):
             _hex_colors(child)
 
 def _gradientify_string(msg, attr, colors):
@@ -341,7 +341,7 @@ def _gradientify(msgdict, attr=None, colors=None):
     while colors and i < len(msgdict['childs']):
         this_child = msgdict['childs'][i]
 
-        if type(this_child) in (str, unicode):
+        if isinstance(this_child, basestring):
             msgdict['childs'][i] = _gradientify_string(this_child, attr, colors) #will consumate some items from colors!
         else:
             _gradientify(this_child, attr, colors)
@@ -350,11 +350,11 @@ def _gradientify(msgdict, attr=None, colors=None):
 
 def _dict_gradients(msgdict):
     '''apply gradients where needed'''
-    if type(msgdict) != dict: return
+    if not isinstance(msgdict, dict): return
     for subdict in msgdict['childs']:
-        if type(subdict) == dict:
+        if isinstance(subdict, dict):
             tag = subdict['tag']
-            if tag in subdict and type(subdict[tag]) == tuple:
+            if tag in subdict and isinstance(subdict[tag], tuple):
                 _gradientify(subdict)
             _dict_gradients(subdict)
 
@@ -377,14 +377,14 @@ def _dict_translate_tags(msgdict):
 
     #Then go recursive!
     for child in msgdict['childs']:
-        if type(child) == dict:
+        if isinstance(child, dict):
             _dict_translate_tags(child)
 
 def msnplus(text, do_parse_emotes=True):
     '''given a string with msn+ formatting, give a DictObj
     representing its formatting.'''
     message_stack = [{'tag':'', 'childs':[]}]
-    text = unicode(text, 'utf8') if type(text) is not unicode else text
+    text = unicode(text, 'utf8') if not isinstance(text, unicode) else text
     dictlike = _msnplus_to_dict(text, message_stack, do_parse_emotes)
     _hex_colors(dictlike)
     _dict_gradients(dictlike)
