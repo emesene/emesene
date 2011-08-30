@@ -139,7 +139,7 @@ class Dialog(object):
         args.append(window.entry.get_text())
 
         if response_cb:
-            if type(widget) == gtk.Entry:
+            if isinstance(widget, gtk.Entry):
                 response_cb(stock.ACCEPT, *args)
             else:
                 response_cb(*args)
