@@ -76,9 +76,9 @@ class DictObj(dict):
         if name in self:
             obj = self[name]
 
-            if type(obj) == dict:
+            if isinstance(obj, dict):
                 return DictObj(obj)
-            elif type(obj) == list:
+            elif isinstance(obj, list):
                 return ListObj(obj)
 
             return obj
@@ -100,7 +100,7 @@ class DictObj(dict):
 
         childs = []
         for child in self.childs:
-            if type(child) in (str, unicode):
+            if isinstance(child, basestring):
                 childs.append(child)
             else:
                 childs.append(child.to_xml())
@@ -127,9 +127,9 @@ class ListObj(list):
 
         obj = list.__getitem__(self, index)
 
-        if type(obj) == dict:
+        if isinstance(obj, dict):
             return DictObj(obj)
-        elif type(obj) == list:
+        elif isinstance(obj, list):
             return ListObj(obj)
 
         return obj
@@ -154,7 +154,7 @@ def raw_string(dct_):
             return result
 
         for child in dct.childs:
-            if type(child) == str or type(child) == unicode:
+            if isinstance(child, basestring):
                 result.append(str(child))
             else:
                 result = result + helper(child)
