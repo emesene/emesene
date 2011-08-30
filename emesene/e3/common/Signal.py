@@ -81,7 +81,7 @@ class Signal(object):
 def format_callback_name(func):
     '''return a pretty representation for a function name
     '''
-    if type(func) == WeakMethodBound:
+    if isinstance(func, WeakMethodBound):
         return func.f.__name__ + "." + func.f.__name__
     else:
         return func.im_class.__name__ + "." + func.__name__
