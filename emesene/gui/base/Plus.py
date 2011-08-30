@@ -87,7 +87,7 @@ special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
 
 #regex used to remove plus markup
 tag_plus_strip_re = re.compile(
-    '(\[\w(\=#?[0-9a-f]+|\=\w+)?\])|(\[\/\w+(\=#?[0-9a-f]+|\=\w+)?\])',
+    '(\[(/)?\w(\=#?[0-9a-f]+|\=\w+)?\])',
     re.IGNORECASE)
 tag_plus_old_strip_re = re.compile(
     '\·([#&\'@0])|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
