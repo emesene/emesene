@@ -215,7 +215,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         if not obj:
             return
 
-        if type(obj) == e3.Group:
+        if isinstance(obj, e3.Group):
             if not self.show_empty_groups:
                 if special and obj.type == e3.Group.OFFLINE:
                     return True
@@ -273,11 +273,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
             return -1
         elif special1 and not special2:
             return 1
-        elif type(obj1) == e3.Group and type(obj2) == e3.Group:
+        elif isinstance(obj1, e3.Group) and isinstance(obj2, e3.Group):
             return self.compare_groups(obj1, obj2, order1, order2)
-        elif type(obj1) == e3.Contact and type(obj2) == e3.Contact:
+        elif isinstance(obj1, e3.Contact) and isinstance(obj2, e3.Contact):
             return self.compare_contacts(obj1, obj2, order1, order2)
-        elif type(obj1) == e3.Group and type(obj2) == e3.Contact:
+        elif isinstance(obj1, e3.Group) and isinstance(obj2, e3.Contact):
             return -1
         else:
             return 1
@@ -323,9 +323,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 child_iter = self.model.convert_iter_to_child_iter(iterator)
                 obj = self._model[child_iter][1]
 
-                if type(obj) == e3.Group:
+                if isinstance(obj, e3.Group):
                     self.group_menu_selected.emit(obj)
-                elif type(obj) == e3.Contact:
+                elif isinstance(obj, e3.Contact):
                     self.contact_menu_selected.emit(obj)
             else:
                 log.debug('empty paths?')
@@ -351,7 +351,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         if row[6]:
             return False
 
-        return type(row[1]) == e3.Group
+        return isinstance(row[1], e3.Group)
 
     def is_contact_selected(self):
         '''return True if a contact is selected'''
@@ -360,7 +360,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         if selected is None:
             return False
 
-        return type(self._model[selected][1]) == e3.Contact
+        return isinstance(self._model[selected][1], e3.Contact)
 
     def get_group_selected(self):
         '''return a group object if there is a group selected, None otherwise
@@ -428,7 +428,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         for row in self._model:
             obj = row[1]
-            if type(obj) == e3.Group:
+            if isinstance(obj, e3.Group):
                 if obj.name == group.name:
                     log.debug('Trying to add an existing group! ' + obj.name)
                     return row.iter
@@ -442,7 +442,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         for row in self._model:
             obj = row[1]
 
-            if type(obj) == e3.Group and obj.name == group.name:
+            if isinstance(obj, e3.Group) and obj.name == group.name:
                 del self._model[row.iter]
 
     def add_contact(self, contact, group=None):
@@ -516,20 +516,20 @@ class ContactList(gui.ContactList, gtk.TreeView):
             for row in self._model:
                 obj = row[1]
                 # check on group
-                if type(obj) == e3.Group:
+                if isinstance(obj, e3.Group):
                     for contact_row in row.iterchildren():
                         con = contact_row[1]
                         if con.account == contact.account:
                             return contact_row.iter
                 # check on the root
-                elif type(obj) == e3.Contact and obj.account == contact.account:
+                elif isinstance(obj, e3.Contact) and obj.account == contact.account:
                     return row.iter
 
             return self._model.append(None, contact_data)
 
         for row in self._model:
             obj = row[1]
-            if type(obj) == e3.Group and obj.name == group.name:
+            if isinstance(obj, e3.Group) and obj.name == group.name:
                 # if the contact is already on the group, then dont add it
                 for contact_row in row.iterchildren():
                     con = contact_row[1]
@@ -543,7 +543,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 # since we added him to a group
                 for irow in self._model:
                     iobj = irow[1]
-                    if type(iobj) == e3.Contact and \
+                    if isinstance(iobj, e3.Contact) and \
                             iobj.account == contact.account:
                         del self._model[irow.iter]
 
@@ -564,7 +564,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             for row in self._model:
                 obj = row[1]
                 # if we get a group we go through the contacts
-                if type(obj) == e3.Group:
+                if isinstance(obj, e3.Group):
                     for contact_row in row.iterchildren():
                         con = contact_row[1]
                         # if we find it, we remove it
@@ -577,7 +577,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                             self.update_group(obj)
 
                 # if it's a contact without group (at the root)
-                elif type(obj) == e3.Contact and obj.account == contact.account:
+                elif isinstance(obj, e3.Contact) and obj.account == contact.account:
                     # TODO: Is removing only the tree object?
                     del self._model[row.iter]
                     del obj # CHECK!!!!!
@@ -588,7 +588,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         for row in self._model:
             obj = row[1]
             # if it's the group we are searching
-            if type(obj) == e3.Group and obj.name == group.name:
+            if isinstance(obj, e3.Group) and obj.name == group.name:
                 # go through all the contacts
                 for contact_row in row.iterchildren():
                     con = contact_row[1]
@@ -644,7 +644,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         for row in self._model:
             obj = row[1]
 
-            if type(obj) == e3.Group:
+            if isinstance(obj, e3.Group):
                 for contact_row in row.iterchildren():
                     con = contact_row[1]
 
@@ -654,7 +654,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         self._model[contact_row.iter] = contact_data
                         self.update_group(obj)
 
-            elif type(obj) == e3.Contact and obj.account == contact.account:
+            elif isinstance(obj, e3.Contact) and obj.account == contact.account:
                 found = True
                 self._model[row.iter] = contact_data
 
@@ -718,7 +718,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         ''' restore groups after a search'''
         for row in self._model:
             obj = row[1]
-            if type(obj) == e3.Group:
+            if isinstance(obj, e3.Group):
                 self.update_group(obj)
 
     def update_group(self, group):
@@ -733,7 +733,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         for row in self._model:
             obj = row[1]
-            if type(obj) == e3.Group and obj.identifier == group.identifier:
+            if isinstance(obj, e3.Group) and obj.identifier == group.identifier:
                 path = None
                 childpath = None
                 if group.name in self.group_state:
@@ -802,7 +802,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         '''check if the contact isn't there already'''
         for row in self._model:
             obj = row[1]
-            if type(obj) == e3.Group:
+            if isinstance(obj, e3.Group):
                 for contact_row in row.iterchildren():
                     con = contact_row[1]
                     if con.account == contact.account:
@@ -823,7 +823,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 display_name = gui.base.Plus.parse_emotes(display_name) # - emotes
 
                 for x in range(len(display_name)):
-                    if type(display_name[x]) is dict:
+                    if isinstance(display_name[x], dict):
                         display_name[x] = '<img src="file://%s" alt="%s">' %\
                                 (display_name[x]["src"], display_name[x]["alt"])
 

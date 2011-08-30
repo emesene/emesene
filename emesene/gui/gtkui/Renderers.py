@@ -312,11 +312,11 @@ class SmileyLayout(pango.Layout):
         self._base_attrlist = pango.AttrList()
         text = ''
 
-        if type(elements_list) in (str, unicode):
+        if isinstance(elements_list, basestring):
             elements_list = [elements_list]
 
         for element in elements_list:
-            if type(element) in (str, unicode):
+            if isinstance(element, basestring):
                 try:
                     attrl, ptxt, unused = pango.parse_markup(element, u'\x00')
                 except:
@@ -338,7 +338,7 @@ class SmileyLayout(pango.Layout):
                         break
 
                 text += ptxt
-            elif type(element) == gtk.gdk.Pixbuf:
+            elif isinstance(element, gtk.gdk.Pixbuf):
                 self._smilies[len(text)] = element
                 text += '_'
 
