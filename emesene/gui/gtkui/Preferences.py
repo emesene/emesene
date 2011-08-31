@@ -51,7 +51,6 @@ LIST = [
     {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
     {'stock_id' : gtk.STOCK_EXECUTE,'text' : _('Extensions')},
     {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
-    {'stock_id' : gtk.STOCK_NETWORK,'text' : _('Download themes')},
 ]
 
 class Preferences(gtk.Window):
@@ -115,10 +114,6 @@ class Preferences(gtk.Window):
         self.extension = Extension(session)
         self.plugins = PluginWindow.PluginMainVBox(
             session, config_dir.join('plugins'))
-        self.themes_down = DownloadExtension(
-            self.session, 'emesene-community-themes',
-            'emesene-supported-themes', 4, e3.common.Collections.ThemesCollection,
-            config_dir.join('themes'))
 
         self.buttons = gtk.HButtonBox()
         self.buttons.set_border_width(2)
@@ -141,7 +136,6 @@ class Preferences(gtk.Window):
         self.theme_page = self.theme
         self.extensions_page = self.extension
         self.plugins_page = self.plugins
-        self.themes_down_page = self.themes_down
 
         self.__init_list()
 
@@ -186,7 +180,6 @@ class Preferences(gtk.Window):
         self.page_dict.append(self.theme_page)
         self.page_dict.append(self.extensions_page)
         self.page_dict.append(self.plugins_page)
-        self.page_dict.append(self.themes_down_page)
 
         for i in LIST:
             # we should use always the same icon size,
@@ -777,38 +770,39 @@ class Theme(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 6, 1)
+        BaseTable.__init__(self, 1, 1)
         self.set_border_width(5)
         self.session = session
 
         self.session.config.get_or_set('adium_theme', 'renkoo')
 
-        self.append_combo(_('Image theme'), gui.theme.get_image_themes,
+        self.tabs = ExtensionList.ThemeList(session)
+
+        self.tabs.append_theme_tab(_('Image theme'), 'images', gui.theme.image_themes,
             'session.config.image_theme')
-        self.append_combo(_('Sound theme'), gui.theme.get_sound_themes,
+        self.tabs.append_theme_tab(_('Sound theme'), 'sounds', gui.theme.sound_themes,
             'session.config.sound_theme')
-        self.append_combo(_('Emote theme'), gui.theme.get_emote_themes,
+        self.tabs.append_theme_tab(_('Emote theme'), 'emotes', gui.theme.emote_themes,
             'session.config.emote_theme')
-        self.adium_theme_combo = self.create_combo_with_label(_('Adium theme'),
-                gui.theme.get_adium_themes, 'session.config.adium_theme',
-                changed_cb = self._on_adium_theme_combo_changed)
-        self.append_row(self.adium_theme_combo)
-        hbox = gtk.HBox()
-        hbox.set_homogeneous(True)
+        adium_tab = self.tabs.append_theme_tab(_('Adium theme'), 'conversations', gui.theme.conv_themes,
+            'session.config.adium_theme', self._on_adium_theme_combo_changed)
+        self.add(self.tabs)
+
+        hbox = gtk.HBox(True)
         label = gtk.Label(_('Adium theme variant'))
         label.set_alignment(0.0, 0.5)
         self.adium_variant_combo = self.create_combo(gui.theme.conv_theme.get_theme_variants,
                 'session.config.adium_theme_variant')
         hbox.pack_start(label, True, True)
         hbox.pack_start(self.adium_variant_combo, False)
-        self.append_row(hbox, None)
+        adium_tab.pack_start(hbox, False)
 
-        self.add_button(_('Apply'), 0, 8,
-                self.on_redraw_main_screen, 0, 0)
+    def on_update(self):
+        self.tabs.on_update()
 
-    def _on_adium_theme_combo_changed(self, combo, property_name, values=None):
+    def _on_adium_theme_combo_changed(self, property_name, value):
         #update adium variants combo
-        self.on_combo_changed(combo, property_name, values)
+        self.set_attr(property_name, value)
 
         image_name = self.session.config.get_or_set('image_theme', 'default')
         emote_name = self.session.config.get_or_set('emote_theme', 'default')
@@ -1284,183 +1278,3 @@ class PrivacySettings(gtk.VBox):
                 self.session.remove_contact(model.get_value(iter, 0))
         except TypeError:
             pass
-
-class ExtensionMainVBox(gtk.VBox):
-
-    def __init__(self, session):
-        gtk.VBox.__init__(self)
-
-        self.set_border_width(2)
-
-        self.session = session
-        self.session.config.get_or_set('l_active_plugins', [])
-
-        self.ext_list_store = ExtensionList.ExtensionListStore()
-        self.ext_list_view = ExtensionList.ExtensionListView(self.ext_list_store)
-        self.ext_list_view.toggle_renderer.connect('toggled', self._cell_toggled, self.ext_list_store)
-
-        scroll = gtk.ScrolledWindow()
-        scroll.add(self.ext_list_view)
-        scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-        scroll.set_shadow_type(gtk.SHADOW_IN)
-        scroll.set_border_width(1)
-
-        button_hbox = gtk.HButtonBox()
-        button_hbox.set_layout(gtk.BUTTONBOX_END)
-        button_hbox.set_border_width(2)
-
-        self.pack_start(scroll)
-        self.pack_start(button_hbox, False)
-        self.on_cursor_changed(self.ext_list_view)
-
-
-    def set_element_to_fetch(self, element):
-        self.__element = element
-
-
-    def _cell_toggled(self, widget, path, model):
-        model[path][0] = not model[path][0]
-        self.__element[model[path][2]].todownload = model[path][0]
-
-
-    def append_element(self, label):
-        self.ext_list_store.append((self.__element[label].todownload, label, label, True, True))
-
-
-    def clearAll(self):
-        self.ext_list_store.clear()
-
-
-    def on_cursor_changed(self, ext_list_view):
-        model, iter = ext_list_view.get_selection().get_selected()
-        if iter is not None:
-          value = model.get_value(iter,0)
-          if value:
-              self.button_stop.show()
-              self.button_refresh.hide()
-          else:
-              self.button_stop.hide()
-              self.button_refresh.show()
-
-
-class DownloadExtension(BaseTable):
-    """the panel to download extensions
-    """
-
-    def __init__(self, session, community_name, supported_name, n_boxes, collection_class, init_path):
-        """constructor
-        """
-        BaseTable.__init__(self, 4, 1)
-        self.first = False
-        self.n_boxes = n_boxes
-        self.set_border_width(5)
-        self.session = session
-        self.main_vboxes = range(self.n_boxes)
-
-        for i in range(self.n_boxes):
-            self.main_vboxes[i] = ExtensionMainVBox(session)
-
-        self.thc_com = {}
-        self.thc_cur_name = 'Supported'
-
-        self.thc_com['Community'] = collection_class(community_name, init_path)
-        self.thc_com['Supported'] = collection_class(supported_name, init_path)
-
-        self.exts_hbox = gtk.VBox()
-
-        for i in range(self.n_boxes):
-            self.exts_hbox.pack_start(self.main_vboxes[i])
-
-        button_hbox = gtk.HButtonBox()
-        button_hbox.set_layout(gtk.BUTTONBOX_END)
-        button_hbox.set_border_width(2)
-
-        self.button_download = gtk.Button("Download")
-        self.button_download.connect('clicked', self.start_download)
-
-        self.button_refresh = gtk.Button("Refresh")
-        self.button_refresh.connect('clicked', self.start_update)
-
-        self.cmb_source = gtk.ComboBox()
-        cmb_model_sources = gtk.ListStore(str)
-
-        iter=cmb_model_sources.append()
-        cmb_model_sources.set_value(iter, 0, "Supported")
-        iter=cmb_model_sources.append()
-        cmb_model_sources.set_value(iter, 0, "Community")
-        
-        self.cmb_source.set_model(cmb_model_sources)
-        cell = gtk.CellRendererText()
-
-        self.cmb_source.pack_start(cell, True)
-        self.cmb_source.add_attribute(cell, 'text',0)
-        self.cmb_source.set_active(0)
-
-        self.cmb_source.connect('changed', self.on_change_theme_source)
-        button_hbox.pack_start(self.cmb_source, fill = False)
-        button_hbox.pack_start(self.button_download, fill = False)
-        button_hbox.pack_start(self.button_refresh, fill = False)
-
-        self.exts_hbox.pack_start(button_hbox)
-
-        self.add(self.exts_hbox)
-        self.show_all()
-
-
-    def on_change_theme_source(self, combobox):
-        self.thc_cur_name = combobox.get_active_text()
-        self.show_update()
-
-
-    def on_update(self):
-        if not self.first:
-            self.start_update()
-            self.first = True
-
-
-    def start_update(self, widget = None):
-        dialog = extension.get_default('dialog')
-        self.progress = dialog.progress_window(
-                        _('Refresh extensions'), self._end_progress_cb)
-        self.progress.set_action(_("Refreshing extensions"))
-        self.progress.show_all()
-        utils.GtkRunner(self.show_update, self.update)
-
-
-    def start_download(self, widget = None):
-        thc_cur = self.thc_com[self.thc_cur_name]
-        thc_cur.download()
-
-
-    def update(self):
-        for k in self.thc_com:
-            self.thc_com[k].fetch()
-
-
-    def show_update(self, result = True):
-
-        self.progress.update(100.0)
-        self.progress.destroy()
-
-        for i in range(self.n_boxes):
-            self.main_vboxes[i].clearAll()
-
-        thc_cur = self.thc_com[self.thc_cur_name]
-
-        n_box = 0
-
-        for key in thc_cur.extensions_descs:
-            element = thc_cur.extensions_descs[key]
-            self.main_vboxes[n_box].set_element_to_fetch(element)
-
-            for label in element:
-                self.main_vboxes[n_box].append_element(label)
-
-            n_box += 1
-
-
-    def _end_progress_cb(self, event, response = None):
-        '''close refresh'''
-        pass
-
-

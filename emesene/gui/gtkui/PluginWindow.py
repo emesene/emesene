@@ -28,8 +28,7 @@ from ExtensionList import ExtensionDownloadList
 class PluginMainVBox(ExtensionDownloadList):
     def __init__(self, session, init_path):
         ExtensionDownloadList.__init__(
-            self, session, 'emesene-community-plugins',
-            'emesene-supported-plugins', 1,
+            self, session, 'plugins', 1,
             e3.common.Collections.PluginsCollection, init_path)
 
         self.config_button = gtk.Button(stock=gtk.STOCK_PREFERENCES)
@@ -39,6 +38,14 @@ class PluginMainVBox(ExtensionDownloadList):
         self.buttonbox.pack_start(self.config_button, fill=False)
         self.on_cursor_changed(self.list_view)
 
+    def prettify_name(self, name, description=''):
+        '''return a prettier name for the plugin with its description in a new
+        line, using Pango markup.
+        '''
+        name = name.replace('_', ' ')
+        pretty_name = '<span><b>%s</b>\n<small>%s</small></span>'
+        return pretty_name % (name[0].upper() + name[1:], description)
+
     def on_update(self, widget=None, download=False, clear=False):
         if self.first or download or clear:
             self.clear_all()
@@ -47,11 +54,11 @@ class PluginMainVBox(ExtensionDownloadList):
 
             for name in pluginmanager.get_plugins():
                 self.append(pluginmanager.plugin_is_active(name),
-                    self.list_store.prettify_name(name, pluginmanager.plugin_description(name)),
+                    self.prettify_name(name, pluginmanager.plugin_description(name)),
                     name)
             ExtensionDownloadList.on_update(self, widget, download, clear)
 
-    def on_toggled(self, widget, path, model):
+    def on_toggled(self, widget, path, model, type_):
         '''called when the toggle button in list view is pressed'''
         sel = self.list_view.get_selection()
         sel.select_path(path)
@@ -60,7 +67,7 @@ class PluginMainVBox(ExtensionDownloadList):
         else:
             self.on_stop()
 
-    def on_cursor_changed(self, list_view):
+    def on_cursor_changed(self, list_view, type_=''):
         '''called when a row is selected'''
         model, iter_ = list_view.get_selection().get_selected()
         if iter_ is not None:
