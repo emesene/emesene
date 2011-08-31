@@ -472,7 +472,6 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_picture_change_succeed(self, account, path):
         '''callback called when the picture of an account is changed'''
-        # our account?
         if account == self.session.account.account:
             self.avatar.set_from_file(path)
         elif account in self.members:
@@ -480,15 +479,13 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
-		
         if self.avatar_box_is_hidden:
-            self.avatar_box_is_hidden = False
             self.avatarBox.show()
             self.his_avatarBox.show()
         else:
-            self.avatar_box_is_hidden = True
             self.avatarBox.hide()
             self.his_avatarBox.hide()
+        self.avatar_box_is_hidden = not self.avatar_box_is_hidden
 
     def on_contact_attr_changed_succeed(self, account, what, old,
             do_notify=True):
