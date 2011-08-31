@@ -55,13 +55,13 @@ class Theme(object):
         self.sound_themes.add_themes_path(sound_theme_path)
         self.sound_themes.add_themes_path(config_sound_themes_path)
 
-        config_emotes_themes_path = os.path.join(config_themes_path, "emotes")
-        ensure_dir_path(config_emotes_themes_path)
+        config_emote_themes_path = os.path.join(config_themes_path, "emotes")
+        ensure_dir_path(config_emote_themes_path)
 
-        emotes_themes_path = os.path.join(os.getcwd(), "themes", "emotes")
-        self.emotes_themes = AdiumEmoteThemes.AdiumEmoteThemes()
-        self.emotes_themes.add_themes_path(emotes_themes_path)
-        self.emotes_themes.add_themes_path(config_emotes_themes_path)
+        emote_themes_path = os.path.join(os.getcwd(), "themes", "emotes")
+        self.emote_themes = AdiumEmoteThemes.AdiumEmoteThemes()
+        self.emote_themes.add_themes_path(emote_themes_path)
+        self.emote_themes.add_themes_path(config_emote_themes_path)
 
         config_images_themes_path = os.path.join(config_themes_path, "images")
         ensure_dir_path(config_images_themes_path)
@@ -80,7 +80,7 @@ class Theme(object):
         self.conv_theme = self.conv_themes.get_conv_theme (conv_name, conv_variant)
         self.sound_theme = self.sound_themes.get_sound_theme (sound_name)
         self.image_theme = self.image_themes.get_image_theme (image_name)
-        self.emote_theme = self.emotes_themes.get_emote_theme (emote_name)
+        self.emote_theme = self.emote_themes.get_emote_theme (emote_name)
 
     def get_image_themes(self):
         '''return a list of names for the image themes'''
@@ -88,7 +88,7 @@ class Theme(object):
 
     def get_emote_themes(self):
         '''return a list of names for the emote themes'''
-        return self.emotes_themes.get_name_list()
+        return self.emote_themes.get_name_list()
 
     def get_sound_themes(self):
         '''return a list of names for the sound themes'''

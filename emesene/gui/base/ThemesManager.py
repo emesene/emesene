@@ -32,6 +32,7 @@ class ThemesManager(object):
         self.paths = []
         #If themes directory has a pattern in their name like ".AdiumMessageStyle"
         # in adium conversation themes
+        self.extension = pattern
         self.pattern = re.compile(pattern, re.IGNORECASE)
         self.reg_pattern = "*" + pattern
 
@@ -58,14 +59,20 @@ class ThemesManager(object):
 
         return items
 
+    def get_name_from_path(self, path):
+        '''return a name from a path as in list()
+        '''
+        name = os.path.basename(path)
+        name = self.pattern.sub('', name)
+        return name
+
     def get_name_list(self):
         '''return a list with the name of all the available themes
         '''
         items = []
 
         for item in self.list():
-            item = os.path.basename(item)
-            item = self.pattern.sub('', item)
+            item = get_name_from_path(item)
             items.append(item)
 
         return items
