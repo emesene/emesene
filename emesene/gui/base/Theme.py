@@ -88,7 +88,7 @@ class Theme(object):
 
     def _set_conv_theme(self, conv_name):
         '''set the conversation theme with default variant'''
-        self._conv_theme = self.conv_themes.get_conv_theme (conv_name, '')
+        self._conv_theme = self.conv_themes.get_theme (conv_name, '')
 
     conv_theme = property(fget=_get_conv_theme, fset=_set_conv_theme)
 
