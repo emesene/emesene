@@ -792,13 +792,21 @@ class Theme(BaseTable):
         label = gtk.Label(_('Adium theme variant'))
         label.set_alignment(0.0, 0.5)
         self.adium_variant_combo = self.create_combo(gui.theme.conv_theme.get_theme_variants,
-                'session.config.adium_theme_variant')
+                'session.config.adium_theme_variant',
+                changed_cb = self._on_adium_variant_combo_changed)
+
         hbox.pack_start(label, True, True)
         hbox.pack_start(self.adium_variant_combo, False)
         adium_tab.pack_start(hbox, False)
 
     def on_update(self):
         self.tabs.on_update()
+
+    def _on_adium_variant_combo_changed(self, combo, property_name, value):
+        variant_name = combo.get_active_text()
+        #update adium variants combo
+        self.set_attr(property_name, variant_name)
+        gui.theme.conv_theme.variant = variant_name
 
     def _on_adium_theme_combo_changed(self, property_name, value):
         #update adium variants combo
