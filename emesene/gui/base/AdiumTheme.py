@@ -38,17 +38,18 @@ class AdiumTheme(object):
 
         get information from the theme located in path
         '''
-        self.path           = None
-        self.resources_path = None
-        self.incoming_path  = None
-        self.outgoing_path  = None
-        self.content        = None
-        self.incoming       = None
-        self.incoming_next  = None
-        self.outgoing       = None
-        self.outgoing_next  = None
+        self.path               = None
+        self.resources_path     = None
+        self.incoming_path      = None
+        self.outgoing_path      = None
+        self.content            = None
+        self.incoming           = None
+        self.incoming_next      = None
+        self.outgoing           = None
+        self.outgoing_next      = None
 
-        self.variant        = None
+        self._variant           = None
+        self.default_variant    = None
         self.load_information(path, variant)
 
     def load_information(self, path, variant):
@@ -57,10 +58,8 @@ class AdiumTheme(object):
         self.path = path
 
         info_file = file(os.path.join(path, 'Contents', 'Info.plist'))
-
-        if not variant or variant == '':
-            info = parsers.Plist(info_file).info
-            variant = info.get('DefaultVariant', None)
+        info = parsers.Plist(info_file).info
+        self.default_variant = info.get('DefaultVariant', None)
 
         self.variant = variant
 
@@ -257,6 +256,17 @@ class AdiumTheme(object):
                 if extension == ".css":
                     variants.append(basename)
         return variants
+
+    def _get_theme_variant(self):
+        return self._variant
+
+    def _set_theme_variant(self, variant):
+        if not variant or variant == '':
+            self._variant = self.default_variant
+        else:
+            self._variant = variant
+
+    variant = property(fget=_get_theme_variant, fset=_set_theme_variant)
 
 def read_file(*args):
     '''read file if exists and is readable, return None otherwise
