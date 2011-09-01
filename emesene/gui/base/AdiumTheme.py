@@ -33,12 +33,11 @@ class AdiumTheme(object):
     '''a class that contains information of a adium theme
     '''
 
-    def __init__(self, path, timefmt, variant):
+    def __init__(self, path, variant):
         '''constructor
 
         get information from the theme located in path
         '''
-        self.timefmt        = timefmt
         self.path           = None
         self.resources_path = None
         self.incoming_path  = None
@@ -166,7 +165,7 @@ class AdiumTheme(object):
 
         if msg.timestamp is None:
             template = template.replace('%time%',
-                escape(time.strftime(self.timefmt)))
+                escape(time.strftime("%H:%M")))
         else:
             def utc_to_local(t):
                 secs = calendar.timegm(t)

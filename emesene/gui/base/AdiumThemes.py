@@ -48,7 +48,7 @@ class AdiumThemes(ThemesManager.ThemesManager):
             self, os.path.join('themes', 'conversations', 'renkoo.AdiumMessageStyle'),
             ".AdiumMessageStyle")
 
-    def get(self, theme_path, variant='', timefmt="%H:%M"):
+    def get(self, theme_path, variant=''):
         '''return a Theme object instance
         returs True, theme_instance if the validation was ok
         False, reason if some validation failed
@@ -59,7 +59,7 @@ class AdiumThemes(ThemesManager.ThemesManager):
             log.warning(message)
             return status, message
 
-        return True, AdiumTheme.AdiumTheme(theme_path, timefmt, variant)
+        return True, AdiumTheme.AdiumTheme(theme_path, variant)
 
     def validate(self, theme_path):
         '''validate a Theme directory structure
