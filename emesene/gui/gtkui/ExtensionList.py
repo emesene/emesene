@@ -102,7 +102,8 @@ class ExtensionListTab(gtk.VBox):
 
     def _make_list(self, type_, radio):
         '''make a new extension list'''
-        extension_list = ExtensionList(self.session, self.on_toggled, self.on_cursor_changed, radio, type_)
+        extension_list = ExtensionList(
+            self.session, self.on_toggled, self.on_cursor_changed, radio, type_)
         self.boxes.append(extension_list)
         self.extension_types.append(type_)
         return extension_list
@@ -127,7 +128,7 @@ class ExtensionListTab(gtk.VBox):
         '''called when a row is selected'''
         pass
 
-    def prettify_name(self, name, description=''):
+    def prettify_name(self, name, type_, description=''):
         '''return a prettier name for the plugin with its description in a new
         line, using Pango markup.
         '''
@@ -136,14 +137,11 @@ class ExtensionListTab(gtk.VBox):
         return pretty_name % (name[0].upper() + name[1:], description)
 
 class ExtensionDownloadList(ExtensionListTab):
-    def __init__(self, session, list_type, boxes,
+    def __init__(self, session, list_type,
                  collection_class, init_path, radio=False, use_tabs=False):
         '''constructor'''
         ExtensionListTab.__init__(self, session, radio, use_tabs)
         self.first = True
-
-        for i in range(boxes - 1):
-            self.append_list()
 
         self.thc_com = {}
         self.thc_cur_name = 'Supported'
@@ -153,7 +151,7 @@ class ExtensionDownloadList(ExtensionListTab):
         self.thc_com['Community'] = collection_class('emesene-community-'+self.list_type, init_path)
         self.thc_com['Supported'] = collection_class('emesene-supported-'+self.list_type, init_path)
 
-        self.download_list = []
+        self.download_list = {}
 
         refresh_button = gtk.Button(stock=gtk.STOCK_REFRESH)
         refresh_button.connect('clicked', self.on_update, True)
@@ -230,18 +228,17 @@ class ExtensionDownloadList(ExtensionListTab):
         '''show an update list of the set collection'''
         self.progress.update(100.0)
         self.progress.destroy()
-        self.download_list = []
+        self.download_list = {}
 
         thc_cur = self.thc_com[self.thc_cur_name]
 
         for box in self.boxes:
-            self.download_list.append([])
+            self.download_list[box.extension_type] = []
             element = thc_cur.extensions_descs.get(box.extension_type, {})
             box.append(False, '<b>Available for download</b>', 'installable', visible=False)
             for label in element:
                 if label not in box.extension_list:
-                    index = self.extension_types.index(box.extension_type)
-                    self.download_list[index].append(label)
+                    self.download_list[box.extension_type].append(label)
                 box.append(False, self.prettify_name(label, box.extension_type), label, False)
 
     def _end_progress_cb(self, event, response=None):
@@ -252,22 +249,19 @@ class ThemeList(ExtensionDownloadList):
     def __init__(self, session):
         config_dir = e3.common.ConfigDir('emesene2')
         ExtensionDownloadList.__init__(
-            self, session, 'themes', 1,
-            e3.common.Collections.ThemesCollection,
+            self, session, 'themes', e3.common.Collections.ThemesCollection,
             config_dir.join('themes'), True, True)
 
-        self.theme_types = []
-        self.themes = []
-        self.theme_configs = []
-        self.callbacks = []
+        self.themes = {}
+        self.theme_configs = {}
+        self.callbacks = {}
 
     def on_toggled(self, widget, path, model, type_):
         '''called when the toggle button in list view is pressed'''
         for row in model:
             row[0] = False
         model[path][0] = True
-        index = self.theme_types.index(type_)
-        self.callbacks[index](self.theme_configs[index], model[path][2])
+        self.callbacks[type_](self.theme_configs[type_], model[path][2])
 
     def get_attr(self, name):
         """return the value of an attribute, if it has dots, then
@@ -298,22 +292,24 @@ class ThemeList(ExtensionDownloadList):
         self.set_attr(property_name, value)
 
     def on_update(self, widget=None, download=False, clear=False):
-        if self.first or download or clear:
-            for i, box in enumerate(self.boxes):
-                box.clear_all()
-                box.append(False, '<b>Installed</b>', 'installed', visible=False)
-                for path in self.themes[i].list():
-                    label = self.themes[i].get_name_from_path(path)
-                    name = os.path.basename(path)
-                    box.append(name == self.get_attr(self.theme_configs[i]), label, name)
-                ExtensionDownloadList.on_update(self, widget, download, clear)
+        if not (self.first or download or clear):
+            return
+        for box in self.boxes:
+            box.clear_all()
+            box.append(False, '<b>Installed</b>', 'installed', visible=False)
+            current = self.get_attr(self.theme_configs[box.extension_type])
+            for path in self.themes[box.extension_type].list():
+                label = self.themes[box.extension_type].get_name_from_path(path)
+                name = os.path.basename(path)
+                box.append(name == current or label == current, label, name)
+            ExtensionDownloadList.on_update(self, widget, download, clear)
 
     def on_cursor_changed(self, list_view, type_):
         '''called when a row is selected'''
         model, iter_ = list_view.get_selection().get_selected()
         if iter_ is not None:
             value = model.get_value(iter_, 2)
-            if value in self.download_list[self.theme_types.index(type_)]:
+            if value in self.download_list[type_]:
                 self.download_item = value
                 self.download_button.show()
             else:
@@ -323,16 +319,15 @@ class ThemeList(ExtensionDownloadList):
         '''return a prettier name using Pango markup.
         '''
         name = name.replace('_', ' ')
-        name = self.themes[self.theme_types.index(type_)].pattern.sub('', name)
+        name = self.themes[type_].pattern.sub('', name)
         return '%s' % name
 
     def append_theme_tab(self, name, theme_type, theme, theme_config, callback=None):
-        self.theme_types.append(theme_type)
-        self.themes.append(theme)
-        self.theme_configs.append(theme_config)
+        self.themes[theme_type] = theme
+        self.theme_configs[theme_type] = theme_config
         if callback:
-            self.callbacks.append(callback)
+            self.callbacks[theme_type] = callback
         else:
-            self.callbacks.append(self.set_theme)
+            self.callbacks[theme_type] = self.set_theme
         box = self.append_tab(name, theme_type, True)
         return box
