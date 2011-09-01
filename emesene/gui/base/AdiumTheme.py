@@ -58,9 +58,9 @@ class AdiumTheme(object):
 
         info_file = file(os.path.join(path, 'Contents', 'Info.plist'))
 
-        if not variant:
+        if not variant or variant == '':
             info = parsers.Plist(info_file).info
-            variant_name = info.get('DefaultVariant', None)
+            variant = info.get('DefaultVariant', None)
 
         self.variant = variant
 
