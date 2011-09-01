@@ -18,6 +18,9 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import logging
+log = logging.getLogger('gui.base.AdiumEmoteThemes')
+
 import ThemesManager
 import AdiumEmoteTheme
 
@@ -28,6 +31,7 @@ class AdiumEmoteThemes(ThemesManager.ThemesManager):
     def __init__(self):
         '''constructor'''
         ThemesManager.ThemesManager.__init__(self, ".AdiumEmoticonset")
+        self.default_path = os.path.join('themes', 'emotes', 'default.AdiumEmoticonset')
 
     def get(self, theme_path):
         '''return a Theme object instance
@@ -37,21 +41,27 @@ class AdiumEmoteThemes(ThemesManager.ThemesManager):
         status, message = self.validate(theme_path)
 
         if not status:
+            log.warning(message)
             return status, message
 
         return True, AdiumEmoteTheme.AdiumEmoteTheme(theme_path)
 
-    def get_emote_theme (self, emote_name):
+    def get_emote_theme(self, emote_name):
         ''' return the instance of AdiumEmoteTheme corresponding to the
             emote_name or the default theme if isn't found
         '''
-        emote_path = os.path.join('themes', 'emotes', 'default.AdiumEmoticonset')
+        emote_path = self.default_path
 
         for elem in self.list():
             if emote_name in elem:
                 emote_path = elem
 
-        return self.get(emote_path)[1]
+        theme = self.get(emote_path)
+
+        if theme[0]:
+            return theme[1]
+        else:
+            return self.get(self.default_path)[1]
 
     def validate(self, theme_path):
         '''validate a Theme directory structure

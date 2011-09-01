@@ -18,6 +18,9 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import logging
+log = logging.getLogger('gui.base.AdiumThemes')
+
 import ThemesManager
 import AdiumTheme
 
@@ -42,6 +45,7 @@ class AdiumThemes(ThemesManager.ThemesManager):
     def __init__(self):
         '''constructor'''
         ThemesManager.ThemesManager.__init__(self, ".AdiumMessageStyle")
+        self.default_path = os.path.join('themes', 'conversations', 'renkoo.AdiumMessageStyle')
 
     def get(self, theme_path, timefmt="%H:%M", variant=''):
         '''return a Theme object instance
@@ -51,21 +55,27 @@ class AdiumThemes(ThemesManager.ThemesManager):
         status, message = self.validate(theme_path)
 
         if not status:
+            log.warning(message)
             return status, message
 
         return True, AdiumTheme.AdiumTheme(theme_path, timefmt, variant)
 
-    def get_conv_theme (self, conv_name, theme_variant):
+    def get_conv_theme(self, conv_name, theme_variant):
         ''' return the instance of AdiumTheme corresponding to the
             conv_name or the default theme if isn't found
         '''
-        conv_path = os.path.join('themes', 'conversations', 'renkoo.AdiumMessageStyle')
+        conv_path = self.default_path
 
         for elem in self.list():
             if conv_name in elem:
                 conv_path = elem
 
-        return self.get(conv_path, variant=theme_variant)[1]
+        theme = self.get(conv_path, variant=theme_variant)
+
+        if theme[0]:
+            return theme[1]
+        else:
+            return self.get(self.default_path, variant=theme_variant)[1]
 
     def validate(self, theme_path):
         '''validate a Theme directory structure

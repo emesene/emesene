@@ -18,6 +18,9 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import logging
+log = logging.getLogger('gui.base.SoundThemes')
+
 import ThemesManager
 import SoundTheme
 
@@ -28,6 +31,7 @@ class SoundThemes(ThemesManager.ThemesManager):
     def __init__(self):
         '''constructor'''
         ThemesManager.ThemesManager.__init__(self, ".AdiumSoundset")
+        self.default_path = os.path.join('themes', 'sounds', 'default.AdiumSoundset')
 
     def get(self, theme_path):
         '''return a Theme object instance
@@ -37,21 +41,27 @@ class SoundThemes(ThemesManager.ThemesManager):
         status, message = self.validate(theme_path)
 
         if not status:
+            log.warning(message)
             return status, message
 
         return True, SoundTheme.SoundTheme(theme_path)
 
-    def get_sound_theme (self, sound_name):
+    def get_sound_theme(self, sound_name):
         ''' return the instance of SoundThemes corresponding to the
             sound_name or the default theme if isn't found
         '''
-        sound_path = os.path.join('themes', 'sounds', 'default.AdiumSoundset')
+        sound_path = self.default_path
 
         for elem in self.list():
             if sound_name in elem:
                 sound_path = elem
 
-        return self.get(sound_path)[1]
+        theme = self.get(sound_path)
+
+        if theme[0]:
+            return theme[1]
+        else:
+            return self.get(self.default_path)[1]
 
     def validate(self, theme_path):
         '''validate a Theme directory structure
