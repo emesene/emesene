@@ -44,7 +44,7 @@ class PluginMainVBox(ExtensionDownloadList):
         '''
         name = name.replace('_', ' ')
         pretty_name = '<span><b>%s</b>\n<small>%s</small></span>'
-        return pretty_name % (name[0].upper() + name[1:], description)
+        return pretty_name % (name.capitalize(), description)
 
     def on_update(self, widget=None, download=False, clear=False):
         if self.first or download or clear:

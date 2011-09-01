@@ -134,7 +134,7 @@ class ExtensionListTab(gtk.VBox):
         '''
         name = name.replace('_', ' ')
         pretty_name = '<span><b>%s</b>\n<small>%s</small></span>'
-        return pretty_name % (name[0].upper() + name[1:], description)
+        return pretty_name % (name.capitalize(), description)
 
 class ExtensionDownloadList(ExtensionListTab):
     def __init__(self, session, list_type,
