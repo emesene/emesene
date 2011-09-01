@@ -44,10 +44,11 @@ class AdiumThemes(ThemesManager.ThemesManager):
 
     def __init__(self):
         '''constructor'''
-        ThemesManager.ThemesManager.__init__(self, ".AdiumMessageStyle")
-        self.default_path = os.path.join('themes', 'conversations', 'renkoo.AdiumMessageStyle')
+        ThemesManager.ThemesManager.__init__(
+            self, os.path.join('themes', 'conversations', 'renkoo.AdiumMessageStyle'),
+            ".AdiumMessageStyle")
 
-    def get(self, theme_path, timefmt="%H:%M", variant=''):
+    def get(self, theme_path, variant='', timefmt="%H:%M"):
         '''return a Theme object instance
         returs True, theme_instance if the validation was ok
         False, reason if some validation failed
@@ -59,23 +60,6 @@ class AdiumThemes(ThemesManager.ThemesManager):
             return status, message
 
         return True, AdiumTheme.AdiumTheme(theme_path, timefmt, variant)
-
-    def get_conv_theme(self, conv_name, theme_variant):
-        ''' return the instance of AdiumTheme corresponding to the
-            conv_name or the default theme if isn't found
-        '''
-        conv_path = self.default_path
-
-        for elem in self.list():
-            if conv_name in elem:
-                conv_path = elem
-
-        theme = self.get(conv_path, variant=theme_variant)
-
-        if theme[0]:
-            return theme[1]
-        else:
-            return self.get(self.default_path, variant=theme_variant)[1]
 
     def validate(self, theme_path):
         '''validate a Theme directory structure

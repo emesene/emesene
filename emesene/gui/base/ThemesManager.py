@@ -25,11 +25,12 @@ class ThemesManager(object):
     '''a class to handle adium themes
     '''
 
-    def __init__(self, pattern):
+    def __init__(self, default_path, pattern):
         '''constructor'''
 
         # the paths to look for themes
         self.paths = []
+        self.default_path = default_path
         #If themes directory has a pattern in their name like ".AdiumMessageStyle"
         # in adium conversation themes
         self.extension = pattern
@@ -76,6 +77,23 @@ class ThemesManager(object):
             items.append(item)
 
         return items
+
+    def get_theme(self, name, *args):
+        ''' return the instance of the theme corresponding to the
+            name or the default theme if it isn't found
+        '''
+        path = self.default_path
+
+        for elem in self.list():
+            if name in elem:
+                path = elem
+
+        theme = self.get(path, *args)
+
+        if theme[0]:
+            return theme[1]
+        else:
+            return self.get(self.default_path, *args)[1]
 
     def get(self, theme_path):
         '''return a Theme object instance

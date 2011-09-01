@@ -38,7 +38,8 @@ class ImagesThemes(ThemesManager.ThemesManager):
 
     def __init__(self):
         '''constructor'''
-        ThemesManager.ThemesManager.__init__(self, "")
+        ThemesManager.ThemesManager.__init__(
+            self, os.path.join('themes', 'images', 'default'), "")
 
     def get(self, theme_path):
         '''return a Theme object instance
@@ -48,21 +49,7 @@ class ImagesThemes(ThemesManager.ThemesManager):
         if not status:
             log.warning(message)
 
-        return ImageTheme.ImageTheme(theme_path)
-
-    def get_image_theme(self, image_name):
-        ''' return the instance of ImageThemes corresponding to the
-            image_name or the default theme if isn't found
-        '''
-        image_path = os.path.join('themes', 'images', 'default')
-
-        print image_name
-
-        for elem in self.list():
-            if image_name in elem:
-                image_path = elem
-
-        return self.get(image_path)
+        return True, ImageTheme.ImageTheme(theme_path)
 
     def validate(self, theme_path):
         '''validate a Theme directory structure
