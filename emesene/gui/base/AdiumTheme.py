@@ -154,8 +154,6 @@ class AdiumTheme(object):
         else:
             template = template.replace('%sender%', escape(msg.display_name))
 
-        print template
-
         template = template.replace('%senderScreenName%', escape(msg.sender))
         template = template.replace('%senderDisplayName%',
             escape(msg.display_name))
