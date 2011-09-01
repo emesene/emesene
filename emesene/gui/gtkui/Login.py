@@ -749,10 +749,10 @@ class Login(LoginBase):
         self._update_fields(self.cmb_account.get_active_text(), True)
 
         def searchService(model, path, iter, user_data):
-            if(model.get(iter,0)[0]==user_data[0]):
+            if(model.get(iter, 0)[0]==user_data[0]):
                 user_data[2].set_active(user_data[1])
                 return True
-            user_data[1]+=1
+            user_data[1] += 1
             return False
 
         i = 0
@@ -818,7 +818,7 @@ class ConnectingWindow(Login):
         '''
         cause the return to login window
         '''
-        self.cancel_clicked=True
+        self.cancel_clicked = True
         self.avatar.stop()
         if self.reconnect_timer_id is not None:
             gobject.source_remove(self.reconnect_timer_id)
