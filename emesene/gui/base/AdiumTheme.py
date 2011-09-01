@@ -138,9 +138,9 @@ class AdiumTheme(object):
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
         if(len(msg.alias) > DISPLAY_NAME_LIMIT):
-            msg.alias = msg.alias[0:DISPLAY_NAME_LIMIT] + "..."
+            msg.alias = msg.alias.decode('utf-8')[0:DISPLAY_NAME_LIMIT] + "..."
         if(len(msg.display_name) > DISPLAY_NAME_LIMIT):
-            msg.display_name = msg.display_name[0:DISPLAY_NAME_LIMIT] + "..."
+            msg.display_name = msg.display_name.decode('utf-8')[0:DISPLAY_NAME_LIMIT] + "..."
 
         msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir, msg.sender)
         msgtext = MarkupParser.urlify(msgtext)
@@ -153,6 +153,8 @@ class AdiumTheme(object):
             template = template.replace('%sender%', escape(msg.alias))
         else:
             template = template.replace('%sender%', escape(msg.display_name))
+
+        print template
 
         template = template.replace('%senderScreenName%', escape(msg.sender))
         template = template.replace('%senderDisplayName%',
