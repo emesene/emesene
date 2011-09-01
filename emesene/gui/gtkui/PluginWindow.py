@@ -33,7 +33,7 @@ class PluginMainVBox(ExtensionDownloadList):
 
         self.config_button = gtk.Button(stock=gtk.STOCK_PREFERENCES)
         self.config_button.connect('clicked', self.on_config)
-        self.download_button.set_property('no-show-all', True)
+        self.no_button.set_property('no-show-all', True)
 
         self.buttonbox.pack_start(self.config_button, fill=False)
         self.on_cursor_changed(self.list_view)
@@ -72,7 +72,7 @@ class PluginMainVBox(ExtensionDownloadList):
         model, iter_ = list_view.get_selection().get_selected()
         if iter_ is not None:
             value = model.get_value(iter_, 2)
-            if value in self.download_list:
+            if value in self.download_list[type_]:
                 self.download_item = value
                 self.config_button.hide()
                 self.download_button.show()
