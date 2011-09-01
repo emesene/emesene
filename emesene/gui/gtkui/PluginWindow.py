@@ -49,7 +49,7 @@ class PluginMainVBox(ExtensionDownloadList):
     def on_update(self, widget=None, download=False, clear=False):
         if self.first or download or clear:
             self.clear_all()
-            self.append(False, '<b>Installed</b>', 'installed', True, False)
+            self.append(False, '<b>'+_('Installed')+'</b>', 'installed', True, False)
             pluginmanager = get_pluginmanager()
 
             for name in pluginmanager.get_plugins():

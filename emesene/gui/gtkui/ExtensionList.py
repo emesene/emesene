@@ -144,12 +144,15 @@ class ExtensionDownloadList(ExtensionListTab):
         self.first = True
 
         self.thc_com = {}
-        self.thc_cur_name = 'Supported'
-
         self.list_type = list_type
 
-        self.thc_com['Community'] = collection_class('emesene-community-'+self.list_type, init_path)
-        self.thc_com['Supported'] = collection_class('emesene-supported-'+self.list_type, init_path)
+        supported = _('Supported')
+        community = _('Community')
+
+        self.thc_cur_name = supported
+
+        self.thc_com[supported] = collection_class('emesene-supported-'+self.list_type, init_path)
+        self.thc_com[community] = collection_class('emesene-community-'+self.list_type, init_path)
 
         self.download_list = {}
 
@@ -164,23 +167,15 @@ class ExtensionDownloadList(ExtensionListTab):
 
         self.no_button = gtk.HBox()
 
-        source_combo = gtk.ComboBox()
-        cmb_model_sources = gtk.ListStore(str)
+        source_combo = gtk.combo_box_new_text()
 
-        iter_ = cmb_model_sources.append()
-        cmb_model_sources.set_value(iter_, 0, "Supported")
-        iter_ = cmb_model_sources.append()
-        cmb_model_sources.set_value(iter_, 0, "Community")
-
-        source_combo.set_model(cmb_model_sources)
-        cell = gtk.CellRendererText()
-
-        source_combo.pack_start(cell, True)
-        source_combo.add_attribute(cell, 'text', 0)
+        source_combo.append_text(supported)
+        source_combo.append_text(community)
         source_combo.set_active(0)
+        source_combo.connect('changed', self.on_change_source)
+
         hbox = gtk.HBox()
 
-        source_combo.connect('changed', self.on_change_source)
         self.buttonbox.pack_start(source_combo, fill=False)
         self.buttonbox.pack_start(refresh_button, fill=False)
         self.buttonbox.pack_start(hbox)
@@ -241,7 +236,7 @@ class ExtensionDownloadList(ExtensionListTab):
         for box in self.boxes:
             self.download_list[box.extension_type] = []
             element = thc_cur.extensions_descs.get(box.extension_type, {})
-            box.append(False, '<b>Available for download</b>', 'installable', visible=False)
+            box.append(False, '<b>'+_('Available for download')+'</b>', 'installable', visible=False)
             for label in element:
                 if label not in box.extension_list:
                     self.download_list[box.extension_type].append(label)
@@ -302,7 +297,7 @@ class ThemeList(ExtensionDownloadList):
             return
         for box in self.boxes:
             box.clear_all()
-            box.append(False, '<b>Installed</b>', 'installed', visible=False)
+            box.append(False, '<b>'+_('Installed')+'</b>', 'installed', visible=False)
             current = self.get_attr(self.theme_configs[box.extension_type])
             for path in self.themes[box.extension_type].list():
                 label = self.themes[box.extension_type].get_name_from_path(path)
