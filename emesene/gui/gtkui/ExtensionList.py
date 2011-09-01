@@ -160,6 +160,9 @@ class ExtensionDownloadList(ExtensionListTab):
         self.download_button.set_image(gtk.image_new_from_stock(
                                        gtk.STOCK_GO_DOWN, gtk.ICON_SIZE_MENU))
         self.download_button.connect('clicked', self.start_download)
+        self.download_button.set_property('no-show-all', True)
+
+        self.no_button = gtk.HBox()
 
         source_combo = gtk.ComboBox()
         cmb_model_sources = gtk.ListStore(str)
@@ -182,17 +185,20 @@ class ExtensionDownloadList(ExtensionListTab):
         self.buttonbox.pack_start(refresh_button, fill=False)
         self.buttonbox.pack_start(hbox)
         self.buttonbox.pack_start(self.download_button, fill=False)
+        self.buttonbox.pack_start(self.no_button)
 
     def on_cursor_changed(self, list_view, type_):
         '''called when a row is selected'''
         model, iter_ = list_view.get_selection().get_selected()
         if iter_ is not None:
             value = model.get_value(iter_, 2)
-            if value in self.download_list:
+            if value in self.download_list[type_]:
                 self.download_item = value
                 self.download_button.show()
+                self.no_button.hide()
             else:
                 self.download_button.hide()
+                self.no_button.show()
 
     def on_change_source(self, combobox):
         '''called when the source is changed'''
@@ -303,17 +309,6 @@ class ThemeList(ExtensionDownloadList):
                 name = os.path.basename(path)
                 box.append(name == current or label == current, label, name)
             ExtensionDownloadList.on_update(self, widget, download, clear)
-
-    def on_cursor_changed(self, list_view, type_):
-        '''called when a row is selected'''
-        model, iter_ = list_view.get_selection().get_selected()
-        if iter_ is not None:
-            value = model.get_value(iter_, 2)
-            if value in self.download_list[type_]:
-                self.download_item = value
-                self.download_button.show()
-            else:
-                self.download_button.hide()
 
     def prettify_name(self, name, type_):
         '''return a prettier name using Pango markup.
