@@ -247,7 +247,7 @@ class OfflineEvent(papyon.event.OfflineMessagesEventInterface):
             self._client._on_conversation_oim_received(message)
         self._client.oim_box.delete_messages()
 
-    def on_oim_messages_deleted(self):
+    def on_oim_messages_deleted(self, *messages=None):
         log.info("OIMs deleted on the server")
 
     def on_oim_message_sent(self, recipient, message):
