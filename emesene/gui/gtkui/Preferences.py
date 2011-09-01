@@ -804,12 +804,7 @@ class Theme(BaseTable):
         #update adium variants combo
         self.set_attr(property_name, value)
 
-        image_name = self.session.config.get_or_set('image_theme', 'default')
-        emote_name = self.session.config.get_or_set('emote_theme', 'default')
-        sound_name = self.session.config.get_or_set('sound_theme', 'default')
-        conv_name = self.session.config.get_or_set('adium_theme',
-                'renkoo.AdiumMessagesStyle')
-        gui.theme.set_theme(image_name, emote_name, sound_name, conv_name)
+        gui.theme.conv_theme = value
         #clear combo
         self.adium_variant_combo.get_model().clear()
         self.fill_combo(self.adium_variant_combo,

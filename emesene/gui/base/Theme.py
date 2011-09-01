@@ -77,10 +77,20 @@ class Theme(object):
         '''set the theme name and change all the paths to reflect the change'''
 
         # conv_name is the name of the selected adium conversation theme
-        self.conv_theme = self.conv_themes.get_conv_theme (conv_name, conv_variant)
+        self._conv_theme = self.conv_themes.get_conv_theme (conv_name, conv_variant)
         self.sound_theme = self.sound_themes.get_sound_theme (sound_name)
         self.image_theme = self.image_themes.get_image_theme (image_name)
         self.emote_theme = self.emote_themes.get_emote_theme (emote_name)
+
+    def _get_conv_theme(self):
+        '''return the conversation theme'''
+        return self._conv_theme
+
+    def _set_conv_theme(self, conv_name):
+        '''set the conversation theme with default variant'''
+        self._conv_theme = self.conv_themes.get_conv_theme (conv_name, '')
+
+    conv_theme = property(fget=_get_conv_theme, fset=_set_conv_theme)
 
     def get_image_themes(self):
         '''return a list of names for the image themes'''
