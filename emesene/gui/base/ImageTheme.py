@@ -71,53 +71,55 @@ class ImageTheme(object):
         self.tool_invite = None
         self.tool_clean = None
         self.tool_file_transfer = None
-        
+
+        self.default_path = os.path.join('themes', 'images', 'default')
+
         self.load_information(path)
 
     def load_information(self, path):
         '''load the information of the theme on path
         '''
-        self.av = os.path.join(path, "audiovideo.png")
-        self.video = os.path.join(path, "video.png")
-        self.call = os.path.join(path, "call.png")
-        self.user = os.path.join(path, "user.png")
-        self.user_def_image = os.path.join(path, "user_def_image.png")
-        self.user_def_imagetool = os.path.join(path, "user_def_imagetool.png")
-        self.email = os.path.join(path, "email.png")
-        self.mailbox = os.path.join(path, "mailbox.png")
-        self.users = os.path.join(path, "users.png")
-        self.password = os.path.join(path, "password.png")
-        self.logo = os.path.join(path, "logo.png")
-        self.logo16 = os.path.join(path, "logo16.png")
-        self.logo32 = os.path.join(path, "logo32.png")
-        self.logo48 = os.path.join(path, "logo48.png")
+        self.av = self.get_image(path, "audiovideo.png")
+        self.video = self.get_image(path, "video.png")
+        self.call = self.get_image(path, "call.png")
+        self.user = self.get_image(path, "user.png")
+        self.user_def_image = self.get_image(path, "user_def_image.png")
+        self.user_def_imagetool = self.get_image(path, "user_def_imagetool.png")
+        self.email = self.get_image(path, "email.png")
+        self.mailbox = self.get_image(path, "mailbox.png")
+        self.users = self.get_image(path, "users.png")
+        self.password = self.get_image(path, "password.png")
+        self.logo = self.get_image(path, "logo.png")
+        self.logo16 = self.get_image(path, "logo16.png")
+        self.logo32 = self.get_image(path, "logo32.png")
+        self.logo48 = self.get_image(path, "logo48.png")
         self.logo96 = self.logo
-        self.throbber = os.path.join(path, "throbber.gif")
-        self.connect = os.path.join(path, "connect.png")
-        self.chat = os.path.join(path, "chat.png")
-        self.group_chat = os.path.join(path, "group-chat.png")
-        self.typing = os.path.join(path, "typing.png")
-        self.new_message = os.path.join(path, "new-message.gif")
-        self.blocked_overlay = os.path.join(path, "blocked-overlay.png")
-        self.blocked_overlay_big = os.path.join(path, "blocked-overlay-big.png")
-        self.transfer_success = os.path.join(path, "transfer_success.png")
-        self.transfer_unsuccess = os.path.join(path, "transfer_unsuccess.png")
-        self.service_msn = os.path.join(path, "msn.png")
-        self.service_facebook = os.path.join(path, "facebook.png")
-        self.service_gtalk = os.path.join(path, "gtalk.png")
-        self.service_dummy = os.path.join(path, "dummy.png")
-        self.favorite = os.path.join(path, "favorite.png")
+        self.throbber = self.get_image(path, "throbber.gif")
+        self.connect = self.get_image(path, "connect.png")
+        self.chat = self.get_image(path, "chat.png")
+        self.group_chat = self.get_image(path, "group-chat.png")
+        self.typing = self.get_image(path, "typing.png")
+        self.new_message = self.get_image(path, "new-message.gif")
+        self.blocked_overlay = self.get_image(path, "blocked-overlay.png")
+        self.blocked_overlay_big = self.get_image(path, "blocked-overlay-big.png")
+        self.transfer_success = self.get_image(path, "transfer_success.png")
+        self.transfer_unsuccess = self.get_image(path, "transfer_unsuccess.png")
+        self.service_msn = self.get_image(path, "msn.png")
+        self.service_facebook = self.get_image(path, "facebook.png")
+        self.service_gtalk = self.get_image(path, "gtalk.png")
+        self.service_dummy = self.get_image(path, "dummy.png")
+        self.favorite = self.get_image(path, "favorite.png")
 
         self.status_icons[status.ONLINE] = \
-            os.path.join(path, "online.png")
+            self.get_image(path, "online.png")
         self.status_icons[status.OFFLINE] = \
-            os.path.join(path, "offline.png")
+            self.get_image(path, "offline.png")
         self.status_icons[status.BUSY] = \
-            os.path.join(path, "busy.png")
+            self.get_image(path, "busy.png")
         self.status_icons[status.AWAY] = \
-            os.path.join(path, "away.png")
+            self.get_image(path, "away.png")
         self.status_icons[status.IDLE] = \
-            os.path.join(path, "idle.png")
+            self.get_image(path, "idle.png")
 
         # allow different icons for indicators/tray icons
         # note: a panel subdirectory requires six pics: 
@@ -154,6 +156,14 @@ class ImageTheme(object):
             self.tool_clean = os.path.join(toolbar_path, "clean-chat.png")
             self.tool_file_transfer = os.path.join(toolbar_path, "file-transfer.png")
             self.tool_ublock = os.path.join(toolbar_path, "ublock.png")
+
+    def get_image(self, path, name):
+        '''get the image path or else use the default image'''
+        full_path = os.path.join(path, name)
+        if os.path.isfile(full_path):
+            return full_path
+        else:
+            return os.path.join(self.default_path, name)
 
     def has_custom_toolbar_icons(self):
         return self.toolbar_path != None
