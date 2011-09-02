@@ -48,7 +48,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             self.popup_enable()
 
         # mozilla tabs are fixed-width, otherwise do the same as emesene-1
-        self.mozilla_tabs = session.config.get_or_set('b_conv_tab_mozilla_like', False)
+        self.mozilla_tabs = session.config.get_or_set('b_conv_tab_mozilla_like', 
+                                                      False)
 
         self.connect('switch-page', self._on_switch_page)
         self.connect('page-reordered', self._on_page_reordered)
@@ -165,7 +166,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
             self.set_message_waiting(page, False)
         if page.show_avatar_in_taskbar:
-            self.update_window(page.text, page.his_avatar.filename, self.get_current_page())
+            self.update_window(page.text, page.his_avatar.filename, 
+                               self.get_current_page())
         else:
             self.update_window(page.text, page.icon, self.get_current_page())
         page.input_grab_focus()
@@ -206,13 +208,15 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         """
         Conversation = extension.get_default('conversation')
         TabWidget = extension.get_default('conversation tab')
-        conversation = Conversation(self.session, cid, self.update_window, None, members)
+        conversation = Conversation(self.session, cid, self.update_window, 
+                                    None, members)
         label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close,
             conversation, self.mozilla_tabs)
         label.set_image(gui.theme.image_theme.connect)
         conversation.tab_label = label
         conversation.tab_index=self.append_page_menu(conversation, label)
-        self.set_tab_label_packing(conversation, not self.mozilla_tabs, True, gtk.PACK_START)
+        self.set_tab_label_packing(conversation, not self.mozilla_tabs, True, 
+                                   gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
 
         return conversation
@@ -220,7 +224,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
     def update_window(self, text, icon, index):
         ''' updates the window's border and item on taskbar
             with given text and icon '''
-        if self.get_current_page() == index or index == (self.get_current_page() + self.get_n_pages()):
+        current_page = self.get_current_page()
+        if current_page == index or current_page + self.get_n_pages() == index:
             win = self.get_parent() # gtk.Window, not a nice hack.
             if win is None:
                 return
