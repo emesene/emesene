@@ -280,7 +280,8 @@ class Dialog(object):
         chooser.set_current_folder(current_path)
         setattr(window, 'chooser', chooser)
         window.hbox.pack_start(chooser)
-        chooser.connect("file-activated", cls.on_file_click_cb, window, response_cb)
+        chooser.connect("file-activated", cls.on_file_click_cb, window, 
+                        response_cb)
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.chooser_cb)
         cls.add_button(window, gtk.STOCK_OPEN, stock.OPEN, response_cb,
@@ -809,7 +810,8 @@ class Dialog(object):
                 passwd = t_passwd.get_text()
 
                 callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
-                        user, passwd, session_id, service, server_host, server_port)
+                         user, passwd, session_id, service, 
+                         server_host, server_port)
 
             window.hide()
 
@@ -895,7 +897,8 @@ class Dialog(object):
             windows.hide()
 
         savebutt.connect('clicked', save_profile)
-        avatarEventBox.connect("button-press-event", handler.on_set_picture_selected)
+        avatarEventBox.connect("button-press-event", 
+                               handler.on_set_picture_selected)
 
         vbox0 = gtk.VBox()
 

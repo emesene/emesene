@@ -34,6 +34,10 @@ class Conversation(gtk.VBox, gui.Conversation):
     DESCRIPTION = 'The widget that displays a conversation'
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
+    
+    VIDEO_ONLY = 0
+    AUDIO_ONLY = 1
+    VIDEOAUDIO = 2
 
     def __init__(self, session, cid, update_win, tab_label, members=None):
         '''constructor'''
@@ -50,7 +54,9 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel = gtk.VPaned()
 
-        self.show_avatar_in_taskbar = self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
+        self.show_avatar_in_taskbar = self.session.config.get_or_set( \
+                                            'b_show_avatar_in_taskbar', 
+                                            True)
 
         Header = extension.get_default('conversation header')
         OutputText = extension.get_default('conversation output')
@@ -77,7 +83,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.his_avatarBox = gtk.EventBox()
         self.his_avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.his_avatarBox.connect('button-press-event', self._on_his_avatar_click)
+        self.his_avatarBox.connect('button-press-event', 
+                                   self._on_his_avatar_click)
 
         self.his_avatar = Avatar(cell_dimension=avatar_size)
         self.his_avatarBox.add(self.his_avatar)
@@ -348,7 +355,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_text(self.text)
 
         if self.show_avatar_in_taskbar:
-            self.update_window(self.text, self.his_avatar.filename, self.tab_index)
+            self.update_window(self.text, 
+                               self.his_avatar.filename, 
+                               self.tab_index)
         else:
             self.update_window(self.text, self.icon, self.tab_index)
 
@@ -562,21 +571,24 @@ class Conversation(gtk.VBox, gui.Conversation):
         account = self.members[0]
         self.call_widget.show_all()
         x_other, x_self = self.call_widget.get_xids()
-        self.session.call_invite(self.cid, account, 0, x_other, x_self) # 0 = Video only
+        self.session.call_invite(self.cid, account, 
+                                 self.VIDEO_ONLY, x_other, x_self)
 
     def on_voice_call(self):
         '''called when the user is requesting an audio-only call'''
         account = self.members[0]
         self.call_widget.show_all()
         x_other, x_self = self.call_widget.get_xids()
-        self.session.call_invite(self.cid, account, 1, x_other, x_self) # 1 = Audio only
+        self.session.call_invite(self.cid, account, 
+                                 self.AUDIO_ONLY, x_other, x_self)
 
     def on_av_call(self):
         '''called when the user is requesting an audio-video call'''
         account = self.members[0]
         self.call_widget.show_all()
         x_other, x_self = self.call_widget.get_xids()
-        self.session.call_invite(self.cid, account, 2, x_other, x_self) # 2 = Audio/Video
+        self.session.call_invite(self.cid, account, 
+                                 self.VIDEOAUDIO, x_other, x_self)
 
     def on_drag_data_received(self, widget, context, posx, posy,\
                           selection, info, timestamp):
