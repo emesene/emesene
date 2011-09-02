@@ -67,18 +67,9 @@ class PluginMainVBox(ExtensionDownloadList):
         else:
             self.on_stop()
 
-    def on_cursor_changed(self, list_view, type_=''):
+    def on_cursor_changed(self, list_view, type_='plugin'):
         '''called when a row is selected'''
-        model, iter_ = list_view.get_selection().get_selected()
-        if iter_ is not None:
-            value = model.get_value(iter_, 2)
-            if value in self.download_list[type_]:
-                self.download_item = value
-                self.config_button.hide()
-                self.download_button.show()
-            else:
-                self.download_button.hide()
-                self.config_button.show()
+        ExtensionDownloadList.on_cursor_changed(self, list_view, type_, self.config_button)
 
     def on_start(self, *args):
         '''start the selected plugin'''
