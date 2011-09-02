@@ -184,7 +184,7 @@ class ExtensionDownloadList(ExtensionListTab):
 
     def on_cursor_changed(self, list_view, type_, extra_button=None):
         '''called when a row is selected'''
-        if extra_button == None:
+        if extra_button is None:
             extra_button = self.no_button
         model, iter_ = list_view.get_selection().get_selected()
         if iter_ is not None:
