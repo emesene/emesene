@@ -160,6 +160,7 @@ class PluginManager(object):
         '''Find plugins and packages inside dir_'''
         if dir_ not in self._plugin_dirs:
             self._plugin_dirs.append(dir_)
+
         for filename in os.listdir(dir_):
             path = os.path.join(dir_, filename)
             if filename.startswith(".") or \
@@ -169,7 +170,8 @@ class PluginManager(object):
 
             try:
                 mod = PluginHandler(dir_, filename, os.path.isdir(path))
-                self._plugins[mod.name] = mod
+                if mod.name not in self._plugins:
+                    self._plugins[mod.name] = mod
             except Exception, reason:
                 log.warning('Exception while importing %s:\n%s' % (
                     filename, reason))
@@ -177,6 +179,7 @@ class PluginManager(object):
         log.debug('Imported plugins: %s' % ', '.join(self._plugins.keys()))
 
     def rescan_directories(self):
+        '''Rescan all directories for new plugins'''
         for dir_ in self._plugin_dirs:
             self.scan_directory(dir_)
 
