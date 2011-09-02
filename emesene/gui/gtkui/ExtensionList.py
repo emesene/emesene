@@ -182,18 +182,20 @@ class ExtensionDownloadList(ExtensionListTab):
         self.buttonbox.pack_start(self.download_button, fill=False)
         self.buttonbox.pack_start(self.no_button)
 
-    def on_cursor_changed(self, list_view, type_):
+    def on_cursor_changed(self, list_view, type_, extra_button=None):
         '''called when a row is selected'''
+        if extra_button == None:
+            extra_button = self.no_button
         model, iter_ = list_view.get_selection().get_selected()
         if iter_ is not None:
             value = model.get_value(iter_, 2)
             if value in self.download_list[type_]:
                 self.download_item = value
                 self.download_button.show()
-                self.no_button.hide()
+                extra_button.hide()
             else:
                 self.download_button.hide()
-                self.no_button.show()
+                extra_button.show()
 
     def on_change_source(self, combobox):
         '''called when the source is changed'''
