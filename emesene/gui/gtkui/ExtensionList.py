@@ -267,9 +267,10 @@ class ExtensionDownloadList(ExtensionListTab):
                            label,
                            False)
 
-    def _end_progress_cb(self, obj, window_or_delete_event=None):
+    def _end_progress_cb(self, obj):
         # TODO: find a way to stop the thread that refreshes the list and other
         # cleanups and get the Cancel button to work
+        pass
 
 class ThemeList(ExtensionDownloadList):
     def __init__(self, session):
