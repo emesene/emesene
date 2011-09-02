@@ -166,7 +166,7 @@ class ExtensionDownloadList(ExtensionListTab):
         self.thc_com[supported] = collection_class('emesene-supported-' + self.list_type, init_path)
         self.thc_com[community] = collection_class('emesene-community-' + self.list_type, init_path)
 
-        self.reinit_download_list()
+        self.download_list = {}
 
         refresh_button = gtk.Button(stock=gtk.STOCK_REFRESH)
         refresh_button.connect('clicked', self.on_update, True)
@@ -201,7 +201,7 @@ class ExtensionDownloadList(ExtensionListTab):
         model, iter_ = list_view.get_selection().get_selected()
         if iter_ is not None:
             value = model.get_value(iter_, 2)
-            if value in self.download_list[type_]:
+            if value in self.download_list.get(type_, []):
                 self.download_item = value
                 self.download_button.show()
                 extra_button.hide()
@@ -241,20 +241,12 @@ class ExtensionDownloadList(ExtensionListTab):
         for k in self.thc_com:
             self.thc_com[k].fetch()
 
-    def reinit_download_list(self):
-        '''Reinitializes the download list so they are empty'''
-        self.download_list = {"plugin" : [],
-                              "images" : [],
-                              "sounds" : [],
-                              "emotes" : [],
-                              "conversations" : []}
-        # TODO: is this all the download types possible?
 
     def show_update(self, result=True):
         '''show an update list of the set collection'''
         self.progress.update(100.0)
         self.progress.destroy()
-        self.reinit_download_list() # TODO: only reinitialize certain list
+        self.download_list = {}
 
         thc_cur = self.thc_com[self.thc_cur_name]
 
