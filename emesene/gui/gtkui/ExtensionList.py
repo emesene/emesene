@@ -23,7 +23,6 @@ import utils
 import extension
 import e3
 
-from Dialog import ProgressWindow
 class ExtensionListView(gtk.TreeView):
     def __init__(self, store, radio=False):
         gtk.TreeView.__init__(self, store)
@@ -277,17 +276,8 @@ class ExtensionDownloadList(ExtensionListTab):
                            False)
 
     def _end_progress_cb(self, obj, window_or_delete_event=None):
-        '''
-        Closes the refresh window. obj should be the gtk object that
-        caused this function to be called, either the button or the window\'s x
-        window_or_delete_event could be either the window or the delete event
-        (generated from the clicking of the x, at least this is the case
-        emperically).
-        '''
         # TODO: find a way to stop the thread that refreshes the list and other
-        # cleanups
-        if isinstance(window_or_delete_event, ProgressWindow):
-            window_or_delete_event.destroy()
+        # cleanups and get the Cancel button to work
 
 class ThemeList(ExtensionDownloadList):
     def __init__(self, session):
