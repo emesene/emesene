@@ -491,7 +491,7 @@ class Controller(object):
         syn = extension.get_default('synch tool')
         # Check if a synch tool is present. Synch tool is only in the gtk gui.
         # Remove the following 'if' when it will be in the qt4 gui too.
-        if syn: 
+        if syn:
             user = self.session.account.account
             current_service = self.session.config.service
             syn = syn(self.session, current_service)

@@ -23,13 +23,21 @@ import utils
 import extension
 import e3
 
+from Dialog import ProgressWindow
 class ExtensionListView(gtk.TreeView):
     def __init__(self, store, radio=False):
         gtk.TreeView.__init__(self, store)
         self.toggle_renderer = gtk.CellRendererToggle()
         self.toggle_renderer.set_radio(radio)
-        self.append_column(gtk.TreeViewColumn(_('Status'), self.toggle_renderer, active=0, activatable=3, visible=4))
-        self.append_column(gtk.TreeViewColumn(_('Name'), gtk.CellRendererText(), markup=1))
+        self.append_column(gtk.TreeViewColumn(_('Status'),
+                           self.toggle_renderer,
+                           active=0,
+                           activatable=3,
+                           visible=4))
+
+        self.append_column(gtk.TreeViewColumn(_('Name'),
+                           gtk.CellRendererText(),
+                           markup=1))
         self.set_rules_hint(True)
 
 class ExtensionListStore(gtk.ListStore):
@@ -48,7 +56,11 @@ class ExtensionList(gtk.VBox):
 
         self.list_store = ExtensionListStore()
         self.list_view = ExtensionListView(self.list_store, radio)
-        self.list_view.toggle_renderer.connect("toggled", on_toggled, self.list_store, type_)
+        self.list_view.toggle_renderer.connect("toggled",
+                                               on_toggled,
+                                               self.list_store,
+                                               type_)
+
         self.list_view.connect("cursor_changed", on_cursor_changed, type_)
         self.extension_list = []
         self.extension_type = type_
@@ -138,7 +150,8 @@ class ExtensionListTab(gtk.VBox):
 
 class ExtensionDownloadList(ExtensionListTab):
     def __init__(self, session, list_type,
-                 collection_class, init_path, radio=False, use_tabs=False):
+                 collection_class, init_path,
+                 radio=False, use_tabs=False):
         '''constructor'''
         ExtensionListTab.__init__(self, session, radio, use_tabs)
         self.first = True
@@ -151,10 +164,10 @@ class ExtensionDownloadList(ExtensionListTab):
 
         self.thc_cur_name = supported
 
-        self.thc_com[supported] = collection_class('emesene-supported-'+self.list_type, init_path)
-        self.thc_com[community] = collection_class('emesene-community-'+self.list_type, init_path)
+        self.thc_com[supported] = collection_class('emesene-supported-' + self.list_type, init_path)
+        self.thc_com[community] = collection_class('emesene-community-' + self.list_type, init_path)
 
-        self.download_list = {}
+        self.reinit_download_list()
 
         refresh_button = gtk.Button(stock=gtk.STOCK_REFRESH)
         refresh_button.connect('clicked', self.on_update, True)
@@ -218,6 +231,8 @@ class ExtensionDownloadList(ExtensionListTab):
 
     def start_download(self, widget=None):
         '''start the download of an extension'''
+        # TODO: Move this to a seperate thread in order to prevent the interface
+        # from freezing if download takes a long time/not possible.
         thc_cur = self.thc_com[self.thc_cur_name]
         thc_cur.download(self.download_item)
         self.on_update(clear=True)
@@ -227,26 +242,52 @@ class ExtensionDownloadList(ExtensionListTab):
         for k in self.thc_com:
             self.thc_com[k].fetch()
 
+    def reinit_download_list(self):
+        '''Reinitializes the download list so they are empty'''
+        self.download_list = {"plugin" : [],
+                              "images" : [],
+                              "sounds" : [],
+                              "emotes" : [],
+                              "conversations" : []}
+        # TODO: is this all the download types possible?
+
     def show_update(self, result=True):
         '''show an update list of the set collection'''
         self.progress.update(100.0)
         self.progress.destroy()
-        self.download_list = {}
+        self.reinit_download_list() # TODO: only reinitialize certain list
 
         thc_cur = self.thc_com[self.thc_cur_name]
 
         for box in self.boxes:
-            self.download_list[box.extension_type] = []
+            if box.extension_type not in self.download_list:
+                self.download_list[box.extension_type] = []
+
             element = thc_cur.extensions_descs.get(box.extension_type, {})
-            box.append(False, '<b>'+_('Available for download')+'</b>', 'installable', visible=False)
+            box.append(False, '<b>'+_('Available for download')+'</b>',
+                       'installable', visible=False)
+
             for label in element:
                 if label not in box.extension_list:
                     self.download_list[box.extension_type].append(label)
-                box.append(False, self.prettify_name(label, box.extension_type), label, False)
 
-    def _end_progress_cb(self, event, response=None):
-        '''close refresh'''
-        pass
+                box.append(False,
+                           self.prettify_name(label, box.extension_type),
+                           label,
+                           False)
+
+    def _end_progress_cb(self, obj, window_or_delete_event=None):
+        '''
+        Closes the refresh window. obj should be the gtk object that
+        caused this function to be called, either the button or the window\'s x
+        window_or_delete_event could be either the window or the delete event
+        (generated from the clicking of the x, at least this is the case
+        emperically).
+        '''
+        # TODO: find a way to stop the thread that refreshes the list and other
+        # cleanups
+        if isinstance(window_or_delete_event, ProgressWindow):
+            window_or_delete_event.destroy()
 
 class ThemeList(ExtensionDownloadList):
     def __init__(self, session):
@@ -299,7 +340,9 @@ class ThemeList(ExtensionDownloadList):
             return
         for box in self.boxes:
             box.clear_all()
-            box.append(False, '<b>'+_('Installed')+'</b>', 'installed', visible=False)
+            box.append(False, '<b>'+_('Installed')+'</b>',
+                       'installed', visible=False)
+
             current = self.get_attr(self.theme_configs[box.extension_type])
             for path in self.themes[box.extension_type].list():
                 label = self.themes[box.extension_type].get_name_from_path(path)
@@ -314,7 +357,8 @@ class ThemeList(ExtensionDownloadList):
         name = self.themes[type_].pattern.sub('', name)
         return '%s' % name
 
-    def append_theme_tab(self, name, theme_type, theme, theme_config, callback=None):
+    def append_theme_tab(self, name, theme_type, theme, theme_config,
+                         callback=None):
         self.themes[theme_type] = theme
         self.theme_configs[theme_type] = theme_config
         if callback:

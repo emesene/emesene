@@ -102,7 +102,8 @@ class PluginMainVBox(ExtensionDownloadList):
         self.on_cursor_changed(self.list_view)
 
     def on_config(self, *args):
-        '''stop the selected plugin'''
+        '''Called when user hits the Preferences button'''
+
         sel = self.list_view.get_selection()
         model, iter = sel.get_selected()
         if iter is not None:

@@ -300,9 +300,9 @@ class Dialog(object):
     @classmethod
     def exc_error(cls, message, response_cb=None, title=_("Error!")):
         '''show an error dialog displaying the message and the traceback;
-        this dialog should have only the option to close and the response 
+        this dialog should have only the option to close and the response
         callback is optional since in few cases one want to know when the error
-        dialog was closed, but it can happen, so return stock.CLOSE to the 
+        dialog was closed, but it can happen, so return stock.CLOSE to the
         callback if its set'''
         #cls.message_window('%s\n\n%s' % (message, traceback.format_exc()),
         #        gtk.STOCK_DIALOG_ERROR, response_cb, title).show()
@@ -419,7 +419,7 @@ class Dialog(object):
         you should call the response callback only once with a dict
         with two keys 'accepted' and 'rejected' and a list of mail
         addresses as values
-        '''    
+        '''
         dialog = AddBuddy(response_cb)
 
         for account, nick in accounts:
@@ -1246,7 +1246,7 @@ class EmotesWindow(gtk.Window):
         button.set_image(gtk.image_new_from_stock(gtk.STOCK_ADD,
             gtk.ICON_SIZE_BUTTON))
         button.connect('clicked', self._on_add_custom_emote_selected)
-        
+
         self.box = gtk.VBox()
         self.box.pack_start(self.table)
         self.box.pack_start(button)
@@ -1305,14 +1305,14 @@ class EmotesWindow(gtk.Window):
 
         for shortcut, name in emote_theme.emotes.iteritems():
             path = emote_theme.emote_to_path(shortcut, True)
-            
+
             if path is None or name in emotes:
                 continue
             emotes.append(name)
-            
+
             column, row, button = button_and_coords(shortcut, path)
             self.table.attach(button, column, column + 1, row, row + 1)
-            
+
             count += 1
 
         for shortcut, hash_ in self.emcache.list():
@@ -1366,7 +1366,7 @@ class EmotesWindow(gtk.Window):
                 else:
                     #resize animated images using imagemagick
                     if not self.emcache.resize_with_imagemagick(path,
-                                                                resized_path, 
+                                                                resized_path,
                                                                 width, height):
                         resized_path = path
 
@@ -1417,7 +1417,7 @@ class EmotesWindow(gtk.Window):
                     Dialog.error(_("Empty shortcut"))
 
         window = Dialog.entry_window(_("New shortcut"), shortcut,
-                    _on_ce_edit_cb, _("Change shortcut"), 
+                    _on_ce_edit_cb, _("Change shortcut"),
                     self.emcache, shortcut, cedict[shortcut])
         window.show()
 
@@ -1765,7 +1765,7 @@ class ProgressWindow(gtk.Window):
         self.set_modal(True)
         self.buttoncancel = gtk.Button()
         self.buttoncancel.set_label(_("Cancel"))
-        self.buttoncancel.connect('clicked', callback)
+        self.buttoncancel.connect('clicked', callback, self)
         self.connect('delete-event', callback)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_default_size(300, 50)
@@ -1778,7 +1778,7 @@ class ProgressWindow(gtk.Window):
         vbox.pack_start(self.progressbar)
         vbox.pack_start(self.buttoncancel)
         self.add(vbox)
-        
+
     def update(self, progress):
         '''called when the progress is updated'''
         self.progressbar.set_fraction(progress / 100.0)
