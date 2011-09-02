@@ -1765,7 +1765,7 @@ class ProgressWindow(gtk.Window):
         self.set_modal(True)
         self.buttoncancel = gtk.Button()
         self.buttoncancel.set_label(_("Cancel"))
-        self.buttoncancel.connect('clicked', callback, self)
+        self.buttoncancel.connect('clicked', callback)
         self.connect('delete-event', callback)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_default_size(300, 50)
