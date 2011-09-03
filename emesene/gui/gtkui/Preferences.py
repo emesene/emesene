@@ -513,9 +513,12 @@ class MainWindow(BaseTable):
 
         ContactList = extension.get_default('contact list')
 
+        self.append_markup('<b>'+_('User panel:')+'</b>')
+
         self.append_check(_('Show user panel'),
             'session.config.b_show_userpanel')
 
+        self.append_markup('<b>'+_('Contact list:')+'</b>')
         self.append_range(_('Contact list avatar size'),
             'session.config.i_avatar_size', 18, 64)
 
