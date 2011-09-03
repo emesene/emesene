@@ -784,7 +784,7 @@ class Theme(BaseTable):
         self.tabs.append_theme_tab(_('Image theme'), 'images', gui.theme.image_themes,
             'session.config.image_theme')
         self.tabs.append_theme_tab(_('Sound theme'), 'sounds', gui.theme.sound_themes,
-            'session.config.sound_theme')
+            'session.config.sound_theme', self._on_sound_combo_changed)
         self.tabs.append_theme_tab(_('Emote theme'), 'emotes', gui.theme.emote_themes,
             'session.config.emote_theme')
         adium_tab = self.tabs.append_theme_tab(_('Adium theme'), 'conversations', gui.theme.conv_themes,
@@ -804,6 +804,11 @@ class Theme(BaseTable):
 
     def on_update(self):
         self.tabs.on_update()
+
+    def _on_sound_combo_changed(self, property_name, value):
+        #update sound theme config
+        self.set_attr(property_name, value)
+        gui.theme.sound_theme = value
 
     def _on_adium_variant_combo_changed(self, combo, property_name, value):
         variant_name = combo.get_active_text()
