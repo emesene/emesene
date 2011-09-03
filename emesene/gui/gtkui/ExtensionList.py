@@ -230,8 +230,14 @@ class ExtensionDownloadList(ExtensionListTab):
 
     def start_download(self, widget=None):
         '''start the download of an extension'''
-        # TODO: Move this to a seperate thread in order to prevent the interface
-        # from freezing if download takes a long time/not possible.
+        dialog = extension.get_default('dialog')
+        self.progress = dialog.progress_window(
+                        _('Downloading extensions'), self._end_progress_cb)
+        self.progress.set_action(_("Downloading extensions"))
+        self.progress.show_all()
+        utils.GtkRunner(self.show_update, self.download)
+
+    def download(self):
         thc_cur = self.thc_com[self.thc_cur_name]
         thc_cur.download(self.download_item)
         self.on_update(clear=True)
