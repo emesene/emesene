@@ -78,7 +78,7 @@ class Theme(object):
 
         # conv_name is the name of the selected adium conversation theme
         self._conv_theme = self.conv_themes.get_theme(conv_name, conv_variant)
-        self.sound_theme = self.sound_themes.get_theme(sound_name)
+        self._sound_theme = self.sound_themes.get_theme(sound_name)
         self.image_theme = self.image_themes.get_theme(image_name)
         self.emote_theme = self.emote_themes.get_theme(emote_name)
 
@@ -91,6 +91,16 @@ class Theme(object):
         self._conv_theme = self.conv_themes.get_theme (conv_name, '')
 
     conv_theme = property(fget=_get_conv_theme, fset=_set_conv_theme)
+
+    def _get_sound_theme(self):
+        '''return the sound theme'''
+        return self._sound_theme
+
+    def _set_sound_theme(self, sound_name):
+        '''set the sound theme'''
+        self._sound_theme = self.sound_themes.get_theme (sound_name)
+
+    sound_theme = property(fget=_get_sound_theme, fset=_set_sound_theme)
 
     def get_image_themes(self):
         '''return a list of names for the image themes'''
