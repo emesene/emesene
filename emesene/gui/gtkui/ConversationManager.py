@@ -65,7 +65,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
                 self.cycle_tabs()
             return True
 
-    def _on_tab_position_changed(self,value):
+    def _on_tab_position_changed(self, value):
         '''callback called when i_tab_position changes'''
         self.set_tab_pos(pos=self.get_tab_position())
 
@@ -200,6 +200,12 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         #       Signals are being unsubscribed (see gtkui.Conversation) but...
         conversation.tab_index = -2
 
+    def after_close(self):
+         #If has one tab hide close button
+        if len(self.conversations) == 1:
+           for k, v in self.conversations.items():
+                v.tab_label.close.hide()
+
     def add_new_conversation(self, session, cid, members):
         """
         create and append a new conversation
@@ -211,11 +217,19 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             conversation, self.mozilla_tabs)
         label.set_image(gui.theme.image_theme.connect)
         conversation.tab_label = label
-        conversation.tab_index=self.append_page_menu(conversation, label)
+        conversation.tab_index = self.append_page_menu(conversation, label)
         self.set_tab_label_packing(conversation, not self.mozilla_tabs, True, gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
 
         return conversation
+
+    def after_new_conversation(self, conversation):
+         #If has more than one tab show close buttons
+        if len(self.conversations) > 2:
+          conversation.tab_label.close.show()
+        elif len(self.conversations) == 2:
+            for k, v in self.conversations.items():
+                v.tab_label.close.show()
 
     def update_window(self, text, icon, index):
         ''' updates the window's border and item on taskbar
@@ -243,8 +257,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         return self.get_parent().get_dimensions()
 
     def get_tab_position(self):
-        positions = [gtk.POS_TOP,gtk.POS_BOTTOM,gtk.POS_LEFT,gtk.POS_RIGHT]
-        return positions[self.session.config.get_or_set('i_tab_position',0)]
+        positions = [gtk.POS_TOP, gtk.POS_BOTTOM, gtk.POS_LEFT, gtk.POS_RIGHT]
+        return positions[self.session.config.get_or_set('i_tab_position', 0)]
 
     def hide_all(self):
         '''
