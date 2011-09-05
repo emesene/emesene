@@ -218,8 +218,8 @@ class MainMenu(gtk.Menu):
 
     def _on_mute_unmute_sounds(self, *args):
         ''' Toggle sound mute <-> unmute '''
-        self.handler.session.config.b_mute_sounds = not self.handler.session.config.b_mute_sounds
-        #self._on_b_mute_sounds_changed
+        value = self.handler.session.config.b_mute_sounds
+        self.handler.session.config.b_mute_sounds = not value
 
     def _on_b_mute_sounds_changed(self, *args):
         ''' Changes the menu item if b_mute_sounds changes '''
