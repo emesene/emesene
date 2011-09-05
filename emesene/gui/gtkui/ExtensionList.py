@@ -198,9 +198,9 @@ class ExtensionDownloadList(ExtensionListTab):
         '''called when a row is selected'''
         if extra_button is None:
             extra_button = self.no_button
-        model, iter_ = list_view.get_selection().get_selected()
-        if iter_ is not None:
-            value = model.get_value(iter_, 2)
+
+        value = self.get_selected_name(list_view)
+        if value is not None:
             if value in self.download_list.get(type_, []):
                 self.download_item = value
                 self.download_button.show()
@@ -208,6 +208,19 @@ class ExtensionDownloadList(ExtensionListTab):
             else:
                 self.download_button.hide()
                 extra_button.show()
+
+    def get_selected_name(self, list_view=None):
+        '''Gets the current selected name in the list view.'''
+        if list_view is None: # Q: is this really necessary, same goes for L197's list_view
+        # TypeError: on_cursor_changed() takes at most 2 arguments (3 given) <-- where is this even coming from..
+            list_view = self.list_view
+
+        model, iter = list_view.get_selection().get_selected()
+        if iter is not None:
+            name = model.get_value(iter, 2)
+            return name
+        else:
+            return None # Q: should something be done here?
 
     def on_change_source(self, combobox):
         '''called when the source is changed'''

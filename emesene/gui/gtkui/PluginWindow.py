@@ -23,7 +23,7 @@ import utils
 import e3
 
 from pluginmanager import get_pluginmanager
-from ExtensionList import ExtensionDownloadList
+from ExtensionList import ExtensionDownloadList # uh.. is this safe?
 
 class PluginMainVBox(ExtensionDownloadList):
     def __init__(self, session, init_path):
@@ -69,45 +69,42 @@ class PluginMainVBox(ExtensionDownloadList):
 
     def on_cursor_changed(self, list_view, type_='plugin'):
         '''called when a row is selected'''
+
         ExtensionDownloadList.on_cursor_changed(self, list_view, type_, self.config_button)
 
     def on_start(self, *args):
         '''start the selected plugin'''
-        sel = self.list_view.get_selection()
-        model, iter = sel.get_selected()
-        if iter is not None:
-            name = model.get_value(iter, 2)
+        name = self.get_selected_name()
+        if name is not None:
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_start(name, self.session)
 
             if name not in self.session.config.l_active_plugins:
                 self.session.config.l_active_plugins.append(name)
 
+            model, iter = self.list_view.get_selection().get_selected()
             model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
         self.on_cursor_changed(self.list_view)
 
     def on_stop(self, *args):
         '''stop the selected plugin'''
-        sel = self.list_view.get_selection()
-        model, iter = sel.get_selected()
-        if iter is not None:
-            name = model.get_value(iter, 2)
+        name = self.get_selected_name()
+        if name is not None:
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_stop(name)
 
             if name in self.session.config.l_active_plugins:
                 self.session.config.l_active_plugins.remove(name)
 
+            model, iter = self.list_view.get_selection().get_selected()
             model.set_value(iter, 0, pluginmanager.plugin_is_active(name))
+
         self.on_cursor_changed(self.list_view)
 
     def on_config(self, *args):
         '''Called when user hits the Preferences button'''
-
-        sel = self.list_view.get_selection()
-        model, iter = sel.get_selected()
-        if iter is not None:
-            name = model.get_value(iter, 2)
+        name = self.get_selected_name()
+        if name is not None:
             pluginmanager = get_pluginmanager()
 
             if pluginmanager.plugin_is_active(name):
