@@ -231,7 +231,14 @@ class ConversationManager(object):
             self.conversations[cid] = conversation
             self.session.conversations[cid] = conversation
 
+        self.after_new_conversation(conversation)
         return conversation
+
+    def after_new_conversation(self, conversation):
+        '''
+         Override what to do after create a conversation
+        '''
+        pass
 
     def renew_session(self, session):
         '''reopen all conversations when the user reconnects'''
@@ -283,6 +290,13 @@ class ConversationManager(object):
         self.remove_conversation(conversation)
         del self.conversations[conversation.cid]
         conversation.on_close()
+        self.after_close()
+        
+    def after_close(self):
+        '''
+        Override what to do after close a conversation
+        '''
+        pass
 
     def close_all(self):
         '''close and finish all conversations'''
