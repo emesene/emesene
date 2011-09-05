@@ -153,12 +153,13 @@ class OutputView(webkit.WebView):
         for i, child in enumerate(children):
             # Ditry hack. The first 3 buttons of the non-image menu
             # are insensitive
-            if i == 1 and child.get_property('sensitive'):
-                child.set_use_stock(False)
-                child.set_property("label", _("Save"))
-            else:
-                menu.remove(child)
-                child.destroy()
+            if len(children) == 4:
+                if i == 1 and child.get_property('sensitive'):
+                    child.set_use_stock(False)
+                    child.set_property("label", _("Save"))
+                else:
+                    menu.remove(child)
+                    child.destroy()
 
         select_all_item = gtk.MenuItem(label=_("Select All"))
         select_all_item.connect('activate', lambda *args: self.select_all())
