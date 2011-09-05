@@ -209,12 +209,8 @@ class ExtensionDownloadList(ExtensionListTab):
                 self.download_button.hide()
                 extra_button.show()
 
-    def get_selected_name(self, list_view=None):
+    def get_selected_name(self, list_view):
         '''Gets the current selected name in the list view.'''
-        if list_view is None: # Q: is this really necessary, same goes for L197's list_view
-        # TypeError: on_cursor_changed() takes at most 2 arguments (3 given) <-- where is this even coming from..
-            list_view = self.list_view
-
         model, iter = list_view.get_selection().get_selected()
         if iter is not None:
             name = model.get_value(iter, 2)

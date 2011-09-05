@@ -74,7 +74,7 @@ class PluginMainVBox(ExtensionDownloadList):
 
     def on_start(self, *args):
         '''start the selected plugin'''
-        name = self.get_selected_name()
+        name = self.get_selected_name(self.list_view)
         if name is not None:
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_start(name, self.session)
@@ -88,7 +88,7 @@ class PluginMainVBox(ExtensionDownloadList):
 
     def on_stop(self, *args):
         '''stop the selected plugin'''
-        name = self.get_selected_name()
+        name = self.get_selected_name(self.list_view)
         if name is not None:
             pluginmanager = get_pluginmanager()
             pluginmanager.plugin_stop(name)
@@ -103,7 +103,7 @@ class PluginMainVBox(ExtensionDownloadList):
 
     def on_config(self, *args):
         '''Called when user hits the Preferences button'''
-        name = self.get_selected_name()
+        name = self.get_selected_name(self.list_view)
         if name is not None:
             pluginmanager = get_pluginmanager()
 
