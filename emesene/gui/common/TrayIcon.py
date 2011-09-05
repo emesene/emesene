@@ -197,12 +197,40 @@ class MainMenu(gtk.Menu):
         self.quit.connect('activate',
             lambda *args: self.handler.on_quit_selected())
 
+        self.unmute_label = _('Unmute sounds')
+        self.unmute_stock = gtk.STOCK_MEDIA_PLAY
+        self.mute_label = _('Mute sounds')
+        self.mute_stock = gtk.STOCK_MEDIA_STOP
+        self.mute = gtk.ImageMenuItem()
+        self._on_b_mute_sounds_changed()
+        self.handler.session.config.subscribe(self._on_b_mute_sounds_changed,
+                                              'b_mute_sounds')
+        
+        self.mute.connect('activate', self._on_mute_unmute_sounds)
+
         self.append(self.hide_show_mainwindow)
+        self.append(self.mute)
         self.append(self.status)
         self.append(self.list)
         self.append(self.disconnect)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)
+
+    def _on_mute_unmute_sounds(self, *args):
+        ''' Toggle sound mute <-> unmute '''
+        self.handler.session.config.b_mute_sounds = not self.handler.session.config.b_mute_sounds
+        #self._on_b_mute_sounds_changed
+
+    def _on_b_mute_sounds_changed(self, *args):
+        ''' Changes the menu item if b_mute_sounds changes '''
+        if self.handler.session.config.b_mute_sounds:
+            self.mute.set_label(self.unmute_label)
+            self.mute.set_image(gtk.image_new_from_stock(self.unmute_stock,
+                                gtk.ICON_SIZE_MENU))
+        else:
+            self.mute.set_label(self.mute_label)
+            self.mute.set_image(gtk.image_new_from_stock(self.mute_stock,
+                                gtk.ICON_SIZE_MENU))
 
 class ContactsMenu(gtk.Menu):
     """
