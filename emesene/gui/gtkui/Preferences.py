@@ -159,7 +159,7 @@ class Preferences(gtk.Window):
         self.page_dict.remove(page)
         num = self.notebook.page_num(page)
         self.notebook.remove_page(num)
-        self.__refresh_list()    
+        self.__refresh_list()
 
     def add_to_list(self, icon, text, page):
 
@@ -190,7 +190,7 @@ class Preferences(gtk.Window):
         msn_in_list = False
         for pair in LIST:
             msn_in_list = msn_in_list or pair['text'] == _('Live Messenger')
-        
+
         if 'msn' in self.session.SERVICES:
         # only when session is papylib.
             if not msn_in_list:
@@ -206,7 +206,7 @@ class Preferences(gtk.Window):
             LIST.remove({'stock_id' : gtk.STOCK_NETWORK,
                          'text' : _('Live Messenger')})
             self.__refresh_list()
-            
+
 
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
@@ -621,14 +621,14 @@ class ConversationWindow(BaseTable):
         self.append_check(_('Show tabs popup menu'),
             'session.config.b_conv_tab_popup')
         # small-toolbar sensitivity depends on conversation toolbar visibility
-        self.cb_small_toolbar = self.create_check(_('Small conversation toolbar'), 
+        self.cb_small_toolbar = self.create_check(_('Small conversation toolbar'),
             'session.config.b_toolbar_small')
         self.session.config.subscribe(self._on_cb_show_toolbar_changed,
             'b_show_toolbar')
         self.append_row(self.cb_small_toolbar)
 
         # Avatar-on-left sensitivity depends on side panel visibility
-        self.cb_avatar_left = self.create_check(_('Avatar on conversation left side'), 
+        self.cb_avatar_left = self.create_check(_('Avatar on conversation left side'),
             'session.config.b_avatar_on_left')
         self.session.config.subscribe(self._on_cb_side_panel_changed,
             'b_show_info')
@@ -636,7 +636,7 @@ class ConversationWindow(BaseTable):
         self.append_check(_('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
         self.append_row(h_lang_box)
-        self.append_check(_('Show avatars in taskbar instead of status icons'), 
+        self.append_check(_('Show avatars in taskbar instead of status icons'),
             'session.config.b_show_avatar_in_taskbar')
 
         self.append_row(h_color_box)
@@ -646,7 +646,7 @@ class ConversationWindow(BaseTable):
 
         self.append_range(_('Conversation avatar size'),
             'session.config.i_conv_avatar_size', 18, 128)
-        
+
         self.session.config.subscribe(self._on_spell_change,
             'b_enable_spell_check')
 
@@ -869,7 +869,7 @@ class Extension(BaseTable):
         def on_activate_link(label, uri):
             webbrowser.open_new_tab(uri)
             return True
-        
+
         self.add_text(_('Categories'), 0, 0, True)
         self.add_text(_('Selected'), 0, 1, True)
         self.add_text('', 0, 2, True)
@@ -1001,10 +1001,10 @@ class DesktopTab(BaseTable):
         self.session = session
 
         self.append_markup('<b>'+_('Logger')+'</b>')
-        self.append_check(_('Enable logger'), 
+        self.append_check(_('Enable logger'),
                           'session.config.b_log_enabled')
         self.append_markup('<b>'+_('File transfers')+'</b>')
-        self.append_check(_('Sort received files by sender'), 
+        self.append_check(_('Sort received files by sender'),
                           'session.config.b_download_folder_per_account')
         self.add_text(_('Save files to:'), 0, 4, True)
 
@@ -1071,7 +1071,7 @@ class MSNPapylib(BaseTable):
 
 class PrivacySettings(gtk.VBox):
     ''' A panel to manage contacts for MSN '''
-    
+
     def __init__(self, session):
         ''' constructor '''
         gtk.VBox.__init__(self)
@@ -1082,9 +1082,9 @@ class PrivacySettings(gtk.VBox):
 
         # box with help message
         eventBox = gtk.EventBox()
-        eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))       
+        eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))
         self.pack_start(eventBox, False, False, 0)
-        
+
         # icon
         box = gtk.HBox(False, 0)
         box.set_size_request(40, 40)
@@ -1092,7 +1092,7 @@ class PrivacySettings(gtk.VBox):
                                          gtk.ICON_SIZE_LARGE_TOOLBAR)
         box.pack_start(image, False, False, 10)
         eventBox.add(box)
-        
+
         # tooltip labels
         labels_box = gtk.VBox(False, 0)
         markup = '<span foreground="black"> %s </span>'
@@ -1105,7 +1105,7 @@ class PrivacySettings(gtk.VBox):
 
         labels_box.pack_start(firstLabel, True, True, 2)
         labels_box.pack_start(secondLabel, False, True, 2)
-        box.pack_start(labels_box, False, False, 50)        
+        box.pack_start(labels_box, False, False, 50)
 
         hbox = gtk.HBox()
         self.add(hbox)
@@ -1117,10 +1117,11 @@ class PrivacySettings(gtk.VBox):
         hbox.add(scroll1)
 
         self.allow_model = gtk.ListStore(str)
+        self.allow_model.set_sort_func(0, self._treesort_compare)
         self.allow_view = gtk.TreeView(self.allow_model)
         self.allow_view.connect("key-press-event", self._on_key_press)
         self.allow_view.connect('button-press-event',
-                                self._on_right_click, self.allow_model)        
+                                self._on_right_click, self.allow_model)
         self.allow_view.set_border_width(1)
         scroll1.add(self.allow_view)
 
@@ -1138,12 +1139,12 @@ class PrivacySettings(gtk.VBox):
         button1.set_image(image1)
         button1.connect('clicked', self.unblock)
         vbox.pack_start(button1, True, False)
-        
+
         button2 = gtk.Button()
         image2 = gtk.image_new_from_stock(gtk.STOCK_GO_FORWARD,
                                           gtk.ICON_SIZE_BUTTON)
         button2.set_image(image2)
-        button2.connect('clicked', self.block)        
+        button2.connect('clicked', self.block)
         vbox.pack_start(button2, True, False)
 
         hbox.pack_start(vbox, False)
@@ -1155,6 +1156,8 @@ class PrivacySettings(gtk.VBox):
         hbox.add(scroll2)
 
         self.block_model = gtk.ListStore(str)
+        # 0 as there are only 1 column
+        self.block_model.set_sort_func(0, self._treesort_compare)
         self.block_view = gtk.TreeView(self.block_model)
         self.block_view.connect("key-press-event", self._on_key_press)
         self.block_view.connect('button-press-event',
@@ -1177,6 +1180,11 @@ class PrivacySettings(gtk.VBox):
         self.session.signals.contact_unblock_succeed.subscribe(self._update_lists)
         self.session.signals.contact_added_you.subscribe(self._update_lists)
 
+    def _treesort_compare(self, model, iter1, iter2, data=None):
+        data1 = model.get_value(iter1, 0).lower()
+        data2 = model.get_value(iter2, 0).lower()
+        return cmp(data1, data2)
+
     def remove_subscriptions(self):
         self.session.signals.contact_add_succeed.unsubscribe(self._update_lists)
         self.session.signals.contact_remove_succeed.unsubscribe(self._update_lists)
@@ -1191,8 +1199,11 @@ class PrivacySettings(gtk.VBox):
 
         for contact in self.session.get_allowed_contacts():
             self.allow_model.append([contact])
+        self.allow_model.set_sort_column_id(0, gtk.SORT_ASCENDING)
+
         for contact in self.session.get_blocked_contacts():
             self.block_model.append([contact])
+        self.block_model.set_sort_column_id(0, gtk.SORT_ASCENDING)
 
     def _on_right_click(self, view, event, model):
         ''' shows a popup menu when a list is clicked '''
@@ -1206,7 +1217,7 @@ class PrivacySettings(gtk.VBox):
         else:
             selection = self.allow_view.get_selection()
             selection.unselect_all()
-        
+
         path = view.get_path_at_pos(int(event.x),int(event.y))
         if not path:
             selection = view.get_selection()
@@ -1215,11 +1226,11 @@ class PrivacySettings(gtk.VBox):
 
         iter = model.get_iter(path[0])
         contact = model.get_value(iter, 0)
-        
+
         menu = gtk.Menu()
         item1 = gtk.MenuItem(_('Add to contacts'))
         item1.connect('activate', lambda x: self.session.add_contact(contact))
-        
+
         # desactive this item if you already have the contact in your list
         if self.session.is_forward(contact):
             item1.set_sensitive(False)
@@ -1230,7 +1241,7 @@ class PrivacySettings(gtk.VBox):
         else:
             item2 = gtk.MenuItem(_('Move to allow list'))
             item2.connect('activate', lambda x: self.session.unblock(contact))
-        
+
         item3 = gtk.MenuItem(_('Delete'))
         item3.connect('activate', self._delete_confirmation, iter, model)
 
@@ -1245,7 +1256,7 @@ class PrivacySettings(gtk.VBox):
         menu.append(item3)
         menu.popup(None, None, None, event.button, event.time)
         menu.show_all()
-       
+
     def block(self, button):
         ''' blocks the selected contact '''
         iter = self.allow_view.get_selection().get_selected()[1]
@@ -1254,7 +1265,7 @@ class PrivacySettings(gtk.VBox):
 
         contact = self.allow_model.get_value(iter, 0)
         self.session.block(contact)
-        
+
     def unblock(self, button):
         ''' unblocks the selected contact '''
         iter = self.block_view.get_selection().get_selected()[1]
@@ -1263,7 +1274,7 @@ class PrivacySettings(gtk.VBox):
 
         contact = self.block_model.get_value(iter, 0)
         self.session.unblock(contact)
-        
+
     def _render_lists(self, column, render, model, iter):
         ''' changes the cell background according to the contact condition '''
         contact = model.get_value(iter, 0)
@@ -1291,7 +1302,7 @@ class PrivacySettings(gtk.VBox):
         ''' shows a confirmation dialog before delete the contact '''
         message = _('Are you sure you want to delete %s from your authorized contacts?') % \
                     model.get_value(iter, 0)
-       
+
         dialog = extension.get_default('dialog')
         dialog.yes_no(message, self._delete_response, iter, model)
 
