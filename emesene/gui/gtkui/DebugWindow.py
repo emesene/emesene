@@ -35,13 +35,13 @@ class DebugWindow(gtk.Window):
         self.resize(800, 600)
         self.store = DebugStore()
         self.view = DebugView(self.store)
-        
+
         logging.getLogger().addHandler(self.store)
-        
+
         self.scroll_view = gtk.ScrolledWindow()
         self.scroll_view.add(self.view)
 
-        
+
         self.vbox = gtk.VBox()
         self.filter_box = gtk.HBox()
         self.buttons_box = gtk.HBox()
@@ -66,7 +66,7 @@ class DebugWindow(gtk.Window):
         self.close_btn = gtk.Button(_("Close"))
         self.buttons_box.pack_end(self.close_btn, False)
         self.vbox.pack_start(self.buttons_box, False)
-        
+
         self.add(self.vbox)
 
         self.filter_btn.connect("clicked", self.on_filter_clicked)
@@ -93,7 +93,7 @@ class DebugWindow(gtk.Window):
         self.hide()
         logging.getLogger().removeHandler(self.store)
         self.on_close_cb()
-        
+
 
     def on_add(self, button, data=None):
         caller = self.test_entry.get_text()
@@ -162,7 +162,7 @@ class DebugStore( gtk.ListStore, logging.Handler ):
         gtk.ListStore.__init__(self, str, str, int, str) #caller, message, level, time
         logging.Handler.__init__(self)
         self.custom_filter = self.filter_new()
-        
+
         queue_handler = debugger.QueueHandler.get()
         for message in queue_handler.get_all():
             self.on_message_added(message)
@@ -172,9 +172,9 @@ class DebugStore( gtk.ListStore, logging.Handler ):
 
     def emit(self, record):
         self.on_message_added(record)
-    
+
     def on_message_added(self, message):
-        self.append([message.name, message.msg.strip(), message.levelno, message.created])
+        self.append([message.name, str(message.msg).strip(), message.levelno, message.created])
 
     def filter_caller( self, name, level ):
         '''
