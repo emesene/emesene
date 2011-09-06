@@ -346,7 +346,7 @@ class ThemeList(ExtensionDownloadList):
                 label = self.themes[box.extension_type].get_name_from_path(path)
                 name = os.path.basename(path)
                 box.append(name == current or label == current, label, name)
-            ExtensionDownloadList.on_update(self, widget, download, clear)
+        ExtensionDownloadList.on_update(self, widget, download, clear)
 
     def prettify_name(self, name, type_):
         '''return a prettier name using Pango markup.
