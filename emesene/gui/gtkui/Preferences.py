@@ -187,13 +187,26 @@ class Preferences(gtk.Window):
             self.listStore.append([self.render_icon(i['stock_id'],
                              gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
 
-        if 'msn' in self.session.SERVICES: # only when session is papylib.
-            LIST.append({'stock_id' : gtk.STOCK_NETWORK,'text' : _('Live Messenger')})
-            self.listStore.append([self.render_icon(gtk.STOCK_NETWORK,
-                             gtk.ICON_SIZE_LARGE_TOOLBAR), _('Live Messenger')])
+        msn_in_list = False
+        for pair in LIST:
+            msn_in_list = msn_in_list or pair['text'] == _('Live Messenger')
+        
+        if 'msn' in self.session.SERVICES:
+        # only when session is papylib.
+            if not msn_in_list:
+                LIST.append({'stock_id' : gtk.STOCK_NETWORK,
+                                 'text' : _('Live Messenger')})
+                self.listStore.append([self.render_icon(gtk.STOCK_NETWORK,
+                                       gtk.ICON_SIZE_LARGE_TOOLBAR),
+                                       _('Live Messenger')])
             self.msn_papylib = MSNPapylib(self.session)
             self.msn_papylib_page = self.msn_papylib
             self.page_dict.append(self.msn_papylib_page)
+        elif msn_in_list:
+            LIST.remove({'stock_id' : gtk.STOCK_NETWORK,
+                         'text' : _('Live Messenger')})
+            self.__refresh_list()
+            
 
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
