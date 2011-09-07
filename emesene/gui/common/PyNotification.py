@@ -33,6 +33,9 @@ def PyNotification(title, text, picture_path=None, const=None,
                    callback=None, tooltip=None):
     if const == 'message-im':
         #In this case title is contact nick
+        if title is None:
+            title = ""
+
         title = Plus.msnplus_strip(title)
     notification = pynotify.Notification(title, text, picture_path)
     notification.set_hint_string("append", "allowed")

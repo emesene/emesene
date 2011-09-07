@@ -208,7 +208,15 @@ class Worker(e3.Worker):
         return session.SendAndCallForResponse(iq, self._on_contact_jabber_changed)
 
     def _on_contact_jabber_changed(self, session, stanza):
-        photo = stanza.getTag('vCard').getTag('PHOTO')
+        if stanza is None:
+            return
+
+        vcard = stanza.getTag('vCard')
+
+        if vcard is None:
+            return
+
+        photo = vcard.getTag('PHOTO')
         account = stanza.getFrom().getStripped()
 
         if not photo:
