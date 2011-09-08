@@ -41,11 +41,11 @@ class Notification():
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
-        self.session.config.get_or_set('b_notify_only_available', True)
+        self.session.config.get_or_set('b_notify_only_when_available', True)
 
         self.notifier = extension.get_default('notificationGUI')
         self.picture_factory = extension.get_default('notificationImage')
-        self.sound_player = extension.get_and_instantiate('sound',session)
+        self.sound_player = extension.get_and_instantiate('sound', session)
 
         if self.session:
             self.session.signals.conv_message.subscribe(
@@ -191,8 +191,9 @@ class Notification():
         """
         This creates and shows the nofification
         """
-        #Only show notifications when aviable
-        if self.session.config.b_notify_only_available == False or (self.session.config.b_notify_only_available and self.session.account.status == status.ONLINE):
+        only_when_available = self.session.config.b_notify_only_when_available
+        #Only show notifications when available
+        if not only_when_available or (only_when_available and self.session.account.status == status.ONLINE):
             if contact is not None and contact.picture is not None and contact.picture != "":
                 uri = "file://" + contact.picture
             else:
