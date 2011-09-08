@@ -427,8 +427,9 @@ class Worker(e3.Worker):
             return
 
         if not isinstance(avatar_data, str):
-            avatar = "".join([chr(b) for b in avatar])
-
+            avatar = "".join([chr(b) for b in avatar_data])
+        else:
+            avatar = avatar_data
         n = xmpp.Node('vCard', attrs={'xmlns': xmpp.NS_VCARD})
         iq_vcard = xmpp.Protocol('iq', self.session.account.account, 'set', payload=[n])
         vcard = iq_vcard.addChild(name='vCard', namespace=xmpp.NS_VCARD)
