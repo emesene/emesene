@@ -49,13 +49,16 @@ class PluginMainVBox(ExtensionDownloadList):
     def on_update(self, widget=None, download=False, clear=False):
         if self.first or download or clear:
             self.clear_all()
-            self.append(False, '<b>'+_('Installed')+'</b>', 'installed', True, False)
+            self.append(False, '<b>' + _('Installed') + '</b>',
+                        'installed', True, False)
+
             pluginmanager = get_pluginmanager()
 
             for name in pluginmanager.get_plugins():
                 self.append(pluginmanager.plugin_is_active(name),
-                    self.prettify_name(name, description=pluginmanager.plugin_description(name)),
-                    name)
+                    self.prettify_name(name,
+                            description=pluginmanager.plugin_description(name)),
+                            name)
             ExtensionDownloadList.on_update(self, widget, download, clear)
 
     def on_toggled(self, widget, path, model, type_):
@@ -69,46 +72,63 @@ class PluginMainVBox(ExtensionDownloadList):
 
     def on_cursor_changed(self, list_view, type_='plugin'):
         '''called when a row is selected'''
-
-        ExtensionDownloadList.on_cursor_changed(self, list_view, type_, self.config_button)
+        ExtensionDownloadList.on_cursor_changed(self,
+                                                list_view,
+                                                type_,
+                                                self.config_button)
 
     def on_start(self, *args):
         '''start the selected plugin'''
         name = self.get_selected_name(self.list_view)
-        if name is not None:
-            pluginmanager = get_pluginmanager()
-            pluginmanager.plugin_start(name, self.session)
 
+        def _start_plugin(pluginmanager):
+            pluginmanager.plugin_start(name, self.session)
             if name not in self.session.config.l_active_plugins:
                 self.session.config.l_active_plugins.append(name)
 
+        self.manipulate_plugin(name, _start_plugin)
+
+        self.on_cursor_changed(self.list_view)
+
+    def manipulate_plugin(self, name, func):
+        '''Starts a plugin given a name
+           name is the name of the plugin
+           func is the code that can manipulate the plugin
+           the func function takes a pluginmanager object.'''
+
+        if name is not None:
+            pluginmanager = get_pluginmanager()
+
+            func(pluginmanager)
+
             model, iter = self.list_view.get_selection().get_selected()
             model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
-        self.on_cursor_changed(self.list_view)
+            return True
+        return False
 
     def on_stop(self, *args):
         '''stop the selected plugin'''
         name = self.get_selected_name(self.list_view)
-        if name is not None:
-            pluginmanager = get_pluginmanager()
+
+        def _stop_plugin(pluginmanager):
             pluginmanager.plugin_stop(name)
 
             if name in self.session.config.l_active_plugins:
                 self.session.config.l_active_plugins.remove(name)
 
-            model, iter = self.list_view.get_selection().get_selected()
-            model.set_value(iter, 0, pluginmanager.plugin_is_active(name))
+        self.manipulate_plugin(name, _stop_plugin)
 
         self.on_cursor_changed(self.list_view)
 
     def on_config(self, *args):
         '''Called when user hits the Preferences button'''
         name = self.get_selected_name(self.list_view)
-        if name is not None:
-            pluginmanager = get_pluginmanager()
 
+        def _config_plugin(pluginmanager):
             if pluginmanager.plugin_is_active(name):
                 pluginmanager.plugin_config(name, self.session)
+
+        self.manipulate_plugin(name, _config_plugin)
 
 class PluginWindow(gtk.Window):
     def __init__(self, session):
