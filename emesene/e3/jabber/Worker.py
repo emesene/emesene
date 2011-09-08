@@ -299,8 +299,12 @@ class Worker(e3.Worker):
         self.my_avatars = self.caches.get_avatar_cache(
                 self.session.account.account)
 
-        if self.client.connect((host, int(port)),
-                proxy=self.proxy_data) == "":
+        try:
+            if self.client.connect((host, int(port)),
+                    proxy=self.proxy_data) == "":
+                self.session.login_failed('Connection error')
+                return
+        except xmpp.protocol.HostUnknown:
             self.session.login_failed('Connection error')
             return
 
