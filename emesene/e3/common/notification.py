@@ -16,13 +16,12 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from e3 import status
-from e3 import Message
+from e3 import Message, status
 import extension
 import gui
-
-import time
 import logging
+import time
+
 log = logging.getLogger('e3.common.notification')
 
 #TODO add config
@@ -42,6 +41,7 @@ class Notification():
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
+        self.session.config.get_or_set('b_notify_only_available', True)
 
         self.notifier = extension.get_default('notificationGUI')
         self.picture_factory = extension.get_default('notificationImage')
@@ -79,13 +79,13 @@ class Notification():
             self.session.signals.filetransfer_invitation.unsubscribe(
                 self._on_filetransfer_invitation)
 
-    def _on_filetransfer_completed(self,args):
-        uri = self.picture_factory('notification-message-email','mail-received')
+    def _on_filetransfer_completed(self, args):
+        uri = self.picture_factory('notification-message-email', 'mail-received')
         self.notifier(_("File transfer successful"), "", uri,
                       'file-transf-completed')
 
-    def _on_filetransfer_canceled(self,args):
-        uri = self.picture_factory('notification-message-email','mail-received')
+    def _on_filetransfer_canceled(self, args):
+        uri = self.picture_factory('notification-message-email', 'mail-received')
         self.notifier(_("File transfer canceled"), "", uri,
                       'file-transf-canceled')
 
@@ -99,9 +99,9 @@ class Notification():
 
     def _on_mail_received(self, message):
         ''' called when a new mail is received '''
-        uri = self.picture_factory('notification-message-email','mail-received')
+        uri = self.picture_factory('notification-message-email', 'mail-received')
         self.notifier(_("New mail from %s") % (message.address),
-                      message._subject, uri,'mail-received', None,
+                      message._subject, uri, 'mail-received', None,
                       message.address)
 
     def has_similar_conversation(self, cid, members):
@@ -129,7 +129,6 @@ class Notification():
         contact = self.session.contacts.get(account)
         
         text = None
-        sound = None #played sound is handled inside conversation.py
         check = False
         if conversation:
             check = conversation.message_waiting
@@ -141,7 +140,7 @@ class Notification():
             else:
                 text = msgobj.body
 
-        self._notify(contact, msgobj.display_name, text, msgobj.account, None)
+        self._notify(contact, msgobj.display_name, text, msgobj.account)
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):
@@ -192,14 +191,16 @@ class Notification():
         """
         This creates and shows the nofification
         """
-        if contact is not None and contact.picture is not None and contact.picture != "":
-            uri = "file://" + contact.picture
-        else:
-            uri = 'notification-message-im'
-        
-        uri = self.picture_factory(uri,'message-im')
-        
-        if text is not None:
-            self.notifier(title, text, uri, 'message-im', None, tooltip)
+        #Only show notifications when aviable
+        if self.session.config.b_notify_only_available == False or (self.session.config.b_notify_only_available and self.session.account.status == status.ONLINE):
+            if contact is not None and contact.picture is not None and contact.picture != "":
+                uri = "file://" + contact.picture
+            else:
+                uri = 'notification-message-im'
+            
+            uri = self.picture_factory(uri, 'message-im')
+            
+            if text is not None:
+                self.notifier(title, text, uri, 'message-im', None, tooltip)
         if sound is not None:
             self.sound_player.play(sound)

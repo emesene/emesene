@@ -150,9 +150,9 @@ class Controller(object):
         self._setup()
 
         signal.signal(signal.SIGINT,
-                lambda *args: glib.idle_add(self.close_session()))
+                lambda * args: glib.idle_add(self.close_session()))
         signal.signal(signal.SIGTERM,
-                lambda *args: glib.idle_add(self.close_session()))
+                lambda * args: glib.idle_add(self.close_session()))
 
     def _setup(self):
         '''register core extensions'''
@@ -610,6 +610,7 @@ class Controller(object):
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
+        self.session.config.get_or_set('b_notify_only_available', True)
         self.session.config.get_or_set('b_show_userpanel', True)
         self.session.config.get_or_set('b_show_emoticons', True)
         self.session.config.get_or_set('b_show_header', True)
@@ -666,7 +667,7 @@ class Controller(object):
 
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
-        self.soundPlayer = extension.get_and_instantiate('sound',self.session)
+        self.soundPlayer = extension.get_and_instantiate('sound', self.session)
 
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify

@@ -777,6 +777,8 @@ class Notification(BaseTable):
         self.append_markup('<b>'+_('Messages events:')+'</b>')
         self.append_check(_('Notify on received message'),
             'session.config.b_notify_receive_message')
+        self.append_check(_('Only when available'),
+            'session.config.b_notify_only_available')
         self.show_all()
 
 class Theme(BaseTable):

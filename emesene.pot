@@ -1153,12 +1153,16 @@ msgstr ""
 msgid "Notify on contact online"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:683
+#: emesene/gui/gtkui/Preferences.py:762
 msgid "Notify on contact offline"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:686
+#: emesene/gui/gtkui/Preferences.py:765
 msgid "Notify on received message"
+msgstr ""
+
+#: emesene/gui/gtkui/Preferecnes.py:767
+msgid "Only when available"
 msgstr ""
 
 #: emesene/gui/gtkui/Preferences.py:705
