@@ -31,7 +31,7 @@ class SoundThemes(ThemesManager.ThemesManager):
     def __init__(self):
         '''constructor'''
         ThemesManager.ThemesManager.__init__(
-            self, os.path.join('themes', 'conversations', 'renkoo.AdiumSoundset'),
+            self, os.path.join('themes', 'sounds', 'renkoo.AdiumSoundset'),
             ".AdiumSoundset")
 
     def get(self, theme_path):

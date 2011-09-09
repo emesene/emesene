@@ -23,13 +23,15 @@ import utils
 import e3
 
 from pluginmanager import get_pluginmanager
-from ExtensionList import ExtensionDownloadList # uh.. is this safe?
+from ExtensionList import ExtensionDownloadList
 
 class PluginMainVBox(ExtensionDownloadList):
     def __init__(self, session, init_path):
         ExtensionDownloadList.__init__(
             self, session, 'plugins',
             e3.common.Collections.PluginsCollection, init_path)
+
+        self.config_dir = e3.common.ConfigDir('emesene2')
 
         self.config_button = gtk.Button(stock=gtk.STOCK_PREFERENCES)
         self.config_button.connect('clicked', self.on_config)
@@ -47,6 +49,10 @@ class PluginMainVBox(ExtensionDownloadList):
         return pretty_name % (name.capitalize(), description)
 
     def on_update(self, widget=None, download=False, clear=False):
+        '''called when the liststore need to be changed'''
+        self.removable_list = {}
+        self.removable_list['plugin'] = {}
+
         if self.first or download or clear:
             self.clear_all()
             self.append(False, '<b>' + _('Installed') + '</b>',
@@ -54,21 +60,28 @@ class PluginMainVBox(ExtensionDownloadList):
 
             pluginmanager = get_pluginmanager()
 
-            for name in pluginmanager.get_plugins():
-                self.append(pluginmanager.plugin_is_active(name),
-                    self.prettify_name(name,
+            for name, plugin in pluginmanager.get_plugins():
+                is_active = pluginmanager.plugin_is_active(name)
+                path = plugin.path
+                if path.startswith(self.config_dir.base_dir) and not is_active:
+                    self.removable_list['plugin'][name] = path
+                self.append(is_active, self.prettify_name(name,
                             description=pluginmanager.plugin_description(name)),
-                            name)
+                            name, path=path)
             ExtensionDownloadList.on_update(self, widget, download, clear)
 
     def on_toggled(self, widget, path, model, type_):
         '''called when the toggle button in list view is pressed'''
-        sel = self.list_view.get_selection()
-        sel.select_path(path)
-        if not widget.get_active():
-            self.on_start()
+        pluginmanager = get_pluginmanager()
+        name = model[path][2]
+        if not model[path][0]:
+            self.on_start(name)
+            self.removable_list[type_].pop(name, None)
         else:
-            self.on_stop()
+            self.on_stop(name)
+            if model[path][5].startswith(self.config_dir.base_dir):
+                self.removable_list[type_][name] = model[path][5]
+        model[path][0] = pluginmanager.plugin_is_active(name)
 
     def on_cursor_changed(self, list_view, type_='plugin'):
         '''called when a row is selected'''
@@ -77,46 +90,24 @@ class PluginMainVBox(ExtensionDownloadList):
                                                 type_,
                                                 self.config_button)
 
-    def on_start(self, *args):
+    def on_start(self, name):
         '''start the selected plugin'''
-        name = self.get_selected_name(self.list_view)
+        pluginmanager = get_pluginmanager()
 
-        def _start_plugin(pluginmanager):
-            pluginmanager.plugin_start(name, self.session)
-            if name not in self.session.config.l_active_plugins:
-                self.session.config.l_active_plugins.append(name)
-
-        self.manipulate_plugin(name, _start_plugin)
+        pluginmanager.plugin_start(name, self.session)
+        if name not in self.session.config.l_active_plugins:
+            self.session.config.l_active_plugins.append(name)
 
         self.on_cursor_changed(self.list_view)
 
-    def manipulate_plugin(self, name, func):
-        '''Starts a plugin given a name
-           name is the name of the plugin
-           func is the code that can manipulate the plugin
-           the func function takes a pluginmanager object.'''
-
-        if name is not None:
-            pluginmanager = get_pluginmanager()
-
-            func(pluginmanager)
-
-            model, iter = self.list_view.get_selection().get_selected()
-            model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
-            return True
-        return False
-
-    def on_stop(self, *args):
+    def on_stop(self, name):
         '''stop the selected plugin'''
-        name = self.get_selected_name(self.list_view)
+        pluginmanager = get_pluginmanager()
 
-        def _stop_plugin(pluginmanager):
-            pluginmanager.plugin_stop(name)
+        pluginmanager.plugin_stop(name)
 
-            if name in self.session.config.l_active_plugins:
-                self.session.config.l_active_plugins.remove(name)
-
-        self.manipulate_plugin(name, _stop_plugin)
+        if name in self.session.config.l_active_plugins:
+            self.session.config.l_active_plugins.remove(name)
 
         self.on_cursor_changed(self.list_view)
 
@@ -124,11 +115,9 @@ class PluginMainVBox(ExtensionDownloadList):
         '''Called when user hits the Preferences button'''
         name = self.get_selected_name(self.list_view)
 
-        def _config_plugin(pluginmanager):
+        if name:
             if pluginmanager.plugin_is_active(name):
                 pluginmanager.plugin_config(name, self.session)
-
-        self.manipulate_plugin(name, _config_plugin)
 
 class PluginWindow(gtk.Window):
     def __init__(self, session):

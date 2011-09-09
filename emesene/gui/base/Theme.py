@@ -50,7 +50,7 @@ class Theme(object):
         config_sound_themes_path = os.path.join(config_themes_path, "sounds")
         ensure_dir_path(config_sound_themes_path)
 
-        sound_theme_path = os.path.join("themes", "sounds")
+        sound_theme_path = os.path.join(os.getcwd(), "themes", "sounds")
         self.sound_themes = SoundThemes.SoundThemes()
         self.sound_themes.add_themes_path(sound_theme_path)
         self.sound_themes.add_themes_path(config_sound_themes_path)

@@ -22,6 +22,7 @@ import gtk
 import utils
 import extension
 import e3
+import shutil
 
 class ExtensionListView(gtk.TreeView):
     def __init__(self, store, radio=False):
@@ -42,7 +43,7 @@ class ExtensionListView(gtk.TreeView):
 class ExtensionListStore(gtk.ListStore):
     def __init__(self):
         # running, pretty name and description, name
-        gtk.ListStore.__init__(self, bool, str, str, bool, bool)
+        gtk.ListStore.__init__(self, bool, str, str, bool, bool, str)
 
 class ExtensionList(gtk.VBox):
     def __init__(self, session, on_toggled, on_cursor_changed, radio, type_):
@@ -77,12 +78,12 @@ class ExtensionList(gtk.VBox):
         self.list_store.clear()
         self.extension_list = []
 
-    def append(self, is_active, label, name, sensitive=True, visible=True):
+    def append(self, is_active, label, name, sensitive=True, visible=True, path=''):
         '''append an item'''
         if not sensitive:
             label = '<span foreground="#696969">%s</span>' % label
         if name not in self.extension_list:
-            self.list_store.append((is_active, label, name, sensitive, visible))
+            self.list_store.append((is_active, label, name, sensitive, visible, path))
             self.extension_list.append(name)
 
 class ExtensionListTab(gtk.VBox):
@@ -167,6 +168,7 @@ class ExtensionDownloadList(ExtensionListTab):
         self.thc_com[community] = collection_class('emesene-community-' + self.list_type, init_path)
 
         self.download_list = {}
+        self.removable_list = {}
 
         refresh_button = gtk.Button(stock=gtk.STOCK_REFRESH)
         refresh_button.connect('clicked', self.on_update, True)
@@ -177,7 +179,12 @@ class ExtensionDownloadList(ExtensionListTab):
         self.download_button.connect('clicked', self.start_download)
         self.download_button.set_property('no-show-all', True)
 
+        self.remove_button = gtk.Button(stock=gtk.STOCK_REMOVE)
+        self.remove_button.connect('clicked', self.remove)
+        self.remove_button.set_property('no-show-all', True)
+
         self.no_button = gtk.HBox()
+        self.no_button2 = gtk.HBox()
 
         source_combo = gtk.combo_box_new_text()
 
@@ -186,13 +193,12 @@ class ExtensionDownloadList(ExtensionListTab):
         source_combo.set_active(0)
         source_combo.connect('changed', self.on_change_source)
 
-        hbox = gtk.HBox()
-
         self.buttonbox.pack_start(source_combo, fill=False)
         self.buttonbox.pack_start(refresh_button, fill=False)
-        self.buttonbox.pack_start(hbox)
-        self.buttonbox.pack_start(self.download_button, fill=False)
         self.buttonbox.pack_start(self.no_button)
+        self.buttonbox.pack_start(self.no_button2)
+        self.buttonbox.pack_start(self.remove_button, fill=False)
+        self.buttonbox.pack_start(self.download_button, fill=False)
 
     def on_cursor_changed(self, list_view, type_, extra_button=None):
         '''called when a row is selected'''
@@ -208,6 +214,13 @@ class ExtensionDownloadList(ExtensionListTab):
             else:
                 self.download_button.hide()
                 extra_button.show()
+            if value in self.removable_list.get(type_, {}):
+                self.remove_item = (type_, value)
+                self.no_button2.hide()
+                self.remove_button.show()
+            else:
+                self.remove_button.hide()
+                self.no_button2.show()
 
     def get_selected_name(self, list_view):
         '''Gets the current selected name in the list view.'''
@@ -244,11 +257,18 @@ class ExtensionDownloadList(ExtensionListTab):
                         _('Downloading extensions'), self._end_progress_cb)
         self.progress.set_action(_("Downloading extensions"))
         self.progress.show_all()
-        utils.GtkRunner(self.show_update, self.download)
+        utils.GtkRunner(self.show_update_callback, self.download)
 
     def download(self):
+        '''download an extension'''
         thc_cur = self.thc_com[self.thc_cur_name]
         thc_cur.download(self.download_item)
+        self.on_update(clear=True)
+
+    def remove(self, widget):
+        '''remove an extension'''
+        shutil.rmtree(self.removable_list[self.remove_item[0]][self.remove_item[1]])
+        self.removable_list[self.remove_item[0]].pop(self.remove_item[1])
         self.on_update(clear=True)
 
     def update(self):
@@ -256,6 +276,10 @@ class ExtensionDownloadList(ExtensionListTab):
         for k in self.thc_com:
             self.thc_com[k].fetch()
 
+    def show_update_callback(self, clear=True):
+        '''method used as callback, because both GtkRunner and buttons
+        need the first argument on the on_update method'''
+        self.on_update(clear=clear)
 
     def show_update(self, result=True):
         '''show an update list of the set collection'''
@@ -289,10 +313,10 @@ class ExtensionDownloadList(ExtensionListTab):
 
 class ThemeList(ExtensionDownloadList):
     def __init__(self, session):
-        config_dir = e3.common.ConfigDir('emesene2')
+        self.config_dir = e3.common.ConfigDir('emesene2')
         ExtensionDownloadList.__init__(
             self, session, 'themes', e3.common.Collections.ThemesCollection,
-            config_dir.join('themes'), True, True)
+            self.config_dir.join('themes'), True, True)
 
         self.themes = {}
         self.theme_configs = {}
@@ -301,8 +325,12 @@ class ThemeList(ExtensionDownloadList):
     def on_toggled(self, widget, path, model, type_):
         '''called when the toggle button in list view is pressed'''
         for row in model:
-            row[0] = False
+            if row[0]:
+                if model[path][5].startswith(self.config_dir.base_dir):
+                    self.removable_list[type_][row[2]] = row[5]
+                row[0] = False
         model[path][0] = True
+        self.removable_list[type_].pop(model[path][2], None)
         self.callbacks[type_](self.theme_configs[type_], model[path][2])
 
     def get_attr(self, name):
@@ -334,9 +362,15 @@ class ThemeList(ExtensionDownloadList):
         self.set_attr(property_name, value)
 
     def on_update(self, widget=None, download=False, clear=False):
+        '''called when the liststore need to be changed'''
         if not (self.first or download or clear):
             return
+
+        self.removable_list = {}
+
         for box in self.boxes:
+            if box.extension_type not in self.removable_list:
+                self.removable_list[box.extension_type] = {}
             box.clear_all()
             box.append(False, '<b>'+_('Installed')+'</b>',
                        'installed', visible=False)
@@ -345,7 +379,10 @@ class ThemeList(ExtensionDownloadList):
             for path in self.themes[box.extension_type].list():
                 label = self.themes[box.extension_type].get_name_from_path(path)
                 name = os.path.basename(path)
-                box.append(name == current or label == current, label, name)
+                is_current = name == current or label == current
+                if path.startswith(self.config_dir.base_dir) and not is_current:
+                    self.removable_list[box.extension_type][name] = path
+                box.append(is_current, label, name, path=path)
         ExtensionDownloadList.on_update(self, widget, download, clear)
 
     def prettify_name(self, name, type_):

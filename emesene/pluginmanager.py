@@ -68,6 +68,7 @@ class PluginHandler(object):
             self.name = self.name.split(".")[0]
 
         self.base_dir = base_dir
+        self.path = os.path.join(base_dir, name)
         self._instance = None
 
         self.is_package = is_package
@@ -156,8 +157,10 @@ class PluginManager(object):
         self._plugins = {} #'name': Plugin/Package
         self._plugin_dirs = []
 
-    def scan_directory(self, dir_):
+    def scan_directory(self, dir_, old_plugins=None):
         '''Find plugins and packages inside dir_'''
+        if not old_plugins:
+            old_plugins = {}
         if dir_ not in self._plugin_dirs:
             self._plugin_dirs.append(dir_)
 
@@ -170,7 +173,9 @@ class PluginManager(object):
 
             try:
                 mod = PluginHandler(dir_, filename, os.path.isdir(path))
-                if mod.name not in self._plugins:
+                if mod.name in old_plugins:
+                    self._plugins[mod.name] = old_plugins[mod.name]
+                else:
                     self._plugins[mod.name] = mod
             except Exception, reason:
                 log.warning('Exception while importing %s:\n%s' % (
@@ -180,8 +185,10 @@ class PluginManager(object):
 
     def rescan_directories(self):
         '''Rescan all directories for new plugins'''
+        old_plugins = dict(self._plugins)
+        self._plugins = {}
         for dir_ in self._plugin_dirs:
-            self.scan_directory(dir_)
+            self.scan_directory(dir_, old_plugins)
 
     def plugin_start(self, name, session):
         '''Starts a plugin.
@@ -227,7 +234,7 @@ class PluginManager(object):
     def get_plugins(self):
         '''return the list of plugin names'''
         self.rescan_directories()
-        return self._plugins.keys()
+        return self._plugins.items()
 
     def plugin_description(self, name):
         '''Get the plugin description.
