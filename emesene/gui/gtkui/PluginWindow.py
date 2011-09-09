@@ -113,10 +113,10 @@ class PluginMainVBox(ExtensionDownloadList):
 
     def on_config(self, *args):
         '''Called when user hits the Preferences button'''
+        pluginmanager = get_pluginmanager()
         name = self.get_selected_name(self.list_view)
 
-        if name:
-            if pluginmanager.plugin_is_active(name):
+        if name and pluginmanager.plugin_is_active(name):
                 pluginmanager.plugin_config(name, self.session)
 
 class PluginWindow(gtk.Window):
