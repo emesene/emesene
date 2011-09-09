@@ -79,27 +79,25 @@ class PluginMainVBox(ExtensionDownloadList):
 
     def on_start(self, *args):
         '''start the selected plugin'''
-        name = self.get_selected_name(self.list_view)
-
-        def _start_plugin(pluginmanager):
+        def _start_plugin(pluginmanager, name):
             pluginmanager.plugin_start(name, self.session)
             if name not in self.session.config.l_active_plugins:
                 self.session.config.l_active_plugins.append(name)
 
-        self.manipulate_plugin(name, _start_plugin)
+        self.manipulate_plugin(_start_plugin)
 
         self.on_cursor_changed(self.list_view)
 
-    def manipulate_plugin(self, name, func):
+    def manipulate_plugin(self, func):
         '''Starts a plugin given a name
            name is the name of the plugin
            func is the code that can manipulate the plugin
            the func function takes a pluginmanager object.'''
-
+        name = self.get_selected_name(self.list_view)
         if name is not None:
             pluginmanager = get_pluginmanager()
 
-            func(pluginmanager)
+            func(pluginmanager, name)
 
             model, iter = self.list_view.get_selection().get_selected()
             model.set_value(iter, 0, bool(pluginmanager.plugin_is_active(name)))
@@ -108,27 +106,23 @@ class PluginMainVBox(ExtensionDownloadList):
 
     def on_stop(self, *args):
         '''stop the selected plugin'''
-        name = self.get_selected_name(self.list_view)
-
-        def _stop_plugin(pluginmanager):
+        def _stop_plugin(pluginmanager, name):
             pluginmanager.plugin_stop(name)
 
             if name in self.session.config.l_active_plugins:
                 self.session.config.l_active_plugins.remove(name)
 
-        self.manipulate_plugin(name, _stop_plugin)
+        self.manipulate_plugin(_stop_plugin)
 
         self.on_cursor_changed(self.list_view)
 
     def on_config(self, *args):
         '''Called when user hits the Preferences button'''
-        name = self.get_selected_name(self.list_view)
-
-        def _config_plugin(pluginmanager):
+        def _config_plugin(pluginmanager, name):
             if pluginmanager.plugin_is_active(name):
                 pluginmanager.plugin_config(name, self.session)
 
-        self.manipulate_plugin(name, _config_plugin)
+        self.manipulate_plugin(_config_plugin)
 
 class PluginWindow(gtk.Window):
     def __init__(self, session):
