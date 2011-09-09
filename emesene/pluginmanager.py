@@ -141,6 +141,8 @@ class PluginHandler(object):
         return False
 
     def configurable(self):
+        if not self.is_active():
+            return False
         return self._instance.configurable
 
     def is_active(self):
