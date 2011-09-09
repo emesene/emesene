@@ -37,7 +37,7 @@ class PluginBase(object):
         return
 
     @abc.abstractmethod
-    def stop(self, session):
+    def stop(self):
         return
 
     @abc.abstractproperty

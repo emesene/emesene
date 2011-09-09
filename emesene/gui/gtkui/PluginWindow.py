@@ -85,6 +85,14 @@ class PluginMainVBox(ExtensionDownloadList):
 
     def on_cursor_changed(self, list_view, type_='plugin'):
         '''called when a row is selected'''
+        name = self.get_selected_name(self.list_view)
+        def _config_plugin(pluginmanager):
+            configurable = pluginmanager.plugin_configurable(name)
+            self.config_button.set_sensitive(configurable)
+
+        if not self.manipulate_plugin(name, _config_plugin):
+            self.config_button.set_sensitive(False)
+
         ExtensionDownloadList.on_cursor_changed(self,
                                                 list_view,
                                                 type_,
