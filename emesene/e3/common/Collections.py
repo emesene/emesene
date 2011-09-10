@@ -21,12 +21,12 @@
 
 from Github import Github
 import os
+import shutil
 
 class ExtensionDescriptor(object):
 
     def __init__(self):
         self.files = {}
-        self.todownload = False
 
     def add_file(self, file_name, blob):
         self.files[file_name] = blob
@@ -38,10 +38,15 @@ class Collection(object):
         self.extensions_descs = {}
         self.theme = theme
         self.github = Github("emesene")
+        self._stop = False
 
     def save_files(self, element, label):
+        self._stop = False
         for el, k in element[label].files.items():
             els = el.split("/")
+            if self._stop:
+                self.remove(os.path.join(self.dest_folder, els[0]))
+                return
             path_to_create = ""
             for i in range(len(els) - 1):
                 path_to_create = os.path.join(path_to_create, els[i])
@@ -54,18 +59,18 @@ class Collection(object):
             f.write(rq)
     
     def download(self, download_item=None):
-        for key in self.extensions_descs:
-            element = self.extensions_descs[key]
+        for element in self.extensions_descs.itervalues():
             if download_item is not None:
                 self.save_files(element, download_item)
-            else:
-                for label in element:
-                    if element[label].todownload:
-                        self.save_files(element, label)
+
+    def remove(self, path):
+        shutil.rmtree(path)
+
+    def stop(self):
+        self._stop = True
 
     def plugin_name_from_file(self, file_name):
         pass
-
 
     def fetch(self):
         pass

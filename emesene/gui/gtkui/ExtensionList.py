@@ -22,7 +22,6 @@ import gtk
 import utils
 import extension
 import e3
-import shutil
 
 class ExtensionListView(gtk.TreeView):
     def __init__(self, store, radio=False):
@@ -267,7 +266,9 @@ class ExtensionDownloadList(ExtensionListTab):
 
     def remove(self, widget):
         '''remove an extension'''
-        shutil.rmtree(self.removable_list[self.remove_item[0]][self.remove_item[1]])
+        thc_cur = self.thc_com[self.thc_cur_name]
+        path = self.removable_list[self.remove_item[0]][self.remove_item[1]]
+        thc_cur.remove(path)
         self.removable_list[self.remove_item[0]].pop(self.remove_item[1])
         self.on_update(clear=True)
 
@@ -306,10 +307,10 @@ class ExtensionDownloadList(ExtensionListTab):
                            label,
                            False)
 
-    def _end_progress_cb(self, obj):
-        # TODO: find a way to stop the thread that refreshes the list and other
-        # cleanups and get the Cancel button to work
-        pass
+    def _end_progress_cb(self, *args):
+        '''stops download of plugins'''
+        for k in self.thc_com:
+            self.thc_com[k].stop()
 
 class ThemeList(ExtensionDownloadList):
     def __init__(self, session):
