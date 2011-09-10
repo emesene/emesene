@@ -25,7 +25,7 @@ import gui
 import utils
 import RichBuffer
 
-from gui.base import MarkupParser
+from gui.base import MarkupParser, Plus
 
 import logging
 log = logging.getLogger('gtkui.Textbox')
@@ -413,7 +413,9 @@ class OutputText(TextBox):
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
-        self.append(formatter.format_information(message.body), None, None,
+        msg = gui.Message.from_information(contact, message)
+        msg.message = Plus.msnplus_strip(msg.message)
+        self.append(formatter.format_information(msg.message), None, None,
                 self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):

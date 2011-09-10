@@ -75,7 +75,7 @@ class MessageFormatter(object):
         '''format a message from the template, include new line
         if new_line is True'''
         template = template.replace('%NL%', self.new_line)
-        template = template.replace('%MESSAGE%', message)
+        template = template.replace('%MESSAGE%', escape(message))
 
         return template
 
