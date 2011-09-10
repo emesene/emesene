@@ -389,10 +389,8 @@ class OutputText(TextBox):
         is_raw, consecutive, outgoing, first, last = \
             formatter.format(contact, message.type, message.timestamp)
 
-        if is_raw:
-            middle = MarkupParser.escape(message.body)
-        else:
-            middle = MarkupParser.escape(message.body)
+        middle = MarkupParser.escape(message.body)
+        if not is_raw:
             middle = e3.common.add_style_to_message(middle, message.style, False)
 
         all_ = first + middle + last
