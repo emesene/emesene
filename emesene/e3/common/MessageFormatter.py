@@ -129,7 +129,12 @@ class MessageFormatter(object):
             first = template
             last = ''
 
-        return (is_raw, first, last)
+        if not is_raw:
+            middle = e3.common.add_style_to_message(msg.message, msg.style, False)
+
+        msg.message = first + middle + last
+
+        return msg.message
 
 dic = {
     '\"'    :    '&quot;',

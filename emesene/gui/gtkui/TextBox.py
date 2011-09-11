@@ -383,27 +383,16 @@ class OutputText(TextBox):
         msg.alias = Plus.msnplus_strip(msg.alias)
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
-        is_raw, first, last = \
-            formatter.format(msg)
-
-        if not is_raw:
-            middle = e3.common.add_style_to_message(msg.message, msg.style, False)
-
-        all_ = first + middle + last
-        self.append(all_, self.config.b_allow_auto_scroll)
+        text = formatter.format(msg)
+        self.append(text, self.config.b_allow_auto_scroll)
 
     def receive_message(self, formatter, msg):
         '''add a message to the widget'''
         msg.alias = Plus.msnplus_strip(msg.alias)
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
-        is_raw, first, last = \
-            formatter.format(msg)
-
-        if not is_raw:
-            middle = e3.common.add_style_to_message(msg.message, msg.style)
-
-        self.append(first + middle + last, self.config.b_allow_auto_scroll)
+        text = formatter.format(msg)
+        self.append(text, self.config.b_allow_auto_scroll)
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
