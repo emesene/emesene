@@ -164,7 +164,8 @@ class AdiumTheme(object):
             status_path)
         template = template.replace('%messageDirection%',
             escape(msg.direction))
-        template = template.replace('%message%', msg.message)
+
+        template = template.replace('%message%', style_message(msg.message, msg.style))
 
         if msg.timestamp is None:
             template = template.replace('%time%',
