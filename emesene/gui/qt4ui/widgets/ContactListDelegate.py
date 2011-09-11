@@ -66,10 +66,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         else:
             # TODO: consider changing how data is stored inside the model, 
             # if useful
-            display_role = self._format_nick(data_role, 
-                (unicode(model.data(index, Role.DisplayRole).toPyObject()),
-                 data_role.nick,
-                 unicode(model.data(index, Role.MessageRole).toPyObject())))
+            display_role = self._format_nick(data_role)
             display_role = _format_contact_display_role(display_role)
     #        message = model.data(index, Role.MessageRole).toString()
     #        if not message.isEmpty():

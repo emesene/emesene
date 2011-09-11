@@ -144,7 +144,9 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
                 self.on_group_collapsed(group)
             
 
-
+    def escaper(self, text):
+        ''' escape the text, this is a toolkit dependant method '''
+        return unicode(text)
 
 
 
