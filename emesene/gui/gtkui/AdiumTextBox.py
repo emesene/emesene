@@ -44,9 +44,6 @@ class OutputView(webkit.WebView):
         webkit_settings.set_property("enable-plugins", False)
 
         self.theme = theme
-        self.last_incoming = None
-        self.last_incoming_account = None
-        self.last_incoming_nickname = None
         self.ready = False
         self.pending = []
         self.add_emoticon_cb = add_emoticon_cb
@@ -81,38 +78,16 @@ class OutputView(webkit.WebView):
                 "text/html", "utf-8", utils.path_to_url(self.theme.path))
         self.pending = []
         self.ready = False
-        self.last_incoming = None
 
-    def add_message(self, msg, style=None, cedict={}, cedir=None):
+    def add_message(self, msg):
         '''add a message to the conversation'''
 
-        b_nick_check = bool(self.last_incoming_nickname != msg.display_name)
-        if b_nick_check:
-            self.last_incoming_nickname = msg.display_name
-
         if msg.incoming:
-            if self.last_incoming is None:
-                self.last_incoming = False
-
-            msg.first = not self.last_incoming
-
-            if self.last_incoming_account != msg.sender or b_nick_check:
-                msg.first = True
-
-            html = self.theme.format_incoming(msg, style, cedict, cedir)
-            self.last_incoming = True
-            self.last_incoming_account = msg.sender
+            html = self.theme.format_incoming(msg)
         else:
-            if self.last_incoming is None:
-                self.last_incoming = True
-
-            msg.first = self.last_incoming
-
-            html = self.theme.format_outgoing(msg, style, cedict, cedir)
-            self.last_incoming = False
+            html = self.theme.format_outgoing(msg)
 
         if msg.type == "status":
-            self.last_incoming = None
             msg.first = True
 
         if msg.first:
@@ -216,21 +191,19 @@ class OutputText(gtk.ScrolledWindow):
         '''clear the content'''
         self.view.clear(source, target, target_display, source_img, target_img)
 
-    def send_message(self, formatter, contact, message, cedict, cedir, is_first):
+    def send_message(self, formatter, msg):
         '''add a message to the widget'''
-        msg = gui.Message.from_contact(contact, message, is_first, False, message.timestamp)
-        self.view.add_message(msg, message.style, cedict, cedir)
+        self.view.add_message(msg)
 
-    def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
+    def receive_message(self, formatter, msg):
         '''add a message to the widget'''
-        msg = gui.Message.from_contact(contact, message, is_first, True, message.timestamp)
-        self.view.add_message(msg, message.style, cedict, cedir)
+        self.view.add_message(msg)
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
         msg = gui.Message.from_information(contact, message)
         msg.message = Plus.msnplus_strip(msg.message)
-        self.view.add_message(msg, None, None, None)
+        self.view.add_message(msg)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''

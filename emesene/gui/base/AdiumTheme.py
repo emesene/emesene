@@ -78,7 +78,7 @@ class AdiumTheme(object):
         self.outgoing_next = read_file(self.outgoing_path,
                 'NextContent.html')
 
-    def format_incoming(self, msg, style=None, cedict={}, cedir=None):
+    def format_incoming(self, msg):
         '''return a string containing the template for the incoming message
         with the vars replaced
         '''
@@ -98,9 +98,9 @@ class AdiumTheme(object):
         else:
             template = self.incoming
 
-        return self.replace(template, msg, style, cedict, cedir)
+        return self.replace(template, msg)
 
-    def format_outgoing(self, msg, style=None, cedict={}, cedir=None):
+    def format_outgoing(self, msg):
         '''return a string containing the template for the outgoing message
         with the vars replaced
         '''
@@ -126,9 +126,9 @@ class AdiumTheme(object):
         else:
             template = self.outgoing
 
-        return self.replace(template, msg, style, cedict, cedir)
+        return self.replace(template, msg)
 
-    def replace(self, template, msg, style=None, cedict={}, cedir=None):
+    def replace(self, template, msg):
         '''replace the variables on template for the values on msg
         '''
 
@@ -140,13 +140,9 @@ class AdiumTheme(object):
         if(len(msg.display_name) > DISPLAY_NAME_LIMIT):
             msg.display_name = msg.display_name.decode('utf-8')[0:DISPLAY_NAME_LIMIT] + "..."
 
-        msgtext = MarkupParser.replace_emotes(escape(msg.message), cedict, cedir, msg.sender)
-        msgtext = MarkupParser.urlify(msgtext)
         image_path = escape(MarkupParser.path_to_url(msg.image_path))
         status_path = escape(MarkupParser.path_to_url(msg.status_path))
 
-        if style is not None:
-            msgtext = style_message(msgtext, style)
         if msg.alias:
             template = template.replace('%sender%', escape(msg.alias))
         else:
@@ -160,7 +156,7 @@ class AdiumTheme(object):
             status_path)
         template = template.replace('%messageDirection%',
             escape(msg.direction))
-        template = template.replace('%message%', msgtext)
+        template = template.replace('%message%', msg.message)
 
         if msg.timestamp is None:
             template = template.replace('%time%',

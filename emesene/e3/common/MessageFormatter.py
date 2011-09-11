@@ -29,9 +29,7 @@ class MessageFormatter(object):
 
     tag list:
 
-    %NICK%: the nick of the account
     %ALIAS%: the alias of the account
-    %ACCOUNT%: the account identifier
     %DISPLAYNAME%: the alias if exist otherwise the nick if exist
         otherwise the account
     %TIME%: the time of the message
@@ -39,7 +37,6 @@ class MessageFormatter(object):
     %MESSAGE%: the message with format
     %RAWMESSAGE%: the message without format
     %STATUS%: the status of the account
-    %PERSONALMESSAGE%: the personal message of the account
     %NL%: new line
 
     some basic formating is allowed as html tags:
@@ -54,8 +51,6 @@ class MessageFormatter(object):
 
         # the contact who sends the messages
         self.contact = contact
-        self.last_message_sender = None
-        self.last_message_time = None
         self.new_line = new_line
 
         # default formats
@@ -82,66 +77,47 @@ class MessageFormatter(object):
     def format_information(self, message):
         '''format an info message from the template, include new line
         if new_line is True'''
-        self.last_message_sender = None
         return self.format_message(self.information, message)
 
-    def format(self, contact, message_type=None, timestamp_override=None):
+    def format(self, msg):
         '''format the message according to the template'''
-        if message_type is None:
-            message_type=e3.Message.TYPE_MESSAGE
+        if msg.type is None:
+            msg.type = e3.Message.TYPE_MESSAGE
 
-        outgoing = False
-        consecutive = False
-
-        if self.contact.account == contact.account:
-            outgoing = True
-
-        if self.last_message_sender and \
-            self.last_message_sender.account == contact.account:
-            consecutive = True
-
-        if not timestamp_override==None:
-            timestamp = calendar.timegm(timestamp_override.timetuple())
+        if not msg.timestamp == None:
+            timestamp = calendar.timegm(msg.timestamp.timetuple())
         else:
             timestamp = time.time()
-        self.last_message_sender = contact
-        self.last_message_time = timestamp
 
-        if message_type == e3.Message.TYPE_MESSAGE:
-            if consecutive:
-                if outgoing:
-                    template = self.consecutive_outgoing
-                else:
-                    template = self.consecutive_incoming
-            else:
-                if outgoing:
-                    template = self.outgoing
-                else:
+        if msg.type == e3.Message.TYPE_MESSAGE:
+            if msg.first:
+                if msg.incoming:
                     template = self.incoming
+                else:
+                    template = self.outgoing
+            else:
+                if msg.incoming:
+                    template = self.consecutive_incoming
+                else:
+                    template = self.consecutive_outgoing
 
-        if message_type == e3.Message.TYPE_FLNMSG:
+        if msg.type == e3.Message.TYPE_FLNMSG:
             template = self.offline_incoming
-            timestamp = timestamp_override
+            timestamp = msg.timestamp
 
         formated_time = time.strftime('%c', time.gmtime(timestamp))
         formated_short_time = time.strftime('%X', time.localtime(timestamp))
 
-        template = template.replace('%NICK%',
-            escape(contact.nick))
         template = template.replace('%ALIAS%',
-            escape(contact.alias))
-        template = template.replace('%ACCOUNT%',
-            escape(contact.account))
+            escape(msg.alias))
         template = template.replace('%DISPLAYNAME%',
-            escape(contact.display_name))
+            escape(msg.display_name))
         template = template.replace('%TIME%',
             escape(formated_time))
         template = template.replace('%SHORTTIME%',
             escape(formated_short_time))
         template = template.replace('%STATUS%',
-            escape(e3.status.STATUS[contact.status]))
-        template = template.replace('%PERSONALMESSAGE%',
-            escape(contact.message))
+            escape(msg.status))
         template = template.replace('%NL%', self.new_line)
 
         is_raw = False

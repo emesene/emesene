@@ -66,6 +66,9 @@ class Conversation(object):
         self.input = None
         self.output = None
         self.soundPlayer = extension.get_and_instantiate('sound', session)
+        self.last_incoming = None
+        self.last_incoming_nickname = None
+        self.last_incoming_account = None
 
     def subscribe_signals(self):
         ''' subscribes current session's signals '''
@@ -224,6 +227,7 @@ class Conversation(object):
     def on_clean(self):
         '''called when the clean button is clicked'''
         self.output.clear()
+        self.last_incoming = None
 
     def on_block_user(self):
         '''blocks the first user of the conversation'''
@@ -343,6 +347,47 @@ class Conversation(object):
 
     is_group_chat = property(fget=_get_group_chat)
 
+    def _pre_process_message(self, contact, message, incomming, cedict, cepath, tstamp=None, mtype=None, mstyle=None):
+        '''Create a new gui.Message and calculates if it's first message
+        '''
+        msg = gui.Message.from_contact(contact,
+                message, self.first, incomming, tstamp)
+
+        if self.session.config.b_show_emoticons:
+            msg.message = MarkupParser.replace_emotes(MarkupParser.escape(msg.message),
+                        cedict, cepath, msg.sender)
+
+        msg.message = MarkupParser.urlify(msg.message)
+
+        b_nick_check = bool(self.last_incoming_nickname != msg.display_name)
+        if b_nick_check:
+            self.last_incoming_nickname = msg.display_name
+
+        if msg.incoming:
+            if self.last_incoming is None:
+                self.last_incoming = False
+
+            msg.first = not self.last_incoming
+
+            if self.last_incoming_account != msg.sender or b_nick_check:
+                msg.first = True
+        else:
+            if self.last_incoming is None:
+                self.last_incoming = True
+
+            msg.first = self.last_incoming
+
+        return msg
+
+    def _post_process_message(self, msg):
+        '''Updates first message status
+        '''
+        if msg.incoming:
+            self.last_incoming = True
+            self.last_incoming_account = msg.sender
+        else:
+            self.last_incoming = False
+
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
         cedict = self.emcache.parse()
@@ -350,8 +395,15 @@ class Conversation(object):
 
         self.session.send_message(self.cid, text, self.cstyle, cedict, custom_emoticons)
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
-        self.output.send_message(self.formatter, self.session.contacts.me,
-                                 message, cedict, self.emcache.path, self.first)
+
+        msg = self._pre_process_message(self.session.contacts.me,
+            message, True, cedict, self.emcache.path, message.timestamp,
+            message.type, self.cstyle)
+
+        self.output.send_message(self.formatter, msg)
+
+        self._post_process_message(msg)
+
         self.messages.push(text)
         self.play_send()
         self.first = False
@@ -368,8 +420,15 @@ class Conversation(object):
                 message.style.color = e3.base.Color.from_hex(self.session.config.override_text_color)
 
             user_emcache = self.caches.get_emoticon_cache(account)
-            self.output.receive_message(self.formatter, contact, message,
-                    received_custom_emoticons, user_emcache.path, self.first)
+
+            msg = self._pre_process_message(contact,
+                message, False, received_custom_emoticons, user_emcache.path,
+                message.timestamp, message.type, message.style)
+
+            self.output.receive_message(self.formatter, msg)
+
+            self._post_process_message(msg)
+
             self.play_type()
 
         elif message.type == e3.Message.TYPE_NUDGE:

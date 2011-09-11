@@ -374,46 +374,42 @@ class OutputText(TextBox):
         '''clear the content'''
         TextBox.clear(self)
     
-    def append(self, text, cedict, cepath, scroll=True):
+    def append(self, text, scroll=True):
         '''append formatted text to the widget'''
-        if self.config.b_show_emoticons:
-            text = MarkupParser.replace_emotes(text, cedict, cepath)
-
-        #Parse links
-        text = MarkupParser.urlify(text)
-
         TextBox.append(self, text, scroll)
 
-    def send_message(self, formatter, contact, message, cedict, cepath, is_first):
+    def send_message(self, formatter, msg):
         '''add a message to the widget'''
-        is_raw, consecutive, outgoing, first, last = \
-            formatter.format(contact, message.type, message.timestamp)
+        msg.alias = Plus.msnplus_strip(msg.alias)
+        msg.display_name = Plus.msnplus_strip(msg.display_name)
 
-        middle = MarkupParser.escape(message.body)
+        is_raw, consecutive, outgoing, first, last = \
+            formatter.format(msg)
+
         if not is_raw:
-            middle = e3.common.add_style_to_message(middle, message.style, False)
+            middle = e3.common.add_style_to_message(msg.message, msg.style, False)
 
         all_ = first + middle + last
-        self.append(all_, cedict, cepath, self.config.b_allow_auto_scroll)
+        self.append(all_, self.config.b_allow_auto_scroll)
 
-    def receive_message(self, formatter, contact, message, cedict, cepath, is_first):
+    def receive_message(self, formatter, msg):
         '''add a message to the widget'''
+        msg.alias = Plus.msnplus_strip(msg.alias)
+        msg.display_name = Plus.msnplus_strip(msg.display_name)
+
         is_raw, consecutive, outgoing, first, last = \
-            formatter.format(contact, None, message.timestamp)
+            formatter.format(msg)
 
         if not is_raw:
-            middle = e3.common.add_style_to_message(message.body, message.style)
-        else:
-            middle = MarkupParser.escape(message.body)
+            middle = e3.common.add_style_to_message(msg.message, msg.style)
 
-        self.append(first + middle + last, cedict, cepath,
-                    self.config.b_allow_auto_scroll)
+        self.append(first + middle + last, self.config.b_allow_auto_scroll)
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
         msg = gui.Message.from_information(contact, message)
         msg.message = Plus.msnplus_strip(msg.message)
-        self.append(formatter.format_information(msg.message), None, None,
+        self.append(formatter.format_information(msg.message),
                 self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
