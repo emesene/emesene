@@ -31,12 +31,7 @@ class AdiumChatOutput (QtGui.QScrollArea):
         QtGui.QScrollArea.__init__(self, parent)
         
         self.theme = gui.theme.conv_theme
-        self.last_incoming = None
-        self.last_incoming_account = None
-        self.last_incoming_nickname = None
-
         self._qwebview = QtWebKit.QWebView(self)
-        self._last_sender = None
         
         self.setWidget(self._qwebview)
         self.setWidgetResizable(True)
@@ -51,36 +46,15 @@ class AdiumChatOutput (QtGui.QScrollArea):
         self._qwebview.linkClicked.connect(
                         lambda qt_url: webbrowser.open(qt_url.toString()) )
                             
-    def _append_message(self, msg, style=None, cedict={}, cedir=None):
+    def _append_message(self, msg):
         '''add a message to the conversation'''
 
-        b_nick_check = bool(self.last_incoming_nickname != msg.display_name)
-        if b_nick_check:
-            self.last_incoming_nickname = msg.display_name
-
         if msg.incoming:
-            if self.last_incoming is None:
-                self.last_incoming = False
-
-            msg.first = not self.last_incoming
-
-            if self.last_incoming_account != msg.sender or b_nick_check:
-                msg.first = True
-
-            html = self.theme.format_incoming(msg, style, cedict, cedir)
-            self.last_incoming = True
-            self.last_incoming_account = msg.sender
+            html = self.theme.format_incoming(msg)
         else:
-            if self.last_incoming is None:
-                self.last_incoming = True
-
-            msg.first = self.last_incoming
-
-            html = self.theme.format_outgoing(msg, style, cedict, cedir)
-            self.last_incoming = False
+            html = self.theme.format_outgoing(msg)
 
         if msg.type == "status":
-            self.last_incoming = None
             msg.first = True
 
         if msg.first:
@@ -90,21 +64,19 @@ class AdiumChatOutput (QtGui.QScrollArea):
 
         self._qwebview.page().mainFrame().evaluateJavaScript(function)
 
-    def send_message(self, formatter, contact, message, cedict, cedir, is_first):
+    def send_message(self, formatter, msg):
         '''add a message to the widget'''
-        msg = gui.Message.from_contact(contact, message, is_first, False, message.timestamp)
-        self._append_message(msg, message.style, cedict, cedir)
+        self._append_message(msg)
 
-    def receive_message(self, formatter, contact, message, cedict, cedir, is_first):
+    def receive_message(self, formatter, msg):
         '''add a message to the widget'''
-        msg = gui.Message.from_contact(contact, message, is_first, True, message.timestamp)
-        self._append_message(msg, message.style, cedict, cedir)
+        self._append_message(msg)
 
     def information(self, formatter, contact, message):
         '''add an information message to the widget'''
         msg = gui.Message.from_information(contact, message)
         msg.message = Plus.msnplus_strip(msg.message)
-        self._append_message(msg, None, None, None)
+        self._append_message(msg)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
@@ -122,8 +94,4 @@ class AdiumChatOutput (QtGui.QScrollArea):
                             }
                        }''' % (_id, path)
             self._qwebview.page().mainFrame().evaluateJavaScript(mystr)
-        
-        
-        
-        
-        
+
