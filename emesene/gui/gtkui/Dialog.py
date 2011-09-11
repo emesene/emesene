@@ -678,7 +678,7 @@ class Dialog(object):
         object of the current session the callback receives the response and
         a string containing the selected account
         '''
-        InviteWindow(session, callback).show()
+        InviteWindow(session, callback)
 
     @classmethod
     def login_preferences(cls, service, callback, use_http, proxy):
@@ -1488,7 +1488,6 @@ class InviteWindow(gtk.Window):
         vbox.pack_start(bbox, False)
         self.add(vbox)
 
-        vbox.show_all()
         badd.connect('clicked', self._on_add_clicked)
         bclose.connect('clicked', lambda *args: self.hide())
         search.connect('changed', self._on_search_changed)
@@ -1497,6 +1496,10 @@ class InviteWindow(gtk.Window):
         self.contact_list.contact_selected.subscribe(
             self._on_contact_selected)
         self.contact_list.fill()
+        self.set_modal(True)
+        self.show()
+        vbox.show_all()
+        
 
     def _on_key_press(self, widget, event):
         if event.keyval == gtk.keysyms.Escape:
