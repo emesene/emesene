@@ -78,7 +78,7 @@ class AdiumTheme(object):
         self.outgoing_next = read_file(self.outgoing_path,
                 'NextContent.html')
 
-    def format_incoming(self, msg):
+    def _format_incoming(self, msg):
         '''return a string containing the template for the incoming message
         with the vars replaced
         '''
@@ -98,9 +98,9 @@ class AdiumTheme(object):
         else:
             template = self.incoming
 
-        return self.replace(template, msg)
+        return self._replace(template, msg)
 
-    def format_outgoing(self, msg):
+    def _format_outgoing(self, msg):
         '''return a string containing the template for the outgoing message
         with the vars replaced
         '''
@@ -126,9 +126,17 @@ class AdiumTheme(object):
         else:
             template = self.outgoing
 
-        return self.replace(template, msg)
+        return self._replace(template, msg)
 
-    def replace(self, template, msg):
+    def format(self, msg):
+        '''return the formatted message'''
+        if msg.incoming:
+            html = self._format_incoming(msg)
+        else:
+            html = self._format_outgoing(msg)
+        return html
+
+    def _replace(self, template, msg):
         '''replace the variables on template for the values on msg
         '''
 
@@ -179,7 +187,7 @@ class AdiumTheme(object):
 
         return template.replace('\n', '')
 
-    def replace_header_or_footer(self, template, source, target,
+    def _replace_header_or_footer(self, template, source, target,
             target_display, source_img, target_img):
         '''replace the variables on template for the parameters
         '''
@@ -229,14 +237,14 @@ class AdiumTheme(object):
         header = read_file(self.resources_path, 'Header.html') or ""
 
         if header:
-            header = self.replace_header_or_footer(header, source, target,
+            header = self._replace_header_or_footer(header, source, target,
                     target_display, source_img, target_img)
 
         template = template.replace("%@", header, 1)
         footer = read_file(self.resources_path, 'Footer.html') or ""
 
         if footer:
-            footer = self.replace_header_or_footer(footer, source, target,
+            footer = self._replace_header_or_footer(footer, source, target,
                     target_display, source_img, target_img)
 
         template = template.replace("%@", footer, 1)

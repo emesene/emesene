@@ -82,10 +82,7 @@ class OutputView(webkit.WebView):
     def add_message(self, msg):
         '''add a message to the conversation'''
 
-        if msg.incoming:
-            html = self.theme.format_incoming(msg)
-        else:
-            html = self.theme.format_outgoing(msg)
+        html = self.theme.format(msg)
 
         if msg.type == "status":
             msg.first = True
