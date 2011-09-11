@@ -41,7 +41,7 @@ class Conversation(object):
 
         self.cid = float(cid)
         self.icid = self.cid
-        self.formatter = e3.common.MessageFormatter(session.contacts.me)
+        self.formatter = e3.common.MessageFormatter()
         self.first = True
 
         self._header_visible = True
@@ -61,14 +61,15 @@ class Conversation(object):
 
         self._style = None
 
+        self.last_incoming = None
+        self.last_incoming_nickname = None
+        self.last_incoming_account = None
+
         # the base class should override this attributes
         self.info = None
         self.input = None
         self.output = None
         self.soundPlayer = extension.get_and_instantiate('sound', session)
-        self.last_incoming = None
-        self.last_incoming_nickname = None
-        self.last_incoming_account = None
 
     def subscribe_signals(self):
         ''' subscribes current session's signals '''

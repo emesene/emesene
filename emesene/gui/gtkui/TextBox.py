@@ -383,7 +383,7 @@ class OutputText(TextBox):
         msg.alias = Plus.msnplus_strip(msg.alias)
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
-        is_raw, consecutive, outgoing, first, last = \
+        is_raw, first, last = \
             formatter.format(msg)
 
         if not is_raw:
@@ -397,7 +397,7 @@ class OutputText(TextBox):
         msg.alias = Plus.msnplus_strip(msg.alias)
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
-        is_raw, consecutive, outgoing, first, last = \
+        is_raw, first, last = \
             formatter.format(msg)
 
         if not is_raw:

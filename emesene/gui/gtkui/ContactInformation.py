@@ -269,7 +269,7 @@ class ChatWidget(gtk.VBox):
 
         OutputText = extension.get_default('conversation output')
         self.text = OutputText(session.config, None)
-        self.formatter = e3.common.MessageFormatter(session.contacts.me)
+        self.formatter = e3.common.MessageFormatter()
 
         buttons = gtk.HButtonBox()
         buttons.set_border_width(2)

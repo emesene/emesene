@@ -46,11 +46,9 @@ class MessageFormatter(object):
     br: new line
     '''
 
-    def __init__(self, contact, new_line='<br/>'):
+    def __init__(self, new_line='<br/>'):
         '''constructor'''
 
-        # the contact who sends the messages
-        self.contact = contact
         self.new_line = new_line
 
         # default formats
@@ -131,7 +129,7 @@ class MessageFormatter(object):
             first = template
             last = ''
 
-        return (is_raw, consecutive, outgoing, first, last)
+        return (is_raw, first, last)
 
 dic = {
     '\"'    :    '&quot;',
