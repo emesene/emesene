@@ -348,11 +348,11 @@ class Conversation(object):
 
     is_group_chat = property(fget=_get_group_chat)
 
-    def _pre_process_message(self, contact, message, incomming, cedict, cepath, tstamp=None, mtype=None, mstyle=None):
+    def _pre_process_message(self, contact, message, incomming, cedict, cepath, tstamp=None, mtype=None, cstyle=None):
         '''Create a new gui.Message and calculates if it's first message
         '''
         msg = gui.Message.from_contact(contact,
-                message, self.first, incomming, tstamp)
+                message, self.first, incomming, tstamp, mtype = mtype, mstyle=cstyle)
 
         if self.session.config.b_show_emoticons:
             msg.message = MarkupParser.replace_emotes(MarkupParser.escape(msg.message),
