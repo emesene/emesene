@@ -196,9 +196,8 @@ class OutputText(gtk.ScrolledWindow):
         '''add a message to the widget'''
         self.view.add_message(msg)
 
-    def information(self, formatter, contact, message):
+    def information(self, formatter, msg):
         '''add an information message to the widget'''
-        msg = gui.Message.from_information(contact, message)
         msg.message = Plus.msnplus_strip(msg.message)
         self.view.add_message(msg)
 

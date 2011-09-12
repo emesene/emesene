@@ -151,6 +151,8 @@ class AdiumTheme(object):
         image_path = escape(MarkupParser.path_to_url(msg.image_path))
         status_path = escape(MarkupParser.path_to_url(msg.status_path))
 
+        if msg.style is not None:
+            msg.message = style_message(msg.message, msg.style)
         if msg.alias:
             template = template.replace('%sender%', escape(msg.alias))
         else:
@@ -165,7 +167,7 @@ class AdiumTheme(object):
         template = template.replace('%messageDirection%',
             escape(msg.direction))
 
-        template = template.replace('%message%', style_message(msg.message, msg.style))
+        template = template.replace('%message%', msg.message)
 
         if msg.timestamp is None:
             template = template.replace('%time%',

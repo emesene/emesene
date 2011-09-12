@@ -394,9 +394,8 @@ class OutputText(TextBox):
         text = formatter.format(msg)
         self.append(text, self.config.b_allow_auto_scroll)
 
-    def information(self, formatter, contact, message):
+    def information(self, formatter, msg):
         '''add an information message to the widget'''
-        msg = gui.Message.from_information(contact, message)
         msg.message = Plus.msnplus_strip(msg.message)
         self.append(formatter.format_information(msg.message),
                 self.config.b_allow_auto_scroll)

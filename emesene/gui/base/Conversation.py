@@ -249,7 +249,9 @@ class Conversation(object):
         self.session.request_attention(self.cid)
         message = e3.Message(e3.Message.TYPE_NUDGE, '', None, None)
         message.body = _('You just sent a nudge!')
-        self.output.information(self.formatter, self.session.contacts.me, message)
+        msg = gui.Message.from_information(self.session.contacts.me, message)
+        self.output.information(self.formatter, msg)
+        self._post_process_message(msg)
 
         self.play_nudge()
 
@@ -389,6 +391,9 @@ class Conversation(object):
         else:
             self.last_incoming = False
 
+        if msg.type == "status":
+            self.last_incoming = None
+
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
         cedict = self.emcache.parse()
@@ -434,7 +439,11 @@ class Conversation(object):
 
         elif message.type == e3.Message.TYPE_NUDGE:
             message.body = _('%s just sent you a nudge!') % (contact.display_name,)
-            self.output.information(self.formatter, contact, message)
+            msg = gui.Message.from_information(contact, message)
+
+            self.output.information(self.formatter, msg)
+            self._post_process_message(msg)
+
             self.play_nudge()
 
         self.first = False
@@ -444,7 +453,10 @@ class Conversation(object):
         contact = self.session.contacts.me
         message = e3.Message(e3.Message.TYPE_MESSAGE, '', None, None)
         message.body = _('Error delivering message')
-        self.output.information(self.formatter, contact, message)
+        msg = gui.Message.from_information(contact, message)
+
+        self.output.information(self.formatter, msg)
+        self._post_process_message(msg)
 
         self.first = False
 
@@ -521,7 +533,11 @@ class Conversation(object):
                 message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
                 _('%s has joined the conversation') % (contact.display_name), \
                 account)
-                self.output.information(self.formatter, contact, message)
+                msg = gui.Message.from_information(contact, message)
+
+                self.output.information(self.formatter, msg)
+                self._post_process_message(msg)
+
         self.update_data()
         
 
@@ -535,7 +551,10 @@ class Conversation(object):
                 message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
                 _('%s has left the conversation') % (contact.display_name), \
                 account)
-                self.output.information(self.formatter, contact, message)
+                msg = gui.Message.from_information(contact, message)
+
+                self.output.information(self.formatter, msg)
+                self._post_process_message(msg)
 
     def on_group_started(self):
         '''called when a group conversation starts'''
