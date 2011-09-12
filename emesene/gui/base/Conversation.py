@@ -403,7 +403,7 @@ class Conversation(object):
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
 
         msg = self._pre_process_message(self.session.contacts.me,
-            message, True, cedict, self.emcache.path, message.timestamp,
+            message, False, cedict, self.emcache.path, message.timestamp,
             message.type, self.cstyle)
 
         self.output.send_message(self.formatter, msg)
@@ -428,7 +428,7 @@ class Conversation(object):
             user_emcache = self.caches.get_emoticon_cache(account)
 
             msg = self._pre_process_message(contact,
-                message, False, received_custom_emoticons, user_emcache.path,
+                message, True, received_custom_emoticons, user_emcache.path,
                 message.timestamp, message.type, message.style)
 
             self.output.receive_message(self.formatter, msg)
