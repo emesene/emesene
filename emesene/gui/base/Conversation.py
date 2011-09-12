@@ -23,6 +23,7 @@ import extension
 import e3
 import gui
 import MarkupParser
+import ConversationStatus
 
 from e3.common.RingBuffer import RingBuffer
 
@@ -42,7 +43,6 @@ class Conversation(object):
         self.cid = float(cid)
         self.icid = self.cid
         self.formatter = e3.common.MessageFormatter()
-        self.first = True
 
         self._header_visible = True
         self._image_visible = True
@@ -61,9 +61,7 @@ class Conversation(object):
 
         self._style = None
 
-        self.last_incoming = None
-        self.last_incoming_nickname = None
-        self.last_incoming_account = None
+        self.conv_status = ConversationStatus.ConversationStatus(self.session.config)
 
         # the base class should override this attributes
         self.info = None
@@ -228,7 +226,7 @@ class Conversation(object):
     def on_clean(self):
         '''called when the clean button is clicked'''
         self.output.clear()
-        self.last_incoming = None
+        self.conv_status.clear()
 
     def on_block_user(self):
         '''blocks the first user of the conversation'''
@@ -251,7 +249,7 @@ class Conversation(object):
         message.body = _('You just sent a nudge!')
         msg = gui.Message.from_information(self.session.contacts.me, message)
         self.output.information(self.formatter, msg)
-        self._post_process_message(msg)
+        self.conv_status.post_process_message(msg)
 
         self.play_nudge()
 
@@ -350,50 +348,6 @@ class Conversation(object):
 
     is_group_chat = property(fget=_get_group_chat)
 
-    def _pre_process_message(self, contact, message, incomming, cedict, cepath, tstamp=None, mtype=None, cstyle=None):
-        '''Create a new gui.Message and calculates if it's first message
-        '''
-        msg = gui.Message.from_contact(contact,
-                message, self.first, incomming, tstamp, mtype = mtype, mstyle=cstyle)
-
-        if self.session.config.b_show_emoticons:
-            msg.message = MarkupParser.replace_emotes(MarkupParser.escape(msg.message),
-                        cedict, cepath, msg.sender)
-
-        msg.message = MarkupParser.urlify(msg.message)
-
-        b_nick_check = bool(self.last_incoming_nickname != msg.display_name)
-        if b_nick_check:
-            self.last_incoming_nickname = msg.display_name
-
-        if msg.incoming:
-            if self.last_incoming is None:
-                self.last_incoming = False
-
-            msg.first = not self.last_incoming
-
-            if self.last_incoming_account != msg.sender or b_nick_check:
-                msg.first = True
-        else:
-            if self.last_incoming is None:
-                self.last_incoming = True
-
-            msg.first = self.last_incoming
-
-        return msg
-
-    def _post_process_message(self, msg):
-        '''Updates first message status
-        '''
-        if msg.incoming:
-            self.last_incoming = True
-            self.last_incoming_account = msg.sender
-        else:
-            self.last_incoming = False
-
-        if msg.type == "status":
-            self.last_incoming = None
-
     def _on_send_message(self, text):
         '''method called when the user press enter on the input text'''
         cedict = self.emcache.parse()
@@ -402,17 +356,17 @@ class Conversation(object):
         self.session.send_message(self.cid, text, self.cstyle, cedict, custom_emoticons)
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
 
-        msg = self._pre_process_message(self.session.contacts.me,
+        msg = self.conv_status.pre_process_message(self.session.contacts.me,
             message, False, cedict, self.emcache.path, message.timestamp,
             message.type, self.cstyle)
 
         self.output.send_message(self.formatter, msg)
 
-        self._post_process_message(msg)
+        self.conv_status.post_process_message(msg)
 
         self.messages.push(text)
         self.play_send()
-        self.first = False
+        self.conv_status.update_status()
 
     def on_receive_message(self, message, account, received_custom_emoticons):
         '''method called when a message arrives to the conversation'''
@@ -427,13 +381,13 @@ class Conversation(object):
 
             user_emcache = self.caches.get_emoticon_cache(account)
 
-            msg = self._pre_process_message(contact,
+            msg = self.conv_status.pre_process_message(contact,
                 message, True, received_custom_emoticons, user_emcache.path,
                 message.timestamp, message.type, message.style)
 
             self.output.receive_message(self.formatter, msg)
 
-            self._post_process_message(msg)
+            self.conv_status.post_process_message(msg)
 
             self.play_type()
 
@@ -442,11 +396,10 @@ class Conversation(object):
             msg = gui.Message.from_information(contact, message)
 
             self.output.information(self.formatter, msg)
-            self._post_process_message(msg)
+            self.conv_status.post_process_message(msg)
 
             self.play_nudge()
-
-        self.first = False
+        self.conv_status.update_status()
 
     def on_send_message_failed(self, errorCode):
         '''method called when a message fails to be delivered'''
@@ -456,9 +409,8 @@ class Conversation(object):
         msg = gui.Message.from_information(contact, message)
 
         self.output.information(self.formatter, msg)
-        self._post_process_message(msg)
-
-        self.first = False
+        self.conv_status.post_process_message(msg)
+        self.conv_status.update_status()
 
     def on_user_typing(self, account):
         '''method called when a someone is typing'''
@@ -536,7 +488,7 @@ class Conversation(object):
                 msg = gui.Message.from_information(contact, message)
 
                 self.output.information(self.formatter, msg)
-                self._post_process_message(msg)
+                self.conv_status.post_process_message(msg)
 
         self.update_data()
         
@@ -554,7 +506,7 @@ class Conversation(object):
                 msg = gui.Message.from_information(contact, message)
 
                 self.output.information(self.formatter, msg)
-                self._post_process_message(msg)
+                self.conv_status.post_process_message(msg)
 
     def on_group_started(self):
         '''called when a group conversation starts'''

@@ -29,6 +29,8 @@ import extension
 import gobject
 import Renderers
 
+import gui.base.ConversationStatus as ConversationStatus
+
 import logging
 log = logging.getLogger('gtkui.ContactInformation')
 
@@ -250,7 +252,7 @@ class ChatWidget(gtk.VBox):
         self.set_border_width(2)
         all = gtk.HBox()
         all.set_border_width(2)
-        self.first = True
+        self.conv_status = ConversationStatus.ConversationStatus(session.config)
 
         self.calendars = gtk.VBox()
         self.calendars.set_border_width(2)
@@ -402,8 +404,9 @@ class ChatWidget(gtk.VBox):
                         account, timestamp=datetimestamp)
 
             if is_me:
-                self.text.send_message(self.formatter, contact,
-                        message, None, None, self.first)
+                msg = self.conv_status.pre_process_message(contact, message,
+                    False, None, None, message.timestamp, message.type, None)
+                self.text.send_message(self.formatter, msg)
             else:
                 try:
                     account_colors[account]
@@ -415,10 +418,13 @@ class ChatWidget(gtk.VBox):
 
                 message.style = self._get_style(account_colors[account])
 
-                self.text.receive_message(self.formatter, contact, message,
-                        None, None, self.first)
+                msg = self.conv_status.pre_process_message(contact, message,
+                    True, None, None, message.timestamp, message.type, message.style)
 
-            self.first = False
+                self.text.receive_message(self.formatter, msg)
+
+            self.conv_status.post_process_message(msg)
+            self.conv_status.update_status()
 
         if len(results) >= 1000:
             self.nicebar.new_message(_('Too many messages to display'),
