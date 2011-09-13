@@ -1,0 +1,6 @@
+*.pyc
+*.swp
+/doc/user-api/
+/build/
+/dist/
+/MANIFEST
