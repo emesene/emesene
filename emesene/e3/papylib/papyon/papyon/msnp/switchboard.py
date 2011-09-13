@@ -289,7 +289,7 @@ class SwitchboardProtocol(BaseProtocol):
 
     def _handle_ACK(self, command):
         # TODO: FIXME: MSNP18 doesn't reply with ACKs?
-        #self._update_switchboard_timeout()
+        self._update_switchboard_timeout()
         self.emit("message-delivered", command.transaction_id)
 
     def _handle_NAK(self, command):
