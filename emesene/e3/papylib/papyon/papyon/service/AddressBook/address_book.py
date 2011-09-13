@@ -688,7 +688,7 @@ class AddressBook(gobject.GObject):
                       for group in ab_storage.groups]
         members = []
         for member in memberships:
-            member_repr = member.PassportName if not isinstance(member, sharing.EmailMember) else member.Email
+            member_repr = member.Account
             for role, deleted in member.Roles.items():
                 member_repr += ' %s-%s' % ('D' if deleted else 'A', role)
             members.append(member_repr)
