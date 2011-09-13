@@ -37,7 +37,8 @@ def gtk_main(Controller):
     import ContactMenu
     import ContactList
     import SyncTool
-    import ContactInfo
+    import ContactInfoRotate
+    import ContactInfoList
     import Conversation
     import ConversationManager
     import ConversationToolbar
@@ -151,7 +152,9 @@ def setup():
         ConversationManager.ConversationManager)
     extension.category_register('conversation', Conversation.Conversation)
     extension.category_register('conversation header', Header.Header)
-    extension.category_register('conversation info', ContactInfo.ContactInfo)
+    extension.category_register('conversation info',
+                                ContactInfoRotate.ContactInfoRotate)
+    extension.register('conversation info', ContactInfoList.ContactInfoList)
     extension.category_register('conversation tab', TabWidget.TabWidget)
     extension.category_register('conversation input', TextBox.InputText)
     extension.category_register('conversation toolbar', \

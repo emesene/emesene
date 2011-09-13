@@ -19,37 +19,41 @@
 import gtk
 import gui
 import extension
+import utils
+
+import pango
 import glib
 
-class ContactInfo(gtk.VBox):
-    '''a widget that contains the display pictures of the contacts and our
-    own display picture'''
-    NAME = 'Contact info'
-    DESCRIPTION = 'The panel to show contact display pictures'
-    AUTHOR = 'Mariano Guerra'
-    WEBSITE = 'www.emesene.org'
+class ContactInfoList(gtk.VBox):
+    '''A widget that contains the display picture of the contact in single chat.
+       If multi chat, it shows more information about contacts.
+       It also contains our own display picture.'''
+
+    NAME = 'Contact info list'
+    DESCRIPTION = 'A panel to show contacts info as a list'
+    AUTHOR = 'Ariel Juodziukynas (arielj)'
+    WEBSITE = 'www.arieljuod.com.ar'
 
     def __init__(self, session, members):
         gtk.VBox.__init__(self)
         self.set_border_width(2)
         self.session = session
-        self.members = members
 
+        #layout
         self._first = None
         self._last = None
         self._first_alig = gtk.Alignment(xalign=0.5, yalign=0.0, xscale=1.0,
             yscale=0.0)
         self._last_alig = None
-        self._last_alig = gtk.Alignment(xalign=0.5, yalign=1.0, xscale=1.0,
+        self._last_alig = gtk.Alignment(xalign=0.5, yalign=1.0, xscale=0.0,
             yscale=0.0)
-        
         self.pack_start(self._first_alig)
         self.pack_end(self._last_alig)
 
         Avatar = extension.get_default('avatar')
-
         avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
 
+        #our avatar
         self.avatarBox = gtk.EventBox()
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.avatarBox.connect('button-press-event', self._on_avatar_click)
@@ -60,6 +64,16 @@ class ContactInfo(gtk.VBox):
         self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
         self.avatarBox.set_border_width(4)
 
+        last_avatar = self.session.config.last_avatar
+        if self.session.config_dir.file_readable(last_avatar):
+            my_picture = last_avatar
+        else:
+            my_picture = gui.theme.image_theme.user
+
+        self.last = self.avatarBox
+        self.avatar.set_from_file(my_picture)
+
+        #contact's avatar if single chat
         self.his_avatarBox = gtk.EventBox()
         self.his_avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.his_avatarBox.connect('button-press-event', self._on_his_avatar_click)
@@ -70,32 +84,29 @@ class ContactInfo(gtk.VBox):
         self.his_avatarBox.set_tooltip_text(_('Click to see informations'))
         self.his_avatarBox.set_border_width(4)
 
-        last_avatar = self.session.config.last_avatar
-        if self.session.config_dir.file_readable(last_avatar):
-            my_picture = last_avatar
-        else:
-            my_picture = gui.theme.image_theme.user
+        #contacts list if multichat
+        self._model = None
+        self._contact_list = gtk.TreeView()
+        avatar = gtk.CellRendererPixbuf()
+        nick = extension.get_and_instantiate('nick renderer')
+        status = gtk.CellRendererPixbuf()
 
-        his_picture = gui.theme.image_theme.user
-        if members is not None:
-            account = members[0]
-            contact = self.session.contacts.get(account)
+        nick.set_property('ellipsize', pango.ELLIPSIZE_END)
+        column = gtk.TreeViewColumn()
+        column.set_expand(True)
+        column.pack_start(avatar, False)
+        column.pack_start(nick, True)
+        column.pack_start(status, False)
+        column.add_attribute(avatar, 'pixbuf', 0)
+        column.add_attribute(nick, 'markup', 2)
+        column.add_attribute(status, 'pixbuf', 3)
+        self._contact_list.append_column(column)
 
-            if contact:
-                if contact.picture:
-                    his_picture = contact.picture
-
-        self.first = self.his_avatarBox
-        self.his_avatar.set_from_file(his_picture)
-
-        self.last = self.avatarBox
-        self.avatar.set_from_file(my_picture)
-
-        self.index = 0 # used for the rotate picture function
-        self.timer = None
-
-        if len(members) > 1:
-            self.timer = glib.timeout_add_seconds(5, self.rotate_picture)
+        if len(members) == 1:
+            self.update_single(members)
+        elif len(members) > 1:
+            self.update_group(members)
+        #else: can members by 0?
 
     def _set_first(self, first):
         '''set the first element and add it to the widget (remove the
@@ -127,7 +138,6 @@ class ContactInfo(gtk.VBox):
 
     last = property(fget=_get_last, fset=_set_last)
 
-
     def _on_avatar_click(self, widget, data):
         '''method called when user click on his avatar '''
         av_chooser = extension.get_default('avatar chooser')(self.session)
@@ -136,7 +146,7 @@ class ContactInfo(gtk.VBox):
 
     def _on_his_avatar_click(self, widget, data):
         '''method called when user click on the other avatar '''
-        account = self.members[self.index - 1]
+        account = self.members[0]
         contact = self.session.contacts.get(account)
         if contact:
             dialog = extension.get_default('dialog')
@@ -153,30 +163,7 @@ class ContactInfo(gtk.VBox):
         self.avatarBox.add(self.avatar)
         self.his_avatarBox.add(self.his_avatar)
 
-
-    def rotate_picture(self):
-        '''change the account picture in a multichat
-           conversation every 5 seconds'''
-        contact = self.session.contacts.get(self.members[self.index])
-
-        if contact is None:
-            self.index = (self.index+1)%len(self.members)
-            return True
-
-        path = contact.picture
-        if path != '':
-            self.his_avatar.set_from_file(path)
-
-        self.index = (self.index+1)%len(self.members)
-        return True
-
-
     def destroy(self):
-        #stop the group chat image rotation timer, if it's started
-        if self.timer is not None:
-            glib.source_remove(self.timer)
-            self.timer = None
-
         #stop the avatars animation... if any...
         self.avatar.stop()
         self.his_avatar.stop()
@@ -186,19 +173,33 @@ class ContactInfo(gtk.VBox):
         self.his_avatarBox.set_sensitive(is_sensitive)
 
     def update_single(self, members):
+        ''' sets the avatar of our contact '''
         self.members = members
-        if len(members) == 1 and self.timer is not None:
-            glib.source_remove(self.timer)
-            self.timer = None
-
         account = members[0]
         contact = self.session.contacts.get(account)
+        his_picture = gui.theme.image_theme.user
         if contact and contact.picture:
             his_picture = contact.picture
-            self.his_avatar.set_from_file(his_picture)
+        self.his_avatar.set_from_file(his_picture)
+        self._first_alig.set(0.5,0.0,1.0,0.0)
+        self.set_size_request(-1,-1)
+        self.first = self.his_avatarBox
 
     def update_group(self, members):
+        ''' sets the contacts list instead of a contact's avatar '''
+        self._contact_list.set_model(None)
+        del self._model
+        self._model = gtk.ListStore(gtk.gdk.Pixbuf, object, str, gtk.gdk.Pixbuf)
         self.members = members
-        if len(members) > 1 and self.timer is None:
-            self.timer = glib.timeout_add_seconds(5, self.rotate_picture)
-
+        for member in self.members:
+            contact = self.session.contacts.get(member)
+            picture = contact.picture or gui.theme.image_theme.user
+            contact_data = (utils.safe_gtk_pixbuf_load(picture,(15,15)),
+              contact, contact.nick, utils.safe_gtk_pixbuf_load(
+              gui.theme.image_theme.status_icons[contact.status],(15,15)))
+            self._model.append(contact_data)
+            self._contact_list.set_model(self._model)
+        self._contact_list.show_all()
+        self._first_alig.set(0.5,0.0,1.0,2.0)
+        self.first = self._contact_list
+        self.set_size_request(200,-1)
