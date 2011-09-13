@@ -195,7 +195,7 @@ class ContactInfo(gtk.VBox):
         contact = self.session.contacts.get(account)
         if contact and contact.picture:
             his_picture = contact.picture
-        self.his_avatar.set_from_file(his_picture)
+            self.his_avatar.set_from_file(his_picture)
 
     def update_group(self, members):
         self.members = members
