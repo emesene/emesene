@@ -1041,6 +1041,11 @@ class MSNPapylib(BaseTable):
         vbox.set_border_width(10)
         align_prin.add(vbox)
 
+        c_keep = gtk.CheckButton("Keep-alive conversations")
+        c_keep.set_active(self.session.get_worker().keepalive_conversations)
+        c_keep.connect('toggled', self._on_keepalive_toggled)
+        vbox.pack_start(c_keep, False, False)
+
         l_text = gtk.Label(_('If you have problems with your nickname/message/picture '
                         'just click on this button, sign in with your account '
                         'and load a picture in your Live Profile. '
@@ -1065,6 +1070,11 @@ class MSNPapylib(BaseTable):
         vbox.pack_start(self.privacy, True, True)
 
         self.show_all()
+
+    def _on_keepalive_toggled(self, widget):
+        ''' enable/disable conversation's keepalives in papyon '''
+        worker = self.session.get_worker()
+        worker.keepalive_conversations = widget.get_active()
 
     def _on_live_profile_clicked(self, arg):
         ''' called when live profile button is clicked '''
