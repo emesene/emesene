@@ -20,6 +20,7 @@ import gtk
 import gui
 import extension
 import utils
+import Tooltips
 
 import pango
 import glib
@@ -101,6 +102,9 @@ class ContactInfoList(gtk.VBox):
         column.add_attribute(nick, 'markup', 2)
         column.add_attribute(status, 'pixbuf', 3)
         self._contact_list.append_column(column)
+        self.tooltips = Tooltips.Tooltips()
+        self._contact_list.connect('motion-notify-event', self.tooltips.on_motion)
+        self._contact_list.connect('leave-notify-event', self.tooltips.on_leave)
 
         if len(members) == 1:
             self.update_single(members)
