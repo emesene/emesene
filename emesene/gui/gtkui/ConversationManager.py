@@ -165,7 +165,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
             self.set_message_waiting(page, False)
         if page.show_avatar_in_taskbar:
-            self.update_window(page.text, page.his_avatar.filename, self.get_current_page())
+            self.update_window(page.text, page.info.his_avatar.filename, self.get_current_page())
         else:
             self.update_window(page.text, page.icon, self.get_current_page())
         page.input_grab_focus()

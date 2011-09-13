@@ -61,29 +61,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         TransfersBar = extension.get_default('filetransfer pool')
         CallWidget = extension.get_default('call widget')
         dialog = extension.get_default('dialog')
-        Avatar = extension.get_default('avatar')
-
-        avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
-
-        self.avatarBox = gtk.EventBox()
-        self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.avatarBox.connect('button-press-event', self._on_avatar_click)
-
-        self.avatar = Avatar(cell_dimension=avatar_size)
-        self.avatarBox.add(self.avatar)
-
-        self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
-        self.avatarBox.set_border_width(4)
-
-        self.his_avatarBox = gtk.EventBox()
-        self.his_avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.his_avatarBox.connect('button-press-event', self._on_his_avatar_click)
-
-        self.his_avatar = Avatar(cell_dimension=avatar_size)
-        self.his_avatarBox.add(self.his_avatar)
-
-        self.his_avatarBox.set_tooltip_text(_('Click to see informations'))
-        self.his_avatarBox.set_border_width(4)
 
         self.header = Header(session, members)
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
@@ -96,7 +73,7 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.cycle_history, self.on_drag_data_received)
         self.output.set_size_request(-1, 25)
         self.input.set_size_request(-1, 25)
-        self.info = ContactInfo()
+        self.info = ContactInfo(self.session, self.members)
         self.transfers_bar = TransfersBar(self.session)
         self.call_widget = CallWidget(self.session)
 
@@ -131,48 +108,11 @@ class Conversation(gtk.VBox, gui.Conversation):
         if len(self.members) == 0:
             self.header.information = ('connecting', 'creating conversation')
 
-        last_avatar = self.session.config.last_avatar
-        if self.session.config_dir.file_readable(last_avatar):
-            my_picture = last_avatar
-        else:
-            my_picture = gui.theme.image_theme.user
-
-        his_picture = gui.theme.image_theme.user
-        if members:
-            account = members[0]
-            contact = self.session.contacts.get(account)
-
-            if contact:
-                if contact.picture:
-                    his_picture = contact.picture
-                self.output.clear(account, contact.nick,
-                         contact.display_name, his_picture, my_picture)
-
-        self.info.first = self.his_avatarBox
-        self.his_avatar.set_from_file(his_picture)
-
-        self.info.last = self.avatarBox
-        self.avatar.set_from_file(my_picture)
-
         self._load_style()
-
+        
         self.subscribe_signals()
 
         self.tab_index = -1 # used to select an existing conversation
-        self.index = 0 # used for the rotate picture function
-        self.rotate_started = False
-        self.timer = 0
-
-        if self.is_group_chat:
-            self.rotate_started = True #to prevents more than one timeout_add
-            self.timer = glib.timeout_add_seconds(5, self.rotate_picture)
-
-    def _on_avatar_click(self, widget, data):
-        '''method called when user click on his avatar
-        '''
-        av_chooser = extension.get_default('avatar chooser')(self.session)
-        av_chooser.set_modal(True)
-        av_chooser.show()
 
     def steal_emoticon_cb(self, path_uri):
         '''receives the path or the uri for the emoticon to be added'''
@@ -208,30 +148,9 @@ class Conversation(gtk.VBox, gui.Conversation):
             dialog.entry.set_max_length(7)
             dialog.show()
 
-    def _on_his_avatar_click(self, widget, data):
-        '''method called when user click on the other avatar
-        '''
-        account = self.members[self.index - 1]
-        contact = self.session.contacts.get(account)
-        if contact:
-            dialog = extension.get_default('dialog')
-            dialog.contact_information_dialog(self.session, contact.account)
-
     def _on_icon_size_change(self, value):
         '''callback called when config.b_toolbar_small changes'''
         self.toolbar.draw()
-
-    def _on_avatarsize_changed(self, value):
-        '''callback called when config.i_conv_avatar_size changes'''
-
-        self.avatarBox.remove(self.avatar)
-        self.his_avatarBox.remove(self.his_avatar)
-
-        self.avatar.set_property('dimension',value)
-        self.his_avatar.set_property('dimension',value)
-
-        self.avatarBox.add(self.avatar)
-        self.his_avatarBox.add(self.his_avatar)
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
@@ -267,15 +186,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''called when the conversation is closed'''
         self.unsubscribe_signals()
 
-        #stop the group chat image rotation timer, if it's started
-        if self.rotate_started:
-            glib.source_remove(self.timer)
-
-        #stop the avatars animation...if any..
-        self.avatar.stop()
-        self.his_avatar.stop()
-
         self.destroy()
+        self.info.destroy()
+        self.header.destroy()
 
     def show(self, other_started=False):
         '''override the show method'''
@@ -336,6 +249,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         account -- the account
         """
         self.header.information = (message, account)
+        self.info.update_single(self.members)
         self.update_tab()
 
     def show_tab_menu(self):
@@ -349,7 +263,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_text(self.text)
 
         if self.show_avatar_in_taskbar:
-            self.update_window(self.text, self.his_avatar.filename, self.tab_index)
+            self.update_window(self.text, self.info.his_avatar.filename, self.tab_index)
         else:
             self.update_window(self.text, self.icon, self.tab_index)
 
@@ -357,10 +271,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         update the information for a conversation with multiple users
         """
-        if not self.rotate_started:
-            self.rotate_started = True
-            self.timer = glib.timeout_add_seconds(5, self.rotate_picture)
-
         #TODO add plus support for nick to the tab label!
         members_nick = []
         i = 0
@@ -380,6 +290,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.header.information = \
             (_('%d members') % (len(self.members) + 1, ),
                     ", ".join(members_nick))
+        self.info.update_group(self.members)
         self.update_tab()
 
     def set_sensitive(self, is_sensitive):
@@ -390,8 +301,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         self.input.set_sensitive(is_sensitive)
         self.toolbar.set_sensitive(is_sensitive)
-        self.avatarBox.set_sensitive(is_sensitive)
-        self.his_avatarBox.set_sensitive(is_sensitive)
+        self.info.set_sensitive(in_sensitive)
 
     def set_image_visible(self, is_visible):
         """
@@ -399,10 +309,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         """
-        if is_visible:
-            self.info.show()
-        else:
-            self.info.hide()
+        self.info.show() if is_visible else self.info.hide()
 
     def set_header_visible(self, is_visible):
         '''
@@ -410,10 +317,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
-        if is_visible:
-            self.header.show()
-        else:
-            self.header.hide()
+        self.header.show() if is_visible else self.header.hide()
 
     def set_toolbar_visible(self, is_visible):
         '''
@@ -421,39 +325,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
-        if is_visible:
-            self.toolbar.show()
-        else:
-            self.toolbar.hide()
-
-    def rotate_picture(self):
-        '''change the account picture in a multichat
-           conversation every 5 seconds'''
-        def increment():
-            if self.index < len(self.members) - 1 :
-                self.index += 1
-            else:
-                self.index = 0
-
-        if len(self.members) == 1:
-            self.index = 0
-            glib.source_remove(self.timer)
-            self.rotate_started = False
-        elif self.index >= len(self.members):
-            self.index = 0
-        contact = self.session.contacts.get(self.members[self.index])
-
-        if contact is None:
-            increment()
-            return True
-
-        path = contact.picture
-
-        if path != '':
-            self.his_avatar.set_from_file(path)
-
-        increment()
-        return True
+        self.toolbar.show() if is_visible else self.toolbar.hide()
 
     def get_preview(self, completepath):
         return utils.makePreview(completepath)
@@ -474,19 +346,20 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_picture_change_succeed(self, account, path):
         '''callback called when the picture of an account is changed'''
         if account == self.session.account.account:
-            self.avatar.set_from_file(path)
+            self.info.avatar.set_from_file(path)
         elif account in self.members:
-            self.his_avatar.set_from_file(path)
+            self.info.his_avatar.set_from_file(path)
 
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
         if self.avatar_box_is_hidden:
-            self.avatarBox.show()
-            self.his_avatarBox.show()
+            self.info.show()
         else:
-            self.avatarBox.hide()
-            self.his_avatarBox.hide()
+            self.info.hide()
         self.avatar_box_is_hidden = not self.avatar_box_is_hidden
+
+    def _on_avatarsize_changed(self, value):
+        self.info._on_avatarsize_changed(value)
 
     def on_contact_attr_changed_succeed(self, account, what, old,
             do_notify=True):
