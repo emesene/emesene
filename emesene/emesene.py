@@ -453,6 +453,11 @@ class Controller(object):
         last_avatar_path = self.session.config_dir.get_path("last_avatar")
         self.session.load_config()
 
+        if 'msn' in self.session.SERVICES:
+            # keepalive conversations...or not
+            b_keepalive = self.session.config.get_or_set("b_papylib_keepalive", False)
+            self.session.get_worker().keepalive_conversations = b_keepalive
+
         image_name = self.session.config.get_or_set('image_theme', 'default')
         emote_name = self.session.config.get_or_set('emote_theme', 'default')
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
