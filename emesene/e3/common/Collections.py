@@ -22,6 +22,7 @@
 from Github import Github
 import os
 import shutil
+from utils import AsyncAction
 
 class ExtensionDescriptor(object):
 
@@ -40,6 +41,7 @@ class Collection(object):
         self.github = Github("emesene")
         self._stop = False
         self._stopfetch = False
+        self._blobs = None
 
     def save_files(self, element, label):
         self._stop = False
@@ -73,6 +75,9 @@ class Collection(object):
     def stop_fetch(self):
         self._stopfetch = True
 
+    def set_blobs(self, result):
+        self._blobs = result
+
     def plugin_name_from_file(self, file_name):
         pass
 
@@ -92,14 +97,16 @@ class PluginsCollection(Collection):
 
     def fetch(self):
 
-        self.github.fetch_blob(self.theme)
+        self._blobs = None
 
-        while self.github.get_blobs() == None:
+        AsyncAction(self.set_blobs, self.github.fetch_blob ,self.theme)
+
+        while self._blobs == None:
             if self._stopfetch == True:
                 self._stopfetch = False
                 return
 
-        j = self.github.get_blobs()
+        j = self._blobs
 
         type = "plugin"
 
@@ -138,14 +145,16 @@ class ThemesCollection(Collection):
 
     def fetch(self):
 
-        self.github.fetch_blob(self.theme)
+        self._blobs = None
 
-        while self.github.get_blobs() == None:
+        AsyncAction(self.set_blobs, self.github.fetch_blob ,self.theme)
+
+        while self._blobs == None:
             if self._stopfetch == True:
                 self._stopfetch = False
                 return
 
-        j = self.github.get_blobs()
+        j = self._blobs
 
         for k in j["blobs"]:
 
