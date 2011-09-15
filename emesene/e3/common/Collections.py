@@ -92,14 +92,18 @@ class PluginsCollection(Collection):
 
     def fetch(self):
 
-        j = self.github.fetch_blob(self.theme)
-        type = "plugin"
+        self.github.fetch_blob(self.theme)
 
-        for k in j["blobs"]:
-
+        while self.github.get_blobs() == None:
             if self._stopfetch == True:
                 self._stopfetch = False
                 return
+
+        j = self.github.get_blobs()
+
+        type = "plugin"
+
+        for k in j["blobs"]:
 
             plugin = self.plugin_name_from_file(k)
 
@@ -134,13 +138,16 @@ class ThemesCollection(Collection):
 
     def fetch(self):
 
-        j = self.github.fetch_blob(self.theme)
+        self.github.fetch_blob(self.theme)
 
-        for k in j["blobs"]:
-
+        while self.github.get_blobs() == None:
             if self._stopfetch == True:
                 self._stopfetch = False
                 return
+
+        j = self.github.get_blobs()
+
+        for k in j["blobs"]:
 
             plugin = self.plugin_name_from_file(k)
 

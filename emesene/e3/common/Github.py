@@ -20,6 +20,7 @@
 #
 
 from urllib2 import urlopen
+from utils import AsyncAction
 try:
     from json import loads
 except ImportError:
@@ -32,14 +33,20 @@ class Github(object):
 
     def __init__(self, org):
         self._org = org
+        self._blobs = None
 
     def get_raw(self, repo, sha):
         response = urlopen(API_GITHUB_GETRAW % (self._org, repo, sha))
         return response.read()
 
-
     def fetch_blob(self, element):
-        response = urlopen(API_GITHUB_FETCHBLOB % (self._org, element))
+        self._blobs = None
+        AsyncAction(self._set_blob, urlopen, API_GITHUB_FETCHBLOB % (self._org, element))
+
+    def _set_blob(self, response):
         rq = response.read()
-        return loads(rq)
+        self._blobs = loads(rq)
+
+    def get_blobs(self):
+        return self._blobs
 
