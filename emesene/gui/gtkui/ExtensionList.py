@@ -240,7 +240,7 @@ class ExtensionDownloadList(ExtensionListTab):
         if self.first or download:
             dialog = extension.get_default('dialog')
             self.progress = dialog.progress_window(
-                            _('Refresh extensions'), self._end_progress_cb)
+                            _('Refresh extensions'), self._end_list_progress_cb)
             self.progress.set_action(_("Refreshing extensions"))
             self.progress.show_all()
             utils.GtkRunner(self.show_update, self.update)
@@ -311,6 +311,11 @@ class ExtensionDownloadList(ExtensionListTab):
         '''stops download of plugins'''
         for k in self.thc_com:
             self.thc_com[k].stop()
+
+    def _end_list_progress_cb(self, *args):
+        '''stops download of plugins'''
+        for k in self.thc_com:
+            self.thc_com[k].stop_fetch()
 
 class ThemeList(ExtensionDownloadList):
     def __init__(self, session):

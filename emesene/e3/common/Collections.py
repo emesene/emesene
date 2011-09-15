@@ -39,6 +39,7 @@ class Collection(object):
         self.theme = theme
         self.github = Github("emesene")
         self._stop = False
+        self._stopfetch = False
 
     def save_files(self, element, label):
         self._stop = False
@@ -69,6 +70,9 @@ class Collection(object):
     def stop(self):
         self._stop = True
 
+    def stop_fetch(self):
+        self._stopfetch = True
+
     def plugin_name_from_file(self, file_name):
         pass
 
@@ -92,6 +96,10 @@ class PluginsCollection(Collection):
         type = "plugin"
 
         for k in j["blobs"]:
+
+            if self._stopfetch == True:
+                self._stopfetch = False
+                return
 
             plugin = self.plugin_name_from_file(k)
 
@@ -129,6 +137,10 @@ class ThemesCollection(Collection):
         j = self.github.fetch_blob(self.theme)
 
         for k in j["blobs"]:
+
+            if self._stopfetch == True:
+                self._stopfetch = False
+                return
 
             plugin = self.plugin_name_from_file(k)
 
