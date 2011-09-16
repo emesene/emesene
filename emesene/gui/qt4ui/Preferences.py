@@ -611,7 +611,7 @@ class Extension(BaseTable):
         self.attach(self.categories_cmb, 1, 2, 0, 1)
         self.attach(self.extensions_cmb, 1, 2, 1, 2)
         
-        categories = self._get_categories()
+        categories = extension.get_multiextension_categories()
         for item in categories:
             log.info('category item: %s' % item)
             self.categories_cmb.addItem(item)
@@ -680,7 +680,7 @@ class Extension(BaseTable):
         model = self.categories_cmb.model().clear()
         # fill it again with available categories
         # this is done because a plugin may have changed them
-        categories = self._get_categories()
+        categories = extension.get_multiextension_categories()
         for item in categories:
             self.categories_cmb.addItems([item])
         self.categories_cmb.setCurrentIndex(0)
@@ -697,17 +697,8 @@ class Extension(BaseTable):
         self.description_info.setText(description)
         self.author_info.setText(author)
         self.website_info.setText(website)
-        
 
-    def _get_categories(self):
-        ''' get available categories'''
-        categories = [ctg for ctg in extension.get_categories().keys() \
-                      if len(extension.get_extensions(ctg)) > 1]
-        categories.sort()
-        return categories
-        
-        
-        
+
 class MSNPapylib(BaseTable):
     ''' This panel contains some msn-papylib specific settings '''
 

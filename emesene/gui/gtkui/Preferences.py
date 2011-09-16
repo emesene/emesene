@@ -895,16 +895,10 @@ class Extension(BaseTable):
         self.add_button(_('Synch with emesene1'), 1, 8,
                 self.on_synch_emesene1, 0, 0)
 
-    def _get_categories(self):
-        ''' get available categories'''
-        categories = [ctg for ctg in extension.get_categories().keys() if len(extension.get_extensions(ctg)) > 1]
-        categories.sort()
-        return categories
-
     def _add_categories_and_extensions_combos(self):
         """add the widgets to display the extensions"""
 
-        categories = self._get_categories()
+        categories = extension.get_multiextension_categories()
 
         for item in categories:
             self.categories.append_text(item)
@@ -984,7 +978,7 @@ class Extension(BaseTable):
         model.clear()
         # fill it again with available categories
         # this is done because a plugin may have changed them
-        categories = self._get_categories()
+        categories = extension.get_multiextension_categories()
 
         for item in categories:
             model.append([item])
