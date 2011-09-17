@@ -167,7 +167,7 @@ class AdiumTheme(object):
         template = template.replace('%messageDirection%',
             escape(msg.direction))
 
-        template = template.replace('%message%', msg.message)
+        template = template.replace('%message%', msg.message.replace('\n', '<br>'))
 
         if msg.timestamp is None:
             template = template.replace('%time%',
