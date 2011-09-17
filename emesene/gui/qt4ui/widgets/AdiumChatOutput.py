@@ -69,9 +69,8 @@ class AdiumChatOutput (QtGui.QScrollArea):
         '''add a message to the widget'''
         self._append_message(msg)
 
-    def information(self, formatter, contact, message):
+    def information(self, formatter, msg):
         '''add an information message to the widget'''
-        msg = gui.Message.from_information(contact, message)
         msg.message = Plus.msnplus_strip(msg.message)
         self._append_message(msg)
 
