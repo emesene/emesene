@@ -382,7 +382,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             _('File transfer accepted by %s') % (contact.display_name), \
             transfer.contact.account)
-            self.output.information(self.formatter, contact, message)
+            msg = gui.Message.from_information(contact, message)
+            self.output.information(self.formatter, msg)
 
     def on_filetransfer_progress(self, transfer):
         ''' called every chunk received '''
@@ -399,7 +400,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             _('File transfer rejected by %s') % (contact.display_name), \
             transfer.contact.account)
-            self.output.information(self.formatter, contact, message)
+            msg = gui.Message.from_information(contact, message)
+            self.output.information(self.formatter, msg)
 
     def on_filetransfer_canceled(self, transfer):
         ''' called when a file transfer is canceled '''
@@ -411,7 +413,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             _('File transfer canceled by %s') % (contact.display_name), \
             transfer.contact.account)
-            self.output.information(self.formatter, contact, message)
+            msg = gui.Message.from_information(contact, message)
+            self.output.information(self.formatter, msg)
 
     def on_filetransfer_completed(self, transfer):
         ''' called when a file transfer is completed '''
@@ -422,7 +425,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             contact = self._member_to_contact(self.members[0])
             message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             _('File transfer completed!'), transfer.contact.account)
-            self.output.information(self.formatter, contact, message)
+            msg = gui.Message.from_information(contact, message)
+            self.output.information(self.formatter, msg)
 
     def on_call_invitation(self, call, cid, westart=False):
         '''called when a new call is issued both from us or other party'''
