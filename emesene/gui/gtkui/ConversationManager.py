@@ -84,9 +84,10 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         accel_group.connect_group(gtk.keysyms.W, \
                                   gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED, \
                                   self.on_key_close_tab)
-        accel_group.connect_group(gtk.keysyms.Escape, \
-                                  0, gtk.ACCEL_LOCKED, \
-                                  self.on_key_close_tab)
+        if self.session.config.get_or_set('b_escape_hotkey', True):
+            accel_group.connect_group(gtk.keysyms.Escape, \
+                                      0, gtk.ACCEL_LOCKED, \
+                                      self.on_key_close_tab)
 
         for i in range(1, 10):
             accel_group.connect_group(gtk.keysyms._0 + i,
