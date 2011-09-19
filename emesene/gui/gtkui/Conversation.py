@@ -301,7 +301,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         self.input.set_sensitive(is_sensitive)
         self.toolbar.set_sensitive(is_sensitive)
-        self.info.set_sensitive(in_sensitive)
+        self.info.set_sensitive(is_sensitive)
 
     def set_image_visible(self, is_visible):
         """
