@@ -167,10 +167,7 @@ class AdiumTheme(object):
         template = template.replace('%messageDirection%',
             escape(msg.direction))
 
-        for nl in ('\r\n', '\r', '\n'):
-            msg.message = msg.message.replace(nl, '<br>')
-
-        template = template.replace('%message%', msg.message)
+        template = template.replace('%message%', escape_no_xml(msg.message))
 
         if msg.timestamp is None:
             template = template.replace('%time%',
@@ -308,6 +305,14 @@ __dic_inv = {
 def escape(string_):
     '''replace the values on dic keys with the values'''
     return xml.sax.saxutils.escape(string_, __dic)
+
+def escape_no_xml(string_):
+    '''replace the values on dic keys with the values
+    without using xml.sax.saxutils'''
+    for key, value in __dic.iteritems():
+        if key not in MarkupParser.dic:
+            string_ = string_.replace(key, value)
+    return string_
 
 def unescape(string_):
     '''replace the values on dic_inv keys with the values'''
