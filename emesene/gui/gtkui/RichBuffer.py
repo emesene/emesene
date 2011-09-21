@@ -24,6 +24,7 @@ import webbrowser
 
 import RichWidget
 from gui import MarkupParser
+import gui.base.Desktop
 
 class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
     '''a buffer that makes it easy to manipulate a gtk textview with
@@ -83,7 +84,7 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         '''insert a link at the current position'''
         
         def on_activate_link(label, uri):
-            webbrowser.open_new_tab(uri)
+            gui.base.Desktop.open(uri)
             return True
     
         lnk = gtk.Label()

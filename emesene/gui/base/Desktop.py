@@ -75,6 +75,7 @@ __version__ = "0.4"
 
 import os
 import sys
+import webbrowser
 
 # Avaiable desktop environment value list
 
@@ -216,15 +217,15 @@ def use_desktop(desktop):
 
     # Test for desktops where the overriding is not verified.
 
-    elif (desktop or detected) == "KDE":
+    elif desktop in "KDE" or detected in "KDE":
         return "KDE"
-    elif (desktop or detected) == "GNOME":
+    elif desktop in "GNOME" or detected in "GNOME":
         return "GNOME"
-    elif (desktop or detected) == "XFCE":
+    elif desktop in "XFCE" or detected in "XFCE":
         return "XFCE"
-    elif (desktop or detected) == "Mac OS X":
+    elif desktop in "Mac OS X" or detected in "Mac OS X":
         return "Mac OS X"
-    elif (desktop or detected) == "X11":
+    elif desktop in "X11" or detected in "X11":
         return "X11"
     else:
         return None
@@ -265,10 +266,13 @@ def open(url, desktop=get_desktop(), wait=0):
     """
 
     # Decide on the desktop environment in use.
+
     if desktop not in _DESKTOP_LIST:
         desktop_in_use = use_desktop(desktop)
     else:
         desktop_in_use = desktop
+        
+    cmd = None
 
     if desktop_in_use == "standard":
         arg = "".join([os.environ["DESKTOP_LAUNCH"], mkarg(url)])
@@ -293,11 +297,13 @@ def open(url, desktop=get_desktop(), wait=0):
     elif desktop_in_use == "X11" and os.environ.has_key("BROWSER"):
         cmd = [os.environ["BROWSER"], url]
 
-    # Finish with an error where no suitable desktop was identified.
+    try:
+        return _run(cmd, 0, wait)
+    except:
+        # use webbrowser.open() where no suitable desktop was identified 
+        # ( cmd == None ) or fail to execute specified program ( raise Error )
+        webbrowser.open(url)
 
-    else:
-        raise OSError, "Desktop '%s' not supported (neither DESKTOP_LAUNCH nor os.startfile could be used)" % desktop_in_use
 
-    return _run(cmd, 0, wait)
 
 # vim: tabstop=4 expandtab shiftwidth=4

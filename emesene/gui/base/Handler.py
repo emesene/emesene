@@ -189,7 +189,7 @@ class HelpHandler(object):
 
     def on_website_selected(self):
         '''called when the website item is selected'''
-        webbrowser.open(EMESENE_WEBSITE)
+        Desktop.open(EMESENE_WEBSITE)
 
     def on_debug_selected(self):
         '''called when the preference button is selected'''
