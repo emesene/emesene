@@ -152,7 +152,7 @@ class OutputView(webkit.WebView):
 
         if not href.startswith("file://"):
             log.info("link clicked: " + href)
-            webbrowser.open_new_tab(href)
+            gui.base.Desktop.open(href)
             return True
 
         return False

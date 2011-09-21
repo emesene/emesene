@@ -872,7 +872,7 @@ class Extension(BaseTable):
         category and the selected extension
         """
         def on_activate_link(label, uri):
-            webbrowser.open_new_tab(uri)
+            gui.base.Desktop.open(uri)
             return True
 
         self.add_text(_('Categories'), 0, 0, True)
@@ -1076,7 +1076,7 @@ class MSNPapylib(BaseTable):
 
     def _on_live_profile_clicked(self, arg):
         ''' called when live profile button is clicked '''
-        webbrowser.open("http://profile.live.com/details/Edit/Pic")
+        gui.base.Desktop.open("http://profile.live.com/details/Edit/Pic")
 
 
 class PrivacySettings(gtk.VBox):
