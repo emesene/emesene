@@ -75,6 +75,12 @@ __version__ = "0.4"
 
 import os
 import sys
+import webbrowser
+
+# Avaiable desktop environment value list
+
+_DESKTOP_LIST = ["standard", "KDE", "GNOME", "XFCE", "Mac OS X",
+                 "Windows", "X11"]
 
 # Provide suitable process creation functions.
 
@@ -141,11 +147,18 @@ def _is_xfce():
     "Return whether XFCE is in use."
 
     # XFCE detection involves testing the output of a program.
+    # or checking $DESKTOP_SESSION (refer to `xdg-open` )
 
     try:
-        return _readfrom(_get_x11_vars() + "xprop -root _DT_SAVE_MODE", shell=1).strip().endswith(' = "xfce4"')
-    except OSError:
-        return 0
+        if _readfrom(_get_x11_vars() + "xprop -root _DT_SAVE_MODE", shell=1).strip().endswith(' = "xfce4"'):
+            return True
+        elif os.environ.get("DESKTOP_SESSION") in "xfce4":
+            return True
+        else:
+            return False
+
+    except (OSError, TypeError):
+        return False
 
 def _is_x11():
 
@@ -204,15 +217,15 @@ def use_desktop(desktop):
 
     # Test for desktops where the overriding is not verified.
 
-    elif (desktop or detected) == "KDE":
+    elif desktop in "KDE" or detected in "KDE":
         return "KDE"
-    elif (desktop or detected) == "GNOME":
+    elif desktop in "GNOME" or detected in "GNOME":
         return "GNOME"
-    elif (desktop or detected) == "XFCE":
+    elif desktop in "XFCE" or detected in "XFCE":
         return "XFCE"
-    elif (desktop or detected) == "Mac OS X":
+    elif desktop in "Mac OS X" or detected in "Mac OS X":
         return "Mac OS X"
-    elif (desktop or detected) == "X11":
+    elif desktop in "X11" or detected in "X11":
         return "X11"
     else:
         return None
@@ -228,7 +241,7 @@ def is_standard():
 
 # Activity functions.
 
-def open(url, desktop=None, wait=0):
+def open(url, desktop=get_desktop(), wait=0):
 
     """
     Open the 'url' in the current desktop's preferred file browser. If the
@@ -254,7 +267,12 @@ def open(url, desktop=None, wait=0):
 
     # Decide on the desktop environment in use.
 
-    desktop_in_use = use_desktop(desktop)
+    if desktop not in _DESKTOP_LIST:
+        desktop_in_use = use_desktop(desktop)
+    else:
+        desktop_in_use = desktop
+        
+    cmd = None
 
     if desktop_in_use == "standard":
         arg = "".join([os.environ["DESKTOP_LAUNCH"], mkarg(url)])
@@ -279,11 +297,13 @@ def open(url, desktop=None, wait=0):
     elif desktop_in_use == "X11" and os.environ.has_key("BROWSER"):
         cmd = [os.environ["BROWSER"], url]
 
-    # Finish with an error where no suitable desktop was identified.
+    try:
+        return _run(cmd, 0, wait)
+    except:
+        # use webbrowser.open() where no suitable desktop was identified 
+        # ( cmd == None ) or fail to execute specified program ( raise Error )
+        webbrowser.open(url)
 
-    else:
-        raise OSError, "Desktop '%s' not supported (neither DESKTOP_LAUNCH nor os.startfile could be used)" % desktop_in_use
 
-    return _run(cmd, 0, wait)
 
 # vim: tabstop=4 expandtab shiftwidth=4
