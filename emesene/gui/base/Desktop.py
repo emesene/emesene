@@ -76,6 +76,11 @@ __version__ = "0.4"
 import os
 import sys
 
+# Avaiable desktop environment value list
+
+_DESKTOP_LIST = ["standard", "KDE", "GNOME", "XFCE", "Mac OS X",
+                 "Windows", "X11"]
+
 # Provide suitable process creation functions.
 
 try:
@@ -235,7 +240,7 @@ def is_standard():
 
 # Activity functions.
 
-def open(url, desktop=None, wait=0):
+def open(url, desktop=get_desktop(), wait=0):
 
     """
     Open the 'url' in the current desktop's preferred file browser. If the
@@ -260,8 +265,10 @@ def open(url, desktop=None, wait=0):
     """
 
     # Decide on the desktop environment in use.
-
-    desktop_in_use = use_desktop(desktop)
+    if desktop not in _DESKTOP_LIST:
+        desktop_in_use = use_desktop(desktop)
+    else:
+        desktop_in_use = desktop
 
     if desktop_in_use == "standard":
         arg = "".join([os.environ["DESKTOP_LAUNCH"], mkarg(url)])
