@@ -141,11 +141,18 @@ def _is_xfce():
     "Return whether XFCE is in use."
 
     # XFCE detection involves testing the output of a program.
+    # or checking $DESKTOP_SESSION (refer to `xdg-open` )
 
     try:
-        return _readfrom(_get_x11_vars() + "xprop -root _DT_SAVE_MODE", shell=1).strip().endswith(' = "xfce4"')
-    except OSError:
-        return 0
+        if _readfrom(_get_x11_vars() + "xprop -root _DT_SAVE_MODE", shell=1).strip().endswith(' = "xfce4"'):
+            return True
+        elif os.environ.get("DESKTOP_SESSION") in "xfce4":
+            return True
+        else:
+            return False
+
+    except (OSError, TypeError):
+        return False
 
 def _is_x11():
 
