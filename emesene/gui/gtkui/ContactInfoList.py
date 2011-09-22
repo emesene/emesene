@@ -88,6 +88,7 @@ class ContactInfoList(gtk.VBox):
         #contacts list if multichat
         self._model = None
         self._contact_list = gtk.TreeView()
+        self._contact_list.set_can_focus(False)
         avatar = gtk.CellRendererPixbuf()
         nick = extension.get_and_instantiate('nick renderer')
         status = gtk.CellRendererPixbuf()
