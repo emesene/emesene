@@ -119,7 +119,7 @@ class PluginHandler(object):
             inst.category_register()
             inst.start(session)
             inst.extension_register()
-            inst._started = True
+            inst.active = True
         except Exception, reason:
             log.warning('error starting "%s": %s' % (self.name, reason))
             print 'error starting "%s": %s' % (self.name, reason)
@@ -131,24 +131,29 @@ class PluginHandler(object):
         '''If active, stop the plugin'''
         if self.is_active():
             self._instance.stop()
-            self._instance._started = False
+            self._instance.active = False
 
     def config(self, session):
-        if self.is_active():
+        if self.is_active() and self._instance.configurable:
             self._instance.config(session)
             return True
 
         return False
 
+    def configurable(self):
+        if not self.is_active():
+            return False
+        return self._instance.configurable
+
     def is_active(self):
         '''@return True if an instance exist and is started. False otherwise'''
         if not self._instance:
             return False
-        return self._instance.is_active()
+        return self._instance.active
 
     def get_description(self):
         '''@return plugin description from Plugin class'''
-        return self.module.Plugin._description
+        return self.module.Plugin.description
 
 
 class PluginManager(object):
@@ -216,7 +221,7 @@ class PluginManager(object):
         '''Config a plugin.
         @param name The name of the plugin. See plugin_base.PluginBase.name.
         '''
-        if name not in self._plugins:
+        if name not in self._plugins or not self._plugins[name].configurable():
             return False
 
         log.info('configuring plugin "%s"' % name)
@@ -227,7 +232,7 @@ class PluginManager(object):
         @param name The name of the plugin. See plugin_base.PluginBase.name.
         @return True if loaded and active, else False.
         '''
-        if not name in self._plugins:
+        if name not in self._plugins:
             return False
         return self._plugins[name].is_active()
 
@@ -241,10 +246,15 @@ class PluginManager(object):
         @param name The name of the plugin. See plugin_base.PluginBase.name.
         @return plugin description if loaded, else False.
         '''
-        if not name in self._plugins:
+        if name not in self._plugins:
             return False
         return self._plugins[name].get_description()
 
+    def plugin_configurable(self, name):
+        # return self._plugins[name].configurable() if name in self._plugins else False
+        if name not in self._plugins:
+            return False
+        return self._plugins[name].configurable()
 
 _instance = None
 def get_pluginmanager():

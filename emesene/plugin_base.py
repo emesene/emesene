@@ -23,29 +23,32 @@ It will be inherited by every plugin.
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+
 class PluginBase(object):
-    '''base class for plugins'''
-    _description = "No description"
+    '''Base class for plugins'''
+    description = 'Your first plugin.'
+    _description = description # DEPRICATE ME!
     _authors = {}
     def __init__(self):
-        self._started = False
-        self._configure = None
+        self.active = False
 
     def start(self, session):
-        '''method to start the plugin'''
-        raise NotImplementedError()
-
-    def is_active(self):
-        '''returns True if the plugin is activated'''
-        return self._started
+        '''Method to start the plugin'''
+        return
 
     def stop(self):
-        '''method to stop the plugin'''
-        raise NotImplementedError()
+        '''Method to stop the plugin'''
+        return
+
+    def configurable(self):
+        '''Method returning a boolean indicating if this plugin can
+        be configured or not.'''
+        return False
 
     def config(self, session):
-        '''method to config the plugin'''
-        raise NotImplementedError()
+        '''Method to configure the plugin. Please put configurable to
+        return True if you need to implement this method.'''
+        pass
 
     def category_register(self):
         '''It's a placeholder. Can be safely called even if not implemented
