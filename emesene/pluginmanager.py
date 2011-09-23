@@ -134,7 +134,7 @@ class PluginHandler(object):
             self._instance.active = False
 
     def config(self, session):
-        if self.is_active() and self._instance.configurable:
+        if self.is_active() and self._instance.configurable():
             self._instance.config(session)
             return True
 
@@ -143,7 +143,7 @@ class PluginHandler(object):
     def configurable(self):
         if not self.is_active():
             return False
-        return self._instance.configurable
+        return self._instance.configurable()
 
     def is_active(self):
         '''@return True if an instance exist and is started. False otherwise'''
@@ -153,7 +153,8 @@ class PluginHandler(object):
 
     def get_description(self):
         '''@return plugin description from Plugin class'''
-        return self.module.Plugin.description
+        description = self.module.Plugin.description
+        return description if description != "Your first plugin." else self.module.Plugin._description
 
 
 class PluginManager(object):
