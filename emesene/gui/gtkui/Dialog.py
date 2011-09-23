@@ -560,11 +560,11 @@ class Dialog(object):
         '''
         def on_website_hook(dialog, web):
             '''called when the website item is selected'''
-            webbrowser.open(web)
+            gui.base.Desktop.open(web)
 
         def on_email_hook(dialog, mail):
-            webbrowser.open("mailto://"+mail)
-
+            gui.base.Desktop.open("mailto://"+mail)
+            
         about = gtk.AboutDialog()
         gtk.about_dialog_set_url_hook(on_website_hook)
         gtk.about_dialog_set_email_hook(on_email_hook)
@@ -988,7 +988,7 @@ Clicking Yes will close emesene.
 
 Do you want to fix your profile now?''')
         def fix_profile(button, close_cb):
-            webbrowser.open("http://profile.live.com/details/Edit/Pic")
+            gui.base.Desktop.open("http://profile.live.com/details/Edit/Pic")
             close_cb()
 
         window = cls.common_window(message, gtk.STOCK_DIALOG_WARNING,

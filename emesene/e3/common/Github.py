@@ -20,6 +20,7 @@
 #
 
 from urllib2 import urlopen
+
 try:
     from json import loads
 except ImportError:

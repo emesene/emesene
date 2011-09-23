@@ -17,6 +17,8 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import MessageFormatter
+import threading
+from urllib2 import urlopen
 
 def add_style_to_message(text, stl, escape=True):
     '''add the style in a xhtml like syntax to text'''
@@ -82,4 +84,28 @@ class PercentDone(object):
 
                 self.__current = aux
                 return changed
+
+
+class AsyncAction(threading.Thread):
+
+    def __init__(self, callback, func, *args, **kwargs):
+        threading.Thread.__init__(self)
+        self._result = None
+        self._callback = callback
+        self._func = func
+        self._args = args
+        self._kwargs = kwargs
+
+        self.start()
+
+    def run(self):
+        result = self._func(*self._args, **self._kwargs)
+        self._callback(result)
+
+    def is_finished(self):
+        return self._result == None
+
+    def get_result(self):
+        return self._result
+
 

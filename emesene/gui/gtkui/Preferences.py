@@ -606,6 +606,7 @@ class ConversationWindow(BaseTable):
         self.session.config.get_or_set('b_toolbar_small', False)
         self.session.config.get_or_set('b_conversation_tabs', True)
         self.session.config.get_or_set('b_conv_tab_popup', False)
+        self.session.config.get_or_set('b_escape_hotkey', True)
         self.append_check(_('Tabbed Conversations'),
                 'session.config.b_conversation_tabs')
         self.append_row(self.tab_pos_cb)
@@ -620,6 +621,8 @@ class ConversationWindow(BaseTable):
             'session.config.b_show_toolbar')
         self.append_check(_('Show tabs popup menu'),
             'session.config.b_conv_tab_popup')
+        self.append_check(_('Enable escape hotkey to close tabs'),
+            'session.config.b_escape_hotkey')
         # small-toolbar sensitivity depends on conversation toolbar visibility
         self.cb_small_toolbar = self.create_check(_('Small conversation toolbar'),
             'session.config.b_toolbar_small')
@@ -869,7 +872,7 @@ class Extension(BaseTable):
         category and the selected extension
         """
         def on_activate_link(label, uri):
-            webbrowser.open_new_tab(uri)
+            gui.base.Desktop.open(uri)
             return True
 
         self.add_text(_('Categories'), 0, 0, True)
@@ -895,16 +898,10 @@ class Extension(BaseTable):
         self.add_button(_('Synch with emesene1'), 1, 8,
                 self.on_synch_emesene1, 0, 0)
 
-    def _get_categories(self):
-        ''' get available categories'''
-        categories = [ctg for ctg in extension.get_categories().keys() if len(extension.get_extensions(ctg)) > 1]
-        categories.sort()
-        return categories
-
     def _add_categories_and_extensions_combos(self):
         """add the widgets to display the extensions"""
 
-        categories = self._get_categories()
+        categories = extension.get_multiextension_categories()
 
         for item in categories:
             self.categories.append_text(item)
@@ -984,7 +981,7 @@ class Extension(BaseTable):
         model.clear()
         # fill it again with available categories
         # this is done because a plugin may have changed them
-        categories = self._get_categories()
+        categories = extension.get_multiextension_categories()
 
         for item in categories:
             model.append([item])
@@ -1079,7 +1076,7 @@ class MSNPapylib(BaseTable):
 
     def _on_live_profile_clicked(self, arg):
         ''' called when live profile button is clicked '''
-        webbrowser.open("http://profile.live.com/details/Edit/Pic")
+        gui.base.Desktop.open("http://profile.live.com/details/Edit/Pic")
 
 
 class PrivacySettings(gtk.VBox):

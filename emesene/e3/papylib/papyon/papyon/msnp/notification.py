@@ -317,10 +317,6 @@ class NotificationProtocol(BaseProtocol, Timer):
 
     # Handlers ---------------------------------------------------------------
     # --------- Connection ---------------------------------------------------
-    def _check_ping(self, time_id):
-        if self.time_id == time_id:
-            self.emit("connection-lost", "Ping timeout")
-
     def _handle_VER(self, command):
         self._protocol_version = int(command.arguments[0].lstrip('MSNP'))
         self._send_command('CVR',
@@ -402,8 +398,7 @@ class NotificationProtocol(BaseProtocol, Timer):
         timeout = int(command.arguments[0])
         self.start_timeout("ping", timeout)
         self._time_id = time.time()
-        self.start_timeout("ping-%s" % self._time_id, timeout+5, \
-                           (self._check_ping, self._time_id))
+        self.start_timeout(("qing", self._time_id), timeout+5)
 
     def _handle_OUT(self, command):
         reason = None
@@ -779,6 +774,10 @@ class NotificationProtocol(BaseProtocol, Timer):
 
     def on_ping_timeout(self):
         self._transport.enable_ping()
+
+    def on_qing_timeout(self, time_id):
+        if self._time_id == time_id:
+            self._transport.emit("connection-lost", "Ping timeout")
 
     def _command_answered_cb(self, tr_id, *args):
         callback, errback = self._callbacks.get(tr_id, (None, None))

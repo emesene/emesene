@@ -398,6 +398,13 @@ def get_categories():
     '''return a dict with all the categories'''
     return _categories
 
+def get_multiextension_categories():
+    ''' get available categories'''
+    categories_blacklisted = ['option provider', 'session']
+    categories = [ctg for ctg in get_categories().keys()
+                    if len(get_extensions(ctg)) > 1 and not ctg in categories_blacklisted]
+    categories.sort()
+    return categories
 
 def get_extensions(category_name):
     '''return a dict of the available extensions id:class'''

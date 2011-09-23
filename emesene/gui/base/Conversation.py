@@ -588,7 +588,7 @@ class Conversation(object):
         """
         play the receive sound
         """
-        if self.session.config.b_play_type:
+        if self.session.config.b_play_type and self.message_waiting:
             self.soundPlayer.play(gui.theme.sound_theme.sound_type)
 
     def cycle_history(self, change=-1):

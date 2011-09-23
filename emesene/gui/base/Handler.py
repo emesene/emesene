@@ -189,7 +189,7 @@ class HelpHandler(object):
 
     def on_website_selected(self):
         '''called when the website item is selected'''
-        webbrowser.open(EMESENE_WEBSITE)
+        Desktop.open(EMESENE_WEBSITE)
 
     def on_debug_selected(self):
         '''called when the preference button is selected'''
@@ -209,7 +209,7 @@ class HelpHandler(object):
     def on_check_update_selected(self):
         ''' checks if a new stable version of emesene is available '''
         if sys.platform == "darwin":
-            subprocess.call(['open', '/Applications/emesene.app/Contents/Resources/emesene_updater.app'])
+            subprocess.call(['open', '/Applications/emesene.app/Contents/Resources/emesene updater.app'])
         else:
             f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/gui/base/Handler.py")
             s = f.read()
