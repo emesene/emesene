@@ -23,32 +23,39 @@ It will be inherited by every plugin.
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import abc
 
 class PluginBase(object):
-    __metaclass__ = abc.ABCMeta
+    '''Base class for plugins'''
     description = 'Your first plugin.'
-
+    _description = description # DEPRICATE ME!
+    _authors = {}
     def __init__(self):
         self.active = False
 
-    @abc.abstractmethod
     def start(self, session):
+        '''Method to start the plugin'''
         return
 
-    @abc.abstractmethod
     def stop(self):
+        '''Method to stop the plugin'''
         return
 
-    @abc.abstractproperty
     def configurable(self):
+        '''Method returning a boolean indicating if this plugin can
+        be configured or not.'''
         return False
 
     def config(self, session):
+        '''Method to configure the plugin. Please put configurable to
+        return True if you need to implement this method.'''
         pass
 
     def category_register(self):
+        '''It's a placeholder. Can be safely called even if not implemented
+        (that means the plugin is old-style)'''
         return False
 
     def extension_register(self):
+        '''It's a placeholder. Can be safely called even if not implemented
+        (that means the plugin is old-style)'''
         return False
