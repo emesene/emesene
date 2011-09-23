@@ -22,7 +22,6 @@ import sys
 import re
 import time
 import urllib
-import webbrowser
 
 import e3.base
 import gui

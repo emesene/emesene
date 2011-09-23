@@ -24,8 +24,6 @@ import webkit
 import base64
 import xml.sax.saxutils
 
-import webbrowser
-
 import e3
 import gui
 from gui.base import Plus

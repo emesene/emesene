@@ -3,7 +3,6 @@
 '''This module contains classes used to build up a Preferences window'''
 
 import logging
-import webbrowser
 
 from PyQt4  import QtGui
 from PyQt4  import QtCore

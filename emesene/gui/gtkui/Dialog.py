@@ -24,7 +24,6 @@ import os
 import gtk
 import pango
 import gobject
-import webbrowser
 import tempfile
 
 import e3

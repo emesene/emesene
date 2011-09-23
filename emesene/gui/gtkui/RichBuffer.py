@@ -20,7 +20,6 @@
 import gtk
 import pango
 import urllib
-import webbrowser
 
 import RichWidget
 from gui import MarkupParser
