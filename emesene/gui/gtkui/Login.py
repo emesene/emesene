@@ -256,40 +256,13 @@ class Login(LoginBaseUI, gui.LoginBase):
 
         LoginBaseUI.__init__(self, callback)
         gui.LoginBase.__init__(self, config, config_dir, config_path,
-                                proxy, use_http, session_id)
+                                proxy, use_http, session_id, no_autologin)
 
         self.callback = callback
         self.cancel_clicked = cancel_clicked
         self.on_preferences_changed = on_preferences_changed
-        self.no_autologin = no_autologin
 
         account = self.config.get_or_set('last_logged_account', '')
-
-        #convert old configs to the new format
-        if len(account.split('|')) == 1:
-            config_keys = self.config.d_remembers.keys()
-            for _account in config_keys:
-                if len(_account.split('|')) != 1:
-                    continue
-                account_and_service = \
-                    _account + '|' + \
-                    self.config.d_user_service.get(_account, 'msn')
-                if _account == account:
-                    self.config.last_logged_account = account_and_service
-                    account = account_and_service
-                self.config.d_remembers[account_and_service] = \
-                    self.config.d_remembers.get(_account)
-                self.config.d_remembers.pop(_account, None)
-                self.config.d_status[account_and_service] = \
-                    self.config.d_status.get(_account)
-                self.config.d_status.pop(_account, None)
-                _value = self.config.d_accounts.get(_account)
-                if _value:
-                    self.config.d_accounts[account_and_service] = _value
-                self.config.d_accounts.pop(_account, None)
-            self.remembers = self.config.d_remembers
-            self.status = self.config.d_status
-        self.accounts = self.config.d_accounts
 
         self.b_connect.connect('clicked', self._on_connect_clicked)
 
@@ -731,7 +704,7 @@ class ConnectingWindow(Login):
     widget that represents the GUI interface showed when connecting
     '''
     def __init__(self, callback, avatar_path, config):
-        LoginBase.__init__(self, callback)
+        LoginBaseUI.__init__(self, callback)
 
         self.callback = callback
         self.avatar.set_from_file(avatar_path)

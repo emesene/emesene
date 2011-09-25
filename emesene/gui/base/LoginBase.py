@@ -28,11 +28,12 @@ class LoginBase(object):
     '''a widget that contains all the components inside'''
 
     def __init__(self, config, config_dir, config_path, proxy=None,
-                use_http=None, session_id=None):
+                use_http=None, session_id=None, no_autologin=False):
         '''constructor'''
         self.config = config
         self.config_dir = config_dir
         self.config_path = config_path
+        self.no_autologin = no_autologin
         # the id of the default extension that handles the session
         # used to select the default session on the preference dialog
         self.use_http = use_http
@@ -45,11 +46,39 @@ class LoginBase(object):
         self.remembers = self.config.get_or_set('d_remembers', {})
         self.config.get_or_set('d_user_service', {})
         self.status = self.config.get_or_set('d_status', {})
-        self.config.get_or_set('last_logged_account', '')
+        account = self.config.get_or_set('last_logged_account', '')
+        self._setup_account(account)
 
         self.services = {}
         self.service2id = {}
         self._setup_services(session_id)
+
+    def _setup_account(self, account):
+        #convert old configs to the new format
+        if len(account.split('|')) == 1:
+            config_keys = self.config.d_remembers.keys()
+            for _account in config_keys:
+                if len(_account.split('|')) != 1:
+                    continue
+                account_and_service = \
+                    _account + '|' + \
+                    self.config.d_user_service.get(_account, 'msn')
+                if _account == account:
+                    self.config.last_logged_account = account_and_service
+                    account = account_and_service
+                self.config.d_remembers[account_and_service] = \
+                    self.config.d_remembers.get(_account)
+                self.config.d_remembers.pop(_account, None)
+                self.config.d_status[account_and_service] = \
+                    self.config.d_status.get(_account)
+                self.config.d_status.pop(_account, None)
+                _value = self.config.d_accounts.get(_account)
+                if _value:
+                    self.config.d_accounts[account_and_service] = _value
+                self.config.d_accounts.pop(_account, None)
+            self.remembers = self.config.d_remembers
+            self.status = self.config.d_status
+        self.accounts = self.config.d_accounts
 
     def _setup_services(self, session_id):
         if session_id is not None:

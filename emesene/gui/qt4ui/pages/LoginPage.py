@@ -41,7 +41,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         # instance variables:
         QtGui.QWidget.__init__(self, parent)
         gui.LoginBase.__init__(self, config, config_dir, config_path,
-                                proxy, use_http, session_id)
+                                proxy, use_http, session_id, no_autologin)
 
         self._on_preferences_changed = on_preferences_changed
         self._login_callback = callback
@@ -62,7 +62,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         if self.config.last_logged_account != '':
             account_combo.setCurrentIndex(account_combo.findData(0))
             self._on_chosen_account_changed(0)
-            if not cancel_clicked and not no_autologin and \
+            if not cancel_clicked and not self.no_autologin and \
                     config.d_remembers[config.last_logged_account] == 3:
                 self.autologin_started = True
                 self._on_start_login()
@@ -172,11 +172,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                 if remember_lvl >= 3:
                     self.auto_login     = True
         
-        service_d         = self.config.d_user_service
-        remember_lvl_d    = self.config.d_remembers
-        emails            = remember_lvl_d.keys()
-        status_d          = self.config.d_status
-        password_d        = self.config.d_accounts
+        emails            = self.remembers.keys()
         default_acc_email = self.config.last_logged_account
 
         if default_acc_email in emails:
@@ -185,23 +181,21 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             emails[0], emails[index] = emails[index], emails[0]
             
         for email in emails:
-            try:
-                service = service_d[email]
-            except KeyError:
-                continue
-            remember_lvl = remember_lvl_d[email]
+            acc = email.rpartition('|')[0]
+            service = self.config.d_user_service.get(
+                            email.rpartition('|')[0], 'msn')
+            remember_lvl = self.remembers[email]
             if remember_lvl >= 1: # we have at least a status
-                status = status_d[email]
+                status = self.config.d_status[email]
             else:
                 status = e3.status.ONLINE
             if remember_lvl >= 2: # we have also a password
-                password = base64.b64decode(password_d[email])
+                password = base64.b64decode(self.accounts[email])
             else:
                 password = ''
 
-            account = Account(service, email, password, status, remember_lvl)
+            account = Account(service, acc, password, status, remember_lvl)
             self._account_list.append(account)
-
 
 
     def _on_account_combo_text_changed(self, new_text): #new text is a QString
