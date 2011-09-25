@@ -19,7 +19,7 @@ import gui
 
 log = logging.getLogger('qt4ui.LoginPage')
 
-class LoginPage(QtGui.QWidget):
+class LoginPage(QtGui.QWidget, gui.LoginBase):
     ''' The Login Page '''
     # pylint: disable=W0612
     NAME = 'LoginPage'
@@ -40,34 +40,26 @@ class LoginPage(QtGui.QWidget):
          
         # instance variables:
         QtGui.QWidget.__init__(self, parent)
+        gui.LoginBase.__init__(self, config, config_dir, config_path,
+                                proxy, use_http, session_id)
 
         self._on_preferences_changed = on_preferences_changed
-        self._config = config
-        self._config_dir = config_dir
-        self._config_path = config_path
-        self._session_id = session_id       # DON'T USE
-        self._proxy = proxy or e3.Proxy()
-        self._use_http = use_http           # DON'T USE
         self._login_callback = callback
 
         # a widget dic to avoid proliferation of instance variables:
         self._widget_d = {}
         self._account_list = []
-        self._service2data = {}
-        self._service2id   = {}
-        self._host = None
-        self._port = None
         self.autologin_started = False
 
         # setup code:
-        self._setup_config()
         self._setup_accounts()
         self._setup_ui()
         self._on_chosen_account_changed(0)
         
         # selects the default account if any:
         account_combo = self._widget_d['account_combo']
-        if self._config.last_logged_account != '':
+
+        if self.config.last_logged_account != '':
             account_combo.setCurrentIndex(account_combo.findData(0))
             self._on_chosen_account_changed(0)
             if not cancel_clicked and not no_autologin and \
@@ -77,27 +69,6 @@ class LoginPage(QtGui.QWidget):
             
         # TODO: this way, if there are remembered accounts, but no default 
         #account, no display pic is shown....
-        
-
-    def _setup_config(self):
-        '''Adds missing options to config file'''
-        log.info('*** _setup_config')
-        default_session = extension.get_default('session')
-        service = default_session.SERVICES.keys()[0]
-        self._host = default_session.SERVICES[service]['host']
-        self._port = default_session.SERVICES[service]['port']
-        self._config.get_or_set('last_logged_account', '')
-        self._config.get_or_set('d_remembers', {})
-        self._config.get_or_set('d_user_service', {})
-        self._config.get_or_set('d_status', {})
-        self._config.get_or_set('service', service)
-        # obtaining host and port info for each service
-        for ext_id, ext_class in extension.get_extensions('session').\
-                                 iteritems():
-            for service_name, service_data in ext_class.SERVICES.iteritems():
-                self._service2data[service_name] = service_data
-                self._service2id[service_name] = ext_id
-        
         
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
@@ -184,9 +155,6 @@ class LoginPage(QtGui.QWidget):
         login_btn.setEnabled(False)
         login_btn.setMinimumWidth(110)
                                         
-
-
-
     def _setup_accounts(self):
         '''Builds up the account list'''
         class Account(object):
@@ -204,12 +172,12 @@ class LoginPage(QtGui.QWidget):
                 if remember_lvl >= 3:
                     self.auto_login     = True
         
-        service_d         = self._config.d_user_service
-        remember_lvl_d    = self._config.d_remembers
+        service_d         = self.config.d_user_service
+        remember_lvl_d    = self.config.d_remembers
         emails            = remember_lvl_d.keys()
-        status_d          = self._config.d_status
-        password_d        = self._config.d_accounts
-        default_acc_email = self._config.last_logged_account
+        status_d          = self.config.d_status
+        password_d        = self.config.d_accounts
+        default_acc_email = self.config.last_logged_account
 
         if default_acc_email in emails:
             index = emails.index(default_acc_email)
@@ -262,7 +230,7 @@ class LoginPage(QtGui.QWidget):
         
             self.clear_login_form()
             # display_pic
-            path = self._config_dir.join(self._host, 
+            path = self.config_dir.join(self.server_host, 
                                          account.email, 'avatars', 'last')
             widget_d['display_pic'].set_display_pic_from_file(path)
             # password:
@@ -277,8 +245,8 @@ class LoginPage(QtGui.QWidget):
             widget_d['save_password_chk'].setChecked(account.save_password)
             widget_d['auto_login_chk']   .setChecked(account.auto_login)
             # host and port:
-            self._host = self._service2data[account.service]['host'] 
-            self._port = self._service2data[account.service]['port']
+            self.server_host = self.services[account.service]['host'] 
+            self.server_port = self.services[account.service]['port']
         self._on_checkbox_state_refresh()
         
     def _on_connection_preferences_clicked(self):
@@ -289,28 +257,28 @@ class LoginPage(QtGui.QWidget):
                                server_host, server_port):
             '''called when the user press accept on the preferences dialog'''
             
-            self._proxy = e3.Proxy(use_proxy, proxy_host,
+            self.proxy = e3.Proxy(use_proxy, proxy_host,
                                    proxy_port, use_auth, user, passwd)
-            self._host = server_host
-            self._port = server_port
+            self.server_host = server_host
+            self.server_port = server_port
             account_email = str(self._widget_d['account_combo'].currentText())
             if account_email != '':
-                self._config.d_user_service[account_email] = service
+                self.config.d_user_service[account_email] = service
                 # to trigger eventual update of dp:
             self._on_account_combo_text_changed(account_email)
     
             # TODO: investigate on what does the following do:
-            self._on_preferences_changed(use_http, self._proxy, session_id,
+            self._on_preferences_changed(use_http, self.proxy, session_id,
                     service)
             
 
-        service = self._config.service
+        service = self.config.service
         account = str(self._widget_d['account_combo'].currentText())
-        if account in self._config.d_user_service.keys():
-            service = self._config.d_user_service[account]
-        extension.get_default('dialog').login_preferences(service, self._host,
-                                        self._port, new_preferences_cb, 
-                                        self._config.b_use_http, self._proxy)
+        if account in self.config.d_user_service.keys():
+            service = self.config.d_user_service[account]
+        extension.get_default('dialog').login_preferences(service, self.server_host,
+                                        self.server_port, new_preferences_cb, 
+                                        self.config.b_use_http, self.proxy)
 
 
     def _on_start_login(self):
@@ -323,16 +291,16 @@ class LoginPage(QtGui.QWidget):
         save_password   =      widget_dic['save_password_chk'].isChecked()
         auto_login      =      widget_dic['auto_login_chk'].isChecked()
         
-        if user in self._config.d_user_service.keys():
-            service_name = self._config.d_user_service[user]
-            session_id = self._service2id[service_name]
+        if user in self.config.d_user_service.keys():
+            service_name = self.config.d_user_service[user]
+            session_id = self.service2id[service_name]
         else:
-            service_name = self._config.service
-            session_id = self._config.session
-        self._config.d_user_service[user] = service_name
+            service_name = self.config.service
+            session_id = self.config.session
+        self.config.d_user_service[user] = service_name
         
 
-        e3_account = e3.Account(user, password, status, self._host)
+        e3_account = e3.Account(user, password, status, self.server_host)
         #is this the email?
         email = e3_account.account
 
@@ -346,21 +314,21 @@ class LoginPage(QtGui.QWidget):
         # TODO: when there's no config file, we have already a d_remembers and 
         # a d_accounts, but no d_status and last_logged_account. This seems to
         # be inconsistent. Is this a bug?
-        d_remembers = self._config.d_remembers
-        d_accounts = self._config.d_accounts
-        d_status = self._config.d_status
+        d_remembers = self.config.d_remembers
+        d_accounts = self.config.d_accounts
+        d_status = self.config.d_status
         if not d_status:
-            self._config.get_or_set('d_status', {})
-            d_status = self._config.d_status
-        if not self._config.last_logged_account:
-            self._config.get_or_set('last_logged_account', '')
+            self.config.get_or_set('d_status', {})
+            d_status = self.config.d_status
+        if not self.config.last_logged_account:
+            self.config.get_or_set('last_logged_account', '')
             
         
         
         if save_account:
             d_remembers[email] = 1
             d_status[email] = status
-            self._config.last_logged_account = email
+            self.config.last_logged_account = email
             if save_password:
                 d_remembers[email] = 2
                 d_accounts[email] = base64.b64encode(e3_account.password)
@@ -379,17 +347,17 @@ class LoginPage(QtGui.QWidget):
          
          # alternative form: 
 #        if auto_login:
-#            self._config.last_logged_account = email
+#            self.config.last_logged_account = email
 #            d_remembers[email] = 3
 #            d_status[email] = status
 #            d_accounts[email] = base64.b64encode(e3_account.password)
 #        elif save_password:
 #            d_remembers[email] = 2
-#            self._config.last_logged_account = email
+#            self.config.last_logged_account = email
 #            d_status[email] = status
 #            d_accounts[email] = base64.b64encode(e3_account.password)
 #        elif save_account:
-#            self._config.last_logged_account = email
+#            self.config.last_logged_account = email
 #            d_remembers[email] = 1
 #            d_status[email] = status
 #            if  email in d_accounts:
@@ -403,11 +371,11 @@ class LoginPage(QtGui.QWidget):
 #                del d_accounts[email]
             
                 
-        self._config.save(self._config_path)
+        self.config.save(self.config_path)
             
         # Invoke the  login callback
-        self._login_callback(e3_account, session_id, self._proxy,
-                             self._config.b_use_http, self._host, self._port)
+        self._login_callback(e3_account, session_id, self.proxy,
+                             self.config.b_use_http, self.server_host, self.server_port)
 
 
 

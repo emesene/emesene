@@ -32,7 +32,7 @@ import stock
 import logging
 log = logging.getLogger('gtkui.Login')
 
-class LoginBase(gtk.Alignment):
+class LoginBaseUI(gtk.Alignment):
     ''' base widget that holds the visual stuff '''
     def __init__(self, callback, args=None):
         gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=0.0,
@@ -245,7 +245,7 @@ class LoginBase(gtk.Alignment):
         '''
         return
 
-class Login(LoginBase):
+class Login(LoginBaseUI, gui.LoginBase):
     '''
     widget that represents the login window
     '''
@@ -254,25 +254,16 @@ class Login(LoginBase):
                 use_http=None, session_id=None, cancel_clicked=False,
                 no_autologin=False):
 
-        LoginBase.__init__(self, callback)
+        LoginBaseUI.__init__(self, callback)
+        gui.LoginBase.__init__(self, config, config_dir, config_path,
+                                proxy, use_http, session_id)
 
-        self.config = config
-        self.config_dir = config_dir
-        self.config_path = config_path
         self.callback = callback
         self.cancel_clicked = cancel_clicked
         self.on_preferences_changed = on_preferences_changed
         self.no_autologin = no_autologin
-        # the id of the default extension that handles the session
-        # used to select the default session on the preference dialog
-        self.use_http = use_http
-        self.session_id = session_id
 
         account = self.config.get_or_set('last_logged_account', '')
-        self.config.get_or_set('service', 'msn')
-        self.remembers = self.config.get_or_set('d_remembers', {})
-        self.config.get_or_set('d_user_service', {})
-        self.status = self.config.get_or_set('d_status', {})
 
         #convert old configs to the new format
         if len(account.split('|')) == 1:
@@ -305,31 +296,6 @@ class Login(LoginBase):
         self._combo_session_list = []
         self.new_combo_session()
         self._reload_account_list()
-
-        if proxy is None:
-            self.proxy = e3.Proxy()
-        else:
-            self.proxy = proxy
-
-        self.services = {}
-
-        if session_id is not None:
-            for ext_id, ext in extension.get_extensions('session').iteritems():
-                for service_name, service_data in ext.SERVICES.iteritems():
-                    self.services[service_name] = service_data
-
-                if session_id == ext_id and self.config.service in ext.SERVICES:
-                    self.server_host = ext.SERVICES[self.config.service]['host']
-                    self.server_port = ext.SERVICES[self.config.service]['port']
-                    break
-            else:
-                self.config.service = 'msn'
-                self.server_host = 'messenger.hotmail.com'
-                self.server_port = '1863'
-        else:
-            self.config.service = 'msn'
-            self.server_host = 'messenger.hotmail.com'
-            self.server_port = '1863'
 
         avatar_path = self.config_dir.join(
                         self.server_host, account.rpartition('|')[0],
