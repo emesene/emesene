@@ -19,7 +19,7 @@
 
 import extension
 import e3
-import gui
+import base64
 
 import logging
 log = logging.getLogger('gui.base.Conversation')
@@ -99,3 +99,32 @@ class LoginBase(object):
             self.config.service = 'msn'
             self.server_host = 'messenger.hotmail.com'
             self.server_port = '1863'
+
+    def config_account(self, account, service, remember_account, remember_password,
+                         auto_login):
+        '''
+        modify the config for the current account before login
+        '''
+
+        account_and_session = account.account + '|' + service
+
+        if auto_login or remember_account or remember_password:
+            self.status[account_and_session] = account.status
+            self.config.last_logged_account = account_and_session
+
+        if auto_login:#+1 account,+1 password,+1 autologin =  3
+            self.accounts[account_and_session] = base64.b64encode(account.password)
+            self.remembers[account_and_session] = 3
+
+        elif remember_password:#+1 account,+1 password = 2
+            self.accounts[account_and_session] = base64.b64encode(account.password)
+            self.remembers[account_and_session] = 2
+
+        elif remember_account:#+1 account = 1
+            self.accounts[account_and_session] = ''
+            self.remembers[account_and_session] = 1
+
+        else:#means i have logged with nothing checked
+            self.config.last_logged_account = ''
+
+        self.config.save(self.config_path)

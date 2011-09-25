@@ -274,104 +274,32 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                                         self.server_port, new_preferences_cb, 
                                         self.config.b_use_http, self.proxy)
 
-
     def _on_start_login(self):
         ''' Slot executed when the user clicks the login button'''
         widget_dic = self._widget_d
-        user            =  str(widget_dic['account_combo'].currentText())
-        password        =  str(widget_dic['password_edit'].text())
-        status          =      widget_dic['status_combo'].status()
-        save_account    =      widget_dic['save_account_chk'].isChecked()
-        save_password   =      widget_dic['save_password_chk'].isChecked()
-        auto_login      =      widget_dic['auto_login_chk'].isChecked()
+        user = str(widget_dic['account_combo'].currentText())
+        password = str(widget_dic['password_edit'].text())
+        status = widget_dic['status_combo'].status()
+        save_account = widget_dic['save_account_chk'].isChecked()
+        save_password = widget_dic['save_password_chk'].isChecked()
+        auto_login = widget_dic['auto_login_chk'].isChecked()
         
         if user in self.config.d_user_service.keys():
             service_name = self.config.d_user_service[user]
-            session_id = self.service2id[service_name]
+            self.session_id = self.service2id[service_name]
         else:
             service_name = self.config.service
-            session_id = self.config.session
+            self.session_id = self.config.session
         self.config.d_user_service[user] = service_name
         
-
         e3_account = e3.Account(user, password, status, self.server_host)
-        #is this the email?
-        email = e3_account.account
 
-
-        # saves the account's config:
-        # the "remember field behaves like this:
-        # - 0: save nothing                 - 1: save account
-        # - 2: save account and password    - 3: save all and autologin
-        
-        
-        # TODO: when there's no config file, we have already a d_remembers and 
-        # a d_accounts, but no d_status and last_logged_account. This seems to
-        # be inconsistent. Is this a bug?
-        d_remembers = self.config.d_remembers
-        d_accounts = self.config.d_accounts
-        d_status = self.config.d_status
-        if not d_status:
-            self.config.get_or_set('d_status', {})
-            d_status = self.config.d_status
-        if not self.config.last_logged_account:
-            self.config.get_or_set('last_logged_account', '')
-            
-        
-        
-        if save_account:
-            d_remembers[email] = 1
-            d_status[email] = status
-            self.config.last_logged_account = email
-            if save_password:
-                d_remembers[email] = 2
-                d_accounts[email] = base64.b64encode(e3_account.password)
-                if auto_login:
-                    d_remembers[email] = 3
-            else:
-                if  email in d_accounts:
-                    del d_accounts[email]
-        else:
-            if email in d_remembers:
-                del d_remembers[email]
-            if email in d_status:
-                del d_status[email]
-            if email in d_accounts:
-                del d_accounts[email]
-         
-         # alternative form: 
-#        if auto_login:
-#            self.config.last_logged_account = email
-#            d_remembers[email] = 3
-#            d_status[email] = status
-#            d_accounts[email] = base64.b64encode(e3_account.password)
-#        elif save_password:
-#            d_remembers[email] = 2
-#            self.config.last_logged_account = email
-#            d_status[email] = status
-#            d_accounts[email] = base64.b64encode(e3_account.password)
-#        elif save_account:
-#            self.config.last_logged_account = email
-#            d_remembers[email] = 1
-#            d_status[email] = status
-#            if  email in d_accounts:
-#                del d_accounts[email]
-#        else:
-#            if email in d_remembers:
-#                del d_remembers[email]
-#            if email in d_status:
-#                del d_status[email]
-#            if  email in d_accounts:
-#                del d_accounts[email]
-            
-                
-        self.config.save(self.config_path)
+        self.config_account(e3_account, service_name, save_account, save_password,
+                            auto_login)
             
         # Invoke the  login callback
-        self._login_callback(e3_account, session_id, self.proxy,
-                             self.config.b_use_http, self.server_host, self.server_port)
-
-
+        self._login_callback(e3_account, self.session_id, self.proxy,
+                             self.use_http, self.server_host, self.server_port)
 
     def clear_login_form(self, clear_pic=False):
         ''' Resets the login form '''
@@ -417,8 +345,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         else:
             login_btn.setEnabled(False)
 
-
-
     # -------------------- QT_OVERRIDE
 
     def eventFilter(self, obj, event):
@@ -432,5 +358,3 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             return True
         else:
             return False
-            
-        

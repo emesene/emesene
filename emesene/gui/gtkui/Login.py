@@ -377,40 +377,11 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.show_error(_('user or password fields are empty'))
             return
 
-        self._config_account(account, remember_account, remember_password,
-                             auto_login)
+        self.config_account(account, self._get_active_service(), remember_account,
+                            remember_password, auto_login)
 
         self.callback(account, self.session_id, self.proxy, self.use_http,
                 self.server_host, self.server_port)
-
-    def _config_account(self, account, remember_account, remember_password,
-                         auto_login):
-        '''
-        modify the config for the current account before login
-        '''
-
-        account_and_session = account.account + '|' + self._get_active_service()
-
-        if auto_login or remember_account or remember_password:
-            self.status[account_and_session] = account.status
-            self.config.last_logged_account = account_and_session
-
-        if auto_login:#+1 account,+1 password,+1 autologin =  3
-            self.accounts[account_and_session] = base64.b64encode(account.password)
-            self.remembers[account_and_session] = 3
-
-        elif remember_password:#+1 account,+1 password = 2
-            self.accounts[account_and_session] = base64.b64encode(account.password)
-            self.remembers[account_and_session] = 2
-
-        elif remember_account:#+1 account = 1
-            self.accounts[account_and_session] = ''
-            self.remembers[account_and_session] = 1
-
-        else:#means i have logged with nothing checked
-            self.config.last_logged_account = ''
-
-        self.config.save(self.config_path)
 
     def _on_account_changed(self, entry):
         '''
