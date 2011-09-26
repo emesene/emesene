@@ -312,6 +312,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_conference_invite(self, call):
         '''handles a conference (call) invite'''
+        return # skip it, we don't support it
         account = call.peer.account
         if account in self.conversations:
             cid = self.conversations[account]
