@@ -149,7 +149,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self._set_status(presence)
 
         # Set a bunch of client's capabilites
-        self.profile.client_capabilities.renders_gif = True
+        self.profile.client_capabilities.renders_gif = False
         self.profile.client_capabilities.renders_isf = False
         self.profile.client_capabilities.supports_winks = False
         self.profile.client_capabilities.supports_shared_search = False
