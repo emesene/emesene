@@ -151,6 +151,7 @@ class Worker(e3.base.Worker, papyon.Client):
         # Set a bunch of client's capabilites
         self.profile.client_capabilities.renders_gif = False
         self.profile.client_capabilities.renders_isf = False
+        self.profile.client_capabilities.supports_activities = False
         self.profile.client_capabilities.supports_winks = False
         self.profile.client_capabilities.supports_shared_search = False
         global PAPY_HAS_AUDIOVIDEO

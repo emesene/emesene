@@ -84,6 +84,9 @@ class ClientCapabilities(gobject.GObject):
         @ivar supports_chunking: does the client supports chunking messages
         @type supports_chunking: bool
 
+        @ivar supports_activities: does the client supports activities
+        @type supports_activities: bool
+
         @ivar supports_direct_im: does the client supports direct IM
         @type supports_direct_im: bool
 
@@ -155,6 +158,7 @@ class ClientCapabilities(gobject.GObject):
             'renders_isf': 0x00000008,
 
             'supports_chunking': 0x00000020,
+            'supports_activities': 0x00000100,
             'supports_direct_im': 0x00004000,
             'supports_winks': 0x00008000,
             'supports_shared_search': 0x00010000,
