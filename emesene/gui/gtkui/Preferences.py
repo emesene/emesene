@@ -1086,24 +1086,21 @@ class PrivacySettings(gtk.VBox):
         gtk.VBox.__init__(self)
         self.config = session.config
         self.session = session
-        self.set_spacing(8)
-        self.set_border_width(10)
 
         # box with help message
         eventBox = gtk.EventBox()
         eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))
-        self.pack_start(eventBox, False, False, 0)
+        self.pack_start(eventBox, False, False)
 
         # icon
-        box = gtk.HBox(False, 0)
-        box.set_size_request(40, 40)
+        box = gtk.HBox()
         image = gtk.image_new_from_stock(gtk.STOCK_DIALOG_INFO,
                                          gtk.ICON_SIZE_LARGE_TOOLBAR)
-        box.pack_start(image, False, False, 10)
+        box.pack_start(image)
         eventBox.add(box)
 
         # tooltip labels
-        labels_box = gtk.VBox(False, 0)
+        labels_box = gtk.VBox()
         markup = '<span foreground="black"> %s </span>'
         firstLabel = gtk.Label()
         text = _('Red contacts are not in your contact list.')
@@ -1111,10 +1108,14 @@ class PrivacySettings(gtk.VBox):
         secondLabel = gtk.Label()
         text = _('Yellow contacts don\'t have you in their contact list.')
         secondLabel.set_markup(markup % text)
+        l_warning = gtk.Label()
+        text = _("<b>WARNING: The information provided below may be inaccurate.</b>")
+        l_warning.set_markup(markup % text)
 
-        labels_box.pack_start(firstLabel, True, True, 2)
-        labels_box.pack_start(secondLabel, False, True, 2)
-        box.pack_start(labels_box, False, False, 50)
+        labels_box.pack_start(firstLabel)
+        labels_box.pack_start(secondLabel)
+        labels_box.pack_start(l_warning)
+        box.pack_start(labels_box)
 
         hbox = gtk.HBox()
         self.add(hbox)
