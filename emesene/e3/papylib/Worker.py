@@ -65,13 +65,14 @@ except Exception, e:
 from PapyEvents import *
 from PapyConvert import *
 
-PAPY_HAS_AUDIOVIDEO = 0
+PAPY_HAS_AUDIOVIDEO = False
 
 # We don't currently support audio/video conversations
+# because the required codecs aren't available in gstreamer
 #try:
 #    import PapyConference
 #    import papyon.media.constants
-#    PAPY_HAS_AUDIOVIDEO = 1
+#    PAPY_HAS_AUDIOVIDEO = True
 #except ImportError, e:
 #    log.exception("You need gstreamer to use the Audio/Video calls support")
 
@@ -147,10 +148,18 @@ class Worker(e3.base.Worker, papyon.Client):
             "last_avatar")
         self._set_status(presence)
 
+        # Set a bunch of client's capabilites
+        self.profile.client_capabilities.renders_gif = True
+        self.profile.client_capabilities.renders_isf = False
+        self.profile.client_capabilities.supports_winks = False
+        self.profile.client_capabilities.supports_shared_search = False
         global PAPY_HAS_AUDIOVIDEO
-        if PAPY_HAS_AUDIOVIDEO:
-            self.profile.client_capabilities.has_webcam = True
-            self.profile.client_capabilities.supports_rtc_video = True
+        self.profile.client_capabilities.supports_voice_im = PAPY_HAS_AUDIOVIDEO
+        self.profile.client_capabilities.supports_sip_invite = PAPY_HAS_AUDIOVIDEO
+        self.profile.client_capabilities.supports_tunneled_sip = PAPY_HAS_AUDIOVIDEO
+        self.profile.client_capabilities.supports_shared_drive = PAPY_HAS_AUDIOVIDEO
+        self.profile.client_capabilities.supports_rtc_video = PAPY_HAS_AUDIOVIDEO
+        self.profile.client_capabilities.has_webcam = PAPY_HAS_AUDIOVIDEO
 
         # initialize caches
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
