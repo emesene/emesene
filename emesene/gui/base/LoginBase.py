@@ -141,3 +141,9 @@ class LoginBase(object):
             self.server_port = service_data['port']
             self.config.service = service
             self.session_id = self.service2id[service]
+
+    def current_avatar_path(self, email):
+        '''return the avatar for the current service'''
+        return self.config_dir.join(
+                        self.server_host, email,
+                        'avatars', 'last')

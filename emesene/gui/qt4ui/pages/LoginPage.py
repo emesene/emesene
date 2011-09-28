@@ -219,11 +219,9 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         # index_in_account_list is None.
         if not index_in_account_list is None:
             account = self._account_list[index_in_account_list]
-        
             self.clear_login_form()
             # display_pic
-            path = self.config_dir.join(self.server_host, 
-                                         account.email, 'avatars', 'last')
+            path = self.current_avatar_path(account.email)
             widget_d['display_pic'].set_display_pic_from_file(path)
             # password:
             if account.password:

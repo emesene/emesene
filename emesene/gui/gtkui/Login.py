@@ -269,9 +269,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         self.new_combo_session()
         self._reload_account_list()
 
-        avatar_path = self.config_dir.join(
-                        self.server_host, account.rpartition('|')[0],
-                        'avatars', 'last')
+        avatar_path = self.current_avatar_path(account.rpartition('|')[0])
         self.avatar.set_from_file(avatar_path)
 
         self.nicebar.hide()
@@ -434,8 +432,7 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.config.d_user_service[account] = service
 
             passw = self.accounts[account_and_service]
-            avatar_path = self.config_dir.join(self.server_host, account,
-                                               'avatars', 'last')
+            avatar_path = self.current_avatar_path(account)
             self.avatar.set_from_file(avatar_path)
 
             if attr == 3:#autologin,password,account checked
