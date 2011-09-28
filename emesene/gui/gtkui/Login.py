@@ -428,8 +428,7 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.server_host = service_data['host']
             self.server_port = service_data['port']
             self.config.service = service
-            session_id, ext = self.session_name_to_ext[service]
-            self.session_id = session_id
+            self.session_id = self.service2id[service]
 
         if account + '|' + service in self.accounts:
             account_and_service = account + '|' + service
