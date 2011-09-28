@@ -89,7 +89,7 @@ class LoginBase(object):
             for ext_id, ext in extension.get_extensions('session').iteritems():
                 for service_name, service_data in ext.SERVICES.iteritems():
                     self.services[service_name] = service_data
-                    self.service2id[service_name] = ext_id
+                    self.service2id[service_name] = (ext_id, ext)
 
                 if session_id == ext_id and self.config.service in ext.SERVICES:
                     self.server_host = ext.SERVICES[self.config.service]['host']
@@ -140,7 +140,7 @@ class LoginBase(object):
             self.server_host = service_data['host']
             self.server_port = service_data['port']
             self.config.service = service
-            self.session_id = self.service2id[service]
+            self.session_id = self.service2id[service][0]
 
     def current_avatar_path(self, email):
         '''return the avatar for the current service'''

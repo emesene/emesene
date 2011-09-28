@@ -255,8 +255,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                 self.config.d_user_service[account_email] = service
                 # to trigger eventual update of dp:
             self._on_account_combo_text_changed(account_email)
-    
-            # TODO: investigate on what does the following do:
             self.on_preferences_changed(use_http, self.proxy, session_id,
                     service)
             
@@ -281,7 +279,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         
         if user in self.config.d_user_service.keys():
             service_name = self.config.d_user_service[user]
-            self.session_id = self.service2id[service_name]
+            self.session_id = self.service2id[service_name][0]
         else:
             service_name = self.config.service
             self.session_id = self.config.session

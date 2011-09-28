@@ -293,7 +293,7 @@ class Login(LoginBaseUI, gui.LoginBase):
 
     def _on_session_changed(self, session_combo):
         service = self._get_active_service()
-        session_id, ext = self.session_name_to_ext[service]
+        session_id, ext = self.service2id[service]
         self._on_new_preferences(
             self.use_http, self.proxy.use_proxy, self.proxy.host,
             self.proxy.port, self.proxy.use_auth, self.proxy.user,
@@ -306,7 +306,6 @@ class Login(LoginBaseUI, gui.LoginBase):
         count = 0
         session_found = False
 
-        self.session_name_to_ext = {}
         self.session_name_to_index = {}
 
         if account in self.accounts:
@@ -331,7 +330,6 @@ class Login(LoginBaseUI, gui.LoginBase):
                     image = None
 
                 self.session_combo.get_model().append([image, service_name])
-                self.session_name_to_ext[service_name] = (ext_id, ext)
                 self.session_name_to_index[service_name] = count
                 count += 1
 
