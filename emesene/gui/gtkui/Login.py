@@ -255,12 +255,11 @@ class Login(LoginBaseUI, gui.LoginBase):
                 no_autologin=False):
 
         LoginBaseUI.__init__(self, callback)
-        gui.LoginBase.__init__(self, config, config_dir, config_path,
+        gui.LoginBase.__init__(self, callback, on_preferences_changed,
+                                config, config_dir, config_path,
                                 proxy, use_http, session_id, no_autologin)
 
-        self.callback = callback
         self.cancel_clicked = cancel_clicked
-        self.on_preferences_changed = on_preferences_changed
 
         account = self.config.get_or_set('last_logged_account', '')
 

@@ -40,11 +40,9 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
          
         # instance variables:
         QtGui.QWidget.__init__(self, parent)
-        gui.LoginBase.__init__(self, config, config_dir, config_path,
+        gui.LoginBase.__init__(self, callback, on_preferences_changed,
+                                config, config_dir, config_path,
                                 proxy, use_http, session_id, no_autologin)
-
-        self._on_preferences_changed = on_preferences_changed
-        self._login_callback = callback
 
         # a widget dic to avoid proliferation of instance variables:
         self._widget_d = {}
@@ -262,7 +260,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             self._on_account_combo_text_changed(account_email)
     
             # TODO: investigate on what does the following do:
-            self._on_preferences_changed(use_http, self.proxy, session_id,
+            self.on_preferences_changed(use_http, self.proxy, session_id,
                     service)
             
 
@@ -298,7 +296,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                             auto_login)
             
         # Invoke the  login callback
-        self._login_callback(e3_account, self.session_id, self.proxy,
+        self.callback(e3_account, self.session_id, self.proxy,
                              self.use_http, self.server_host, self.server_port)
 
     def clear_login_form(self, clear_pic=False):

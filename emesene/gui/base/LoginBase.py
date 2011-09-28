@@ -27,9 +27,13 @@ log = logging.getLogger('gui.base.Conversation')
 class LoginBase(object):
     '''a widget that contains all the components inside'''
 
-    def __init__(self, config, config_dir, config_path, proxy=None,
-                use_http=None, session_id=None, no_autologin=False):
+    def __init__(self, callback, on_preferences_changed, config, config_dir,
+                config_path, proxy=None, use_http=None, session_id=None,
+                no_autologin=False):
         '''constructor'''
+
+        self.callback = callback
+        self.on_preferences_changed = on_preferences_changed
         self.config = config
         self.config_dir = config_dir
         self.config_path = config_path
