@@ -217,7 +217,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         index_in_account_list = account_combo.itemData(acc_index).toPyObject()
         # If we don't have any account at all, this slots gets called but 
         # index_in_account_list is None.
-        if not index_in_account_list is None: 
+        if not index_in_account_list is None:
             account = self._account_list[index_in_account_list]
         
             self.clear_login_form()
@@ -236,9 +236,8 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             widget_d['save_account_chk'] .setChecked(account.save_account)
             widget_d['save_password_chk'].setChecked(account.save_password)
             widget_d['auto_login_chk']   .setChecked(account.auto_login)
-            # host and port:
-            self.server_host = self.services[account.service]['host'] 
-            self.server_port = self.services[account.service]['port']
+
+            self.update_service(account.service)
         self._on_checkbox_state_refresh()
         
     def _on_connection_preferences_clicked(self):

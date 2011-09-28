@@ -132,3 +132,12 @@ class LoginBase(object):
             self.config.last_logged_account = ''
 
         self.config.save(self.config_path)
+
+    def update_service(self, service):
+        '''Update current service if found in service list'''
+        if service in self.services:
+            service_data = self.services[service]
+            self.server_host = service_data['host']
+            self.server_port = service_data['port']
+            self.config.service = service
+            self.session_id = self.service2id[service]

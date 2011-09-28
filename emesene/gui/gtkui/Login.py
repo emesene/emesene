@@ -423,12 +423,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         else:
             service = self._get_active_service()
 
-        if service in self.services:
-            service_data = self.services[service]
-            self.server_host = service_data['host']
-            self.server_port = service_data['port']
-            self.config.service = service
-            self.session_id = self.service2id[service]
+        self.update_service(service)
 
         if account + '|' + service in self.accounts:
             account_and_service = account + '|' + service
