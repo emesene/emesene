@@ -147,3 +147,7 @@ class LoginBase(object):
         return self.config_dir.join(
                         self.server_host, email,
                         'avatars', 'last')
+
+    def decode_password(self, email):
+        '''return password or "" if not found'''
+        return base64.b64decode(self.accounts.get(email, ""))

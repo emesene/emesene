@@ -19,18 +19,15 @@
 
 import logging
 
-from PyQt4          import QtGui
-from PyQt4          import QtCore
-from PyQt4.QtCore   import Qt
+from PyQt4 import QtGui
+from PyQt4 import QtCore
+from PyQt4.QtCore import Qt
 
 from gui.qt4ui.Utils import tr
-
-import base64
 
 import extension
 import e3
 import gui
-
 
 log = logging.getLogger('qt4ui.LoginPage')
 
@@ -42,17 +39,17 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
-    
+
     def __init__(self, callback, on_preferences_changed, config=None,
                  config_dir=None, config_path=None, proxy=None, use_http=None,
                  session_id=None, cancel_clicked=False, no_autologin=False,
                  parent=None):
         '''Constructor'''
         # pylint: disable=R0913
-        
+
         # NOTE: a 'session' is an object like e3.jabber.Session.Session, so, representing a protocol
         # a 'service' is a service using a given protocol.
-         
+
         # instance variables:
         QtGui.QWidget.__init__(self, parent)
         gui.LoginBase.__init__(self, callback, on_preferences_changed,
@@ -68,7 +65,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         self._setup_accounts()
         self._setup_ui()
         self._on_chosen_account_changed(0)
-        
+
         # selects the default account if any:
         account_combo = self._widget_d['account_combo']
 
@@ -79,17 +76,17 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                     config.d_remembers[config.last_logged_account] == 3:
                 self.autologin_started = True
                 self._on_start_login()
-            
+
         # TODO: this way, if there are remembered accounts, but no default 
         #account, no display pic is shown....
-        
+
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
-        avatar_cls          = extension.get_default('avatar')
-        status_combo_cls    = extension.get_default('status combo') 
+        avatar_cls = extension.get_default('avatar')
+        status_combo_cls = extension.get_default('status combo')
         widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.image_theme.logo,
-                                                clickable=False)
+                                            clickable=False)
         widget_d['account_combo'] = QtGui.QComboBox()
         widget_d['password_edit'] = QtGui.QLineEdit()
         widget_d['status_combo']  = status_combo_cls()
@@ -118,7 +115,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         lay.addStretch()
         lay.addWidget(widget_d['login_btn'], 0, Qt.AlignCenter)
         lay.addSpacing(45)
-        
 
         hor_lay = QtGui.QHBoxLayout()
         hor_lay.addStretch()
@@ -127,12 +123,12 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         hor_lay.addSpacing(40)
         hor_lay.addStretch()
         self.setLayout(hor_lay)
-        
+
         # insert accounts in the combo box:
         account_combo = widget_d['account_combo']
         for account in self._account_list:
             account_combo.addItem(account.email,
-                                  self._account_list.index(account) )
+                                  self._account_list.index(account))
 
         widget_d['account_combo'].currentIndexChanged.connect(
                                     self._on_chosen_account_changed)
@@ -143,14 +139,14 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         widget_d['save_account_chk'].stateChanged.connect(
                                     self._on_checkbox_state_refresh)
         widget_d['save_password_chk'].stateChanged.connect(
-                                    self._on_checkbox_state_refresh) 
+                                    self._on_checkbox_state_refresh)
         widget_d['auto_login_chk'].stateChanged.connect(
                                     self._on_checkbox_state_refresh)
         widget_d['advanced_btn'].clicked.connect(
                                     self._on_connection_preferences_clicked)
         widget_d['login_btn'].clicked.connect(
                                     self._on_start_login)
-                                        
+
         self.installEventFilter(self)
 
         account_combo = widget_d['account_combo']
@@ -167,32 +163,32 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         login_btn.setAutoDefault(True)
         login_btn.setEnabled(False)
         login_btn.setMinimumWidth(110)
-                                        
+
     def _setup_accounts(self):
         '''Builds up the account list'''
         class Account(object):
             '''Convenience class to store account's settings'''
             def __init__(self, service, email, password, status, remember_lvl):
                 '''Constructor'''
-                self.service, self.status             = service, status
-                self.email, self.password             = email, password
+                self.service, self.status = service, status
+                self.email, self.password = email, password
                 self.save_account, self.save_password = False, False
-                self.auto_login                       = False
+                self.auto_login = False
                 if remember_lvl >= 1:
                     self.save_account   = True
                 if remember_lvl >= 2:
                     self.save_password  = True
                 if remember_lvl >= 3:
                     self.auto_login     = True
-        
-        emails            = self.remembers.keys()
+
+        emails = self.remembers.keys()
         default_acc_email = self.config.last_logged_account
 
         if default_acc_email in emails:
             index = emails.index(default_acc_email)
             # put the default account's email in the first position
             emails[0], emails[index] = emails[index], emails[0]
-            
+
         for email in emails:
             acc = email.rpartition('|')[0]
             service = self.config.d_user_service.get(
@@ -202,10 +198,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                 status = self.config.d_status[email]
             else:
                 status = e3.status.ONLINE
-            if remember_lvl >= 2: # we have also a password
-                password = base64.b64decode(self.accounts[email])
-            else:
-                password = ''
+            password = self.decode_password(email)
 
             account = Account(service, acc, password, status, remember_lvl)
             self._account_list.append(account)

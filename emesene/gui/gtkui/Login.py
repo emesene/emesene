@@ -347,7 +347,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         account = self.config.get_or_set('last_logged_account', '')
 
         if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
-            password = base64.b64decode(self.config.d_accounts[account])
+            password = self.decode_password(account)
 
             self.cmb_account.get_children()[0].set_text(account.rpartition('|')[0])
             self.txt_password.set_text(password)
@@ -429,16 +429,16 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.btn_status.set_status(int(self.status[account_and_service]))
             self.config.d_user_service[account] = service
 
-            passw = self.accounts[account_and_service]
+            passw = self.decode_password(account_and_service)
             avatar_path = self.current_avatar_path(account)
             self.avatar.set_from_file(avatar_path)
 
             if attr == 3:#autologin,password,account checked
-                self.txt_password.set_text(base64.b64decode(passw))
+                self.txt_password.set_text(passw)
                 self.txt_password.set_sensitive(False)
                 self.auto_login.set_active(True)
             elif attr == 2:#password,account checked
-                self.txt_password.set_text(base64.b64decode(passw))
+                self.txt_password.set_text(passw)
                 self.txt_password.set_sensitive(False)
                 self.remember_password.set_active(True)
             elif attr == 1:#only account checked
