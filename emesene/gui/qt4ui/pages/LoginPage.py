@@ -191,13 +191,9 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
 
         for email in emails:
             acc = email.rpartition('|')[0]
-            service = self.config.d_user_service.get(
-                            email.rpartition('|')[0], 'msn')
+            service = self.config.d_user_service.get(acc, 'msn')
             remember_lvl = self.remembers[email]
-            if remember_lvl >= 1: # we have at least a status
-                status = self.config.d_status[email]
-            else:
-                status = e3.status.ONLINE
+            status = self.config.d_status.get(email, e3.status.ONLINE)
             password = self.decode_password(email)
 
             account = Account(service, acc, password, status, remember_lvl)
