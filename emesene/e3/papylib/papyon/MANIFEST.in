@@ -1,5 +1,0 @@
-include test.py
-include setup.py
-include doc.py
-include doc/user-api.conf
-include README COPYING AUTHORS NEWS ChangeLog

@@ -15,3 +15,9 @@ pyOpenSSL (>= 0.6)
 gst-python (>= 0.10)
 python-farsight
 pycrypto
+
+NOTICE
+============
+WARNING: This version diverges from upstream papyon.
+You can find all the changes/contribute here:
+https://github.com/emesene/papyon

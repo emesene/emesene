@@ -162,6 +162,9 @@ class Worker(e3.base.Worker, papyon.Client):
         self.profile.client_capabilities.supports_rtc_video = PAPY_HAS_AUDIOVIDEO
         self.profile.client_capabilities.has_webcam = PAPY_HAS_AUDIOVIDEO
 
+        self.profile.end_point_name = "emesene"
+        self.profile.privacy = papyon.profile.Privacy.BLOCK
+
         # initialize caches
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         self.my_avatars = self.caches.get_avatar_cache(
