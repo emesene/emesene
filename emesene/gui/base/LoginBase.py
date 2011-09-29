@@ -94,7 +94,6 @@ class LoginBase(object):
                 if session_id == ext_id and self.config.service in ext.SERVICES:
                     self.server_host = ext.SERVICES[self.config.service]['host']
                     self.server_port = ext.SERVICES[self.config.service]['port']
-                    break
             else:
                 self.config.service = 'msn'
                 self.server_host = 'messenger.hotmail.com'
