@@ -87,30 +87,60 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         status_combo_cls = extension.get_default('status combo')
         widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.image_theme.logo,
                                             clickable=False)
+
+        account_box = QtGui.QHBoxLayout()
+        widget_d['account_box'] = account_box
         widget_d['account_combo'] = QtGui.QComboBox()
+        account_img = QtGui.QLabel()
+        account_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.user))
+        widget_d['account_img'] = account_img
+        widget_d['forgiveme_btn']  = QtGui.QToolButton()
+        widget_d['forgiveme_btn'].setAutoRaise(True)
+        widget_d['forgiveme_btn'].setIcon(
+                                    QtGui.QIcon.fromTheme('edit-delete'))
+        account_box.addWidget(widget_d['account_img'])
+        account_box.addWidget(widget_d['account_combo'])
+        account_box.addWidget(widget_d['forgiveme_btn'])
+
+
+        password_box = QtGui.QHBoxLayout()
+        widget_d['password_box'] = password_box
         widget_d['password_edit'] = QtGui.QLineEdit()
+        password_img = QtGui.QLabel()
+        password_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.password))
+        widget_d['password_img'] = password_img
+        password_box.addWidget(widget_d['password_img'])
+        password_box.addWidget(widget_d['password_edit'])
+        password_box.addSpacing(32)
+
+        status_box = QtGui.QHBoxLayout()
+        widget_d['status_box'] = status_box
         widget_d['status_combo']  = status_combo_cls()
+        widget_d['advanced_btn']  = QtGui.QToolButton()
+        status_box.addSpacing(36)
+        status_box.addWidget(widget_d['status_combo'])
+        status_box.addWidget(widget_d['advanced_btn'])
+
+        layv = QtGui.QVBoxLayout()
         widget_d['save_account_chk'] =    \
                 QtGui.QCheckBox(tr('Remember me'))
         widget_d['save_password_chk'] =   \
                 QtGui.QCheckBox(tr('Remember password'))
         widget_d['auto_login_chk'] =  \
                 QtGui.QCheckBox(tr('Auto-login'))
-        widget_d['advanced_btn']  = QtGui.QToolButton() 
         widget_d['login_btn'] = QtGui.QPushButton(tr('Connect'))
 
         lay = QtGui.QVBoxLayout()
         lay.addSpacing(40)
         lay.addWidget(widget_d['display_pic'], 0, Qt.AlignCenter)
         lay.addSpacing(40)
-        lay.addWidget(widget_d['account_combo'])
-        lay.addWidget(widget_d['password_edit'])
-        lay.addWidget(widget_d['status_combo'])
+        lay.addLayout(widget_d['account_box'])
+        lay.addLayout(widget_d['password_box'])
+        lay.addLayout(widget_d['status_box'])
         lay.addSpacing(20)
         lay.addWidget(widget_d['save_account_chk'])
         lay.addWidget(widget_d['save_password_chk'])
         lay.addWidget(widget_d['auto_login_chk'])
-        lay.addWidget(widget_d['advanced_btn'], 0, Qt.AlignRight)
         lay.addSpacing(35)
         lay.addStretch()
         lay.addWidget(widget_d['login_btn'], 0, Qt.AlignCenter)
@@ -144,6 +174,8 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                                     self._on_checkbox_state_refresh)
         widget_d['advanced_btn'].clicked.connect(
                                     self._on_connection_preferences_clicked)
+        widget_d['forgiveme_btn'].clicked.connect(
+                                    self._on_forgiveme_clicked)
         widget_d['login_btn'].clicked.connect(
                                     self._on_start_login)
 
@@ -270,6 +302,41 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         extension.get_default('dialog').login_preferences(service, self.server_host,
                                         self.server_port, new_preferences_cb, 
                                         self.config.b_use_http, self.proxy)
+
+    def _on_forgiveme_clicked(self):
+        ''''''
+        def _yes_no_cb(response):
+            '''callback from the confirmation dialog'''
+            if (response == 36): #Accepted
+                account = str(widget_dic['account_combo'].currentText())
+                service = self.config.d_user_service.get(account, self.config.service)
+                account_and_service =  account + '|' + service
+                try: # Delete user's folder
+                    rmtree(self.config_dir.join(self.server_host, account))
+                except:
+                    #FIXME:
+                    #self.show_error(_('Error while deleting user'))
+                    print _('Error while deleting user')
+
+                if account_and_service in self.accounts:
+                    del self.accounts[account_and_service]
+                if account_and_service in self.remembers:
+                    del self.remembers[account_and_service]
+                if account_and_service in self.status:
+                    del self.status[account_and_service]
+                if account in self.config.d_user_service:
+                    del self.config.d_user_service[account]
+                if account_and_service == self.config.last_logged_account:
+                    self.config.last_logged_account = ''
+
+                self.config.save(self.config_path)
+                #FIXME: remove fron account_list and combo
+                widget_dic['account_combo'].setCurrentIndex(0)
+
+        widget_dic = self._widget_d
+        extension.get_default('dialog').yes_no(
+                _('Are you sure you want to delete the account %s ?') % \
+                str(widget_dic['account_combo'].currentText()), _yes_no_cb)
 
     def _on_start_login(self):
         ''' Slot executed when the user clicks the login button'''
