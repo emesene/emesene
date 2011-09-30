@@ -20,7 +20,6 @@ import gtk
 import base64
 import gobject
 import sys
-from shutil import rmtree
 
 import e3
 import gui
@@ -531,26 +530,10 @@ class Login(LoginBaseUI, gui.LoginBase):
         '''
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
-            account = self.cmb_account.get_active_text()
-            account_and_service =  account + '|' + self._get_active_service()
             if response == stock.YES:
-                try: # Delete user's folder
-                    rmtree(self.config_dir.join(self.server_host, account))
-                except:
-                    self.show_error(_('Error while deleting user'))
-
-                if account_and_service in self.accounts:
-                    del self.accounts[account_and_service]
-                if account_and_service in self.remembers:
-                    del self.remembers[account_and_service]
-                if account_and_service in self.status:
-                    del self.status[account_and_service]
-                if account in self.config.d_user_service:
-                    del self.config.d_user_service[account]
-                if account_and_service == self.config.last_logged_account:
-                    self.config.last_logged_account = ''
-
-                self.config.save(self.config_path)
+                account = self.cmb_account.get_active_text()
+                service = self._get_active_service()
+                self.forgive_user(account, service)
                 self._reload_account_list()
                 self.cmb_account.get_children()[0].set_text('')
 

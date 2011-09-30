@@ -94,13 +94,13 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         account_img = QtGui.QLabel()
         account_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.user))
         widget_d['account_img'] = account_img
-        widget_d['forgiveme_btn']  = QtGui.QToolButton()
-        widget_d['forgiveme_btn'].setAutoRaise(True)
-        widget_d['forgiveme_btn'].setIcon(
+        widget_d['forgive_me_btn']  = QtGui.QToolButton()
+        widget_d['forgive_me_btn'].setAutoRaise(True)
+        widget_d['forgive_me_btn'].setIcon(
                                     QtGui.QIcon.fromTheme('edit-delete'))
         account_box.addWidget(widget_d['account_img'])
         account_box.addWidget(widget_d['account_combo'])
-        account_box.addWidget(widget_d['forgiveme_btn'])
+        account_box.addWidget(widget_d['forgive_me_btn'])
 
 
         password_box = QtGui.QHBoxLayout()
@@ -174,8 +174,8 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                                     self._on_checkbox_state_refresh)
         widget_d['advanced_btn'].clicked.connect(
                                     self._on_connection_preferences_clicked)
-        widget_d['forgiveme_btn'].clicked.connect(
-                                    self._on_forgiveme_clicked)
+        widget_d['forgive_me_btn'].clicked.connect(
+                                    self._on_forgive_me_clicked)
         widget_d['login_btn'].clicked.connect(
                                     self._on_start_login)
 
@@ -303,33 +303,14 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                                         self.server_port, new_preferences_cb, 
                                         self.config.b_use_http, self.proxy)
 
-    def _on_forgiveme_clicked(self):
+    def _on_forgive_me_clicked(self):
         ''''''
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
             if (response == 36): #Accepted
                 account = str(widget_dic['account_combo'].currentText())
                 service = self.config.d_user_service.get(account, self.config.service)
-                account_and_service =  account + '|' + service
-                try: # Delete user's folder
-                    rmtree(self.config_dir.join(self.server_host, account))
-                except:
-                    #FIXME:
-                    #self.show_error(_('Error while deleting user'))
-                    print _('Error while deleting user')
-
-                if account_and_service in self.accounts:
-                    del self.accounts[account_and_service]
-                if account_and_service in self.remembers:
-                    del self.remembers[account_and_service]
-                if account_and_service in self.status:
-                    del self.status[account_and_service]
-                if account in self.config.d_user_service:
-                    del self.config.d_user_service[account]
-                if account_and_service == self.config.last_logged_account:
-                    self.config.last_logged_account = ''
-
-                self.config.save(self.config_path)
+                self.forgive_user(account, service)
                 #FIXME: remove fron account_list and combo
                 widget_dic['account_combo'].setCurrentIndex(0)
 

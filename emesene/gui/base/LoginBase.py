@@ -20,6 +20,7 @@
 import extension
 import e3
 import base64
+from shutil import rmtree
 
 import logging
 log = logging.getLogger('gui.base.Conversation')
@@ -150,3 +151,24 @@ class LoginBase(object):
     def decode_password(self, email):
         '''return password or "" if not found'''
         return base64.b64decode(self.accounts.get(email, ""))
+
+    def forgive_user(self, account, service):
+        '''Remove stored information about an account and a service'''
+        try: # Delete user's folder
+            rmtree(self.config_dir.join(self.server_host, account))
+        except:
+            print(_('Error while deleting user'))
+
+        account_and_service =  account + '|' + service
+        if account_and_service in self.accounts:
+            del self.accounts[account_and_service]
+        if account_and_service in self.remembers:
+            del self.remembers[account_and_service]
+        if account_and_service in self.status:
+            del self.status[account_and_service]
+        if account in self.config.d_user_service:
+            del self.config.d_user_service[account]
+        if account_and_service == self.config.last_logged_account:
+            self.config.last_logged_account = ''
+
+        self.config.save(self.config_path)
