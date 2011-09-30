@@ -353,8 +353,10 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
         if self.avatar_box_is_hidden:
+            self.toolbar.toggle_avatar.set_stock_id(gtk.STOCK_GO_FORWARD)
             self.info.show()
         else:
+            self.toolbar.toggle_avatar.set_stock_id(gtk.STOCK_GO_BACK)
             self.info.hide()
         self.avatar_box_is_hidden = not self.avatar_box_is_hidden
 
