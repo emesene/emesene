@@ -27,7 +27,7 @@ import extension
 import logging
 log = logging.getLogger('gtkui.MainWindow')
 
-class MainWindow(gtk.VBox):
+class MainWindow(gtk.VBox, gui.MainWindowBase):
     '''this class represents the widget that is shown when the user is logged
     in (menu, contact list etc)'''
     NAME = 'Main Window'
@@ -39,7 +39,8 @@ class MainWindow(gtk.VBox):
                 on_disconnect_cb):
         '''class constructor'''
         gtk.VBox.__init__(self)
-        self.session = session
+        gui.MainWindowBase.__init__(self, session, on_new_conversation,
+                                                on_close, on_disconnect_cb)
         self.__hotmail = Hotmail(self.session)
 
         UserPanel = extension.get_default('user panel')
@@ -54,9 +55,6 @@ class MainWindow(gtk.VBox):
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
         scroll.set_border_width(1)
-        self.on_new_conversation = on_new_conversation
-        self.on_close = on_close
-        self.on_disconnect_cb = on_disconnect_cb
 
         self.session.signals.contact_attr_changed.subscribe(
             self._on_contact_attr_changed)

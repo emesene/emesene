@@ -11,7 +11,7 @@ from gui.qt4ui.Utils import tr
 
 import extension
 
-class MainPage (QtGui.QWidget):
+class MainPage (QtGui.QWidget, MainWindowBase.MainWindowBase):
     '''The main page (the one with the contact list)'''
     # pylint: disable=W0612
     NAME = 'MainPage'
@@ -24,12 +24,9 @@ class MainPage (QtGui.QWidget):
                 on_disconnect, set_menu_bar_cb, parent=None):
         '''Constructor'''
         QtGui.QWidget.__init__(self, parent)
-
-        self._session = session
+        MainWindowBase.MainWindowBase.__init__(self, session, on_new_conversation,
+                                                on_close, on_disconnect)
         # callbacks:
-        self._on_new_conversation = on_new_conversation
-        self._on_close = on_close
-        self._on_disconnect = on_disconnect
         self._set_menu_bar_cb = set_menu_bar_cb
 
         # menu objects:
@@ -68,8 +65,8 @@ class MainPage (QtGui.QWidget):
                 tr('<u>Click here to set a personal message...</u>')))
         widget_dict['current_media'] = QtGui.QLabel()
         widget_dict['status_combo'] = status_combo_cls()
-        widget_dict['display_pic'] = avatar_cls(self._session)
-        widget_dict['contact_list'] = contact_list_cls(self._session)
+        widget_dict['display_pic'] = avatar_cls(self.session)
+        widget_dict['contact_list'] = contact_list_cls(self.session)
         my_info_lay_left = QtGui.QVBoxLayout()
         my_info_lay_left.addWidget(widget_dict['nick_edit'])
         my_info_lay_left.addWidget(widget_dict['psm_edit'])
@@ -97,16 +94,16 @@ class MainPage (QtGui.QWidget):
         widget_dict['display_pic'].clicked.connect(
                                         self._on_display_pic_clicked)
         widget_dict['contact_list'].new_conversation_requested.connect(
-                                        self._on_new_conversation_requested)
+                                        self.on_new_conversation_requested)
 
     def _on_ss_profile_get_succeed(self, nick, psm):
         '''This method sets the displayed account's info,
         retrieving data from "_session" object'''
         if nick == '':
-            nick = self._session.contacts.me.display_name
+            nick = self.session.contacts.me.display_name
         if psm == '':
-            psm = self._session.contacts.me.message
-        status = self._session.contacts.me.status
+            psm = self.session.contacts.me.message
+        status = self.session.contacts.me.status
 
         widget_dict = self._widget_dict
         widget_dict['nick_edit'].set_text(nick)
@@ -120,31 +117,31 @@ class MainPage (QtGui.QWidget):
         '''Slot called when the user doubleclicks
         an entry in the contact list'''
         conv_id = time.time()
-        self._on_new_conversation(conv_id, [account], False)
+        self.on_new_conversation(conv_id, [account], False)
         # TODO: shouldn't this go somewhere else?!
         # calls the e3 handler
-        self._session.new_conversation(account, conv_id)
+        self.session.new_conversation(account, conv_id)
 
     def _on_set_new_nick(self, nick):
         '''Slot called when user tries to se a new nick'''
-        self._session.set_nick(nick)
+        self.session.set_nick(nick)
         # to be completed handling the subsequent signal from e3
 
     def _on_set_new_psm(self, psm):
         '''Slot called when the user tries to set a new psm'''
-        self._session.set_message(psm)
+        self.session.set_message(psm)
         # to be completed handling the subsequent signal from e3
 
     def _on_set_new_status(self, status):
         '''Slot called when the user tries to set a new status'''
-        self._session.set_status(status)
+        self.session.set_status(status)
         # to be completed handling the subsequent signal from e3
 
     def _on_display_pic_clicked(self):
         '''Slot called when the user clicks the display pic. It shows
         the AvatarChooser'''
         chooser_cls = extension.get_default('avatar chooser')
-        chooser = chooser_cls(self._session)
+        chooser = chooser_cls(self.session)
         chooser.exec_()
 
     def replace_extensions(self):

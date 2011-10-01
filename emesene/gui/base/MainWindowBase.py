@@ -1,3 +1,4 @@
+'''base implementation of a main window'''
 # -*- coding: utf-8 -*-
 
 #    This file is part of emesene.
@@ -16,23 +17,22 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import MarkupParser
-
-from Theme import Theme
-from Handler import *
-from Message import Message
-from ContactList import ContactList
-from Conversation import Conversation
-from LoginBase import LoginBase
-from ConversationManager import ConversationManager
-from AvatarManager  import AvatarManager
-from PictureHandler import PictureHandler
-from ContactInformation import ContactInformation
-from BaseTray import BaseTray
-from MainWindowBase import MainWindowBase
-
-theme = Theme()
-
-import stock
 import extension
 import e3
+
+import logging
+log = logging.getLogger('gui.base.MainWindowBase')
+
+class MainWindowBase(object):
+    '''a widget that contains all the components inside'''
+
+    def __init__(self, session, on_new_conversation, on_close,
+                on_disconnect_cb):
+        '''class constructor'''
+
+        self.session = session
+        self.on_new_conversation = on_new_conversation
+        self.on_close = on_close
+        self.on_disconnect_cb = on_disconnect_cb
+
+
