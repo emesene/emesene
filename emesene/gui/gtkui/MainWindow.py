@@ -17,7 +17,6 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
-import time
 
 import e3
 import gui
@@ -89,7 +88,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_list.group_menu_selected.subscribe(
             self._on_group_menu_selected)
 
-        self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
         self.session.signals.broken_profile.subscribe(self._on_broken_profile)
 
         scroll.add(self.contact_list)
@@ -194,11 +192,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def _on_contact_selected(self, contact):
         '''callback for the contact-selected signal'''
-        cid = time.time()
-        self.on_new_conversation(cid, [contact.account], False)
-
-        #this calls the e3 Handler
-        self.session.new_conversation(contact.account, cid)
+        self.on_new_conversation_requested(contact.account)
 
     def _on_group_selected(self, group):
         '''callback for the group-selected signal'''
@@ -248,6 +242,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def on_disconnect(self):
         '''callback called when the disconnect option is selected'''
+        gui.MainWindowBase.on_disconnect(self)
         self.contact_list.contact_selected.unsubscribe(
             self._on_contact_selected)
         self.contact_list.group_selected.unsubscribe(self._on_group_selected)
@@ -258,8 +253,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_list.remove_subscriptions()
         self.session.config.unsubscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
-        self.session.signals.mail_count_changed.unsubscribe(
-            self._on_mail_count_changed)
         self.session.signals.contact_attr_changed.unsubscribe(
             self._on_contact_attr_changed)
         self.session.signals.broken_profile.unsubscribe(self._on_broken_profile)

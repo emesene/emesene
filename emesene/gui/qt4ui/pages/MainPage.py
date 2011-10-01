@@ -2,16 +2,15 @@
 
 '''This module contains classes to represent the main page.'''
 
-import time
-
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
 from gui.qt4ui.Utils import tr
 
 import extension
+import gui
 
-class MainPage (QtGui.QWidget, MainWindowBase.MainWindowBase):
+class MainPage (QtGui.QWidget, gui.MainWindowBase):
     '''The main page (the one with the contact list)'''
     # pylint: disable=W0612
     NAME = 'MainPage'
@@ -24,7 +23,7 @@ class MainPage (QtGui.QWidget, MainWindowBase.MainWindowBase):
                 on_disconnect, set_menu_bar_cb, parent=None):
         '''Constructor'''
         QtGui.QWidget.__init__(self, parent)
-        MainWindowBase.MainWindowBase.__init__(self, session, on_new_conversation,
+        gui.MainWindowBase.__init__(self, session, on_new_conversation,
                                                 on_close, on_disconnect)
         # callbacks:
         self._set_menu_bar_cb = set_menu_bar_cb
@@ -59,7 +58,18 @@ class MainPage (QtGui.QWidget, MainWindowBase.MainWindowBase):
         avatar_cls = extension.get_default('avatar')
         contact_list_cls = extension.get_default('contact list')
 
+        nick_box = QtGui.QHBoxLayout()
         widget_dict['nick_edit'] = nick_edit_cls()
+        widget_dict['mail_btn']  = QtGui.QToolButton()
+        widget_dict['mail_btn'].setAutoRaise(True)
+        widget_dict['mail_btn'].setIcon(
+                                    QtGui.QIcon.fromTheme('mail-unread'))
+        widget_dict['mail_btn'].setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        widget_dict['mail_btn'].setText("(0)")
+        nick_box.addWidget(widget_dict['nick_edit'])
+        nick_box.addWidget(widget_dict['mail_btn'])
+
+
         widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True,
             empty_message=QtCore.QString(
                 tr('<u>Click here to set a personal message...</u>')))
@@ -68,7 +78,7 @@ class MainPage (QtGui.QWidget, MainWindowBase.MainWindowBase):
         widget_dict['display_pic'] = avatar_cls(self.session)
         widget_dict['contact_list'] = contact_list_cls(self.session)
         my_info_lay_left = QtGui.QVBoxLayout()
-        my_info_lay_left.addWidget(widget_dict['nick_edit'])
+        my_info_lay_left.addLayout(nick_box)
         my_info_lay_left.addWidget(widget_dict['psm_edit'])
         my_info_lay_left.addWidget(widget_dict['current_media'])
         my_info_lay_left.addWidget(widget_dict['status_combo'])
@@ -116,11 +126,7 @@ class MainPage (QtGui.QWidget, MainWindowBase.MainWindowBase):
     def _on_new_conversation_requested(self, account):
         '''Slot called when the user doubleclicks
         an entry in the contact list'''
-        conv_id = time.time()
-        self.on_new_conversation(conv_id, [account], False)
-        # TODO: shouldn't this go somewhere else?!
-        # calls the e3 handler
-        self.session.new_conversation(account, conv_id)
+        self.on_new_conversation_requested(account)
 
     def _on_set_new_nick(self, nick):
         '''Slot called when user tries to se a new nick'''
@@ -143,6 +149,10 @@ class MainPage (QtGui.QWidget, MainWindowBase.MainWindowBase):
         chooser_cls = extension.get_default('avatar chooser')
         chooser = chooser_cls(self.session)
         chooser.exec_()
+
+    def _on_mail_count_changed(self, count):
+        widget_dict = self._widget_dict
+        widget_dict['mail_btn'].setText("(%d)" % count)
 
     def replace_extensions(self):
         #FIXME: add extension support

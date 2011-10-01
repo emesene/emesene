@@ -21,6 +21,7 @@ import extension
 import e3
 from e3.hotmail.Hotmail import Hotmail
 
+import time
 import logging
 log = logging.getLogger('gui.base.MainWindowBase')
 
@@ -37,7 +38,25 @@ class MainWindowBase(object):
         self.on_disconnect_cb = on_disconnect_cb
 
         self.__hotmail = Hotmail(self.session)
+        self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
 
     def on_mail_click(self):
         self.__hotmail.openInBrowser()
+
+    def on_new_conversation_requested(self, account):
+        '''Slot called when the user doubleclicks
+        an entry in the contact list'''
+        cid = time.time()
+        self.on_new_conversation(cid, [account], False)
+        #this calls the e3 Handler
+        self.session.new_conversation(account, cid)
+
+    def _on_mail_count_changed(self, count):
+        pass
+
+    def on_disconnect(self):
+        '''callback called when the disconnect option is selected'''
+        print "called"
+        self.session.signals.mail_count_changed.unsubscribe(
+            self._on_mail_count_changed)
 
