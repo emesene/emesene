@@ -27,7 +27,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)
         self._content_type = 'empty'
         self._cb_on_close = cb_on_close
-        self._give_cb_on_close = cb_on_close
+        self._given_cb_on_close = cb_on_close
         self._content = None
 
         self.setObjectName('mainwindow')
