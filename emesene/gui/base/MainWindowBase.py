@@ -19,6 +19,7 @@
 
 import extension
 import e3
+from e3.hotmail.Hotmail import Hotmail
 
 import logging
 log = logging.getLogger('gui.base.MainWindowBase')
@@ -35,4 +36,8 @@ class MainWindowBase(object):
         self.on_close = on_close
         self.on_disconnect_cb = on_disconnect_cb
 
+        self.__hotmail = Hotmail(self.session)
+
+    def on_mail_click(self):
+        self.__hotmail.openInBrowser()
 

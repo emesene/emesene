@@ -20,7 +20,6 @@ import gtk
 import time
 
 import e3
-from e3.hotmail.Hotmail import Hotmail
 import gui
 import extension
 
@@ -41,7 +40,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         gtk.VBox.__init__(self)
         gui.MainWindowBase.__init__(self, session, on_new_conversation,
                                                 on_close, on_disconnect_cb)
-        self.__hotmail = Hotmail(self.session)
 
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
@@ -112,7 +110,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.panel.mail.set_label("(%d)" % count)
 
     def _on_mail_click(self, widget, data):
-        self.__hotmail.openInBrowser()
+        self.on_mail_click()
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''
