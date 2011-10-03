@@ -30,10 +30,6 @@ Recommended Format (strip out comments):
     "authors" : [["Name", "Email"], ["Another Name", "Another@Email"]]
 }
 """
-
-# DISCUSSIONS REQUIRED: Category register and extension register could be done
-# via this?
-
 import json
 
 class MetaData(object):
@@ -43,16 +39,13 @@ class MetaData(object):
             self.__dict__['_data'] = json.load(f)
 
         for name in self._required_attributes:
-            # assert name in self._data, "'%s' missing meta attribute of '%s'" % (filename, name)
-            # DISCUSSION REQUIRED: above form or the below?
-            if name not in self._data:
-                raise AttributeError("'%s' missing meta attribute of '%s'" % (filename, name))
+            assert name in self._data, "'%s' missing meta attribute of '%s'" % (filename, name)
 
     def __getattr__(self, name):
         try:
             return self._data[name]
         except KeyError:
-            raise AttributeError("'%s' has no meta attribute of '%s'" % (self._data["name"], name))
+            return None # Default value or this?
 
     def __setattr__(self, name, value):
         raise Exception("MetaData cannot be changed!")
