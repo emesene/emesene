@@ -42,10 +42,7 @@ class MetaData(object):
             assert name in self._data, "'%s' missing meta attribute of '%s'" % (filename, name)
 
     def __getattr__(self, name):
-        try:
-            return self._data[name]
-        except KeyError:
-            return None # Default value or this?
+        return self._data.get(name, None)
 
     def __setattr__(self, name, value):
         raise Exception("MetaData cannot be changed!")
