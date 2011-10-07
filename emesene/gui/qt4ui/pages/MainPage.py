@@ -105,6 +105,8 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
                                         self._on_display_pic_clicked)
         widget_dict['contact_list'].new_conversation_requested.connect(
                                         self.on_new_conversation_requested)
+        widget_dict['mail_btn'].clicked.connect(
+                                    self._on_mail_click)
 
     def _on_ss_profile_get_succeed(self, nick, psm):
         '''This method sets the displayed account's info,
@@ -153,6 +155,9 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     def _on_mail_count_changed(self, count):
         widget_dict = self._widget_dict
         widget_dict['mail_btn'].setText("(%d)" % count)
+
+    def _on_mail_click(self):
+        self.on_mail_click()
 
     def replace_extensions(self):
         #FIXME: add extension support
