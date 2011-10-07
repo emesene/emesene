@@ -56,7 +56,6 @@ class MainWindowBase(object):
 
     def on_disconnect(self):
         '''callback called when the disconnect option is selected'''
-        print "called"
         self.session.signals.mail_count_changed.unsubscribe(
             self._on_mail_count_changed)
 

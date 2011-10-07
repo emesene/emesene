@@ -178,7 +178,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self._replace_below_menu()
         self._replace_below_panel()
 
-
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
         self.contact_list.filter_text = entry.get_text().lower()
