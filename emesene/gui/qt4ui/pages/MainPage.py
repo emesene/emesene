@@ -33,15 +33,12 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self._contact_menu = None
         self._group_menu = None
 
-
         # a widget dic to avoid proliferation of instance variables:
         self._widget_dict = {}
-
         self._setup_ui()
 
         # emesene's
         self.contact_list = self._widget_dict['contact_list']
-
 
         # Session's Signals: [Remember to unsubscribe! O_O]
         session.signals.profile_get_succeed.subscribe(
@@ -68,7 +65,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         widget_dict['mail_btn'].setText("(0)")
         nick_box.addWidget(widget_dict['nick_edit'])
         nick_box.addWidget(widget_dict['mail_btn'])
-
 
         widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True,
             empty_message=QtCore.QString(

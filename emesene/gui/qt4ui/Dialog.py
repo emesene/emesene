@@ -13,7 +13,6 @@ from gui.qt4ui.Utils import tr
 import gui
 import extension
 
-
 log = logging.getLogger('qt4ui.Dialog')
 
 class Dialog(object):
@@ -23,6 +22,31 @@ class Dialog(object):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
 
+    @classmethod
+    def broken_profile(cls, close_cb):
+        '''a dialog that asks you to fix your profile'''
+        message = _('''\
+Your live profile seems to be broken,
+which will cause you to experience issues
+with your display name, picture
+and/or personal message.
+
+You can fix it now by re-uploading
+your profile picture on the
+Live Messenger website that will open,
+or you can choose to fix it later.
+To fix your profile, emesene must be closed.
+Clicking Yes will close emesene.
+
+Do you want to fix your profile now?''')
+        gui.base.Desktop.open("http://profile.live.com/details/Edit/Pic")
+
+        reply = QtGui.QMessageBox.warning(None, _("You have a broken profile"),
+                    message, QtGui.QMessageBox.Yes |
+                    QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+
+        if reply == QtGui.QMessageBox.Yes:
+            close_cb()
 
     @classmethod
     def add_contact(cls, groups, group_selected, response_cb,
@@ -70,8 +94,7 @@ class Dialog(object):
         group = group_combo.itemData(group_combo.currentIndex()).toPyObject()
         log.debug('[%s,%s]' % (email, group))
         response_cb(response, email, group )
-        
-        
+
     @classmethod
     def add_group(cls, response_cb, title=tr('Add group')):
         '''show a dialog asking for a group name, the response callback
@@ -99,8 +122,7 @@ class Dialog(object):
         group_name = unicode(group_edit.text())
         
         response_cb(response, group_name)
-        
-        
+
     @classmethod
     def rename_group(cls, group, response_cb, title=tr('Rename group')):
         '''show a dialog with the group name and ask to rename it, the
@@ -111,7 +133,6 @@ class Dialog(object):
         dialog = EntryDialog(tr('New group name:'), group.name, title)
         response = dialog.exec_()
         response_cb(response, group, dialog.text())
-        
         
     @classmethod
     def contact_added_you(cls, accounts, response_cb,
@@ -450,18 +471,6 @@ class Dialog(object):
             
         response_cb(response, *args)
         
-        
-        
-
-        
-
-        
-
-        
-
-        
-
-        
 class StandardButtonDialog (QtGui.QDialog):
     '''Skeleton for a dialog window with standard buttons'''
     def __init__(self, title, expanding=False, parent=None):
@@ -577,9 +586,6 @@ class YesNoDialog (StandardButtonDialog):
     def set_reject_response(self, response):
         self._reject_response = response
 
-
-
-
 class ContactAddedYouDialog (QtCore.QObject):
     '''Dialog window asking wether to add to the contact list
     a contact which has just added you'''
@@ -633,7 +639,6 @@ class ContactAddedYouDialog (QtCore.QObject):
         def exec_(self):
             log.debug('Don\'t call \'exec_\' on a Page')
             return None
-            
 
     def __init__(self, accounts, done_cb, title, expanding=False, parent=None):
         '''Constructor'''
@@ -658,7 +663,6 @@ class ContactAddedYouDialog (QtCore.QObject):
             page.move(x+i*40, y+i*40)
             i += 1
 
-        
     def _create_slot(self, mail):
         return lambda result: self._on_finished(mail, result)
     
@@ -676,13 +680,7 @@ class ContactAddedYouDialog (QtCore.QObject):
     
     def __del__(self):
         log.debug('ContactAddedYouDialog destroyed')
-            
-        
-        
-        
-        
-        
-    
+
 class EntryDialog (OkCancelDialog):
     '''Dialog window with a text entry.'''
     def __init__(self, label, text, title, expanding=True, parent=None):
