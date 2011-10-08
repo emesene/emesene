@@ -18,7 +18,6 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import extension
-import e3
 from e3.hotmail.Hotmail import Hotmail
 
 import time
@@ -39,6 +38,7 @@ class MainWindowBase(object):
 
         self.__hotmail = Hotmail(self.session)
         self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
+        self.session.signals.broken_profile.subscribe(self._on_broken_profile)
 
     def on_mail_click(self):
         self.__hotmail.openInBrowser()
@@ -52,10 +52,16 @@ class MainWindowBase(object):
         self.session.new_conversation(account, cid)
 
     def _on_mail_count_changed(self, count):
+        '''update ui widget with new email count'''
         pass
+
+    def _on_broken_profile(self):
+        '''called when a person has a broken profile'''
+        dialog = extension.get_default('dialog')
+        dialog.broken_profile(self.on_close)
 
     def on_disconnect(self):
         '''callback called when the disconnect option is selected'''
         self.session.signals.mail_count_changed.unsubscribe(
             self._on_mail_count_changed)
-
+        self.session.signals.broken_profile.unsubscribe(self._on_broken_profile)
