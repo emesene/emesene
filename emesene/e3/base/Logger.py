@@ -993,7 +993,7 @@ def log_message(session, members, message, sent, error=False, cid=None):
         src = e3.Logger.Account.from_contact(session.contacts.me)
 
         if message.type == e3.Message.TYPE_NUDGE:
-            message.body = _("you just sent a nudge!")
+            message.body = _("You just sent a nudge!")
 
         logs = []
 

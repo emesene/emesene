@@ -1,5 +1,5 @@
 * How to create/update a pot (translation template) file:
-xgettext emesene/*.py emesene/e3/base/status.py emesene/e3/common/notification.py emesene/gui/base/Handler.py emesene/gui/base/Conversation.py emesene/gui/gtkui/*.py emesene/gui/common/*.py -o emesene.pot
+xgettext emesene/*.py emesene/e3/base/status.py emesene/e3/common/*.py emesene/gui/base/*.py emesene/gui/gtkui/*.py emesene/gui/common/*.py -o emesene.pot
 
 The translations are located at: https://translations.launchpad.net/emesene/trunk
 

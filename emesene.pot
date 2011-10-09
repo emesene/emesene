@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-26 18:43+0200\n"
+"POT-Creation-Date: 2011-10-09 19:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,16 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: emesene/e3/base/Logger.py:996 emesene/gui/base/Conversation.py:249
+msgid "You just sent a nudge!"
+msgstr ""
+
+#: emesene/e3/base/Logger.py:1038 emesene/e3/common/notification.py:139
+#: emesene/gui/base/Conversation.py:395
+#, python-format
+msgid "%s just sent you a nudge!"
+msgstr ""
 
 #: emesene/e3/base/status.py:25
 msgid "Available"
@@ -54,17 +64,57 @@ msgstr ""
 msgid "New mail from %s"
 msgstr ""
 
-#: emesene/e3/common/notification.py:139 emesene/gui/base/Conversation.py:395
-#, python-format
-msgid "%s just sent you a nudge!"
-msgstr ""
-
 #: emesene/e3/common/notification.py:162
 msgid "is online"
 msgstr ""
 
 #: emesene/e3/common/notification.py:184
 msgid "is offline"
+msgstr ""
+
+#: emesene/gui/base/AdiumEmoteThemes.py:55 emesene/gui/base/AdiumThemes.py:69
+#: emesene/gui/base/AdiumThemes.py:87 emesene/gui/base/ImagesThemes.py:59
+#: emesene/gui/base/SoundThemes.py:54
+#, python-format
+msgid "%s is not a directory"
+msgstr ""
+
+#: emesene/gui/base/AdiumEmoteThemes.py:59
+msgid "Emoticons.plist not found"
+msgstr ""
+
+#: emesene/gui/base/AdiumThemes.py:82
+#, python-format
+msgid "%s is not a file"
+msgstr ""
+
+#: emesene/gui/base/AdiumThemes.py:84
+#, python-format
+msgid "%s is not readable"
+msgstr ""
+
+#: emesene/gui/base/ContactList.py:386
+#: emesene/gui/gtkui/ContactInformation.py:144
+#: emesene/gui/gtkui/Tooltips.py:54
+msgid "Blocked"
+msgstr ""
+
+#: emesene/gui/base/Conversation.py:408
+msgid "Error delivering message"
+msgstr ""
+
+#: emesene/gui/base/Conversation.py:450
+msgid "Group chat"
+msgstr ""
+
+#: emesene/gui/base/Conversation.py:486
+#, python-format
+msgid "%s has joined the conversation"
+msgstr ""
+
+#: emesene/gui/base/Conversation.py:504
+#, python-format
+msgid "%s has left the conversation"
 msgstr ""
 
 #: emesene/gui/base/Handler.py:185
@@ -117,26 +167,16 @@ msgstr ""
 msgid "No group selected"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:249
-msgid "You just sent a nudge!"
+#: emesene/gui/base/ImagesThemes.py:62
+msgid "image theme incomplete"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:408
-msgid "Error delivering message"
+#: emesene/gui/base/LoginBase.py:160
+msgid "Error while deleting user"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:450
-msgid "Group chat"
-msgstr ""
-
-#: emesene/gui/base/Conversation.py:486
-#, python-format
-msgid "%s has joined the conversation"
-msgstr ""
-
-#: emesene/gui/base/Conversation.py:504
-#, python-format
-msgid "%s has left the conversation"
+#: emesene/gui/base/SoundThemes.py:58
+msgid "Sounds.plist not found"
 msgstr ""
 
 #: emesene/gui/gtkui/AccountMenu.py:39 emesene/gui/gtkui/Dialog.py:850
@@ -269,7 +309,7 @@ msgid "E-Mail"
 msgstr ""
 
 #: emesene/gui/gtkui/ContactInformation.py:140 emesene/gui/gtkui/Dialog.py:938
-#: emesene/gui/gtkui/ExtensionList.py:31 emesene/gui/gtkui/Login.py:67
+#: emesene/gui/gtkui/ExtensionList.py:31 emesene/gui/gtkui/Login.py:66
 #: emesene/gui/gtkui/MainMenu.py:86 emesene/gui/gtkui/Tooltips.py:53
 #: emesene/gui/common/TrayIcon.py:178
 msgid "Status"
@@ -277,11 +317,6 @@ msgstr ""
 
 #: emesene/gui/gtkui/ContactInformation.py:142
 msgid "Message"
-msgstr ""
-
-#: emesene/gui/gtkui/ContactInformation.py:144
-#: emesene/gui/gtkui/Tooltips.py:54
-msgid "Blocked"
 msgstr ""
 
 #: emesene/gui/gtkui/ContactInformation.py:187
@@ -376,22 +411,22 @@ msgstr ""
 msgid "%d members"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:383
+#: emesene/gui/gtkui/Conversation.py:385
 #, python-format
 msgid "File transfer accepted by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:401
+#: emesene/gui/gtkui/Conversation.py:403
 #, python-format
 msgid "File transfer rejected by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:414
+#: emesene/gui/gtkui/Conversation.py:416
 #, python-format
 msgid "File transfer canceled by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:427
+#: emesene/gui/gtkui/Conversation.py:429
 msgid "File transfer completed!"
 msgstr ""
 
@@ -500,7 +535,7 @@ msgstr ""
 msgid "Add user"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:440 emesene/gui/gtkui/Login.py:57
+#: emesene/gui/gtkui/Dialog.py:440 emesene/gui/gtkui/Login.py:56
 msgid "Account"
 msgstr ""
 
@@ -588,11 +623,11 @@ msgstr ""
 msgid "User"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:762 emesene/gui/gtkui/Login.py:72
+#: emesene/gui/gtkui/Dialog.py:762 emesene/gui/gtkui/Login.py:71
 msgid "Password"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:821 emesene/gui/gtkui/Login.py:161
+#: emesene/gui/gtkui/Dialog.py:821 emesene/gui/gtkui/Login.py:160
 #: emesene/gui/gtkui/Preferences.py:64
 msgid "Preferences"
 msgstr ""
@@ -891,54 +926,50 @@ msgstr ""
 msgid "Draw a square to select an area"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:84
+#: emesene/gui/gtkui/Login.py:83
 msgid "Remember me"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:85
+#: emesene/gui/gtkui/Login.py:84
 msgid "Remember password"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:86
+#: emesene/gui/gtkui/Login.py:85
 msgid "Auto-login"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:100
+#: emesene/gui/gtkui/Login.py:99
 msgid "Delete user"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:153
+#: emesene/gui/gtkui/Login.py:152
 msgid "Choose your network"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:195
+#: emesene/gui/gtkui/Login.py:194
 msgid ""
 "<b>Connection error!\n"
 " </b>"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:438
+#: emesene/gui/gtkui/Login.py:371
 msgid "user or password fields are empty"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:553
+#: emesene/gui/gtkui/Login.py:450
 msgid "Error while reading user config"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:642
-msgid "Error while deleting user"
-msgstr ""
-
-#: emesene/gui/gtkui/Login.py:660
+#: emesene/gui/gtkui/Login.py:541
 #, python-format
 msgid "Are you sure you want to delete the account %s ?"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:801
+#: emesene/gui/gtkui/Login.py:682
 msgid "Connect now"
 msgstr ""
 
-#: emesene/gui/gtkui/Login.py:872
+#: emesene/gui/gtkui/Login.py:753
 #, python-format
 msgid "Reconnecting in %d seconds"
 msgstr ""
