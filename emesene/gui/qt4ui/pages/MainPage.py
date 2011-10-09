@@ -19,12 +19,12 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     WEBSITE = ''
     # pylint: enable=W0612
 
-    def __init__(self, session, on_new_conversation, on_close,
-                 on_disconnect, set_menu_bar_cb, parent=None):
+    def __init__(self,  session, on_new_conversation, on_close,
+                on_disconnect, set_menu_bar_cb, parent=None):
         '''Constructor'''
         QtGui.QWidget.__init__(self, parent)
         gui.MainWindowBase.__init__(self, session, on_new_conversation,
-                                    on_close, on_disconnect)
+                                                on_close, on_disconnect)
         # callbacks:
         self._set_menu_bar_cb = set_menu_bar_cb
 
@@ -42,9 +42,9 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
 
         # Session's Signals: [Remember to unsubscribe! O_O]
         session.signals.profile_get_succeed.subscribe(
-                                                      self._on_ss_profile_get_succeed)
+                                self._on_ss_profile_get_succeed)
         session.signals.status_change_succeed.subscribe(
-                                                        self._widget_dict['status_combo'].set_status)
+                                self._widget_dict['status_combo'].set_status)
 
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
@@ -60,15 +60,15 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         widget_dict['mail_btn']  = QtGui.QToolButton()
         widget_dict['mail_btn'].setAutoRaise(True)
         widget_dict['mail_btn'].setIcon(
-                                        QtGui.QIcon.fromTheme('mail-unread'))
+                                    QtGui.QIcon.fromTheme('mail-unread'))
         widget_dict['mail_btn'].setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         widget_dict['mail_btn'].setText("(0)")
         nick_box.addWidget(widget_dict['nick_edit'])
         nick_box.addWidget(widget_dict['mail_btn'])
 
         widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True,
-                                                empty_message=QtCore.QString(
-                                                tr('<u>Click here to set a personal message...</u>')))
+            empty_message=QtCore.QString(
+                tr('<u>Click here to set a personal message...</u>')))
         widget_dict['current_media'] = QtGui.QLabel()
         widget_dict['status_combo'] = status_combo_cls()
         widget_dict['display_pic'] = avatar_cls(self.session)
@@ -89,20 +89,20 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self.setLayout(lay)
 
         # First fill of personal Infos:
-        self._on_ss_profile_get_succeed('', '')
+        self._on_ss_profile_get_succeed('','')
 
         widget_dict['nick_edit'].nick_changed.connect(
-                                                      self._on_set_new_nick)
+                                        self._on_set_new_nick)
         widget_dict['psm_edit'].nick_changed.connect(
-                                                     self._on_set_new_psm)
+                                        self._on_set_new_psm)
         widget_dict['status_combo'].status_changed.connect(
-                                                           self._on_set_new_status)
+                                        self._on_set_new_status)
         widget_dict['display_pic'].clicked.connect(
-                                                   self._on_display_pic_clicked)
+                                        self._on_display_pic_clicked)
         widget_dict['contact_list'].new_conversation_requested.connect(
-                                                                       self.on_new_conversation_requested)
+                                        self.on_new_conversation_requested)
         widget_dict['mail_btn'].clicked.connect(
-                                                self._on_mail_click)
+                                    self._on_mail_click)
 
     def _on_ss_profile_get_succeed(self, nick, psm):
         '''This method sets the displayed account's info,
@@ -160,3 +160,4 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         #below_userlist, below_menu, below_panel
         #we can only import qt extensions
         pass
+
