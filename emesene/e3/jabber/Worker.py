@@ -24,7 +24,6 @@ import sys
 import time
 import Queue
 import base64
-import sha
 import hashlib
 import e3
 import StringIO
@@ -226,7 +225,7 @@ class Worker(e3.Worker):
         photo_bin = photo.getTag('BINVAL').getData()
         photo_bin = base64.b64decode(photo_bin)
         ext = PHOTO_TYPES[photo_type]
-        photo_hash = sha.new()
+        photo_hash = hashlib.sha1()
         photo_hash.update(photo_bin)
         photo_hash = photo_hash.hexdigest()
 
