@@ -78,6 +78,18 @@ class AdiumTheme(object):
         self.outgoing_next = read_file(self.outgoing_path,
                 'NextContent.html')
 
+        #setup incoming template fallback
+        if self.incoming is None:
+            self.incoming = self.content
+        if self.incoming_next is None:
+            self.incoming_next = self.incoming
+
+        #setup incoming template fallback
+        if self.outgoing is None:
+            self.outgoing = self.incoming
+        if self.outgoing_next is None:
+            self.outgoing_next = self.outgoing
+
         #first try load custom Template.html from theme
         template_path = urljoin(self.resources_path, 'Template.html')
         if not os.path.exists(template_path):
@@ -91,19 +103,10 @@ class AdiumTheme(object):
         '''return a string containing the template for the incoming message
         with the vars replaced
         '''
-        # fallback madness, some repetition but well..
         if (msg.type == "status" and self.status):
             template = self.status
         elif not msg.first:
-            if self.incoming_next is None:
-                if self.incoming is None:
-                    template = self.content
-                else:
-                    template = self.incoming
-            else:
-                template = self.incoming_next
-        elif self.incoming is None:
-            template = self.content
+            template = self.incoming_next
         else:
             template = self.incoming
 
@@ -113,25 +116,10 @@ class AdiumTheme(object):
         '''return a string containing the template for the outgoing message
         with the vars replaced
         '''
-        # fallback madness, some repetition but well..
         if (msg.type == "status" and self.status):
             template = self.status
         elif not msg.first:
-            if self.outgoing_next is None:
-                if self.outgoing is None:
-                    if self.incoming is None:
-                        template = self.content
-                    else:
-                        template = self.incoming
-                else:
-                    template = self.outgoing
-            else:
-                template = self.outgoing_next
-        elif self.outgoing is None:
-            if self.incoming is None:
-                template = self.content
-            else:
-                template = self.incoming
+            template = self.outgoing_next
         else:
             template = self.outgoing
 
