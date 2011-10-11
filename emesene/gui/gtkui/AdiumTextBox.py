@@ -33,8 +33,7 @@ class OutputView(webkit.WebView):
     '''a class that represents the output widget of a conversation
     '''
 
-    def __init__(self, theme, source, target, target_display, source_img,
-            target_img, add_emoticon_cb):
+    def __init__(self, theme, add_emoticon_cb):
         webkit.WebView.__init__(self)
         # Trying to debug issue #232
         # https://github.com/emesene/emesene/issues/#issue/232
@@ -173,10 +172,8 @@ class OutputText(gtk.ScrolledWindow):
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
         self.loaded = False
-        picture = utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
 
-        self.view = OutputView(gui.theme.conv_theme, "", "", "", picture,
-                picture, add_emoticon_cb)
+        self.view = OutputView(gui.theme.conv_theme, add_emoticon_cb)
         self.clear()
         self.view.show()
         self.add(self.view)
