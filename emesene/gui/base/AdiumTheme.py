@@ -78,6 +78,15 @@ class AdiumTheme(object):
         self.outgoing_next = read_file(self.outgoing_path,
                 'NextContent.html')
 
+        #first try load custom Template.html from theme
+        template_path = urljoin(self.resources_path, 'Template.html')
+        if not os.path.exists(template_path):
+            template_path = urljoin("gui", "base", "template.html")
+        self.template = read_file(template_path)
+
+        self.header = read_file(self.resources_path, 'Header.html') or ""
+        self.footer = read_file(self.resources_path, 'Footer.html') or ""
+
     def _format_incoming(self, msg):
         '''return a string containing the template for the incoming message
         with the vars replaced
@@ -213,11 +222,7 @@ class AdiumTheme(object):
     def get_body(self, source, target, target_display, source_img, target_img):
         '''return the template to put as html content
         '''
-        #first try load custom Template.html from theme
-        path = urljoin(self.resources_path, 'Template.html')
-        if not os.path.exists(path):
-            path = urljoin("gui", "base", "template.html")
-        template = read_file(path)
+        template = self.template#read_file(path)
         resources_url = MarkupParser.path_to_url(self.resources_path)
         css_path = urljoin(resources_url, "main.css")
 
@@ -237,15 +242,15 @@ class AdiumTheme(object):
         target = Plus.msnplus_strip(target)
         target_display = Plus.msnplus_strip(target_display)
 
-        header = read_file(self.resources_path, 'Header.html') or ""
+        header = self.header
 
         if header:
             header = self._replace_header_or_footer(header, source, target,
                     target_display, source_img, target_img)
 
         template = template.replace("%@", header, 1)
-        footer = read_file(self.resources_path, 'Footer.html') or ""
 
+        footer = self.footer
         if footer:
             footer = self._replace_header_or_footer(footer, source, target,
                     target_display, source_img, target_img)
