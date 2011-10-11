@@ -16,7 +16,6 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
 import gtk
 import logging
 log = logging.getLogger('gtkui.AdiumTextBox')
@@ -24,7 +23,6 @@ import webkit
 import base64
 import xml.sax.saxutils
 
-import e3
 import gui
 from gui.base import Plus
 import utils
