@@ -148,7 +148,6 @@ class AdiumTheme(object):
     def _replace(self, template, msg):
         '''replace the variables on template for the values on msg
         '''
-
         msg.alias = Plus.msnplus_strip(msg.alias)
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
@@ -222,7 +221,7 @@ class AdiumTheme(object):
     def get_body(self, source, target, target_display, source_img, target_img):
         '''return the template to put as html content
         '''
-        template = self.template#read_file(path)
+        template = self.template
         resources_url = MarkupParser.path_to_url(self.resources_path)
         css_path = urljoin(resources_url, "main.css")
 
