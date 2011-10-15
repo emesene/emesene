@@ -737,6 +737,8 @@ class Sound(BaseTable):
             'session.config.b_play_type'))
         self.array.append(self.append_check(_('Play sound on nudge'),
             'session.config.b_play_nudge'))
+        self.array.append(self.append_check(_('Mute sounds when the conversation has focus'),
+            'session.config.b_mute_sounds_when_focussed'))
         self.append_markup('<b>'+_('Users events:')+'</b>')
         self.array.append(self.append_check(_('Play sound on contact online'),
             'session.config.b_play_contact_online'))
