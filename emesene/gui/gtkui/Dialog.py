@@ -69,7 +69,12 @@ class Dialog(object):
     def window_add_label(cls, window, text):
         '''add a label with the text (as pango) on the window'''
 
+        def on_activate_link(label, uri):
+            gui.base.Desktop.open(uri)
+            return True
+
         label = gtk.Label()
+        label.connect('activate-link', on_activate_link)
         #label.set_selectable(True)
         label.set_use_markup(True)
         label.set_markup('<span>' + \
