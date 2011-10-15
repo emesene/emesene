@@ -127,7 +127,7 @@ class Notification():
         """
         conversation = self.has_similar_conversation(cid, account)
         contact = self.session.contacts.get(account)
-        
+
         text = None
         check = False
         if conversation:
@@ -198,10 +198,10 @@ class Notification():
                 uri = "file://" + contact.picture
             else:
                 uri = 'notification-message-im'
-            
+
             uri = self.picture_factory(uri, 'message-im')
-            
+
             if text is not None:
-                self.notifier(title, text, uri, 'message-im', None, tooltip)
+                self.notifier(title if title else '', text, uri, 'message-im', None, tooltip)
         if sound is not None:
             self.sound_player.play(sound)
