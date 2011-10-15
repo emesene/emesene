@@ -41,6 +41,7 @@ class Notification():
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
+        self.session.config.get_or_set('b_notify_when_focussed', False)
         self.session.config.get_or_set('b_notify_only_when_available', True)
 
         self.notifier = extension.get_default('notificationGUI')
@@ -131,7 +132,7 @@ class Notification():
         text = None
         check = False
         if conversation:
-            check = conversation.message_waiting
+            check = conversation.message_waiting or self.session.config.b_notify_when_focussed
 
         if self.session.config.b_notify_receive_message and check:
             if msgobj.type == Message.TYPE_NUDGE:
