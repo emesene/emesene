@@ -17,7 +17,6 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-import subprocess
 import sys
 import re
 import time
@@ -207,35 +206,32 @@ class HelpHandler(object):
 
     def on_check_update_selected(self):
         ''' checks if a new stable version of emesene is available '''
-        if sys.platform == "darwin":
-            subprocess.call(['open', '/Applications/emesene.app/Contents/Resources/emesene updater.app'])
-        else:
-            f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/gui/base/Handler.py")
-            s = f.read()
-            f.close()
-            s = re.findall(r'EMESENE_LAST_STABLE = "(([^"\\]+|\\.)*)"', s)
-            try:
-                loc_ver = EMESENE_VERSION.split(".")
-                rem_ver = s[0][0].split(".") # [("version","version")]
-                if len(rem_ver[2]) > 2:
-                    return # no RCs, BETAs or DEVELs
-                if len(loc_ver[2]) > 2:
-                    self.dialog.information(_("You're running a development version of emesene, "
-                                              "you might want to use the latest stable version "
-                                              "(%s) unless you know what you're doing") % (s[0][0]))
+        f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/gui/base/Handler.py")
+        s = f.read()
+        f.close()
+        s = re.findall(r'EMESENE_LAST_STABLE = "(([^"\\]+|\\.)*)"', s)
+        try:
+            loc_ver = EMESENE_VERSION.split(".")
+            rem_ver = s[0][0].split(".") # [("version","version")]
+            if len(rem_ver[2]) > 2:
+                return # no RCs, BETAs or DEVELs
+            if len(loc_ver[2]) > 2:
+                self.dialog.information(_("You're running a development version of emesene, "
+                                          "you might want to use the latest stable version "
+                                          "(%s) unless you know what you're doing") % (s[0][0]))
+                return
+            if int(loc_ver[0]) == int(rem_ver[0]):
+                if int(loc_ver[1]) < int(rem_ver[1]):
+                    self.notify_update(s[0][0])
                     return
-                if int(loc_ver[0]) == int(rem_ver[0]):
-                    if int(loc_ver[1]) < int(rem_ver[1]):
+                elif int(loc_ver[1]) == int(rem_ver[1]):
+                    if int(loc_ver[2]) < int(rem_ver[2]):
                         self.notify_update(s[0][0])
                         return
-                    elif int(loc_ver[1]) == int(rem_ver[1]):
-                        if int(loc_ver[2]) < int(rem_ver[2]):
-                            self.notify_update(s[0][0])
-                            return
-            except IndexError:
-                pass # Silently fail
+        except IndexError:
+            pass # Silently fail
 
-            self.dialog.information(_("No update available"))
+        self.dialog.information(_("No update available"))
 
 class ContactHandler(object):
     '''this handler contains all the handlers needed to handle the contact
@@ -668,4 +664,3 @@ class CallHandler(object):
         ''' cancels a call '''
         self.call.state = e3.base.Call.FAILED
         self.session.cancel_call(self.call)
-
