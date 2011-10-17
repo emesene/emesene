@@ -153,6 +153,8 @@ class Controller(object):
                 lambda * args: glib.idle_add(self.close_session))
         signal.signal(signal.SIGTERM,
                 lambda * args: glib.idle_add(self.close_session))
+        signal.signal(signal.SIGHUP,
+                lambda * args: glib.idle_add(self.close_session))
 
     def _setup(self):
         '''register core extensions'''
