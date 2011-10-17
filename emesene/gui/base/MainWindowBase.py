@@ -55,7 +55,7 @@ class MainWindowBase(object):
     def _on_broken_profile(self):
         '''called when a person has a broken profile'''
         dialog = extension.get_default('dialog')
-        dialog.broken_profile(self.on_close)
+        dialog.broken_profile(self.session.close)
 
     def on_disconnect(self):
         '''callback called when the disconnect option is selected'''
