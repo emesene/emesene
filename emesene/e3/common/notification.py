@@ -41,6 +41,7 @@ class Notification():
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
+        self.session.config.get_or_set('b_notify_typing', False)
         self.session.config.get_or_set('b_notify_when_focussed', False)
         self.session.config.get_or_set('b_notify_only_when_available', True)
 
@@ -51,6 +52,8 @@ class Notification():
         if self.session:
             self.session.signals.conv_message.subscribe(
                 self._on_message)
+            self.session.signals.user_typing.subscribe(
+                self._on_user_typing)
             self.session.signals.contact_attr_changed.subscribe(
                 self._on_contact_attr_changed)
             self.session.signals.mail_received.subscribe(
@@ -69,6 +72,8 @@ class Notification():
         if self.session:
             self.session.signals.conv_message.unsubscribe(
                 self._on_message)
+            self.session.signals.user_typing.unsubscribe(
+                self._on_user_typing)
             self.session.signals.contact_attr_changed.unsubscribe(
                 self._on_contact_attr_changed)
             self.session.signals.mail_received.unsubscribe(
@@ -97,6 +102,12 @@ class Notification():
 
         contact = self.session.contacts.get(arg1.sender.account)
         self._notify(contact, contact.nick, _("File transfer invitation"), arg1.sender.account)
+
+    def _on_user_typing(self, cid, account, *args):
+        ''' called when a user is typing '''
+        if self.session.config.b_notify_typing:
+            contact = self.session.contacts.get(account)
+            self._notify(contact, contact.nick, _("%s is typing a message..."), account)
 
     def _on_mail_received(self, message):
         ''' called when a new mail is received '''

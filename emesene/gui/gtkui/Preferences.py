@@ -781,6 +781,8 @@ class Notification(BaseTable):
         self.append_markup('<b>'+_('Messages events:')+'</b>')
         self.append_check(_('Notify on received message'),
             'session.config.b_notify_receive_message')
+        self.append_check(_('Notify when a contact is typing'),
+            'session.config.b_notify_typing')
         self.append_check(_('Notify also when the conversation has focus'),
             'session.config.b_notify_when_focussed')
         self.append_check(_('Only when available'),
