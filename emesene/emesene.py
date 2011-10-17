@@ -150,9 +150,9 @@ class Controller(object):
         self._setup()
 
         signal.signal(signal.SIGINT,
-                lambda * args: glib.idle_add(self.close_session()))
+                lambda * args: glib.idle_add(self.close_session))
         signal.signal(signal.SIGTERM,
-                lambda * args: glib.idle_add(self.close_session()))
+                lambda * args: glib.idle_add(self.close_session))
 
     def _setup(self):
         '''register core extensions'''
