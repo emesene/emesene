@@ -701,10 +701,7 @@ class Controller(object):
                 self.conversations.append(conv_manager)
 
                 if self.session.config.b_conv_minimized and other_started:
-                    if UnityLauncher is None:
-                        # FIXME: Dirty hack that makes sure windows don't
-                        # magically disappear on Oneiric
-                        window.iconify()
+                    window.iconify()
                     window.show()
                     window.iconify()
                 else:
