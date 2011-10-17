@@ -917,7 +917,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_logout(self):
         ''' handle Action.ACTION_LOGOUT '''
-        self.quit()
+        self.session.close()
 
     # e3 action handlers - address book
     def _handle_action_add_contact(self, account):

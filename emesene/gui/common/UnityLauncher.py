@@ -26,12 +26,11 @@ class UnityLauncher(BaseTray):
     AUTHOR = 'Sven (Sbte)'
     WEBSITE = 'www.emesene.org'
 
-    def __init__ (self, close_session):
+    def __init__ (self):
         '''constructor'''
         BaseTray.__init__(self)
         self.count = 0
         self.session = None
-        self.close_session = close_session
 
         self.launcher = Unity.LauncherEntry.get_for_desktop_id('emesene.desktop')
         self.launcher.set_property("count", self.count)
@@ -108,5 +107,5 @@ class UnityLauncher(BaseTray):
             self.launcher.set_property("urgent", False)
 
     def _close_session(self, menu_item, menu_object):
-        self.close_session()
+        self.session.close()
 

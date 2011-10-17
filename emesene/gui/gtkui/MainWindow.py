@@ -33,12 +33,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, session, on_new_conversation, on_close,
-                on_disconnect_cb):
+    def __init__(self, session, on_new_conversation):
         '''class constructor'''
         gtk.VBox.__init__(self)
-        gui.MainWindowBase.__init__(self, session, on_new_conversation,
-                                                on_close, on_disconnect_cb)
+        gui.MainWindowBase.__init__(self, session, on_new_conversation)
 
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
@@ -55,6 +53,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
         self.session.signals.contact_attr_changed.subscribe(
             self._on_contact_attr_changed)
+        self.session.signals.close.subscribe(self.on_disconnect)
 
         self.menu = None
         self.contact_menu = None
@@ -114,8 +113,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         '''buildall the menus used on the client'''
         dialog = extension.get_default('dialog')
 
-        handler = gui.base.MenuHandler(self.session, dialog, self.contact_list,
-            self.on_disconnect, self.on_close)
+        handler = gui.base.MenuHandler(self.session, dialog, self.contact_list)
 
         contact_handler = gui.base.ContactHandler(self.session, dialog,
             self.contact_list)
@@ -232,7 +230,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             else:
                 self.entry.hide()
 
-    def on_disconnect(self):
+    def on_disconnect(self, close=None):
         '''callback called when the disconnect option is selected'''
         gui.MainWindowBase.on_disconnect(self)
         self.contact_list.contact_selected.unsubscribe(
@@ -248,7 +246,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.session.signals.contact_attr_changed.unsubscribe(
             self._on_contact_attr_changed)
         self.panel.remove_subscriptions()
-        self.on_disconnect_cb()
+        self.session.signals.close.unsubscribe(self.on_disconnect)
 
     def _on_search_toggled(self, button):
         '''called when the search button is toggled'''

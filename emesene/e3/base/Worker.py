@@ -69,7 +69,7 @@ EVENTS = (\
  'media received' , 'message read',
  'contact added you', 'user typing',
  'mail received', 'mail count changed',
- 'broken profile')
+ 'broken profile', 'close')
 
 ACTIONS = (\
  'login'            , 'logout'           ,
@@ -237,7 +237,7 @@ class Worker(threading.Thread):
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT
         '''
-        pass
+        self.session.close()
 
     def _handle_action_move_to_group(self, account, src_gid, dest_gid):
         '''handle Action.ACTION_MOVE_TO_GROUP

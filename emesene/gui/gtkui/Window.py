@@ -80,7 +80,7 @@ class Window(gtk.Window):
         self.content = LoginWindow(callback, on_preferences_changed,
             config, config_dir, config_path, proxy, use_http, session_id,
             cancel_clicked, no_autologin)
-        if self.get_child() == None:
+        if self.get_child() is None:
             self.add(self.content)
 
         self.content.show()
@@ -95,12 +95,10 @@ class Window(gtk.Window):
         self.content.show()
         self.content_type = 'connecting'
 
-    def go_main(self, session, on_new_conversation,
-            on_close, on_disconnect, quit_on_close=False):
+    def go_main(self, session, on_new_conversation, quit_on_close=False):
         '''change to the main window'''
         MainWindow = extension.get_default('main window')
-        self.content = MainWindow(session, on_new_conversation,
-            on_close, on_disconnect)
+        self.content = MainWindow(session, on_new_conversation)
         self.add(self.content)
         self.content.show()
         self.content_type = 'main'

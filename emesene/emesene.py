@@ -190,8 +190,7 @@ class Controller(object):
         if UnityLauncher is not None:
             extension.category_register('unity launcher', UnityLauncher)
             extension.set_default('unity launcher', UnityLauncher)
-            self.unity_launcher = extension.get_and_instantiate(
-                    'unity launcher', self.close_session)
+            self.unity_launcher = extension.get_and_instantiate('unity launcher')
         else:
             self.unity_launcher = None
 
@@ -277,6 +276,7 @@ class Controller(object):
 
         # if you add a signal here, add it on _remove_subscriptions
         signals = self.session.signals
+        signals.close.subscribe(self.on_close)
         signals.login_succeed.subscribe(self.on_login_succeed)
         signals.login_failed.subscribe(self.on_login_failed)
         signals.contact_list_ready.subscribe(self.on_contact_list_ready)
@@ -362,6 +362,7 @@ class Controller(object):
         '''remove the subscriptions to signals'''
         if self.session is not None:
             signals = self.session.signals
+            signals.close.unsubscribe(self.on_close)
             signals.login_succeed.unsubscribe(self.on_login_succeed)
             signals.login_failed.unsubscribe(self.on_login_failed)
             signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
@@ -476,8 +477,7 @@ class Controller(object):
         self.tray_icon.set_main(self.session)
 
         self.window.go_main(self.session, self.on_new_conversation,
-            self.on_close, self.on_user_disconnect,
-            self.tray_icon.quit_on_close)
+                            self.tray_icon.quit_on_close)
 
     def _draw_tray_icon(self):
         '''draws the tray icon'''
@@ -488,8 +488,7 @@ class Controller(object):
                 return
             self.tray_icon.set_visible(False)
 
-        handler = gui.base.TrayIconHandler(self.session, gui.theme,
-            self.on_user_disconnect, self.on_close)
+        handler = gui.base.TrayIconHandler(self.session, gui.theme)
         self.tray_icon = trayiconcls(handler, self.window)
 
     def _sync_emesene1(self):
@@ -758,16 +757,11 @@ class Controller(object):
         conv_manager.close_all()
         self.conversations.remove(conv_manager)
 
-    def on_user_disconnect(self):
-        '''
-        method called when the user selects disconnect
-        '''
-        self.close_session(False)
-        self.go_login(cancel_clicked=True, no_autologin=True)
-
-    def on_close(self):
-        '''called on close'''
-        self.close_session()
+    def on_close(self, close=False):
+        '''called when the session is closed by the user'''
+        self.close_session(close)
+        if not close:
+            self.go_login(cancel_clicked=True, no_autologin=True)
 
     def on_disconnected(self, reason, reconnect=0):
         '''called when the server disconnect us'''

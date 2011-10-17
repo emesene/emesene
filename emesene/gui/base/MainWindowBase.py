@@ -27,14 +27,11 @@ log = logging.getLogger('gui.base.MainWindowBase')
 class MainWindowBase(object):
     '''a widget that contains all the components inside'''
 
-    def __init__(self, session, on_new_conversation, on_close,
-                on_disconnect_cb):
+    def __init__(self, session, on_new_conversation):
         '''class constructor'''
 
         self.session = session
         self.on_new_conversation = on_new_conversation
-        self.on_close = on_close
-        self.on_disconnect_cb = on_disconnect_cb
 
         self.__hotmail = Hotmail(self.session)
         self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
