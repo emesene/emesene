@@ -371,7 +371,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_filetransfer_invitation(self, transfer, cid):
         ''' called when a new file transfer is issued '''
-        if cid == self.cid:
+        if transfer.contact.account == self.members[0]:
             self.transfers_bar.add(transfer)
 
     def on_filetransfer_accepted(self, transfer):
