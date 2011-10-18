@@ -107,7 +107,7 @@ class Notification():
         ''' called when a user is typing '''
         if self.session.config.b_notify_typing:
             contact = self.session.contacts.get(account)
-            self._notify(contact, contact.nick, _("%s is typing a message..."), account)
+            self._notify(contact, contact.nick, _("is typing a message"), account)
 
     def _on_mail_received(self, message):
         ''' called when a new mail is received '''
