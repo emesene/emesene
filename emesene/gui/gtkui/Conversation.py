@@ -107,6 +107,13 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         if len(self.members) == 0:
             self.header.information = ('connecting', 'creating conversation')
+        else:
+            #update adium theme header/footer
+            account = self.members[0]
+            contact = self.session.contacts.get(account)
+            his_picture = contact.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+            my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+            self.output.clear(account, contact.nick, contact.display_name, my_picture, his_picture)
 
         self._load_style()
         
