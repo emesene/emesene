@@ -17,7 +17,6 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import extension
-import traceback
 
 def import_and_register(category_name, cls):
     try:
@@ -28,7 +27,6 @@ def import_and_register(category_name, cls):
             extension.register(category_name, eval(cls+'.'+cls))
         return imported_cls
     except ImportError:
-        traceback.print_exc()
         return None
 
 import_and_register('tray icon', 'MessagingMenu')

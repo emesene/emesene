@@ -16,8 +16,37 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from gi.repository import Unity, Dbusmenu
+import logging
+log = logging.getLogger("gui.common.UnityLauncher")
+
+import dbus, dbus.service
 import gui
+
+class UnityDBusController(dbus.service.Object):
+    def __init__(self, app_uri):
+        dbus.service.Object.__init__(self, dbus.SessionBus(), '/')
+        self.properties = {}
+        self.app_uri = app_uri
+        self._update()
+
+    def set_property(self, property_, value):
+        if property_ == "count":
+            value = dbus.Int64(value)
+        self.properties[property_] = value
+        self._update()
+
+    def _update(self):
+        self.Update(self.app_uri, self.properties)
+
+    @dbus.service.signal(dbus_interface='com.canonical.Unity.LauncherEntry',
+                         signature=("sa{sv}"))
+    def Update(self, app_uri, properties):
+        pass
+
+    @dbus.service.method(dbus_interface='com.canonical.Unity.LauncherEntry',
+                         in_signature="sa{sv}", out_signature="")
+    def Query(self, app_uri, properties):
+        log.debug("DBus message. app_uri: %s, properties: %s" % (app_uri, properties))
 
 class UnityLauncher(gui.BaseTray):
     ''' A widget that implements fancy unity launcher actions '''
@@ -31,17 +60,8 @@ class UnityLauncher(gui.BaseTray):
         gui.BaseTray.__init__(self)
         self.count = 0
         self.session = None
+        self.launcher = UnityDBusController("application://emesene.desktop")
 
-        self.launcher = Unity.LauncherEntry.get_for_desktop_id('emesene.desktop')
-        self.launcher.set_property("count", self.count)
-
-        # Also add a quicklist
-        ql = Dbusmenu.Menuitem.new()
-        ql_quit = Dbusmenu.Menuitem.new()
-        ql_quit.property_set(Dbusmenu.MENUITEM_PROP_LABEL, _('Quit'))
-        ql_quit.connect('item-activated', self._close_session)
-        ql.child_append(ql_quit)
-        self.launcher.set_property("quicklist", ql)
         self.icid_dict = {}
 
     def set_session(self, session):
@@ -80,7 +100,7 @@ class UnityLauncher(gui.BaseTray):
                 self.icid_dict[icid] = 1
             self.count += 1
             self.launcher.set_property("count", self.count)
-            self.launcher.set_property("count_visible", True)
+            self.launcher.set_property("count-visible", True)
             self.launcher.set_property("urgent", True)
 
     def _on_message_read(self, conv):
@@ -103,7 +123,7 @@ class UnityLauncher(gui.BaseTray):
         if self.icid_dict == {}:
             self.count = 0
         if self.count == 0:
-            self.launcher.set_property("count_visible", False)
+            self.launcher.set_property("count-visible", False)
             self.launcher.set_property("urgent", False)
 
     def _close_session(self, menu_item, menu_object):
