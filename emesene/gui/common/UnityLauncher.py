@@ -17,9 +17,9 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from gi.repository import Unity, Dbusmenu
-from BaseTray import BaseTray
+import gui
 
-class UnityLauncher(BaseTray):
+class UnityLauncher(gui.BaseTray):
     ''' A widget that implements fancy unity launcher actions '''
     NAME = 'Unity Launcher'
     DESCRIPTION = 'Unity message count and quicklist'
@@ -28,7 +28,7 @@ class UnityLauncher(BaseTray):
 
     def __init__ (self):
         '''constructor'''
-        BaseTray.__init__(self)
+        gui.BaseTray.__init__(self)
         self.count = 0
         self.session = None
 

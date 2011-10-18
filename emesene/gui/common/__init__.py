@@ -17,6 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import extension
+import traceback
 
 def import_and_register(category_name, cls):
     try:
@@ -27,6 +28,7 @@ def import_and_register(category_name, cls):
             extension.register(category_name, eval(cls+'.'+cls))
         return imported_cls
     except ImportError:
+        traceback.print_exc()
         return None
 
 import_and_register('tray icon', 'MessagingMenu')
@@ -38,3 +40,4 @@ import_and_register(('notificationGUI'), 'PyNotification')
 import_and_register(('notificationGUI'), 'GtkNotification')
 import_and_register(('notificationImage'), 'ThemeNotificationImage')
 import_and_register(('notificationImage'), 'DummyNotificationImage')
+import_and_register('unity launcher', 'UnityLauncher')

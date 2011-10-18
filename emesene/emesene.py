@@ -85,11 +85,6 @@ except ImportError:
     DBusNetworkChecker = None
 
 try:
-    from gui.base.UnityLauncher import UnityLauncher
-except ImportError:
-    UnityLauncher = None
-
-try:
     from gui import gtkui
 except ImportError, exc:
     log.error('Cannot import gtkui: %s' % str(exc))
@@ -189,12 +184,7 @@ class Controller(object):
         else:
             self.network_checker = None
 
-        if UnityLauncher is not None:
-            extension.category_register('unity launcher', UnityLauncher)
-            extension.set_default('unity launcher', UnityLauncher)
-            self.unity_launcher = extension.get_and_instantiate('unity launcher')
-        else:
-            self.unity_launcher = None
+        self.unity_launcher = extension.get_and_instantiate('unity launcher')
 
         extension.category_register('sound', e3.common.Sounds.SoundPlayer,
                 None, True)
