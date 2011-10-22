@@ -28,6 +28,7 @@ class UnityDBusController(dbus.service.Object):
         self.properties = {}
         self.app_uri = app_uri
         self._update()
+        self.set_property("count-visible", True)
 
     def set_property(self, property_, value):
         if property_ == "count":
