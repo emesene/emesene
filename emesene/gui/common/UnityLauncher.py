@@ -44,9 +44,9 @@ class UnityDBusController(dbus.service.Object):
         pass
 
     @dbus.service.method(dbus_interface='com.canonical.Unity.LauncherEntry',
-                         in_signature="sa{sv}", out_signature="")
-    def Query(self, app_uri, properties):
-        log.debug("DBus message. app_uri: %s, properties: %s" % (app_uri, properties))
+                         in_signature="", out_signature="sa{sv}")
+    def Query(self):
+        return self.app_uri, self.properties
 
 class UnityLauncher(gui.BaseTray):
     ''' A widget that implements fancy unity launcher actions '''
