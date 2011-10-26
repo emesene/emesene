@@ -22,7 +22,6 @@
 import os
 import hashlib
 from time import time
-import Desktop
 import tempfile
 
 class Hotmail:
@@ -86,6 +85,3 @@ class Hotmail:
         tmp_file.close()
 
         return 'file:///' + file_
-
-    def open_in_browser(self):
-        Desktop.open(self._get_login_page())

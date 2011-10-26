@@ -19,7 +19,7 @@
 
 import extension
 
-import Hotmail
+import MailManager
 import time
 import logging
 log = logging.getLogger('gui.base.MainWindowBase')
@@ -33,12 +33,12 @@ class MainWindowBase(object):
         self.session = session
         self.on_new_conversation = on_new_conversation
 
-        self._hotmail = Hotmail.Hotmail(self.session)
+        self._mail = MailManager.MailManager(self.session)
         self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
         self.session.signals.broken_profile.subscribe(self._on_broken_profile)
 
     def on_mail_click(self):
-        self._hotmail.open_in_browser()
+        self._mail.open_in_browser()
 
     def on_new_conversation_requested(self, account):
         '''Slot called when the user doubleclicks
