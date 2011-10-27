@@ -21,6 +21,8 @@ import gtk
 import e3.common
 import gui
 import utils
+import subprocess
+import sys
 import extension
 import stock
 
@@ -538,6 +540,20 @@ class MainWindow(BaseTable):
                 'session.config.nick_template_clist', ContactList.NICK_TPL)
         self.append_entry_default(_('Group format'), 'group',
                 'session.config.group_template', ContactList.GROUP_TPL)
+
+        if sys.platform == 'darwin':
+
+            def do_hideshow(widget):
+                if widget.get_active():
+                    subprocess.call('defaults write /Applications/emesene.app/Contents/Info LSUIElement -bool false', shell=True)
+                else:
+                    subprocess.call('defaults write /Applications/emesene.app/Contents/Info LSUIElement -bool true', shell=True)
+
+            self.append_markup('<b>'+_('OS X Integration:')+'</b>')
+            self.session.config.get_or_set('b_show_dock_icon', True)    
+            button = self.append_check(_('Show dock icon (requires restart of emesene)'),
+                         'session.config.b_show_dock_icon')
+            button.connect("toggled", do_hideshow)
 
         self.show_all()
 
