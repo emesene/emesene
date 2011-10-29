@@ -144,11 +144,14 @@ class Controller(object):
         self._parse_commandline()
         self._setup()
 
-        signal.signal(signal.SIGINT,
+        if hasattr(signal, 'SIGINT'):
+            signal.signal(signal.SIGINT,
                 lambda * args: glib.idle_add(self.close_session))
-        signal.signal(signal.SIGTERM,
+        if hasattr(signal, 'SIGTERM'):
+            signal.signal(signal.SIGTERM,
                 lambda * args: glib.idle_add(self.close_session))
-        signal.signal(signal.SIGHUP,
+        if hasattr(signal, 'SIGHUP'):
+            signal.signal(signal.SIGHUP,
                 lambda * args: glib.idle_add(self.close_session))
 
     def _setup(self):
