@@ -111,9 +111,16 @@ class Conversation(gtk.VBox, gui.Conversation):
             #update adium theme header/footer
             account = self.members[0]
             contact = self.session.contacts.get(account)
-            his_picture = contact.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+            if contact:
+                his_picture = contact.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+                nick = contact.nick
+                display_name = contact.display_name
+            else:
+                his_picture = utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+                nick = ""
+                display_name = ""
             my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
-            self.output.clear(account, contact.nick, contact.display_name, my_picture, his_picture)
+            self.output.clear(account, nick, display_name, my_picture, his_picture)
 
         self._load_style()
         
