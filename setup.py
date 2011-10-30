@@ -65,7 +65,7 @@ if os.name == "nt":
         '../dlls/msvcr90.dll',
         ('gui/base', ['gui/base/template.html'])]
 
-    for base in ("e3/msn/xml templates", "themes", "plugins"):
+    for base in ("e3/msn/xml templates", "themes", "plugins", "gui/common"):
         for dirname, dirnames, files in os.walk(base):
             fpath = []
             for f in files:
