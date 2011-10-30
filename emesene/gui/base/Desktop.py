@@ -300,9 +300,16 @@ def open(url, desktop=get_desktop(), wait=0):
     try:
         return _run(cmd, 0, wait)
     except:
-        # use webbrowser.open() where no suitable desktop was identified 
-        # ( cmd == None ) or fail to execute specified program ( raise Error )
-        webbrowser.open(url)
+        try:
+            # As a fallback, try to use xdg-open, which should be present on
+            # most desktops and uses the default browser as set by the system.
+            # webbrowser.open seems to use sensible-browser, which isn't always
+            # the same as the default (on Ubuntu at least).
+            return _run(["xdg-open", url] , 0, wait)
+        except:
+            # use webbrowser.open() where no suitable desktop was identified 
+            # ( cmd == None ) or fail to execute specified program ( raise Error )
+            webbrowser.open(url)
 
 
 
