@@ -148,7 +148,7 @@ class IMAPMail(MailClient):
         address = address[0][1][6:]
         subject = subject[0][1][9:]
         address = address[address.find("<") + 1 : address.find(">")]
-        self._imap_server.store(email_ids[0].split()[0],'-FLAGS','\Seen')
+        self._imap_server.store(e_id,'-FLAGS','\Seen')
         return MailMessage("", address, subject, "", "")
 
     def stop(self):
