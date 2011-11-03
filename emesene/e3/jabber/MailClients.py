@@ -129,7 +129,7 @@ class IMAPMail(MailClient):
     def on_initialize(self):
         self._imap_server.login(self._username, self._password)
         old_count, new_count = self.update_counter()
-        self._handlers["mailcount"](new_count, old_count)
+        self._handlers["mailcount"](new_count)
 
     def on_end(self):
         pass
