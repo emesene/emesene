@@ -35,23 +35,39 @@ class Session(e3.Session):
 
         if host == "talk.google.com":
             try:
-                mail_client = IMAPMail("imap.gmail.com", 993, account, password)
+                self.mail_client = IMAPMail(self, "imap.gmail.com", 993, account, password)
             except socket.error, sockerr:
                 log.warn("couldn't connect to mail server " + str(sockerr))
-                mail_client = NullMail(account, password)
+                self.mail_client = NullMail()
 
             # gtalk allows to connect on port 80, it's not HTTP protocol but
             # the port is HTTP so it will pass through firewalls (yay!)
             if use_http:
                 port = 80
+        elif host == "chat.facebook.com":
+            try:
+                self.mail_client = FacebookMail(self)
+            except socket.error, sockerr:
+                log.warn("couldn't connect to mail server " + str(sockerr))
+                self.mail_client = NullMail()
         else:
-            mail_client = NullMail(account, password)
+            self.mail_client = NullMail()
 
-        self.__worker = Worker('emesene2', self, proxy, mail_client, use_http)
+        self.mail_client.register_handler('mailcount', self.mail_count_changed)
+        self.mail_client.register_handler('mailnew', self.mail_received)
+        self.mail_client.register_handler('socialreq', self.social_request)
+
+        self.__worker = Worker('emesene2', self, proxy, use_http)
         self.__worker.start()
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
             host, port))
+
+    def start_mail_client(self):
+        self.mail_client.start()
+        
+    def stop_mail_client(self):
+        self.mail_client.stop()
 
     def send_message(self, cid, text, style=None, cedict=None, celist=None):
         '''send a common message'''

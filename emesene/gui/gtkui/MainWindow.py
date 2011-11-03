@@ -23,6 +23,9 @@ import gui
 import extension
 
 import logging
+
+from gui import Desktop
+
 log = logging.getLogger('gtkui.MainWindow')
 
 class MainWindow(gtk.VBox, gui.MainWindowBase):
@@ -101,6 +104,15 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def _on_mail_click(self, widget, data):
         self.on_mail_click()
+
+    def _on_social_request(self, conn_url):
+        Desktop.open(conn_url)
+
+        def set_token(token):
+            self.session.config.facebook_token = token
+        dialog = extension.get_default('dialog')
+        fb_token_dialog = dialog.facebook_token_window("", set_token)
+
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''

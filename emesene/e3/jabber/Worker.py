@@ -63,7 +63,7 @@ class Worker(e3.Worker):
 
     NOTIFICATION_DELAY = 60
 
-    def __init__(self, app_name, session, proxy, mail_client, use_http=False):
+    def __init__(self, app_name, session, proxy, use_http=False):
         '''class constructor'''
         e3.Worker.__init__(self, app_name, session)
         self.jid = xmpp.protocol.JID(session.account.account)
@@ -82,7 +82,6 @@ class Worker(e3.Worker):
                 self.proxy_data['username'] = self.proxy.user
                 self.proxy_data['password'] = self.proxy.passwd
 
-        self.mail_client = mail_client
         self.conversations = {}
         self.rconversations = {}
         self.roster = None
@@ -104,8 +103,6 @@ class Worker(e3.Worker):
 
             except Queue.Empty:
                 pass
-
-        self.mail_client.stop()
 
     def _change_status(self, status_):
         '''change the user status'''
@@ -251,6 +248,9 @@ class Worker(e3.Worker):
         log.info("New mailbox message received: %s" % mail_message)
         self.session.mail_received(mail_message)
 
+    def _on_social_external_request(self, conn_url):
+        self.session.social_request(conn_url)
+
     # action handlers
     def _handle_action_quit(self):
         '''handle Action.ACTION_QUIT
@@ -311,10 +311,8 @@ class Worker(e3.Worker):
             self.session.account.password) == None:
             self.session.login_failed('Authentication error')
             return
-
+        
         self.session.login_succeed()
-        self.mail_client.register_handler('mailcount', self._on_mailbox_unread_mail_count_changed)
-        self.mail_client.register_handler('mailnew', self._on_mailbox_new_mail_received)
         self.start_time = time.time()
 
         self.client.RegisterHandler('message', self._on_message)
@@ -349,7 +347,6 @@ class Worker(e3.Worker):
 
         self.session.contact_list_ready()
         self._change_status(status_)
-        self.mail_client.start()
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT

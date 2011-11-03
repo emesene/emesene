@@ -331,6 +331,7 @@ class Controller(object):
             self.timeout_id = None
 
         if self.session is not None:
+            self.session.stop_mail_client()
             self.session.quit()
 
         self.window.on_disconnect(self.close_session)
@@ -571,6 +572,8 @@ class Controller(object):
         self._restore_session()
 
         self._sync_emesene1()
+
+        self.session.start_mail_client()
         self.logged_in = True
 
         if self.network_checker is not None:
@@ -595,7 +598,7 @@ class Controller(object):
             self.window.content.clear_connect()
 
         self._new_session(account)
-
+        
         # set default values if not already set
         self.session.config.get_or_set('b_conv_minimized', True)
         self.session.config.get_or_set('b_conv_maximized', False)

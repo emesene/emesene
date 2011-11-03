@@ -110,6 +110,9 @@ class Session(object):
             except:
                 print "Error on save configuration"
 
+    def start_mail_client(self):
+        pass
+
     def load_config(self):
         '''load the config of the session'''
         # load the global configuration

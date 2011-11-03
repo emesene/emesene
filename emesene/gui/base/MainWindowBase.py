@@ -35,6 +35,7 @@ class MainWindowBase(object):
 
         self._mail = MailManager.MailManager(self.session)
         self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
+        self.session.signals.social_request.subscribe(self._on_social_request)
         self.session.signals.broken_profile.subscribe(self._on_broken_profile)
 
     def on_mail_click(self):
@@ -50,6 +51,9 @@ class MainWindowBase(object):
 
     def _on_mail_count_changed(self, count):
         '''update ui widget with new email count'''
+        pass
+
+    def _on_social_request(self, conn_url):
         pass
 
     def _on_broken_profile(self):

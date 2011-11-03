@@ -33,7 +33,7 @@ class MailManager:
         if current_service == "talk.google.com":
             return "http://mail.google.com/"
         elif current_service == "chat.facebook.com":
-            return "http://facebook.com/"
+            return "http://www.facebook.com/messages/"
         else:
             hotmail = Hotmail.Hotmail(self.session)
             return hotmail._get_login_page()
