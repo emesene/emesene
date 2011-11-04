@@ -113,6 +113,9 @@ class Session(object):
     def start_mail_client(self):
         pass
 
+    def stop_mail_client(self):
+        pass
+
     def load_config(self):
         '''load the config of the session'''
         # load the global configuration
