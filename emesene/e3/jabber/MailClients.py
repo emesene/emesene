@@ -171,6 +171,8 @@ class FacebookMail(MailClient):
         self.get_token()
         old_count, new_count = self.update_counter()
         if old_count < new_count:
+            mail = self.new_mails()
+            self._handlers["mailnew"](mail)
             self._handlers["mailcount"](new_count)
 
     def on_initialize(self):
@@ -196,5 +198,16 @@ class FacebookMail(MailClient):
         return (old_count, self._count)
 
     def new_mails(self):
-        pass
+        #What you're going to see is not suitable for programmers..
+        #I didn't get mad, it's just seems like Fql is not supporting tables join. 
+        #I made this fast workaround, hope to find a better solution. Thank you!
+        query_thread = self._client.fql.query("SELECT thread_id, subject, recipients FROM thread WHERE folder_id = 0 and unread = 1")
+        orclause = "WHERE "
+        for thread in query_thread:
+            orclause = "%s thread_id = %s OR " % (orclause, thread['thread_id'])
+        orclause = orclause[0:len(orclause)-3]
+        orclause = "%s ORDER BY created_time DESC" % orclause
+        query_message = self._client.fql.query("SELECT body, author_id, created_time FROM message %s" % orclause)
+        query_user = self._client.fql.query("SELECT name FROM user WHERE uid =  %s" % query_message[0]['author_id'])
+        return MailMessage("", query_user[0]['name'], query_message[0]['body'], "", "")
 
