@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-10-29 19:56+0200\n"
+"POT-Creation-Date: 2011-11-05 19:56+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -157,7 +157,7 @@ msgstr ""
 #: emesene/gui/base/Handler.py:304 emesene/gui/base/Handler.py:327
 #: emesene/gui/base/Handler.py:337 emesene/gui/base/Handler.py:345
 #: emesene/gui/base/Handler.py:355 emesene/gui/base/Handler.py:363
-#: emesene/gui/gtkui/Dialog.py:1519
+#: emesene/gui/gtkui/Dialog.py:1526
 msgid "No contact selected"
 msgstr ""
 
@@ -239,8 +239,8 @@ msgstr ""
 msgid "Are you sure you want to remove all items?"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:272 emesene/gui/gtkui/Dialog.py:1109
-#: emesene/gui/gtkui/Dialog.py:1198 emesene/gui/gtkui/ImageChooser.py:144
+#: emesene/gui/gtkui/AvatarChooser.py:272 emesene/gui/gtkui/Dialog.py:1116
+#: emesene/gui/gtkui/Dialog.py:1205 emesene/gui/gtkui/ImageChooser.py:144
 msgid "No picture selected"
 msgstr ""
 
@@ -708,7 +708,7 @@ msgstr ""
 msgid "Give text a color (in hex)"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:980
+#: emesene/gui/gtkui/Dialog.py:987
 msgid ""
 "Your live profile seems to be broken,\n"
 "which will cause you to experience issues\n"
@@ -725,75 +725,79 @@ msgid ""
 "Do you want to fix your profile now?"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:999
+#: emesene/gui/gtkui/Dialog.py:1006
 msgid "You have a broken profile"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1013 emesene/gui/gtkui/ImageChooser.py:39
+#: emesene/gui/gtkui/Dialog.py:1020 emesene/gui/gtkui/ImageChooser.py:39
 msgid "Image Chooser"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1056 emesene/gui/gtkui/ImageChooser.py:91
+#: emesene/gui/gtkui/Dialog.py:1063 emesene/gui/gtkui/ImageChooser.py:91
 msgid "All files"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1061 emesene/gui/gtkui/ImageChooser.py:96
+#: emesene/gui/gtkui/Dialog.py:1068 emesene/gui/gtkui/ImageChooser.py:96
 msgid "All images"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1146
+#: emesene/gui/gtkui/Dialog.py:1153
 msgid "Small (16x16)"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1147
+#: emesene/gui/gtkui/Dialog.py:1154
 msgid "Big (50x50)"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1155
+#: emesene/gui/gtkui/Dialog.py:1162
 msgid "Shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1193 emesene/gui/gtkui/Dialog.py:1421
+#: emesene/gui/gtkui/Dialog.py:1200 emesene/gui/gtkui/Dialog.py:1428
 msgid "Empty shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1249
+#: emesene/gui/gtkui/Dialog.py:1256
 msgid "Add emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1392 emesene/gui/gtkui/Dialog.py:1424
+#: emesene/gui/gtkui/Dialog.py:1399 emesene/gui/gtkui/Dialog.py:1431
 msgid "Change shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1397 emesene/gui/gtkui/IconView.py:104
+#: emesene/gui/gtkui/Dialog.py:1404 emesene/gui/gtkui/IconView.py:104
 #: emesene/gui/gtkui/Preferences.py:1277
 msgid "Delete"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1423
+#: emesene/gui/gtkui/Dialog.py:1430
 msgid "New shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1447
+#: emesene/gui/gtkui/Dialog.py:1454
 msgid "Invite friend"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1561
+#: emesene/gui/gtkui/Dialog.py:1568
 msgid "Add contact"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1603
+#: emesene/gui/gtkui/Dialog.py:1610
 msgid "Remind me later"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1671
+#: emesene/gui/gtkui/Dialog.py:1678
 msgid ""
 " has added you.\n"
 "Do you want to add him/her to your contact list?"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1774
+#: emesene/gui/gtkui/Dialog.py:1781 emesene/gui/gtkui/Dialog.py:1816
 msgid "Cancel"
+msgstr ""
+
+#: emesene/gui/gtkui/Dialog.py:1819
+msgid "Ok"
 msgstr ""
 
 #: emesene/gui/gtkui/ExtensionList.py:37 emesene/gui/gtkui/Preferences.py:902
