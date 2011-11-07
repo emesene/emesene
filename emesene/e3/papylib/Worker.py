@@ -109,8 +109,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.papyconv = {}
         # this stores papyon conversations as conversation : cid
         self.rpapyconv = {}
-        # this stores conversation handlers
-        self._conversation_handler = {}
         # store ongoing filetransfers
         self.filetransfers = {}
         self.rfiletransfers = {}
@@ -309,7 +307,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.conversations[id_multichat] = cid
         self.rconversations[cid] = id_multichat
         newconversationevent = ConversationEvent(papyconversation, self)
-        self._conversation_handler[cid] = newconversationevent
         self.papyconv[cid] = papyconversation
         self.rpapyconv[papyconversation] = cid
         self.session.conv_first_action(cid, members)
@@ -517,7 +514,6 @@ class Worker(e3.base.Worker, papyon.Client):
             cid = time.time()
             self.conversations[account] = cid # add to account:cid
             self.rconversations[cid] = account
-            self._conversation_handler[cid] = pyconvevent # add conv handler
             self.papyconv[cid] = pyconvevent.conversation # add papy conv
             self.rpapyconv[pyconvevent.conversation] = cid
             self.session.conv_first_action(cid, [account])
@@ -579,7 +575,6 @@ class Worker(e3.base.Worker, papyon.Client):
             cid = time.time()
             self.conversations[account] = cid # add to account:cid
             self.rconversations[cid] = account
-            self._conversation_handler[cid] = pyconvevent # add conv handler
             self.papyconv[cid] = pyconvevent.conversation # add papy conv
             self.rpapyconv[pyconvevent.conversation] = cid
             self.session.conv_first_action(cid, [account])
@@ -1267,8 +1262,6 @@ class Worker(e3.base.Worker, papyon.Client):
             self.rpapyconv[conv] = cid
             # attach the conversation event handler
             convhandler = ConversationEvent(conv, self)
-            self._conversation_handler[cid] = convhandler
-
         else:
             #print "creating a new conversation et. al"
             # new emesene conversation
@@ -1281,7 +1274,6 @@ class Worker(e3.base.Worker, papyon.Client):
             self.rpapyconv[conv] = cid
             # attach the conversation event handler
             convhandler = ConversationEvent(conv, self)
-            self._conversation_handler[cid] = convhandler
 
     def _handle_action_close_conversation(self, cid):
         '''handle Action.ACTION_CLOSE_CONVERSATION
@@ -1294,7 +1286,6 @@ class Worker(e3.base.Worker, papyon.Client):
         del self.rconversations[cid]
         del self.papyconv[cid]
         del self.rpapyconv[conv]
-        del self._conversation_handler[cid]
         self.session.conv_ended(cid)
 
     def _handle_action_conv_invite(self, cid, account):
