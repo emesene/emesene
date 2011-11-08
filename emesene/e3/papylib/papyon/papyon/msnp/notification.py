@@ -793,9 +793,6 @@ class NotificationProtocol(BaseProtocol, Timer):
             return
         if address_book.state != AB.AddressBookState.SYNCHRONIZED:
             return
-        if address_book.profile is None:
-            self._client.address_book.sync(False)
-            return
         self._client.profile._cid = address_book.profile._cid
         self._client.profile._server_property_changed("display-name",
                 address_book.profile.display_name)
