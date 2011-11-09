@@ -273,8 +273,8 @@ class ExtensionDownloadList(ExtensionListTab):
 
     def update(self):
         '''update the collections'''
-        for k in self.thc_com:
-            self.thc_com[k].fetch()
+        for item in self.thc_com.itervalues():
+            item.fetch()
 
     def show_update_callback(self, clear=True):
         '''method used as callback, because both GtkRunner and buttons
@@ -308,13 +308,13 @@ class ExtensionDownloadList(ExtensionListTab):
 
     def _end_progress_cb(self, *args):
         '''stops download of plugins'''
-        for k in self.thc_com:
-            self.thc_com[k].stop()
+        for item in self.thc_com.itervalues():
+            item.stop()
 
     def _end_list_progress_cb(self, *args):
         '''stops download of plugins'''
-        for k in self.thc_com:
-            self.thc_com[k].stop_fetch()
+        for item in self.thc_com.itervalues():
+            item.stop_fetch()
 
 class ThemeList(ExtensionDownloadList):
     def __init__(self, session):
