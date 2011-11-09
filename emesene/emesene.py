@@ -87,13 +87,13 @@ except ImportError:
 try:
     from gui import gtkui
 except ImportError, exc:
-    log.error('Cannot import gtkui: %s' % str(exc))
+    print 'Cannot import gtkui: %s' % str(exc)
 
 try:
     from e3 import jabber
 except ImportError, exc:
     jabber = None
-    log.warning('Errors occurred while importing jabber backend: %s' % str(exc))
+    print 'Errors occurred while importing jabber backend: %s' % str(exc)
 
 try:
     from gui import qt4ui
@@ -104,7 +104,7 @@ try:
     from e3 import papylib
 except ImportError, exc:
     papylib = None
-    log.warning('Errors occurred while importing msn backend: %s' % str(exc))
+    print 'Errors occurred while importing msn backend: %s' % str(exc)
 
 from pluginmanager import get_pluginmanager
 import extension
