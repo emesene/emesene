@@ -19,6 +19,9 @@
 import os
 import gtk
 
+import logging
+log = logging.getLogger('gtkui.ExtensionList')
+
 import utils
 import extension
 import e3
@@ -276,13 +279,17 @@ class ExtensionDownloadList(ExtensionListTab):
         for item in self.thc_com.itervalues():
             item.fetch()
 
-    def show_update_callback(self, clear=True):
+    def show_update_callback(self, result=None):
         '''method used as callback, because both GtkRunner and buttons
         need the first argument on the on_update method'''
-        self.on_update(clear=clear)
+        if result is not None and not result[0]:
+            log.error(result[1])
+        self.on_update(clear=True)
 
-    def show_update(self, result=True):
+    def show_update(self, result=None):
         '''show an update list of the set collection'''
+        if result is not None and not result[0]:
+            log.error(result[1])
         self.progress.update(100.0)
         self.progress.destroy()
         self.download_list = {}
