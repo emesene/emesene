@@ -283,13 +283,13 @@ class ExtensionDownloadList(ExtensionListTab):
         '''method used as callback, because both GtkRunner and buttons
         need the first argument on the on_update method'''
         if result is not None and not result[0]:
-            log.error(result[1])
+            log.error(str(result[1]))
         self.on_update(clear=True)
 
     def show_update(self, result=None):
         '''show an update list of the set collection'''
         if result is not None and not result[0]:
-            log.error(result[1])
+            log.error(str(result[1]))
         self.progress.update(100.0)
         self.progress.destroy()
         self.download_list = {}
