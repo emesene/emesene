@@ -262,7 +262,6 @@ class ExtensionDownloadList(ExtensionListTab):
         '''download an extension'''
         thc_cur = self.thc_com[self.thc_cur_name]
         thc_cur.download(self.download_item)
-        self.on_update(clear=True)
 
     def remove(self, widget):
         '''remove an extension'''
