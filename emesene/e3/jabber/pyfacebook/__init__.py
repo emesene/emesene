@@ -58,7 +58,10 @@ try:
     import hashlib
 except ImportError:
     import md5 as hashlib
-from django.conf import settings
+try:
+    from django.conf import settings
+except ImportError:
+    print 'Django module not found.'
 import binascii
 import urlparse
 import mimetypes
