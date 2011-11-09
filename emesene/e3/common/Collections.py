@@ -45,6 +45,8 @@ class Collection(object):
 
     def save_files(self, element, label):
         self._stop = False
+        if not label in element:
+            return
         for path, k in element[label].files.items():
             split_path = path.split("/")
             if self._stop:
@@ -66,8 +68,8 @@ class Collection(object):
             f.write(rq)
     
     def download(self, download_item=None):
-        for element in self.extensions_descs.itervalues():
-            if download_item is not None:
+        if download_item is not None:
+            for element in self.extensions_descs.itervalues():
                 self.save_files(element, download_item)
 
     def remove(self, path):
