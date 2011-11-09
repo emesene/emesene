@@ -45,20 +45,24 @@ class Collection(object):
 
     def save_files(self, element, label):
         self._stop = False
-        for el, k in element[label].files.items():
-            els = el.split("/")
+        for path, k in element[label].files.items():
+            split_path = path.split("/")
             if self._stop:
-                self.remove(os.path.join(self.dest_folder, els[0]))
+                if self.theme.endswith("themes"):
+                    self.remove(os.path.join(self.dest_folder, split_path[0], split_path[1]))
+                else:
+                    self.remove(os.path.join(self.dest_folder, split_path[0]))
                 return
-            path_to_create = ""
-            for i in range(len(els) - 1):
-                path_to_create = os.path.join(path_to_create, els[i])
+
+            path_to_create = self.dest_folder
+            for part in split_path[:-1]:
+                path_to_create = os.path.join(path_to_create, part)
             try:
-                os.makedirs(os.path.join(self.dest_folder , path_to_create))
+                os.makedirs(path_to_create)
             except OSError:
                 pass
             rq = self.github.get_raw(self.theme, k)
-            f = open(os.path.join(self.dest_folder, el), "wb")
+            f = open(os.path.join(path_to_create, split_path[-1]), "wb")
             f.write(rq)
     
     def download(self, download_item=None):
