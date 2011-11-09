@@ -91,8 +91,6 @@ class ConversationManager(object):
         conversation_tabs = self.session.config.get_or_set(
                 'b_conversation_tabs', True)
 
-        log.error("New message with cid: %s account: %s and conversation: %s conversation_tabs: %s", cid, account, conversation, conversation_tabs)
-
         if conversation is None and conversation_tabs:
             conversation = self.new_conversation(cid, [account])
 
