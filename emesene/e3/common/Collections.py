@@ -66,6 +66,7 @@ class Collection(object):
             rq = self.github.get_raw(self.theme, k)
             f = open(os.path.join(path_to_create, split_path[-1]), "wb")
             f.write(rq)
+            f.close()
     
     def download(self, download_item=None):
         if download_item is not None:
