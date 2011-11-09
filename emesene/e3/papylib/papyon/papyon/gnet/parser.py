@@ -212,4 +212,3 @@ class HTTPParser(AbstractParser):
         response.parse(self._receive_buffer)
         self.emit("received", response)
         self._reset_state()
-

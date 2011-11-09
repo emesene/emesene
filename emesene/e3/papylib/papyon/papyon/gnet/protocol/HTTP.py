@@ -25,6 +25,8 @@ from papyon.gnet.io import TCPClient
 from papyon.gnet.parser import HTTPParser
 from papyon.gnet.proxy.factory import ProxyFactory
 
+from urlparse import urlsplit
+
 import gobject
 import base64
 import logging
@@ -71,7 +73,10 @@ class HTTP(gobject.GObject):
         self._transport = None
         self._http_parser = None
         self._outgoing_queue = []
+        self._redirected = False
         self._waiting_response = False
+        self._parser_handles = []
+        self._transport_handles = []
 
         if self._proxies and self._proxies.get('http', None):
             if self._proxies['http'].type == 'http':
@@ -100,17 +105,32 @@ class HTTP(gobject.GObject):
 
     def _setup_parser(self):
         self._http_parser = HTTPParser(self._transport)
-        self._http_parser.connect("received", self._on_response_received)
-        self._transport.connect("notify::status", self._on_status_change)
-        self._transport.connect("error", self._on_error)
-        self._transport.connect("sent", self._on_request_sent)
+        self._parser_handles.append(self._http_parser.connect("received",
+            self._on_response_received))
+
+        self._transport_handles.append(self._transport.connect("notify::status",
+            self._on_status_change))
+        self._transport_handles.append(self._transport.connect("error",
+            self._on_error))
+        self._transport_handles.append(self._transport.connect("sent",
+            self._on_request_sent))
+
+    def _clean_transport(self):
+        if self._http_parser:
+            self._http_parser.disable()
+            for handle in self._parser_handles:
+                self._http_parser.disconnect(handle)
+            self._http_parser = None
+        if self._transport:
+            for handle in self._transport_handles:
+                self._transport.disconnect(handle)
 
     def _on_status_change(self, transport, param):
         if transport.get_property("status") == IoStatus.OPEN:
             self._process_queue()
         elif transport.get_property("status") == IoStatus.CLOSED and\
                 (self._waiting_response or len(self._outgoing_queue) > 0) and\
-                not self._errored:
+                not (self._errored or self._redirected):
             self._waiting_response = False
             self._setup_transport()
 
@@ -124,23 +144,30 @@ class HTTP(gobject.GObject):
             return
         if not self._waiting_response:
             logger.warning("Received response but wasn't waiting for one")
+            logger.warning("<<< " + str(response))
             return
-        #if response.status in (301, 302): # UNTESTED: please test
-        #    location = response.headers['Location']
 
-        #    location = location.rsplit("://", 1)
-        #    if len(location) == 2:
-        #        scheme = location[0]
-        #        location = location[1]
-        #    if scheme == "http":
-        #        location = location.rsplit(":", 1)
-        #        self._host = location[0]
-        #        if len(location) == 2:
-        #            self._port = int(location[1])
-        #        self._outgoing_queue[0].headers['Host'] = response.headers['Location']
-        #        self._setup_transport()
-        #        return
         self._waiting_response = False
+
+        if response.status in (301, 302):
+            self.close()
+            location = response.headers['Location']
+            logger.info("Server moved to %s" % location)
+            logger.info("<<< " + str(response))
+
+            protocol, host, path, query, fragment = urlsplit(location)
+            self._redirected = True
+            self._outgoing_queue[0].headers['Host'] = host
+            try:
+                host, port = host.rsplit(":", 1)
+                port = int(port)
+            except:
+                port = None
+            self._host = host
+            self._redirected = False
+            self._setup_transport()
+            return
+
         if len(self._outgoing_queue) > 0:
             self._outgoing_queue.pop(0) # pop the request from the queue
         if response.status >= 400:
@@ -186,5 +213,7 @@ class HTTP(gobject.GObject):
         self._process_queue()
 
     def close(self):
+        self._clean_transport()
         if self._transport:
             self._transport.close()
+        self._transport = None
