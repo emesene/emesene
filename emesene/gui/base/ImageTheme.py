@@ -141,7 +141,7 @@ class ImageTheme(object):
                 os.path.join(panel_path, "idle.png")
         else:
             self.status_icons_panel = self.status_icons.copy()
-            self.logo_panel = self.logo.copy()
+            self.logo_panel = self.logo
 
         # allow theme-specific toolbar icons
         self.toolbar_path = None
