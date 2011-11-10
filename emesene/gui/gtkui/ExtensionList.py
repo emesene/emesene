@@ -25,6 +25,7 @@ log = logging.getLogger('gtkui.ExtensionList')
 import utils
 import extension
 import e3
+import gobject
 
 class ExtensionListView(gtk.TreeView):
     def __init__(self, store, radio=False):
@@ -157,6 +158,7 @@ class ExtensionDownloadList(ExtensionListTab):
         '''constructor'''
         ExtensionListTab.__init__(self, session, radio, use_tabs)
         self.first = True
+        self.done = True
 
         self.thc_com = {}
         self.list_type = list_type
@@ -243,10 +245,12 @@ class ExtensionDownloadList(ExtensionListTab):
         if self.first or download:
             dialog = extension.get_default('dialog')
             self.progress = dialog.progress_window(
-                            _('Refresh extensions'), self._end_list_progress_cb)
+                            _('Refresh extensions'), self._end_progress_cb)
             self.progress.set_action(_("Refreshing extensions"))
             self.progress.show_all()
-            utils.GtkRunner(self.show_update, self.update)
+            self.done = False
+            gobject.timeout_add(100, self.update_progress)
+            utils.GtkRunner(self.show_update_callback, self.update)
 
             self.first = False
         elif clear:
@@ -259,6 +263,8 @@ class ExtensionDownloadList(ExtensionListTab):
                         _('Downloading extensions'), self._end_progress_cb)
         self.progress.set_action(_("Downloading extensions"))
         self.progress.show_all()
+        self.done = False
+        gobject.timeout_add(100, self.update_progress)
         utils.GtkRunner(self.show_update_callback, self.download)
 
     def download(self):
@@ -279,19 +285,24 @@ class ExtensionDownloadList(ExtensionListTab):
         for item in self.thc_com.itervalues():
             item.fetch()
 
+    def update_progress(self):
+        thc_cur = self.thc_com[self.thc_cur_name]
+        self.progress.update(100.0 * thc_cur.progress)
+        if self.done:
+            return False
+        return True
+
     def show_update_callback(self, result=None):
         '''method used as callback, because both GtkRunner and buttons
         need the first argument on the on_update method'''
         if result is not None and not result[0]:
             log.error(str(result[1]))
+        self.done = True
+        self.progress.destroy()
         self.on_update(clear=True)
 
-    def show_update(self, result=None):
+    def show_update(self):
         '''show an update list of the set collection'''
-        if result is not None and not result[0]:
-            log.error(str(result[1]))
-        self.progress.update(100.0)
-        self.progress.destroy()
         self.download_list = {}
 
         thc_cur = self.thc_com[self.thc_cur_name]
@@ -317,11 +328,7 @@ class ExtensionDownloadList(ExtensionListTab):
         '''stops download of plugins'''
         for item in self.thc_com.itervalues():
             item.stop()
-
-    def _end_list_progress_cb(self, *args):
-        '''stops download of plugins'''
-        for item in self.thc_com.itervalues():
-            item.stop_fetch()
+            self.done = True
 
 class ThemeList(ExtensionDownloadList):
     def __init__(self, session):

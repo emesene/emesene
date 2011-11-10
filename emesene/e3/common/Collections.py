@@ -19,9 +19,13 @@
 #    module created by Andrea Stagi stagi.andrea(at)gmail.com
 #
 
-from Github import Github
 import os
 import shutil
+
+import logging
+log = logging.getLogger('e3.common.Collections')
+
+from Github import Github
 from utils import AsyncAction
 
 class ExtensionDescriptor(object):
@@ -40,20 +44,25 @@ class Collection(object):
         self.theme = theme
         self.github = Github("emesene")
         self._stop = False
-        self._stopfetch = False
         self._blobs = None
+        self.progress = 0.0
 
     def save_files(self, element, label):
         self._stop = False
         if not label in element:
             return
-        for path, k in element[label].files.items():
+        keys = element[label].files.keys()
+        for k, path in enumerate(keys):
+            self.progress = k / float(len(keys))
+
             split_path = path.split("/")
+            if self.theme.endswith("themes"):
+                removal_path = os.path.join(self.dest_folder, split_path[0], split_path[1])
+            else:
+                removal_path = os.path.join(self.dest_folder, split_path[0])
+
             if self._stop:
-                if self.theme.endswith("themes"):
-                    self.remove(os.path.join(self.dest_folder, split_path[0], split_path[1]))
-                else:
-                    self.remove(os.path.join(self.dest_folder, split_path[0]))
+                self.remove(removal_path)
                 return
 
             path_to_create = self.dest_folder
@@ -63,12 +72,21 @@ class Collection(object):
                 os.makedirs(path_to_create)
             except OSError:
                 pass
-            rq = self.github.get_raw(self.theme, k)
+
+            try:
+                rq = self.github.get_raw(self.theme, element[label].files[path])
+            except Exception, ex:
+                log.error(str(ex))
+                self.remove(removal_path)
+                return
+
             f = open(os.path.join(path_to_create, split_path[-1]), "wb")
             f.write(rq)
             f.close()
+        self.progress = 1.0
     
     def download(self, download_item=None):
+        self.progress = 0.0
         if download_item is not None:
             for element in self.extensions_descs.itervalues():
                 self.save_files(element, download_item)
@@ -79,9 +97,6 @@ class Collection(object):
     def stop(self):
         self._stop = True
 
-    def stop_fetch(self):
-        self._stopfetch = True
-
     def set_blobs(self, result):
         self._blobs = result
 
@@ -89,88 +104,25 @@ class Collection(object):
         pass
 
     def fetch(self):
-        pass
-
-class PluginsCollection(Collection):
-
-    def plugin_name_from_file(self, file_name):
-        ps = file_name.find( "/")
-
-        if ps != -1:
-            return file_name[:ps]
-        else:
-            return ps
-
-
-    def fetch(self):
-
+        self._stop = False
         self._blobs = None
+        self.progress = 0.0
 
         AsyncAction(self.set_blobs, self.github.fetch_blob ,self.theme)
 
-        while self._blobs == None:
-            if self._stopfetch == True:
-                self._stopfetch = False
+        while self._blobs is None:
+            if self._stop:
                 return
 
+        self.progress = 0.5
         j = self._blobs
 
-        type = "plugin"
+        for i, k in enumerate(j["blobs"]):
 
-        for k in j["blobs"]:
+            (type, name) = self.plugin_name_from_file(k)
 
-            plugin = self.plugin_name_from_file(k)
-
-            if plugin == -1:
+            if type is None:
                 continue
-
-            try:
-                extype = self.extensions_descs[type]
-            except KeyError:
-                extype = self.extensions_descs[type] = {}
-
-            try:
-                pl = extype[plugin]
-            except KeyError:
-                pl = extype[plugin] = ExtensionDescriptor()
-
-            pl.add_file(k, j["blobs"][k])
-
-
-class ThemesCollection(Collection):
-
-    def plugin_name_from_file(self, file_name):
-
-        ps = file_name.find( "/")
-        ps = file_name.find( "/", ps + 1)
-
-        if ps != -1:
-            return file_name[:ps]
-        else:
-            return ps
-
-
-    def fetch(self):
-
-        self._blobs = None
-
-        AsyncAction(self.set_blobs, self.github.fetch_blob ,self.theme)
-
-        while self._blobs == None:
-            if self._stopfetch == True:
-                self._stopfetch = False
-                return
-
-        j = self._blobs
-
-        for k in j["blobs"]:
-
-            plugin = self.plugin_name_from_file(k)
-
-            if plugin == -1:
-                continue
-
-            (type, name) = plugin.split("/")
 
             try:
                 extype = self.extensions_descs[type]
@@ -183,4 +135,29 @@ class ThemesCollection(Collection):
                 pl = extype[name] = ExtensionDescriptor()
 
             pl.add_file(k, j["blobs"][k])
+            self.progress = i / float(len(j["blobs"]) * 2) + 0.5
+        self.progress = 1.0
+
+class PluginsCollection(Collection):
+
+    def plugin_name_from_file(self, file_name):
+        ps = file_name.find( "/")
+
+        if ps != -1:
+            return ("plugin", file_name[:ps])
+        else:
+            return (None, None)
+
+class ThemesCollection(Collection):
+
+    def plugin_name_from_file(self, file_name):
+
+        ps = file_name.find( "/")
+        ps = file_name.find( "/", ps + 1)
+
+        if ps != -1:
+            path = file_name[:ps]
+            return path.split("/")
+        else:
+            return (None, None)
 
