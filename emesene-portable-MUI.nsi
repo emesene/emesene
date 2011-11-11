@@ -16,7 +16,7 @@
 
     ; Program info
     !define PROGRAM_NAME "emesene"
-    !define PROGRAM_VERSION "2.11.8-devel"
+    !define PROGRAM_VERSION "2.11.11-devel"
     !define /date PROGRAM_BUILDTIME "%Y%m%d_%H%M"
     !define PROGRAM_TYPE "portable"
     !define PROGRAM_PUBLISHER "emesene team"
@@ -87,7 +87,7 @@
     Section "${PROGRAM_NAME} ${PROGRAM_VERSION}" secInstall
         SetOutPath "$EXEDIR\${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}"
         SetOverwrite on
-        File /r "dist\*.*"
+        File /r /x *.py dist\*.*
 
         SetOutPath "$EXEDIR\${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}"
     SectionEnd

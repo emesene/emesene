@@ -22,7 +22,7 @@
 
     ; Program info
     !define PROGRAM_NAME "emesene"
-    !define PROGRAM_VERSION "2.11.8-devel"
+    !define PROGRAM_VERSION "2.11.11-devel"
     !define /date PROGRAM_BUILDTIME "%Y%m%d_%H%M"
     !define PROGRAM_TYPE "installer"
     !define PROGRAM_PUBLISHER "emesene team"
@@ -184,7 +184,7 @@
 
         SetOutPath "$INSTDIR"
         SetOverwrite on
-        File /r "dist\*.*"
+        File /r /x *.py dist\*.*
 
         ; Store installation folder
         WriteRegStr ${REG_HIVE} "${REG_INSTALL}" "Install_Dir" "$INSTDIR"

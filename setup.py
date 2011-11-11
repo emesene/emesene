@@ -63,7 +63,8 @@ if os.name == "nt":
     for dirname, dirnames, files in os.walk("emesene"):
         fpath = []
         for f in files:
-            fpath.append(os.path.join(dirname, f))
+            if not f.endswith(".pyc") and not f.startswith("."):
+                fpath.append(os.path.join(dirname, f))
         _data_files.append((dirname[8:], fpath))
 
     for dirname, dirnames, files in os.walk("dlls"):
@@ -81,7 +82,7 @@ if os.name == "nt":
                 "atk", "gobject", "os", "code", "winsound", "win32api",
                 "plistlib", "win32gui", "OpenSSL", "Crypto", "Queue", "sqlite3",
                 "glob", "webbrowser", "json", "imaplib", "cgi", "gzip", "uuid",
-                "platform", "imghdr"],
+                "platform", "imghdr", "ctypes"],
             "excludes": ["ltihooks", "pywin", "pywin.debugger",
                 "pywin.debugger.dbgcon", "pywin.dialogs",
                 "pywin.dialogs.list", "Tkconstants", "Tkinter", "tcl",
