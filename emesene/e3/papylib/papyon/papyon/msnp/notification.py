@@ -42,6 +42,9 @@ import papyon.service.SingleSignOn as SSO
 import papyon.service.AddressBook as AB
 import papyon.service.OfflineIM as OIM
 
+import random
+import base64
+import hmac
 import hashlib
 import time
 import logging
@@ -101,6 +104,7 @@ class NotificationProtocol(BaseProtocol, Timer):
         self._protocol_version = version
         self._callbacks = {} # tr_id=>(callback, errback)
         self._time_id = 0
+        self.tokens = None
 
     # Properties ------------------------------------------------------------
     def __get_state(self):
@@ -287,6 +291,13 @@ class NotificationProtocol(BaseProtocol, Timer):
         self._callbacks[tr_id] = (callback, None)
 
     # Helpers ----------------------------------------------------------------
+    def __derive_key(self, key, magic):
+        hash1 = hmac.new(key, magic, hashlib.sha1).digest()
+        hash2 = hmac.new(key, hash1 + magic, hashlib.sha1).digest()
+        hash3 = hmac.new(key, hash1, hashlib.sha1).digest()
+        hash4 = hmac.new(key, hash3 + magic, hashlib.sha1).digest()
+        return hash2 + hash4[0:4]
+
     def __search_account(self, account, network_id=profile.NetworkID.MSN):
         contact = self._client.address_book.search_contact(account, network_id)
 
@@ -650,6 +661,56 @@ class NotificationProtocol(BaseProtocol, Timer):
             self.emit("unmanaged-message-received", contact, message)
 
     # --------- Urls ---------------------------------------------------------
+    def _build_url_post_data_new(self,
+                message_url="/cgi-bin/HoTMaiL",
+                post_url='https://login.live.com/ppsecure/sha1auth.srf?',
+                post_id='2'):
+
+        passportToken = self.tokens[SSO.LiveService.TB].security_token
+        proofToken = self.tokens[SSO.LiveService.TB].proof_token
+        nonce = ""
+        for i in range(0,24):
+            nonce += chr(int(random.random()*256))
+        # Create the percent encoded string
+        encodedString = \
+            "<EncryptedData xmlns=\"http://www.w3.org/2001/04/xmlenc#\"" \
+            "Id=\"BinaryDAToken0\" Type=\"http://www.w3.org/2001/04/xmlenc#Element\">" \
+            "<EncryptionMethodAlgorithm=\"http://www.w3.org/2001/04/xmlenc#tripledes-cbc\"/>" \
+            "<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">" \
+            "<ds:KeyName>http://Passport.NET/STS</ds:KeyName>" \
+            "</ds:KeyInfo>" \
+            "<CipherData>" \
+            "<CipherValue>%s</CipherValue>" \
+            "</CipherData>" \
+            "</EncryptedData>" % passportToken
+        # Create the token
+        token_args = {
+            "ct"    : int(time.time()),
+            "rru"   : message_url,
+            "sru"   : message_url,
+            "ru"    : message_url,
+            "bver"  : "4",
+            "svc"   : "mail",
+            "js"    : "yes",
+            "id"    : post_id,
+            "pl"    : "?id=%s" % post_id,
+            "da"    : encodedString,
+            "nonce" : base64.b64encode(nonce)
+        }
+        # we have to replace manually -. because urllib doesn't do it
+        token = urllib.urlencode(token_args).replace("-", "%2D").replace(".", "%2E")
+        # Compute the keys with HMAC-Sha1 algorithm
+        key1 = base64.b64decode(proofToken)
+        magic = "WS-SecureConversation" + nonce
+        key2 = self.__derive_key(key1, magic)
+        myhash = hmac.new(key2, token, hashlib.sha1).digest()
+        token_args_part_two = {
+            "hash" : base64.b64encode(myhash)
+        }
+        token += "&" + urllib.urlencode(token_args_part_two)
+
+        post_data = dict([('token', token)])
+        return (post_url, post_data)
 
     def _build_url_post_data(self,
                 message_url="/cgi-bin/HoTMaiL",
@@ -761,6 +822,7 @@ class NotificationProtocol(BaseProtocol, Timer):
         if self._state != ProtocolState.AUTHENTICATING:
             return
 
+        self.tokens = tokens
         clear_token = tokens[SSO.LiveService.MESSENGER_CLEAR]
         token = clear_token.security_token
         blob = clear_token.mbi_crypt(nonce)

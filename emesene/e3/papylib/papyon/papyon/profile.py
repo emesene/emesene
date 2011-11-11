@@ -735,6 +735,9 @@ class Profile(BaseContact):
     def request_profile_url(self, callback):
         self._ns_client.send_url_request(('PROFILE', '0x0409'), callback)
 
+    def request_mail_url(self):
+        return self._ns_client._build_url_post_data_new()
+
     def _client_capability_changed(self, client, name, value):
         self.__pending_set_presence[1] = self._client_capabilities
         self._ns_client.set_presence(*self.__pending_set_presence)

@@ -25,9 +25,9 @@ from time import time
 import tempfile
 
 class Hotmail:
-
+    ''' this class is responsible for the hotmail login '''
     def __init__(self, session):
-
+        ''' constructor, saves some needed vars (papyon dependant)'''
         self.session = session
         self.user = self.session.account.account
 
@@ -37,9 +37,23 @@ class Hotmail:
 
         self.profile = self.session.get_profile()
         self.password = self.session.account.password
-        self.MSPAuth = self.profile['MSPAuth']
+        self.MSPAuth = self.profile.profile['MSPAuth']
 
     def _get_login_page(self, message_url=None, post_url=None, id='2'):
+        ''' creates the data needed for the hotmail login '''
+
+        # WARNING: This depends on papyon!
+        post_url, token = self.profile.request_mail_url()
+        post_url += self.profile.profile['lang_preference']
+
+        template_data = {
+            'site': post_url,
+            'token': token["token"]
+        }
+
+        return self._parse_template(template_data)
+
+        # WARNING: The authentication method below is deprecated:
         if post_url is None:
             if self.user.split('@')[1] == 'msn.com':
                 post_url = 'https://msnia.login.live.com/ppsecure/md5auth.srf?lc=' + self.profile['lang_preference']
@@ -49,9 +63,9 @@ class Hotmail:
         if message_url is None:
             message_url = "/cgi-bin/HoTMaiL"
 
-        sl = str(int(time()) - int(self.profile['LoginTime']))
+        sl = str(int(time()) - int(self.profile.profile['LoginTime']))
         auth = self.MSPAuth
-        sid = self.profile['sid']
+        sid = self.profile.profile['sid']
         cred =  hashlib.md5(auth + sl + self.password).hexdigest()
 
         template_data = {
@@ -70,13 +84,14 @@ class Hotmail:
         return self._parse_template(template_data)
 
     def _parse_template(self, data):
+        ''' adds the data to the template and returns the tmp file path '''
         hotmlog_file = open(os.path.join(os.getcwd(), 'data','hotmlog.htm'))
         hotmlog = hotmlog_file.read()
         hotmlog_file.close()
         for key in data:
             hotmlog = hotmlog.replace('$'+key, data[key])
 
-        name_suffix = hashlib.md5(self.password+self.user).hexdigest() + ".html"
+        name_suffix = hashlib.md5(self.user).hexdigest() + ".html"
 
         file_ = tempfile.mkstemp(suffix = name_suffix)[1]
 
@@ -85,3 +100,4 @@ class Hotmail:
         tmp_file.close()
 
         return 'file:///' + file_
+

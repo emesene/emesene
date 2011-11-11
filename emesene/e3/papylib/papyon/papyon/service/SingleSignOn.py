@@ -207,10 +207,12 @@ class SingleSignOn(SOAPService):
                     "/wsa:EndpointReference/wsa:Address")
             token.lifetime[0] = node.findtext("./wst:LifeTime/wsu:Created", "datetime")
             token.lifetime[1] = node.findtext("./wst:LifeTime/wsu:Expires", "datetime")
-            
+
             try:
                 token.security_token = node.findtext("./wst:RequestedSecurityToken"
                         "/wsse:BinarySecurityToken")
+                if token.security_token == "":
+                    raise AttributeError
             except AttributeError:
                 token.security_token = node.findtext("./wst:RequestedSecurityToken"
                         "/xmlenc:EncryptedData/xmlenc:CipherData"

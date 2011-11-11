@@ -93,7 +93,7 @@ class Session(e3.Session):
         return self.__worker
 
     def get_profile(self):
-        return self.__worker.profile.profile
+        return self.__worker.profile
 
     # methods for the privacy tab
     def get_blocked_contacts(self):

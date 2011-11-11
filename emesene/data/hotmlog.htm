@@ -34,6 +34,8 @@ body {
     <p>loading mail</p>
 </div>
 <form id="pform" action="$site" method="post">
+    <input type="hidden" name="token" value="$token" />
+<!-- // Deprecated
     <input type="hidden" name="mode" value="ttl" />
     <input type="hidden" name="login" value="$login" />
     <input type="hidden" name="username" value="$email" />
@@ -46,6 +48,7 @@ body {
     <input type="hidden" name="creds" value="$creds" />
     <input type="hidden" name="svc" value="mail" />
     <input type="hidden" name="js" value="yes" />
+-->
 </form>
 </body>
 </html>
