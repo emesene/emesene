@@ -61,7 +61,7 @@ except ImportError:
 try:
     from django.conf import settings
 except ImportError:
-    print 'Django module not found.'
+    pass
 import binascii
 import urlparse
 import mimetypes
