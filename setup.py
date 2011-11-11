@@ -58,26 +58,30 @@ def osx_check():
 if os.name == "nt":
     import py2exe
 
-    _data_files = ['../dlls/Microsoft.VC90.CRT.manifest',
-        '../dlls/msvcm90.dll',
-        '../dlls/msvcp90.dll',
-        '../dlls/msvcr71.dll',
-        '../dlls/msvcr90.dll',
-        ('gui/base', ['gui/base/template.html'])]
+    _data_files = []
 
-    for base in ("e3/msn/xml templates", "themes", "plugins", "gui/common"):
-        for dirname, dirnames, files in os.walk(base):
-            fpath = []
-            for f in files:
-                fpath.append(os.path.join(dirname, f))
-            _data_files.append((dirname, fpath))
+    for dirname, dirnames, files in os.walk("emesene"):
+        fpath = []
+        for f in files:
+            fpath.append(os.path.join(dirname, f))
+        _data_files.append((dirname[8:], fpath))
+
+    for dirname, dirnames, files in os.walk("dlls"):
+        fpath = []
+        for f in files:
+            fpath.append(os.path.join(dirname, f))
+        _data_files.append((".", fpath))
+
 
     opts = {
         "py2exe": {
-            "packages": ["encodings", "gtk", "OpenSSL", "Crypto", "papyon", "xml", "xml.etree", "xml.etree.ElementTree"],
+            "packages": ["encodings", "gtk", "OpenSSL", "Crypto", "xml",
+                         "xml.etree", "xml.etree.ElementTree"],
             "includes": ["locale", "gio", "cairo", "pangocairo", "pango",
                 "atk", "gobject", "os", "code", "winsound", "win32api",
-                "win32gui", "optparse", "plugin_base", "OpenSSL", "Crypto", "papyon"],
+                "plistlib", "win32gui", "OpenSSL", "Crypto", "Queue", "sqlite3",
+                "glob", "webbrowser", "json", "imaplib", "cgi", "gzip", "uuid",
+                "platform", "imghdr"],
             "excludes": ["ltihooks", "pywin", "pywin.debugger",
                 "pywin.debugger.dbgcon", "pywin.dialogs",
                 "pywin.dialogs.list", "Tkconstants", "Tkinter", "tcl",
@@ -86,15 +90,15 @@ if os.name == "nt":
                 "getopt", "gdk"],
             "dll_excludes": ["libglade-2.0-0.dll", "w9xpopen.exe"],
             "optimize": "2",
-            "dist_dir": "../dist",
+            "dist_dir": "dist",
             "skip_archive": 1
         }
     }
 
     setup(
         requires   = ["gtk"],
-        windows    = [{"script": "emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene"}],
-        console    = [{"script": "emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_debug"}],
+        windows    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene"}],
+        console    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_debug"}],
         options    = opts,
         data_files = _data_files,
         **setup_info
