@@ -19,7 +19,7 @@
 #    module created by Andrea Stagi stagi.andrea(at)gmail.com
 #
 
-from urllib2 import urlopen
+from urllib import urlopen
 
 try:
     from json import loads
