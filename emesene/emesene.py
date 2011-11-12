@@ -723,9 +723,7 @@ class Controller(object):
             conv_manager.present(conversation)
 
 
-        if not self.session.config.b_mute_sounds and other_started and \
-           self.session.contacts.me.status != e3.status.BUSY and \
-           self.session.config.b_play_first_send and not \
+        if self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
             self.soundPlayer.play(gui.theme.sound_theme.sound_type)
 
