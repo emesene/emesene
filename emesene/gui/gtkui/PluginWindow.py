@@ -45,8 +45,7 @@ class PluginMainVBox(ExtensionDownloadList):
         line, using Pango markup.
         '''
         name = name.replace('_', ' ')
-        pretty_name = '<span><b>%s</b>\n<small>%s</small></span>'
-        return pretty_name % (name.capitalize(), description)
+        return '<span><b>%s</b>\n<small>%s</small></span>' % (name, description)
 
     def on_update(self, widget=None, download=False, clear=False):
         '''called when the liststore need to be changed'''
@@ -65,7 +64,7 @@ class PluginMainVBox(ExtensionDownloadList):
                 path = plugin.path
                 if path.startswith(self.config_dir.base_dir) and not is_active:
                     self.removable_list['plugin'][name] = path
-                self.append(is_active, self.prettify_name(name,
+                self.append(is_active, self.prettify_name(plugin.meta.name,
                             description=pluginmanager.plugin_description(name)),
                             name, path=path)
             ExtensionDownloadList.on_update(self, widget, download, clear)

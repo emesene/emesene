@@ -22,9 +22,11 @@ import os
 import sys
 import logging
 
+from metaparser import MetaData
+
 log = logging.getLogger('pluginmanager')
 
-BLACKLIST = ["lint.py", "__init__.py"]
+BLACKLIST = ("lint.py", "__init__.py")
 
 
 class PackageResource(object):
@@ -62,7 +64,7 @@ class PluginHandler(object):
 
     '''
     def __init__(self, base_dir, name, is_package=False):
-        '''@param directory The directory containing the package'''
+        '''@param base_dir The directory containing the package'''
         self.name = os.path.basename(name.rstrip("/"))
         if not is_package:
             self.name = self.name.split(".")[0]
@@ -72,6 +74,8 @@ class PluginHandler(object):
         self._instance = None
 
         self.is_package = is_package
+
+        self.meta = MetaData(os.path.join(self.path, "meta.json"))
 
         self.module = None
         self._do_import()
@@ -134,7 +138,7 @@ class PluginHandler(object):
             self._instance.active = False
 
     def config(self, session):
-        if self.is_active() and self._instance.configurable():
+        if self.is_active() and self.meta.configurable:
             self._instance.config(session)
             return True
 
@@ -143,7 +147,7 @@ class PluginHandler(object):
     def configurable(self):
         if not self.is_active():
             return False
-        return self._instance.configurable()
+        return self.meta.configurable
 
     def is_active(self):
         '''@return True if an instance exist and is started. False otherwise'''
@@ -153,8 +157,7 @@ class PluginHandler(object):
 
     def get_description(self):
         '''@return plugin description from Plugin class'''
-        description = self.module.Plugin.description
-        return description if description != "Your first plugin." else self.module.Plugin._description
+        return self.meta.description
 
 
 class PluginManager(object):
