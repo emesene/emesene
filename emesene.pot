@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-05 19:56+0100\n"
+"POT-Creation-Date: 2011-11-12 13:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -313,7 +313,7 @@ msgid "E-Mail"
 msgstr ""
 
 #: emesene/gui/gtkui/ContactInformation.py:140 emesene/gui/gtkui/Dialog.py:943
-#: emesene/gui/gtkui/ExtensionList.py:31 emesene/gui/gtkui/Login.py:66
+#: emesene/gui/gtkui/ExtensionList.py:35 emesene/gui/gtkui/Login.py:66
 #: emesene/gui/gtkui/MainMenu.py:86 emesene/gui/gtkui/Tooltips.py:53
 #: emesene/gui/common/TrayIcon.py:178
 msgid "Status"
@@ -800,40 +800,40 @@ msgstr ""
 msgid "Ok"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:37 emesene/gui/gtkui/Preferences.py:902
+#: emesene/gui/gtkui/ExtensionList.py:41 emesene/gui/gtkui/Preferences.py:902
 msgid "Name"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:161
+#: emesene/gui/gtkui/ExtensionList.py:166
 msgid "Supported"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:162
+#: emesene/gui/gtkui/ExtensionList.py:167
 msgid "Community"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:175
+#: emesene/gui/gtkui/ExtensionList.py:180
 msgid "Download"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:243
+#: emesene/gui/gtkui/ExtensionList.py:248
 msgid "Refresh extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:244
+#: emesene/gui/gtkui/ExtensionList.py:249
 msgid "Refreshing extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:256
-#: emesene/gui/gtkui/ExtensionList.py:257
+#: emesene/gui/gtkui/ExtensionList.py:263
+#: emesene/gui/gtkui/ExtensionList.py:264
 msgid "Downloading extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:298
+#: emesene/gui/gtkui/ExtensionList.py:315
 msgid "Available for download"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:381 emesene/gui/gtkui/PluginWindow.py:58
+#: emesene/gui/gtkui/ExtensionList.py:394 emesene/gui/gtkui/PluginWindow.py:58
 msgid "Installed"
 msgstr ""
 
