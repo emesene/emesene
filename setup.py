@@ -16,7 +16,7 @@ python_version = platform.python_version()[0:3]
 
 setup_info = dict(
     name = "emesene",
-    version = "2.0",
+    version = "2.11.11",
     description = "Instant Messaging Client",
     author = "Luis Mariano Guerra",
     author_email = "luismarianoguerra@gmail.com",
