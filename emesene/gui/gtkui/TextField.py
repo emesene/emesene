@@ -147,3 +147,6 @@ class TextField(gtk.VBox):
             self.on_entry_activate(self.entry)
             return True
         return False
+
+    def has_focus(self):
+        return self.entry.is_focus()

@@ -241,6 +241,17 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
                 self.entry.grab_focus()
             else:
                 self.entry.hide()
+        elif not self.panel.nick.has_focus() and \
+             not self.panel.message.has_focus():
+            if event.string != "":
+                if not self.panel.search.get_active():
+                    self.panel.search.set_active(True)
+                    self.entry.show()
+                    self.entry.grab_focus()
+            elif event.keyval == gtk.keysyms.BackSpace and \
+                 self.entry.get_text_length() == 1:
+                self.panel.search.set_active(False)
+                self.entry.hide()
 
     def on_disconnect(self, close=None):
         '''callback called when the disconnect option is selected'''
