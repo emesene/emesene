@@ -82,7 +82,7 @@ class MessageFormatter(object):
         if msg.type is None:
             msg.type = e3.Message.TYPE_MESSAGE
 
-        if not msg.timestamp == None:
+        if not msg.timestamp is None:
             timestamp = calendar.timegm(msg.timestamp.timetuple())
         else:
             timestamp = time.time()
@@ -101,7 +101,6 @@ class MessageFormatter(object):
 
         if msg.type == e3.Message.TYPE_FLNMSG:
             template = self.offline_incoming
-            timestamp = msg.timestamp
 
         formated_time = time.strftime('%c', time.gmtime(timestamp))
         formated_short_time = time.strftime('%X', time.localtime(timestamp))
