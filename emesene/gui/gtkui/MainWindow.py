@@ -79,9 +79,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.pack_start(self.below_menu, False)
         self.pack_start(self.panel, False)
         self.pack_start(self.below_panel, False)
+        self.pack_start(self.entry, False)
         self.pack_start(scroll, True, True)
         self.pack_start(self.below_userlist, False)
-        self.pack_start(self.entry, False)
 
         self.contact_list.contact_selected.subscribe(self._on_contact_selected)
         self.contact_list.group_selected.subscribe(self._on_group_selected)
