@@ -95,8 +95,8 @@ class ConversationManager(object):
             conversation = self.new_conversation(cid, [account])
 
         if conversation is not None:
-            conversation.on_receive_message(message, account, cedict)
             self.set_message_waiting(conversation, True)
+            conversation.on_receive_message(message, account, cedict)
 
     def _on_user_typing(self, cid, account, *args):
         """
