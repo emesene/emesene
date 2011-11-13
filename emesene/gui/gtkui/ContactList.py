@@ -230,7 +230,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     return False
 
                 if not self.show_blocked:
-                    if len([contact for contact in contacts \
+                    online_contacts = self.contacts.get_online_list(contacts)
+                    if len([contact for contact in online_contacts \
                        if contact.blocked]) == con_on:
                         return False
 
