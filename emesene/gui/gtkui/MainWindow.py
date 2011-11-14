@@ -158,7 +158,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.remove(self.below_userlist)
         self.below_userlist = extension.get_and_instantiate('below userlist', self)
         self.pack_start(self.below_userlist, False)
-        pos = len(self.get_children()) - 2
+        pos = len(self.get_children()) - 1
         self.reorder_child(self.below_userlist, pos)
         self.below_userlist.show()
 
