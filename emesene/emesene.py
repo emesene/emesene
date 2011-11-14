@@ -42,8 +42,12 @@ def project_path():
     even if we are frozen using py2exe"""
 
     if we_are_frozen():
-        return os.path.abspath(os.path.dirname(unicode(sys.executable,
+        path = os.path.abspath(os.path.dirname(unicode(sys.executable,
             sys.getfilesystemencoding())))
+        if sys.executable.endswith("portable.exe") or \
+           sys.executable.endswith("portable_debug.exe"):
+            os.environ['APPDATA'] = path
+        return path
 
     this_module_path = os.path.dirname(unicode(__file__,
         sys.getfilesystemencoding()))
