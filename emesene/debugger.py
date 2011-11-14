@@ -46,7 +46,7 @@ class QueueHandler(logging.Handler):
 
     instance = None
 
-    def __init__(self, maxlen=50):
+    def __init__(self, maxlen=500):
         logging.Handler.__init__(self)
         self.setLevel(logging.DEBUG)
         self.maxlen = maxlen
