@@ -48,7 +48,7 @@
     !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
     ; Finish page configuration
-    !define MUI_FINISHPAGE_RUN "$EXEDIR\${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}\emesene.exe"
+    !define MUI_FINISHPAGE_RUN "$EXEDIR\emesene\emesene_portable.exe"
 
 #--------------------------------
 # Pages
@@ -85,18 +85,20 @@
 
     ; Main installation (Required)
     Section "${PROGRAM_NAME} ${PROGRAM_VERSION}" secInstall
-        SetOutPath "$EXEDIR\${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}"
+        SetOutPath "$EXEDIR\emesene"
         SetOverwrite on
-        File /r /x *.py dist\*.*
+        File /r /x *.py /x emesene.exe /x emesene_debug.exe dist\*.*
 
-        SetOutPath "$EXEDIR\${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}"
+        SetOutPath "$EXEDIR\emesene"
     SectionEnd
 
+    /*
     ; Shortcut
     Section "Shortcut"  secShortcut
         ; Creates shortcut
-        CreateShortCut "$EXEDIR\${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}.lnk" "$EXEDIR\${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}\emesene.exe"
+        CreateShortCut "$EXEDIR\${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}.lnk" "$EXEDIR\${PROGRAM_NAME}-${PROGRAM_VERSION}-${PROGRAM_BUILDTIME}-${PROGRAM_TYPE}\emesene_portable.exe"
     SectionEnd
+    */
 
     /*
     ; Plug-ins (Optional)

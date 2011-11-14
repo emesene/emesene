@@ -184,7 +184,7 @@
 
         SetOutPath "$INSTDIR"
         SetOverwrite on
-        File /r /x *.py dist\*.*
+        File /r /x *.py /x *portable* dist\*.*
 
         ; Store installation folder
         WriteRegStr ${REG_HIVE} "${REG_INSTALL}" "Install_Dir" "$INSTDIR"

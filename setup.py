@@ -10,7 +10,7 @@ except ImportError:
 
 import os
 import platform
-
+import sys
 
 python_version = platform.python_version()[0:3]
 
@@ -60,29 +60,51 @@ if os.name == "nt":
 
     _data_files = []
 
-    for dirname, dirnames, files in os.walk("emesene"):
-        fpath = []
-        for f in files:
-            if not f.endswith(".pyc") and not f.startswith("."):
-                fpath.append(os.path.join(dirname, f))
-        _data_files.append((dirname[8:], fpath))
+    #include data files, like images, xml, html files
+    for dir in ['emesene/e3', 'emesene/gui', 'emesene/po', 'emesene/themes']:
+        for dirname, dirnames, files in os.walk(dir):
+            if dirname.find("xmppy") == -1 and dirname.find("papylib\papyon") == -1:
+                fpath = []
+                for f in files:
+                    #ignore pyc, py, .gitignore, .doxygen and lintreport.sh files
+                    if not f.endswith(".pyc") \
+                      and not f.endswith(".py") \
+                      and not f.startswith(".git") \
+                      and not f == ".doxygen" \
+                      and not f == "lintreport.sh":
+                        fpath.append(os.path.join(dirname, f))
+                if fpath != []:
+                    _data_files.append((dirname[8:], fpath))
 
+    #include all needed dlls
     for dirname, dirnames, files in os.walk("dlls"):
         fpath = []
         for f in files:
             fpath.append(os.path.join(dirname, f))
-        _data_files.append((".", fpath))
+        if fpath != []:
+            _data_files.append((".", fpath))
 
+    # include all needed modules
+    includes = ["locale", "gio", "cairo", "pangocairo", "pango",
+                "atk", "gobject", "os", "code", "winsound", "win32api",
+                "plistlib", "win32gui", "OpenSSL", "Crypto", "Queue", "sqlite3",
+                "glob", "webbrowser", "json", "imaplib", "cgi", "gzip", "uuid",
+                "platform", "imghdr", "ctypes", "optparse", "plugin_base",
+                "e3.msn", "papyon", "xmpp", "plugins"]
+
+    # incude gui.common modules manually, i guess py2exe doesn't do that
+    # automatically because the imports are made inside some functions    
+    for dirname, dirnames, files in os.walk("emesene\\gui\\common"):
+        fpath = []
+        for f in files:
+            if f != "__init__.py" and f.endswith(".py"):
+                includes.append("gui.common."+f[:-2])
 
     opts = {
         "py2exe": {
             "packages": ["encodings", "gtk", "OpenSSL", "Crypto", "xml",
                          "xml.etree", "xml.etree.ElementTree"],
-            "includes": ["locale", "gio", "cairo", "pangocairo", "pango",
-                "atk", "gobject", "os", "code", "winsound", "win32api",
-                "plistlib", "win32gui", "OpenSSL", "Crypto", "Queue", "sqlite3",
-                "glob", "webbrowser", "json", "imaplib", "cgi", "gzip", "uuid",
-                "platform", "imghdr", "ctypes"],
+            "includes": includes,
             "excludes": ["ltihooks", "pywin", "pywin.debugger",
                 "pywin.debugger.dbgcon", "pywin.dialogs",
                 "pywin.dialogs.list", "Tkconstants", "Tkinter", "tcl",
@@ -96,15 +118,24 @@ if os.name == "nt":
         }
     }
 
+    # Add paths so we don't need to copy files to ./emesene and we can run the
+    # setup from outside emesene's source folder
+    sys.path.insert(0, os.path.abspath("./dlls"))
+    sys.path.insert(0, os.path.abspath("./emesene"))
+    sys.path.insert(0, os.path.abspath("./emesene/e3/papylib/papyon"))
+    sys.path.insert(0, os.path.abspath("./emesene/e3/jabber/xmppy"))
+
+    # run setup
     setup(
         requires   = ["gtk"],
-        windows    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene"}],
-        console    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_debug"}],
+        windows    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene"},
+                      {"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_portable"}],
+        console    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_debug"},
+                      {"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_portable_debug"}],
         options    = opts,
         data_files = _data_files,
         **setup_info
     )
-
     print "done! files at: dist"
 
 else:
