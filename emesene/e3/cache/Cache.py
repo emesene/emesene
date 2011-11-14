@@ -17,6 +17,7 @@ def get_file_path_hash(file_path):
     '''
 
     if not os.access(file_path, os.R_OK):
+        log.warning("Can't read file to hash")
         return None
 
     handle = file(file_path)

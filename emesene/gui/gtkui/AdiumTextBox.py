@@ -138,7 +138,8 @@ class OutputView(webkit.WebView):
 
     def on_download_requested(self, webview, download):
         if self.add_emoticon_cb is not None:
-            self.add_emoticon_cb(download.get_uri())
+            uri = download.get_uri().split("?")[0]
+            self.add_emoticon_cb(uri)
         return False
 
     def on_navigation_requested(self, widget, WebKitWebFrame, WebKitNetworkRequest):
