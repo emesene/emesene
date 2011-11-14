@@ -21,7 +21,6 @@ import logging
 log = logging.getLogger('e3.common.Signal')
 
 import weakref
-import traceback
 
 class Signal(object):
     '''an object that represents a signal a callback can subscribe
@@ -67,13 +66,11 @@ class Signal(object):
                     break
             except TypeError:
                 to_remove.append(callback)
-                log.warning('Method called on dead object: %s' %
+                log.exception('Method called on dead object: %s' %
                         format_callback_name(callback))
-                traceback.print_exc()
             except Exception, error:
-                log.warning('Signal handler (%s) error: %s' %
+                log.exception('Signal handler (%s) error: %s' %
                         (format_callback_name(callback), str(error)))
-                traceback.print_exc()
 
         for item in to_remove:
             del self._subscribers[item]
