@@ -348,13 +348,8 @@ class Conversation(object):
 
     is_group_chat = property(fget=_get_group_chat)
 
-    def _on_send_message(self, text):
-        '''method called when the user press enter on the input text'''
-        cedict = self.emcache.parse()
-        custom_emoticons = gui.base.MarkupParser.get_custom_emotes(text, cedict)
-
-        self.session.send_message(self.cid, text, self.cstyle, cedict, custom_emoticons)
-        message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
+    def output_message(self, message, cedict):
+        '''display current outgoing message into OutputText'''
 
         msg = self.conv_status.pre_process_message(self.session.contacts.me,
             message, False, cedict, self.emcache.path, message.timestamp,
@@ -364,9 +359,30 @@ class Conversation(object):
 
         self.conv_status.post_process_message(msg)
 
+    def _on_send_message(self, text):
+        '''method called when the user press enter on the input text'''
+        cedict = self.emcache.parse()
+        custom_emoticons = gui.base.MarkupParser.get_custom_emotes(text, cedict)
+
+        self.session.send_message(self.cid, text, self.cstyle, cedict, custom_emoticons)
+
+        message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
+        self.output_message(message, cedict)
+
         self.messages.push(text)
         self.play_send()
         self.conv_status.update_status()
+
+    def input_message(self, message, contact, cedict, cepath):
+        '''display current ingoing message into OutputText'''
+
+        msg = self.conv_status.pre_process_message(contact,
+                message, True, cedict, cepath,
+                message.timestamp, message.type, message.style)
+
+        self.output.receive_message(self.formatter, msg)
+
+        self.conv_status.post_process_message(msg)
 
     def on_receive_message(self, message, account, received_custom_emoticons):
         '''method called when a message arrives to the conversation'''
@@ -381,13 +397,7 @@ class Conversation(object):
 
             user_emcache = self.caches.get_emoticon_cache(account)
 
-            msg = self.conv_status.pre_process_message(contact,
-                message, True, received_custom_emoticons, user_emcache.path,
-                message.timestamp, message.type, message.style)
-
-            self.output.receive_message(self.formatter, msg)
-
-            self.conv_status.post_process_message(msg)
+            self.input_message(message, contact, received_custom_emoticons, user_emcache.path)
 
             self.play_type()
 
