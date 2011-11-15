@@ -140,21 +140,12 @@ class Worker(e3.Worker):
             contact.picture)
 
         if old_status != stat:
-            change_type = 'status'
-
-            if old_status == e3.status.OFFLINE:
-                change_type = 'online'
-
-            if stat == e3.status.OFFLINE:
-                change_type = 'offline'
-
             do_notify = (self.start_time + Worker.NOTIFICATION_DELAY) < \
                     time.time()
 
-            self.session.contact_attr_changed(account, change_type, old_status,
+            self.session.contact_attr_changed(account, 'status', old_status,
                     do_notify)
-            self.session.log('status change', stat, str(stat),
-                log_account)
+            self.session.log('status change', stat, str(stat), log_account)
 
         if old_message != contact.message:
             self.session.contact_attr_changed(account, 'message', old_message)
