@@ -21,7 +21,7 @@ import re
 import os
 import plistlib
 try:
-    import OrderedDict
+    from collections import OrderedDict
 except:
     from e3.common.OrderedDict import OrderedDict
 plistlib._InternalDict = OrderedDict
