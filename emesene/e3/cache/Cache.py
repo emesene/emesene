@@ -127,4 +127,4 @@ class Cache(object):
             return value == 0
         else:
             log.warning("Can't resize animated gifs, install ImageMagick")
-            return false
+            return False
