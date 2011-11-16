@@ -17,6 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import e3
+import extension
 
 import logging
 log = logging.getLogger('gui.base.ConversationManager')
@@ -38,6 +39,11 @@ class ConversationManager(object):
 
         if self.session.conversations is None or conversation_tabs:
             self.session.conversations = {}
+
+        self.aftconv = None
+        AfterConversation = extension.get_default('after_new_conversation')
+        if AfterConversation is not None:
+            self.aftconv = AfterConversation(self.session)
 
     def subscribe_signals(self):
         self.session.signals.conv_message.subscribe(
@@ -236,9 +242,10 @@ class ConversationManager(object):
 
     def after_new_conversation(self, conversation):
         '''
-         Override what to do after create a conversation
+         What to do after create a conversation
         '''
-        pass
+        if self.aftconv is not None:
+            self.aftconv.run(conversation)
 
     def renew_session(self, session):
         '''reopen all conversations when the user reconnects'''
