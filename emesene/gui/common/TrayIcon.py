@@ -41,7 +41,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         """
         constructor
 
-        handler -- a e3common.Handler.TrayIconHandler object
+        handler -- a gui.base.Handler.TrayIconHandler object
         """
         gui.BaseTray.__init__(self, handler)
         gtk.StatusIcon.__init__(self)
