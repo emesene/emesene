@@ -84,13 +84,61 @@ if os.name == "nt":
         if fpath != []:
             _data_files.append((".", fpath))
 
+    #include gtk runtime/share, runtime/lib and runtime/etc
+    for path in sys.path:
+        if path.find("gtk") != -1:
+            for dirname, dirnames, files in os.walk(path+"\\runtime\\share\\"):
+                dir = dirname.replace(path+"\\runtime\\share\\","")
+                to = dirname.replace(path+"\\runtime\\","")
+                #ignore unneded folders
+                if dir.startswith('glib-2.0') or \
+                   dir.startswith('gtk-2.0') or \
+                   dir.startswith('icons') or \
+                   dir.startswith('locale') or \
+                   dir.startswith('themes') or \
+                   dir.startswith('webkit-1.0') or \
+                   dir.startswith('xml'):
+                    #ignore extra themes
+                    if not dir.startswith("themes\\Default\\") and \
+                       not dir.startswith("themes\\Emacs\\") and \
+                       not dir.startswith("themes\\Raleigh\\"):
+                        fpath = []
+                        for f in files:
+                            fpath.append(os.path.join(dirname, f))
+                        if fpath != []:
+                            _data_files.append((to, fpath))
+            for dirname, dirnames, files in os.walk(path+"\\runtime\\lib\\"):
+                to = dirname.replace(path+"\\runtime\\","")
+                fpath = []
+                for f in files:
+                    #ignore some files
+                    if not f.endswith(".a") and not f.endswith(".lib"):
+                        fpath.append(os.path.join(dirname, f))
+                if fpath != []:
+                    _data_files.append((to, fpath))
+            for dirname, dirnames, files in os.walk(path+"\\runtime\\etc\\"):
+                to = dirname.replace(path+"\\runtime\\","")
+                fpath = []
+                for f in files:
+                    fpath.append(os.path.join(dirname, f))
+                if fpath != []:
+                    _data_files.append((to, fpath))
+    #Use clearlooks theme
+    for dirname, dirnames, files in os.walk(".\\windows\\Clearlooks\\"):
+        to = dirname.replace(".\\windows\\Clearlooks\\","")
+        fpath = []
+        for f in files:
+            fpath.append(os.path.join(dirname, f))
+        if fpath != []:
+            _data_files.append((to, fpath))
+
     # include all needed modules
     includes = ["locale", "gio", "cairo", "pangocairo", "pango",
                 "atk", "gobject", "os", "code", "winsound", "win32api",
                 "plistlib", "win32gui", "OpenSSL", "Crypto", "Queue", "sqlite3",
                 "glob", "webbrowser", "json", "imaplib", "cgi", "gzip", "uuid",
                 "platform", "imghdr", "ctypes", "optparse", "plugin_base",
-                "e3.msn", "papyon", "xmpp", "plugins"]
+                "e3.msn", "papyon", "xmpp", "plugins","webkit"]
 
     # incude gui.common modules manually, i guess py2exe doesn't do that
     # automatically because the imports are made inside some functions    
@@ -127,14 +175,14 @@ if os.name == "nt":
 
     # run setup
     setup(
-        requires   = ["gtk"],
-        windows    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene"},
-                      {"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_portable"}],
-        console    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_debug"},
-                      {"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_portable_debug"}],
-        options    = opts,
-        data_files = _data_files,
-        **setup_info
+       requires   = ["gtk"],
+       windows    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene"},
+                     {"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_portable"}],
+       console    = [{"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_debug"},
+                     {"script": "emesene/emesene.py", "icon_resources": [(1, "emesene.ico")], "dest_base": "emesene_portable_debug"}],
+       options    = opts,
+       data_files = _data_files,
+       **setup_info
     )
     print "done! files at: dist"
 
