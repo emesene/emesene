@@ -258,6 +258,9 @@ def _color_gradient(color1, color2, length):
         r, g, b = [hex2dec(i.upper()) for i in (r, g, b)]
         return (r, g, b)
 
+    if length == 0:
+        return
+
     rgb_tuple1 = full_hex2dec(color1)
     rgb_tuple2 = full_hex2dec(color2)
 
