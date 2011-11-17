@@ -80,9 +80,10 @@ class FileHandler(object):
     menu items
     '''
 
-    def __init__(self, session):
+    def __init__(self, session, on_quit=None):
         '''constructor'''
         self.session = session
+        self.on_quit = on_quit
 
     def on_status_selected(self, stat):
         '''called when a status is selected on the status menu'''
@@ -94,7 +95,10 @@ class FileHandler(object):
 
     def on_quit_selected(self):
         '''called when a status is selected on the status menu'''
-        self.session.close(True)
+        if self.on_quit:
+            self.on_quit()
+        else:
+            self.session.close(True)
 
 class ActionsHandler(object):
     '''this handler contains all the handlers needed to handle the actions
@@ -576,14 +580,14 @@ class TrayIconHandler(FileHandler):
     this handler contains all the methods to handle a tray icon
     """
 
-    def __init__(self, session, theme, on_disconnect=None, on_quit=None):
+    def __init__(self, session, theme, on_quit=None):
         """
         constructor
 
         session -- a e3.Session implementation
         theme -- a gui.Theme object
         """
-        FileHandler.__init__(self, session)
+        FileHandler.__init__(self, session, on_quit)
         self.theme = theme
         
     def on_hide_show_mainwindow(self, main_window=None):

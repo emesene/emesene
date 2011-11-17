@@ -488,7 +488,7 @@ class Controller(object):
                 return
             self.tray_icon.set_visible(False)
 
-        handler = gui.base.TrayIconHandler(self.session, gui.theme)
+        handler = gui.base.TrayIconHandler(self.session, gui.theme, self.close_session)
         self.tray_icon = trayiconcls(handler, self.window)
 
     def _sync_emesene1(self):
