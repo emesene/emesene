@@ -100,7 +100,7 @@ class Worker(e3.Worker):
                 '·$4Red·$11Aqua·$6,8PurpleOnYellow·$14GrayOnYellow·0Black·$9Lime',
                 e3.status.BUSY, '', False)
         self._add_contact('thirteen@hotmail.com',
-                '[c=7][b][I am][/c=yellow][/b][c=89] so [A]wesome that [I] only use invalid tags [/c]',
+                '[c=7][b][I am][/c=yellow][/b][c=70][/c=89][c=89] so [A]wesome that [I] only use invalid tags [/c]',
                 e3.status.BUSY, '', False)
 
         self._add_group('ninjas')
