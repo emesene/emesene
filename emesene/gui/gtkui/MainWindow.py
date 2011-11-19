@@ -243,7 +243,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
                 self.entry.hide()
         elif not self.panel.nick.has_focus() and \
              not self.panel.message.has_focus():
-            if event.string != "":
+            if event.string != "" and event.keyval != gtk.keysyms.Return and \
+               event.keyval != gtk.keysyms.KP_Enter:
                 if not self.panel.search.get_active():
                     self.panel.search.set_active(True)
                     self.entry.show()
