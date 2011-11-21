@@ -312,7 +312,9 @@ class SwitchboardManager(gobject.GObject):
         # Check already open switchboards
         for switchboard in self._switchboards.keys():
             switchboard_participants = set(switchboard.participants.values())
-            if handler_participants == switchboard_participants:
+            if handler_participants == switchboard_participants and \
+               (switchboard.state == msnp.ProtocolState.OPEN or \
+                switchboard.state == msnp.ProtocolState.OPENING):
                 logger.info("Using already opened switchboard %s" %
                         switchboard.session_id)
                 self._switchboards[switchboard].add(handler)
