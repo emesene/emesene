@@ -1327,9 +1327,13 @@ class Worker(e3.base.Worker, papyon.Client):
 
         if len(papyconversation.total_participants) == 1:
             first_dude = papyconversation.total_participants.pop()
-            switchboard = papyconversation.switchboard
+            try:
+                switchboard = papyconversation.switchboard
+            except AttributeError:
+                switchboard = None
 
-            if first_dude.presence == papyon.Presence.OFFLINE:
+            if first_dude.presence == papyon.Presence.OFFLINE or \
+               first_dude.network_id == papyon.profile.NetworkID.EXTERNAL:
                 if switchboard is None or \
                    switchboard.state == papyon.msnp.ProtocolState.CLOSED:
 
