@@ -1326,7 +1326,9 @@ class Worker(e3.base.Worker, papyon.Client):
         papyconversation = self.papyconv[cid]
 
         if len(papyconversation.total_participants) == 1:
-            first_dude = papyconversation.total_participants.pop()
+            for first_dude in papyconversation.total_participants:
+                break
+
             try:
                 switchboard = papyconversation.switchboard
             except AttributeError:
