@@ -34,10 +34,14 @@ import extension
 
 import ContactInformation
 
-import webkit
-
 import logging
 log = logging.getLogger('gtkui.Dialog')
+
+try:
+    import webkit
+    use_webkit = True
+except:
+    use_webkit = False
 
 class Dialog(object):
     '''a class full of static methods to handle dialogs, dont instantiate it'''
@@ -978,7 +982,9 @@ class Dialog(object):
 
     @classmethod
     def web_window(cls, title, url, callback):
-        '''returns a progress window used for emesene 1 synch'''
+        '''returns a window with a webview'''
+        if not use_webkit:
+            return None
         dialog = WebWindow(title, url, callback)
         dialog.show_all()
         return dialog
