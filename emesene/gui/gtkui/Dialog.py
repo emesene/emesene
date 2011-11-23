@@ -40,7 +40,7 @@ log = logging.getLogger('gtkui.Dialog')
 try:
     import webkit
     use_webkit = True
-except:
+except ImportError:
     use_webkit = False
 
 class Dialog(object):
