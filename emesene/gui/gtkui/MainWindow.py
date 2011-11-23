@@ -106,12 +106,19 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.on_mail_click()
 
     def _on_social_request(self, conn_url):
-        Desktop.open(conn_url)
 
-        def set_token(token):
+        def set_token(token_url):
+            if token_url.find("#access_token=") == -1:
+                return
+            pattern_start_token = "#access_token="
+            pattern_end_token = "&expires_in"
+            start_token = token_url.find(pattern_start_token) + len(pattern_start_token)
+            end_token = token_url.find(pattern_end_token)
+            token = token_url[start_token:end_token]
             self.session.config.facebook_token = token
+
         dialog = extension.get_default('dialog')
-        fb_token_dialog = dialog.facebook_token_window("", set_token)
+        fb_token_dialog = dialog.web_window(_("Connect Emesene and Facebook"), conn_url ,set_token)
 
 
     def _on_show_userpanel_changed(self, value):

@@ -34,6 +34,8 @@ import extension
 
 import ContactInformation
 
+import webkit
+
 import logging
 log = logging.getLogger('gtkui.Dialog')
 
@@ -975,9 +977,9 @@ class Dialog(object):
         return dialog
 
     @classmethod
-    def facebook_token_window(cls, title, callback):
+    def web_window(cls, title, url, callback):
         '''returns a progress window used for emesene 1 synch'''
-        dialog = FacebookTokenWindow(title, callback)
+        dialog = WebWindow(title, url, callback)
         dialog.show_all()
         return dialog
 
@@ -1802,42 +1804,21 @@ class ProgressWindow(gtk.Window):
         '''called when the action changes'''
         self.desclabel.set_text(action)
 
-class FacebookTokenWindow(gtk.Window):
+class WebWindow(gtk.Window):
     '''A class for a progressbar dialog'''
 
-    def __init__(self, title, callback):
+    def __init__(self, title, url, callback = None):
         '''Constructor. Packs widgets'''
         gtk.Window.__init__(self)
-        self._callback = callback
         self.set_title(title)
-        self.set_role("dialog")
-        self.set_modal(True)
-        self.buttoncancel = gtk.Button()
-        self.buttoncancel.set_label(_("Cancel"))
-        self.buttoncancel.connect('clicked', self.on_click_cancel)
-        self.buttonok = gtk.Button()
-        self.buttonok.set_label(_("Ok"))
-        self.buttonok.connect('clicked', self.on_click_ok)
-        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
-        self.set_default_size(300, 50)
-        self.set_position(gtk.WIN_POS_CENTER)
-        self.set_border_width(8)
-        hbox = gtk.HBox()
-        vbox = gtk.VBox()
-        self.text_token = gtk.TextView()
-        vbox.pack_start(self.text_token)
-        hbox.pack_start(self.buttonok)
-        hbox.pack_start(self.buttoncancel)
-        vbox.pack_start(hbox)
-        self.add(vbox)
+        self._callback = callback
+        bro = webkit.WebView()
+        bro.connect('load-committed', self._load_committed_cb)
+        bro.open(url)
+        self.add(bro)
 
-    def on_click_ok(self, widget):
-        buffer = self.text_token.get_buffer()
-        (start, end) = buffer.get_bounds()
-        token = buffer.get_text(start, end)
-        self._callback(token)
-        self.destroy()
-
-    def on_click_cancel(self, widget):
-        self.destroy()
+    def _load_committed_cb(self, web_view, frame):
+        uri = frame.get_uri()
+        if self._callback != None:
+            self._callback(uri)
         
