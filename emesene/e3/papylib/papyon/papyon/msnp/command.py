@@ -39,7 +39,7 @@ class CommandPrinter(object):
         command = self.command
 
         result = command.name
-        if command.transaction_id is not None:
+        if command.transaction_id is not None and result != 'OUT':
             result += ' ' + str(command.transaction_id)
 
         if command.arguments is not None and len(command.arguments) > 0:
@@ -206,7 +206,7 @@ class Command(object):
     ### private and special methods
     def __str__(self):
         result = self.name[:]
-        if self.transaction_id is not None:
+        if self.transaction_id is not None and result != 'OUT':
             result += ' ' + str(self.transaction_id)
 
         if self.arguments is not None and len(self.arguments) > 0:
