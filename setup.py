@@ -58,7 +58,7 @@ def osx_check():
 if os.name == "nt":
     import py2exe
 
-    _data_files = []
+    _data_files = [("data",["emesene/data/hotmlog.htm"])]
 
     #include data files, like images, xml, html files
     for dir in ['emesene/e3', 'emesene/gui', 'emesene/po', 'emesene/themes']:
