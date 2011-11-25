@@ -22,6 +22,7 @@ import os
 import time, calendar
 import datetime
 import xml.sax.saxutils
+import e3
 
 import parsers
 import MarkupParser
@@ -38,18 +39,22 @@ class AdiumTheme(object):
 
         get information from the theme located in path
         '''
-        self.path               = None
-        self.resources_path     = None
-        self.incoming_path      = None
-        self.outgoing_path      = None
-        self.content            = None
-        self.incoming           = None
-        self.incoming_next      = None
-        self.outgoing           = None
-        self.outgoing_next      = None
+        self.path = None
+        self.resources_path = None
+        self.incoming_path = None
+        self.outgoing_path = None
+        self.content = None
+        self.incoming = None
+        self.incoming_next = None
+        self.outgoing = None
+        self.outgoing_next = None
+        self.history_in = None
+        self.history_in_next = None
+        self.history_out = None
+        self.history_out_next = None
 
-        self._variant           = None
-        self.default_variant    = None
+        self._variant = None
+        self.default_variant = None
         self.load_information(path, variant)
 
     def load_information(self, path, variant):
@@ -78,6 +83,14 @@ class AdiumTheme(object):
         self.outgoing_next = read_file(self.outgoing_path,
                 'NextContent.html')
 
+        self.history_in = read_file(self.incoming_path, 'Context.html')
+        self.history_in_next = read_file(self.incoming_path,
+                'NextContext.html')
+
+        self.history_out = read_file(self.outgoing_path, 'Context.html')
+        self.history_out_next = read_file(self.outgoing_path,
+                'NextContext.html')
+
         #setup incoming template fallback
         if self.incoming is None:
             self.incoming = self.content
@@ -89,6 +102,17 @@ class AdiumTheme(object):
             self.outgoing = self.incoming
         if self.outgoing_next is None:
             self.outgoing_next = self.outgoing
+
+        #setup history template fallback
+        if (self.history_in is None):
+            self.history_in = self.incoming
+        if (self.history_in_next is None):
+            self.history_in_next = self.incoming_next
+
+        if (self.history_out is None):
+            self.history_out = self.outgoing
+        if (self.history_out_next is None):
+            self.history_out_next = self.outgoing_next
 
         #first try load custom Template.html from theme
         template_path = urljoin(self.resources_path, 'Template.html')
@@ -106,10 +130,15 @@ class AdiumTheme(object):
         if (msg.type == "status" and self.status):
             template = self.status
         elif not msg.first:
-            template = self.incoming_next
+            if (msg.type == e3.Message.TYPE_OLDMSG):
+                template = self.history_in_next
+            else:
+                template = self.incoming_next
         else:
-            template = self.incoming
-
+            if (msg.type == e3.Message.TYPE_OLDMSG):
+                template = self.history_in
+            else:
+                template = self.incoming
         return self._replace(template, msg)
 
     def _format_outgoing(self, msg):
@@ -119,10 +148,15 @@ class AdiumTheme(object):
         if (msg.type == "status" and self.status):
             template = self.status
         elif not msg.first:
-            template = self.outgoing_next
+            if (msg.type == e3.Message.TYPE_OLDMSG):
+                template = self.history_out_next
+            else:
+                template = self.outgoing_next
         else:
-            template = self.outgoing
-
+            if (msg.type == e3.Message.TYPE_OLDMSG):
+                template = self.history_out
+            else:
+                template = self.outgoing
         return self._replace(template, msg)
 
     def format(self, msg):

@@ -63,6 +63,8 @@ class MessageFormatter(object):
         self.offline_incoming = \
             '<i>(offline message)</i><b>%DISPLAYNAME%</b>:%NL%    [%SHORTTIME%] %MESSAGE%%NL%'
         self.information = '<i>%MESSAGE%</i>%NL%'
+        self.history = '<div class="message-history">'\
+            '<b>%TIME% %DISPLAYNAME%</b>: %MESSAGE%%NL%</div>'
 
     def format_message(self, template, message):
         '''format a message from the template, include new line
@@ -98,6 +100,9 @@ class MessageFormatter(object):
                     template = self.consecutive_incoming
                 else:
                     template = self.consecutive_outgoing
+
+        if msg.type == e3.Message.TYPE_OLDMSG:
+            template = self.history
 
         if msg.type == e3.Message.TYPE_FLNMSG:
             template = self.offline_incoming

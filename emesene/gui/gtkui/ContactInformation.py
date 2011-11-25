@@ -400,7 +400,7 @@ class ChatWidget(gtk.VBox):
                 contact = e3.Contact(account, nick=nick)
 
             datetimestamp = datetime.datetime.utcfromtimestamp(timestamp)
-            message = e3.Message(e3.Message.TYPE_MESSAGE, msg_text,
+            message = e3.Message(e3.Message.TYPE_OLDMSG, msg_text,
                         account, timestamp=datetimestamp)
 
             if is_me:
