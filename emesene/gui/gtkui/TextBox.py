@@ -368,12 +368,24 @@ class OutputText(TextBox):
         self.set_shadow_type(gtk.SHADOW_IN)
         self._textbox.set_editable(False)
         self._textbox.set_cursor_visible(False)
+        self.locked = False
+        self.pending = []
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
         '''clear the content'''
         TextBox.clear(self)
     
+    def lock (self):
+        self.locked = True
+
+    def unlock(self):
+        #add messages and then unlock
+        for text in self.pending:
+            self.append(text, self.config.b_allow_auto_scroll)
+        self.pending = []
+        self.locked = False
+
     def append(self, text, scroll=True):
         '''append formatted text to the widget'''
         TextBox.append(self, text, scroll)
@@ -384,7 +396,10 @@ class OutputText(TextBox):
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
         text = formatter.format(msg)
-        self.append(text, self.config.b_allow_auto_scroll)
+        if self.locked and msg.type!=e3.Message.TYPE_OLDMSG:
+            self.pending.append(text)
+        else:
+            self.append(text, self.config.b_allow_auto_scroll)
 
     def receive_message(self, formatter, msg):
         '''add a message to the widget'''
@@ -392,13 +407,20 @@ class OutputText(TextBox):
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
         text = formatter.format(msg)
-        self.append(text, self.config.b_allow_auto_scroll)
+        if self.locked and msg.type!=e3.Message.TYPE_OLDMSG:
+            self.pending.append(text)
+        else:
+            self.append(text, self.config.b_allow_auto_scroll)
 
     def information(self, formatter, msg):
         '''add an information message to the widget'''
         msg.message = Plus.msnplus_strip(msg.message)
-        self.append(formatter.format_information(msg.message),
-                self.config.b_allow_auto_scroll)
+        text = formatter.format_information(msg.message)
+
+        if self.locked and msg.type!=e3.Message.TYPE_OLDMSG:
+            self.pending.append(text)
+        else:
+            self.append(text,self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''

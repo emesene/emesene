@@ -23,6 +23,7 @@ import webkit
 import base64
 import xml.sax.saxutils
 
+import e3
 import gui
 from gui.base import Plus
 import utils
@@ -176,6 +177,18 @@ class OutputText(gtk.ScrolledWindow):
         self.clear()
         self.view.show()
         self.add(self.view)
+        self.locked = False
+        self.pending = []
+
+    def lock (self):
+        self.locked = True
+
+    def unlock(self):
+        #add messages and then unlock
+        for formatter, msg in self.pending:
+            self.view.add_message(msg)
+        self.pending = []
+        self.locked = False
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
@@ -184,16 +197,25 @@ class OutputText(gtk.ScrolledWindow):
 
     def send_message(self, formatter, msg):
         '''add a message to the widget'''
-        self.view.add_message(msg)
+        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
+            self.pending.append((formatter, msg))
+        else:
+            self.view.add_message(msg)
 
     def receive_message(self, formatter, msg):
         '''add a message to the widget'''
-        self.view.add_message(msg)
+        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
+            self.pending.append((formatter, msg))
+        else:
+            self.view.add_message(msg)
 
     def information(self, formatter, msg):
         '''add an information message to the widget'''
         msg.message = Plus.msnplus_strip(msg.message)
-        self.view.add_message(msg)
+        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
+            self.pending.append((formatter, msg))
+        else:
+            self.view.add_message(msg)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
