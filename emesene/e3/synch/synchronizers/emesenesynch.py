@@ -93,7 +93,7 @@ class EmeseneSynch(Synch):
                 dest_avatar = os.path.join(self.__dest_path, "avatars", infile)
 
                 if not os.path.exists(dest_avatar):
-                    shutil.copy (os.path.join(self.__source_path, "avatars", infile), 
+                    shutil.copy (os.path.join(self.__source_path, "avatars", infile),
                                  dest_avatar )
 
                 actual_avatar += 1.0
@@ -110,7 +110,7 @@ class EmeseneSynch(Synch):
             actual_emoticons = 0.0
 
             emoticons_dir = os.path.join(self.__dest_path, self.__myuser, "emoticons")
-             
+
             #try create emoticons directory
             try:
                 os.mkdir(emoticons_dir)
@@ -118,7 +118,12 @@ class EmeseneSynch(Synch):
                 pass
 
             fconfig = open(os.path.join(emoticons_dir,"emoticons.info"), 'a')
-            fmap1 = open(os.path.join(self.__source_path, "custom_emoticons", "map"), 'r')                
+            # if the user didn't use custom emoticon in version 1.0, there is no custom_emoticons/map
+            try:
+                fmap1 = open(os.path.join(self.__source_path, "custom_emoticons", "map"), 'r')
+            except IOError:
+                fconfig.close()
+                return
 
             while True:
                 self._is_stop()
@@ -129,7 +134,7 @@ class EmeseneSynch(Synch):
                 aux_name = emot_path.split("/")
                 emot_name = aux_name[len(aux_name) - 1]
 
-                dest_emoticon = os.path.join(self.__dest_path, self.__myuser, 
+                dest_emoticon = os.path.join(self.__dest_path, self.__myuser,
                                              "emoticons", emot_name)
 
                 if not os.path.exists(dest_emoticon):
@@ -173,7 +178,7 @@ class EmeseneSynch(Synch):
 
                 if found == 0:
                     new_account = self.__user_to_account(user[1])
- 
+
                     if(new_account == None):
                         new_account = e3.base.Contact(user[1])
                         new_account = e3.Logger.Account.from_contact(new_account)
@@ -182,7 +187,7 @@ class EmeseneSynch(Synch):
                         self._session.logger.log("status change", 0, new_account.nick, new_account)
 
 
-            #Get all old conversations		
+            #Get all old conversations
 
             conversations = self.__conn_src.cursor()
 
@@ -194,7 +199,7 @@ class EmeseneSynch(Synch):
             other_users_fetched = []
             actual_conv = 0
             conversations_list = conversations.fetchall()
-           
+
             percent = e3.common.PercentDone(len(conversations_list))
 
             for conv in conversations_list:
@@ -202,7 +207,7 @@ class EmeseneSynch(Synch):
                 self._is_stop()
 
                 users_fetched = []
-                
+
                 if id_conv != conv[0]:
                     other_users_fetched = self.__dest_user(conv[0])
                     id_conv = conv[0]
@@ -218,14 +223,14 @@ class EmeseneSynch(Synch):
                     self._prog_callback(percent.current)
 
                 for user_fetched in users_fetched:
-                    conversations_attr.append({"user" : self.__user_to_account(conv[1]), 
-                                               "dest" : user_fetched, 
-                                               "time" : conv[2], 
+                    conversations_attr.append({"user" : self.__user_to_account(conv[1]),
+                                               "dest" : user_fetched,
+                                               "time" : conv[2],
                                                "data" : self.__data_conversion(conv[3]),
                                                "cid"  : conv[0]})
 
 
-            actual_conv = 0  
+            actual_conv = 0
             percent = e3.common.PercentDone(len(conversations_attr))
 
             self.__reset_progressbar()
@@ -242,7 +247,7 @@ class EmeseneSynch(Synch):
                 self._is_stop()
 
                 if not self.__verify_duplicate(conv, conversation2_list):
-                    self._session.logger.log("message", 0, conv["data"], 
+                    self._session.logger.log("message", 0, conv["data"],
                                              conv["user"], conv["dest"], conv["time"],
                                              cid = conv["cid"])
 
