@@ -185,7 +185,7 @@ class OutputText(gtk.ScrolledWindow):
 
     def unlock(self):
         #add messages and then unlock
-        for formatter, msg in self.pending:
+        for msg in self.pending:
             self.view.add_message(msg)
         self.pending = []
         self.locked = False
@@ -197,23 +197,21 @@ class OutputText(gtk.ScrolledWindow):
 
     def send_message(self, formatter, msg):
         '''add a message to the widget'''
-        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
-            self.pending.append((formatter, msg))
-        else:
-            self.view.add_message(msg)
+        self.append(msg)
 
     def receive_message(self, formatter, msg):
         '''add a message to the widget'''
-        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
-            self.pending.append((formatter, msg))
-        else:
-            self.view.add_message(msg)
+        self.append(msg)
 
     def information(self, formatter, msg):
         '''add an information message to the widget'''
         msg.message = Plus.msnplus_strip(msg.message)
+        self.append(msg)
+
+    def append(self, msg):
+        '''appends a msg into the view'''
         if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
-            self.pending.append((formatter, msg))
+            self.pending.append(msg)
         else:
             self.view.add_message(msg)
 

@@ -382,13 +382,16 @@ class OutputText(TextBox):
     def unlock(self):
         #add messages and then unlock
         for text in self.pending:
-            self.append(text, self.config.b_allow_auto_scroll)
+            TextBox.append(self, text, self.config.b_allow_auto_scroll)
         self.pending = []
         self.locked = False
 
-    def append(self, text, scroll=True):
+    def append(self, text, msg, scroll=True):
         '''append formatted text to the widget'''
-        TextBox.append(self, text, scroll)
+        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
+            self.pending.append(text)
+        else:
+            TextBox.append(self, text, scroll)
 
     def send_message(self, formatter, msg):
         '''add a message to the widget'''
@@ -396,10 +399,7 @@ class OutputText(TextBox):
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
         text = formatter.format(msg)
-        if self.locked and msg.type!=e3.Message.TYPE_OLDMSG:
-            self.pending.append(text)
-        else:
-            self.append(text, self.config.b_allow_auto_scroll)
+        self.append(text, msg, self.config.b_allow_auto_scroll)
 
     def receive_message(self, formatter, msg):
         '''add a message to the widget'''
@@ -407,20 +407,13 @@ class OutputText(TextBox):
         msg.display_name = Plus.msnplus_strip(msg.display_name)
 
         text = formatter.format(msg)
-        if self.locked and msg.type!=e3.Message.TYPE_OLDMSG:
-            self.pending.append(text)
-        else:
-            self.append(text, self.config.b_allow_auto_scroll)
+        self.append(text, msg, self.config.b_allow_auto_scroll)
 
     def information(self, formatter, msg):
         '''add an information message to the widget'''
         msg.message = Plus.msnplus_strip(msg.message)
         text = formatter.format_information(msg.message)
-
-        if self.locked and msg.type!=e3.Message.TYPE_OLDMSG:
-            self.pending.append(text)
-        else:
-            self.append(text,self.config.b_allow_auto_scroll)
+        self.append(text, msg, self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
