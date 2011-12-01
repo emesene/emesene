@@ -82,6 +82,8 @@ class MessagingMenu(gui.BaseTray):
         contact = self.handler.session.contacts.get(account)
         conv_manager = self._get_conversation_manager(cid, account)
         conv = self._get_conversation(cid, account)
+        if conv is None:
+            return # it can happen, just quickly open/close a conv
         icid = conv.icid
 
         if icid not in self.indicator_dict.values() and conv_manager and \
