@@ -19,10 +19,12 @@
 import pynotify
 if not pynotify.init("emesene"):
     raise ImportError
-import utils
-from gui.base import Plus
+
 import logging
 log = logging.getLogger('gui.common.PyNotification')
+
+from gui.base import Plus
+import gui.gtkui.utils as utils
 
 NAME = 'PyNotification'
 DESCRIPTION = 'Wrapper around pynotify for the notification system'
