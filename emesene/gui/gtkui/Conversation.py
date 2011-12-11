@@ -62,6 +62,11 @@ class Conversation(gtk.VBox, gui.Conversation):
         CallWidget = extension.get_default('call widget')
         dialog = extension.get_default('dialog')
 
+        self.below_conversation = None
+        BelowConversation = extension.get_default('below conversation')
+        if BelowConversation is not None:
+            self.below_conversation = BelowConversation(self, session)
+
         self.header = Header(session, members)
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
             dialog, gui.theme, self)
@@ -104,6 +109,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.pack_start(self.header, False)
         self.pack_start(self.hbox, True, True)
         self.pack_start(self.transfers_bar, False)
+        if self.below_conversation is not None:
+            self.pack_start(self.below_conversation, False)
 
         if len(self.members) == 0:
             self.header.information = ('connecting', 'creating conversation')
