@@ -40,6 +40,7 @@ def PyNotification(title, text, picture_path=None, const=None,
 
         title = Plus.msnplus_strip(title)
     notification = pynotify.Notification(title, text, picture_path)
-    notification.set_icon_from_pixbuf(utils.safe_gtk_pixbuf_load(picture_path, (96, 96)))
+    notification.set_icon_from_pixbuf(
+                utils.safe_gtk_pixbuf_load(picture_path[7:], (96, 96)))
     notification.set_hint_string("append", "allowed")
     notification.show()
