@@ -389,6 +389,8 @@ class ChatWidget(gtk.VBox):
         if not results:
             return
 
+        self.conv_status.clear()
+
         for stat, timestamp, msg_text, nick, account in results:
             is_me = self.session.contacts.me.account == account
             if is_me:
