@@ -187,6 +187,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self._replace_below_userlist()
         self._replace_below_menu()
         self._replace_below_panel()
+        self.panel.replace_userpanel_extension(self)
 
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''

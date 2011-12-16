@@ -102,12 +102,13 @@ class UserPanel(gtk.VBox):
         #test_btn.connect('clicked', do_something_weird)
         #test_btn.show()
         #nick_hbox.pack_start(test_btn, False)
+        self.userpanel_button = None
 
         vbox.pack_start(nick_hbox, False)
-        message_hbox = gtk.HBox()
-        message_hbox.pack_start(self.message, True, True)
-        message_hbox.pack_start(self.status, False)
-        vbox.pack_start(message_hbox, False)
+        self.message_hbox = gtk.HBox()
+        self.message_hbox.pack_start(self.message, True, True)
+        self.message_hbox.pack_start(self.status, False)
+        vbox.pack_start(self.message_hbox, False)
 
         hbox.pack_start(vbox, True, True)
 
@@ -116,10 +117,24 @@ class UserPanel(gtk.VBox):
 
         hbox.show()
         nick_hbox.show()
-        message_hbox.show()
+        self.message_hbox.show()
         vbox.show()
 
         self._add_subscriptions()
+
+    def replace_userpanel_extension(self, main_window):
+        #first remove current button
+        if not self.userpanel_button is None:
+            self.message_hbox.remove(self.userpanel_button)
+            self.userpanel_button = None
+
+        UserPanelButton = extension.get_default('userpanel button')
+        if UserPanelButton is not None:
+            #add new button
+            self.userpanel_button = UserPanelButton(self, main_window)
+            self.message_hbox.pack_start(self.userpanel_button, False)
+            self.message_hbox.reorder_child(self.userpanel_button, 1)
+            self.userpanel_button.show()
 
     def show(self):
         '''override show'''
@@ -130,6 +145,8 @@ class UserPanel(gtk.VBox):
         self.message.show()
         self.status.show()
         self.search.show()
+        if self.userpanel_button:
+            self.userpanel_button.show()
         self.mail.show()
         self.toolbar.show()
 
@@ -144,6 +161,8 @@ class UserPanel(gtk.VBox):
         self.message.enabled = value
         self.status.set_sensitive(value)
         self.search.set_sensitive(value)
+        if self.userpanel_button:
+            self.userpanel_button.set_sensitive(value)
         self._enabled = value
 
     def _get_enabled(self):
