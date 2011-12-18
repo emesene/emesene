@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-12-03 19:55+0100\n"
+"POT-Creation-Date: 2011-12-18 18:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgid "You just sent a nudge!"
 msgstr ""
 
 #: emesene/e3/base/Logger.py:1038 emesene/e3/common/notification.py:151
-#: emesene/gui/base/Conversation.py:395
+#: emesene/gui/base/Conversation.py:405
 #, python-format
 msgid "%s just sent you a nudge!"
 msgstr ""
@@ -103,20 +103,20 @@ msgstr ""
 msgid "Blocked"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:408
+#: emesene/gui/base/Conversation.py:418
 msgid "Error delivering message"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:450
+#: emesene/gui/base/Conversation.py:460
 msgid "Group chat"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:486
+#: emesene/gui/base/Conversation.py:496
 #, python-format
 msgid "%s has joined the conversation"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:504
+#: emesene/gui/base/Conversation.py:514
 #, python-format
 msgid "%s has left the conversation"
 msgstr ""
@@ -187,19 +187,19 @@ msgstr ""
 msgid "Change profile"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:126
+#: emesene/gui/gtkui/AdiumTextBox.py:127
 msgid "Save"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:131
+#: emesene/gui/gtkui/AdiumTextBox.py:132
 msgid "Select All"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:133
+#: emesene/gui/gtkui/AdiumTextBox.py:134
 msgid "Clear"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:161
+#: emesene/gui/gtkui/AdiumTextBox.py:162
 msgid "A widget to display conversation messages using adium style"
 msgstr ""
 
