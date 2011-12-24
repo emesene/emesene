@@ -22,6 +22,11 @@
 import os
 import shutil
 
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 import logging
 log = logging.getLogger('e3.common.Collections')
 
@@ -32,6 +37,7 @@ class ExtensionDescriptor(object):
 
     def __init__(self):
         self.files = {}
+        self.metadata = {}
 
     def add_file(self, file_name, blob):
         self.files[file_name] = blob
@@ -138,6 +144,29 @@ class Collection(object):
             self.progress = i / float(len(j["blobs"]) * 2) + 0.5
         self.progress = 1.0
 
+    def has_item(self, type_, name):
+        current_ext = self.extensions_descs.get(type_, {}).get(name)
+        if not current_ext:
+            return False
+        return True
+
+    def fetch_metadata(self, type_, name):
+        '''fetch metadata if available'''
+        current_ext = self.extensions_descs.get(type_, {}).get(name)
+        if not current_ext:
+            return None
+
+        for path in current_ext.files.keys():
+            if os.path.basename(path) == 'meta.json':
+                try:
+                    rq = self.github.get_raw(self.theme, current_ext.files[path])
+                except Exception, ex:
+                    log.error(str(ex))
+                    return None
+                current_ext.metadata = json.loads(rq)
+                return current_ext.metadata
+        return None
+
 class PluginsCollection(Collection):
 
     def plugin_name_from_file(self, file_name):
@@ -160,4 +189,3 @@ class ThemesCollection(Collection):
             return path.split("/")
         else:
             return (None, None)
-

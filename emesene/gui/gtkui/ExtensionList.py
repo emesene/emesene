@@ -27,6 +27,8 @@ import extension
 import e3
 import gobject
 
+from pluginmanager import get_pluginmanager
+
 class ExtensionListView(gtk.TreeView):
     def __init__(self, store, radio=False):
         gtk.TreeView.__init__(self, store)
@@ -46,7 +48,7 @@ class ExtensionListView(gtk.TreeView):
 class ExtensionListStore(gtk.ListStore):
     def __init__(self):
         # running, pretty name and description, name
-        gtk.ListStore.__init__(self, bool, str, str, bool, bool, str)
+        gtk.ListStore.__init__(self, bool, str, str, bool, bool, str, str)
 
 class ExtensionList(gtk.VBox):
     def __init__(self, session, on_toggled, on_cursor_changed, radio, type_):
@@ -81,12 +83,12 @@ class ExtensionList(gtk.VBox):
         self.list_store.clear()
         self.extension_list = []
 
-    def append(self, is_active, label, name, sensitive=True, visible=True, path=''):
+    def append(self, is_active, label, name, sensitive=True, visible=True, path='', type_=''):
         '''append an item'''
         if not sensitive:
             label = '<span foreground="#696969">%s</span>' % label
         if name not in self.extension_list:
-            self.list_store.append((is_active, label, name, sensitive, visible, path))
+            self.list_store.append((is_active, label, name, sensitive, visible, path, type_))
             self.extension_list.append(name)
 
 class ExtensionListTab(gtk.VBox):
@@ -143,13 +145,38 @@ class ExtensionListTab(gtk.VBox):
         '''called when a row is selected'''
         pass
 
-    def prettify_name(self, name, type_, description=''):
+    def prettify_name(self, name, type_='', description=''):
         '''return a prettier name for the plugin with its description in a new
         line, using Pango markup.
         '''
         name = name.replace('_', ' ')
         pretty_name = '<span><b>%s</b>\n<small>%s</small></span>'
         return pretty_name % (name.capitalize(), description)
+
+    def get_attr(self, name):
+        """return the value of an attribute, if it has dots, then
+        get the values until the last
+        """
+
+        obj = self
+        for attr in name.split('.'):
+            obj = getattr(obj, attr)
+
+        return obj
+
+    def set_attr(self, name, value):
+        """set the value of an attribute, if it has dots, then
+        get the values until the last
+        """
+
+        obj = self
+        terms = name.split('.')
+
+        for attr in terms[:-1]:
+            obj = getattr(obj, attr)
+
+        setattr(obj, terms[-1], value)
+        return obj
 
 class ExtensionDownloadList(ExtensionListTab):
     def __init__(self, session, list_type,
@@ -352,31 +379,6 @@ class ThemeList(ExtensionDownloadList):
         self.removable_list[type_].pop(model[path][2], None)
         self.callbacks[type_](self.theme_configs[type_], model[path][2])
 
-    def get_attr(self, name):
-        """return the value of an attribute, if it has dots, then
-        get the values until the last
-        """
-
-        obj = self
-        for attr in name.split('.'):
-            obj = getattr(obj, attr)
-
-        return obj
-
-    def set_attr(self, name, value):
-        """set the value of an attribute, if it has dots, then
-        get the values until the last
-        """
-
-        obj = self
-        terms = name.split('.')
-
-        for attr in terms[:-1]:
-            obj = getattr(obj, attr)
-
-        setattr(obj, terms[-1], value)
-        return obj
-
     def set_theme(self, property_name, value):
         self.set_attr(property_name, value)
 
@@ -421,3 +423,200 @@ class ThemeList(ExtensionDownloadList):
             self.callbacks[theme_type] = self.set_theme
         box = self.append_tab(name, theme_type, True)
         return box
+
+class UpdateList(ExtensionListTab):
+    def __init__(self, session):
+        ExtensionListTab.__init__(self, session)
+        self.update_list = {'plugins': {}, 'themes': {}}
+
+        self.first = True
+        self.done = True
+
+        self.config_dir = e3.common.ConfigDir('emesene2')
+
+        self.themes = {}
+        self.theme_names = {}
+        self.theme_configs = {}
+        self.collections = \
+        {
+            'plugins':
+            {
+                'supported': e3.common.Collections.PluginsCollection('emesene-supported-plugins', self.config_dir.join('plugins')),
+                'community': e3.common.Collections.PluginsCollection('emesene-community-plugins', self.config_dir.join('plugins'))
+            },
+            'themes':
+            {
+                'supported': e3.common.Collections.ThemesCollection('emesene-supported-themes', self.config_dir.join('themes')),
+                'community': e3.common.Collections.ThemesCollection('emesene-community-themes', self.config_dir.join('themes'))
+            }
+        }
+
+        self.download_button = gtk.Button(_('Update'))
+        self.download_button.set_image(gtk.image_new_from_stock(
+                                       gtk.STOCK_REFRESH, gtk.ICON_SIZE_MENU))
+        self.download_button.connect('clicked', self.start_download)
+
+        self.buttonbox.set_layout(gtk.BUTTONBOX_END)
+        self.buttonbox.pack_start(self.download_button, fill=False)
+
+    def on_toggled(self, widget, path, model, type_):
+        '''remove from or add to the update_list'''
+        model[path][0] = not model[path][0]
+        if model[path][6] == 'plugin':
+            item = self.update_list['plugins'][model[path][6]]
+        else:
+            item = self.update_list['themes'][model[path][6]]
+        if model[path][0]:
+            item[model[path][2]] = model[path][5]
+        else:
+            del item[model[path][2]]
+        print self.update_list
+
+    def show_update_callback(self, result=None):
+        '''method used as callback, because both GtkRunner and buttons
+        need the first argument on the on_update method'''
+        if result is not None and not result[0]:
+            log.error(str(result[1]))
+        self.done = True
+        self.progress.destroy()
+        self.on_update(clear=True)
+
+    def download(self, name, cur_thc):
+        '''download an extension'''
+        cur_thc.download(name)
+
+    def remove(self, path, cur_thc):
+        '''remove an extension'''
+        cur_thc.remove(path)
+
+    def get_thc(self, collection, type_, name):
+        if self.collections[collection]['supported'].has_item(type_, name):
+            return self.collections[collection]['supported']
+        elif self.collections[collection]['community'].has_item(type_, name):
+            return self.collections[collection]['community']
+
+    def start_download(self, widget=None):
+        '''start the download of an extension'''
+        dialog = extension.get_default('dialog')
+        self.progress = dialog.progress_window(
+                        _('Updating extensions'), self._end_progress_cb)
+        self.progress.set_action(_("Updating extensions"))
+        self.progress.show_all()
+        self.done = False
+        gobject.timeout_add(100, self.update_progress)
+        utils.GtkRunner(self.show_update_callback, self.download_updates)
+
+    def download_updates(self):
+        for collection_name, items in self.update_list.iteritems():
+            for ext_type, ext_list in items.iteritems():
+                for ext, path in ext_list.iteritems():
+                    cur_thc = self.get_thc(collection_name, ext_type, ext)
+                    self.remove(path, cur_thc)
+                    self.download(ext, cur_thc)
+                ext_list = {}
+        self.on_update(clear=True)
+
+    def fetch_metadata(self, collection, type_, name):
+        meta = self.collections[collection]['supported'].fetch_metadata(type_, name)
+        if not meta:
+            meta = self.collections[collection]['community'].fetch_metadata(type_, name)
+        return meta
+
+    def check_updates(self, collection, type_, path, instance=None):
+        '''check whether updates are available'''
+        name = os.path.basename(path)
+        meta = self.fetch_metadata(collection, type_, name)
+        if not meta or not meta.get('version'):
+            return False
+
+        local_meta = e3.common.MetaData.get_metadata_from_path(path)
+        if not local_meta or not local_meta.get('version'):
+            return True
+
+        if local_meta.get('version') >= meta.get('version'):
+            return False
+
+    def show_update(self):
+        '''called when the liststore need to be changed'''
+        self.clear_all()
+
+        for theme_type in self.themes.iterkeys():
+            first = True
+            if theme_type not in self.update_list['themes']:
+                self.update_list['themes'][theme_type] = {}
+
+            current = self.get_attr(self.theme_configs[theme_type])
+            for path in self.themes[theme_type].list():
+                if not self.check_updates('themes', theme_type, path):
+                    continue
+                if first:
+                    self.append(False, '<b>'+self.theme_names[theme_type]+'</b>', theme_type, visible=False)
+                    first = False
+                label = self.themes[theme_type].get_name_from_path(path)
+                self.update_list['themes'][theme_type][name] = path
+                self.append(True, label, name, path=path, type_=theme_type)
+
+        pluginmanager = get_pluginmanager()
+
+        first = True
+        if 'plugin' not in self.update_list['plugins']:
+            self.update_list['plugins']['plugin'] = {}
+
+        for name, plugin in pluginmanager.get_plugins():
+            path = plugin.path
+            if not self.check_updates('plugins', 'plugin', path, plugin):
+                continue
+            if first:
+                self.append(False, '<b>' + _('Plugins') + '</b>', 'installed', True, False)
+                first = False
+            self.update_list['plugins']['plugin'][name] = path
+            self.append(True, self.prettify_name(name,
+                        description=pluginmanager.plugin_description(name)),
+                        name, path=path, type_='plugin')
+
+
+    def on_update(self, widget=None, download=False, clear=False):
+        '''called when the liststore need to be changed'''
+        if self.first or download:
+            dialog = extension.get_default('dialog')
+            self.progress = dialog.progress_window(
+                            _('Refresh extensions'), self._end_progress_cb)
+            self.progress.set_action(_("Refreshing extensions"))
+            self.progress.show_all()
+            self.done = False
+            gobject.timeout_add(100, self.update_progress)
+            utils.GtkRunner(self.show_update_callback, self.update)
+
+            self.first = False
+        elif clear:
+            self.show_update()
+
+    def update(self):
+        '''update the collections'''
+        for collection in self.collections.itervalues():
+            for thc_cur in collection.itervalues():
+                thc_cur.fetch()
+
+    def update_progress(self):
+        progress = 0.0
+        for collection in self.collections.itervalues():
+            for thc_cur in collection.itervalues():
+                progress += thc_cur.progress / 4.0
+
+        self.progress.update(100.0 * progress)
+
+        if self.done:
+            return False
+        return True
+
+    def append_theme(self, name, theme_type, theme, theme_config):
+        self.themes[theme_type] = theme
+        self.theme_configs[theme_type] = theme_config
+        self.theme_names[theme_type] = name
+
+    def _end_progress_cb(self, *args):
+        '''stops download of plugins'''
+        for collection in self.collections.itervalues():
+            for thc_cur in collection.itervalues():
+                thc_cur.stop()
+        self.done = True

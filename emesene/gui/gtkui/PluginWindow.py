@@ -40,14 +40,6 @@ class PluginMainVBox(ExtensionDownloadList):
         self.buttonbox.pack_start(self.config_button, fill=False)
         self.on_cursor_changed(self.list_view)
 
-    def prettify_name(self, name, type_='', description=''):
-        '''return a prettier name for the plugin with its description in a new
-        line, using Pango markup.
-        '''
-        name = name.replace('_', ' ')
-        pretty_name = '<span><b>%s</b>\n<small>%s</small></span>'
-        return pretty_name % (name.capitalize(), description)
-
     def on_update(self, widget=None, download=False, clear=False):
         '''called when the liststore need to be changed'''
         self.removable_list = {}

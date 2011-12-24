@@ -52,6 +52,7 @@ LIST = [
     {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
     {'stock_id' : gtk.STOCK_EXECUTE,'text' : _('Extensions')},
     {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
+    {'stock_id' : gtk.STOCK_REFRESH,'text' : _('Updates')},
 ]
 
 class Preferences(gtk.Window):
@@ -115,6 +116,7 @@ class Preferences(gtk.Window):
         self.extension = Extension(session)
         self.plugins = PluginWindow.PluginMainVBox(
             session, config_dir.join('plugins'))
+        self.updates = Update(session)
 
         self.buttons = gtk.HButtonBox()
         self.buttons.set_border_width(2)
@@ -137,6 +139,7 @@ class Preferences(gtk.Window):
         self.theme_page = self.theme
         self.extensions_page = self.extension
         self.plugins_page = self.plugins
+        self.updates_page = self.updates
 
         self.__init_list()
 
@@ -181,6 +184,7 @@ class Preferences(gtk.Window):
         self.page_dict.append(self.theme_page)
         self.page_dict.append(self.extensions_page)
         self.page_dict.append(self.plugins_page)
+        self.page_dict.append(self.updates_page)
 
         for i in LIST:
             # we should use always the same icon size,
@@ -864,6 +868,32 @@ class Theme(BaseTable):
         self.adium_variant_combo.get_model().clear()
         self.fill_combo(self.adium_variant_combo,
             gui.theme.conv_theme.get_theme_variants, 'session.config.adium_theme_variant')
+
+class Update(BaseTable):
+    """the panel to display/modify the config related to the theme
+    """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 1, 1)
+        self.set_border_width(5)
+        self.session = session
+
+        self.tabs = ExtensionList.UpdateList(session)
+
+        self.tabs.append_theme(_('Image theme'), 'images', gui.theme.image_themes,
+            'session.config.image_theme')
+        self.tabs.append_theme(_('Sound theme'), 'sounds', gui.theme.sound_themes,
+            'session.config.sound_theme')
+        self.tabs.append_theme(_('Emote theme'), 'emotes', gui.theme.emote_themes,
+            'session.config.emote_theme')
+        self.tabs.append_theme(_('Adium theme'), 'conversations', gui.theme.conv_themes,
+            'session.config.adium_theme')
+        self.add(self.tabs)
+
+    def on_update(self):
+        self.tabs.on_update()
 
 class Extension(BaseTable):
     """the panel to display/modify the config related to the extensions

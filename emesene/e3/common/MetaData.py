@@ -22,16 +22,20 @@ try:
 except ImportError:
     import simplejson as json
 
+def get_metadata_from_path(path):
+    '''fetch the metadata from a path'''
+    meta_path = os.path.join(path, 'meta.json')
+    meta = None
+    if os.path.exists(meta_path):
+        f = open(meta_path, 'r')
+        meta = json.load(f)
+        f.close()
+    return meta
+
 class MetaData(object):
     '''a class that contains metadata that is used in plugins and themes
     '''
 
     def __init__(self, path):
         '''constructor'''
-
-        self.meta = None
-        meta_path = os.path.join(path, 'meta.json')
-        if os.path.exists(meta_path):
-            f = open(meta_path, 'r')
-            self.meta = json.load(f)
-            f.close()
+        self.meta = get_metadata_from_path(path)
