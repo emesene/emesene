@@ -22,6 +22,8 @@ import os
 import sys
 import logging
 
+from e3.common.MetaData import MetaData
+
 log = logging.getLogger('pluginmanager')
 
 BLACKLIST = ["lint.py", "__init__.py"]
@@ -54,7 +56,7 @@ class PackageResource(object):
                 return
 
 
-class PluginHandler(object):
+class PluginHandler(MetaData):
     '''Abstraction over a plugin.
 
     Given a directory, will import the plugin.py file inside it and allows to control it.
@@ -63,6 +65,7 @@ class PluginHandler(object):
     '''
     def __init__(self, base_dir, name, is_package=False):
         '''@param directory The directory containing the package'''
+        MetaData.__init__(self, os.path.join(base_dir, name))
         self.name = os.path.basename(name.rstrip("/"))
         if not is_package:
             self.name = self.name.split(".")[0]

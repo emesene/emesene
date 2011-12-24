@@ -23,6 +23,7 @@ import time, calendar
 import datetime
 import xml.sax.saxutils
 import e3
+from e3.common.MetaData import MetaData
 
 import parsers
 import MarkupParser
@@ -30,7 +31,7 @@ import Plus
 
 DISPLAY_NAME_LIMIT = 25
 
-class AdiumTheme(object):
+class AdiumTheme(MetaData):
     '''a class that contains information of a adium theme
     '''
 
@@ -39,6 +40,7 @@ class AdiumTheme(object):
 
         get information from the theme located in path
         '''
+        MetaData.__init__(self, path)
         self.path = None
         self.resources_path = None
         self.incoming_path = None

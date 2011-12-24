@@ -20,13 +20,17 @@
 import re
 import os
 import plistlib
+
 try:
     from collections import OrderedDict
 except:
     from e3.common.OrderedDict import OrderedDict
+
+from e3.common.MetaData import MetaData
+
 plistlib._InternalDict = OrderedDict
 
-class AdiumEmoteTheme(object):
+class AdiumEmoteTheme(MetaData):
     '''a class that contains information of a adium emote theme
     '''
 
@@ -35,6 +39,7 @@ class AdiumEmoteTheme(object):
 
         get information from the theme located in path
         '''
+        MetaData.__init__(self, path)
         self.path           = None
         # if you add a smilie key twice you will have a nice stack overflow :D
         self.emotes         = OrderedDict()
@@ -119,4 +124,3 @@ class AdiumEmoteTheme(object):
         keys = self.emotes.keys()
         return [(item in keys, item) for item in self.emote_regex.split(text)
                 if item is not None]
-

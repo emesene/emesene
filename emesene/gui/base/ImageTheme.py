@@ -19,8 +19,9 @@
 
 import os
 from e3 import status
+from e3.common.MetaData import MetaData
 
-class ImageTheme(object):
+class ImageTheme(MetaData):
     '''a class that contains information of a image theme
     '''
 
@@ -29,6 +30,7 @@ class ImageTheme(object):
 
         get information from the theme located in path
         '''
+        MetaData.__init__(self, path)
         self.av                 = None
         self.video              = None
         self.call               = None
@@ -167,4 +169,3 @@ class ImageTheme(object):
 
     def has_custom_toolbar_icons(self):
         return self.toolbar_path != None
-

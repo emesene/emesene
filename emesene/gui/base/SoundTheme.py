@@ -19,8 +19,9 @@
 
 import os
 import plistlib
+from e3.common.MetaData import MetaData
 
-class SoundTheme(object):
+class SoundTheme(MetaData):
     '''a class that contains information of a sound theme
     '''
 
@@ -29,6 +30,7 @@ class SoundTheme(object):
 
         get information from the theme located in path
         '''
+        MetaData.__init__(self, path)
 
         self.sound_alert    = None
         self.sound_nudge    = None
@@ -63,4 +65,3 @@ class SoundTheme(object):
         self.sound_online   = os.path.join(path, online)
         self.sound_send     = os.path.join(path, send)
         self.sound_type     = os.path.join(path, typing)
-

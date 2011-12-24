@@ -16,21 +16,22 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys
-sys.path.append('..')
-import locations
-import notification
-import Collections
+import os
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
-import XmlParser
+class MetaData(object):
+    '''a class that contains metadata that is used in plugins and themes
+    '''
 
-from utils import *
-from Config import Config
-from Signal import Signal
-from Signals import Signals
-from ConfigDir import ConfigDir
-from RingBuffer import RingBuffer
-from MessageFormatter import MessageFormatter
-from Sounds import SoundPlayer
-from OrderedDict import OrderedDict
-from MetaData import MetaData
+    def __init__(self, path):
+        '''constructor'''
+
+        self.meta = None
+        meta_path = os.path.join(path, 'meta.json')
+        if os.path.exists(meta_path):
+            f = open(meta_path, 'r')
+            self.meta = json.load(f)
+            f.close()
