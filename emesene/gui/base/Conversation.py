@@ -531,7 +531,11 @@ class Conversation(object):
         contact = self.session.contacts.get(account)
 
         if contact:
-            message = MarkupParser.escape(contact.message)
+            if contact.media == '':
+                message = MarkupParser.escape(contact.message)
+            else:
+                message = MarkupParser.escape(contact.media)
+
             nick = MarkupParser.escape(contact.display_name)
         else:
             message = ''

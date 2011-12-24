@@ -389,6 +389,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         ''' called when contacts change their attributes'''
         if account in self.members and what in ('status', 'nick'):
             self.update_tab()
+        else:
+            if what == 'media':
+                self.update_data()
 
     def on_filetransfer_invitation(self, transfer, cid):
         ''' called when a new file transfer is issued '''
