@@ -182,7 +182,8 @@ class UserPanel(gtk.VBox):
 
     def on_media_change_succeed(self, message):
         '''callback called when the message has been changed successfully'''
-        self.message.text = message
+        if not message is None:
+            self.message.text = message
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
