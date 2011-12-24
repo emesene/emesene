@@ -178,7 +178,10 @@ class UserPanel(gtk.VBox):
 
     def on_message_change_succeed(self, message):
         '''callback called when the message has been changed successfully'''
-        self.message.text = message
+        if self.session.contacts.me.media is None or self.session.contacts.me.media is "":
+            self.message.text = message
+        else:
+            self.message.text = '♫ ' + self.session.contacts.me.media
 
     def on_media_change_succeed(self, message):
         '''callback called when the message has been changed successfully'''
