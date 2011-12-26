@@ -18,7 +18,6 @@
 
 import MessageFormatter
 import threading
-from urllib2 import urlopen
 
 def add_style_to_message(text, stl, escape=True):
     '''add the style in a xhtml like syntax to text'''
@@ -107,5 +106,3 @@ class AsyncAction(threading.Thread):
 
     def get_result(self):
         return self._result
-
-

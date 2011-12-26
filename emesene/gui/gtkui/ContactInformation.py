@@ -438,9 +438,8 @@ class ChatWidget(gtk.VBox):
             color = e3.Color.from_hex(color)
         except ValueError:
             color = self.session.config.font_color = '#000000'
-            color = e3.Color.from_hex(font_color)
+            color = e3.Color.from_hex(color)
 
         cstyle = e3.Style(color = color)
 
         return cstyle
-

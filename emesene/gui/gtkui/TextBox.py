@@ -25,7 +25,7 @@ import gui
 import utils
 import RichBuffer
 
-from gui.base import MarkupParser, Plus
+from gui.base import Plus
 
 import logging
 log = logging.getLogger('gtkui.Textbox')
@@ -424,4 +424,3 @@ class OutputText(TextBox):
                     path, tip = obj
                     if path == what[2]:
                         self.add_image_at_anchor(anchor, path, tip)
-

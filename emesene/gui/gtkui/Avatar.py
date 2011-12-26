@@ -19,11 +19,9 @@ from __future__ import division
 
 import gtk
 import gtk.gdk
-import cairo
 import gobject
 
 import gui
-import extension
 from AvatarManager import AvatarManager
 
 class Avatar(AvatarManager):

@@ -18,8 +18,6 @@
 
 import gtk
 
-import gui
-import utils
 import e3
 
 from pluginmanager import get_pluginmanager

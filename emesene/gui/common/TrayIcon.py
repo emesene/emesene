@@ -20,7 +20,6 @@ import os
 import sys
 import gtk
 import time
-import gobject
 
 import extension
 from e3 import status

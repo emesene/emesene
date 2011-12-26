@@ -73,7 +73,7 @@ class ThemesManager(object):
         items = []
 
         for item in self.list():
-            item = get_name_from_path(item)
+            item = self.get_name_from_path(item)
             items.append(item)
 
         return items

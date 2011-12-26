@@ -23,7 +23,6 @@ import os
 import sys
 import hashlib
 import shutil
-import sys
 import tempfile
 
 import extension
@@ -154,4 +153,3 @@ class AvatarManager(object):
                 shutil.copy(fpath, self.avatar_path)
             except OSError, error:
                 print error
-

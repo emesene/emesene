@@ -101,7 +101,6 @@ def close_tags(text1, text2=''):
     '''make sure the plus and emesene tags are closed before an emoticon'''
     ret1 = ret2 = ""
     opened = []
-    closed = []
     if text1 != "":
         text = text1
         while text != '':

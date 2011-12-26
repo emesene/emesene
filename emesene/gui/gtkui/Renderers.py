@@ -22,10 +22,8 @@ from __future__ import division
 import sys
 import gtk
 import pango
-import cairo
 import gobject
 
-import gui
 from gui.base import Plus
 import MarkupParser
 import extension

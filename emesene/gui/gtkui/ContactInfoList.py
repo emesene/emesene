@@ -23,7 +23,6 @@ import utils
 import Tooltips
 
 import pango
-import glib
 
 class ContactInfoList(gtk.VBox):
     '''A widget that contains the display picture of the contact in single chat.

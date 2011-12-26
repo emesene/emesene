@@ -580,13 +580,13 @@ class UpdateList(ExtensionListTab):
             if theme_type not in self.update_list['themes']:
                 self.update_list['themes'][theme_type] = {}
 
-            current = self.get_attr(self.theme_configs[theme_type])
             for path in self.themes[theme_type].list():
                 if not self.check_updates('themes', theme_type, path):
                     continue
                 if first:
                     self.append(False, '<b>'+self.theme_names[theme_type]+'</b>', theme_type, visible=False)
                     first = False
+                name = os.path.basename(path)
                 label = self.themes[theme_type].get_name_from_path(path)
                 self.update_list['themes'][theme_type][name] = path
                 self.append(True, label, name, path=path, type_=theme_type)

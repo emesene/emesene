@@ -18,13 +18,10 @@
 
 import gtk
 
-import e3
 import gui
 import extension
 
 import logging
-
-from gui import Desktop
 
 log = logging.getLogger('gtkui.MainWindow')
 
@@ -106,10 +103,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.on_mail_click()
 
     def _on_social_request(self, conn_url):
-
         def set_token(token_url):
             if token_url.find("#access_token=") == -1:
                 return
+
             pattern_start_token = "#access_token="
             pattern_end_token = "&expires_in"
             start_token = token_url.find(pattern_start_token) + len(pattern_start_token)
@@ -118,8 +115,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.session.config.facebook_token = token
 
         dialog = extension.get_default('dialog')
-        fb_token_dialog = dialog.web_window(_("Connect Emesene and Facebook"), conn_url ,set_token)
-
+        dialog.web_window(_("Connect Emesene and Facebook"), conn_url ,set_token)
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''
@@ -295,4 +291,3 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.contact_list.is_searching = False
             self.contact_list.show_empty_groups = self.session.config.b_show_empty_groups
             self.contact_list.un_expand_groups()
-
