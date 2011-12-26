@@ -409,6 +409,13 @@ class Conversation(object):
             self.conv_status.post_process_message(msg)
 
             self.play_nudge()
+
+        elif message.type == e3.Message.TYPE_INFO:
+            msg = gui.Message.from_information(contact, message)
+
+            self.output.information(self.formatter, msg)
+            self.conv_status.post_process_message(msg)
+
         self.conv_status.update_status()
 
     def on_send_message_failed(self, errorCode):

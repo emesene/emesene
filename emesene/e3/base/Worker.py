@@ -69,7 +69,8 @@ EVENTS = (\
  'media received' , 'message read',
  'contact added you', 'user typing',
  'mail received', 'mail count changed',
- 'broken profile', 'close', 'social request')
+ 'broken profile', 'close', 'social request',
+ 'info message')
 
 ACTIONS = (\
  'login'            , 'logout'           ,
