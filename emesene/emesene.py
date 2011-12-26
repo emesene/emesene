@@ -681,7 +681,7 @@ class Controller(object):
 
         # check to see if there is a conversation with the same member
         for convman in self.conversations:
-            if convman.reuse_conversation(cid, members):
+            if convman.has_similar_conversation(cid, members):
                 conv_manager = convman
                 break
 
