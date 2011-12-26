@@ -22,7 +22,7 @@ log = logging.getLogger("emesene.e3.common.DBus")
 
 import extension
 import e3
-from e3.base import Action
+from e3.base import Action, Event
 
 ERROR = False
 try:
@@ -147,4 +147,3 @@ else: #ERROR
             pass
 
     extension.register('external api', DummyExternalAPI)
-
