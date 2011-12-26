@@ -18,6 +18,7 @@
 
 import os
 import gtk
+import re
 
 import logging
 log = logging.getLogger('gtkui.ExtensionList')
@@ -26,6 +27,7 @@ import utils
 import extension
 import e3
 import gobject
+import gui
 
 from pluginmanager import get_pluginmanager
 
@@ -178,6 +180,18 @@ class ExtensionListTab(gtk.VBox):
         setattr(obj, terms[-1], value)
         return obj
 
+    def version_value(self, version):
+        '''return an integer version value'''
+        if isinstance(version, int):
+            return version
+
+        stripped_version = re.sub(r'[^\d.]+', '', version)
+        split_version = stripped_version.split(".")
+        split_version.reverse()
+        value = 0
+        for i, val in enumerate(split_version):
+            value += (int(val) << ((3-i) * 8))
+
 class ExtensionDownloadList(ExtensionListTab):
     def __init__(self, session, list_type,
                  collection_class, init_path,
@@ -328,6 +342,17 @@ class ExtensionDownloadList(ExtensionListTab):
         self.progress.destroy()
         self.on_update(clear=True)
 
+    def check_version(self, type_, name):
+        meta = self.thc_com[self.thc_cur_name].fetch_metadata(type_, name)
+        if not meta or not meta.get('required emesene version'):
+            return True
+
+        if self.version_value(meta.get('required emesene version')) > \
+           self.version_value(gui.base.EMESENE_VERSION):
+            return False
+
+        return True
+
     def show_update(self):
         '''show an update list of the set collection'''
         self.download_list = {}
@@ -343,6 +368,8 @@ class ExtensionDownloadList(ExtensionListTab):
                        'installable', visible=False)
 
             for label in element:
+                if not self.check_version(box.extension_type, label):
+                    continue
                 if label not in box.extension_list:
                     self.download_list[box.extension_type].append(label)
 
@@ -470,7 +497,6 @@ class UpdateList(ExtensionListTab):
             item[model[path][2]] = model[path][5]
         else:
             del item[model[path][2]]
-        print self.update_list
 
     def show_update_callback(self, result=None):
         '''method used as callback, because both GtkRunner and buttons
@@ -526,15 +552,24 @@ class UpdateList(ExtensionListTab):
         '''check whether updates are available'''
         name = os.path.basename(path)
         meta = self.fetch_metadata(collection, type_, name)
-        if not meta or not meta.get('version'):
+        if not meta or not meta.get('version') or not meta.get('required emesene version'):
             return False
 
         local_meta = e3.common.MetaData.get_metadata_from_path(path)
-        if not local_meta or not local_meta.get('version'):
+        if not local_meta or not local_meta.get('required emesene version'):
             return True
 
-        if local_meta.get('version') >= meta.get('version'):
+        if self.version_value(meta.get('required emesene version')) > \
+           self.version_value(gui.base.EMESENE_VERSION):
             return False
+
+        if not local_meta.get('version'):
+            return True
+
+        if self.version_value(meta.get('version')) > self.version_value(local_meta.get('version')):
+            return True
+
+        return False
 
     def show_update(self):
         '''called when the liststore need to be changed'''
