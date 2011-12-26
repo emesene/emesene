@@ -67,7 +67,6 @@ class AdiumTheme(MetaData):
         info_file = file(os.path.join(path, 'Contents', 'Info.plist'))
         info = parsers.Plist(info_file).info
         self.default_variant = info.get('DefaultVariant', None)
-
         self.variant = variant
 
         self.resources_path = os.path.join(path, 'Contents', 'Resources')
