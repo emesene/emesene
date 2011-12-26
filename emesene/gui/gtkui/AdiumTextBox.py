@@ -69,15 +69,12 @@ class OutputView(webkit.WebView):
         self.ready = False
 
     def add_message(self, msg, scroll=True):
-        '''add a message to the conversation'''
+        '''add a message to the conversation. append the message directly
+        if the renderer finished loading, append it to
+        pending if still loading'''
 
         function = self.theme.format(msg, scroll)
-        self.append(function)
 
-    def append(self, function):
-        '''append a message if the renderer finished loading, append it to
-        pending if still loading
-        '''
         if self.ready:
             self.execute_script(function)
         else:
