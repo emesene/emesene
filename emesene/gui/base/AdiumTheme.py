@@ -68,6 +68,7 @@ class AdiumTheme(MetaData):
         info = parsers.Plist(info_file).info
         self.default_variant = info.get('DefaultVariant', None)
         self.variant = variant
+        self.theme_version = info.get('MessageViewVersion', 0)
 
         self.resources_path = os.path.join(path, 'Contents', 'Resources')
         self.incoming_path = os.path.join(self.resources_path, 'Incoming')
@@ -160,13 +161,36 @@ class AdiumTheme(MetaData):
                 template = self.outgoing
         return self._replace(template, msg)
 
-    def format(self, msg):
+    def _append_message(self, html, scroll):
+        #versions earlier than 3 don't have no-scroll variant
+        if scroll or self.theme_version < 3:
+            return "appendMessage('" + html + "')"
+
+        return "appendMessageNoScroll('" + html + "')"
+
+    def _append_next_message(self, html, scroll):
+        #versions earlier than 3 don't have no-scroll variant
+        if scroll or self.theme_version < 3:
+            return "appendNextMessage('" + html + "')"
+
+        return "appendNextMessageNoScroll('" + html + "')"
+
+    def format(self, msg, scroll):
         '''return the formatted message'''
         if msg.incoming:
             html = self._format_incoming(msg)
         else:
             html = self._format_outgoing(msg)
-        return html
+
+        if msg.type == "status":
+            msg.first = True
+
+        if msg.first:
+            function = self._append_message(html, scroll)
+        else:
+            function = self._append_next_message(html, scroll)
+
+        return function
 
     def _replace(self, template, msg):
         '''replace the variables on template for the values on msg

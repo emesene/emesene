@@ -51,8 +51,6 @@ class OutputView(webkit.WebView):
 
         for function in self.pending:
             self.execute_script(function)
-        if self.pending:
-            self.execute_script("scrollToBottom()")
         self.pending = []
 
     def _error_cb(self, view, message, line, source_id):
@@ -70,19 +68,10 @@ class OutputView(webkit.WebView):
         self.pending = []
         self.ready = False
 
-    def add_message(self, msg):
+    def add_message(self, msg, scroll=True):
         '''add a message to the conversation'''
 
-        html = self.theme.format(msg)
-
-        if msg.type == "status":
-            msg.first = True
-
-        if msg.first:
-            function = "appendMessage('" + html + "')"
-        else:
-            function = "appendNextMessage('" + html + "')"
-
+        function = self.theme.format(msg, scroll)
         self.append(function)
 
     def append(self, function):
@@ -91,7 +80,6 @@ class OutputView(webkit.WebView):
         '''
         if self.ready:
             self.execute_script(function)
-            self.execute_script("scrollToBottom()")
         else:
             self.pending.append(function)
 
@@ -181,7 +169,7 @@ class OutputText(gtk.ScrolledWindow):
     def unlock(self):
         #add messages and then unlock
         for msg in self.pending:
-            self.view.add_message(msg)
+            self.view.add_message(msg, self.config.b_allow_auto_scroll)
         self.pending = []
         self.locked = False
 
@@ -208,7 +196,7 @@ class OutputText(gtk.ScrolledWindow):
         if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
             self.pending.append(msg)
         else:
-            self.view.add_message(msg)
+            self.view.add_message(msg, self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
