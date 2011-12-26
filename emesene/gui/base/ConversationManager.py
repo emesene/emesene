@@ -190,15 +190,16 @@ class ConversationManager(object):
         if cid in self.conversations:
             return self.conversations[cid]
 
-        elif members is not None:
+        if members is not None:
             for conversation in self.conversations.itervalues():
                 if conversation.members == members:
                     return conversation
 
-        else:
-            for conversation in self.conversations.itervalues():
-                if conversation.icid == cid:
-                    return conversation
+        for conversation in self.conversations.itervalues():
+            if conversation.icid == cid:
+                return conversation
+
+        return None
 
     def reuse_conversation(self, cid, members):
         '''
@@ -212,20 +213,20 @@ class ConversationManager(object):
         '''
         conversation = self.has_similar_conversation(cid, members)
 
-        if conversation:
-            old_cid = conversation.cid
+        if conversation is None:
+            return None
 
-            if old_cid in self.conversations:
-                del self.conversations[old_cid]
-            if old_cid in self.session.conversations:
-                del self.session.conversations[old_cid]
+        old_cid = conversation.cid
 
-            conversation.cid = cid
-            self.conversations[cid] = conversation
-            self.session.conversations[cid] = conversation
-            return conversation
+        if old_cid in self.conversations:
+            del self.conversations[old_cid]
+        if old_cid in self.session.conversations:
+            del self.session.conversations[old_cid]
 
-        return None
+        conversation.cid = cid
+        self.conversations[cid] = conversation
+        self.session.conversations[cid] = conversation
+        return conversation
 
     def new_conversation(self, cid, members=None):
         '''create a new conversation widget and append it to the tabs,
