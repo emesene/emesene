@@ -1,7 +1,7 @@
-@import url("Green on Steel.css");
-@import url("../alternating.css");
+@import url("./Green on Steel.css");
+@import url("../Styles/alternating.css");
 
-
-.outgoingItem .myBubble .indicator {
-	background:url("../images/greenIndicator2.png") no-repeat top left;
+.x-outgoingItem .x-myBubble .x-indicator
+{
+	background: url("../images/greenIndicator2.png") no-repeat top left;
 }
