@@ -243,6 +243,7 @@ class Controller(object):
 
         if self.minimize:
             self.window.iconify()
+        self.window.show()
 
     def go_login(self, proxy=None, use_http=None, cancel_clicked=False,
             no_autologin=False):
@@ -263,7 +264,6 @@ class Controller(object):
             self.config_dir, self.config_path, proxy,
             use_http, self.config.session, cancel_clicked, no_autologin)
         self.tray_icon.set_login()
-        self.window.show()
 
     def _new_session(self, account=None):
         '''create a new session object'''
