@@ -34,11 +34,6 @@ class OutputView(webkit.WebView):
 
     def __init__(self, theme, add_emoticon_cb):
         webkit.WebView.__init__(self)
-        # Trying to debug issue #232
-        # https://github.com/emesene/emesene/issues/#issue/232
-        webkit_settings = self.get_settings()
-        webkit_settings.set_property("enable-plugins", False)
-
         self.theme = theme
         self.ready = False
         self.pending = []
