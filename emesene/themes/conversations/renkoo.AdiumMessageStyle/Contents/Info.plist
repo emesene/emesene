@@ -28,6 +28,8 @@
 	<integer>13</integer>
 	<key>DefaultBackgroundColor</key>
 	<string>ffffff</string>
+	<key>DefaultVariant</key>
+	<string>Green on Yellow</string>
 	<key>AllowTextColors</key>
 	<true/>
 </dict>
