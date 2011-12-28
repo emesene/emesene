@@ -34,6 +34,9 @@ class OutputView(webkit.WebView):
 
     def __init__(self, theme, add_emoticon_cb):
         webkit.WebView.__init__(self)
+        settings = self.get_settings()
+        settings.set_property('default-font-size', 8)
+
         self.theme = theme
         self.ready = False
         self.pending = []
