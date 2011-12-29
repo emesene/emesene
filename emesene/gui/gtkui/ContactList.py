@@ -838,7 +838,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
         if self.session.config.b_order_by_group:    
             group_src = self.get_contact_selected_group()
 
-            pos = widget.get_dest_row_at_pos(x,y)[0][0]
+            try:
+                pos = widget.get_dest_row_at_pos(x,y)[0][0]
+            except TypeError: # yes, this can happen if you drag into a blank area
+                return True
             group_des = self.model[pos][1]
 
             if group_src and group_src != group_des and not self._model[pos][6]:
