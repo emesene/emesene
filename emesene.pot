@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-12-25 21:24+0100\n"
+"POT-Creation-Date: 2011-12-29 13:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,12 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: emesene/e3/base/Logger.py:996 emesene/gui/base/Conversation.py:249
+#: emesene/e3/base/Logger.py:996 emesene/gui/base/Conversation.py:267
 msgid "You just sent a nudge!"
 msgstr ""
 
 #: emesene/e3/base/Logger.py:1038 emesene/e3/common/notification.py:151
-#: emesene/gui/base/Conversation.py:405
+#: emesene/gui/base/Conversation.py:423
 #, python-format
 msgid "%s just sent you a nudge!"
 msgstr ""
@@ -103,33 +103,33 @@ msgstr ""
 msgid "Blocked"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:418
+#: emesene/gui/base/Conversation.py:443
 msgid "Error delivering message"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:460
+#: emesene/gui/base/Conversation.py:485
 msgid "Group chat"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:496
+#: emesene/gui/base/Conversation.py:521
 #, python-format
 msgid "%s has joined the conversation"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:514
+#: emesene/gui/base/Conversation.py:539
 #, python-format
 msgid "%s has left the conversation"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:183
+#: emesene/gui/base/Handler.py:182
 msgid "A simple yet powerful instant messaging client"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:184
+#: emesene/gui/base/Handler.py:183
 msgid "translator-credits"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:201
+#: emesene/gui/base/Handler.py:200
 #, python-format
 msgid ""
 "New version available: %(ver)s\n"
@@ -137,37 +137,37 @@ msgid ""
 "informations about it."
 msgstr ""
 
-#: emesene/gui/base/Handler.py:218
+#: emesene/gui/base/Handler.py:217
 #, python-format
 msgid ""
 "You're running a development version of emesene, you might want to use the "
 "latest stable version (%s) unless you know what you're doing"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:233
+#: emesene/gui/base/Handler.py:232
 msgid "No update available"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:287
+#: emesene/gui/base/Handler.py:286
 #, python-format
 msgid "Are you sure you want to delete %s?"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:290 emesene/gui/base/Handler.py:299
-#: emesene/gui/base/Handler.py:308 emesene/gui/base/Handler.py:331
-#: emesene/gui/base/Handler.py:341 emesene/gui/base/Handler.py:349
-#: emesene/gui/base/Handler.py:359 emesene/gui/base/Handler.py:367
+#: emesene/gui/base/Handler.py:289 emesene/gui/base/Handler.py:298
+#: emesene/gui/base/Handler.py:307 emesene/gui/base/Handler.py:330
+#: emesene/gui/base/Handler.py:340 emesene/gui/base/Handler.py:348
+#: emesene/gui/base/Handler.py:358 emesene/gui/base/Handler.py:366
 #: emesene/gui/gtkui/Dialog.py:1534
 msgid "No contact selected"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:407
+#: emesene/gui/base/Handler.py:406
 #, python-format
 msgid "Are you sure you want to delete the %s group?"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:410 emesene/gui/base/Handler.py:430
-#: emesene/gui/base/Handler.py:446 emesene/gui/base/Handler.py:458
+#: emesene/gui/base/Handler.py:409 emesene/gui/base/Handler.py:429
+#: emesene/gui/base/Handler.py:445 emesene/gui/base/Handler.py:457
 msgid "No group selected"
 msgstr ""
 
@@ -187,19 +187,19 @@ msgstr ""
 msgid "Change profile"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:127
+#: emesene/gui/gtkui/AdiumTextBox.py:110
 msgid "Save"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:132
+#: emesene/gui/gtkui/AdiumTextBox.py:115
 msgid "Select All"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:134
+#: emesene/gui/gtkui/AdiumTextBox.py:117
 msgid "Clear"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:162
+#: emesene/gui/gtkui/AdiumTextBox.py:145
 msgid "A widget to display conversation messages using adium style"
 msgstr ""
 
@@ -260,12 +260,12 @@ msgstr ""
 msgid "Call Manager"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInfoList.py:65
+#: emesene/gui/gtkui/ContactInfoList.py:64
 #: emesene/gui/gtkui/ContactInfoRotate.py:60 emesene/gui/gtkui/UserPanel.py:51
 msgid "Click here to set your avatar"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInfoList.py:85
+#: emesene/gui/gtkui/ContactInfoList.py:84
 #: emesene/gui/gtkui/ContactInfoRotate.py:70
 msgid "Click to see informations"
 msgstr ""
@@ -313,9 +313,9 @@ msgid "E-Mail"
 msgstr ""
 
 #: emesene/gui/gtkui/ContactInformation.py:140 emesene/gui/gtkui/Dialog.py:949
-#: emesene/gui/gtkui/ExtensionList.py:37 emesene/gui/gtkui/Login.py:66
+#: emesene/gui/gtkui/ExtensionList.py:39 emesene/gui/gtkui/Login.py:66
 #: emesene/gui/gtkui/MainMenu.py:86 emesene/gui/gtkui/Tooltips.py:53
-#: emesene/gui/common/TrayIcon.py:178
+#: emesene/gui/common/TrayIcon.py:177
 msgid "Status"
 msgstr ""
 
@@ -390,47 +390,51 @@ msgstr ""
 msgid "View information"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:149
+#: emesene/gui/gtkui/Conversation.py:150
 msgid "Can't add, default emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:151
+#: emesene/gui/gtkui/Conversation.py:152
 msgid "Can't add, own emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:160
+#: emesene/gui/gtkui/Conversation.py:161
 msgid "Shortcut already in use"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:167
+#: emesene/gui/gtkui/Conversation.py:168
 msgid "Type emoticon's shortcut: "
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:168
+#: emesene/gui/gtkui/Conversation.py:169
 msgid "Choose custom emoticon's shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:312
+#: emesene/gui/gtkui/Conversation.py:313
 #, python-format
 msgid "%d members"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:406
+#: emesene/gui/gtkui/Conversation.py:369
+msgid "Are you sure you want to block this contact?"
+msgstr ""
+
+#: emesene/gui/gtkui/Conversation.py:427
 #, python-format
 msgid "File transfer accepted by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:424
+#: emesene/gui/gtkui/Conversation.py:445
 #, python-format
 msgid "File transfer rejected by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:437
+#: emesene/gui/gtkui/Conversation.py:458
 #, python-format
 msgid "File transfer canceled by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:450
+#: emesene/gui/gtkui/Conversation.py:471
 msgid "File transfer completed!"
 msgstr ""
 
@@ -632,7 +636,7 @@ msgid "Password"
 msgstr ""
 
 #: emesene/gui/gtkui/Dialog.py:832 emesene/gui/gtkui/Login.py:160
-#: emesene/gui/gtkui/Preferences.py:67
+#: emesene/gui/gtkui/Preferences.py:65
 msgid "Preferences"
 msgstr ""
 
@@ -766,7 +770,7 @@ msgid "Change shortcut"
 msgstr ""
 
 #: emesene/gui/gtkui/Dialog.py:1412 emesene/gui/gtkui/IconView.py:104
-#: emesene/gui/gtkui/Preferences.py:1307
+#: emesene/gui/gtkui/Preferences.py:1304
 msgid "Delete"
 msgstr ""
 
@@ -796,56 +800,56 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:43 emesene/gui/gtkui/Preferences.py:932
+#: emesene/gui/gtkui/ExtensionList.py:45 emesene/gui/gtkui/Preferences.py:929
 msgid "Name"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:193
+#: emesene/gui/gtkui/ExtensionList.py:207
 msgid "Supported"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:194
+#: emesene/gui/gtkui/ExtensionList.py:208
 msgid "Community"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:207
+#: emesene/gui/gtkui/ExtensionList.py:221
 msgid "Download"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:275
-#: emesene/gui/gtkui/ExtensionList.py:583
+#: emesene/gui/gtkui/ExtensionList.py:289
+#: emesene/gui/gtkui/ExtensionList.py:618
 msgid "Refresh extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:276
-#: emesene/gui/gtkui/ExtensionList.py:584
+#: emesene/gui/gtkui/ExtensionList.py:290
+#: emesene/gui/gtkui/ExtensionList.py:619
 msgid "Refreshing extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:290
-#: emesene/gui/gtkui/ExtensionList.py:291
+#: emesene/gui/gtkui/ExtensionList.py:304
+#: emesene/gui/gtkui/ExtensionList.py:305
 msgid "Downloading extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:342
+#: emesene/gui/gtkui/ExtensionList.py:367
 msgid "Available for download"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:396 emesene/gui/gtkui/PluginWindow.py:50
+#: emesene/gui/gtkui/ExtensionList.py:423 emesene/gui/gtkui/PluginWindow.py:48
 msgid "Installed"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:454
+#: emesene/gui/gtkui/ExtensionList.py:481
 msgid "Update"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:502
-#: emesene/gui/gtkui/ExtensionList.py:503
+#: emesene/gui/gtkui/ExtensionList.py:528
+#: emesene/gui/gtkui/ExtensionList.py:529
 msgid "Updating extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:570
-#: emesene/gui/gtkui/PluginWindow.py:122 emesene/gui/gtkui/Preferences.py:54
+#: emesene/gui/gtkui/ExtensionList.py:605
+#: emesene/gui/gtkui/PluginWindow.py:120 emesene/gui/gtkui/Preferences.py:52
 msgid "Plugins"
 msgstr ""
 
@@ -1070,365 +1074,365 @@ msgstr ""
 msgid "Check for updates"
 msgstr ""
 
-#: emesene/gui/gtkui/MainWindow.py:121
+#: emesene/gui/gtkui/MainWindow.py:118
 msgid "Connect Emesene and Facebook"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:47
+#: emesene/gui/gtkui/Preferences.py:45
 msgid "Main Window"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:48
+#: emesene/gui/gtkui/Preferences.py:46
 msgid "Conversation Window"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:49
+#: emesene/gui/gtkui/Preferences.py:47
 msgid "Desktop"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:50
+#: emesene/gui/gtkui/Preferences.py:48
 msgid "Sounds"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:51
+#: emesene/gui/gtkui/Preferences.py:49
 msgid "Notifications"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:52
+#: emesene/gui/gtkui/Preferences.py:50
 msgid "Theme"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:53
+#: emesene/gui/gtkui/Preferences.py:51
 msgid "Extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:55
+#: emesene/gui/gtkui/Preferences.py:53
 msgid "Updates"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:82 emesene/gui/gtkui/Preferences.py:929
+#: emesene/gui/gtkui/Preferences.py:80 emesene/gui/gtkui/Preferences.py:926
 msgid "Categories"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:197 emesene/gui/gtkui/Preferences.py:203
-#: emesene/gui/gtkui/Preferences.py:206 emesene/gui/gtkui/Preferences.py:212
+#: emesene/gui/gtkui/Preferences.py:195 emesene/gui/gtkui/Preferences.py:201
+#: emesene/gui/gtkui/Preferences.py:204 emesene/gui/gtkui/Preferences.py:210
 msgid "Live Messenger"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:328
+#: emesene/gui/gtkui/Preferences.py:326
 msgid "Reset"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:534
+#: emesene/gui/gtkui/Preferences.py:531
 msgid "User panel:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:536
+#: emesene/gui/gtkui/Preferences.py:533
 msgid "Show user panel"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:539
+#: emesene/gui/gtkui/Preferences.py:536
 msgid "Contact list:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:540
+#: emesene/gui/gtkui/Preferences.py:537
 msgid "Contact list avatar size"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:543
+#: emesene/gui/gtkui/Preferences.py:540
 msgid "Nick format"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:545
+#: emesene/gui/gtkui/Preferences.py:542
 msgid "Group format"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:556
+#: emesene/gui/gtkui/Preferences.py:553
 msgid "OS X Integration:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:558
+#: emesene/gui/gtkui/Preferences.py:555
 msgid "Show dock icon (requires restart of emesene)"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:591
+#: emesene/gui/gtkui/Preferences.py:588
 #, python-format
 msgid "Enable spell check if available (requires %s)"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:600
+#: emesene/gui/gtkui/Preferences.py:597
 msgid "Override incoming text color"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:621
+#: emesene/gui/gtkui/Preferences.py:618
 msgid "Tab position"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:629
+#: emesene/gui/gtkui/Preferences.py:626
 msgid "Tabbed Conversations"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:633
+#: emesene/gui/gtkui/Preferences.py:630
 msgid "Start minimized/iconified"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:634
+#: emesene/gui/gtkui/Preferences.py:631
 msgid "Show emoticons"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:635
+#: emesene/gui/gtkui/Preferences.py:632
 msgid "Show conversation header"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:637
+#: emesene/gui/gtkui/Preferences.py:634
 msgid "Show conversation side panel"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:639
+#: emesene/gui/gtkui/Preferences.py:636
 msgid "Show conversation toolbar"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:641
+#: emesene/gui/gtkui/Preferences.py:638
 msgid "Show tabs popup menu"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:643
+#: emesene/gui/gtkui/Preferences.py:640
 msgid "Enable escape hotkey to close tabs"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:646
+#: emesene/gui/gtkui/Preferences.py:643
 msgid "Small conversation toolbar"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:653
+#: emesene/gui/gtkui/Preferences.py:650
 msgid "Avatar on conversation left side"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:658
+#: emesene/gui/gtkui/Preferences.py:655
 msgid "Allow auto scroll in conversation"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:661
+#: emesene/gui/gtkui/Preferences.py:658
 msgid "Show avatars in taskbar instead of status icons"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:669
+#: emesene/gui/gtkui/Preferences.py:666
 msgid "Conversation avatar size"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:717
+#: emesene/gui/gtkui/Preferences.py:714
 msgid "Top"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:717
+#: emesene/gui/gtkui/Preferences.py:714
 msgid "Bottom"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:717
+#: emesene/gui/gtkui/Preferences.py:714
 msgid "Left"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:717
+#: emesene/gui/gtkui/Preferences.py:714
 msgid "Right"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:748
+#: emesene/gui/gtkui/Preferences.py:745
 msgid "General:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:749 emesene/gui/common/TrayIcon.py:202
+#: emesene/gui/gtkui/Preferences.py:746 emesene/gui/common/TrayIcon.py:201
 msgid "Mute sounds"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:751 emesene/gui/gtkui/Preferences.py:801
+#: emesene/gui/gtkui/Preferences.py:748 emesene/gui/gtkui/Preferences.py:798
 msgid "Messages events:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:752
+#: emesene/gui/gtkui/Preferences.py:749
 msgid "Play sound on sent message"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:754
+#: emesene/gui/gtkui/Preferences.py:751
 msgid "Play sound on first received message"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:756
+#: emesene/gui/gtkui/Preferences.py:753
 msgid "Play sound on received message"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:758
+#: emesene/gui/gtkui/Preferences.py:755
 msgid "Play sound on nudge"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:760
+#: emesene/gui/gtkui/Preferences.py:757
 msgid "Mute sounds when the conversation has focus"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:762 emesene/gui/gtkui/Preferences.py:796
+#: emesene/gui/gtkui/Preferences.py:759 emesene/gui/gtkui/Preferences.py:793
 msgid "Users events:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:763
+#: emesene/gui/gtkui/Preferences.py:760
 msgid "Play sound on contact online"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:765
+#: emesene/gui/gtkui/Preferences.py:762
 msgid "Play sound on contact offline"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:797
+#: emesene/gui/gtkui/Preferences.py:794
 msgid "Notify on contact online"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:799
+#: emesene/gui/gtkui/Preferences.py:796
 msgid "Notify on contact offline"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:802
+#: emesene/gui/gtkui/Preferences.py:799
 msgid "Notify on received message"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:804
+#: emesene/gui/gtkui/Preferences.py:801
 msgid "Notify when a contact is typing"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:806
+#: emesene/gui/gtkui/Preferences.py:803
 msgid "Notify also when the conversation has focus"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:808
+#: emesene/gui/gtkui/Preferences.py:805
 msgid "Only when available"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:827 emesene/gui/gtkui/Preferences.py:885
+#: emesene/gui/gtkui/Preferences.py:824 emesene/gui/gtkui/Preferences.py:882
 msgid "Image theme"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:829 emesene/gui/gtkui/Preferences.py:887
+#: emesene/gui/gtkui/Preferences.py:826 emesene/gui/gtkui/Preferences.py:884
 msgid "Sound theme"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:831 emesene/gui/gtkui/Preferences.py:889
+#: emesene/gui/gtkui/Preferences.py:828 emesene/gui/gtkui/Preferences.py:886
 msgid "Emote theme"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:833 emesene/gui/gtkui/Preferences.py:891
+#: emesene/gui/gtkui/Preferences.py:830 emesene/gui/gtkui/Preferences.py:888
 msgid "Adium theme"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:838
+#: emesene/gui/gtkui/Preferences.py:835
 msgid "Adium theme variant"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:930
+#: emesene/gui/gtkui/Preferences.py:927
 msgid "Selected"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:933
+#: emesene/gui/gtkui/Preferences.py:930
 msgid "Description"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:934
+#: emesene/gui/gtkui/Preferences.py:931
 msgid "Author"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:935
+#: emesene/gui/gtkui/Preferences.py:932
 msgid "Website"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:946
+#: emesene/gui/gtkui/Preferences.py:943
 msgid "Redraw main screen"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:949
+#: emesene/gui/gtkui/Preferences.py:946
 msgid "Synch with emesene1"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1004
+#: emesene/gui/gtkui/Preferences.py:1001
 msgid "Could not set %1 as default extension for %2"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1053
+#: emesene/gui/gtkui/Preferences.py:1050
 msgid "Logger"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1054
+#: emesene/gui/gtkui/Preferences.py:1051
 msgid "Enable logger"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1056
+#: emesene/gui/gtkui/Preferences.py:1053
 msgid "File transfers"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1057
+#: emesene/gui/gtkui/Preferences.py:1054
 msgid "Sort received files by sender"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1059
+#: emesene/gui/gtkui/Preferences.py:1056
 msgid "Save files to:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1067
+#: emesene/gui/gtkui/Preferences.py:1064
 msgid "Choose a Directory"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1092
+#: emesene/gui/gtkui/Preferences.py:1089
 msgid "Keep-alive conversations"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1097
+#: emesene/gui/gtkui/Preferences.py:1094
 msgid ""
 "If you have problems with your nickname/message/picture just click on this "
 "button, sign in with your account and load a picture in your Live Profile. "
 "Then restart emesene and have fun."
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1108
+#: emesene/gui/gtkui/Preferences.py:1105
 msgid "Open Live Profile"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1158
+#: emesene/gui/gtkui/Preferences.py:1155
 msgid "Red contacts are not in your contact list."
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1161
+#: emesene/gui/gtkui/Preferences.py:1158
 msgid "Yellow contacts don't have you in their contact list."
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1164
+#: emesene/gui/gtkui/Preferences.py:1161
 msgid "<b>WARNING: The information provided below may be inaccurate.</b>"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1191
+#: emesene/gui/gtkui/Preferences.py:1188
 msgid "Allow list:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1230
+#: emesene/gui/gtkui/Preferences.py:1227
 msgid "Block list:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1293
+#: emesene/gui/gtkui/Preferences.py:1290
 msgid "Add to contacts"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1301
+#: emesene/gui/gtkui/Preferences.py:1298
 msgid "Move to block list"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1304
+#: emesene/gui/gtkui/Preferences.py:1301
 msgid "Move to allow list"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:1365
+#: emesene/gui/gtkui/Preferences.py:1362
 #, python-format
 msgid "Are you sure you want to delete %s from your authorized contacts?"
 msgstr ""
 
-#: emesene/gui/gtkui/Renderers.py:175
+#: emesene/gui/gtkui/Renderers.py:173
 msgid "Parse MSN+ markup, showing colors, gradients and effects"
 msgstr ""
 
-#: emesene/gui/gtkui/Renderers.py:193
+#: emesene/gui/gtkui/Renderers.py:191
 msgid ""
 "Strip MSN+ markup, not showing any effect/color, but improving the "
 "readability"
@@ -1486,18 +1490,18 @@ msgstr ""
 msgid "The Ayatana Indicator applet extension"
 msgstr ""
 
-#: emesene/gui/common/TrayIcon.py:152 emesene/gui/common/TrayIcon.py:189
+#: emesene/gui/common/TrayIcon.py:151 emesene/gui/common/TrayIcon.py:188
 msgid "Hide/Show emesene"
 msgstr ""
 
-#: emesene/gui/common/TrayIcon.py:184
+#: emesene/gui/common/TrayIcon.py:183
 msgid "Contacts"
 msgstr ""
 
-#: emesene/gui/common/TrayIcon.py:200
+#: emesene/gui/common/TrayIcon.py:199
 msgid "Unmute sounds"
 msgstr ""
 
-#: emesene/gui/common/TrayIcon.py:240
+#: emesene/gui/common/TrayIcon.py:239
 msgid "A menu with sessions' contacts"
 msgstr ""
