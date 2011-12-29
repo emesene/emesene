@@ -20,14 +20,18 @@
 #
 
 from urllib import urlopen
+import base64
 
 try:
     from json import loads
 except ImportError:
     from simplejson import loads
 
-API_GITHUB_FETCHBLOB = "http://github.com/api/v2/json/blob/all/%s/%s/master"
-API_GITHUB_GETRAW = "http://github.com/api/v2/json/blob/show/%s/%s/%s"
+API_GITHUB_FETCHBLOB_v2 = "http://github.com/api/v2/json/blob/all/%s/%s/master"
+API_GITHUB_GETRAW_v2 = "http://github.com/api/v2/json/blob/show/%s/%s/%s"
+
+API_GITHUB_FETCHTREE = "https://api.github.com/repos/%s/%s/git/trees/master?recursive=100"
+API_GITHUB_GETRAW = "https://api.github.com/repos/%s/%s/git/blobs/%s"
 
 class Github(object):
 
@@ -36,11 +40,16 @@ class Github(object):
 
     def get_raw(self, repo, sha):
         response = urlopen(API_GITHUB_GETRAW % (self._org, repo, sha))
-        return response.read()
-
+        rq = response.read()
+        content = loads(rq).get('content')
+        return base64.b64decode(content)
 
     def fetch_blob(self, element):
         response = urlopen(API_GITHUB_FETCHBLOB % (self._org, element))
         rq = response.read()
         return loads(rq)
 
+    def fetch_tree(self, element):
+        response = urlopen(API_GITHUB_FETCHTREE % (self._org, element))
+        rq = response.read()
+        return loads(rq)

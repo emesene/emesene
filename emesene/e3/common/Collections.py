@@ -50,7 +50,7 @@ class Collection(object):
         self.theme = theme
         self.github = Github("emesene")
         self._stop = False
-        self._blobs = None
+        self._tree = None
         self.progress = 0.0
 
     def save_files(self, element, label):
@@ -103,29 +103,33 @@ class Collection(object):
     def stop(self):
         self._stop = True
 
-    def set_blobs(self, result):
-        self._blobs = result
+    def set_tree(self, result):
+        self._tree = result
 
     def plugin_name_from_file(self, file_name):
         pass
 
     def fetch(self):
         self._stop = False
-        self._blobs = None
+        self._tree = None
         self.progress = 0.0
 
-        AsyncAction(self.set_blobs, self.github.fetch_blob ,self.theme)
+        AsyncAction(self.set_tree, self.github.fetch_tree, self.theme)
 
-        while self._blobs is None:
+        while self._tree is None:
             if self._stop:
                 return
 
         self.progress = 0.5
-        j = self._blobs
 
-        for i, k in enumerate(j["blobs"]):
+        for i, item in enumerate(self._tree['tree']):
 
-            (type, name) = self.plugin_name_from_file(k)
+            if item.get('type') != 'blob':
+                continue
+
+            file_name = item.get('path')
+
+            (type, name) = self.plugin_name_from_file(file_name)
 
             if type is None:
                 continue
@@ -140,8 +144,8 @@ class Collection(object):
             except KeyError:
                 pl = extype[name] = ExtensionDescriptor()
 
-            pl.add_file(k, j["blobs"][k])
-            self.progress = i / float(len(j["blobs"]) * 2) + 0.5
+            pl.add_file(file_name, item.get('sha'))
+            self.progress = i / float(len(self._tree['tree']) * 2) + 0.5
         self.progress = 1.0
 
     def has_item(self, type_, name):

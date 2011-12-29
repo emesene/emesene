@@ -259,4 +259,3 @@ class GtkRunner(threading.Thread):
 
         self.callback(result)
         return False
-
