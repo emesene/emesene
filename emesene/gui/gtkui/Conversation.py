@@ -353,6 +353,22 @@ class Conversation(gtk.VBox, gui.Conversation):
     def get_preview(self, completepath):
         return utils.makePreview(completepath)
 
+    def _on_block_user_accept(self, accept, account):
+        if accept == stock.YES:
+            self.session.block(account)
+
+    def on_block_user(self):
+        '''blocks the first user of the conversation'''
+        account = self.members[0]
+        contact = self.session.contacts.contacts[account]
+
+        if contact.blocked:
+            self.session.unblock(account)
+        else:
+            dialog = extension.get_default('dialog')
+            dialog.yes_no(_("Are you sure you want to block this contact?"),
+                          self._on_block_user_accept, account)
+
     def on_user_typing(self, account):
         """
         inform that the other user has started typing
