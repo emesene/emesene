@@ -122,6 +122,7 @@ class Conversation(gtk.VBox, gui.Conversation):
                 his_picture = contact.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
                 nick = contact.nick
                 display_name = contact.display_name
+                self.set_sensitive(not contact.blocked, False)
             else:
                 his_picture = utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
                 nick = ""
@@ -314,15 +315,16 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.info.update_group(self.members)
         self.update_tab()
 
-    def set_sensitive(self, is_sensitive):
+    def set_sensitive(self, is_sensitive, toolbar=True):
         """
         used to make the conversation insensitive while the conversation
         is still open while the user is disconnected and to set it back to
         sensitive when the user is reconnected
         """
         self.input.set_sensitive(is_sensitive)
-        self.toolbar.set_sensitive(is_sensitive)
         self.info.set_sensitive(is_sensitive)
+        if toolbar:
+            self.toolbar.set_sensitive(is_sensitive)
 
     def set_image_visible(self, is_visible):
         """
@@ -510,4 +512,3 @@ class Conversation(gtk.VBox, gui.Conversation):
         elif path.startswith('file:'): # xffm
             path = path[5:] # 5 is len('file:')
         return path
-

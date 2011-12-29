@@ -104,6 +104,11 @@ class Conversation(object):
         self.session.signals.call_invitation.subscribe(
                 self.on_call_invitation)
 
+        self.session.signals.contact_block_succeed.subscribe(
+                self.on_contact_block_succeed)
+        self.session.signals.contact_unblock_succeed.subscribe(
+                self.on_contact_unblock_succeed)
+
     def unsubscribe_signals(self):
         ''' unsubscribes current session's signals '''
         self.session.config.unsubscribe(self._on_avatarsize_changed,
@@ -138,6 +143,11 @@ class Conversation(object):
 
         self.session.signals.call_invitation.unsubscribe(
                 self.on_call_invitation)
+
+        self.session.signals.contact_block_succeed.unsubscribe(
+                self.on_contact_block_succeed)
+        self.session.signals.contact_unblock_succeed.unsubscribe(
+                self.on_contact_unblock_succeed)
 
     def _get_style(self):
         '''return the value of style'''
@@ -238,6 +248,14 @@ class Conversation(object):
         else:
             self.session.block(account)
 
+    def on_contact_block_succeed(self, account):
+        if account == self.members[0]:
+            self.set_sensitive(False, False)
+
+    def on_contact_unblock_succeed(self, account):
+        if account == self.members[0]:
+            self.set_sensitive(True)
+
     def on_emote(self, emote):
         '''called when a emote is selected on the emote window'''
         self.input.append(emote)
@@ -285,7 +303,7 @@ class Conversation(object):
         """
         raise NotImplementedError("Method not implemented")
 
-    def set_sensitive(self, is_sensitive):
+    def set_sensitive(self, is_sensitive, toolbar=True):
         """
         used to make the conversation insensitive while the conversation
         is still open while the user is disconnected and to set it back to
