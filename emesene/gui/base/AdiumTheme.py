@@ -63,14 +63,15 @@ class AdiumTheme(MetaData):
         '''load the information of the theme on path
         '''
         self.path = path
+        self.resources_path = os.path.join(path, 'Contents', 'Resources')
 
         info_file = file(os.path.join(path, 'Contents', 'Info.plist'))
         info = parsers.Plist(info_file).info
-        self.default_variant = info.get('DefaultVariant', None)
+        self.default_variant = info.get('DefaultVariant', None) or \
+                               sorted(self.get_theme_variants())[0]
         self.variant = variant
         self.theme_version = info.get('MessageViewVersion', 0)
 
-        self.resources_path = os.path.join(path, 'Contents', 'Resources')
         self.incoming_path = os.path.join(self.resources_path, 'Incoming')
         self.outgoing_path = os.path.join(self.resources_path, 'Outgoing')
 
