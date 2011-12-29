@@ -91,7 +91,7 @@ def replace_emotes(msgtext, cedict={}, cedir=None, sender=''):
                 # creating sort of uid for image name since different users
                 # may have different images with the same shortcut
                 _id = base64.b64encode(sender+shortcut)
-                imgtag = '<img src="%s" alt="%s" name="%s"/>' % (path, eshort, _id)
+                imgtag = '<img src="%s" alt="%s" title="%s" name="%s"/>' % (path, eshort, eshort, _id)
                 #msgtext = msgtext.replace(eshort, imgtag)
                 msgtext = replace_shortcut_with_tag(msgtext, eshort, imgtag)
 
