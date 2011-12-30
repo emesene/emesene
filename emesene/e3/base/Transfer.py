@@ -45,10 +45,6 @@ class FileTransfer(object):
         return '<e3.base.filetransfer filename="%s" len="%i">' % (self.filename,
                                                             self.received_data)
 
-    #FIXME: remove this once papyon is fixed. see comment in e3/papylib/worker.py
-    def is_partially_received(self):
-        return self.received_data < self.size
-
     def get_progress(self):
         ''' returns the lenght of the received data '''
         return self.received_data
