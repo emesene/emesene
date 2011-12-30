@@ -437,7 +437,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_filetransfer_rejected(self, transfer):
         ''' called when a file transfer is rejected '''
         if transfer in self.transfers_bar.transfers:
-            self.transfers_bar.update(transfer)
+            self.transfers_bar.canceled(transfer)
 
         if transfer.contact.account == self.members[0]:
             contact = self._member_to_contact(self.members[0])
