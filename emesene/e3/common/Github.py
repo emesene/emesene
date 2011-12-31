@@ -41,11 +41,11 @@ class Github(object):
     def get_raw(self, repo, sha):
         response = urlopen(API_GITHUB_GETRAW % (self._org, repo, sha))
         rq = response.read()
-        content = loads(rq).get('content')
+        content = loads(rq).get('content', '')
         return base64.b64decode(content)
 
     def fetch_blob(self, element):
-        response = urlopen(API_GITHUB_FETCHBLOB % (self._org, element))
+        response = urlopen(API_GITHUB_FETCHBLOB_v2 % (self._org, element))
         rq = response.read()
         return loads(rq)
 

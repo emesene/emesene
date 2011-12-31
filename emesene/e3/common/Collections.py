@@ -82,7 +82,7 @@ class Collection(object):
             try:
                 rq = self.github.get_raw(self.theme, element[label].files[path])
             except Exception, ex:
-                log.error(str(ex))
+                log.exception(str(ex))
                 self.remove(removal_path)
                 return
 
@@ -165,7 +165,7 @@ class Collection(object):
                 try:
                     rq = self.github.get_raw(self.theme, current_ext.files[path])
                 except Exception, ex:
-                    log.error(str(ex))
+                    log.exception(str(ex))
                     return None
                 current_ext.metadata = json.loads(rq)
                 return current_ext.metadata
