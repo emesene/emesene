@@ -21,6 +21,7 @@
 from e3.base.Event import Event
 
 import papyon.event
+import papyon.gnet.errors
 
 import logging
 log = logging.getLogger('papylib.Events')
@@ -74,7 +75,9 @@ class ClientEvents(papyon.event.ClientEventInterface):
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
                                                'Protocol error', 0)
         elif error_type == papyon.event.ClientErrorType.CONTENT_ROAMING:
-            if error.response and error.response.status and error.response.status == 404:
+            if isinstance(error, papyon.gnet.errors.HTTPError) and \
+               error.response and error.response.status and \
+               error.response.status == 404:
                 self._client.session.add_event(Event.EVENT_BROKEN_PROFILE)
         elif error_type == papyon.event.ClientErrorType.ADDRESSBOOK:#TODO
             log.error("Client got an error handling addressbook: %s %s" % (error_type, error))
@@ -266,4 +269,3 @@ class MailboxEvent(papyon.event.MailboxEventInterface):
 
     def on_mailbox_new_mail_received(self, mail_message):
         self._client._on_mailbox_new_mail_received(mail_message)
-
