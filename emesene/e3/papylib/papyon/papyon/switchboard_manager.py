@@ -324,7 +324,9 @@ class SwitchboardManager(gobject.GObject):
         # Check Orphaned switchboards
         for switchboard in list(self._orphaned_switchboards):
             switchboard_participants = set(switchboard.participants.values())
-            if handler_participants == switchboard_participants:
+            if handler_participants == switchboard_participants and \
+               (switchboard.state == msnp.ProtocolState.OPEN or \
+                switchboard.state == msnp.ProtocolState.OPENING):
                 logger.info("Using orphaned switchboard %s" %
                         switchboard.session_id)
                 self._switchboards[switchboard] = set([handler]) #FIXME: WeakSet ?
