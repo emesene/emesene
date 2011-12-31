@@ -551,7 +551,7 @@ class MainWindow(BaseTable):
                     subprocess.call('defaults write /Applications/emesene.app/Contents/Info LSUIElement -bool true', shell=True)
 
             self.append_markup('<b>'+_('OS X Integration:')+'</b>')
-            self.session.config.get_or_set('b_show_dock_icon', True)    
+            self.session.config.get_or_set('b_show_dock_icon', False)    
             button = self.append_check(_('Show dock icon (requires restart of emesene)'),
                          'session.config.b_show_dock_icon')
             button.connect("toggled", do_hideshow)
