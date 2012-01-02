@@ -16,7 +16,7 @@
 
     ; Program info
     !define PROGRAM_NAME "emesene"
-    !define PROGRAM_VERSION "2.12.1"
+    !define PROGRAM_VERSION "2.12.2-devel"
     !define /date PROGRAM_BUILDTIME "%Y%m%d_%H%M"
     !define PROGRAM_TYPE "portable"
     !define PROGRAM_PUBLISHER "emesene team"
