@@ -70,7 +70,7 @@ EVENTS = (\
  'contact added you', 'user typing',
  'mail received', 'mail count changed',
  'broken profile', 'close', 'social request',
- 'info message')
+ 'gui message')
 
 ACTIONS = (\
  'login'            , 'logout'           ,

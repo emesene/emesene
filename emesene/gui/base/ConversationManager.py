@@ -48,7 +48,7 @@ class ConversationManager(object):
     def subscribe_signals(self):
         self.session.signals.conv_message.subscribe(
             self._on_message)
-        self.session.signals.info_message.subscribe(
+        self.session.signals.gui_message.subscribe(
             self._on_message)
         self.session.signals.user_typing.subscribe(
             self._on_user_typing)
@@ -70,7 +70,7 @@ class ConversationManager(object):
     def unsubscribe_signals(self):
         self.session.signals.conv_message.unsubscribe(
             self._on_message)
-        self.session.signals.info_message.unsubscribe(
+        self.session.signals.gui_message.unsubscribe(
             self._on_message)
         self.session.signals.user_typing.unsubscribe(
             self._on_user_typing)
