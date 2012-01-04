@@ -86,22 +86,23 @@ class UnityLauncher(gui.BaseTray):
 
     def _on_message(self, cid, account, msgobj, cedict=None):
         ''' This is fired when a new message arrives '''
-        conv = self._get_conversation(cid, account)
-        if conv:
-            icid = conv.icid
-            if icid in self.icid_dict.keys():
-                self.icid_dict[icid] += 1
-            else:
-                conv_manager = self._get_conversation_manager(cid, account)
-                if not conv_manager:
-                    return
-                if conv_manager.is_active():
-                    return
-                self.icid_dict[icid] = 1
-            self.count += 1
-            self.launcher.set_property("count", self.count)
-            self.launcher.set_property("count-visible", True)
-            self.launcher.set_property("urgent", True)
+        conv_manager = self.session.get_conversation_manager(cid, [account])
+        if not conv_manager:
+            return
+
+        conv = conv_manager.has_similar_conversation(cid, [account])
+        icid = conv.icid
+        if icid in self.icid_dict.keys():
+            self.icid_dict[icid] += 1
+        elif conv_manager.is_active():
+            return
+        else:
+            self.icid_dict[icid] = 1
+
+        self.count += 1
+        self.launcher.set_property("count", self.count)
+        self.launcher.set_property("count-visible", True)
+        self.launcher.set_property("urgent", True)
 
     def _on_message_read(self, conv):
         ''' This is called when the user read the message '''
@@ -110,7 +111,7 @@ class UnityLauncher(gui.BaseTray):
 
     def _on_conv_ended(self, cid):
         ''' This is called when the conversation is closed '''
-        conv = self._get_conversation(cid)
+        conv = self.session.get_conversation(cid)
         if conv:
             self._hide_count(conv.icid)
 
@@ -128,4 +129,3 @@ class UnityLauncher(gui.BaseTray):
 
     def _close_session(self, menu_item, menu_object):
         self.session.close()
-

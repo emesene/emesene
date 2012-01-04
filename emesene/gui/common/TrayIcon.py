@@ -80,7 +80,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         Blink tray icon and save newest unread message
         """
 
-        conv_manager = self._get_conversation_manager(cid, account)
+        conv_manager = self.handler.session.get_conversation_manager(cid, [account])
 
         if conv_manager and not conv_manager.is_active():
             self.set_blinking(True)
@@ -102,10 +102,10 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         if self.last_new_message is not None and self.get_blinking():
             # show the tab with the latest message
             cid = self.last_new_message
-            conv_manager = self._get_conversation_manager(cid)
+            conv_manager = self.handler.session.get_conversation_manager(cid)
 
             if conv_manager:
-                conversation = conv_manager.conversations[cid]
+                conversation = conv_manager.has_similar_conversation(cid)
                 conv_manager.present(conversation)
         else:
             self.handler.on_hide_show_mainwindow(self.main_window)

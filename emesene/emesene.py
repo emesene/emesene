@@ -301,9 +301,6 @@ class Controller(object):
                 for conv_manager in self.conversations:
                     conv_manager.renew_session(self.session)
                     self.session.conversation_managers.append(conv_manager)
-                self.tray_icon.set_conversations(self.conversations)
-                if self.unity_launcher is not None:
-                    self.unity_launcher.set_conversations(self.conversations)
             else:
                 for conv_manager in self.conversations:
                     conv_manager.hide_all()
@@ -708,11 +705,6 @@ class Controller(object):
 
             else:
                 conv_manager = self.conversations[0]
-
-
-        self.tray_icon.set_conversations(self.conversations)
-        if self.unity_launcher is not None:
-            self.unity_launcher.set_conversations(self.conversations)
 
         conversation = conv_manager.new_conversation(cid, members)
 

@@ -6,16 +6,9 @@ class BaseTray(object):
     '''
 
     def __init__(self, handler=None):
-        self.conversations = None
         self.quit_on_close = False
         self.signals_have_been_connected = False
         self.handler = handler
-
-    def set_conversations(self, convs):
-        """
-        Sets the conversations manager
-        """
-        self.conversations = convs
 
     def set_contacts(self, contacts):
         """
@@ -93,38 +86,3 @@ class BaseTray(object):
         This is called when a contact changes something
         """
         pass
-
-    def _get_conversation_manager(self, cid, account=None):
-        '''
-        return a conversation manager that matches cid and/or members
-        '''
-        if not self.conversations:
-            return None
-
-        for convman in self.conversations:
-            if account:
-                if convman.has_similar_conversation(cid, [account]):
-                    return convman
-            elif convman.has_similar_conversation(cid):
-                return convman
-
-        return None
-
-    def _get_conversation(self, cid, account=None):
-        '''
-        return a conversation that matches cid and/or members
-        '''
-        if not self.conversations:
-            return None
-
-        for convman in self.conversations:
-            if account:
-                conversation = convman.has_similar_conversation(cid, [account])
-            else:
-                conversation = convman.has_similar_conversation(cid)
-
-            if conversation:
-                return conversation
-
-        return None
-

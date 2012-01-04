@@ -80,8 +80,8 @@ class MessagingMenu(gui.BaseTray):
         This is fired when a new message arrives to a user.
         """
         contact = self.handler.session.contacts.get(account)
-        conv_manager = self._get_conversation_manager(cid, account)
-        conv = self._get_conversation(cid, account)
+        conv_manager = self.handler.session.get_conversation_manager(cid, [account])
+        conv = conv_manager.has_similar_conversation(cid, [account])
         if conv is None:
             return # it can happen, just quickly open/close a conv
         icid = conv.icid
@@ -112,7 +112,7 @@ class MessagingMenu(gui.BaseTray):
         """
         Called when the user close the conversation.
         """
-        conv = self._get_conversation(cid)
+        conv = self.handler.session.get_conversation(cid)
         if conv and conv.icid in self.r_indicator_dict.keys():
             ind = self.r_indicator_dict[conv.icid]
             ind.hide()
@@ -171,10 +171,10 @@ class MessagingMenu(gui.BaseTray):
         if subtype == "im":
             icid = self.indicator_dict[indicator]
 
-            convman = self._get_conversation_manager(icid)
+            convman = self.handler.session.get_conversation_manager(icid)
 
             if convman:
-                conv = self._get_conversation(icid)
+                conv = convman.has_similar_conversation(icid)
                 convman.present(conv)
 
         if self.indicator_dict[indicator] is not None:
@@ -191,4 +191,3 @@ class MessagingMenu(gui.BaseTray):
         This is fired when the user clicks on the server indicator item.
         """
         self.main_window.present()
-

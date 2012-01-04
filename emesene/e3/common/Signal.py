@@ -129,4 +129,3 @@ def WeakMethod(f):
         return WeakMethodFree(f)
 
     return WeakMethodBound(f)
-
