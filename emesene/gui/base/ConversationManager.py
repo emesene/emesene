@@ -40,11 +40,6 @@ class ConversationManager(object):
         if self.session.conversations is None or conversation_tabs:
             self.session.conversations = {}
 
-        self.aftconv = None
-        AfterConversation = extension.get_default('after_new_conversation')
-        if AfterConversation is not None:
-            self.aftconv = AfterConversation(self.session)
-
     def subscribe_signals(self):
         self.session.signals.conv_message.subscribe(
             self._on_message)
@@ -241,16 +236,15 @@ class ConversationManager(object):
             conversation = self.add_new_conversation(self.session, cid, members)
             self.conversations[cid] = conversation
             self.session.conversations[cid] = conversation
-
-        self.after_new_conversation(conversation)
+        #notify a new conversation has started
+        self.session.conv_started(cid, members)
         return conversation
 
     def after_new_conversation(self, conversation):
         '''
          What to do after create a conversation
         '''
-        if self.aftconv is not None:
-            self.aftconv.run(conversation)
+        pass
 
     def renew_session(self, session):
         '''reopen all conversations when the user reconnects'''

@@ -73,6 +73,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.toolbar = ConversationToolbar(toolbar_handler)
         self.toolbar.set_property('can-focus', False)
         self.output = OutputText(self.session.config, self.steal_emoticon_cb)
+        if self.session.conversation_start_locked:
+            self.output.lock()
+
         self.output.set_size_request(-1, 30)
         self.input = InputText(self.session, self._on_send_message,
                 self.cycle_history, self.on_drag_data_received)

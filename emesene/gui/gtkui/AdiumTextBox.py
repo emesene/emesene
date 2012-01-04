@@ -160,18 +160,20 @@ class OutputText(gtk.ScrolledWindow):
         self.clear()
         self.view.show()
         self.add(self.view)
-        self.locked = False
+        self.locked = 0
         self.pending = []
 
     def lock (self):
-        self.locked = True
+        self.locked += 1
 
     def unlock(self):
         #add messages and then unlock
-        for msg in self.pending:
-            self.view.add_message(msg, self.config.b_allow_auto_scroll)
-        self.pending = []
-        self.locked = False
+        self.locked -=1
+        if self.locked <=0:
+            for msg in self.pending:
+                self.view.add_message(msg, self.config.b_allow_auto_scroll)
+            self.pending = []
+            self.locked = 0
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):

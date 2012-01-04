@@ -45,6 +45,7 @@ class Session(object):
         self._account = None
         self.contacts = None
         self.logger = None
+        self.conversation_start_locked = False #if conversation start locked
         self.conversations = None
         self.conversation_managers = []
         self.extras = {}

@@ -368,7 +368,7 @@ class OutputText(TextBox):
         self.set_shadow_type(gtk.SHADOW_IN)
         self._textbox.set_editable(False)
         self._textbox.set_cursor_visible(False)
-        self.locked = False
+        self.locked = 0
         self.pending = []
 
     def clear(self, source="", target="", target_display="",
@@ -377,14 +377,16 @@ class OutputText(TextBox):
         TextBox.clear(self)
     
     def lock (self):
-        self.locked = True
+        self.locked += 1
 
     def unlock(self):
         #add messages and then unlock
-        for text in self.pending:
-            TextBox.append(self, text, self.config.b_allow_auto_scroll)
-        self.pending = []
-        self.locked = False
+        self.locked -=1
+        if self.locked <=0:
+            for text in self.pending:
+                TextBox.append(self, text, self.config.b_allow_auto_scroll)
+            self.pending = []
+            self.locked = 0
 
     def append(self, text, msg, scroll=True):
         '''append formatted text to the widget'''
