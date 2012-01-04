@@ -293,12 +293,14 @@ class Controller(object):
     def _restore_session(self):
         account = self.session.account
         if self.conv_manager_available:
+            self.session.conversation_managers = []
             if account and self.last_session_account == account.account and \
                self.last_session_service == account.service:
                 self.conv_manager_available = False
                 self.session.conversations = {}
                 for conv_manager in self.conversations:
                     conv_manager.renew_session(self.session)
+                    self.session.conversation_managers.append(conv_manager)
                 self.tray_icon.set_conversations(self.conversations)
                 if self.unity_launcher is not None:
                     self.unity_launcher.set_conversations(self.conversations)
@@ -695,6 +697,7 @@ class Controller(object):
                 self._set_location(window, True)
                 conv_manager = window.content
                 self.conversations.append(conv_manager)
+                self.session.conversation_managers.append(conv_manager)
 
                 if self.session.config.b_conv_minimized and other_started:
                     window.iconify()
@@ -748,6 +751,7 @@ class Controller(object):
                 self.session.config.b_conv_maximized = False
             else:
                 self.session.config.b_conv_maximized = True
+            self.session.conversation_managers.remove(conv_manager)
 
         conv_manager.close_all()
         self.conversations.remove(conv_manager)

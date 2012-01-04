@@ -46,6 +46,7 @@ class Session(object):
         self.contacts = None
         self.logger = None
         self.conversations = None
+        self.conversation_managers = []
         self.extras = {}
 
         self.events = Queue.Queue()
@@ -60,6 +61,34 @@ class Session(object):
         self.config_dir = e3.common.ConfigDir('emesene2')
         # set the base dir of the config to the base dir plus the account
         self.signals = e3.common.Signals(EVENTS, self.events)
+
+    def get_conversation(self, cid, members=None):
+        '''
+        return a conversation that matches cid and/or members
+        '''
+        if not self.conversation_managers:
+            return None
+
+        for convman in self.conversation_managers:
+            conversation = convman.has_similar_conversation(cid, members)
+
+            if conversation:
+                return conversation
+
+        return None
+
+    def get_conversation_manager(self, cid, members=None):
+        '''
+        return a conversation manager that matches cid and/or members
+        '''
+        if not self.conversation_managers:
+            return None
+
+        for convman in self.conversation_managers:
+            if convman.has_similar_conversation(cid, members):
+                return convman
+
+        return None
 
     def _set_account(self, account):
         '''set the value of account'''
