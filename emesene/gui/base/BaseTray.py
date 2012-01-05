@@ -26,15 +26,18 @@ class BaseTray(object):
         """ dummy, indicators remove themselves automagically """
         if self.signals_have_been_connected:
             self.handler.session.signals.contact_attr_changed.unsubscribe(
-                                            self._on_contact_attr_changed)
+                self._on_contact_attr_changed)
+            self.handler.session.signals.picture_change_succeed.unsubscribe(
+                self._on_contact_attr_changed)
             self.handler.session.signals.status_change_succeed.unsubscribe(
-                                                 self._on_status_change_succeed)
+                self._on_status_change_succeed)
             self.handler.session.signals.conv_message.unsubscribe(
                 self._on_conv_message)
             self.handler.session.signals.conv_ended.unsubscribe(
                 self._on_conv_ended)
             self.handler.session.signals.message_read.unsubscribe(
                 self._on_message_read)
+
             self.signals_have_been_connected = False
 
     def set_main(self, session):
@@ -43,11 +46,11 @@ class BaseTray(object):
         """
         self.handler.session = session
         self.handler.session.signals.contact_attr_changed.subscribe(
-                                            self._on_contact_attr_changed)
+            self._on_contact_attr_changed)
         self.handler.session.signals.picture_change_succeed.subscribe(
-                                            self._on_contact_attr_changed)
+            self._on_contact_attr_changed)
         self.handler.session.signals.status_change_succeed.subscribe(
-                                                 self._on_status_change_succeed)
+            self._on_status_change_succeed)
         self.handler.session.signals.conv_message.subscribe(
             self._on_conv_message)
         self.handler.session.signals.conv_ended.subscribe(

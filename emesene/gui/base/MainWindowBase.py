@@ -66,3 +66,4 @@ class MainWindowBase(object):
         self.session.signals.mail_count_changed.unsubscribe(
             self._on_mail_count_changed)
         self.session.signals.broken_profile.unsubscribe(self._on_broken_profile)
+        self.session.signals.social_request.unsubscribe(self._on_social_request)
