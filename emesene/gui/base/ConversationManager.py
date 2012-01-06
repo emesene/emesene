@@ -236,6 +236,8 @@ class ConversationManager(object):
             conversation = self.add_new_conversation(self.session, cid, members)
             self.conversations[cid] = conversation
             self.session.conversations[cid] = conversation
+
+        self.after_new_conversation(conversation)
         #notify a new conversation has started
         self.session.conv_started(cid, members)
         return conversation
