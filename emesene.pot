@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-12-29 13:37+0100\n"
+"POT-Creation-Date: 2012-01-07 19:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -390,51 +390,51 @@ msgstr ""
 msgid "View information"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:150
+#: emesene/gui/gtkui/Conversation.py:153
 msgid "Can't add, default emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:152
+#: emesene/gui/gtkui/Conversation.py:155
 msgid "Can't add, own emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:161
+#: emesene/gui/gtkui/Conversation.py:164
 msgid "Shortcut already in use"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:168
+#: emesene/gui/gtkui/Conversation.py:171
 msgid "Type emoticon's shortcut: "
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:169
+#: emesene/gui/gtkui/Conversation.py:172
 msgid "Choose custom emoticon's shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:313
+#: emesene/gui/gtkui/Conversation.py:316
 #, python-format
 msgid "%d members"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:369
+#: emesene/gui/gtkui/Conversation.py:372
 msgid "Are you sure you want to block this contact?"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:427
+#: emesene/gui/gtkui/Conversation.py:430
 #, python-format
 msgid "File transfer accepted by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:445
+#: emesene/gui/gtkui/Conversation.py:448
 #, python-format
 msgid "File transfer rejected by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:458
+#: emesene/gui/gtkui/Conversation.py:461
 #, python-format
 msgid "File transfer canceled by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:471
+#: emesene/gui/gtkui/Conversation.py:474
 msgid "File transfer completed!"
 msgstr ""
 
