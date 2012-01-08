@@ -130,17 +130,17 @@ class ImageTheme(MetaData):
         panel_path = os.path.join(path, "panel")
         if os.path.exists(panel_path):
             self.panel_path = panel_path
-            self.logo_panel = os.path.join(panel_path, "logo.png")
+            self.logo_panel = self.get_image(path, "panel", "logo.png")
             self.status_icons_panel[status.ONLINE] = \
-                os.path.join(panel_path, "online.png")
+                self.get_image(path, "panel", "online.png")
             self.status_icons_panel[status.OFFLINE] = \
-                os.path.join(panel_path, "offline.png")
+                self.get_image(path, "panel", "offline.png")
             self.status_icons_panel[status.BUSY] = \
-                os.path.join(panel_path, "busy.png")
+                self.get_image(path, "panel", "busy.png")
             self.status_icons_panel[status.AWAY] = \
-                os.path.join(panel_path, "away.png")
+                self.get_image(path, "panel", "away.png")
             self.status_icons_panel[status.IDLE] = \
-                os.path.join(panel_path, "idle.png")
+                self.get_image(path, "panel", "idle.png")
         else:
             self.status_icons_panel = self.status_icons.copy()
             self.logo_panel = self.logo
@@ -159,13 +159,13 @@ class ImageTheme(MetaData):
             self.tool_file_transfer = os.path.join(toolbar_path, "file-transfer.png")
             self.tool_ublock = os.path.join(toolbar_path, "ublock.png")
 
-    def get_image(self, path, name):
+    def get_image(self, base_path, *paths):
         '''get the image path or else use the default image'''
-        full_path = os.path.join(path, name)
+        full_path = os.path.join(base_path, *paths)
         if os.path.isfile(full_path):
             return full_path
         else:
-            return os.path.join(self.default_path, name)
+            return os.path.join(self.default_path, *paths)
 
     def has_custom_toolbar_icons(self):
         return self.toolbar_path != None
