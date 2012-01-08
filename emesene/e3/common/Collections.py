@@ -89,7 +89,7 @@ class Collection(object):
             f = open(os.path.join(path_to_create, split_path[-1]), "wb")
             f.write(rq)
             f.close()
-        self.progress = 1.0
+        self.progress = 0.0
     
     def download(self, download_item=None):
         self.progress = 0.0
@@ -146,7 +146,7 @@ class Collection(object):
 
             pl.add_file(file_name, item.get('sha'))
             self.progress = i / float(len(self._tree['tree']) * 2) + 0.5
-        self.progress = 1.0
+        self.progress = 0.0
 
     def has_item(self, type_, name):
         current_ext = self.extensions_descs.get(type_, {}).get(name)

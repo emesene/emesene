@@ -199,7 +199,7 @@ class ExtensionDownloadList(ExtensionListTab):
         '''constructor'''
         ExtensionListTab.__init__(self, session, radio, use_tabs)
         self.first = True
-        self.done = True
+        self.updated_amount = 0
 
         self.thc_com = {}
         self.list_type = list_type
@@ -289,7 +289,6 @@ class ExtensionDownloadList(ExtensionListTab):
                             _('Refresh extensions'), self._end_progress_cb)
             self.progress.set_action(_("Refreshing extensions"))
             self.progress.show_all()
-            self.done = False
             gobject.timeout_add(100, self.update_progress)
             utils.GtkRunner(self.show_update_callback, self.update)
 
@@ -304,12 +303,12 @@ class ExtensionDownloadList(ExtensionListTab):
                         _('Downloading extensions'), self._end_progress_cb)
         self.progress.set_action(_("Downloading extensions"))
         self.progress.show_all()
-        self.done = False
         gobject.timeout_add(100, self.update_progress)
         utils.GtkRunner(self.show_update_callback, self.download)
 
     def download(self):
         '''download an extension'''
+        self.updated_amount = 0
         thc_cur = self.thc_com[self.thc_cur_name]
         thc_cur.download(self.download_item)
 
@@ -323,14 +322,19 @@ class ExtensionDownloadList(ExtensionListTab):
 
     def update(self):
         '''update the collections'''
+        self.updated_amount = 0
         for item in self.thc_com.itervalues():
             item.fetch()
+            self.updated_amount += 1
 
     def update_progress(self):
-        thc_cur = self.thc_com[self.thc_cur_name]
-        self.progress.update(100.0 * thc_cur.progress)
-        if self.done:
+        if not self.progress:
             return False
+
+        thc_cur = self.thc_com[self.thc_cur_name]
+        progress = thc_cur.progress + self.updated_amount / 2.0
+        self.progress.update(100.0 * progress)
+
         return True
 
     def show_update_callback(self, result=None):
@@ -338,8 +342,8 @@ class ExtensionDownloadList(ExtensionListTab):
         need the first argument on the on_update method'''
         if result is not None and not result[0]:
             log.error(str(result[1]))
-        self.done = True
         self.progress.destroy()
+        self.progress = None
         self.on_update(clear=True)
 
     def check_version(self, type_, name):
@@ -382,7 +386,7 @@ class ExtensionDownloadList(ExtensionListTab):
         '''stops download of plugins'''
         for item in self.thc_com.itervalues():
             item.stop()
-            self.done = True
+        self.show_update_callback()
 
 class ThemeList(ExtensionDownloadList):
     def __init__(self, session):
@@ -457,7 +461,8 @@ class UpdateList(ExtensionListTab):
         self.update_list = {'plugins': {}, 'themes': {}}
 
         self.first = True
-        self.done = True
+        self.update_amount = 0
+        self.updated_amount = 0
 
         self.config_dir = e3.common.ConfigDir('emesene2')
 
@@ -503,8 +508,8 @@ class UpdateList(ExtensionListTab):
         need the first argument on the on_update method'''
         if result is not None and not result[0]:
             log.error(str(result[1]))
-        self.done = True
         self.progress.destroy()
+        self.progress = None
         self.on_update(clear=True)
 
     def download(self, name, cur_thc):
@@ -528,19 +533,36 @@ class UpdateList(ExtensionListTab):
                         _('Updating extensions'), self._end_progress_cb)
         self.progress.set_action(_("Updating extensions"))
         self.progress.show_all()
-        self.done = False
-        gobject.timeout_add(100, self.update_progress)
+        gobject.timeout_add(100, self.update_download_progress)
         utils.GtkRunner(self.show_update_callback, self.download_updates)
 
     def download_updates(self):
+        self.updated_amount = 0
         for collection_name, items in self.update_list.iteritems():
             for ext_type, ext_list in items.iteritems():
                 for ext, path in ext_list.iteritems():
                     cur_thc = self.get_thc(collection_name, ext_type, ext)
                     self.remove(path, cur_thc)
                     self.download(ext, cur_thc)
+                    self.updated_amount += 1
                 ext_list = {}
         self.on_update(clear=True)
+
+    def update_download_progress(self):
+        if not self.progress:
+            return False
+
+        if not self.update_amount:
+            progress = 1.0
+        else:
+            progress = self.updated_amount / float(self.update_amount)
+            for collection in self.collections.itervalues():
+                for thc_cur in collection.itervalues():
+                    progress += thc_cur.progress / float(self.update_amount)
+
+        self.progress.update(100.0 * progress)
+
+        return True
 
     def fetch_metadata(self, collection, type_, name):
         meta = self.collections[collection]['supported'].fetch_metadata(type_, name)
@@ -574,6 +596,7 @@ class UpdateList(ExtensionListTab):
     def show_update(self):
         '''called when the liststore need to be changed'''
         self.clear_all()
+        self.update_amount = 0
 
         for theme_type in self.themes.iterkeys():
             first = True
@@ -589,6 +612,7 @@ class UpdateList(ExtensionListTab):
                 name = os.path.basename(path)
                 label = self.themes[theme_type].get_name_from_path(path)
                 self.update_list['themes'][theme_type][name] = path
+                self.update_amount += 1
                 self.append(True, label, name, path=path, type_=theme_type)
 
         pluginmanager = get_pluginmanager()
@@ -605,6 +629,7 @@ class UpdateList(ExtensionListTab):
                 self.append(False, '<b>' + _('Plugins') + '</b>', 'installed', True, False)
                 first = False
             self.update_list['plugins']['plugin'][name] = path
+            self.update_amount += 1
             self.append(True, self.prettify_name(name,
                         description=pluginmanager.plugin_description(name)),
                         name, path=path, type_='plugin')
@@ -618,7 +643,6 @@ class UpdateList(ExtensionListTab):
                             _('Refresh extensions'), self._end_progress_cb)
             self.progress.set_action(_("Refreshing extensions"))
             self.progress.show_all()
-            self.done = False
             gobject.timeout_add(100, self.update_progress)
             utils.GtkRunner(self.show_update_callback, self.update)
 
@@ -628,20 +652,23 @@ class UpdateList(ExtensionListTab):
 
     def update(self):
         '''update the collections'''
+        self.updated_amount = 0
         for collection in self.collections.itervalues():
             for thc_cur in collection.itervalues():
                 thc_cur.fetch()
+                self.updated_amount += 1
 
     def update_progress(self):
-        progress = 0.0
+        if not self.progress:
+            return False
+
+        progress = self.updated_amount / 4.0
         for collection in self.collections.itervalues():
             for thc_cur in collection.itervalues():
                 progress += thc_cur.progress / 4.0
 
         self.progress.update(100.0 * progress)
 
-        if self.done:
-            return False
         return True
 
     def append_theme(self, name, theme_type, theme, theme_config):
@@ -654,4 +681,4 @@ class UpdateList(ExtensionListTab):
         for collection in self.collections.itervalues():
             for thc_cur in collection.itervalues():
                 thc_cur.stop()
-        self.done = True
+        self.show_update_callback()
