@@ -54,9 +54,10 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         gui.BaseTray.__init__(self, handler)
         app_name_hax = "emesene-%s" % uuid.uuid1()
         appindicator.Indicator.__init__(
-            self, app_name_hax, "logo",
+            self, app_name_hax,
+            self._get_icon_name(self.handler.theme.image_theme.logo_panel),
             appindicator.CATEGORY_APPLICATION_STATUS,
-            os.path.join(os.getcwd(), handler.theme.image_theme.panel_path))
+            self._get_icon_directory(self.handler.theme.image_theme.logo_panel))
 
         self.main_window = main_window
 
@@ -90,11 +91,22 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         """
         change the icon in the tray according to user's state
         """
-        path = os.path.join(os.getcwd(),
-                            self.handler.theme.image_theme.panel_path)
-        self.set_icon_theme_path(path)
+        icon_path = self.handler.theme.image_theme.status_icons_panel[stat]
+        self.set_icon_theme_path(self._get_icon_directory(icon_path))
         #the appindicator takes a 'name' of an icon and NOT a filename.
         #that means that we have to strip the file extension
-        icon_name = self.handler.theme.image_theme.status_icons_panel[stat].split("/")[-1]
-        icon_name = icon_name[:icon_name.rfind(".")]
-        self.set_icon(icon_name)
+        self.set_icon(self._get_icon_name(icon_path))
+
+    def _get_icon_directory(self, icon_path):
+        """
+        get the directory of the current icon
+        """
+        return os.path.dirname(os.path.join(os.getcwd(), icon_path))
+
+    def _get_icon_name(self, icon_path):
+        """
+        get the name of the current panel icon
+        """
+        name = os.path.basename(os.path.join(os.getcwd(), icon_path))
+        name = os.path.splitext(name)
+        return name[0];
