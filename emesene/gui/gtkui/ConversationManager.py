@@ -228,7 +228,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         gui.ConversationManager.after_new_conversation(self, conversation)
          #If has more than one tab show close buttons
         if len(self.conversations) > 2:
-          conversation.tab_label.close.show()
+            conversation.tab_label.close.show()
         elif len(self.conversations) == 2:
             for k, v in self.conversations.items():
                 v.tab_label.close.show()

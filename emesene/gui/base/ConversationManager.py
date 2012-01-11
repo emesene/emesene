@@ -257,7 +257,7 @@ class ConversationManager(object):
             conversation.subscribe_signals()
             conversation.set_sensitive(True)
             account = conversation.members[0]
-            self.new_conversation(cid, [account])
+            self.reuse_conversation(cid, [account])
             self.session.new_conversation(account, cid)
 
     def close_session(self):
