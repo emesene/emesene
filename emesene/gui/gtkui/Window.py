@@ -115,8 +115,7 @@ class Window(gtk.Window):
 
     def go_conversation(self, session):
         '''change to a conversation window'''
-        ConversationManager = extension.get_default('conversation window')
-        self.content = ConversationManager(session, self._on_last_tab_close)
+        self.content = extension.get_and_instantiate('conversation window', session, self._on_last_tab_close)
         self.add(self.content)
         self.connect('focus-in-event', self.content._on_focus)
         self.connect('key-press-event', self.content._on_key_press)
@@ -209,4 +208,3 @@ class Window(gtk.Window):
     def present(self):
         ''' raise the window '''
         gtk.Window.present(self)
-
