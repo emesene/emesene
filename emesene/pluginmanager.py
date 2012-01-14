@@ -156,8 +156,12 @@ class PluginHandler(MetaData):
 
     def get_description(self):
         '''@return plugin description from Plugin class'''
-        description = self.module.Plugin.description
-        return description if description != "Your first plugin." else self.module.Plugin._description
+        description = self.meta.get('description', '')
+        if not description: # TODO: Should be deprecated later
+            description = self.module.Plugin.description
+            description = description if description != "Your first plugin." \
+                                      else self.module.Plugin._description
+        return description
 
 
 class PluginManager(object):
