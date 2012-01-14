@@ -199,7 +199,9 @@ class ExtensionListTab(gtk.VBox):
         split_version.reverse()
         value = 0
         for i, val in enumerate(split_version):
-            value += (int(val) << ((3-i) * 8))
+            value += (int(val) << (i * 8))
+
+        return value
 
 class ExtensionDownloadList(ExtensionListTab):
     def __init__(self, session, list_type,
