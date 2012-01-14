@@ -154,11 +154,14 @@ class Collection(object):
             return False
         return True
 
-    def fetch_metadata(self, type_, name):
+    def fetch_metadata(self, type_, name, refresh=False):
         '''fetch metadata if available'''
         current_ext = self.extensions_descs.get(type_, {}).get(name)
         if not current_ext:
             return None
+
+        if not refresh and current_ext.metadata:
+            return current_ext.metadata
 
         for path in current_ext.files.keys():
             if os.path.basename(path) == 'meta.json':
