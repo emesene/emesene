@@ -24,7 +24,7 @@ INFOBARERROR = False
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR, GROWLERROR
+    global WEBKITERROR, INFOBARERROR
 
     import gtk
     import gobject
@@ -48,7 +48,7 @@ def gtk_main(Controller):
     import FileTransferBarWidget
     import FileTransferWidget
     import GroupMenu
-        
+
     import Header
     import ImageAreaSelector
     import ImageChooser
@@ -76,7 +76,7 @@ def gtk_main(Controller):
         import AdiumTextBox
     except ImportError:
         WEBKITERROR = True
-    
+
     import PictureHandler
 
     setup()
@@ -101,7 +101,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR, INDICATORERROR, INFOBARERROR, PYNOTIFYERROR, MESSAGINGMENUERROR, GROWLERROR
+    global WEBKITERROR, INFOBARERROR
 
     import gtk
     gtk.settings_get_default().set_property("gtk-error-bell", False)
@@ -170,6 +170,5 @@ def setup():
         extension.register('conversation output', TextBox.OutputText)
     else:
         extension.category_register('conversation output', TextBox.OutputText)
-    
-    extension.category_register('picture handler', PictureHandler.PictureHandler)
 
+    extension.category_register('picture handler', PictureHandler.PictureHandler)
