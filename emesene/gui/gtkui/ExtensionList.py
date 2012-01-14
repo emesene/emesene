@@ -85,12 +85,25 @@ class ExtensionList(gtk.VBox):
         self.list_store.clear()
         self.extension_list = []
 
-    def append(self, is_active, label, name, sensitive=True, visible=True, path='', type_=''):
+    def prettify_name(self, name, description):
+        '''return a prettier name for the plugin with its description in a new
+        line, using Pango markup.
+        '''
+        name = name.replace('_', ' ')
+        if description:
+            pretty_name = '<span><b>%s</b>\n<small>%s</small></span>' % \
+                          (name.capitalize(), description)
+        else:
+            pretty_name = '<span><b>%s</b></span>' % name.capitalize()
+        return pretty_name
+
+    def append(self, is_active, label, name, sensitive=True, visible=True, path='', type_='', description=''):
         '''append an item'''
+        pretty_name = self.prettify_name(label, description)
         if not sensitive:
-            label = '<span foreground="#696969">%s</span>' % label
+            pretty_name = '<span foreground="#696969">%s</span>' % pretty_name
         if name not in self.extension_list:
-            self.list_store.append((is_active, label, name, sensitive, visible, path, type_))
+            self.list_store.append((is_active, pretty_name, name, sensitive, visible, path, type_))
             self.extension_list.append(name)
 
 class ExtensionListTab(gtk.VBox):
@@ -139,6 +152,10 @@ class ExtensionListTab(gtk.VBox):
         self.lists.append_page(extension_list, label)
         return extension_list
 
+    def strip_name(self, name, *args):
+        '''called to strip names when needed'''
+        return name
+
     def on_toggled(self, *args):
         '''called when a checkbox is toggled'''
         pass
@@ -146,14 +163,6 @@ class ExtensionListTab(gtk.VBox):
     def on_cursor_changed(self, *args):
         '''called when a row is selected'''
         pass
-
-    def prettify_name(self, name, type_='', description=''):
-        '''return a prettier name for the plugin with its description in a new
-        line, using Pango markup.
-        '''
-        name = name.replace('_', ' ')
-        pretty_name = '<span><b>%s</b>\n<small>%s</small></span>'
-        return pretty_name % (name.capitalize(), description)
 
     def get_attr(self, name):
         """return the value of an attribute, if it has dots, then
@@ -327,6 +336,11 @@ class ExtensionDownloadList(ExtensionListTab):
             item.fetch()
             self.updated_amount += 1
 
+    def fetch_metadata(self, type_, name):
+        ''' fetch metadata '''
+        meta = self.thc_com[self.thc_cur_name].fetch_metadata(type_, name)
+        return meta
+
     def update_progress(self):
         if not self.progress:
             return False
@@ -347,7 +361,7 @@ class ExtensionDownloadList(ExtensionListTab):
         self.on_update(clear=True)
 
     def check_version(self, type_, name):
-        meta = self.thc_com[self.thc_cur_name].fetch_metadata(type_, name)
+        meta = self.fetch_metadata(type_, name)
         if not meta or not meta.get('required emesene version'):
             return True
 
@@ -368,7 +382,7 @@ class ExtensionDownloadList(ExtensionListTab):
                 self.download_list[box.extension_type] = []
 
             element = thc_cur.extensions_descs.get(box.extension_type, {})
-            box.append(False, '<b>'+_('Available for download')+'</b>',
+            box.append(False, _('Available for download'),
                        'installable', visible=False)
 
             for label in element:
@@ -377,10 +391,9 @@ class ExtensionDownloadList(ExtensionListTab):
                 if label not in box.extension_list:
                     self.download_list[box.extension_type].append(label)
 
-                box.append(False,
-                           self.prettify_name(label, box.extension_type),
-                           label,
-                           False)
+                box.append(False, self.strip_name(label, box.extension_type),
+                           label, False, description=self.fetch_metadata(
+                                box.extension_type, label).get('description'))
 
     def _end_progress_cb(self, *args):
         '''stops download of plugins'''
@@ -424,7 +437,7 @@ class ThemeList(ExtensionDownloadList):
             if box.extension_type not in self.removable_list:
                 self.removable_list[box.extension_type] = {}
             box.clear_all()
-            box.append(False, '<b>'+_('Installed')+'</b>',
+            box.append(False, _('Installed'),
                        'installed', visible=False)
 
             current = self.get_attr(self.theme_configs[box.extension_type])
@@ -437,9 +450,8 @@ class ThemeList(ExtensionDownloadList):
                 box.append(is_current, label, name, path=path)
         ExtensionDownloadList.on_update(self, widget, download, clear)
 
-    def prettify_name(self, name, type_):
-        '''return a prettier name using Pango markup.
-        '''
+    def strip_name(self, name, type_):
+        '''return a stripped version of theme name.'''
         name = name.replace('_', ' ')
         name = self.themes[type_].pattern.sub('', name)
         return '%s' % name
@@ -607,7 +619,7 @@ class UpdateList(ExtensionListTab):
                 if not self.check_updates('themes', theme_type, path):
                     continue
                 if first:
-                    self.append(False, '<b>'+self.theme_names[theme_type]+'</b>', theme_type, visible=False)
+                    self.append(False, self.theme_names[theme_type], theme_type, visible=False)
                     first = False
                 name = os.path.basename(path)
                 label = self.themes[theme_type].get_name_from_path(path)
@@ -626,13 +638,12 @@ class UpdateList(ExtensionListTab):
             if not self.check_updates('plugins', 'plugin', path, plugin):
                 continue
             if first:
-                self.append(False, '<b>' + _('Plugins') + '</b>', 'installed', True, False)
+                self.append(False, _('Plugins'), 'installed', True, False)
                 first = False
             self.update_list['plugins']['plugin'][name] = path
             self.update_amount += 1
-            self.append(True, self.prettify_name(name,
-                        description=pluginmanager.plugin_description(name)),
-                        name, path=path, type_='plugin')
+            self.append(True, name, name, path=path, type_='plugin',
+                        description=pluginmanager.plugin_description(name))
 
 
     def on_update(self, widget=None, download=False, clear=False):

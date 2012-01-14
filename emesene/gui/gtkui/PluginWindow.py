@@ -45,8 +45,7 @@ class PluginMainVBox(ExtensionDownloadList):
 
         if self.first or download or clear:
             self.clear_all()
-            self.append(False, '<b>' + _('Installed') + '</b>',
-                        'installed', True, False)
+            self.append(False, _('Installed'), 'installed', True, False)
 
             pluginmanager = get_pluginmanager()
 
@@ -55,9 +54,8 @@ class PluginMainVBox(ExtensionDownloadList):
                 path = plugin.path
                 if path.startswith(self.config_dir.base_dir) and not is_active:
                     self.removable_list['plugin'][name] = path
-                self.append(is_active, self.prettify_name(name,
-                            description=pluginmanager.plugin_description(name)),
-                            name, path=path)
+                self.append(is_active, name, name, path=path,
+                            description=pluginmanager.plugin_description(name))
             ExtensionDownloadList.on_update(self, widget, download, clear)
 
     def on_toggled(self, widget, path, model, type_):
