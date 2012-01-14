@@ -690,9 +690,6 @@ class Controller(object):
                 windowcls = extension.get_default('window frame')
                 window = windowcls(self._on_conversation_window_close)
 
-                # Make the conversation window single instance when tabs are used
-                # This should hopefully fix some memory related issues
-                extension.get_category('conversation window').is_single = conversation_tabs
                 window.go_conversation(self.session)
                 self._set_location(window, True)
                 conv_manager = window.content
