@@ -86,6 +86,7 @@ class SyncTool(object):
 
             self.progress = dialog.progress_window(
                 _('Synchronization progress'), self._synch_progress_cb)
+            self.progress.set_modal(True)
 
             self._syn.initialize(self._session, self._show_finish,
                                  self._update_progress, self._update_action)
@@ -102,4 +103,3 @@ class SyncTool(object):
     def _synch_progress_cb(self, event, response = None):
         '''stop synch'''
         self._syn.stop_synch()
-

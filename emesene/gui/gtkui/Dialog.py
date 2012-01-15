@@ -1784,7 +1784,6 @@ class ProgressWindow(gtk.Window):
         gtk.Window.__init__(self)
         self.set_title(title)
         self.set_role("dialog")
-        self.set_modal(True)
         self.buttoncancel = gtk.Button()
         self.buttoncancel.set_label(_("Cancel"))
         self.buttoncancel.connect('clicked', callback)
@@ -1827,4 +1826,3 @@ class WebWindow(gtk.Window):
         uri = frame.get_uri()
         if self._callback != None:
             self._callback(uri)
-        
