@@ -192,6 +192,12 @@ class Window(gtk.Window):
         gtk.Window.show(self)
         self.set_location()
 
+    def present(self):
+        '''override the method to set the position
+        '''
+        gtk.Window.present(self)
+        self.set_location()
+
     def _on_window_state_event(self, window, state):
         '''callew when window state is changed
         '''
@@ -201,12 +207,3 @@ class Window(gtk.Window):
         '''return True is window is maximized, False otherwise
         '''
         return self._state & gtk.gdk.WINDOW_STATE_MAXIMIZED == gtk.gdk.WINDOW_STATE_MAXIMIZED
-
-    def iconify(self):
-        ''' yes, we want to iconify the window, really '''
-        gtk.Window.iconify(self)
-
-    def present(self):
-        ''' raise the window '''
-        gtk.Window.present(self)
-

@@ -590,11 +590,11 @@ class TrayIconHandler(FileHandler):
         self.theme = theme
         
     def on_hide_show_mainwindow(self, main_window=None):
-        if (main_window != None):
-            if(main_window.get_property("visible")):
+        if main_window is not None:
+            if main_window.get_visible():
                 main_window.hide()
             else:
-                main_window.show()
+                main_window.present()
 
 class FileTransferHandler(object):
     ''' this handler handles a file transfer object '''
