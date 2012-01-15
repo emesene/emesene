@@ -67,8 +67,9 @@ class AdiumTheme(MetaData):
 
         info_file = file(os.path.join(path, 'Contents', 'Info.plist'))
         info = parsers.Plist(info_file).info
+        theme_variants = sorted(self.get_theme_variants())
         self.default_variant = info.get('DefaultVariant', None) or \
-                               sorted(self.get_theme_variants())[0]
+                               ('' if not theme_variants else theme_variants[0])
         self.variant = variant
         self.theme_version = info.get('MessageViewVersion', 0)
 
