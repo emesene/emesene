@@ -90,7 +90,7 @@ class Collection(object):
             f.write(rq)
             f.close()
         self.progress = 0.0
-    
+
     def download(self, download_item=None):
         self.progress = 0.0
         if download_item is not None:
@@ -153,6 +153,14 @@ class Collection(object):
         if not current_ext:
             return False
         return True
+
+    def fetch_all_metadata(self, refresh=True):
+        self._stop = False
+        for type_, exts in self.extensions_descs.iteritems():
+            for name in exts.iterkeys():
+                if self._stop:
+                    return
+                self.fetch_metadata(type_, name, refresh)
 
     def fetch_metadata(self, type_, name, refresh=False):
         '''fetch metadata if available'''

@@ -336,6 +336,7 @@ class ExtensionDownloadList(ExtensionListTab):
         self.updated_amount = 0
         for item in self.thc_com.itervalues():
             item.fetch()
+            item.fetch_all_metadata()
             self.updated_amount += 1
 
     def fetch_metadata(self, type_, name):
@@ -669,6 +670,7 @@ class UpdateList(ExtensionListTab):
         for collection in self.collections.itervalues():
             for thc_cur in collection.itervalues():
                 thc_cur.fetch()
+                thc_cur.fetch_all_metadata()
                 self.updated_amount += 1
 
     def update_progress(self):
