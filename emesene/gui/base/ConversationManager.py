@@ -92,7 +92,7 @@ class ConversationManager(object):
 
     def _on_message(self, cid, account, message, cedict=None):
         '''called when a message is received'''
-        conversation = self.has_similar_conversation(cid, account)
+        conversation = self.has_similar_conversation(cid, [account])
         conversation_tabs = self.session.config.get_or_set(
                 'b_conversation_tabs', True)
 
