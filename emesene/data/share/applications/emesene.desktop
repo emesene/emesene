@@ -2,7 +2,7 @@
 Name=emesene
 GenericName=emesene
 Comment=Instant messaging client for MSN, Gtalk and Facebook
-Exec=emesene
+Exec=emesene -s
 Icon=emesene
 Terminal=false
 Type=Application
