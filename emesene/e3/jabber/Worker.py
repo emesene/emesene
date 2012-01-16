@@ -249,7 +249,6 @@ class Worker(e3.Worker):
         log.debug('closing thread')
         self.session.events.queue.clear()
         self.session.logger.quit()
-        self.client.disconnect()
         self._continue = False
         self.session.disconnected(None, False)
 
