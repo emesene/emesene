@@ -30,7 +30,7 @@ class ThemesManager(object):
 
         # the paths to look for themes
         self.paths = []
-        self.default_path = default_path
+        self.default_path = os.path.join(os.getcwd(), default_path)
         #If themes directory has a pattern in their name like ".AdiumMessageStyle"
         # in adium conversation themes
         self.extension = pattern

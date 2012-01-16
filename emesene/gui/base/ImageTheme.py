@@ -74,7 +74,7 @@ class ImageTheme(MetaData):
         self.tool_clean = None
         self.tool_file_transfer = None
 
-        self.default_path = os.path.join('themes', 'images', 'default')
+        self.default_path = os.path.join(os.getcwd(), 'themes', 'images', 'default')
 
         self.load_information(path)
 
@@ -168,4 +168,4 @@ class ImageTheme(MetaData):
             return os.path.join(self.default_path, *paths)
 
     def has_custom_toolbar_icons(self):
-        return self.toolbar_path != None
+        return self.toolbar_path is not None

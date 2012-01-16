@@ -39,4 +39,3 @@ def ThemeNotificationImage(picture, const_value):
         return "file://" + gui.theme.image_theme.user_def_imagetool
     else:
         return "file://" + gui.theme.image_theme.user_def_imagetool
-
