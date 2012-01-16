@@ -124,7 +124,8 @@ class AdiumTheme(MetaData):
             template_path = urljoin("gui", "base", "template.html")
         self.template = read_file(template_path)
 
-        self.header = read_file(self.resources_path, 'Header.html') or ""
+        #~ self.header = read_file(self.resources_path, 'Header.html') or ""
+        self.header = ""
         self.footer = read_file(self.resources_path, 'Footer.html') or ""
 
     def _format_incoming(self, msg):
