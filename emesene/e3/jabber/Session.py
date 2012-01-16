@@ -28,6 +28,7 @@ class Session(e3.Session):
     def __init__(self, id_=None, account=None):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
+        self.mail_client = NullMail()
 
     def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
@@ -38,8 +39,7 @@ class Session(e3.Session):
                 self.mail_client = IMAPMail(self, "imap.gmail.com", 993, account, password)
             except socket.error, sockerr:
                 log.warn("couldn't connect to mail server " + str(sockerr))
-                self.mail_client = NullMail()
-
+                
             # gtalk allows to connect on port 80, it's not HTTP protocol but
             # the port is HTTP so it will pass through firewalls (yay!)
             if use_http:
@@ -49,9 +49,6 @@ class Session(e3.Session):
                 self.mail_client = FacebookMail(self)
             except socket.error, sockerr:
                 log.warn("couldn't connect to mail server " + str(sockerr))
-                self.mail_client = NullMail()
-        else:
-            self.mail_client = NullMail()
 
         self.mail_client.register_handler('mailcount', self.mail_count_changed)
         self.mail_client.register_handler('mailnew', self.mail_received)
