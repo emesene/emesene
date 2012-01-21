@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-01-14 21:45+0100\n"
+"POT-Creation-Date: 2012-01-21 19:56+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "You just sent a nudge!"
 msgstr ""
 
-#: emesene/e3/base/Logger.py:1038 emesene/e3/common/notification.py:151
+#: emesene/e3/base/Logger.py:1038 emesene/e3/common/notification.py:134
 #: emesene/gui/base/Conversation.py:423
 #, python-format
 msgid "%s just sent you a nudge!"
@@ -68,11 +68,11 @@ msgstr ""
 msgid "New mail from %s"
 msgstr ""
 
-#: emesene/e3/common/notification.py:174
+#: emesene/e3/common/notification.py:157
 msgid "is online"
 msgstr ""
 
-#: emesene/e3/common/notification.py:196
+#: emesene/e3/common/notification.py:179
 msgid "is offline"
 msgstr ""
 
@@ -796,7 +796,7 @@ msgid ""
 "Do you want to add him/her to your contact list?"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1789
+#: emesene/gui/gtkui/Dialog.py:1788
 msgid "Cancel"
 msgstr ""
 
@@ -817,12 +817,12 @@ msgid "Download"
 msgstr ""
 
 #: emesene/gui/gtkui/ExtensionList.py:300
-#: emesene/gui/gtkui/ExtensionList.py:656
+#: emesene/gui/gtkui/ExtensionList.py:657
 msgid "Refresh extensions"
 msgstr ""
 
 #: emesene/gui/gtkui/ExtensionList.py:301
-#: emesene/gui/gtkui/ExtensionList.py:657
+#: emesene/gui/gtkui/ExtensionList.py:658
 msgid "Refreshing extensions"
 msgstr ""
 
@@ -831,24 +831,24 @@ msgstr ""
 msgid "Downloading extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:387
+#: emesene/gui/gtkui/ExtensionList.py:388
 msgid "Available for download"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:442 emesene/gui/gtkui/PluginWindow.py:48
+#: emesene/gui/gtkui/ExtensionList.py:443 emesene/gui/gtkui/PluginWindow.py:48
 msgid "Installed"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:500
+#: emesene/gui/gtkui/ExtensionList.py:501
 msgid "Update"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:547
 #: emesene/gui/gtkui/ExtensionList.py:548
+#: emesene/gui/gtkui/ExtensionList.py:549
 msgid "Updating extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:643
+#: emesene/gui/gtkui/ExtensionList.py:644
 #: emesene/gui/gtkui/PluginWindow.py:118 emesene/gui/gtkui/Preferences.py:52
 msgid "Plugins"
 msgstr ""
