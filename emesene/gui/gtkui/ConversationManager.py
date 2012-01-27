@@ -44,9 +44,6 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         #self.set_scrollable(session.config.get_or_set('b_conv_tab_scroll',
         #    True))
 
-        if session.config.get_or_set('b_conv_tab_popup', False):
-            self.popup_enable()
-
         # mozilla tabs are fixed-width, otherwise do the same as emesene-1
         self.mozilla_tabs = session.config.get_or_set('b_conv_tab_mozilla_like', False)
 
