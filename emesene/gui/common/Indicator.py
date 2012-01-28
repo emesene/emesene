@@ -69,9 +69,7 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         """
         method called to set the state to the login window
         """
-        icon_name = self.handler.theme.image_theme.logo_panel.split("/")[-1]
-        icon_name = icon_name[:icon_name.rfind(".")]
-        self.set_icon(icon_name)
+        self.set_icon(self._get_icon_name(self.handler.theme.image_theme.logo_panel))
         self.menu = TrayIcon.LoginMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_menu(self.menu)
