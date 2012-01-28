@@ -52,7 +52,6 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         self.connect('popup-menu', self._on_popup)
 
         self.set_login()
-        gui.BaseTray.set_visible(self, True)
         gtk.StatusIcon.set_visible(self, True)
 
         self.set_tooltip("emesene")

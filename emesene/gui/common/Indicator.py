@@ -61,7 +61,6 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
 
         self.main_window = main_window
 
-        gui.BaseTray.set_visible(self, True)
         self.menu = None
         self.set_login()
         self.set_status(appindicator.STATUS_ACTIVE)
@@ -109,4 +108,4 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         """
         name = os.path.basename(os.path.join(os.getcwd(), icon_path))
         name = os.path.splitext(name)
-        return name[0];
+        return name[0]

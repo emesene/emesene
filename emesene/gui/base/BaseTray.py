@@ -23,27 +23,16 @@ class BaseTray(object):
         pass
 
     def set_visible(self, arg):
-        """ dummy, indicators remove themselves automagically """
-        if self.signals_have_been_connected:
-            self.handler.session.signals.contact_attr_changed.unsubscribe(
-                self._on_contact_attr_changed)
-            self.handler.session.signals.picture_change_succeed.unsubscribe(
-                self._on_contact_attr_changed)
-            self.handler.session.signals.status_change_succeed.unsubscribe(
-                self._on_status_change_succeed)
-            self.handler.session.signals.conv_message.unsubscribe(
-                self._on_conv_message)
-            self.handler.session.signals.conv_ended.unsubscribe(
-                self._on_conv_ended)
-            self.handler.session.signals.message_read.unsubscribe(
-                self._on_message_read)
-
-            self.signals_have_been_connected = False
+        """ remove subscriptions if not overridden """
+        if arg:
+            return
+        self.disconnect_signals()
 
     def set_main(self, session):
         """
         method called to set the state to the main window
         """
+        self.disconnect_signals()
         self.handler.session = session
         self.handler.session.signals.contact_attr_changed.subscribe(
             self._on_contact_attr_changed)
@@ -59,6 +48,26 @@ class BaseTray(object):
             self._on_message_read)
 
         self.signals_have_been_connected = True
+
+    def disconnect_signals(self):
+        """ Disconnect all signals """
+        if not self.signals_have_been_connected:
+            return
+
+        self.handler.session.signals.contact_attr_changed.unsubscribe(
+            self._on_contact_attr_changed)
+        self.handler.session.signals.picture_change_succeed.unsubscribe(
+            self._on_contact_attr_changed)
+        self.handler.session.signals.status_change_succeed.unsubscribe(
+            self._on_status_change_succeed)
+        self.handler.session.signals.conv_message.unsubscribe(
+            self._on_conv_message)
+        self.handler.session.signals.conv_ended.unsubscribe(
+            self._on_conv_ended)
+        self.handler.session.signals.message_read.unsubscribe(
+            self._on_message_read)
+
+        self.signals_have_been_connected = False
 
     def _on_conv_message(self, cid, account, msgobj, cedict=None):
         """
