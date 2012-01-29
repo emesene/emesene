@@ -45,8 +45,7 @@ class ContactInformation(gtk.Window, gui.base.ContactInformation):
         gtk.Window.__init__(self)
         self.set_default_size(640, 350)
         self.set_title(_('Contact information (%s)') % (account,))
-        self.set_role("dialog")
-        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        self.set_position(gtk.WIN_POS_CENTER)
 
         self.tabs = gtk.Notebook()
 
