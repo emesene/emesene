@@ -26,8 +26,7 @@ from ExtensionList import ExtensionDownloadList
 class PluginMainVBox(ExtensionDownloadList):
     def __init__(self, session, init_path):
         ExtensionDownloadList.__init__(
-            self, session, 'plugins',
-            e3.common.Collections.PluginsCollection, init_path)
+            self, session, 'plugins', init_path)
 
         self.config_dir = e3.common.ConfigDir('emesene2')
 
@@ -38,25 +37,24 @@ class PluginMainVBox(ExtensionDownloadList):
         self.buttonbox.pack_start(self.config_button, fill=False)
         self.on_cursor_changed(self.list_view)
 
-    def on_update(self, widget=None, download=False, clear=False):
+    def show_update(self):
         '''called when the liststore need to be changed'''
         self.removable_list = {}
         self.removable_list['plugin'] = {}
 
-        if self.first or download or clear:
-            self.clear_all()
-            self.append(False, _('Installed'), 'installed', True, False)
+        self.clear_all()
+        self.append(False, _('Installed'), 'installed', True, False)
 
-            pluginmanager = get_pluginmanager()
+        pluginmanager = get_pluginmanager()
 
-            for name, plugin in pluginmanager.get_plugins():
-                is_active = pluginmanager.plugin_is_active(name)
-                path = plugin.path
-                if path.startswith(self.config_dir.base_dir) and not is_active:
-                    self.removable_list['plugin'][name] = path
-                self.append(is_active, name, name, path=path,
-                            description=pluginmanager.plugin_description(name))
-            ExtensionDownloadList.on_update(self, widget, download, clear)
+        for name, plugin in pluginmanager.get_plugins():
+            is_active = pluginmanager.plugin_is_active(name)
+            path = plugin.path
+            if path.startswith(self.config_dir.base_dir) and not is_active:
+                self.removable_list['plugin'][name] = path
+            self.append(is_active, name, name, path=path,
+                        description=pluginmanager.plugin_description(name))
+        ExtensionDownloadList.show_update(self)
 
     def on_toggled(self, widget, path, model, type_):
         '''called when the toggle button in list view is pressed'''

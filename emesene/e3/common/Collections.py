@@ -30,6 +30,7 @@ except ImportError:
 import logging
 log = logging.getLogger('e3.common.Collections')
 
+import extension
 from Github import Github
 from utils import AsyncAction
 
@@ -109,7 +110,10 @@ class Collection(object):
     def plugin_name_from_file(self, file_name):
         pass
 
-    def fetch(self):
+    def fetch(self, refresh=True):
+        if not refresh and self._tree is not None:
+            return
+
         self._stop = False
         self._tree = None
         self.progress = 0.0
@@ -192,6 +196,22 @@ class PluginsCollection(Collection):
         else:
             return (None, None)
 
+class SupportedPluginsCollection(PluginsCollection):
+    def __init__(self, dest_folder):
+        PluginsCollection.__init__(self, 'emesene-supported-plugins',
+                                   dest_folder)
+
+extension.category_register('supported plugins collection',
+                            SupportedPluginsCollection, single_instance=True)
+
+class CommunityPluginsCollection(PluginsCollection):
+    def __init__(self, dest_folder):
+        PluginsCollection.__init__(self, 'emesene-community-plugins',
+                                   dest_folder)
+
+extension.category_register('community plugins collection',
+                            CommunityPluginsCollection, single_instance=True)
+
 class ThemesCollection(Collection):
 
     def plugin_name_from_file(self, file_name):
@@ -204,3 +224,19 @@ class ThemesCollection(Collection):
             return path.split("/")
         else:
             return (None, None)
+
+class SupportedThemesCollection(ThemesCollection):
+    def __init__(self, dest_folder):
+        ThemesCollection.__init__(self, 'emesene-supported-themes',
+                                  dest_folder)
+
+extension.category_register('supported themes collection',
+                            SupportedThemesCollection, single_instance=True)
+
+class CommunityThemesCollection(ThemesCollection):
+    def __init__(self, dest_folder):
+        ThemesCollection.__init__(self, 'emesene-community-themes',
+                                  dest_folder)
+
+extension.category_register('community themes collection',
+                            CommunityThemesCollection, single_instance=True)
