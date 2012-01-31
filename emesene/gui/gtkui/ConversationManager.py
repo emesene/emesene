@@ -66,24 +66,24 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         '''callback called when i_tab_position changes'''
         self.set_tab_pos(pos=self.get_tab_position())
 
-    def _set_accels(self):
+    def set_accels(self):
         """set the keyboard shortcuts
         """
         accel_group = gtk.AccelGroup()
         self.get_parent().add_accel_group(accel_group)
         self.accel_group = accel_group
-        accel_group.connect_group(gtk.keysyms.Page_Down, \
-                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED, \
+        accel_group.connect_group(gtk.keysyms.Page_Down,
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
                                   self.on_key_cycle_tabs)
-        accel_group.connect_group(gtk.keysyms.Page_Up, \
-                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED, \
+        accel_group.connect_group(gtk.keysyms.Page_Up,
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
                                   self.on_key_cycle_tabs)
-        accel_group.connect_group(gtk.keysyms.W, \
-                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED, \
+        accel_group.connect_group(gtk.keysyms.W,
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
                                   self.on_key_close_tab)
         if self.session.config.get_or_set('b_escape_hotkey', True):
-            accel_group.connect_group(gtk.keysyms.Escape, \
-                                      0, gtk.ACCEL_LOCKED, \
+            accel_group.connect_group(gtk.keysyms.Escape,
+                                      0, gtk.ACCEL_LOCKED,
                                       self.on_key_close_tab)
 
         for i in range(1, 10):

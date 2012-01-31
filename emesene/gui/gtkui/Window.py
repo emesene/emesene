@@ -60,8 +60,8 @@ class Window(gtk.Window):
     def set_icon(self, icon):
         '''set the icon of the window'''
         if utils.file_readable(icon):
-            gtk.Window.set_icon(self, \
-                        utils.safe_gtk_image_load(icon).get_pixbuf())
+            gtk.Window.set_icon(self,
+                                utils.safe_gtk_image_load(icon).get_pixbuf())
 
     def clear(self):
         '''remove the content from the main window'''
@@ -122,7 +122,7 @@ class Window(gtk.Window):
         self.connect('key-press-event', self.content._on_key_press)
         self.content.show()
         self.content_type = 'conversation'
-        self.content._set_accels()
+        self.content.set_accels()
 
     def set_location(self, width=0, height=0, posx=None, posy=None):
         """place the window on the given coordinates
@@ -153,9 +153,8 @@ class Window(gtk.Window):
         width, height = self.get_size()
         return width, height, posx, posy
 
-    def _on_delete_event(self, widget, event):
-        '''call the cb_on_close callback, if the callback return True
-        then dont close the window'''
+    def save_dimensions(self):
+        '''save the window dimensions'''
         width, height, posx, posy = self.get_dimensions()
 
         self.set_or_get_width(width)
@@ -163,12 +162,19 @@ class Window(gtk.Window):
         self.set_or_get_posx(posx)
         self.set_or_get_posy(posy)
 
+    def _on_delete_event(self, widget, event):
+        '''call the cb_on_close callback, if the callback return True
+        then dont close the window'''
+        self.save_dimensions()
         return self.cb_on_close(self.content)
 
     def _on_key_press(self, widget, event):
         '''called when a key is pressed on the window'''
         if self.content_type == 'main':
-            self.content._on_key_press(widget, event)
+            if event.keyval == gtk.keysyms.Escape:
+                self._on_delete_event(None, None)
+            else:
+                self.content._on_key_press(widget, event)
 
     def _on_last_tab_close(self):
         '''do the action when the last tab is closed on a conversation window
@@ -179,11 +185,7 @@ class Window(gtk.Window):
     def hide(self):
         '''override the method to remember the position
         '''
-        width, height, posx, posy = self.get_dimensions()
-        self.set_or_get_width(width)
-        self.set_or_get_height(height)
-        self.set_or_get_posx(posx)
-        self.set_or_get_posy(posy)
+        self.save_dimensions()
         gtk.Window.hide(self)
 
     def show(self):
