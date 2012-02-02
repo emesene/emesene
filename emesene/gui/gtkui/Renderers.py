@@ -122,7 +122,9 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
     def get_layout(self, widget):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
-        layout = SmileyLayout(widget.create_pango_context())
+        layout = SmileyLayout(widget.create_pango_context(),
+                              color=widget.style.text[gtk.STATE_NORMAL],
+                              override_color=widget.style.text[gtk.STATE_SELECTED])
 
         if self.markup:
             try:
@@ -227,15 +229,8 @@ class SmileyLayout(pango.Layout):
         self._override_attrlist = None # with override color
         self.angle = 0
 
-        if color is None:
-            self._color = gtk.gdk.Color()
-        else:
-            self._color = color
-
-        if override_color is None:
-            self._override_color = gtk.gdk.Color()
-        else:
-            self._override_color = override_color
+        self._color = color
+        self._override_color = override_color
 
         self._smilies_scaled = {} # key: (index_pos), value(pixbuf)
         self._scaling = scaling # relative to ascent + desent, -1 for natural
@@ -291,12 +286,6 @@ class SmileyLayout(pango.Layout):
             self._update_attributes()
 
     def set_colors(self, color=None, override_color=None):
-        if color is None:
-            color = gtk.gdk.Color()
-
-        if override_color is None:
-            override_color = gtk.gdk.Color()
-
         self._color = color
         self._override_color = override_color
         self._update_attrlists()
@@ -391,16 +380,20 @@ class SmileyLayout(pango.Layout):
         self._update_attrlists()
 
     def _update_attrlists(self):
-        clr = self._color
-        oclr = self._override_color
-        norm_forground = pango.AttrForeground( clr.red,
-                clr.green, clr.blue, 0, len(self.get_text()))
-        override_forground = pango.AttrForeground( oclr.red,
-                oclr.green, oclr.blue, 0, len(self.get_text()))
         self._attrlist = pango.AttrList()
-        self._attrlist.insert(norm_forground)
+        if self._color:
+            clr = self._color
+            norm_forground = pango.AttrForeground(clr.red,
+                    clr.green, clr.blue, 0, len(self.get_text()))
+            self._attrlist.insert(norm_forground)
+
         self._override_attrlist = pango.AttrList()
-        self._override_attrlist.insert(override_forground)
+        if self._override_color:
+            oclr = self._override_color
+            override_forground = pango.AttrForeground(oclr.red,
+                    oclr.green, oclr.blue, 0, len(self.get_text()))
+            self._override_attrlist.insert(override_forground)
+
         itter = self._base_attrlist.get_iterator()
 
         while True:

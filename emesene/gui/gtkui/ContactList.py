@@ -849,4 +849,3 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     group_src.identifier, group_des.identifier)
 
         return True
-
