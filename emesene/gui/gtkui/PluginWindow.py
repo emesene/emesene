@@ -21,11 +21,11 @@ import gtk
 import e3
 
 from pluginmanager import get_pluginmanager
-from ExtensionList import ExtensionDownloadList
+from ExtensionList import DownloadList
 
-class PluginMainVBox(ExtensionDownloadList):
+class PluginMainVBox(DownloadList):
     def __init__(self, session, init_path):
-        ExtensionDownloadList.__init__(
+        DownloadList.__init__(
             self, session, 'plugins', init_path)
 
         self.config_dir = e3.common.ConfigDir('emesene2')
@@ -54,7 +54,7 @@ class PluginMainVBox(ExtensionDownloadList):
                 self.removable_list['plugin'][name] = path
             self.append(is_active, name, name, path=path,
                         description=pluginmanager.plugin_description(name))
-        ExtensionDownloadList.show_update(self)
+        DownloadList.show_update(self)
 
     def on_toggled(self, widget, path, model, type_):
         '''called when the toggle button in list view is pressed'''
@@ -75,10 +75,8 @@ class PluginMainVBox(ExtensionDownloadList):
         pluginmanager = get_pluginmanager()
         self.config_button.set_sensitive(pluginmanager.plugin_configurable(name))
 
-        ExtensionDownloadList.on_cursor_changed(self,
-                                                list_view,
-                                                type_,
-                                                self.config_button)
+        DownloadList.on_cursor_changed(self, list_view, type_,
+                                       self.config_button)
 
     def on_start(self, name):
         '''start the selected plugin'''

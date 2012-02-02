@@ -184,7 +184,9 @@ class Collection(object):
                     return None
                 current_ext.metadata = json.loads(rq)
                 return current_ext.metadata
-        return None
+
+        current_ext.metadata = {}
+        return current_ext.metadata
 
 class PluginsCollection(Collection):
 

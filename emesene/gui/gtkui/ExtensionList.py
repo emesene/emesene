@@ -203,22 +203,96 @@ class ExtensionListTab(gtk.VBox):
 
         return value
 
-class ExtensionDownloadList(ExtensionListTab):
-    def __init__(self, session, list_type, init_path,
-                 radio=False, use_tabs=False):
+
+class DownloadListBase(ExtensionListTab):
+    def __init__(self, session, radio=False, use_tabs=False):
         '''constructor'''
         ExtensionListTab.__init__(self, session, radio, use_tabs)
         self.updated_amount = 0
 
-        self.thc_com = {}
+        self.config_dir = e3.common.ConfigDir('emesene2')
 
-        supported = _('Supported')
-        community = _('Community')
+        self.list_types = ['plugins', 'themes']
 
-        self.thc_cur_name = supported
+        self.collections = \
+        {
+            'plugins':
+            {
+                'supported': extension.get_and_instantiate(
+                                'supported plugins collection',
+                                self.config_dir.join('plugins')),
+                'community': extension.get_and_instantiate(
+                                'community plugins collection',
+                                self.config_dir.join('plugins'))
+            },
+            'themes':
+            {
+                'supported': extension.get_and_instantiate(
+                                'supported themes collection',
+                                self.config_dir.join('themes')),
+                'community': extension.get_and_instantiate(
+                                'community themes collection',
+                                self.config_dir.join('themes'))
+            }
+        }
 
-        self.thc_com[supported] = extension.get_and_instantiate('supported ' + list_type + ' collection', init_path)
-        self.thc_com[community] = extension.get_and_instantiate('community ' + list_type + ' collection', init_path)
+    def on_update(self, widget=None, refresh=False):
+        '''called when the liststore need to be changed'''
+        dialog = extension.get_default('dialog')
+        self.progress = dialog.progress_window(
+                        _('Refresh extensions'), self._end_progress_cb)
+        self.progress.set_action(_("Refreshing extensions"))
+        self.progress.show_all()
+        gobject.timeout_add(100, self.update_progress)
+        utils.GtkRunner(self.show_update_callback, self.update, refresh)
+
+    def update(self, refresh):
+        '''update the collection data'''
+        self.updated_amount = 0
+        for list_type in self.list_types:
+            for current_collection in self.collections[list_type].itervalues():
+                current_collection.fetch(refresh)
+                current_collection.fetch_all_metadata(refresh)
+                self.updated_amount += 1
+
+    def update_progress(self):
+        if not self.progress:
+            return False
+
+        progress = self.updated_amount / (len(self.list_types) * 2.0)
+        for collection in self.collections.itervalues():
+            for current_collection in collection.itervalues():
+                progress += current_collection.progress / (len(self.list_types) * 2.0)
+
+        self.progress.update(100.0 * progress)
+
+        return True
+
+    def show_update_callback(self, result=None):
+        '''method used as callback, because both GtkRunner and buttons
+        need the first argument on the on_update method'''
+        if result is not None and not result[0]:
+            log.error(str(result[1]))
+        self.progress.destroy()
+        self.progress = None
+        self.show_update()
+
+    def _end_progress_cb(self, *args):
+        '''stops download of plugins'''
+        for collection in self.collections.itervalues():
+            for current_collection in collection.itervalues():
+                current_collection.stop()
+        self.show_update_callback()
+
+class DownloadList(DownloadListBase):
+    def __init__(self, session, list_type, init_path,
+                 radio=False, use_tabs=False):
+        '''constructor'''
+        DownloadListBase.__init__(self, session, radio, use_tabs)
+
+        self.list_types = [list_type]
+
+        self.current_collection = self.collections[list_type]['supported']
 
         self.download_list = {}
         self.removable_list = {}
@@ -239,10 +313,14 @@ class ExtensionDownloadList(ExtensionListTab):
         self.no_button = gtk.HBox()
         self.no_button2 = gtk.HBox()
 
-        source_combo = gtk.combo_box_new_text()
+        combo_store = gtk.ListStore(str, str)
+        combo_store.append((_('Supported'), 'supported'))
+        combo_store.append((_('Community'), 'community'))
 
-        source_combo.append_text(supported)
-        source_combo.append_text(community)
+        source_combo = gtk.ComboBox(combo_store)
+        cell = gtk.CellRendererText()
+        source_combo.pack_start(cell, True)
+        source_combo.add_attribute(cell, 'text', 0)
         source_combo.set_active(0)
         source_combo.connect('changed', self.on_change_source)
 
@@ -282,22 +360,14 @@ class ExtensionDownloadList(ExtensionListTab):
             name = model.get_value(iter, 2)
             return name
         else:
-            return None # Q: should something be done here?
+            return None
 
     def on_change_source(self, combobox):
         '''called when the source is changed'''
-        self.thc_cur_name = combobox.get_active_text()
+        index = combobox.get_active()
+        collection_type = combobox.get_model()[index][1]
+        self.current_collection = self.collections[self.list_types[0]][collection_type]
         self.show_update()
-
-    def on_update(self, widget=None, refresh=False):
-        '''called when the liststore need to be changed'''
-        dialog = extension.get_default('dialog')
-        self.progress = dialog.progress_window(
-                        _('Refresh extensions'), self._end_progress_cb)
-        self.progress.set_action(_("Refreshing extensions"))
-        self.progress.show_all()
-        gobject.timeout_add(100, self.update_progress)
-        utils.GtkRunner(self.show_update_callback, self.update, refresh)
 
     def start_download(self, widget=None):
         '''start the download of an extension'''
@@ -312,48 +382,19 @@ class ExtensionDownloadList(ExtensionListTab):
     def download(self):
         '''download an extension'''
         self.updated_amount = 0
-        thc_cur = self.thc_com[self.thc_cur_name]
-        thc_cur.download(self.download_item)
+        self.current_collection.download(self.download_item)
 
     def remove(self, widget):
         '''remove an extension'''
-        thc_cur = self.thc_com[self.thc_cur_name]
         path = self.removable_list[self.remove_item[0]][self.remove_item[1]]
-        thc_cur.remove(path)
+        self.current_collection.remove(path)
         self.removable_list[self.remove_item[0]].pop(self.remove_item[1])
         self.show_update()
 
-    def update(self, refresh):
-        '''update the collections'''
-        self.updated_amount = 0
-        for item in self.thc_com.itervalues():
-            item.fetch(refresh)
-            item.fetch_all_metadata(refresh)
-            self.updated_amount += 1
-
     def fetch_metadata(self, type_, name):
         ''' fetch metadata '''
-        meta = self.thc_com[self.thc_cur_name].fetch_metadata(type_, name)
+        meta = self.current_collection.fetch_metadata(type_, name)
         return meta
-
-    def update_progress(self):
-        if not self.progress:
-            return False
-
-        thc_cur = self.thc_com[self.thc_cur_name]
-        progress = thc_cur.progress + self.updated_amount / 2.0
-        self.progress.update(100.0 * progress)
-
-        return True
-
-    def show_update_callback(self, result=None):
-        '''method used as callback, because both GtkRunner and buttons
-        need the first argument on the on_update method'''
-        if result is not None and not result[0]:
-            log.error(str(result[1]))
-        self.progress.destroy()
-        self.progress = None
-        self.show_update()
 
     def check_version(self, type_, name):
         meta = self.fetch_metadata(type_, name)
@@ -370,13 +411,11 @@ class ExtensionDownloadList(ExtensionListTab):
         '''show an update list of the set collection'''
         self.download_list = {}
 
-        thc_cur = self.thc_com[self.thc_cur_name]
-
         for box in self.boxes:
             if box.extension_type not in self.download_list:
                 self.download_list[box.extension_type] = []
 
-            element = thc_cur.extensions_descs.get(box.extension_type, {})
+            element = self.current_collection.extensions_descs.get(box.extension_type, {})
             box.append(False, _('Available for download'),
                        'installable', visible=False)
 
@@ -390,16 +429,10 @@ class ExtensionDownloadList(ExtensionListTab):
                            label, False, description=self.fetch_metadata(
                                 box.extension_type, label).get('description'))
 
-    def _end_progress_cb(self, *args):
-        '''stops download of plugins'''
-        for item in self.thc_com.itervalues():
-            item.stop()
-        self.show_update_callback()
-
-class ThemeList(ExtensionDownloadList):
+class ThemeList(DownloadList):
     def __init__(self, session):
         self.config_dir = e3.common.ConfigDir('emesene2')
-        ExtensionDownloadList.__init__(
+        DownloadList.__init__(
             self, session, 'themes',
             self.config_dir.join('themes'), True, True)
 
@@ -440,7 +473,7 @@ class ThemeList(ExtensionDownloadList):
                 if path.startswith(self.config_dir.base_dir) and not is_current:
                     self.removable_list[box.extension_type][name] = path
                 box.append(is_current, label, name, path=path)
-        ExtensionDownloadList.show_update(self)
+        DownloadList.show_update(self)
 
     def strip_name(self, name, type_):
         '''return a stripped version of theme name.'''
@@ -459,33 +492,16 @@ class ThemeList(ExtensionDownloadList):
         box = self.append_tab(name, theme_type, True)
         return box
 
-class UpdateList(ExtensionListTab):
+class UpdateList(DownloadListBase):
     def __init__(self, session):
-        ExtensionListTab.__init__(self, session)
+        DownloadListBase.__init__(self, session)
         self.update_list = {'plugins': {}, 'themes': {}}
 
-        self.first = True
         self.update_amount = 0
-        self.updated_amount = 0
-
-        self.config_dir = e3.common.ConfigDir('emesene2')
 
         self.themes = {}
         self.theme_names = {}
         self.theme_configs = {}
-        self.collections = \
-        {
-            'plugins':
-            {
-                'supported': extension.get_and_instantiate('supported plugins collection', self.config_dir.join('plugins')),
-                'community': extension.get_and_instantiate('community plugins collection', self.config_dir.join('plugins'))
-            },
-            'themes':
-            {
-                'supported': extension.get_and_instantiate('supported themes collection', self.config_dir.join('themes')),
-                'community': extension.get_and_instantiate('community themes collection', self.config_dir.join('themes'))
-            }
-        }
 
         self.download_button = gtk.Button(_('Update'))
         self.download_button.set_image(gtk.image_new_from_stock(
@@ -507,24 +523,15 @@ class UpdateList(ExtensionListTab):
         else:
             del item[model[path][2]]
 
-    def show_update_callback(self, result=None):
-        '''method used as callback, because both GtkRunner and buttons
-        need the first argument on the on_update method'''
-        if result is not None and not result[0]:
-            log.error(str(result[1]))
-        self.progress.destroy()
-        self.progress = None
-        self.show_update()
-
-    def download(self, name, cur_thc):
+    def download(self, name, current_extension):
         '''download an extension'''
-        cur_thc.download(name)
+        current_extension.download(name)
 
-    def remove(self, path, cur_thc):
+    def remove(self, path, current_extension):
         '''remove an extension'''
-        cur_thc.remove(path)
+        current_extension.remove(path)
 
-    def get_thc(self, collection, type_, name):
+    def get_collection(self, collection, type_, name):
         if self.collections[collection]['supported'].has_item(type_, name):
             return self.collections[collection]['supported']
         elif self.collections[collection]['community'].has_item(type_, name):
@@ -545,12 +552,12 @@ class UpdateList(ExtensionListTab):
         for collection_name, items in self.update_list.iteritems():
             for ext_type, ext_list in items.iteritems():
                 for ext, path in ext_list.iteritems():
-                    cur_thc = self.get_thc(collection_name, ext_type, ext)
-                    self.remove(path, cur_thc)
-                    self.download(ext, cur_thc)
+                    current_extension = self.get_collection(collection_name, ext_type, ext)
+                    self.remove(path, current_extension)
+                    self.download(ext, current_extension)
                     self.updated_amount += 1
                 ext_list = {}
-        self.on_update(clear=True)
+        self.show_update()
 
     def update_download_progress(self):
         if not self.progress:
@@ -561,8 +568,8 @@ class UpdateList(ExtensionListTab):
         else:
             progress = self.updated_amount / float(self.update_amount)
             for collection in self.collections.itervalues():
-                for thc_cur in collection.itervalues():
-                    progress += thc_cur.progress / float(self.update_amount)
+                for current_collection in collection.itervalues():
+                    progress += current_collection.progress / float(self.update_amount)
 
         self.progress.update(100.0 * progress)
 
@@ -637,46 +644,7 @@ class UpdateList(ExtensionListTab):
             self.append(True, name, name, path=path, type_='plugin',
                         description=pluginmanager.plugin_description(name))
 
-    def on_update(self, widget=None, refresh=False):
-        '''called when the liststore need to be changed'''
-        dialog = extension.get_default('dialog')
-        self.progress = dialog.progress_window(
-                        _('Refresh extensions'), self._end_progress_cb)
-        self.progress.set_action(_("Refreshing extensions"))
-        self.progress.show_all()
-        gobject.timeout_add(100, self.update_progress)
-        utils.GtkRunner(self.show_update_callback, self.update, refresh)
-
-    def update(self, refresh):
-        '''update the collections'''
-        self.updated_amount = 0
-        for collection in self.collections.itervalues():
-            for thc_cur in collection.itervalues():
-                thc_cur.fetch(refresh)
-                thc_cur.fetch_all_metadata(refresh)
-                self.updated_amount += 1
-
-    def update_progress(self):
-        if not self.progress:
-            return False
-
-        progress = self.updated_amount / 4.0
-        for collection in self.collections.itervalues():
-            for thc_cur in collection.itervalues():
-                progress += thc_cur.progress / 4.0
-
-        self.progress.update(100.0 * progress)
-
-        return True
-
     def append_theme(self, name, theme_type, theme, theme_config):
         self.themes[theme_type] = theme
         self.theme_configs[theme_type] = theme_config
         self.theme_names[theme_type] = name
-
-    def _end_progress_cb(self, *args):
-        '''stops download of plugins'''
-        for collection in self.collections.itervalues():
-            for thc_cur in collection.itervalues():
-                thc_cur.stop()
-        self.show_update_callback()
