@@ -25,7 +25,7 @@ except ImportError:
 def get_metadata_from_path(path):
     '''fetch the metadata from a path'''
     meta_path = os.path.join(path, 'meta.json')
-    meta = None
+    meta = {}
     if os.path.exists(meta_path):
         f = open(meta_path, 'r')
         meta = json.load(f)
