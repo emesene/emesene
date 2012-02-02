@@ -42,10 +42,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def __init__(self, session):
         '''class constructor'''
         self._model = None
-        dialog = extension.get_default('dialog')
         pbr = extension.get_default('avatar renderer')
         self.pbr = pbr()
-        gui.ContactList.__init__(self, session, dialog)
+
+        gui.ContactList.__init__(self, session)
         gtk.TreeView.__init__(self)
 
         self.set_enable_search(False) #we enable our searching widget with CTRL+F in MainWindow.py
@@ -64,8 +64,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
             ('text/plain',0,2)],gtk.gdk.ACTION_COPY)
 
         self.enable_model_drag_dest([('emesene-contact',0,0)], gtk.gdk.ACTION_DEFAULT)
-        self.contact_handler = gui.base.ContactHandler(session, dialog, self)
-        self.group_handler = gui.base.GroupHandler(session, dialog, self)
+        self.contact_handler = gui.base.ContactHandler(session, self)
+        self.group_handler = gui.base.GroupHandler(session, self)
 
         if self.session.config.d_weights is None:
             self.session.config.d_weights = {}
@@ -121,7 +121,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.set_search_column(2)
         self.set_headers_visible(False)
-
 
         self.connect('row-activated', self._on_row_activated)
         self.connect('button-release-event' , self._on_button_press_event)

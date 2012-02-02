@@ -60,7 +60,6 @@ class Conversation(gtk.VBox, gui.Conversation):
             'conversation toolbar')
         TransfersBar = extension.get_default('filetransfer pool')
         CallWidget = extension.get_default('call widget')
-        dialog = extension.get_default('dialog')
 
         self.below_conversation = None
         BelowConversation = extension.get_default('below conversation')
@@ -69,7 +68,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.header = Header(session, members)
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
-            dialog, gui.theme, self)
+            gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
         self.toolbar.set_property('can-focus', False)
         self.output = OutputText(self.session.config, self.steal_emoticon_cb)

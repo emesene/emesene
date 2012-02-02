@@ -26,7 +26,7 @@ class ContactList(object):
 
     GROUP_TPL = '[$b][$NAME] ([$ONLINE_COUNT]/[$TOTAL_COUNT])[$/b]'
 
-    def __init__(self, session, dialog):
+    def __init__(self, session):
         '''class constructor'''
 
         self.is_searching = False
@@ -40,7 +40,6 @@ class ContactList(object):
         self.contacts = session.contacts
         self.groups = session.groups
         self.session = session
-        self.dialog = dialog
 
         self.session.config.get_or_set('b_order_by_name', True)
         self.session.config.get_or_set('b_order_by_group', True)
@@ -561,4 +560,3 @@ class ContactList(object):
             return 1
         else:
             return cmp(contact1.display_name, contact2.display_name)
-

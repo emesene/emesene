@@ -126,13 +126,12 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def _build_menus(self):
         '''buildall the menus used on the client'''
-        dialog = extension.get_default('dialog')
 
-        handler = gui.base.MenuHandler(self.session, dialog, self.contact_list)
+        handler = gui.base.MenuHandler(self.session, self.contact_list)
 
-        contact_handler = gui.base.ContactHandler(self.session, dialog,
+        contact_handler = gui.base.ContactHandler(self.session,
             self.contact_list)
-        group_handler = gui.base.GroupHandler(self.session, dialog,
+        group_handler = gui.base.GroupHandler(self.session,
             self.contact_list)
 
         MainMenu = extension.get_default('main menu')

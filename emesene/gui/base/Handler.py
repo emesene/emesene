@@ -67,12 +67,12 @@ class MenuHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, contact_list):
+    def __init__(self, session, contact_list):
         '''constructor'''
         self.file_handler = FileHandler(session)
-        self.actions_handler = ActionsHandler(session, dialog, contact_list)
+        self.actions_handler = ActionsHandler(session, contact_list)
         self.options_handler = OptionsHandler(session, contact_list)
-        self.help_handler = HelpHandler(dialog)
+        self.help_handler = HelpHandler()
 
 class FileHandler(object):
     '''this handler contains all the handlers needed to handle the file
@@ -104,11 +104,11 @@ class ActionsHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, contact_list):
+    def __init__(self, session, contact_list):
         '''constructor'''
-        self.contact_handler = ContactHandler(session, dialog, contact_list)
-        self.group_handler = GroupHandler(session, dialog, contact_list)
-        self.my_account_handler = MyAccountHandler(session, dialog)
+        self.contact_handler = ContactHandler(session, contact_list)
+        self.group_handler = GroupHandler(session, contact_list)
+        self.my_account_handler = MyAccountHandler(session)
 
 class OptionsHandler(object):
     '''this handler contains all the handlers needed to handle the options
@@ -171,9 +171,9 @@ class HelpHandler(object):
     menu items
     '''
 
-    def __init__(self, dialog):
+    def __init__(self):
         '''constructor'''
-        self.dialog = dialog
+        self.dialog = extension.get_default('dialog')
         self.debug_window = None
 
     def on_about_selected(self):
@@ -236,10 +236,10 @@ class ContactHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, contact_list):
+    def __init__(self, session, contact_list):
         '''constructor'''
         self.session = session
-        self.dialog = dialog
+        self.dialog = extension.get_default('dialog')
         self.contact_list = contact_list
 
     def get_contact_groups(self):
@@ -370,10 +370,10 @@ class GroupHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog, contact_list):
+    def __init__(self, session, contact_list):
         '''constructor'''
         self.session = session
-        self.dialog = dialog
+        self.dialog = extension.get_default('dialog')
         self.contact_list = contact_list
 
     def is_by_group_view(self):
@@ -461,10 +461,10 @@ class MyAccountHandler(object):
     menu items
     '''
 
-    def __init__(self, session, dialog):
+    def __init__(self, session):
         '''constructor'''
         self.session = session
-        self.dialog = dialog
+        self.dialog = extension.get_default('dialog')
 
         self.old_nick = self.session.contacts.me.nick
         self.old_pm = self.session.contacts.me.message
@@ -492,10 +492,10 @@ class ConversationToolbarHandler(object):
     '''this handler contains all the methods to handle a conversation toolbar
     '''
 
-    def __init__(self, session, dialog, theme, conversation):
+    def __init__(self, session, theme, conversation):
         '''constructor'''
         self.session = session
-        self.dialog = dialog
+        self.dialog = extension.get_default('dialog')
         self.conversation = conversation
         self.theme = theme
 
