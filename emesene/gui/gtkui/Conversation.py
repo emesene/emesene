@@ -430,6 +430,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             transfer.contact.account)
             msg = gui.Message.from_information(contact, message)
             self.output.information(self.formatter, msg)
+            self.conv_status.post_process_message(msg)
 
     def on_filetransfer_progress(self, transfer):
         ''' called every chunk received '''
@@ -448,6 +449,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             transfer.contact.account)
             msg = gui.Message.from_information(contact, message)
             self.output.information(self.formatter, msg)
+            self.conv_status.post_process_message(msg)
 
     def on_filetransfer_canceled(self, transfer):
         ''' called when a file transfer is canceled '''
@@ -461,6 +463,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             transfer.contact.account)
             msg = gui.Message.from_information(contact, message)
             self.output.information(self.formatter, msg)
+            self.conv_status.post_process_message(msg)
 
     def on_filetransfer_completed(self, transfer):
         ''' called when a file transfer is completed '''
@@ -473,6 +476,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             _('File transfer completed!'), transfer.contact.account)
             msg = gui.Message.from_information(contact, message)
             self.output.information(self.formatter, msg)
+            self.conv_status.post_process_message(msg)
 
     def on_call_invitation(self, call, cid, westart=False):
         '''called when a new call is issued both from us or other party'''
