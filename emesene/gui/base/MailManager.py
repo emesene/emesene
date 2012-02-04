@@ -37,6 +37,3 @@ class MailManager:
         else:
             hotmail = Hotmail.Hotmail(self.session)
             return hotmail._get_login_page()
-            
-
-
