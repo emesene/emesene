@@ -232,10 +232,12 @@ class ConversationManager(object):
         value'''
         conversation = self.reuse_conversation(cid, members)
 
-        if conversation is None:
-            conversation = self.add_new_conversation(self.session, cid, members)
-            self.conversations[cid] = conversation
-            self.session.conversations[cid] = conversation
+        if conversation:
+            return conversation
+
+        conversation = self.add_new_conversation(self.session, cid, members)
+        self.conversations[cid] = conversation
+        self.session.conversations[cid] = conversation
 
         self.after_new_conversation(conversation)
         #notify a new conversation has started
