@@ -39,6 +39,8 @@ class AvatarChooser(gtk.Window):
         gtk.Window.__init__(self)
         self.set_modal(True)
 
+        self.config = session.config
+
         self.avatar_manager = gui.base.AvatarManager(session)
         
         self.set_title(_("Avatar chooser"))
@@ -214,11 +216,15 @@ class AvatarChooser(gtk.Window):
         def _on_image_selected(response, path):
             '''method called when an image is selected'''
             if response == gui.stock.ACCEPT:
+                self.config.avatar_chooser_folder = os.path.dirname(path)
                 animation = gtk.gdk.PixbufAnimation(path)
                 self._on_image_area_selector(path, animation.is_static_image())
 
+        if self.config.avatar_chooser_folder is None:
+            self.config.avatar_chooser_folder = os.path.expanduser('~')
+
         class_ = extension.get_default('image chooser')
-        class_(os.path.expanduser('~'), _on_image_selected).show()
+        class_(self.config.avatar_chooser_folder, _on_image_selected).show()
 
     def _on_image_area_selector(self, path, static=True):
         '''called when the user must resize the added image'''
