@@ -214,17 +214,20 @@ class Controller(object):
 
         debugger.init(debuglevel=options.debuglevel)
 
-        if options.single_instance:
-            try:
-                import SingleInstance
-                self.single_instance = SingleInstance.SingleInstance()
-                if self.single_instance.emesene_is_running():
+        #needed to check for autologin
+        self.emesene_is_running = False
+        try:
+            import SingleInstance
+            self.single_instance = SingleInstance.SingleInstance()
+            if self.single_instance.emesene_is_running():
+                self.emesene_is_running = True
+                # try to show the instance that's already running
+                if options.single_instance:
                     print "Another instance of emesene is already running."
-                    # try to show the instance that's already running
                     self.single_instance.show()
                     sys.exit(0)
-            except ImportError:
-                pass
+        except ImportError:
+            pass
 
         if options.minimized:
             self.minimize = True
@@ -239,7 +242,9 @@ class Controller(object):
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
-        self.go_login(proxy, use_http)
+
+        #cancel autologin if another emesene instance is running
+        self.go_login(proxy, use_http, no_autologin=self.emesene_is_running)
 
         if self.minimize:
             self.window.iconify()
