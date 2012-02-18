@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-02-04 19:55+0100\n"
+"POT-Creation-Date: 2012-02-18 22:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -203,43 +203,43 @@ msgstr ""
 msgid "A widget to display conversation messages using adium style"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:44
+#: emesene/gui/gtkui/AvatarChooser.py:46
 msgid "Avatar chooser"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:54
+#: emesene/gui/gtkui/AvatarChooser.py:56
 msgid "Used"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:56
+#: emesene/gui/gtkui/AvatarChooser.py:58
 msgid "System pictures"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:58
+#: emesene/gui/gtkui/AvatarChooser.py:60
 msgid "Contact pictures"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:73
+#: emesene/gui/gtkui/AvatarChooser.py:75
 msgid "No picture"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:76
+#: emesene/gui/gtkui/AvatarChooser.py:78
 msgid "Remove all"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:91
+#: emesene/gui/gtkui/AvatarChooser.py:93
 msgid "Current"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:190
+#: emesene/gui/gtkui/AvatarChooser.py:192
 msgid "could not remove"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:255
+#: emesene/gui/gtkui/AvatarChooser.py:261
 msgid "Are you sure you want to remove all items?"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:272 emesene/gui/gtkui/Dialog.py:1124
+#: emesene/gui/gtkui/AvatarChooser.py:278 emesene/gui/gtkui/Dialog.py:1124
 #: emesene/gui/gtkui/Dialog.py:1213 emesene/gui/gtkui/ImageChooser.py:144
 msgid "No picture selected"
 msgstr ""
