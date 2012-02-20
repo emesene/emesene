@@ -44,6 +44,21 @@ class ConversationToolbar(gtk.Toolbar):
 
         self.draw()
 
+    def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
+        self.ublock.set_sensitive(force_sensitive_block_button or is_sensitive)
+        self.font.set_sensitive(is_sensitive)
+        self.nudge.set_sensitive(is_sensitive)
+        self.clean.set_sensitive(is_sensitive)
+        self.color.set_sensitive(is_sensitive)
+        self.emotes.set_sensitive(is_sensitive)
+        self.invite.set_sensitive(is_sensitive)
+        self.toggle_avatar.set_sensitive(is_sensitive)
+        self.invite_av_call.set_sensitive(is_sensitive)
+        self.invite_video_call.set_sensitive(is_sensitive)
+        self.invite_audio_call.set_sensitive(is_sensitive)
+        self.invite_file_transfer.set_sensitive(is_sensitive)
+
+
     def draw(self):
         '''draw the toolbar'''
         toolbar_small = self.handler.session.config.get_or_set('b_toolbar_small', False)
@@ -92,73 +107,73 @@ class ConversationToolbar(gtk.Toolbar):
 
         self.font = gtk.ToolButton(theme_tool_font)
         self.font.set_label(_('Select font'))
-        self.font.set_tooltip_text(_('Select font')) 
+        self.font.set_tooltip_text(_('Select font'))
         self.font.connect('clicked',
             lambda *args: self.handler.on_font_selected())
 
         self.color = gtk.ToolButton(theme_tool_font_color)
         self.color.set_label(_('Select font color'))
-        self.color.set_tooltip_text(_('Select font color')) 
+        self.color.set_tooltip_text(_('Select font color'))
         self.color.connect('clicked',
             lambda *args: self.handler.on_color_selected())
 
         self.emotes = gtk.ToolButton(theme_tool_emotes)
         self.emotes.set_label(_('Send an emoticon'))
-        self.emotes.set_tooltip_text(_('Send an emoticon')) 
+        self.emotes.set_tooltip_text(_('Send an emoticon'))
         self.emotes.connect('clicked',
             lambda *args: self.handler.on_emotes_selected())
 
         self.nudge = gtk.ToolButton(theme_tool_nudge)
         self.nudge.set_label(_('Request attention'))
-        self.nudge.set_tooltip_text(_('Request attention')) 
+        self.nudge.set_tooltip_text(_('Request attention'))
         self.nudge.connect('clicked',
             lambda *args: self.handler.on_notify_attention_selected())
 
         self.invite = gtk.ToolButton(theme_tool_invite)
         self.invite.set_label(_('Invite a buddy'))
-        self.invite.set_tooltip_text(_('Invite a buddy')) 
+        self.invite.set_tooltip_text(_('Invite a buddy'))
         self.invite.connect('clicked',
             lambda *args: self.handler.on_invite_selected())
 
         self.clean = gtk.ToolButton(theme_tool_clean)
         self.clean.set_label(_('Clean the conversation'))
-        self.clean.set_tooltip_text(_('Clean the conversation')) 
+        self.clean.set_tooltip_text(_('Clean the conversation'))
         self.clean.connect('clicked',
             lambda *args: self.handler.on_clean_selected())
 
         self.invite_file_transfer = gtk.ToolButton(theme_tool_file_transfer)
         self.invite_file_transfer.set_label(_('Send a file'))
-        self.invite_file_transfer.set_tooltip_text(_('Send a file')) 
+        self.invite_file_transfer.set_tooltip_text(_('Send a file'))
         self.invite_file_transfer.connect('clicked',
             lambda *args: self.handler.on_invite_file_transfer_selected())
 
         self.ublock = gtk.ToolButton(theme_tool_ublock)
         self.ublock.set_label(_('Block/Unblock contact'))
-        self.ublock.set_tooltip_text(_('Block/Unblock contact')) 
+        self.ublock.set_tooltip_text(_('Block/Unblock contact'))
         self.ublock.connect('clicked',
             lambda *args: self.handler.on_ublock_selected())
-			
+
         self.toggle_avatar = gtk.ToolButton(theme_tool_toggle_avatar)
         self.toggle_avatar.set_label(_('Hide/Show avatar'))
-        self.toggle_avatar.set_tooltip_text(_('Hide/Show avatar')) 
+        self.toggle_avatar.set_tooltip_text(_('Hide/Show avatar'))
         self.toggle_avatar.connect('clicked',
             lambda *args: self.handler.on_toggle_avatar_selected())
 
         self.invite_video_call = gtk.ToolButton(theme_tool_video)
         self.invite_video_call.set_label(_('Video Call'))
-        self.invite_video_call.set_tooltip_text(_('Video Call')) 
+        self.invite_video_call.set_tooltip_text(_('Video Call'))
         self.invite_video_call.connect('clicked',
             lambda *args: self.handler.on_invite_video_call_selected())
 
         self.invite_audio_call = gtk.ToolButton(theme_tool_call)
         self.invite_audio_call.set_label(_('Voice Call'))
-        self.invite_audio_call.set_tooltip_text(_('Voice Call')) 
+        self.invite_audio_call.set_tooltip_text(_('Voice Call'))
         self.invite_audio_call.connect('clicked',
             lambda *args: self.handler.on_invite_voice_call_selected())
 
         self.invite_av_call = gtk.ToolButton(theme_tool_av)
         self.invite_av_call.set_label(_('Audio/Video Call'))
-        self.invite_av_call.set_tooltip_text(_('Audio/Video Call')) 
+        self.invite_av_call.set_tooltip_text(_('Audio/Video Call'))
         self.invite_av_call.connect('clicked',
             lambda *args: self.handler.on_invite_av_call_selected())
 

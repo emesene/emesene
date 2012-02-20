@@ -220,7 +220,7 @@ class Conversation(object):
     def on_video_call(self):
         '''called when the user is requesting a video-only call'''
         raise NotImplementedError
-		
+
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
         raise NotImplementedError
@@ -250,7 +250,7 @@ class Conversation(object):
 
     def on_contact_block_succeed(self, account):
         if account == self.members[0]:
-            self.set_sensitive(False, False)
+            self.set_sensitive(False, True)
 
     def on_contact_unblock_succeed(self, account):
         if account == self.members[0]:
@@ -303,7 +303,7 @@ class Conversation(object):
         """
         raise NotImplementedError("Method not implemented")
 
-    def set_sensitive(self, is_sensitive, toolbar=True):
+    def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         """
         used to make the conversation insensitive while the conversation
         is still open while the user is disconnected and to set it back to
@@ -531,7 +531,7 @@ class Conversation(object):
                 self.conv_status.post_process_message(msg)
 
         self.update_data()
-        
+
 
     def on_contact_left(self, account):
         '''called when a contact leaves the conversation'''

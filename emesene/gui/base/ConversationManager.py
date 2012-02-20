@@ -29,7 +29,7 @@ class ConversationManager(object):
         '''class constructor'''
         self.session = session
         self.on_last_close = on_last_close
-        
+
         self.conversations = {}
         if self.session:
             self.subscribe_signals()
@@ -257,8 +257,11 @@ class ConversationManager(object):
         for cid, conversation in self.conversations.iteritems():
             conversation.session = session
             conversation.subscribe_signals()
-            conversation.set_sensitive(True)
             account = conversation.members[0]
+
+            contact = self.session.contacts.contacts[account]
+            conversation.set_sensitive(not contact.blocked,  True)
+ 
             self.reuse_conversation(cid, [account])
             self.session.new_conversation(account, cid)
 
@@ -302,7 +305,7 @@ class ConversationManager(object):
         del self.session.conversations[conversation.cid]
         conversation.on_close()
         self.after_close()
-        
+
     def after_close(self):
         '''
         Override what to do after close a conversation
