@@ -366,6 +366,11 @@ class Conversation(object):
 
     is_group_chat = property(fget=_get_group_chat)
 
+
+    def _send_typing_notification(self):
+        '''method called to send typing notifications'''
+        self.session.send_typing_notification(self.cid)
+
     def output_message(self, message, cedict):
         '''display current outgoing message into OutputText'''
 

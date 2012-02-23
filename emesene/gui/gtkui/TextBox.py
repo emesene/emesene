@@ -192,11 +192,13 @@ class InputText(TextBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, session, on_send_message, on_cycle_history, on_drag_data_received):
+    def __init__(self, session, on_send_message, on_cycle_history,
+                on_drag_data_received, send_typing_notification):
         '''constructor'''
         TextBox.__init__(self, session.config, on_drag_data_received)
         self.on_send_message = on_send_message
         self.on_cycle_history = on_cycle_history
+        self.send_typing_notification = send_typing_notification
         self._tag = None
         self._textbox.connect('key-press-event', self._on_key_press_event)
         self._buffer.connect('changed', self.on_changed_event)
@@ -253,6 +255,8 @@ class InputText(TextBox):
                     event.keyval == gtk.keysyms.Down):
 
             self.on_cycle_history(1)
+        else:
+            self.send_typing_notification()
 
         if self.parse_timeout is None:
             self.parse_timeout = gobject.timeout_add(500, self.parse_emotes)        

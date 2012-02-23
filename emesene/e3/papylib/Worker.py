@@ -1345,6 +1345,9 @@ class Worker(e3.base.Worker, papyon.Client):
         if message.type == e3.base.Message.TYPE_NUDGE:
             papyconversation.send_nudge()
 
+        elif message.type == e3.base.Message.TYPE_TYPING:
+            papyconversation.send_typing_notification()
+
         elif message.type == e3.base.Message.TYPE_MESSAGE:
             # format the text for papy
             formatting = formatting_e3_to_papy(message.style)

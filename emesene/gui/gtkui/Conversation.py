@@ -77,7 +77,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.output.set_size_request(-1, 30)
         self.input = InputText(self.session, self._on_send_message,
-                self.cycle_history, self.on_drag_data_received)
+                self.cycle_history, self.on_drag_data_received, self._send_typing_notification)
         self.output.set_size_request(-1, 25)
         self.input.set_size_request(-1, 25)
         self.info = ContactInfo(self.session, self.members)

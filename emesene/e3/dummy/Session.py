@@ -41,6 +41,10 @@ class Session(e3.Session):
             style)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
 
+    def send_typing_notification(self, cid):
+        '''send typing notification to contact'''
+        pass
+
     def request_attention(self, cid):
         '''request the attention of the contact'''
         account = self.account.account

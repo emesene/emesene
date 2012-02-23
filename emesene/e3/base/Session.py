@@ -261,6 +261,10 @@ class Session(object):
         '''send a common message'''
         raise NotImplementedError('Not implemented')
 
+    def send_typing_notification(self, cid):
+        '''send typing notification to contact'''
+        raise NotImplementedError('Not implemented')
+
     def request_attention(self, cid):
         '''request the attention of the contact'''
         raise NotImplementedError('Not implemented')
