@@ -206,6 +206,7 @@ class InputText(TextBox):
 
         self.changed = False
         self.parse_timeout = None
+        self.typing_timeout = None
         self.invisible_tag = gtk.TextTag()
         self.invisible_tag.set_property('invisible', True)
         self._buffer.get_tag_table().add(self.invisible_tag)
@@ -256,10 +257,17 @@ class InputText(TextBox):
 
             self.on_cycle_history(1)
         else:
-            self.send_typing_notification()
+            if self.typing_timeout is None:
+                self.typing_timeout = gobject.timeout_add_seconds(3, self.emit_typing)
 
         if self.parse_timeout is None:
             self.parse_timeout = gobject.timeout_add(500, self.parse_emotes)        
+
+    def emit_typing(self):
+        '''emit typing notification'''
+        self.send_typing_notification()
+        self.typing_timeout = None
+        return False
 
     def parse_emotes(self):
         """
