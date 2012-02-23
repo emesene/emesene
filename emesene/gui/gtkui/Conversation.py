@@ -41,6 +41,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         gui.Conversation.__init__(self, session, cid, update_win, members)
         self.set_border_width(2)
 
+        self.typing_timeout = None
         self.tab_label = tab_label
 
         self._header_visible = session.config.b_show_header
@@ -133,7 +134,6 @@ class Conversation(gtk.VBox, gui.Conversation):
             self.output.clear(account, nick, display_name, my_picture, his_picture)
 
         self._load_style()
-        
         self.subscribe_signals()
 
         self.tab_index = -1 # used to select an existing conversation
@@ -283,6 +283,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def update_tab(self):
         '''update the values of the tab'''
+        self.typing_timeout = None
+
         self.tab_label.set_image(self.icon)
         self.tab_label.set_text(self.text)
 
@@ -377,7 +379,9 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         if account in self.members:
             self.tab_label.set_image(gui.theme.image_theme.typing)
-            glib.timeout_add_seconds(3, self.update_tab)
+            if self.typing_timeout is not None:
+                glib.source_remove(self.typing_timeout)
+            self.typing_timeout = glib.timeout_add_seconds(3, self.update_tab)
 
     def on_emote(self, emote):
         '''called when an emoticon is selected'''
