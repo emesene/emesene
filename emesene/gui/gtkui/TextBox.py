@@ -258,14 +258,14 @@ class InputText(TextBox):
             self.on_cycle_history(1)
         else:
             if self.typing_timeout is None:
-                self.typing_timeout = gobject.timeout_add_seconds(3, self.emit_typing)
+                self.send_typing_notification()
+                self.typing_timeout = gobject.timeout_add_seconds(3, self.reset_typing_timeout)
 
         if self.parse_timeout is None:
-            self.parse_timeout = gobject.timeout_add(500, self.parse_emotes)        
+            self.parse_timeout = gobject.timeout_add(500, self.parse_emotes)
 
-    def emit_typing(self):
+    def reset_typing_timeout(self):
         '''emit typing notification'''
-        self.send_typing_notification()
         self.typing_timeout = None
         return False
 
