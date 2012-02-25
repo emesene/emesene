@@ -29,6 +29,9 @@ class ContactList(object):
     def __init__(self, session):
         '''class constructor'''
 
+        # Thread pointer for order by requests.
+        self.thread_order_by = None
+
         self.is_searching = False
         # define the class signals
         # the param is the contact object
@@ -259,12 +262,15 @@ class ContactList(object):
 
     def _set_order_by_group(self, value):
         '''set the value of order by group'''
+        if self.fill() == False:
+            return
+
         self._order_by_group = value
         self.session.config.b_order_by_group = value
-        self.fill()
 
     order_by_group = property(fget=_get_order_by_group,
         fset=_set_order_by_group)
+
 
     def _get_show_offline(self):
         '''return the value of self._show_offline'''
@@ -483,6 +489,8 @@ class ContactList(object):
 
         for contact in self.contacts.get_no_group():
             self.add_contact(contact)
+
+        return True
 
     def clear(self):
         '''clear the contact list, return True if the list was cleared
