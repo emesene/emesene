@@ -115,7 +115,7 @@ class OutputView(webkit.WebView):
         select_all_item = gtk.MenuItem(label=_("Select All"))
         select_all_item.connect('activate', lambda *args: self.select_all())
         clear_item = gtk.MenuItem(label=_("Clear"))
-        clear_item.connect('activate', self.clear)
+        clear_item.connect('activate',  lambda *args: self.clear())
         menu.append(select_all_item)
         menu.append(clear_item)
         menu.show_all()
