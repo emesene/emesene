@@ -201,4 +201,3 @@ class ContactInfoRotate(gtk.VBox):
         self.members = members
         if len(members) > 1 and self.timer is None:
             self.timer = glib.timeout_add_seconds(5, self.rotate_picture)
-

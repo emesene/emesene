@@ -326,7 +326,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         sensitive when the user is reconnected.
         """
         self.input.set_sensitive(is_sensitive)
-        self.info.set_sensitive(is_sensitive)  
+        self.info.set_sensitive(is_sensitive or force_sensitive_block_button)
         self.toolbar.set_sensitive(is_sensitive, force_sensitive_block_button)
 
     def set_image_visible(self, is_visible):
