@@ -48,7 +48,7 @@ class Conversation(object):
         self._image_visible = True
         self._toolbar_visible = True
 
-        self._message_waiting = True
+        self._message_waiting = False
 
         buffer_size = session.config.get_or_set("i_msg_history_size", 5)
         self.messages = RingBuffer(max=buffer_size)
