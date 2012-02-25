@@ -1335,7 +1335,8 @@ class Worker(e3.base.Worker, papyon.Client):
                 if switchboard is None or \
                    switchboard.state == papyon.msnp.ProtocolState.CLOSED:
 
-                    if message.type == e3.base.Message.TYPE_NUDGE:
+                    if message.type == e3.base.Message.TYPE_NUDGE or \
+                       message.type == e3.base.Message.TYPE_TYPING:
                         return
                     else:
                         self.oim_box.send_message(first_dude, message.body)
@@ -1477,4 +1478,3 @@ class Worker(e3.base.Worker, papyon.Client):
 
         del self.calls[self.rcalls[c]]
         del self.rcalls[c]
-
