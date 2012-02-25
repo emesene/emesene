@@ -273,6 +273,9 @@ class DownloadListBase(ExtensionListTab):
         need the first argument on the on_update method'''
         if result is not None and not result[0]:
             log.error(str(result[1]))
+        if self.progress is None:
+            return
+
         self.progress.destroy()
         self.progress = None
         self.show_update()
