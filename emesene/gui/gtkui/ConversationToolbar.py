@@ -155,7 +155,10 @@ class ConversationToolbar(gtk.Toolbar):
 
         self.toggle_avatar = gtk.ToolButton(theme_tool_toggle_avatar)
         self.toggle_avatar.set_label(_('Hide/Show avatar'))
-        self.toggle_avatar.set_tooltip_text(_('Hide/Show avatar'))
+        if self.handler.session.config.b_show_info:
+            self.toggle_avatar.set_tooltip_text(_('Hide avatar'))
+        else:
+            self.toggle_avatar.set_tooltip_text(_('Show avatar'))
         self.toggle_avatar.connect('clicked',
             lambda *args: self.handler.on_toggle_avatar_selected())
 
