@@ -252,7 +252,13 @@ class DownloadListBase(ExtensionListTab):
         for list_type in self.list_types:
             for current_collection in self.collections[list_type].itervalues():
                 current_collection.fetch(refresh)
+                if self.progress is None:
+                    return
+
                 current_collection.fetch_all_metadata(refresh)
+                if self.progress is None:
+                    return
+
                 self.updated_amount += 1
 
     def update_progress(self):
@@ -555,6 +561,9 @@ class UpdateList(DownloadListBase):
         for collection_name, items in self.update_list.iteritems():
             for ext_type, ext_list in items.iteritems():
                 for ext, path in ext_list.iteritems():
+                    if self.progress is None:
+                        return
+
                     current_extension = self.get_collection(collection_name, ext_type, ext)
                     self.remove(path, current_extension)
                     self.download(ext, current_extension)
