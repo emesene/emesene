@@ -146,6 +146,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             if (is_waiting and not parent.is_active()) or not is_waiting:
                 parent.set_urgency_hint(is_waiting)
                 conversation.message_waiting = is_waiting
+            if (is_waiting and self.get_current_page() != conversation.tab_index):
+                conversation.message_waiting = is_waiting
 
     def _on_focus(self, widget, event):
         '''called when the widget receives the focus'''
