@@ -17,6 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
+import gobject
 import logging
 log = logging.getLogger('gtkui.AdiumTextBox')
 import webkit
@@ -133,6 +134,10 @@ class OutputView(webkit.WebView):
         '''callback called when a link is clicked'''
         href = WebKitNetworkRequest.get_uri()
 
+        if href.startswith("search://"):
+            self.emit("search_request", href)
+            return True
+
         if not href.startswith("file://"):
             log.info("link clicked: " + href)
             gui.base.Desktop.open(href)
@@ -140,6 +145,9 @@ class OutputView(webkit.WebView):
 
         return False
 
+gobject.type_register(OutputView)
+gobject.signal_new("search_request", OutputView, gobject.SIGNAL_RUN_FIRST,
+                   gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
 
 class OutputText(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
@@ -160,11 +168,15 @@ class OutputText(gtk.ScrolledWindow):
         self.loaded = False
 
         self.view = OutputView(gui.theme.conv_theme, handler)
+        self.view.connect('search_request', self._search_request_cb)
         self.clear()
         self.view.show()
         self.add(self.view)
         self.locked = 0
         self.pending = []
+
+    def _search_request_cb(self, view, link):
+        self.emit("search_request", link)
 
     def lock (self):
         self.locked += 1
@@ -210,3 +222,7 @@ class OutputText(gtk.ScrolledWindow):
             _id = base64.b64encode(_creator+xml.sax.saxutils.unescape(_friendly)) #see gui/base/MarkupParser.py
             mystr = "var now=new Date();var x=document.images;for(var i=0;i<x.length;i++){if(x[i].name=='%s'){x[i].src='%s?'+now.getTime();}}" % (_id, path)
             self.view.execute_script(mystr)
+
+gobject.type_register(OutputText)
+gobject.signal_new("search_request", OutputText, gobject.SIGNAL_RUN_FIRST,
+                   gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))

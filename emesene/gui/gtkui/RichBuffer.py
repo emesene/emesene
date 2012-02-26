@@ -20,6 +20,7 @@
 import gtk
 import pango
 import urllib
+import gobject
 
 import RichWidget
 from gui import MarkupParser
@@ -83,6 +84,9 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         '''insert a link at the current position'''
         
         def on_activate_link(label, uri):
+            if uri.startswith("search://"):
+                self.emit("search_request", uri)
+                return True
             gui.base.Desktop.open(uri)
             return True
     
@@ -192,6 +196,10 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         size_tag = self.create_tag('size_' + str(value), size_points=value)
         self.size_tags[value] = size_tag
         return size_tag
+
+gobject.type_register(RichBuffer)
+gobject.signal_new("search_request", RichBuffer, gobject.SIGNAL_RUN_FIRST,
+                   gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
 
 def test():
     '''do some tests with the buffer'''

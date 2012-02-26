@@ -253,6 +253,8 @@ class ChatWidget(gtk.VBox):
         all.set_border_width(2)
         self.conv_status = ConversationStatus.ConversationStatus(session.config)
 
+        self.search_mode = False
+
         self.calendars = gtk.VBox()
         self.calendars.set_border_width(2)
 
@@ -270,6 +272,8 @@ class ChatWidget(gtk.VBox):
 
         OutputText = extension.get_default('conversation output')
         self.text = OutputText(session.config, None)
+        self.text.connect("search_request", self._search_request_cb)
+
         self.formatter = e3.common.MessageFormatter()
 
         buttons = gtk.HButtonBox()
@@ -303,7 +307,21 @@ class ChatWidget(gtk.VBox):
         self.calendars.pack_start(gtk.Label(_('Chats to')), False)
         self.calendars.pack_start(self.to_calendar, True, True)
 
+        #Search Widgets
+        searchbox = gtk.HBox()
+        search_label = gtk.Label(_("Search:"))
+        self.search_entry = gtk.Entry(50)
+        self.search_entry.set_icon_from_stock(1, gtk.STOCK_FIND)
+        self.search_entry.set_icon_tooltip_text (1, _('Search'))
+        self.search_entry.connect('icon-press', self._on_search_button_press)
+        self.search_entry.connect('key-press-event', self._on_search_key_press)
+
+
+        searchbox.pack_end(self.search_entry, False)
+        searchbox.pack_end(search_label, False)
+
         chat_box.pack_start(self.nicebar, False)
+        chat_box.pack_start(searchbox, False)
         chat_box.pack_start(self.text, True, True)
 
         all.pack_start(self.calendars, False)
@@ -312,6 +330,40 @@ class ChatWidget(gtk.VBox):
         self.pack_start(all, True, True)
         self.pack_start(buttons, False)
         self.refresh_history()
+
+    def _on_search_button_press(self, entry, icon_pos, event):
+        '''called when the search button is clicked
+        '''
+        self._search_history(entry.get_text())
+
+    def _on_search_key_press(self, entry, event):
+        '''activates search when enter is pressed
+        '''
+        if event.keyval == gtk.keysyms.Return:
+            self._search_history(entry.get_text())
+
+    def _search_history(self, keywords):
+        '''search history for certain keywords
+        '''
+        from_t = self._get_from_timestamp()
+        to_t = self._get_to_timestamp()
+
+        self._prepare_history()
+        self.search_mode = True
+        self.session.logger.get_chats_by_keyword(self.account,
+            self.session.account.account, from_t, to_t, keywords, 1000,
+            self._on_chats_ready)
+
+    def _search_request_cb(self, view, link):
+        link = link[9:] #remove search://
+        search_date = datetime.date.fromtimestamp(float(link))
+
+        self.from_calendar.select_month(search_date.month-1, search_date.year)
+        self.from_calendar.select_day(search_date.day)
+        self.to_calendar.select_month(search_date.month-1, search_date.year)
+        self.to_calendar.select_day(search_date.day)
+        self.refresh_history()
+
 
     def _on_toggle_calendars(self, button):
         '''called when the toogle_calendars button is clicked
@@ -338,9 +390,8 @@ class ChatWidget(gtk.VBox):
         '''called when the refresh button is clicked'''
         self.refresh_history()
 
-    def refresh_history(self):
-        '''refresh the history according to the values on the calendars
-        '''
+    def _prepare_history(self):
+        '''clean up ouput'''
         self.nicebar.empty_queue()
         if self.contact:
             his_picture = self.contact.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
@@ -348,17 +399,30 @@ class ChatWidget(gtk.VBox):
             self.text.clear(self.account, self.contact.nick, self.contact.display_name, my_picture, his_picture)
         else:
             self.text.clear()
+
+    def refresh_history(self):
+        '''refresh the history according to the values on the calendars
+        '''
+        self._prepare_history()
         self.request_chats_between(1000, self._on_chats_ready)
 
-    def request_chats_between(self, limit, callback):
+    def _get_from_timestamp(self):
+        '''read from_calendar widget and return a timestamp
+        '''
         from_year, from_month, from_day = self.from_calendar.get_date()
-        from_t = time.mktime(datetime.date(from_year, from_month + 1,
+        return time.mktime(datetime.date(from_year, from_month + 1,
             from_day).timetuple())
 
+    def _get_to_timestamp(self):
+        '''read to_calendar widget and return a timestamp
+        '''
         to_year, to_month, to_day = self.to_calendar.get_date()
-        to_t = time.mktime((datetime.date(to_year, to_month + 1,
+        return time.mktime((datetime.date(to_year, to_month + 1,
             to_day) + datetime.timedelta(1)).timetuple())
 
+    def request_chats_between(self, limit, callback):
+        from_t = self._get_from_timestamp()
+        to_t = self._get_to_timestamp()
         self.session.logger.get_chats_between(self.account,
             self.session.account.account, from_t, to_t, limit, callback)
 
@@ -386,6 +450,7 @@ class ChatWidget(gtk.VBox):
                            "#FF00FF", font_color_default]
 
         if not results:
+            self.search_mode = False
             return
 
         self.conv_status.clear()
@@ -399,6 +464,10 @@ class ChatWidget(gtk.VBox):
 
             if contact == None:
                 contact = e3.Contact(account, nick=nick)
+
+            if self.search_mode:
+                uri = " search://%s" % timestamp
+                msg_text = msg_text + uri
 
             datetimestamp = datetime.datetime.utcfromtimestamp(timestamp)
             message = e3.Message(e3.Message.TYPE_OLDMSG, msg_text,
@@ -418,10 +487,8 @@ class ChatWidget(gtk.VBox):
                         account_colors[account] = font_color_default
 
                 message.style = self._get_style(account_colors[account])
-
                 msg = self.conv_status.pre_process_message(contact, message,
                     True, None, None, message.timestamp, message.type, message.style)
-
                 self.text.receive_message(self.formatter, msg)
 
             self.conv_status.post_process_message(msg)
@@ -430,6 +497,8 @@ class ChatWidget(gtk.VBox):
         if len(results) >= 1000:
             self.nicebar.new_message(_('Too many messages to display'),
                 gtk.STOCK_DIALOG_WARNING)
+
+        self.search_mode = False
 
     def _get_style(self, color):
 

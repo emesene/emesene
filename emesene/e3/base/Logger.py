@@ -300,6 +300,23 @@ class Logger(object):
         ORDER BY tmstp DESC LIMIT ?;
     '''
 
+    SELECT_CHATS_KEYWORDS = '''
+        SELECT f.status, f.tmstp, f.payload, i.nick, a.account
+        FROM fact_event f, d_info i, d_account a
+        WHERE f.id_event=? and
+            ((f.id_src_acc=? and id_dest_acc=?) or
+            (f.id_dest_acc=? and id_src_acc=?)  or
+            (f.id_src_acc<>? and f.cid in
+                ( SELECT f.cid FROM fact_event f
+                  WHERE f.id_event=?  and  ((f.id_src_acc=? and id_dest_acc=?)
+                  or  (f.id_dest_acc=? and id_src_acc=?)) )
+            )) and
+            f.id_src_info = i.id_info and
+            f.payload like ? and
+            f.tmstp >= ? and f.tmstp <= ? and f.id_src_acc = a.id_account
+        ORDER BY tmstp DESC LIMIT ?;
+    '''
+
     SELECT_NEW_FIELDS = '''
         SELECT cid FROM fact_event;
     '''
@@ -703,6 +720,28 @@ class Logger(object):
 
         return self._fetch_sorted()
 
+    def get_chats_by_keyword(self, src, dest, from_t, to_t, keywords, limit):
+        '''return the last # messages containing keywords sent from src to dest
+        or from dest to src, where # is the limit value
+        '''
+        id_event = self.events.get('message', None)
+
+        if src not in self.accounts or dest not in self.accounts:
+            return None
+
+        id_src = self.accounts[src].id_account
+        id_dest = self.accounts[dest].id_account
+
+        #FIXME: escape keywords??
+        keywords = "%" + keywords + "%"
+
+        self.execute(Logger.SELECT_CHATS_KEYWORDS,
+                     (id_event, id_src, id_dest, id_src, id_dest, id_dest,
+                      id_event, id_src, id_dest, id_src, id_dest,
+                      keywords, from_t, to_t, limit))
+
+        return self._fetch_sorted()
+
     def add_groups(self, groups):
         '''add all groups to the database'''
         existing = set(self.groups.keys())
@@ -811,6 +850,7 @@ class LoggerProcess(threading.Thread):
         self.actions['get_sent_messages'] = self.logger.get_sent_messages
         self.actions['get_chats'] = self.logger.get_chats
         self.actions['get_chats_between'] = self.logger.get_chats_between
+        self.actions['get_chats_by_keyword'] = self.logger.get_chats_by_keyword
         self.actions['add_groups'] = self.logger.add_groups
         self.actions['add_contacts'] = self.logger.add_contacts
         self.actions['add_contact_by_group'] = self.logger.add_contact_by_group
@@ -946,7 +986,13 @@ class LoggerProcess(threading.Thread):
         '''
         self.input.put(('get_chats_between', (src, dest, from_t, to_t, limit,
                                               callback)))
-
+    def get_chats_by_keyword(self, src, dest, from_t, to_t, keywords, limit, callback):
+        '''return the last # sent from src to dest or from dest to src ,
+        between two timestamps from_t and to_t, containing keywords,
+        where # is the limit value
+        '''
+        self.input.put(('get_chats_by_keyword', (src, dest, from_t, to_t, keywords,
+                                               limit, callback)))
     def add_groups(self, groups):
         '''add all groups to the database'''
         self.input.put(('add_groups', (groups, None)))

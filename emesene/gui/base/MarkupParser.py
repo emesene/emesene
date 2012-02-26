@@ -38,6 +38,8 @@ dic_inv = {
 
 URL_REGEX_STR = '(http[s]?://|www\.)(?:[a-zA-Z]|[0-9]|[$\-_@\.&+]|[!*\"\'\(\),]|[=;/#?:]|(?:%[0-9a-fA-F][0-9a-fA-F])|[\{\}\|\[\]\\\^~])+'
 URL_REGEX = re.compile(URL_REGEX_STR)
+SEARCH_REGEX_STR = '(search://)(?:[a-zA-Z]|[0-9]|[$\-_@\.&+]|[!*\"\'\(\),]|[=;/#?:]|(?:%[0-9a-fA-F][0-9a-fA-F])|[\{\}\|\[\]\\\^~])+'
+SEARCH_REGEX = re.compile(SEARCH_REGEX_STR)
 IMAGE_TAG = re.compile('(<img[^>]+>|&(?:#\d{1,3}|[\d\w]+);)')
 
 def escape(string_):
@@ -123,8 +125,14 @@ def replace_urls(match):
         hurl = 'http://' + url
     return '<a href="%s">%s</a>' % (hurl, url)
 
+def replace_search_urls(match):
+    '''function to be called on each search url match'''
+    hurl = match.group()
+    return '<a href="%s">%s</a>' % (hurl, _('view more'))
+
 def urlify(strng):
     '''replace urls by an html link'''
+    strng = SEARCH_REGEX.sub(replace_search_urls, strng)
     return URL_REGEX.sub(replace_urls, strng)
 
 def path_to_url(path):

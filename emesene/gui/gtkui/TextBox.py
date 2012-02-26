@@ -55,10 +55,15 @@ class TextBox(gtk.ScrolledWindow):
             self._textbox.connect('drag-data-received', self.on_drag_data_received)
 
         self._buffer = RichBuffer.RichBuffer()
+        self._buffer.connect('search_request', self._search_request_cb)
+
         self._textbox.set_buffer(self._buffer)
         self._textbox.connect_after('copy-clipboard', self._on_copy_clipboard)
         self.add(self._textbox)
         self.widgets = {}
+
+    def _search_request_cb(self, texbox, link):
+        self.emit("search_request", link)
 
     def clear(self):
         '''clear the content'''
@@ -170,6 +175,10 @@ class TextBox(gtk.ScrolledWindow):
         return text
 
     text = property(fget=_get_text, fset=_set_text)
+
+gobject.type_register(TextBox)
+gobject.signal_new("search_request", TextBox, gobject.SIGNAL_RUN_FIRST,
+                   gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
 
 class InputView(gtk.TextView):
     __gsignals__ = {
