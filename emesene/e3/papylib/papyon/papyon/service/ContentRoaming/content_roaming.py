@@ -114,7 +114,7 @@ class ContentRoaming(gobject.GObject):
         gp = GetStoredProfileScenario(self._storage,
                                       (self.__get_dn_and_pm_cb,),
                                       (self.__get_display_picture_cb,),
-                                      (self.__common_errback,))
+                                      (self.__common_errback, None))
         gp.cid = self._ab.profile.cid
         gp()
 
