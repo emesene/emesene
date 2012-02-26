@@ -648,12 +648,14 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 for contact_row in row.iterchildren():
                     con = contact_row[1]
 
+                    # if we found it, update.
                     if con.account == contact.account:
                         found = True
                         group_found = obj
                         self._model[contact_row.iter] = contact_data
                         self.update_group(obj)
 
+            # if it's a contact without group (at the root)
             elif isinstance(obj, e3.Contact) and obj.account == contact.account:
                 found = True
                 self._model[row.iter] = contact_data
@@ -662,12 +664,18 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # delete contact from offline/online group and add to the oposite.
         if self.order_by_status and found:
             # y todavia no estoy en el grupo.
-            if offline and group_found != self.offline_group:
-                self.remove_contact(contact, self.online_group)
+            if offline and \
+                not self.offline_group \
+                or group_found != self.offline_group:
+
+                self.remove_contact(contact, group_found)
                 self.add_contact(contact, self.offline_group)
 
-            if online and group_found != self.online_group:
-                self.remove_contact(contact, self.offline_group)
+            if online and \
+                not self.online_group \
+                or group_found != self.online_group:
+
+                self.remove_contact(contact, group_found)
                 self.add_contact(contact, self.online_group)
 
         if self.order_by_group and self.group_offline and found:
