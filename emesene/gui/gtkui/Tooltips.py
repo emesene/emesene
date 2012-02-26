@@ -160,6 +160,8 @@ class Tooltips(gtk.Window):
         self.image.show()
 
         # set the location of the tooltip
+        if view.window is None:
+            return False
         x, y = self.computePosition(origCoords, view.window)
         self.move(x, y)
         self.show()
@@ -204,4 +206,3 @@ class Tooltips(gtk.Window):
             y = 0
             
         return (x, y)
-
