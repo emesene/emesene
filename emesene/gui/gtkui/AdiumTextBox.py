@@ -114,17 +114,19 @@ class OutputView(webkit.WebView):
 
         select_all_item = gtk.MenuItem(label=_("Select All"))
         select_all_item.connect('activate', lambda *args: self.select_all())
-
-        clear_item = gtk.MenuItem(label=_("Clear"))
-        clear_item.connect('activate',  lambda *args: self.handler.on_clean_selected())
-
         menu.append(select_all_item)
-        menu.append(clear_item)
+
+        if self.handler is not None:
+            clear_item = gtk.MenuItem(label=_("Clear"))
+            clear_item.connect('activate',  lambda *args: self.handler.on_clean_selected())
+            menu.append(clear_item)
+
         menu.show_all()
 
     def on_download_requested(self, webview, download):
-        uri = download.get_uri().split("?")[0]
-        self.handler.add_emoticon_selected(uri)
+        if self.handler is not None:
+            uri = download.get_uri().split("?")[0]
+            self.handler.add_emoticon_selected(uri)
         return False
 
     def on_navigation_requested(self, widget, WebKitWebFrame, WebKitNetworkRequest):
