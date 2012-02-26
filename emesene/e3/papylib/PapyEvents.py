@@ -57,23 +57,23 @@ class ClientEvents(papyon.event.ClientEventInterface):
     def on_client_error(self, error_type, error):
         if error_type == papyon.event.ClientErrorType.AUTHENTICATION:
             self._client.session.add_event(Event.EVENT_LOGIN_FAILED,
-                                           'Authentication failure')      
+                                           _('Authentication failure'))      
         elif error_type == papyon.event.ClientErrorType.NETWORK:
             self._client.session.add_event(Event.EVENT_DISCONNECTED,
-                                           'Network error', 1)#for reconnecting
+                                           _('Network error'), 1)#for reconnecting
         elif error_type == papyon.event.ClientErrorType.PROTOCOL:
             if error == papyon.event.ProtocolError.OTHER_CLIENT:
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
-                              'Logged in from another location', 0)
+                              _('Logged in from another location'), 0)
             elif error == papyon.event.ProtocolError.SERVER_DOWN:
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
-                                               'Server down', 1)#for reconnecting
+                                               _('Server down'), 1)#for reconnecting
             elif error == papyon.event.ProtocolError.AUTHENTICATION_FAILED:
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
-                                               'Authentication failure', 0)
+                                               _('Authentication failure'), 0)
             else:
                 self._client.session.add_event(Event.EVENT_DISCONNECTED,
-                                               'Protocol error', 0)
+                                               _('Protocol error'), 0)
         elif error_type == papyon.event.ClientErrorType.CONTENT_ROAMING:
             if isinstance(error, papyon.gnet.errors.HTTPError) and \
                error.response and error.response.status and \
