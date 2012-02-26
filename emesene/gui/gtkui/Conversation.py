@@ -72,7 +72,8 @@ class Conversation(gtk.VBox, gui.Conversation):
             gui.theme, self)
         self.toolbar = ConversationToolbar(toolbar_handler)
         self.toolbar.set_property('can-focus', False)
-        self.output = OutputText(self.session.config, self.steal_emoticon_cb)
+        outputview_handler = gui.base.OutputViewHandler(self)
+        self.output = OutputText(self.session.config, outputview_handler)
         if self.session.conversation_start_locked:
             self.output.lock()
 
@@ -138,7 +139,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.tab_index = -1 # used to select an existing conversation
 
-    def steal_emoticon_cb(self, path_uri):
+    def steal_emoticon(self, path_uri):
         '''receives the path or the uri for the emoticon to be added'''
         if path_uri.startswith("file://"):
             path_uri = path_uri[7:]

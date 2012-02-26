@@ -32,15 +32,15 @@ class OutputView(webkit.WebView):
     '''a class that represents the output widget of a conversation
     '''
 
-    def __init__(self, theme, add_emoticon_cb):
+    def __init__(self, theme, handler):
         webkit.WebView.__init__(self)
         settings = self.get_settings()
         settings.set_property('default-font-size', 8)
 
+        self.handler = handler
         self.theme = theme
         self.ready = False
         self.pending = []
-        self.add_emoticon_cb = add_emoticon_cb
         self.connect('load-finished', self._loading_finished_cb)
         self.connect('populate-popup', self.on_populate_popup)
         self.connect('navigation-requested', self.on_navigation_requested)
@@ -114,16 +114,17 @@ class OutputView(webkit.WebView):
 
         select_all_item = gtk.MenuItem(label=_("Select All"))
         select_all_item.connect('activate', lambda *args: self.select_all())
+
         clear_item = gtk.MenuItem(label=_("Clear"))
-        clear_item.connect('activate',  lambda *args: self.clear())
+        clear_item.connect('activate',  lambda *args: self.handler.on_clean_selected())
+
         menu.append(select_all_item)
         menu.append(clear_item)
         menu.show_all()
 
     def on_download_requested(self, webview, download):
-        if self.add_emoticon_cb is not None:
-            uri = download.get_uri().split("?")[0]
-            self.add_emoticon_cb(uri)
+        uri = download.get_uri().split("?")[0]
+        self.handler.add_emoticon_selected(uri)
         return False
 
     def on_navigation_requested(self, widget, WebKitWebFrame, WebKitNetworkRequest):
@@ -146,7 +147,7 @@ class OutputText(gtk.ScrolledWindow):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, config, add_emoticon_cb):
+    def __init__(self, config, handler):
         '''constructor'''
         gtk.ScrolledWindow.__init__(self)
 
@@ -156,7 +157,7 @@ class OutputText(gtk.ScrolledWindow):
         self.set_shadow_type(gtk.SHADOW_IN)
         self.loaded = False
 
-        self.view = OutputView(gui.theme.conv_theme, add_emoticon_cb)
+        self.view = OutputView(gui.theme.conv_theme, handler)
         self.clear()
         self.view.show()
         self.add(self.view)

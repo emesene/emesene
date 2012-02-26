@@ -574,6 +574,22 @@ class ConversationToolbarHandler(object):
         '''called when the user is requesting an audio-video call'''
         self.conversation.on_av_call()
 
+class OutputViewHandler(object):
+    '''this handler contains all the methods to handle output view
+    '''
+
+    def __init__(self, conversation):
+        '''constructor'''
+        self.conversation = conversation
+
+    def on_clean_selected(self):
+        '''called when the Clear menu item is selected'''
+        self.conversation.on_clean()
+
+    def add_emoticon_selected(self, uri):
+        '''called when an emoticon is being stolen'''
+        self.conversation.steal_emoticon(uri)
+
 class TrayIconHandler(FileHandler):
     """
     this handler contains all the methods to handle a tray icon

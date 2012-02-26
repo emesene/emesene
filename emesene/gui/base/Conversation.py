@@ -660,3 +660,9 @@ class Conversation(object):
 
     def _member_to_contact(self,member):
         return self.session.contacts.contacts[member]
+
+    def steal_emoticon(self, uri):
+        """
+        receives the path or the uri for the emoticon to be added
+        """
+        raise NotImplementedError("Method not implemented")
