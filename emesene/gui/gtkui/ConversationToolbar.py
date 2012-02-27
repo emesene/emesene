@@ -46,13 +46,13 @@ class ConversationToolbar(gtk.Toolbar):
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         self.ublock.set_sensitive(force_sensitive_block_button or is_sensitive)
+        self.toggle_avatar.set_sensitive(force_sensitive_block_button or is_sensitive)
         self.font.set_sensitive(is_sensitive)
         self.nudge.set_sensitive(is_sensitive)
         self.clean.set_sensitive(is_sensitive)
         self.color.set_sensitive(is_sensitive)
         self.emotes.set_sensitive(is_sensitive)
         self.invite.set_sensitive(is_sensitive)
-        self.toggle_avatar.set_sensitive(is_sensitive)
         self.invite_av_call.set_sensitive(is_sensitive)
         self.invite_video_call.set_sensitive(is_sensitive)
         self.invite_audio_call.set_sensitive(is_sensitive)

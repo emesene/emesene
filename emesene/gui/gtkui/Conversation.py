@@ -47,7 +47,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         self._header_visible = session.config.b_show_header
         self._image_visible = session.config.b_show_info
         self._toolbar_visible = session.config.b_show_toolbar
-        self.avatar_box_is_hidden = False
 
         self.panel = gtk.VPaned()
 
@@ -397,15 +396,16 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
-        if self.avatar_box_is_hidden:
+        if not self.session.config.b_show_info:
             self.toolbar.toggle_avatar.set_stock_id(gtk.STOCK_GO_FORWARD)
-            self.toolbar.toggle_avatar.set_tooltip_text(('Hide avatar'))
+            self.toolbar.toggle_avatar.set_tooltip_text(_('Hide avatar'))
             self.info.show()
+            self.session.config.b_show_info = True
         else:
             self.toolbar.toggle_avatar.set_stock_id(gtk.STOCK_GO_BACK)
-            self.toolbar.toggle_avatar.set_tooltip_text(('Show avatar'))
+            self.toolbar.toggle_avatar.set_tooltip_text(_('Show avatar'))
             self.info.hide()
-        self.avatar_box_is_hidden = not self.avatar_box_is_hidden
+            self.session.config.b_show_info = False
 
     def _on_avatarsize_changed(self, value):
         self.info._on_avatarsize_changed(value)
