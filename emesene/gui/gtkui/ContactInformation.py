@@ -113,6 +113,7 @@ class InformationWidget(gtk.VBox):
         self.mail = gtk.Label()
         self.mail.set_alignment(0.0, 0.5)
         self.mail.set_ellipsize(pango.ELLIPSIZE_END)
+        self.mail.set_selectable(True)
         self.message = Renderers.SmileyLabel()
         self.message.set_ellipsize(pango.ELLIPSIZE_END)
         self.message.set_alignment(0.0, 0.5)
