@@ -549,11 +549,12 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
                 return return_iter
 
-        else: #######WTF??? where does this belong???
+        else: # for-else contingency workaround.
+            log.warning("add_contact: ending for-else reached, \
+                            group not found, adding new group.")
             self.add_group(group)
             result = self.add_contact(contact, group)
             self.update_group(group)
-
             return result
 
     def remove_contact(self, contact, group=None):
