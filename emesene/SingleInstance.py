@@ -35,21 +35,27 @@ class SingleInstance:
         if os.name == 'posix':
             try:
                 import dbus, dbus.service
-                dbus_version = getattr(dbus, 'version', (0, 0, 0))
-                if dbus_version >= (0, 41, 0):
-                    import dbus.glib
-                if dbus_version >= (0, 80, 0):
-                    from dbus.mainloop.glib import DBusGMainLoop
-                    DBusGMainLoop(set_as_default=True)
-                    self.new_dbus = True
-                else:
-                    import dbus.mainloop.glib
-                    self.new_dbus = False
-                self.have_dbus = True
-                self.dbus = dbus
-            except dbus.DBusException, error:
                 self.have_dbus = False
-                print 'Unable to use D-Bus: %s' % str(error)
+            except ImportError:
+                self.have_dbus = False
+
+            if self.have_dbus:
+                try:
+                    dbus_version = getattr(dbus, 'version', (0, 0, 0))
+                    if dbus_version >= (0, 41, 0):
+                        import dbus.glib
+                    if dbus_version >= (0, 80, 0):
+                        from dbus.mainloop.glib import DBusGMainLoop
+                        DBusGMainLoop(set_as_default=True)
+                        self.new_dbus = True
+                    else:
+                        import dbus.mainloop.glib
+                        self.new_dbus = False
+                    self.have_dbus = True
+                    self.dbus = dbus
+                except dbus.DBusException, error:
+                    self.have_dbus = False
+                    print 'Unable to use D-Bus: %s' % str(error)
 
         self.lock_file_name = os.path.normpath(tempfile.gettempdir() +
                             '/emesene-' + getpass.getuser() + '.lock')
