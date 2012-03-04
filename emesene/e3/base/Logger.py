@@ -733,7 +733,7 @@ class Logger(object):
         id_dest = self.accounts[dest].id_account
 
         #FIXME: escape keywords??
-        keywords = "%" + keywords + "%"
+        keywords = "%" + unicode(keywords, 'utf8') + "%"
 
         self.execute(Logger.SELECT_CHATS_KEYWORDS,
                      (id_event, id_src, id_dest, id_src, id_dest, id_dest,
