@@ -166,9 +166,8 @@ class P2PTransportManager(gobject.GObject):
 
         try:
             blob.append_chunk(chunk)
-        except Exception, err:
-            logger.exception(err)
-            logger.warning("Couldn't append chunk to blob, ignoring it")
+        except AssertionError, err:
+            logger.warning("Couldn't append chunk to blob, ignoring it. Reason: %s" % err )
             return
 
         self._on_chunk_transferred(peer, peer_guid, chunk)
