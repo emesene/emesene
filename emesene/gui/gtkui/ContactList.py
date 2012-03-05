@@ -825,11 +825,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             display_name = self.get_contact_selected().display_name
 
             if selection.target == 'text/html':
-                formatter = gui.base.Plus.MsnPlusMarkupMohrtutchy() # - colors
-                formatter.isHtml = True
-
-                display_name = formatter.replaceMarkup(display_name)
-                display_name = gui.base.Plus.parse_emotes(display_name) # - emotes
+                display_name = gui.base.Plus.msnplus_parse(display_name)
 
                 for x in range(len(display_name)):
                     if isinstance(display_name[x], dict):
