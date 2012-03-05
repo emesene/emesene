@@ -207,6 +207,10 @@ class FacebookClient(object):
         url_path = self._get_url_path({'query' : query, 'access_token' : self.access_token, 'format' : 'json'})
         url = "%s%s" % (self.FBQL_BASE_URL, url_path)
         data = self._make_request(url)
+
+        if "error" in str(data):
+            ex = self.factory.make_object('Error', data)
+            raise PyfbException(ex.error_msg)
         return self.factory.make_objects_list(table, data)
 
 
