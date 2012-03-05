@@ -152,62 +152,33 @@ class IMAPMail(MailClient):
         self._imap_server.store(e_id,'-FLAGS','\Seen')
         return MailMessage("", address, subject, "", "")
 
-from pyfacebook import Facebook
-from pyfacebook import FacebookError
-
-API_KEY = "302582423085987"
-SECRET_KEY = "a36182c056595e7d5007c9f85e3ee6bc"
-REDIRECT_URL = "http://toworktogether.eu/emesenefb.html"
-
 class FacebookMail(MailClient):
 
     def __init__(self, session):
         MailClient.__init__(self, session)
         self._count = 0
-        self._client = Facebook(API_KEY, SECRET_KEY, oauth2 = True, app_id = API_KEY)
         self._session = session
+        self._client = session.facebook_client
 
     def on_run(self):
-        self.get_token()
-        old_count, new_count = self.update_counter()
-        if old_count < new_count:
+        new_count = self._client.get_unread_mail_count()
+        if self._count < new_count:
             mail = self.new_mails()
             self._handlers["mailnew"](mail)
             self._handlers["mailcount"](new_count)
 
     def on_initialize(self):
-        self.get_token()
-        if self._client.oauth2_token == None:
-            conn_url = self._client.login(REDIRECT_URL, required_permissions="read_mailbox, offline_access")
-            self._handlers["socialreq"](conn_url)
-        old_count, new_count = self.update_counter()
+        new_count = self._client.get_unread_mail_count()
         self._handlers["mailcount"](new_count)
 
     def on_end(self):
         pass
 
-    def get_token(self):
-        self._client.oauth2_token = self._session.config.facebook_token
-
-    def update_counter(self):
-        if self._client.oauth2_token == None:
-            return (0, 0)
-        old_count = self._count
-        query = self._client.fql.query("SELECT folder_id, name, unread_count, viewer_id FROM mailbox_folder WHERE viewer_id=me() and folder_id = 0")
-        self._count = query[0]['unread_count']
-        return (old_count, self._count)
-
     def new_mails(self):
-        #What you're going to see is not suitable for programmers..
-        #I didn't get mad, it's just seems like Fql is not supporting tables join. 
-        #I made this fast workaround, hope to find a better solution. Thank you!
-        query_thread = self._client.fql.query("SELECT thread_id, subject, recipients FROM thread WHERE folder_id = 0 and unread = 1")
-        orclause = "WHERE "
-        for thread in query_thread:
-            orclause = "%s thread_id = %s OR " % (orclause, thread['thread_id'])
-        orclause = orclause[0:len(orclause)-3]
-        orclause = "%s ORDER BY created_time DESC" % orclause
-        query_message = self._client.fql.query("SELECT body, author_id, created_time FROM message %s" % orclause)
-        query_user = self._client.fql.query("SELECT name FROM user WHERE uid =  %s" % query_message[0]['author_id'])
-        return MailMessage("", query_user[0]['name'], query_message[0]['body'], "", "")
+        try:
+            name, body = self._client.get_new_mail_info()
+            return MailMessage("", name, body, "", "")
+        except TypeError:
+            #we don't have any new emails
+            pass
 
