@@ -2,6 +2,8 @@ import socket
 
 from Worker import Worker
 from MailClients import *
+import facebook
+
 import e3
 
 import logging
@@ -28,6 +30,7 @@ class Session(e3.Session):
     def __init__(self, id_=None, account=None):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
+        self.facebook_client = None
         self.mail_client = NullMail()
 
     def login(self, account, password, status, proxy, host, port, use_http=False):
@@ -45,6 +48,7 @@ class Session(e3.Session):
             if use_http:
                 port = 80
         elif host == "chat.facebook.com":
+            self.facebook_client = facebook.FacebookCLient(self)
             try:
                 self.mail_client = FacebookMail(self)
             except socket.error, sockerr:
@@ -61,6 +65,8 @@ class Session(e3.Session):
             host, port))
 
     def start_mail_client(self):
+        if not self.facebook_client is None:
+            self.facebook_client.request_permitions()
         self.mail_client.start()
         
     def stop_mail_client(self):
@@ -93,4 +99,12 @@ class Session(e3.Session):
 
     def activate_social_services(self, active):
         '''activates/deactivates social services if avariable in protocol'''
-        pass
+        if not self.facebook_client is None:
+            self.facebook_client.set_token(self.config.facebook_token, active)
+            if active:
+                msg = self.facebook_client.message
+                nick = self.facebook_client.nick
+                self.contacts.me.message = msg
+                self.contacts.me.nick = nick
+                self.profile_get_succeed(nick, msg)
+

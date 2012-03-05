@@ -45,8 +45,8 @@ class FacebookCLient(object):
             self._client.set_access_token(token)
             self._activated = True
 
-     def _get_personal_nick(self):
-         nick = ""
+    def _get_personal_nick(self):
+        nick = ""
         if self._activated:
             try:
                 me = self._client.get_myself()
@@ -54,22 +54,22 @@ class FacebookCLient(object):
             except PyfbException, ex:
                 log.warn("couldn't get nick " + str(ex))
 
-         return nick
+        return nick
 
-     nick = property(fget=_get_personal_nick, fset=None)
+    nick = property(fget=_get_personal_nick, fset=None)
 
-     def _set_personal_message(self, message):
-         '''publish a message into your wall'''
+    def _set_personal_message(self, message):
+        '''publish a message into your wall'''
         #FIXME: we need a preference about this
         if self._activated and len(message)!= 0:
-             try:
-                 self._client.publish(message, "me")
+            try:
+                self._client.publish(message, "me")
             except PyfbException, ex:
                 log.warn("couldn't publish message " + str(ex))
 
-     def _get_personal_message(self):
-         '''gets last message published into your wall'''
-         message = ""
+    def _get_personal_message(self):
+        '''gets last message published into your wall'''
+        message = ""
         if self._activated:
             try:
                 messages = self._client.get_statuses("me")
@@ -77,9 +77,9 @@ class FacebookCLient(object):
                     message = self._client.get_statuses("me")[0].message
             except PyfbException, ex:
                 log.warn("couldn't get message " + str(ex))
-         return message
+        return message
 
-     message = property(fget=_get_personal_message, fset=_set_personal_message)
+    message = property(fget=_get_personal_message, fset=_set_personal_message)
 
     def get_unread_mail_count(self):
         '''get current unread mail count'''
