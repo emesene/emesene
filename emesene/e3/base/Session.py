@@ -261,6 +261,11 @@ class Session(object):
         '''send a common message'''
         raise NotImplementedError('Not implemented')
 
+    def activate_social_services(self, active):
+        '''activates/deactivates social services if avariable in protocol'''
+        #XXX: override to add support
+        pass
+
     def send_typing_notification(self, cid):
         '''send typing notification to contact'''
         raise NotImplementedError('Not implemented')
