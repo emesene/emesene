@@ -18,6 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
+import e3
+import os
 from pyfb.pyfb import Pyfb, PyfbException
 
 import logging
@@ -60,7 +62,6 @@ class FacebookCLient(object):
 
     def _set_personal_message(self, message):
         '''publish a message into your wall'''
-        #FIXME: we need a preference about this
         if self._activated and len(message)!= 0:
             try:
                 self._client.publish(message, "me")
@@ -110,3 +111,16 @@ class FacebookCLient(object):
             #we don't have any unread msg
             return None
 
+    def _get_profile_pic(self):
+        try:
+            query_thread = self._client.fql_query("SELECT pic_big FROM user WHERE uid = me()")
+            self.caches = e3.cache.CacheManager(self._session.config_dir.base_dir)
+            avatars = self.caches.get_avatar_cache(self._session.account.account)
+            new_path = avatars.insert_url(query_thread[0].pic_big)
+            avatar_path = os.path.join(avatars.path, new_path[1])
+            return avatar_path
+        except PyfbException:
+            #we don't have any avatar pic
+            return None
+
+    picture = property(fget=_get_profile_pic, fset=None)

@@ -107,4 +107,8 @@ class Session(e3.Session):
                 self.contacts.me.message = msg
                 self.contacts.me.nick = nick
                 self.profile_get_succeed(nick, msg)
+                avatar_path = self.facebook_client.picture
+                if not avatar_path is None:
+                    self.picture_change_succeed(self.account.account, avatar_path)
+
 
