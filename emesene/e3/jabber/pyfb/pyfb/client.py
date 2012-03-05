@@ -204,7 +204,7 @@ class FacebookClient(object):
             Executes a FBQL query and return a list of objects
         """
         table = self._get_table_name(query)
-        url_path = self._get_url_path({'query' : query, 'format' : 'json'})
+        url_path = self._get_url_path({'query' : query, 'access_token' : self.access_token, 'format' : 'json'})
         url = "%s%s" % (self.FBQL_BASE_URL, url_path)
         data = self._make_request(url)
         return self.factory.make_objects_list(table, data)
