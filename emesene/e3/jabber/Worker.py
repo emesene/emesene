@@ -387,6 +387,10 @@ class Worker(e3.Worker):
         self.client.send(xmpp.protocol.Presence(priority=24, show=stat,
             status=message))
 
+        if not self.session.facebook_client is None and self.session.config.b_fb_status_write:
+            ##update facebook message
+            self.session.facebook_client.message = message
+
         e3.base.Worker._handle_action_set_message(self, message)
 
     def _handle_action_set_media(self, message):
