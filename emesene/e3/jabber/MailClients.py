@@ -163,6 +163,7 @@ class FacebookMail(MailClient):
     def on_run(self):
         new_count = self._client.get_unread_mail_count()
         if self._count < new_count:
+            self._count = new_count
             mail = self.new_mails()
             self._handlers["mailnew"](mail)
             self._handlers["mailcount"](new_count)
