@@ -191,8 +191,10 @@ class Preferences(gtk.Window):
                              gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
 
         msn_in_list = False
+        fb_in_list = False
         for pair in LIST:
             msn_in_list = msn_in_list or pair['text'] == _('Live Messenger')
+            fb_in_list = fb_in_list or pair['text'] == _('Facebook')
 
         if 'msn' in self.session.SERVICES:
         # only when session is papylib.
@@ -210,6 +212,21 @@ class Preferences(gtk.Window):
                          'text' : _('Live Messenger')})
             self.__refresh_list()
 
+        if 'facebook' in self.session.SERVICES:
+        # only when session is papylib.
+            if not fb_in_list:
+                LIST.append({'stock_id' : gtk.STOCK_NETWORK,
+                                 'text' : _('Facebook')})
+                self.listStore.append([self.render_icon(gtk.STOCK_NETWORK,
+                                       gtk.ICON_SIZE_LARGE_TOOLBAR),
+                                       _('Facebook')])
+            self.facebook = Facebook(self.session)
+            self.facebook_page = self.facebook
+            self.page_dict.append(self.facebook_page)
+        elif fb_in_list:
+            LIST.remove({'stock_id' : gtk.STOCK_NETWORK,
+                         'text' : _('Facebook')})
+            self.__refresh_list()
 
         for i in range(len(self.page_dict)):
            self.notebook.append_page(self.page_dict[i])
@@ -1123,6 +1140,25 @@ class MSNPapylib(BaseTable):
         ''' called when live profile button is clicked '''
         gui.base.Desktop.open("http://profile.live.com/details/Edit/Pic")
 
+class Facebook(BaseTable):
+    """ This panel contains some facebook specific settings """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 1, 1)
+        self.set_border_width(5)
+        self.session = session
+
+        self.append_markup('<b>'+_('Facebook Integration:')+'</b>')
+        self.append_check(_('Automatically download Facebook status'),
+                          'session.config.b_fb_status_download')
+        self.append_check(_('Publish Facebook status'),
+                          'session.config.b_fb_status_write')
+        self.append_check(_('Automatically download profile photo'),
+                          'session.config.b_fb_picture_download')
+
+        self.show_all()
 
 class PrivacySettings(gtk.VBox):
     ''' A panel to manage contacts for MSN '''

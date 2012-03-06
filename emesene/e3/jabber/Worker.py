@@ -387,8 +387,8 @@ class Worker(e3.Worker):
         self.client.send(xmpp.protocol.Presence(priority=24, show=stat,
             status=message))
 
-        ##FIXME: need user preference
-        if not self.session.facebook_client is None:
+        if not self.session.facebook_client is None
+            and self.session.config.b_fb_status_write:
             ##update facebook message
             self.session.facebook_client.message = message
 
