@@ -161,6 +161,8 @@ class FacebookMail(MailClient):
         self._client = session.facebook_client
 
     def on_run(self):
+        ##sincronice facebook stuff
+        self._session.process_social_integration()
         new_count = self._client.get_unread_mail_count()
         if self._count < new_count:
             self._count = new_count

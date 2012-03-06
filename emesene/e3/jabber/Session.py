@@ -101,16 +101,18 @@ class Session(e3.Session):
         '''activates/deactivates social services if avariable in protocol'''
         if not self.facebook_client is None:
             self.facebook_client.set_token(self.config.facebook_token, active)
-            if active:
-                if self.config.b_fb_status_download:
-                    msg = self.facebook_client.message
-                    nick = self.facebook_client.nick
-                    self.contacts.me.message = msg
-                    self.contacts.me.nick = nick
-                    self.profile_get_succeed(nick, msg)
-                if self.config.b_fb_picture_download:
-                    avatar_path = self.facebook_client.picture
-                    if not avatar_path is None:
-                        self.picture_change_succeed(self.account.account, avatar_path)
 
+    def process_social_integration(self):
+        '''Do social stuff'''
+        if not self.facebook_client is None and self.facebook_client.active:
+            if self.config.b_fb_status_download:
+                msg = self.facebook_client.message
+                nick = self.facebook_client.nick
+                self.contacts.me.message = msg
+                self.contacts.me.nick = nick
+                self.profile_get_succeed(nick, msg)
+            if self.config.b_fb_picture_download:
+                avatar_path = self.facebook_client.picture
+                if not avatar_path is None:
+                    self.picture_change_succeed(self.account.account, avatar_path)
 
