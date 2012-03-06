@@ -79,6 +79,9 @@ class ClientEvents(papyon.event.ClientEventInterface):
                error.response and error.response.status and \
                error.response.status == 404:
                 self._client.session.add_event(Event.EVENT_BROKEN_PROFILE)
+                return
+            if error._fault == "ItemDoesNotExist": # TODO: check it's a ContentRoamingError first
+                self._client.session.add_event(Event.EVENT_BROKEN_PROFILE)
         elif error_type == papyon.event.ClientErrorType.ADDRESSBOOK:#TODO
             log.error("Client got an error handling addressbook: %s %s" % (error_type, error))
         elif error_type == papyon.event.ClientErrorType.OFFLINE_MESSAGES:#TODO
