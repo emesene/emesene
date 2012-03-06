@@ -4,6 +4,8 @@ from __future__ import with_statement
 import os
 import time
 import shutil
+import tempfile
+from urllib import urlretrieve
 
 import Cache
 
@@ -52,6 +54,15 @@ class AvatarCache(Cache.Cache):
         shutil.copy2(item, path)
         shutil.copy2(item, last_path)
         return self.__add_entry(hash_)
+
+    def insert_url(self, url):
+        '''download and insert a new item into the cache
+        return the information (stamp, hash) on success None otherwise
+        item -- a path to an image
+        '''
+        path = os.path.join(tempfile.gettempdir(), "avatars")
+        urlretrieve(url, path)
+        return self.insert(path)
 
     def insert_raw(self, item):
         '''insert a new item into the cache

@@ -1817,10 +1817,13 @@ class WebWindow(gtk.Window):
         gtk.Window.__init__(self)
         self.set_title(title)
         self._callback = callback
+        scroll = gtk.ScrolledWindow()
         bro = webkit.WebView()
+        bro.set_size_request(350, 350)
         bro.connect('load-committed', self._load_committed_cb)
         bro.open(url)
-        self.add(bro)
+        scroll.add(bro)
+        self.add(scroll)
 
     def _load_committed_cb(self, web_view, frame):
         uri = frame.get_uri()

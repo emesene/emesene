@@ -105,6 +105,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def _on_social_request(self, conn_url):
         def set_token(token_url):
             if token_url.find("#access_token=") == -1:
+                self.session.activate_social_services(False)
                 return
 
             pattern_start_token = "#access_token="
@@ -113,6 +114,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             end_token = token_url.find(pattern_end_token)
             token = token_url[start_token:end_token]
             self.session.config.facebook_token = token
+            self.session.activate_social_services(True)
 
         dialog = extension.get_default('dialog')
         dialog.web_window(_("Connect Emesene and Facebook"), conn_url ,set_token)
