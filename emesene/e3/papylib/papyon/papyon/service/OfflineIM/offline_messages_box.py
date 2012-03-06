@@ -352,10 +352,13 @@ class OfflineMessagesBox(gobject.GObject):
     ### Callbacks ------------------------------------------------------------
 
     def __fetch_message_cb(self, id, run_id, sequence_num, text):
-        message = self._messages.search_by_id(id)[0]
-        message._run_id = run_id
-        message._sequence_num = sequence_num
-        message._text = text
+        try:
+            message = self._messages.search_by_id(id)[0]
+            message._run_id = run_id
+            message._sequence_num = sequence_num
+            message._text = text
+        except IndexError:
+            logger.error("OIM not found by __fetch_message_cb")
 
     def __fetch_messages_cb(self, messages):
         messages.sort()
