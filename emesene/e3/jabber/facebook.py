@@ -37,7 +37,7 @@ class FacebookCLient(object):
         self._session.config.get_or_set('b_fb_status_write', False)
         self._session.config.get_or_set('b_fb_picture_download', False)
         self._client = Pyfb(API_KEY)
-        self._activated = False
+        self.active = False
 
     def request_permitions(self):
         conn_url = self._client.get_auth_url(REDIRECT_URL)
@@ -45,14 +45,14 @@ class FacebookCLient(object):
 
     def set_token(self, token, active):
         '''Sets the authentication token'''
-        self._activated = active
-        if self._activated and not token is None:
+        self.active = active
+        if self.active and not token is None:
             self._client.set_access_token(token)
-            self._activated = True
+            self.active = True
 
     def _get_personal_nick(self):
         nick = ""
-        if self._activated:
+        if self.active:
             try:
                 me = self._client.get_myself()
                 nick = me.name
@@ -65,7 +65,7 @@ class FacebookCLient(object):
 
     def _set_personal_message(self, message):
         '''publish a message into your wall'''
-        if self._activated and len(message)!= 0:
+        if self.active and len(message)!= 0:
             try:
                 self._client.publish(message, "me")
             except PyfbException, ex:
@@ -74,7 +74,7 @@ class FacebookCLient(object):
     def _get_personal_message(self):
         '''gets last message published into your wall'''
         message = ""
-        if self._activated:
+        if self.active:
             try:
                 messages = self._client.get_statuses("me")
                 if len(messages) > 0:
@@ -88,7 +88,7 @@ class FacebookCLient(object):
     def get_unread_mail_count(self):
         '''get current unread mail count'''
         unread_count = 0
-        if self._activated:
+        if self.active:
             try:
                 qry = self._client.fql_query("SELECT unread_count FROM mailbox_folder WHERE folder_id = 0 and viewer_id = me()")
                 unread_count = qry[0].unread_count
@@ -115,15 +115,20 @@ class FacebookCLient(object):
             return None
 
     def _get_profile_pic(self):
-        try:
-            query_thread = self._client.fql_query("SELECT pic_big FROM user WHERE uid = me()")
-            self.caches = e3.cache.CacheManager(self._session.config_dir.base_dir)
-            avatars = self.caches.get_avatar_cache(self._session.account.account)
-            new_path = avatars.insert_url(query_thread[0].pic_big)
-            avatar_path = os.path.join(avatars.path, new_path[1])
-            return avatar_path
-        except PyfbException:
-            #we don't have any avatar pic
-            return None
+        '''get current profile picture'''
+        path = None
+        if self.active:
+            try:
+                query_thread = self._client.fql_query("SELECT pic_big FROM user WHERE uid = me()")
+                self.caches = e3.cache.CacheManager(self._session.config_dir.base_dir)
+                avatars = self.caches.get_avatar_cache(self._session.account.account)
+                new_path = avatars.insert_url(query_thread[0].pic_big)
+                avatar_path = os.path.join(avatars.path, new_path[1])
+                path = avatar_path
+            except PyfbException:
+                #we don't have any avatar pic
+                pass
+
+        return path
 
     picture = property(fget=_get_profile_pic, fset=None)
