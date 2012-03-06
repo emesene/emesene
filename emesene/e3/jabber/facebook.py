@@ -33,6 +33,7 @@ class FacebookCLient(object):
 
     def __init__(self, session):
         self._session = session
+        self._session.config.get_or_set('b_fb_mail_check', True)
         self._session.config.get_or_set('b_fb_status_download', False)
         self._session.config.get_or_set('b_fb_status_write', False)
         self._session.config.get_or_set('b_fb_picture_download', False)

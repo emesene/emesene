@@ -1151,6 +1151,8 @@ class Facebook(BaseTable):
         self.session = session
 
         self.append_markup('<b>'+_('Facebook Integration:')+'</b>')
+        self.append_check(_('Automatically check Facebook mail'),
+                          'session.config.b_fb_mail_check')
         self.append_check(_('Automatically download Facebook status'),
                           'session.config.b_fb_status_download')
         self.append_check(_('Publish Facebook status'),

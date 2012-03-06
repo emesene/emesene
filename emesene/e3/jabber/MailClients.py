@@ -163,16 +163,18 @@ class FacebookMail(MailClient):
     def on_run(self):
         ##sincronice facebook stuff
         self._session.process_social_integration()
-        new_count = self._client.get_unread_mail_count()
-        if self._count < new_count:
-            self._count = new_count
-            mail = self.new_mails()
-            self._handlers["mailnew"](mail)
-            self._handlers["mailcount"](new_count)
+        if self._session.config.b_fb_mail_check:
+            new_count = self._client.get_unread_mail_count()
+            if self._count < new_count:
+                self._count = new_count
+                mail = self.new_mails()
+                self._handlers["mailnew"](mail)
+                self._handlers["mailcount"](new_count)
 
     def on_initialize(self):
-        new_count = self._client.get_unread_mail_count()
-        self._handlers["mailcount"](new_count)
+        if self._session.config.b_fb_mail_check:
+            self._count = self._client.get_unread_mail_count()
+            self._handlers["mailcount"](self._count)
 
     def on_end(self):
         pass
