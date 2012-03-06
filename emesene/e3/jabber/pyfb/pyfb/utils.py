@@ -3,8 +3,10 @@
 
     This file provides utilities to the pyfb library
 """
-
-import simplejson
+try:
+    import json as simplejson
+except ImportError:
+    import simplejson
 
 class NamedObject(object):
     """
