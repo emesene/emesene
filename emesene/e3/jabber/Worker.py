@@ -434,17 +434,20 @@ class Worker(e3.Worker):
         self.client.send(iq_vcard)
 
         avatar_hash = hashlib.sha1(avatar).hexdigest().encode("hex")
-        avatar_path = os.path.join(self.my_avatars.path, avatar_hash)
 
         if avatar_hash in self.my_avatars:
+            avatar_path = os.path.join(self.my_avatars.path, avatar_hash)
             self.session.picture_change_succeed(self.session.account.account,
                     avatar_path)
+            self.session.contacts.me.picture = avatar_path
         else:
-            self.my_avatars.insert_raw(StringIO.StringIO(avatar_data))
-            self.session.picture_change_succeed(self.session.account.account,
-                    avatar_path)
-
-        self.session.contacts.me.picture = avatar_path
+            result = self.my_avatars.insert_raw(StringIO.StringIO(avatar_data))
+            if not result is None:
+                avatar_hash = result[1]
+                avatar_path = os.path.join(self.my_avatars.path, avatar_hash)
+                self.session.picture_change_succeed(self.session.account.account,
+                        avatar_path)
+                self.session.contacts.me.picture = avatar_path
 
     def _handle_action_set_preferences(self, preferences):
         '''handle Action.ACTION_SET_PREFERENCES
