@@ -440,7 +440,7 @@ class Worker(e3.Worker):
             self.session.picture_change_succeed(self.session.account.account,
                     avatar_path)
         else:
-            self.my_avatars.insert_raw(avatar_data)
+            self.my_avatars.insert_raw(StringIO.StringIO(avatar_data))
             self.session.picture_change_succeed(self.session.account.account,
                     avatar_path)
 
