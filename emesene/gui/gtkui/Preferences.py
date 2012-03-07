@@ -229,7 +229,7 @@ class Preferences(gtk.Window):
             self.__refresh_list()
 
         for i in range(len(self.page_dict)):
-           self.notebook.append_page(self.page_dict[i])
+            self.notebook.append_page(self.page_dict[i])
 
     def __refresh_list(self):
 
