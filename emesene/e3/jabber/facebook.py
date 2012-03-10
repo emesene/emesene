@@ -39,6 +39,7 @@ class FacebookCLient(object):
         self._session.config.get_or_set('b_fb_picture_download', False)
         self._client = Pyfb(API_KEY)
         self.active = False
+        self._nick = None
 
     def request_permitions(self):
         conn_url = self._client.get_auth_url(REDIRECT_URL)
@@ -52,15 +53,15 @@ class FacebookCLient(object):
             self.active = True
 
     def _get_personal_nick(self):
-        nick = ""
-        if self.active:
+        '''get the person name as nick'''
+        if self.active and self._nick is None:
             try:
                 me = self._client.get_myself()
-                nick = me.name
+                self._nick = me.name
             except PyfbException, ex:
                 log.warn("couldn't get nick " + str(ex))
 
-        return nick
+        return self._nick
 
     nick = property(fget=_get_personal_nick, fset=None)
 
