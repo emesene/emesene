@@ -108,11 +108,13 @@ class Session(e3.Session):
             if self.config.b_fb_status_download:
                 msg = self.facebook_client.message
                 nick = self.facebook_client.nick
-                self.contacts.me.message = msg
-                self.contacts.me.nick = nick
-                self.profile_get_succeed(nick, msg)
+                if not (msg == self.contacts.me.message or nick == self.contacts.me.nick):
+                    self.contacts.me.message = msg
+                    self.contacts.me.nick = nick
+                    self.profile_get_succeed(nick, msg)
             if self.config.b_fb_picture_download:
                 avatar_path = self.facebook_client.picture
-                if not avatar_path is None:
+                if not (avatar_path is None or self.contacts.me.picture == avatar_path):
+                    self.contacts.me.picture = avatar_path
                     self.picture_change_succeed(self.account.account, avatar_path)
 
