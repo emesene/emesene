@@ -66,7 +66,11 @@ class Session(e3.Session):
 
     def start_mail_client(self):
         if not self.facebook_client is None:
-            self.facebook_client.request_permitions()
+            if self.config.facebook_token is None:
+                self.facebook_client.request_permitions()
+            else:
+                #reuse token
+                self.activate_social_services(True)
         self.mail_client.start()
         
     def stop_mail_client(self):
