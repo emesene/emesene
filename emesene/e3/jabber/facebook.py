@@ -40,6 +40,9 @@ class FacebookCLient(object):
         self._client = Pyfb(API_KEY)
         self.active = False
         self._nick = None
+        self._avatar_cache = None
+        self._avatar_url = None
+        self._avatar_path = None
 
     def request_permitions(self):
         conn_url = self._client.get_auth_url(REDIRECT_URL)
@@ -121,12 +124,16 @@ class FacebookCLient(object):
         path = None
         if self.active:
             try:
-                query_thread = self._client.fql_query("SELECT pic_big FROM user WHERE uid = me()")
-                self.caches = e3.cache.CacheManager(self._session.config_dir.base_dir)
-                avatars = self.caches.get_avatar_cache(self._session.account.account)
-                new_path = avatars.insert_url(query_thread[0].pic_big)
-                avatar_path = os.path.join(avatars.path, new_path[1])
-                path = avatar_path
+                avatar_url = self._client.fql_query("SELECT pic_big FROM user WHERE uid = me()")[0].pic_big
+                #check if avatar url change since last time
+                if not avatar_url == self._avatar_url:
+                    if self._avatar_cache is None:
+                        caches = e3.cache.CacheManager(self._session.config_dir.base_dir)
+                        self._avatar_cache = caches.get_avatar_cache(self._session.account.account)
+                    new_path = self._avatar_cache.insert_url(avatar_url)[1]
+                    self._avatar_path = os.path.join(self._avatar_cache.path, new_path)
+                    self._avatar_url = avatar_url
+                path = self._avatar_path
             except PyfbException:
                 #we don't have any avatar pic
                 pass
