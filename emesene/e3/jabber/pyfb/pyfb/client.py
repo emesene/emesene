@@ -53,7 +53,12 @@ class FacebookClient(object):
         if self.access_token is None:
             raise PyfbException("Must Be authenticated. Do you forgot to get the access token?")
 
-        token_url = "?access_token=%s" % self.access_token
+        if '?' in path:
+            token_url = "&"
+        else:
+            token_url = "?"
+
+        token_url = "%saccess_token=%s" % (token_url, self.access_token)
         url = "%s%s%s" % (self.GRAPH_URL, path, token_url)
         if data:
             post_data = urllib.urlencode(data)
@@ -160,7 +165,7 @@ class FacebookClient(object):
 
         return obj
 
-    def get_list(self, id, path, object_name=None):
+    def get_list(self, id, path, object_name=None, limit=None, offset=None):
         """
             Gets A list of objects
         """
@@ -169,6 +174,14 @@ class FacebookClient(object):
         if object_name is None:
             object_name = path
         path = "%s/%s" % (id, path.lower())
+        if not limit is None:
+            path = "%s?limit=%s" % (path, limit)
+        if not offset is None:
+            if not limit is None:
+                path = "%s&offset=%s" % (path, offset)
+            else:
+                path = "%s?offset=%s" % (path, offset)
+
         return self.get_one(path, object_name).__dict__[object_name]
 
     def push(self, id, path, **data):

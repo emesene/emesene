@@ -100,23 +100,23 @@ class Pyfb(object):
         """
         return self._client.get_list(id, "Friends")
 
-    def get_statuses(self, id=None):
+    def get_statuses(self, id=None, limit=None, offset=None):
         """
             Gets a list of status objects
         """
-        return self._client.get_list(id, "Statuses")
+        return self._client.get_list(id, "Statuses", limit=limit, offset=offset)
 
-    def get_photos(self, id=None):
+    def get_photos(self, id=None, limit=None, offset=None):
         """
             Gets a list of photos objects
         """
-        return self._client.get_list(id, "Photos")
+        return self._client.get_list(id, "Photos", limit=limit, offset=offset)
 
-    def get_comments(self, id=None):
+    def get_comments(self, id=None, limit=None, offset=None):
         """
             Gets a list of photos objects
         """
-        return self._client.get_list(id, "Comments")
+        return self._client.get_list(id, "Comments", limit=limit, offset=offset)
 
     def publish(self, message, id=None):
         """
@@ -130,11 +130,11 @@ class Pyfb(object):
         """
         self._client.push(id, "comments", message=message)
 
-    def get_likes(self, id=None):
+    def get_likes(self, id=None, limit=None, offset=None):
         """
             Get a list of liked objects
         """
-        return self._client.get_list(id, "likes")
+        return self._client.get_list(id, "likes", limit=limit, offset=offset)
 
     def like(self, id):
         """
