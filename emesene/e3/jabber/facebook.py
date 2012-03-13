@@ -109,7 +109,7 @@ class FacebookCLient(object):
             #strip last 'OR '
             orclause = orclause[0:len(orclause)-3]
             orclause = "%s ORDER BY created_time DESC" % orclause
-            query_message = self._client.fql_query("SELECT body, author_id, created_time FROM message %s" % orclause)
+            query_message = self._client.fql_query("SELECT body, author_id FROM message %s" % orclause)
             query_user = self._client.fql_query("SELECT name FROM user WHERE uid =  %s" % query_message[0].author_id)
             return (query_user[0].name, query_message[0].body)
         except PyfbException:
