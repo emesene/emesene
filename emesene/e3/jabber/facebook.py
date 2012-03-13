@@ -80,7 +80,7 @@ class FacebookCLient(object):
             try:
                 messages = self._client.get_statuses("me")
                 if len(messages) > 0:
-                    message = self._client.get_statuses("me")[0].message
+                    message = self._client.get_statuses("me", 1)[0].message
             except PyfbException, ex:
                 log.warn("couldn't get message " + str(ex))
         return message
