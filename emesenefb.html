@@ -1,0 +1,79 @@
+
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head> 
+    <meta name="viewport" content="width=320; user-scalable=no" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>PhoneGap</title>
+    <style type="text/css" media="screen">@import "css/iphonenav.css";</style> 
+    <script type="application/x-javascript" src="js/iphonenav.js"></script> 
+    <script type="text/javascript" charset="utf-8" src="js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/phonegap-1.0.0.js"></script>
+     <script type="text/javascript" charset="utf-8" src="js/pixastic.custom.js"></script>
+      <script type="text/javascript" charset="utf-8" src="js/slide.js"></script>  
+	  <script type="text/javascript" charset="utf-8" src="js/saveimage.js"></script>  
+    <script type="text/javascript" charset="utf-8">
+
+        function init() {
+            document.addEventListener("deviceready", showRecipe, true);
+        }
+
+        function getAttributes()
+        {
+            document.$_GET = [];
+            var urlHalves = String(document.location).split('#');
+            if(urlHalves[1]){
+                var urlVars = urlHalves[1].split('&');
+                for(var i = 0; i <= (urlVars.length); i++){
+                    if(urlVars[i]){
+                        var urlVarPair = urlVars[i].split('=');
+                        document.$_GET[urlVarPair[0]] = urlVarPair[1];
+                    }
+                }
+            }
+        }
+
+        function showRecipe() {
+            getAttributes();
+            document.getElementById('selectedReceipe').innerHTML = document.$_GET['access_token'];
+        }
+
+        function gotFS(fileSystem) {
+            fileSystem.root.getDirectory("LeMieRicette", {create: true, exclusive: false}, directoryFS, fail);
+        }
+
+        function directoryFS(fileSystem) {
+            fileSystem.getFile(document.$_GET['ricetta'], {create: true}, gotFileEntry, fail); 
+        }
+
+        function gotFileEntry(fileEntry) {
+            fileEntry.file(readRecipe, fail);
+        }
+
+        function readRecipe(file) {
+            var reader = new FileReader();
+            reader.onloadend = function(evt) {
+                console.log("read success");
+                console.log(evt.target.result);
+                document.getElementById('selectedReceipe').innerHTML = evt.target.result;
+            };
+            reader.readAsText(file);
+        }
+
+        function fail(err) {
+            alert("Error processing SQL: " + err.code);
+        }
+
+        function successCB() {
+            alert("success!");
+        }
+
+    </script>
+</head> 
+ 
+<body> 
+    <h1 id="pageTitle"></h1> 
+    <center><img src="emesenefb.png"/></center>
+    <center>Now Emesene is connected to your Facebook account!</center>
+</body> 
+</html> 
+
