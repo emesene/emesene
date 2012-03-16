@@ -27,7 +27,7 @@ log = logging.getLogger('jabber.facebook')
 
 API_KEY = "302582423085987"
 SECRET_KEY = "a36182c056595e7d5007c9f85e3ee6bc"
-REDIRECT_URL = "http://toworktogether.eu/emesenefb.html"
+REDIRECT_URL = "http://emesene.github.com/emesene/index.html"
 
 class FacebookCLient(object):
 
