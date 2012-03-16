@@ -374,7 +374,14 @@ def unescape(string_):
 
 def replace_time(match):
     '''replace the format of the time to it's value'''
-    return time.strftime(match.groups()[0])
+    #Python time function differs from adium time
+    #so we try to convert it but if that fails,
+    #we fallback to simple time
+    format = match.groups()[0]
+    result = time.strftime(match.groups()[0])
+    if result == format:
+        result = escape(time.strftime("%H:%M"))
+    return result
 
 def style_message(msgtext, style):
     '''add html markupt to msgtext to format the style of the message'''
