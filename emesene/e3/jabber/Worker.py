@@ -119,7 +119,7 @@ class Worker(e3.Worker):
         show = presence.getShow()
         account = presence.getFrom().getStripped()
 
-        if show == None:
+        if show is None:
             show = presence.getAttrs().get('type', 'chat')
 
         stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
@@ -298,7 +298,7 @@ class Worker(e3.Worker):
             return
 
         if self.client.auth(self.jid.getNode(),
-            self.session.account.password) == None:
+            self.session.account.password) is None:
             self.session.login_failed('Authentication error')
             return
         

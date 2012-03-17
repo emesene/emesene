@@ -179,7 +179,7 @@ class EmeseneSynch(Synch):
                 if found == 0:
                     new_account = self.__user_to_account(user[1])
 
-                    if(new_account == None):
+                    if new_account is None:
                         new_account = e3.base.Contact(user[1])
                         new_account = e3.Logger.Account.from_contact(new_account)
                         self._session.logger.log("status change", 0, new_account.nick, new_account)

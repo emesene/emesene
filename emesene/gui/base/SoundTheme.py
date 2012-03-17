@@ -50,13 +50,13 @@ class SoundTheme(MetaData):
         sound_data = plistlib.readPlist(file(sound_config_file))
         alert = sound_data['Sounds']['Error']
         nudge = sound_data['Sounds'].get('Notification received', None)
-        if nudge == None:
+        if nudge is None:
             nudge = sound_data['Sounds'].get('Message Received', None)
         offline = sound_data['Sounds']['Contact Signed Off']
         online = sound_data['Sounds']['Contact Signed On']
         send = sound_data['Sounds']['Message Sent']
         typing = sound_data['Sounds'].get('Message Received', None)
-        if typing == None:
+        if typing is None:
             typing = sound_data['Sounds'].get('Contact Invites You to Chat', None)
 
         self.sound_alert    = os.path.join(path, alert)

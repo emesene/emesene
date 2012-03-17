@@ -308,7 +308,7 @@ def open(url, desktop=get_desktop(), wait=0):
             return _run(["xdg-open", url] , 0, wait)
         except:
             # use webbrowser.open() where no suitable desktop was identified 
-            # ( cmd == None ) or fail to execute specified program ( raise Error )
+            # ( cmd is None ) or fail to execute specified program ( raise Error )
             webbrowser.open(url)
 
 

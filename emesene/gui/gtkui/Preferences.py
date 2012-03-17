@@ -294,7 +294,7 @@ class BaseTable(gtk.Table):
         """append a row to the table
         """
         increment_current_row = False
-        if row == None:
+        if row is None:
             row = self.current_row
             increment_current_row = True
 

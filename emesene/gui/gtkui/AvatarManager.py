@@ -95,8 +95,8 @@ class AvatarManager(gtk.Widget):
     def _set_pixbuf(self, pixbuf):
         '''set the pixbuf or crossfades to it'''
         if self.__should_replace(pixbuf):
-            if self._crossfade and not (self._pixbuf == None) \
-                and not (pixbuf == None):
+            if self._crossfade and not (self._pixbuf is None) \
+                and not (pixbuf is None):
                 self.transition_pixbuf = pixbuf
 
                 if self.fps < 1:

@@ -106,7 +106,7 @@ class WeakMethodBound(object):
         self.c = weakref.ref(f.im_self)
 
     def __call__(self, *arg):
-        if self.c() == None:
+        if self.c() is None:
             raise TypeError('Method called on dead object')
 
         self.f(self.c(), *arg)
@@ -117,7 +117,7 @@ class WeakMethodFree(object):
         self.f = weakref.ref(f)
 
     def __call__(self, *arg):
-        if self.f() == None:
+        if self.f() is None:
             raise TypeError('Function no longer exist')
 
         self.f()(*arg)

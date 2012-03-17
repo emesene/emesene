@@ -237,11 +237,11 @@ class FileTransferTooltip(gtk.Window):
 
         self.pointer_is_over_widget = False
 
-        self.__fileprev=None
+        self.__fileprev = None
 
     def add_label(self, l_string, left, right, top, bottom, label = None):
         ''' adds a label to the widget '''
-        if label == None:
+        if label is None:
             label = gtk.Label(l_string)
 
         label.set_alignment(0, 0)

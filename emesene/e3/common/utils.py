@@ -102,7 +102,7 @@ class AsyncAction(threading.Thread):
         self._callback(result)
 
     def is_finished(self):
-        return self._result == None
+        return self._result is None
 
     def get_result(self):
         return self._result

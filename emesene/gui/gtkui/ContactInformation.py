@@ -463,7 +463,7 @@ class ChatWidget(gtk.VBox):
             else:
                 contact = self.session.contacts.get(account)
 
-            if contact == None:
+            if contact is None:
                 contact = e3.Contact(account, nick=nick)
 
             if self.search_mode:
