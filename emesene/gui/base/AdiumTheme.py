@@ -227,6 +227,8 @@ class AdiumTheme(MetaData):
 
         template = template.replace('%message%', escape_no_xml(msg.message))
 
+        template = re.sub("%time{(.*?)}%", replace_time, template)
+
         if msg.timestamp is None:
             template = template.replace('%time%',
                 escape(time.strftime("%H:%M")))
@@ -239,7 +241,6 @@ class AdiumTheme(MetaData):
             template = template.replace('%time%',
                 escape(d_time.strftime('%x %X')))
 
-        template = re.sub("%time{(.*?)}%", replace_time, template)
         template = template.replace('%shortTime%',
             escape(time.strftime("%H:%M")))
         template = template.replace('%service%', escape(msg.service))
@@ -380,7 +381,7 @@ def replace_time(match):
     format = match.groups()[0]
     result = time.strftime(match.groups()[0])
     if result == format:
-        result = escape(time.strftime("%H:%M"))
+        result = '%time%'
     return result
 
 def style_message(msgtext, style):
