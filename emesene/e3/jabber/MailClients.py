@@ -180,10 +180,8 @@ class FacebookMail(MailClient):
         pass
 
     def new_mails(self):
-        try:
-            name, body = self._client.get_new_mail_info()
+        result = self._client.get_new_mail_info()
+        if not result is None:
+            name, body = result
             return MailMessage("", name, body, "", "")
-        except TypeError:
-            #we don't have any new emails
-            pass
 
