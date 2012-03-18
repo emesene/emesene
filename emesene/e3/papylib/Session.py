@@ -154,4 +154,6 @@ class Session(e3.Session):
     def session_has_service(self, service):
         '''returns True if some service is supported, False otherwise'''
         #papyon support ALL services
+        if service == Session.SERVICE_CALLS:
+            return False
         return True

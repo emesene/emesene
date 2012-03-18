@@ -91,12 +91,12 @@ class Session(e3.Session):
 
     def session_has_service(self, service):
         '''returns True if some service is supported, False otherwise'''
-        if service == Session.SERVICE_CONTACT_MANAGING or \
-            service == Session.SERVICE_CONTACT_BLOCK or \
-            service == Session.SERVICE_GROUP_MANAGING or \
-            service == Session.SERVICE_CONTACT_INVITE or \
-            service == Session.SERVICE_CALLS or \
-            service == Session.SERVICE_FILETRANSFER:
+        if service in [Session.SERVICE_CONTACT_MANAGING,
+                        Session.SERVICE_CONTACT_BLOCK,
+                        Session.SERVICE_GROUP_MANAGING,
+                        Session.SERVICE_CONTACT_INVITE,
+                        Session.SERVICE_CALLS,
+                        Session.SERVICE_FILETRANSFER]:
             return False
 
         if service == Session.SERVICE_PROFILE_PICTURE:
