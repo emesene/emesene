@@ -50,10 +50,7 @@ class Session(e3.Session):
                 port = 80
         elif host == "chat.facebook.com":
             self._is_facebook = True
-            try:
-                self.mail_client = FacebookMail(self)
-            except socket.error, sockerr:
-                log.warn("couldn't connect to mail server " + str(sockerr))
+            self.mail_client = FacebookMail(self)
 
         self.mail_client.register_handler('mailcount', self.mail_count_changed)
         self.mail_client.register_handler('mailnew', self.mail_received)
@@ -67,15 +64,10 @@ class Session(e3.Session):
 
     def start_mail_client(self):
         if self._is_facebook and self.config.get_or_set('b_fb_enable_integration', True):
-            self.facebook_client = facebook.FacebookCLient(self)
+            self.facebook_client = facebook.FacebookCLient(self, self.config.facebook_token)
             self.mail_client.facebook_client = self.facebook_client
-            if self.config.facebook_token is None:
-                self.facebook_client.request_permitions()
-            else:
-                #reuse token
-                self.activate_social_services(True)
         self.mail_client.start()
-        
+
     def stop_mail_client(self):
         self.mail_client.stop()
 
@@ -124,20 +116,3 @@ class Session(e3.Session):
         '''activates/deactivates social services if avariable in protocol'''
         if not self.facebook_client is None:
             self.facebook_client.set_token(self.config.facebook_token, active)
-
-    def process_social_integration(self):
-        '''Do social stuff'''
-        if not self.facebook_client is None and self.facebook_client.active:
-            if self.config.b_fb_status_download:
-                msg = self.facebook_client.message
-                nick = self.facebook_client.nick
-                if not (msg == self.contacts.me.message or nick == self.contacts.me.nick):
-                    self.contacts.me.message = msg
-                    self.contacts.me.nick = nick
-                    self.profile_get_succeed(nick, msg)
-            if self.config.b_fb_picture_download:
-                avatar_path = self.facebook_client.picture
-                if not (avatar_path is None or self.contacts.me.picture == avatar_path):
-                    self.contacts.me.picture = avatar_path
-                    self.picture_change_succeed(self.account.account, avatar_path)
-

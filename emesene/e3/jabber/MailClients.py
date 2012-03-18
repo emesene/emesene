@@ -163,7 +163,7 @@ class FacebookMail(MailClient):
     def on_run(self):
         if not self.facebook_client is None:
             ##sincronice facebook stuff
-            self._session.process_social_integration()
+            self.facebook_client.process_facebook_integration()
             if self._session.config.b_fb_mail_check:
                 new_count = self.facebook_client.get_unread_mail_count()
                 if self._count < new_count:

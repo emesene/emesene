@@ -31,7 +31,7 @@ REDIRECT_URL = "http://emesene.github.com/emesene/index.html"
 
 class FacebookCLient(object):
 
-    def __init__(self, session):
+    def __init__(self, session, token):
         self._session = session
         self._session.config.get_or_set('b_fb_mail_check', True)
         self._session.config.get_or_set('b_fb_status_download', False)
@@ -42,6 +42,11 @@ class FacebookCLient(object):
         self._nick = None
         self._avatar_cache = None
         self._avatar_path = None
+        if token is None:
+            self.request_permitions()
+        else:
+            #reuse old token
+            self.set_token(token, True)
 
     def request_permitions(self):
         conn_url = self._client.get_auth_url(REDIRECT_URL)
@@ -140,3 +145,20 @@ class FacebookCLient(object):
         return path
 
     picture = property(fget=_get_profile_pic, fset=None)
+
+    def process_facebook_integration(self):
+        '''Do social stuff'''
+        if self.active:
+            if self._session.config.b_fb_status_download:
+                msg = self.message
+                nick = self.nick
+                if not (msg == self._session.contacts.me.message or \
+                        nick == self._session.contacts.me.nick):
+                    self._session.contacts.me.message = msg
+                    self._session.contacts.me.nick = nick
+                    self._session.profile_get_succeed(nick, msg)
+            if self._session.config.b_fb_picture_download:
+                avatar_path = self.picture
+                if not (avatar_path is None or self._session.contacts.me.picture == avatar_path):
+                    self._session.contacts.me.picture = avatar_path
+                    self._session.picture_change_succeed(self._session.account.account, avatar_path)
