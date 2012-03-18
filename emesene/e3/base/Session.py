@@ -36,6 +36,10 @@ class Session(object):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
+    (SERVICE_CONTACT_MANAGING, SERVICE_CONTACT_BLOCK, SERVICE_CONTACT_INVITE,
+     SERVICE_GROUP_MANAGING, SERVICE_FILETRANSFER, SERVICE_CALLS,
+     SERVICE_PROFILE_PICTURE) = range(7)
+
     def __init__(self, id_=None, account=None):
         self.id_ = id_
 
@@ -265,6 +269,10 @@ class Session(object):
         '''activates/deactivates social services if avariable in protocol'''
         #XXX: override to add support
         pass
+
+    def session_has_service(self, service):
+        '''returns True if some service is supported, False otherwise'''
+        raise NotImplementedError('Not implemented')
 
     def send_typing_notification(self, cid):
         '''send typing notification to contact'''

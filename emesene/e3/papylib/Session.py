@@ -150,3 +150,8 @@ class Session(e3.Session):
             return False
             
         return (Membership.FORWARD & contacts[0].memberships)
+
+    def session_has_service(self, service):
+        '''returns True if some service is supported, False otherwise'''
+        #papyon support ALL services
+        return True

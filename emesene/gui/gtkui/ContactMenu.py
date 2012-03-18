@@ -16,6 +16,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import e3
 import gtk
 
 class ContactMenu(gtk.Menu):
@@ -27,7 +28,7 @@ class ContactMenu(gtk.Menu):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, handler):
+    def __init__(self, handler, session):
         """
         constructor
 
@@ -35,6 +36,7 @@ class ContactMenu(gtk.Menu):
         """
         gtk.Menu.__init__(self)
         self.handler = handler
+        self.session = session
 
         self.add = gtk.ImageMenuItem(gtk.STOCK_ADD)
         self.add.connect('activate',
@@ -102,14 +104,17 @@ class ContactMenu(gtk.Menu):
 
         self.set_unblocked()
 
-        self.append(self.add)
-        self.append(self.remove)
-        self.append(self.block)
-        self.append(self.unblock)
+        if self.session.session_has_service(e3.Session.SERVICE_CONTACT_MANAGING):
+            self.append(self.add)
+            self.append(self.remove)
+        if self.session.session_has_service(e3.Session.SERVICE_CONTACT_BLOCK):
+            self.append(self.block)
+            self.append(self.unblock)
         self.append(self.set_alias)
-        self.append(self.move_to_group)
-        self.append(self.copy_to_group)
-        self.append(self.remove_from_group)
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            self.append(self.move_to_group)
+            self.append(self.copy_to_group)
+            self.append(self.remove_from_group)
         self.append(self.account_to_clipboard)
         self.append(self.view_info)
 

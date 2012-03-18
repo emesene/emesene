@@ -94,6 +94,19 @@ class Session(e3.Session):
         ##FIXME: implement this
         pass
 
+    def session_has_service(self, service):
+        '''returns True if some service is supported, False otherwise'''
+        if service == Session.SERVICE_CONTACT_MANAGING or \
+            service == Session.SERVICE_CONTACT_BLOCK or \
+            service == Session.SERVICE_GROUP_MANAGING or \
+            service == Session.SERVICE_PROFILE_PICTURE or \
+            service == Session.SERVICE_CONTACT_INVITE or \
+            service == Session.SERVICE_CALLS or \
+            service == Session.SERVICE_FILETRANSFER:
+            return False
+
+        return True
+
     def request_attention(self, cid):
         '''request the attention of the contact'''
         account = self.account.account

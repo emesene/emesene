@@ -18,6 +18,7 @@
 
 import gtk
 
+import e3
 import gui
 import utils
 
@@ -186,21 +187,23 @@ class ConversationToolbar(gtk.Toolbar):
 
         self.add(self.emotes)
         self.add(self.nudge)
-        self.add(gtk.SeparatorToolItem())
 
-        self.add(self.invite)
-        if self.handler.session_filetransfer_supported():
+        if self.handler.session_service_supported(e3.Session.SERVICE_CONTACT_INVITE):
+            self.add(gtk.SeparatorToolItem())
+            self.add(self.invite)
+        if self.handler.session_service_supported(e3.Session.SERVICE_FILETRANSFER):
             self.add(self.invite_file_transfer)
         self.add(gtk.SeparatorToolItem())
 
-        if self.handler.session_call_supported():
+        if self.handler.session_service_supported(e3.Session.SERVICE_CALLS):
             self.add(self.invite_video_call)
             self.add(self.invite_audio_call)
             self.add(self.invite_av_call)
             self.add(gtk.SeparatorToolItem())
 
         self.add(self.clean)
-        self.add(self.ublock)
+        if self.handler.session_service_supported(e3.Session.SERVICE_CONTACT_BLOCK):
+            self.add(self.ublock)
         self.add(gtk.SeparatorToolItem())
         self.add(self.toggle_avatar)
 

@@ -32,7 +32,7 @@ class MainMenu(gtk.MenuBar):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, handlers, config):
+    def __init__(self, handlers, session):
         """
         constructor
 
@@ -52,11 +52,11 @@ class MainMenu(gtk.MenuBar):
         self.file.set_submenu(self.file_menu)
 
         self.actions = gtk.MenuItem(_('_Actions'))
-        self.actions_menu = ActionsMenu(self.handlers.actions_handler)
+        self.actions_menu = ActionsMenu(self.handlers.actions_handler, session)
         self.actions.set_submenu(self.actions_menu)
 
         self.options = gtk.MenuItem(_('_Options'))
-        self.options_menu = OptionsMenu(self.handlers.options_handler, config)
+        self.options_menu = OptionsMenu(self.handlers.options_handler, session.config)
         self.options.set_submenu(self.options_menu)
 
         self.help = gtk.MenuItem(_('_Help'))
@@ -106,7 +106,7 @@ class ActionsMenu(gtk.Menu):
     A widget that represents the Actions popup menu located on the main menu
     """
 
-    def __init__(self, handler):
+    def __init__(self, handler, session):
         """
         constructor
 
@@ -121,11 +121,11 @@ class ActionsMenu(gtk.Menu):
 
         self.contact = gtk.ImageMenuItem(_('_Contact'))
         self.contact.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
-        self.contact_menu = ContactsMenu(self.handler.contact_handler)
+        self.contact_menu = ContactsMenu(self.handler.contact_handler, session)
         self.contact.set_submenu(self.contact_menu)
         self.group = gtk.ImageMenuItem(_('_Group'))
         self.group.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.group_chat))
-        self.group_menu = GroupsMenu(self.handler.group_handler)
+        self.group_menu = GroupsMenu(self.handler.group_handler, session)
         self.group.set_submenu(self.group_menu)
         self.account = gtk.ImageMenuItem(_('_Account'))
         self.account.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))

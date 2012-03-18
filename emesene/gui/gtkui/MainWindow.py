@@ -140,10 +140,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         ContactMenu = extension.get_default('menu contact')
         GroupMenu = extension.get_default('menu group')
 
-        self.menu = MainMenu(handler, self.session.config)
+        self.menu = MainMenu(handler, self.session)
 
-        self.contact_menu = ContactMenu(contact_handler)
-        self.group_menu = GroupMenu(group_handler)
+        self.contact_menu = ContactMenu(contact_handler, self.session)
+        self.group_menu = GroupMenu(group_handler, self.session)
         self.contact_menu.show_all()
         self.group_menu.show_all()
 

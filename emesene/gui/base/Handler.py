@@ -499,17 +499,9 @@ class ConversationToolbarHandler(object):
         self.conversation = conversation
         self.theme = theme
 
-    def session_call_supported(self):
-        '''check if current session supports calls '''
-        user = self.session.account.account
-        current_service = self.session.config.d_user_service.get(user, 'msn')
-        return current_service in ['']
-
-    def session_filetransfer_supported(self):
-        '''check if current session supports file transfers '''
-        user = self.session.account.account
-        current_service = self.session.config.d_user_service.get(user, 'msn')
-        return current_service in ['msn']
+    def session_service_supported(self, service):
+        '''check if current session supports the service '''
+        return self.session.session_has_service(service)
 
     def on_font_selected(self):
         '''called when the Font button is selected'''
