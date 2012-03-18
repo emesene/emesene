@@ -158,30 +158,32 @@ class FacebookMail(MailClient):
         MailClient.__init__(self, session)
         self._count = 0
         self._session = session
-        self._client = session.facebook_client
+        self.facebook_client = session.facebook_client
 
     def on_run(self):
-        ##sincronice facebook stuff
-        self._session.process_social_integration()
-        if self._session.config.b_fb_mail_check:
-            new_count = self._client.get_unread_mail_count()
-            if self._count < new_count:
-                self._count = new_count
-                mail = self.new_mails()
-                self._handlers["mailnew"](mail)
-                self._handlers["mailcount"](new_count)
+        if not self.facebook_client is None:
+            ##sincronice facebook stuff
+            self._session.process_social_integration()
+            if self._session.config.b_fb_mail_check:
+                new_count = self.facebook_client.get_unread_mail_count()
+                if self._count < new_count:
+                    self._count = new_count
+                    mail = self.new_mails()
+                    self._handlers["mailnew"](mail)
+                    self._handlers["mailcount"](new_count)
 
     def on_initialize(self):
-        if self._session.config.b_fb_mail_check:
-            self._count = self._client.get_unread_mail_count()
+        if not self.facebook_client is None and self._session.config.b_fb_mail_check:
+            self._count = self.facebook_client.get_unread_mail_count()
             self._handlers["mailcount"](self._count)
 
     def on_end(self):
         pass
 
     def new_mails(self):
-        result = self._client.get_new_mail_info()
-        if not result is None:
-            name, body = result
-            return MailMessage("", name, body, "", "")
+        if not self.facebook_client is None:
+            result = self.facebook_client.get_new_mail_info()
+            if not result is None:
+                name, body = result
+                return MailMessage("", name, body, "", "")
 

@@ -30,6 +30,7 @@ class Session(e3.Session):
     def __init__(self, id_=None, account=None):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
+        self._is_facebook = False
         self.facebook_client = None
         self.mail_client = NullMail()
 
@@ -48,7 +49,7 @@ class Session(e3.Session):
             if use_http:
                 port = 80
         elif host == "chat.facebook.com":
-            self.facebook_client = facebook.FacebookCLient(self)
+            self._is_facebook = True
             try:
                 self.mail_client = FacebookMail(self)
             except socket.error, sockerr:
@@ -65,7 +66,9 @@ class Session(e3.Session):
             host, port))
 
     def start_mail_client(self):
-        if not self.facebook_client is None:
+        if self._is_facebook and self.config.get_or_set('b_fb_enable_integration', True):
+            self.facebook_client = facebook.FacebookCLient(self)
+            self.mail_client.facebook_client = self.facebook_client
             if self.config.facebook_token is None:
                 self.facebook_client.request_permitions()
             else:

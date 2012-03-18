@@ -1151,6 +1151,8 @@ class Facebook(BaseTable):
         self.session = session
 
         self.append_markup('<b>'+_('Facebook Integration:')+'</b>')
+        self.append_check(_('Enable Facebook integration'),
+                          'session.config.b_fb_enable_integration')
         self.append_check(_('Automatically check Facebook mail'),
                           'session.config.b_fb_mail_check')
         self.append_check(_('Automatically download Facebook status'),
@@ -1159,8 +1161,26 @@ class Facebook(BaseTable):
                           'session.config.b_fb_status_write')
         self.append_check(_('Automatically download profile photo'),
                           'session.config.b_fb_picture_download')
+        # box with help message
+        eventBox = gtk.EventBox()
+        eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))
+
+        markup = '<span foreground="black"> %s </span>'
+        noticelabel = gtk.Label()
+        text = _("<b>WARNING: This will reset your facebook token.\nemesene will ask you to login into facebook on next login</b>")
+        noticelabel.set_markup(markup % text)
+        eventBox.add(noticelabel)
+        self.append_row(eventBox, None)
+
+        self.add_button(_('Reset Facebook settings'), 0, 7,
+                self.reset_facebook_login, 0, 0)
 
         self.show_all()
+
+    def reset_facebook_login(self, button):
+        '''Reset facebook integration settings'''
+        self.session.config.avatar_url = None
+        self.session.config.facebook_token = None
 
 class PrivacySettings(gtk.VBox):
     ''' A panel to manage contacts for MSN '''
