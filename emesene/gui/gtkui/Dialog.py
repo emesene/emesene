@@ -905,7 +905,8 @@ class Dialog(object):
             windows.hide()
 
         savebutt.connect('clicked', save_profile)
-        avatarEventBox.connect("button-press-event", handler.on_set_picture_selected)
+        if handler.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
+            avatarEventBox.connect("button-press-event", handler.on_set_picture_selected)
 
         vbox0 = gtk.VBox()
 

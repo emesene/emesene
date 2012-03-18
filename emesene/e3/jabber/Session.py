@@ -99,11 +99,14 @@ class Session(e3.Session):
         if service == Session.SERVICE_CONTACT_MANAGING or \
             service == Session.SERVICE_CONTACT_BLOCK or \
             service == Session.SERVICE_GROUP_MANAGING or \
-            service == Session.SERVICE_PROFILE_PICTURE or \
             service == Session.SERVICE_CONTACT_INVITE or \
             service == Session.SERVICE_CALLS or \
             service == Session.SERVICE_FILETRANSFER:
             return False
+
+        if service == Session.SERVICE_PROFILE_PICTURE:
+            #return False if it's facebook, True otherwise
+            return (self.facebook_client is None)
 
         return True
 

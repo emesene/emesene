@@ -16,6 +16,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import e3
 import gtk
 import gui
 import extension
@@ -56,7 +57,8 @@ class ContactInfoList(gtk.VBox):
         #our avatar
         self.avatarBox = gtk.EventBox()
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.avatarBox.connect('button-press-event', self._on_avatar_click)
+        if self.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
+            self.avatarBox.connect('button-press-event', self._on_avatar_click)
 
         self.avatar = Avatar(cell_dimension=avatar_size)
         self.avatarBox.add(self.avatar)
