@@ -51,7 +51,8 @@ class FacebookClient(object):
             Don't forgot to get the access token before use it.
         """
         if self.access_token is None:
-            raise PyfbException("Must Be authenticated. Do you forgot to get the access token?")
+            raise self._make_exception("Must Be authenticated. Do you forgot to get the access token?",
+                                        "OAuthException")
 
         if '?' in path:
             token_url = "&"
@@ -134,7 +135,7 @@ class FacebookClient(object):
 
         if not "access_token" in data:
             ex = self.factory.make_object('Error', data)
-            raise PyfbException(ex.error.message)
+            raise self._make_exception(ex.error.message, ex.error.type)
 
         data = dict(parse_qsl(data))
         self.access_token = data.get('access_token')
@@ -161,7 +162,7 @@ class FacebookClient(object):
         obj = self._make_object(object_name, data)
 
         if hasattr(obj, 'error'):
-            raise PyfbException(obj.error.message)
+            raise self._make_exception(obj.error.message, obj.error.type)
 
         return obj
 
@@ -220,20 +221,36 @@ class FacebookClient(object):
         url_path = self._get_url_path({'query' : query, 'access_token' : self.access_token, 'format' : 'json'})
         url = "%s%s" % (self.FBQL_BASE_URL, url_path)
         data = self._make_request(url)
-
         if "error" in str(data):
             ex = self.factory.make_object('Error', data)
-            raise PyfbException(ex.error_msg)
+            etype = None
+            if hasattr(ex, "error_type"):
+                etype = ex.error_type
+            raise self._make_exception(ex.error_msg, etype)
         return self.factory.make_objects_list(table, data)
 
+    def _make_exception(self, message, etype=None):
+        """
+            make corresponding exception
+        """
+        if etype == "OAuthException":
+            return OAuthException(message)
+        else:
+            return PyfbException(message)
 
 class PyfbException(Exception):
     """
         A PyFB Exception class
     """
-
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
         return repr(self.value)
+
+class OAuthException(PyfbException):
+    """
+        A OAuth Exception class
+    """
+    def __init__(self, message):
+        PyfbException(message)

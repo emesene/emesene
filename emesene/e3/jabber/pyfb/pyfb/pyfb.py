@@ -6,7 +6,7 @@
 """
 
 import webbrowser
-from client import FacebookClient, PyfbException
+from client import FacebookClient, PyfbException, OAuthException
 
 class Pyfb(object):
     """
