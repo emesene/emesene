@@ -20,7 +20,7 @@
 
 import e3
 import os
-from pyfb.pyfb import Pyfb, PyfbException
+from pyfb.pyfb import Pyfb, PyfbException, OAuthException
 
 import logging
 log = logging.getLogger('jabber.facebook')
@@ -65,6 +65,8 @@ class FacebookCLient(object):
             try:
                 me = self._client.get_myself()
                 self._nick = me.name
+            except OAuthException:
+                self.request_permitions()
             except PyfbException, ex:
                 log.warn("couldn't get nick " + str(ex))
 
@@ -77,6 +79,8 @@ class FacebookCLient(object):
         if self.active and len(message)!= 0:
             try:
                 self._client.publish(message, "me")
+            except OAuthException:
+                self.request_permitions()
             except PyfbException, ex:
                 log.warn("couldn't publish message " + str(ex))
 
@@ -88,6 +92,8 @@ class FacebookCLient(object):
                 messages = self._client.get_statuses("me")
                 if len(messages) > 0:
                     message = self._client.get_statuses("me", 1)[0].message
+            except OAuthException:
+                self.request_permitions()
             except PyfbException, ex:
                 log.warn("couldn't get message " + str(ex))
         return message
@@ -101,6 +107,8 @@ class FacebookCLient(object):
             try:
                 qry = self._client.fql_query("SELECT unread_count FROM mailbox_folder WHERE folder_id = 0 and viewer_id = me()")
                 unread_count = qry[0].unread_count
+            except OAuthException:
+                self.request_permitions()
             except PyfbException, ex:
                 log.warn("couldn't get unread messages count " + str(ex))
 
@@ -119,6 +127,8 @@ class FacebookCLient(object):
             query_message = self._client.fql_query("SELECT body, author_id FROM message %s" % orclause)
             query_user = self._client.fql_query("SELECT name FROM user WHERE uid =  %s" % query_message[0].author_id)
             return (query_user[0].name, query_message[0].body)
+        except OAuthException:
+            self.request_permitions()
         except PyfbException:
             #we don't have any unread msg
             return None
@@ -138,6 +148,8 @@ class FacebookCLient(object):
                     self._avatar_path = os.path.join(self._avatar_cache.path, new_path)
                     self._session.config.avatar_url = avatar_url
                 path = self._avatar_path
+            except OAuthException:
+                self.request_permitions()
             except PyfbException:
                 #we don't have any avatar pic
                 pass
