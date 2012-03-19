@@ -24,7 +24,11 @@ from papyon.event.media import *
 import pygst
 pygst.require('0.10')
 
-import farsight
+try:
+    import farstream as farsight
+except ImportError: # Hello older systems
+    import farsight
+
 import gobject
 import gst
 import logging
