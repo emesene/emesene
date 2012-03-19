@@ -93,12 +93,24 @@ class ContactMenu(gtk.Menu):
             gtk.ICON_SIZE_MENU))
         self.view_info.connect('activate',
             lambda *args: self.handler.on_view_information_selected())
-            
+
         self.account_to_clipboard = gtk.ImageMenuItem(_('Copy mail to clipboard'))
         self.account_to_clipboard.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY,
             gtk.ICON_SIZE_MENU))
         self.account_to_clipboard.connect('activate',
             lambda *args: self.on_copy_account_to_clipboard())
+
+        self.nick_to_clipboard = gtk.ImageMenuItem(_('Copy nick to clipboard'))
+        self.nick_to_clipboard.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY,
+            gtk.ICON_SIZE_MENU))
+        self.nick_to_clipboard.connect('activate',
+            lambda *args: self.on_copy_nick_to_clipboard())
+
+        self.message_to_clipboard = gtk.ImageMenuItem(_('Copy personal message to clipboard'))
+        self.message_to_clipboard.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY,
+            gtk.ICON_SIZE_MENU))
+        self.message_to_clipboard.connect('activate',
+            lambda *args: self.on_copy_message_to_clipboard())
 
         self.set_unblocked()
 
@@ -110,15 +122,32 @@ class ContactMenu(gtk.Menu):
         self.append(self.move_to_group)
         self.append(self.copy_to_group)
         self.append(self.remove_from_group)
+        self.append(self.nick_to_clipboard)
+        self.append(self.message_to_clipboard)
         self.append(self.account_to_clipboard)
         self.append(self.view_info)
 
     def on_copy_account_to_clipboard(self):
         contact = self.handler.contact_list.get_contact_selected()
-        
+
         if contact:
             clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
             clipboard.set_text(contact.account)
+
+    def on_copy_nick_to_clipboard(self):
+        contact = self.handler.contact_list.get_contact_selected()
+
+        if contact:
+            clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
+            clipboard.set_text(contact.nick)
+
+    def on_copy_message_to_clipboard(self):
+        contact = self.handler.contact_list.get_contact_selected()
+
+        if contact:
+            clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
+            clipboard.set_text(contact.message)
+
 
     def on_move_to_group(self):
         self.update_submenus()
