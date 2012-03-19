@@ -48,8 +48,8 @@ class UserPanel(gtk.VBox):
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         if session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
             self.avatarBox.connect('button-press-event', self.on_avatar_click)
+            self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
         self.avatarBox.add(self.avatar)
-        self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
         self.avatarBox.set_border_width(4)
 
         self.avatar_path = self.config_dir.get_path("last_avatar")

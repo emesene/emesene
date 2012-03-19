@@ -55,11 +55,11 @@ class ContactInfoRotate(gtk.VBox):
         self.avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         if self.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
             self.avatarBox.connect('button-press-event', self._on_avatar_click)
+            self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
 
         self.avatar = Avatar(cell_dimension=avatar_size)
         self.avatarBox.add(self.avatar)
 
-        self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
         self.avatarBox.set_border_width(4)
 
         self.his_avatarBox = gtk.EventBox()

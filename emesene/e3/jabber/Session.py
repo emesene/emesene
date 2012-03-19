@@ -101,7 +101,7 @@ class Session(e3.Session):
 
         if service == Session.SERVICE_PROFILE_PICTURE:
             #return False if it's facebook, True otherwise
-            return (self.facebook_client is None)
+            return not self._is_facebook
 
         return True
 
