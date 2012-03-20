@@ -144,7 +144,11 @@ class UserPanel(gtk.VBox):
         self.avatarBox.show()
         self.nick.show()
         self.message.show()
-        self.status.show()
+        if self.session.session_has_service(e3.Session.SERVICE_STATUS):
+            self.status.show()
+        else:
+            self.status.hide()
+
         self.search.show()
         if self.userpanel_button:
             self.userpanel_button.show()
@@ -219,8 +223,9 @@ class UserPanel(gtk.VBox):
             self.on_message_change_succeed)
         self.session.signals.media_change_succeed.subscribe(
             self.on_media_change_succeed)
-        self.session.signals.status_change_succeed.subscribe(
-            self.on_status_change_succeed)
+        if self.session.session_has_service(e3.Session.SERVICE_STATUS):
+            self.session.signals.status_change_succeed.subscribe(
+                self.on_status_change_succeed)
         self.session.signals.contact_list_ready.subscribe(
             self.on_contact_list_ready)
         self.session.signals.picture_change_succeed.subscribe(
@@ -236,8 +241,9 @@ class UserPanel(gtk.VBox):
             self.on_message_change_succeed)
         self.session.signals.media_change_succeed.unsubscribe(
             self.on_media_change_succeed)
-        self.session.signals.status_change_succeed.unsubscribe(
-            self.on_status_change_succeed)
+        if self.session.session_has_service(e3.Session.SERVICE_STATUS):
+            self.session.signals.status_change_succeed.unsubscribe(
+                self.on_status_change_succeed)
         self.session.signals.contact_list_ready.unsubscribe(
             self.on_contact_list_ready)
         self.session.signals.picture_change_succeed.unsubscribe(

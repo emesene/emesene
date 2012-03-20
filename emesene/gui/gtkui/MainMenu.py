@@ -17,7 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
-
+import e3
 import gui
 import utils
 
@@ -48,7 +48,7 @@ class MainMenu(gtk.MenuBar):
         HelpMenu = extension.get_default('menu help')
 
         self.file = gtk.MenuItem(_('_File'))
-        self.file_menu = FileMenu(self.handlers.file_handler)
+        self.file_menu = FileMenu(self.handlers.file_handler, session)
         self.file.set_submenu(self.file_menu)
 
         self.actions = gtk.MenuItem(_('_Actions'))
@@ -73,7 +73,7 @@ class FileMenu(gtk.Menu):
     A widget that represents the File popup menu located on the main menu
     """
 
-    def __init__(self, handler):
+    def __init__(self, handler, session):
         """
         constructor
 
@@ -82,12 +82,14 @@ class FileMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        StatusMenu = extension.get_default('menu status')
-        self.status = gtk.ImageMenuItem(_('Status'))
-        self.status.set_image(gtk.image_new_from_stock(gtk.STOCK_CONVERT,
-            gtk.ICON_SIZE_MENU))
-        self.status_menu = StatusMenu(handler.on_status_selected)
-        self.status.set_submenu(self.status_menu)
+        if session and session.session_has_service(e3.Session.SERVICE_STATUS):
+            StatusMenu = extension.get_default('menu status')
+            self.status = gtk.ImageMenuItem(_('Status'))
+            self.status.set_image(gtk.image_new_from_stock(gtk.STOCK_CONVERT,
+                gtk.ICON_SIZE_MENU))
+            self.status_menu = StatusMenu(handler.on_status_selected)
+            self.status.set_submenu(self.status_menu)
+            self.append(self.status)
 
         self.disconnect = gtk.ImageMenuItem(gtk.STOCK_DISCONNECT)
         self.disconnect.connect('activate',
@@ -96,7 +98,6 @@ class FileMenu(gtk.Menu):
         self.quit.connect('activate',
             lambda *args: self.handler.on_quit_selected())
 
-        self.append(self.status)
         self.append(self.disconnect)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)

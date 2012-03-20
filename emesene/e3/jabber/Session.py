@@ -97,6 +97,7 @@ class Session(e3.Session):
                         Session.SERVICE_GROUP_MANAGING,
                         Session.SERVICE_CONTACT_INVITE,
                         Session.SERVICE_CALLS,
+                        Session.SERVICE_STATUS,
                         Session.SERVICE_FILETRANSFER]:
             return False
 

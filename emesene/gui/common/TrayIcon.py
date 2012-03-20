@@ -22,6 +22,7 @@ import gtk
 import time
 
 import extension
+import e3
 from e3 import status
 
 import gui
@@ -211,7 +212,8 @@ class MainMenu(gtk.Menu):
 
         self.append(self.hide_show_mainwindow)
         self.append(self.mute)
-        self.append(self.status)
+        if self.handler.session.session_has_service(e3.Session.SERVICE_STATUS):
+            self.append(self.status)
         self.append(self.list)
         self.append(self.disconnect)
         self.append(self.preferences)
