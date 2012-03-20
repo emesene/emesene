@@ -449,11 +449,6 @@ class Worker(e3.Worker):
                         avatar_path)
                 self.session.contacts.me.picture = avatar_path
 
-    def _handle_action_set_preferences(self, preferences):
-        '''handle Action.ACTION_SET_PREFERENCES
-        '''
-        pass
-
     def _handle_action_new_conversation(self, account, cid):
         '''handle Action.ACTION_NEW_CONVERSATION
         '''

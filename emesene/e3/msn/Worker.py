@@ -835,11 +835,6 @@ class Worker(e3.Worker):
         self.session.add_event(e3.Event.EVENT_PICTURE_CHANGE_SUCCEED,
                 self.session.account.account, picture_name)
 
-    def _handle_action_set_preferences(self, preferences):
-        '''handle e3.Action.ACTION_SET_PREFERENCES
-        '''
-        pass
-
     def _handle_action_new_conversation(self, account, cid):
         '''handle e3.Action.ACTION_NEW_CONVERSATION
         '''

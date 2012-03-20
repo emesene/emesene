@@ -1238,11 +1238,6 @@ class Worker(e3.base.Worker, papyon.Client):
             self.content_roaming.store(xml.sax.saxutils.escape(nick),
                     xml.sax.saxutils.escape(message), avatar)
 
-    def _handle_action_set_preferences(self, preferences):
-        '''handle Action.ACTION_SET_PREFERENCES
-        '''
-        pass
-
     def _handle_action_new_conversation(self, account, cid):
         ''' handle Action.ACTION_NEW_CONVERSATION '''
         # % { 'ci' : cid, 'acco' : account }

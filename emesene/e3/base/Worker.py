@@ -83,7 +83,7 @@ ACTIONS = (\
  'add group'        , 'remove group'     ,
  'set nick'         , 'set message'      ,
  'set media' ,
- 'set picture'      , 'set preferences'  ,
+ 'set picture'      ,
  'new conversation' , 'close conversation',
  'send message'     , 'conv invite',
  'ft invite', 'ft accept',
@@ -143,7 +143,6 @@ class Worker(threading.Thread):
         dah[Action.ACTION_SET_NICK] = self._handle_action_set_nick
         dah[Action.ACTION_SET_PICTURE] = self._handle_action_set_picture
         dah[Action.ACTION_SET_MEDIA] = self._handle_action_set_media
-        dah[Action.ACTION_SET_PREFERENCES] = self._handle_action_set_preferences
         dah[Action.ACTION_NEW_CONVERSATION] = \
             self._handle_action_new_conversation
         dah[Action.ACTION_CLOSE_CONVERSATION] = \
@@ -310,11 +309,6 @@ class Worker(threading.Thread):
 
         self.session.log('media change', contact.status, message,
             account)
-
-    def _handle_action_set_preferences(self, preferences):
-        '''handle Action.ACTION_SET_PREFERENCES
-        '''
-        pass
 
     def _handle_action_new_conversation(self, account, cid):
         '''handle Action.ACTION_NEW_CONVERSATION
