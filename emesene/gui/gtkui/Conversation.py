@@ -69,7 +69,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.header = Header(session, members)
         toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
             gui.theme, self)
-        self.toolbar = ConversationToolbar(toolbar_handler)
+        self.toolbar = ConversationToolbar(toolbar_handler, self.session)
         self.toolbar.set_property('can-focus', False)
         outputview_handler = gui.base.OutputViewHandler(self)
         self.output = OutputText(self.session.config, outputview_handler)
@@ -397,15 +397,20 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
         if not self.session.config.b_show_info:
-            self.toolbar.toggle_avatar.set_stock_id(gtk.STOCK_GO_FORWARD)
             self.toolbar.toggle_avatar.set_tooltip_text(_('Hide avatar'))
-            self.info.show()
-            self.session.config.b_show_info = True
         else:
-            self.toolbar.toggle_avatar.set_stock_id(gtk.STOCK_GO_BACK)
             self.toolbar.toggle_avatar.set_tooltip_text(_('Show avatar'))
-            self.info.hide()
-            self.session.config.b_show_info = False
+            
+        self.info.set_visible(not self.info.get_visible())
+        self.toolbar.toggle_avatar.set_stock_id(self.get_toggle_avatar_icon())
+        self.session.config.b_show_info = not self.session.config.b_show_info
+
+    def get_toggle_avatar_icon(self):
+        current_stock_id = self.toolbar.toggle_avatar.get_stock_id()
+        if current_stock_id == gtk.STOCK_GO_FORWARD:
+            return gtk.STOCK_GO_BACK
+        else:
+            return gtk.STOCK_GO_FORWARD
 
     def _on_avatarsize_changed(self, value):
         self.info._on_avatarsize_changed(value)
