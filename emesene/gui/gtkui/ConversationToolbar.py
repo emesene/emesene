@@ -31,7 +31,7 @@ class ConversationToolbar(gtk.Toolbar):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, handler):
+    def __init__(self, handler, session):
         """
         constructor
 
@@ -42,6 +42,7 @@ class ConversationToolbar(gtk.Toolbar):
         self.set_tooltips(True)
 
         self.handler = handler
+        self.session = session
 
         self.draw()
 
@@ -69,8 +70,6 @@ class ConversationToolbar(gtk.Toolbar):
         else:
             size = gtk.ICON_SIZE_LARGE_TOOLBAR
 
-        whsize = gtk.icon_size_lookup(size)
-
         self.settings = self.get_settings()
         self.settings.set_long_property('gtk-toolbar-icon-size', size, \
             'ConversationToolbar.py:37')
@@ -87,7 +86,6 @@ class ConversationToolbar(gtk.Toolbar):
             theme_tool_clean = utils.gtk_ico_image_load(image_theme.tool_clean, size)
             theme_tool_file_transfer = utils.gtk_ico_image_load(image_theme.tool_file_transfer, size)
             theme_tool_ublock = utils.gtk_ico_image_load(image_theme.tool_ublock, size)
-            theme_tool_toggle_avatar = gtk.STOCK_GO_FORWARD
         else:
             theme_tool_font = gtk.STOCK_SELECT_FONT
             theme_tool_font_color = gtk.STOCK_SELECT_COLOR
@@ -100,6 +98,10 @@ class ConversationToolbar(gtk.Toolbar):
             theme_tool_clean = gtk.STOCK_CLEAR
             theme_tool_file_transfer = gtk.STOCK_GO_UP
             theme_tool_ublock = gtk.STOCK_STOP
+
+        if self.session.config.b_avatar_on_left == self.session.config.b_show_info:
+            theme_tool_toggle_avatar = gtk.STOCK_GO_BACK
+        else:
             theme_tool_toggle_avatar = gtk.STOCK_GO_FORWARD
 
         theme_tool_call = utils.gtk_ico_image_load(image_theme.call, size)
