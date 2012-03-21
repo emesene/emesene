@@ -30,7 +30,7 @@ class DebugWindow(gtk.Window):
     def __init__(self, on_close_cb):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
         self.on_close_cb = on_close_cb
-        self.set_title("debug")
+        self.set_title(_('Debug'))
         self.connect("delete_event", self.on_delete)
         self.resize(800, 600)
         self.store = DebugStore()
@@ -49,13 +49,13 @@ class DebugWindow(gtk.Window):
 
         self.filter_entry = gtk.Entry()
         self.filter_level = gtk.combo_box_new_text()
-        self.filter_level.append_text("Debug")
-        self.filter_level.append_text("Info")
-        self.filter_level.append_text("Warning")
-        self.filter_level.append_text("Error")
-        self.filter_level.append_text("Critical")
+        self.filter_level.append_text(_('Debug'))
+        self.filter_level.append_text(_('Info'))
+        self.filter_level.append_text(_('Warning'))
+        self.filter_level.append_text(_('Error'))
+        self.filter_level.append_text(_('Critical'))
         self.filter_level.set_active(0)
-        self.filter_btn = gtk.Button("Filter")
+        self.filter_btn = gtk.Button(_("Filter"))
         self.filter_box.pack_start(self.filter_entry)
         self.filter_box.pack_start(self.filter_level, False)
         self.filter_box.pack_start(self.filter_btn, False)
@@ -84,8 +84,8 @@ class DebugWindow(gtk.Window):
         '''used when the filter button is clicked'''
         pattern = self.filter_entry.get_text()
         level = self.filter_level.get_active_text()
-        d = {'Debug':logging.DEBUG, 'Info': logging.INFO, 'Warning': logging.WARNING,
-                'Error':logging.ERROR, 'Critical':logging.CRITICAL}
+        d = {_('Debug'):logging.DEBUG, _('Info'): logging.INFO, _('Warning'): logging.WARNING,
+                _('Error'):logging.ERROR, _('Critical'):logging.CRITICAL}
         levelno = d[level]
         self.view.filter_caller(pattern, levelno)
 
