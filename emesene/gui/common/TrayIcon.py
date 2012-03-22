@@ -194,6 +194,9 @@ class MainMenu(gtk.Menu):
         self.quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit.connect('activate',
             lambda *args: self.handler.on_quit_selected())
+        self.preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
+        self.preferences.connect('activate',
+            lambda *args: self.handler.on_preferences_selected())
 
         self.unmute_label = _('Unmute sounds')
         self.unmute_stock = gtk.STOCK_MEDIA_PLAY
@@ -211,6 +214,7 @@ class MainMenu(gtk.Menu):
         self.append(self.status)
         self.append(self.list)
         self.append(self.disconnect)
+        self.append(self.preferences)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)
 

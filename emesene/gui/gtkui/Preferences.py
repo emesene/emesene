@@ -572,6 +572,10 @@ class MainWindow(BaseTable):
             button = self.append_check(_('Show dock icon (requires restart of emesene)'),
                          'session.config.b_show_dock_icon')
             button.connect("toggled", do_hideshow)
+            self.session.config.get_or_set('b_hide_menu', True)    
+            button = self.append_check(_('Hide menu'),
+                         'session.config.b_hide_menu')
+
 
         self.show_all()
 

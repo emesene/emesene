@@ -150,7 +150,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def show(self):
         '''show the widget'''
         gtk.VBox.show(self)
-        self.menu.show_all()
+        if not self.session.config.b_hide_menu:
+            self.menu.show_all() 
         self.panel.show()
         self.contact_list.show()
         self.below_menu.show()
