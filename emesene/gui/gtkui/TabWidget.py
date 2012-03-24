@@ -64,13 +64,15 @@ class TabWidget(gtk.HBox):
             conversation)
 
         if CLOSE_ON_LEFT:
-            self.pack_start(self.close, False, False, 0)
+            if self.session.config.get_or_set('b_close_button_on_tabs', True):
+                self.pack_start(self.close, False, False, 0)
             self.pack_start(self.image, False, False, 0)
             self.pack_start(self.label, True, True, 0)
         else:
             self.pack_start(self.image, False, False, 0)
             self.pack_start(self.label, True, True, 0)
-            self.pack_start(self.close, False, False, 0)
+            if self.session.config.get_or_set('b_close_button_on_tabs', True):
+                self.pack_start(self.close, False, False, 0)
 
         if self.session.config.i_tab_position > 1:
             self.set_orientation(gtk.ORIENTATION_VERTICAL)

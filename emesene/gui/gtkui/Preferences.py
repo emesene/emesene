@@ -655,6 +655,8 @@ class ConversationWindow(BaseTable):
             'session.config.b_show_info')
         self.append_check(_('Show conversation toolbar'),
             'session.config.b_show_toolbar')
+        self.append_check(_('Show close button on tabs'),
+            'session.config.b_close_button_on_tabs')
         self.append_check(_('Enable escape hotkey to close tabs'),
             'session.config.b_escape_hotkey')
         # small-toolbar sensitivity depends on conversation toolbar visibility
