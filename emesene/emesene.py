@@ -61,7 +61,7 @@ os.chdir(os.path.abspath(project_path()))
 import gettext
 import locale
 default_locale = locale.getdefaultlocale()[0]
-lang = os.environ['LANGUAGE'] or default_locale
+lang = os.getenv('LANGUAGE') or default_locale
 translation = gettext.NullTranslations()
 locales_path = 'po/' if os.path.exists('po/') else None
 
