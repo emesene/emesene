@@ -56,27 +56,30 @@ def project_path():
 
 os.chdir(os.path.abspath(project_path()))
 
+
+# load translations
 import gettext
 import locale
-# load translations
-lang = os.environ['LANGUAGE'] or locale.getdefaultlocale()[0]
-print lang
+default_locale = locale.getdefaultlocale()[0]
+lang = os.environ['LANGUAGE'] or default_locale
+translation = gettext.NullTranslations()
+locales_path = 'po/' if os.path.exists('po/') else None
+
 if os.path.exists('default.mo'):
-    gettext.GNUTranslations(open('default.mo')).install()
-elif os.path.exists('po/'):
-    try:
-        gettext.translation('emesene', localedir='po/', \
-                            languages=[lang]).install()
-    except IOError:
-        gettext.translation('emesene', localedir='po/', \
-                            languages=[locale.getdefaultlocale()[0]]).install()
+    translation = gettext.GNUTranslations(open('default.mo'))
 else:
     try:
-        gettext.translation('emesene', \
-                            languages=[lang]).install()
+        translation = gettext.translation('emesene', localedir=locales_path, \
+                                          languages=[lang])
     except IOError:
-        gettext.translation('emesene', localedir='po/', \
-                            languages=[locale.getdefaultlocale()[0]]).install()
+        try:
+            translation = gettext.translation('emesene', \
+                                              localedir=locales_path, \
+                                              languages=[default_locale])
+        except IOError:
+            pass
+
+translation.install()
 
 
 import glib
