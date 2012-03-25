@@ -262,7 +262,7 @@ class FileTransferTooltip(gtk.Window):
             return
 
         if self.transfer.preview is not None:
-            if(self.__fileprev==None):
+            if self.__fileprev is None:
                 self.__fileprev=tempfile.mkstemp(prefix=hashlib.md5(self.transfer.preview).hexdigest(), 
                                                  suffix=hashlib.md5(self.transfer.preview).hexdigest())[1]
 
