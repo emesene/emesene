@@ -719,6 +719,7 @@ class Controller(object):
                 self.session.conversation_managers.append(conv_manager)
 
                 if self.session.config.b_conv_minimized and other_started:
+                    window.iconify()
                     window.show()
                     window.iconify()
                 else:
