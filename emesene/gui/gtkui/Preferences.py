@@ -643,6 +643,7 @@ class ConversationWindow(BaseTable):
         self.session.config.get_or_set('b_toolbar_small', False)
         self.session.config.get_or_set('b_conversation_tabs', True)
         self.session.config.get_or_set('b_escape_hotkey', True)
+        self.session.config.get_or_set('b_close_button_on_tabs', True)
         self.append_check(_('Tabbed Conversations'),
                 'session.config.b_conversation_tabs')
         self.append_row(self.tab_pos_cb)
