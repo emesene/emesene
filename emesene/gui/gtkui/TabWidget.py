@@ -55,9 +55,13 @@ class TabWidget(gtk.HBox):
         self.session = conversation.session
         self.mozilla_like = mozilla_like
         self.image = gtk.Image()
-        self.label = Renderers.SmileyLabel()
-        self.label.set_ellipsize(True)
-        self.label.set_text(text)
+        self.label = gtk.EventBox()
+        self.label.connect('button-press-event', self.on_tab_clicked, on_close_clicked, conversation)
+        self.label.set_visible_window(False)
+        self._label = Renderers.SmileyLabel()
+        self._label.set_ellipsize(True)
+        self._label.set_text(text)
+        self.label.add(self._label)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
         self.close.set_tooltip_text(_('Close Tab (Ctrl+W)'))
         self.close.connect('clicked', on_close_clicked,
@@ -76,16 +80,16 @@ class TabWidget(gtk.HBox):
 
         if self.session.config.i_tab_position > 1:
             self.set_orientation(gtk.ORIENTATION_VERTICAL)
-            self.label.set_angle(90)
+            self._label.set_angle(90)
         else:
             self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
-            self.label.set_angle(0)
+            self._label.set_angle(0)
 
         self.session.config.subscribe(self.on_tab_position_change,'i_tab_position')
 
         self.image.show()
         self.label.show()
-        #self.close.show()
+        self._label.show()
 
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self.on_tab_position_change,'i_tab_position')
@@ -102,14 +106,18 @@ class TabWidget(gtk.HBox):
 
     def set_text(self, text):
         '''set the text of the label'''
-        self.label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(text)))
+        self._label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(text)))
         if self.mozilla_like:
             self.set_size_request(235, 18) # Empiric measures.
 
     def on_tab_position_change(self, position):
         if self.session.config.i_tab_position > 1:
             self.set_orientation(gtk.ORIENTATION_VERTICAL)
-            self.label.set_angle(90)
+            self._label.set_angle(90)
         else:
             self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
-            self.label.set_angle(0)
+            self._label.set_angle(0)
+
+    def on_tab_clicked(self, widget, event, close_function, conv):
+        if event.button == 2:
+            close_function(widget, conv)
