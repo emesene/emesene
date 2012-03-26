@@ -43,11 +43,11 @@ class ContactInfoList(gtk.VBox):
         #layout
         self._first = None
         self._last = None
-        self._first_alig = gtk.Alignment(xalign=0.5, yalign=0.0, xscale=1.0,
-            yscale=0.0)
+        self._first_alig = gtk.Alignment(xalign=0.5, yalign=0.0, 
+                                         xscale=1.0, yscale=0.0)
         self._last_alig = None
-        self._last_alig = gtk.Alignment(xalign=0.5, yalign=1.0, xscale=0.0,
-            yscale=0.0)
+        self._last_alig = gtk.Alignment(xalign=0.5, yalign=1.0, 
+                                        xscale=0.0, yscale=0.0)
         self.pack_start(self._first_alig)
         self.pack_end(self._last_alig)
 
@@ -78,7 +78,8 @@ class ContactInfoList(gtk.VBox):
         #contact's avatar if single chat
         self.his_avatarBox = gtk.EventBox()
         self.his_avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.his_avatarBox.connect('button-press-event', self._on_his_avatar_click)
+        self.his_avatarBox.connect('button-press-event',
+                                    self._on_his_avatar_click)
 
         self.his_avatar = Avatar(cell_dimension=avatar_size)
         self.his_avatarBox.add(self.his_avatar)
@@ -105,8 +106,11 @@ class ContactInfoList(gtk.VBox):
         column.add_attribute(status, 'pixbuf', 3)
         self._contact_list.append_column(column)
         self.tooltips = Tooltips.Tooltips()
-        self._contact_list.connect('motion-notify-event', self.tooltips.on_motion)
-        self._contact_list.connect('leave-notify-event', self.tooltips.on_leave)
+        self._contact_list.connect('motion-notify-event', 
+                                   self.tooltips.on_motion)
+
+        self._contact_list.connect('leave-notify-event', 
+                                   self.tooltips.on_leave)
 
         if len(members) == 1:
             self.update_single(members)
@@ -163,8 +167,8 @@ class ContactInfoList(gtk.VBox):
         self.avatarBox.remove(self.avatar)
         self.his_avatarBox.remove(self.his_avatar)
 
-        self.avatar.set_property('dimension',value)
-        self.his_avatar.set_property('dimension',value)
+        self.avatar.set_property('dimension', value)
+        self.his_avatar.set_property('dimension', value)
 
         self.avatarBox.add(self.avatar)
         self.his_avatarBox.add(self.his_avatar)
@@ -187,25 +191,26 @@ class ContactInfoList(gtk.VBox):
         if contact and contact.picture:
             his_picture = contact.picture
         self.his_avatar.set_from_file(his_picture)
-        self._first_alig.set(0.5,0.0,1.0,0.0)
-        self.set_size_request(-1,-1)
+        self._first_alig.set(0.5, 0.0, 1.0, 0.0)
+        self.set_size_request(-1, -1)
         self.first = self.his_avatarBox
 
     def update_group(self, members):
         ''' sets the contacts list instead of a contact's avatar '''
         self._contact_list.set_model(None)
         del self._model
-        self._model = gtk.ListStore(gtk.gdk.Pixbuf, object, str, gtk.gdk.Pixbuf)
+        self._model = gtk.ListStore(gtk.gdk.Pixbuf, object, 
+                                    str, gtk.gdk.Pixbuf)
         self.members = members
         for member in self.members:
             contact = self.session.contacts.get(member)
             picture = contact.picture or gui.theme.image_theme.user
-            contact_data = (utils.safe_gtk_pixbuf_load(picture,(15,15)),
+            contact_data = (utils.safe_gtk_pixbuf_load(picture, (15, 15)),
               contact, contact.nick, utils.safe_gtk_pixbuf_load(
-              gui.theme.image_theme.status_icons[contact.status],(15,15)))
+              gui.theme.image_theme.status_icons[contact.status], (15, 15)))
             self._model.append(contact_data)
             self._contact_list.set_model(self._model)
         self._contact_list.show_all()
-        self._first_alig.set(0.5,0.0,1.0,2.0)
+        self._first_alig.set(0.5, 0.0, 1.0, 2.0)
         self.first = self._contact_list
-        self.set_size_request(200,-1)
+        self.set_size_request(200, -1)
