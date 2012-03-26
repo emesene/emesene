@@ -69,15 +69,22 @@ if os.path.exists('default.mo'):
     translation = gettext.GNUTranslations(open('default.mo'))
 else:
     try:
+        #try with LANGUAGE variable
         translation = gettext.translation('emesene', localedir=locales_path, \
                                           languages=[lang])
     except IOError:
         try:
+            #try with Python's locale module
             translation = gettext.translation('emesene', \
                                               localedir=locales_path, \
                                               languages=[default_locale])
         except IOError:
-            pass
+            #let gettext handle the language
+            try:
+                translation = gettext.translation('emesene', \
+                                              localedir=locales_path)
+            except IOError:
+                pass
     except AttributeError:
         pass
 
