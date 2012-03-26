@@ -78,6 +78,8 @@ else:
                                               languages=[default_locale])
         except IOError:
             pass
+    except AttributeError:
+        pass
 
 translation.install()
 
