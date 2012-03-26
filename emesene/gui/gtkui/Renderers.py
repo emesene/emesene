@@ -136,7 +136,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                     decorated_markup = self.function(self.markup, False)
                 except Exception, error: #We really want to catch all exceptions
                     log.error("Even stripping plus markup doesn't help. Error: %s" % error)
-
                     decorated_markup = self.markup
 
             layout.set_text(decorated_markup)
@@ -211,7 +210,7 @@ class SmileyLayout(pango.Layout):
                  parsed_elements_list = None,
                  color = None,
                  override_color = None,
-                 scaling=1.0):
+                 scaling = 1.0):
         pango.Layout.__init__(self, context)
 
         self._width = -1
@@ -291,7 +290,6 @@ class SmileyLayout(pango.Layout):
         self._update_attrlists()
 
     def _update_base(self, elements_list=None):
-
         if elements_list is None:
             elements_list = ['']
 
@@ -303,6 +301,10 @@ class SmileyLayout(pango.Layout):
             elements_list = [elements_list]
 
         for element in elements_list:
+            _element = ''
+            for c in element:
+                _element += c
+            element = element
             if isinstance(element, basestring):
                 try:
                     attrl, ptxt, unused = pango.parse_markup(element, u'\x00')
@@ -315,7 +317,6 @@ class SmileyLayout(pango.Layout):
 
                 while True:
                     attrs = itter.get_attrs()
-
                     for attr in attrs:
                         attr.end_index += shift
                         attr.start_index += shift
