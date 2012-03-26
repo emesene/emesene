@@ -301,10 +301,13 @@ class SmileyLayout(pango.Layout):
             elements_list = [elements_list]
 
         for element in elements_list:
+            # this is a weird fix for the weird warning on issue 1094
             _element = ''
             for c in element:
                 _element += c
             element = element
+            # don't remove it
+            
             if isinstance(element, basestring):
                 try:
                     attrl, ptxt, unused = pango.parse_markup(element, u'\x00')
