@@ -243,8 +243,12 @@ class Controller(object):
         #needed to check for autologin
         self.emesene_is_running = False
         try:
-            import SingleInstance
-            self.single_instance = SingleInstance.SingleInstance()
+            if os.name == 'posix':
+                from SingleInstance import SingleInstancePosix as SingleInstance
+            else:
+                from SingleInstance import SingleInstanceWin32 as SingleInstance
+
+            self.single_instance = SingleInstance()
             if self.single_instance.emesene_is_running():
                 self.emesene_is_running = True
                 # try to show the instance that's already running
