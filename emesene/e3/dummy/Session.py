@@ -56,6 +56,7 @@ class Session(e3.Session):
         '''returns True if some service is supported, False otherwise'''
         if service in [Session.SERVICE_CONTACT_MANAGING,
                         Session.SERVICE_CONTACT_BLOCK,
+                        Session.SERVICE_CONTACT_ALIAS,
                         Session.SERVICE_GROUP_MANAGING,
                         Session.SERVICE_CONTACT_INVITE,
                         Session.SERVICE_CALLS,
