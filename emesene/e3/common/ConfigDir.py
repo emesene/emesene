@@ -61,8 +61,12 @@ class ConfigDir(object):
     def _get_default_base_dir(self):
         '''return the default base dir for configuration according to the OS'''
         if sys.platform == 'linux2' or sys.platform == 'linux3':
-            return os.path.expanduser(os.path.join('~', '.config',
-                self.app_name))
+            xdg_dir = os.environ['XDG_CONFIG_HOME']
+            if xdg_dir is not None:
+                return os.path.join(xdg_dir, self.app_name)
+            else:
+                return os.path.expanduser(os.path.join('~', '.config',
+                    self.app_name))
         elif sys.platform == 'win32':
             return os.path.expanduser(os.path.join(os.environ['APPDATA'], 'emesene',
                 self.app_name))
