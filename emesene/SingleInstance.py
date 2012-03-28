@@ -34,7 +34,7 @@ class SingleInstancePosix:
 
         try:
             import dbus, dbus.service
-            self.have_dbus = False
+            self.have_dbus = True
         except ImportError:
             self.have_dbus = False
 
