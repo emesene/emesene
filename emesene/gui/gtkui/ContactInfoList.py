@@ -79,7 +79,7 @@ class ContactInfoList(gtk.VBox):
         self.his_avatarBox = gtk.EventBox()
         self.his_avatarBox.set_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.his_avatarBox.connect('button-press-event',
-                                    self._on_his_avatar_click)
+                                   self._on_his_avatar_click)
 
         self.his_avatar = Avatar(cell_dimension=avatar_size)
         self.his_avatarBox.add(self.his_avatar)

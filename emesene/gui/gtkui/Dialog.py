@@ -290,11 +290,17 @@ class Dialog(object):
         chooser.set_current_folder(current_path)
         setattr(window, 'chooser', chooser)
         window.hbox.pack_start(chooser)
-        chooser.connect("file-activated", cls.on_file_click_cb, window, response_cb)
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
-            cls.chooser_cb)
-        cls.add_button(window, gtk.STOCK_OPEN, stock.OPEN, response_cb,
-            cls.chooser_cb)
+        chooser.connect("file-activated", 
+                        cls.on_file_click_cb, 
+                        window, response_cb)
+
+        cls.add_button(window, gtk.STOCK_CANCEL, 
+                       stock.CANCEL, response_cb,
+                       cls.chooser_cb)
+
+        cls.add_button(window, gtk.STOCK_OPEN, 
+                       stock.OPEN, response_cb,
+                       cls.chooser_cb)
 
         window.show_all()
 
@@ -906,7 +912,8 @@ class Dialog(object):
 
         savebutt.connect('clicked', save_profile)
         if handler.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
-            avatarEventBox.connect("button-press-event", handler.on_set_picture_selected)
+            avatarEventBox.connect("button-press-event", 
+                                   handler.on_set_picture_selected)
 
         vbox0 = gtk.VBox()
 
@@ -928,8 +935,10 @@ class Dialog(object):
         class TableText(gtk.Alignment):
             '''class that implements selectable labels aligned to the left'''
             def __init__(self, text):
-                gtk.Alignment.__init__(self, xalign=0.0, yalign=0.0, xscale=0.0,
-                                       yscale=0.0)
+                gtk.Alignment.__init__(self, 
+                                       xalign=0.0, yalign=0.0, 
+                                       xscale=0.0, yscale=0.0)
+
                 self.label = gtk.Label(text)
                 self.label.set_selectable(True)
                 self.add(self.label)

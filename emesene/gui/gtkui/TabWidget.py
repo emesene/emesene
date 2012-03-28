@@ -46,7 +46,8 @@ class TabWidget(gtk.HBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, text, on_tab_menu, on_close_clicked, conversation, mozilla_like):
+    def __init__(self, text, on_tab_menu, 
+                 on_close_clicked, conversation, mozilla_like):
         '''constructor'''
         gtk.HBox.__init__(self)
         self.set_border_width(0)
@@ -56,7 +57,8 @@ class TabWidget(gtk.HBox):
         self.mozilla_like = mozilla_like
         self.image = gtk.Image()
         self.label = gtk.EventBox()
-        self.label.connect('button-press-event', self.on_tab_clicked, on_close_clicked, conversation)
+        self.label.connect('button-press-event', self.on_tab_clicked,
+                           on_close_clicked, conversation)
         self.label.set_visible_window(False)
         self._label = Renderers.SmileyLabel()
         self._label.set_ellipsize(True)
@@ -85,14 +87,16 @@ class TabWidget(gtk.HBox):
             self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
             self._label.set_angle(0)
 
-        self.session.config.subscribe(self.on_tab_position_change,'i_tab_position')
+        self.session.config.subscribe(self.on_tab_position_change, 
+                                      'i_tab_position')
 
         self.image.show()
         self.label.show()
         self._label.show()
 
     def remove_subscriptions(self):
-        self.session.config.unsubscribe(self.on_tab_position_change,'i_tab_position')
+        self.session.config.unsubscribe(self.on_tab_position_change, 
+                                        'i_tab_position')
 
     def set_image(self, path):
         '''set the image from path'''

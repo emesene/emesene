@@ -202,8 +202,8 @@ class Preferences(gtk.Window):
                 LIST.append({'stock_id' : gtk.STOCK_NETWORK,
                                  'text' : _('Live Messenger')})
                 self.listStore.append([self.render_icon(gtk.STOCK_NETWORK,
-                                       gtk.ICON_SIZE_LARGE_TOOLBAR),
-                                       _('Live Messenger')])
+                                      gtk.ICON_SIZE_LARGE_TOOLBAR),
+                                      _('Live Messenger')])
             self.msn_papylib = MSNPapylib(self.session)
             self.msn_papylib_page = self.msn_papylib
             self.page_dict.append(self.msn_papylib_page)
@@ -218,8 +218,8 @@ class Preferences(gtk.Window):
                 LIST.append({'stock_id' : gtk.STOCK_NETWORK,
                                  'text' : _('Facebook')})
                 self.listStore.append([self.render_icon(gtk.STOCK_NETWORK,
-                                       gtk.ICON_SIZE_LARGE_TOOLBAR),
-                                       _('Facebook')])
+                                      gtk.ICON_SIZE_LARGE_TOOLBAR),
+                                      _('Facebook')])
             self.facebook = Facebook(self.session)
             self.facebook_page = self.facebook
             self.page_dict.append(self.facebook_page)
@@ -239,7 +239,7 @@ class Preferences(gtk.Window):
             # we should use always the same icon size,
             # we can remove that field in LIST
             self.listStore.append([self.render_icon(i['stock_id'],
-                             gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
+                                  gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
 
     def _on_row_activated(self,treeview):
         # Get information about the row that has been selected
@@ -265,14 +265,16 @@ class BaseTable(gtk.Table):
 
         self.current_row = 0
 
-    def add_text(self, text, column, row, align_left=False, line_wrap=True):
+    def add_text(self, text, column, row, 
+                 align_left=False, line_wrap=True):
         """add a label with thext to row and column, align the text left if
         align_left is True
         """
         label = gtk.Label(text)
         self.add_label(label, column, row, align_left)
 
-    def add_label(self, label, column, row, align_left=False, line_wrap=True):
+    def add_label(self, label, column, row,
+                  align_left=False, line_wrap=True):
         """add a label with thext to row and column, align the text left if
         align_left is True
         """
@@ -282,7 +284,9 @@ class BaseTable(gtk.Table):
         label.set_line_wrap(line_wrap)
         self.attach(label, column, column + 1, row, row + 1, yoptions=0)
 
-    def add_button(self, text, column, row, on_click, xoptions=gtk.EXPAND|gtk.FILL, yoptions=gtk.EXPAND|gtk.FILL):
+    def add_button(self, text, column, row, 
+                   on_click, xoptions=gtk.EXPAND|gtk.FILL, 
+                   yoptions=gtk.EXPAND|gtk.FILL):
         """add a button with text to the row and column, connect the clicked
         event to on_click"""
         button = gtk.Button(text)
@@ -370,7 +374,8 @@ class BaseTable(gtk.Table):
         self.append_row(widget, row)
         return widget
 
-    def append_range(self, text, property_name, min_val, max_val,is_int=True):
+    def append_range(self, text, property_name, 
+                     min_val, max_val,is_int=True):
         """append a row with a scale to select an integer value between
         min and max
         """
@@ -393,8 +398,8 @@ class BaseTable(gtk.Table):
         hbox.pack_start(label, True, True)
         hbox.pack_start(scale, False)
 
-        scale.connect('button_release_event', self.on_range_changed, property_name,
-                is_int)
+        scale.connect('button_release_event', self.on_range_changed,
+                      property_name, is_int)
 
         self.append_row(hbox, None)
 
@@ -414,17 +419,24 @@ class BaseTable(gtk.Table):
 
         combo.set_active(default_count)
 
-    def create_combo (self, getter, property_name, values=None, changed_cb = None):
+    def create_combo (self, getter, property_name,
+                      values=None, changed_cb = None):
+
         combo = gtk.combo_box_new_text()
         self.fill_combo(combo, getter, property_name, values)
         if changed_cb:
-            combo.connect('changed', changed_cb, property_name, values)
+            combo.connect('changed', changed_cb, 
+                          property_name, values)
         else:
-            combo.connect('changed', self.on_combo_changed, property_name, values)
+            combo.connect('changed', self.on_combo_changed,
+                          property_name, values)
         return combo
 
-    def create_combo_with_label(self, text, getter, property_name,values=None, changed_cb = None):
-        """creates and return a new ComboBox with a label and append values to the combo
+    def create_combo_with_label(self, text, 
+                                getter, property_name, 
+                                values=None, changed_cb = None):
+        """creates and return a new ComboBox with a label and append 
+           values to the combo
         """
         hbox = gtk.HBox()
         hbox.set_homogeneous(True)
@@ -570,11 +582,11 @@ class MainWindow(BaseTable):
             self.append_markup('<b>'+_('OS X Integration:')+'</b>')
             self.session.config.get_or_set('b_show_dock_icon', False)    
             button = self.append_check(_('Show dock icon (requires restart of emesene)'),
-                         'session.config.b_show_dock_icon')
+                                       'session.config.b_show_dock_icon')
             button.connect("toggled", do_hideshow)
             self.session.config.get_or_set('b_hide_menu', True)    
             button = self.append_check(_('Hide menu'),
-                         'session.config.b_hide_menu')
+                                       'session.config.b_hide_menu')
 
 
         self.show_all()
@@ -623,7 +635,8 @@ class ConversationWindow(BaseTable):
         def on_color_selected(cb):
             col = cb.get_color()
             col_e3 = e3.base.Color(col.red, col.green, col.blue)
-            self.set_attr('session.config.override_text_color', '#'+col_e3.to_hex())
+            self.set_attr('session.config.override_text_color', 
+                          '#'+col_e3.to_hex())
 
         self.b_text_color = gtk.ColorButton(color=gtk.gdk.color_parse(
                             self.get_attr('session.config.override_text_color')))
@@ -648,8 +661,10 @@ class ConversationWindow(BaseTable):
                 'session.config.b_conversation_tabs')
         self.append_row(self.tab_pos_cb)
         self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
-        self.append_check(_('Start minimized/iconified'), 'session.config.b_conv_minimized')
-        self.append_check(_('Show emoticons'), 'session.config.b_show_emoticons')
+        self.append_check(_('Start minimized/iconified'),
+                          'session.config.b_conv_minimized')
+        self.append_check(_('Show emoticons'),
+                          'session.config.b_show_emoticons')
         self.append_check(_('Show conversation header'),
             'session.config.b_show_header')
         self.append_check(_('Show conversation side panel'),
@@ -842,14 +857,24 @@ class Theme(BaseTable):
 
         self.tabs = ExtensionList.ThemeList(session)
 
-        self.tabs.append_theme_tab(_('Image theme'), 'images', gui.theme.image_themes,
-            'session.config.image_theme')
-        self.tabs.append_theme_tab(_('Sound theme'), 'sounds', gui.theme.sound_themes,
-            'session.config.sound_theme', self._on_sound_combo_changed)
-        self.tabs.append_theme_tab(_('Emote theme'), 'emotes', gui.theme.emote_themes,
-            'session.config.emote_theme')
-        adium_tab = self.tabs.append_theme_tab(_('Adium theme'), 'conversations', gui.theme.conv_themes,
-            'session.config.adium_theme', self._on_adium_theme_combo_changed)
+        self.tabs.append_theme_tab(_('Image theme'), 'images',
+                                   gui.theme.image_themes,
+                                   'session.config.image_theme')
+
+        self.tabs.append_theme_tab(_('Sound theme'), 'sounds',
+                                   gui.theme.sound_themes,
+                                   'session.config.sound_theme',
+                                   self._on_sound_combo_changed)
+
+        self.tabs.append_theme_tab(_('Emote theme'), 'emotes', 
+                                   gui.theme.emote_themes,
+                                   'session.config.emote_theme')
+
+        adium_tab = self.tabs.append_theme_tab(_('Adium theme'),
+                                           'conversations', 
+                                           gui.theme.conv_themes,
+                                           'session.config.adium_theme',
+                                           self._on_adium_theme_combo_changed)
         self.add(self.tabs)
 
         hbox = gtk.HBox(True)
@@ -871,7 +896,9 @@ class Theme(BaseTable):
         self.set_attr(property_name, value)
         gui.theme.sound_theme = value
 
-    def _on_adium_variant_combo_changed(self, combo, property_name, value):
+    def _on_adium_variant_combo_changed(self, combo, 
+                                        property_name, value):
+        
         variant_name = combo.get_active_text()
         #update adium variants combo
         self.set_attr(property_name, variant_name)
@@ -885,7 +912,8 @@ class Theme(BaseTable):
         #clear combo
         self.adium_variant_combo.get_model().clear()
         self.fill_combo(self.adium_variant_combo,
-            gui.theme.conv_theme.get_theme_variants, 'session.config.adium_theme_variant')
+            gui.theme.conv_theme.get_theme_variants,
+            'session.config.adium_theme_variant')
 
 class Update(BaseTable):
     """the panel to display/modify the config related to the theme
@@ -900,14 +928,21 @@ class Update(BaseTable):
 
         self.tabs = ExtensionList.UpdateList(session)
 
-        self.tabs.append_theme(_('Image theme'), 'images', gui.theme.image_themes,
-            'session.config.image_theme')
-        self.tabs.append_theme(_('Sound theme'), 'sounds', gui.theme.sound_themes,
-            'session.config.sound_theme')
-        self.tabs.append_theme(_('Emote theme'), 'emotes', gui.theme.emote_themes,
-            'session.config.emote_theme')
-        self.tabs.append_theme(_('Adium theme'), 'conversations', gui.theme.conv_themes,
-            'session.config.adium_theme')
+        self.tabs.append_theme(_('Image theme'), 'images',
+                               gui.theme.image_themes,
+                               'session.config.image_theme')
+                               
+        self.tabs.append_theme(_('Sound theme'), 'sounds',
+                               gui.theme.sound_themes,
+                               'session.config.sound_theme')
+
+        self.tabs.append_theme(_('Emote theme'), 'emotes',
+                               gui.theme.emote_themes,
+                               'session.config.emote_theme')
+
+        self.tabs.append_theme(_('Adium theme'), 'conversations',
+                               gui.theme.conv_themes,
+                               'session.config.adium_theme')
         self.add(self.tabs)
 
     def on_update(self):
