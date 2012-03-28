@@ -61,7 +61,7 @@ class ConfigDir(object):
     def _get_default_base_dir(self):
         '''return the default base dir for configuration according to the OS'''
         if sys.platform == 'linux2' or sys.platform == 'linux3':
-            xdg_dir = os.environ['XDG_CONFIG_HOME']
+            xdg_dir = os.environ.get('XDG_CONFIG_HOME', None)
             if xdg_dir is not None:
                 return os.path.join(xdg_dir, self.app_name)
             else:
