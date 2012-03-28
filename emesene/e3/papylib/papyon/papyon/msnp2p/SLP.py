@@ -405,9 +405,9 @@ class SLPSessionCloseBody(SLPMessageBody):
             self.add_header("Context", base64.b64encode(context));
         if reason is not None:
             if reason[0] == SLPStatus.ACCEPTED:
-                self.add_header("AcceptedBy", "{%s}" % reason[1].upper())
+                self.add_header("AcceptedBy", "{%s}" % str(reason[1]).upper())
             elif reason[0] == SLPStatus.DECLINED:
-                self.add_header("DeclinedBy", "{%s}" % reason[1].upper())
+                self.add_header("DeclinedBy", "{%s}" % str(reason[1]).upper())
 
     @property
     def context(self):
