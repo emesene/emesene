@@ -47,7 +47,7 @@ class SSLSocketClient(GIOChannelClient):
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
             except AttributeError:
                 pass
-        context = OpenSSL.Context(OpenSSL.SSLv23_METHOD)
+        context = OpenSSL.Context(OpenSSL.SSLv3_METHOD)
         ssl_sock = OpenSSL.Connection(context, sock)
         GIOChannelClient._pre_open(self, ssl_sock)
 
