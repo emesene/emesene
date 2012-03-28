@@ -62,6 +62,13 @@ class SingleInstancePosix:
 
     def emesene_is_running(self):
         '''Checks if emesene is already running'''
+        if self.have_dbus:
+            try:
+                bus = self.dbus.SessionBus()
+                return bus.name_has_owner('org.emesene.Service')
+            except self.dbus.DBusException, error:
+                pass
+
         import fcntl
         self.lock_file = open(self.lock_file_name, 'w')
         try:
