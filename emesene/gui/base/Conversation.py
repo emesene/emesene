@@ -72,17 +72,17 @@ class Conversation(object):
     def subscribe_signals(self):
         ''' subscribes current session's signals '''
         self.session.config.subscribe(self._on_avatarsize_changed,
-            'i_conv_avatar_size')
+                                     'i_conv_avatar_size')
         self.session.config.subscribe(self._on_show_toolbar_changed,
-            'b_show_toolbar')
+                                      'b_show_toolbar')
         self.session.config.subscribe(self._on_show_header_changed,
-            'b_show_header')
+                                      'b_show_header')
         self.session.config.subscribe(self._on_show_info_changed,
-            'b_show_info')
+                                      'b_show_info')
         self.session.config.subscribe(self._on_show_avatar_onleft,
-            'b_avatar_on_left')
+                                      'b_avatar_on_left')
         self.session.config.subscribe(self._on_icon_size_change,
-            'b_toolbar_small')
+                                      'b_toolbar_small')
         self.session.signals.picture_change_succeed.subscribe(
             self.on_picture_change_succeed)
         self.session.signals.contact_attr_changed.subscribe(
@@ -281,7 +281,8 @@ class Conversation(object):
 
     def update_message_waiting(self, is_waiting):
         """
-        update the information on the conversation to inform if a message is waiting
+        update the information on the conversation to inform 
+        if a message is waiting
 
         is_waiting -- boolean value that indicates if a message is waiting
         """
@@ -313,9 +314,11 @@ class Conversation(object):
 
     def set_image_visible(self, is_visible):
         """
-        set the visibility of the widget that displays the images of the members
+        set the visibility of the widget that displays the images 
+        of the members
 
-        is_visible -- boolean that says if the message should be shown or hidden
+        is_visible -- boolean that says if the message should 
+                      be shown or hidden
         """
         raise NotImplementedError("Method not implemented")
 
@@ -323,7 +326,8 @@ class Conversation(object):
         '''
         hide or show the widget according to is_visible
 
-        is_visible -- boolean that says if the widget should be shown or hidden
+        is_visible -- boolean that says if the widget should 
+                      be shown or hidden
         '''
         raise NotImplementedError("Method not implemented")
 
@@ -331,7 +335,8 @@ class Conversation(object):
         '''
         hide or show the widget according to is_visible
 
-        is_visible -- boolean that says if the widget should be shown or hidden
+        is_visible -- boolean that says if the widget should 
+                      be shown or hidden
         '''
         raise NotImplementedError("Method not implemented")
 
@@ -387,7 +392,8 @@ class Conversation(object):
         cedict = self.emcache.parse()
         custom_emoticons = gui.base.MarkupParser.get_custom_emotes(text, cedict)
 
-        self.session.send_message(self.cid, text, self.cstyle, cedict, custom_emoticons)
+        self.session.send_message(self.cid, text, self.cstyle, 
+                                  cedict, custom_emoticons)
 
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
         self.output_message(message, cedict)
@@ -414,13 +420,17 @@ class Conversation(object):
         if contact is None:
             contact = e3.Contact(account)
 
-        if message.type == e3.Message.TYPE_MESSAGE or message.type == e3.Message.TYPE_FLNMSG:
+        if message.type == e3.Message.TYPE_MESSAGE or \
+           message.type == e3.Message.TYPE_FLNMSG:
+                
             if self.session.config.b_override_text_color:
-                message.style.color = e3.base.Color.from_hex(self.session.config.override_text_color)
+                message.style.color = \
+                e3.base.Color.from_hex(self.session.config.override_text_color)
 
             user_emcache = self.caches.get_emoticon_cache(account)
 
-            self.input_message(message, contact, received_custom_emoticons, user_emcache.path)
+            self.input_message(message, contact, 
+                               received_custom_emoticons, user_emcache.path)
 
             self.play_type()
 
