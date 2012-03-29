@@ -30,7 +30,9 @@ class Window(gtk.Window):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, cb_on_close, height=410, width=250, posx=100, posy=100):
+    def __init__(self, cb_on_close, height=410, width=250, 
+                 posx=100, posy=100):
+
         gtk.Window.__init__(self)
 
         self.set_location(width, height, posx, posy)
@@ -70,9 +72,10 @@ class Window(gtk.Window):
             self.content = None
 
     def go_login(self, callback, on_preferences_changed,
-           config=None, config_dir=None, config_path=None,
-           proxy=None, use_http=None, session_id=None, cancel_clicked=False,
-           no_autologin=False):
+                 config=None, config_dir=None, config_path=None,
+                 proxy=None, use_http=None, session_id=None, 
+                 cancel_clicked=False, no_autologin=False):
+
         '''draw the login window on the main window'''
 
         LoginWindow = extension.get_default('login window')
@@ -127,7 +130,8 @@ class Window(gtk.Window):
     def set_location(self, width=0, height=0, posx=None, posy=None):
         """place the window on the given coordinates
         """
-        self.set_default_size(self.set_or_get_width(width), self.set_or_get_height(height))
+        self.set_default_size(self.set_or_get_width(width),
+                              self.set_or_get_height(height))
         self.move(self.set_or_get_posx(posx), self.set_or_get_posy(posy))
 
     def set_or_get_height(self, height=0):
