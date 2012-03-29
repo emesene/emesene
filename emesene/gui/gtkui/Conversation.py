@@ -78,7 +78,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.output.set_size_request(-1, 30)
         self.input = InputText(self.session, self._on_send_message,
-                self.cycle_history, self.on_drag_data_received, self._send_typing_notification)
+                               self.cycle_history, self.on_drag_data_received,
+                               self._send_typing_notification)
         self.output.set_size_request(-1, 25)
         self.input.set_size_request(-1, 25)
         self.info = ContactInfo(self.session, self.members)
@@ -131,7 +132,8 @@ class Conversation(gtk.VBox, gui.Conversation):
                 nick = ""
                 display_name = ""
             my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
-            self.output.clear(account, nick, display_name, my_picture, his_picture)
+            self.output.clear(account, nick, display_name, 
+                              my_picture, his_picture)
 
         self._load_style()
         self.subscribe_signals()
@@ -197,7 +199,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         else:
             self.info.hide()
 
-    def _on_show_avatar_onleft(self,value):
+    def _on_show_avatar_onleft(self, value):
         '''callback called when config.b_avatar_on_left changes'''
         if value:
             self.hbox.reorder_child(self.panel, 1)
@@ -289,7 +291,8 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_text(self.text)
 
         if self.show_avatar_in_taskbar:
-            self.update_window(self.text, self.info.his_avatar.filename, self.tab_index)
+            self.update_window(self.text, self.info.his_avatar.filename, 
+                               self.tab_index)
         else:
             self.update_window(self.text, self.icon, self.tab_index)
 
@@ -501,24 +504,28 @@ class Conversation(gtk.VBox, gui.Conversation):
         account = self.members[0]
         self.call_widget.show_all()
         x_other, x_self = self.call_widget.get_xids()
-        self.session.call_invite(self.cid, account, 0, x_other, x_self) # 0 = Video only
+        self.session.call_invite(self.cid, account, 0, 
+                                 x_other, x_self) # 0 = Video only
 
     def on_voice_call(self):
         '''called when the user is requesting an audio-only call'''
         account = self.members[0]
         self.call_widget.show_all()
         x_other, x_self = self.call_widget.get_xids()
-        self.session.call_invite(self.cid, account, 1, x_other, x_self) # 1 = Audio only
+        self.session.call_invite(self.cid, account, 1, 
+                                 x_other, x_self) # 1 = Audio only
 
     def on_av_call(self):
         '''called when the user is requesting an audio-video call'''
         account = self.members[0]
         self.call_widget.show_all()
         x_other, x_self = self.call_widget.get_xids()
-        self.session.call_invite(self.cid, account, 2, x_other, x_self) # 2 = Audio/Video
+        self.session.call_invite(self.cid, account, 2, 
+                                 x_other, x_self) # 2 = Audio/Video
 
-    def on_drag_data_received(self, widget, context, posx, posy,\
-                          selection, info, timestamp):
+    def on_drag_data_received(self, widget, context, 
+                              posx, posy, selection, 
+                              info, timestamp):
         '''called when a file is received by text input widget'''
         uri = selection.data.strip()
         uri_splitted = uri.split()
