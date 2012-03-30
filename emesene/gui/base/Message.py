@@ -26,9 +26,10 @@ class Message(object):
     '''a class that represents a message to be used by the adium themes
     '''
 
-    def __init__(self, incoming, first, sender, display_name, alias, image_path,
-            status_path, message, status, service='MSN', classes='',
-            direction='ltr', timestamp=None, msgtype=None, msgstyle=None):
+    def __init__(self, incoming, first, sender, display_name, 
+                 alias, image_path, status_path, message, status,
+                 service='MSN', classes='', direction='ltr', 
+                 timestamp=None, msgtype=None, msgstyle=None):
         '''constructor, see
         http://trac.adium.im/wiki/CreatingMessageStyles for more information
         of the values
@@ -50,7 +51,8 @@ class Message(object):
         self.style          = msgstyle
 
     @classmethod
-    def from_contact(cls, contact, message, first, incomming, tstamp=None, mtype=None, mstyle=None):
+    def from_contact(cls, contact, message, first, incomming, 
+                     tstamp=None, mtype=None, mstyle=None):
         picture = contact.picture or ''
 
         if not picture or not os.path.exists(picture):

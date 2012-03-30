@@ -92,7 +92,9 @@ try:
         return opener.pid
 
     def _readfrom(cmd, shell):
-        opener = subprocess.Popen(cmd, shell=shell, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        opener = subprocess.Popen(cmd, shell=shell, 
+                                  stdin=subprocess.PIPE, 
+                                  stdout=subprocess.PIPE)
         opener.stdin.close()
         return opener.stdout.read()
 
