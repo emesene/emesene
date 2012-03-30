@@ -158,10 +158,11 @@ class HTTP(gobject.GObject):
             protocol, host, path, query, fragment = urlsplit(location)
             self._redirected = True
             self._outgoing_queue[0].headers['Host'] = host
+
             try:
                 host, port = host.rsplit(":", 1)
                 port = int(port)
-            except:
+            except (TypeError, ValueError):
                 port = None
             self._host = host
             self._redirected = False
