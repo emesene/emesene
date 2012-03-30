@@ -31,15 +31,18 @@ class ConversationStatus(object):
         self.last_incoming_nickname = None
         self.last_incoming_account = None
 
-    def pre_process_message(self, contact, message, incomming, cedict, cepath, tstamp=None, mtype=None, cstyle=None):
+    def pre_process_message(self, contact, message, incomming, cedict, 
+                            cepath, tstamp=None, mtype=None, cstyle=None):
         '''Create a new gui.Message
         '''
-        msg = gui.Message.from_contact(contact,
-                message, self.first, incomming, tstamp, mtype = mtype, mstyle=cstyle)
+        msg = gui.Message.from_contact(contact, message, self.first, 
+                                       incomming, tstamp, 
+                                       mtype = mtype, mstyle=cstyle)
 
         if self.config.b_show_emoticons:
-            msg.message = MarkupParser.replace_emotes(MarkupParser.escape(msg.message),
-                        cedict, cepath, msg.sender)
+            msg.message = MarkupParser.replace_emotes(
+                                              MarkupParser.escape(msg.message),
+                                              cedict, cepath, msg.sender)
 
         msg.message = MarkupParser.urlify(msg.message)
 
