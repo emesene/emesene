@@ -97,7 +97,8 @@ class LoginBaseUI(gtk.Alignment):
 
         self.forget_me = gtk.Button()
         self.forget_me.set_tooltip_text(_('Delete user'))
-        forget_img = gtk.image_new_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
+        forget_img = gtk.image_new_from_stock(gtk.STOCK_CANCEL, 
+                                              gtk.ICON_SIZE_MENU)
         self.forget_me.set_image(forget_img)
         self.forget_me.set_relief(gtk.RELIEF_NONE)
         self.forget_me.set_border_width(0)
@@ -159,7 +160,7 @@ class LoginBaseUI(gtk.Alignment):
         self.b_preferences = gtk.Button()
         self.b_preferences.set_tooltip_text(_('Preferences'))
         self.img_preferences = gtk.image_new_from_stock(gtk.STOCK_PREFERENCES,
-            gtk.ICON_SIZE_MENU)
+                                                        gtk.ICON_SIZE_MENU)
         self.img_preferences.set_sensitive(False)
         self.b_preferences.set_image(self.img_preferences)
         self.b_preferences.set_relief(gtk.RELIEF_NONE)
@@ -171,7 +172,8 @@ class LoginBaseUI(gtk.Alignment):
             self._on_preferences_selected)
         self.b_preferences.set_size_request(34, -1)
 
-        img_sessionpix = gtk.image_new_from_stock(gtk.STOCK_CONNECT, gtk.ICON_SIZE_MENU)
+        img_sessionpix = gtk.image_new_from_stock(gtk.STOCK_CONNECT, 
+                                                  gtk.ICON_SIZE_MENU)
         img_sessionpix.set_size_request(20, -1)
         img_sessionpix.set_sensitive(False)
         hbox_session = gtk.HBox(spacing=6)
@@ -187,23 +189,29 @@ class LoginBaseUI(gtk.Alignment):
 
         self.nicebar = NiceBar()
 
-        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.throbber, None,
-                animated=True)
+        th_pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.throbber, 
+                                            None, animated=True)
+
         self.throbber = gtk.image_new_from_animation(th_pix)
         self.label_timer = gtk.Label()
         self.label_timer.set_markup(_('<b>Connection error!\n </b>'))
 
-        al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.0)
-        al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.1,
-            yscale=0.1)
-        al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2,
-            yscale=0.0)
-        al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.2)
+        al_label_timer = gtk.Alignment(xalign=0.5, yalign=0.5, 
+                                       xscale=0.0, yscale=0.0)
+
+        al_throbber = gtk.Alignment(xalign=0.5, yalign=0.5, 
+                                    xscale=0.1, yscale=0.1)
+
+        al_vbox_entries = gtk.Alignment(xalign=0.5, yalign=0.5, 
+                                        xscale=0.2, yscale=0.0)
+
+        al_vbox_remember = gtk.Alignment(xalign=0.5, yalign=0.5, 
+                                         xscale=0.0, yscale=0.2)
+
         al_button = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.2)
-        al_account = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.0,
-            yscale=0.3)
+
+        al_account = gtk.Alignment(xalign=0.5, yalign=0.5, 
+                                   xscale=0.0, yscale=0.3)
 
         al_label_timer.add(self.label_timer)
         al_throbber.add(self.throbber)
@@ -249,14 +257,14 @@ class Login(LoginBaseUI, gui.LoginBase):
     widget that represents the login window
     '''
     def __init__(self, callback, on_preferences_changed,
-                config, config_dir, config_path, proxy=None,
-                use_http=None, session_id=None, cancel_clicked=False,
-                no_autologin=False):
+                 config, config_dir, config_path, proxy=None,
+                 use_http=None, session_id=None, cancel_clicked=False,
+                 no_autologin=False):
 
         LoginBaseUI.__init__(self, callback)
         gui.LoginBase.__init__(self, callback, on_preferences_changed,
-                                config, config_dir, config_path,
-                                proxy, use_http, session_id, no_autologin)
+                               config, config_dir, config_path,
+                               proxy, use_http, session_id, no_autologin)
 
         self.cancel_clicked = cancel_clicked
 
@@ -323,7 +331,9 @@ class Login(LoginBaseUI, gui.LoginBase):
                     session_found = True
 
                 try:
-                    s_name = getattr(gui.theme.image_theme, "service_" + service_name)
+                    s_name = getattr(gui.theme.image_theme, 
+                                     "service_" + service_name)
+
                     image = utils.safe_gtk_pixbuf_load(s_name)
                 except:
                     image = None
@@ -371,11 +381,12 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.show_error(_('user or password fields are empty'))
             return
 
-        self.config_account(account, self._get_active_service(), remember_account,
-                            remember_password, auto_login)
+        self.config_account(account, self._get_active_service(), 
+                            remember_account, remember_password, 
+                            auto_login)
 
         self.callback(account, self.session_id, self.proxy, self.use_http,
-                self.server_host, self.server_port)
+                      self.server_host, self.server_port)
 
     def _on_account_changed(self, entry):
         '''
@@ -615,18 +626,22 @@ class Login(LoginBaseUI, gui.LoginBase):
             self._on_new_preferences, self.use_http, self.proxy)
 
     def _on_new_preferences(self, use_http, use_proxy, proxy_host, proxy_port,
-        use_auth, user, passwd, session_id, service, server_host, server_port):
+                            use_auth, user, passwd, session_id, 
+                            service, server_host, server_port):
         '''
         called when the user press accept on the preferences dialog
         '''
-        self.proxy = e3.Proxy(use_proxy, proxy_host, proxy_port, use_auth, user, passwd)
+        self.proxy = e3.Proxy(use_proxy, proxy_host, proxy_port, 
+                              use_auth, user, passwd)
+
         self.session_id = session_id
         self.use_http = use_http
         self.server_host = server_host
         self.server_port = server_port
 
-        self.on_preferences_changed(self.use_http, self.proxy, self.session_id,
-                service)
+        self.on_preferences_changed(self.use_http, self.proxy, 
+                                    self.session_id, service)
+
         self._update_fields(self.cmb_account.get_active_text(), True)
 
         def searchService(model, path, iter, user_data):
@@ -707,7 +722,7 @@ class ConnectingWindow(Login):
         self.callback()
 
     def _on_connect_now_clicked(self, button, callback, account, session_id,
-                            proxy, use_http, service):
+                                proxy, use_http, service):
         '''
         don't wait for timout to reconnect
         '''
@@ -732,14 +747,17 @@ class ConnectingWindow(Login):
         '''
         self.label_timer.show()
         self.b_connect.show()
-        self.b_connect.connect('clicked', self._on_connect_now_clicked, callback, \
-                               account, session_id, proxy, use_http, service)
+        self.b_connect.connect('clicked', self._on_connect_now_clicked, 
+                               callback, account, session_id, proxy, 
+                               use_http, service)
+
         self.throbber.hide()
         self.reconnect_after = 30
         if self.reconnect_timer_id is None:
             self.reconnect_timer_id = gobject.timeout_add_seconds(1, \
-                self.update_reconnect_timer, callback, account, session_id,
-                                    proxy, use_http, service)
+                                            self.update_reconnect_timer, 
+                                            callback, account, session_id,
+                                            proxy, use_http, service)
 
         self.update_reconnect_timer(callback, account, session_id,
                                     proxy, use_http, service)
