@@ -27,8 +27,9 @@ import ImagesThemes
 class Theme(object):
     '''this class contains all the paths and information regarding a theme'''
 
-    def __init__(self, image_name="default", emote_name="default",
-            sound_name="default", conv_name='renkoo.AdiumMessageStyle', conv_variant = ''):
+    def __init__(self, image_name="default", 
+                 emote_name="default", sound_name="default", 
+                 conv_name='renkoo.AdiumMessageStyle', conv_variant = ''):
         '''class constructor'''
         self.emote_theme = None
         config_dir = ConfigDir.ConfigDir('emesene2')
@@ -38,10 +39,13 @@ class Theme(object):
         config_themes_path = os.path.join(config_path, "themes")
         ensure_dir_path(config_themes_path)
 
-        config_conv_themes_path = os.path.join(config_themes_path, "conversations")
+        config_conv_themes_path = os.path.join(config_themes_path, 
+                                               "conversations")
         ensure_dir_path(config_conv_themes_path)
 
-        conv_themes_path = os.path.join(os.getcwd(), "themes", "conversations")
+        conv_themes_path = os.path.join(os.getcwd(), "themes", 
+                                        "conversations")
+
         self.conv_themes = AdiumThemes.AdiumThemes()
         self.conv_themes.add_themes_path(conv_themes_path)
         self.conv_themes.add_themes_path(config_conv_themes_path)
@@ -66,14 +70,16 @@ class Theme(object):
         config_images_themes_path = os.path.join(config_themes_path, "images")
         ensure_dir_path(config_images_themes_path)
 
-        image_path = os.path.join(os.getcwd(),"themes", "images")
+        image_path = os.path.join(os.getcwd(), "themes", "images")
         self.image_themes = ImagesThemes.ImagesThemes()
         self.image_themes.add_themes_path(image_path)
         self.image_themes.add_themes_path(config_images_themes_path)
 
-        self.set_theme(image_name, emote_name, sound_name, conv_name, conv_variant)
+        self.set_theme(image_name, emote_name, sound_name, 
+                       conv_name, conv_variant)
 
-    def set_theme(self, image_name, emote_name, sound_name, conv_name, conv_variant=''):
+    def set_theme(self, image_name, emote_name, 
+                  sound_name, conv_name, conv_variant=''):
         '''set the theme name and change all the paths to reflect the change'''
 
         # conv_name is the name of the selected adium conversation theme
