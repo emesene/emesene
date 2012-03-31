@@ -80,7 +80,7 @@ class Preferences(gtk.Window):
         treeViewColumn = gtk.TreeViewColumn(_('Categories'))
 
         treeViewColumn.pack_start(cellPix, expand=False)
-        treeViewColumn.add_attribute(cellPix, 'pixbuf',0)
+        treeViewColumn.add_attribute(cellPix, 'pixbuf', 0)
         treeViewColumn.pack_start(cellText, expand=True)
         treeViewColumn.set_attributes(cellText, text=1)
 
@@ -99,9 +99,9 @@ class Preferences(gtk.Window):
 
         vbox.set_spacing(4)
         hbox = gtk.HBox(homogeneous=False, spacing=5)
-        hbox.pack_start(treeView, True,True) # False, True
+        hbox.pack_start(treeView, True, True) # False, True
         hbox.pack_start(self.notebook, True, True)
-        vbox.pack_start(hbox, True,True) # hbox, True, True
+        vbox.pack_start(hbox, True, True) # hbox, True, True
 
         config_dir = e3.common.ConfigDir('emesene2')
 
@@ -241,7 +241,7 @@ class Preferences(gtk.Window):
             self.listStore.append([self.render_icon(i['stock_id'],
                                   gtk.ICON_SIZE_LARGE_TOOLBAR), i['text']])
 
-    def _on_row_activated(self,treeview):
+    def _on_row_activated(self, treeview):
         # Get information about the row that has been selected
         cursor, obj = treeview.get_cursor()
         self.showPage(cursor[0])
@@ -449,10 +449,10 @@ class BaseTable(gtk.Table):
 
         return hbox
 
-    def append_combo(self, text, getter, property_name,values=None):
+    def append_combo(self, text, getter, property_name, values=None):
         """append a label and a combo and adds values to it
         """
-        hbox = self.create_combo_with_label(text, getter, property_name,values)
+        hbox = self.create_combo_with_label(text, getter, property_name, values)
         self.append_row(hbox, None)
 
     def append_markup(self, text):
@@ -575,13 +575,19 @@ class MainWindow(BaseTable):
 
             def do_hideshow(widget):
                 if widget.get_active():
-                    subprocess.call('defaults write /Applications/emesene.app/Contents/Info LSUIElement -bool false', shell=True)
+                    subprocess.call('defaults write '
+                                    '/Applications/emesene.app/Contents/Info'
+                                    ' LSUIElement -bool false', shell=True)
                 else:
-                    subprocess.call('defaults write /Applications/emesene.app/Contents/Info LSUIElement -bool true', shell=True)
+                    subprocess.call('defaults write '
+                                    '/Applications/emesene.app/Contents/Info'
+                                    ' LSUIElement -bool true', shell=True)
 
             self.append_markup('<b>'+_('OS X Integration:')+'</b>')
             self.session.config.get_or_set('b_show_dock_icon', False)    
-            button = self.append_check(_('Show dock icon (requires restart of emesene)'),
+            
+            button = self.append_check(_('Show dock icon '
+                                       '(requires restart of emesene)'),
                                        'session.config.b_show_dock_icon')
             button.connect("toggled", do_hideshow)
             self.session.config.get_or_set('b_hide_menu', True)    
@@ -618,7 +624,8 @@ class ConversationWindow(BaseTable):
             index += 1
 
         cb_check_spelling = self.create_check(
-            _('Enable spell check if available (requires %s)') % 'python-gtkspell',
+            _('Enable spell check if available (requires %s)') 
+            % 'python-gtkspell',
             'session.config.b_enable_spell_check')
 
         h_lang_box = gtk.HBox()
@@ -627,8 +634,10 @@ class ConversationWindow(BaseTable):
 
         # override text color option
 
-        cb_override_text_color = self.create_check(_('Override incoming text color'),
-            'session.config.b_override_text_color')
+        cb_override_text_color = self.create_check(
+                                        _('Override incoming text color'),
+                                        'session.config.b_override_text_color')
+
         self.session.config.subscribe(self._on_cb_override_text_color_toggled,
             'b_override_text_color')
 
@@ -747,7 +756,7 @@ class ConversationWindow(BaseTable):
         self.session.config.spell_lang = combo.get_active_text()
 
     def get_tab_positions(self):
-        return [_("Top"),_("Bottom"),_("Left"),_("Right")]
+        return [_("Top"), _("Bottom"), _("Left"), _("Right")]
 
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_cb_show_toolbar_changed,
@@ -1209,7 +1218,10 @@ class Facebook(BaseTable):
 
         markup = '<span foreground="black"> %s </span>'
         noticelabel = gtk.Label()
-        text = _("<b>WARNING: This will reset your facebook token.\nemesene will ask you to login into facebook on next login</b>")
+        text = _("<b>WARNING: This will reset your facebook token."
+                 "\nemesene will ask you to login into facebook on"
+                 " next login</b>")
+
         noticelabel.set_markup(markup % text)
         eventBox.add(noticelabel)
         self.append_row(eventBox, None)
@@ -1255,7 +1267,9 @@ class PrivacySettings(gtk.VBox):
         text = _('Yellow contacts don\'t have you in their contact list.')
         secondLabel.set_markup(markup % text)
         l_warning = gtk.Label()
-        text = _("<b>WARNING: The information provided below may be inaccurate.</b>")
+        text = _("<b>WARNING: The information provided below "
+                 "may be inaccurate.</b>")
+
         l_warning.set_markup(markup % text)
 
         labels_box.pack_start(firstLabel)
@@ -1374,7 +1388,7 @@ class PrivacySettings(gtk.VBox):
             selection = self.allow_view.get_selection()
             selection.unselect_all()
 
-        path = view.get_path_at_pos(int(event.x),int(event.y))
+        path = view.get_path_at_pos(int(event.x), int(event.y))
         if not path:
             selection = view.get_selection()
             selection.unselect_all()
