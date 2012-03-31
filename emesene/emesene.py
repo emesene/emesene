@@ -56,40 +56,10 @@ def project_path():
 
 os.chdir(os.path.abspath(project_path()))
 
+from Language import Language
 
-# load translations
-import gettext
-import locale
-default_locale = locale.getdefaultlocale()[0]
-lang = os.getenv('LANGUAGE') or default_locale
-translation = gettext.NullTranslations()
-locales_path = 'po/' if os.path.exists('po/') else None
-
-if os.path.exists('default.mo'):
-    translation = gettext.GNUTranslations(open('default.mo'))
-else:
-    try:
-        #try with LANGUAGE variable
-        translation = gettext.translation('emesene', localedir=locales_path, \
-                                          languages=[lang])
-    except IOError:
-        try:
-            #try with Python's locale module
-            translation = gettext.translation('emesene', \
-                                              localedir=locales_path, \
-                                              languages=[default_locale])
-        except IOError:
-            #let gettext handle the language
-            try:
-                translation = gettext.translation('emesene', \
-                                              localedir=locales_path)
-            except IOError:
-                pass
-    except AttributeError:
-        pass
-
-translation.install()
-
+language_management = Language()
+language_management.install_default_translation()
 
 import glib
 import optparse
@@ -170,6 +140,14 @@ class Controller(object):
         self.conv_manager_available = False
         self.last_session_account = None
         self.last_session_service = None
+
+        language_management = Language()
+        
+        self.config.get_or_set("language_config", 
+                               language_management.get_lang())
+        
+        language_management.install_desired_translation(
+                                self.config.language_config)
 
         self._parse_commandline()
         self._setup()
@@ -280,8 +258,8 @@ class Controller(object):
             self.window.iconify()
         self.window.show()
 
-    def go_login(self, proxy=None, use_http=None, cancel_clicked=False,
-            no_autologin=False):
+    def go_login(self, proxy=None, use_http=None, 
+                 cancel_clicked=False, no_autologin=False):
         '''shows the login GUI'''
         if proxy is None:
             proxy = self._get_proxy_settings()
@@ -295,9 +273,10 @@ class Controller(object):
         self._set_location(self.window)
 
         self.window.go_login(self.on_login_connect,
-            self.on_preferences_changed, self.config,
-            self.config_dir, self.config_path, proxy,
-            use_http, self.config.session, cancel_clicked, no_autologin)
+                             self.on_preferences_changed, self.config,
+                             self.config_dir, self.config_path, proxy,
+                             use_http, self.config.session, 
+                             cancel_clicked, no_autologin)
         self.tray_icon.set_login()
 
     def _new_session(self, account=None):
@@ -487,7 +466,7 @@ class Controller(object):
 
         last_avatar_path = self.session.config_dir.get_path("last_avatar")
         self.session.load_config()
-
+        
         if 'msn' in self.session.SERVICES:
             # keepalive conversations...or not
             b_keepalive = self.session.config.get_or_set("b_papylib_keepalive", False)
@@ -659,7 +638,7 @@ class Controller(object):
         self.session.config.get_or_set('b_download_folder_per_account', False)
         self.session.config.get_or_set('b_override_text_color', False)
         self.session.config.get_or_set('override_text_color', '#000000')
-
+       
         self.timeout_id = glib.timeout_add(500,
                 self.session.signals._handle_events)
         self.session.login(account.account, account.password, account.status,

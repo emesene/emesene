@@ -24,6 +24,7 @@ import subprocess
 import sys
 import extension
 import stock
+from Language import Language
 
 from gui.base import MarkupParser
 
@@ -44,7 +45,7 @@ except:
 LIST = [
     {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Main Window')},
     {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Conversation Window')},
-    {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('Desktop')},
+    {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('General')},
     {'stock_id' : gtk.STOCK_MEDIA_PLAY,'text' : _('Sounds')},
     {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
     {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
@@ -1115,10 +1116,25 @@ class DesktopTab(BaseTable):
         self.append_markup('<b>'+_('Logger')+'</b>')
         self.append_check(_('Enable logger'),
                           'session.config.b_log_enabled')
+                          
+        # language settings
+        self.append_markup('<b>'+_('Language')+'</b>')
+        # languages combobox
+        self._language_management = Language()
+
+        self.session.config.subscribe(self._on_language_changed,
+                                      'language_config')
+        self.languages_cb = self.create_combo_with_label(_('Session language'),
+                            self._language_management.get_available_languages,
+                            'session.config.language_config' )
+
+        self.append_row(self.languages_cb)
+
+
         self.append_markup('<b>'+_('File transfers')+'</b>')
         self.append_check(_('Sort received files by sender'),
                           'session.config.b_download_folder_per_account')
-        self.add_text(_('Save files to:'), 0, 4, True)
+        self.add_text(_('Save files to:'), 0, 6, True)
 
         def on_path_selected(f_chooser):
             ''' updates the download dir config value '''
@@ -1135,6 +1151,11 @@ class DesktopTab(BaseTable):
                 e3.common.locations.downloads()))
         fc_button.connect('selection-changed', on_path_selected)
         self.attach(fc_button, 2, 3, 4, 5, gtk.EXPAND|gtk.FILL, 0)
+        
+        
+    def _on_language_changed(self,  lang):
+        self._language_management.install_desired_translation(lang)
+
 
 class MSNPapylib(BaseTable):
     """ This panel contains some msn-papylib specific settings """
