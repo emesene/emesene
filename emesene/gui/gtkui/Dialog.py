@@ -716,6 +716,16 @@ class Dialog(object):
         box.set_property('row-spacing', 4)
         box.set_property('column-spacing', 4)
 
+        def expander_toggled(expander,param):
+            if not expander.get_expanded():
+                expander.remove(box)
+                window.resize(150,100)
+            else:            
+                expander.add(box)
+                window.show_all()
+
+        advanced.connect('notify::expanded',expander_toggled)
+
         try:
             s_name = getattr(gui.theme.image_theme, "service_" + service)
             session_pixbuf = utils.safe_gtk_pixbuf_load(s_name)
@@ -844,10 +854,8 @@ class Dialog(object):
         session_box.pack_start(session_image)
         session_box.pack_start(session_label)
 
-        advanced.add(box)
         content.pack_start(session_box, False)
         content.pack_start(advanced, False)
-
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
                 button_cb)
         cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
