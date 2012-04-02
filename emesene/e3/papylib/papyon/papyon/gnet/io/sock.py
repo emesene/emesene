@@ -52,6 +52,11 @@ class SocketClient(GIOChannelClient):
 
     def _post_open(self):
         GIOChannelClient._post_open(self)
+        try:
+            opts = self._transport.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
+        except socket.error:
+            opts = 0
+
         opts = self._transport.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
         if opts == 0:
             self._watch_set_cond(gobject.IO_IN | gobject.IO_PRI |
