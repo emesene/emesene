@@ -823,8 +823,14 @@ class ContactList(gui.ContactList, gtk.TreeView):
             return override
 
         if self.order_by_name:
-            return cmp(Plus.msnplus_strip(contact1.display_name),
-                       Plus.msnplus_strip(contact2.display_name))
+            # first order by status, online contacts first
+            result = cmp(e3.status.ORDERED.index(contact1.status),
+                e3.status.ORDERED.index(contact2.status))
+            if result == 0:
+                #same status, order by name
+                result = cmp(Plus.msnplus_strip(contact1.display_name),
+                            Plus.msnplus_strip(contact2.display_name))
+            return result
 
         result = cmp(e3.status.ORDERED.index(contact1.status),
             e3.status.ORDERED.index(contact2.status))
