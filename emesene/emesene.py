@@ -353,6 +353,7 @@ class Controller(object):
 
         self.window.on_disconnect(self.close_session)
 
+        self._save_application_language()
         self.save_extensions_config()
         self._save_login_dimensions()
 
@@ -390,6 +391,19 @@ class Controller(object):
             if self.notification:
                 self.notification.remove_subscriptions()
                 self.notification = None
+
+    def _save_application_language(self):
+        '''save global settings to application config
+           obtained from session settings.
+        '''
+        if self.session is None:
+            return
+            
+        if self.config is None:
+            return
+        
+        self.config.language_config = self.session.config.language_config
+
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''

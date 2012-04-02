@@ -1124,7 +1124,7 @@ class DesktopTab(BaseTable):
 
         self.session.config.subscribe(self._on_language_changed,
                                       'language_config')
-        self.languages_cb = self.create_combo_with_label(_('Session language'),
+        self.languages_cb = self.create_combo_with_label(_('Select language:'),
                             self._language_management.get_available_languages,
                             'session.config.language_config' )
 
@@ -1150,7 +1150,7 @@ class DesktopTab(BaseTable):
         fc_button.set_current_folder(self.session.config.get_or_set("download_folder", \
                 e3.common.locations.downloads()))
         fc_button.connect('selection-changed', on_path_selected)
-        self.attach(fc_button, 2, 3, 4, 5, gtk.EXPAND|gtk.FILL, 0)
+        self.attach(fc_button, 2, 3, 6, 7, gtk.EXPAND|gtk.FILL, 0)
         
         
     def _on_language_changed(self,  lang):
