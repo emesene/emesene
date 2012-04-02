@@ -140,9 +140,7 @@ class Controller(object):
         self.conv_manager_available = False
         self.last_session_account = None
         self.last_session_service = None
-
-        language_management = Language()
-        
+      
         self.config.get_or_set("language_config", 
                                language_management.get_lang())
         
