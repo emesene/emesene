@@ -101,4 +101,5 @@ class Language(object):
         
         langs = [file.split(os.path.sep)[-3] for file in files]
         
+        langs.sort()
         return langs
