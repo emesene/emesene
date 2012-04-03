@@ -19,6 +19,7 @@
 
 
 import e3
+import os
 import sys
 from pyfb.pyfb import Pyfb, PyfbException, OAuthException
 
