@@ -19,7 +19,6 @@
 
 import os
 import sys
-import re
 import subprocess
 
 def downloads():
@@ -63,23 +62,6 @@ def get_command_output(*args):
                 stdout=subprocess.PIPE).communicate()[0].strip()
     except OSError:
         return None
-
-def get_from_user_dirs(name="XDG_DOWNLOAD_DIR"):
-    '''
-    get the value of *name* from user-dirs.dirs if exist and defined
-    return None if not found
-    '''
-
-    user_dirs = os.path.expanduser('~/.config/user-dirs.dirs')
-
-    if os.path.exists(user_dirs):
-        match = re.search(name + '="(.*?)"',
-                    open(user_dirs).read())
-        if match:
-            return os.path.expanduser(
-                match.group(1).replace('$HOME', '~'))
-
-    return None
 
 def join_home(*paths):
     '''
