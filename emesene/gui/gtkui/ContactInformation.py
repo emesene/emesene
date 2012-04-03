@@ -61,7 +61,6 @@ class ContactInformation(gtk.Window, gui.base.ContactInformation):
     def _create_tabs(self):
         '''create all the tabs on the window'''
         self.info = InformationWidget(self.session, self.account)
-        self.nicks = ListWidget(self.session, self.account)
 
         self.avatar_manager = gui.base.AvatarManager(self.session)
 
@@ -69,14 +68,17 @@ class ContactInformation(gtk.Window, gui.base.ContactInformation):
 
         self.avatars = IconView(_('Avatar history'), [account_path],
                         None, None, IconView.TYPE_SELF_PICS, None)
-        self.messages = ListWidget(self.session, self.account)
         self.status = ListWidget(self.session, self.account)
         self.chats = ChatWidget(self.session, self.account)
 
         self.tabs.append_page(self.info, gtk.Label(_('Information')))
-        self.tabs.append_page(self.nicks, gtk.Label(_('Nick history')))
+        if self.session.session_has_service(e3.Session.SERVICE_CONTACT_NICK):
+            self.nicks = ListWidget(self.session, self.account)
+            self.tabs.append_page(self.nicks, gtk.Label(_('Nick history')))
         self.tabs.append_page(self.avatars, gtk.Label(_('Avatar history')))
-        self.tabs.append_page(self.messages, gtk.Label(_('Message history')))
+        if self.session.session_has_service(e3.Session.SERVICE_CONTACT_PM):
+            self.messages = ListWidget(self.session, self.account)
+            self.tabs.append_page(self.messages, gtk.Label(_('Message history')))
         self.tabs.append_page(self.status, gtk.Label(_('Status history')))
         self.tabs.append_page(self.chats, gtk.Label(_('Chat history')))
 

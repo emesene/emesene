@@ -101,7 +101,9 @@ class Session(e3.Session):
                         Session.SERVICE_FILETRANSFER]:
             return False
 
-        if service == Session.SERVICE_PROFILE_PICTURE:
+        if service in [Session.SERVICE_PROFILE_PICTURE,
+                        Session.SERVICE_CONTACT_NICK,
+                        Session.SERVICE_CONTACT_PM]:
             #return False if it's facebook, True otherwise
             return not self._is_facebook
 
