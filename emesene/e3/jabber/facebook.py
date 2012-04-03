@@ -19,7 +19,6 @@
 
 
 import e3
-import os
 import sys
 from pyfb.pyfb import Pyfb, PyfbException, OAuthException
 
@@ -52,7 +51,7 @@ class FacebookCLient(object):
 
     def request_permitions(self):
         '''ask user to grant access to facebook APIs'''
-        if os.name == 'mac' or (os.name == 'nt' and sys.getwindowsversion()[0] > 6):
+        if sys.platform == 'darwin' or (sys.platform == 'win32' and sys.getwindowsversion()[0] > 6):
             #Mac didn't have webkit suppport so open link in browser
             # and ask user to copy the url
             self._client.authenticate()
