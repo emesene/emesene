@@ -103,21 +103,47 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.on_mail_click()
 
     def _on_social_request(self, conn_url):
-        def set_token(token_url):
+
+        def get_token(token_url):
+            '''strips the access token from an url'''
+            if token_url is None:
+                return token_url
+
             if token_url.find("#access_token=") == -1:
-                self.session.activate_social_services(False)
-                return
+                return None
 
             pattern_start_token = "#access_token="
             pattern_end_token = "&expires_in"
             start_token = token_url.find(pattern_start_token) + len(pattern_start_token)
             end_token = token_url.find(pattern_end_token)
-            token = token_url[start_token:end_token]
-            self.session.config.facebook_token = token
-            self.session.activate_social_services(True)
+            return token_url[start_token:end_token]
+
+        def set_token(token_url):
+            '''callback used by webkit'''
+            self.session.config.facebook_token = get_token(token_url)
+            #only activate service if we have an access token
+            activate = bool(self.session.config.facebook_token is not None)
+            self.session.activate_social_services(activate)
+
+        def set_token_fallback(response, data, token_url):
+            '''callback used as fallback when webkit isn't avariable'''
+            self.session.config.facebook_token = get_token(token_url)
+            #only activate service if user press accept and we have an access token
+            activate = bool(response == 1 and self.session.config.facebook_token is not None)
+            self.session.activate_social_services(activate)
 
         dialog = extension.get_default('dialog')
-        dialog.web_window(_("Connect Emesene and Facebook"), conn_url ,set_token)
+        if conn_url is not None:
+            dialog.web_window(_("Connect Emesene and Facebook"), conn_url, set_token)
+        else:
+            #Fallback method
+            #Open a browser and ask user to copy the access token
+            w = dialog.entry_window("Url:", "", set_token_fallback, "Facebook Integration", None)
+            lbl = dialog.window_add_label_vbox(w,
+                  _("Please login into facebook and copy the url opened in your browser here"))
+            lbl.set_selectable(False)
+            w.vbox.reorder_child(lbl, 0)
+            w.show()
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''

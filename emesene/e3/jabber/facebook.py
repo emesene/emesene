@@ -42,6 +42,7 @@ class FacebookCLient(object):
         self._nick = None
         self._avatar_cache = None
         self._avatar_path = None
+        # only ask for access token if we didn't have one
         if token is None:
             self.request_permitions()
         else:
@@ -49,11 +50,19 @@ class FacebookCLient(object):
             self.set_token(token, True)
 
     def request_permitions(self):
-        conn_url = self._client.get_auth_url(REDIRECT_URL)
+        '''ask user to grant access to facebook APIs'''
+        if os.name == 'mac':
+            #Mac didn't have webkit suppport so open link in browser
+            # and ask user to copy the url
+            self._client.authenticate()
+            # None means fallback to non webkit dialog
+            conn_url = None
+        else:
+            conn_url = self._client.get_auth_url(REDIRECT_URL)
         self._session.social_request(conn_url)
 
     def set_token(self, token, active):
-        '''Sets the authentication token'''
+        '''Set the authentication token'''
         self.active = active
         if self.active and not token is None:
             self._client.set_access_token(token)
