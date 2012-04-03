@@ -73,6 +73,8 @@ class FacebookCLient(object):
         '''get the person name as nick'''
         if self.active and self._nick is None:
             try:
+                params = {}
+                params["fields"] = "name"
                 me = self._client.get_myself()
                 self._nick = me.name
             except OAuthException:
@@ -101,7 +103,10 @@ class FacebookCLient(object):
             try:
                 messages = self._client.get_statuses("me")
                 if len(messages) > 0:
-                    message = self._client.get_statuses("me", 1)[0].message
+                    params = {}
+                    params["limit"] = 1
+                    params["fields"] = "message"
+                    message = self._client.get_statuses("me", params)[0].message
             except OAuthException:
                 self.request_permitions()
             except PyfbException, ex:

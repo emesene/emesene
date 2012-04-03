@@ -80,43 +80,43 @@ class Pyfb(object):
         """
         self._client.permissions = permissions
 
-    def get_myself(self):
+    def get_myself(self, params=None):
         """
             Gets myself data
         """
-        return self._client.get_one("me", "FBUser")
+        return self._client.get_one("me", "FBUser", params=params)
 
-    def get_user_by_id(self, id=None):
+    def get_user_by_id(self, id=None, params=None):
         """
             Gets an user by the id
         """
         if id is None:
             id = "me"
-        return self._client.get_one(id, "FBUser")
+        return self._client.get_one(id, "FBUser", params=params)
 
-    def get_friends(self, id=None):
+    def get_friends(self, id=None, params=None):
         """
             Gets a list with your friends
         """
-        return self._client.get_list(id, "Friends")
+        return self._client.get_list(id, "Friends", params=params)
 
-    def get_statuses(self, id=None, limit=None, offset=None):
+    def get_statuses(self, id=None, params=None):
         """
             Gets a list of status objects
         """
-        return self._client.get_list(id, "Statuses", limit=limit, offset=offset)
+        return self._client.get_list(id, "Statuses", params=params)
 
-    def get_photos(self, id=None, limit=None, offset=None):
+    def get_photos(self, id=None, params=None):
         """
             Gets a list of photos objects
         """
-        return self._client.get_list(id, "Photos", limit=limit, offset=offset)
+        return self._client.get_list(id, "Photos", params=params)
 
-    def get_comments(self, id=None, limit=None, offset=None):
+    def get_comments(self, id=None, params=None):
         """
             Gets a list of photos objects
         """
-        return self._client.get_list(id, "Comments", limit=limit, offset=offset)
+        return self._client.get_list(id, "Comments", params=params)
 
     def publish(self, message, id=None):
         """
@@ -130,11 +130,11 @@ class Pyfb(object):
         """
         self._client.push(id, "comments", message=message)
 
-    def get_likes(self, id=None, limit=None, offset=None):
+    def get_likes(self, id=None, params=None):
         """
             Get a list of liked objects
         """
-        return self._client.get_list(id, "likes", limit=limit, offset=offset)
+        return self._client.get_list(id, "likes", params=params)
 
     def like(self, id):
         """
