@@ -505,7 +505,6 @@ class Worker(e3.base.Worker, papyon.Client):
         ''' handle the reception of a message '''
         account = papycontact.account
         conv = pyconvevent.conversation
-
         if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
         else:
@@ -561,7 +560,16 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.conv_message(cid, account, msgobj,
                 received_custom_emoticons)
-        e3.Logger.log_message(self.session, None, msgobj, False, cid = cid)
+
+        #XXX: when we send messages from the web iface we get those here, so log them propertly
+        if msgobj.account == self.session.contacts.me.account:
+            participants = [x.account for x in conv.participants]
+            sent = True
+        else:
+            participants = None
+            sent = False
+
+        e3.Logger.log_message(self.session, participants, msgobj, sent, cid = cid)
 
     def _on_conversation_nudge_received(self, papycontact, pyconvevent):
         ''' handle received nudges '''
