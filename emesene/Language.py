@@ -35,11 +35,15 @@ class Language(object):
 
     def __init__(self):
         """ constructor """
+        self._languages = None
+
         self._translation = gettext.NullTranslations()
 
         self._default_locale = locale.getdefaultlocale()[0]
         self._lang = os.getenv('LANGUAGE') or self._default_locale
         self._locales_path = 'po/' if os.path.exists('po/') else None
+        
+        self._get_languages_list()
 
     def install_desired_translation(self,  language):
         """
@@ -47,28 +51,12 @@ class Language(object):
         """
         self._lang = language
 
-        try:
-            #try with LANGUAGE variable
+        if self._lang in self._languages:
             self._translation = gettext.translation('emesene', 
                                             localedir=self._locales_path,
                                             languages=[self._lang])
-
-        except IOError:
-            try:
-                #try with Python's locale module
-                self._translation = gettext.translation('emesene',
-                                          localedir=self._locales_path,
-                                          languages=[self._default_locale])
-
-            except IOError:
-                    #let gettext handle the language
-                    try:
-                        self._translation = gettext.translation('emesene',
-                                                localedir=self._locales_path)
-                    except IOError:
-                        pass
-        except AttributeError:
-            pass
+        else:
+            self._translation = gettext.NullTranslations()
 
         self._translation.install()
 
@@ -95,11 +83,15 @@ class Language(object):
 
     def get_available_languages(self):
         """ returns a list of available languages """
+        return self._get_languages_list()
 
-        files = glob.glob(os.path.join(self._locales_path, '*',
-                                  'LC_MESSAGES', 'emesene.mo'))
-        
-        langs = [file.split(os.path.sep)[-3] for file in files]
-        
-        langs.sort()
-        return langs
+    def _get_languages_list(self):
+        """ fills languages list"""
+        if self._languages is None:  
+            files = glob.glob(os.path.join(self._locales_path, '*',
+                                      'LC_MESSAGES', 'emesene.mo'))
+            
+            self._languages = [file.split(os.path.sep)[-3] for file in files]     
+            self._languages.sort()
+    
+        return self._languages
