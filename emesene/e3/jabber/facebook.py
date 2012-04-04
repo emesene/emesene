@@ -155,7 +155,7 @@ class FacebookCLient(object):
             try:
                 avatar_url = self._client.fql_query("SELECT pic_big FROM user WHERE uid = me()")[0].pic_big
                 #check if avatar url change since last time
-                if not avatar_url == self._session.config.avatar_url:
+                if self._avatar_path is None or not avatar_url == self._session.config.avatar_url:
                     if self._avatar_cache is None:
                         caches = e3.cache.CacheManager(self._session.config_dir.base_dir)
                         self._avatar_cache = caches.get_avatar_cache(self._session.account.account)
