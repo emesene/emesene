@@ -56,7 +56,11 @@ class Language(object):
                                             localedir=self._locales_path,
                                             languages=[self._lang])
         else:
-            self._translation = gettext.NullTranslations()
+            try:
+                self._translation = gettext.translation('emesene',  
+                                            localedir=self._locales_path)
+            except IOError:
+                self._translation = gettext.NullTranslations()
 
         self._translation.install()
 
