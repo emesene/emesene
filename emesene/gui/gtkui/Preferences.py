@@ -286,6 +286,8 @@ class BaseTable(gtk.Table):
 
         label.set_line_wrap(line_wrap)
         self.attach(label, column, column + 1, row, row + 1, yoptions=0)
+        self.current_row += 1
+
 
     def add_button(self, text, column, row, 
                    on_click, xoptions=gtk.EXPAND|gtk.FILL, 
@@ -1126,11 +1128,13 @@ class DesktopTab(BaseTable):
 
         self.session.config.subscribe(self._on_language_changed,
                                       'language_config')
-        self.languages_cb = self.create_combo_with_label(_('Select language:'),
+      
+        self.add_text(_("Select language:"), 0, 3,  True)
+        self.languages_cb = self.create_combo( 
                             self._language_management.get_available_languages,
                             'session.config.language_config' )
-
-        self.append_row(self.languages_cb)
+        
+        self.attach(self.languages_cb, 2, 3, 3, 4, gtk.EXPAND|gtk.FILL, 0)
 
 
         self.append_markup('<b>'+_('File transfers')+'</b>')

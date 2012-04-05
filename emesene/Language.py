@@ -74,15 +74,28 @@ class Language(object):
         
     # Getters 
     def get_default_locale(self):
+        """
+        returns default locale obtained assigned only on object instantiation
+        from locale python module
+        """
         return self._default_locale
 
     def get_lang(self):
+        """
+        returns the current language code that has been used for translation
+        """
         return self._lang
     
     def get_locales_path(self):
+        """
+        returns the locales path
+        """
         return self._locales_path
         
     def get_current_translation(self):
+        """
+        returns the translation object
+        """
         return self._translation
 
     def get_available_languages(self):
@@ -92,10 +105,10 @@ class Language(object):
     def _get_languages_list(self):
         """ fills languages list"""
         if self._languages is None:  
-            files = glob.glob(os.path.join(self._locales_path, '*',
+            paths = glob.glob(os.path.join(self._locales_path, '*',
                                       'LC_MESSAGES', 'emesene.mo'))
             
-            self._languages = [file.split(os.path.sep)[-3] for file in files]     
+            self._languages = [path.split(os.path.sep)[-3] for path in paths]
             self._languages.sort()
     
         return self._languages
