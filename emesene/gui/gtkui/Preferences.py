@@ -42,17 +42,7 @@ except:
         return []
 
 # TODO: consider moving to nicer icons than stock ones.
-LIST = [
-    {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Main Window')},
-    {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Conversation Window')},
-    {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('General')},
-    {'stock_id' : gtk.STOCK_MEDIA_PLAY,'text' : _('Sounds')},
-    {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
-    {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
-    {'stock_id' : gtk.STOCK_EXECUTE,'text' : _('Extensions')},
-    {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
-    {'stock_id' : gtk.STOCK_REFRESH,'text' : _('Updates')},
-]
+
 
 class Preferences(gtk.Window):
     """A window to display/modify the preferences
@@ -65,6 +55,18 @@ class Preferences(gtk.Window):
         self.set_border_width(2)
         self.set_title(_("Preferences"))
         self.session = session
+
+        self.LIST = [
+            {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Main Window')},
+            {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Conversation Window')},
+            {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('General')},
+            {'stock_id' : gtk.STOCK_MEDIA_PLAY,'text' : _('Sounds')},
+            {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
+            {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
+            {'stock_id' : gtk.STOCK_EXECUTE,'text' : _('Extensions')},
+            {'stock_id' : gtk.STOCK_DISCONNECT,'text' : _('Plugins')},
+            {'stock_id' : gtk.STOCK_REFRESH,'text' : _('Updates')},
+        ]
 
         self.set_default_size(600, 400)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
@@ -158,7 +160,7 @@ class Preferences(gtk.Window):
 
     def remove_from_list(self, icon, text, page):
 
-        LIST.remove({'stock_id' : icon,'text' : text})
+        self.LIST.remove({'stock_id' : icon,'text' : text})
         self.page_dict.remove(page)
         num = self.notebook.page_num(page)
         self.notebook.remove_page(num)
@@ -166,7 +168,7 @@ class Preferences(gtk.Window):
 
     def add_to_list(self, icon, text, page):
 
-        LIST.append({'stock_id' : icon,'text' : text})
+        self.LIST.append({'stock_id' : icon,'text' : text})
         self.page_dict.append(page)
         self.notebook.append_page(page)
         self.__refresh_list()
@@ -185,7 +187,7 @@ class Preferences(gtk.Window):
         self.page_dict.append(self.plugins_page)
         self.page_dict.append(self.updates_page)
 
-        for i in LIST:
+        for i in self.LIST:
             # we should use always the same icon size,
             # we can remove that field in LIST
             self.listStore.append([self.render_icon(i['stock_id'],
@@ -193,14 +195,14 @@ class Preferences(gtk.Window):
 
         msn_in_list = False
         fb_in_list = False
-        for pair in LIST:
+        for pair in self.LIST:
             msn_in_list = msn_in_list or pair['text'] == _('Live Messenger')
             fb_in_list = fb_in_list or pair['text'] == _('Facebook')
 
         if 'msn' in self.session.SERVICES:
         # only when session is papylib.
             if not msn_in_list:
-                LIST.append({'stock_id' : gtk.STOCK_NETWORK,
+                self.LIST.append({'stock_id' : gtk.STOCK_NETWORK,
                                  'text' : _('Live Messenger')})
                 self.listStore.append([self.render_icon(gtk.STOCK_NETWORK,
                                       gtk.ICON_SIZE_LARGE_TOOLBAR),
@@ -209,14 +211,14 @@ class Preferences(gtk.Window):
             self.msn_papylib_page = self.msn_papylib
             self.page_dict.append(self.msn_papylib_page)
         elif msn_in_list:
-            LIST.remove({'stock_id' : gtk.STOCK_NETWORK,
+            self.LIST.remove({'stock_id' : gtk.STOCK_NETWORK,
                          'text' : _('Live Messenger')})
             self.__refresh_list()
 
         if 'facebook' in self.session.SERVICES:
         # only when session is papylib.
             if not fb_in_list:
-                LIST.append({'stock_id' : gtk.STOCK_NETWORK,
+                self.LIST.append({'stock_id' : gtk.STOCK_NETWORK,
                                  'text' : _('Facebook')})
                 self.listStore.append([self.render_icon(gtk.STOCK_NETWORK,
                                       gtk.ICON_SIZE_LARGE_TOOLBAR),
@@ -225,7 +227,7 @@ class Preferences(gtk.Window):
             self.facebook_page = self.facebook
             self.page_dict.append(self.facebook_page)
         elif fb_in_list:
-            LIST.remove({'stock_id' : gtk.STOCK_NETWORK,
+            self.LIST.remove({'stock_id' : gtk.STOCK_NETWORK,
                          'text' : _('Facebook')})
             self.__refresh_list()
 
@@ -236,7 +238,7 @@ class Preferences(gtk.Window):
 
         self.listStore.clear()
 
-        for i in LIST:
+        for i in self.LIST:
             # we should use always the same icon size,
             # we can remove that field in LIST
             self.listStore.append([self.render_icon(i['stock_id'],
