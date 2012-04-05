@@ -19,6 +19,7 @@
 import os
 import time
 import gui.gtkui.utils as utils
+import e3
 import indicate
 
 import gui
@@ -80,6 +81,9 @@ class MessagingMenu(gui.BaseTray):
         This is fired when a new message arrives to a user.
         """
         contact = self.handler.session.contacts.get(account)
+        if contact is None:
+            contact = e3.Contact(account)
+
         conv_manager = self.handler.session.get_conversation_manager(cid, [account])
         conv = conv_manager.has_similar_conversation(cid, [account])
         if conv is None:
