@@ -128,7 +128,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
                 if action.id_ == Action.ACTION_QUIT:
                     log.debug('closing thread')
-                    self.logout()
+                    if not self.state == papyon.event.ClientState.CLOSED:
+                        self.logout()
                     self.session.logger.quit()
                     break
 
