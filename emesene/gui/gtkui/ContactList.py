@@ -126,12 +126,12 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.set_search_column(2)
         self.set_headers_visible(False)
 
-        self.connect('row-activated', self._on_row_activated)
-        self.connect('button-release-event' , self._on_button_press_event)
-        self.connect('row-expanded' , self._on_expand)
-        self.connect('row-collapsed' , self._on_collapse)
-        self.connect('drag-data-get', self._on_drag_data_get)
-        self.connect('drag-drop', self._on_drag_drop)
+        self.connect('row-activated',  self._on_row_activated)
+        self.connect('button-release-event',  self._on_button_press_event)
+        self.connect('row-expanded',  self._on_expand)
+        self.connect('row-collapsed',  self._on_collapse)
+        self.connect('drag-data-get',  self._on_drag_data_get)
+        self.connect('drag-drop',  self._on_drag_drop)
 
     def _set_accels(self, mainwindow):
         """set the keyboard shortcuts
@@ -146,10 +146,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
         if self.is_focus():
             if self.is_contact_selected():
                 self.contact_handler.on_remove_contact_selected()
-            
+
             elif self.is_group_selected() and \
                  self.group_handler.is_by_group_view():
-                
+
                 self.group_handler.on_remove_group_selected()
 
     def _on_expand(self, treeview, iter_, path):
@@ -881,7 +881,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             group_src = self.get_contact_selected_group()
 
             try:
-                pos = widget.get_dest_row_at_pos(x,y)[0][0]
+                pos = widget.get_dest_row_at_pos(x, y)[0][0]
             except TypeError: # yes, this can happen if you drag into a blank area
                 return True
             group_des = self.model[pos][1]
