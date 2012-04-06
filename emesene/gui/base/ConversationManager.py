@@ -300,17 +300,10 @@ class ConversationManager(object):
     def close(self, conversation):
         '''close a conversation'''
         self.session.close_conversation(conversation.cid)
-        self.remove_conversation(conversation)
         del self.conversations[conversation.cid]
         del self.session.conversations[conversation.cid]
+        self.remove_conversation(conversation)
         conversation.on_close()
-        self.after_close()
-
-    def after_close(self):
-        '''
-        Override what to do after close a conversation
-        '''
-        pass
 
     def close_all(self):
         '''close and finish all conversations'''

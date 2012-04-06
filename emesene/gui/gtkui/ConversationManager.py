@@ -196,15 +196,12 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         page_num = self.page_num(conversation)
         conversation.tab_label.remove_subscriptions()
         self.remove_page(page_num)
-        #FIXME: Dirty hack, why conversation is still alive when it's closed?
-        #       Signals are being unsubscribed (see gtkui.Conversation) but...
-        conversation.tab_index = -2
 
-    def after_close(self):
-         #If has one tab hide close button
-        if len(self.conversations) == 1:
-           for k, v in self.conversations.items():
-                v.tab_label.close.hide()
+        # Update the tab indices and close buttons of all open conversations
+        for conv in self.conversations.itervalues():
+            conv.tab_index = self.page_num(conv)
+            if len(self.conversations) == 1:
+                conv.tab_label.close.hide()
 
     def add_new_conversation(self, session, cid, members):
         """
