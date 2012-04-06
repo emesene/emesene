@@ -699,8 +699,6 @@ class ConversationWindow(BaseTable):
         # Avatar-on-left sensitivity depends on side panel visibility
         self.cb_avatar_left = self.create_check(_('Avatar on conversation left side'),
             'session.config.b_avatar_on_left')
-        self.session.config.subscribe(self._on_cb_side_panel_changed,
-            'b_show_info')
         self.append_row(self.cb_avatar_left)
         self.append_check(_('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
@@ -726,8 +724,6 @@ class ConversationWindow(BaseTable):
         self._on_conversation_tabs_change(self.session.config.get_or_set('b_conversation_tabs', True))
         #update spell lang combo sensitivity
         self._on_spell_change(self.session.config.get_or_set('b_enable_spell_check', False))
-        #update side-panel dependent options sensitivity
-        self._on_cb_side_panel_changed(self.session.config.get_or_set('b_show_info', True))
         #update small-toolbar sensitivity
         self._on_cb_show_toolbar_changed(self.session.config.get_or_set('b_show_toolbar', True))
 
@@ -738,12 +734,6 @@ class ConversationWindow(BaseTable):
             self.cb_small_toolbar.set_sensitive(True)
         else:
             self.cb_small_toolbar.set_sensitive(False)
-
-    def _on_cb_side_panel_changed(self, value):
-        if value:
-            self.cb_avatar_left.set_sensitive(True)
-        else:
-            self.cb_avatar_left.set_sensitive(False)
 
     def _on_spell_change(self, value):
         if value:
@@ -766,8 +756,6 @@ class ConversationWindow(BaseTable):
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_cb_show_toolbar_changed,
             'b_show_toolbar')
-        self.session.config.unsubscribe(self._on_cb_side_panel_changed,
-            'b_show_info')
         self.session.config.unsubscribe(self._on_spell_change,
             'b_enable_spell_check')
         self.session.config.unsubscribe(self._on_conversation_tabs_change,

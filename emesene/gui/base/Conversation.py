@@ -415,10 +415,7 @@ class Conversation(object):
 
     def on_receive_message(self, message, account, received_custom_emoticons):
         '''method called when a message arrives to the conversation'''
-        contact = self.session.contacts.get(account)
-
-        if contact is None:
-            contact = e3.Contact(account)
+        contact = self.session.contacts.safe_get(account)
 
         if message.type == e3.Message.TYPE_MESSAGE or \
            message.type == e3.Message.TYPE_FLNMSG:
@@ -499,14 +496,8 @@ class Conversation(object):
         if self.is_group_chat:
             text = _('Group chat')
         elif len(self.members) == 1:
-            contact = self.session.contacts.get(self.members[0])
-
-            # can be false if we are un a group chat with someone we dont
-            # have and the last contact leaves..
-            if contact:
-                text = contact.display_name
-            else:
-                text = self.members[0]
+            contact = self.session.contacts.safe_get(self.members[0])
+            text = contact.display_name
         else:
             log.debug('unknown state on Conversation._get_text')
             text = '(?)'
@@ -530,8 +521,8 @@ class Conversation(object):
         '''called when a contact joins the conversation'''
         if account not in self.members:
             self.members.append(account)
-            contact = self.session.contacts.get(account)
-            if contact and len(self.members) > 1:
+            contact = self.session.contacts.safe_get(account)
+            if len(self.members) > 1:
                 message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
                 _('%s has joined the conversation') % (contact.display_name), \
                 account)
@@ -548,15 +539,14 @@ class Conversation(object):
         if len(self.members) > 1 and account in self.members:
             self.members.remove(account)
             self.update_data()
-            contact = self.session.contacts.get(account)
-            if contact:
-                message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
-                _('%s has left the conversation') % (contact.display_name), \
-                account)
-                msg = gui.Message.from_information(contact, message)
+            contact = self.session.contacts.safe_get(account)
+            message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
+            _('%s has left the conversation') % (contact.display_name), \
+            account)
+            msg = gui.Message.from_information(contact, message)
 
-                self.output.information(self.formatter, msg)
-                self.conv_status.post_process_message(msg)
+            self.output.information(self.formatter, msg)
+            self.conv_status.post_process_message(msg)
 
     def on_group_started(self):
         '''called when a group conversation starts'''
@@ -568,18 +558,14 @@ class Conversation(object):
 
     def _update_single_information(self, account):
         '''set the data of the conversation to the data of the account'''
-        contact = self.session.contacts.get(account)
+        contact = self.session.contacts.safe_get(account)
 
-        if contact:
-            if contact.media == '':
-                message = MarkupParser.escape(contact.message)
-            else:
-                message = MarkupParser.escape(contact.media)
-
-            nick = MarkupParser.escape(contact.display_name)
+        if contact.media == '':
+            message = MarkupParser.escape(contact.message)
         else:
-            message = ''
-            nick = account
+            message = MarkupParser.escape(contact.media)
+
+        nick = MarkupParser.escape(contact.display_name)
 
         self.update_single_information(nick, message, account)
 

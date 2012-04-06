@@ -75,7 +75,7 @@ class Header(gtk.HBox):
     def copy_nick(self, data, widget=None):
         nick_list = []
         for member in self.members:
-            contact = self.session.contacts.get(member)
+            contact = self.session.contacts.safe_get(member)
             nick_list.append(contact.nick)
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
@@ -84,7 +84,7 @@ class Header(gtk.HBox):
     def copy_pm(self, data, widget=None):
         pm_list = []
         for member in self.members:
-            contact = self.session.contacts.get(member)
+            contact = self.session.contacts.safe_get(member)
             pm_list.append(contact.message)
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)

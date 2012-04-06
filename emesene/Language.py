@@ -66,15 +66,22 @@ class Language(object):
         self._default_locale = locale.getdefaultlocale()[0]
         self._lang = os.getenv('LANGUAGE') or self._default_locale
         self._locales_path = 'po/' if os.path.exists('po/') else None
-        
+
         self._get_languages_list()
 
     def install_desired_translation(self,  language):
         """
-        installs translation of the given @language 
+        installs translation of the given @language
         """
         self._lang = language
 
+        #if default_locale is something like es_UY or en_XX, strip the end 
+        #if it's not in LANGUAGES_DICT
+        if not self._lang in self.LANGUAGES_DICT.keys():
+            self._lang = self._lang.split("_")[0]
+
+        #now it's a nice language in LANGUAGE_DICT or, if not it's english or
+        #some unsupported translation so we fall back to english in those cases
         try:
             self._translation = gettext.translation('emesene', 
                                             localedir=self._locales_path,
@@ -91,8 +98,8 @@ class Language(object):
         """
         language = os.getenv('LANGUAGE') or self._default_locale
         self.install_desired_translation(language)
-        
-    # Getters 
+
+    # Getters
     def get_default_locale(self):
         """
         returns default locale obtained assigned only on object instantiation
@@ -105,13 +112,13 @@ class Language(object):
         returns the current language code that has been used for translation
         """
         return self._lang
-    
+
     def get_locales_path(self):
         """
         returns the locales path
         """
         return self._locales_path
-        
+
     def get_current_translation(self):
         """
         returns the translation object
@@ -124,12 +131,12 @@ class Language(object):
 
     def _get_languages_list(self):
         """ fills languages list"""
-        if self._languages is None:  
+        if self._languages is None:
             paths = glob.glob(os.path.join(self._locales_path, '*',
                                       'LC_MESSAGES', 'emesene.mo'))
-            
+
             self._languages = [path.split(os.path.sep)[-3] for path in paths]
             self._languages.append('en')
             self._languages.sort()
-    
+
         return self._languages

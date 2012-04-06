@@ -81,11 +81,10 @@ class ContactInfoRotate(gtk.VBox):
         his_picture = gui.theme.image_theme.user
         if members is not None:
             account = members[0]
-            contact = self.session.contacts.get(account)
+            contact = self.session.contacts.safe_get(account)
 
-            if contact:
-                if contact.picture:
-                    his_picture = contact.picture
+            if contact.picture:
+                his_picture = contact.picture
 
         self.first = self.his_avatarBox
         self.his_avatar.set_from_file(his_picture)
@@ -194,8 +193,8 @@ class ContactInfoRotate(gtk.VBox):
             self.timer = None
 
         account = members[0]
-        contact = self.session.contacts.get(account)
-        if contact and contact.picture:
+        contact = self.session.contacts.safe_get(account)
+        if contact.picture:
             his_picture = contact.picture
             self.his_avatar.set_from_file(his_picture)
 
