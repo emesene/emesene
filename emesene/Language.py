@@ -64,14 +64,14 @@ class Language(object):
                                         languages=[self._lang.split("_")[0]], 
                                         fallback=True)
 
-            if isinstance(self._translation, gettext.NullTranslations):
+            if not isinstance(self._translation, gettext.GNUTranslations):
                 #try with Python's locale module     
                 self._translation = gettext.translation('emesene',
                                         localedir=self._locales_path,
                                         languages=[self._default_locale],
                                         fallback=True)
 
-            if isinstance(self._translation, gettext.NullTranslations):
+            if not isinstance(self._translation, gettext.GNUTranslations):
                 #let gettext handle the language
                 self._translation = gettext.translation('emesene',
                                         localedir=self._locales_path, 
