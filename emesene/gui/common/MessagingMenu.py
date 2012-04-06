@@ -137,6 +137,8 @@ class MessagingMenu(gui.BaseTray):
 
             #Get user icon.
             contact = self.handler.session.contacts.get(body)
+            if contact is None:
+                contact = e3.Contact(body)
             pixbuf = utils.safe_gtk_pixbuf_load(contact.picture or '', (48, 48))
             if pixbuf is not None:
                 ind.set_property_icon("icon", pixbuf)
