@@ -1130,9 +1130,31 @@ class DesktopTab(BaseTable):
                                       'language_config')
       
         self.add_text(_("Select language:"), 0, 3,  True)
-        self.languages_cb = self.create_combo( 
-                            self._language_management.get_available_languages,
-                            'session.config.language_config' )
+        self.languages_cb = gtk.combo_box_new_text()
+        
+        default = None
+        index = 0
+        
+        lang_dict_r = self._language_management.LANGUAGES_DICT_R
+        for lang in sorted(lang_dict_r.keys()):
+            self.languages_cb.append_text(lang)
+            if lang_dict_r[lang] == self.session.config.language_config:
+                default = index
+            index += 1
+            
+        #in case we have some new language and it's not already on the DICT
+        for lang in self._language_management.get_available_languages():
+            if lang not in self._language_management.LANGUAGES_DICT.keys():
+                self.languages_cb.append_text(lang)
+                lang_dict_r[lang] = lang
+                if lang == self.session.config.language_config:
+                    default = index
+                index += 1
+
+        self.languages_cb.set_active(default)
+        self.languages_cb.connect('changed', self.on_language_combo_changed, \
+                                  'session.config.language_config',
+                                  lang_dict_r)
         
         self.attach(self.languages_cb, 2, 3, 3, 4, gtk.EXPAND|gtk.FILL, 0)
 
@@ -1161,6 +1183,9 @@ class DesktopTab(BaseTable):
         
     def _on_language_changed(self,  lang):
         self._language_management.install_desired_translation(lang)
+    
+    def on_language_combo_changed(self, combo, property_name, values):
+        self.set_attr(property_name, values[combo.get_active_text()])
 
 
 class MSNPapylib(BaseTable):

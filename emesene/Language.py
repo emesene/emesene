@@ -32,6 +32,30 @@ class Language(object):
     DESCRIPTION = 'Language management module'
     AUTHOR = 'Lucas F. Ottaviano (lfottaviano)'
     WEBSITE = 'www.emesene.org'
+    LANGUAGES_DICT = {'af':'Afrikaans','ar':'Arabic','ast':'Asturian', \
+      'az':'Azerbaijani','bg':'Bulgarian','bn':'Bengali','bs':'Bosnian', \
+      'ca':'Catalan','cs':'Czech','da':'Danish','de':'German','dv':'Divehi', \
+      'el':'Greek','en':'English','en_AU':'English(Australia)', \
+      'en_CA':'English(Canada)','en_GB':'English(United Kingdom)', \
+      'eo':'Esperanto','es':'Espa\xc3\xb1ol','et':'Estonian','eu':'Basque', \
+      'fi':'Finnish','fil':'Filipino','fo':'Faroese','fr':'French', \
+      'ga':'Irish','gl':'Galician','gv':'Manx','he':'Hebrew','hr':'Croatian', \
+      'hu':'Hungarian','ia':'Interlingua','id':'Indonesian','is':'Icelandic', \
+      'it':'Italian','ja':'Japanese','kab':'Kabyle','kn':'Kannada', \
+      'ko':'Korean','ku':'Kurdish','la':'Latin','lb':'Luxembourgish', \
+      'lt':'Lithuanian','lv':'Latvian','mk':'Macedonian','ms':'Malay', \
+      'nan':'Min Nan Chinese','nb':'Norwegian Bokmal','nds':'Low German', \
+      'nl':'Dutch','nn':'Norwegian Nynorsk','oc':'Occitan (post 1500)', \
+      'pl':'Polish','pt':'Portuguese','pt_BR':'Brazilian Portuguese', \
+      'ro':'Romanian','ru':'Russian','sk':'Slovak','sl':'Slovenian', \
+      'sq':'Albanian','sr':'Serbian','sv':'Swedish','ta':'Tamil','th':'Thai', \
+      'tr':'Turkish','uk':'Ukrainian','vec':'Venetian', \
+      'zh_CN':'Chinese (Simplified)','zh_HK':'Chinese (Hong Kong)', \
+      'zh_TW':'Chinese (Traditional)'}
+
+    LANGUAGES_DICT_R = {}
+    for key,value in LANGUAGES_DICT.iteritems():  
+        LANGUAGES_DICT_R[value] = key
 
     def __init__(self):
         """ constructor """
@@ -51,16 +75,12 @@ class Language(object):
         """
         self._lang = language
 
-        if self._lang in self._languages:
+        try:
             self._translation = gettext.translation('emesene', 
                                             localedir=self._locales_path,
                                             languages=[self._lang])
-        else:
-            try:
-                self._translation = gettext.translation('emesene',  
-                                            localedir=self._locales_path)
-            except IOError:
-                self._translation = gettext.NullTranslations()
+        except IOError:
+            self._translation = gettext.NullTranslations()
 
         self._translation.install()
 
@@ -109,6 +129,7 @@ class Language(object):
                                       'LC_MESSAGES', 'emesene.mo'))
             
             self._languages = [path.split(os.path.sep)[-3] for path in paths]
+            self._languages.append('en')
             self._languages.sort()
     
         return self._languages
