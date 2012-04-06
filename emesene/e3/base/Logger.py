@@ -1045,10 +1045,7 @@ def log_message(session, members, message, sent, error=False, cid=None):
 
         if len(members) == 1:
             member = members[0]
-            dst = session.contacts.get(members[0])
-
-            if dst is None:
-                dst = e3.Contact(members[0])
+            dst = session.contacts.safe_get(members[0])
 
             dest = e3.Logger.Account.from_contact(dst)
 
@@ -1058,10 +1055,7 @@ def log_message(session, members, message, sent, error=False, cid=None):
         else:
 
             for dst_account in members:
-                dst = session.contacts.get(dst_account)
-
-                if dst is None:
-                    dst = e3.Contact(dst_account)
+                dst = session.contacts.safe_get(dst_account)
 
                 dest = e3.Logger.Account.from_contact(dst)
                 logs.append((event, status, message.body, src, dest, cid))

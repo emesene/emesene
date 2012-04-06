@@ -80,9 +80,7 @@ class MessagingMenu(gui.BaseTray):
         """
         This is fired when a new message arrives to a user.
         """
-        contact = self.handler.session.contacts.get(account)
-        if contact is None:
-            contact = e3.Contact(account)
+        contact = self.handler.session.contacts.safe_get(account)
 
         conv_manager = self.handler.session.get_conversation_manager(cid, [account])
         conv = conv_manager.has_similar_conversation(cid, [account])
@@ -136,9 +134,7 @@ class MessagingMenu(gui.BaseTray):
                 ind = indicate.IndicatorMessage()
 
             #Get user icon.
-            contact = self.handler.session.contacts.get(body)
-            if contact is None:
-                contact = e3.Contact(body)
+            contact = self.handler.session.contacts.safe_get(body)
             pixbuf = utils.safe_gtk_pixbuf_load(contact.picture or '', (48, 48))
             if pixbuf is not None:
                 ind.set_property_icon("icon", pixbuf)

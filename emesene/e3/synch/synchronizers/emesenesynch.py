@@ -275,12 +275,9 @@ class EmeseneSynch(Synch):
                 if(account.lower() == user.lower()):
                     user = account
 
-            founded_account = self._session.contacts.get(user)
+            found_account = self._session.contacts.safe_get(user)
 
-            if(founded_account != None):
-                return e3.Logger.Account.from_contact( founded_account )
-            else:
-                return e3.Logger.Account.from_contact( e3.base.Contact(user) )
+            return e3.Logger.Account.from_contact(found_account)
 
 
         def __dest_user(self, conv_id):
@@ -304,4 +301,3 @@ class EmeseneSynch(Synch):
             d=data.partition("UTF-8\r\n")
             end=d[2].encode('UTF-8')
             return end
-

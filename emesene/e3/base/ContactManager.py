@@ -37,6 +37,13 @@ class ContactManager(object):
         '''return a contact from an account'''
         return self.contacts.get(account, None)
 
+    def safe_get(self, account):
+        '''return a contact from an account if present, otherwise create one'''
+        contact = self.contacts.get(account)
+        if contact is None:
+            contact = Contact(account)
+        return contact
+
     # actions on our contact
     def get_no_group(self):
         '''return a list of contacts that dont belong to any group'''
