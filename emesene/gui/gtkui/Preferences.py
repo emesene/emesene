@@ -1139,7 +1139,8 @@ class DesktopTab(BaseTable):
                     default = index
                 index += 1
 
-        self.languages_cb.set_active(default)
+        if default is not None:
+            self.languages_cb.set_active(default)
         self.languages_cb.connect('changed', self.on_language_combo_changed, \
                                   'session.config.language_config',
                                   lang_dict_r)

@@ -32,37 +32,37 @@ class Language(object):
     DESCRIPTION = 'Language management module'
     AUTHOR = 'Lucas F. Ottaviano (lfottaviano)'
     WEBSITE = 'www.emesene.org'
-    LANGUAGES_DICT = {'af':'Afrikaans', \
-      'ar':'\xd8\xa7\xd9\x84\xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a\xd8\xa9', \
-      'ast':'Asturianu', \
-      'az':'\xd8\xa2\xd8\xb0\xd8\xb1\xd8\xa8\xd8\xa7\xdb\x8c\xd8\xac\xd8\xa7\xd9\x86 \xd8\xaf\xdb\x8c\xd9\x84\xdb\x8c', \
-      'bg':'\xd0\x91\xd1\x8a\xd0\xbb\xd0\xb3\xd0\xb0\xd1\x80\xd1\x81\xd0\xba\xd0\xb8 \xd0\xb5\xd0\xb7\xd0\xb8\xd0\xba', \
-      'bn':'\xe0\xa6\xac\xe0\xa6\xbe\xe0\xa6\x82\xe0\xa6\xb2\xe0\xa6\xbe', \
-      'bs':'\xd0\xb1\xd0\xbe\xd1\x81\xd0\xb0\xd0\xbd\xd1\x81\xd0\xba\xd0\xb8', \
-      'ca':'Catal\xc3\xa0','cs':'\xc4\x8de\xc5\xa1tina','da':'Danish', \
-      'de':'Deutsch','dv':'\xde\x8b\xde\xa8\xde\x88\xde\xac\xde\x80\xde\xa8', \
-      'el':'\xce\x95\xce\xbb\xce\xbb\xce\xb7\xce\xbd\xce\xb9\xce\xba\xce\xac', \
-      'en':'English','en_AU':'English(Australia)', \
-      'en_CA':'English(Canada)','en_GB':'English(United Kingdom)', \
-      'eo':'Esperanto','es':'Espa\xc3\xb1ol','et':'Eesti keel','eu':'Euskara', \
-      'fi':'Suomi','fil':'Filipino','fo':'F\xc3\xb8royskt','fr':'Fran\xc3\xa7ais', \
-      'ga':'Gaeilge','gl':'Galego','gv':'Gaelg', \
-      'he':'\xd7\xa2\xd6\xb4\xd7\x91\xd6\xb0\xd7\xa8\xd6\xb4\xd7\x99\xd7\xaa', \
-      'hr':'Hrvatski','hu':'Magyar','ia':'Interlingua', \
-      'id':'Bahasa Indonesia','is':'\xc3\x8dslenska','it':'Italiano', \
-      'ja':'\xe6\x97\xa5\xe6\x9c\xac\xe8\xaa\x9e','kab':'Taqbaylit', \
-      'kn':'Kanna\xe1\xb8\x8da', \
-      'ko':'\xed\x95\x9c\xea\xb5\xad\xec\x96\xb4/\xec\xa1\xb0\xec\x84\xa0\xeb\xa7\x90', \
-      'ku':'\xda\xa9\xd9\x88\xd8\xb1\xd8\xaf\xdb\x8c', \
-      'la':'Lat\xc4\xabna','lb':'L\xc3\xabtzebuergesch', \
-      'lt':'Lithuanian','lv':'Latvian','mk':'Macedonian','ms':'Malay', \
-      'nan':'Min Nan Chinese','nb':'Norwegian Bokmal','nds':'Low German', \
-      'nl':'Dutch','nn':'Norwegian Nynorsk','oc':'Occitan (post 1500)', \
-      'pl':'Polish','pt':'Portuguese','pt_BR':'Brazilian Portuguese', \
-      'ro':'Romanian','ru':'Russian','sk':'Slovak','sl':'Slovenian', \
-      'sq':'Albanian','sr':'Serbian','sv':'Swedish','ta':'Tamil','th':'Thai', \
-      'tr':'Turkish','uk':'Ukrainian','vec':'Venetian', \
-      'zh_CN':'Chinese (Simplified)','zh_HK':'Chinese (Hong Kong)', \
+    LANGUAGES_DICT = {'af':'Afrikaans',
+      'ar':'\xd8\xa7\xd9\x84\xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a\xd8\xa9',
+      'ast':'Asturianu',
+      'az':'\xd8\xa2\xd8\xb0\xd8\xb1\xd8\xa8\xd8\xa7\xdb\x8c\xd8\xac\xd8\xa7\xd9\x86 \xd8\xaf\xdb\x8c\xd9\x84\xdb\x8c',
+      'bg':'\xd0\x91\xd1\x8a\xd0\xbb\xd0\xb3\xd0\xb0\xd1\x80\xd1\x81\xd0\xba\xd0\xb8 \xd0\xb5\xd0\xb7\xd0\xb8\xd0\xba',
+      'bn':'\xe0\xa6\xac\xe0\xa6\xbe\xe0\xa6\x82\xe0\xa6\xb2\xe0\xa6\xbe',
+      'bs':'\xd0\xb1\xd0\xbe\xd1\x81\xd0\xb0\xd0\xbd\xd1\x81\xd0\xba\xd0\xb8',
+      'ca':'Catal\xc3\xa0','cs':'\xc4\x8de\xc5\xa1tina','da':'Danish',
+      'de':'Deutsch','dv':'\xde\x8b\xde\xa8\xde\x88\xde\xac\xde\x80\xde\xa8',
+      'el':'\xce\x95\xce\xbb\xce\xbb\xce\xb7\xce\xbd\xce\xb9\xce\xba\xce\xac',
+      'en':'English','en_AU':'English(Australia)',
+      'en_CA':'English(Canada)','en_GB':'English(United Kingdom)',
+      'eo':'Esperanto','es':'Espa\xc3\xb1ol','et':'Eesti keel','eu':'Euskara',
+      'fi':'Suomi','fil':'Filipino','fo':'F\xc3\xb8royskt','fr':'Fran\xc3\xa7ais',
+      'ga':'Gaeilge','gl':'Galego','gv':'Gaelg',
+      'he':'\xd7\xa2\xd6\xb4\xd7\x91\xd6\xb0\xd7\xa8\xd6\xb4\xd7\x99\xd7\xaa',
+      'hr':'Hrvatski','hu':'Magyar','ia':'Interlingua',
+      'id':'Bahasa Indonesia','is':'\xc3\x8dslenska','it':'Italiano',
+      'ja':'\xe6\x97\xa5\xe6\x9c\xac\xe8\xaa\x9e','kab':'Taqbaylit',
+      'kn':'Kanna\xe1\xb8\x8da',
+      'ko':'\xed\x95\x9c\xea\xb5\xad\xec\x96\xb4/\xec\xa1\xb0\xec\x84\xa0\xeb\xa7\x90',
+      'ku':'\xda\xa9\xd9\x88\xd8\xb1\xd8\xaf\xdb\x8c',
+      'la':'Lat\xc4\xabna','lb':'L\xc3\xabtzebuergesch',
+      'lt':'Lithuanian','lv':'Latvian','mk':'Macedonian','ms':'Malay',
+      'nan':'Min Nan Chinese','nb':'Norwegian Bokmal','nds':'Low German',
+      'nl':'Dutch','nn':'Norwegian Nynorsk','oc':'Occitan (post 1500)',
+      'pl':'Polish','pt':'Portuguese','pt_BR':'Brazilian Portuguese',
+      'ro':'Romanian','ru':'Russian','sk':'Slovak','sl':'Slovenian',
+      'sq':'Albanian','sr':'Serbian','sv':'Swedish','ta':'Tamil','th':'Thai',
+      'tr':'Turkish','uk':'Ukrainian','vec':'Venetian',
+      'zh_CN':'Chinese (Simplified)','zh_HK':'Chinese (Hong Kong)',
       'zh_TW':'Chinese (Traditional)'}
 
     LANGUAGES_DICT_R = {}
@@ -89,7 +89,7 @@ class Language(object):
 
         #if default_locale is something like es_UY or en_XX, strip the end 
         #if it's not in LANGUAGES_DICT
-        if not self._lang in self.LANGUAGES_DICT.keys():
+        if self._lang not in self.LANGUAGES_DICT.keys() and self._lang is not None:
             self._lang = self._lang.split("_")[0]
 
         #now it's a nice language in LANGUAGE_DICT or, if not it's english or
