@@ -82,12 +82,10 @@ class Language(object):
 
         #now it's a nice language in LANGUAGE_DICT or, if not it's english or
         #some unsupported translation so we fall back to english in those cases
-        try:
-            self._translation = gettext.translation('emesene', 
-                                            localedir=self._locales_path,
-                                            languages=[self._lang])
-        except IOError:
-            self._translation = gettext.NullTranslations()
+        self._translation = gettext.translation('emesene', 
+                                                localedir=self._locales_path,
+                                                languages=[self._lang],
+                                                fallback=True)
 
         self._translation.install()
 
