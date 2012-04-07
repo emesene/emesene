@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 '''Language module, allows the user to change the language on demand'''
 # -*- coding: utf-8 -*-
 
