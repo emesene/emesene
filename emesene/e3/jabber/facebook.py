@@ -40,6 +40,7 @@ class FacebookCLient(object):
         self._session.config.get_or_set('b_fb_picture_download', False)
         self._client = Pyfb(API_KEY)
         self.active = False
+        self.active_social_request = False
         self._nick = None
         self._avatar_cache = None
         self._avatar_path = None
@@ -52,6 +53,9 @@ class FacebookCLient(object):
 
     def request_permitions(self):
         '''ask user to grant access to facebook APIs'''
+        if self.active_social_request:
+            #avoid multiple requests
+            return
         if sys.platform == 'darwin' or (sys.platform == 'win32' and sys.getwindowsversion()[0] > 6):
             #Mac didn't have webkit suppport so open link in browser
             # and ask user to copy the url
@@ -60,6 +64,7 @@ class FacebookCLient(object):
             conn_url = None
         else:
             conn_url = self._client.get_auth_url(REDIRECT_URL)
+        self.active_social_request = True
         self._session.social_request(conn_url)
 
     def set_token(self, token, active):
@@ -68,6 +73,7 @@ class FacebookCLient(object):
         if self.active and not token is None:
             self._client.set_access_token(token)
             self.active = True
+        self.active_social_request = False
 
     def _get_personal_nick(self):
         '''get the person name as nick'''
