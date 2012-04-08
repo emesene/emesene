@@ -129,11 +129,16 @@ class Language(object):
         if self._lang not in self.LANGUAGES_DICT.keys() and self._lang is not None:
             self._lang = self._lang.split("_")[0]
 
+        # gettext.translation() receives a _list_ of languages, so make it a list.
+        # if _lang is exactly None, this lets gettext resolve the language. 
+        if self._lang is not None:
+            self._lang = [self._lang]
+
         #now it's a nice language in LANGUAGE_DICT or, if not it's english or
         #some unsupported translation so we fall back to english in those cases
         self._translation = gettext.translation('emesene', 
                                                 localedir=self._locales_path,
-                                                languages=[self._lang],
+                                                languages=self._lang,
                                                 fallback=True)
 
         self._translation.install()
