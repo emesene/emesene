@@ -156,7 +156,6 @@ class FacebookCLient(object):
 
     def _get_profile_pic(self):
         '''get current profile picture'''
-        path = None
         if self.active:
             try:
                 avatar_url = self._client.fql_query("SELECT pic_big FROM user WHERE uid = me()")[0].pic_big
@@ -168,30 +167,28 @@ class FacebookCLient(object):
                     new_path = self._avatar_cache.insert_url(avatar_url)[1]
                     self._avatar_path = os.path.join(self._avatar_cache.path, new_path)
                     self._session.config.avatar_url = avatar_url
-                path = self._avatar_path
             except OAuthException:
                 self.request_permitions()
             except PyfbException:
                 #we don't have any avatar pic
                 pass
 
-        return path
+        return self._avatar_path
 
     picture = property(fget=_get_profile_pic, fset=None)
 
     def process_facebook_integration(self):
         '''Do social stuff'''
-        if self.active:
-            if self._session.config.b_fb_status_download:
-                msg = self.message
-                nick = self.nick
-                if not (msg == self._session.contacts.me.message or \
-                        nick == self._session.contacts.me.nick):
-                    self._session.contacts.me.message = msg
-                    self._session.contacts.me.nick = nick
-                    self._session.profile_get_succeed(nick, msg)
-            if self._session.config.b_fb_picture_download:
-                avatar_path = self.picture
-                if not (avatar_path is None or self._session.contacts.me.picture == avatar_path):
-                    self._session.contacts.me.picture = avatar_path
-                    self._session.picture_change_succeed(self._session.account.account, avatar_path)
+        if self._session.config.b_fb_status_download:
+            msg = self.message
+            nick = self.nick
+            if not (msg == self._session.contacts.me.message or \
+                    nick == self._session.contacts.me.nick):
+                self._session.contacts.me.message = msg
+                self._session.contacts.me.nick = nick
+                self._session.profile_get_succeed(nick, msg)
+        if self._session.config.b_fb_picture_download:
+            avatar_path = self.picture
+            if not (avatar_path is None or self._session.contacts.me.picture == avatar_path):
+                self._session.contacts.me.picture = avatar_path
+                self._session.picture_change_succeed(self._session.account.account, avatar_path)
