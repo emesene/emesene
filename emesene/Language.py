@@ -122,15 +122,15 @@ class Language(object):
         @language, a string with the language code or None
         """
         if language is not None:
-          #if default_locale is something like es_UY or en_XX, strip the end 
-          #if it's not in LANGUAGES_DICT
-          if language not in self.LANGUAGES_DICT.keys():
-              language = language.split("_")[0]
+            #if default_locale is something like es_UY or en_XX, strip the end 
+            #if it's not in LANGUAGES_DICT
+            if language not in self.LANGUAGES_DICT.keys():
+                language = language.split("_")[0]
 
-          self._lang = language
+            self._lang = language
 
-          # gettext.translation() receives a _list_ of languages, so make it a list.
-          language = [language]
+            # gettext.translation() receives a _list_ of languages, so make it a list.
+            language = [language]
 
         #now it's a nice language in LANGUAGE_DICT or, if not, it's english or
         #some unsupported translation so we fall back to english in those cases
@@ -138,8 +138,8 @@ class Language(object):
                                           localedir=self._locales_path,
                                           languages=language,
                                           fallback=True)
-                                          
-        if isinstance(translation, gettext.NullTranslations):
+
+        if not isinstance(translation, gettext.GNUTranslations):
             self._lang = 'en'
 
         translation.install()
