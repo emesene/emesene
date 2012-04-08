@@ -141,11 +141,11 @@ class Controller(object):
         self.last_session_account = None
         self.last_session_service = None
       
-        self.config.get_or_set("language_config", 
-                               language_management.get_lang())
-        
-        language_management.install_desired_translation(
-                                self.config.language_config)
+        if self.config.language_config is not None:
+            language_management.install_desired_translation(
+                                    self.config.language_config)
+        else:
+            language_management.install_default_translation()
 
         self._parse_commandline()
         self._setup()

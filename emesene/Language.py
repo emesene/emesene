@@ -110,8 +110,6 @@ class Language(object):
         """ constructor """
         self._languages = None
 
-        self._translation = gettext.NullTranslations()
-
         self._default_locale = locale.getdefaultlocale()[0]
         self._lang = os.getenv('LANGUAGE') or self._default_locale
         self._locales_path = 'po/' if os.path.exists('po/') else None
@@ -121,28 +119,30 @@ class Language(object):
     def install_desired_translation(self,  language):
         """
         installs translation of the given @language
+        @language, a string with the language code or None
         """
-        self._lang = language
+        if language is not None:
+          #if default_locale is something like es_UY or en_XX, strip the end 
+          #if it's not in LANGUAGES_DICT
+          if language not in self.LANGUAGES_DICT.keys():
+              language = language.split("_")[0]
 
-        #if default_locale is something like es_UY or en_XX, strip the end 
-        #if it's not in LANGUAGES_DICT
-        if self._lang not in self.LANGUAGES_DICT.keys() and self._lang is not None:
-            self._lang = self._lang.split("_")[0]
+          self._lang = language
 
-        # gettext.translation() receives a _list_ of languages, so make it a list.
-        # if _lang is exactly None, this lets gettext resolve the language. 
-        if self._lang is not None:
-            self._lang = [self._lang]
+          # gettext.translation() receives a _list_ of languages, so make it a list.
+          language = [language]
 
-        #now it's a nice language in LANGUAGE_DICT or, if not it's english or
+        #now it's a nice language in LANGUAGE_DICT or, if not, it's english or
         #some unsupported translation so we fall back to english in those cases
-        self._translation = gettext.translation('emesene', 
-                                                localedir=self._locales_path,
-                                                languages=self._lang,
-                                                fallback=True)
+        translation = gettext.translation('emesene',
+                                          localedir=self._locales_path,
+                                          languages=language,
+                                          fallback=True)
+                                          
+        if isinstance(translation, gettext.NullTranslations):
+            self._lang = 'en'
 
-        self._translation.install()
-
+        translation.install()
 
     def install_default_translation(self):
         """
@@ -170,12 +170,6 @@ class Language(object):
         returns the locales path
         """
         return self._locales_path
-
-    def get_current_translation(self):
-        """
-        returns the translation object
-        """
-        return self._translation
 
     def get_available_languages(self):
         """ returns a list of available languages """
