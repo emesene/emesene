@@ -45,6 +45,27 @@ class ConversationToolbar(gtk.Toolbar):
         self.session = session
 
         self.draw()
+        
+        
+    def redraw_ublock_button(self, contact_unblocked):
+        """
+        redraws the block button,
+        setting the appropiated stock_id and tooltip
+        """
+        if contact_unblocked:
+            ublock_icon = self.theme_tool_block
+            tooltip_text = _('Block contact')
+        else:
+            ublock_icon = self.theme_tool_unblock
+            tooltip_text = _('Unblock contact')
+
+        self.ublock.set_tooltip_text(tooltip_text)
+        
+        if isinstance(ublock_icon, gtk.Widget):
+            self.ublock.set_icon_widget(ublock_icon)
+        else:
+            self.ublock.set_stock_id(ublock_icon)
+   
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         self.ublock.set_sensitive(force_sensitive_block_button or is_sensitive)
@@ -85,7 +106,8 @@ class ConversationToolbar(gtk.Toolbar):
             theme_tool_invite = utils.gtk_ico_image_load(image_theme.tool_invite, size)
             theme_tool_clean = utils.gtk_ico_image_load(image_theme.tool_clean, size)
             theme_tool_file_transfer = utils.gtk_ico_image_load(image_theme.tool_file_transfer, size)
-            theme_tool_ublock = utils.gtk_ico_image_load(image_theme.tool_ublock, size)
+            self.theme_tool_block = utils.gtk_ico_image_load(image_theme.tool_block, size)
+            self.theme_tool_unblock = utils.gtk_ico_image_load(image_theme.tool_unblock, size)
         else:
             theme_tool_font = gtk.STOCK_SELECT_FONT
             theme_tool_font_color = gtk.STOCK_SELECT_COLOR
@@ -97,7 +119,8 @@ class ConversationToolbar(gtk.Toolbar):
             theme_tool_invite = gtk.STOCK_ADD
             theme_tool_clean = gtk.STOCK_CLEAR
             theme_tool_file_transfer = gtk.STOCK_GO_UP
-            theme_tool_ublock = gtk.STOCK_STOP
+            self.theme_tool_block = gtk.STOCK_STOP
+            self.theme_tool_unblock = gtk.STOCK_YES
 
         if self.session.config.b_avatar_on_left == self.session.config.b_show_info:
             theme_tool_toggle_avatar = gtk.STOCK_GO_BACK
@@ -150,7 +173,7 @@ class ConversationToolbar(gtk.Toolbar):
         self.invite_file_transfer.connect('clicked',
             lambda *args: self.handler.on_invite_file_transfer_selected())
 
-        self.ublock = gtk.ToolButton(theme_tool_ublock)
+        self.ublock = gtk.ToolButton(self.theme_tool_block)
         self.ublock.set_label(_('Block/Unblock contact'))
         self.ublock.set_tooltip_text(_('Block/Unblock contact'))
         self.ublock.connect('clicked',
