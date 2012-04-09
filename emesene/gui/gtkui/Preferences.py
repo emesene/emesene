@@ -1116,37 +1116,40 @@ class DesktopTab(BaseTable):
 
         self.session.config.subscribe(self._on_language_changed,
                                       'language_config')
-      
+
         self.add_text(_("Select language:"), 0, 3,  True)
-        self.languages_cb = gtk.combo_box_new_text()
-        
-        default = None
-        index = 0
-        
-        lang_dict_r = self._language_management.LANGUAGES_DICT_R
-        for lang in sorted(lang_dict_r.keys()):
-            self.languages_cb.append_text(lang)
-            if lang_dict_r[lang] == self.session.config.language_config:
+
+        default = 0
+        index = 1
+        combo_store = gtk.ListStore(str, str)
+        combo_store.append((None, _('Automatic detection')))
+
+        lang_dict = self._language_management.LANGUAGES_DICT
+
+        for lang_key in sorted(lang_dict.keys()):
+            combo_store.append((lang_key, lang_dict[lang_key]))
+            if lang_key == self.session.config.language_config:
                 default = index
             index += 1
-            
+
         #in case we have some new language and it's not already on the DICT
-        for lang in self._language_management.get_available_languages():
-            if lang not in self._language_management.LANGUAGES_DICT.keys():
-                self.languages_cb.append_text(lang)
-                lang_dict_r[lang] = lang
+        for lang_key in self._language_management.get_available_languages():
+            if lang_key not in self._language_management.LANGUAGES_DICT.keys():
+                combo_store.append((lang_key, lang_key))
                 if lang == self.session.config.language_config:
                     default = index
                 index += 1
 
-        if default is not None:
-            self.languages_cb.set_active(default)
-        self.languages_cb.connect('changed', self.on_language_combo_changed, \
-                                  'session.config.language_config',
-                                  lang_dict_r)
-        
-        self.attach(self.languages_cb, 2, 3, 3, 4, gtk.EXPAND|gtk.FILL, 0)
+        self.language_combo = gtk.ComboBox(combo_store)
+        cell = gtk.CellRendererText()
+        self.language_combo.pack_start(cell, True)
+        self.language_combo.add_attribute(cell, 'text', 1)
+        self.language_combo.set_active(default)
 
+        self.language_combo.connect('changed', self.on_language_combo_changed,
+                                    'session.config.language_config')
+
+        self.attach(self.language_combo, 2, 3, 3, 4, gtk.EXPAND|gtk.FILL, 0)
 
         self.append_markup('<b>'+_('File transfers')+'</b>')
         self.append_check(_('Sort received files by sender'),
@@ -1164,17 +1167,18 @@ class DesktopTab(BaseTable):
             buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                      gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         fc_button = gtk.FileChooserButton(path_chooser)
-        fc_button.set_current_folder(self.session.config.get_or_set("download_folder", \
+        fc_button.set_current_folder(self.session.config.get_or_set("download_folder",
                 e3.common.locations.downloads()))
         fc_button.connect('selection-changed', on_path_selected)
         self.attach(fc_button, 2, 3, 6, 7, gtk.EXPAND|gtk.FILL, 0)
-        
-        
+
     def _on_language_changed(self,  lang):
         self._language_management.install_desired_translation(lang)
     
-    def on_language_combo_changed(self, combo, property_name, values):
-        self.set_attr(property_name, values[combo.get_active_text()])
+    def on_language_combo_changed(self, combo, property_name):
+        index = combo.get_active()
+        lang_key = combo.get_model()[index][0]
+        self.set_attr(property_name, lang_key)
 
 
 class MSNPapylib(BaseTable):
