@@ -115,7 +115,7 @@ class LoginBase(object):
         if auto_login or remember_account or remember_password:
             self.status[account_and_session] = account.status
             self.config.last_logged_account = account_and_session
-            self.config.d_user_service[account] = service
+            self.config.d_user_service[account.account] = service
 
         if auto_login:#+1 account,+1 password,+1 autologin =  3
             self.accounts[account_and_session] = base64.b64encode(account.password)
