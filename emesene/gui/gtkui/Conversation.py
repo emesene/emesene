@@ -327,6 +327,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.info.set_sensitive(is_sensitive or force_sensitive_block_button)
         self.toolbar.set_sensitive(is_sensitive, force_sensitive_block_button)
 
+        # redraws block button to its corresponding icon and tooltip
+        contact_unblocked = not force_sensitive_block_button or is_sensitive
+        self.toolbar.redraw_ublock_button(contact_unblocked)
+
     def set_image_visible(self, is_visible):
         """
         set the visibility of the widget that displays the images of the members

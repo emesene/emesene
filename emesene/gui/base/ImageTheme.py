@@ -157,7 +157,8 @@ class ImageTheme(MetaData):
             self.tool_invite = os.path.join(toolbar_path, "invite.png")
             self.tool_clean = os.path.join(toolbar_path, "clean-chat.png")
             self.tool_file_transfer = os.path.join(toolbar_path, "file-transfer.png")
-            self.tool_ublock = os.path.join(toolbar_path, "ublock.png")
+            self.tool_block = os.path.join(toolbar_path, "ublock.png")
+            self.tool_unblock = os.path.join(toolbar_path, "user_unblock.png")
 
     def get_image(self, base_path, *paths):
         '''get the image path or else use the default image'''
