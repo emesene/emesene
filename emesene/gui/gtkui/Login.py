@@ -437,7 +437,6 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.remember_account.set_sensitive(False)
             self.forget_me.set_sensitive(True)
             self.btn_status.set_status(int(self.status[account_and_service]))
-            self.config.d_user_service[account] = service
 
             passw = self.decode_password(account_and_service)
             avatar_path = self.current_avatar_path(account)
@@ -780,4 +779,3 @@ class ConnectingWindow(Login):
             return False
         else:
             return True
-
