@@ -102,10 +102,6 @@ class Language(object):
       'zh_HK':'\xe6\xb1\x89\xe8\xaf\xad/\xe6\xbc\xa2\xe8\xaa\x9e (\xe9\xa6\x99\xe6\xb8\xaf\xe4\xba\xba)',
       'zh_TW':'\xe7\xb9\x81\xe9\xab\x94\xe4\xb8\xad\xe6\x96\x87'}
 
-    LANGUAGES_DICT_R = {}
-    for key,value in LANGUAGES_DICT.iteritems():  
-        LANGUAGES_DICT_R[value] = key
-
     def __init__(self):
         """ constructor """
         self._languages = None
@@ -122,7 +118,7 @@ class Language(object):
         @language, a string with the language code or None
         """
         if language is not None:
-            #if default_locale is something like es_UY or en_XX, strip the end 
+            #if default_locale is something like es_UY or en_XX, strip the end
             #if it's not in LANGUAGES_DICT
             if language not in self.LANGUAGES_DICT.keys():
                 language = language.split("_")[0]
