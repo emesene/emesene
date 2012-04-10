@@ -199,6 +199,8 @@ class Controller(object):
                 e3.common.notification.Notification)
         extension.category_register('history exporter',
                 e3.Logger.save_logs_as_txt)
+        extension.category_register('xml history exporter',
+                e3.Logger.save_logs_as_xml)
 
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
