@@ -1016,6 +1016,54 @@ def save_logs_as_txt(results, handle):
         date_text = time.strftime('[%c]', time.gmtime(timestamp))
         handle.write("%s %s: %s\n" % (date_text, nick, message))
 
+
+def save_logs_as_xml(results, handle):
+    '''save the chats in results (from get_chats or get_chats_between) as xml
+    to handle (file like object)
+
+    the caller is responsible of closing the handle
+    '''
+    from xml.dom.minidom import Document
+
+    doc = Document()
+    doc.appendChild(doc.createProcessingInstruction("xml-stylesheet",
+                                "type=\"text/css\" href=\"conversation.css\""))
+    conversation = doc.createElement("conversation")
+    doc.appendChild(conversation)
+
+    for stat, timestamp, message, nick, account in results:
+        
+        timestamp_tag = doc.createElement("timestamp")
+        date_text = time.strftime('[%c]', time.gmtime(timestamp))
+        timestamp_text = doc.createTextNode(date_text)
+        timestamp_tag.appendChild(timestamp_text)
+
+        
+        nick_tag = doc.createElement("nick")
+        nick_text = doc.createTextNode(nick)
+        nick_tag.appendChild(nick_text)
+        timestamp_tag.appendChild(nick_tag)
+
+        status_tag = doc.createElement("status")
+        status_text = doc.createTextNode(str(stat))
+        status_tag.appendChild(status_text)
+        timestamp_tag.appendChild(status_tag)
+
+        account_tag = doc.createElement("account")
+        account_text = doc.createTextNode(account)
+        account_tag.appendChild(account_text)
+        timestamp_tag.appendChild(account_tag)
+
+        message_tag = doc.createElement("message")
+        message_text = doc.createTextNode(message)
+        message_tag.appendChild(message_text)
+        timestamp_tag.appendChild(message_tag)
+
+        conversation.appendChild(timestamp_tag)
+
+    handle.write(doc.toprettyxml(indent="  ",  encoding="UTF-8"))
+
+
 def log_message(session, members, message, sent, error=False, cid=None):
     '''log a message, session is an e3.Session object, members is a list of
     members only used if sent is True, sent is True if we sent the message,
