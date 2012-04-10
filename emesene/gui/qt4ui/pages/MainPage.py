@@ -19,12 +19,10 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     WEBSITE = ''
     # pylint: enable=W0612
 
-    def __init__(self,  session, on_new_conversation, on_close,
-                on_disconnect, set_menu_bar_cb, parent=None):
+    def __init__(self,  session, on_new_conversation, set_menu_bar_cb, parent=None):
         '''Constructor'''
         QtGui.QWidget.__init__(self, parent)
-        gui.MainWindowBase.__init__(self, session, on_new_conversation,
-                                                on_close, on_disconnect)
+        gui.MainWindowBase.__init__(self, session, on_new_conversation)
         # callbacks:
         self._set_menu_bar_cb = set_menu_bar_cb
 

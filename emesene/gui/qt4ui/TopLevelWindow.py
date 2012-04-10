@@ -115,20 +115,18 @@ class TopLevelWindow (QtGui.QMainWindow):
             self._switch_to_page(login_page)
         self.setMenuBar(None)
 
-    def go_main(self, session, on_new_conversation,
-            on_close, on_disconnect, quit_on_close=False):
+    def go_main(self, session, on_new_conversation, quit_on_close=False):
         '''Adds a main page (the one with the contact list) to the top
         level window and shows it'''
         log.debug('GO MAIN! ^_^')
         # TODO: handle quit_on_close (??) [consider creating a base class and 
         # moving code there.] 
         main_window_cls = extension.get_default('main window')
-        main_page = main_window_cls(session, on_new_conversation, on_close, 
-                                    on_disconnect, self.setMenuBar)
+        main_page = main_window_cls(session, on_new_conversation, self.setMenuBar)
         self._content_type = 'main'
         self._switch_to_page(main_page)
-        self._setup_main_menu(session, main_page.contact_list, 
-                              on_close, on_disconnect)
+        self._setup_main_menu(session, main_page.contact_list)
+
         if quit_on_close:
             self._cb_on_close = self._given_cb_on_close
         else:
@@ -165,7 +163,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         self._cb_on_close(self._content)
         self.hide()
         
-    def _setup_main_menu(self, session, contact_list, on_close, on_disconnect):
+    def _setup_main_menu(self, session, contact_list):
         '''build all the menus used on the client'''
         
         # retrieving classes:
@@ -175,13 +173,10 @@ class TopLevelWindow (QtGui.QMainWindow):
         avatar_manager = None #avatar_manager_cls(self._session)
         
         # create menu handlers
-        menu_hnd = gui.base.MenuHandler(session, dialog_cls, contact_list,  
-                                        on_disconnect, on_close)
+        menu_hnd = gui.base.MenuHandler(session, contact_list)
 
-        contact_hnd = gui.base.ContactHandler(session, dialog_cls,
-                                              contact_list)
-        group_hnd = gui.base.GroupHandler(session, dialog_cls,
-                                          contact_list)
+        contact_hnd = gui.base.ContactHandler(session, contact_list)
+        group_hnd = gui.base.GroupHandler(session, contact_list)
         # retrieve menu classes
         main_menu_cls = extension.get_default('main menu')
         contact_menu_cls = extension.get_default('menu contact')

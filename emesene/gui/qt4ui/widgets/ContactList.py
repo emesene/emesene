@@ -35,7 +35,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         # We need a model *before* callig gui.ContactList's costructor!!
         self._model = ContactListModel.ContactListModel(session.config, self)
         self._pmodel = ContactListProxy.ContactListProxy(session.config, self)
-        gui.ContactList.__init__(self, session, dialog)
+        gui.ContactList.__init__(self, session)
         
         self._pmodel.setSourceModel(self._model)
         self.setModel(self._pmodel)
