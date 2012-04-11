@@ -26,9 +26,10 @@ import sqlite3.dbapi2 as sqlite
 import status as pstatus
 
 import logging
-log = logging.getLogger('e3.base.Logger') # oh snap!
+log = logging.getLogger('e3.base.Logger')  # oh snap!
 
 import e3
+
 
 class Account(object):
     '''a class to store account data'''
@@ -64,6 +65,7 @@ class Account(object):
         return cls(contact.cid, None, contact.account,
             contact.status, contact.nick, contact.message, contact.picture)
 
+
 class Group(object):
     '''a class that represents a group of contacts'''
 
@@ -78,6 +80,7 @@ class Group(object):
     def __str__(self):
         '''return a string representation of the object'''
         return "<group '%s'>" % (self.name,)
+
 
 class Logger(object):
     '''a class to log activity on an IM'''
@@ -341,7 +344,7 @@ class Logger(object):
         full_path = os.path.join(path, db_name)
 
         if os.path.exists(full_path + "copy"):
-            shutil.copy (full_path + "copy", full_path)
+            shutil.copy(full_path + "copy", full_path)
 
         self.connection = sqlite.connect(full_path)
         self.cursor = self.connection.cursor()
@@ -557,7 +560,8 @@ class Logger(object):
     def insert_account_by_group(self, id_account, id_group):
         '''insert the relation between an account and a group'''
         try:
-            self.execute(Logger.INSERT_ACCOUNT_BY_GROUP, (id_account, id_group))
+            self.execute(Logger.INSERT_ACCOUNT_BY_GROUP,
+                         (id_account, id_group))
         except sqlite.IntegrityError, e:
             log.error(str(e))
 
@@ -596,7 +600,10 @@ class Logger(object):
 
     def add_event(self, event, status, payload, src, dest=None, ext_time=None,
             id_time=None, cid=0):
-        '''add an event on the fact and the dimensiones using the actual time'''
+        '''
+        add an event on the fact and the dimensiones using
+        the actual time
+        '''
 
         id_event = self.insert_event(event)
         (id_src_info, id_src_acc) = self.insert_info(src.account, src.id,
@@ -645,7 +652,8 @@ class Logger(object):
         if id_event is None:
             return None
 
-        self.execute(Logger.SELECT_ACCOUNT_EVENT, (id_event, id_account, limit))
+        self.execute(Logger.SELECT_ACCOUNT_EVENT,
+                     (id_event, id_account, limit))
 
         return self._fetch_sorted()
 
@@ -821,6 +829,7 @@ class Logger(object):
                 self.delete_account_by_group(local_account.id_account,
                                              local_group.id)
 
+
 class LoggerProcess(threading.Thread):
     '''a process that exposes a thread safe api to log events of a session'''
 
@@ -986,13 +995,16 @@ class LoggerProcess(threading.Thread):
         '''
         self.input.put(('get_chats_between', (src, dest, from_t, to_t, limit,
                                               callback)))
-    def get_chats_by_keyword(self, src, dest, from_t, to_t, keywords, limit, callback):
+
+    def get_chats_by_keyword(self, src, dest, from_t,
+                             to_t, keywords, limit, callback):
         '''return the last # sent from src to dest or from dest to src ,
         between two timestamps from_t and to_t, containing keywords,
         where # is the limit value
         '''
-        self.input.put(('get_chats_by_keyword', (src, dest, from_t, to_t, keywords,
-                                               limit, callback)))
+        self.input.put(('get_chats_by_keyword', (src, dest, from_t, to_t,
+                                                 keywords, limit, callback)))
+
     def add_groups(self, groups):
         '''add all groups to the database'''
         self.input.put(('add_groups', (groups, None)))
@@ -1004,6 +1016,7 @@ class LoggerProcess(threading.Thread):
     def add_contact_by_group(self, contacts, groups):
         '''add all contacts, groups and relations to the database'''
         self.input.put(('add_contact_by_group', (contacts, groups, None)))
+
 
 def save_logs_as_txt(results, handle):
     '''save the chats in results (from get_chats or get_chats_between) as txt
@@ -1032,13 +1045,12 @@ def save_logs_as_xml(results, handle):
     doc.appendChild(conversation)
 
     for stat, timestamp, message, nick, account in results:
-        
+
         timestamp_tag = doc.createElement("timestamp")
         date_text = time.strftime('[%c]', time.gmtime(timestamp))
         timestamp_text = doc.createTextNode(date_text)
         timestamp_tag.appendChild(timestamp_text)
 
-        
         nick_tag = doc.createElement("nick")
         nick_text = doc.createTextNode(nick)
         nick_tag.appendChild(nick_text)
