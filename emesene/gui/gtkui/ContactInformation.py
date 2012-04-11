@@ -438,10 +438,7 @@ class ChatWidget(gtk.VBox):
             if not results:
                 return
 
-            if path.endswith('.xml'):
-                exporter = extension.get_default('xml history exporter')
-            else:
-                exporter = extension.get_default('history exporter')
+            exporter = extension.get_default('history exporter')
 
             exporter(results, open(path, "w"))
 
