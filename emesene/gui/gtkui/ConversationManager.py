@@ -81,10 +81,9 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         accel_group.connect_group(gtk.keysyms.W,
                                   gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
                                   self.on_key_close_tab)
-        if self.session.config.get_or_set('b_escape_hotkey', True):
-            accel_group.connect_group(gtk.keysyms.Escape,
-                                      0, gtk.ACCEL_LOCKED,
-                                      self.on_key_close_tab)
+        accel_group.connect_group(gtk.keysyms.Escape,
+                                  0, gtk.ACCEL_LOCKED,
+                                  self.on_key_close_tab)
 
         for i in range(1, 10):
             accel_group.connect_group(gtk.keysyms._0 + i,
@@ -93,9 +92,10 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
     def on_key_close_tab(self, accel_group, window, keyval, modifier):
         '''Catches events like Ctrl+W and closes current tab'''
-        index = self.get_current_page()
-        conversation = self.get_nth_page(index)
-        self.on_conversation_close(conversation)
+        if self.session.config.get_or_set('b_escape_hotkey', True):
+            index = self.get_current_page()
+            conversation = self.get_nth_page(index)
+            self.on_conversation_close(conversation)
 
     def on_key_change_tab(self, accelGroup, window, keyval, modifier):
         '''Catches alt+number and shows tab number-1  '''
