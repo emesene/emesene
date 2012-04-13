@@ -99,8 +99,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def _on_mail_count_changed(self, count):
         self.panel.mail.set_label("(%d)" % count)
 
-    def _on_mail_click(self, widget, data):
-        self.on_mail_click()
+    def _on_mail_click(self, widget, event):
+        if event.button == 1:
+            self.on_mail_click()
 
     def _on_social_request(self, conn_url):
 
