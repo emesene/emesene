@@ -70,15 +70,19 @@ class TabWidget(gtk.HBox):
             conversation)
 
         if CLOSE_ON_LEFT:
-            if self.session.config.get_or_set('b_close_button_on_tabs', True):
-                self.pack_start(self.close, False, False, 0)
+            self.pack_start(self.close, False, False, 0)
             self.pack_start(self.image, False, False, 0)
             self.pack_start(self.label, True, True, 0)
         else:
             self.pack_start(self.image, False, False, 0)
             self.pack_start(self.label, True, True, 0)
-            if self.session.config.get_or_set('b_close_button_on_tabs', True):
-                self.pack_start(self.close, False, False, 0)
+            self.pack_start(self.close, False, False, 0)
+
+        self.session.config.subscribe(self._on_close_button_on_tabs_visible,
+            'b_close_button_on_tabs')
+        self._on_close_button_on_tabs_visible(
+              self.session.config.get_or_set('b_close_button_on_tabs', True))
+
 
         if self.session.config.i_tab_position > 1:
             self.set_orientation(gtk.ORIENTATION_VERTICAL)
@@ -97,6 +101,8 @@ class TabWidget(gtk.HBox):
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self.on_tab_position_change, 
                                         'i_tab_position')
+        self.session.config.unsubscribe(self._on_close_button_on_tabs_visible,
+                                        'b_close_button_on_tabs')
 
     def set_image(self, path):
         '''set the image from path'''
@@ -113,6 +119,10 @@ class TabWidget(gtk.HBox):
         self._label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(text)))
         if self.mozilla_like:
             self.set_size_request(235, 18) # Empiric measures.
+
+    def _on_close_button_on_tabs_visible(self, value):
+        '''callback called when b_close_button_on_tabs changes'''
+        self.close.set_visible(value)
 
     def on_tab_position_change(self, position):
         if self.session.config.i_tab_position > 1:
