@@ -107,7 +107,7 @@ class Preferences(QtGui.QWidget):
         self.widget_stack.currentWidget().on_update()
         
     
-    def _present(self):
+    def present(self):
         '''Does Nothing...'''
         pass
 
