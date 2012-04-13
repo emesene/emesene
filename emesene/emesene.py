@@ -639,6 +639,7 @@ class Controller(object):
         self.session.config.get_or_set('b_notify_receive_message', True)
         self.session.config.get_or_set('b_notify_only_when_available', True)
         self.session.config.get_or_set('b_show_userpanel', True)
+        self.session.config.get_or_set('b_show_mail_inbox', True)
         self.session.config.get_or_set('b_show_emoticons', True)
         self.session.config.get_or_set('b_show_header', True)
         self.session.config.get_or_set('b_show_info', True)

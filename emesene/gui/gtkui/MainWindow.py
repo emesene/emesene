@@ -90,11 +90,13 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         scroll.add(self.contact_list)
         scroll.show_all()
 
-        if self.session.config.b_show_userpanel:
-            self.panel.hide()
-
         self.session.config.subscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
+        self.session.config.subscribe(self._on_show_mail_inbox_changed,
+            'b_show_mail_inbox')
+            
+        self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
+        self._on_show_userpanel_changed(self.session.config.b_show_userpanel)
 
     def _on_mail_count_changed(self, count):
         self.panel.mail.set_label("(%d)" % count)
@@ -102,7 +104,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def _on_mail_click(self, widget, event):
         if event.button == 1:
             self.on_mail_click()
-
+    
     def _on_social_request(self, conn_url):
 
         def get_token(token_url):
@@ -152,6 +154,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.panel.show()
         else:
             self.panel.hide()
+
+    def _on_show_mail_inbox_changed(self, value):
+        '''callback called when config.b_show_mail_inbox changes'''
+        self.panel.mail.set_visible(value)
 
     def _build_menus(self):
         '''buildall the menus used on the client'''
@@ -300,6 +306,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_list.remove_subscriptions()
         self.session.config.unsubscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
+        self.session.config.unsubscribe(self._on_show_mail_inbox_changed,
+            'b_show_mail_inbox')
         self.session.signals.contact_attr_changed.unsubscribe(
             self._on_contact_attr_changed)
         self.panel.remove_subscriptions()
