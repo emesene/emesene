@@ -745,6 +745,8 @@ class Dialog(object):
         t_server_host = gtk.Entry()
         t_server_port = gtk.Entry()
 
+        c_use_auth = gtk.CheckButton(_('Use authentication'))
+
         def on_toggled(check_button, *entries):
             '''called when a check button is toggled, receive a set
             of entries, enable or disable them deppending on the state
@@ -754,8 +756,7 @@ class Dialog(object):
 
         c_use_http = gtk.CheckButton(_('Use HTTP method'))
         c_use_proxy = gtk.CheckButton(_('Use proxy'))
-        c_use_proxy.connect('toggled', on_toggled, t_proxy_host, t_proxy_port)
-        c_use_auth = gtk.CheckButton(_('Use authentication'))
+        c_use_proxy.connect('toggled', on_toggled, t_proxy_host, t_proxy_port, c_use_auth)
         c_use_auth.connect('toggled', on_toggled, t_user, t_passwd)
 
         for ext_id, ext in extension.get_extensions('session').iteritems():
