@@ -792,15 +792,6 @@ class Dialog(object):
         proxy_settings = (l_host, l_port, l_user, l_passwd, t_proxy_host,
                 t_proxy_port, t_user, t_passwd, c_use_auth)
 
-        def on_use_proxy_toggled(*args):
-            for widget in proxy_settings:
-                if c_use_proxy.get_active():
-                    widget.show()
-                else:
-                    widget.hide()
-
-        c_use_proxy.connect('toggled', on_use_proxy_toggled)
-
         box.attach(l_server_host, 0, 1, 0, 1)
         box.attach(t_server_host, 1, 2, 0, 1)
         box.attach(l_server_port, 0, 1, 1, 2)
@@ -810,15 +801,15 @@ class Dialog(object):
         # msn (papylib) automagically gets system proxies
         if service != 'msn':
             box.attach(c_use_proxy, 0, 2, 3, 4)
-        box.attach(l_host, 0, 1, 4, 5)
-        box.attach(t_proxy_host, 1, 2, 4, 5)
-        box.attach(l_port, 0, 1, 5, 6)
-        box.attach(t_proxy_port, 1, 2, 5, 6)
-        box.attach(c_use_auth, 0, 2, 6, 7)
-        box.attach(l_user, 0, 1, 7, 8)
-        box.attach(t_user, 1, 2, 7, 8)
-        box.attach(l_passwd, 0, 1, 8, 9)
-        box.attach(t_passwd, 1, 2, 8, 9)
+            box.attach(l_host, 0, 1, 4, 5)
+            box.attach(t_proxy_host, 1, 2, 4, 5)
+            box.attach(l_port, 0, 1, 5, 6)
+            box.attach(t_proxy_port, 1, 2, 5, 6)
+            box.attach(c_use_auth, 0, 2, 6, 7)
+            box.attach(l_user, 0, 1, 7, 8)
+            box.attach(t_user, 1, 2, 7, 8)
+            box.attach(l_passwd, 0, 1, 8, 9)
+            box.attach(t_passwd, 1, 2, 8, 9)
 
         def response_cb(response):
             '''called on any response (close, accept, cancel) if accept
