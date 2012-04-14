@@ -92,6 +92,9 @@ class ConversationManager(object):
 
     def _on_message(self, cid, account, message, cedict=None):
         '''called when a message is received'''
+
+        log.debug('Message received: %f, %s' % (cid, account))
+
         conversation = self.has_similar_conversation(cid, [account])
         conversation_tabs = self.session.config.get_or_set(
                 'b_conversation_tabs', True)
@@ -102,6 +105,10 @@ class ConversationManager(object):
         if conversation is not None:
             self.set_message_waiting(conversation, True)
             conversation.on_receive_message(message, account, cedict)
+        elif conversation_tabs:
+            log.error('No conversation found. Available cids are:')
+            for conv in self.conversations.itervalues():
+                log.error('%f, %s' % (conv.cid, conv.members))
 
     def _on_user_typing(self, cid, account, *args):
         """
@@ -181,18 +188,26 @@ class ConversationManager(object):
         if not found return None
         '''
         cid = float(cid)
+        log.debug('Looking for conversations with the same cid: %f' % cid)
 
         if cid in self.conversations:
+            log.debug('A similar conversation was found with the same cid: %f' % self.conversations[cid].icid)
             return self.conversations[cid]
 
         if members is not None:
             for conversation in self.conversations.itervalues():
                 if conversation.members == members:
+                    log.debug('A similar conversation was found with the '
+                              'same members and cid: %f' % conversation.cid)
                     return conversation
 
         for conversation in self.conversations.itervalues():
             if conversation.icid == cid:
+                log.debug('A similar conversation was found with the '
+                          'same icid: %f' % conversation.icid)
                 return conversation
+
+        log.debug('No similar conversation was found')
 
         return None
 
@@ -213,6 +228,8 @@ class ConversationManager(object):
 
         old_cid = conversation.cid
 
+        log.debug('Reusing conversation. Old cid: %f, new cid: %f' % (old_cid, cid))
+
         if old_cid in self.conversations:
             del self.conversations[old_cid]
         if old_cid in self.session.conversations:
@@ -230,9 +247,13 @@ class ConversationManager(object):
         this method returns a tuple containing a boolean and a conversation
         object. If the conversation already exists, return True on as first
         value'''
+
+        log.debug('Constructing a new conversation: %f' % cid)
+
         conversation = self.reuse_conversation(cid, members)
 
         if conversation:
+            log.debug('Returning an existing conversation')
             return conversation
 
         conversation = self.add_new_conversation(self.session, cid, members)
@@ -242,6 +263,8 @@ class ConversationManager(object):
         self.after_new_conversation(conversation)
         #notify a new conversation has started
         self.session.conv_started(cid, members)
+
+        log.debug('Returning a new conversation')
         return conversation
 
     def after_new_conversation(self, conversation):
@@ -295,10 +318,12 @@ class ConversationManager(object):
         self.close(conversation)
 
         if len(self.conversations) == 0:
+            log.debug('Closing the conversation window')
             self.on_last_close()
 
     def close(self, conversation):
         '''close a conversation'''
+        log.debug('Closing conversation: %f' % conversation.cid)
         self.session.close_conversation(conversation.cid)
         del self.conversations[conversation.cid]
         del self.session.conversations[conversation.cid]
