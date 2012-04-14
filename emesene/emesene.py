@@ -70,7 +70,6 @@ import logging
 log = logging.getLogger('emesene')
 
 import e3
-#from e3 import msn
 from e3 import dummy
 
 try:
@@ -165,12 +164,9 @@ class Controller(object):
         '''register core extensions'''
         extension.category_register('session', dummy.Session,
                 single_instance=True)
-        #extension.category_register('session', msn.Session,
-        #        single_instance=True)
         if jabber is not None:
             extension.register('session', jabber.Session)
         extension.register('session', dummy.Session)
-        #extension.register('session', msn.Session)
 
         if papylib is not None:
             extension.register('session', papylib.Session)
