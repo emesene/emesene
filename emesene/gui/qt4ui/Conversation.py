@@ -135,8 +135,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             self._on_new_style_selected)
 
         dialog = extension.get_default('dialog')
-        self.toolbar_handler = gui.base.ConversationToolbarHandler(self._session,
-            dialog, gui.theme, self)
+        self.toolbar_handler = gui.base.ConversationToolbarHandler(self._session, gui.theme, self)
         action_dict['add_smiley'].triggered.connect(
                             self._on_show_smiley_chooser)
         action_dict['send_nudge'].triggered.connect(

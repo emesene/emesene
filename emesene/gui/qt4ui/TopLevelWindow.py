@@ -138,7 +138,7 @@ class TopLevelWindow (QtGui.QMainWindow):
     
     def maximize(self):
         '''Tries to maximize the window'''
-        QtGui.QMainWindow.showMaximized()
+        QtGui.QMainWindow.showMaximized(self)
         
     def on_disconnect(self, cb_on_close):
         '''called when the user is disconnected'''

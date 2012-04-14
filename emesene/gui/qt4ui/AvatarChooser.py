@@ -3,6 +3,7 @@
 '''This module contains a class to select an avatar'''
 
 import os
+import logging
 
 from PyQt4  import QtGui
 from PyQt4  import QtCore
@@ -14,6 +15,7 @@ from gui.qt4ui.Utils import tr
 import extension
 import gui
 
+log = logging.getLogger('qt4ui.AvatarChooser')
 
 class AvatarChooser(Dialog.OkCancelDialog):
     '''A dialog to choose an avatar'''
