@@ -20,7 +20,6 @@
 
 import e3
 import os
-import sys
 from pyfb.pyfb import Pyfb, PyfbException, OAuthException
 
 import logging
@@ -56,14 +55,7 @@ class FacebookCLient(object):
         if self.active_social_request:
             #avoid multiple requests
             return
-        if sys.platform == 'darwin' or (sys.platform == 'win32' and sys.getwindowsversion()[0] > 6):
-            #Mac didn't have webkit suppport so open link in browser
-            # and ask user to copy the url
-            self._client.authenticate()
-            # None means fallback to non webkit dialog
-            conn_url = None
-        else:
-            conn_url = self._client.get_auth_url(REDIRECT_URL)
+        conn_url = self._client.get_auth_url(REDIRECT_URL)
         self.active_social_request = True
         self._session.social_request(conn_url)
 

@@ -21,6 +21,7 @@ import gtk
 import gui
 import extension
 
+import sys
 import logging
 
 log = logging.getLogger('gtkui.MainWindow')
@@ -136,11 +137,17 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.session.activate_social_services(activate)
 
         dialog = extension.get_default('dialog')
-        if conn_url is not None:
+
+        use_fallback = (gui.gtkui.WEBKITERROR or sys.platform == 'darwin' or
+                        #FIXME: remove this check when webkit works on windows 7
+                        (sys.platform == 'win32' and sys.getwindowsversion()[0] > 6))
+
+        if not use_fallback:
             dialog.web_window(_("Connect Emesene and Facebook"), conn_url, set_token)
         else:
             #Fallback method
             #Open a browser and ask user to copy the access token
+            gui.base.Desktop.open(conn_url)
             w = dialog.entry_window("Url:", "", set_token_fallback, "Facebook Integration", None)
             lbl = dialog.window_add_label_vbox(w,
                   _("Please login into facebook and copy the url opened in your browser here"))
