@@ -62,7 +62,6 @@ language_management = Language()
 language_management.install_default_translation()
 
 import glib
-import optparse
 import shutil
 import signal
 
@@ -212,7 +211,7 @@ class Controller(object):
 
     def _parse_commandline(self):
         '''parse command line options'''
-        options = PluggableOptionParser.get_parsing()[0]
+        options = optionprovider.PluggableOptionParser.get_parsing()[0]
 
         debugger.init(debuglevel=options.debuglevel)
 
@@ -817,27 +816,6 @@ class Controller(object):
                 except OSError, e:
                     log.warning("Cannot remove file: %s" % e)
 
-class PluggableOptionParser(object):
-
-    results = ()
-
-    def __init__(self, args):
-        self.parser = optparse.OptionParser(conflict_handler="resolve")
-        self.args = args
-        custom_options = extension.get_category('option provider').use()()\
-                .option_register().get_result()
-        for opt in custom_options.values():
-            self.parser.add_option(opt)
-
-    def read_options(self):
-        if not self.__class__.results:
-            self.__class__.results = self.parser.parse_args(self.args)
-        return self.__class__.results
-
-    @classmethod
-    def get_parsing(cls):
-        return cls.results
-
 def main():
     """
     the main method of emesene
@@ -847,7 +825,7 @@ def main():
             interfaces=interfaces.IOptionProvider)
     extension.get_category('option provider').multi_extension = True
     extension.get_category('option provider').activate(optionprovider.ExtensionDefault)
-    options = PluggableOptionParser(args=emesene_args)
+    options = optionprovider.PluggableOptionParser(args=emesene_args)
     options.read_options()
     main_method = extension.get_default('main')
     main_method(Controller)

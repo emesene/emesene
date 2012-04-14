@@ -85,3 +85,23 @@ class ExtensionDefault(object):
 extension.implements('option provider')(ExtensionDefault)
 extension.get_category('option provider').activate(ExtensionDefault)
 
+class PluggableOptionParser(object):
+
+    results = ()
+
+    def __init__(self, args):
+        self.parser = optparse.OptionParser(conflict_handler="resolve")
+        self.args = args
+        custom_options = extension.get_category('option provider').use()()\
+                .option_register().get_result()
+        for opt in custom_options.values():
+            self.parser.add_option(opt)
+
+    def read_options(self):
+        if not self.__class__.results:
+            self.__class__.results = self.parser.parse_args(self.args)
+        return self.__class__.results
+
+    @classmethod
+    def get_parsing(cls):
+        return cls.results
