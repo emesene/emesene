@@ -390,6 +390,27 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         else:
             login_btn.setEnabled(False)
 
+    def clear_all(self, clear_pic=False):
+        '''
+        clear all login fields and checkbox
+        '''
+        widget_dic = self._widget_d
+        if clear_pic:
+            widget_dic['display_pic'].set_default_pic()
+        widget_dic['password_edit'].clear()
+        widget_dic['status_combo'].set_status(e3.status.ONLINE)
+        # _on_checkbox_state_changed enables them:
+        widget_dic['auto_login_chk'].setChecked(False)
+        widget_dic['save_password_chk'].setChecked(False)
+        widget_dic['save_account_chk'].setChecked(False)
+
+    def show_error(self, reason):
+        #implement nicebar in qt4
+        '''
+        show an error on the top of the window using nicebar
+        '''
+        pass
+
     # -------------------- QT_OVERRIDE
 
     def eventFilter(self, obj, event):
