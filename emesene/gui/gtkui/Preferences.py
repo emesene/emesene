@@ -125,6 +125,7 @@ class Preferences(gtk.Window):
         self.close = gtk.Button(stock=gtk.STOCK_CLOSE)
         self.close.connect('clicked', self.save_and_hide)
         self.buttons.pack_start(self.close)
+        self.set_accels()
 
         vbox.pack_start(self.buttons, False, False)
 
@@ -151,6 +152,22 @@ class Preferences(gtk.Window):
     def save_and_hide(self, widget):
         self.hide()
         self.session.save_config()
+        
+    def set_accels(self):
+        """
+        set the keyboard shortcuts
+        """
+        accel_group = gtk.AccelGroup()
+        self.add_accel_group(accel_group)
+        self.accel_group = accel_group
+        accel_group.connect_group(gtk.keysyms.Escape,
+                                  0, gtk.ACCEL_LOCKED,
+                                  self.on_key_close_preferences)
+
+    def on_key_close_preferences(self, accel_group, window, keyval, modifier):
+        '''Catches ESC key event and closes preferences window'''
+        self.save_and_hide(None)
+
 
     def remove_subscriptions(self):
         self.conversation.remove_subscriptions()
