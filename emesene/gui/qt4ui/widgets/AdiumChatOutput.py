@@ -46,10 +46,10 @@ class AdiumChatOutput (QtGui.QScrollArea):
         self._qwebview.linkClicked.connect(
                         lambda qt_url: webbrowser.open(qt_url.toString()) )
                             
-    def _append_message(self, msg):
+    def _append_message(self, msg, scroll=True):
         '''add a message to the conversation'''
 
-        html = self.theme.format(msg)
+        html = self.theme.format(msg, scroll)
 
         if msg.type == "status":
             msg.first = True
