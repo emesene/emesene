@@ -138,7 +138,7 @@ if os.name == "nt":
                 "plistlib", "win32gui", "OpenSSL", "Crypto", "Queue", "sqlite3",
                 "glob", "webbrowser", "json", "imaplib", "cgi", "gzip", "uuid",
                 "platform", "imghdr", "ctypes", "optparse", "plugin_base",
-                "e3.msn", "papyon", "xmpp", "plugins","webkit"]
+                "e3.msn", "pyfb", "papyon", "xmpp", "plugins","webkit"]
 
     # incude gui.common modules manually, i guess py2exe doesn't do that
     # automatically because the imports are made inside some functions    
@@ -153,7 +153,7 @@ if os.name == "nt":
             "packages": ["encodings", "gtk", "OpenSSL", "Crypto", "xml",
                          "xml.etree", "xml.etree.ElementTree"],
             "includes": includes,
-            "excludes": ["ltihooks", "pywin", "pywin.debugger",
+            "excludes": ["appindicator", "ltihooks", "pywin", "pywin.debugger",
                 "pywin.debugger.dbgcon", "pywin.dialogs",
                 "pywin.dialogs.list", "Tkconstants", "Tkinter", "tcl",
                 "doctest", "macpath", "pdb", "cookielib", "ftplib",
@@ -172,6 +172,7 @@ if os.name == "nt":
     sys.path.insert(0, os.path.abspath("./emesene"))
     sys.path.insert(0, os.path.abspath("./emesene/e3/papylib/papyon"))
     sys.path.insert(0, os.path.abspath("./emesene/e3/jabber/xmppy"))
+    sys.path.insert(0, os.path.abspath("./emesene/e3/jabber/pyfb"))
 
     # run setup
     setup(
