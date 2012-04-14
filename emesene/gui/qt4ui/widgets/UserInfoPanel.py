@@ -33,7 +33,6 @@ class UserInfoPanel (QtGui.QWidget):
         self.setLayout(lay)
         self._message_lbl.setTextFormat(Qt.RichText)
         
-
     def set_all(self, message, account):
         '''Updates the infos shown in the panel'''
         self._account = account
@@ -41,9 +40,9 @@ class UserInfoPanel (QtGui.QWidget):
         
     def set_icon(self, icon):
         '''Updates the icon'''
-        pixmap = QtGui.QPixmap(icon)
-        self._emblem_lbl.setPixmap(pixmap)
-        
+        self._emblem_lbl = QtGui.QLabel(self)
+        self._emblem_lbl.setPixmap(QtGui.QPixmap(icon))        
+       
     def set_message(self, message):
         '''Updates the message'''
         message = Utils.escape(message)
