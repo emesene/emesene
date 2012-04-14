@@ -26,6 +26,7 @@ import logging
 
 log = logging.getLogger('gtkui.MainWindow')
 
+
 class MainWindow(gtk.VBox, gui.MainWindowBase):
     '''this class represents the widget that is shown when the user is logged
     in (menu, contact list etc)'''
@@ -44,7 +45,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
         self.below_menu = extension.get_and_instantiate('below menu', self)
         self.below_panel = extension.get_and_instantiate('below panel', self)
-        self.below_userlist = extension.get_and_instantiate('below userlist', self)
+        self.below_userlist = extension.get_and_instantiate('below userlist',
+                                                            self)
 
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
@@ -95,7 +97,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             'b_show_userpanel')
         self.session.config.subscribe(self._on_show_mail_inbox_changed,
             'b_show_mail_inbox')
-            
+
         self._on_show_userpanel_changed(self.session.config.b_show_userpanel)
         self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
 
@@ -105,7 +107,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def _on_mail_click(self, widget, event):
         if event.button == 1:
             self.on_mail_click()
-    
+
     def _on_social_request(self, conn_url):
 
         def get_token(token_url):
@@ -143,7 +145,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
                         (sys.platform == 'win32' and sys.getwindowsversion()[0] > 6))
 
         if not use_fallback:
-            dialog.web_window(_("Connect Emesene and Facebook"), conn_url, set_token)
+            dialog.web_window(_("Connect Emesene and Facebook"),
+                              conn_url, set_token)
         else:
             #Fallback method
             #Open a browser and ask user to copy the access token
@@ -215,7 +218,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         '''show the widget'''
         gtk.VBox.show(self)
         if not self.session.config.b_hide_menu:
-            self.menu.show_all() 
+            self.menu.show_all()
         self.contact_list.show()
         self.below_menu.show()
         self.below_panel.show()
@@ -258,7 +261,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def _on_entry_key_press(self, entry, event):
         '''called when a key is pressed on the search box'''
         if event.keyval == gtk.keysyms.Escape or \
-           event.state  & gtk.gdk.CONTROL_MASK:
+           event.state & gtk.gdk.CONTROL_MASK:
             self.panel.search.set_active(False)
             entry.hide()
 

@@ -22,6 +22,7 @@ import gui
 import utils
 import extension
 
+
 class Window(gtk.Window):
     '''the class used to create all the windows of emesene'''
 
@@ -30,7 +31,7 @@ class Window(gtk.Window):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, cb_on_close, height=410, width=250, 
+    def __init__(self, cb_on_close, height=410, width=250,
                  posx=100, posy=100):
 
         gtk.Window.__init__(self)
@@ -73,7 +74,7 @@ class Window(gtk.Window):
 
     def go_login(self, callback, on_preferences_changed,
                  config=None, config_dir=None, config_path=None,
-                 proxy=None, use_http=None, session_id=None, 
+                 proxy=None, use_http=None, session_id=None,
                  cancel_clicked=False, no_autologin=False):
 
         '''draw the login window on the main window'''
