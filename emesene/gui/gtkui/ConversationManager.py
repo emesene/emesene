@@ -221,6 +221,16 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
         return conversation
 
+    def after_new_conversation(self, conversation):
+        gui.ConversationManager.after_new_conversation(self, conversation)
+         #If has more than one tab show close buttons
+        if len(self.conversations) < 2:
+            conversation.tab_label.close.hide()
+        elif len(self.conversations) == 2:
+            for k, v in self.conversations.items():
+                v.tab_label.close.set_visible(
+                            self.session.config.b_close_button_on_tabs)
+
     def update_window(self, text, icon, index):
         ''' updates the window's border and item on taskbar
             with given text and icon '''
