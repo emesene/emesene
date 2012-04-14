@@ -154,6 +154,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.panel.show()
         else:
             self.panel.hide()
+        self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
 
     def _on_show_mail_inbox_changed(self, value):
         '''callback called when config.b_show_mail_inbox changes'''
