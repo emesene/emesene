@@ -79,9 +79,15 @@ except ImportError:
     DBusController = None
 
 try:
-    from e3.common.NetworkManagerHelper import DBusNetworkChecker
+    from e3.common.NetworkManagerHelper import DBusNetworkChecker as NetworkChecker
 except ImportError:
-    DBusNetworkChecker = None
+    NetworkChecker = None
+
+#try windows network check
+try:
+    from e3.common.NetworkManagerHelperWin32 import Win32NetworkChecker as NetworkChecker
+except ImportError:
+    NetworkChecker = None
 
 try:
     from gui import gtkui
@@ -182,9 +188,9 @@ class Controller(object):
         else:
             self.dbus_ext = None
 
-        if DBusNetworkChecker is not None:
-            extension.category_register('network checker', DBusNetworkChecker)
-            extension.set_default('network checker', DBusNetworkChecker)
+        if NetworkChecker is not None:
+            extension.category_register('network checker', NetworkChecker)
+            extension.set_default('network checker', NetworkChecker)
             self.network_checker = extension.get_and_instantiate(
                     'network checker')
         else:
