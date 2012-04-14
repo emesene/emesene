@@ -188,6 +188,29 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_menu.show_all()
         self.group_menu.show_all()
 
+    def set_accels(self, window=None):
+        ''' set accels group to the given window '''
+        if window == None:
+            return
+
+        accel_group = gtk.AccelGroup()
+        window.add_accel_group(accel_group)
+        window.accel_group = accel_group
+        accel_group.connect_group(gtk.keysyms.Q,
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
+                                  self.on_key_quit)
+        accel_group.connect_group(gtk.keysyms.D,
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
+                                  self.on_key_disconnect)
+
+    def on_key_quit(self, accel_group, window, keyval, modifier):
+        '''Catches Ctrl+Q and quits the program'''
+        self.session.close(True)
+
+    def on_key_disconnect(self, accel_group, window, keyval, modifier):
+        '''Catches Ctrl+D and closes the session (disconnection)'''
+        self.session.close()
+
     def show(self):
         '''show the widget'''
         gtk.VBox.show(self)
@@ -234,7 +257,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def _on_entry_key_press(self, entry, event):
         '''called when a key is pressed on the search box'''
-        if event.keyval == gtk.keysyms.Escape:
+        if event.keyval == gtk.keysyms.Escape or \
+           event.state  & gtk.gdk.CONTROL_MASK:
             self.panel.search.set_active(False)
             entry.hide()
 

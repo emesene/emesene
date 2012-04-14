@@ -102,6 +102,7 @@ class Window(gtk.Window):
         '''change to the main window'''
         MainWindow = extension.get_default('main window')
         self.content = MainWindow(session, on_new_conversation)
+        self.content.set_accels(self)
         self.add(self.content)
         self.content.show()
         self.content_type = 'main'
