@@ -95,8 +95,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.session.config.subscribe(self._on_show_mail_inbox_changed,
             'b_show_mail_inbox')
             
-        self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
         self._on_show_userpanel_changed(self.session.config.b_show_userpanel)
+        self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
 
     def _on_mail_count_changed(self, count):
         self.panel.mail.set_label("(%d)" % count)
@@ -185,7 +185,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         gtk.VBox.show(self)
         if not self.session.config.b_hide_menu:
             self.menu.show_all() 
-        self.panel.show()
         self.contact_list.show()
         self.below_menu.show()
         self.below_panel.show()
