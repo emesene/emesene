@@ -22,6 +22,7 @@ import e3
 import gui
 import utils
 
+
 class ConversationToolbar(gtk.Toolbar):
     """
     A class that represents the toolbar on the conversation window
@@ -45,8 +46,7 @@ class ConversationToolbar(gtk.Toolbar):
         self.session = session
 
         self.draw()
-        
-        
+
     def redraw_ublock_button(self, contact_unblocked):
         """
         redraws the block button,
@@ -60,12 +60,11 @@ class ConversationToolbar(gtk.Toolbar):
             tooltip_text = _('Unblock contact')
 
         self.ublock.set_tooltip_text(tooltip_text)
-        
+
         if isinstance(ublock_icon, gtk.Widget):
             self.ublock.set_icon_widget(ublock_icon)
         else:
             self.ublock.set_stock_id(ublock_icon)
-   
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         self.ublock.set_sensitive(force_sensitive_block_button or is_sensitive)
@@ -81,10 +80,11 @@ class ConversationToolbar(gtk.Toolbar):
         self.invite_audio_call.set_sensitive(is_sensitive)
         self.invite_file_transfer.set_sensitive(is_sensitive)
 
-
     def draw(self):
         '''draw the toolbar'''
-        toolbar_small = self.handler.session.config.get_or_set('b_toolbar_small', False)
+        toolbar_small = self.handler.session.config.get_or_set(
+                                                'b_toolbar_small',
+                                                False)
 
         if toolbar_small:
             size = gtk.ICON_SIZE_MENU
@@ -92,8 +92,8 @@ class ConversationToolbar(gtk.Toolbar):
             size = gtk.ICON_SIZE_LARGE_TOOLBAR
 
         self.settings = self.get_settings()
-        self.settings.set_long_property('gtk-toolbar-icon-size', size, \
-            'ConversationToolbar.py:37')
+        self.settings.set_long_property('gtk-toolbar-icon-size', size,
+                                        'ConversationToolbar.py:37')
 
         # check if we have theme-specific toolbar-icons
 
@@ -231,4 +231,3 @@ class ConversationToolbar(gtk.Toolbar):
             self.add(self.ublock)
         self.add(gtk.SeparatorToolItem())
         self.add(self.toggle_avatar)
-
