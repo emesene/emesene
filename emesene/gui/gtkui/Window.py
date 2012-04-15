@@ -51,25 +51,38 @@ class Window(gtk.Window):
 
         self.cb_on_close = cb_on_close
         self.cb_on_quit = cb_on_close
+
         self._state = 0
+        self._content = None
+        self.accel_group = None
 
         self.connect('delete-event', self._on_delete_event)
         self.connect('window-state-event', self._on_window_state_event)
-        self.content = None
 
         self.content_type = 'empty'
+
+    def _get_content(self):
+        '''content getter'''
+        return self._content
+
+    def _set_content(self, content):
+        '''content setter'''
+        if self._content:
+            self.remove(self._content)
+            if self.accel_group:
+                self.remove_accel_group(self.accel_group)
+                self.accel_group = None
+            del self._content
+        self._content = content
+        self.add(self._content)
+
+    content = property(_get_content, _set_content)
 
     def set_icon(self, icon):
         '''set the icon of the window'''
         if utils.file_readable(icon):
             gtk.Window.set_icon(self,
                                 utils.safe_gtk_image_load(icon).get_pixbuf())
-
-    def clear(self):
-        '''remove the content from the main window'''
-        if self.get_child():
-            self.remove(self.get_child())
-            self.content = None
 
     def go_login(self, callback, on_preferences_changed,
                  config=None, config_dir=None, config_path=None,
@@ -83,8 +96,6 @@ class Window(gtk.Window):
         self.content = LoginWindow(callback, on_preferences_changed,
             config, config_dir, config_path, proxy, use_http, session_id,
             cancel_clicked, no_autologin)
-        if self.get_child() is None:
-            self.add(self.content)
 
         self.content.show()
         self.content_type = 'login'
@@ -94,7 +105,6 @@ class Window(gtk.Window):
         ConnectingWindow = extension.get_default('connecting window')
 
         self.content = ConnectingWindow(callback, avatar_path, config)
-        self.add(self.content)
         self.content.show()
         self.content_type = 'connecting'
 
@@ -102,7 +112,6 @@ class Window(gtk.Window):
         '''change to the main window'''
         MainWindow = extension.get_default('main window')
         self.content = MainWindow(session, on_new_conversation)
-        self.add(self.content)
         self.connect('key-press-event', self.content._on_key_press)
         self.content.show()
         self.content_type = 'main'
@@ -122,7 +131,6 @@ class Window(gtk.Window):
         '''change to a conversation window'''
         ConversationManager = extension.get_default('conversation window')
         self.content = ConversationManager(session, self._on_last_tab_close)
-        self.add(self.content)
         self.connect('focus-in-event', self.content._on_focus)
         self.connect('key-press-event', self.content._on_key_press)
         self.content.show()
