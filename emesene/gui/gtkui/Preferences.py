@@ -20,6 +20,7 @@ import gtk
 
 import e3.common
 import gui
+from gui.gtkui import check_gtk3
 import subprocess
 import sys
 import extension
@@ -149,6 +150,11 @@ class Preferences(gtk.Window):
         self.add(vbox)
         vbox.show_all()
 
+    if gui.gtkui.check_gtk3():
+        def hide_on_delete(self, event, data):
+            self.hide()
+            return True
+
     def save_and_hide(self, widget):
         self.hide()
         self.session.save_config()
@@ -264,7 +270,11 @@ class Preferences(gtk.Window):
     def _on_row_activated(self, treeview):
         # Get information about the row that has been selected
         cursor, obj = treeview.get_cursor()
-        self.showPage(cursor[0])
+        if not gui.gtkui.check_gtk3():
+            self.showPage(cursor[0])
+        else:
+            if cursor:
+                self.showPage(cursor.get_indices()[0])
 
     def showPage(self, index):
         self.notebook.set_current_page(index)
@@ -1039,10 +1049,13 @@ class Extension(BaseTable):
 
     def _on_category_changed(self, combo):
         """callback called when the category on the combo changes"""
-        self.extensions.disconnect(self.ext_id)
+        if self.extensions.handler_is_connected(self.ext_id):
+            self.extensions.disconnect(self.ext_id)
         self.extensions.get_model().clear()
         self.extension_list = []
         category = combo.get_active_text()
+        if category is None:
+            return
         default = extension.get_default(category)
         extensions = extension.get_extensions(category)
 
@@ -1100,17 +1113,25 @@ class Extension(BaseTable):
     def on_update(self):
         '''called when changed to this page'''
         # empty categories combo
-        model = self.categories.get_model()
-        self.categories.set_model(None)
-        model.clear()
+        if not gui.gtkui.check_gtk3():
+            model = self.categories.get_model()
+            self.categories.set_model(None)
+            model.clear()
+        else:
+            self.categories.remove_all()
+
         # fill it again with available categories
         # this is done because a plugin may have changed them
         categories = extension.get_multiextension_categories()
 
         for item in categories:
-            model.append([item])
+            if not gui.gtkui.check_gtk3():
+                model.append([item])
+            else:
+                self.categories.append_text(item)
 
-        self.categories.set_model(model)
+        if not gui.gtkui.check_gtk3():
+            self.categories.set_model(model)
         self.categories.set_active(0)
 
 class DesktopTab(BaseTable):
@@ -1158,7 +1179,11 @@ class DesktopTab(BaseTable):
                     default = index
                 index += 1
 
-        self.language_combo = gtk.ComboBox(combo_store)
+        if gui.gtkui.check_gtk3():
+            self.language_combo = gtk.ComboBox.new_with_model(combo_store)
+        else:
+            self.language_combo = gtk.ComboBox(combo_store)
+
         cell = gtk.CellRendererText()
         self.language_combo.pack_start(cell, True)
         self.language_combo.add_attribute(cell, 'text', 1)
@@ -1187,6 +1212,9 @@ class DesktopTab(BaseTable):
         fc_button = gtk.FileChooserButton(path_chooser)
         fc_button.set_current_folder(self.session.config.get_or_set("download_folder",
                 e3.common.locations.downloads()))
+        if gui.gtkui.check_gtk3():
+            #setting on path_chooser didn't work
+            fc_button.set_action (gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER)
         fc_button.connect('selection-changed', on_path_selected)
         self.attach(fc_button, 2, 3, 6, 7, gtk.EXPAND|gtk.FILL, 0)
 
@@ -1275,18 +1303,32 @@ class Facebook(BaseTable):
                           'session.config.b_fb_status_write')
         self.append_check(_('Automatically download profile photo'),
                           'session.config.b_fb_picture_download')
+
         # box with help message
-        eventBox = gtk.EventBox()
-        eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))
+        if gui.gtkui.check_gtk3():
+            eventBox = gtk.InfoBar()
+            eventBox.set_message_type(gtk.MessageType.INFO)
+            box = eventBox.get_content_area ()
+        else:
+            eventBox = gtk.EventBox()
+            eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))
+            # icon
+            box = gtk.HBox()
+            eventBox.add(box)
+
+        # icon
+        image = gtk.image_new_from_stock(gtk.STOCK_DIALOG_INFO,
+                                         gtk.ICON_SIZE_LARGE_TOOLBAR)
+        box.pack_start(image)
 
         markup = '<span foreground="black"> %s </span>'
         noticelabel = gtk.Label()
         text = _("<b>WARNING: This will reset your facebook token."
                  "\nemesene will ask you to login into facebook on"
                  " next login</b>")
-
         noticelabel.set_markup(markup % text)
-        eventBox.add(noticelabel)
+        box.pack_start(noticelabel)
+
         self.append_row(eventBox, None)
 
         self.add_button(_('Reset Facebook settings'), 0, 7,
@@ -1309,16 +1351,22 @@ class PrivacySettings(gtk.VBox):
         self.session = session
 
         # box with help message
-        eventBox = gtk.EventBox()
-        eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))
+        if gui.gtkui.check_gtk3():
+            eventBox = gtk.InfoBar()
+            eventBox.set_message_type(gtk.MessageType.INFO)
+            box = eventBox.get_content_area ()
+        else:
+            eventBox = gtk.EventBox()
+            eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))
+            # icon
+            box = gtk.HBox()
+            eventBox.add(box)
         self.pack_start(eventBox, False, False)
 
         # icon
-        box = gtk.HBox()
         image = gtk.image_new_from_stock(gtk.STOCK_DIALOG_INFO,
                                          gtk.ICON_SIZE_LARGE_TOOLBAR)
         box.pack_start(image)
-        eventBox.add(box)
 
         # tooltip labels
         labels_box = gtk.VBox()
@@ -1508,7 +1556,7 @@ class PrivacySettings(gtk.VBox):
         contact = self.block_model.get_value(iter, 0)
         self.session.unblock(contact)
 
-    def _render_lists(self, column, render, model, iter):
+    def _render_lists(self, column, render, model, iter, *args):
         ''' changes the cell background according to the contact condition '''
         contact = model.get_value(iter, 0)
 

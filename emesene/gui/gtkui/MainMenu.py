@@ -19,6 +19,7 @@
 import gtk
 import e3
 import gui
+from gui.gtkui import check_gtk3
 import utils
 
 import extension
@@ -165,8 +166,13 @@ class OptionsMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        self.by_status = gtk.RadioMenuItem(None, _('Order by _status'))
-        self.by_group = gtk.RadioMenuItem(self.by_status, _('Order by _group'))
+        if not check_gtk3():
+            self.by_status = gtk.RadioMenuItem(None, _('Order by _status'))
+            self.by_group = gtk.RadioMenuItem(self.by_status, _('Order by _group'))
+        else:
+            self.by_status = gtk.RadioMenuItem(_('Order by _status'))
+            self.by_status.set_use_underline(True)
+            self.by_group = gtk.RadioMenuItem.new_with_mnemonic_from_widget(self.by_status, _('Order by _group'))
         self.by_group.set_active(config.b_order_by_group)
         self.by_status.set_active(not config.b_order_by_group)
 

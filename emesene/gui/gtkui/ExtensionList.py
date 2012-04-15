@@ -330,7 +330,9 @@ class DownloadList(DownloadListBase):
         combo_store.append((_('Supported'), 'supported'))
         combo_store.append((_('Community'), 'community'))
 
-        source_combo = gtk.ComboBox(combo_store)
+        source_combo = gtk.ComboBox()
+        source_combo.set_model(combo_store)
+
         cell = gtk.CellRendererText()
         source_combo.pack_start(cell, True)
         source_combo.add_attribute(cell, 'text', 0)
@@ -368,12 +370,13 @@ class DownloadList(DownloadListBase):
 
     def get_selected_name(self, list_view):
         '''Gets the current selected name in the list view.'''
-        model, iter = list_view.get_selection().get_selected()
-        if iter is not None:
-            name = model.get_value(iter, 2)
-            return name
-        else:
-            return None
+        selection = list_view.get_selection()
+        if not selection is None:
+            model, iter = selection.get_selected()
+            if iter is not None:
+                name = model.get_value(iter, 2)
+                return name
+        return None
 
     def on_change_source(self, combobox):
         '''called when the source is changed'''

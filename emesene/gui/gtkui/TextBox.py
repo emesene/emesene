@@ -22,6 +22,7 @@ import os
 
 import e3
 import gui
+from gui.gtkui import check_gtk3
 import utils
 import RichBuffer
 
@@ -189,8 +190,13 @@ class InputView(gtk.TextView):
     def __init__(self):
         gobject.GObject.__init__(self)
         gtk.TextView.__init__(self)
-        gtk.binding_entry_add_signal(self, gtk.keysyms.KP_Enter, 0, 'message-send')
-        gtk.binding_entry_add_signal(self, gtk.keysyms.Return, 0, 'message-send')
+        self.connect('key-press-event', self.on_key_press_event)
+
+    def on_key_press_event(self, widget, event):
+        if event.keyval in [gtk.keysyms.Return, gtk.keysyms.KP_Enter]:
+            self.emit('message-send')
+            return True
+        return False
 
 gobject.type_register(InputView)
 
@@ -222,7 +228,8 @@ class InputText(TextBox):
 
         self.spell_checker = None
 
-        if self.config.b_enable_spell_check:
+        #FIXME: gtk2 only as there isn't gtk3 package yet
+        if not check_gtk3() and self.config.b_enable_spell_check:
             try:
                 import gtkspell
                 spell_lang = self.config.get_or_set("spell_lang", "en")

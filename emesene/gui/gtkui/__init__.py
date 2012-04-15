@@ -50,7 +50,11 @@ def gtk_main(Controller):
     import GroupMenu
 
     import Header
-    import ImageAreaSelector
+    if not check_gtk3():
+        import ImageAreaSelector
+    else:
+        import ImageAreaSelectorNew as ImageAreaSelector
+
     import ImageChooser
     import Login
     import MainMenu
@@ -65,7 +69,12 @@ def gtk_main(Controller):
 
     import PluginWindow
     import Preferences
-    import Renderers
+
+    if not check_gtk3():
+        import Renderers
+    else:
+        import RenderersNew as Renderers
+
     import StatusMenu
     import TabWidget
     import TextBox
@@ -111,7 +120,6 @@ def setup():
                                 single_instance=True)
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
     extension.category_register('avatar', Avatar.Avatar)
-    extension.category_register('avatar renderer', Renderers.AvatarRenderer)
     extension.category_register('avatar manager', AvatarManager.AvatarManager)
 
     extension.category_register('preferences', Preferences.Preferences,
@@ -122,8 +130,15 @@ def setup():
     extension.category_register('main window', MainWindow.MainWindow)
     extension.category_register('contact list', ContactList.ContactList)
     extension.category_register('synch tool', SyncTool.SyncTool)
-    extension.category_register('nick renderer', Renderers.CellRendererPlus)
-    extension.register('nick renderer', Renderers.CellRendererNoPlus)
+    if not check_gtk3():
+        extension.category_register('avatar renderer', Renderers.AvatarRenderer)
+        extension.category_register('nick renderer', Renderers.CellRendererPlus)
+        extension.register('nick renderer', Renderers.CellRendererNoPlus)
+    else:
+        extension.category_register('avatar renderer', RenderersNew.AvatarRenderer)
+        extension.category_register('nick renderer', RenderersNew.CellRendererPlus)
+        extension.register('nick renderer', RenderersNew.CellRendererNoPlus)
+
     extension.category_register('user panel', UserPanel.UserPanel)
 
     extension.category_register('debug window', DebugWindow.DebugWindow)
@@ -162,7 +177,10 @@ def setup():
         ConversationToolbar.ConversationToolbar)
     extension.category_register('plugin window', \
         PluginWindow.PluginWindow)
-    extension.category_register('image area selector', ImageAreaSelector.ImageAreaSelectorDialog)
+    if not check_gtk3():
+        extension.category_register('image area selector', ImageAreaSelector.ImageAreaSelectorDialog)
+    else:
+        extension.category_register('image area selector', ImageAreaSelectorNew.ImageAreaSelectorDialog)
     extension.category_register('filetransfer pool', FileTransferBarWidget.FileTransferBarWidget)
     extension.category_register('filetransfer widget', FileTransferWidget.FileTransferWidget)
 
@@ -173,3 +191,8 @@ def setup():
         extension.category_register('conversation output', TextBox.OutputText)
 
     extension.category_register('picture handler', PictureHandler.PictureHandler)
+
+def check_gtk3():
+    '''return true if it's gtk3'''
+    import gtk
+    return gtk.pygtk_version[0] == 2 and gtk.pygtk_version[1] == 99

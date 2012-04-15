@@ -72,6 +72,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.panel.enabled = False
 
         self.entry = gtk.Entry()
+        if hasattr(gtk.Entry, "set_placeholder_text"):
+            self.entry.set_placeholder_text(_('Type to search...'))
         self.entry.connect('changed', self._on_entry_changed)
         self.entry.connect('key-press-event', self._on_entry_key_press)
 

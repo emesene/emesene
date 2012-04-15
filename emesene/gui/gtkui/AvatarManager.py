@@ -22,16 +22,18 @@ import gtk
 import cairo
 import gobject
 
-class AvatarManager(gtk.Widget):
+from gui.gtkui import check_gtk3
+
+class AvatarManager(gobject.GObject):
     '''Manager for avatars'''
 
     #key-position, is aa Anchor Type constant. Refer to 
     #http://www.pygtk.org/docs/pygtk/gtk-constants.html#gtk-anchor-type-constants
 
     def __init__(self, cell_dimension = 32, cell_radius = 0.11,
-                crossfade = True, cell_key_position = gtk.ANCHOR_CENTER):
+                crossfade = True, cell_key_position = gtk.gdk.GRAVITY_CENTER):
         ''' constructor'''
-        gtk.Widget.__init__(self)
+        gobject.GObject.__init__(self)
 
         self.filename = ''
         self._pixbuf = None
@@ -147,27 +149,31 @@ class AvatarManager(gtk.Widget):
             context.clip()
 
         context.scale(scale_factor, scale_factor)
-        context.set_source_pixbuf(pixbuf, 0, 0)
+        if not check_gtk3():
+            context.set_source_pixbuf(pixbuf, 0, 0)
+        else:
+            gtk.gdk.cairo_set_source_pixbuf(context, pixbuf, 0, 0)
+
         context.paint_with_alpha(alpha)
         context.restore()
 
     def translate_key_postion(self, context, position, width, height,
                              scale_width, scale_height):
         ''' translate anchor type constants to an actual position'''
-        if position in (gtk.ANCHOR_NORTH_WEST, gtk.ANCHOR_WEST,
-                        gtk.ANCHOR_SOUTH_WEST):
+        if position in (gtk.gdk.GRAVITY_NORTH_WEST, gtk.gdk.GRAVITY_WEST,
+                        gtk.gdk.GRAVITY_SOUTH_WEST):
             xpos = 0
-        elif position in (gtk.ANCHOR_NORTH, gtk.ANCHOR_CENTER,
-                          gtk.ANCHOR_SOUTH):
+        elif position in (gtk.gdk.GRAVITY_NORTH, gtk.gdk.GRAVITY_CENTER,
+                          gtk.gdk.GRAVITY_SOUTH):
             xpos = (width // 2) - (scale_width // 2)
         else:
             xpos = width - scale_width
 
-        if position in (gtk.ANCHOR_NORTH_WEST, gtk.ANCHOR_NORTH,
-                        gtk.ANCHOR_NORTH_EAST):
+        if position in (gtk.gdk.GRAVITY_NORTH_WEST, gtk.gdk.GRAVITY_NORTH,
+                        gtk.gdk.GRAVITY_NORTH_EAST):
             ypos = 0
-        elif position in (gtk.ANCHOR_EAST, gtk.ANCHOR_CENTER,
-                          gtk.ANCHOR_WEST):
+        elif position in (gtk.gdk.GRAVITY_EAST, gtk.gdk.GRAVITY_CENTER,
+                          gtk.gdk.GRAVITY_WEST):
             ypos = (height // 2) - (scale_height // 2)
         else:
             ypos = height - scale_height

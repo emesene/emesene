@@ -26,6 +26,7 @@ from glib import timeout_add, source_remove
 import xml.sax.saxutils
 
 import gui
+from gui.gtkui import check_gtk3
 from gui.base import Plus
 
 class Tooltips(gtk.Window):
@@ -40,7 +41,12 @@ class Tooltips(gtk.Window):
         self.set_resizable(False)
         self.set_border_width(4)
         self.set_app_paintable(True)
-        self.connect('expose-event', self.on_expose_event)
+
+        if not check_gtk3():
+            self.connect('expose-event', self.on_expose_event)
+        else:
+            context = self.get_style_context()
+            gtk.StyleContext.add_class (context, "tooltip");
 
         self.label = gtk.Label('')
         self.label.set_line_wrap(True)

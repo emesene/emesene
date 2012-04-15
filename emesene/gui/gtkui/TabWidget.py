@@ -21,20 +21,32 @@ import gtk
 import gobject
 
 import utils
-import TinyButton
 
-import Renderers
+from gui.gtkui import check_gtk3
+
+if check_gtk3():
+    import TinyButtonNew as TinyButton
+else:
+    import TinyButton
+
+if check_gtk3():
+    import RenderersNew as Renderers
+else:
+    import Renderers
+
 
 CLOSE_ON_LEFT = 0
 
-try:
-    import gconf
-    gclient = gconf.client_get_default()
-    val = gclient.get("/apps/metacity/general/button_layout")
-    if val.get_string().startswith("close"):
-        CLOSE_ON_LEFT = 1
-except:
-    pass
+#FIXME: find correct GSettings value and replace this in gtk3
+if not check_gtk3():
+    try:
+        import gconf
+        gclient = gconf.client_get_default()
+        val = gclient.get("/apps/metacity/general/button_layout")
+        if val.get_string().startswith("close"):
+            CLOSE_ON_LEFT = 1
+    except:
+        pass
 
 if sys.platform == 'darwin':
     CLOSE_ON_LEFT = 1

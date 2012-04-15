@@ -223,7 +223,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         return picture
 
-    def _visible_func(self, model, _iter):
+    def _visible_func(self, model, _iter, *args):
         '''return True if the row should be displayed according to the
         value of the config'''
         obj = self._model[_iter][1]

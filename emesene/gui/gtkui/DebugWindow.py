@@ -174,7 +174,7 @@ class DebugStore( gtk.ListStore, logging.Handler ):
         self.on_message_added(record)
 
     def on_message_added(self, message):
-        self.append([message.name, str(message.msg).strip(), message.levelno, message.created])
+        self.append([message.name, str(message.msg).strip(), message.levelno, str(message.created)])
 
     def filter_caller( self, name, level ):
         '''

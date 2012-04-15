@@ -23,12 +23,19 @@ import e3
 HAVE_GSTREAMER = True
 try:
     import pygst
-    pygst.require("0.10")
     import gst
 
     def gst_on_message(bus, message, player):
-        if message.type == gst.MESSAGE_EOS:
-            player.set_state(gst.STATE_NULL)
+        #FIXME: we are affected by bug
+        #https://bugzilla.gnome.org/show_bug.cgi?id=660612
+        if hasattr(gst, "init"):
+             player.set_state(gst.State.NULL)
+        else:
+            if message.type == gst.MESSAGE_EOS:
+                player.set_state(gst.STATE_NULL)
+
+    if hasattr(gst, "init"):
+        gst.init(None)
     gst_player = gst.element_factory_make("playbin", "player")
     bus = gst_player.get_bus()
     bus.enable_sync_message_emission()

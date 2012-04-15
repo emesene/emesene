@@ -20,6 +20,7 @@ import gtk
 
 import e3
 import gui
+from gui.gtkui import check_gtk3
 import utils
 
 
@@ -91,6 +92,10 @@ class ConversationToolbar(gtk.Toolbar):
         else:
             size = gtk.ICON_SIZE_LARGE_TOOLBAR
 
+        if check_gtk3():
+            context = self.get_style_context()
+            gtk.StyleContext.add_class (context, "inline-toolbar")
+
         self.settings = self.get_settings()
         self.settings.set_long_property('gtk-toolbar-icon-size', size,
                                         'ConversationToolbar.py:37')
@@ -143,13 +148,15 @@ class ConversationToolbar(gtk.Toolbar):
         self.color.connect('clicked',
             lambda *args: self.handler.on_color_selected())
 
-        self.emotes = gtk.ToolButton(theme_tool_emotes)
+        self.emotes = gtk.ToolButton()
+        self.emotes.set_icon_widget(theme_tool_emotes)
         self.emotes.set_label(_('Send an emoticon'))
         self.emotes.set_tooltip_text(_('Send an emoticon'))
         self.emotes.connect('clicked',
             lambda *args: self.handler.on_emotes_selected())
 
-        self.nudge = gtk.ToolButton(theme_tool_nudge)
+        self.nudge = gtk.ToolButton()
+        self.nudge.set_icon_widget(theme_tool_nudge)
         self.nudge.set_label(_('Request attention'))
         self.nudge.set_tooltip_text(_('Request attention'))
         self.nudge.connect('clicked',

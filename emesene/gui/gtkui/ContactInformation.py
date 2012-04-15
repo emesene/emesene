@@ -27,7 +27,12 @@ import gui
 import utils
 import extension
 import gobject
-import Renderers
+from gui.gtkui import check_gtk3
+
+if check_gtk3():
+    import RenderersNew as Renderers
+else:
+    import Renderers
 
 import gui.base.ConversationStatus as ConversationStatus
 

@@ -24,6 +24,8 @@ import gobject
 import thread
 import time
 import gc
+
+from gui.gtkui import check_gtk3
 from gui.base import MarkupParser
 
 # Class that holds the iconview from the avatar chooser dialog
@@ -43,9 +45,11 @@ class IconView(gtk.HBox):
 
         self.model = gtk.ListStore(gtk.gdk.Pixbuf, str)
         self.iconview = gtk.IconView(self.model)
-        self.iconview.enable_model_drag_dest([('text/uri-list', 0, 0)],
-                                gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_COPY)
-        self.iconview.connect("drag-data-received", self._drag_data_received)
+        #FIXME: gtk3
+        if not check_gtk3():
+            self.iconview.enable_model_drag_dest([('text/uri-list', 0, 0)],
+                                    gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_COPY)
+            self.iconview.connect("drag-data-received", self._drag_data_received)
         self.iconview.set_pixbuf_column(0)
         self.iconview.connect("item-activated", self._on_icon_activated)
         self.iconview.connect("button_press_event", self.pop_up)

@@ -61,6 +61,13 @@ from Language import Language
 language_management = Language()
 language_management.install_default_translation()
 
+if 'USE_GI' in os.environ:
+    try:
+        import pygicompat
+    except ImportError:
+        print "error: pygi compat not found"
+        pass
+
 import glib
 import shutil
 import signal

@@ -25,6 +25,7 @@ import urllib
 import stock
 import utils
 import gui
+from gui.gtkui import check_gtk3
 import extension
 import e3
 
@@ -98,8 +99,12 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.panel.pack1(self.output, True, False)
         self.panel.pack2(frame_input, False, False)
 
-        self.panel_signal_id = self.panel.connect_after('expose-event',
-                self.update_panel_position)
+        if not check_gtk3():
+            self.panel_signal_id = self.panel.connect_after('expose-event',
+                    self.update_panel_position)
+        else:
+            self.panel_signal_id = self.panel.connect_after('draw',
+                    self.update_panel_position)
         self.panel.connect('button-release-event', self.on_input_panel_resize)
 
         self.hbox = gtk.HBox()
@@ -136,7 +141,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_index = -1 # used to select an existing conversation
 
     def check_visible(self):
-        return self.flags() & gtk.VISIBLE
+        if not check_gtk3():
+            return self.flags() & gtk.VISIBLE
+        else:
+            return self.get_visible()
 
     def steal_emoticon(self, path_uri):
         '''receives the path or the uri for the emoticon to be added'''

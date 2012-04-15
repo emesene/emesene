@@ -610,12 +610,12 @@ class Dialog(object):
         e3.Message.Style object with the current style
         the callback receives a new style object with the new selection
         '''
-        def select_font_cb(button, window, callback, response, color_sel,
-            color):
-            '''callback called on button selection'''
-            if response == stock.ACCEPT:
-                window.hide()
-                fdesc = pango.FontDescription(font_sel.get_font_name())
+        if hasattr(gtk, "FontChooser"): #gtk 3.2+
+            window = cls.new_window(_('Select font'))
+            font_chooser = gtk.FontChooserDialog.new(_('Select font'), window)
+            color = style.color
+            if font_chooser.run() == gtk.ResponseType.OK:
+                fdesc = gtk.FontChooser.get_font_desc(font_chooser)
                 style = utils.pango_font_description_to_style(fdesc)
                 style.color.red = color.red
                 style.color.green = color.green
@@ -624,22 +624,39 @@ class Dialog(object):
 
                 callback(style)
 
+            font_chooser.destroy()
             window.hide()
+        else:
+            def select_font_cb(button, window, callback, response, color_sel,
+                color):
+                '''callback called on button selection'''
+                if response == stock.ACCEPT:
+                    window.hide()
+                    fdesc = pango.FontDescription(font_sel.get_font_name())
+                    style = utils.pango_font_description_to_style(fdesc)
+                    style.color.red = color.red
+                    style.color.green = color.green
+                    style.color.blue = color.blue
+                    style.color.alpha = color.alpha
 
-        window = cls.new_window(_('Select font'))
+                    callback(style)
 
-        font_sel = gtk.FontSelection()
-        font_sel.set_preview_text(_('This is a preview text!'))
-        fdesc = utils.style_to_pango_font_description(style)
+                window.hide()
 
-        window.hbox.pack_start(font_sel, True, True)
-        font_sel.set_font_name(fdesc.to_string())
+            window = cls.new_window(_('Select font'))
 
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback,
-            select_font_cb, font_sel, style.color)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback,
-            select_font_cb, font_sel, style.color)
-        window.show_all()
+            font_sel = gtk.FontSelection()
+            font_sel.set_preview_text(_('This is a preview text!'))
+            fdesc = utils.style_to_pango_font_description(style)
+
+            window.hbox.pack_start(font_sel, True, True)
+            font_sel.set_font_name(fdesc.to_string())
+
+            cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback,
+                select_font_cb, font_sel, style.color)
+            cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback,
+                select_font_cb, font_sel, style.color)
+            window.show_all()
 
     @classmethod
     def select_color(cls, color, callback):
@@ -647,30 +664,48 @@ class Dialog(object):
         color the callback receives a new color object woth the new selection
         '''
 
-        def select_color_cb(button, window, callback, response, color_sel):
-            '''callback called on button selection'''
+        if hasattr(gtk, 'ColorChooserDialog'):
+            def response_cb(dialog, response):
+                if response == -5:
+                    color = gtk.gdk.RGBA()
+                    dialog.get_rgba(color)
+                    colors = color.to_string()[4:-1].split(",")
+                    e3_color = e3.Color(int(colors[0]),int(colors[1]),int(colors[2]))
+                    e3_color.aplha = color.alpha
+                    callback(e3_color)
+                color_sel.destroy()
 
-            if response == stock.ACCEPT:
+            color_sel = gtk.ColorChooserDialog(_('Select color'))
+            color_sel.connect("response", response_cb)
+            current_color = gtk.gdk.RGBA()
+            current_color.parse('#' + color.to_hex())
+            color_sel.set_rgba(current_color)
+            color_sel.show()
+        else:
+            def select_color_cb(button, window, callback, response, color_sel):
+                '''callback called on button selection'''
+
+                if response == stock.ACCEPT:
+                    window.hide()
+                    gtk_color = color_sel.get_current_color()
+                    color = e3.Color(gtk_color.red, gtk_color.green,
+                        gtk_color.blue)
+                    callback(color)
+
                 window.hide()
-                gtk_color = color_sel.get_current_color()
-                color = e3.Color(gtk_color.red, gtk_color.green,
-                    gtk_color.blue)
-                callback(color)
 
-            window.hide()
+            window = cls.new_window(_('Select color'))
 
-        window = cls.new_window(_('Select color'))
+            color_sel = gtk.ColorSelection()
 
-        color_sel = gtk.ColorSelection()
+            window.hbox.pack_start(color_sel, True, True)
+            color_sel.set_current_color(gtk.gdk.color_parse('#' + color.to_hex()))
 
-        window.hbox.pack_start(color_sel, True, True)
-        color_sel.set_current_color(gtk.gdk.color_parse('#' + color.to_hex()))
-
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback,
-            select_color_cb, color_sel)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback,
-            select_color_cb, color_sel)
-        window.show_all()
+            cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, callback,
+                select_color_cb, color_sel)
+            cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, callback,
+                select_color_cb, color_sel)
+            window.show_all()
 
     @classmethod
     def select_style(cls, style, callback):
@@ -1504,6 +1539,8 @@ class InviteWindow(gtk.Window):
         bclose = gtk.Button(stock=gtk.STOCK_CLOSE)
 
         search = gtk.Entry()
+        if hasattr(gtk.Entry, "set_placeholder_text"):
+            search.set_placeholder_text(_('Type to search...'))
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)

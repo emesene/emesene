@@ -750,6 +750,6 @@ class AvatarRenderer(gtk.GenericCellRenderer, AvatarManager):
 
         if avatar:
             self.draw_avatar(ctx, avatar, width - dim, ypad, dim,
-                gtk.ANCHOR_CENTER, self._radius_factor, alpha)
+                gtk.gdk.GRAVITY_CENTER, self._radius_factor, alpha)
 
 gobject.type_register(AvatarRenderer)

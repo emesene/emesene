@@ -155,7 +155,6 @@ class Notification(gtk.Window):
 
         # constants
         self.FColor = "white"
-        BColor = gtk.gdk.Color()
         avatar_size = 48
         max_width = 300
         self.callback = callback
@@ -218,7 +217,13 @@ class Notification(gtk.Window):
         # change background color
         self.set_app_paintable(True)
         self.realize()
-        self.window.set_background(BColor)
+        if hasattr(self, 'window'):
+            BColor = gtk.gdk.Color(0, 0, 0)
+            self.window.set_background(BColor)
+        else:
+            ABColor = gtk.gdk.RGBA(0,0,0,0)
+            state = self.get_state_flags()
+            self.override_background_color(state, ABColor)
 
         # A bit of transparency to be less intrusive
         self.set_opacity(0.85)

@@ -218,7 +218,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         del conversation.tab_label
         conversation.tab_label = label
         conversation.tab_index = self.append_page_menu(conversation, label)
-        self.set_tab_label_packing(conversation, not self.mozilla_tabs, True, gtk.PACK_START)
+
+        self.child_set_property(conversation, "tab-expand", not self.mozilla_tabs)
         self.set_tab_reorderable(conversation, True)
         self.update_close_buttons()
 

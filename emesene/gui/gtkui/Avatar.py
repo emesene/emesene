@@ -22,9 +22,11 @@ import gtk.gdk
 import gobject
 
 import gui
+from gui.gtkui import check_gtk3
+
 from AvatarManager import AvatarManager
 
-class Avatar(AvatarManager):
+class Avatar(gtk.Widget, AvatarManager):
     """AvatarWidget """
     #TODO move in an avatarManager class?????
 
@@ -46,13 +48,18 @@ class Avatar(AvatarManager):
             gobject.PARAM_READWRITE),
          }
 
-    __gsignals__ = { 'size_request': 'override', 'expose-event': 'override' }
+    if not check_gtk3():
+        __gsignals__ = { 'size_request': 'override', 'expose-event': 'override' }
 
     def __init__(self, cell_dimension = 96, crossfade = True, cell_radius = 0.05,
-                 cell_key_position = gtk.ANCHOR_CENTER):
+                 cell_key_position = gtk.gdk.GRAVITY_CENTER):
+        gtk.Widget.__init__(self)
         AvatarManager.__init__(self, cell_dimension, cell_radius, crossfade,
             cell_key_position)
-        self.set_flags(self.flags() | gtk.NO_WINDOW)
+        if not check_gtk3():
+            self.set_flags(self.flags() | gtk.NO_WINDOW)
+        else:
+            gtk.Widget.set_has_window(self, False)
 
     def animate_callback(self):
         if self.current_frame > self.total_frames:
@@ -118,31 +125,38 @@ class Avatar(AvatarManager):
     #end of public methods
     #
 
-    def _start_animation(self, animation):
-        iteran = animation.get_iter()
-        #we don't need to resize here!
-        self.__set_from_pixbuf(iteran.get_pixbuf())
+    if check_gtk3():
+        #FIXME: this is broken on gtk3, use static pixbuf for now
+        def _start_animation(self, animation):
+            self.__set_from_pixbuf(animation.get_pixbuf())
+    else:
+        def _start_animation(self, animation):
+            iteran = animation.get_iter()
+            #we don't need to resize here!
+            self.__set_from_pixbuf(iteran.get_pixbuf())
 
-        if self.anim_source is None:
+            if self.anim_source is None:
+                self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
+
+        def _advance(self, iteran):
+            iteran.advance()
+            self.__set_from_pixbuf_animation(iteran.get_pixbuf())
             self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
+            return False
 
-    def _advance(self, iteran):
-        iteran.advance()
-        self.__set_from_pixbuf_animation(iteran.get_pixbuf())
-        self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
-        return False
+    def do_draw (self, ctx):
+        if not self._pixbuf:
+            return False
 
-    def do_size_request(self,requisition):
-        requisition.width = self._dimension
-        requisition.height = self._dimension
-
-    def do_expose_event(self, evnt):
-        if not self._pixbuf: return
-
-        ctx = evnt.window.cairo_create()
         cell_area = self.get_allocation()
+        if not check_gtk3():
+            cell_x, cell_y, cell_width, cell_height = cell_area
+        else:
+            cell_x = 0
+            cell_width = cell_area.width
+            cell_y = 0
+            cell_height = cell_area.height
 
-        cell_x, cell_y, cell_width, cell_height = cell_area
         if self.in_animation:
             self.draw_avatar(ctx, self._pixbuf, cell_x,
                 cell_y, self._dimension, self._key_position, self._radius_factor,
@@ -154,5 +168,25 @@ class Avatar(AvatarManager):
             self.draw_avatar(ctx, self._pixbuf, cell_x,
                 cell_y, self._dimension, self._key_position, self._radius_factor, 1)
 
+        return False
+
+    if not check_gtk3():
+        def do_size_request(self,requisition):
+            requisition.width = self._dimension
+            requisition.height = self._dimension
+
+        def do_expose_event(self, evnt):
+            ctx = evnt.window.cairo_create()
+            self.do_draw(ctx)
+    else:
+        def do_get_preferred_width(self):
+            min_width = self._dimension
+            natural_width = self._dimension
+            return min_width, natural_width
+
+        def do_get_preferred_height(self):
+            min_height = self._dimension
+            natural_height = self._dimension
+            return min_height, natural_height
 
 gobject.type_register(Avatar)

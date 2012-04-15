@@ -18,7 +18,12 @@
 
 import gtk
 
-import Renderers
+from gui.gtkui import check_gtk3
+
+if check_gtk3():
+    import RenderersNew as Renderers
+else:
+    import Renderers
 
 class Header(gtk.HBox):
     '''a widget used to display some information about the conversation'''

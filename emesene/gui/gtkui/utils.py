@@ -19,6 +19,7 @@
 
 import os
 import gtk
+import gobject
 import pango
 import hashlib
 import tempfile
@@ -150,12 +151,16 @@ def pango_font_description_to_style(fdesc):
 def simple_animation_scale(path, width, height):
     if file_readable(path):
         f = open(path, 'rb')
-        pixloader = gtk.gdk.PixbufLoader()
-        pixloader.set_size(width, height)
-        pixloader.write(f.read())
-        pixloader.close()
+        try:
+            pixloader = gtk.gdk.PixbufLoader('gif')
+            pixloader.set_size(width, height)
+            pixloader.write(f.read())
+            pixloader.close()
+            ret = pixloader.get_animation()
+        except gobject.GError:
+            ret = gtk.gdk.PixbufAnimation(path)
         f.close()
-        return pixloader.get_animation()
+        return ret
     else:
         return None
 
