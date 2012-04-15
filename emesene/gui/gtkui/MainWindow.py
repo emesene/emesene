@@ -191,14 +191,11 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_menu.show_all()
         self.group_menu.show_all()
 
-    def set_accels(self, window=None):
+    def set_accels(self):
         ''' set accels group to the given window '''
-        if window == None:
-            return
-
         accel_group = gtk.AccelGroup()
-        window.add_accel_group(accel_group)
-        window.accel_group = accel_group
+        self.get_parent().add_accel_group(accel_group)
+        self.get_parent().accel_group = accel_group
         accel_group.connect_group(gtk.keysyms.Q,
                                   gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
                                   self.on_key_quit)
