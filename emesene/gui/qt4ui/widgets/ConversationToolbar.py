@@ -102,7 +102,7 @@ class ConversationToolbar (QtGui.QToolBar):
             self.theme_tool_unblock = QtGui.QIcon(image_theme.tool_unblock)
         else:
             theme_tool_font = QtGui.QIcon.fromTheme("preferences-desktop-font")
-            theme_tool_font_color = QtGui.QIcon("") #FIXME: no stock icon
+            theme_tool_font_color = QtGui.QIcon.fromTheme("preferences-desktop-theme") #FIXME: no stock icon
 
             emote_theme = gui.theme.emote_theme
 
