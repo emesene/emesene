@@ -54,7 +54,6 @@ class Window(gtk.Window):
         self._state = 0
 
         self.connect('delete-event', self._on_delete_event)
-        self.connect('key-press-event', self._on_key_press)
         self.connect('window-state-event', self._on_window_state_event)
         self.content = None
 
@@ -104,6 +103,7 @@ class Window(gtk.Window):
         MainWindow = extension.get_default('main window')
         self.content = MainWindow(session, on_new_conversation)
         self.add(self.content)
+        self.connect('key-press-event', self.content._on_key_press)
         self.content.show()
         self.content_type = 'main'
         self.content.set_accels()
@@ -173,14 +173,6 @@ class Window(gtk.Window):
         then dont close the window'''
         self.save_dimensions()
         return self.cb_on_close(self.content)
-
-    def _on_key_press(self, widget, event):
-        '''called when a key is pressed on the window'''
-        if self.content_type == 'main':
-            if event.keyval == gtk.keysyms.Escape:
-                self._on_delete_event(None, None)
-            else:
-                self.content._on_key_press(widget, event)
 
     def _on_last_tab_close(self):
         '''do the action when the last tab is closed on a conversation window

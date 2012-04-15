@@ -202,6 +202,12 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         accel_group.connect_group(gtk.keysyms.D,
                                   gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
                                   self.on_key_disconnect)
+        accel_group.connect_group(gtk.keysyms.F,
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
+                                  self.on_key_search)
+        accel_group.connect_group(gtk.keysyms.Escape,
+                                  0, gtk.ACCEL_LOCKED,
+                                  self.on_key_hide)
 
     def on_key_quit(self, accel_group, window, keyval, modifier):
         '''Catches Ctrl+Q and quits the program'''
@@ -210,6 +216,23 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def on_key_disconnect(self, accel_group, window, keyval, modifier):
         '''Catches Ctrl+D and closes the session (disconnection)'''
         self.session.close()
+
+    def on_key_hide(self, accel_group, window, keyval, modifier):
+        '''Catches Escape and closes the window'''
+        if self.panel.search.get_active():
+            print self.panel.search.get_active()
+            return
+
+        self.get_parent().emit('delete-event', gtk.gdk.Event(gtk.gdk.DELETE))
+
+    def on_key_search(self, accel_group, window, keyval, modifier):
+        '''Catches Ctrl+F and opens or closes the search entry'''
+        self.panel.search.set_active(not self.panel.search.get_active())
+        if self.panel.search.get_active():
+            self.entry.show()
+            self.entry.grab_focus()
+        else:
+            self.entry.hide()
 
     def show(self):
         '''show the widget'''
@@ -257,8 +280,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def _on_entry_key_press(self, entry, event):
         '''called when a key is pressed on the search box'''
-        if event.keyval == gtk.keysyms.Escape or \
-           event.state & gtk.gdk.CONTROL_MASK:
+        if event.keyval == gtk.keysyms.Escape:
             self.panel.search.set_active(False)
             entry.hide()
 
@@ -303,19 +325,15 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def _on_key_press(self, widget, event):
         '''method called when a key is pressed on the input widget'''
-        if event.keyval == gtk.keysyms.f and \
-                event.state & gtk.gdk.CONTROL_MASK:
-            self.panel.search.set_active(not self.panel.search.get_active())
-            if self.panel.search.get_active():
-                self.entry.show()
-                self.entry.grab_focus()
-            else:
-                self.entry.hide()
-        elif not self.panel.nick.has_focus() and \
-             not self.panel.message.has_focus():
-            if event.string != "" and event.keyval != gtk.keysyms.Return and \
-               event.keyval != gtk.keysyms.KP_Enter:
-                if not self.panel.search.get_active():
+        if event.state & gtk.gdk.CONTROL_MASK or \
+           event.keyval == gtk.keysyms.Return or \
+           event.keyval == gtk.keysyms.KP_Enter or \
+           event.keyval == gtk.keysyms.Escape:
+            return
+
+        if not self.panel.nick.has_focus() and \
+           not self.panel.message.has_focus():
+            if event.string != "" and not self.panel.search.get_active():
                     self.panel.search.set_active(True)
                     self.entry.show()
                     self.entry.grab_focus()
