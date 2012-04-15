@@ -47,10 +47,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     def set_current_page(self, tab_index): # emesene's
         '''Show the chat tab at the given index'''
         QtGui.QTabWidget.setCurrentIndex(self, tab_index)
-        
-    
-        
-        
+
     #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
     
     def add_new_conversation(self, session, conv_id, members):
@@ -75,16 +72,22 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         size = self.size()
         position = self.pos()
         return size.width(), size.height(), position.x(), position.y()
-        
+
     def hide_all(self):
         '''Hides the window'''
         # FIXME: shouldn't this be called on something else??
         self.get_parent().hide()
-    
+
+    def is_active(self):
+        '''
+        return True if the conversation manager is active
+        '''
+        return self.get_parent().hasFocus()
+
     def is_maximized(self):
         # FIXME: again, why is this heeeeeeeeeereeeeeeeeeee????
-        return False
-        
+        return self.get_parent().isMaximized()
+
     def present(self, conversation): # emesene's
         '''Raises the tab containing the given conversation'''
         self.setCurrentIndex(conversation.tab_index)
@@ -94,13 +97,12 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         abstract method.'''
         index = self.indexOf(conversation)
         self.removeTab(index)
-    
+
     def set_message_waiting(self, conversation, is_waiting): # emesene's
         '''Not Sure what to do here....'''
         log.info('Conversation: %s; is_waiting: %s' % 
                  (conversation, is_waiting))
-        
-        
+
     def _on_contact_attr_changed(self, account, change_type, old_value,
             do_notify=True):
         '''called when an attribute of a contact changes.
@@ -125,13 +127,3 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     def _on_tab_close_request(self, index):
         '''Slot executed when the use clicks the close button in a tab'''
         self.on_conversation_close(self.widget(index))
-
-
-        
-
-
-
-
-
-
-

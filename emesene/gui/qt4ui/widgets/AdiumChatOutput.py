@@ -2,7 +2,6 @@
 
 '''This module contains the AdiumChatOutput class'''
 import base64
-import webbrowser
 
 from PyQt4      import QtGui
 from PyQt4      import QtCore
@@ -44,25 +43,19 @@ class AdiumChatOutput (QtGui.QScrollArea):
         self._qwebview.setHtml(body)
         
         self._qwebview.linkClicked.connect(
-                        lambda qt_url: webbrowser.open(qt_url.toString()) )
+                        lambda qt_url: gui.base.Desktop.open(qt_url.toString()) )
                             
     def _append_message(self, msg, scroll=True):
         '''add a message to the conversation'''
 
         html = self.theme.format(msg, scroll)
 
-        if msg.type == "status":
-            msg.first = True
-
-        if msg.first:
-            function = "appendMessage('" + html + "')"
-        else:
-            function = "appendNextMessage('" + html + "')"
-
-        self._qwebview.page().mainFrame().evaluateJavaScript(function)
+        self._qwebview.page().mainFrame().evaluateJavaScript(html)
 
     def send_message(self, formatter, msg):
         '''add a message to the widget'''
+        ##FIXME: implement autoscroll
+        #self.config.b_allow_auto_scroll)
         self._append_message(msg)
 
     def receive_message(self, formatter, msg):
