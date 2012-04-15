@@ -38,8 +38,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         # a widget dic to avoid proliferation of instance variables:
         self._widget_d = {}
-        # an action dict to avoid proliferation of instance variables:
-        self._action_dict = {}
         
         self._setup_ui()
         
@@ -69,35 +67,24 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
-        action_dict = self._action_dict
         
         # Classes
         conv_output_cls     = extension.get_default('conversation output')
         smiley_chooser_cls  = extension.get_default('smiley chooser')
         avatar_cls          = extension.get_default('avatar')
         info_panel_cls      = extension.get_default('info panel')
+        conv_toolbar_cls      = extension.get_default('conversation toolbar')
         
-        # Actions
-        icon_path = gui.theme.emote_theme.emote_to_path(':)')[6:]
-        action_dict['add_smiley']   = QtGui.QAction(
-                            QtGui.QIcon(icon_path), tr('Add Smiley'), self)
-        icon_path = gui.theme.emote_theme.emote_to_path(':S')[6:]
-        action_dict['send_nudge']   = QtGui.QAction(
-                            QtGui.QIcon(icon_path), tr('Send Nudge'), self)
-        action_dict['change_font']  = QtGui.QAction(
-                            QtGui.QIcon.fromTheme("preferences-desktop-font"),  tr('Change Font'), self)
-        action_dict['change_color'] = QtGui.QAction(
-                            QtGui.QIcon(""), tr('Change Color'), self) 
-        action_dict['toggle_avatars'] = QtGui.QAction(
-                            QtGui.QIcon.fromTheme("go-next"), tr('Toggle Avatars'), self) 
-
         # TOP LEFT
         widget_d['chat_output'] = conv_output_cls(self.session.config)
         top_left_lay = QtGui.QHBoxLayout()
         top_left_lay.addWidget(widget_d['chat_output'])
 
         # BOTTOM LEFT
-        widget_d['toolbar'] = QtGui.QToolBar(self)
+        self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session, gui.theme, self)
+        widget_d['toolbar'] = conv_toolbar_cls(self.toolbar_handler, self.session)
+        widget_d['toolbar'].redraw_ublock_button(self._get_first_contact().blocked)
+
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         widget_d['chat_input'] = Widgets.ChatInput()
 
@@ -107,17 +94,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         bottom_left_lay = QtGui.QVBoxLayout()
         bottom_left_lay.addWidget(widget_d['toolbar'])
         bottom_left_lay.addLayout(text_edit_lay)
-        
-        toolbar = widget_d['toolbar']
-        toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
-        toolbar.addAction(action_dict['change_font'])
-        toolbar.addAction(action_dict['change_color'])
-        toolbar.addSeparator()
-        toolbar.addAction(action_dict['add_smiley'])
-        toolbar.addAction(action_dict['send_nudge'])
-        toolbar.addSeparator()
-        toolbar.addAction(action_dict['toggle_avatars'])
-        
+
         widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.emotes)
 
         widget_d['smiley_chooser'].emoticon_selected.connect(
@@ -128,17 +105,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             self._on_new_style_selected)
 
         dialog = extension.get_default('dialog')
-        self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session, gui.theme, self)
-        action_dict['add_smiley'].triggered.connect(
-                            self._on_show_smiley_chooser)
-        action_dict['send_nudge'].triggered.connect(
-                            self.toolbar_handler.on_notify_attention_selected)
-        action_dict['change_font'].triggered.connect(
-                            widget_d['chat_input'].show_font_chooser)
-        action_dict['change_color'].triggered.connect(
-                            widget_d['chat_input'].show_color_chooser)
-        action_dict['toggle_avatars'].triggered.connect(
-                            self.toolbar_handler.on_toggle_avatar_selected)
         
         # LEFT (TOP & BOTTOM)
         left_widget = QtGui.QSplitter(Qt.Vertical)
@@ -181,11 +147,14 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         
         self.setLayout(lay)
-        
-        
     
     # emesene's
-    
+
+    def on_font_selected(self, style):
+        '''called when a new font is selected'''
+        gui.base.Conversation.on_font_selected(self, style)
+        self._widget_d['chat_input'].e3_style = style
+
     def input_grab_focus(self):
         '''sets the focus on the input widget'''
         self._widget_d['chat_input'].setFocus(Qt.OtherFocusReason)
@@ -217,7 +186,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
     def _on_show_info_changed(self, value):
         '''callback called when config.b_show_info changes'''
-        self.on_toggle_avatar()
+        #FIXME: this broke toolbar toggling
+#        self.on_toggle_avatar()
 
     def _on_show_avatar_onleft(self,value):
         '''callback called when config.b_avatar_on_left changes'''
@@ -263,7 +233,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''Slot called when the user clicks the smiley button.
         Show the smiley chooser panel'''
         self._widget_d['smiley_chooser'].show()
-
 
     def _on_smiley_selected(self, shortcut):
         '''Slot called when the user selects a smiley in the smiley 
@@ -319,7 +288,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         pass
 
 
-    def set_sensitive(self, is_sensitive):
+    def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         """
         used to make the conversation insensitive while the conversation
         is still open while the user is disconnected and to set it back to
@@ -364,9 +333,17 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
+        #FIXME: this is not working sometimes
         self.set_image_visible(self.avatar_box_is_hidden)
         self.avatar_box_is_hidden = not self.avatar_box_is_hidden
-        
+        self._widget_d['toolbar'].update_toggle_avatar_icon(not self.session.config.b_show_info)
+        self.session.config.b_show_info = not self.session.config.b_show_info
+
+    def _get_first_contact(self):
+        account = self.members[0]
+        contact = self.session.contacts.contacts[account]
+        return contact
+
     def on_filetransfer_invitation(self, transfer, conv_id):
         ''' called when a new file transfer is issued '''
         if self.icid != conv_id:

@@ -3,6 +3,7 @@
 ''' This module contains the utilities'''
 
 import xml
+import e3
 
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
@@ -10,6 +11,22 @@ from PyQt4.QtCore   import Qt
 
 from gui.base import MarkupParser
 
+def qfont_to_style(qfont):
+
+    font = qfont.family()
+
+    font_italic = qfont.italic()
+    font_bold = qfont.bold()
+
+    font_underline = qfont.underline()
+    font_strike = qfont.strikeOut()
+
+    font_size = qfont.pixelSize()
+    if font_size < 6 or font_size > 32:
+        font_size = 10
+
+    return e3.Style(font, e3.Color(0, 0, 0), font_bold,
+        font_italic, font_underline, font_strike, font_size)
 
 
 # consider changing these directly in MarkupParser

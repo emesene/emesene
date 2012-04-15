@@ -17,3 +17,4 @@ from NickEdit               import NickEdit
 from SmileyPopupChooser     import SmileyPopupChooser
 from StatusCombo            import StatusCombo
 from UserInfoPanel          import UserInfoPanel
+from ConversationToolbar    import ConversationToolbar

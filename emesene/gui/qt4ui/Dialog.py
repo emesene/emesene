@@ -8,7 +8,7 @@ from PyQt4  import QtCore
 from PyQt4  import QtGui
 from PyQt4.QtCore  import Qt
 
-from gui.qt4ui.Utils import tr
+from gui.qt4ui.Utils import tr, qfont_to_style
 
 import gui
 import extension
@@ -438,8 +438,6 @@ Do you want to fix your profile now?''')
         '''show a confirm dialog displaying a question and two buttons:
         Yes and No, return the response as stock.YES or stock.NO or
         stock.CLOSE if the user closes the window'''
-        print response_cb
-        print args
         dialog  = YesNoDialog('')
         icon    = QtGui.QLabel()
         message = QtGui.QLabel(unicode(message))
@@ -454,6 +452,33 @@ Do you want to fix your profile now?''')
         response = dialog.exec_()
 
         response_cb(response, *args)
+
+    @classmethod
+    def select_font(cls, style, callback):
+        '''select font and if available size and style, receives a
+        e3.Message.Style object with the current style
+        the callback receives a new style object with the new selection
+        '''
+        new_qt_font, result = QtGui.QFontDialog.getFont()
+        color = style.color
+        if result:
+            style = qfont_to_style(new_qt_font)
+            style.color.red = color.red
+            style.color.green = color.green
+            style.color.blue = color.blue
+            style.color.alpha = color.alpha
+            callback(style)
+
+    @classmethod
+    def select_emote(cls, session, theme, callback, max_width=16):
+        '''select an emoticon, receives a gui.Theme object with the theme
+        settings the callback receives the response and a string representing
+        the selected emoticon
+        '''
+        smiley_chooser_cls  = extension.get_default('smiley chooser')
+        smiley_chooser = smiley_chooser_cls()
+        smiley_chooser.emoticon_selected.connect(callback)
+        smiley_chooser.show()
 
 class StandardButtonDialog (QtGui.QDialog):
     '''Skeleton for a dialog window with standard buttons'''

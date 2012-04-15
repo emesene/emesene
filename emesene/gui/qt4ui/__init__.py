@@ -105,6 +105,7 @@ def setup():
     
     extension.category_register('contact list',        widgets.ContactList)
     extension.category_register('conversation input',  widgets.ChatInput)
+    extension.category_register('conversation toolbar',  widgets.ConversationToolbar)
     extension.category_register('avatar',              widgets.DisplayPic)
     extension.category_register('image area selector', 
                                                     widgets.ImageAreaSelector)

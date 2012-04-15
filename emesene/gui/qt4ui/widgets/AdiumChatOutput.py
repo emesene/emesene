@@ -45,7 +45,14 @@ class AdiumChatOutput (QtGui.QScrollArea):
         
         self._qwebview.linkClicked.connect(
                         lambda qt_url: gui.base.Desktop.open(qt_url.toString()) )
-                            
+
+    def clear(self, source="", target="", target_display="",
+            source_img="", target_img=""):
+        '''clear the content'''
+        body = self.theme.get_body(source, target, target_display, source_img,
+                target_img)
+        self._qwebview.setHtml(body)
+
     def _append_message(self, msg, scroll=True):
         '''add a message to the conversation'''
 

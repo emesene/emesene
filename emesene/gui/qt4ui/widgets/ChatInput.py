@@ -129,18 +129,6 @@ class ChatInput (QtGui.QTextEdit):
             self.setTextCursor(cur)
             self._current_chat_line_idx = idx
 
-
-    def show_font_chooser(self):
-        '''Shows the font style chooser'''
-        qt_font = self._get_qt_font()
-        new_qt_font, result = QtGui.QFontDialog.getFont(qt_font)
-        if result:
-            log.info('font chooser: accepted')
-            self._set_qt_font(new_qt_font)
-        else:
-            log.info('font chooser: canceled')
-            
-            
     def show_color_chooser(self):
         '''Shows the font color chooser'''
         qt_color = self._get_qt_color()
@@ -196,7 +184,6 @@ class ChatInput (QtGui.QTextEdit):
         self.document().setDefaultFont(new_font)
         if old_font != new_font:
             self.style_changed.emit()
-
 
     def _get_qt_font(self):
         '''Returns the default font in qt format'''

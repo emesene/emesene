@@ -238,6 +238,10 @@ class Conversation(object):
         self.output.clear()
         self.conv_status.clear()
 
+    def _on_block_user_accept(self, accept, account):
+        if accept == gui.stock.YES:
+            self.session.block(account)
+
     def on_block_user(self):
         '''blocks the first user of the conversation'''
         account = self.members[0]
@@ -246,7 +250,9 @@ class Conversation(object):
         if contact.blocked:
             self.session.unblock(account)
         else:
-            self.session.block(account)
+            dialog = extension.get_default('dialog')
+            dialog.yes_no(_("Are you sure you want to block this contact?"),
+                          self._on_block_user_accept, account)
 
     def on_contact_block_succeed(self, account):
         if account == self.members[0]:
