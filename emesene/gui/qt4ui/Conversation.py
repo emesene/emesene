@@ -33,9 +33,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         gui.base.Conversation.__init__(self, session, conv_id, None, members)
         QtGui.QWidget.__init__(self, parent)
         
-        self._session = session
-        self._conv_id = conv_id
-        self._members = members
         self.avatar_box_is_hidden = False
         self._on_typing_timer = QtCore.QTimer()
         
@@ -50,7 +47,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.tab_index = 0
         self.input = self._widget_d['chat_input']
         self.output = self._widget_d['chat_output']
-        
+
         #FIXME: move this to base class
         self._load_style()
         self._widget_d['chat_input'].e3_style = self.cstyle
@@ -62,15 +59,13 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._on_typing_timer.timeout.connect(
             lambda *args: self._widget_d['info_panel'].set_icon(
                 gui.theme.image_theme.status_icons[
-                    self._session.contacts.get(
-                        self._members[0]).status]))
+                    self.session.contacts.get(
+                        self.members[0]).status]))
         self.subscribe_signals()
-        
-        
+
     def __del__(self):
         log.debug('conversation adieeeeeeeuuuu ;______;')
-        
-        
+
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
@@ -95,19 +90,17 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             QtGui.QIcon(""), tr('Change Color'), self) 
         action_dict['toggle_avatars'] = QtGui.QAction(
                             QtGui.QIcon.fromTheme("go-next"), tr('Toggle Avatars'), self) 
-   
-        
+
         # TOP LEFT
-        widget_d['chat_output'] = conv_output_cls()
+        widget_d['chat_output'] = conv_output_cls(self.session.config)
         top_left_lay = QtGui.QHBoxLayout()
         top_left_lay.addWidget(widget_d['chat_output'])
-        
-        
+
         # BOTTOM LEFT
         widget_d['toolbar'] = QtGui.QToolBar(self)
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         widget_d['chat_input'] = Widgets.ChatInput()
-        
+
         text_edit_lay = QtGui.QHBoxLayout()
         text_edit_lay.addWidget(widget_d['chat_input'])
         
@@ -135,7 +128,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             self._on_new_style_selected)
 
         dialog = extension.get_default('dialog')
-        self.toolbar_handler = gui.base.ConversationToolbarHandler(self._session, gui.theme, self)
+        self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session, gui.theme, self)
         action_dict['add_smiley'].triggered.connect(
                             self._on_show_smiley_chooser)
         action_dict['send_nudge'].triggered.connect(
@@ -162,8 +155,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         left_widget.moveSplitter(splitter_pos, 1)
 
         # RIGHT
-        widget_d['his_display_pic'] = avatar_cls(self._session)
-        widget_d['my_display_pic'] = avatar_cls(self._session)
+        widget_d['his_display_pic'] = avatar_cls(self.session)
+        widget_d['my_display_pic'] = avatar_cls(self.session)
         
         right_lay = QtGui.QVBoxLayout()
         right_lay.addWidget(widget_d['his_display_pic'])
@@ -171,8 +164,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         right_lay.addWidget(widget_d['my_display_pic'])
         
         widget_d['my_display_pic'].set_display_pic_of_account()
-        if self._members:
-            his_email = self._members[0]
+        if self.members:
+            his_email = self.members[0]
             widget_d['his_display_pic'].set_display_pic_of_account(
                                                                 his_email)
 
@@ -252,7 +245,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # account is a string containing the email
         # does this have to update the picture too?
         log.debug('UPSingInfo Start')
-        status = self._session.contacts.get(account).status
+        status = self.session.contacts.get(account).status
         log.debug('UpSingInfo: [%s], [%s], [%s], [%s]' % (status, nick, message, account))
         self._widget_d['info_panel'].set_all(Utils.unescape(message), account)
         log.debug('UPSingInfo Stop')
@@ -295,20 +288,20 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def on_contact_attr_changed_succeed(self, account, what, old,
             do_notify=True):
         ''' called when contacts change their attributes'''
-        if account in self._members:
+        if account in self.members:
             if what  == 'status':
                 # FIXME: self.icon doesn't beahave correctly at the 
                 # moment. That's probably because 'set message
                 # waiting' stuff is still not implemented (in fact
                 # self.icon returns that icon.)
                 #self._widget_d['info_panel'].set_icon(self.icon)
-                status = self._session.contacts.get(account).status
+                status = self.session.contacts.get(account).status
                 icon =  gui.theme.image_theme.status_icons[status]
                 self._widget_d['info_panel'].set_icon(icon)
             elif what == 'nick':
                 self._widget_d['info_panel'].set_nick(self.text)
             elif what == 'message':
-                message = self._session.contacts.get(account).message
+                message = self.session.contacts.get(account).message
                 self._widget_d['info_panel'].set_message(message)
                 
     def on_user_typing(self, account):
@@ -376,11 +369,11 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
     def on_filetransfer_invitation(self, transfer, conv_id):
         ''' called when a new file transfer is issued '''
-        if self._conv_id != conv_id:
+        if self.icid != conv_id:
             return
             
         self.transferw = extension.get_and_instantiate('filetransfer widget', 
-                                                       self._session, transfer)
+                                                       self.session, transfer)
         self.transferw.show()
 
     def on_filetransfer_accepted(self, transfer):

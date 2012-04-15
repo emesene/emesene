@@ -26,10 +26,11 @@ class AdiumChatOutput (QtGui.QScrollArea):
     # pylint: enable=W0612
     
     
-    def __init__(self, parent=None):
+    def __init__(self, config, parent=None):
         QtGui.QScrollArea.__init__(self, parent)
         
         self.theme = gui.theme.conv_theme
+        self.config = config
         self._qwebview = QtWebKit.QWebView(self)
         
         self.setWidget(self._qwebview)
@@ -54,18 +55,16 @@ class AdiumChatOutput (QtGui.QScrollArea):
 
     def send_message(self, formatter, msg):
         '''add a message to the widget'''
-        ##FIXME: implement autoscroll
-        #self.config.b_allow_auto_scroll)
-        self._append_message(msg)
+        self._append_message(msg, self.config.b_allow_auto_scroll)
 
     def receive_message(self, formatter, msg):
         '''add a message to the widget'''
-        self._append_message(msg)
+        self._append_message(msg, self.config.b_allow_auto_scroll)
 
     def information(self, formatter, msg):
         '''add an information message to the widget'''
         msg.message = Plus.msnplus_strip(msg.message)
-        self._append_message(msg)
+        self._append_message(msg, self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
