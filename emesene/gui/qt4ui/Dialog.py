@@ -8,7 +8,8 @@ from PyQt4  import QtCore
 from PyQt4  import QtGui
 from PyQt4.QtCore  import Qt
 
-from gui.qt4ui.Utils import tr, qfont_to_style
+from gui.qt4ui import Utils
+from gui.qt4ui.Utils import tr
 
 import gui
 import extension
@@ -460,14 +461,9 @@ Do you want to fix your profile now?''')
         the callback receives a new style object with the new selection
         '''
         new_qt_font, result = QtGui.QFontDialog.getFont()
-        color = style.color
         if result:
-            style = qfont_to_style(new_qt_font)
-            style.color.red = color.red
-            style.color.green = color.green
-            style.color.blue = color.blue
-            style.color.alpha = color.alpha
-            callback(style)
+            estyle = Utils.qfont_to_style(new_qt_font, style.color)
+            callback(estyle)
 
     @classmethod
     def select_emote(cls, session, theme, callback, max_width=16):
@@ -475,10 +471,21 @@ Do you want to fix your profile now?''')
         settings the callback receives the response and a string representing
         the selected emoticon
         '''
-        smiley_chooser_cls  = extension.get_default('smiley chooser')
+        smiley_chooser_cls = extension.get_default('smiley chooser')
         smiley_chooser = smiley_chooser_cls()
         smiley_chooser.emoticon_selected.connect(callback)
         smiley_chooser.show()
+
+    @classmethod
+    def select_color(cls, color, callback):
+        '''select color, receives a e3.Message.Color with the current
+        color the callback receives a new color object woth the new selection
+        '''
+        qt_color = Utils.e3_color_to_qcolor(color)
+        new_qt_color = QtGui.QColorDialog.getColor(qt_color)
+        if new_qt_color.isValid() and not new_qt_color == qt_color:
+            color = Utils.qcolor_to_e3_color(new_qt_color)
+            callback(color)
 
 class StandardButtonDialog (QtGui.QDialog):
     '''Skeleton for a dialog window with standard buttons'''

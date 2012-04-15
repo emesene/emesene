@@ -45,9 +45,8 @@ class ChatInput (QtGui.QTextEdit):
         
     # emesene's
     def update_style(self, style):
-        '''Don't remember what this was supposed to do and 
-        why I made it empty ;_;'''
-        pass
+        '''update style'''
+        self.e3_style = style
     
 
     def set_smiley_dict(self, smiley_dict):
@@ -115,8 +114,6 @@ class ChatInput (QtGui.QTextEdit):
         self.document().addResource(QtGui.QTextDocument.ImageResource, 
                                    QtCore.QUrl(shortcut), image)
 
-
-
     def _swap_to_chat_line(self, idx):
         '''Swaps to the given chat line in the history'''
         if idx < 0 or idx > len(self._chat_lines)-1:
@@ -129,54 +126,27 @@ class ChatInput (QtGui.QTextEdit):
             self.setTextCursor(cur)
             self._current_chat_line_idx = idx
 
-    def show_color_chooser(self):
-        '''Shows the font color chooser'''
-        qt_color = self._get_qt_color()
-        new_qt_color = QtGui.QColorDialog.getColor(qt_color)
-        if new_qt_color.isValid() and not new_qt_color == qt_color:
-            self._set_qt_color(new_qt_color)
-            
-
     def _get_e3_style(self):
         '''Returns the font style in e3 format'''
         qt_font = self._get_qt_font()
-        qt_color = self._get_qt_color()
-        
-        e3_color = e3.Color.from_hex(unicode(qt_color.name()))
-        e3_color.alpha = qt_color.alpha()
-        
-        font = unicode(qt_font.family())
-        log.info('Font\'s raw Name: ' + font +
-                 'Font default family: ' + qt_font.defaultFamily())
-        
-        e3_style = e3.Style(font, e3_color, qt_font.bold(), 
-                                            qt_font.italic(),
-                                            qt_font.underline(), 
-                                            qt_font.strikeOut(), 
-                                            qt_font.pointSize())
-        log.info(qt_font.toString())
-        log.info(e3_style)
+        e3_color = Utils.qcolor_to_e3_color(self._qt_color)
+        e3_style = Utils.qfont_to_style(qt_font, e3_color)
         return e3_style
-        
-    
+
     def _set_e3_style(self, e3_style):
         '''Sets the font style, given an e3 style'''
-        e3_color = e3_style.color
-        qt_color = QtGui.QColor(e3_color.red,  e3_color.green, 
-                                e3_color.blue, e3_color.alpha  )
+        qt_color =  Utils.e3_color_to_qcolor(e3_style.color)
         qt_font = QtGui.QFont()
         qt_font.setFamily(      e3_style.font   )
         qt_font.setBold(        e3_style.bold   )
         qt_font.setItalic(      e3_style.italic )
         qt_font.setStrikeOut(   e3_style.strike )
         qt_font.setPointSize(   e3_style.size   )
-        
+
         self._set_qt_color(qt_color)
         self._set_qt_font(qt_font)
-        
-    
+
     e3_style = property(_get_e3_style, _set_e3_style)
-        
 
     def _set_qt_font(self, new_font):
         '''sets the font style in qt format'''
@@ -188,18 +158,11 @@ class ChatInput (QtGui.QTextEdit):
     def _get_qt_font(self):
         '''Returns the default font in qt format'''
         return self.document().defaultFont()
-        
 
     def _set_qt_color(self, new_color):
         '''Sets the color'''
-        if not new_color.isValid():
-            return
-        
         old_color = self._qt_color
         self._qt_color = new_color
-        
-        if old_color != new_color:
-            self.style_changed.emit()
         
         cursor = self.textCursor() 
         cursor_position = cursor.position()
@@ -216,11 +179,6 @@ class ChatInput (QtGui.QTextEdit):
         # because it just changes current block's format! 
         self.setTextColor(new_color) 
 
-
-    def _get_qt_color(self):
-        '''gets the color'''
-        return self._qt_color
-        
 # -------------------- QT_OVERRIDE
 
     def keyPressEvent(self, event):

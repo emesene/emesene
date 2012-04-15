@@ -122,18 +122,16 @@ class ConversationToolbar (QtGui.QToolBar):
             self.theme_tool_show_avatar = QtGui.QIcon.fromTheme("go-previous")
 
 #FIXME: add icons
-#        theme_tool_call = QtGui.QIcon(image_theme.call, size)
-#        theme_tool_video = QtGui.QIcon(image_theme.video, size)
-#        theme_tool_av = QtGui.QIcon(image_theme.av, size)
+#        theme_tool_call = QtGui.QIcon(image_theme.call)
+#        theme_tool_video = QtGui.QIcon(image_theme.video)
+#        theme_tool_av = QtGui.QIcon(image_theme.av)
 
         action_dict['change_font']  = QtGui.QAction(theme_tool_font,  tr('Select font'), self)
         action_dict['change_font'].triggered.connect(self.handler.on_font_selected)
 
         action_dict['change_color'] = QtGui.QAction(theme_tool_font_color, tr('Select font color'), self)
-#        action_dict['change_color'].triggered.connect(
-#                            widget_d['chat_input'].show_color_chooser)
-#        self.color.connect('clicked',
-#            lambda *args: self.handler.on_color_selected())
+        action_dict['change_color'].triggered.connect(
+                            self.handler.on_color_selected)
 
         action_dict['add_smiley'] = QtGui.QAction(theme_tool_emotes, tr('Send an emoticon'), self)
         #FIXME: this should use self.handler.on_emotes_selected but that isn't working

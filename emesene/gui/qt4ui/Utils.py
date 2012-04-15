@@ -11,9 +11,9 @@ from PyQt4.QtCore   import Qt
 
 from gui.base import MarkupParser
 
-def qfont_to_style(qfont):
+def qfont_to_style(qfont, color=None):
 
-    font = qfont.family()
+    font = unicode(qfont.family())
 
     font_italic = qfont.italic()
     font_bold = qfont.bold()
@@ -21,13 +21,25 @@ def qfont_to_style(qfont):
     font_underline = qfont.underline()
     font_strike = qfont.strikeOut()
 
-    font_size = qfont.pixelSize()
+    font_size = qfont.pointSize()
     if font_size < 6 or font_size > 32:
         font_size = 10
 
-    return e3.Style(font, e3.Color(0, 0, 0), font_bold,
+    if color is None:
+        color = e3.Color(0, 0, 0)
+
+    return e3.Style(font, color, font_bold,
         font_italic, font_underline, font_strike, font_size)
 
+def e3_color_to_qcolor(color):
+    '''converts from e3.color to qtcolor'''
+    return QtGui.QColor(color.red, color.green, color.blue, color.alpha)
+
+def qcolor_to_e3_color(qt_color):
+    '''converts from qcolor to e3.color'''
+    color = e3.Color.from_hex(unicode(qt_color.name()))
+    color.alpha = qt_color.alpha()
+    return color
 
 # consider changing these directly in MarkupParser
 def escape(string, add_dic=None):
