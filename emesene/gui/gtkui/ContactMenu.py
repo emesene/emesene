@@ -118,15 +118,16 @@ class ContactMenu(gtk.Menu):
 
         if self.session.session_has_service(e3.Session.SERVICE_CONTACT_MANAGING):
             self.append(self.add)
-            if self.session.session_has_service(e3.Session.SERVICE_CONTACT_BLOCK):
-                self.append(self.block)
-                self.append(self.unblock)
+        if self.session.session_has_service(e3.Session.SERVICE_CONTACT_BLOCK):
+            self.append(self.block)
+            self.append(self.unblock)
+        if self.session.session_has_service(e3.Session.SERVICE_CONTACT_MANAGING):
             self.append(self.remove)
             self.append(gtk.SeparatorMenuItem())
-            if self.session.session_has_service(e3.Session.SERVICE_CONTACT_ALIAS):
-                self.append(self.set_alias)
-            self.append(self.view_info)
-            self.append(gtk.SeparatorMenuItem())
+        if self.session.session_has_service(e3.Session.SERVICE_CONTACT_ALIAS):
+            self.append(self.set_alias)
+        self.append(self.view_info)
+        self.append(gtk.SeparatorMenuItem())
         if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
             self.append(self.move_to_group)
             self.append(self.copy_to_group)
