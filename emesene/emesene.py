@@ -269,9 +269,6 @@ class Controller(object):
         if use_http is None:
             use_http = self.config.get_or_set('b_use_http', False)
 
-        if self.window.content_type != 'empty':
-            self.window.clear()
-
         self._save_login_dimensions()
         self._set_location(self.window)
 
@@ -479,8 +476,6 @@ class Controller(object):
     def draw_main_screen(self):
         '''create and populate the main screen
         '''
-        self.window.clear()
-
         last_avatar_path = self.session.config_dir.get_path("last_avatar")
         self.session.load_config()
         
@@ -617,7 +612,6 @@ class Controller(object):
         if not on_reconnect:
             self.on_preferences_changed(use_http, proxy, session_id,
                     self.config.service)
-            self.window.clear()
             self.avatar_path = self.config_dir.join(host, account.account,
                     'avatars', 'last')
             self.window.go_connect(self.on_cancel_login, self.avatar_path,
@@ -800,7 +794,6 @@ class Controller(object):
 
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''
-        self.window.clear()
         self.window.go_connect(self.on_cancel_login, self.avatar_path,
                 self.config)
 
