@@ -81,13 +81,11 @@ except ImportError:
 try:
     from e3.common.NetworkManagerHelper import DBusNetworkChecker as NetworkChecker
 except ImportError:
-    NetworkChecker = None
-
-#try windows network check
-try:
-    from e3.common.NetworkManagerHelperWin32 import Win32NetworkChecker as NetworkChecker
-except ImportError:
-    NetworkChecker = None
+    #try windows network check
+    try:
+        from e3.common.NetworkManagerHelperWin32 import Win32NetworkChecker as NetworkChecker
+    except ImportError:
+        NetworkChecker = None
 
 try:
     from gui import gtkui
