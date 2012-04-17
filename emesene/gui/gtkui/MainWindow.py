@@ -196,12 +196,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         accel_group = gtk.AccelGroup()
         self.get_parent().add_accel_group(accel_group)
         self.get_parent().accel_group = accel_group
-        accel_group.connect_group(gtk.keysyms.Q,
-                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
-                                  self.on_key_quit)
-        accel_group.connect_group(gtk.keysyms.D,
-                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
-                                  self.on_key_disconnect)
+        self.menu.set_accels(accel_group)
         accel_group.connect_group(gtk.keysyms.F,
                                   gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
                                   self.on_key_search)
@@ -209,18 +204,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
                                   0, gtk.ACCEL_LOCKED,
                                   self.on_key_hide)
 
-    def on_key_quit(self, accel_group, window, keyval, modifier):
-        '''Catches Ctrl+Q and quits the program'''
-        self.session.close(True)
-
-    def on_key_disconnect(self, accel_group, window, keyval, modifier):
-        '''Catches Ctrl+D and closes the session (disconnection)'''
-        self.session.close()
-
     def on_key_hide(self, accel_group, window, keyval, modifier):
         '''Catches Escape and closes the window'''
         if self.panel.search.get_active():
-            print self.panel.search.get_active()
             return
 
         self.get_parent().emit('delete-event', gtk.gdk.Event(gtk.gdk.DELETE))

@@ -68,6 +68,17 @@ class MainMenu(gtk.MenuBar):
         self.append(self.options)
         self.append(self.help)
 
+    def set_accels(self, accel_group):
+        """
+        Set accelerators for menu items
+        """
+        self.file_menu.quit.add_accelerator(
+                'activate', accel_group, gtk.keysyms.Q,
+                gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
+        self.file_menu.disconnect.add_accelerator(
+                'activate', accel_group, gtk.keysyms.D,
+                gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
+
 class FileMenu(gtk.Menu):
     """
     A widget that represents the File popup menu located on the main menu
@@ -250,4 +261,3 @@ class HelpMenu(gtk.Menu):
         self.append(self.debug)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.updatecheck)
-
