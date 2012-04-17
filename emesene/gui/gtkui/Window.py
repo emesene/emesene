@@ -59,8 +59,6 @@ class Window(gtk.Window):
         self.connect('delete-event', self._on_delete_event)
         self.connect('window-state-event', self._on_window_state_event)
 
-        self.content_type = 'empty'
-
     def _get_content(self):
         '''content getter'''
         return self._content
@@ -88,25 +86,22 @@ class Window(gtk.Window):
                  config=None, config_dir=None, config_path=None,
                  proxy=None, use_http=None, session_id=None,
                  cancel_clicked=False, no_autologin=False):
-
         '''draw the login window on the main window'''
-
+        if self.content is not None and not cancel_clicked:
+            return
         LoginWindow = extension.get_default('login window')
 
         self.content = LoginWindow(callback, on_preferences_changed,
             config, config_dir, config_path, proxy, use_http, session_id,
             cancel_clicked, no_autologin)
-
         self.content.show()
-        self.content_type = 'login'
 
     def go_connect(self, callback, avatar_path, config):
-        '''draw the login window on the main window'''
+        '''draw the window that handles logging in'''
         ConnectingWindow = extension.get_default('connecting window')
 
         self.content = ConnectingWindow(callback, avatar_path, config)
         self.content.show()
-        self.content_type = 'connecting'
 
     def go_main(self, session, on_new_conversation, quit_on_close=False):
         '''change to the main window'''
@@ -114,7 +109,6 @@ class Window(gtk.Window):
         self.content = MainWindow(session, on_new_conversation)
         self.connect('key-press-event', self.content._on_key_press)
         self.content.show()
-        self.content_type = 'main'
         self.content.set_accels()
 
         # hide the main window only when the user is connected
@@ -134,7 +128,6 @@ class Window(gtk.Window):
         self.connect('focus-in-event', self.content._on_focus)
         self.connect('key-press-event', self.content._on_key_press)
         self.content.show()
-        self.content_type = 'conversation'
         self.content.set_accels()
 
     def set_location(self, width=0, height=0, posx=None, posy=None):
