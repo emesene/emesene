@@ -173,19 +173,3 @@ class LoginBase(object):
             self.config.last_logged_account = ''
 
         self.config.save(self.config_path)
-
-    def check_autologin(self):
-        '''check if autologin is set and can be started'''
-        if self.cancel_clicked:
-            return
-
-        account = self.config.get_or_set('last_logged_account', '')
-
-        if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
-            password = self.decode_password(account)
-
-            self.cmb_account.get_children()[0].set_text(account.rpartition('|')[0])
-            self.txt_password.set_text(password)
-
-            if not self.no_autologin:
-                self.do_connect()
