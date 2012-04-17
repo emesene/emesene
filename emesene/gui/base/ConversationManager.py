@@ -102,6 +102,10 @@ class ConversationManager(object):
         if conversation is None and conversation_tabs:
             conversation = self.new_conversation(cid, [account])
 
+        if not conversation.check_visible():
+            log.debug('The conversation exists but it\'s hidden. Show it! (hack)')
+            conversation.show()
+
         if conversation is not None:
             self.set_message_waiting(conversation, True)
             conversation.on_receive_message(message, account, cedict)
@@ -238,6 +242,7 @@ class ConversationManager(object):
         conversation.cid = cid
         self.conversations[cid] = conversation
         self.session.conversations[cid] = conversation
+
         return conversation
 
     def new_conversation(self, cid, members=None):
