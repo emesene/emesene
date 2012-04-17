@@ -288,9 +288,6 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.cmb_account.get_children()[0].set_text(
                 account.rpartition('|')[0])
 
-        if not self.cancel_clicked:
-            self._check_autologin()
-
     def _get_active_service(self):
         '''fetch the active service from the session combo box'''
         active = self.session_combo.get_active()
@@ -350,19 +347,6 @@ class Login(LoginBaseUI, gui.LoginBase):
         self.session_combo.connect('changed', self._on_session_changed)
 
         self._combo_session_list.append(self.session_combo)
-
-    def _check_autologin(self):
-        '''check if autologin is set and can be started'''
-        account = self.config.get_or_set('last_logged_account', '')
-
-        if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
-            password = self.decode_password(account)
-
-            self.cmb_account.get_children()[0].set_text(account.rpartition('|')[0])
-            self.txt_password.set_text(password)
-
-            if not self.no_autologin:
-                self.do_connect()
 
     def do_connect(self):
         '''
@@ -543,7 +527,7 @@ class Login(LoginBaseUI, gui.LoginBase):
             if response == stock.YES:
                 account = self.cmb_account.get_active_text()
                 service = self._get_active_service()
-                self.forgive_user(account, service)
+                self.forget_user(account, service)
                 self._reload_account_list()
                 self.cmb_account.get_children()[0].set_text('')
 
