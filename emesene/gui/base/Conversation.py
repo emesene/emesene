@@ -217,6 +217,11 @@ class Conversation(object):
         self.session.filetransfer_invite(self.cid, self.members[0],
                 filename, completepath, self.get_preview(completepath))
 
+    def check_visible(self):
+        ''' called by conversation manager to prevent hidden conversations
+            from receiving messages '''
+        raise NotImplementedError
+
     def on_video_call(self):
         '''called when the user is requesting a video-only call'''
         raise NotImplementedError

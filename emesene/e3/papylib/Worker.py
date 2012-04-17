@@ -306,6 +306,17 @@ class Worker(e3.base.Worker, papyon.Client):
         partecipants = list(papyconversation.participants)
         members = [account.account for account in partecipants]
 
+        if len(partecipants) == 1:
+            # This gets executed even without a multichat
+            self.conversations[partecipants[0]] = cid
+            self.rconversations[cid] = partecipants[0]
+            newconversationevent = ConversationEvent(papyconversation, self)
+            self._conversation_handler[cid] = newconversationevent
+            self.papyconv[cid] = papyconversation
+            self.rpapyconv[papyconversation] = cid
+            self.session.conv_first_action(cid, members)
+            return
+
         id_multichat = 'GroupChat'+str(cid)
         self.conversations[id_multichat] = cid
         self.rconversations[cid] = id_multichat
@@ -509,6 +520,9 @@ class Worker(e3.base.Worker, papyon.Client):
         if conv in self.rpapyconv:
             cid = self.rpapyconv[conv]
         else:
+            raise Exception("CID Error", "Not in rpapyconv - did not receive an invite for this message")
+        '''
+        else: # TODO:FIXME: this never happens (?)
             # emesene must create another conversation
             cid = time.time()
             self.conversations[account] = cid # add to account:cid
@@ -517,7 +531,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.papyconv[cid] = pyconvevent.conversation # add papy conv
             self.rpapyconv[pyconvevent.conversation] = cid
             self.session.conv_first_action(cid, [account])
-
+        '''
         msgobj = e3.base.Message(e3.base.Message.TYPE_MESSAGE,
                 papymessage.content, account,
                 formatting_papy_to_e3(papymessage.formatting,
@@ -1286,7 +1300,7 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_close_conversation(self, cid):
         '''handle Action.ACTION_CLOSE_CONVERSATION
         '''
-        #print "you close conversation %s, are you happy?" % cid
+        #print "you close conversation %f, are you happy?" % cid
         account = self.rconversations[cid]
         conv = self.papyconv[cid]
         conv.leave()
