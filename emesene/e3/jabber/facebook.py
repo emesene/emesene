@@ -77,7 +77,7 @@ class FacebookCLient(object):
                 self._nick = me.name
             except OAuthException:
                 self.request_permitions()
-            except PyfbException, ex:
+            except (PyfbException, IOError) as ex:
                 log.warn("couldn't get nick " + str(ex))
 
         return self._nick
@@ -91,7 +91,7 @@ class FacebookCLient(object):
                 self._client.publish(message, "me")
             except OAuthException:
                 self.request_permitions()
-            except PyfbException, ex:
+            except (PyfbException, IOError) as ex:
                 log.warn("couldn't publish message " + str(ex))
 
     def _get_personal_message(self):
@@ -107,7 +107,7 @@ class FacebookCLient(object):
                     message = self._client.get_statuses("me", params)[0].message
             except OAuthException:
                 self.request_permitions()
-            except PyfbException, ex:
+            except (PyfbException, IOError) as ex:
                 log.warn("couldn't get message " + str(ex))
         return message
 
@@ -122,7 +122,7 @@ class FacebookCLient(object):
                 unread_count = qry[0].unread_count
             except OAuthException:
                 self.request_permitions()
-            except PyfbException, ex:
+            except (PyfbException, IOError) as ex:
                 log.warn("couldn't get unread messages count " + str(ex))
 
         return unread_count
@@ -142,7 +142,7 @@ class FacebookCLient(object):
             return (query_user[0].name, query_message[0].body)
         except OAuthException:
             self.request_permitions()
-        except PyfbException:
+        except PyfbException, IOError:
             #we don't have any unread msg
             return None
 
@@ -161,7 +161,7 @@ class FacebookCLient(object):
                     self._session.config.avatar_url = avatar_url
             except OAuthException:
                 self.request_permitions()
-            except PyfbException:
+            except PyfbException, IOError:
                 #we don't have any avatar pic
                 pass
 
