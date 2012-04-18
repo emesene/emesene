@@ -209,6 +209,7 @@ class DownloadListBase(ExtensionListTab):
         '''constructor'''
         ExtensionListTab.__init__(self, session, radio, use_tabs)
         self.updated_amount = 0
+        self.progress = None
 
         self.config_dir = e3.common.ConfigDir('emesene2')
 
@@ -238,6 +239,9 @@ class DownloadListBase(ExtensionListTab):
 
     def on_update(self, widget=None, refresh=False):
         '''called when the liststore need to be changed'''
+        if self.progress is not None:
+            return
+
         dialog = extension.get_default('dialog')
         self.progress = dialog.progress_window(
                         _('Refresh extensions'), self._end_progress_cb)
@@ -380,6 +384,9 @@ class DownloadList(DownloadListBase):
 
     def start_download(self, widget=None):
         '''start the download of an extension'''
+        if self.progress is not None:
+            return
+
         dialog = extension.get_default('dialog')
         self.progress = dialog.progress_window(
                         _('Downloading extensions'), self._end_progress_cb)
@@ -548,6 +555,9 @@ class UpdateList(DownloadListBase):
 
     def start_download(self, widget=None):
         '''start the download of an extension'''
+        if self.progress is not None:
+            return
+
         dialog = extension.get_default('dialog')
         self.progress = dialog.progress_window(
                         _('Updating extensions'), self._end_progress_cb)

@@ -153,7 +153,7 @@ class LoginBase(object):
         '''return password or "" if not found'''
         return base64.b64decode(self.accounts.get(email, ""))
 
-    def forgive_user(self, account, service):
+    def forget_user(self, account, service):
         '''Remove stored information about an account and a service'''
         try: # Delete user's folder
             rmtree(self.config_dir.join(self.server_host, account))

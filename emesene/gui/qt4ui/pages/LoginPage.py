@@ -94,13 +94,13 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         account_img = QtGui.QLabel()
         account_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.user))
         widget_d['account_img'] = account_img
-        widget_d['forgive_me_btn']  = QtGui.QToolButton()
-        widget_d['forgive_me_btn'].setAutoRaise(True)
-        widget_d['forgive_me_btn'].setIcon(
+        widget_d['forget_me_btn']  = QtGui.QToolButton()
+        widget_d['forget_me_btn'].setAutoRaise(True)
+        widget_d['forget_me_btn'].setIcon(
                                     QtGui.QIcon.fromTheme('edit-delete'))
         account_box.addWidget(widget_d['account_img'])
         account_box.addWidget(widget_d['account_combo'])
-        account_box.addWidget(widget_d['forgive_me_btn'])
+        account_box.addWidget(widget_d['forget_me_btn'])
 
 
         password_box = QtGui.QHBoxLayout()
@@ -174,8 +174,8 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                                     self._on_checkbox_state_refresh)
         widget_d['advanced_btn'].clicked.connect(
                                     self._on_connection_preferences_clicked)
-        widget_d['forgive_me_btn'].clicked.connect(
-                                    self._on_forgive_me_clicked)
+        widget_d['forget_me_btn'].clicked.connect(
+                                    self._on_forget_me_clicked)
         widget_d['login_btn'].clicked.connect(
                                     self._on_start_login)
 
@@ -303,14 +303,14 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                                         self.server_port, new_preferences_cb, 
                                         self.config.b_use_http, self.proxy)
 
-    def _on_forgive_me_clicked(self):
+    def _on_forget_me_clicked(self):
         ''''''
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
             if (response == 36): #Accepted
                 account = str(widget_dic['account_combo'].currentText())
                 service = self.config.d_user_service.get(account, self.config.service)
-                self.forgive_user(account, service)
+                self.forget_user(account, service)
                 #FIXME: remove fron account_list and combo
                 widget_dic['account_combo'].setCurrentIndex(0)
 
