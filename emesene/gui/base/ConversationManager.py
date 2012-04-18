@@ -287,8 +287,8 @@ class ConversationManager(object):
             conversation.subscribe_signals()
             account = conversation.members[0]
 
-            contact = self.session.contacts.contacts[account]
-            conversation.set_sensitive(not contact.blocked,  True)
+            contact = self.session.contacts.safe_get(account)
+            conversation.set_sensitive(not contact.blocked, True)
  
             self.reuse_conversation(cid, [account])
             self.session.new_conversation(account, cid)
