@@ -250,7 +250,10 @@ class Conversation(object):
     def on_block_user(self):
         '''blocks the first user of the conversation'''
         account = self.members[0]
-        contact = self.session.contacts.contacts[account]
+        contact = self.session.contacts.get(account)
+
+        if contact is None:
+            return
 
         if contact.blocked:
             self.session.unblock(account)
@@ -666,7 +669,7 @@ class Conversation(object):
         self.message_offset = 0
 
     def _member_to_contact(self,member):
-        return self.session.contacts.contacts[member]
+        return self.session.contacts.safe_get(member)
 
     def steal_emoticon(self, uri):
         """
