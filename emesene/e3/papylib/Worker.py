@@ -1351,7 +1351,7 @@ class Worker(e3.base.Worker, papyon.Client):
             if first_dude.presence == papyon.Presence.OFFLINE or \
                first_dude.network_id == papyon.profile.NetworkID.EXTERNAL:
                 if switchboard is None or \
-                   switchboard.state == papyon.msnp.ProtocolState.CLOSED:
+                   switchboard.state != papyon.msnp.ProtocolState.OPEN:
 
                     if message.type == e3.base.Message.TYPE_NUDGE or \
                        message.type == e3.base.Message.TYPE_TYPING:
