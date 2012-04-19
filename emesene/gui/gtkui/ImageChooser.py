@@ -137,11 +137,17 @@ class ImageChooser(gtk.Window):
     def _on_accept(self, button):
         '''method called when the user clicks the button'''
         filename = get_filename(self)
-        if os.path.isfile(filename):
-            self.hide()
-            self.response_cb(gui.stock.ACCEPT, filename)
-        else:
+        
+        if filename is None:
             extension.get_default('dialog').error(_("No picture selected"))
+            return
+            
+        if not os.path.isfile(filename):
+            extension.get_default('dialog').error(_("No picture selected"))
+            return
+
+        self.hide()
+        self.response_cb(gui.stock.ACCEPT, filename)
 
     def _on_cancel(self, button):
         '''method called when the user clicks the button'''
