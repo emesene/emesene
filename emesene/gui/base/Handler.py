@@ -541,8 +541,13 @@ class ConversationToolbarHandler(object):
         start a file transfer'''
         def open_file_cb(response, filepath):
             if response is not gui.stock.CANCEL:
-                filename = os.path.basename(filepath)
-                self.conversation.on_filetransfer_invite(filename, filepath)
+                if filepath is None:
+                    extension.get_default('dialog').error(
+                                                _("No file selected"))
+                else:
+                    filename = os.path.basename(filepath)
+                    self.conversation.on_filetransfer_invite(filename,
+                                                             filepath)
 
         self.dialog.choose_file(os.path.expanduser("~"), open_file_cb)
 
