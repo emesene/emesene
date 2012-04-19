@@ -1350,15 +1350,16 @@ class Worker(e3.base.Worker, papyon.Client):
 
             if first_dude.presence == papyon.Presence.OFFLINE or \
                first_dude.network_id == papyon.profile.NetworkID.EXTERNAL:
-                if message.type == e3.base.Message.TYPE_NUDGE or \
-                   message.type == e3.base.Message.TYPE_TYPING:
-                    return
-
                 if switchboard is None or \
                    switchboard.state == papyon.msnp.ProtocolState.CLOSED:
-                    self.oim_box.send_message(first_dude, message.body)
-                    # don't process this.
-                    message.type = e3.base.Message.TYPE_FLNMSG
+
+                    if message.type == e3.base.Message.TYPE_NUDGE or \
+                       message.type == e3.base.Message.TYPE_TYPING:
+                        return
+                    else:
+                        self.oim_box.send_message(first_dude, message.body)
+                        # don't process this.
+                        message.type = e3.base.Message.TYPE_FLNMSG
 
         if message.type == e3.base.Message.TYPE_NUDGE:
             papyconversation.send_nudge()
