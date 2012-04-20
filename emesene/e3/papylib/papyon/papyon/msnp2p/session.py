@@ -23,6 +23,7 @@ from papyon.event import EventsDispatcher
 from papyon.msnp2p.constants import *
 from papyon.msnp2p.SLP import *
 from papyon.msnp2p.transport import *
+from papyon.msnp2p.transport.direct import *
 from papyon.util.parsing import build_account
 from papyon.util.timer import Timer
 import papyon.util.element_tree as ElementTree
@@ -31,6 +32,7 @@ import gobject
 import base64
 import logging
 import random
+import socket
 import uuid
 import os
 
@@ -79,6 +81,8 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
         self._euf_guid = euf_guid
         self._application_id = application_id
         self._completed = False
+        # data to be send if sending
+        self._data = None
 
         self._version = 1
         if self._client.profile.client_id.supports_p2pv2 and \
@@ -166,7 +170,9 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
 
     def _transreq(self):
         self._cseq = 0
-        body = SLPTransportRequestBody(self._id, 0, 1)
+        body = SLPTransportRequestBody(self._id, 0, 1,
+                self._transport_manager.supported_transports,
+                self._session_manager._client.conn_type)
         message = SLPRequestMessage(SLPRequestMethod.INVITE,
                 "MSNMSGR:" + self.remote_id,
                 to=self.remote_id,
@@ -175,6 +181,8 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
                 cseq=self._cseq,
                 call_id=self._call_id)
         message.body = body
+        print "****** sending transreq *******"
+        print message
         self._send_slp_message(message)
 
     def _respond(self, status_code):
@@ -213,14 +221,117 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
 
     def _accept_transreq(self, transreq, bridge, listening, nonce, local_ip,
             local_port, extern_ip, extern_port):
+        conn_type = self._session_manager._client.conn_type
         body = SLPTransportResponseBody(bridge, listening, nonce, [local_ip],
-                local_port, [extern_ip], extern_port, self._id, 0, 1)
+                local_port, [extern_ip], extern_port, self._id, 0, 1, conn_type)
         self._respond_transreq(transreq, 200, body)
 
     def _decline_transreq(self, transreq):
         body = SLPTransportResponseBody(session_id=self._id)
         self._respond_transreq(transreq, 603, body)
         self._dispose()
+
+    def _request_bridge(self):
+        # use active bridge if any
+        bridge = self._transport_manager.find_transport(self._peer, self._peer_guid, None)
+        print "BRIDGE: ******************", bridge
+        print "AVAIL TRANSPORTS >>>>>>>>>>>>>>>>>>", self._transport_manager._transports
+        if bridge is not None and bridge.rating > 0: # TODO: c10ud -> 0 means switchboard, first we should check transreq if we receive 0 (?)
+            logger.info("Use already active %s connection" % bridge.name)
+            self._on_bridge_selected()
+        else:
+            self._transreq()
+
+    def _switch_bridge(self, transreq):
+        choices = transreq.body.bridges # offered by other client
+        if "TCPv1" in choices:
+            proto = "TCPv1"
+        else:
+            proto = self._transport_manager._default_transport
+        new_bridge = self._transport_manager.create_transport(self.peer,
+                self.peer_guid, proto)
+        print "Received transreq - bridges:", choices, proto, new_bridge
+        print transreq
+        if new_bridge is None or new_bridge.connected:
+            self._on_bridge_selected()
+        else:
+            new_bridge.connect("listening", self._bridge_listening, transreq)
+            new_bridge.connect("connected", self._bridge_switched)
+            new_bridge.connect("failed", self._bridge_failed)
+            new_bridge.listen()
+
+    def _transreq_accepted(self, transresp):
+        print "@@@@@@@ transreq accepted @@@@@@@@@"
+        print transresp
+        if not transresp.listening: # other client isn't listening, fall back to switchboard
+            # TODO offer to be the server
+            self._bridge_failed(None)
+            return
+
+        ip, port = self._select_address(transresp)
+        new_bridge = self._transport_manager.create_transport(self.peer,
+                self.peer_guid, transresp.bridge)
+        if new_bridge is None or new_bridge.connected:
+            self._bridge_selected()
+        else:
+            new_bridge.connect("connected", self._bridge_switched)
+            new_bridge.connect("failed", self._bridge_failed)
+            new_bridge.open(ip, port, transresp.nonce)
+
+    def _select_address(self, transresp):
+        client_ip = self._session_manager._client.client_ip
+        local_ip = self._session_manager._client.local_ip
+        local_addr = socket.inet_aton(local_ip)
+        ips = []
+
+        # try external addresses
+        port = transresp.external_port
+        for ip in transresp.external_ips:
+            try:
+                socket.inet_aton(ip)
+            except:
+                continue
+            if ip == client_ip:
+                # we are on the same NAT
+                ips = []
+                break
+            ips.append((ip, port))
+        if ips:
+            return ips[0]
+
+        # try internal addresses
+        port = transresp.internal_port
+        for ip in transresp.internal_ips:
+            try:
+                addr = socket.inet_aton(ip)
+                # same local area network
+                if addr[0:3] == local_addr[0:3]:
+                    return (ip, port)
+            except:
+                continue
+            ips.append((ip, port))
+        if ips:
+            return ips[0]
+        
+        # no valid address found
+        return (None, None)
+
+    def _bridge_listening(self, new_bridge, external_ip, external_port,
+            transreq):
+        logger.debug("Bridge listening %s %s" % (external_ip, external_port))
+        print "Bridge listening %s %s" % (external_ip, external_port)
+        self._accept_transreq(transreq, new_bridge.protocol, True,
+                new_bridge.nonce, new_bridge.ip, new_bridge.port,
+                external_ip, external_port)
+
+    def _bridge_switched(self, new_bridge):
+        logger.info("Bridge switched to %s connection" % new_bridge.name)
+        self._on_bridge_selected()
+
+    def _bridge_failed(self, new_bridge):
+        print "Bridge switching failed", new_bridge
+        logger.error("Bridge switching failed, using default one (switchboard)")
+        self._on_bridge_selected()
 
     def _close(self, context=None, reason=None):
         body = SLPSessionCloseBody(context=context, session_id=self._id,
@@ -287,6 +398,8 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
         if isinstance(message, SLPRequestMessage):
             if isinstance(message.body, SLPSessionRequestBody):
                 self._on_invite_received(message)
+            elif isinstance(message.body, SLPTransportRequestBody):
+                self._switch_bridge(message)
             elif isinstance(message.body, SLPSessionCloseBody):
                 self._on_bye_received(message)
             else:
@@ -300,6 +413,9 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
                 elif message.status == 603:
                     self._emit("rejected")
                     self._on_session_rejected(message)
+            elif isinstance(message.body, SLPTransportResponseBody):
+                if message.status == 200:
+                    self._transreq_accepted(message.body)
             else:
                 print "Unhandled response blob :", message
 
@@ -325,6 +441,11 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
 
     def on_bye_timeout(self):
         self._dispose()
+
+    def _on_bridge_selected(self):
+        if self._data:
+            self._send_data("\x00" * 4)
+            self._send_data(self._data)
 
     # Methods to implement in different P2P applications
 

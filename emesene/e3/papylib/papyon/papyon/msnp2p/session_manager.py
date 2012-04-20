@@ -79,12 +79,20 @@ class P2PSessionManager(gobject.GObject):
         del self._sessions[session.id]
         self._transport_manager.add_to_blacklist(session.peer,
                 session.peer_guid, session.id)
+        if not self._search_session_by_peer(session.peer, session.peer_guid):
+            self._transport_manager.close_transport(session.peer, session.peer_guid)
 
     def _get_session(self, session_id):
         if session_id in self._sessions:
             return self._sessions[session_id]
         else:
             return None
+
+    def _search_session_by_peer(self, peer, peer_guid):
+        for session in self._sessions.itervalues():
+            if session.peer == peer and session.peer_guid == peer_guid:
+                return session
+        return None
 
     def _search_session_by_call(self, call_id):
         for session in self._sessions.itervalues():
@@ -142,23 +150,27 @@ class P2PSessionManager(gobject.GObject):
 
             # If there was no session then create one only if it's an INVITE
             if isinstance(message, SLPRequestMessage) and \
-                    isinstance(message.body, SLPSessionRequestBody) and \
                     message.method == SLPRequestMethod.INVITE:
-                try:
-                    # Find the contact we received the message from
-                    peer, guid = self._find_contact(message.frm)
-                    for handler in self._handlers:
-                        if handler._can_handle_message(message):
-                            session = handler._handle_message(peer, guid, message)
-                            if session is not None:
-                                break
-                    if session is None:
-                        logger.error("No handler could handle euf-guid %s" % (message.body.euf_guid))
-                        return
-                except Exception, err:
-                    #TODO: answer with a 603 Decline ?
-                    logger.exception(err)
-                    logger.error("Could not handle SLP invite message")
+                if isinstance(message.body, SLPSessionRequestBody):
+                    try:
+                        # Find the contact we received the message from
+                        peer, guid = self._find_contact(message.frm)
+                        for handler in self._handlers:
+                            if handler._can_handle_message(message):
+                                session = handler._handle_message(peer, guid, message)
+                                if session is not None:
+                                    break
+                        if session is None:
+                            logger.error("No handler could handle euf-guid %s" % (message.body.euf_guid))
+                            return
+                    except Exception, err:
+                        #TODO: answer with a 603 Decline ?
+                        logger.exception(err)
+                        logger.error("Could not handle SLP invite message")
+                        return None
+                elif isinstance(message.body, SLPTransportRequestBody): #TODO: c10ud
+                    session = self._sessions[session_id]
+                else:
                     return None
             else:
                 logger.warning('Received initial blob with SessionID=0 and non INVITE SLP data')
