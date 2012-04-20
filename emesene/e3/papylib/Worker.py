@@ -303,23 +303,13 @@ class Worker(e3.base.Worker, papyon.Client):
     def _on_conversation_invite(self, papyconversation):
         ''' called when we are invited in a conversation '''
         cid = time.time()
-        partecipants = list(papyconversation.participants)
-        members = [account.account for account in partecipants]
+        participants = list(papyconversation.participants)
+        members = [account.account for account in participants]
 
-        if len(partecipants) == 1:
-            # This gets executed even without a multichat
-            self.conversations[partecipants[0]] = cid
-            self.rconversations[cid] = partecipants[0]
-            newconversationevent = ConversationEvent(papyconversation, self)
-            self._conversation_handler[cid] = newconversationevent
-            self.papyconv[cid] = papyconversation
-            self.rpapyconv[papyconversation] = cid
-            self.session.conv_first_action(cid, members)
-            return
+        conv_id = members[0] if len(participants) == 1 else 'GroupChat'+str(cid)
 
-        id_multichat = 'GroupChat'+str(cid)
-        self.conversations[id_multichat] = cid
-        self.rconversations[cid] = id_multichat
+        self.conversations[conv_id] = cid
+        self.rconversations[cid] = conv_id
         newconversationevent = ConversationEvent(papyconversation, self)
         self._conversation_handler[cid] = newconversationevent
         self.papyconv[cid] = papyconversation
