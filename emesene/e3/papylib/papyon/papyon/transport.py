@@ -360,6 +360,7 @@ class HTTPPollConnection(BaseTransport):
         
         self._command_queue = []
         self._waiting_for_response = False # are we waiting for a response
+        self._polling_source_id = None
         self._session_id = None
         self.__error = None
 
@@ -378,8 +379,9 @@ class HTTPPollConnection(BaseTransport):
         self.emit("connection-success")
 
     def lose_connection(self, error=None):
-        gobject.source_remove(self._polling_source_id)
-        del self._polling_source_id
+        if self._polling_source_id:
+            gobject.source_remove(self._polling_source_id)
+            self._polling_source_id = None
         if error is not None:
             self.emit("connection-failure", error)
         elif not self.__error:
