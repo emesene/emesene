@@ -265,18 +265,11 @@ class ConversationManager(object):
         self.conversations[cid] = conversation
         self.session.conversations[cid] = conversation
 
-        self.after_new_conversation(conversation)
         #notify a new conversation has started
         self.session.conv_started(cid, members)
 
         log.debug('Returning a new conversation')
         return conversation
-
-    def after_new_conversation(self, conversation):
-        '''
-         What to do after create a conversation
-        '''
-        pass
 
     def renew_session(self, session):
         '''reopen all conversations when the user reconnects'''
