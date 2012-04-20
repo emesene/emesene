@@ -86,11 +86,6 @@ class ImageChooser(gtk.Window):
         to the gdk available image formats
         '''
 
-        # All files filter
-        all_files = gtk.FileFilter()
-        all_files.set_name(_('All files'))
-        all_files.add_pattern('*')
-
         # All images filter
         all_images = gtk.FileFilter()
         all_images.set_name(_('All images'))
@@ -113,7 +108,6 @@ class ImageChooser(gtk.Window):
 
             filters.append(filter_)
 
-        self.file_chooser.add_filter(all_files)
         self.file_chooser.add_filter(all_images)
         self.file_chooser.set_filter(all_images)
 
@@ -138,11 +132,7 @@ class ImageChooser(gtk.Window):
         '''method called when the user clicks the button'''
         filename = get_filename(self)
         
-        if filename is None:
-            extension.get_default('dialog').error(_("No picture selected"))
-            return
-            
-        if not os.path.isfile(filename):
+        if filename is None or not os.path.isfile(filename):
             extension.get_default('dialog').error(_("No picture selected"))
             return
 
