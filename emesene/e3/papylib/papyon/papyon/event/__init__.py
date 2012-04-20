@@ -22,7 +22,10 @@
 Defines the interfaces that the client can implement to benefit from the
 client event notifications."""
 
-from papyon.util.weak import WeakSet
+try:
+    from weakref import WeakSet
+except ImportError:
+    from papyon.util.weak import WeakSet
 
 class EventsDispatcher(object):
     """Abstract object from which all the objects generating events inherit"""

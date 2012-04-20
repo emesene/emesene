@@ -31,7 +31,10 @@ import papyon.msnp as msnp
 from papyon.profile import Presence
 from papyon.transport import ServerType
 from papyon.util.async import run
-from papyon.util.weak import WeakSet
+try:
+    from weakref import WeakSet
+except ImportError:
+    from papyon.util.weak import WeakSet
 from papyon.event import ConversationErrorType, ContactInviteError, MessageError
 
 __all__ = ['SwitchboardManager']
