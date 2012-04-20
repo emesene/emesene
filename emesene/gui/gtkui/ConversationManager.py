@@ -200,8 +200,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         # Update the tab indices and close buttons of all open conversations
         for conv in self.conversations.itervalues():
             conv.tab_index = self.page_num(conv)
-            if len(self.conversations) == 1:
-                conv.tab_label.close.hide()
+        self.update_close_buttons()
 
     def add_new_conversation(self, session, cid, members):
         """
@@ -218,18 +217,17 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         conversation.tab_index = self.append_page_menu(conversation, label)
         self.set_tab_label_packing(conversation, not self.mozilla_tabs, True, gtk.PACK_START)
         self.set_tab_reorderable(conversation, True)
+        self.update_close_buttons()
 
         return conversation
 
-    def after_new_conversation(self, conversation):
-        gui.ConversationManager.after_new_conversation(self, conversation)
-         #If has more than one tab show close buttons
-        if len(self.conversations) < 2:
-            conversation.tab_label.close.hide()
-        elif len(self.conversations) == 2:
-            for k, v in self.conversations.items():
-                v.tab_label.close.set_visible(
-                            self.session.config.b_close_button_on_tabs)
+    def update_close_buttons(self):
+        """
+        Show or hide the close buttons on tab labels
+        """
+        show = self.get_n_pages() > 1 and self.session.config.b_close_button_on_tabs
+        for conv_index in range(self.get_n_pages()):
+            self.get_nth_page(conv_index).tab_label.close.set_visible(show)
 
     def update_window(self, text, icon, index):
         ''' updates the window's border and item on taskbar
