@@ -22,7 +22,10 @@ from papyon.media import MediaCodec, MediaStreamDescription, MediaSessionMessage
 from papyon.media.constants import *
 from papyon.sip.ice import ICECandidateEncoder
 from papyon.util.decorator import rw_property
-from papyon.util.odict import odict
+try:
+    from collections import OrderedDict as odict
+except ImportError:
+    from papyon.util.odict import odict
 
 import logging
 

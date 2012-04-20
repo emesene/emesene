@@ -23,7 +23,10 @@ import cgi
 import gzip
 from papyon.gnet.constants import *
 from papyon.gnet.errors import *
-from papyon.util.odict import odict
+try:
+    from collections import OrderedDict as odict
+except ImportError:
+    from papyon.util.odict import odict
 import papyon.util.string_io as StringIO
 
 __all__ = ['HTTPMessage', 'HTTPResponse', 'HTTPRequest']
