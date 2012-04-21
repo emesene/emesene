@@ -485,7 +485,7 @@ class MyAccountHandler(object):
 
     def on_set_picture_selected(self, widget, data=None):
         '''called when set picture is selected'''
-        _av_chooser = extension.get_default('avatar chooser')(self.session)
+        _av_chooser = extension.get_and_instantiate('avatar chooser', self.session)
         _av_chooser.show()
 
 class ConversationToolbarHandler(object):

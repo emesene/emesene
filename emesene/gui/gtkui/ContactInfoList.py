@@ -150,7 +150,7 @@ class ContactInfoList(gtk.VBox):
 
     def _on_avatar_click(self, widget, data):
         '''method called when user click on his avatar '''
-        av_chooser = extension.get_default('avatar chooser')(self.session)
+        av_chooser = extension.get_and_instantiate('avatar chooser',  self.session)
         av_chooser.set_modal(True)
         av_chooser.show()
 

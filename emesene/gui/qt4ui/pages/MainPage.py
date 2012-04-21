@@ -142,8 +142,7 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     def _on_display_pic_clicked(self):
         '''Slot called when the user clicks the display pic. It shows
         the AvatarChooser'''
-        chooser_cls = extension.get_default('avatar chooser')
-        chooser = chooser_cls(self.session)
+        chooser = extension.get_and_instantiate('avatar chooser', self.session)
         chooser.exec_()
 
     def _on_mail_count_changed(self, count):
