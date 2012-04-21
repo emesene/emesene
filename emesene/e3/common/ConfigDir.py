@@ -68,8 +68,13 @@ class ConfigDir(object):
                 return os.path.expanduser(os.path.join('~', '.config',
                     self.app_name))
         elif sys.platform == 'win32':
-            return os.path.expanduser(os.path.join(os.environ['APPDATA'], 'emesene',
-                self.app_name))
+            if 'APPDATA' in os.environ:
+                return os.path.expanduser(os.path.join(os.environ['APPDATA'],
+                                                       'emesene',
+                                                       self.app_name))
+            else:
+                return os.path.abspath(self.app_name)
+
         elif sys.platform == 'darwin':
             return os.path.expanduser(os.path.join('~', 'Library/Application Support',
                 self.app_name))
