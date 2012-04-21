@@ -21,6 +21,7 @@
 
 import os
 import shutil
+import tempfile
 
 try:
     import json
@@ -54,25 +55,23 @@ class Collection(object):
         self._tree = None
         self.progress = 0.0
 
-    def save_files(self, element, label):
+    def save_files(self, type_, label):
         self._stop = False
-        if not label in element:
+        element = self.extensions_descs[type_].get(label)
+        if element is None:
             return
-        keys = element[label].files.keys()
+
+        keys = element.files.keys()
+        tmp_dir = tempfile.mkdtemp()
         for k, path in enumerate(keys):
+            if self._stop:
+                self.remove(tmp_dir)
+                return
+
             self.progress = k / float(len(keys))
 
             split_path = path.split("/")
-            if self.theme.endswith("themes"):
-                removal_path = os.path.join(self.dest_folder, split_path[0], split_path[1])
-            else:
-                removal_path = os.path.join(self.dest_folder, split_path[0])
-
-            if self._stop:
-                self.remove(removal_path)
-                return
-
-            path_to_create = self.dest_folder
+            path_to_create = tmp_dir
             for part in split_path[:-1]:
                 path_to_create = os.path.join(path_to_create, part)
             try:
@@ -81,25 +80,38 @@ class Collection(object):
                 pass
 
             try:
-                rq = self.github.get_raw(self.theme, element[label].files[path])
+                rq = self.github.get_raw(self.theme, element.files[path])
             except Exception, ex:
                 log.exception(str(ex))
-                self.remove(removal_path)
+                self.remove(tmp_dir)
                 return
 
             f = open(os.path.join(path_to_create, split_path[-1]), "wb")
             f.write(rq)
             f.close()
+
+        self.remove(self.get_abspath(type_, label))
+        first_path = os.path.split(self.get_path(type_, label))
+        first_path = first_path[0] or first_path[1]
+        self.move(os.path.join(tmp_dir, first_path), self.dest_folder)
+        self.remove(tmp_dir)
         self.progress = 0.0
 
     def download(self, download_item=None):
         self.progress = 0.0
         if download_item is not None:
-            for element in self.extensions_descs.itervalues():
+            for element in self.extensions_descs.iterkeys():
                 self.save_files(element, download_item)
 
     def remove(self, path):
-        shutil.rmtree(path)
+        try:
+            shutil.rmtree(path)
+        except OSError, e:
+            if e.errno != 2: # code 2 - no such file or directory
+                raise
+
+    def move(self, src, dst):
+        shutil.move(src, dst)
 
     def stop(self):
         self._stop = True
@@ -109,6 +121,13 @@ class Collection(object):
 
     def plugin_name_from_file(self, file_name):
         pass
+
+    def get_path(self, type_, label):
+        pass
+
+    def get_abspath(self, type_, label):
+        ''' Get the full path of the plugin from the path of the file'''
+        return os.path.join(self.dest_folder, self.get_path(type_, label))
 
     def fetch(self, refresh=True):
         if not refresh and self._tree is not None:
@@ -191,12 +210,16 @@ class Collection(object):
 class PluginsCollection(Collection):
 
     def plugin_name_from_file(self, file_name):
-        ps = file_name.find( "/")
+        ps = file_name.find("/")
 
         if ps != -1:
             return ("plugin", file_name[:ps])
         else:
             return (None, None)
+
+    def get_path(self, type_, label):
+        ''' Get the path of the plugin'''
+        return label
 
 class SupportedPluginsCollection(PluginsCollection):
     def __init__(self, dest_folder):
@@ -218,14 +241,18 @@ class ThemesCollection(Collection):
 
     def plugin_name_from_file(self, file_name):
 
-        ps = file_name.find( "/")
-        ps = file_name.find( "/", ps + 1)
+        ps = file_name.find("/")
+        ps = file_name.find("/", ps + 1)
 
         if ps != -1:
             path = file_name[:ps]
             return path.split("/")
         else:
             return (None, None)
+
+    def get_path(self, type_, label):
+        ''' Get the path of the theme'''
+        return os.path.join(type_, label)
 
 class SupportedThemesCollection(ThemesCollection):
     def __init__(self, dest_folder):

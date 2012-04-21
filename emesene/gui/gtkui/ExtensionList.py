@@ -575,7 +575,6 @@ class UpdateList(DownloadListBase):
                         return
 
                     current_extension = self.get_collection(collection_name, ext_type, ext)
-                    self.remove(path, current_extension)
                     self.download(ext, current_extension)
                     self.updated_amount += 1
                 ext_list = {}
