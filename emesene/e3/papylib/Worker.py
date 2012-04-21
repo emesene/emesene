@@ -1401,6 +1401,11 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_ft_invite(self, cid, account, filename, completepath,
             preview_data):
 
+        if not os.path.getsize(completepath):
+            # size is 0 or function returned None, 
+            # don't try to send anything
+            return
+
         papycontact = self.contact_by_account(account)
         papysession = self._ft_manager.send(papycontact, filename,
                 os.path.getsize(completepath), preview_data)
