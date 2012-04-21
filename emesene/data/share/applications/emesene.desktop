@@ -5,11 +5,13 @@ Comment=Instant messaging client for MSN, Gtalk and Facebook
 Exec=emesene -s
 Icon=emesene
 Terminal=false
+StartupNotify=true
 Type=Application
+OnlyShowIn=GNOME;Unity;
 Categories=Network;InstantMessaging;
 X-Ayatana-Desktop-Shortcuts=NewInstance;
 
 [NewInstance Shortcut Group]
 Name=Open a new instance
 Exec=emesene
-TargetEnvironment=Unity
+OnlyShowIn=Unity;
