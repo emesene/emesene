@@ -200,9 +200,9 @@ class Dialog(object):
         entry.connect('activate', cls.entry_cb, window, response_cb, *args)
 
         window.hbox.pack_start(entry, True, True)
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
-            cls.entry_cb, *args)
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
+            cls.entry_cb, *args)
+        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
             cls.entry_cb, *args)
 
         setattr(window, 'entry', entry)
@@ -388,9 +388,9 @@ class Dialog(object):
         stock.CLOSE if the user closes the window'''
         window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION,
             response_cb, _("Confirm"), stock.NO)
-        cls.add_button(window, gtk.STOCK_YES, stock.YES, response_cb,
-            cls.default_cb, *args)
         cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb,
+            cls.default_cb, *args)
+        cls.add_button(window, gtk.STOCK_YES, stock.YES, response_cb,
             cls.default_cb, *args)
         window.set_modal(True)
         window.show()
@@ -402,11 +402,11 @@ class Dialog(object):
         stock.CANCEL or stock.CLOSE if the user closes the window'''
         window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION,
             response_cb, _("Confirm"))
-        cls.add_button(window, gtk.STOCK_YES, stock.YES, response_cb,
+        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
             cls.default_cb, *args)
         cls.add_button(window, gtk.STOCK_NO, stock.NO, response_cb,
             cls.default_cb, *args)
-        cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
+        cls.add_button(window, gtk.STOCK_YES, stock.YES, response_cb,
             cls.default_cb, *args)
 
         window.show()
@@ -418,9 +418,9 @@ class Dialog(object):
         stock.CLOSE'''
         window = cls.common_window(message, gtk.STOCK_DIALOG_QUESTION,
             response_cb, _("Confirm"))
-        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
-            cls.default_cb, *args)
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, response_cb,
+            cls.default_cb, *args)
+        cls.add_button(window, gtk.STOCK_OK, stock.ACCEPT, response_cb,
             cls.default_cb, *args)
 
         window.show()
@@ -558,6 +558,7 @@ class Dialog(object):
             title, account, alias)
         cls.add_button(window, gtk.STOCK_CLEAR, stock.CLEAR, response_cb,
             cls.entry_cb, account, alias)
+
         window.show()
 
     @classmethod
@@ -1022,10 +1023,10 @@ Do you want to fix your profile now?''')
 
         window = cls.common_window(message, gtk.STOCK_DIALOG_WARNING,
             None, _("You have a broken profile"))
-        cls.add_button(window, gtk.STOCK_YES, stock.YES, fix_profile,
-            cls.default_cb, close_cb)
         cls.add_button(window, gtk.STOCK_CANCEL, stock.CANCEL, None,
             cls.default_cb)
+        cls.add_button(window, gtk.STOCK_YES, stock.YES, fix_profile,
+            cls.default_cb, close_cb)
 
         window.show()
 
