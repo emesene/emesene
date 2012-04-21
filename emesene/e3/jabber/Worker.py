@@ -412,18 +412,8 @@ class Worker(e3.Worker):
     def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE
         '''
-        try:
-            f = open(picture_name, 'rb')
-            avatar_data = f.read()
-            f.close()
-        except Exception:
-            log.error("Loading of picture %s failed" % picture_name)
-            return
+        avatar = self._filedata_to_string(picture_name)
 
-        if not isinstance(avatar_data, str):
-            avatar = "".join([chr(b) for b in avatar_data])
-        else:
-            avatar = avatar_data
         n = xmpp.Node('vCard', attrs={'xmlns': xmpp.NS_VCARD})
         iq_vcard = xmpp.Protocol('iq', self.session.account.account, 'set', payload=[n])
         vcard = iq_vcard.addChild(name='vCard', namespace=xmpp.NS_VCARD)

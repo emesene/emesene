@@ -184,6 +184,20 @@ class Worker(threading.Thread):
                 self.session.error('Error calling action handler', action.id_)
                 traceback.print_exc()
 
+    # common functions
+    def _filedata_to_string(self, filename):
+        '''read a filename and convert it's data to String'''
+        try:
+            f = open(filename, 'rb')
+            avatar = f.read()
+            f.close()
+        except Exception:
+            log.error("Loading of filename %s failed" % filename)
+
+        if not isinstance(avatar, str):
+            avatar = "".join([chr(b) for b in avatar])
+
+        return avatar
 
     # action handlers (the stubs, copy and complete them on your implementation)
     def _handle_action_add_contact(self, account):

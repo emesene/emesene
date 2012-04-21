@@ -380,18 +380,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def papy_ft_accepted(self, ftsession):
         tr = self.filetransfers[ftsession]
-        try:
-            f = open(tr.completepath, 'rb')
-            filedata = f.read()
-            f.close()
-        except Exception as e:
-            log.error("Reading of file %s failed: %s" % (tr.completepath, e))
-
-        if not isinstance(filedata, str):
-            filedata = "".join([chr(b) for b in filedata])
-
-        data=StringIO.StringIO(filedata)
-        ftsession.send(data)
+        filedata = self._filedata_to_string(tr.completepath)
+        ftsession.send(StringIO.StringIO(filedata))
 
         self.session.filetransfer_accepted(tr)
 
@@ -1216,15 +1206,7 @@ class Worker(e3.base.Worker, papyon.Client):
             self.session.picture_change_succeed(self.session.account.account, None)
             return
 
-        try:
-            f = open(picture_name, 'rb')
-            avatar = f.read()
-            f.close()
-        except Exception:
-            log.error("Loading of picture %s failed" % picture_name)
-
-        if not isinstance(avatar, str):
-            avatar = "".join([chr(b) for b in avatar])
+        avatar = self._filedata_to_string(picture_name)
 
         msn_object = papyon.p2p.MSNObject(self.profile, len(avatar),
                 papyon.p2p.MSNObjectType.DISPLAY_PICTURE,
@@ -1368,18 +1350,9 @@ class Worker(e3.base.Worker, papyon.Client):
             if l_custom_emoticons is None: l_custom_emoticons = []
 
             for custom_emoticon in l_custom_emoticons:
-                try:
-                    fpath = os.path.join(emoticon_cache.path,
-                            cedict[custom_emoticon])
-                    f = open(fpath, 'rb')
-                    d_custom_emoticon = f.read()
-                    f.close()
-                except IOError as ioerror:
-                    log.error("Loading of emoticon failed: %s" % ioerror)
 
-                if not isinstance(d_custom_emoticon, str):
-                    d_custom_emoticon = "".join(
-                            [chr(b) for b in d_custom_emoticon])
+                fpath = os.path.join(emoticon_cache.path, cedict[custom_emoticon])
+                d_custom_emoticon = self._filedata_to_string(fpath)
 
                 msn_object = papyon.p2p.MSNObject(self.session.account.account,
                         len(d_custom_emoticon),
