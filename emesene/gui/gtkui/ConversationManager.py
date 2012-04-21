@@ -202,6 +202,9 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             conv.tab_index = self.page_num(conv)
         self.update_close_buttons()
 
+        # Mark the conversation as read (for the tray icons)
+        self.session.add_event(e3.Event.EVENT_MESSAGE_READ, conversation)
+
     def add_new_conversation(self, session, cid, members):
         """
         create and append a new conversation
