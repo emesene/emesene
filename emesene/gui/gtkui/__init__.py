@@ -109,8 +109,7 @@ def setup():
     extension.category_register('dialog', Dialog.Dialog)
     extension.category_register('image chooser', ImageChooser.ImageChooser, 
                                 single_instance=True)
-    extension.category_register('avatar chooser', AvatarChooser.AvatarChooser, 
-                                single_instance=True)
+    extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
     extension.category_register('avatar', Avatar.Avatar)
     extension.category_register('avatar renderer', Renderers.AvatarRenderer)
     extension.category_register('avatar manager', AvatarManager.AvatarManager)

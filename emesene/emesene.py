@@ -326,11 +326,6 @@ class Controller(object):
         if pref:
             pref.hide()
             
-        # prevent avatar chooser from staying open and breaking things
-        avatar_chooser = extension.get_instance('avatar chooser')
-        if avatar_chooser:
-            avatar_chooser.hide()
-            
         # prevent image chooser from staying open and breaking things
         image_chooser = extension.get_instance('image chooser')
         if image_chooser:
