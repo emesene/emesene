@@ -290,10 +290,15 @@ class ContactHandler(object):
 
     def on_block_contact_selected(self):
         '''called when block contact is selected'''
+        def on_block_contact_accept(accept, account):
+            if accept == gui.stock.YES:
+                self.session.block(account)
+
         contact = self.contact_list.get_contact_selected()
 
         if contact:
-            self.session.block(contact.account)
+            self.dialog.yes_no(_("Are you sure you want to block this contact?"),
+                          on_block_contact_accept, contact.account)
         else:
             self.dialog.error(_('No contact selected'))
 
