@@ -284,7 +284,7 @@ class Dialog(object):
         '''show a choose dialog with the current directory set to path.
         the buttons should display a cancel and save buttons.
          the posible reasons are stock.CANCEL, stock.SAVE and stock.CLOSE'''
-        window = cls.new_window(title, response_cb)
+        window = cls.new_window(title, response_cb, current_path)
         window.set_default_size(640, 480)
         chooser = gtk.FileChooserWidget(gtk.FILE_CHOOSER_ACTION_OPEN)
         chooser.set_current_folder(current_path)

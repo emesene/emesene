@@ -540,7 +540,9 @@ class ConversationToolbarHandler(object):
         '''called when the client requestes to a remote user to
         start a file transfer'''
         def open_file_cb(response, filepath):
-            if response is not gui.stock.CANCEL:
+            if response is not gui.stock.CANCEL and \
+                response is not gui.stock.CLOSE:
+
                 if filepath is None:
                     extension.get_default('dialog').error(
                                                 _("No file selected"))
