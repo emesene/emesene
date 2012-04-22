@@ -1272,30 +1272,16 @@ class Worker(e3.base.Worker, papyon.Client):
             oldcid = self.conversations[account]
             self._handle_action_close_conversation(oldcid)
 
-            self.conversations[account] = cid
-            self.rconversations[cid] = account
-            # create a papyon conversation
-            contact = self.contact_by_account(account)
-            conv = papyon.Conversation(self, [contact,])
-            self.papyconv[cid] = conv
-            self.rpapyconv[conv] = cid
-            # attach the conversation event handler
-            convhandler = ConversationEvent(conv, self)
-            self._conversation_handler[cid] = convhandler
-
-        else:
-            #print "creating a new conversation et. al"
-            # new emesene conversation
-            self.conversations[account] = cid
-            self.rconversations[cid] = account
-            contact = self.contact_by_account(account)
-            # create a papyon conversation
-            conv = papyon.Conversation(self, [contact,])
-            self.papyconv[cid] = conv
-            self.rpapyconv[conv] = cid
-            # attach the conversation event handler
-            convhandler = ConversationEvent(conv, self)
-            self._conversation_handler[cid] = convhandler
+        self.conversations[account] = cid
+        self.rconversations[cid] = account
+        # create a papyon conversation
+        contact = self.contact_by_account(account)
+        conv = papyon.Conversation(self, [contact,])
+        self.papyconv[cid] = conv
+        self.rpapyconv[conv] = cid
+        # attach the conversation event handler
+        convhandler = ConversationEvent(conv, self)
+        self._conversation_handler[cid] = convhandler
 
     def _handle_action_close_conversation(self, cid):
         '''handle Action.ACTION_CLOSE_CONVERSATION
