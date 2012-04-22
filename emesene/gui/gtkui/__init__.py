@@ -114,6 +114,9 @@ def setup():
     import gtk
     gtk.settings_get_default().set_property("gtk-error-bell", False)
 
+    extension.register('quit', gtk.main_quit)
+    extension.set_default('quit', gtk.main_quit)
+
     extension.category_register('dialog', Dialog.Dialog)
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
     extension.category_register('avatar', Avatar.Avatar)

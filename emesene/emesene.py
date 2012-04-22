@@ -244,7 +244,7 @@ class Controller(object):
                 if options.single_instance:
                     print "Another instance of emesene is already running."
                     self.single_instance.show()
-                    sys.exit(0)
+                    extension.get_and_instantiate('quit')
         except ImportError:
             pass
 
@@ -381,10 +381,8 @@ class Controller(object):
         if do_exit:
             if self.tray_icon is not None:
                 self.tray_icon.set_visible(False)
-            self.window.hide()
-            self.window = None
 
-            sys.exit(0)
+            extension.get_and_instantiate('quit')
 
     def _remove_subscriptions(self):
         '''remove the subscriptions to signals'''
@@ -777,6 +775,7 @@ def main():
     extension.category_register('session', dummy.Session, single_instance=True)
     extension.category_register('option provider', None,
             interfaces=interfaces.IOptionProvider)
+    extension.register('quit', sys.exit)
     extension.get_category('option provider').multi_extension = True
     extension.get_category('option provider').activate(optionprovider.ExtensionDefault)
     options = optionprovider.PluggableOptionParser(args=emesene_args)
