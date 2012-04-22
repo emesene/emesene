@@ -148,13 +148,16 @@ def pango_font_description_to_style(fdesc):
         font_italic, font_underline, font_strike, font_size)
 
 def simple_animation_scale(path, width, height):
-    f = open(path, 'rb')
-    pixloader = gtk.gdk.PixbufLoader()
-    pixloader.set_size(width, height)
-    pixloader.write(f.read())
-    pixloader.close()
-    f.close()
-    return pixloader.get_animation()
+    if file_readable(path):
+        f = open(path, 'rb')
+        pixloader = gtk.gdk.PixbufLoader()
+        pixloader.set_size(width, height)
+        pixloader.write(f.read())
+        pixloader.close()
+        f.close()
+        return pixloader.get_animation()
+    else:
+        return None
 
 def simple_animation_overlap(animation,pixbuf_dest):
     iter = animation.get_iter()

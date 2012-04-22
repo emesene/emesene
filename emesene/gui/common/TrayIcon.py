@@ -323,12 +323,13 @@ class ContactsMenu(gtk.Menu):
         '''try to return a pixbuf of the user picture or the default
         picture
         '''
-        if path is not None and path != '':
-            pixbuf = utils.simple_animation_scale(path, self.avatar_size, 
-                                                  self.avatar_size)
+        pixbuf = utils.simple_animation_scale(path, self.avatar_size,
+                                              self.avatar_size)
+        if pixbuf is not None:
             picture = gtk.image_new_from_animation(pixbuf)
         else:
-            pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
+            pix = utils.safe_gtk_pixbuf_load(
+                        gui.theme.image_theme.user,
                         (self.avatar_size, self.avatar_size))
             picture = gtk.image_new_from_pixbuf(pix)
 
