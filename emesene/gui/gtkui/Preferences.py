@@ -583,7 +583,7 @@ class MainWindow(BaseTable):
 
         self.append_check(_('Show user panel'),
             'session.config.b_show_userpanel')
-        self.append_check(_('Show mail inbox'),
+        self.append_check(_('Show unread mail count'),
             'session.config.b_show_mail_inbox')
         self.append_markup('<b>'+_('Contact list:')+'</b>')
         self.append_range(_('Contact list avatar size'),
