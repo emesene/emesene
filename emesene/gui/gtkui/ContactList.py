@@ -141,6 +141,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.accel_group = accel_group
         accel_group.connect_group(gtk.keysyms.Delete, 0, gtk.ACCEL_LOCKED,
                 self._on_key_delete_item)
+        accel_group.connect_group(gtk.keysyms.T,
+                                  gtk.gdk.CONTROL_MASK,
+                                  gtk.ACCEL_LOCKED,
+                                  self._on_key_get_contact)
 
     def _on_key_delete_item(self, accel_group, window, keyval, mod):
         if self.is_focus():
@@ -304,6 +308,15 @@ class ContactList(gui.ContactList, gtk.TreeView):
             return None
 
         return self.model.convert_iter_to_child_iter(iter_)
+
+    def _on_key_get_contact(self, accel_group, window, keyval, modifier):
+        """ 
+        Catches CTRL+T and if contact emits contact, 
+        opens new conversation.
+        """
+        contact = self.get_contact_selected()
+        if contact:
+            self.contact_selected.emit(contact)
 
     def _on_row_activated(self, treeview, path, view_column):
         '''callback called when the user selects a row'''
