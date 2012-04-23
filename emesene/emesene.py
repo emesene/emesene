@@ -21,7 +21,6 @@
 import os
 import sys
 
-
 # Extract any non-GStreamer arguments, and leave the GStreamer arguments for
 # processing by GStreamer. This needs to be done before GStreamer is imported,
 # so that GStreamer doesn't hijack e.g. ``--help``.
@@ -104,10 +103,10 @@ except ImportError, exc:
     print 'Cannot import gtkui: %s' % str(exc)
 
 try:
-    from e3 import jabber
+    from e3 import xmpp
 except ImportError, exc:
-    jabber = None
-    print 'Errors occurred while importing jabber backend: %s' % str(exc)
+    xmpp = None
+    print 'Errors occurred while importing xmpp backend: %s' % str(exc)
 
 try:
     from gui import qt4ui
@@ -173,8 +172,8 @@ class Controller(object):
         '''register core extensions'''
         extension.category_register('session', dummy.Session,
                 single_instance=True)
-        if jabber is not None:
-            extension.register('session', jabber.Session)
+        if xmpp is not None:
+            extension.register('session', xmpp.Session)
         extension.register('session', dummy.Session)
 
         if papylib is not None:
