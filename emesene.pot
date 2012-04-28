@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-21 20:50+0200\n"
+"POT-Creation-Date: 2012-04-28 19:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,7 +31,7 @@ msgstr ""
 msgid "Available"
 msgstr ""
 
-#: emesene/e3/base/status.py:26 emesene/gui/gtkui/ContactList.py:488
+#: emesene/e3/base/status.py:26 emesene/gui/gtkui/ContactList.py:501
 msgid "Offline"
 msgstr ""
 
@@ -123,7 +123,7 @@ msgstr ""
 msgid "Blocked"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:262
+#: emesene/gui/base/Conversation.py:262 emesene/gui/base/Handler.py:300
 msgid "Are you sure you want to block this contact?"
 msgstr ""
 
@@ -177,25 +177,25 @@ msgstr ""
 msgid "Are you sure you want to delete %s?"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:289 emesene/gui/base/Handler.py:298
-#: emesene/gui/base/Handler.py:307 emesene/gui/base/Handler.py:330
-#: emesene/gui/base/Handler.py:340 emesene/gui/base/Handler.py:348
-#: emesene/gui/base/Handler.py:358 emesene/gui/base/Handler.py:366
+#: emesene/gui/base/Handler.py:289 emesene/gui/base/Handler.py:303
+#: emesene/gui/base/Handler.py:312 emesene/gui/base/Handler.py:335
+#: emesene/gui/base/Handler.py:345 emesene/gui/base/Handler.py:353
+#: emesene/gui/base/Handler.py:363 emesene/gui/base/Handler.py:371
 #: emesene/gui/gtkui/Dialog.py:1545
 msgid "No contact selected"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:406
+#: emesene/gui/base/Handler.py:411
 #, python-format
 msgid "Are you sure you want to delete the %s group?"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:409 emesene/gui/base/Handler.py:429
-#: emesene/gui/base/Handler.py:445 emesene/gui/base/Handler.py:457
+#: emesene/gui/base/Handler.py:414 emesene/gui/base/Handler.py:434
+#: emesene/gui/base/Handler.py:450 emesene/gui/base/Handler.py:462
 msgid "No group selected"
 msgstr ""
 
-#: emesene/gui/base/Handler.py:548
+#: emesene/gui/base/Handler.py:553
 msgid "No file selected"
 msgstr ""
 
@@ -394,11 +394,11 @@ msgstr ""
 msgid "Too many messages to display"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactList.py:509
+#: emesene/gui/gtkui/ContactList.py:522
 msgid "Online"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactList.py:530
+#: emesene/gui/gtkui/ContactList.py:543
 msgid "No group"
 msgstr ""
 
@@ -1211,7 +1211,7 @@ msgid "Show user panel"
 msgstr ""
 
 #: emesene/gui/gtkui/Preferences.py:586
-msgid "Show mail inbox"
+msgid "Show unread mail count"
 msgstr ""
 
 #: emesene/gui/gtkui/Preferences.py:588
