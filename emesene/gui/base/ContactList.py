@@ -505,17 +505,19 @@ class ContactList(object):
     def on_group_collapsed(self, group):
         '''called when a group is collapsed, update the status of the
         groups'''
-        self.group_state[group.name] = False
         if self.is_searching or len(group.contacts) == 0:
             return
+
+        self.group_state[group.name] = False
         self.session.config.d_group_state[group.name.decode("utf_8")] = "0"
 
     def on_group_expanded(self, group):
         '''called when a group is expanded, update the status of the
         groups'''
-        self.group_state[group.name] = True
         if self.is_searching:
             return
+
+        self.group_state[group.name] = True
         self.session.config.d_group_state[group.name.decode("utf_8")] = "1"
 
     def compare_groups(self, group1, group2, order1=0, order2=0):

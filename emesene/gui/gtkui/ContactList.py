@@ -144,7 +144,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         accel_group.connect_group(gtk.keysyms.T,
                                   gtk.gdk.CONTROL_MASK,
                                   gtk.ACCEL_LOCKED,
-                                  self._on_key_get_contact)
+                                  self.open_conversation)
 
     def _on_key_delete_item(self, accel_group, window, keyval, mod):
         if self.is_focus():
@@ -186,7 +186,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 if bool(contact.blocked):
                     pixbufblock=utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay)
                     utils.simple_images_overlap(pix, pixbufblock,
-                                                -pixbufblock.props.width, 
+                                                -pixbufblock.props.width,
                                                 -pixbufblock.props.width)
 
                 picture = gtk.image_new_from_pixbuf(pix)
@@ -216,7 +216,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             if bool(contact.blocked):
                 pixbufblock=utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay)
                 utils.simple_images_overlap(pix, pixbufblock,
-                                            -pixbufblock.props.width, 
+                                            -pixbufblock.props.width,
                                             -pixbufblock.props.width)
 
             picture = gtk.image_new_from_pixbuf(pix)
@@ -309,10 +309,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         return self.model.convert_iter_to_child_iter(iter_)
 
-    def _on_key_get_contact(self, accel_group, window, keyval, modifier):
-        """ 
-        Catches CTRL+T and if contact emits contact, 
-        opens new conversation.
+    def open_conversation(self, *args):
+        """
+        Opens a new conversation if a contact is selected
         """
         contact = self.get_contact_selected()
         if contact:
@@ -490,7 +489,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             utils.safe_gtk_pixbuf_load(gui.theme.image_theme.status_icons[contact.status]),
             weight, False, offline)
 
-        # if group_offline is set and the contact is offline 
+        # if group_offline is set and the contact is offline
         # then put it on the special offline group
         if self.group_offline and offline:
             duplicate = self._duplicate_check(contact)
@@ -498,11 +497,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 return duplicate
             if not self.offline_group:
                 self.session.config.d_weights['1'] = 0
-                self.offline_group = e3.Group(_("Offline"), 
-                                              identifier='1', 
+                self.offline_group = e3.Group(_("Offline"),
+                                              identifier='1',
                                               type_=e3.Group.OFFLINE)
 
-                self.offline_group_iter = self.add_group(self.offline_group, 
+                self.offline_group_iter = self.add_group(self.offline_group,
                                                          True)
 
             self.offline_group.contacts.append(contact.account)
@@ -519,11 +518,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
             if not self.online_group:
                 self.session.config.d_weights['0'] = 1
 
-                self.online_group = e3.Group(_("Online"), 
+                self.online_group = e3.Group(_("Online"),
                                             identifier='0',
                                             type_=e3.Group.ONLINE)
 
-                self.online_group_iter = self.add_group(self.online_group, 
+                self.online_group_iter = self.add_group(self.online_group,
                                                         True)
 
             self.online_group.contacts.append(contact.account)
@@ -540,8 +539,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
                 return self._model.append(self.no_group_iter, contact_data)
             else:
-                self.no_group = e3.Group(_("No group"), 
-                                         identifier='0', 
+                self.no_group = e3.Group(_("No group"),
+                                         identifier='0',
                                          type_ = e3.Group.NONE)
 
                 self.no_group_iter = self.add_group(self.no_group, True)
@@ -564,7 +563,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 # check on the root
                 elif isinstance(obj, e3.Contact) and \
                         obj.account == contact.account:
-                    
+
                     return row.iter
 
             return self._model.append(None, contact_data)
@@ -622,7 +621,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 # if it's a contact without group (at the root)
                 elif isinstance(obj, e3.Contact) and \
                       obj.account == contact.account:
-                    
+
                     # TODO: Is removing only the tree object?
                     del self._model[row.iter]
                     del obj # CHECK!!!!!
@@ -770,8 +769,15 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self._model[self.offline_group_iter] = group_data
         self.update_group(self.offline_group)
 
+    def expand_groups(self):
+        ''' expand groups while searching'''
+        if self.is_searching:
+            self.expand_all()
+            return
+
     def un_expand_groups(self):
         ''' restore groups after a search'''
+        self.get_selection().unselect_all()
         for row in self._model:
             obj = row[1]
             if isinstance(obj, e3.Group):
@@ -792,7 +798,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             obj = row[1]
             if isinstance(obj, e3.Group) and \
                 obj.identifier == group.identifier:
-                
+
                 path = None
                 childpath = None
                 if group.name in self.group_state:
@@ -808,7 +814,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 group.contacts = obj.contacts
                 group_data = (None, group,
                               self.format_group(group),
-                              False, None, weight, 
+                              False, None, weight,
                               (group.type != e3.base.Group.STANDARD), False)
 
                 self._model[row.iter] = group_data
@@ -896,7 +902,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
     def _on_drag_drop(self, widget, drag_context, x, y, time):
         drag_context.finish(True, False, time)
-        if self.session.config.b_order_by_group:    
+        if self.session.config.b_order_by_group:
             group_src = self.get_contact_selected_group()
 
             try:
@@ -908,7 +914,20 @@ class ContactList(gui.ContactList, gtk.TreeView):
             if group_src and group_src != group_des and not self._model[pos][6]:
 
                 self.session.move_to_group(self.get_contact_selected().account,
-                                           group_src.identifier, 
+                                           group_src.identifier,
                                            group_des.identifier)
 
         return True
+
+    def select_top_contact(self):
+        ''' Select the topmost contact '''
+        selected = self.get_selection()
+        for row in self.model:
+            obj = row[1]
+            if isinstance(obj, e3.Group):
+                for contact_row in row.iterchildren():
+                    selected.select_path(contact_row.path)
+                    return
+            elif isinstance(obj, e3.Contact):
+                selected.select_path(row.path)
+                return

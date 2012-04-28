@@ -262,7 +262,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
         self.contact_list.filter_text = entry.get_text().lower()
-        self.contact_list.un_expand_groups()
+        self.contact_list.expand_groups()
+        self.contact_list.select_top_contact()
 
     def _on_entry_key_press(self, entry, event):
         '''called when a key is pressed on the search box'''
@@ -311,6 +312,13 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def _on_key_press(self, widget, event):
         '''method called when a key is pressed on the input widget'''
+        if (event.keyval == gtk.keysyms.Return or \
+            event.keyval == gtk.keysyms.KP_Enter) and \
+           self.panel.search.get_active():
+            self.contact_list.open_conversation()
+            self.panel.search.set_active(False)
+            return
+
         if event.state & gtk.gdk.CONTROL_MASK or \
            event.keyval == gtk.keysyms.Return or \
            event.keyval == gtk.keysyms.KP_Enter or \
@@ -321,12 +329,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
            not self.panel.message.has_focus():
             if event.string != "" and not self.panel.search.get_active():
                     self.panel.search.set_active(True)
-                    self.entry.show()
-                    self.entry.grab_focus()
             elif event.keyval == gtk.keysyms.BackSpace and \
                  self.entry.get_text_length() == 1:
                 self.panel.search.set_active(False)
-                self.entry.hide()
 
     def on_disconnect(self, close=None):
         '''callback called when the disconnect option is selected'''
