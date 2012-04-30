@@ -17,13 +17,20 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+
+import gui
+from gui.gtkui import check_gtk3
+
+if check_gtk3():
+    #FIXME: port this to gtk3
+    raise ImportError
+
 import appindicator
 
 import logging
 log = logging.getLogger('gui.common.Indicator')
 
 import TrayIcon
-import gui
 
 # This line will except with too old version of appindicator
 # so you'll get your nice gtk trayicon
