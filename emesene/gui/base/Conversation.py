@@ -50,7 +50,7 @@ class Conversation(object):
 
         self._message_waiting = False
 
-        buffer_size = session.config.get_or_set("i_msg_history_size", 5)
+        buffer_size = 10
         self.messages = RingBuffer(max=buffer_size)
         self.message_offset = 0
 
@@ -413,6 +413,7 @@ class Conversation(object):
         self.output_message(message, cedict)
 
         self.messages.push(text)
+        self.reset_message_offset()
         self.play_send()
         self.conv_status.update_status()
 
@@ -659,7 +660,10 @@ class Conversation(object):
         if no message in the buffer return an empty string
         """
         self.message_offset += change
-
+        if abs(self.message_offset) + 1 > len(self.messages):
+            self.message_offset=1 - len(self.messages)
+        if self.message_offset > 0:
+            self.reset_message_offset()
         try:
             self.input.text = self.messages.peak(self.message_offset)
         except IndexError:
