@@ -20,7 +20,17 @@ import os
 import time
 import gui.gtkui.utils as utils
 import e3
-import indicate
+
+from gui.gtkui import check_gtk3
+
+def enable_indicate():
+	import sys
+	from gi.repository import Indicate
+	sys.modules['indicate'] = Indicate
+	Indicate.indicate_server_ref_default = Indicate.Server.ref_default
+
+if check_gtk3():
+	enable_indicate()
 
 import gui
 

@@ -78,6 +78,7 @@ Gdk.PixbufAnimation = PixbufAnimation
 def save(self, filename, extension):
     GdkPixbuf.Pixbuf.savev(self, filename, extension, [],[])
 Gdk.Pixbuf.save = save
+
 orig_get_formats = GdkPixbuf.Pixbuf.get_formats
 def get_formats():
     formats = orig_get_formats()
@@ -157,6 +158,7 @@ class Colormap(object):
 def colormap_get_system():
     return Colormap()
 Gdk.colormap_get_system = colormap_get_system
+
 def quit_add(arg1, callback):
     pass
 Gtk.quit_add = quit_add
