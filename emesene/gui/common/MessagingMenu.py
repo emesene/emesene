@@ -20,7 +20,6 @@ import os
 import time
 import gui.gtkui.utils as utils
 import e3
-import indicate
 
 from gui.gtkui import check_gtk3
 
@@ -33,6 +32,7 @@ def enable_indicate():
 if check_gtk3():
 	enable_indicate()
 
+import indicate
 import gui
 
 class MessagingMenu(gui.BaseTray):
