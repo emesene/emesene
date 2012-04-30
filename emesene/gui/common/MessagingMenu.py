@@ -31,6 +31,8 @@ def enable_indicate():
 
 if check_gtk3():
 	enable_indicate()
+else:
+    import indicate
 
 import gui
 
