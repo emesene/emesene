@@ -21,6 +21,7 @@ import e3
 import gui
 from gui.gtkui import check_gtk3
 import utils
+import sys
 
 import extension
 
@@ -73,12 +74,20 @@ class MainMenu(gtk.MenuBar):
         """
         Set accelerators for menu items
         """
-        self.file_menu.quit.add_accelerator(
-                'activate', accel_group, gtk.keysyms.Q,
-                gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
-        self.file_menu.disconnect.add_accelerator(
-                'activate', accel_group, gtk.keysyms.D,
-                gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
+        if sys.platform == 'darwin':
+            self.file_menu.quit.add_accelerator(
+                    'activate', accel_group, gtk.keysyms.Q,
+                    gtk.gdk.META_MASK, gtk.ACCEL_VISIBLE)
+            self.file_menu.disconnect.add_accelerator(
+                    'activate', accel_group, gtk.keysyms.D,
+                    gtk.gdk.META_MASK, gtk.ACCEL_VISIBLE)
+        else:
+            self.file_menu.quit.add_accelerator(
+                    'activate', accel_group, gtk.keysyms.Q,
+                    gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
+            self.file_menu.disconnect.add_accelerator(
+                    'activate', accel_group, gtk.keysyms.D,
+                    gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
 
 class FileMenu(gtk.Menu):
     """
