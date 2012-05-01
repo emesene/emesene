@@ -441,6 +441,11 @@ class Conversation(object):
 
             user_emcache = self.caches.get_emoticon_cache(account)
 
+            #XXX: when we send messages from the web iface we get those here, so show them propertly
+            if contact.account == self.session.contacts.me.account:
+                self.output_message(message, None)
+                return
+
             self.input_message(message, contact, 
                                received_custom_emoticons, user_emcache.path)
 
