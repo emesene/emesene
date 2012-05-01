@@ -112,28 +112,42 @@ inherited by extensions.
         #add padding to first line
         y_coord += y_padding / 2
 
+        self.calculate_positions(ctx, widget, x_coord, y_coord)
+        context = widget.get_style_context()
+
+    def calculate_positions(self, ctx, widget, x_base=0, y_base=0):
+        '''calculate x,y coord of each element'''
+        current_line = 1
+        lines_height = self.calculate_lines_height()
+
+        #base coord
+        x_coord = x_base
+        y_coord = y_base
+
+        context = widget.get_style_context()
+
         for w in self.update_markup():
-            context = widget.get_style_context()
             if isinstance(w, basestring):
                 lines = w.split("\n")
                 lines_count = len(lines)
                 for i in range(0, lines_count):
-                    #render label
                     lbl = Gtk.Label()
                     lbl.set_markup(lines[i])
                     layout = lbl.get_layout()
                     Gtk.render_layout(context, ctx, x_coord, y_coord, layout)
-                    #if we aren't in last line then update coordenates
+
+                    #if we aren't in last line then update coords
                     if lines_count > 1 and i != lines_count - 1:
-                        x_coord = cell_area.x + self.xpad
-                        y_coord += lbl.get_preferred_height()[1]
+                        x_coord = x_base
+                        y_coord += lines_height[current_line]
+                        #avoid moving on last line, since we can have pixbuf in it
+                        current_line += i
                     else:
-                        #update only  x coord because we can have smileys in this line
+                        #update only x coord because we can have smileys in this line
                         x_coord += lbl.get_preferred_width()[1]
             elif isinstance(w, GdkPixbuf.Pixbuf):
-                #render image
-                #FIXME: we scale to the minimum text size instead of current line size
-                size = min(total_text_height, w.get_width())
+                #scale image to the text height
+                size = min(lines_height[current_line], w.get_width())
                 pix = w.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
                 Gtk.render_icon(context, ctx, pix, x_coord, y_coord)
                 x_coord += pix.get_width()
@@ -144,40 +158,37 @@ inherited by extensions.
         '''return the total height. Text height takes precedence,
             if there isn't any text, take image height otherwise returns 0.
             we also returns the lines count'''
-        total_lines = 1
+        lines_height = self.calculate_lines_height()
         total_height = 0
-        #when find a label return, otherwise keep looping
-        current_line_height = -1
+        for i in lines_height.itervalues():
+            total_height += i
+        return (total_height, len(lines_height))
+
+    def calculate_lines_height(self):
+        '''calculate the height of each line'''
+        current_line = 1
+        lines_height = {}
+
         for w in self.update_markup():
             if isinstance(w, basestring):
                 lines = w.split("\n")
                 lines_count = len(lines)
-                total_lines += lines_count
-                for i in range(0, lines_count - 1):
+                for i in range(0, lines_count):
+                    if i < lines_count:
+                        current_line += i
                     lbl = Gtk.Label()
                     lbl.set_markup(lines[i])
-                    #get max text height and add to total height
-                    total_height += max(current_line_height, lbl.get_preferred_height()[1])
-                    if i < lines_count - 1:
-                        #reset height
-                        current_line_height = -1
+                    lines_height[current_line] = max(lines_height.get(current_line, 0), lbl.get_preferred_height()[1])
             elif isinstance(w, GdkPixbuf.Pixbuf):
                 #if pixbuf is longer than text we scale down
-                current_line_height = min(current_line_height, w.get_height())
+                lines_height[current_line] = min(lines_height.get(current_line, 0), w.get_height())
             else:
                 log.error("unhandled type %s" % type(i))
 
-        #if we don't have any text but have a pixbuf use it's height
-        if total_height == 0 and current_line_height > 0:
-            total_height = current_line_height
-
-        return (total_height, lines_count)
+        return lines_height
 
     def update_markup(self):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
-        if not self.markup:
-            return ""
-
         try:
             decorated_markup = self.function(self.markup)
         except Exception, error: #We really want to catch all exceptions
