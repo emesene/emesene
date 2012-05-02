@@ -141,9 +141,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_index = -1 # used to select an existing conversation
 
     def check_visible(self):
-        if not check_gtk3():
-            return self.flags() & gtk.VISIBLE
-        else:
             return self.get_visible()
 
     def steal_emoticon(self, path_uri):
