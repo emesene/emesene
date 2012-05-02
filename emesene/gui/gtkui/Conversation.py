@@ -141,7 +141,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_index = -1 # used to select an existing conversation
 
     def check_visible(self):
-            return self.get_visible()
+        return self.get_visible()
 
     def steal_emoticon(self, path_uri):
         '''receives the path or the uri for the emoticon to be added'''
