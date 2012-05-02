@@ -155,6 +155,17 @@ class Worker(e3.base.Worker, papyon.Client):
         self.profile.client_capabilities.supports_activities = False
         self.profile.client_capabilities.supports_winks = False
         self.profile.client_capabilities.supports_shared_search = False
+        self.profile.client_capabilities.supports_voice_over_msnp = False
+        self.profile.client_capabilities.supports_uucp_sip_stack = False
+        self.profile.client_capabilities.supports_sharing_video = False
+        self.profile.client_capabilities.circle_voiceim_enabled = False
+        self.profile.client_capabilities.sharing_enabled = False
+        self.profile.client_capabilities.mobile_suspendim_fanout_disable = False
+        self.profile.client_capabilities.supports_videocall_16x9 = False
+        self.profile.client_capabilities.siptunnel_v2 = False
+        self.profile.client_capabilities.supports_wma_voiceclip = False
+        self.profile.client_capabilities.supports_circleim_voiceclip = False
+        self.profile.client_capabilities.supports_socialnews_objecttypes = False
         global PAPY_HAS_AUDIOVIDEO
         self.profile.client_capabilities.supports_voice_im = PAPY_HAS_AUDIOVIDEO
         self.profile.client_capabilities.supports_sip_invite = PAPY_HAS_AUDIOVIDEO

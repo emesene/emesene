@@ -126,7 +126,7 @@ class ClientCapabilities(gobject.GObject):
                 (object, object)),
             }
 
-    MSNC = [0x0, # MSNC0
+    MSNC = [0x00000000, # MSNC0
             0x10000000, # MSNC1
             0x20000000, # MSNC2
             0x30000000, # MSNC3
@@ -136,7 +136,11 @@ class ClientCapabilities(gobject.GObject):
             0x70000000, # MSNC7
             0x80000000, # MSNC8
             0x90000000, # MSNC9
-            0xA0000000] # MSNC10
+            0xA0000000, # MSNC10 - MSN 14.0, Wave 3 (MSNP18)
+            0xB0000000, # MSNC11 - MSN 15.0, Wave 4 (MSNP21)
+            0xC0000000, # MSNC12 - MSN 16.0 Cloud, Wave 5 (MSNP21)
+            0xD0000000, # unknown
+            0xE0000000] # unknown
 
     _CAPABILITIES = {
             'is_bot': 0x00020000,
@@ -174,8 +178,38 @@ class ClientCapabilities(gobject.GObject):
             }
 
     _EXTRA = {
-            'supports_rtc_video': 0x00000010,
-            'supports_p2pv2': 0x00000030
+            #'is_sms_only' : 0x01,
+            'supports_voice_over_msnp' : 0x02,
+            'supports_uucp_sip_stack' : 0x04,
+            #'supports_application_messages' : 0x08,
+            'supports_rtc_video' : 0x10,
+            'supports_p2pv2' : 0x20,
+            #'is_authenticated_webim_user' : 0x40,
+            #'supports_1on1_via_group' : 0x80,
+            #'supports_oim' : 0x100,
+            'supports_sharing_video' : 0x200,
+            #'supports_nudges' : 0x400,
+            'circle_voiceim_enabled' : 0x800,
+            'sharing_enabled' : 0x1000,
+            'mobile_suspendim_fanout_disable' : 0x2000,
+            #'_0x4000' : 0x4000,
+            #'supports_p2p_mixer_relay' : 0x8000,
+            #'_0x10000' : 0x10000,
+            #'conv_window_file_transfer' : 0x20000,
+            'supports_videocall_16x9' : 0x40000,
+            #'supports_p2p_enveloping' : 0x80000,
+            #'_0x100000' : 0x100000,
+            #'_0x200000' : 0x200000,
+            #'yahooim_disabled' : 0x400000,
+            'siptunnel_v2' : 0x800000,
+            'supports_wma_voiceclip' : 0x1000000,
+            'supports_circleim_voiceclip' : 0x2000000,
+            'supports_socialnews_objecttypes' : 0x4000000,
+            #'supports_custom_emoticons' : 0x8000000,
+            #'supports_utf8_moodmessages' : 0x10000000,
+            #'supports_fturn' : 0x20000000,
+            #'supports_p4_activity' : 0x40000000,
+            #'supports_multiparty_conversations' : 0x80000000,
             }
 
     def __init__(self, msnc=0, client_id="0:0"):
