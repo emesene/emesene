@@ -20,7 +20,7 @@
 name = "Sharing"
 description = "Membership address book service"
 
-url = "https://omega.contacts.msn.com/abservice/SharingService.asmx"
+url = "https://local-bay.contacts.msn.com/abservice/SharingService.asmx"
 
 import FindMembership
 import AddMember
