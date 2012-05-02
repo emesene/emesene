@@ -48,4 +48,9 @@ class TCPClient(SocketClient, ProxyfiableClient):
     @property
     def protocol(self):
         return "TCP"
+
+    def set_socket(self, sock):
+        SocketClient._pre_open(self, sock)
+        SocketClient._post_open(self)
+
 gobject.type_register(TCPClient)

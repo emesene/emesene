@@ -19,7 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-__all__ = ['EufGuid', 'ApplicationID', 'SLPContentType', 'SLPRequestMethod']
+__all__ = ['EufGuid', 'ApplicationID', 'SLPContentType', 'SLPRequestMethod',
+           'DEFAULT_DIRECT_PORT']
 
 class EufGuid(object):
     MSN_OBJECT = "{A4268EEC-FEC5-49E5-95C3-F126696BDBF6}"
@@ -66,3 +67,6 @@ class PeerInfo(object):
     IMPLEMENTATION_ID = 0
     VERSION = 3584
     CAPABILITIES = 271
+
+DEFAULT_DIRECT_PORT = 6891
+
