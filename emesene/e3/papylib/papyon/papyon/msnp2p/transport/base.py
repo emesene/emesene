@@ -35,6 +35,12 @@ MAX_INT32 = 2147483647
 
 class BaseP2PTransport(gobject.GObject):
     __gsignals__ = {
+            "connected": (gobject.SIGNAL_RUN_FIRST,
+                gobject.TYPE_NONE,
+                ()),
+            "failed": (gobject.SIGNAL_RUN_FIRST,
+                gobject.TYPE_NONE,
+                ()),
             "chunk-received": (gobject.SIGNAL_RUN_FIRST,
                 gobject.TYPE_NONE,
                 (object, object, object)), # peer, peer_guid, chunk
@@ -71,7 +77,15 @@ class BaseP2PTransport(gobject.GObject):
         return self._name
 
     @property
+    def protocol(self):
+        raise NotImplementedError
+
+    @property
     def peer(self):
+        raise NotImplementedError
+
+    @property
+    def connected(self):
         raise NotImplementedError
 
     @property

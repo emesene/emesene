@@ -231,7 +231,8 @@ class MessageChunk(object):
     def set_nonce(self, nonce):
         """Set the chunk headers from a nonce and make it a nonce chunk by
            adding the KEY flag."""
-
+        if isinstance(nonce, str):
+            nonce = uuid.UUID(nonce)
         bytes = nonce.bytes
 
         self.header.dw1 = struct.unpack(">L", bytes[0:4])[0]

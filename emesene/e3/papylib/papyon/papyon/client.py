@@ -306,10 +306,40 @@ class Client(EventsDispatcher):
         self.__state = ClientState.CLOSED
 
     ### Protected API --------------------------------------------------------
+    @property
+    def client_ip(self):
+        if not self._profile:
+            return ""
+        return self._profile.profile.get("ClientIP")
+
+    @property
+    def client_port(self):
+        if not self._profile:
+            return 0
+        return self._profile.profile.get("ClientPort")
 
     @property
     def local_ip(self):
         return self._transport.sockname[0]
+
+    @property
+    def local_port(self):
+        return self._transport.sockname[1]
+
+    @property
+    def conn_type(self):
+        if not self.local_ip or not self.client_ip:
+            return "Unkown-Connect"
+        if self.local_ip == self.client_ip:
+            if self.local_port == self.client_port:
+                return "Direct-Connect"
+            else:
+                return "Port-Restrict-NAT"
+        else:
+            if self.local_port == self.client_port:
+                return "IP-Restrict-NAT"
+            else:
+                return "Symmetric-NAT"
 
     @property
     def protocol_version(self):

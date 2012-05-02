@@ -21,6 +21,7 @@
 from papyon.msnp2p.SLP import *
 from papyon.msnp2p.transport.switchboard import *
 from papyon.msnp2p.transport.notification import *
+from papyon.msnp2p.transport.direct import *
 from papyon.msnp2p.transport.TLP import MessageBlob
 
 import gobject
@@ -62,13 +63,19 @@ class P2PTransportManager(gobject.GObject):
         self._client = client
         switchboard_manager = self._client._switchboard_manager
         switchboard_manager.register_handler_class(SwitchboardP2PTransport, self)
-        self._default_transport = lambda peer, peer_guid : \
-            SwitchboardP2PTransport.handle_peer(client, peer, peer_guid, self)
+
+        self._default_transport = "SBBridge"
+        self._supported_transports = {"SBBridge" : SwitchboardP2PTransport,
+                                      "TCPv1"    : DirectP2PTransport}
         self._transports = set()
         self._transport_signals = {}
         self._data_blobs = {} # (peer, peer_guid, session_id) => blob
         self._blacklist = set() # blacklist of (peer, peer_guid, session_id)
         uun_transport = NotificationP2PTransport(client, self)
+
+    @property
+    def supported_transports(self):
+        return self._supported_transports.keys()
 
     # Public API -------------------------------------------------------------
 
@@ -136,11 +143,35 @@ class P2PTransportManager(gobject.GObject):
 
     # Transport selection ----------------------------------------------------
 
-    def _get_transport(self, peer, peer_guid, blob):
+    def create_transport(self, peer, peer_guid, proto):
+        if not proto or proto not in self._supported_transports:
+            return None
+        transport_class = self._supported_transports[proto]
+        transport = transport_class.handle_peer(self._client, peer, peer_guid, self)
+        return transport
+
+    def close_transport(self, peer, peer_guid):
+        transports = set(self._transports)
+        for transport in transports:
+            if transport.peer == peer and transport.peer_guid == peer_guid:
+                transport.close()
+
+    def find_transport(self, peer, peer_guid, blob):
+        best = None
+        print "Available transports:", self._transports
         for transport in self._transports:
             if transport.can_send(peer, peer_guid, blob):
-                return transport
-        return self._default_transport(peer, peer_guid)
+                if best is None or transport.rating > best.rating:
+                    if transport.connected:
+                        best = transport
+                    print "Best transport is now:", best
+        return best
+
+    def _get_transport(self, peer, peer_guid, blob):
+        best = self.find_transport(peer, peer_guid, blob)
+        if best is not None:
+            return best
+        return self.create_transport(peer, peer_guid, self._default_transport)
 
     # Chunk/blob demuxing ----------------------------------------------------
 
@@ -189,7 +220,7 @@ class P2PTransportManager(gobject.GObject):
         session_id = blob.session_id
         if session_id == 0:
             msg = self._parse_signaling_blob(blob)
-            if msg and not self._handle_signaling_message(peer, peer_guid, msg):
+            if msg:
                 self.emit("slp-message-received", peer, peer_guid, msg)
         else:
             self.emit("data-received", peer, peer_guid, session_id, blob.data)
@@ -198,31 +229,6 @@ class P2PTransportManager(gobject.GObject):
         session_id = blob.session_id
         if session_id != 0:
             self.emit("data-sent", peer, peer_guid, session_id, blob.data)
-
-    # Signaling messages handling --------------------------------------------
-
-    def _handle_signaling_message(self, peer, peer_guid, message):
-        """ Handle the SLP message if it's transport related.
-            Returns True if the message has been handled. """
-        if isinstance(message, SLPRequestMessage) and \
-                isinstance(message.body, SLPTransportRequestBody):
-            self._on_transport_request_received(peer, peer_guid, message)
-            return True
-        if isinstance(message, SLPResponseMessage) and \
-                isinstance(message.body, SLPTransportResponseBody):
-            self._on_transport_response_received(peer, peer_guid, message)
-            return True
-        return False
-
-    def _on_transport_request_received(self, peer, peer_guid, message):
-        logger.info("Received transport request from %s;{%s}" %
-                (peer.account, peer_guid))
-        return
-
-    def _on_transport_response_received(self, peer, peer_guid, message):
-        logger.info("Received transport response %i from %s;{%s}" %
-                (message.status, peer.account, peer_guid))
-        return
 
     # Utilities --------------------------------------------------------------
 

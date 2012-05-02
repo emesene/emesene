@@ -36,8 +36,6 @@ class FileTransferSession(P2PSession):
         self._size = 0
         self._has_preview = False
         self._preview = None
-        # data to be send if sending
-        self._data = None
 
     @property
     def filename(self):
@@ -77,8 +75,7 @@ class FileTransferSession(P2PSession):
 
     def send(self, data):
         self._data = data
-        self._send_data("\x00" * 4)
-        self._send_data(self._data)
+        self._request_bridge()
 
     def parse_context(self, context):
         try:
@@ -102,11 +99,8 @@ class FileTransferSession(P2PSession):
             context += self._preview
         return context
 
-    def _on_session_accepted(self):
-        if self._data:
-            self.send(self._data)
-
     def _on_bye_received(self, message):
         if not self.completed:
             self._emit("canceled")
         self._dispose()
+

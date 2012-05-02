@@ -73,6 +73,10 @@ class SwitchboardP2PTransport(BaseP2PTransport, SwitchboardHandler):
         return self._peer
 
     @property
+    def connected(self):
+        return True
+
+    @property
     def peer_guid(self):
         return self._peer_guid
 
