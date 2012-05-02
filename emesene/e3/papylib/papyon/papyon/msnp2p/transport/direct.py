@@ -121,6 +121,9 @@ class DirectP2PTransport(BaseP2PTransport):
     def max_chunk_size(self):
         return 1350
 
+    def can_send(self, peer, peer_guid, blob, bootstrap=False):
+        return (self._peer == peer and self._peer_guid == peer_guid)
+
     def open(self):
         self._server = False
         self._listening = False
