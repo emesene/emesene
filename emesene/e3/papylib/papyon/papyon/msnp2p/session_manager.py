@@ -168,7 +168,7 @@ class P2PSessionManager(gobject.GObject):
                         logger.exception(err)
                         logger.error("Could not handle SLP invite message")
                         return None
-                elif isinstance(message.body, SLPTransportRequestBody): #TODO: c10ud
+                elif isinstance(message.body, SLPTransportRequestBody): #TODO: check this
                     session = self._sessions[session_id]
                 else:
                     return None

@@ -181,8 +181,6 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
                 cseq=self._cseq,
                 call_id=self._call_id)
         message.body = body
-        print "****** sending transreq *******"
-        print message
         self._send_slp_message(message)
 
     def _respond(self, status_code):
@@ -234,9 +232,8 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
     def _request_bridge(self):
         # use active bridge if any
         bridge = self._transport_manager.find_transport(self._peer, self._peer_guid, None)
-        print "BRIDGE: ******************", bridge
-        print "AVAIL TRANSPORTS >>>>>>>>>>>>>>>>>>", self._transport_manager._transports
-        if bridge is not None and bridge.rating > 0: # TODO: c10ud -> 0 means switchboard, first we should check transreq if we receive 0 (?)
+
+        if bridge is not None and bridge.rating > 0:
             logger.info("Use already active %s connection" % bridge.name)
             self._on_bridge_selected()
         else:
@@ -250,8 +247,7 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
             proto = self._transport_manager._default_transport
         new_bridge = self._transport_manager.create_transport(self.peer,
                 self.peer_guid, proto)
-        print "Received transreq - bridges:", choices, proto, new_bridge
-        print transreq
+
         if new_bridge is None or new_bridge.connected:
             self._on_bridge_selected()
         else:
@@ -261,10 +257,8 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
             new_bridge.listen()
 
     def _transreq_accepted(self, transresp):
-        print "@@@@@@@ transreq accepted @@@@@@@@@"
-        print transresp
         if not transresp.listening: # other client isn't listening, fall back to switchboard
-            # TODO offer to be the server
+            # TODO: offer to be the server
             self._bridge_failed(None)
             return
 
@@ -319,7 +313,6 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
     def _bridge_listening(self, new_bridge, external_ip, external_port,
             transreq):
         logger.debug("Bridge listening %s %s" % (external_ip, external_port))
-        print "Bridge listening %s %s" % (external_ip, external_port)
         self._accept_transreq(transreq, new_bridge.protocol, True,
                 new_bridge.nonce, new_bridge.ip, new_bridge.port,
                 external_ip, external_port)
@@ -329,7 +322,6 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
         self._on_bridge_selected()
 
     def _bridge_failed(self, new_bridge):
-        print "Bridge switching failed", new_bridge
         logger.error("Bridge switching failed, using default one (switchboard)")
         self._on_bridge_selected()
 
@@ -403,7 +395,7 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
             elif isinstance(message.body, SLPSessionCloseBody):
                 self._on_bye_received(message)
             else:
-                print "Unhandled signaling blob :", message
+                logger.error("Unhandled signaling blob: %s" % message)
         elif isinstance(message, SLPResponseMessage):
             if isinstance(message.body, SLPSessionRequestBody):
                 self.stop_timeout("response")
@@ -417,7 +409,7 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
                 if message.status == 200:
                     self._transreq_accepted(message.body)
             else:
-                print "Unhandled response blob :", message
+                logger.error("Unhandled response blob: %s" % message)
 
     def _on_data_sent(self, data):
         logger.info("Session data transfer completed")

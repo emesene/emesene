@@ -99,10 +99,6 @@ class FileTransferSession(P2PSession):
             context += self._preview
         return context
 
-    #def _on_session_accepted(self):
-    #    if self._data:
-    #        self.send(self._data)
-
     def _on_bye_received(self, message):
         if not self.completed:
             self._emit("canceled")
