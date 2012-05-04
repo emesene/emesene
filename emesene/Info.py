@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-'''main module of emesene, does the startup and related stuff'''
 # -*- coding: utf-8 -*-
 
 #    This file is part of emesene.
