@@ -34,6 +34,7 @@ EMESENE_CONTRIBUTORS = [ # TODO: Load this from CONTRIBUTORS
 'Jose Rostagno <joserostagno@vijona.com.ar>',
 'nenemfromhell <sniper3000@gmail.com>',
 'Gabriele "Whisky" Visconti <visconti.gabriele@gmail.com>',
+'Lucas F. Ottaviano <lfottaviano@gmail.com>',
 ]
 EMESENE_LICENSE = '''    emesene is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
