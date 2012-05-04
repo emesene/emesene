@@ -21,3 +21,7 @@ See http://learn.github.com/p/tagging.html - tl;dr:
 git tag -s v2.xx.y -m 'emesene 2.xx.y'
 git push --tags
 You will automagically have a https://github.com/emesene/emesene/{tar,zip}ball/v2.xx.y link pointing to the {tar,zip} archive with the tagged code
+
+* How to change release versions in emesene:
+Look in emesene/Info.py
+
