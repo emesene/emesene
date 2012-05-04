@@ -25,42 +25,10 @@ import e3.base
 import gui
 import extension
 import Desktop
+import Info
 
 import logging
 log = logging.getLogger('gui.base.Handler')
-
-EMESENE_LICENSE = '''    emesene is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    emesene is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with emesene; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-'''
-
-EMESENE_VERSION = "2.12.4-dev"
-EMESENE_LAST_STABLE = "2.12.3"
-EMESENE_WEBSITE = "http://www.emesene.org"
-EMESENE_AUTHORS = "marianoguerra & c10ud"
-EMESENE_CONTRIBUTORS = [ # TODO: Load this from CONTRIBUTORS
-'Riccardo (c10ud) <c10ud.dev@gmail.com>',
-'Mariano Guerra <luismarianoguerra@gmail.com>',
-'arielj <arieljuod@gmail.com>',
-'Stefano Candori <stefanocandori@gmail.com>',
-'4ndreaSt4gi <stagi.andrea@gmail.com>',
-'Davide Lo Re <boyska@gmail.com>',
-'dequis <dx@dxzone.com.ar>',
-'Sven (Sbte) <svenb.linux@gmail.com>',
-'Jose Rostagno <joserostagno@vijona.com.ar>',
-'nenemfromhell <sniper3000@gmail.com>',
-'Gabriele "Whisky" Visconti <visconti.gabriele@gmail.com>',
-]
 
 class MenuHandler(object):
     '''this handler contains all the handlers needed to handle all the
@@ -178,14 +146,14 @@ class HelpHandler(object):
 
     def on_about_selected(self):
         '''called when the about item is selected'''
-        self.dialog.about_dialog('emesene', EMESENE_VERSION, EMESENE_AUTHORS,
-            _('A simple yet powerful instant messaging client'), EMESENE_LICENSE,
-            EMESENE_WEBSITE, EMESENE_CONTRIBUTORS, _('translator-credits'),
+        self.dialog.about_dialog('emesene', Info.EMESENE_VERSION, Info.EMESENE_AUTHORS,
+            _('A simple yet powerful instant messaging client'), Info.EMESENE_LICENSE,
+            Info.EMESENE_WEBSITE, Info.EMESENE_CONTRIBUTORS, _('translator-credits'),
             gui.theme.image_theme.logo)
 
     def on_website_selected(self):
         '''called when the website item is selected'''
-        Desktop.open(EMESENE_WEBSITE)
+        Desktop.open(Info.EMESENE_WEBSITE)
 
     def on_debug_selected(self):
         '''called when the preference button is selected'''
@@ -200,16 +168,16 @@ class HelpHandler(object):
         self.dialog.information(_("New version available: %(ver)s\nVisit the "
                     "<a href=\"%(web)s\">emesene website</a> for the "
                     "latest informations about it.") % {"ver" : ver,
-                    "web" : EMESENE_WEBSITE})
+                    "web" : Info.EMESENE_WEBSITE})
 
     def on_check_update_selected(self):
         ''' checks if a new stable version of emesene is available '''
-        f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/gui/base/Handler.py")
+        f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/Info.py")
         s = f.read()
         f.close()
         s = re.findall(r'EMESENE_LAST_STABLE = "(([^"\\]+|\\.)*)"', s)
         try:
-            loc_ver = EMESENE_VERSION.split(".")
+            loc_ver = Info.EMESENE_VERSION.split(".")
             rem_ver = s[0][0].split(".") # [("version","version")]
             if len(rem_ver[2]) > 2:
                 return # no RCs, BETAs or DEVELs

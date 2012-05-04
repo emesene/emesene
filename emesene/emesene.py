@@ -71,6 +71,7 @@ if 'USE_GI' in os.environ:
 import glib
 import shutil
 import signal
+import Info
 
 import debugger
 import logging
@@ -243,6 +244,12 @@ class Controller(object):
 
         if options.minimized:
             self.minimize = True
+
+        if options.version:
+            print "Current Emesene Version: " + Info.EMESENE_VERSION
+            print "Last Stable Version: " + Info.EMESENE_LAST_STABLE
+            print "\n" + Info.EMESENE_WEBSITE
+            sys.exit(0)
 
     def start(self, account=None):
         '''the entry point to the class'''
