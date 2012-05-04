@@ -45,6 +45,14 @@ class Session(e3.Session):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
 
+    def load_config(self):
+        '''load the config of the session'''
+        e3.Session.load_config(self)
+
+        # keepalive conversations...or not
+        b_keepalive = self.config.get_or_set("b_papylib_keepalive", False)
+        self.__worker.keepalive_conversations = b_keepalive
+
     def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
         self.__worker = Worker('emesene2', self, proxy, use_http)
