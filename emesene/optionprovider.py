@@ -32,6 +32,19 @@ class MinimizedOption(object):
 extension.implements('option provider')(MinimizedOption)
 extension.get_category('option provider').activate(MinimizedOption)
 
+class VersionOption(object):
+    '''option parser'''
+
+    def option_register(self):
+        '''register the options to parse by the command line option parser'''
+        option = optparse.Option("--version",
+            action="count", dest="version", default=False,
+            help="Shows emesene version")
+        return option
+
+extension.implements('option provider')(VersionOption)
+extension.get_category('option provider').activate(VersionOption)
+
 class SingleInstanceOption(object):
     '''option parser'''
 
