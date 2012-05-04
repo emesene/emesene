@@ -173,8 +173,6 @@ class Win32NetworkChecker():
         # 1 means reconnect
         self.__session.add_event(Event.EVENT_DISCONNECTED, 'Network error', 1)
 
-extension.register('external api', Win32NetworkChecker)
-
 if __name__ == '__main__':
     # Run an expample of the code so that the user can test the code in
     # real life.
