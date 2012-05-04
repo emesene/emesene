@@ -463,14 +463,6 @@ class Controller(object):
         '''
         width, height, posx, posy = self.window.get_dimensions()
 
-        # when login window is minimized, posx and posy are -32000 on Windows
-        if os.name == "nt":
-            # make sure that the saved dimensions are visible
-            if posx < (-width):
-                posx = 0
-            if posy < (-height):
-                posy = 0
-
         if not self.window.is_maximized():
             self.config.i_login_posx = posx
             self.config.i_login_posy = posy
@@ -754,14 +746,6 @@ class Controller(object):
         if self.session:
             width, height, posx, posy = \
                     conv_manager.get_dimensions()
-
-            # when window is minimized, posx and posy are -32000 on Windows
-            if os.name == "nt":
-                # make sure that the saved dimensions are visible
-                if posx < (-width):
-                    posx = 0
-                if posy < (-height):
-                    posy = 0
 
             if not conv_manager.is_maximized():
                 self.session.config.i_conv_width = width

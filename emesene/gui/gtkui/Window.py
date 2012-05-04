@@ -18,6 +18,7 @@
 
 import gtk
 
+import os
 import gui
 import utils
 import extension
@@ -158,6 +159,15 @@ class Window(gtk.Window):
         """
         posx, posy = self.get_position()
         width, height = self.get_size()
+
+        # when login window is minimized, posx and posy are -32000 on Windows
+        if os.name == "nt":
+            # make sure that the saved dimensions are visible
+            if posx < (-width):
+                posx = 0
+            if posy < (-height):
+                posy = 0
+
         return width, height, posx, posy
 
     def save_dimensions(self):
