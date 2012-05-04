@@ -30,6 +30,10 @@ import Info
 import logging
 log = logging.getLogger('gui.base.Handler')
 
+#TODO: Remove this someday in future because we still need it
+#      for pre-2.12.4-dev versions searching for updates
+EMESENE_LAST_STABLE = "2.12.3"
+
 class MenuHandler(object):
     '''this handler contains all the handlers needed to handle all the
     menu items
