@@ -5,6 +5,10 @@ import os
 import time
 import shutil
 import tempfile
+
+import logging
+log = logging.getLogger('e3.cache.Cache.py')
+
 from urllib import urlretrieve
 
 import Cache
@@ -61,7 +65,12 @@ class AvatarCache(Cache.Cache):
         item -- a path to an image
         '''
         path = os.path.join(tempfile.gettempdir(), "avatars")
-        urlretrieve(url, path)
+        try:
+            urlretrieve(url, path)
+        except IOError:
+            log.warning("Can't read url avatar")
+            return None
+
         return self.insert(path)
 
     def insert_raw(self, item):
