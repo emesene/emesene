@@ -28,6 +28,7 @@ import extension
 import e3
 import gobject
 import gui
+import Info
 
 from pluginmanager import get_pluginmanager
 
@@ -421,7 +422,7 @@ class DownloadList(DownloadListBase):
             return True
 
         if self.version_value(meta.get('required emesene version')) > \
-           self.version_value(gui.base.EMESENE_VERSION):
+           self.version_value(Info.EMESENE_VERSION):
             return False
 
         return True
@@ -617,7 +618,7 @@ class UpdateList(DownloadListBase):
             return True
 
         if self.version_value(meta.get('required emesene version')) > \
-           self.version_value(gui.base.EMESENE_VERSION):
+           self.version_value(Info.EMESENE_VERSION):
             return False
 
         if not local_meta.get('version'):
