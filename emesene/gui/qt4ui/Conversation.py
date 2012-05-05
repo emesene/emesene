@@ -302,12 +302,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         """
-        if is_visible:
-            self._widget_d['his_display_pic'].show()
-            self._widget_d['my_display_pic'].show()
-        else:
-            self._widget_d['his_display_pic'].hide()
-            self._widget_d['my_display_pic'].hide()
+        self._widget_d['his_display_pic'].setVisible(is_visible)
+        self._widget_d['my_display_pic'].setVisible(is_visible)
 
     def set_header_visible(self, is_visible):
         '''
@@ -315,10 +311,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
-        if is_visible:
-            self._widget_d['info_panel'].show()
-        else:
-            self._widget_d['info_panel'].hide()
+        self._widget_d['info_panel'].setVisible(is_visible)
 
     def set_toolbar_visible(self, is_visible):
         '''
@@ -326,10 +319,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
-        if is_visible:
-            self._widget_d['toolbar'].show()
-        else:
-            self._widget_d['toolbar'].hide()
+        self._widget_d['toolbar'].setVisible(is_visible)
 
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
