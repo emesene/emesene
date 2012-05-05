@@ -48,7 +48,7 @@ def gtk_main(Controller):
     import FileTransferBarWidget
     import FileTransferWidget
     import GroupMenu
-
+    import Splash
     import Header
     if not check_gtk3():
         import ImageAreaSelector
@@ -114,6 +114,12 @@ def setup():
 
     import gtk
     gtk.settings_get_default().set_property("gtk-error-bell", False)
+
+    try: 
+        import cairo
+        extension.category_register('splash', Splash.Splash)
+    except ImportError:
+        print "Try to install pycairo"
 
     extension.category_register('dialog', Dialog.Dialog)
     extension.category_register('image chooser', ImageChooser.ImageChooser, 
