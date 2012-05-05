@@ -399,7 +399,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         called when a key is released in the account field
         '''
         self._update_fields(self.cmb_account.get_active_text())
-        if event.keyval == gtk.keysyms.Tab:
+        if event.keyval == gtk.keysyms.Tab and self.is_reconnecting is None:
             self.txt_password.grab_focus()
 
     def _update_fields(self, account, from_preferences=False):
@@ -668,6 +668,9 @@ class ConnectingWindow(Login):
         #for reconnecting
         self.reconnect_timer_id = None
 
+        #Check if is reconnecting or not, so you don't "focus" the window
+        self.is_reconnecting = None
+
         account = config.get_or_set('last_logged_account', '')
         remembers = config.get_or_set('d_remembers', {})
 
@@ -723,7 +726,7 @@ class ConnectingWindow(Login):
     def _on_connect_now_clicked(self, button, callback, account, session_id,
                                 proxy, use_http, service):
         '''
-        don't wait for timout to reconnect
+        don't wait for timeout to reconnect
         '''
         button.hide()
         self.avatar.stop()
@@ -744,6 +747,7 @@ class ConnectingWindow(Login):
         '''
         show the reconnect countdown
         '''
+        self.is_reconnecting = true
         self.label_timer.show()
         self.b_connect.show()
         self.b_connect.connect('clicked', self._on_connect_now_clicked, 
@@ -752,7 +756,7 @@ class ConnectingWindow(Login):
 
         self.throbber.hide()
         self.reconnect_after = 30
-        if self.reconnect_timer_id is None:
+        if self.reconnect_timer_id is None:            
             self.reconnect_timer_id = gobject.timeout_add_seconds(1, \
                                             self.update_reconnect_timer, 
                                             callback, account, session_id,
