@@ -192,6 +192,7 @@ class Conversation(gtk.VBox, gui.Conversation):
     def _on_show_info_changed(self, value):
         '''callback called when config.b_show_info changes'''
         self.info.set_visible(value)
+        self.toolbar.update_toggle_avatar_icon(value)
 
     def _on_show_avatar_onleft(self, value):
         '''callback called when config.b_avatar_on_left changes'''
@@ -377,21 +378,8 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
-        if not self.session.config.b_show_info:
-            self.toolbar.toggle_avatar.set_tooltip_text(_('Hide avatar'))
-        else:
-            self.toolbar.toggle_avatar.set_tooltip_text(_('Show avatar'))
-            
-        self.info.set_visible(not self.info.get_visible())
-        self.toolbar.toggle_avatar.set_stock_id(self.get_toggle_avatar_icon())
+        # widget visibility is handled in _on_show_info_changed
         self.session.config.b_show_info = not self.session.config.b_show_info
-
-    def get_toggle_avatar_icon(self):
-        current_stock_id = self.toolbar.toggle_avatar.get_stock_id()
-        if current_stock_id == gtk.STOCK_GO_FORWARD:
-            return gtk.STOCK_GO_BACK
-        else:
-            return gtk.STOCK_GO_FORWARD
 
     def _on_avatarsize_changed(self, value):
         self.info._on_avatarsize_changed(value)

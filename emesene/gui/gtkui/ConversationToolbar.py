@@ -67,6 +67,25 @@ class ConversationToolbar(gtk.Toolbar):
         else:
             self.ublock.set_stock_id(ublock_icon)
 
+    def update_toggle_avatar_icon(self, toggle_avatar):
+        """
+        redraws the toggle avatar button,
+        setting the appropiated stock_id and tooltip
+        """
+        if toggle_avatar:
+            tooltip_text = _('Hide avatar')
+            toggle_avatar_icon = self.theme_tool_hide_avatar
+        else:
+            tooltip_text =_('Show avatar')
+            toggle_avatar_icon = self.theme_tool_show_avatar
+
+        self.toggle_avatar.set_tooltip_text(tooltip_text)
+
+        if isinstance(toggle_avatar_icon, gtk.Widget):
+            self.toggle_avatar.set_icon_widget(toggle_avatar_icon)
+        else:
+            self.toggle_avatar.set_stock_id(toggle_avatar_icon)
+
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         self.ublock.set_sensitive(force_sensitive_block_button or is_sensitive)
         self.toggle_avatar.set_sensitive(force_sensitive_block_button or is_sensitive)
@@ -127,10 +146,12 @@ class ConversationToolbar(gtk.Toolbar):
             self.theme_tool_block = gtk.STOCK_STOP
             self.theme_tool_unblock = gtk.STOCK_YES
 
-        if self.session.config.b_avatar_on_left == self.session.config.b_show_info:
-            theme_tool_toggle_avatar = gtk.STOCK_GO_BACK
+        if self.session.config.b_avatar_on_left:
+            self.theme_tool_hide_avatar = gtk.STOCK_GO_BACK
+            self.theme_tool_show_avatar = gtk.STOCK_GO_FORWARD
         else:
-            theme_tool_toggle_avatar = gtk.STOCK_GO_FORWARD
+            self.theme_tool_hide_avatar = gtk.STOCK_GO_FORWARD
+            self.theme_tool_show_avatar = gtk.STOCK_GO_BACK
 
         theme_tool_call = utils.gtk_ico_image_load(image_theme.call, size)
         theme_tool_video = utils.gtk_ico_image_load(image_theme.video, size)
@@ -186,12 +207,9 @@ class ConversationToolbar(gtk.Toolbar):
         self.ublock.connect('clicked',
             lambda *args: self.handler.on_ublock_selected())
 
-        self.toggle_avatar = gtk.ToolButton(theme_tool_toggle_avatar)
+        self.toggle_avatar = gtk.ToolButton(self.theme_tool_show_avatar)
         self.toggle_avatar.set_label(_('Hide/Show avatar'))
-        if self.handler.session.config.b_show_info:
-            self.toggle_avatar.set_tooltip_text(_('Hide avatar'))
-        else:
-            self.toggle_avatar.set_tooltip_text(_('Show avatar'))
+        self.update_toggle_avatar_icon(self.session.config.b_show_info)
         self.toggle_avatar.connect('clicked',
             lambda *args: self.handler.on_toggle_avatar_selected())
 

@@ -70,7 +70,6 @@ class ConversationToolbar (QtGui.QToolBar):
 #        self.invite_file_transfer.set_sensitive(is_sensitive)
 
     def update_toggle_avatar_icon(self, show_avatars):
-        ##FIXME: fix gtkui
         if show_avatars:
             self._action_dict['toggle_avatars'].setIcon(self.theme_tool_hide_avatar)
             self._action_dict['toggle_avatars'].setToolTip(tr('Hide avatar'))

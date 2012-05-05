@@ -33,7 +33,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         gui.base.Conversation.__init__(self, session, conv_id, None, members)
         QtGui.QWidget.__init__(self, parent)
         
-        self.avatar_box_is_hidden = False
         self._on_typing_timer = QtCore.QTimer()
         
         # a widget dic to avoid proliferation of instance variables:
@@ -84,6 +83,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session, gui.theme, self)
         widget_d['toolbar'] = conv_toolbar_cls(self.toolbar_handler, self.session)
         widget_d['toolbar'].redraw_ublock_button(self._get_first_contact().blocked)
+        widget_d['toolbar'].update_toggle_avatar_icon(self.session.config.b_show_info)
 
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         widget_d['chat_input'] = Widgets.ChatInput()
@@ -186,8 +186,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
     def _on_show_info_changed(self, value):
         '''callback called when config.b_show_info changes'''
-        #FIXME: this broke toolbar toggling
-#        self.on_toggle_avatar()
+        self.set_image_visible(value)
+        self._widget_d['toolbar'].update_toggle_avatar_icon(value)
 
     def _on_show_avatar_onleft(self,value):
         '''callback called when config.b_avatar_on_left changes'''
@@ -333,10 +333,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
-        #FIXME: this is not working sometimes
-        self.set_image_visible(self.avatar_box_is_hidden)
-        self.avatar_box_is_hidden = not self.avatar_box_is_hidden
-        self._widget_d['toolbar'].update_toggle_avatar_icon(not self.session.config.b_show_info)
+        # widget visibility is handled in _on_show_info_changed
         self.session.config.b_show_info = not self.session.config.b_show_info
 
     def _get_first_contact(self):
