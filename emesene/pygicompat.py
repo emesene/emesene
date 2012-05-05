@@ -197,6 +197,12 @@ class TreeView(Gtk.TreeView):
         return Gtk.TreeView.get_parent_window(self)
 Gtk.TreeView = TreeView
 
+class EventBox(Gtk.EventBox):
+    @property
+    def window(self):
+        return Gtk.EventBox.get_parent_window(self)
+Gtk.EventBox = EventBox
+
 orig_set_text = Gtk.Clipboard.set_text
 def new_set_text(self, text, len=-1):
     orig_set_text(self, text, len)

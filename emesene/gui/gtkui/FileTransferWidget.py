@@ -42,6 +42,9 @@ class FileTransferWidget(gtk.HBox):
         
         self.event_box = gtk.EventBox()
         self.progress = gtk.ProgressBar()
+        if check_gtk3():
+            self.progress.set_show_text(True)
+            self.progress.set_text("")
         self.progress.set_ellipsize(pango.ELLIPSIZE_END)
         self.progress.add_events(gtk.gdk.BUTTON_PRESS_MASK)
         self.progress.connect('button-press-event', self._on_dbl_click_transfer)
@@ -291,6 +294,8 @@ class FileTransferTooltip(gtk.Window):
                 self.image.set_from_pixbuf(pixbuf)
 
         # set the location of the tooltip
+        if view.window is None:
+            return False
         x, y = self.find_position(o_coords, view.window)
         self.move(x, y)
         self.update()
