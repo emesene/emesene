@@ -39,7 +39,16 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._widget_d = {}
         
         self._setup_ui()
-        
+
+        #update information
+        self._widget_d['my_display_pic'].set_display_pic_of_account()
+        if self.members:
+            account = self.members[0]
+            contact = self.session.contacts.safe_get(account)
+            self._widget_d['his_display_pic'].set_display_pic_of_account(
+                                                                account)
+            self.set_sensitive(not contact.blocked, True)
+
         # emesene's
         self.tab_index = 0
         self.input = self._widget_d['chat_input']
@@ -129,12 +138,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         right_lay.addStretch()
         right_lay.addWidget(widget_d['my_display_pic'])
         
-        widget_d['my_display_pic'].set_display_pic_of_account()
-        if self.members:
-            his_email = self.members[0]
-            widget_d['his_display_pic'].set_display_pic_of_account(
-                                                                his_email)
-
         # LEFT & RIGHT
         widget_d['info_panel'] = info_panel_cls()
         
@@ -144,10 +147,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         lay = QtGui.QVBoxLayout()
         lay.addWidget(widget_d['info_panel'])
         lay.addLayout(lay_no_info)
-        
-        
+
         self.setLayout(lay)
-    
+
     # emesene's
 
     def on_font_selected(self, style):
@@ -228,7 +230,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''Slot called when the user clicks ok in the color chooser or the 
         font chooser'''
         self.cstyle = self._widget_d['chat_input'].e3_style
-   
+
     def _on_show_smiley_chooser(self):
         '''Slot called when the user clicks the smiley button.
         Show the smiley chooser panel'''
@@ -239,8 +241,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         chooser panel. Inserts the smiley in the chat edit'''
         # handles cursor position
         self._widget_d['chat_input'].insert_text_after_cursor(shortcut)
-        
-    
+
     def _on_send_btn_clicked(self):
         '''Slot called when the user clicks the send button or presses Enter in
         the chat line editor. Sends the message'''
@@ -294,7 +295,13 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         is still open while the user is disconnected and to set it back to
         sensitive when the user is reconnected
         """
-        pass
+        self._widget_d['toolbar'].set_sensitive(is_sensitive, force_sensitive_block_button)
+        self._widget_d['chat_input'].setEnabled(is_sensitive)
+        self._widget_d['info_panel'].setEnabled(is_sensitive or force_sensitive_block_button)
+
+        # redraws block button to its corresponding icon and tooltip
+        contact_unblocked = not force_sensitive_block_button or is_sensitive
+        self._widget_d['toolbar'].redraw_ublock_button(contact_unblocked)
 
     def set_image_visible(self, is_visible):
         """

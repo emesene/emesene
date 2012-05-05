@@ -54,15 +54,15 @@ class ConversationToolbar (QtGui.QToolBar):
         self._action_dict['ublock'].setToolTip(tooltip_text)
         self._action_dict['ublock'].setIcon(ublock_icon)
    
-#FIXME: implement
-#    def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
-#        self.ublock.set_sensitive(force_sensitive_block_button or is_sensitive)
-#        self.toggle_avatar.set_sensitive(force_sensitive_block_button or is_sensitive)
-#        self.font.set_sensitive(is_sensitive)
-#        self.nudge.set_sensitive(is_sensitive)
-#        self.clean.set_sensitive(is_sensitive)
-#        self.color.set_sensitive(is_sensitive)
-#        self.emotes.set_sensitive(is_sensitive)
+    def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
+        self._action_dict['ublock'].setEnabled(force_sensitive_block_button or is_sensitive)
+        self._action_dict['toggle_avatars'].setEnabled(force_sensitive_block_button or is_sensitive)
+        self._action_dict['change_font'].setEnabled(is_sensitive)
+        self._action_dict['send_nudge'].setEnabled(is_sensitive)
+        self._action_dict['clean'].setEnabled(is_sensitive)
+        self._action_dict['change_color'].setEnabled(is_sensitive)
+        self._action_dict['add_smiley'].setEnabled(is_sensitive)
+
 #        self.invite.set_sensitive(is_sensitive)
 #        self.invite_av_call.set_sensitive(is_sensitive)
 #        self.invite_video_call.set_sensitive(is_sensitive)
