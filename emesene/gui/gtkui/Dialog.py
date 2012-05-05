@@ -971,8 +971,7 @@ class Dialog(object):
         class TableText(gtk.Alignment):
             '''class that implements selectable labels aligned to the left'''
             def __init__(self, text):
-                gtk.Alignment.__init__(self, 
-                                       xalign=0.0, yalign=0.0, 
+                gtk.Alignment.__init__(self, xalign=0.0, yalign=0.0, 
                                        xscale=0.0, yscale=0.0)
 
                 self.label = gtk.Label(text)
@@ -1612,8 +1611,7 @@ class AddBuddy(gtk.Window):
 
     def __init__(self, callback):
         '''Constructor. Packs widgets'''
-        gtk.Window.__init__(self)
-
+        gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
         self.mails = []  # [(mail, nick), ...]
         self.rejected = []
         self.accepted = []
@@ -1622,11 +1620,12 @@ class AddBuddy(gtk.Window):
 
         # window
         self.set_title(_("Add contact"))
-        self.set_border_width(4)
+        self.set_resizable(False)
+        self.set_decorated(False)
+        self.set_keep_above(True)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.move(30, 30) # top-left
         self.connect('delete-event', self.cb_delete)
-
         ## widgets
 
         # main vbox
@@ -1662,6 +1661,8 @@ class AddBuddy(gtk.Window):
         self.buttonbox.set_layout(gtk.BUTTONBOX_END)
 
         # the contents of the buttonbox
+        self.quit = gtk.Button(_('Quit'), gtk.STOCK_QUIT)        
+        self.quit.connect('clicked', self.hide)       
         self.later = gtk.Button()
         self.later.add(gtk.Label(_('Remind me later')))
         self.later.connect('clicked', self.cb_cancel)
@@ -1681,11 +1682,12 @@ class AddBuddy(gtk.Window):
         self.vboxtext.pack_start(self.pages, False, False)
         self.vboxtext.pack_start(self.text, True, True)
 
+        self.hboxbuttons.pack_start(self.quit, False, False)
         self.hboxbuttons.pack_start(self.later, False, False)
         self.hboxbuttons.pack_start(self.reject, False, False)
         self.hboxbuttons.pack_start(self.buttonbox)
         self.buttonbox.pack_start(self.addbutton)
-
+        
     def _buildpages(self):
         '''Builds hboxpages, that is a bit complex to include in __init__'''
         hboxpages = gtk.HBox()
@@ -1756,7 +1758,7 @@ class AddBuddy(gtk.Window):
 
         self.update()
 
-    def hide(self):
+    def hide(self, button=False):
         '''Called to hide the window'''
         self.callback({'accepted': self.accepted, 'rejected': self.rejected})
         gtk.Window.hide(self)
