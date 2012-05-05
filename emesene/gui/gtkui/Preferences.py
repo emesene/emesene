@@ -339,7 +339,8 @@ class BaseTable(gtk.Table):
         if increment_current_row:
             self.current_row += 1
 
-    def append_entry_default(self, text, format_type, property_name, default):
+    def append_entry_default(self, text, format_type, 
+                             property_name, default, tooltip_text):
         """append a row with a label and a entry, set the value to the
         value of property_name if exists, if not set it to default.
          Add a reset button that sets the value to the default"""
@@ -385,6 +386,7 @@ class BaseTable(gtk.Table):
                                               gtk.ICON_SIZE_MENU)
         entry_help.set_image(help_image)
         entry_help.connect('clicked', on_help_clicked, format_type)
+        entry_help.set_tooltip_text(tooltip_text)
 
         self.append_row(hbox, None)
 
@@ -600,9 +602,11 @@ class MainWindow(BaseTable):
             'session.config.i_avatar_size', 18, 64)
 
         self.append_entry_default(_('Nick format'), 'nick',
-                'session.config.nick_template_clist', ContactList.NICK_TPL)
+                                  'session.config.nick_template_clist',
+                                  ContactList.NICK_TPL, _('Nick Format Help'))
         self.append_entry_default(_('Group format'), 'group',
-                'session.config.group_template', ContactList.GROUP_TPL)
+                                  'session.config.group_template',
+                                  ContactList.GROUP_TPL, _('Group Format Help'))
 
         if sys.platform == 'darwin':
 
