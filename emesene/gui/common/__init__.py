@@ -29,6 +29,12 @@ def import_and_register(category_name, cls):
     except ImportError:
         return None
 
+#FIXME: gi init the debugger and spam the console if a package isn't found
+from gui.gtkui import check_gtk3
+if check_gtk3():
+    import debugger
+    debugger.init(debuglevel=0)
+
 import_and_register('tray icon', 'MessagingMenu')
 import_and_register('tray icon', 'Indicator')
 import_and_register('tray icon', 'TrayIcon')
