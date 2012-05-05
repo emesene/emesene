@@ -333,7 +333,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         """
-        self.info.show() if is_visible else self.info.hide()
+        self.info.set_visible(is_visible)
 
     def set_header_visible(self, is_visible):
         '''
@@ -341,7 +341,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
-        self.header.show() if is_visible else self.header.hide()
+        self.header.set_visible(is_visible)
 
     def set_toolbar_visible(self, is_visible):
         '''
@@ -349,7 +349,7 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
-        self.toolbar.show() if is_visible else self.toolbar.hide()
+        self.toolbar.set_visible(is_visible)
 
     def get_preview(self, completepath):
         return utils.makePreview(completepath)
