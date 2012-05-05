@@ -183,33 +183,20 @@ class Conversation(gtk.VBox, gui.Conversation):
 
     def _on_show_toolbar_changed(self, value):
         '''callback called when config.b_show_toolbar changes'''
-        if value:
-            self.toolbar.show()
-        else:
-            self.toolbar.hide()
+        self.toolbar.set_visible(value)
 
     def _on_show_header_changed(self, value):
         '''callback called when config.b_show_header changes'''
-        if value:
-            self.header.show()
-        else:
-            self.header.hide()
+        self.header.set_visible(value)
 
     def _on_show_info_changed(self, value):
         '''callback called when config.b_show_info changes'''
-        if value:
-            self.info.show()
-        else:
-            self.info.hide()
+        self.info.set_visible(value)
 
     def _on_show_avatar_onleft(self, value):
         '''callback called when config.b_avatar_on_left changes'''
-        if value:
-            self.hbox.reorder_child(self.panel, 1)
-            self.hbox.reorder_child(self.info, 0)
-        else:
-            self.hbox.reorder_child(self.panel, 0)
-            self.hbox.reorder_child(self.info, 1)
+        self.hbox.reorder_child(self.panel, value)
+        self.hbox.reorder_child(self.info, not value)
 
     def on_close(self):
         '''called when the conversation is closed'''
