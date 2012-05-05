@@ -12,11 +12,13 @@ import os
 import platform
 import sys
 
+import emesene.Info
+
 python_version = platform.python_version()[0:3]
 
 setup_info = dict(
     name = "emesene",
-    version = "2.12.2-devel",
+    version = emesene.Info.EMESENE_VERSION,
     description = "Instant Messaging Client",
     author = "Luis Mariano Guerra",
     author_email = "luismarianoguerra@gmail.com",
