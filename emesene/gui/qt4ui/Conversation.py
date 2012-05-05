@@ -321,11 +321,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''
         self._widget_d['toolbar'].setVisible(is_visible)
 
-    def on_toggle_avatar(self):
-        '''hide or show the avatar bar'''
-        # widget visibility is handled in _on_show_info_changed
-        self.session.config.b_show_info = not self.session.config.b_show_info
-
     def _get_first_contact(self):
         account = self.members[0]
         contact = self.session.contacts.contacts[account]

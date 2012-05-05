@@ -376,11 +376,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         elif account in self.members:
             self.info.his_avatar.set_from_file(path)
 
-    def on_toggle_avatar(self):
-        '''hide or show the avatar bar'''
-        # widget visibility is handled in _on_show_info_changed
-        self.session.config.b_show_info = not self.session.config.b_show_info
-
     def _on_avatarsize_changed(self, value):
         self.info._on_avatarsize_changed(value)
 

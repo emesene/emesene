@@ -228,7 +228,8 @@ class Conversation(object):
 
     def on_toggle_avatar(self):
         '''hide or show the avatar bar'''
-        raise NotImplementedError
+        # widget visibility is handled in _on_show_info_changed
+        self.session.config.b_show_info = not self.session.config.b_show_info
 
     def on_voice_call(self):
         '''called when the user is requesting an audio-only call'''
