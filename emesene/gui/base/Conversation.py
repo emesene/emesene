@@ -608,7 +608,7 @@ class Conversation(object):
         self._header_visible = value
 
     def _get_header_visible(self):
-        '''return the value of image_visible'''
+        '''return the value of _header_visible'''
         return self._header_visible
 
     header_visible = property(fget=_get_header_visible,
