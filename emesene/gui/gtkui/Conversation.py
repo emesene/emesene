@@ -51,7 +51,9 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.panel = gtk.VPaned()
 
-        self.show_avatar_in_taskbar = self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
+        self.show_avatar_in_taskbar = self.session.config.get_or_set(
+                                                    'b_show_avatar_in_taskbar',
+                                                    True)
 
         Header = extension.get_default('conversation header')
         OutputText = extension.get_default('conversation output')
