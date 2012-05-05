@@ -593,11 +593,6 @@ class Conversation(object):
     def _set_image_visible(self, value):
         '''hide or show the widget according to value'''
         self.set_image_visible(value)
-        if value:
-            self.info.show()
-        else:
-            self.info.hide()
-
         self._image_visible = value
 
     def _get_image_visible(self):
