@@ -16,12 +16,24 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+
+import sys
+import logging
+log = logging.getLogger('gui.common.PyNotification')
+
+from gui.gtkui import check_gtk3
+
+def enable_pynotify():
+    from gi.repository import Notify
+    sys.modules['pynotify'] = Notify
+    Notify.Notification = Notify.Notification.new
+
+if check_gtk3():
+    enable_pynotify()
+
 import pynotify
 if not pynotify.init("emesene"):
     raise ImportError
-
-import logging
-log = logging.getLogger('gui.common.PyNotification')
 
 from gui.base import Plus
 import gui.gtkui.utils as utils

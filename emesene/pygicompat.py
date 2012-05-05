@@ -35,13 +35,6 @@ gi.pygtkcompat.enable_gtk(version='3.0')
 gi.pygtkcompat.enable_webkit(version='3.0')
 gi.pygtkcompat.enable_gst()
 
-def enable_pynotify():
-    from gi.repository import Notify
-    sys.modules['pynotify'] = Notify
-    Notify.Notification = Notify.Notification.new
-
-enable_pynotify()
-
 Pango.SCALE_SMALL = 0.8333333333333
 
 #override control_mask due to bug in pygicompat
