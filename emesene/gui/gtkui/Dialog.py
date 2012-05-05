@@ -1692,13 +1692,13 @@ class AddBuddy(gtk.Window):
         '''Builds hboxpages, that is a bit complex to include in __init__'''
         hboxpages = gtk.HBox()
 
-        arrowleft = TinyArrow(gtk.ARROW_LEFT)
+        arrowleft = gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
         self.buttonleft = gtk.Button()
         self.buttonleft.set_relief(gtk.RELIEF_NONE)
         self.buttonleft.add(arrowleft)
         self.buttonleft.connect('clicked', self.switchmail, -1)
 
-        arrowright = TinyArrow(gtk.ARROW_RIGHT)
+        arrowright = gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_NONE)
         self.buttonright = gtk.Button()
         self.buttonright.set_relief(gtk.RELIEF_NONE)
         self.buttonright.add(arrowright)
@@ -1785,46 +1785,6 @@ class AddBuddy(gtk.Window):
         self.accepted.append(mail)
         self.mails.pop(self.pointer)
         self.switchmail(None, -1)
-
-class TinyArrow(gtk.DrawingArea):
-    LENGTH = 8
-    WIDTH = 5
-
-    def __init__(self, arrow_type, shadow=gtk.SHADOW_NONE):
-        gtk.DrawingArea.__init__(self)
-        self.arrow_type = arrow_type
-        self.shadow = shadow
-        self.margin = 0
-
-        self.set_size_request(*self.get_size())
-        self.connect("expose_event", self.expose)
-
-    def get_size(self):
-        if self.arrow_type in (gtk.ARROW_LEFT, gtk.ARROW_RIGHT):
-            return (TinyArrow.WIDTH + self.margin*2, \
-                    TinyArrow.LENGTH + self.margin*2)
-        else:
-            return (TinyArrow.LENGTH + self.margin*2, \
-                    TinyArrow.WIDTH + self.margin*2)
-
-    def expose(self, widget=None, event=None):
-        if self.window is None:
-            return
-        self.window.clear()
-        width, height = self.get_size()
-        self.get_style().paint_arrow(self.window, self.state, \
-            self.shadow, None, self, '', self.arrow_type, True, \
-            0, 0, width, height)
-
-        return False
-
-    def set(self, arrow_type, shadow=gtk.SHADOW_NONE, margin=None):
-        self.arrow_type = arrow_type
-        self.shadow = shadow
-        if margin is not None:
-            self.margin = margin
-        self.set_size_request(*self.get_size())
-        self.expose()
 
 class ProgressWindow(gtk.Window):
     '''A class for a progressbar dialog'''
