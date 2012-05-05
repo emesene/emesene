@@ -40,8 +40,19 @@ Pango.SCALE_SMALL = 0.8333333333333
 #override control_mask due to bug in pygicompat
 Gdk.CONTROL_MASK = Gdk.ModifierType.CONTROL_MASK
 
-Gdk.screen_width = Gdk.Screen.width
-Gdk.screen_height = Gdk.Screen.height
+if not hasattr(Gdk, 'screen_width'):
+    Gdk.screen_width = Gdk.Screen.width
+    Gdk.screen_height = Gdk.Screen.height
+
+    Gtk.AccelGroup.connect_group = Gtk.AccelGroup.connect
+    Gtk.image_new_from_animation = Gtk.Image.new_from_animation
+    Gtk.image_new_from_icon_set = Gtk.Image.new_from_icon_set
+    Gtk.image_new_from_file = Gtk.Image.new_from_file
+
+    Gtk.status_icon_position_menu = Gtk.StatusIcon.position_menu
+    Gtk.StatusIcon.set_tooltip = Gtk.StatusIcon.set_tooltip_text
+    Gtk.clipboard_get = Gtk.Clipboard.get
+
 def new_with_model_and_entry(model, column):
     combo = Gtk.ComboBox.new_with_model_and_entry(model)
     combo.set_entry_text_column (0)
@@ -69,7 +80,7 @@ class PixbufAnimation(GdkPixbuf.PixbufAnimation):
 Gdk.PixbufAnimation = PixbufAnimation
 
 def save(self, filename, extension):
-    GdkPixbuf.Pixbuf.savev(self, filename, extension, [],[])
+    GdkPixbuf.Pixbuf.savev(self, filename, extension, [], [])
 Gdk.Pixbuf.save = save
 
 orig_get_formats = GdkPixbuf.Pixbuf.get_formats
@@ -118,11 +129,6 @@ class Entry(Gtk.Entry):
             entry.set_max_length(length)
         return entry
 Gtk.Entry = Entry
-
-Gtk.AccelGroup.connect_group = Gtk.AccelGroup.connect
-Gtk.image_new_from_animation = Gtk.Image.new_from_animation
-Gtk.image_new_from_icon_set = Gtk.Image.new_from_icon_set
-Gtk.image_new_from_file = Gtk.Image.new_from_file
 
 def about_dialog_set_url_hook(hook):
     pass
@@ -181,18 +187,15 @@ Gtk.Notebook.append_page = append_page
 def set_attributes(self, cellText, text=0):
     self.add_attribute(cellText, 'text', text)
 Gtk.TreeViewColumn.set_attributes = set_attributes
-Gtk.StatusIcon.set_tooltip = Gtk.StatusIcon.set_tooltip_text
 def set_blinking(self, blink):
     pass
 Gtk.StatusIcon.set_blinking = set_blinking
-Gtk.status_icon_position_menu = Gtk.StatusIcon.position_menu
 
 class TreeView(Gtk.TreeView):
     @property
     def window(self):
         return Gtk.TreeView.get_parent_window(self)
 Gtk.TreeView = TreeView
-Gtk.clipboard_get = Gtk.Clipboard.get
 
 orig_set_text = Gtk.Clipboard.set_text
 def new_set_text(self, text, len=-1):
