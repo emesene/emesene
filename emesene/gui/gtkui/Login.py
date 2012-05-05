@@ -756,7 +756,7 @@ class ConnectingWindow(Login):
 
         self.throbber.hide()
         self.reconnect_after = 30
-        if self.reconnect_timer_id is None:            
+        if self.reconnect_timer_id is None:
             self.reconnect_timer_id = gobject.timeout_add_seconds(1, \
                                             self.update_reconnect_timer, 
                                             callback, account, session_id,
