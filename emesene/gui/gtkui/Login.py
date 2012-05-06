@@ -399,7 +399,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         called when a key is released in the account field
         '''
         self._update_fields(self.cmb_account.get_active_text())
-        if event.keyval == gtk.keysyms.Tab and self.is_reconnecting is None:
+        if event.keyval == gtk.keysyms.Tab and self.is_reconnecting is False:
             self.txt_password.grab_focus()
 
     def _update_fields(self, account, from_preferences=False):
@@ -669,7 +669,7 @@ class ConnectingWindow(Login):
         self.reconnect_timer_id = None
 
         #Check if is reconnecting or not, so you don't "focus" the window
-        self.is_reconnecting = None
+        self.is_reconnecting = False
 
         account = config.get_or_set('last_logged_account', '')
         remembers = config.get_or_set('d_remembers', {})
@@ -747,7 +747,7 @@ class ConnectingWindow(Login):
         '''
         show the reconnect countdown
         '''
-        self.is_reconnecting = true
+        self.is_reconnecting = True
         self.label_timer.show()
         self.b_connect.show()
         self.b_connect.connect('clicked', self._on_connect_now_clicked, 
