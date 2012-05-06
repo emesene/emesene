@@ -239,7 +239,7 @@ class FileTransferTooltip(gtk.Window):
             self.connect('expose-event', self.on_expose_event)
         else:
             context = self.get_style_context()
-            gtk.StyleContext.add_class (context, "tooltip");
+            gtk.StyleContext.add_class(context, "tooltip")
 
         w_parent.connect('enter-notify-event', self.on_motion)
         w_parent.connect('leave-notify-event', self.on_leave)
