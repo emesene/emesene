@@ -262,13 +262,13 @@ class InputText(TextBox):
         self.apply_tag()
 
         if event.state == gtk.gdk.CONTROL_MASK and \
-                 chr(event.keyval) == "p" or \
+                 event.keyval == gtk.keysyms.p or \
                     event.keyval == gtk.keysyms.Up:
 
             self.on_cycle_history()
 
         elif event.state == gtk.gdk.CONTROL_MASK and \
-                chr(event.keyval) == "n" or \
+                event.keyval == gtk.keysyms.n or \
                     event.keyval == gtk.keysyms.Down:
 
             self.on_cycle_history(1)
