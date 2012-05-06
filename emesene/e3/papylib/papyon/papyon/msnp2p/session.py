@@ -262,7 +262,6 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
             self._bridge_failed(None)
             return
 
-        ip, port = self._select_address(transresp)
         new_bridge = self._transport_manager.create_transport(self.peer,
                 self.peer_guid, transresp.bridge)
         if new_bridge is None or new_bridge.connected:
@@ -270,45 +269,7 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
         else:
             new_bridge.connect("connected", self._bridge_switched)
             new_bridge.connect("failed", self._bridge_failed)
-            new_bridge.open(ip, port, transresp.nonce)
-
-    def _select_address(self, transresp):
-        client_ip = self._session_manager._client.client_ip
-        local_ip = self._session_manager._client.local_ip
-        local_addr = socket.inet_aton(local_ip)
-        ips = []
-
-        # try external addresses
-        port = transresp.external_port
-        for ip in transresp.external_ips:
-            try:
-                socket.inet_aton(ip)
-            except:
-                continue
-            if ip == client_ip:
-                # we are on the same NAT
-                ips = []
-                break
-            ips.append((ip, port))
-        if ips:
-            return ips[0]
-
-        # try internal addresses
-        port = transresp.internal_port
-        for ip in transresp.internal_ips:
-            try:
-                addr = socket.inet_aton(ip)
-                # same local area network
-                if addr[0:3] == local_addr[0:3]:
-                    return (ip, port)
-            except:
-                continue
-            ips.append((ip, port))
-        if ips:
-            return ips[0]
-        
-        # no valid address found
-        return (None, None)
+            new_bridge.open(transresp.nonce)
 
     def _bridge_listening(self, new_bridge, external_ip, external_port,
             transreq):
