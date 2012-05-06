@@ -92,6 +92,7 @@ class OptionsHandler(object):
         '''constructor'''
         self.session = session
         self.contact_list = contact_list
+        self.preferences = None
 
     def on_order_by_group_toggled(self, active):
         '''called when the order by group radio button is toggled'''
@@ -125,13 +126,17 @@ class OptionsHandler(object):
 
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
-        instance = extension.get_and_instantiate('preferences', self.session)
-        if self.session is not instance.session:
-            instance.remove_subscriptions()
+        self.preferences = extension.get_and_instantiate('preferences',
+                                                         self.session)
+
+        if self.session is not self.preferences.session:
+            self.preferences.remove_subscriptions()
             extension.delete_instance('preferences')
-            instance = extension.get_and_instantiate('preferences', self.session)
-        instance.show()
-        instance.present()
+            self.preferences = extension.get_and_instantiate('preferences',
+                                                             self.session)
+
+        self.preferences.show()
+        self.preferences.present()
 
     def on_plugins_selected(self):
         '''called when the plugins button is selected'''

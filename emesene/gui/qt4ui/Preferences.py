@@ -97,7 +97,6 @@ class Preferences(QtGui.QWidget):
                                                         self._on_row_activated)
 
 
-
     def _on_row_activated(self, new_idx, old_idx):
         '''Callback executed when the user clicks an elemet in the list 
         on the left. Shows the matching preference page in the righ part 
@@ -107,12 +106,13 @@ class Preferences(QtGui.QWidget):
         self.widget_stack.currentWidget().on_update()
         
     
+    def remove_subscriptions(self):
+        '''RemovesNothing...'''
+        pass
+    
     def present(self):
         '''Does Nothing...'''
         pass
-
-
-
 
 
 
@@ -143,9 +143,6 @@ class QListViewMod (QtGui.QListView):
         size = QtGui.QListView.sizeHint(self)
         return QtCore.QSize((2*width+size.width())/3, 
                             (2*height+size.height())/3)
-
-
-
 
 
 
