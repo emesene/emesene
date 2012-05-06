@@ -586,6 +586,7 @@ class TrayIconHandler(FileHandler):
         """
         FileHandler.__init__(self, session, on_quit)
         self.theme = theme
+        self.preferences = None
         
     def on_hide_show_mainwindow(self, main_window=None):
         if main_window is not None:
@@ -596,13 +597,17 @@ class TrayIconHandler(FileHandler):
                 
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
-        instance = extension.get_and_instantiate('preferences', self.session)
-        if self.session is not instance.session:
-            instance.remove_subscriptions()
+        self.preferences = extension.get_and_instantiate('preferences',
+                                                         self.session)
+
+        if self.session is not self.preferences.session:
+            self.preferences.remove_subscriptions()
             extension.delete_instance('preferences')
-            instance = extension.get_and_instantiate('preferences', self.session)
-        instance.show()
-        instance.present()
+            self.preferences = extension.get_and_instantiate('preferences',
+                                                             self.session)
+
+        self.preferences.show()
+        self.preferences.present()
 
 class FileTransferHandler(object):
     ''' this handler handles a file transfer object '''
