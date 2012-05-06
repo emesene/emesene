@@ -22,6 +22,7 @@ from papyon.gnet.constants import *
 from papyon.gnet.io import *
 from papyon.msnp.message import MessageAcknowledgement
 from papyon.msnp2p.constants import *
+from papyon.msnp2p.transport.TLPv1 import MessageChunk as NonceChunk
 from papyon.msnp2p.transport.TLP import MessageChunk
 from papyon.msnp2p.transport.base import BaseP2PTransport
 import papyon.util.debug as debug
@@ -124,7 +125,11 @@ class DirectP2PTransport(BaseP2PTransport):
     def can_send(self, peer, peer_guid, blob, bootstrap=False):
         return (self._peer == peer and self._peer_guid == peer_guid)
 
-    def open(self):
+    def _ready_to_send(self):
+        return self._connected
+
+    def open(self, nonce):
+        self._nonce = nonce
         self._server = False
         self._listening = False
         self._transport = TCPClient(self._ip, self._port)
@@ -199,7 +204,6 @@ class DirectP2PTransport(BaseP2PTransport):
     def _on_error_mapping_port(self, simple, error, proto, extern_port,
         local_ip, local_port, description):
         logger.warning("Error mapping port %u (%s)" % (local_port, error))
-        print extern_port, local_ip, local_port, description
         self._set_listening(None, None)
 
     def _on_external_port_mapped(self, simple, proto, extern_ip, replaces,
@@ -224,17 +228,16 @@ class DirectP2PTransport(BaseP2PTransport):
             self._listening = True
             self.emit("listening", ip, port)
 
-    def _send_chunk(self, chunk):
-        self._send_data(str(chunk), self.__on_chunk_sent, (chunk,))
+    def _send_chunk(self, peer, peer_guid, chunk):
+        self._send_data(str(chunk), (self.__on_chunk_sent, chunk))
 
     def __on_chunk_sent(self, chunk):
-        logger.debug(">> Chunk of %i bytes with flags 0x%x" %
-                (chunk.header.chunk_size, chunk.header.flags))
+        logger.debug(">> Chunk of %i bytes" % chunk.header.chunk_size)
         self._on_chunk_sent(chunk)
 
-    def _send_data(self, data, callback=None, cb_args=()):
+    def _send_data(self, data, callback=None):
         body = struct.pack('<L', len(data)) + data
-        self._transport.send(body, callback, *cb_args)
+        self._transport.send(body, callback)
 
     def _remove_connect_timeout(self):
         if self._connect_timeout_src is not None:
@@ -295,7 +298,7 @@ class DirectP2PTransport(BaseP2PTransport):
     def _send_nonce(self):
         logger.debug("Sending nonce %s" % self._nonce)
         self.__nonce_sent = True
-        chunk = MessageChunk()
+        chunk = NonceChunk()
         chunk.header.blob_id = random.randint(1000, 2147483647)
         chunk.set_nonce(self._nonce)
         self._send_data(str(chunk))
@@ -303,9 +306,9 @@ class DirectP2PTransport(BaseP2PTransport):
     def _receive_nonce(self, chunk):
         if not chunk.is_nonce_chunk():
             return
-        nonce = chunk.get_nonce().upper()
-        logger.debug("Received nonce %s" % nonce)
-        if self._nonce.upper() != nonce:
+        nonce = str(chunk.get_nonce()).upper()
+        logger.debug("Received nonce %s, local nonce %s" % (nonce, self._nonce))
+        if str(self._nonce).upper() != nonce:
             logger.warning("Received nonce doesn't match (connection failed)")
             self._on_failed()
             return
@@ -336,12 +339,14 @@ class DirectP2PTransport(BaseP2PTransport):
                 self._receive_foo(body)
                 return
 
-            chunk = MessageChunk.parse(body)
             if not self.__nonce_received:
+                chunk = NonceChunk.parse(body)
                 self._receive_nonce(chunk)
-            elif chunk.body == "\x00" *4:
-                logger.debug("Received 0000 chunk, ignoring it")
             else:
-                logger.debug("<< Chunk of %i bytes" % chunk.header.chunk_size)
-                self._on_chunk_received(chunk)
+                chunk = MessageChunk.parse(2, body) #TODO: TLPv1 or TLPv2?
+                if chunk.body == "\x00" *4:
+                    logger.debug("Received 0000 chunk, ignoring it")
+                else:
+                    logger.debug("<< Chunk of %i bytes" % chunk.header.chunk_size)
+                    self._on_chunk_received(chunk)
 
