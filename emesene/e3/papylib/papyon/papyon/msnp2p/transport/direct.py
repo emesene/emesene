@@ -229,11 +229,11 @@ class DirectP2PTransport(BaseP2PTransport):
             self.emit("listening", ip, port)
 
     def _send_chunk(self, peer, peer_guid, chunk):
-        self._send_data(str(chunk), (self.__on_chunk_sent, chunk))
+        self._send_data(str(chunk), (self.__on_chunk_sent, peer, peer_guid, chunk))
 
-    def __on_chunk_sent(self, chunk):
+    def __on_chunk_sent(self, peer, peer_guid, chunk):
         logger.debug(">> Chunk of %i bytes" % chunk.header.chunk_size)
-        self._on_chunk_sent(chunk)
+        self._on_chunk_sent(peer, peer_guid, chunk)
 
     def _send_data(self, data, callback=None):
         body = struct.pack('<L', len(data)) + data
@@ -348,5 +348,5 @@ class DirectP2PTransport(BaseP2PTransport):
                     logger.debug("Received 0000 chunk, ignoring it")
                 else:
                     logger.debug("<< Chunk of %i bytes" % chunk.header.chunk_size)
-                    self._on_chunk_received(chunk)
+                    self._on_chunk_received(self._peer, self._peer_guid, chunk)
 
