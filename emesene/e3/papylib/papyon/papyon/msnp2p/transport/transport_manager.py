@@ -158,13 +158,13 @@ class P2PTransportManager(gobject.GObject):
 
     def find_transport(self, peer, peer_guid, blob):
         best = None
-        print "Available transports:", self._transports
+        logger.debug("Available transports: %s" % self._transports)
         for transport in self._transports:
             if transport.can_send(peer, peer_guid, blob):
                 if best is None or transport.rating > best.rating:
                     if transport.connected:
                         best = transport
-                    print "Best transport is now:", best
+                    logger.debug("Best transport is now: %s" % best)
         return best
 
     def _get_transport(self, peer, peer_guid, blob):
