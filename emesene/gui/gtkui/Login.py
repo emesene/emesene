@@ -269,7 +269,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         self.cancel_clicked = cancel_clicked
 
         #Check if is reconnecting or not, so you don't "focus" the window
-        self.is_reconnecting = False
+        Login.is_reconnecting = False
         
         account = self.config.get_or_set('last_logged_account', '')
 
@@ -402,7 +402,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         called when a key is released in the account field
         '''
         self._update_fields(self.cmb_account.get_active_text())
-        if event.keyval == gtk.keysyms.Tab and not self.is_reconnecting:
+        if event.keyval == gtk.keysyms.Tab and not Login.is_reconnecting:
             self.txt_password.grab_focus()
 
     def _update_fields(self, account, from_preferences=False):
