@@ -1179,7 +1179,7 @@ class DesktopTab(BaseTable):
         for lang_key in self._language_management.get_available_languages():
             if lang_key not in self._language_management.LANGUAGES_DICT.keys():
                 combo_store.append((lang_key, lang_key))
-                if lang == self.session.config.language_config:
+                if lang_key == self.session.config.language_config:
                     default = index
                 index += 1
 
