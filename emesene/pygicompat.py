@@ -53,6 +53,9 @@ if not hasattr(Gdk, 'screen_width'):
     Gtk.StatusIcon.set_tooltip = Gtk.StatusIcon.set_tooltip_text
     Gtk.clipboard_get = Gtk.Clipboard.get
 
+
+Gtk.SeparatorMenuItem = Gtk.SeparatorMenuItem.new
+
 def new_with_model_and_entry(model, column):
     combo = Gtk.ComboBox.new_with_model_and_entry(model)
     combo.set_entry_text_column (0)
