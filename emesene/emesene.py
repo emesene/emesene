@@ -691,8 +691,6 @@ class Controller(object):
 
         self.on_pending_contacts()
 
-        glib.timeout_add(500, self.session.logger.check)
-
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
         self.soundPlayer = extension.get_and_instantiate('sound', self.session)

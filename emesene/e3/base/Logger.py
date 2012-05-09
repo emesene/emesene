@@ -830,6 +830,35 @@ class Logger(object):
                                              local_group.id)
 
 
+class LoggerOutputProcess(threading.Thread):
+    '''a process that processes the output calls from the logger thread'''
+
+    def __init__(self):
+        '''constructor'''
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
+        self.output = Queue.Queue()
+        self._close = False
+
+    def run(self):
+        '''main method'''
+        while True:
+            if self._close:
+                return
+
+            try:
+                action, result, callback = self.output.get(True)
+                callback(result)
+            except Queue.Empty:
+                pass
+
+    def close(self):
+        self._close = True
+
+    def put(self, *args):
+        self.output.put(*args)
+
+
 class LoggerProcess(threading.Thread):
     '''a process that exposes a thread safe api to log events of a session'''
 
@@ -842,7 +871,7 @@ class LoggerProcess(threading.Thread):
         self.db_name = db_name
         self.logger = None
         self.input = Queue.Queue()
-        self.output = Queue.Queue()
+        self.output = LoggerOutputProcess()
 
         self.actions = {}
 
@@ -850,6 +879,7 @@ class LoggerProcess(threading.Thread):
         '''main method'''
         data = None
         self.logger = Logger(self.path, self.db_name)
+        self.output.start()
 
         self.actions['get_event'] = self.logger.get_event
         self.actions['get_nicks'] = self.logger.get_nicks
@@ -870,10 +900,9 @@ class LoggerProcess(threading.Thread):
                 quit = self._process(data)
 
                 if quit:
+                    self.output.close()
                     self.logger.close()
-                    #log.debug('closing logger thread')
-                    break
-
+                    return
             except Queue.Empty:
                 pass
 
@@ -918,27 +947,6 @@ class LoggerProcess(threading.Thread):
     @property
     def input_size(self):
         return self.input.qsize()
-
-    def check(self, sync=False):
-        '''call this method from the main thread if you dont want to have
-        problems with threads, it will extract the results and call the
-        callback that was passed to the get_* call
-
-        the sync parameter is used for testing, it basically waits for a
-        message'''
-
-        try:
-            if sync:
-                action, result, callback = self.output.get()
-                callback(result)
-            else:
-                while True:
-                    action, result, callback = self.output.get(False)
-                    callback(result)
-        except Queue.Empty:
-            pass
-
-        return True
 
     def log(self, event, status, payload, src, dest=None, new_time=None,
             cid=None):
