@@ -138,17 +138,12 @@ class ActionsMenu(gtk.Menu):
         self.handler = handler
 
         ContactsMenu = extension.get_default('menu contact')
-        GroupsMenu = extension.get_default('menu group')
         AccountMenu = extension.get_default('menu account')
 
         self.contact = gtk.ImageMenuItem(_('_Contact'))
         self.contact.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
         self.contact_menu = ContactsMenu(self.handler.contact_handler, session)
         self.contact.set_submenu(self.contact_menu)
-        self.group = gtk.ImageMenuItem(_('_Group'))
-        self.group.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.group_chat))
-        self.group_menu = GroupsMenu(self.handler.group_handler, session)
-        self.group.set_submenu(self.group_menu)
         self.account = gtk.ImageMenuItem(_('_Account'))
         self.account.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
 
@@ -158,7 +153,15 @@ class ActionsMenu(gtk.Menu):
         self.myaccount.set_submenu(self.account_menu)
 
         self.append(self.contact)
-        self.append(self.group)
+
+        if session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            GroupsMenu = extension.get_default('menu group')
+            self.group = gtk.ImageMenuItem(_('_Group'))
+            self.group.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.group_chat))
+            self.group_menu = GroupsMenu(self.handler.group_handler)
+            self.group.set_submenu(self.group_menu)
+            self.append(self.group)
+
         self.append(self.myaccount)
 
 class OptionsMenu(gtk.Menu):

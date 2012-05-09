@@ -19,6 +19,7 @@
 import gtk
 
 import gui
+import e3
 import extension
 
 import sys
@@ -89,8 +90,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_list.group_selected.subscribe(self._on_group_selected)
         self.contact_list.contact_menu_selected.subscribe(
             self._on_contact_menu_selected)
-        self.contact_list.group_menu_selected.subscribe(
-            self._on_group_menu_selected)
+
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            self.contact_list.group_menu_selected.subscribe(
+                self._on_group_menu_selected)
 
         scroll.add(self.contact_list)
         scroll.show_all()
@@ -179,19 +182,20 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
         contact_handler = gui.base.ContactHandler(self.session,
             self.contact_list)
-        group_handler = gui.base.GroupHandler(self.session,
-            self.contact_list)
 
         MainMenu = extension.get_default('main menu')
         ContactMenu = extension.get_default('menu contact')
-        GroupMenu = extension.get_default('menu group')
 
         self.menu = MainMenu(handler, self.session)
 
         self.contact_menu = ContactMenu(contact_handler, self.session)
-        self.group_menu = GroupMenu(group_handler, self.session)
         self.contact_menu.show_all()
-        self.group_menu.show_all()
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            group_handler = gui.base.GroupHandler(self.session,
+                self.contact_list)
+            GroupMenu = extension.get_default('menu group')
+            self.group_menu = GroupMenu(group_handler)
+            self.group_menu.show_all()
 
     def set_accels(self):
         ''' set accels group to the given window '''
@@ -343,8 +347,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_list.group_selected.unsubscribe(self._on_group_selected)
         self.contact_list.contact_menu_selected.unsubscribe(
             self._on_contact_menu_selected)
-        self.contact_list.group_menu_selected.unsubscribe(
-            self._on_group_menu_selected)
+
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            self.contact_list.group_menu_selected.unsubscribe(
+                self._on_group_menu_selected)
         self.contact_list.remove_subscriptions()
         self.session.config.unsubscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
