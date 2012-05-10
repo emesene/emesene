@@ -707,7 +707,7 @@ class Controller(object):
 
         if conv_manager is None:
             if not self.conversations or not conversation_tabs:
-                if self.session.config.b_single_window:
+                if self.session.config.b_single_window and conversation_tabs:
                     window = self.window
                 else:
                     windowcls = extension.get_default('window frame')
@@ -719,7 +719,7 @@ class Controller(object):
                 self.conversations.append(conv_manager)
                 self.session.conversation_managers.append(conv_manager)
 
-                if not self.session.config.b_single_window:
+                if not self.session.config.b_single_window and conversation_tabs:
                     if self.session.config.b_conv_minimized and other_started:
                         window.iconify()
                         window.show()
@@ -737,7 +737,8 @@ class Controller(object):
         # raises the container and grabs the focus
         # handles cases where window is minimized and ctrl+tab focus stealing
         if not other_started:
-            conv_manager.present(conversation, self.session.config.b_single_window)
+            conv_manager.present(conversation, 
+                                 self.session.config.b_single_window and conversation_tabs)
 
         if self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
