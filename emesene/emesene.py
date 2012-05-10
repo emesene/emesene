@@ -345,7 +345,6 @@ class Controller(object):
         if image_chooser:
             image_chooser.hide()
 
-
         self._remove_subscriptions()
 
         if server_disconnected:
@@ -412,12 +411,9 @@ class Controller(object):
         '''
         if self.session is None:
             return
-            
         if self.config is None:
             return
-        
         self.config.language_config = self.session.config.language_config
-
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -568,8 +564,8 @@ class Controller(object):
         self._remove_subscriptions()
         self._new_session()
         self.go_login(cancel_clicked=True)
-        self.window.content.clear_all()
-        self.window.content.show_error(reason)
+        self.window.content_main.clear_all()
+        self.window.content_main.show_error(reason)
 
     def _setup_plugins(self):
         plugin_manager = get_pluginmanager()
@@ -584,7 +580,7 @@ class Controller(object):
         for plugin in self.session.config.l_active_plugins:
             plugin_manager.plugin_start(plugin, self.session)
         self.set_default_extensions_from_config()
-        self.window.content.replace_extensions()
+        self.window.content_main.replace_extensions()
 
     def on_login_succeed(self):
         '''callback called on login succeed'''
@@ -619,7 +615,7 @@ class Controller(object):
                     self.config)
             self.window.show()
         else:
-            self.window.content.clear_connect()
+            self.window.content_main.clear_connect()
 
         self._new_session(account)
         
@@ -687,7 +683,7 @@ class Controller(object):
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
-        self.window.content.contact_list.fill()
+        self.window.content_main.contact_list.fill()
 
         self.on_pending_contacts()
 
@@ -713,13 +709,15 @@ class Controller(object):
 
         if conv_manager is None:
             if not self.conversations or not conversation_tabs:
-
-                windowcls = extension.get_default('window frame')
-                window = windowcls(self._on_conversation_window_close)
+                if 1: # TODO: make this configurable
+                    window = self.window
+                else:
+                    windowcls = extension.get_default('window frame')
+                    window = windowcls(self._on_conversation_window_close)
 
                 window.go_conversation(self.session)
                 self._set_location(window, True)
-                conv_manager = window.content
+                conv_manager = window.content_conv
                 self.conversations.append(conv_manager)
                 self.session.conversation_managers.append(conv_manager)
 
@@ -782,8 +780,8 @@ class Controller(object):
         else:
             self.go_login(cancel_clicked=True, no_autologin=True)
             if reason is not None:
-                self.window.content.clear_all()
-                self.window.content.show_error(reason)
+                self.window.content_main.clear_all()
+                self.window.content_main.show_error(reason)
 
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''
@@ -792,7 +790,7 @@ class Controller(object):
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
-        self.window.content.on_reconnect(self.on_login_connect, account, \
+        self.window.content_main.on_reconnect(self.on_login_connect, account, \
                                          self.config.session, proxy, use_http, \
                                          self.cur_service)
 

@@ -34,8 +34,17 @@ class Window(gtk.Window):
 
     def __init__(self, cb_on_close, height=410, width=250,
                  posx=100, posy=100):
-
         gtk.Window.__init__(self)
+        self.box = gtk.HPaned()
+        # a bunch of properties/methods accessed by the outside
+        self.box.add_accel_group = self.add_accel_group
+        self.box.set_title = self.set_title
+        self.box.set_icon = self.set_icon
+        self.box.set_urgency_hint = self.set_urgency_hint
+        self.box.present = self.present
+        self.box.is_active = self.is_active
+        self.box.get_dimensions = self.get_dimensions
+        self.box.is_maximized = self.is_maximized
 
         self.set_location(width, height, posx, posy)
         self.set_title("emesene")
@@ -54,28 +63,47 @@ class Window(gtk.Window):
         self.cb_on_quit = cb_on_close
 
         self._state = 0
-        self._content = None
+        self._content_main = None
+        self._content_conv = None
         self.accel_group = None
 
+        self.add(self.box)
         self.connect('delete-event', self._on_delete_event)
         self.connect('window-state-event', self._on_window_state_event)
 
-    def _get_content(self):
+    def _get_content_main(self):
         '''content getter'''
-        return self._content
+        return self._content_main
 
-    def _set_content(self, content):
+    def _set_content_main(self, content_main):
         '''content setter'''
-        if self._content:
-            self.remove(self._content)
+        if self._content_main:
+            self.box.remove(self._content_main)
             if self.accel_group:
                 self.remove_accel_group(self.accel_group)
                 self.accel_group = None
-            del self._content
-        self._content = content
-        self.add(self._content)
+            del self._content_main
+        self._content_main = content_main
+        self.box.pack1(self._content_main)
 
-    content = property(_get_content, _set_content)
+    content_main = property(_get_content_main, _set_content_main)
+
+    def _get_content_conv(self):
+        '''content getter'''
+        return self._content_conv
+
+    def _set_content_conv(self, content_conv):
+        '''content setter'''
+        if self._content_conv:
+            self.remove(self._content_conv)
+            if self.accel_group:
+                self.remove_accel_group(self.accel_group)
+                self.accel_group = None
+            del self._content_conv
+        self._content_conv = content_conv
+        self.box.pack2(self._content_conv)
+
+    content_conv = property(_get_content_conv, _set_content_conv)
 
     def set_icon(self, icon):
         '''set the icon of the window'''
@@ -90,27 +118,27 @@ class Window(gtk.Window):
         '''draw the login window on the main window'''
         LoginWindow = extension.get_default('login window')
 
-        self.content = LoginWindow(callback, on_preferences_changed,
+        self.content_main = LoginWindow(callback, on_preferences_changed,
             config, config_dir, config_path, proxy, use_http, session_id,
             cancel_clicked, no_autologin)
-        self.content.show()
+        self.content_main.show()
 
-        self.content.check_autologin()
+        self.content_main.check_autologin()
 
     def go_connect(self, callback, avatar_path, config):
         '''draw the window that handles logging in'''
         ConnectingWindow = extension.get_default('connecting window')
 
-        self.content = ConnectingWindow(callback, avatar_path, config)
-        self.content.show()
+        self.content_main = ConnectingWindow(callback, avatar_path, config)
+        self.content_main.show()
 
     def go_main(self, session, on_new_conversation, quit_on_close=False):
         '''change to the main window'''
         MainWindow = extension.get_default('main window')
-        self.content = MainWindow(session, on_new_conversation)
-        self.connect('key-press-event', self.content._on_key_press)
-        self.content.show()
-        self.content.set_accels()
+        self.content_main = MainWindow(session, on_new_conversation)
+        self.connect('key-press-event', self.content_main._on_key_press)
+        self.content_main.show()
+        self.content_main.set_accels()
 
         # hide the main window only when the user is connected
         if quit_on_close:
@@ -125,11 +153,11 @@ class Window(gtk.Window):
     def go_conversation(self, session):
         '''change to a conversation window'''
         ConversationManager = extension.get_default('conversation window')
-        self.content = ConversationManager(session, self._on_last_tab_close)
-        self.connect('focus-in-event', self.content._on_focus)
-        self.connect('key-press-event', self.content._on_key_press)
-        self.content.show()
-        self.content.set_accels()
+        self.content_conv = ConversationManager(session, self._on_last_tab_close)
+        self.connect('focus-in-event', self.content_conv._on_focus)
+        self.connect('key-press-event', self.content_conv._on_key_press)
+        self.content_conv.show()
+        self.content_conv.set_accels()
 
     def set_location(self, width=0, height=0, posx=None, posy=None):
         """place the window on the given coordinates
@@ -183,12 +211,12 @@ class Window(gtk.Window):
         '''call the cb_on_close callback, if the callback return True
         then dont close the window'''
         self.save_dimensions()
-        return self.cb_on_close(self.content)
+        return self.cb_on_close(self.content_main)
 
     def _on_last_tab_close(self):
         '''do the action when the last tab is closed on a conversation window
         '''
-        self.cb_on_close(self.content)
+        self.cb_on_close(self.content_conv)
         self.hide()
 
     def hide(self):
@@ -201,6 +229,7 @@ class Window(gtk.Window):
         '''override the method to set the position
         '''
         gtk.Window.show(self)
+        self.box.show()
         self.set_location()
 
     def present(self):
