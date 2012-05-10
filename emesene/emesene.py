@@ -644,6 +644,7 @@ class Controller(object):
         self.session.config.get_or_set('b_download_folder_per_account', False)
         self.session.config.get_or_set('b_override_text_color', False)
         self.session.config.get_or_set('override_text_color', '#000000')
+        self.session.config.get_or_set('b_conversation_tabs', True)
         self.session.config.get_or_set('b_single_window', True)
 
         self.timeout_id = glib.timeout_add(500,
@@ -694,8 +695,8 @@ class Controller(object):
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
         opening a conversation'''
-        conversation_tabs = self.session.config.get_or_set(
-                'b_conversation_tabs', True)
+        conv_tabs = self.session.config.b_conversation_tabs
+        sing_wind = self.session.config.b_single_window
 
         conv_manager = None
 
@@ -706,8 +707,8 @@ class Controller(object):
                 break
 
         if conv_manager is None:
-            if not self.conversations or not conversation_tabs:
-                if self.session.config.b_single_window and conversation_tabs:
+            if not self.conversations or not conv_tabs:
+                if sing_wind and conv_tabs:
                     window = self.window
                 else:
                     windowcls = extension.get_default('window frame')
@@ -719,7 +720,7 @@ class Controller(object):
                 self.conversations.append(conv_manager)
                 self.session.conversation_managers.append(conv_manager)
 
-                if not self.session.config.b_single_window and conversation_tabs:
+                if not (sing_wind and conv_tabs):
                     if self.session.config.b_conv_minimized and other_started:
                         window.iconify()
                         window.show()
@@ -737,8 +738,7 @@ class Controller(object):
         # raises the container and grabs the focus
         # handles cases where window is minimized and ctrl+tab focus stealing
         if not other_started:
-            conv_manager.present(conversation, 
-                                 self.session.config.b_single_window and conversation_tabs)
+            conv_manager.present(conversation, sing_wind and conv_tabs)
 
         if self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
