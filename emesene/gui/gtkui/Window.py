@@ -159,12 +159,17 @@ class Window(gtk.Window):
         self.content_conv.show()
         self.content_conv.set_accels()
 
-    def set_location(self, width=0, height=0, posx=None, posy=None):
+    def set_location(self, width=0, height=0, posx=None, posy=None, single_window=False):
         """place the window on the given coordinates
         """
-        self.set_default_size(self.set_or_get_width(width),
-                              self.set_or_get_height(height))
-        self.move(self.set_or_get_posx(posx), self.set_or_get_posy(posy))
+        if single_window:
+            w, h = self.get_size()
+            self.set_default_size(self.set_or_get_height(height+h),
+                                  self.set_or_get_width(width+w))
+        else:
+            self.set_default_size(self.set_or_get_width(width),
+                                  self.set_or_get_height(height))
+            self.move(self.set_or_get_posx(posx), self.set_or_get_posy(posy))
 
     def set_or_get_height(self, height=0):
         self._height = height if height > 0 else self._height
@@ -232,11 +237,11 @@ class Window(gtk.Window):
         self.box.show()
         self.set_location()
 
-    def present(self):
+    def present(self, b_single_window):
         '''override the method to set the position
         '''
         gtk.Window.present(self)
-        self.set_location()
+        self.set_location(single_window=b_single_window)
 
     def _on_window_state_event(self, window, state):
         '''callew when window state is changed

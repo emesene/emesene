@@ -243,12 +243,12 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             win.set_title(Plus.msnplus_strip(text))
             win.set_icon(icon)
 
-    def present(self, conversation):
+    def present(self, conversation, b_single_window=False):
         '''
         present the given conversation
         '''
         self.set_current_page(conversation.tab_index)
-        self.get_parent().present()
+        self.get_parent().present(b_single_window)
         conversation.input_grab_focus()
 
     def get_dimensions(self):

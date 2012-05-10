@@ -152,7 +152,6 @@ class Controller(object):
         self.last_session_service = None
       
         lang = self.config.get_or_set("language_config", None)
-        
         language_management.install_desired_translation(lang)
 
         self._parse_commandline()
@@ -432,8 +431,7 @@ class Controller(object):
         and set them as default on the extensions module'''
 
         if self.session.config.d_extensions is not None:
-            for cat_name, ext_id in self.session.config\
-                    .d_extensions.iteritems():
+            for cat_name, ext_id in self.session.config.d_extensions.iteritems():
                 extension.set_default_by_id(cat_name, ext_id)
 
     def _get_proxy_settings(self):
@@ -641,13 +639,13 @@ class Controller(object):
         self.session.config.get_or_set('b_show_info', True)
         self.session.config.get_or_set('b_show_toolbar', True)
         self.session.config.get_or_set('b_allow_auto_scroll', True)
-        self.session.config.get_or_set('adium_theme',
-                'renkoo.AdiumMessageStyle')
+        self.session.config.get_or_set('adium_theme', 'renkoo.AdiumMessageStyle')
         self.session.config.get_or_set('b_enable_spell_check', False)
         self.session.config.get_or_set('b_download_folder_per_account', False)
         self.session.config.get_or_set('b_override_text_color', False)
         self.session.config.get_or_set('override_text_color', '#000000')
-       
+        self.session.config.get_or_set('b_single_window', True)
+
         self.timeout_id = glib.timeout_add(500,
                 self.session.signals._handle_events)
         self.session.login(account.account, account.password, account.status,
@@ -709,7 +707,7 @@ class Controller(object):
 
         if conv_manager is None:
             if not self.conversations or not conversation_tabs:
-                if 1: # TODO: make this configurable
+                if self.session.config.b_single_window:
                     window = self.window
                 else:
                     windowcls = extension.get_default('window frame')
@@ -721,13 +719,13 @@ class Controller(object):
                 self.conversations.append(conv_manager)
                 self.session.conversation_managers.append(conv_manager)
 
-                if self.session.config.b_conv_minimized and other_started:
-                    window.iconify()
-                    window.show()
-                    window.iconify()
-                else:
-                    window.show()
-
+                if not self.session.config.b_single_window:
+                    if self.session.config.b_conv_minimized and other_started:
+                        window.iconify()
+                        window.show()
+                        window.iconify()
+                    else:
+                        window.show()
             else:
                 conv_manager = self.conversations[0]
 
@@ -739,8 +737,7 @@ class Controller(object):
         # raises the container and grabs the focus
         # handles cases where window is minimized and ctrl+tab focus stealing
         if not other_started:
-            conv_manager.present(conversation)
-
+            conv_manager.present(conversation, self.session.config.b_single_window)
 
         if self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
