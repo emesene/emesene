@@ -54,6 +54,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
     def _on_key_press(self, widget, event):
         '''Catches Ctrl+Tab and Ctrl+Shift+Tab for cycling through tabs'''
+        if not self.get_focus_child():
+            return
         if (event.state & gtk.gdk.CONTROL_MASK) and \
             event.keyval in [gtk.keysyms.Tab, gtk.keysyms.ISO_Left_Tab]:
             if event.state & gtk.gdk.SHIFT_MASK:
@@ -92,6 +94,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
     def on_key_close_tab(self, accel_group, window, keyval, modifier):
         '''Catches events like Ctrl+W and closes current tab'''
+        if not self.get_focus_child():
+            return
         if self.session.config.get_or_set('b_escape_hotkey', True):
             index = self.get_current_page()
             conversation = self.get_nth_page(index)
@@ -108,6 +112,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
     def on_key_cycle_tabs(self, accelGroup, window, keyval, modifier):
         '''Catches events like Ctrl+AvPag and consequently changes current
         tab'''
+        if not self.get_focus_child():
+            return
         if not modifier == gtk.gdk.CONTROL_MASK:
             return
 

@@ -237,7 +237,7 @@ class Window(gtk.Window):
         self.box.show()
         self.set_location()
 
-    def present(self, b_single_window):
+    def present(self, b_single_window=False):
         '''override the method to set the position
         '''
         gtk.Window.present(self)
