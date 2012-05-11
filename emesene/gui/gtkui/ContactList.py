@@ -612,7 +612,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         # if we find it, we remove it
                         if con.account == contact.account:
                             # we remove it from tree and from group.
-                            del self._model[contact_row.iter]
+                            self._model.remove(contact_row.iter)
                             del con
                             if obj.contacts.count(contact.account) > 0:
                                 obj.contacts.remove(contact.account)
@@ -623,7 +623,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                       obj.account == contact.account:
 
                     # TODO: Is removing only the tree object?
-                    del self._model[row.iter]
+                    self._model.remove(row.iter)
                     del obj # CHECK!!!!!
 
             return
@@ -638,7 +638,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     con = contact_row[1]
                     # if we find it, we remove it, from group and model
                     if con.account == contact.account:
-                        del self._model[contact_row.iter]
+                        self._model.remove(contact_row.iter)
 
                         if group.contacts.count(contact.account) > 0:
                             group.contacts.remove(contact.account)
