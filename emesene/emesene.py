@@ -352,7 +352,7 @@ class Controller(object):
             self.conv_manager_available = True # update with new session
         else:
             for conv_manager in self.conversations:
-                conv_manager.hide_all()
+                conv_manager.hide()
                 self._on_conversation_window_close(conv_manager)
 
         if self.timeout_id:

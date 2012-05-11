@@ -95,7 +95,7 @@ class Window(gtk.Window):
     def _set_content_conv(self, content_conv):
         '''content setter'''
         if self._content_conv:
-            self.remove(self._content_conv)
+            self.box.remove(self._content_conv)
             if self.accel_group:
                 self.remove_accel_group(self.accel_group)
                 self.accel_group = None
