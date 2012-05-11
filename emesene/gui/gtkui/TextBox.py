@@ -196,7 +196,8 @@ class InputView(gtk.TextView):
         if event.keyval in [gtk.keysyms.Return, gtk.keysyms.KP_Enter] and \
             not event.state & gtk.gdk.SHIFT_MASK:
 
-            self.emit('message-send')
+            if not self.im_context_filter_keypress(event):
+                self.emit('message-send')
             return True
         return False
 
