@@ -113,12 +113,12 @@ class OutputView(webkit.WebView):
                     menu.remove(child)
                     child.destroy()
 
-        select_all_item = gtk.MenuItem(label=_("Select All"))
+        select_all_item = gtk.MenuItem(_("Select All"))
         select_all_item.connect('activate', lambda *args: self.select_all())
         menu.append(select_all_item)
 
         if self.handler is not None:
-            clear_item = gtk.MenuItem(label=_("Clear"))
+            clear_item = gtk.MenuItem(_("Clear"))
             clear_item.connect('activate',  lambda *args: self.handler.on_clean_selected())
             menu.append(clear_item)
 
