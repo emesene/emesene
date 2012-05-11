@@ -30,7 +30,7 @@ class GroupMenu(gtk.Menu):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, handler, session):
+    def __init__(self, handler):
         """
         constructor
 
@@ -72,10 +72,9 @@ class GroupMenu(gtk.Menu):
         else:
             self.show_set_favorite_item()
 
-        if session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
-            self.append(self.add)
-            self.append(self.remove)
-            self.append(self.rename)
+        self.append(self.add)
+        self.append(self.remove)
+        self.append(self.rename)
         self.append(self.set_favorite)
         self.append(self.unset_favorite)
 

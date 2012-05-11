@@ -39,6 +39,7 @@ Pango.SCALE_SMALL = 0.8333333333333
 
 #override control_mask due to bug in pygicompat
 Gdk.CONTROL_MASK = Gdk.ModifierType.CONTROL_MASK
+Gdk.SHIFT_MASK = Gdk.ModifierType.SHIFT_MASK
 
 if not hasattr(Gdk, 'screen_width'):
     Gdk.screen_width = Gdk.Screen.width
@@ -52,6 +53,9 @@ if not hasattr(Gdk, 'screen_width'):
     Gtk.status_icon_position_menu = Gtk.StatusIcon.position_menu
     Gtk.StatusIcon.set_tooltip = Gtk.StatusIcon.set_tooltip_text
     Gtk.clipboard_get = Gtk.Clipboard.get
+
+
+Gtk.SeparatorMenuItem = Gtk.SeparatorMenuItem.new
 
 def new_with_model_and_entry(model, column):
     combo = Gtk.ComboBox.new_with_model_and_entry(model)

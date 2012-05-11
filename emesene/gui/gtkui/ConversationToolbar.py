@@ -111,10 +111,6 @@ class ConversationToolbar(gtk.Toolbar):
         else:
             size = gtk.ICON_SIZE_LARGE_TOOLBAR
 
-        if check_gtk3():
-            context = self.get_style_context()
-            gtk.StyleContext.add_class (context, "inline-toolbar")
-
         self.settings = self.get_settings()
         self.settings.set_long_property('gtk-toolbar-icon-size', size,
                                         'ConversationToolbar.py:37')
