@@ -268,13 +268,16 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         positions = [gtk.POS_TOP, gtk.POS_BOTTOM, gtk.POS_LEFT, gtk.POS_RIGHT]
         return positions[self.session.config.get_or_set('i_tab_position', 0)]
 
-    def hide_all(self):
+    def hide_all(self, b_single_window=False):
         '''
         hide all conversations
         '''
         self.session.config.unsubscribe(self._on_tab_position_changed,
             'i_tab_position')
-        self.get_parent().hide()
+        if b_single_window:
+            self.hide()
+        else:
+            self.get_parent().hide()
 
     def is_active(self):
         '''

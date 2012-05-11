@@ -324,7 +324,7 @@ class Controller(object):
                     self.session.conversation_managers.append(conv_manager)
             else:
                 for conv_manager in self.conversations:
-                    conv_manager.hide_all()
+                    conv_manager.hide_all(self.session.config.b_single_window)
                     # _on_conversation_window_close, without saving settings
                     conv_manager.close_all()
                     self.conversations.remove(conv_manager)
@@ -352,14 +352,14 @@ class Controller(object):
             self.conv_manager_available = True # update with new session
         else:
             for conv_manager in self.conversations:
-                conv_manager.hide()
+                conv_manager.hide_all(self.session.config.b_single_window)
                 self._on_conversation_window_close(conv_manager)
 
         if self.timeout_id:
             glib.source_remove(self.timeout_id)
             self.timeout_id = None
 
-        if self.session is not None:
+        if self.session:
             self.session.stop_mail_client()
             self.session.quit()
 
@@ -369,7 +369,7 @@ class Controller(object):
         self.save_extensions_config()
         self._save_login_dimensions()
 
-        if self.session is not None and self.logged_in:
+        if self.session and self.logged_in:
             self.session.save_config()
             self.session = None
             self.logged_in = False
