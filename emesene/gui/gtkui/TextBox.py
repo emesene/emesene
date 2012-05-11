@@ -190,17 +190,14 @@ class InputView(gtk.TextView):
     def __init__(self):
         gobject.GObject.__init__(self)
         gtk.TextView.__init__(self)
-        if not check_gtk3():
-            gtk.binding_entry_add_signal(self, gtk.keysyms.KP_Enter, 0, 'message-send')
-            gtk.binding_entry_add_signal(self, gtk.keysyms.Return, 0, 'message-send')
-        else:
-            self.connect('key-press-event', self.on_key_press_event)
+        self.connect('key-press-event', self.on_key_press_event)
 
     def on_key_press_event(self, widget, event):
         if event.keyval in [gtk.keysyms.Return, gtk.keysyms.KP_Enter] and \
             not event.state & gtk.gdk.SHIFT_MASK:
 
-            self.emit('message-send')
+            if not self.im_context_filter_keypress(event):
+                self.emit('message-send')
             return True
         return False
 
