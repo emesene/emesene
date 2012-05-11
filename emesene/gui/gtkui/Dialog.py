@@ -673,7 +673,7 @@ class Dialog(object):
                     e3_color = e3.Color(int(colors[0]),int(colors[1]),int(colors[2]))
                     e3_color.aplha = color.alpha
                     callback(e3_color)
-                color_sel.destroy()
+                dialog.destroy()
 
             color_sel = gtk.ColorChooserDialog(_('Select color'))
             color_sel.connect("response", response_cb)
