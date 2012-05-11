@@ -21,6 +21,7 @@ import gtk
 import gui
 import extension
 import glib
+from gui.gtkui import check_gtk3
 
 class ContactInfoRotate(gtk.VBox):
     '''a widget that contains the display pictures of the contacts and our
@@ -71,6 +72,21 @@ class ContactInfoRotate(gtk.VBox):
 
         self.his_avatarBox.set_tooltip_text(_('Click to see informations'))
         self.his_avatarBox.set_border_width(4)
+
+        if check_gtk3():
+            #In gtk3 eventbox renders background, so make it transparent
+            prov = gtk.CssProvider()
+            prov.load_from_data("* {\n"
+                "background-color: transparent;\n"
+                "}");
+
+            context = self.his_avatarBox.get_style_context()
+            context.add_provider(prov, 600) #GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+            context.save()
+
+            context = self.avatarBox.get_style_context()
+            context.add_provider(prov, 600) #GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+            context.save()
 
         last_avatar = self.session.config.last_avatar
         if self.session.config_dir.file_readable(last_avatar):
