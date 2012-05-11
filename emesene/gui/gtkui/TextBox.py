@@ -193,15 +193,9 @@ class InputView(gtk.TextView):
         self.connect('key-press-event', self.on_key_press_event)
 
     def on_key_press_event(self, widget, event):
+        if event.keyval in [gtk.keysyms.Return, gtk.keysyms.KP_Enter] and \
+            not event.state & gtk.gdk.SHIFT_MASK:
 
-        if not check_gtk3():
-            if event.state & gtk.gdk.SHIFT_MASK:
-                return False
-        else:
-            if event.state & gtk.gdk.ModifierType.SHIFT_MASK:
-                return False
-
-        if event.keyval in [gtk.keysyms.Return, gtk.keysyms.KP_Enter]:
             self.emit('message-send')
             return True
         return False
