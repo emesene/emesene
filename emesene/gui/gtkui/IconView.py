@@ -45,11 +45,16 @@ class IconView(gtk.HBox):
 
         self.model = gtk.ListStore(gtk.gdk.Pixbuf, str)
         self.iconview = gtk.IconView(self.model)
-        #FIXME: gtk3
+
         if not check_gtk3():
-            self.iconview.enable_model_drag_dest([('text/uri-list', 0, 0)],
+            target = ('text/uri-list', 0, 0)
+        else:
+            #FIXME: this is not working in gtk3
+            target = gtk.TargetEntry.new('text/uri-list', 0, 0)
+
+        self.iconview.enable_model_drag_dest([target],
                                     gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_COPY)
-            self.iconview.connect("drag-data-received", self._drag_data_received)
+        self.iconview.connect("drag-data-received", self._drag_data_received)
         self.iconview.set_pixbuf_column(0)
         self.iconview.connect("item-activated", self._on_icon_activated)
         self.iconview.connect("button_press_event", self.pop_up)
