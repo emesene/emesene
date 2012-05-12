@@ -59,8 +59,8 @@ class LoginBaseUI(gtk.Alignment):
             self._on_account_key_press)
         self.cmb_account.connect('changed',
             self._on_account_changed)
-        self.cmb_account.connect('key-release-event',
-            self._on_account_key_release)
+        self.acc_key_rel_handler = self.cmb_account.connect('key-release-event',
+                                                   self._on_account_key_release)
 
         self.btn_status = StatusButton.StatusButton()
         self.btn_status.set_tooltip_text(_('Status'))
@@ -667,6 +667,9 @@ class ConnectingWindow(Login):
 
         #for reconnecting
         self.reconnect_timer_id = None
+        
+        # Disconnect inherited and unneeded event
+        self.cmb_account.disconnect(self.acc_key_rel_handler)
 
         account = config.get_or_set('last_logged_account', '')
         remembers = config.get_or_set('d_remembers', {})
