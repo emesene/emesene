@@ -80,7 +80,7 @@ class OutputView(webkit.WebView):
         function = self.theme.format(msg, scroll)
 
         if self.ready:
-            self.execute_script(function)
+            gobject.idle_add(self.execute_script, function)
         else:
             self.pending.append(function)
 
