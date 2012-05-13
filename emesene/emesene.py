@@ -305,7 +305,6 @@ class Controller(object):
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
         signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
-        signals.contact_added_you.subscribe(self.on_pending_contacts)
 
         #let's start dbus and unity launcher
         if self.dbus_ext is not None:
@@ -394,7 +393,6 @@ class Controller(object):
             signals.disconnected.unsubscribe(self.on_disconnected)
             signals.picture_change_succeed.unsubscribe(
                     self.on_picture_change_succeed)
-            signals.contact_added_you.unsubscribe(self.on_pending_contacts)
             if self.unity_launcher is not None:
                 self.unity_launcher.remove_session()
             # unsubscribe notifications signals
@@ -656,32 +654,8 @@ class Controller(object):
             self.session.quit()
         self.go_login(cancel_clicked=True, no_autologin=True)
 
-    def on_pending_contacts(self):
-        '''callback called when some contact is pending'''
-        def on_contact_added_you(responses):
-            '''
-            callback called when the dialog is closed
-            '''
-            for account in responses['accepted']:
-                self.session.add_contact(account)
-
-            for account in responses['rejected']:
-                self.session.reject_contact(account)
-
-        if self.session.contacts.pending:
-            accounts = []
-            for contact in self.session.contacts.pending.values():
-                accounts.append((contact.account, contact.display_name))
-
-            dialog = extension.get_default('dialog')
-            dialog.contact_added_you(accounts, on_contact_added_you)
-
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
-        self.window.content_main.contact_list.fill()
-
-        self.on_pending_contacts()
-
         notificationcls = extension.get_default('notification')
         self.notification = notificationcls(self.session)
         self.soundPlayer = extension.get_and_instantiate('sound', self.session)

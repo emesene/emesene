@@ -18,6 +18,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import e3
+import extension
 
 class ContactList(object):
     '''an abstract class that defines the api that the contact list should
@@ -100,6 +101,10 @@ class ContactList(object):
         self.group_template = self.session.config.get_or_set('group_template',
             ContactList.GROUP_TPL)
 
+        self.session.signals.contact_list_ready.subscribe(
+            self.on_contact_list_ready)
+        self.session.signals.contact_added_you.subscribe(
+            self.on_pending_contacts)
         #contact signals
         self.session.signals.contact_attr_changed.subscribe(
             self._on_contact_attr_changed)
@@ -128,6 +133,11 @@ class ContactList(object):
 
     def remove_subscriptions(self):
         '''disconnect signals subscriptions'''
+        self.session.signals.contact_list_ready.unsubscribe(
+            self.on_contact_list_ready)
+        self.session.signals.contact_added_you.unsubscribe(
+            self.on_pending_contacts)
+
         self.session.config.unsubscribe(self._on_avatarssize_changed,
             'i_avatar_size')
         self.session.signals.contact_attr_changed.unsubscribe(
@@ -153,6 +163,31 @@ class ContactList(object):
             self._on_remove_group)
         self.session.signals.group_rename_succeed.unsubscribe(
             self._on_update_group)
+
+    def on_contact_list_ready(self):
+        '''callback called when the contact list is ready to be used'''
+        self.fill()
+        self.on_pending_contacts()
+
+    def on_pending_contacts(self):
+        '''callback called when some contact is pending'''
+        def on_contact_added_you(responses):
+            '''
+            callback called when the dialog is closed
+            '''
+            for account in responses['accepted']:
+                self.session.add_contact(account)
+
+            for account in responses['rejected']:
+                self.session.reject_contact(account)
+
+        if self.session.contacts.pending:
+            accounts = []
+            for contact in self.session.contacts.pending.values():
+                accounts.append((contact.account, contact.display_name))
+
+            dialog = extension.get_default('dialog')
+            dialog.contact_added_you(accounts, on_contact_added_you)
 
     def _on_avatarssize_changed(self, value):
         '''callback called when config.i_avatar_size changes'''
