@@ -57,8 +57,12 @@ def project_path():
 os.chdir(os.path.abspath(project_path()))
 
 from Language import Language
+import extension
 
-language_management = Language()
+extension.category_register('language', Language, 
+                            single_instance=True)
+
+language_management = extension.get_and_instantiate('language')
 language_management.install_default_translation()
 
 if 'USE_GI' in os.environ:
@@ -117,7 +121,6 @@ except ImportError, exc:
     print 'Errors occurred while importing msn backend: %s' % str(exc)
 
 from pluginmanager import get_pluginmanager
-import extension
 import interfaces
 import gui
 import optionprovider
