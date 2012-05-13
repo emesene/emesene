@@ -54,6 +54,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
     def _on_key_press(self, widget, event):
         '''Catches Ctrl+Tab and Ctrl+Shift+Tab for cycling through tabs'''
+        if not self.get_focus_child():
+            return
         if (event.state & gtk.gdk.CONTROL_MASK) and \
             event.keyval in [gtk.keysyms.Tab, gtk.keysyms.ISO_Left_Tab]:
             if event.state & gtk.gdk.SHIFT_MASK:
@@ -92,6 +94,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
     def on_key_close_tab(self, accel_group, window, keyval, modifier):
         '''Catches events like Ctrl+W and closes current tab'''
+        if not self.get_focus_child():
+            return
         if self.session.config.get_or_set('b_escape_hotkey', True):
             index = self.get_current_page()
             conversation = self.get_nth_page(index)
@@ -108,6 +112,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
     def on_key_cycle_tabs(self, accelGroup, window, keyval, modifier):
         '''Catches events like Ctrl+AvPag and consequently changes current
         tab'''
+        if not self.get_focus_child():
+            return
         if not modifier == gtk.gdk.CONTROL_MASK:
             return
 
@@ -243,12 +249,12 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             win.set_title(Plus.msnplus_strip(text))
             win.set_icon(icon)
 
-    def present(self, conversation):
+    def present(self, conversation, b_single_window=False):
         '''
         present the given conversation
         '''
         self.set_current_page(conversation.tab_index)
-        self.get_parent().present()
+        self.get_parent().present(b_single_window)
         conversation.input_grab_focus()
 
     def get_dimensions(self):
@@ -262,13 +268,17 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         positions = [gtk.POS_TOP, gtk.POS_BOTTOM, gtk.POS_LEFT, gtk.POS_RIGHT]
         return positions[self.session.config.get_or_set('i_tab_position', 0)]
 
-    def hide_all(self):
+    def hide_all(self, b_single_window=False):
         '''
         hide all conversations
         '''
         self.session.config.unsubscribe(self._on_tab_position_changed,
             'i_tab_position')
-        self.get_parent().hide()
+        if b_single_window:
+            self.hide()
+        else:
+            # we need to hide the gtk.Window
+            self.get_window().hide()
 
     def is_active(self):
         '''

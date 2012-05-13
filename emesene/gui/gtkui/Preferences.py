@@ -591,8 +591,12 @@ class MainWindow(BaseTable):
 
         ContactList = extension.get_default('contact list')
 
-        self.append_markup('<b>'+_('User panel:')+'</b>')
+        self.append_markup('<b>'+_('Single window:')+'</b>')
+        self.append_check(_('Incorporate conversations in emesene\'s main window.'
+                            ' Also requires tabbed conversations'),
+                          'session.config.b_single_window')
 
+        self.append_markup('<b>'+_('User panel:')+'</b>')
         self.append_check(_('Show user panel'),
             'session.config.b_show_userpanel')
         self.append_check(_('Show unread mail count'),

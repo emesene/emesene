@@ -318,6 +318,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def _on_key_press(self, widget, event):
         '''method called when a key is pressed on the input widget'''
+        if not self.get_focus_child():
+            return
         if (event.keyval == gtk.keysyms.Return or \
             event.keyval == gtk.keysyms.KP_Enter) and \
            self.panel.search.get_active():

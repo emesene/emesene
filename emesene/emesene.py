@@ -152,7 +152,6 @@ class Controller(object):
         self.last_session_service = None
       
         lang = self.config.get_or_set("language_config", None)
-        
         language_management.install_desired_translation(lang)
 
         self._parse_commandline()
@@ -325,7 +324,7 @@ class Controller(object):
                     self.session.conversation_managers.append(conv_manager)
             else:
                 for conv_manager in self.conversations:
-                    conv_manager.hide_all()
+                    conv_manager.hide_all(self.session.config.b_single_window)
                     # _on_conversation_window_close, without saving settings
                     conv_manager.close_all()
                     self.conversations.remove(conv_manager)
@@ -345,7 +344,6 @@ class Controller(object):
         if image_chooser:
             image_chooser.hide()
 
-
         self._remove_subscriptions()
 
         if server_disconnected:
@@ -354,14 +352,14 @@ class Controller(object):
             self.conv_manager_available = True # update with new session
         else:
             for conv_manager in self.conversations:
-                conv_manager.hide_all()
+                conv_manager.hide_all(self.session.config.b_single_window)
                 self._on_conversation_window_close(conv_manager)
 
         if self.timeout_id:
             glib.source_remove(self.timeout_id)
             self.timeout_id = None
 
-        if self.session is not None:
+        if self.session:
             self.session.stop_mail_client()
             self.session.quit()
 
@@ -371,7 +369,7 @@ class Controller(object):
         self.save_extensions_config()
         self._save_login_dimensions()
 
-        if self.session is not None and self.logged_in:
+        if self.session and self.logged_in:
             self.session.save_config()
             self.session = None
             self.logged_in = False
@@ -412,12 +410,9 @@ class Controller(object):
         '''
         if self.session is None:
             return
-            
         if self.config is None:
             return
-        
         self.config.language_config = self.session.config.language_config
-
 
     def save_extensions_config(self):
         '''save the state of the extensions to the config'''
@@ -436,8 +431,7 @@ class Controller(object):
         and set them as default on the extensions module'''
 
         if self.session.config.d_extensions is not None:
-            for cat_name, ext_id in self.session.config\
-                    .d_extensions.iteritems():
+            for cat_name, ext_id in self.session.config.d_extensions.iteritems():
                 extension.set_default_by_id(cat_name, ext_id)
 
     def _get_proxy_settings(self):
@@ -568,8 +562,8 @@ class Controller(object):
         self._remove_subscriptions()
         self._new_session()
         self.go_login(cancel_clicked=True)
-        self.window.content.clear_all()
-        self.window.content.show_error(reason)
+        self.window.content_main.clear_all()
+        self.window.content_main.show_error(reason)
 
     def _setup_plugins(self):
         plugin_manager = get_pluginmanager()
@@ -584,7 +578,7 @@ class Controller(object):
         for plugin in self.session.config.l_active_plugins:
             plugin_manager.plugin_start(plugin, self.session)
         self.set_default_extensions_from_config()
-        self.window.content.replace_extensions()
+        self.window.content_main.replace_extensions()
 
     def on_login_succeed(self):
         '''callback called on login succeed'''
@@ -619,7 +613,7 @@ class Controller(object):
                     self.config)
             self.window.show()
         else:
-            self.window.content.clear_connect()
+            self.window.content_main.clear_connect()
 
         self._new_session(account)
         
@@ -645,13 +639,14 @@ class Controller(object):
         self.session.config.get_or_set('b_show_info', True)
         self.session.config.get_or_set('b_show_toolbar', True)
         self.session.config.get_or_set('b_allow_auto_scroll', True)
-        self.session.config.get_or_set('adium_theme',
-                'renkoo.AdiumMessageStyle')
+        self.session.config.get_or_set('adium_theme', 'renkoo.AdiumMessageStyle')
         self.session.config.get_or_set('b_enable_spell_check', False)
         self.session.config.get_or_set('b_download_folder_per_account', False)
         self.session.config.get_or_set('b_override_text_color', False)
         self.session.config.get_or_set('override_text_color', '#000000')
-       
+        self.session.config.get_or_set('b_conversation_tabs', True)
+        self.session.config.get_or_set('b_single_window', True)
+
         self.timeout_id = glib.timeout_add(500,
                 self.session.signals._handle_events)
         self.session.login(account.account, account.password, account.status,
@@ -687,7 +682,7 @@ class Controller(object):
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
-        self.window.content.contact_list.fill()
+        self.window.content_main.contact_list.fill()
 
         self.on_pending_contacts()
 
@@ -698,8 +693,8 @@ class Controller(object):
     def on_new_conversation(self, cid, members, other_started=True):
         '''callback called when the other user does an action that justify
         opening a conversation'''
-        conversation_tabs = self.session.config.get_or_set(
-                'b_conversation_tabs', True)
+        conv_tabs = self.session.config.b_conversation_tabs
+        sing_wind = self.session.config.b_single_window
 
         conv_manager = None
 
@@ -710,24 +705,26 @@ class Controller(object):
                 break
 
         if conv_manager is None:
-            if not self.conversations or not conversation_tabs:
-
-                windowcls = extension.get_default('window frame')
-                window = windowcls(self._on_conversation_window_close)
+            if not self.conversations or not conv_tabs:
+                if sing_wind and conv_tabs:
+                    window = self.window
+                else:
+                    windowcls = extension.get_default('window frame')
+                    window = windowcls(self._on_conversation_window_close)
 
                 window.go_conversation(self.session)
                 self._set_location(window, True)
-                conv_manager = window.content
+                conv_manager = window.content_conv
                 self.conversations.append(conv_manager)
                 self.session.conversation_managers.append(conv_manager)
 
-                if self.session.config.b_conv_minimized and other_started:
-                    window.iconify()
-                    window.show()
-                    window.iconify()
-                else:
-                    window.show()
-
+                if not (sing_wind and conv_tabs):
+                    if self.session.config.b_conv_minimized and other_started:
+                        window.iconify()
+                        window.show()
+                        window.iconify()
+                    else:
+                        window.show()
             else:
                 conv_manager = self.conversations[0]
 
@@ -739,8 +736,7 @@ class Controller(object):
         # raises the container and grabs the focus
         # handles cases where window is minimized and ctrl+tab focus stealing
         if not other_started:
-            conv_manager.present(conversation)
-
+            conv_manager.present(conversation, sing_wind and conv_tabs)
 
         if self.session.config.b_play_first_send and not \
            self.session.config.b_play_type:
@@ -780,8 +776,8 @@ class Controller(object):
         else:
             self.go_login(cancel_clicked=True, no_autologin=True)
             if reason is not None:
-                self.window.content.clear_all()
-                self.window.content.show_error(reason)
+                self.window.content_main.clear_all()
+                self.window.content_main.show_error(reason)
 
     def on_reconnect(self, account):
         '''makes the reconnect after 30 seconds'''
@@ -790,7 +786,7 @@ class Controller(object):
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
-        self.window.content.on_reconnect(self.on_login_connect, account, \
+        self.window.content_main.on_reconnect(self.on_login_connect, account, \
                                          self.config.session, proxy, use_http, \
                                          self.cur_service)
 
