@@ -138,7 +138,6 @@ class Window(gtk.Window):
         self.content_main = MainWindow(session, on_new_conversation)
         self.connect('key-press-event', self.content_main._on_key_press)
         self.content_main.show()
-        self.content_main.set_parent(self)
         self.content_main.set_accels()
 
         # hide the main window only when the user is connected
