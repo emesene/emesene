@@ -138,6 +138,22 @@ class Worker(e3.Worker):
         self._add_contact_to_group('twelve@hotmail.com', 'strange nicks')
         self._add_contact_to_group('thirteen@hotmail.com', 'strange nicks')
 
+        #test pending contact dialog
+        self._add_pending_contacts()
+
+    def _add_pending_contacts(self):
+        tmp_cont = e3.base.Contact("test1@test.com", 1,
+            "test1", "test1nick",
+            e3.status.BUSY, '',
+            True)
+        self.session.contacts.pending["test1@test.com"] = tmp_cont
+
+        tmp_cont = e3.base.Contact("test2@test.com", 2,
+            "test2", "test2nick",
+            e3.status.ONLINE, '',
+            True)
+        self.session.contacts.pending["test2@test.com"] = tmp_cont
+
     def _add_contact(self, mail, nick, status_, alias, blocked):
         """
         method to add a contact to the contact list

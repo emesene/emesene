@@ -29,9 +29,6 @@ class Session(e3.Session):
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status))
 
-        #test pending contact dialog
-        gobject.timeout_add(300, self._test_pending_contacts)
-
     def send_message(self, cid, text, style=None, cedict=None, celist=None):
         '''send a common message'''
         if cedict is None:
@@ -44,21 +41,6 @@ class Session(e3.Session):
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, account,
             style)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
-
-    def _test_pending_contacts(self):
-        tmp_cont = e3.base.Contact("test1@test.com", 1,
-            "test1", "test1nick",
-            e3.status.BUSY, '',
-            True)
-        self.contacts.pending["test1@test.com"] = tmp_cont
-
-        tmp_cont = e3.base.Contact("test2@test.com", 2,
-            "test2", "test2nick",
-            e3.status.ONLINE, '',
-            True)
-        self.contacts.pending["test2@test.com"] = tmp_cont
-
-        return False
 
     def send_typing_notification(self, cid):
         '''send typing notification to contact'''
