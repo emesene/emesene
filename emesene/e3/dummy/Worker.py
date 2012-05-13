@@ -3,6 +3,7 @@ import Queue
 import random
 
 import e3
+import gobject
 
 import logging
 log = logging.getLogger('dummy.Worker')
@@ -155,6 +156,16 @@ class Worker(e3.Worker):
             True)
         self.session.contacts.pending["test2@test.com"] = tmp_cont
 
+    def _late_contact_add(self):
+        '''this simulates adding a contact after we show the contactlist'''
+        tmp_cont = e3.base.Contact("testlate1@test.com", 1,
+            "testlate1", "testlate1nick",
+            e3.status.BUSY, '',
+            True)
+        self.session.contacts.pending["testlate1@test.com"] = tmp_cont
+        self.session.contact_added_you()
+        return False
+
     def _add_contact(self, mail, nick, status_, alias, blocked):
         """
         method to add a contact to the contact list
@@ -215,6 +226,7 @@ class Worker(e3.Worker):
         self.session.nick_change_succeed('dummy nick is dummy')
         self._fill_contact_list()
         self.session.contact_list_ready()
+        gobject.timeout_add_seconds(4, self._late_contact_add)
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT
