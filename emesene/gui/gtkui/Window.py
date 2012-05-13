@@ -36,7 +36,7 @@ class Window(gtk.Window):
                  posx=100, posy=100):
         gtk.Window.__init__(self)
         self.box = gtk.HPaned()
-        # a bunch of properties/methods accessed by the outside
+        # HACK! a bunch of properties/methods accessed by the outside
         self.box.add_accel_group = self.add_accel_group
         self.box.set_title = self.set_title
         self.box.set_icon = self.set_icon

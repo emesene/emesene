@@ -277,7 +277,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         if b_single_window:
             self.hide()
         else:
-            self.get_parent().hide()
+            # we need to hide the gtk.Window
+            self.get_window().hide()
 
     def is_active(self):
         '''
