@@ -67,6 +67,7 @@ class Session(object):
         self.config_dir = e3.common.ConfigDir('emesene2')
         # set the base dir of the config to the base dir plus the account
         self.signals = e3.common.Signals(EVENTS, self.events)
+        self.signals.start()
 
     def get_conversation(self, cid, members=None):
         '''

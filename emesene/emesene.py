@@ -144,13 +144,12 @@ class Controller(object):
 
         self.session = None
         self.logged_in = False
-        self.timeout_id = None
         self.cur_service = None
         self.notification = None
         self.conv_manager_available = False
         self.last_session_account = None
         self.last_session_service = None
-      
+
         lang = self.config.get_or_set("language_config", None)
         language_management.install_desired_translation(lang)
 
@@ -268,7 +267,7 @@ class Controller(object):
             self.window.iconify()
         self.window.show()
 
-    def go_login(self, proxy=None, use_http=None, 
+    def go_login(self, proxy=None, use_http=None,
                  cancel_clicked=False, no_autologin=False):
         '''shows the login GUI'''
         if proxy is None:
@@ -282,7 +281,7 @@ class Controller(object):
         self.window.go_login(self.on_login_connect,
                              self.on_preferences_changed, self.config,
                              self.config_dir, self.config_path, proxy,
-                             use_http, self.config.session, 
+                             use_http, self.config.session,
                              cancel_clicked, no_autologin)
         self.tray_icon.set_login()
 
@@ -338,7 +337,7 @@ class Controller(object):
         pref = extension.get_instance('preferences')
         if pref:
             pref.hide()
-            
+
         # prevent image chooser from staying open and breaking things
         image_chooser = extension.get_instance('image chooser')
         if image_chooser:
@@ -354,10 +353,6 @@ class Controller(object):
             for conv_manager in self.conversations:
                 conv_manager.hide_all(self.session.config.b_single_window)
                 self._on_conversation_window_close(conv_manager)
-
-        if self.timeout_id:
-            glib.source_remove(self.timeout_id)
-            self.timeout_id = None
 
         if self.session:
             self.session.stop_mail_client()
@@ -478,7 +473,7 @@ class Controller(object):
         '''
         last_avatar_path = self.session.config_dir.get_path("last_avatar")
         self.session.load_config()
-        
+
         image_name = self.session.config.get_or_set('image_theme', 'default')
         emote_name = self.session.config.get_or_set('emote_theme', 'default')
         sound_name = self.session.config.get_or_set('sound_theme', 'default')
@@ -616,7 +611,7 @@ class Controller(object):
             self.window.content_main.clear_connect()
 
         self._new_session(account)
-        
+
         # set default values if not already set
         self.session.config.get_or_set('b_conv_minimized', True)
         self.session.config.get_or_set('b_conv_maximized', False)
@@ -647,8 +642,6 @@ class Controller(object):
         self.session.config.get_or_set('b_conversation_tabs', True)
         self.session.config.get_or_set('b_single_window', True)
 
-        self.timeout_id = glib.timeout_add(500,
-                self.session.signals._handle_events)
         self.session.login(account.account, account.password, account.status,
             proxy, host, port, use_http)
 

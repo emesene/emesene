@@ -25,6 +25,7 @@ class Worker(e3.Worker):
                 if action.id_ == e3.Action.ACTION_QUIT:
                     log.debug('closing thread')
                     self.session.logger.quit()
+                    self.session.signals.quit()
                     break
 
                 self._process_action(action)

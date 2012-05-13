@@ -17,13 +17,19 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import Queue
+import threading
+import glib
 
 import Signal
 
-class Signals(object):
+class Signals(threading.Thread):
     '''a class that conversats e3 signals into gui.Signal'''
 
     def __init__(self, events, event_queue):
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
+
+        self._stop = False
         self.events = events
         self.event_queue = event_queue
         self.event_names = tuple(sorted(events))
@@ -32,18 +38,22 @@ class Signals(object):
             event = event.replace(' ', '_')
             setattr(self, event, Signal.Signal())
 
-    def _handle_events(self):
+    def run(self):
         '''convert Event object on the queue to gui.Signal'''
-        while True:
-            try:
-                event = self.event_queue.get(False)
+        while not self._stop:
+            event = self.event_queue.get()
+            glib.idle_add(self.process, event)
 
-                if event.id_ < len(self.event_names):
-                    event_name = self.event_names[event.id_].replace(' ', '_')
-                    signal = getattr(self, event_name)
-                    # uncomment this to get the signals that are being fired
-                    # print event_name, event.args
-                    signal.emit(*event.args)
-            except Queue.Empty:
-                break
-        return True
+    def process(self, event):
+        '''process events'''
+        if event.id_ < len(self.event_names):
+            event_name = self.event_names[event.id_].replace(' ', '_')
+            signal = getattr(self, event_name)
+            # uncomment this to get the signals that are being fired
+            # print event_name, event.args
+            signal.emit(*event.args)
+        return False
+
+    def quit(self):
+        '''stop the signals thread'''
+        self._stop = True

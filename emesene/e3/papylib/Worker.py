@@ -131,6 +131,7 @@ class Worker(e3.base.Worker, papyon.Client):
                     if not self.state == papyon.event.ClientState.CLOSED:
                         self.logout()
                     self.session.logger.quit()
+                    self.session.signals.quit()
                     break
 
                 self._process_action(action)
