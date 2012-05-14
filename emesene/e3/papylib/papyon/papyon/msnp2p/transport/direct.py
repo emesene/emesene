@@ -183,13 +183,13 @@ class DirectP2PTransport(BaseP2PTransport):
             self._set_listening(None, None)
             return
 
-        self._mapping_timeout_src = gobject.timeout_add(timeout * 1000,
+        self._mapping_timeout_src = gobject.timeout_add_seconds(timeout,
                 self._on_mapping_timeout)
 
         self.simple = Simple()
         self.simple.connect("error-mapping-port", self._on_error_mapping_port)
         self.simple.connect("mapped-external-port", self._on_external_port_mapped)
-        self.simple.add_port("TCP", 0, local_ip, local_port, 6000, "MSN P2P Direct Connection")
+        self.simple.add_port("TCP", 0, local_ip, local_port, 6000, "msn")
         logger.info("Trying to map external port using UPnP")
 
     def _unmap_external_port(self):
@@ -345,7 +345,7 @@ class DirectP2PTransport(BaseP2PTransport):
                 chunk = NonceChunk.parse(body)
                 self._receive_nonce(chunk)
             else:
-                chunk = MessageChunk.parse(2, body) #TODO: TLPv1 or TLPv2?
+                chunk = MessageChunk.parse(self.version, body)
                 if chunk.body == "\x00" *4:
                     logger.debug("Received 0000 chunk, ignoring it")
                 else:
