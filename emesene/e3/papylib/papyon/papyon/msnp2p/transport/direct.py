@@ -128,7 +128,9 @@ class DirectP2PTransport(BaseP2PTransport):
     def _ready_to_send(self):
         return self._connected
 
-    def open(self, nonce):
+    def open(self, nonce, ip, port):
+        self._ip = ip
+        self._port = port
         self._nonce = nonce
         self._server = False
         self._listening = False
@@ -136,7 +138,7 @@ class DirectP2PTransport(BaseP2PTransport):
         self._transport.connect("notify::status", self._on_status_changed)
         self._transport.connect("error", self._on_error)
         self._transport.connect("received", self._on_data_received)
-        logger.info("Try to connect to %s(%i)" % (self._ip, self._port))
+        logger.info("Try to connect to %s:%i" % (self._ip, self._port))
         self._connect_timeout_src = gobject.timeout_add_seconds(5, self._on_connect_timeout)
         self._transport.open()
 

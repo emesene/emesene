@@ -377,28 +377,28 @@ class SLPTransportResponseBody(SLPMessageBody):
     @property
     def internal_ips(self):
         try:
-            return self.get_header("IPv4Internal-Addrs"[::-1])[::-1].split()
+            return self.get_header("IPv4Internal-Addrs").split()
         except (KeyError, ValueError):
             return []
 
     @property
     def internal_port(self):
         try:
-            return int(self.get_header("IPv4Internal-Port"[::-1])[::-1])
+            return int(self.get_header("IPv4Internal-Port"))
         except (KeyError, ValueError):
             return 0
 
     @property
     def external_ips(self):
         try:
-            return self.get_header("IPv4External-Addrs"[::-1])[::-1].split()
+            return self.get_header("IPv4External-Addrs").split()
         except (KeyError, ValueError):
             return []
 
     @property
     def external_port(self):
         try:
-            return int(self.get_header("IPv4External-Port"[::-1])[::-1])
+            return int(self.get_header("IPv4External-Port"))
         except (KeyError, ValueError):
             return 0
 
