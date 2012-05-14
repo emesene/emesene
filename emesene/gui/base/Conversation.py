@@ -53,6 +53,7 @@ class Conversation(object):
         buffer_size = 10
         self.messages = RingBuffer(max=buffer_size)
         self.message_offset = 0
+        self.message_input = ""
 
         if members is None:
             self.members = []
@@ -659,14 +660,23 @@ class Conversation(object):
         -1 will go backwards
 
         if no message in the buffer return an empty string
+
+        if there is message before cycling, it will be stored
+        till the message sent
         """
+        if change < 0 and self.message_offset == 0:
+            self.message_input = self.input.text
+
         self.message_offset += change
         if abs(self.message_offset) + 1 > len(self.messages):
             self.message_offset=1 - len(self.messages)
         if self.message_offset > 0:
             self.reset_message_offset()
         try:
-            self.input.text = self.messages.peak(self.message_offset)
+            if self.message_offset == 0:
+                self.input.text = self.message_input
+            else:
+                self.input.text = self.messages.peak(self.message_offset)
         except IndexError:
             pass
 
