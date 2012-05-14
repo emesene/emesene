@@ -221,7 +221,8 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
             local_port, extern_ip, extern_port):
         conn_type = self._session_manager._client.conn_type
         body = SLPTransportResponseBody(bridge, listening, nonce, [local_ip],
-                local_port, [extern_ip], extern_port, self._id, 0, 1, conn_type)
+                local_port, [extern_ip], extern_port, self._id, 0, 1, conn_type,
+                self._version)
         self._respond_transreq(transreq, 200, body)
 
     def _decline_transreq(self, transreq):

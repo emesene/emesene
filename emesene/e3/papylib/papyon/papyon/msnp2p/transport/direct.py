@@ -345,7 +345,7 @@ class DirectP2PTransport(BaseP2PTransport):
                 chunk = NonceChunk.parse(body)
                 self._receive_nonce(chunk)
             else:
-                chunk = MessageChunk.parse(2, body) #TODO: TLPv1 or TLPv2?
+                chunk = MessageChunk.parse(self.version, body)
                 if chunk.body == "\x00" *4:
                     logger.debug("Received 0000 chunk, ignoring it")
                 else:
