@@ -264,16 +264,16 @@ class InputText(TextBox):
         self.changed = True
         self.apply_tag()
 
-        if event.state == gtk.gdk.CONTROL_MASK and \
-                 event.keyval == gtk.keysyms.p or \
-                    event.keyval == gtk.keysyms.Up:
+        if ( event.state & gtk.gdk.CONTROL_MASK ) and \
+                 ( event.keyval == gtk.keysyms.p or \
+                    event.keyval == gtk.keysyms.Up ):
 
             if not self._textbox.im_context_filter_keypress(event):
                 self.on_cycle_history()
             return True
-        elif event.state == gtk.gdk.CONTROL_MASK and \
-                event.keyval == gtk.keysyms.n or \
-                    event.keyval == gtk.keysyms.Down:
+        elif ( event.state == gtk.gdk.CONTROL_MASK ) and \
+                ( event.keyval == gtk.keysyms.n or \
+                    event.keyval == gtk.keysyms.Down ):
 
             if not self._textbox.im_context_filter_keypress(event):
                 self.on_cycle_history(1)
