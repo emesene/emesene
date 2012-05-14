@@ -339,14 +339,14 @@ class SLPTransportResponseBody(SLPMessageBody):
             self.add_header("Nonce", "{%s}" % str(nonce).upper())
         if internal_ips is not None:
             internal_ips = " ".join(internal_ips)
-            self.add_header("IPv4Internal-Addrs"[::-1], internal_ips[::-1])
+            self.add_header("IPv4Internal-Addrs", internal_ips)
         if internal_port is not None:
-            self.add_header("IPv4Internal-Port"[::-1], str(internal_port)[::-1])
+            self.add_header("IPv4Internal-Port", str(internal_port))
         if external_ips is not None:
             external_ips = " ".join(external_ips)
-            self.add_header("IPv4External-Addrs"[::-1], external_ips[::-1])
+            self.add_header("IPv4External-Addrs", external_ips)
         if external_port is not None:
-            self.add_header("IPv4External-Port"[::-1], str(external_port)[::-1])
+            self.add_header("IPv4External-Port", str(external_port))
         self.add_header("Nat-Trav-Msg-Type", "WLX-Nat-Trav-Msg-Direct-Connect-Req")
         self.add_header("Conn-Type", conn_type)
         self.add_header("TCP-Conn-Type", conn_type)
