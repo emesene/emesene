@@ -330,7 +330,7 @@ class SLPTransportResponseBody(SLPMessageBody):
         SLPMessageBody.__init__(self,SLPContentType.TRANSPORT_RESPONSE,
                                     session_id, s_channel_state, capabilities_flags)
 
-        self.version = version
+        self._version = version
 
         if bridge is not None:
             self.add_header("Bridge", bridge)
@@ -340,30 +340,32 @@ class SLPTransportResponseBody(SLPMessageBody):
             self.add_header("Nonce", "{%s}" % str(nonce).upper())
         if internal_ips is not None:
             internal_ips = " ".join(internal_ips)
-            if self.version >= 2:
-                self.add_header("IPv4Internal-Addrs"[::-1], internal_ips[::-1])
-            else:
-                self.add_header("IPv4Internal-Addrs", internal_ips)
+            self._add_header("IPv4Internal-Addrs", internal_ips)
         if internal_port is not None:
-            if self.version >= 2:
-                self.add_header("IPv4Internal-Port"[::-1], str(internal_port)[::-1])
-            else:
-                self.add_header("IPv4Internal-Port", str(internal_port))
+            self._add_header("IPv4Internal-Port", str(internal_port))
         if external_ips is not None:
             external_ips = " ".join(external_ips)
-            if self.version >= 2:
-                self.add_header("IPv4External-Addrs"[::-1], external_ips[::-1])
-            else:
-                self.add_header("IPv4External-Addrs", external_ips)
+            self._add_header("IPv4External-Addrs", external_ips)
         if external_port is not None:
-            if self.version >= 2:
-                self.add_header("IPv4External-Port"[::-1], str(external_port)[::-1])
-            else:
-                self.add_header("IPv4External-Port", str(external_port))
+            self._add_header("IPv4External-Port", str(external_port))
         self.add_header("Nat-Trav-Msg-Type", "WLX-Nat-Trav-Msg-Direct-Connect-Req")
         self.add_header("Conn-Type", conn_type)
         self.add_header("TCP-Conn-Type", conn_type)
         self.add_header("IPv6-global", "")
+
+    def _add_header(self, name, value):
+        ''' add_header convenience method for p2pv1 and p2pv2'''
+        if self._version >= 2:
+            self.add_header(name[::-1], value[::-1])
+        else:
+            self.add_header(name, value)
+
+    def _get_header(self, name):
+        ''' get_header convenience method for p2pv1 and p2pv2'''
+        if self._version >= 2:
+            return self.get_header(name[::-1])[::-1]
+        else:
+            return self.get_header(name)
 
     @property
     def bridge(self):
@@ -390,40 +392,28 @@ class SLPTransportResponseBody(SLPMessageBody):
     @property
     def internal_ips(self):
         try:
-            if self.version >= 2:
-                return self.get_header("IPv4Internal-Addrs"[::-1])[::-1].split()
-            else:
-                return self.get_header("IPv4Internal-Addrs").split()
+            return self._get_header("IPv4Internal-Addrs").split()
         except (KeyError, ValueError):
             return []
 
     @property
     def internal_port(self):
         try:
-            if self.version >= 2:
-                return int(self.get_header("IPv4Internal-Port"[::-1])[::-1])
-            else:
-                return int(self.get_header("IPv4Internal-Port"))
+            return int(self._get_header("IPv4Internal-Port"))
         except (KeyError, ValueError):
             return 0
 
     @property
     def external_ips(self):
         try:
-            if self.version >= 2:
-                return self.get_header("IPv4External-Addrs"[::-1])[::-1].split()
-            else:
-                return self.get_header("IPv4External-Addrs").split()
+            return self._get_header("IPv4External-Addrs").split()
         except (KeyError, ValueError):
             return []
 
     @property
     def external_port(self):
         try:
-            if self.version >= 2:
-                return int(self.get_header("IPv4External-Port"[::-1])[::-1])
-            else:
-                return int(self.get_header("IPv4External-Port"))
+            return int(self._get_header("IPv4External-Port"))
         except (KeyError, ValueError):
             return 0
 
@@ -460,4 +450,3 @@ class SLPSessionFailureResponseBody(SLPMessageBody):
                 session_id, s_channel_state, capabilities_flags)
 
 SLPMessageBody.register_content(SLPContentType.SESSION_FAILURE, SLPSessionFailureResponseBody)
-
