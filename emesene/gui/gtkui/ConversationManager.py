@@ -262,7 +262,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         return dimensions of the conversation window, if more than one return
         the value of one of them
         '''
-        return self.get_parent().get_dimensions()
+        return self.get_parent().get_dimensions(True)
 
     def get_tab_position(self):
         positions = [gtk.POS_TOP, gtk.POS_BOTTOM, gtk.POS_LEFT, gtk.POS_RIGHT]
