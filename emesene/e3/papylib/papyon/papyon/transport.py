@@ -273,8 +273,8 @@ class DirectConnection(BaseTransport):
 
     def reset_connection(self, server=None):
         if server:
-            self._transport.set_property("host", server[0])
-            self._transport.set_property("port", server[1])
+            self._transport.host = server[0]
+            self._transport.port = server[1]
             self.server = server
         self.__resetting = True
         self._transport.close()

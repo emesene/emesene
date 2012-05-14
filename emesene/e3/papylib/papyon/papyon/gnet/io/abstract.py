@@ -34,23 +34,11 @@ class AbstractClient(gobject.GObject):
         @since: 0.1"""
 
     __gproperties__ = {
-            "host": (gobject.TYPE_STRING,
-                "Remote Host",
-                "The remote host to connect to.",
-                "",
-                gobject.PARAM_READWRITE),
-
-            "port": (gobject.TYPE_INT,
-                "Remote Port",
-                "The remote port to connect to.",
-                -1, 65535, -1,
-                gobject.PARAM_READWRITE),
-
             "status": (gobject.TYPE_INT,
                 "Connection Status",
                 "The status of this connection.",
                 0, 3, IoStatus.CLOSED,
-                gobject.PARAM_READABLE),
+                gobject.PARAM_READABLE)
             }
 
     __gsignals__ = {
@@ -138,15 +126,21 @@ class AbstractClient(gobject.GObject):
 
     # properties
     def __get_host(self):
+        "The remote host to connect to."
         return self._host
     def __set_host(self, host):
-        self.set_property("host", host)
+        if len(host) == 0:
+            raise ValueError("Wrong host %s" % self._host)
+        self._host = host
     host = property(__get_host, __set_host)
 
     def __get_port(self):
+        "The remote port to connect to."
         return self._port
     def __set_port(self, port):
-        self.set_property("port", port)
+        if port < 0 or port > 65535:
+            raise ValueError("Wrong port %d" % port)
+        self._port = port
     port = property(__get_port, __set_port)
 
     def __get_sockname(self):
@@ -175,24 +169,12 @@ class AbstractClient(gobject.GObject):
     status  = property(__get_status)
 
     def do_get_property(self, pspec):
-        if pspec.name == "host":
-            return self._host
-        elif pspec.name == "port":
-            return self._port
-        elif pspec.name == "status":
+        if pspec.name == "status":
             return self.__status
         else:
             raise AttributeError, "unknown property %s" % pspec.name
 
     def do_set_property(self, pspec, value):
-        if pspec.name == "host":
-            if len(value) == 0:
-                raise ValueError("Wrong host %s" % self._host)
-            self._host = value
-        elif pspec.name == "port":
-            if self._port < 0 or self._port > 65535:
-                raise ValueError("Wrong port %d" % self._port)
-            self._port = value
-        else:
-            raise AttributeError, "unknown property %s" % pspec.name
+         raise AttributeError, "unknown property %s" % pspec.name
+
 gobject.type_register(AbstractClient)
