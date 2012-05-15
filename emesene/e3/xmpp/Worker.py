@@ -154,14 +154,6 @@ class Worker(e3.Worker):
 
     def _on_presence(self, presence):
         '''handle the reception of a presence message'''
-        #<presence to="rikyz619@gmail.com/5C034291" from="0daebwjuox4mk0hgq7idl2wxqe@public.talk.google.com/TalkGadgetE00E7FDA">
-        #  <show>away</show>
-        #  <priority>24</priority>
-        #  <c xmlns="http://jabber.org/protocol/caps" node="http://talkgadget.google.com/client/caps" ext="pmuc-v1 vavinvite-v1 share-v1" ver="1.0" />
-        #  <x xmlns="vcard-temp:x:update">
-        #    <photo>a34d1397a11a7be2d244293a2569e9cd1b53c7af</photo>
-        #  </x>
-        #</presence>,
         message = ''
         show = presence.get_type()
         account = presence.get_from().bare
@@ -191,10 +183,10 @@ class Worker(e3.Worker):
             self.session.log('message change', contact.status,
                 contact.message, log_account)
 
-    def _on_message(self, client, message):
+    def _on_message(self, message):
         '''handle the reception of a message'''
-        body = message.getBody()
-        account = message.getFrom().getStripped()
+        body = message['body']
+        account = message['from']
 
         if account in self.conversations:
             cid = self.conversations[account]
@@ -211,12 +203,10 @@ class Worker(e3.Worker):
 
         msgobj = e3.Message(type_, body, account)
         self.session.conv_message(cid, account, msgobj)
-
         # log message
         e3.Logger.log_message(self.session, None, msgobj, False)
 
-
-    def _on_photo_update(self, session, stanza):
+    def _on_photo_update(self, session, stanza): #TODO:
 
         account = stanza.getFrom().getStripped()
         vupdate = stanza.getTag('x', namespace='vcard-temp:x:update')
@@ -233,7 +223,7 @@ class Worker(e3.Worker):
         iq = xmpp.Protocol('iq', account, 'get', payload=[n])
         return session.SendAndCallForResponse(iq, self._on_contact_jabber_changed)
 
-    def _on_contact_jabber_changed(self, session, stanza):
+    def _on_contact_jabber_changed(self, session, stanza): #TODO:
         if stanza is None:
             return
 
@@ -282,7 +272,7 @@ class Worker(e3.Worker):
         self.session.social_request(conn_url)
 
     # action handlers
-    def _handle_action_quit(self):
+    def _handle_action_quit(self): #TODO:
         '''handle Action.ACTION_QUIT
         '''
         log.debug('closing thread')
@@ -317,7 +307,7 @@ class Worker(e3.Worker):
         '''
         pass
 
-    def _handle_action_change_status(self, status_):
+    def _handle_action_change_status(self, status_): #TODO:
         '''handle Action.ACTION_CHANGE_STATUS
         '''
         self._change_status(status_)
@@ -337,8 +327,9 @@ class Worker(e3.Worker):
         # whitespace keepalives do not work.
         self.client.register_plugin('xep_0199', {'keepalive': True, 'frequency': 60})
 
-        self.client.add_event_handler("session_start", self._session_started)
+        self.client.add_event_handler('session_start', self._session_started)
         self.client.add_event_handler('changed_status', self._on_presence)
+        self.client.add_event_handler('message', self._on_message)
 
         self.client.connect((host, port))
 
@@ -384,7 +375,7 @@ class Worker(e3.Worker):
         '''
         pass
 
-    def _handle_action_set_message(self, message):
+    def _handle_action_set_message(self, message): #TODO:
         '''handle Action.ACTION_SET_MESSAGE
         '''
         contact = self.session.contacts.me
@@ -399,7 +390,7 @@ class Worker(e3.Worker):
 
         e3.base.Worker._handle_action_set_message(self, message)
 
-    def _handle_action_set_media(self, message):
+    def _handle_action_set_media(self, message): #TODO:
         '''handle Action.ACTION_SET_MEDIA
         '''
         contact = self.session.contacts.me
@@ -415,7 +406,7 @@ class Worker(e3.Worker):
         '''
         pass
 
-    def _handle_action_set_picture(self, picture_name):
+    def _handle_action_set_picture(self, picture_name): #TODO:
         '''handle Action.ACTION_SET_PICTURE
         '''
         avatar = self._filedata_to_string(picture_name)
@@ -445,13 +436,13 @@ class Worker(e3.Worker):
                         avatar_path)
                 self.session.contacts.me.picture = avatar_path
 
-    def _handle_action_new_conversation(self, account, cid):
+    def _handle_action_new_conversation(self, account, cid): #TODO:
         '''handle Action.ACTION_NEW_CONVERSATION
         '''
         self.conversations[account] = cid
         self.rconversations[cid] = [account]
 
-    def _handle_action_close_conversation(self, cid):
+    def _handle_action_close_conversation(self, cid): #TODO:
         '''handle Action.ACTION_CLOSE_CONVERSATION
         '''
         if cid in self.rconversations:
@@ -461,7 +452,7 @@ class Worker(e3.Worker):
         else:
             log.warning('conversation %s not found' % cid)
 
-    def _handle_action_send_message(self, cid, message):
+    def _handle_action_send_message(self, cid, message): #TODO:
         '''handle Action.ACTION_SEND_MESSAGE
         cid is the conversation id, message is a Message object
         '''
@@ -475,24 +466,3 @@ class Worker(e3.Worker):
             # log message
         e3.Logger.log_message(self.session, recipients, message, True)
 
-    # p2p handlers
-
-    def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
-        '''handle Action.ACTION_P2P_INVITE,
-         cid is the conversation id
-         pid is the p2p session id, both are numbers that identify the
-            conversation and the session respectively, time.time() is
-            recommended to be used.
-         dest is the destination account
-         type_ is one of the e3.Transfer.TYPE_* constants
-         identifier is the data that is needed to be sent for the invitation
-        '''
-        pass
-
-    def _handle_action_p2p_accept(self, pid):
-        '''handle Action.ACTION_P2P_ACCEPT'''
-        pass
-
-    def _handle_action_p2p_cancel(self, pid):
-        '''handle Action.ACTION_P2P_CANCEL'''
-        pass
