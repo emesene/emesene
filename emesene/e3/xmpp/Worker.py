@@ -376,19 +376,20 @@ class Worker(e3.Worker):
         '''
         pass
 
-    def _handle_action_set_picture(self, picture_name): #TODO:
+    def _handle_action_set_picture(self, picture_name):
         '''handle Action.ACTION_SET_PICTURE
         '''
         avatar = self._filedata_to_string(picture_name)
+        vcard = self.client.plugin['xep_0054'].make_vcard()
+        if avatar:
+            vcard['PHOTO']['BINVAL'] = avatar
+        else: # set empty photo
+            vcard['PHOTO'] = ''
 
-        n = xmpp.Node('vCard', attrs={'xmlns': xmpp.NS_VCARD})
-        iq_vcard = xmpp.Protocol('iq', self.session.account.account, 'set', payload=[n])
-        vcard = iq_vcard.addChild(name='vCard', namespace=xmpp.NS_VCARD)
-        #vcard.addChild(name='NICKNAME', payload=[nick])
-        photo = vcard.addChild(name='PHOTO')
-        #photo.setTagData(tag='TYPE', val=mime_type)
-        photo.setTagData(tag='BINVAL', val=avatar.encode('base64'))
-        self.client.send(iq_vcard)
+        self.client.plugin['xep_0054'].publish_vcard(vcard, block=False)
+
+        if not avatar:
+            return # TODO: reset avatar locally and remove it from the UI
 
         avatar_hash = hashlib.sha1(avatar).hexdigest().encode("hex")
 
@@ -398,8 +399,8 @@ class Worker(e3.Worker):
                     avatar_path)
             self.session.contacts.me.picture = avatar_path
         else:
-            result = self.my_avatars.insert_raw(StringIO.StringIO(avatar_data))
-            if not result is None:
+            result = self.my_avatars.insert_raw(StringIO.StringIO(avatar))
+            if result:
                 avatar_hash = result[1]
                 avatar_path = os.path.join(self.my_avatars.path, avatar_hash)
                 self.session.picture_change_succeed(self.session.account.account,
