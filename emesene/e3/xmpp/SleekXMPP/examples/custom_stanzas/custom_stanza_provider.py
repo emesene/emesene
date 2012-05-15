@@ -15,7 +15,13 @@ import getpass
 from optparse import OptionParser
 
 import sleekxmpp
-from sleekxmpp.exceptions import IqError, IqTimeout
+
+from sleekxmpp import ClientXMPP, Iq
+from sleekxmpp.exceptions import IqError, IqTimeout, XMPPError
+from sleekxmpp.xmlstream import register_stanza_plugin
+from sleekxmpp.xmlstream.handler import Callback
+from sleekxmpp.xmlstream.matcher import StanzaPath
+from stanza import Action
 
 # Python versions before 3.0 do not use UTF-8 encoding
 # by default. To ensure that Unicode is handled properly
@@ -28,15 +34,11 @@ else:
     raw_input = input
 
 
-class RegisterBot(sleekxmpp.ClientXMPP):
+class ActionBot(sleekxmpp.ClientXMPP):
 
     """
-    A basic bot that will attempt to register an account
-    with an XMPP server.
-
-    NOTE: This follows the very basic registration workflow
-          from XEP-0077. More advanced server registration
-          workflows will need to check for data forms, etc.
+    A simple SleekXMPP bot that receives a custom stanza
+    from another client.
     """
 
     def __init__(self, jid, password):
@@ -47,16 +49,18 @@ class RegisterBot(sleekxmpp.ClientXMPP):
         # and the XML streams are ready for use. We want to
         # listen for this event so that we we can initialize
         # our roster.
-        self.add_event_handler("session_start", self.start, threaded=True)
+        self.add_event_handler("session_start", self.start)
 
-        # The register event provides an Iq result stanza with
-        # a registration form from the server. This may include
-        # the basic registration fields, a data form, an 
-        # out-of-band URL, or any combination. For more advanced
-        # cases, you will need to examine the fields provided
-        # and respond accordingly. SleekXMPP provides plugins
-        # for data forms and OOB links that will make that easier.
-        self.add_event_handler("register", self.register, threaded=True)
+        self.registerHandler(
+          Callback('Some custom iq',
+            StanzaPath('iq@type=set/action'),
+            self._handle_action))
+
+        self.add_event_handler('custom_action', 
+                self._handle_action_event, 
+                threaded=True)
+
+        register_stanza_plugin(Iq, Action)
 
     def start(self, event):
         """
@@ -74,43 +78,37 @@ class RegisterBot(sleekxmpp.ClientXMPP):
         self.send_presence()
         self.get_roster()
 
-        # We're only concerned about registering, so nothing more to do here.
-        self.disconnect()
-
-    def register(self, iq):
+    def _handle_action(self, iq):
         """
-        Fill out and submit a registration form.
-
-        The form may be composed of basic registration fields, a data form,
-        an out-of-band link, or any combination thereof. Data forms and OOB
-        links can be checked for as so:
-
-        if iq.match('iq/register/form'):
-            # do stuff with data form
-            # iq['register']['form']['fields']
-        if iq.match('iq/register/oob'):
-            # do stuff with OOB URL
-            # iq['register']['oob']['url']
-
-        To get the list of basic registration fields, you can use:
-            iq['register']['fields']
+        Raise an event for the stanza so that it can be processed in its
+        own thread without blocking the main stanza processing loop.
         """
-        resp = self.Iq()
-        resp['type'] = 'set'
-        resp['register']['username'] = self.boundjid.user
-        resp['register']['password'] = self.password
+        self.event('custom_action', iq)
 
-        try:
-            resp.send(now=True)
-            logging.info("Account created for %s!" % self.boundjid)
-        except IqError as e:
-            logging.error("Could not register account: %s" % 
-                    e.iq['error']['text'])
-            self.disconnect()
-        except IqTimeout:
-            logging.error("No response from server.")
-            self.disconnect()
+    def _handle_action_event(self, iq):
+        """
+        Respond to the custom action event.
 
+        Since one of the actions is to disconnect, this
+        event handler needs to be run in threaded mode, by
+        using `threaded=True` in the `add_event_handler` call.
+        """
+        method = iq['action']['method']
+        param = iq['action']['param']
+
+        if method == 'is_prime' and param == '2':
+            print("got message: %s" % iq)
+            iq.reply()
+            iq['action']['status'] = 'done'
+            iq.send()
+        elif method == 'bye':
+            print("got message: %s" % iq)
+            self.disconnect()
+        else:
+            print("got message: %s" % iq)
+            iq.reply()
+            iq['action']['status'] = 'error'
+            iq.send()
 
 if __name__ == '__main__':
     # Setup the command line arguments.
@@ -144,14 +142,14 @@ if __name__ == '__main__':
     if opts.password is None:
         opts.password = getpass.getpass("Password: ")
 
-    # Setup the RegisterBot and register plugins. Note that while plugins may
+    # Setup the CommandBot and register plugins. Note that while plugins may
     # have interdependencies, the order in which you register them does
     # not matter.
-    xmpp = RegisterBot(opts.jid, opts.password)
+    xmpp = ActionBot(opts.jid, opts.password)
     xmpp.register_plugin('xep_0030') # Service Discovery
-    xmpp.register_plugin('xep_0004') # Data forms
-    xmpp.register_plugin('xep_0066') # Out-of-band Data
-    xmpp.register_plugin('xep_0077') # In-band Registration
+    xmpp.register_plugin('xep_0004') # Data Forms
+    xmpp.register_plugin('xep_0050') # Adhoc Commands
+    xmpp.register_plugin('xep_0199', {'keepalive': True, 'frequency':15})
 
     # If you are working with an OpenFire server, you may need
     # to adjust the SSL version used:

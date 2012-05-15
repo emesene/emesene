@@ -15,7 +15,11 @@ import getpass
 from optparse import OptionParser
 
 import sleekxmpp
-from sleekxmpp.exceptions import IqError, IqTimeout
+from sleekxmpp import Iq
+from sleekxmpp.exceptions import XMPPError
+from sleekxmpp.xmlstream import register_stanza_plugin
+
+from stanza import Action
 
 # Python versions before 3.0 do not use UTF-8 encoding
 # by default. To ensure that Unicode is handled properly
@@ -28,19 +32,17 @@ else:
     raw_input = input
 
 
-class RegisterBot(sleekxmpp.ClientXMPP):
+class ActionUserBot(sleekxmpp.ClientXMPP):
 
     """
-    A basic bot that will attempt to register an account
-    with an XMPP server.
-
-    NOTE: This follows the very basic registration workflow
-          from XEP-0077. More advanced server registration
-          workflows will need to check for data forms, etc.
+    A simple SleekXMPP bot that sends a custom action stanza
+    to another client.
     """
 
-    def __init__(self, jid, password):
+    def __init__(self, jid, password, other):
         sleekxmpp.ClientXMPP.__init__(self, jid, password)
+
+        self.action_provider = other
 
         # The session_start event will be triggered when
         # the bot establishes its connection with the server
@@ -48,15 +50,9 @@ class RegisterBot(sleekxmpp.ClientXMPP):
         # listen for this event so that we we can initialize
         # our roster.
         self.add_event_handler("session_start", self.start, threaded=True)
+        self.add_event_handler("message", self.message)
 
-        # The register event provides an Iq result stanza with
-        # a registration form from the server. This may include
-        # the basic registration fields, a data form, an 
-        # out-of-band URL, or any combination. For more advanced
-        # cases, you will need to examine the fields provided
-        # and respond accordingly. SleekXMPP provides plugins
-        # for data forms and OOB links that will make that easier.
-        self.add_event_handler("register", self.register, threaded=True)
+        register_stanza_plugin(Iq, Action)
 
     def start(self, event):
         """
@@ -74,43 +70,44 @@ class RegisterBot(sleekxmpp.ClientXMPP):
         self.send_presence()
         self.get_roster()
 
-        # We're only concerned about registering, so nothing more to do here.
-        self.disconnect()
+        self.send_custom_iq()
 
-    def register(self, iq):
+    def send_custom_iq(self):
+        """Create and send two custom actions.
+
+        If the first action was successful, then send
+        a shutdown command and then disconnect.
         """
-        Fill out and submit a registration form.
-
-        The form may be composed of basic registration fields, a data form,
-        an out-of-band link, or any combination thereof. Data forms and OOB
-        links can be checked for as so:
-
-        if iq.match('iq/register/form'):
-            # do stuff with data form
-            # iq['register']['form']['fields']
-        if iq.match('iq/register/oob'):
-            # do stuff with OOB URL
-            # iq['register']['oob']['url']
-
-        To get the list of basic registration fields, you can use:
-            iq['register']['fields']
-        """
-        resp = self.Iq()
-        resp['type'] = 'set'
-        resp['register']['username'] = self.boundjid.user
-        resp['register']['password'] = self.password
+        iq = self.Iq()
+        iq['to'] = self.action_provider
+        iq['type'] = 'set'
+        iq['action']['method'] = 'is_prime'
+        iq['action']['param'] = '2'
 
         try:
-            resp.send(now=True)
-            logging.info("Account created for %s!" % self.boundjid)
-        except IqError as e:
-            logging.error("Could not register account: %s" % 
-                    e.iq['error']['text'])
-            self.disconnect()
-        except IqTimeout:
-            logging.error("No response from server.")
-            self.disconnect()
+            resp = iq.send()
+            if resp['action']['status'] == 'done':
+                #sending bye
+                iq2 = self.Iq()
+                iq2['to'] = self.action_provider
+                iq2['type'] = 'set'
+                iq2['action']['method'] = 'bye'
+                iq2.send(block=False)
+            
+                # The wait=True delays the disconnect until the queue
+                # of stanzas to be sent becomes empty.
+                self.disconnect(wait=True)
+        except XMPPError:
+            print('There was an error sending the custom action.')
 
+    def message(self, msg):
+        """
+        Process incoming message stanzas.
+
+        Arguments:
+            msg -- The received message stanza.
+        """
+        logging.info(msg['body'])
 
 if __name__ == '__main__':
     # Setup the command line arguments.
@@ -132,6 +129,8 @@ if __name__ == '__main__':
                     help="JID to use")
     optp.add_option("-p", "--password", dest="password",
                     help="password to use")
+    optp.add_option("-o", "--other", dest="other",
+                    help="JID providing custom stanza")
 
     opts, args = optp.parse_args()
 
@@ -143,15 +142,16 @@ if __name__ == '__main__':
         opts.jid = raw_input("Username: ")
     if opts.password is None:
         opts.password = getpass.getpass("Password: ")
+    if opts.other is None:
+        opts.other = raw_input("JID Providing custom stanza: ")
 
-    # Setup the RegisterBot and register plugins. Note that while plugins may
+    # Setup the CommandBot and register plugins. Note that while plugins may
     # have interdependencies, the order in which you register them does
     # not matter.
-    xmpp = RegisterBot(opts.jid, opts.password)
+    xmpp = ActionUserBot(opts.jid, opts.password, opts.other)
     xmpp.register_plugin('xep_0030') # Service Discovery
-    xmpp.register_plugin('xep_0004') # Data forms
-    xmpp.register_plugin('xep_0066') # Out-of-band Data
-    xmpp.register_plugin('xep_0077') # In-band Registration
+    xmpp.register_plugin('xep_0004') # Data Forms
+    xmpp.register_plugin('xep_0050') # Adhoc Commands
 
     # If you are working with an OpenFire server, you may need
     # to adjust the SSL version used:
