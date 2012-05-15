@@ -60,14 +60,6 @@ STATUS_MAP_REVERSE['xa'] = e3.status.IDLE
 STATUS_MAP_REVERSE['chat'] = e3.status.ONLINE
 STATUS_MAP_REVERSE['unavailable'] = e3.status.OFFLINE
 
-PHOTO_TYPES = {
-    'image/png': '.png',
-    'image/jpg': '.jpg',
-    'image/jpeg': '.jpg',
-    'image/gif': '.gif',
-    'image/bmp': '.bmp',
-    }
-
 class Worker(e3.Worker):
     '''xmpp's Worker thread'''
 
@@ -191,9 +183,9 @@ class Worker(e3.Worker):
         photo = vcard_temp['PHOTO']
         if not photo:
             return
-        photo_type = photo.get('TYPE')
         photo_bin = photo.get('BINVAL')
-        ext = PHOTO_TYPES[photo_type]
+        if not photo_bin:
+            return
         photo_hash = hashlib.sha1()
         photo_hash.update(photo_bin)
         photo_hash = photo_hash.hexdigest()
