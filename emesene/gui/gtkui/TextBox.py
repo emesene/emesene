@@ -271,7 +271,7 @@ class InputText(TextBox):
             if not self._textbox.im_context_filter_keypress(event):
                 self.on_cycle_history()
             return True
-        elif ( event.state == gtk.gdk.CONTROL_MASK ) and \
+        elif ( event.state & gtk.gdk.CONTROL_MASK ) and \
                 ( event.keyval == gtk.keysyms.n or \
                     event.keyval == gtk.keysyms.Down ):
 
