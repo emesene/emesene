@@ -21,7 +21,6 @@
 
 import os
 import sys
-import ssl
 import time
 import Queue
 import base64
@@ -98,7 +97,7 @@ class Worker(e3.Worker):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        while self._continue == True:
+        while self._continue:
             if self.client:
                 self.client.process(block=True)
             try:
@@ -154,7 +153,7 @@ class Worker(e3.Worker):
 
     def _on_presence(self, presence):
         '''handle the reception of a presence message'''
-        message = ''
+        message = presence['status']
         show = presence.get_type()
         account = presence.get_from().bare
 
@@ -185,6 +184,10 @@ class Worker(e3.Worker):
 
     def _on_message(self, message):
         '''handle the reception of a message'''
+        if msg['type'] not in ('chat', 'normal'):
+            log.error("Unhandled message: %s" % message)
+            return
+
         body = message['body']
         account = message['from']
 
@@ -275,12 +278,12 @@ class Worker(e3.Worker):
     def _handle_action_quit(self): #TODO:
         '''handle Action.ACTION_QUIT
         '''
-        log.debug('closing thread')
-        self.session.events.queue.clear()
+        #self.session.events.queue.clear()
+        self.client.disconnect(wait=True)
         self.session.logger.quit()
         self.session.signals.quit()
-        self._continue = False
         self.session.disconnected(None, False)
+        self._continue = False
 
     def _handle_action_add_contact(self, account):
         '''handle Action.ACTION_ADD_CONTACT
@@ -436,13 +439,13 @@ class Worker(e3.Worker):
                         avatar_path)
                 self.session.contacts.me.picture = avatar_path
 
-    def _handle_action_new_conversation(self, account, cid): #TODO:
+    def _handle_action_new_conversation(self, account, cid):
         '''handle Action.ACTION_NEW_CONVERSATION
         '''
         self.conversations[account] = cid
         self.rconversations[cid] = [account]
 
-    def _handle_action_close_conversation(self, cid): #TODO:
+    def _handle_action_close_conversation(self, cid):
         '''handle Action.ACTION_CLOSE_CONVERSATION
         '''
         if cid in self.rconversations:
@@ -450,19 +453,16 @@ class Worker(e3.Worker):
             del self.conversations[account]
             del self.rconversations[cid]
         else:
-            log.warning('conversation %s not found' % cid)
+            log.warning('Conversation %s not found' % cid)
 
-    def _handle_action_send_message(self, cid, message): #TODO:
+    def _handle_action_send_message(self, cid, message):
         '''handle Action.ACTION_SEND_MESSAGE
         cid is the conversation id, message is a Message object
         '''
 
         recipients = self.rconversations.get(cid, ())
-
         for recipient in recipients:
-            self.client.send(xmpp.protocol.Message(recipient, message.body,
-                'chat'))
+            self.client.send_message(recipient, message.body)
 
-            # log message
         e3.Logger.log_message(self.session, recipients, message, True)
 
