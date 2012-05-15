@@ -178,8 +178,8 @@ class DirectP2PTransport(BaseP2PTransport):
         try:
             from gupnp.igd import Simple
         except ImportError:
-            logger.error("Module gupnp.idg was not found")
-            logger.error("Please install gupnp-igd >= 0.1.6 to get NAT traversal functionality")
+            logger.warning("Module gupnp.idg was not found")
+            logger.warning("Please install python-gupnp-igd to get NAT traversal functionality")
             self._set_listening(None, None)
             return
 
