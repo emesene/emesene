@@ -154,6 +154,11 @@ class Worker(e3.Worker):
         show = presence.get_type()
         account = presence.get_from().bare
 
+        #TODO: ask for vcard only when vcard-temp:x:update and photo are
+        #      in presence (?)
+        self.client.plugin['xep_0054'].get_vcard(jid=presence.get_from(),
+            block=False, callback=self._on_vcard_get)
+
         stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
         contact = self.session.contacts.contacts.get(account, None)
 
@@ -178,6 +183,30 @@ class Worker(e3.Worker):
             self.session.contact_attr_changed(account, 'message', old_message)
             self.session.log('message change', contact.status,
                 contact.message, log_account)
+
+    def _on_vcard_get(self, stanza):
+        ''' vcard_get callback '''
+        vcard_temp = stanza.get('vcard_temp')
+        account = stanza.get_from().bare
+        photo = vcard_temp['PHOTO']
+        if not photo:
+            return
+        photo_type = photo.get('TYPE')
+        photo_bin = photo.get('BINVAL')
+        ext = PHOTO_TYPES[photo_type]
+        photo_hash = hashlib.sha1()
+        photo_hash.update(photo_bin)
+        photo_hash = photo_hash.hexdigest()
+
+        ctct = self.session.contacts.get(account)
+        avatars = self.caches.get_avatar_cache(account)
+        avatar_path = os.path.join(avatars.path, photo_hash)
+        ctct.picture = avatar_path
+
+        if photo_hash not in avatars:
+            avatars.insert_raw(StringIO.StringIO(photo_bin))
+
+        self.session.picture_change_succeed(account, avatar_path)
 
     def _on_message(self, message):
         '''handle the reception of a message'''
@@ -206,56 +235,6 @@ class Worker(e3.Worker):
         # log message
         e3.Logger.log_message(self.session, None, msgobj, False)
 
-    def _on_photo_update(self, session, stanza): #TODO:
-
-        account = stanza.getFrom().getStripped()
-        vupdate = stanza.getTag('x', namespace='vcard-temp:x:update')
-        if not vupdate:
-            return
-        photo = vupdate.getTag('photo')
-        if not photo:
-            return
-        photo = photo.getData()
-        if not photo:
-            return
-        #request the photo only if we don't have it already
-        n = xmpp.Node('vCard', attrs={'xmlns': xmpp.NS_VCARD})
-        iq = xmpp.Protocol('iq', account, 'get', payload=[n])
-        return session.SendAndCallForResponse(iq, self._on_contact_jabber_changed)
-
-    def _on_contact_jabber_changed(self, session, stanza): #TODO:
-        if stanza is None:
-            return
-
-        vcard = stanza.getTag('vCard')
-
-        if vcard is None:
-            return
-
-        photo = vcard.getTag('PHOTO')
-        account = stanza.getFrom().getStripped()
-
-        if not photo:
-            return
-
-        photo_type = photo.getTag('TYPE').getData()
-        photo_bin = photo.getTag('BINVAL').getData()
-        photo_bin = base64.b64decode(photo_bin)
-        ext = PHOTO_TYPES[photo_type]
-        photo_hash = hashlib.sha1()
-        photo_hash.update(photo_bin)
-        photo_hash = photo_hash.hexdigest()
-
-        ctct = self.session.contacts.get(account)
-        avatars = self.caches.get_avatar_cache(account)
-        avatar_path = os.path.join(avatars.path, photo_hash)
-        ctct.picture = avatar_path
-
-        if photo_hash not in avatars:
-            avatars.insert_raw(StringIO.StringIO(photo_bin))
-
-        self.session.picture_change_succeed(account, avatar_path)
-
     # mailbox handlers
     def _on_mailbox_unread_mail_count_changed(self, unread_mail_count,
             initial):
@@ -272,7 +251,7 @@ class Worker(e3.Worker):
         self.session.social_request(conn_url)
 
     # action handlers
-    def _handle_action_quit(self): #TODO:
+    def _handle_action_quit(self):
         '''handle Action.ACTION_QUIT
         '''
         self.session.logger.quit()
@@ -306,7 +285,7 @@ class Worker(e3.Worker):
         '''
         pass
 
-    def _handle_action_change_status(self, status_): #TODO:
+    def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS
         '''
         self._change_status(status_)
@@ -319,8 +298,9 @@ class Worker(e3.Worker):
 
         self.client = xmpp.ClientXMPP(account, password)
         self.client.process(block=False)
-        self.client.register_plugin('xep_0030') # Service Discovery
         self.client.register_plugin('xep_0004') # Data Forms
+        self.client.register_plugin('xep_0030') # Service Discovery
+        self.client.register_plugin('xep_0054') # vcard-temp
         self.client.register_plugin('xep_0060') # PubSub
         # MSN will kill connections that have been inactive for even
         # short periods of time. So use pings to keep the session alive;
