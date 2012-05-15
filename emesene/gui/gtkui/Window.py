@@ -46,6 +46,9 @@ class Window(gtk.Window):
         self.box.get_dimensions = self.get_dimensions
         self.box.is_maximized = self.is_maximized
 
+        self._content_main = None
+        self._content_conv = None
+
         self.set_location(width, height, posx, posy)
         self.set_title("emesene")
         image_theme = gui.theme.image_theme
@@ -63,8 +66,6 @@ class Window(gtk.Window):
         self.cb_on_quit = cb_on_close
 
         self._state = 0
-        self._content_main = None
-        self._content_conv = None
         self.accel_group = None
 
         self.add(self.box)
@@ -85,6 +86,7 @@ class Window(gtk.Window):
             del self._content_main
         self._content_main = content_main
         self.box.pack1(self._content_main)
+        self.set_location()
 
     content_main = property(_get_content_main, _set_content_main)
 
@@ -162,11 +164,13 @@ class Window(gtk.Window):
     def set_location(self, width=0, height=0, posx=None, posy=None, single_window=False):
         """place the window on the given coordinates
         """
+        w, h = self.get_size()
         if single_window:
-            w, h = self.get_size()
-            self.set_default_size(self.set_or_get_height(height+h),
-                                  self.set_or_get_width(width+w))
+            self.resize(self.set_or_get_width(width+w),
+                        self.set_or_get_height(h))
         else:
+            content = self.content_conv or self.content_main or self
+            content.set_size_request(w,h)
             self.set_default_size(self.set_or_get_width(width),
                                   self.set_or_get_height(height))
             self.move(self.set_or_get_posx(posx), self.set_or_get_posy(posy))
@@ -187,11 +191,13 @@ class Window(gtk.Window):
         self._posy = posy if posy != None and posy > -self._height else self._posy
         return self._posy
 
-    def get_dimensions(self):
+    def get_dimensions(self, conversation=False):
         """return width, height, posx, posy from the window
         """
         posx, posy = self.get_position()
-        width, height = self.get_size()
+        content = self.content_conv if conversation else self.content_main or self
+        width = content.get_allocation().width
+        height = content.get_allocation().height
 
         # when login window is minimized, posx and posy are -32000 on Windows
         if os.name == "nt":
@@ -244,7 +250,8 @@ class Window(gtk.Window):
         '''override the method to set the position
         '''
         gtk.Window.present(self)
-        self.set_location(single_window=b_single_window)
+        if not b_single_window:
+            self.set_location()
 
     def _on_window_state_event(self, window, state):
         '''callew when window state is changed

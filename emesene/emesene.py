@@ -516,7 +516,7 @@ class Controller(object):
             syn = syn(self.session, current_service)
             syn.show()
 
-    def _set_location(self, window, is_conv=False):
+    def _set_location(self, window, is_conv=False, single_window=False):
         '''get and set the location of the window'''
         if is_conv:
             posx = self.session.config.get_or_set('i_conv_posx', 100)
@@ -541,7 +541,7 @@ class Controller(object):
         if maximized:
             window.maximize()
 
-        window.set_location(width, height, posx, posy)
+        window.set_location(width, height, posx, posy, single_window)
 
     def on_preferences_changed(self, use_http, proxy, session_id, service):
         '''called when the preferences on login change'''
@@ -682,7 +682,7 @@ class Controller(object):
                     window = windowcls(self._on_conversation_window_close)
 
                 window.go_conversation(self.session)
-                self._set_location(window, True)
+                self._set_location(window, True, sing_wind)
                 conv_manager = window.content_conv
                 self.conversations.append(conv_manager)
                 self.session.conversation_managers.append(conv_manager)
