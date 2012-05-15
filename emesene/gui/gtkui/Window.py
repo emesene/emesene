@@ -216,7 +216,10 @@ class Window(gtk.Window):
         '''call the cb_on_close callback, if the callback return True
         then dont close the window'''
         self.save_dimensions()
-        return self.cb_on_close(self.content_main)
+        if self.content_conv is not None:
+            return self.cb_on_close(self.content_conv)
+        else:
+            return self.cb_on_close(self.content_main)
 
     def _on_last_tab_close(self):
         '''do the action when the last tab is closed on a conversation window
