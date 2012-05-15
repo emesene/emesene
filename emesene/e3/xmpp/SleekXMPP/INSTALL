@@ -1,0 +1,12 @@
+Pre-requisites:
+- Python 3.1 or 2.6
+
+Install:
+> python3 setup.py install
+
+Root install:
+> sudo python3 setup.py install
+
+To test:
+> cd examples
+> python echo_client.py -v -j [USER@example.com] -p [PASSWORD]
