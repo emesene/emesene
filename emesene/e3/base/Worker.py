@@ -191,8 +191,8 @@ class Worker(threading.Thread):
             f = open(filename, 'rb')
             avatar = f.read()
             f.close()
-        except Exception:
-            log.error("Loading of filename %s failed" % filename)
+        except IOError:
+            return None
 
         if not isinstance(avatar, str):
             avatar = "".join([chr(b) for b in avatar])
