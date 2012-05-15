@@ -98,8 +98,6 @@ class Worker(e3.Worker):
         '''main method, block waiting for data, process it, and send data back
         '''
         while self._continue:
-            if self.client:
-                self.client.process(block=True)
             try:
                 action = self.session.actions.get(True, 0.1)
                 self._process_action(action)
@@ -147,8 +145,7 @@ class Worker(e3.Worker):
         contact = self.session.contacts.me
         stat = STATUS_MAP[status_]
 
-        self.client.send(xmpp.protocol.Presence(priority=24,
-            show=stat,status=contact.message))
+        self.client.send_presence(pshow=stat, pstatus=contact.message)
         e3.base.Worker._handle_action_change_status(self, status_)
 
     def _on_presence(self, presence):
@@ -184,7 +181,7 @@ class Worker(e3.Worker):
 
     def _on_message(self, message):
         '''handle the reception of a message'''
-        if msg['type'] not in ('chat', 'normal'):
+        if message['type'] not in ('chat', 'normal'):
             log.error("Unhandled message: %s" % message)
             return
 
@@ -278,11 +275,10 @@ class Worker(e3.Worker):
     def _handle_action_quit(self): #TODO:
         '''handle Action.ACTION_QUIT
         '''
-        #self.session.events.queue.clear()
-        self.client.disconnect(wait=True)
         self.session.logger.quit()
         self.session.signals.quit()
         self.session.disconnected(None, False)
+        self.client.disconnect(wait=True)
         self._continue = False
 
     def _handle_action_add_contact(self, account):
@@ -322,6 +318,7 @@ class Worker(e3.Worker):
                 self.session.account.account)
 
         self.client = xmpp.ClientXMPP(account, password)
+        self.client.process(block=False)
         self.client.register_plugin('xep_0030') # Service Discovery
         self.client.register_plugin('xep_0004') # Data Forms
         self.client.register_plugin('xep_0060') # PubSub
@@ -378,29 +375,27 @@ class Worker(e3.Worker):
         '''
         pass
 
-    def _handle_action_set_message(self, message): #TODO:
+    def _handle_action_set_message(self, message):
         '''handle Action.ACTION_SET_MESSAGE
         '''
         contact = self.session.contacts.me
         stat = STATUS_MAP[contact.status]
 
-        self.client.send(xmpp.protocol.Presence(priority=24, show=stat,
-            status=message))
+        self.client.send_presence(pshow=stat, pstatus=contact.message)
 
-        if not self.session.facebook_client is None and self.session.config.b_fb_status_write:
-            ##update facebook message
+        if self.session.facebook_client and self.session.config.b_fb_status_write:
+            # update facebook message
             self.session.facebook_client.message = message
 
         e3.base.Worker._handle_action_set_message(self, message)
 
-    def _handle_action_set_media(self, message): #TODO:
+    def _handle_action_set_media(self, message):
         '''handle Action.ACTION_SET_MEDIA
         '''
         contact = self.session.contacts.me
         stat = STATUS_MAP[contact.status]
 
-        self.client.send(xmpp.protocol.Presence(priority=24, show=stat,
-            status=message))
+        self.client.send_presence(pshow=stat, pstatus=contact.message)
 
         e3.base.Worker._handle_action_set_media(self, message)
 
