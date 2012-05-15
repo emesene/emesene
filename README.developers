@@ -3,7 +3,7 @@ xgettext emesene/*.py emesene/e3/base/*.py emesene/e3/common/*.py emesene/e3/pap
 
 The translations are located at: https://translations.launchpad.net/emesene/trunk
 
-* How to easily upload a file to sf.net:
+* How to easily upload a file to sf.net (deprecated):
 Assuming you have the proper rights on sf.net, just type (example) 
 scp emesene1.6.3-install.exe c10ud,emesene@frs.sourceforge.net:/home/frs/project/e/em/emesene/emesene-1.6.3/
 otherwise try with the web ui.

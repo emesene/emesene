@@ -1,16 +1,27 @@
 === Core ===
- * python >= 2.5
+ * python >= 2.6 (NO python3)
+ * python-gobject
+ * python-dbus (optional)
+ * python-gst0.10 (optional)
 
-=== Libs ===
- * python-papyon >= 0.5.5 (optional)
- * python-xmppy (optional)
+=== Network Libraries ===
+ * python-papyon >= 0.5.6 (built-in)
+ * python-dnspython
+ * python-farstream
+ * python-gupnp-igd (optional)
+ * python-sleekxmppy (built-in)
 
-=== Gtk ===
- * python-notify (libnotify python wrapper) (optional)
- * pygtk >= 2.12
+=== Gtk2 UI ===
+ * python-notify (optional)
+ * python-gtk2 >= 2.12
 
-=== Qt4 ===
+=== Gtk3 UI ===
+ * 
+
+=== Qt4 UI ===
  * python-qt4 >= 4.6
 
 === Indicators ===
  * python-appindicator (optional)
+ * indicator-status-provider-emesene (optional)
+
