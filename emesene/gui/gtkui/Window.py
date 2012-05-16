@@ -165,9 +165,9 @@ class Window(gtk.Window):
         """
         if single_window:
             w, h = self.get_size()
-            self.content_main.set_size_request(w,-1)
             self.resize(self.set_or_get_width(width+w if width > 0 else 0),
                         self.set_or_get_height(0))
+            self.box.set_position(w)
         else:
             self.set_default_size(self.set_or_get_width(width),
                                   self.set_or_get_height(height))
