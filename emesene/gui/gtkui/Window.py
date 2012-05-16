@@ -173,6 +173,15 @@ class Window(gtk.Window):
             content.set_size_request(w,h)
             self.set_default_size(self.set_or_get_width(width),
                                   self.set_or_get_height(height))
+
+            #if window isn't visible center on screen
+            screen = self.get_screen()
+            pwidth, pheight = screen.get_width(), screen.get_height()
+            if posx > pwidth:
+                posx = (pwidth - width) // 2
+            if posy > pheight:
+                posy = (pheight - height) // 2
+
             self.move(self.set_or_get_posx(posx), self.set_or_get_posy(posy))
 
     def set_or_get_height(self, height=0):

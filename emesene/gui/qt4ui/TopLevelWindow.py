@@ -64,20 +64,6 @@ class TopLevelWindow (QtGui.QMainWindow):
         position = self.pos()
         return size.width(), size.height(), position.x(), position.y()
     
-    def get_screen(self):
-        ''' Mimics Gtk's built-in method. Necessary because emesene.py relies
-        on this.
-        '''
-        # TODO: change emesene.py or update base class
-        class Screen(object):
-            def __init__(self):
-                pass
-            def get_width(self):
-                return QtGui.QApplication.instance().desktop().availableGeometry().width()
-            def get_height(self):
-                return QtGui.QApplication.instance().desktop().availableGeometry().height()
-        return Screen()
-
     def go_connect(self, on_cancel_login, avatar_path, config):
         '''Adds a 'connecting' page to the top level window and shows it'''
         log.debug('GO CONNECT! ^_^')
