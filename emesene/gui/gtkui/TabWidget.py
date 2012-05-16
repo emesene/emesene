@@ -128,7 +128,7 @@ class TabWidget(gtk.HBox):
 
     def set_text(self, text):
         '''set the text of the label'''
-        self._label.set_markup(Renderers.msnplus_to_list(gobject.markup_escape_text(text)))
+        self._label.set_markup(gobject.markup_escape_text(text))
         if self.mozilla_like:
             self.set_size_request(235, 18) # Empiric measures.
 

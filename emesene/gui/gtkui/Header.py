@@ -71,7 +71,7 @@ class Header(gtk.HBox):
     def _set_information(self, lines):
         '''set the text on the information, lines is a tuple of size 3 with 3
         strings that will be replaced on the template'''
-        self._information.set_markup(Renderers.msnplus_to_list(Header.INFO_TPL % lines))
+        self._information.set_markup(Header.INFO_TPL % lines)
         
     def _get_information(self):
         '''return the text on the information'''

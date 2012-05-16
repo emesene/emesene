@@ -58,7 +58,6 @@ inherited by extensions.
         Gtk.CellRenderer.__init__(self)
         self.__dict__['markup'] = ''
         self.function = function
-        self.label = SmileyLabel()
 
     def __getattr__(self, name):
         try:
@@ -259,50 +258,41 @@ extension.implements(CellRendererNoPlus, 'nick renderer')
 GObject.type_register(CellRendererNoPlus)
 
 
-class SmileyLabel(Gtk.Box):
+class SmileyLabel(Gtk.CellView):
     def __init__(self):
-        Gtk.Box.__init__(self)
-        self._text = ['']
-        self.set_border_width(0)
-        self.set_homogeneous(False)
-        self.set_spacing(0)
-        self.set_alignment(0.0, 0.5)
+        Gtk.CellView.__init__(self)
+        self._model = Gtk.ListStore(str)
+        self.set_model(self._model)
+        self.crt = extension.get_and_instantiate('nick renderer')
+        self.crt.set_property('ellipsize', Pango.ELLIPSIZE_END)
+        self.pack_start(self.crt, False)
+        self.add_attribute(self.crt, 'markup', 0)
+        self._text = ""
 
-    def set_text(self, text=['']):
+    def set_text(self, text=''):
         self._text = text
-        self._clear()
-        for i in text:
-            if isinstance(i, basestring):
-                lbl = Gtk.Label()
-                lbl.set_markup(i)
-                lbl.set_alignment(self.x_align, self.y_align)
-                lbl.show()
-                self.pack_start(lbl, False, False, 0)
-            elif isinstance(i, GdkPixbuf.Pixbuf):
-                img = Gtk.Image.new_from_pixbuf(i)
-                img.show()
-                self.pack_start(img, False, False, 0)
-            else:
-                log.error("unhandled type %s" % type(i))
+        self._model.clear()
+        iter_ = self._model.append([text])
+        path = self._model.get_path(iter_)
+        self.set_displayed_row(path)
 
-    def set_markup(self, text=['']):
+    def set_markup(self, text=''):
         self.set_text(text)
 
-    def _clear(self):
-        widgets = self.get_children()
-        for w in widgets:
-            self.remove(w)
+    def get_markup(self):
+        return self._text
 
-    def set_ellipsize(self, mode):
-        #FIXME: add support?
-        pass
+    def set_ellipsize(self, mode=Pango.ELLIPSIZE_END):
+        self.crt.set_property('ellipsize', mode)
 
     def set_alignment(self, x=0.0, y=0.5):
-        self.x_align = x
-        self.y_align = y
-        self.set_text(self._text)
+        #FIXME: aligment??
+#        self.x_align = x
+#        self.y_align = y
+        pass
 
     def set_angle(self, angle):
+        #FIXME: add support for this in cellrenderer
         if angle in [0, 180]:
              self.set_orientation(Gtk.Orientation.HORIZONTAL)
         elif angle in [90, 270]:

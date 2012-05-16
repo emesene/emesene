@@ -251,6 +251,7 @@ class SmileyLayout(pango.Layout):
 
     def set_markup(self, markup):
         ''' Same as set_text() '''
+        markup = Renderers.msnplus_to_list(markup)
         self.set_element_list(markup)
 
     def set_width(self, width):
