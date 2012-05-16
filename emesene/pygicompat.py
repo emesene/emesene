@@ -37,9 +37,10 @@ gi.pygtkcompat.enable_gst()
 
 Pango.SCALE_SMALL = 0.8333333333333
 
-#override control_mask due to bug in pygicompat
-Gdk.CONTROL_MASK = Gdk.ModifierType.CONTROL_MASK
-Gdk.SHIFT_MASK = Gdk.ModifierType.SHIFT_MASK
+if not Gdk.CONTROL_MASK == Gdk.ModifierType.CONTROL_MASK:
+    #override control_mask due to bug in pygicompat
+    Gdk.CONTROL_MASK = Gdk.ModifierType.CONTROL_MASK
+    Gdk.SHIFT_MASK = Gdk.ModifierType.SHIFT_MASK
 
 if not hasattr(Gdk, 'screen_width'):
     Gdk.screen_width = Gdk.Screen.width
