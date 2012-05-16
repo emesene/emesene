@@ -75,12 +75,11 @@ language_management = get_language_manager()
 language_management.install_default_translation()
 import extension
 
-if 'USE_GI' in os.environ:
-    try:
-        import pygicompat
-    except ImportError:
-        print "error: pygi compat not found"
-        pass
+try:
+    import pygicompat
+except ImportError:
+    print "error: pygi compat not found"
+    pass
 
 import glib
 import shutil

@@ -17,6 +17,25 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os
+import sys
+
+#XXX: since we can't do import gi to check gtk3 avariability because that pull gi
+# and replaces gtk classes making old biddings unusabled in case gi was avariable
+#but version isn't enought
+#minimun vesion is pygobject >=3.2
+def check_gtk_version():
+    result = False
+    paths = sys.path
+    for i in paths:
+        if i.endswith("site-packages") or i.endswith("dist-packages"):
+            check = os.path.join(i, "gi/pygtkcompat.py")
+            result = os.path.isfile(check)
+    return result
+
+if not check_gtk_version():
+    raise ImportError
+
 try:
     import gi
     gi.require_version('Gtk', '3.0')
@@ -24,7 +43,6 @@ try:
 except (ImportError, ValueError) as ex:
     raise ImportError
 
-import sys
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
