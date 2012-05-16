@@ -72,6 +72,7 @@ if 'USE_GI' in os.environ:
         pass
 
 import glib
+import shutil
 import signal
 import Info
 
@@ -302,6 +303,7 @@ class Controller(object):
         signals.contact_list_ready.subscribe(self.on_contact_list_ready)
         signals.conv_first_action.subscribe(self.on_new_conversation)
         signals.disconnected.subscribe(self.on_disconnected)
+        signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
 
         #let's start dbus and unity launcher
         if self.dbus_ext is not None:
@@ -388,6 +390,8 @@ class Controller(object):
             signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
             signals.conv_first_action.unsubscribe(self.on_new_conversation)
             signals.disconnected.unsubscribe(self.on_disconnected)
+            signals.picture_change_succeed.unsubscribe(
+                    self.on_picture_change_succeed)
             if self.unity_launcher is not None:
                 self.unity_launcher.remove_session()
             # unsubscribe notifications signals
@@ -747,6 +751,18 @@ class Controller(object):
         self.window.content_main.on_reconnect(self.on_login_connect, account, \
                                          self.config.session, proxy, use_http, \
                                          self.cur_service)
+
+    def on_picture_change_succeed(self, account, path):
+        '''save the avatar change as the last avatar'''
+        if account == self.session.account.account:
+            last_avatar_path = self.session.config_dir.get_path("last_avatar")
+            if path:
+                shutil.copy(path, last_avatar_path)
+            else:
+                try:
+                    os.remove(last_avatar_path)
+                except OSError, e:
+                    log.warning("Cannot remove file: %s" % e)
 
 def main():
     """

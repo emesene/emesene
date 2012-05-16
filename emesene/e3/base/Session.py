@@ -20,7 +20,6 @@
 import os
 import time
 import Queue
-import shutil
 
 from Worker import EVENTS
 from Event import Event
@@ -176,23 +175,10 @@ class Session(object):
     def quit(self):
         '''close the worker and socket threads'''
         self.add_action(Action.ACTION_QUIT, ())
-        self.signals.picture_change_succeed.unsubscribe(self._on_picture_change_succeed)
 
     def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
-        self.signals.picture_change_succeed.subscribe(self._on_picture_change_succeed)
-
-    def _on_picture_change_succeed(self, account, path):
-        '''save the avatar change as the last avatar'''
-        if account == self.account.account:
-            last_avatar_path = self.config_dir.get_path("last_avatar")
-            if path:
-                shutil.copy(path, last_avatar_path)
-            else:
-                try:
-                    os.remove(last_avatar_path)
-                except OSError, e:
-                    log.warning("Cannot remove file: %s" % e)
+        raise NotImplementedError('Not implemented')
 
     def logout(self):
         '''close the session'''
