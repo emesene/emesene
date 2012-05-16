@@ -46,10 +46,10 @@ class Session(e3.Session):
             "host": "chat.facebook.com",
             "port": "5222"
         },
-        "messenger": {
-            "host": "xmpp.messenger.live.com",
-            "port": "5222"
-        }
+        #"messenger": {
+        #    "host": "xmpp.messenger.live.com",
+        #    "port": "5222"
+        #}
     }
 
     def __init__(self, id_=None, account=None):

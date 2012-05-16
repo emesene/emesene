@@ -97,19 +97,7 @@ class Worker(e3.Worker):
                 pass
 
     def _session_started(self, event):
-        """
-        Process the session_start event.
-
-        Typical actions for the session_start event are
-        requesting the roster and broadcasting an initial
-        presence stanza.
-
-        Arguments:
-            event -- An empty dictionary. The session_start
-                     event does not provide any additional
-                     data.
-        """
-
+        '''Process the session_start event'''
         self.client.get_roster(block=True)
         self.client.send_presence()
 
