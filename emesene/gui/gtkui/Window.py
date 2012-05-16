@@ -86,7 +86,6 @@ class Window(gtk.Window):
             del self._content_main
         self._content_main = content_main
         self.box.pack1(self._content_main)
-        self.set_location()
 
     content_main = property(_get_content_main, _set_content_main)
 
@@ -164,13 +163,12 @@ class Window(gtk.Window):
     def set_location(self, width=0, height=0, posx=None, posy=None, single_window=False):
         """place the window on the given coordinates
         """
-        w, h = self.get_size()
         if single_window:
-            self.resize(self.set_or_get_width(width+w),
-                        self.set_or_get_height(h))
+            w, h = self.get_size()
+            self.content_main.set_size_request(w,-1)
+            self.resize(self.set_or_get_width(width+w if width > 0 else 0),
+                        self.set_or_get_height(0))
         else:
-            content = self.content_conv or self.content_main or self
-            content.set_size_request(w,h)
             self.set_default_size(self.set_or_get_width(width),
                                   self.set_or_get_height(height))
 
@@ -204,9 +202,11 @@ class Window(gtk.Window):
         """return width, height, posx, posy from the window
         """
         posx, posy = self.get_position()
-        content = self.content_conv if conversation else self.content_main or self
-        width = content.get_allocation().width
-        height = content.get_allocation().height
+        width, height = self.get_size()
+        if conversation and self.content_main:
+            width = width - self.box.get_position()
+        elif not conversation and self.content_conv is not None:
+            width = self.box.get_position()
 
         # when login window is minimized, posx and posy are -32000 on Windows
         if os.name == "nt":
