@@ -61,6 +61,7 @@ class Session(e3.Session):
 
     def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
+        e3.Session.login(self, account, password, status, proxy, host, port, use_http)
         self.account = e3.Account(account, password, status, host)
 
         if host == "talk.google.com":
