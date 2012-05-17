@@ -20,6 +20,16 @@ import gtk
 import gobject
 import logging
 log = logging.getLogger('gtkui.AdiumTextBox')
+
+#check for webkit gi package
+from gui.gtkui import check_gtk3
+try:
+    if check_gtk3():
+        import gi.pygtkcompat
+        gi.pygtkcompat.enable_webkit(version='3.0')
+except ValueError:
+    raise ImportError
+
 import webkit
 import base64
 import xml.sax.saxutils

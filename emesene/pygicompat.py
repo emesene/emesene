@@ -32,7 +32,6 @@ from gi.repository import Pango
 
 gi.pygtkcompat.enable()
 gi.pygtkcompat.enable_gtk(version='3.0')
-gi.pygtkcompat.enable_webkit(version='3.0')
 gi.pygtkcompat.enable_gst()
 
 Pango.SCALE_SMALL = 0.8333333333333

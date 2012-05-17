@@ -38,9 +38,15 @@ import logging
 log = logging.getLogger('gtkui.Dialog')
 
 try:
+    #check for webkit gi package
+    from gui.gtkui import check_gtk3
+    if check_gtk3():
+        import gi.pygtkcompat
+        gi.pygtkcompat.enable_webkit(version='3.0')
+
     import webkit
     use_webkit = True
-except ImportError:
+except (ImportError, ValueError):
     use_webkit = False
 
 # A list of all open dialogs
