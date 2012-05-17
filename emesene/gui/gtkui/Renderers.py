@@ -251,7 +251,7 @@ class SmileyLayout(pango.Layout):
 
     def set_markup(self, markup):
         ''' Same as set_text() '''
-        markup = Renderers.msnplus_to_list(markup)
+        markup = msnplus_to_list(markup)
         self.set_element_list(markup)
 
     def set_width(self, width):
@@ -568,7 +568,8 @@ class SmileyLabel(gtk.Label):
         self.queue_resize()
 
     def set_markup(self, text=['']):
-        self.set_text(text)
+        markup = msnplus_to_list(text)
+        self.set_text(markup)
 
     def set_text(self, text=['']):
         ''' Sets widget text '''
