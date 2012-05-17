@@ -4,6 +4,7 @@ import random
 
 import e3
 import gobject
+import time
 
 import logging
 log = logging.getLogger('dummy.Worker')
@@ -166,6 +167,13 @@ class Worker(e3.Worker):
         self.session.contact_added_you()
         return False
 
+    def _return_message(self, cid, account, message):
+        ''' Method to return a message after some timeout '''
+        self.session.conv_message(cid, account, message)
+        message.account = account
+        e3.Logger.log_message(self.session, None, message, False)
+        return False
+
     def _add_contact(self, mail, nick, status_, alias, blocked):
         """
         method to add a contact to the contact list
@@ -300,11 +308,8 @@ class Worker(e3.Worker):
         '''
         self.session.conv_message_send_succeed(cid, message)
         account = random.choice(self.session.contacts.contacts.keys())
-        self.session.conv_message(cid, account, message)
-
         e3.Logger.log_message(self.session, [account], message, True)
-        message.account = account
-        e3.Logger.log_message(self.session, None, message, False)
+        gobject.timeout_add_seconds(1, self._return_message, cid, account, message)
 
     # p2p handlers
 
