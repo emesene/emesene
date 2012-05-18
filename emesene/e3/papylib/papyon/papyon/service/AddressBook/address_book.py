@@ -410,7 +410,8 @@ class AddressBook(gobject.GObject):
     def update_contact_infos(self, contact, infos, done_cb=None, failed_cb=None):
         def callback():
             contact._server_infos_changed(infos)
-            self.__common_callback(None, done_cb)
+            self.__common_callback(None, done_cb, contact)
+
         up = scenario.ContactUpdatePropertiesScenario(self._ab,
                 (callback,),
                 (self.__common_errback, failed_cb))

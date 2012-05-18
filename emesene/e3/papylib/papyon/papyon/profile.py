@@ -27,7 +27,7 @@ contacts in his/her contact list.
     @sort: Presence, Membership, Privacy, NetworkID"""
 
 from papyon.util.decorator import rw_property
-
+from papyon.service.description import AB
 import gobject
 import logging
 
@@ -500,6 +500,14 @@ class BaseContact(gobject.GObject):
         """Contact display name
             @rtype: utf-8 encoded string"""
         return self._display_name
+
+    @property
+    def alias(self):
+        """Contact nick name
+            @rtype: utf-8 encoded string"""
+        alias = self.infos.get(AB.constants.ContactGeneral.ANNOTATIONS,
+                {}).get(AB.constants.ContactAnnotations.NICKNAME, "")
+        return unicode(alias, 'utf-8')
 
     @property
     def end_points(self):

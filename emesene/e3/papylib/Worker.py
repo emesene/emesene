@@ -249,13 +249,9 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _add_contact(self, papycontact):
         ''' helper method to add a contact to the (gui) contact list '''
-        constants = papyon.service.description.AB.constants
-        alias = papycontact.infos.get(constants.ContactGeneral.ANNOTATIONS,
-                {}).get(constants.ContactAnnotations.NICKNAME, "")
-        alias = unicode(alias, 'utf-8')
         contact = e3.base.Contact(papycontact.account, papycontact.id,
             papycontact.display_name, papycontact.personal_message,
-            STATUS_PAPY_TO_E3[papycontact.presence], alias,
+            STATUS_PAPY_TO_E3[papycontact.presence], papycontact.alias,
             (papyon.profile.Membership.BLOCK & papycontact.memberships))
 
         self.session.contacts.contacts[papycontact.account] = contact
@@ -1134,16 +1130,32 @@ class Worker(e3.base.Worker, papyon.Client):
             self.address_book.rename_group(papygroup, name,
                     failed_cb=(rename_group_fail,))
 
-    def _handle_action_set_contact_alias(self, account, alias): #TODO: finish
+    def _handle_action_set_contact_alias(self, account, alias):
         ''' handle Action.ACTION_SET_CONTACT_ALIAS '''
+
+        contact = self.session.contacts.contacts.get(account, None)
+        if not contact:
+            return
+
+        account = contact.account
+        old_nick = contact.nick
+
         def set_contact_alias_fail(*args):
             log.error("Error when settings alias: %s" % args)
             # account
             self.session.contact_alias_failed('')
 
-        def set_contact_alias_succeed(*args):
-            log.info("Setting alias ok: %s" % args)
-            self.session.contact_alias_succeed(account)
+        def set_contact_alias_succeed(papycontact, *args):
+            log.info("Setting alias ok: %s" % account)
+
+            if alias != "":
+                contact.alias = papycontact.alias
+                contact.nick = papycontact.alias
+            else:
+                contact.alias = ""
+                contact.nick = papycontact.display_name
+
+            self.session.contact_attr_changed(account, 'nick', old_nick)
 
         papycontact = self.contact_by_account(account)
         new_alias = alias.encode("utf-8")
@@ -1152,27 +1164,9 @@ class Worker(e3.base.Worker, papyon.Client):
         infos = {constants.ContactGeneral.ANNOTATIONS:
                 {constants.ContactAnnotations.NICKNAME: new_alias}}
 
-        self.address_book.update_contact_infos(papycontact, infos)
-        #   TODO: Find out why these don't work
-        #    done_cb=set_contact_alias_succeed,
-        #        failed_cb=set_contact_alias_fail)
-
-        contact = self.session.contacts.contacts.get(account, None)
-
-        if not contact:
-            return
-
-        account = contact.account
-        old_nick = contact.nick
-
-        if alias != "":
-            contact.alias = new_alias
-            contact.nick = new_alias
-        else:
-            contact.alias = ""
-            contact.nick = papycontact.display_name
-
-        self.session.contact_attr_changed(account, 'nick', old_nick)
+        self.address_book.update_contact_infos(papycontact, infos,
+            done_cb=(set_contact_alias_succeed,),
+                failed_cb=set_contact_alias_fail)
 
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS '''
