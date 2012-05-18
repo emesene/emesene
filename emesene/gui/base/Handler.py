@@ -496,11 +496,6 @@ class ConversationToolbarHandler(object):
         self.dialog.select_color(self.conversation.cstyle.color,
             self.conversation.on_color_selected)
 
-    def on_style_selected(self):
-        '''called when the Style button is selected'''
-        self.dialog.select_style(self.conversation.cstyle,
-            self.conversation.on_style_selected)
-
     def on_invite_selected(self):
         '''called when the Invite button is selected'''
         self.dialog.invite_dialog(self.session,

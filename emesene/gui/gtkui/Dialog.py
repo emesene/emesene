@@ -740,15 +740,6 @@ class Dialog(object):
             window.show_all()
 
     @classmethod
-    def select_style(cls, style, callback):
-        '''select bold, italic, underline and strike, receives
-        a e3.Message.Style object with the current style
-        the callback receives the response and a new style object with the
-        selection
-        '''
-        pass
-
-    @classmethod
     def select_emote(cls, session, theme, callback, max_width=16):
         '''select an emoticon, receives a gui.Theme object with the theme
         settings the callback receives the response and a string representing

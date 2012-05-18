@@ -205,10 +205,6 @@ class Conversation(object):
         self.session.config.font_color = '#' + color.to_hex()
         self.input.update_style(self.cstyle)
 
-    def on_style_selected(self, style):
-        '''called when a new font is selected'''
-        self.cstyle = style
-
     def on_invite(self, account):
         '''called when a contact is selected to be invited'''
         self.session.conversation_invite(self.cid, account)
