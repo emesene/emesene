@@ -54,15 +54,14 @@ inherited by extensions.
 
     property_names = __gproperties__.keys()
 
-    def __init__(self, function):
+    def __init__(self, is_plus):
         Gtk.CellRenderer.__init__(self)
         self.__dict__['markup'] = ''
-        self.function = function
+        self.is_plus = is_plus
 
         #caching
         self._lines_width = {}
         self._lines_height = {}
-
 
     def __getattr__(self, name):
         try:
@@ -205,39 +204,30 @@ inherited by extensions.
             else:
                 log.error("unhandled type %s" % type(i))
 
+    def _prepare_markup(self, markup, is_plus=True):
+        if is_plus:
+            text = Plus.msnplus_parse(markup)
+        else:
+            text = Plus.msnplus_strip(markup)
+
+        text = MarkupParser.replace_markup(text)
+        text_list = MarkupParser.replace_emoticons(text)
+        return text_list
+
     def update_markup(self):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
         try:
-            decorated_markup = self.function(self.markup)
+            decorated_markup = self._prepare_markup(self.markup, self.is_plus)
         except Exception, error: #We really want to catch all exceptions
             log.error("this nick: '%s' made the parser go crazy, striping. Error: %s" % (
                     self.markup, error))
             try:
-                decorated_markup = self.function(self.markup, False)
+                decorated_markup = self._prepare_markup(self.markup, False)
             except Exception, error: #We really want to catch all exceptions
                 log.error("Even stripping plus markup doesn't help. Error: %s" % error)
                 decorated_markup = self.markup
 
         return decorated_markup
-
-plus_or_noplus = 1 # 1 means plus, 0 means noplus
-
-def plus_text_parse(item, plus=True):
-    '''parse plus in the contact list'''
-    global plus_or_noplus
-    # get a plain string with objects
-    if plus_or_noplus and plus:
-        item = Plus.msnplus_parse(item)
-    else:
-        item = Plus.msnplus_strip(item)
-    return item
-
-def msnplus_to_list(text, plus=True):
-    '''parse text and return a list of strings and GdkPixbuf.Pixbufs'''
-    text = plus_text_parse(text, plus)
-    text = MarkupParser.replace_markup(text)
-    text_list = MarkupParser.replace_emoticons(text)
-    return text_list
 
 class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
@@ -248,14 +238,12 @@ class CellRendererPlus(CellRendererFunction):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
+    __gtype_name__ = 'CellRendererPlus'
+
     def __init__(self):
-        global plus_or_noplus
-        plus_or_noplus = 1
-        CellRendererFunction.__init__(self, msnplus_to_list)
+        CellRendererFunction.__init__(self, True)
 
 extension.implements(CellRendererPlus, 'nick renderer')
-
-GObject.type_register(CellRendererPlus)
 
 class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
@@ -266,18 +254,17 @@ class CellRendererNoPlus(CellRendererFunction):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
+    __gtype_name__ = 'CellRendererNoPlus'
 
     def __init__(self):
-        global plus_or_noplus
-        plus_or_noplus = 0
-        CellRendererFunction.__init__(self, msnplus_to_list)
+        CellRendererFunction.__init__(self, False)
 
 extension.implements(CellRendererNoPlus, 'nick renderer')
 
-GObject.type_register(CellRendererNoPlus)
-
-
 class SmileyLabel(Gtk.CellView):
+
+    __gtype_name__ = 'SmileyLabel'
+
     def __init__(self):
         Gtk.CellView.__init__(self)
         self._model = Gtk.ListStore(str)
@@ -319,8 +306,6 @@ class SmileyLabel(Gtk.CellView):
         else:
             log.error("unhandled angle %d" % angle)
 
-GObject.type_register(SmileyLabel)
-
 #from emesene1 by mariano guerra adapted by cando
 #animation support by cando
 #TODO add transformation field in configuration
@@ -328,6 +313,8 @@ GObject.type_register(SmileyLabel)
 
 class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
     """Renderer for avatar """
+
+    __gtype_name__ = 'AvatarRenderer'
 
     __gproperties__ = {
         'image': (GObject.TYPE_OBJECT, 'The contact image', '',
@@ -451,5 +438,3 @@ class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
         if avatar:
             self.draw_avatar(ctx, avatar, width - dim, ypad, dim,
                 Gdk.Gravity.CENTER, self._radius_factor, alpha)
-
-GObject.type_register(AvatarRenderer)
