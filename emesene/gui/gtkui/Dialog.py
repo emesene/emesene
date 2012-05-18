@@ -463,6 +463,11 @@ class Dialog(object):
         with two keys 'accepted' and 'rejected' and a list of mail
         addresses as values
         '''
+        global dialogs
+        for i in dialogs:
+            if type(i) == AddBuddy:
+                i.destroy()
+
         dialog = AddBuddy(response_cb)
 
         for account, nick in accounts:
