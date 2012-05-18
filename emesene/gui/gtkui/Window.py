@@ -63,6 +63,7 @@ class Window(gtk.Window):
                 utils.safe_gtk_image_load(image_theme.logo).get_pixbuf())
 
         self.cb_on_close = cb_on_close
+        self.cb_on_close_conv = cb_on_close
         self.cb_on_quit = cb_on_close
 
         self._state = 0
@@ -83,6 +84,7 @@ class Window(gtk.Window):
             if self.accel_group:
                 self.remove_accel_group(self.accel_group)
                 self.accel_group = None
+            self._content_main.destroy()
             del self._content_main
         self._content_main = content_main
         self.box.pack1(self._content_main)
@@ -95,14 +97,20 @@ class Window(gtk.Window):
 
     def _set_content_conv(self, content_conv):
         '''content setter'''
+        w = self.box.get_position()
         if self._content_conv:
             self.box.remove(self._content_conv)
             if self.accel_group:
                 self.remove_accel_group(self.accel_group)
                 self.accel_group = None
+            self._content_conv.destroy()
             del self._content_conv
         self._content_conv = content_conv
-        self.box.pack2(self._content_conv)
+        if content_conv is not None:
+            self.box.pack2(self._content_conv)
+        else:
+            self.resize(self.set_or_get_width(w),
+                        self.set_or_get_height(0))
 
     content_conv = property(_get_content_conv, _set_content_conv)
 
@@ -151,7 +159,7 @@ class Window(gtk.Window):
         '''called when the user is disconnected'''
         self.cb_on_close = cb_on_close
 
-    def go_conversation(self, session):
+    def go_conversation(self, session, on_close_cb):
         '''change to a conversation window'''
         ConversationManager = extension.get_default('conversation window')
         self.content_conv = ConversationManager(session, self._on_last_tab_close)
@@ -159,6 +167,8 @@ class Window(gtk.Window):
         self.connect('key-press-event', self.content_conv._on_key_press)
         self.content_conv.show()
         self.content_conv.set_accels()
+
+        self.cb_on_close_conv = on_close_cb
 
     def set_location(self, width=0, height=0, posx=None, posy=None, single_window=False):
         """place the window on the given coordinates
@@ -231,16 +241,16 @@ class Window(gtk.Window):
         '''call the cb_on_close callback, if the callback return True
         then dont close the window'''
         self.save_dimensions()
-        if self.content_conv is not None:
-            return self.cb_on_close(self.content_conv)
+        if self.content_conv and not self.content_main:
+            return self.cb_on_close_conv(self.content_conv)
         else:
-            return self.cb_on_close(self.content_main)
+            return self.cb_on_close()
 
     def _on_last_tab_close(self):
         '''do the action when the last tab is closed on a conversation window
         '''
-        self.cb_on_close(self.content_conv)
-        self.hide()
+        self.cb_on_close_conv(self.content_conv)
+        self.content_conv = None
 
     def hide(self):
         '''override the method to remember the position

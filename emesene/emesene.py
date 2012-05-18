@@ -673,7 +673,7 @@ class Controller(object):
                     windowcls = extension.get_default('window frame')
                     window = windowcls(self._on_conversation_window_close)
 
-                window.go_conversation(self.session)
+                window.go_conversation(self.session, self._on_conversation_window_close)
                 self._set_location(window, True, sing_wind)
                 conv_manager = window.content_conv
                 self.conversations.append(conv_manager)
