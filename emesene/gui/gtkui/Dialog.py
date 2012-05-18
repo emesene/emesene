@@ -43,12 +43,29 @@ try:
 except ImportError:
     use_webkit = False
 
+# A list of all open dialogs
+dialogs = []
+
 class Dialog(object):
     '''a class full of static methods to handle dialogs, dont instantiate it'''
     NAME = 'Dialog'
     DESCRIPTION = 'Class to show all the dialogs of the application'
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
+
+    @classmethod
+    def close_all(cls):
+        '''close all left open dialogs'''
+        global dialogs
+        for dialog in list(dialogs):
+            dialog.destroy()
+
+    @classmethod
+    def window_destroy(cls, window):
+        '''properly close and remove a dialog'''
+        global dialogs
+        dialogs.remove(window)
+        window.destroy()
 
     @classmethod
     def window_add_image(cls, window, stock_id):
@@ -112,7 +129,7 @@ class Dialog(object):
         if response_cb:
             response_cb(*args)
 
-        window.hide()
+        window.destroy()
 
     @classmethod
     def default_cb(cls, widget, window, response_cb, *args):
@@ -122,12 +139,12 @@ class Dialog(object):
         if response_cb:
             response_cb(*args)
 
-        window.hide()
+        window.destroy()
 
     @classmethod
     def on_file_click_cb(cls, widget, window, response_cb):
         response_cb(gtk.STOCK_OPEN, widget.get_filename())
-        window.hide()
+        window.destroy()
 
     @classmethod
     def chooser_cb(cls, widget, window, response_cb, response):
@@ -138,7 +155,7 @@ class Dialog(object):
         if response_cb:
             response_cb(response, filename)
 
-        window.hide()
+        window.destroy()
 
     @classmethod
     def entry_cb(cls, widget, window, response_cb, *args):
@@ -154,7 +171,7 @@ class Dialog(object):
             else:
                 response_cb(*args)
 
-        window.hide()
+        window.destroy()
 
     @classmethod
     def add_contact_cb(cls, widget, window, response_cb, response):
@@ -164,7 +181,7 @@ class Dialog(object):
         group = window.combo.get_model().get_value(
             window.combo.get_active_iter(), 0)
 
-        window.hide()
+        window.destroy()
         response_cb(response, contact, group)
 
     @classmethod
@@ -248,6 +265,9 @@ class Dialog(object):
 
         window.add(vbox)
 
+        global dialogs
+        dialogs.append(window)
+
         setattr(window, 'vbox', vbox)
         setattr(window, 'hbox', hbox)
         setattr(window, 'bbox', bbox)
@@ -256,6 +276,7 @@ class Dialog(object):
         args.insert(0, stock.CLOSE)
         window.connect('delete-event', cls.close_cb, window,
             response_cb, *args)
+        window.connect('destroy', cls.window_destroy)
 
         vbox.show_all()
 
@@ -330,7 +351,7 @@ class Dialog(object):
         trace = gtk.Label(traceback.format_exc())
         def on_hide(*args):
             if hide_button.get_active(): #show
-                hide_button.set_label(_('Hide details'))
+                hide_button.set_label(_('hide details'))
                 trace.show()
             else:
                 hide_button.set_label(_('Show details'))
@@ -339,7 +360,7 @@ class Dialog(object):
 
         close_button = gtk.Button(stock=gtk.STOCK_OK)
         def on_ok(*args):
-            window.destroy()
+            window.hide()
         close_button.connect('clicked', on_ok)
         vbox.pack_start(hide_button, False, False)
         vbox.pack_start(trace)
@@ -581,7 +602,7 @@ class Dialog(object):
 
         def on_email_hook(dialog, mail):
             gui.base.Desktop.open("mailto://"+mail)
-            
+
         about = gtk.AboutDialog()
         gtk.about_dialog_set_url_hook(on_website_hook)
         gtk.about_dialog_set_email_hook(on_email_hook)
@@ -597,7 +618,7 @@ class Dialog(object):
         icon = gtk.gdk.pixbuf_new_from_file(logo_path)
         about.set_logo(icon)
         about.run()
-        about.hide()
+        about.destroy()
 
     @classmethod
     def contact_information_dialog(cls, session, account):
@@ -625,13 +646,13 @@ class Dialog(object):
                 callback(style)
 
             font_chooser.destroy()
-            window.hide()
+            window.destroy()
         else:
             def select_font_cb(button, window, callback, response, color_sel,
                 color):
                 '''callback called on button selection'''
                 if response == stock.ACCEPT:
-                    window.hide()
+                    window.destroy()
                     fdesc = pango.FontDescription(font_sel.get_font_name())
                     style = utils.pango_font_description_to_style(fdesc)
                     style.color.red = color.red
@@ -641,7 +662,7 @@ class Dialog(object):
 
                     callback(style)
 
-                window.hide()
+                window.destroy()
 
             window = cls.new_window(_('Select font'))
 
@@ -686,13 +707,13 @@ class Dialog(object):
                 '''callback called on button selection'''
 
                 if response == stock.ACCEPT:
-                    window.hide()
+                    window.destroy()
                     gtk_color = color_sel.get_current_color()
                     color = e3.Color(gtk_color.red, gtk_color.green,
                         gtk_color.blue)
                     callback(color)
 
-                window.hide()
+                window.destroy()
 
             window = cls.new_window(_('Select color'))
 
@@ -865,7 +886,7 @@ class Dialog(object):
                 callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
                         user, passwd, session_id, service, server_host, server_port)
 
-            window.hide()
+            window.destroy()
 
         def button_cb(button, window, response_cb, response):
             '''called when a button is pressedm get the response id and call
@@ -892,7 +913,7 @@ class Dialog(object):
         window.show_all()
 
         for widget in proxy_settings:
-            widget.hide()
+            widget.destroy()
 
     @classmethod
     def edit_profile(cls, handler, user_nick, user_message, last_avatar):
@@ -944,7 +965,7 @@ class Dialog(object):
             new_nick = nick.get_text()
             new_pm = pm.get_text()
             handler.save_profile(new_nick, new_pm)
-            windows.hide()
+            windows.destroy()
 
         savebutt.connect('clicked', save_profile)
         if handler.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
@@ -1070,8 +1091,11 @@ class ImageChooser(gtk.FileChooserDialog):
     def __init__(self, path, response_cb):
         '''class constructor, path is the directory where the
         dialog opens'''
-        gtk.FileChooserDialog.__init__(self, _("Image Chooser"), \
+        gtk.FileChooserDialog.__init__(self, _("Image Chooser"),
                     parent=None, action=gtk.FILE_CHOOSER_ACTION_OPEN)
+
+        global dialogs
+        dialogs.append(self)
 
         self.response_cb = response_cb
 
@@ -1104,6 +1128,12 @@ class ImageChooser(gtk.FileChooserDialog):
 
         self._add_filters()
         self._add_preview()
+
+    def destroy(self):
+        '''override destroy method'''
+        global dialogs
+        dialogs.remove(self)
+        gtk.Window.destroy(self)
 
     def _add_filters(self):
         '''
@@ -1163,19 +1193,19 @@ class ImageChooser(gtk.FileChooserDialog):
         '''method called when the user clicks the button'''
         filename = self.get_filename()
         if os.path.isfile(filename):
-            self.hide()
+            self.destroy()
             self.response_cb(gtk.RESPONSE_ACCEPT, filename)
         else:
             Dialog.error(_("No picture selected"))
 
     def _on_cancel(self, button):
         '''method called when the user clicks the button'''
-        self.hide()
+        self.destroy()
         self.response_cb(gtk.RESPONSE_CANCEL, self.get_filename())
 
     def _on_close(self, window, event):
         '''called when the user click on close'''
-        self.hide()
+        self.destroy()
         self.response_cb(gtk.RESPONSE_CLOSE, self.get_filename())
 
     def _on_update_preview(self, filechooser):
@@ -1210,6 +1240,9 @@ class CEChooser(ImageChooser):
         '''class constructor'''
         ImageChooser.__init__(self, path, None)
 
+        global dialogs
+        dialogs.append(self)
+
         self.response_cb = response_cb
 
         label = gtk.Label(_("Shortcut"))
@@ -1242,6 +1275,12 @@ class CEChooser(ImageChooser):
         self._on_changed(None)
         self.shortcut.connect('changed', self._on_changed)
 
+    def destroy(self):
+        '''override destroy method'''
+        global dialogs
+        dialogs.remove(self)
+        gtk.Window.destroy(self)
+
     def _on_accept(self, button):
         '''method called when the user clicks the button'''
         filename = self.get_filename()
@@ -1252,19 +1291,19 @@ class CEChooser(ImageChooser):
             if not shortcut:
                 Dialog.error(_("Empty shortcut"))
             else:
-                self.hide()
+                self.destroy()
                 self.response_cb(stock.ACCEPT, filename, shortcut, size)
         else:
             Dialog.error(_("No picture selected"))
 
     def _on_cancel(self, button):
         '''method called when the user clicks the button'''
-        self.hide()
+        self.destroy()
         self.response_cb(stock.CANCEL, None, None, None)
 
     def _on_close(self, window, event):
         '''called when the user click on close'''
-        self.hide()
+        self.destroy()
         self.response_cb(stock.CLOSE, None, None, None)
 
     def _on_changed(self, shortcut):
@@ -1288,6 +1327,9 @@ class EmotesWindow(gtk.Window):
         max_width -- the maximum number of columns
         """
         gtk.Window.__init__(self)
+
+        global dialogs
+        dialogs.append(self)
 
         self.session = session
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
@@ -1323,12 +1365,18 @@ class EmotesWindow(gtk.Window):
 
         self.tag = None
 
+    def destroy(self):
+        '''override destroy method'''
+        global dialogs
+        dialogs.remove(self)
+        gtk.Window.destroy(self)
+
     def on_leave_notify_event(self, *args):
         """
         callback called when the mouse leaves this window
         """
         if self.tag is None:
-            self.tag = gobject.timeout_add(500, self.hide)
+            self.tag = gobject.timeout_add(500, self.destroy)
 
     def on_enter_notify_event(self, *args):
         """
@@ -1441,7 +1489,7 @@ class EmotesWindow(gtk.Window):
     def _on_emote_selected(self, button, shortcut):
         '''called when an emote is selected'''
         self.emote_selected(shortcut)
-        self.hide()
+        self.destroy()
 
     def _on_emote_clicked(self, button, event, shortcut):
         '''intercept right click and show a nice menu'''
@@ -1468,7 +1516,7 @@ class EmotesWindow(gtk.Window):
 
     def _on_emote_shortcut_edit(self, widget, shortcut):
         '''modify a shortcut for the selected custom emoticon'''
-        self.hide()
+        self.destroy()
         cedict = self.emcache.parse()
 
         def _on_ce_edit_cb(response, emcache, shortcut, hash_, text=''):
@@ -1487,7 +1535,7 @@ class EmotesWindow(gtk.Window):
 
     def _on_emote_shortcut_dele(self, widget, shortcut):
         '''delete a custom emoticon and its shortcut'''
-        self.hide()
+        self.destroy()
         cedict = self.emcache.parse()
         #TODO: confirmation? or not?
         self.emcache.remove(cedict[shortcut])
@@ -1503,6 +1551,10 @@ class InviteWindow(gtk.Window):
         constructor
         """
         gtk.Window.__init__(self)
+
+        global dialogs
+        dialogs.append(self)
+
         self.set_border_width(1)
         self.set_title(_('Invite friend'))
         self.set_default_size(300, 250)
@@ -1510,7 +1562,7 @@ class InviteWindow(gtk.Window):
         self.callback = callback
         ContactList = extension.get_default('contact list')
         self.contact_list = ContactList(session)
-        self.contact_list.hide_on_filtering = True
+        self.contact_list.destroy_on_filtering = True
         self.contact_list.nick_template = \
             '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
 
@@ -1555,21 +1607,20 @@ class InviteWindow(gtk.Window):
         self.add(vbox)
 
         badd.connect('clicked', self._on_add_clicked)
-        bclose.connect('clicked', lambda *args: self.hide())
+        bclose.connect('clicked', lambda *args: self.destroy())
         search.connect('changed', self._on_search_changed)
         self.connect('key-press-event', self._on_key_press)
-        self.connect('delete-event', lambda *args: self.hide())
+        self.connect('delete-event', lambda *args: self.destroy())
         self.contact_list.contact_selected.subscribe(
             self._on_contact_selected)
         self.contact_list.fill()
         self.set_modal(True)
         self.show()
         vbox.show_all()
-        
 
     def _on_key_press(self, widget, event):
         if event.keyval == gtk.keysyms.Escape:
-            self._hide()
+            self.destroy()
 
     def _on_add_clicked(self, button):
         """
@@ -1582,7 +1633,7 @@ class InviteWindow(gtk.Window):
             return
 
         self.callback(contact.account)
-        self._hide()
+        self.destroy()
 
     def _on_search_changed(self, entry):
         """
@@ -1595,15 +1646,17 @@ class InviteWindow(gtk.Window):
         method called when the contact is selected
         """
         self.callback(contact.account)
-        self._hide()
+        self.destroy()
 
-    def _hide(self):
+    def destroy(self):
         """
-        unsubscribe the signal, and hide the dialog
+        unsubscribe the signal, and destroy the dialog
         """
+        global dialogs
+        dialogs.remove(self)
         self.contact_list.contact_selected.unsubscribe(
             self._on_contact_selected)
-        self.hide()
+        gtk.Window.destroy(self)
 
 class AddBuddy(gtk.Window):
     '''Confirm dialog informing that someone has added you
@@ -1612,6 +1665,10 @@ class AddBuddy(gtk.Window):
     def __init__(self, callback):
         '''Constructor. Packs widgets'''
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
+
+        global dialogs
+        dialogs.append(self)
+
         self.mails = []  # [(mail, nick), ...]
         self.rejected = []
         self.accepted = []
@@ -1662,7 +1719,7 @@ class AddBuddy(gtk.Window):
 
         # the contents of the buttonbox
         self.quit = gtk.Button(_('Quit'), gtk.STOCK_QUIT)        
-        self.quit.connect('clicked', self.hide)       
+        self.quit.connect('clicked', self.destroy)       
         self.later = gtk.Button()
         self.later.add(gtk.Label(_('Remind me later')))
         self.later.connect('clicked', self.cb_cancel)
@@ -1725,7 +1782,7 @@ class AddBuddy(gtk.Window):
         try:
             mail, nick = self.mails[self.pointer]
         except IndexError:
-            self.hide()
+            self.destroy()
             return
 
         if nick != mail:
@@ -1758,10 +1815,12 @@ class AddBuddy(gtk.Window):
 
         self.update()
 
-    def hide(self, button=False):
-        '''Called to hide the window'''
+    def destroy(self, button=False):
+        '''Called to destroy the window'''
+        global dialogs
+        dialogs.remove(self)
         self.callback({'accepted': self.accepted, 'rejected': self.rejected})
-        gtk.Window.hide(self)
+        gtk.Window.destroy(self)
 
     def cb_delete(self, *args):
         '''Callback when the window is destroyed'''
@@ -1792,6 +1851,10 @@ class ProgressWindow(gtk.Window):
     def __init__(self, title, callback):
         '''Constructor. Packs widgets'''
         gtk.Window.__init__(self)
+
+        global dialogs
+        dialogs.append(self)
+
         self.set_title(title)
         self.set_role("dialog")
         self.buttoncancel = gtk.Button()
@@ -1810,6 +1873,12 @@ class ProgressWindow(gtk.Window):
         vbox.pack_start(self.buttoncancel)
         self.add(vbox)
 
+    def destroy(self):
+        '''override destroy method'''
+        global dialogs
+        dialogs.remove(self)
+        gtk.Window.destroy(self)
+
     def update(self, progress):
         '''called when the progress is updated'''
         self.progressbar.set_fraction(progress / 100.0)
@@ -1825,6 +1894,10 @@ class WebWindow(gtk.Window):
     def __init__(self, title, url, callback = None):
         '''Constructor. Packs widgets'''
         gtk.Window.__init__(self)
+
+        global dialogs
+        dialogs.append(self)
+
         self.set_title(title)
         self._callback = callback
         scroll = gtk.ScrolledWindow()
@@ -1834,6 +1907,12 @@ class WebWindow(gtk.Window):
         bro.open(url)
         scroll.add(bro)
         self.add(scroll)
+
+    def destroy(self):
+        '''override destroy method'''
+        global dialogs
+        dialogs.remove(self)
+        gtk.Window.destroy(self)
 
     def _load_committed_cb(self, web_view, frame):
         uri = frame.get_uri()

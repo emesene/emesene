@@ -344,6 +344,9 @@ class Controller(object):
         if image_chooser:
             image_chooser.hide()
 
+        # close all dialogs that are open
+        extension.get_default('dialog').close_all()
+
         self._remove_subscriptions()
 
         if server_disconnected:
