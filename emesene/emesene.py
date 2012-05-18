@@ -160,13 +160,13 @@ class Controller(object):
 
         if hasattr(signal, 'SIGINT'):
             signal.signal(signal.SIGINT,
-                lambda * args: glib.idle_add(self.close_session))
+                lambda * args: glib.idle_add(self.kill))
         if hasattr(signal, 'SIGTERM'):
             signal.signal(signal.SIGTERM,
-                lambda * args: glib.idle_add(self.close_session))
+                lambda * args: glib.idle_add(self.kill))
         if hasattr(signal, 'SIGHUP'):
             signal.signal(signal.SIGHUP,
-                lambda * args: glib.idle_add(self.close_session))
+                lambda * args: glib.idle_add(self.kill))
 
     def _setup(self):
         '''register core extensions'''
@@ -331,6 +331,14 @@ class Controller(object):
 
         self.last_session_account = account.account
         self.last_session_service = account.service
+
+    def kill(self):
+        '''method that tries to kill emesene in a friendly way'''
+        try:
+            self.close_session()
+        except:
+            log.exception("Error while shutting down")
+            sys.exit(1)
 
     def close_session(self, do_exit=True, server_disconnected=False):
         '''close session'''
