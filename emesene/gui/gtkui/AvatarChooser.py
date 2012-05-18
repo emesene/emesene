@@ -223,10 +223,9 @@ class AvatarChooser(gtk.Window):
         if self.config.avatar_chooser_folder is None:
             self.config.avatar_chooser_folder = os.path.expanduser('~')
 
-        image_chooser = extension.get_and_instantiate('image chooser',
-                                          self.config.avatar_chooser_folder,
-                                          _on_image_selected)
-        image_chooser.show()
+        dialog = extension.get_default('dialog')
+        dialog.select_image(self.config.avatar_chooser_folder,
+                            _on_image_selected)
 
     def _on_image_area_selector(self, path, static=True):
         '''called when the user must resize the added image'''

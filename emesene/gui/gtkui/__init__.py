@@ -55,7 +55,6 @@ def gtk_main(Controller):
     else:
         import ImageAreaSelectorNew as ImageAreaSelector
 
-    import ImageChooser
     import Login
     import MainMenu
     import MainWindow
@@ -116,8 +115,6 @@ def setup():
     gtk.settings_get_default().set_property("gtk-error-bell", False)
 
     extension.category_register('dialog', Dialog.Dialog)
-    extension.category_register('image chooser', ImageChooser.ImageChooser, 
-                                single_instance=True)
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
     extension.category_register('avatar', Avatar.Avatar)
     extension.category_register('avatar manager', AvatarManager.AvatarManager)

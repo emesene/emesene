@@ -339,11 +339,6 @@ class Controller(object):
         if pref:
             pref.hide()
 
-        # prevent image chooser from staying open and breaking things
-        image_chooser = extension.get_instance('image chooser')
-        if image_chooser:
-            image_chooser.hide()
-
         # close all dialogs that are open
         extension.get_default('dialog').close_all()
 

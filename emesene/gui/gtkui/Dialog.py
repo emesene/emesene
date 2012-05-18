@@ -351,7 +351,7 @@ class Dialog(object):
         trace = gtk.Label(traceback.format_exc())
         def on_hide(*args):
             if hide_button.get_active(): #show
-                hide_button.set_label(_('hide details'))
+                hide_button.set_label(_('Hide details'))
                 trace.show()
             else:
                 hide_button.set_label(_('Show details'))
@@ -746,6 +746,13 @@ class Dialog(object):
         EmotesWindow(session, callback, max_width).show()
 
     @classmethod
+    def select_image(cls, path, response_cb):
+        '''select an image from the disk using the given default path
+        returns a stock response and a string containing the path of the image
+        '''
+        ImageChooser(path, response_cb).show()
+
+    @classmethod
     def invite_dialog(cls, session, callback):
         '''select a contact to add to the conversation, receives a session
         object of the current session the callback receives the response and
@@ -1085,27 +1092,31 @@ Do you want to fix your profile now?''')
 
         window.show()
 
-class ImageChooser(gtk.FileChooserDialog):
+class ImageChooser(gtk.Window):
     '''a class to select images'''
 
     def __init__(self, path, response_cb):
         '''class constructor, path is the directory where the
         dialog opens'''
-        gtk.FileChooserDialog.__init__(self, _("Image Chooser"),
-                    parent=None, action=gtk.FILE_CHOOSER_ACTION_OPEN)
+        gtk.Window.__init__(self)
 
         global dialogs
         dialogs.append(self)
 
         self.response_cb = response_cb
 
+        self.set_modal(True)
+        self.set_title(_("Image Chooser"))
         self.set_default_size(600, 400)
         self.set_border_width(4)
         self.set_position(gtk.WIN_POS_CENTER)
+        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
-        self.vbox.set_spacing(4)
-
-        self.set_current_folder(path)
+        self.image = None
+        self.vbox = gtk.VBox(spacing=4)
+ 
+        self.file_chooser = gtk.FileChooserWidget()
+        self.file_chooser.set_current_folder(path)
 
         hbbox = gtk.HButtonBox()
         hbbox.set_spacing(4)
@@ -1117,14 +1128,18 @@ class ImageChooser(gtk.FileChooserDialog):
         b_accept.connect('clicked', self._on_accept)
         b_cancel.connect('clicked', self._on_cancel)
         self.connect('delete-event', self._on_close)
-        self.connect("file-activated",self._on_accept)
+        self.file_chooser.connect("file-activated", self._on_accept)
 
         hbbox.pack_start(b_cancel, False)
         hbbox.pack_start(b_accept, False)
 
-        self.vbox.pack_end(hbbox, False)
-
-        self.show_all()
+        vbox = gtk.VBox()
+        self.vbox.pack_start(self.file_chooser, True, True)
+ 
+        vbox.add(self.vbox)
+        vbox.pack_start(hbbox, False)
+        self.add(vbox)
+        vbox.show_all()
 
         self._add_filters()
         self._add_preview()
@@ -1135,16 +1150,17 @@ class ImageChooser(gtk.FileChooserDialog):
         dialogs.remove(self)
         gtk.Window.destroy(self)
 
+    def set_icon(self, icon):
+        '''set the icon of the window'''
+        if utils.file_readable(icon):
+            gtk.Window.set_icon(self,
+                utils.safe_gtk_image_load(icon).get_pixbuf())
+
     def _add_filters(self):
         '''
         Adds all the possible file filters to the dialog. The filters correspond
         to the gdk available image formats
         '''
-
-        # All files filter
-        all_files = gtk.FileFilter()
-        all_files.set_name(_('All files'))
-        all_files.add_pattern('*')
 
         # All images filter
         all_images = gtk.FileFilter()
@@ -1152,67 +1168,68 @@ class ImageChooser(gtk.FileChooserDialog):
 
         filters = []
         formats = gtk.gdk.pixbuf_get_formats()
-        for format in formats:
-            filter = gtk.FileFilter()
-            name = "%s (*.%s)" % (format['description'], format['name'])
-            filter.set_name(name)
+        for format_ in formats:
+            filter_ = gtk.FileFilter()
+            name = "%s (*.%s)" % (format_['description'], format_['name'])
+            filter_.set_name(name)
 
-            for mtype in format['mime_types']:
-                filter.add_mime_type(mtype)
+            for mtype in format_['mime_types']:
+                filter_.add_mime_type(mtype)
                 all_images.add_mime_type(mtype)
 
-            for pattern in format['extensions']:
+            for pattern in format_['extensions']:
                 tmp = '*.' + pattern
-                filter.add_pattern(tmp)
+                filter_.add_pattern(tmp)
                 all_images.add_pattern(tmp)
 
-            filters.append(filter)
+            filters.append(filter_)
 
+        self.file_chooser.add_filter(all_images)
+        self.file_chooser.set_filter(all_images)
 
-        self.add_filter(all_files)
-        self.add_filter(all_images)
-        self.set_filter(all_images)
-
-        for filter in filters:
-            self.add_filter(filter)
+        for filter_ in filters:
+            self.file_chooser.add_filter(filter_)
 
     def _add_preview(self):
         '''
         Adds a preview widget to the file chooser
         '''
+
         self.image = gtk.Image()
         self.image.set_size_request(128, 128)
         self.image.show()
 
-        self.set_preview_widget(self.image)
-        self.set_preview_widget_active(True)
+        self.file_chooser.set_preview_widget(self.image)
+        self.file_chooser.set_preview_widget_active(True)
 
-        self.connect('selection-changed', self._on_update_preview)
+        self.file_chooser.connect('update-preview', self._on_update_preview)
 
     def _on_accept(self, button):
         '''method called when the user clicks the button'''
         filename = self.get_filename()
-        if os.path.isfile(filename):
-            self.destroy()
-            self.response_cb(gtk.RESPONSE_ACCEPT, filename)
-        else:
-            Dialog.error(_("No picture selected"))
+        
+        if filename is None or not os.path.isfile(filename):
+            extension.get_default('dialog').error(_("No picture selected"))
+            return
+
+        self.hide()
+        self.response_cb(gui.stock.ACCEPT, filename)
 
     def _on_cancel(self, button):
         '''method called when the user clicks the button'''
-        self.destroy()
-        self.response_cb(gtk.RESPONSE_CANCEL, self.get_filename())
+        self.hide()
+        self.response_cb(gui.stock.CANCEL, self.get_filename())
 
     def _on_close(self, window, event):
         '''called when the user click on close'''
-        self.destroy()
-        self.response_cb(gtk.RESPONSE_CLOSE, self.get_filename())
+        self.hide()
+        self.response_cb(gui.stock.CLOSE, self.get_filename())
 
     def _on_update_preview(self, filechooser):
         '''
         Updates the preview image
         '''
-        path = self.get_filename()
+        path = self.get_preview_filename()
 
         if path:
             # if the file is smaller than 1MB we
@@ -1221,7 +1238,8 @@ class ImageChooser(gtk.FileChooserDialog):
                 try:
                     pixbuf = gtk.gdk.pixbuf_new_from_file(self.get_filename())
                     if pixbuf.get_width() > 128 and pixbuf.get_height() > 128:
-                        pixbuf = pixbuf.scale_simple(128, 128, gtk.gdk.INTERP_BILINEAR)
+                        pixbuf = pixbuf.scale_simple(128, 128,
+                                gtk.gdk.INTERP_BILINEAR)
                     self.image.set_from_pixbuf(pixbuf)
 
                 except gobject.GError:
@@ -1230,6 +1248,23 @@ class ImageChooser(gtk.FileChooserDialog):
             else:
                 self.image.set_from_stock(gtk.STOCK_DIALOG_ERROR,
                     gtk.ICON_SIZE_DIALOG)
+
+    def get_filename(self):
+        '''Shortcut to get a properly-encoded filename from a file chooser'''
+        filename = self.file_chooser.get_filename()
+        if filename:
+            return gobject.filename_display_name(filename)
+        else:
+            return filename
+
+    def get_preview_filename(self):
+        '''Shortcut to get a properly-encoded preview filename'''
+        filename = self.file_chooser.get_preview_filename()
+        if filename:
+            return gobject.filename_display_name(filename)
+        else:
+            return filename
+
 
 class CEChooser(ImageChooser):
     '''a dialog to create a custom emoticon'''
@@ -1484,7 +1519,7 @@ class EmotesWindow(gtk.Window):
 
             self.emcache.insert((shortcut, resized_path))
 
-        CEChooser(os.path.expanduser("~"), _on_ce_choosed, self.shortcut_list)
+        CEChooser(os.path.expanduser("~"), _on_ce_choosed, self.shortcut_list).show()
 
     def _on_emote_selected(self, button, shortcut):
         '''called when an emote is selected'''
