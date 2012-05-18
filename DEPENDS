@@ -1,22 +1,30 @@
 === Core ===
  * python >= 2.6 (NO python3)
- * python-gobject
+ * python-gobject (not with gtk3 ui)
  * python-dbus (optional)
- * python-gst0.10 (optional)
+ * python-gst0.10 (optional) (not with gtk3 ui)
 
 === Network Libraries ===
  * python-papyon >= 0.5.6 (built-in)
- * python-dnspython
+ * python-crypto
+ * python-openssl (>= 0.6) 
  * python-farstream
  * python-gupnp-igd (optional)
  * python-sleekxmppy (built-in)
+ * python-dnspython
 
 === Gtk2 UI ===
  * python-notify (optional)
  * python-gtk2 >= 2.12
 
 === Gtk3 UI ===
- * 
+ * pygobject >= 3.2
+ * gir1.2-gtk-3.0
+ * gir1.2-gst-plugins-base-0.10
+ * gir1.2-gstreamer-0.10
+ * gir1.2-webkit-3.0 (optional)
+ * gir1.2-appindicator3 (optional)
+ * gir1.2-notify-0.7 (optional)
 
 === Qt4 UI ===
  * python-qt4 >= 4.6
