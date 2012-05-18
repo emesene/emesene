@@ -102,9 +102,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         if prop.name not in self.property_names:
             raise TypeError('No property named %s' % (prop.name,))
 
-        if prop == 'markup': #plus formatting
-            value = Plus.msnplus_to_dict
-
         self.__dict__[prop.name] = value
 
     def on_render(self, win, widget, bgnd_area, cell_area, expose_area, flags):
