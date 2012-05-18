@@ -235,7 +235,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         """
         Show or hide the close buttons on tab labels
         """
-        show = self.get_n_pages() > 1 and self.session.config.b_close_button_on_tabs
+        show = self.session.config.b_close_button_on_tabs and \
+               (self.session.config.b_single_window or self.get_n_pages() > 1)
         for conv_index in range(self.get_n_pages()):
             self.get_nth_page(conv_index).tab_label.close.set_visible(show)
 
