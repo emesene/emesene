@@ -29,6 +29,11 @@ import gui.base.Desktop
 class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
     '''a buffer that makes it easy to manipulate a gtk textview with
     rich text'''
+    __gsignals__ = {
+            "search_request": (gobject.SIGNAL_RUN_FIRST,
+                gobject.TYPE_NONE,
+                (gobject.TYPE_PYOBJECT,))
+            }
 
     def __init__(self):
         '''constructor'''
@@ -196,9 +201,6 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         size_tag = self.create_tag('size_' + str(value), size_points=value)
         self.size_tags[value] = size_tag
         return size_tag
-
-gobject.signal_new("search_request", RichBuffer, gobject.SIGNAL_RUN_FIRST,
-                   gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
 
 def test():
     '''do some tests with the buffer'''

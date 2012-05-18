@@ -34,6 +34,11 @@ log = logging.getLogger('gtkui.Textbox')
 class TextBox(gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
     text in the widget'''
+    __gsignals__ = {
+            "search_request": (gobject.SIGNAL_RUN_FIRST,
+                gobject.TYPE_NONE,
+                (gobject.TYPE_PYOBJECT,))
+            }
 
     def __init__(self, config, on_drag_data_received=None):
         '''constructor'''
@@ -176,9 +181,6 @@ class TextBox(gtk.ScrolledWindow):
         return text
 
     text = property(fget=_get_text, fset=_set_text)
-
-gobject.signal_new("search_request", TextBox, gobject.SIGNAL_RUN_FIRST,
-                   gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
 
 class InputView(gtk.TextView):
 
