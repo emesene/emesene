@@ -42,7 +42,6 @@ import utils
 class OutputView(webkit.WebView):
     '''a class that represents the output widget of a conversation
     '''
-
     def __init__(self, theme, handler):
         webkit.WebView.__init__(self)
         settings = self.get_settings()
@@ -155,7 +154,6 @@ class OutputView(webkit.WebView):
 
         return False
 
-gobject.type_register(OutputView)
 gobject.signal_new("search_request", OutputView, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
 
@@ -233,6 +231,5 @@ class OutputText(gtk.ScrolledWindow):
             mystr = "var now=new Date();var x=document.images;for(var i=0;i<x.length;i++){if(x[i].name=='%s'){x[i].src='%s?'+now.getTime();}}" % (_id, path)
             self.view.execute_script(mystr)
 
-gobject.type_register(OutputText)
 gobject.signal_new("search_request", OutputText, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))

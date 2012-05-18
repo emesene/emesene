@@ -28,7 +28,6 @@ from AvatarManager import AvatarManager
 
 class Avatar(gtk.Widget, AvatarManager):
     """AvatarWidget """
-    #TODO move in an avatarManager class?????
 
     __gproperties__ = {
         'dimension': (gobject.TYPE_FLOAT, 'cell dimensions',
@@ -188,5 +187,3 @@ class Avatar(gtk.Widget, AvatarManager):
             min_height = self._dimension
             natural_height = self._dimension
             return min_height, natural_height
-
-gobject.type_register(Avatar)

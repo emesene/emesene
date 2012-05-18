@@ -177,11 +177,11 @@ class TextBox(gtk.ScrolledWindow):
 
     text = property(fget=_get_text, fset=_set_text)
 
-gobject.type_register(TextBox)
 gobject.signal_new("search_request", TextBox, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
 
 class InputView(gtk.TextView):
+
     __gsignals__ = {
         'message-send':(gobject.SIGNAL_RUN_LAST|gobject.SIGNAL_ACTION,
                         gobject.TYPE_NONE, ())
@@ -200,8 +200,6 @@ class InputView(gtk.TextView):
                 self.emit('message-send')
             return True
         return False
-
-gobject.type_register(InputView)
 
 class InputText(TextBox):
     '''a widget that is used to insert the messages to send'''

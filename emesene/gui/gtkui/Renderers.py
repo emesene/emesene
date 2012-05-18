@@ -182,8 +182,6 @@ class CellRendererPlus(CellRendererFunction):
 
 extension.implements(CellRendererPlus, 'nick renderer')
 
-gobject.type_register(CellRendererPlus)
-
 class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
     but improving the readability'''
@@ -193,15 +191,12 @@ class CellRendererNoPlus(CellRendererFunction):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-
     def __init__(self):
         global plus_or_noplus
         plus_or_noplus = 0
         CellRendererFunction.__init__(self, msnplus_to_list)
 
 extension.implements(CellRendererNoPlus, 'nick renderer')
-
-gobject.type_register(CellRendererNoPlus)
 
 class SmileyLayout(pango.Layout):
     '''a pango layout to draw smilies'''
@@ -624,8 +619,6 @@ class SmileyLabel(gtk.Label):
         ctx = event.window.cairo_create()
         self._smiley_layout.draw(ctx, area)
 
-gobject.type_register(SmileyLabel)
-
 #from emesene1 by mariano guerra adapted by cando
 #animation support by cando
 #TODO add transformation field in configuration
@@ -753,5 +746,3 @@ class AvatarRenderer(gtk.GenericCellRenderer, AvatarManager):
         if avatar:
             self.draw_avatar(ctx, avatar, width - dim, ypad, dim,
                 gtk.gdk.GRAVITY_CENTER, self._radius_factor, alpha)
-
-gobject.type_register(AvatarRenderer)

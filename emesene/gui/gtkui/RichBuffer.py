@@ -197,7 +197,6 @@ class RichBuffer(gtk.TextBuffer, RichWidget.RichWidget):
         self.size_tags[value] = size_tag
         return size_tag
 
-gobject.type_register(RichBuffer)
 gobject.signal_new("search_request", RichBuffer, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,))
 

@@ -103,7 +103,7 @@ class ImageAreaSelectorDialog(Gtk.Dialog):
         self.selector.rotate(-1)
 
 class ImageAreaSelector(Gtk.DrawingArea):
-    __gtype_name__ = "ImageAreaSelector"
+
     def __init__(self, button_accept):
         Gtk.DrawingArea.__init__(self)
         self.connect("draw", self.draw)

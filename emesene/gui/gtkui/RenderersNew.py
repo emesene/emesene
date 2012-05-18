@@ -238,8 +238,6 @@ class CellRendererPlus(CellRendererFunction):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    __gtype_name__ = 'CellRendererPlus'
-
     def __init__(self):
         CellRendererFunction.__init__(self, True)
 
@@ -254,16 +252,12 @@ class CellRendererNoPlus(CellRendererFunction):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    __gtype_name__ = 'CellRendererNoPlus'
-
     def __init__(self):
         CellRendererFunction.__init__(self, False)
 
 extension.implements(CellRendererNoPlus, 'nick renderer')
 
 class SmileyLabel(Gtk.CellView):
-
-    __gtype_name__ = 'SmileyLabel'
 
     def __init__(self):
         Gtk.CellView.__init__(self)
@@ -313,8 +307,6 @@ class SmileyLabel(Gtk.CellView):
 
 class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
     """Renderer for avatar """
-
-    __gtype_name__ = 'AvatarRenderer'
 
     __gproperties__ = {
         'image': (GObject.TYPE_OBJECT, 'The contact image', '',
