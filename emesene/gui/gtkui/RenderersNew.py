@@ -59,6 +59,11 @@ inherited by extensions.
         self.__dict__['markup'] = ''
         self.function = function
 
+        #caching
+        self._lines_width = {}
+        self._lines_height = {}
+
+
     def __getattr__(self, name):
         try:
             return self.get_property(name)
@@ -72,11 +77,13 @@ inherited by extensions.
             self.__dict__[name] = value
 
     def do_get_preferred_width(self, wid):
-        #FIXME: calculate real witdh
-        return 100, 100
+        width = self.calculate_lines_width()
+        min_width = width + self.xpad * 2
+        natural_width = width + self.xpad * 2
+        return min_width, natural_width
 
     def do_get_preferred_height(self, wid):
-        height, lines = self.calculate_line_height_and_count()
+        height = self.calculate_lines_height()
         min_height = height + self.ypad * 2
         natural_height = height + self.ypad * 2
         return min_height, natural_height
@@ -93,10 +100,31 @@ inherited by extensions.
         if prop.name not in self.property_names:
             raise TypeError('No property named %s' % (prop.name,))
 
-        if prop == 'markup': #plus formatting
-            value = Plus.msnplus_to_dict
+        if prop.name == 'markup':
+            #only recalculte if really change
+            if not self.markup == value:
+                self.__dict__[prop.name] = value
+                self.calculate_lines_height_width()
+        else:
+            self.__dict__[prop.name] = value
 
-        self.__dict__[prop.name] = value
+    def calculate_lines_count(self):
+        '''return the number of lines the text need'''
+        return max(len(self._lines_height), 1)
+
+    def calculate_lines_height(self):
+        '''return the minimum height needed to display the text'''
+        total_height = 0
+        for i in self._lines_height.itervalues():
+            total_height += i
+        return total_height
+
+    def calculate_lines_width(self):
+        '''return the minimum width needed to display the text'''
+        total_width = 0
+        for i in self._lines_width.itervalues():
+            total_width += i
+        return total_width
 
     def do_render(self, ctx, widget, bgnd_area, cell_area, flags):
         '''Called by gtk to render the cell.'''
@@ -105,19 +133,19 @@ inherited by extensions.
         height = cell_area.height - self.ypad
         width = cell_area.width - self.xpad
 
-        total_text_height, total_lines_count = self.calculate_line_height_and_count()
+        total_lines_count = self.calculate_lines_count()
+        total_text_height = self.calculate_lines_height()
+
         y_padding = max(((height - total_text_height) / (total_lines_count * 2)), 0)
 
         #add padding to first line
         y_coord += y_padding / 2
 
         self.calculate_positions(ctx, widget, x_coord, y_coord)
-        context = widget.get_style_context()
 
     def calculate_positions(self, ctx, widget, x_base=0, y_base=0):
         '''calculate x,y coord of each element'''
         current_line = 1
-        lines_height = self.calculate_lines_height()
 
         #base coord
         x_coord = x_base
@@ -138,7 +166,7 @@ inherited by extensions.
                     #if we aren't in last line then update coords
                     if lines_count > 1 and i != lines_count - 1:
                         x_coord = x_base
-                        y_coord += lines_height[current_line]
+                        y_coord += self._lines_height[current_line]
                         #avoid moving on last line, since we can have pixbuf in it
                         current_line += i
                     else:
@@ -146,27 +174,18 @@ inherited by extensions.
                         x_coord += lbl.get_preferred_width()[1]
             elif isinstance(w, GdkPixbuf.Pixbuf):
                 #scale image to the text height
-                size = min(lines_height[current_line], w.get_width())
+                size = min(self._lines_height[current_line], w.get_width())
                 pix = w.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
                 Gtk.render_icon(context, ctx, pix, x_coord, y_coord)
                 x_coord += pix.get_width()
             else:
                 log.error("unhandled type %s" % type(i))
 
-    def calculate_line_height_and_count(self):
-        '''return the total height. Text height takes precedence,
-            if there isn't any text, take image height otherwise returns 0.
-            we also returns the lines count'''
-        lines_height = self.calculate_lines_height()
-        total_height = 0
-        for i in lines_height.itervalues():
-            total_height += i
-        return (total_height, len(lines_height))
-
-    def calculate_lines_height(self):
-        '''calculate the height of each line'''
+    def calculate_lines_height_width(self):
+        '''calculate the height, width of each line'''
         current_line = 1
-        lines_height = {}
+        self._lines_height = {}
+        self._lines_width = {}
 
         for w in self.update_markup():
             if isinstance(w, basestring):
@@ -177,14 +196,14 @@ inherited by extensions.
                         current_line += i
                     lbl = Gtk.Label()
                     lbl.set_markup(lines[i])
-                    lines_height[current_line] = max(lines_height.get(current_line, 0), lbl.get_preferred_height()[1])
+                    self._lines_height[current_line] = max(self._lines_height.get(current_line, 0), lbl.get_preferred_height()[1])
+                    self._lines_width[current_line] = self._lines_width.get(current_line, 0) + lbl.get_preferred_width()[1]
             elif isinstance(w, GdkPixbuf.Pixbuf):
                 #if pixbuf is longer than text we scale down
-                lines_height[current_line] = min(lines_height.get(current_line, 0), w.get_height())
+                self._lines_height[current_line] = min(self._lines_height.get(current_line, 0), w.get_height())
+                self._lines_width[current_line] = self._lines_width.get(current_line, 0) + w.get_width()
             else:
                 log.error("unhandled type %s" % type(i))
-
-        return lines_height
 
     def update_markup(self):
         '''Gets the Pango layout used in the cell in a TreeView widget.'''
