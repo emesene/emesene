@@ -365,7 +365,9 @@ class Controller(object):
         self.window.on_disconnect(self.close_session)
 
         self._save_application_language()
-        self.save_extensions_config()
+        if self.session is not None:
+            self.session.save_extensions_config()
+
         self._save_login_dimensions()
 
         if self.session and self.logged_in:
@@ -409,26 +411,6 @@ class Controller(object):
         if self.config is None:
             return
         self.config.language_config = self.session.config.language_config
-
-    def save_extensions_config(self):
-        '''save the state of the extensions to the config'''
-        if self.session is None:
-            return
-
-        if self.session.config.d_extensions is None:
-            self.session.config.d_extensions = {}
-
-        for name, category in extension.get_categories().iteritems():
-            self.session.config.d_extensions[name] = \
-                category.default_id
-
-    def set_default_extensions_from_config(self):
-        '''get the ids of the default extensions stored on config
-        and set them as default on the extensions module'''
-
-        if self.session.config.d_extensions is not None:
-            for cat_name, ext_id in self.session.config.d_extensions.iteritems():
-                extension.set_default_by_id(cat_name, ext_id)
 
     def _get_proxy_settings(self):
         '''return the values of the proxy settings as a e3.Proxy object
@@ -487,7 +469,7 @@ class Controller(object):
         self.session.config.get_or_set('last_avatar', last_avatar_path)
 
         self.config.save(self.config_path)
-        self.set_default_extensions_from_config()
+        self.session.set_default_extensions_from_config()
 
         self._draw_tray_icon()
         self.tray_icon.set_main(self.session)
@@ -567,7 +549,7 @@ class Controller(object):
 
         for plugin in self.session.config.l_active_plugins:
             plugin_manager.plugin_start(plugin, self.session)
-        self.set_default_extensions_from_config()
+        self.session.set_default_extensions_from_config()
         self.window.content_main.replace_extensions()
 
     def on_login_succeed(self):

@@ -27,6 +27,7 @@ from Action import Action
 
 import e3
 import Logger
+import extension
 from ContactManager import ContactManager
 
 class Session(object):
@@ -145,6 +146,23 @@ class Session(object):
                 self.config.save(config_path)
             except:
                 print "Error on save configuration"
+
+    def save_extensions_config(self):
+        '''save the state of the extensions to the config'''
+        if self.config.d_extensions is None:
+            self.config.d_extensions = {}
+
+        for name, category in extension.get_categories().iteritems():
+            self.config.d_extensions[name] = \
+                category.default_id
+
+    def set_default_extensions_from_config(self):
+        '''get the ids of the default extensions stored on config
+        and set them as default on the extensions module'''
+
+        if self.config.d_extensions is not None:
+            for cat_name, ext_id in self.config.d_extensions.iteritems():
+                extension.set_default_by_id(cat_name, ext_id)
 
     def start_mail_client(self):
         pass
