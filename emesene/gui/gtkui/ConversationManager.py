@@ -245,7 +245,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             with given text and icon '''
         if self.get_current_page() == index or index == (self.get_current_page() + self.get_n_pages()):
             win = self.get_parent() # gtk.Window, not a nice hack.
-            if win is None:
+            if win is None or self.session.config.b_single_window:
                 return
             win.set_title(Plus.msnplus_strip(text))
             win.set_icon(icon)
