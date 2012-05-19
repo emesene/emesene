@@ -539,7 +539,7 @@ class Controller(object):
         if maximized:
             window.maximize()
 
-        window.set_location(width, height, posx, posy, single_window)
+        window.set_location(width, height, posx, posy, single_window and is_conv)
 
     def on_preferences_changed(self, use_http, proxy, session_id, service):
         '''called when the preferences on login change'''
