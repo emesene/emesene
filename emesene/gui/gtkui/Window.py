@@ -179,6 +179,7 @@ class Window(gtk.Window):
                         self.set_or_get_height(height))
             while gtk.events_pending(): # DO NOT ASK
                 gtk.main_iteration_do(False)
+            self.box.set_position(w)
         else:
             self.set_default_size(self.set_or_get_width(width),
                                   self.set_or_get_height(height))
