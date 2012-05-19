@@ -324,9 +324,8 @@ class Controller(object):
                     self.session.conversation_managers.append(conv_manager)
             else:
                 for conv_manager in self.conversations:
-                    conv_manager.hide_all(self.session.config.b_single_window)
-                    # _on_conversation_window_close, without saving settings
                     conv_manager.close_all()
+                    conv_manager.hide_all(self.session.config.b_single_window)
                     self.conversations.remove(conv_manager)
 
         self.last_session_account = account.account
@@ -358,8 +357,8 @@ class Controller(object):
             self.conv_manager_available = True # update with new session
         else:
             for conv_manager in self.conversations:
+                conv_manager.close_all()
                 conv_manager.hide_all(self.session.config.b_single_window)
-                self._on_conversation_window_close(conv_manager)
 
         if self.session:
             self.session.stop_mail_client()
@@ -712,8 +711,7 @@ class Controller(object):
     def _on_conversation_window_close(self, conv_manager):
         '''method called when the conversation window is closed'''
         if self.session:
-            width, height, posx, posy = \
-                    conv_manager.get_dimensions()
+            width, height, posx, posy = conv_manager.get_dimensions()
 
             if not conv_manager.is_maximized():
                 self.session.config.i_conv_width = width
@@ -725,7 +723,6 @@ class Controller(object):
                 self.session.config.b_conv_maximized = True
             self.session.conversation_managers.remove(conv_manager)
 
-        conv_manager.close_all()
         self.conversations.remove(conv_manager)
 
     def on_close(self, close=False):

@@ -332,7 +332,7 @@ class ConversationManager(object):
         '''close and finish all conversations'''
         self.unsubscribe_signals()
         for conversation in self.conversations.values():
-            self.close(conversation)
+            self.on_conversation_close(conversation)
 
     def present(self, conversation):
         '''
