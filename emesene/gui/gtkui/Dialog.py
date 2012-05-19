@@ -1715,7 +1715,6 @@ class AddBuddy(gtk.Window):
         # window
         self.set_title(_("Add contact"))
         self.set_resizable(False)
-        self.set_decorated(False)
         self.set_keep_above(True)
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.move(30, 30) # top-left
