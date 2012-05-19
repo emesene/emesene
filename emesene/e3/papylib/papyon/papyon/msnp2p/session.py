@@ -270,8 +270,12 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
         else:
             new_bridge.connect("connected", self._bridge_switched)
             new_bridge.connect("failed", self._bridge_failed)
-            new_bridge.open(transresp.nonce, transresp.external_ips[0],
-                            transresp.external_port)
+            try:
+                new_bridge.open(transresp.nonce, transresp.external_ips[0],
+                                transresp.external_port)
+            except Exception, e:
+                logger.exception(e)
+                print transresp
 
     def _bridge_listening(self, new_bridge, external_ip, external_port,
             transreq):
