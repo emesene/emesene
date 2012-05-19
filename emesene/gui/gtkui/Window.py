@@ -217,7 +217,7 @@ class Window(gtk.Window):
         width, height = self.get_size()
         if conversation and self.content_main:
             width = width - self.box.get_position()
-        elif not conversation and self.content_conv is not None:
+        elif not conversation and self.box.get_position():
             width = self.box.get_position()
 
         # when login window is minimized, posx and posy are -32000 on Windows
