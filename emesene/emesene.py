@@ -733,9 +733,10 @@ class Controller(object):
 
     def on_disconnected(self, reason, reconnect=0):
         '''called when the server disconnect us'''
+        account = self.session.account
         self.close_session(False, True)
         if reconnect:
-            self.on_reconnect(self.session.account)
+            self.on_reconnect(account)
         else:
             self.go_login(cancel_clicked=True, no_autologin=True)
             if reason is not None:
