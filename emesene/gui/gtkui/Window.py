@@ -177,8 +177,8 @@ class Window(gtk.Window):
             w, h = self.get_size()
             self.resize(self.set_or_get_width(width+w), 
                         self.set_or_get_height(height))
-            while gtk.events_pending(): # DO NOT ASK
-                gtk.main_iteration_do(False)
+            #TODO: FIXME: Find a way to make the resize happen asap
+            # otherwise get_size() suffers of racy conditions
             self.box.set_position(w)
         else:
             self.set_default_size(self.set_or_get_width(width),
