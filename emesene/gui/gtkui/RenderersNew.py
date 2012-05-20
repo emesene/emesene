@@ -77,8 +77,9 @@ inherited by extensions.
 
     def do_get_preferred_width(self, wid):
         width = self.calculate_lines_width()
-        min_width = width + self.xpad * 2
         natural_width = width + self.xpad * 2
+        #FIXME: fix min_width calculation
+        min_width = min (100, natural_width)
         return min_width, natural_width
 
     def do_get_preferred_height(self, wid):
