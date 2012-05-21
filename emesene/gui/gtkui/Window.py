@@ -253,6 +253,8 @@ class Window(gtk.Window):
         '''
         self.cb_on_close_conv(self.content_conv)
         self.content_conv = None
+        if not self.content_main:
+            self.hide()
 
     def hide(self):
         '''override the method to remember the position
