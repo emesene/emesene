@@ -347,12 +347,6 @@ class ConversationManager(object):
         '''
         raise NotImplementedError("not implemented")
 
-    def hide_all(self):
-        '''
-        hide all conversations
-        '''
-        raise NotImplementedError("not implemented")
-
     def is_active(self):
         '''
         return True if the conversation manager is active

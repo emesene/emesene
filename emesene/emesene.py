@@ -325,7 +325,6 @@ class Controller(object):
             else:
                 for conv_manager in self.conversations:
                     conv_manager.close_all()
-                    conv_manager.hide_all(self.session.config.b_single_window)
                     self.conversations.remove(conv_manager)
 
         self.last_session_account = account.account
@@ -358,7 +357,6 @@ class Controller(object):
         else:
             for conv_manager in self.conversations:
                 conv_manager.close_all()
-                conv_manager.hide_all(self.session.config.b_single_window)
 
         if self.session:
             self.session.stop_mail_client()
