@@ -17,6 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
+import glib
 
 import os
 import gui
@@ -175,11 +176,13 @@ class Window(gtk.Window):
         """
         if single_window:
             w, h = self.get_size()
-            self.resize(self.set_or_get_width(width+w), 
-                        self.set_or_get_height(height))
-            #TODO: FIXME: Find a way to make the resize happen asap
-            # otherwise get_size() suffers of racy conditions
-            self.box.set_position(w)
+            def this_is_an_hax(*args):
+                # Really, it is! And an ugly one!
+                self.resize(self.set_or_get_width(width+w), 
+                            self.set_or_get_height(height))
+                self.box.set_position(w)
+                return False
+            glib.idle_add(this_is_an_hax)
         else:
             self.set_default_size(self.set_or_get_width(width),
                                   self.set_or_get_height(height))
