@@ -679,10 +679,10 @@ class Controller(object):
                     window = windowcls(self._on_conversation_window_close)
 
                 window.go_conversation(self.session, self._on_conversation_window_close)
+                self._set_location(window, True, sing_wind)
                 conv_manager = window.content_conv
                 self.conversations.append(conv_manager)
                 self.session.conversation_managers.append(conv_manager)
-                self._set_location(window, True, sing_wind)
 
                 if not (sing_wind and conv_tabs):
                     if self.session.config.b_conv_minimized and other_started:
