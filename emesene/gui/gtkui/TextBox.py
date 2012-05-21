@@ -198,7 +198,7 @@ class InputView(gtk.TextView):
         if event.keyval in [gtk.keysyms.Return, gtk.keysyms.KP_Enter] and \
             not event.state & gtk.gdk.SHIFT_MASK:
 
-            if not self.im_context_filter_keypress(event):
+            if not check_im_context_filter_keypress(self, event):
                 self.emit('message-send')
             return True
         return False
@@ -268,14 +268,14 @@ class InputText(TextBox):
                  ( event.keyval == gtk.keysyms.p or \
                     event.keyval == gtk.keysyms.Up ):
 
-            if not self._textbox.im_context_filter_keypress(event):
+            if not check_im_context_filter_keypress(self._textbox, event):
                 self.on_cycle_history()
             return True
         elif ( event.state & gtk.gdk.CONTROL_MASK ) and \
                 ( event.keyval == gtk.keysyms.n or \
                     event.keyval == gtk.keysyms.Down ):
 
-            if not self._textbox.im_context_filter_keypress(event):
+            if not check_im_context_filter_keypress(self._textbox, event):
                 self.on_cycle_history(1)
             return True
         else:
@@ -460,3 +460,10 @@ class OutputText(TextBox):
                     path, tip = obj
                     if path == what[2]:
                         self.add_image_at_anchor(anchor, path, tip)
+
+def check_im_context_filter_keypress(target, event):
+    ''' return True if the event is handled by Input Method '''
+    if hasattr(target, 'im_context_filter_keypress') and \
+       target.im_context_filter_keypress(event):
+        return True
+    return False
