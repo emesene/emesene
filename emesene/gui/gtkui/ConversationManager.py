@@ -100,6 +100,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
             index = self.get_current_page()
             conversation = self.get_nth_page(index)
             self.on_conversation_close(conversation)
+            return True
 
     def on_key_change_tab(self, accelGroup, window, keyval, modifier):
         '''Catches alt+number and shows tab number-1  '''
