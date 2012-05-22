@@ -766,22 +766,13 @@ class ConversationWindow(BaseTable):
         self.show_all()
 
     def _on_cb_show_toolbar_changed(self, value):
-        if value:
-            self.cb_small_toolbar.set_sensitive(True)
-        else:
-            self.cb_small_toolbar.set_sensitive(False)
+        self.cb_small_toolbar.set_sensitive(value)
 
     def _on_spell_change(self, value):
-        if value:
-            self.lang_menu.set_sensitive(True)
-        else:
-            self.lang_menu.set_sensitive(False)
+        self.lang_menu.set_sensitive(value)
 
     def _on_conversation_tabs_change(self, value):
-        if value:
-            self.tab_pos_cb.set_sensitive(True)
-        else:
-            self.tab_pos_cb.set_sensitive(False)
+        self.tab_pos_cb.set_sensitive(value)
 
     def _on_lang_combo_change(self, combo):
         self.session.config.spell_lang = combo.get_active_text()
@@ -800,10 +791,7 @@ class ConversationWindow(BaseTable):
             'b_override_text_color')
 
     def _on_cb_override_text_color_toggled(self, value):
-        if value:
-            self.b_text_color.set_sensitive(True)
-        else:
-            self.b_text_color.set_sensitive(False)
+        self.b_text_color.set_sensitive(value)
 
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
@@ -845,10 +833,7 @@ class Sound(BaseTable):
 
     def _on_mute_sounds_changed(self, value):
         for i in self.array:
-            if value:
-                i.set_sensitive(False)
-            else:
-                i.set_sensitive(True)
+            i.set_sensitive(value)
 
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_mute_sounds_changed,
