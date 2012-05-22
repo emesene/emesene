@@ -209,7 +209,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.info.destroy()
         self.header.destroy()
 
-    def show(self, other_started=False):
+    def show(self):
         '''override the show method'''
         gtk.VBox.show(self)
 
@@ -222,9 +222,6 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self.hbox.show()
         self.panel.show_all()
-
-        if not other_started:
-            self.input_grab_focus()
 
         if not self.session.config.b_show_toolbar:
             self.toolbar.hide()
