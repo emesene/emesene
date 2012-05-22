@@ -18,6 +18,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
+import glib
 
 import e3
 import gui
@@ -257,7 +258,10 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         '''
         self.set_current_page(conversation.tab_index)
         self.get_parent().present(b_single_window)
-        conversation.input_grab_focus()
+        def grab_focus_hack(conv):
+            conv.input_grab_focus()
+            return False
+        glib.idle_add(grab_focus_hack, conversation)
 
     def get_dimensions(self):
         '''

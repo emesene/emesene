@@ -37,6 +37,7 @@ class Window(gtk.Window):
                  posx=100, posy=100):
         gtk.Window.__init__(self)
         self.box = gtk.HPaned()
+        self.box.set_can_focus(False)
         # HACK! a bunch of properties/methods accessed by the outside
         self.box.add_accel_group = self.add_accel_group
         self.box.set_title = self.set_title
@@ -107,7 +108,7 @@ class Window(gtk.Window):
             self._content_conv.destroy()
             del self._content_conv
         self._content_conv = content_conv
-        if content_conv is not None:
+        if content_conv:
             self.box.pack2(self._content_conv)
         else:
             self.resize(self.set_or_get_width(w),
