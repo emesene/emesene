@@ -500,7 +500,6 @@ class Controller(object):
         trayiconcls = extension.get_default('tray icon')
 
         if self.tray_icon is not None:
-            print "tray:", self.tray_icon, trayiconcls
             if trayiconcls == self.tray_icon.__class__:
                 return
             self.tray_icon.set_visible(False)
