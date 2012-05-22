@@ -554,7 +554,7 @@ class Controller(object):
         self._new_session()
         self.go_login(cancel_clicked=True)
         self.window.content_main.clear_all()
-        self.window.content_main.show_error(reason)
+        self.window.content_main.show_error(reason, login_failed=True)
 
     def _setup_plugins(self):
         plugin_manager = get_pluginmanager()

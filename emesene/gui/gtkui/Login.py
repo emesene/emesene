@@ -482,10 +482,12 @@ class Login(LoginBaseUI, gui.LoginBase):
         self._clear_all()
         self.cmb_account.get_children()[0].set_text('')
 
-    def show_error(self, reason):
+    def show_error(self, reason, login_failed=False):
         '''
         show an error on the top of the window using nicebar
         '''
+        if login_failed:
+            self.auto_login.set_active(False)
         self.nicebar.new_message(reason, gtk.STOCK_DIALOG_ERROR)
 
     def _reload_account_list(self, *args):
