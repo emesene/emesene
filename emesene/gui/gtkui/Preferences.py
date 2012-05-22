@@ -717,8 +717,6 @@ class ConversationWindow(BaseTable):
                           'session.config.b_show_emoticons')
         self.append_check(_('Show conversation header'),
             'session.config.b_show_header')
-        self.append_check(_('Show conversation side panel'),
-            'session.config.b_show_info')
         self.append_check(_('Show conversation toolbar'),
             'session.config.b_show_toolbar')
         self.append_check(_('Show close button on tabs'),
