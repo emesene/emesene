@@ -126,4 +126,4 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
 
     def _on_tab_close_request(self, index):
         '''Slot executed when the use clicks the close button in a tab'''
-        self.on_conversation_close(self.widget(index))
+        self.close(self.widget(index))

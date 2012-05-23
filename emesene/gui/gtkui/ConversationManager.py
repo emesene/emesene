@@ -99,7 +99,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         if self.session.config.get_or_set('b_escape_hotkey', True):
             index = self.get_current_page()
             conversation = self.get_nth_page(index)
-            self.on_conversation_close(conversation)
+            self.close(conversation)
             return True
 
     def on_key_change_tab(self, accelGroup, window, keyval, modifier):
@@ -183,7 +183,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         # TODO: we can check the last message timstamp and if it's less than
         # certains seconds, inform that there is a new message (to avoid
         # closing a tab instants after you receive a new message)
-        self.on_conversation_close(conversation)
+        self.close(conversation)
 
     def _on_tab_menu(self, widget, event, conversation):
         '''called when the user right clicks on the tab'''

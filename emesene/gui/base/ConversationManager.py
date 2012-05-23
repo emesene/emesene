@@ -306,18 +306,6 @@ class ConversationManager(object):
             if account in conversation.members:
                 conversation.update_p2p(account, _type, *what)
 
-    def on_conversation_close(self, conversation):
-        """
-        called when the user wants to close a conversation widget
-        """
-        # TODO: there is a strange case when changing the tabbed to no tabbed
-        # config, for some reason that conversations don't seem to be removed
-        self.close(conversation)
-
-        if len(self.conversations) == 0:
-            log.debug('Closing the conversation window')
-            self.on_last_close()
-
     def close(self, conversation):
         '''close a conversation'''
         log.debug('Closing conversation: %f' % conversation.cid)
@@ -327,11 +315,15 @@ class ConversationManager(object):
         self.remove_conversation(conversation)
         conversation.on_close()
 
+        if len(self.conversations) == 0:
+            log.debug('Closing the conversation window')
+            self.on_last_close()
+
     def close_all(self):
         '''close and finish all conversations'''
         self.unsubscribe_signals()
         for conversation in self.conversations.values():
-            self.on_conversation_close(conversation)
+            self.close(conversation)
 
     def present(self, conversation):
         '''
