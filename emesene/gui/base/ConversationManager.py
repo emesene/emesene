@@ -33,12 +33,6 @@ class ConversationManager(object):
         self.conversations = {}
         self.subscribe_signals()
 
-        conversation_tabs = self.session.config.get_or_set(
-                'b_conversation_tabs', True)
-
-        if self.session.conversations is None or conversation_tabs:
-            self.session.conversations = {}
-
     def subscribe_signals(self):
         if not self.session:
             return

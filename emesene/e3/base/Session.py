@@ -52,7 +52,7 @@ class Session(object):
         self.contacts = None
         self.logger = None
         self.conversation_start_locked = False #if conversation start locked
-        self.conversations = None
+        self.conversations = {}
         self.conversation_managers = []
         self.extras = {}
 
