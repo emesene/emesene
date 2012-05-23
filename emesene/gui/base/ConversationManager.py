@@ -105,10 +105,6 @@ class ConversationManager(object):
             conversation = self.new_conversation(cid, [account])
 
         if conversation is not None:
-            if not conversation.check_visible():
-                log.debug('The conversation exists but it\'s hidden. Show it! (hack)')
-                conversation.show()
-
             self.set_message_waiting(conversation, True)
             conversation.on_receive_message(message, account, cedict)
         else:
@@ -269,6 +265,10 @@ class ConversationManager(object):
 
         #notify a new conversation has started
         self.session.conv_started(cid, members)
+
+        # Update and show the conversation
+        conversation.update_data()
+        conversation.show() # puts widget visible
 
         log.debug('Returning a new conversation')
         return conversation

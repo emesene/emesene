@@ -676,9 +676,6 @@ class Controller(object):
 
         conversation = conv_manager.new_conversation(cid, members)
 
-        conversation.update_data()
-        conversation.show() # puts widget visible
-
         # raises the container and grabs the focus
         # handles cases where window is minimized and ctrl+tab focus stealing
         if not other_started:
