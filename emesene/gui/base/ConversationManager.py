@@ -98,17 +98,20 @@ class ConversationManager(object):
         conversation_tabs = self.session.config.get_or_set(
                 'b_conversation_tabs', True)
 
-        if conversation is None and conversation_tabs:
+        if conversation is None and not conversation_tabs:
+            return
+
+        if conversation is None:
             conversation = self.new_conversation(cid, [account])
 
-        if not conversation.check_visible():
-            log.debug('The conversation exists but it\'s hidden. Show it! (hack)')
-            conversation.show()
-
         if conversation is not None:
+            if not conversation.check_visible():
+                log.debug('The conversation exists but it\'s hidden. Show it! (hack)')
+                conversation.show()
+
             self.set_message_waiting(conversation, True)
             conversation.on_receive_message(message, account, cedict)
-        elif conversation_tabs:
+        else:
             log.error('No conversation found. Available cids are:')
             for conv in self.conversations.itervalues():
                 log.error('%f, %s' % (conv.cid, conv.members))
