@@ -31,8 +31,7 @@ class ConversationManager(object):
         self.on_last_close = on_last_close
 
         self.conversations = {}
-        if self.session:
-            self.subscribe_signals()
+        self.subscribe_signals()
 
         conversation_tabs = self.session.config.get_or_set(
                 'b_conversation_tabs', True)
@@ -41,6 +40,9 @@ class ConversationManager(object):
             self.session.conversations = {}
 
     def subscribe_signals(self):
+        if not self.session:
+            return
+
         self.session.signals.conv_message.subscribe(
             self._on_message)
         self.session.signals.gui_message.subscribe(
@@ -63,6 +65,9 @@ class ConversationManager(object):
             self._on_p2p_finished)
 
     def unsubscribe_signals(self):
+        if not self.session:
+            return
+
         self.session.signals.conv_message.unsubscribe(
             self._on_message)
         self.session.signals.gui_message.unsubscribe(
