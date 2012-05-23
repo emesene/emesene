@@ -182,7 +182,12 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
 
     def _on_page_reordered(self, widget, conversation, new_num):
         '''called when a page is reordered'''
-        conversation.tab_index = new_num
+        self.update_tab_indices()
+
+    def update_tab_indices(self):
+        '''called when tabs are closed or pages are reordered'''
+        for conv in self.conversations.itervalues():
+            conv.tab_index = self.page_num(conv)
 
     def remove_conversation(self, conversation):
         """
@@ -195,8 +200,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         self.remove_page(page_num)
 
         # Update the tab indices and close buttons of all open conversations
-        for conv in self.conversations.itervalues():
-            conv.tab_index = self.page_num(conv)
+        self.update_tab_indices()
         self.update_close_buttons()
 
         # Mark the conversation as read (for the tray icons)
