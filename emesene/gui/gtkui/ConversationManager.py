@@ -126,22 +126,12 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         return True
 
     def cycle_tabs(self, reverse=False):
-        last = self.get_n_pages() - 1
-
+        current = self.get_current_page()
         if reverse:
-            current = self.get_current_page()
-
-            if current > 0:
-                self.prev_page()
-            else:
-                self.set_current_page(last)
+            page = current - 1
         else:
-            current = self.get_current_page()
-
-            if current < last:
-                self.next_page()
-            else:
-                self.set_current_page(0)
+            page = current + 1
+        self.set_current_page(page % self.get_n_pages())
 
     def set_message_waiting(self, conversation, is_waiting):
         """
