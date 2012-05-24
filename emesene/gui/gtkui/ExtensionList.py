@@ -247,8 +247,9 @@ class DownloadListBase(ExtensionListTab):
         self.progress = dialog.progress_window(
                         _('Refresh extensions'), self._end_progress_cb)
         self.progress.set_action(_("Refreshing extensions"))
+        self.progress.set_modal(True)
         self.progress.show_all()
-        gobject.timeout_add(100, self.update_progress)
+        gobject.timeout_add_seconds(1, self.update_progress)
         utils.GtkRunner(self.show_update_callback, self.update, refresh)
 
     def update(self, refresh):
