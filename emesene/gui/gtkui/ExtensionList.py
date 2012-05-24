@@ -30,6 +30,13 @@ import gobject
 import gui
 import Info
 
+from gui.gtkui import check_gtk3
+
+if check_gtk3():
+    import TinyButtonNew as TinyButton
+else:
+    import TinyButton
+
 from pluginmanager import get_pluginmanager
 
 class ExtensionListView(gtk.TreeView):
@@ -130,8 +137,38 @@ class ExtensionListTab(gtk.VBox):
         self.buttonbox.set_layout(gtk.BUTTONBOX_EDGE)
         self.buttonbox.set_border_width(2)
 
+        #progressbar widgets
+        self.progressbox = gtk.VBox()
+        self.progressbox.set_border_width(2)
+        box = gtk.HBox()
+        box.set_border_width(2)
+        self.progresslabel = gtk.Label()
+        self.progressbar = gtk.ProgressBar()
+        self.progress_cancel_button = TinyButton.TinyButton(gtk.STOCK_CANCEL)
+        self.end_progress_handler = None
+
+        box.pack_start(self.progresslabel, False, False, 0)
+        box.pack_start(self.progressbar, False, False, 5)
+        box.pack_start(self.progress_cancel_button, False, False, 0)
+
+        separator = gtk.HSeparator()
+        self.progressbox.pack_start(separator, False, False, 0)
+        self.progressbox.pack_start(box, False, False, 2)
+
         self.pack_start(self.lists)
         self.pack_start(self.buttonbox, False)
+        self.pack_start(self.progressbox, False)
+
+    def set_action(self, action):
+        '''called when the action changes'''
+        self.progresslabel.set_text(action)
+        self.progressbar.set_fraction(0)
+        self.progressbar.set_text("0 %")
+
+    def update_action(self, progress):
+        '''called when the progress is updated'''
+        self.progressbar.set_fraction(progress / 100.0)
+        self.progressbar.set_text("%d %s" % (progress, "%"))
 
     def _make_list(self, type_, radio):
         '''make a new extension list'''
@@ -210,7 +247,9 @@ class DownloadListBase(ExtensionListTab):
         '''constructor'''
         ExtensionListTab.__init__(self, session, radio, use_tabs)
         self.updated_amount = 0
-        self.progress = None
+        self.default_action = _('Refresh extensions')
+        self.progress = False
+
 
         self.config_dir = e3.common.ConfigDir('emesene2')
 
@@ -240,15 +279,13 @@ class DownloadListBase(ExtensionListTab):
 
     def on_update(self, widget=None, refresh=False):
         '''called when the liststore need to be changed'''
-        if self.progress is not None:
+        if self.progress:
             return
 
-        dialog = extension.get_default('dialog')
-        self.progress = dialog.progress_window(
-                        _('Refresh extensions'), self._end_progress_cb)
-        self.progress.set_action(_("Refreshing extensions"))
-        self.progress.set_modal(True)
-        self.progress.show_all()
+        self.progress = True
+        self.set_action(self.default_action)
+        self.progressbox.show_all()
+        self.end_progress_handler = self.progress_cancel_button.connect('clicked', self._end_progress_cb)
         gobject.timeout_add_seconds(1, self.update_progress)
         utils.GtkRunner(self.show_update_callback, self.update, refresh)
 
@@ -276,7 +313,7 @@ class DownloadListBase(ExtensionListTab):
             for current_collection in collection.itervalues():
                 progress += current_collection.progress / (len(self.list_types) * 2.0)
 
-        self.progress.update(100.0 * progress)
+        self.update_action(100.0 * progress)
 
         return True
 
@@ -285,11 +322,13 @@ class DownloadListBase(ExtensionListTab):
         need the first argument on the on_update method'''
         if result is not None and not result[0]:
             log.error(str(result[1]))
-        if self.progress is None:
+        if not self.progress:
             return
 
-        self.progress.destroy()
-        self.progress = None
+        #hide progressbox
+        self.progressbox.hide()
+        self.progress_cancel_button.disconnect(self.end_progress_handler)
+        self.progress = False
         self.show_update()
 
     def _end_progress_cb(self, *args):
@@ -389,15 +428,16 @@ class DownloadList(DownloadListBase):
 
     def start_download(self, widget=None):
         '''start the download of an extension'''
-        if self.progress is not None:
+        if self.progress:
             return
 
-        dialog = extension.get_default('dialog')
-        self.progress = dialog.progress_window(
-                        _('Downloading extensions'), self._end_progress_cb)
-        self.progress.set_action(_("Downloading extensions"))
-        self.progress.show_all()
-        gobject.timeout_add(100, self.update_progress)
+        self.progress = True
+        self.set_action(_('Downloading extensions'))
+        self.progressbox.show_all()
+        self.progress_cancel_button.connect('clicked', self._end_progress_cb)
+        self.end_progress_handler = self.progress_cancel_button.connect('clicked',
+                                        self._end_progress_cb)
+        gobject.timeout_add_seconds(1, self.update_progress)
         utils.GtkRunner(self.show_update_callback, self.download)
 
     def download(self):
@@ -456,6 +496,8 @@ class ThemeList(DownloadList):
         DownloadList.__init__(
             self, session, 'themes',
             self.config_dir.join('themes'), True, True)
+
+        self.default_action = _('Refresh themes')
 
         self.themes = {}
         self.theme_configs = {}
@@ -560,15 +602,15 @@ class UpdateList(DownloadListBase):
 
     def start_download(self, widget=None):
         '''start the download of an extension'''
-        if self.progress is not None:
+        if self.progress:
             return
 
-        dialog = extension.get_default('dialog')
-        self.progress = dialog.progress_window(
-                        _('Updating extensions'), self._end_progress_cb)
-        self.progress.set_action(_("Updating extensions"))
-        self.progress.show_all()
-        gobject.timeout_add(100, self.update_download_progress)
+        self.progress = True
+        self.set_action(_('Updating extensions'))
+        self.progressbox.show_all()
+        self.end_progress_handler = self.progress_cancel_button.connect('clicked',
+                                        self._end_progress_cb)
+        gobject.timeout_add_seconds(1, self.update_download_progress)
         utils.GtkRunner(self.show_update_callback, self.download_updates)
 
     def download_updates(self):
@@ -597,7 +639,7 @@ class UpdateList(DownloadListBase):
                 for current_collection in collection.itervalues():
                     progress += current_collection.progress / float(self.update_amount)
 
-        self.progress.update(100.0 * progress)
+        self.update_action(100.0 * progress)
 
         return True
 
