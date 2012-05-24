@@ -187,7 +187,7 @@ class Notification():
         """
         This creates and shows the nofification
         """
-        if self.session.b_mute_notification:
+        if self.session.config.b_mute_notification:
             #don't show notification if user disable all of them
             return
 
