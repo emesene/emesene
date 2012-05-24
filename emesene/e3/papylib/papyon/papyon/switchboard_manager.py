@@ -212,7 +212,10 @@ class SwitchboardHandler(object):
         callback, errback = self._delivery_callbacks.pop(trid, (None, None))
         error = MessageError.DELIVERY_FAILED
         run(errback, error)
-        self._on_error(ConversationErrorType.MESSAGE, error)
+        if hasattr(self, "max_chunk_size"):
+            self._on_error(ConversationErrorType.P2P, error)
+        else:
+            self._on_error(ConversationErrorType.MESSAGE, error)
 
     # Helper functions
     def _process_pending_queues(self):

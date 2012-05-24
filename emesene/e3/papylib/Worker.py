@@ -600,6 +600,9 @@ class Worker(e3.base.Worker, papyon.Client):
         e3.Logger.log_message(self.session, None, msgobj, False)
 
     def _on_conversation_message_error(self, err_type, error, convevent):
+        if err_type != papyon.event.ConversationErrorType.MESSAGE:
+            return #discard silently
+
         cid = self.rpapyconv[convevent.conversation]
 
         msgobj = e3.base.Message(e3.base.Message.TYPE_MESSAGE, error,
