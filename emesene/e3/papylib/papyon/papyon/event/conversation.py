@@ -43,6 +43,8 @@ class ConversationErrorType(object):
     "Contact invitation related errors"
     MESSAGE = 4
     "Message sending related errors"
+    P2P = 5
+    "Data sending related errors"
 
 
 class ContactInviteError(object):
