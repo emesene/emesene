@@ -714,4 +714,6 @@ class MSNPapylib(BaseTable):
 
     def _on_live_profile_clicked(self, arg):
         ''' called when live profile button is clicked '''
-        gui.base.Desktop.open("http://profile.live.com/details/Edit/Pic")
+        profile_url = self.session.get_worker().profile_url
+        gui.base.Desktop.open(profile_url)
+

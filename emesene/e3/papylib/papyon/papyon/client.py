@@ -284,7 +284,7 @@ class Client(EventsDispatcher):
             @param password: the password needed to authenticate to the account
             @type password: utf-8 encoded string
             """
-        if (self._state != ClientState.CLOSED):
+        if self._state != ClientState.CLOSED:
             logger.warning('login already in progress')
             return
         self.__die = False
@@ -304,6 +304,13 @@ class Client(EventsDispatcher):
         self._switchboard_manager.close()
         self._protocol.signoff()
         self.__state = ClientState.CLOSED
+
+    def disconnect_other_endpoints(self):
+        """ Disconnects other endpoints """
+        if self._state == ClientState.CLOSED:
+            return
+        self._protocol.send_user_notification("goawyplzthxbye-nomorempop",
+           self.profile.account, "", 4)
 
     ### Protected API --------------------------------------------------------
     @property

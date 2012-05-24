@@ -1269,6 +1269,11 @@ class MSNPapylib(BaseTable):
         c_keep.connect('toggled', self._on_keepalive_toggled)
         vbox.pack_start(c_keep, False, False)
 
+        c_ep = gtk.CheckButton(_("Disconnect other endpoints when logging in"))
+        c_ep.set_active(self.session.config.b_papylib_disconnect_ep)
+        c_ep.connect('toggled', self._on_ep_toggled)
+        vbox.pack_start(c_ep, False, False)
+
         l_text = gtk.Label(_('If you have problems with your nickname/message/picture '
                         'just click on this button, sign in with your account '
                         'and load a picture in your Live Profile. '
@@ -1300,9 +1305,16 @@ class MSNPapylib(BaseTable):
         worker.keepalive_conversations = widget.get_active()
         self.session.config.b_papylib_keepalive = widget.get_active()
 
+    def _on_ep_toggled(self, widget):
+        ''' enable/disable conversation's keepalives in papyon '''
+        worker = self.session.get_worker()
+        worker.disconnect_ep = widget.get_active()
+        self.session.config.b_papylib_disconnect_ep = widget.get_active()
+
     def _on_live_profile_clicked(self, arg):
         ''' called when live profile button is clicked '''
-        gui.base.Desktop.open("http://profile.live.com/details/Edit/Pic")
+        profile_url = self.session.get_worker().profile_url
+        gui.base.Desktop.open(profile_url)
 
 class Facebook(BaseTable):
     """ This panel contains some facebook specific settings """
