@@ -437,6 +437,7 @@ class BaseTable(gtk.Table):
                       property_name, is_int)
 
         self.append_row(hbox, None)
+        return scale
 
     def fill_combo(self, combo, getter, property_name, values=None):
         if values:
@@ -603,8 +604,10 @@ class MainWindow(BaseTable):
         self.append_check(_('Show unread mail count'),
             'session.config.b_show_mail_inbox')
         self.append_markup('<b>'+_('Contact list:')+'</b>')
-        self.append_range(_('Contact list avatar size'),
+        avatar_size = self.append_range(_('Contact list avatar size'),
             'session.config.i_avatar_size', 18, 64)
+
+        avatar_size.add_mark(32, gtk.POS_BOTTOM, None)
 
         self.append_entry_default(_('Nick format'), 'nick',
                                   'session.config.nick_template_clist',
@@ -746,8 +749,11 @@ class ConversationWindow(BaseTable):
         self._on_cb_override_text_color_toggled(
                 self.session.config.get_or_set('b_override_text_color', False))
 
-        self.append_range(_('Conversation avatar size'),
+        avatar_size = self.append_range(_('Conversation avatar size'),
             'session.config.i_conv_avatar_size', 18, 128)
+
+        avatar_size.add_mark(64, gtk.POS_BOTTOM, None)
+        avatar_size.add_mark(96, gtk.POS_BOTTOM, None)
 
         self.session.config.subscribe(self._on_spell_change,
             'b_enable_spell_check')
