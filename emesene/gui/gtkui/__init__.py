@@ -93,7 +93,7 @@ def gtk_main(Controller):
     gtk.gdk.threads_enter()
     controller = Controller()
     controller.start()
-    gtk.quit_add(0, controller.on_close)
+    extension.set_default('quit', gtk.main_quit)
     gtk.main()
     gtk.gdk.threads_leave()
 
@@ -115,7 +115,6 @@ def setup():
     gtk.settings_get_default().set_property("gtk-error-bell", False)
 
     extension.register('quit', gtk.main_quit)
-    extension.set_default('quit', gtk.main_quit)
 
     extension.category_register('dialog', Dialog.Dialog)
     extension.category_register('avatar chooser', AvatarChooser.AvatarChooser)
