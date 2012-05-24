@@ -402,3 +402,6 @@ class Worker(threading.Thread):
 
     def _handle_action_call_cancel(self, c):
         pass
+
+    def _handle_action_disconnect_other_endpoints(self):
+        pass
