@@ -618,6 +618,7 @@ class Controller(object):
         self.session.config.get_or_set('override_text_color', '#000000')
         self.session.config.get_or_set('b_conversation_tabs', True)
         self.session.config.get_or_set('b_single_window', True)
+        self.session.config.get_or_set('b_mute_notification', False)
 
         self.session.login(account.account, account.password, account.status,
             proxy, host, port, use_http)
