@@ -755,12 +755,12 @@ class Dialog(object):
         ImageChooser(path, response_cb).show()
 
     @classmethod
-    def invite_dialog(cls, session, callback):
+    def invite_dialog(cls, session, callback, l_buddy_exclude):
         '''select a contact to add to the conversation, receives a session
         object of the current session the callback receives the response and
         a string containing the selected account
         '''
-        InviteWindow(session, callback)
+        InviteWindow(session, callback, l_buddy_exclude)
 
     @classmethod
     def login_preferences(cls, service, callback, use_http, proxy):
@@ -1583,7 +1583,7 @@ class InviteWindow(gtk.Window):
     the conversarion
     """
 
-    def __init__(self, session, callback):
+    def __init__(self, session, callback, l_buddy_exclude):
         """
         constructor
         """
@@ -1651,6 +1651,9 @@ class InviteWindow(gtk.Window):
         self.contact_list.contact_selected.subscribe(
             self._on_contact_selected)
         self.contact_list.fill()
+        l_buddy_exclude.append(self.session.account.account)
+        for buddy in l_buddy_exclude:
+            self.contact_list.remove_contact(e3.Contact(buddy))
         self.set_modal(True)
         self.show()
         vbox.show_all()

@@ -498,8 +498,9 @@ class ConversationToolbarHandler(object):
 
     def on_invite_selected(self):
         '''called when the Invite button is selected'''
+        l_buddy_exclude = self.conversation.members
         self.dialog.invite_dialog(self.session,
-            self.conversation.on_invite)
+                                  self.conversation.on_invite, l_buddy_exclude)
 
     def on_clean_selected(self):
         '''called when the Clean button is selected'''

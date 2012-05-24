@@ -601,7 +601,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def remove_contact(self, contact, group=None):
         '''remove a contact from the specified group, if group is None
         then remove him from all groups'''
-        if not group:
+        if group is None:
             # go though the groups and the contacts without group
             for row in self._model:
                 obj = row[1]
@@ -621,7 +621,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 # if it's a contact without group (at the root)
                 elif isinstance(obj, e3.Contact) and \
                       obj.account == contact.account:
-
                     # TODO: Is removing only the tree object?
                     self._model.remove(row.iter)
                     del obj # CHECK!!!!!
