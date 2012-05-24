@@ -1065,7 +1065,7 @@ class Dialog(object):
         return dialog
 
     @classmethod
-    def broken_profile(cls, close_cb):
+    def broken_profile(cls, close_cb, profile_url):
         '''a dialog that asks you to fix your profile'''
         message = _('''\
 Your live profile seems to be broken,
@@ -1082,7 +1082,7 @@ Clicking Yes will close emesene.
 
 Do you want to fix your profile now?''')
         def fix_profile(button, close_cb):
-            gui.base.Desktop.open("http://profile.live.com/details/Edit/Pic")
+            gui.base.Desktop.open(profile_url)
             close_cb()
 
         window = cls.common_window(message, gtk.STOCK_DIALOG_WARNING,
