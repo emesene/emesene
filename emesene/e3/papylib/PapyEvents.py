@@ -26,6 +26,8 @@ import papyon.gnet.errors
 import logging
 log = logging.getLogger('papylib.Events')
 
+PROFILE_URL = "http://profile.live.com/details/Edit/Pic"
+
 class ClientEvents(papyon.event.ClientEventInterface):
     def on_client_state_changed(self, state):
         if state == papyon.event.ClientState.CLOSED:
@@ -78,11 +80,13 @@ class ClientEvents(papyon.event.ClientEventInterface):
             if isinstance(error, papyon.gnet.errors.HTTPError) and \
                error.response and error.response.status and \
                error.response.status == 404:
-                self._client.session.add_event(Event.EVENT_BROKEN_PROFILE)
+                self._client.session.add_event(Event.EVENT_BROKEN_PROFILE,
+                                               PROFILE_URL)
                 return
             try:
                 if error._fault == "ItemDoesNotExist":
-                    self._client.session.add_event(Event.EVENT_BROKEN_PROFILE)
+                    self._client.session.add_event(Event.EVENT_BROKEN_PROFILE,
+                                                   PROFILE_URL)
             except AttributeError:
                 log.error("Client got an error: %s %s" % (error_type, error))
         elif error_type == papyon.event.ClientErrorType.ADDRESSBOOK:#TODO

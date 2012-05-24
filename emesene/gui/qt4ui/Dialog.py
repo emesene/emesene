@@ -24,7 +24,7 @@ class Dialog(object):
     WEBSITE = ''
 
     @classmethod
-    def broken_profile(cls, close_cb):
+    def broken_profile(cls, close_cb, url):
         '''a dialog that asks you to fix your profile'''
         message = _('''\
 Your live profile seems to be broken,
@@ -40,7 +40,7 @@ To fix your profile, emesene must be closed.
 Clicking Yes will close emesene.
 
 Do you want to fix your profile now?''')
-        gui.base.Desktop.open("http://profile.live.com/details/Edit/Pic")
+        gui.base.Desktop.open(url)
 
         reply = QtGui.QMessageBox.warning(None, _("You have a broken profile"),
                                           message, QtGui.QMessageBox.Yes |

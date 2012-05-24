@@ -59,10 +59,10 @@ class MainWindowBase(object):
     def _on_social_request(self, conn_url):
         pass
 
-    def _on_broken_profile(self):
+    def _on_broken_profile(self, profile_url):
         '''called when a person has a broken profile'''
         dialog = extension.get_default('dialog')
-        dialog.broken_profile(self.session.close)
+        dialog.broken_profile(self.session.close, profile_url)
 
     def on_disconnect(self):
         '''callback called when the disconnect option is selected'''

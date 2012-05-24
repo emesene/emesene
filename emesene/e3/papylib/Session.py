@@ -52,6 +52,10 @@ class Session(e3.Session):
         # keepalive conversations...or not
         b_keepalive = self.config.get_or_set("b_papylib_keepalive", False)
         self.__worker.keepalive_conversations = b_keepalive
+        # disconnect other endpoints...or not
+        b_dc_ep = self.config.get_or_set("b_papylib_disconnect_ep", False)
+        if b_dc_ep:
+            self.add_action(e3.Action.ACTION_DISCONNECT_OTHER_ENDPOINTS)
 
     def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''

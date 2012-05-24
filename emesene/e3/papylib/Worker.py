@@ -93,6 +93,8 @@ class Worker(e3.base.Worker, papyon.Client):
             self.client = papyon.Client.__init__(self, server,
                 proxies=get_proxies(), version=18)
 
+        self.profile_url = PROFILE_URL
+
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
         self._invite_handler = InviteEvent(self)
@@ -1456,3 +1458,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         del self.calls[self.rcalls[c]]
         del self.rcalls[c]
+
+    def _handle_action_disconnect_other_endpoints(self):
+        self.disconnect_other_endpoints()
+

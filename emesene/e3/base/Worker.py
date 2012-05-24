@@ -92,7 +92,7 @@ ACTIONS = (\
  'call cancel', 'call reject',
  'p2p invite'       , 'p2p accept',
  'p2p cancel'       , 'media send', # media send if got Wink and audio clips
- 'send oim')
+ 'send oim', 'disconnect other endpoints')
 
 Event.set_constants(EVENTS)
 Action.set_constants(ACTIONS)
@@ -167,6 +167,8 @@ class Worker(threading.Thread):
         dah[Action.ACTION_CALL_ACCEPT] = self._handle_action_call_accept
         dah[Action.ACTION_CALL_REJECT] = self._handle_action_call_reject
         dah[Action.ACTION_CALL_CANCEL] = self._handle_action_call_cancel
+        # papylib specific
+        dah[Action.ACTION_DISCONNECT_OTHER_ENDPOINTS] = self._handle_action_disconnect_other_endpoints
 
         self.action_handlers = dah
 
