@@ -38,6 +38,7 @@ class Notification():
         Class Constructor
         """
         self.session = session
+        self.session.config.get_or_set('b_mute_notification', False)
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
@@ -186,6 +187,10 @@ class Notification():
         """
         This creates and shows the nofification
         """
+        if self.session.b_mute_notification:
+            #don't show notification if user disable all of them
+            return
+
         only_when_available = self.session.config.b_notify_only_when_available
         #Only show notifications when available
         if not only_when_available or (only_when_available and self.session.account.status == status.ONLINE):

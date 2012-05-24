@@ -178,6 +178,7 @@ class Preferences(gtk.Window):
     def remove_subscriptions(self):
         self.conversation.remove_subscriptions()
         self.sound.remove_subscriptions()
+        self.notifications_page.remove_subscriptions()
         if hasattr(self, 'msn_papylib'):
             self.msn_papylib.privacy.remove_subscriptions()
 
@@ -831,7 +832,7 @@ class Sound(BaseTable):
 
     def _on_mute_sounds_changed(self, value):
         for i in self.array:
-            i.set_sensitive(value)
+            i.set_sensitive(not value)
 
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_mute_sounds_changed,
@@ -847,21 +848,40 @@ class Notification(BaseTable):
         BaseTable.__init__(self, 4, 1)
         self.set_border_width(5)
         self.session = session
+        self.array = []
+
+        self.append_markup('<b>'+_('General:')+'</b>')
+        self.append_check(_('Mute notification'),
+            'session.config.b_mute_notification')
         self.append_markup('<b>'+_('Users events:')+'</b>')
-        self.append_check(_('Notify on contact online'),
-            'session.config.b_notify_contact_online')
-        self.append_check(_('Notify on contact offline'),
-            'session.config.b_notify_contact_offline')
+        self.array.append(self.append_check(_('Notify on contact online'),
+            'session.config.b_notify_contact_online'))
+        self.array.append(self.append_check(_('Notify on contact offline'),
+            'session.config.b_notify_contact_offline'))
         self.append_markup('<b>'+_('Messages events:')+'</b>')
-        self.append_check(_('Notify on received message'),
-            'session.config.b_notify_receive_message')
-        self.append_check(_('Notify when a contact is typing'),
-            'session.config.b_notify_typing')
-        self.append_check(_('Notify also when the conversation has focus'),
-            'session.config.b_notify_when_focussed')
-        self.append_check(_('Only when available'),
-            'session.config.b_notify_only_when_available')
+        self.array.append(self.append_check(_('Notify on received message'),
+            'session.config.b_notify_receive_message'))
+        self.array.append(self.append_check(_('Notify when a contact is typing'),
+            'session.config.b_notify_typing'))
+        self.array.append(self.append_check(_('Notify also when the conversation has focus'),
+            'session.config.b_notify_when_focussed'))
+        self.array.append(self.append_check(_('Only when available'),
+            'session.config.b_notify_only_when_available'))
+
+        self._on_mute_notification_changed(self.session.config.b_mute_sounds)
+
+        self.session.config.subscribe(self._on_mute_notification_changed,
+            'b_mute_notification')
+
         self.show_all()
+
+    def _on_mute_notification_changed(self, value):
+        for i in self.array:
+            i.set_sensitive(not value)
+
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_mute_notification_changed,
+            'b_mute_notification')
 
 class Theme(BaseTable):
     """the panel to display/modify the config related to the theme
