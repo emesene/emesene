@@ -465,7 +465,6 @@ class MyAccountHandler(object):
         self.session.set_nick(nick)
         self.session.set_message(pm)
 
-
     def on_set_picture_selected(self, widget, data=None):
         '''called when set picture is selected'''
         _av_chooser = extension.get_and_instantiate('avatar chooser', self.session)

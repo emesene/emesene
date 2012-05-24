@@ -1235,6 +1235,11 @@ class DesktopTab(BaseTable):
         fc_button.connect('selection-changed', on_path_selected)
         self.attach(fc_button, 2, 3, 6, 7, gtk.EXPAND|gtk.FILL, 0)
 
+        # mail settings
+        self.append_markup('<b>'+_('Mail')+'</b>')
+        self.append_check(_('Open mail in default desktop client'),
+                          'session.config.b_open_mail_in_desktop')
+
     def _on_language_changed(self,  lang):
         self._language_management.install_desired_translation(lang)
     

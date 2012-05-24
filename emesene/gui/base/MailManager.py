@@ -19,6 +19,7 @@
 
 import Hotmail
 import Desktop
+import webbrowser
 
 class MailManager:
 
@@ -27,6 +28,9 @@ class MailManager:
 
     def open_in_browser(self):
         Desktop.open(self._get_mail_url())
+
+    def open_in_default_client(self):
+        webbrowser.open("mailto:")
 
     def _get_mail_url(self):
         current_service = self.session.account.service

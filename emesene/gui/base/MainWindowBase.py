@@ -39,7 +39,10 @@ class MainWindowBase(object):
         self.session.signals.broken_profile.subscribe(self._on_broken_profile)
 
     def on_mail_click(self):
-        self._mail.open_in_browser()
+        if self.session.config.b_open_mail_in_desktop:
+            self._mail.open_in_default_client()
+        else:
+            self._mail.open_in_browser()
 
     def on_new_conversation_requested(self, account):
         '''Slot called when the user doubleclicks

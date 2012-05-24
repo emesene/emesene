@@ -619,6 +619,7 @@ class Controller(object):
         self.session.config.get_or_set('b_conversation_tabs', True)
         self.session.config.get_or_set('b_single_window', True)
         self.session.config.get_or_set('b_mute_notification', False)
+        self.session.config.get_or_set('b_open_mail_in_desktop', False)
 
         self.session.login(account.account, account.password, account.status,
             proxy, host, port, use_http)
