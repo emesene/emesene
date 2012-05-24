@@ -150,10 +150,6 @@ Gtk.Frame = Frame
 def set_tooltips(self, tooltips):
     pass
 Gtk.Toolbar.set_tooltips = set_tooltips
-def add_signal(self, keyval, modifiers, signal_name):
-    #FIXME: simulate with key-press signal
-    print "FIXME: ignoring Binding"
-Gtk.binding_entry_add_signal = add_signal
 
 class Colormap(object):
     def alloc_color(self, color):
