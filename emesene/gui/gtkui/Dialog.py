@@ -1374,7 +1374,10 @@ class EmotesWindow(gtk.Window):
 
         self.shortcut_list = []
 
-        self.set_decorated(False)
+        #XXX: Don't set undecorated on macos lion, it crash see #1065
+        import platform, sys
+        if not (sys.platform == 'darwin' and platform.release().startswith('11.3')):
+            self.set_decorated(False)
         self.set_role("emotes")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.set_position(gtk.WIN_POS_MOUSE)
