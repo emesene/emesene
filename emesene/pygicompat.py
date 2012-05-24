@@ -162,10 +162,6 @@ def colormap_get_system():
     return Colormap()
 Gdk.colormap_get_system = colormap_get_system
 
-def quit_add(arg1, callback):
-    pass
-Gtk.quit_add = quit_add
-
 orig_get_slice = Gtk.TextBuffer.get_slice
 def get_slice(self, start, end, include_hidden_chars=False):
     return orig_get_slice(self, start, end, include_hidden_chars)
