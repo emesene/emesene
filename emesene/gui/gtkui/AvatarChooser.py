@@ -88,7 +88,8 @@ class AvatarChooser(gtk.Window):
         self.connect('delete-event', self._on_close)
         self.connect("key-press-event", self.on_key_press)
 
-        self.img_current = gtk.Image()
+        Avatar = extension.get_default('avatar')
+        self.img_current = Avatar()
         self.img_current.set_size_request(96, 96)
         frame_current = gtk.Frame(_("Current"))
         frame_current.add(self.img_current)
@@ -121,8 +122,7 @@ class AvatarChooser(gtk.Window):
         self.add(vbox)
         
         current_avatar = session.config.last_avatar
-        # which is the difference with self.config_dir.get_path("last_avatar")?
-        self.set_current_picture(current_avatar)
+        self.img_current.set_from_file(current_avatar)
 
     def _on_tab_changed(self, notebook, page, page_num):
         if page_num == 1: # System Pictures
@@ -143,12 +143,6 @@ class AvatarChooser(gtk.Window):
         if utils.file_readable(icon):
             gtk.Window.set_icon(self,
                 utils.safe_gtk_image_load(icon).get_pixbuf())
-
-    def set_current_picture(self, path):
-        '''set the current picture on the frame'''
-        if os.path.exists(path):
-            pixbuf = gtk.gdk.pixbuf_new_from_file(path)
-            self.img_current.set_from_pixbuf(pixbuf)
 
     def get_selected(self):
         '''return a tuple (pixbuf, path) of the selection, or None'''
