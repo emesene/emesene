@@ -57,6 +57,7 @@ class ImageAreaSelectorDialog(gtk.Dialog):
 
         self.selector = ImageAreaSelector(self.button_accept)
         self.selector.set_from_pixbuf(pixbuf)
+        self.selector.set_size_request(self.selector.pixbuf.get_height(), self.selector.pixbuf.get_width())
 
         if not MAC:
             self.button_rcw = gtk.Button(_("Rotate"))
