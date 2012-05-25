@@ -94,6 +94,7 @@ class Worker(e3.base.Worker, papyon.Client):
                 proxies=get_proxies(), version=18)
 
         self.profile_url = PROFILE_URL
+        self.end_point_local = None # will be set on_profile_end_point_added
 
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
@@ -177,7 +178,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.profile.client_capabilities.supports_rtc_video = PAPY_HAS_AUDIOVIDEO
         self.profile.client_capabilities.has_webcam = PAPY_HAS_AUDIOVIDEO
 
-        self.profile.end_point_name = "emesene"
         self.profile.privacy = papyon.profile.Privacy.BLOCK
 
         # initialize caches
@@ -913,6 +913,17 @@ class Worker(e3.base.Worker, papyon.Client):
         """form url"""
         return self._form_data '''
 
+    def _on_profile_end_point_added(self, ep):
+        """Called when endpoints change (added)"""
+        if self.end_point_local is None and ep.name == "":
+            self.end_point_local = ep
+            return
+        self.session.endpoint_added(ep.name)
+
+    def _on_profile_end_point_removed(self, ep):
+        """Called when endpoints change (removed)"""
+        self.session.endpoint_removed(ep.name)
+
 ################################################################################
 # BELOW THIS LINE, ONLY e3 HANDLERS
 ################################################################################
@@ -926,6 +937,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.login_started()
         self.login(account, password)
+        self.profile.end_point_name = "emesene" #TODO: FIXME: This does not seem to work
 
     def _handle_action_logout(self):
         ''' handle Action.ACTION_LOGOUT '''
@@ -1463,5 +1475,15 @@ class Worker(e3.base.Worker, papyon.Client):
         del self.rcalls[c]
 
     def _handle_action_disconnect_other_endpoints(self):
+        """ disconnects all other msnp18 mpop instances """
         self.disconnect_other_endpoints()
+
+    def _handle_action_disconnect_endpoint(self, name):
+        """ disconnects a single msnp18 mpop instance """
+        if name == 'all other endpoints':
+            self.disconnect_other_endpoints()
+            return
+        for ep in self.profile.end_points.values():
+            if ep.name == name:
+                self.disconnect_endpoint(ep.id)
 

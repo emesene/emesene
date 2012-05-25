@@ -210,6 +210,12 @@ class ProfileEvent(papyon.event.ProfileEventInterface):
     def on_profile_msn_object_changed(self):
         self._client._on_profile_msn_object_changed()
 
+    def on_profile_end_point_added(self, ep):
+        self._client._on_profile_end_point_added(ep)
+
+    def on_profile_end_point_removed(self, ep):
+        self._client._on_profile_end_point_removed(ep)
+
 class CallEvent(papyon.event.CallEventInterface):
     def __init__(self, call, client):
         papyon.event.CallEventInterface.__init__(self, call)
