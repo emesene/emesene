@@ -915,7 +915,6 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_profile_end_point_added(self, ep):
         """Called when endpoints change (added)"""
-        print ">>> ADD", ep, ep.name
         if self.end_point_local is None and ep.name == "":
             self.end_point_local = ep
             return
@@ -923,7 +922,6 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_profile_end_point_removed(self, ep):
         """Called when endpoints change (removed)"""
-        print ">>> REM", ep, ep.name
         self.session.endpoint_removed(ep.name)
 
 ################################################################################

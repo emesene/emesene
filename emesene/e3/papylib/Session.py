@@ -56,6 +56,10 @@ class Session(e3.Session):
         b_dc_ep = self.config.get_or_set("b_papylib_disconnect_ep", False)
         if b_dc_ep:
             self.add_action(e3.Action.ACTION_DISCONNECT_OTHER_ENDPOINTS)
+        # we fire the event for every endpoint because otherwise we lose
+        # endpoints that were present before we logged in
+        for endp in self.__worker.profile.end_points.values():
+            self.__worker._on_profile_end_point_added(endp)
 
     def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''

@@ -114,6 +114,7 @@ class EndPointsMenu(gtk.Menu):
         self.session.signals.endpoint_removed.subscribe(self.endpoint_removed)
 
     def endpoint_added(self, name):
+        self.endpoint_removed(name)
         ep = gtk.MenuItem(_('Disconnect') + ' ' + name)
         ep.connect('activate',
             lambda *args: self.handler.on_disconnect_endpoint_selected(name))
