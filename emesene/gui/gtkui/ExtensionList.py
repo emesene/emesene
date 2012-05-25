@@ -145,6 +145,7 @@ class ExtensionListTab(gtk.VBox):
         self.progresslabel = gtk.Label()
         self.progressbar = gtk.ProgressBar()
         self.progress_cancel_button = TinyButton.TinyButton(gtk.STOCK_CANCEL)
+        self.progress_cancel_button.set_tooltip_text(_('Cancel'))
         self.end_progress_handler = None
 
         box.pack_start(self.progresslabel, False, False, 0)
