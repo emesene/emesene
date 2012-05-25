@@ -70,7 +70,7 @@ EVENTS = (\
  'contact added you', 'user typing',
  'mail received', 'mail count changed',
  'broken profile', 'close', 'social request',
- 'gui message')
+ 'gui message', 'endpoint added', 'endpoint removed')
 
 ACTIONS = (\
  'login'            , 'logout'           ,
@@ -92,7 +92,7 @@ ACTIONS = (\
  'call cancel', 'call reject',
  'p2p invite'       , 'p2p accept',
  'p2p cancel'       , 'media send', # media send if got Wink and audio clips
- 'send oim', 'disconnect other endpoints')
+ 'send oim', 'disconnect other endpoints', 'disconnect endpoint')
 
 Event.set_constants(EVENTS)
 Action.set_constants(ACTIONS)

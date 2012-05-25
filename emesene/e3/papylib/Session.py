@@ -169,3 +169,8 @@ class Session(e3.Session):
         if service == Session.SERVICE_CALLS:
             return False
         return True
+
+    def disconnect_endpoint(self, name):
+        '''disconnects a single endpoint from msn'''
+        self.add_action(e3.Action.ACTION_DISCONNECT_ENDPOINT, name)
+

@@ -112,6 +112,17 @@ class FileMenu(gtk.Menu):
             self.status.set_submenu(self.status_menu)
             self.append(self.status)
 
+        if session.session_has_service(e3.Session.ENDPOINTS)
+            self.ep_dict = {}
+            name = 'all other endpoints'
+            ep = gtk.MenuItem(_('Disconnect') + ' ' + name)
+            ep.connect('activate',
+                lambda *args: self.handler.on_disconnect_endpoint_selected(name))
+            self.append(ep)
+            self.ep_dict[name] = ep
+            session.subscribe.endpoint_added.subscribe(self.endpoint_added)
+            session.subscribe.endpoint_added.subscribe(self.endpoint_removed)
+
         self.disconnect = gtk.ImageMenuItem(gtk.STOCK_DISCONNECT)
         self.disconnect.connect('activate',
             lambda *args: self.handler.on_disconnect_selected())
@@ -122,6 +133,16 @@ class FileMenu(gtk.Menu):
         self.append(self.disconnect)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)
+
+        def endpoint_added(self, name):
+            ep = gtk.MenuItem(_('Disconnect') + ' ' + name)
+            ep.connect('activate',
+                lambda *args: self.handler.on_disconnect_endpoint_selected(name))
+            self.append(ep)
+            self.ep_dict[name] = ep
+
+        def endpoint_removed(self, name):
+            del self.ep_dict[name]
 
 class ActionsMenu(gtk.Menu):
     """
