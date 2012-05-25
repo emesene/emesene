@@ -70,7 +70,7 @@ EVENTS = (\
  'contact added you', 'user typing',
  'mail received', 'mail count changed',
  'broken profile', 'close', 'social request',
- 'gui message')
+ 'gui message', 'endpoint added', 'endpoint removed')
 
 ACTIONS = (\
  'login'            , 'logout'           ,
@@ -92,7 +92,7 @@ ACTIONS = (\
  'call cancel', 'call reject',
  'p2p invite'       , 'p2p accept',
  'p2p cancel'       , 'media send', # media send if got Wink and audio clips
- 'send oim', 'disconnect other endpoints')
+ 'send oim', 'disconnect other endpoints', 'disconnect endpoint')
 
 Event.set_constants(EVENTS)
 Action.set_constants(ACTIONS)
@@ -169,6 +169,7 @@ class Worker(threading.Thread):
         dah[Action.ACTION_CALL_CANCEL] = self._handle_action_call_cancel
         # papylib specific
         dah[Action.ACTION_DISCONNECT_OTHER_ENDPOINTS] = self._handle_action_disconnect_other_endpoints
+        dah[Action.ACTION_DISCONNECT_ENDPOINT] = self._handle_action_disconnect_endpoint
 
         self.action_handlers = dah
 
@@ -404,4 +405,7 @@ class Worker(threading.Thread):
         pass
 
     def _handle_action_disconnect_other_endpoints(self):
+        pass
+
+    def _handle_action_disconnect_endpoint(self, name):
         pass
