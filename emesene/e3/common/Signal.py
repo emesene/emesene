@@ -20,7 +20,7 @@ import functools
 import logging
 log = logging.getLogger('e3.common.Signal')
 
-import weakref
+from WeakMethod import WeakMethod, WeakMethodBound
 
 class Signal(object):
     '''an object that represents a signal a callback can subscribe
@@ -97,35 +97,3 @@ def extend(func):
        return result
 
     return wrapper
-
-# http://code.activestate.com/recipes/81253/
-class WeakMethodBound(object):
-
-    def __init__(self, f):
-        self.f = f.im_func
-        self.c = weakref.ref(f.im_self)
-
-    def __call__(self, *arg):
-        if self.c() is None:
-            raise TypeError('Method called on dead object')
-
-        self.f(self.c(), *arg)
-
-class WeakMethodFree(object):
-
-    def __init__(self, f):
-        self.f = weakref.ref(f)
-
-    def __call__(self, *arg):
-        if self.f() is None:
-            raise TypeError('Function no longer exist')
-
-        self.f()(*arg)
-
-def WeakMethod(f):
-    try:
-        f.im_func
-    except AttributeError:
-        return WeakMethodFree(f)
-
-    return WeakMethodBound(f)

@@ -20,9 +20,9 @@
 import logging
 log = logging.getLogger('e3.common.Config')
 
-from Signal import WeakMethod
+from NotificationObject import NotificationObject
 
-class Config(object):
+class Config(NotificationObject):
     '''a class that contains all the configurations of the user,
     the config keys follow a convention, all the names start with
     the type they have, for example:
@@ -39,9 +39,8 @@ class Config(object):
 
     def __init__(self, **kwargs):
         '''constructor'''
+        NotificationObject.__init__(self)
         self.__dict__ = kwargs
-        self._item_callbacks = None
-        self._callbacks = None
 
     def __getattr__(self, name):
         if name in self.__dict__:
@@ -60,63 +59,6 @@ class Config(object):
             self.__dict__[name] = default
 
         return self.__dict__[name]
-
-    def notify_change(self, item, value):
-        '''notify the callbacks that item has changed its value'''
-        if self._callbacks is None:
-            self._callbacks = []
-
-        if self._item_callbacks is None:
-            self._item_callbacks = {}
-
-        for callback in self._callbacks:
-            callback(item, value)
-
-        for callback in self._item_callbacks.get(item, ()):
-            callback(value)
-
-    def subscribe(self, callback, item=None):
-        '''add callback to the list of callbacks to be notified
-        on an attribute change, if item is None then notify on
-        all item changes, it item is a string, then notify on
-        the change of that item'''
-        callback = WeakMethod(callback)
-
-        if self._callbacks is None:
-            self._callbacks = []
-
-        if self._item_callbacks is None:
-            self._item_callbacks = {}
-
-        if item is None:
-            if callback not in self._callbacks:
-                self._callbacks.append(callback)
-        else:
-            if item not in self._item_callbacks:
-                self._item_callbacks[item] = []
-
-            if callback not in self._item_callbacks[item]:
-                self._item_callbacks[item].append(callback)
-
-    def unsubscribe(self, callback, item=None):
-        '''remove the callback from the callback list, if item is None
-        try to remove the callback from the global callback list, if it's
-        a string try to remove from the callback list of that item'''
-        callbacks = []
-
-        if item is None:
-            callbacks = self._callbacks
-        elif item in self._item_callbacks:
-            callbacks = self._item_callbacks[item]
-
-
-        to_remove = None
-        for weakmethod in callbacks:
-            if callback == weakmethod.f:
-                to_remove = weakmethod
-
-        if to_remove is not None:
-            self._callbacks.remove(to_remove)
 
     def load(self, path, clear=False):
         '''load the config file from path, clear old values if
