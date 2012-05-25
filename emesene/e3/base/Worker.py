@@ -169,6 +169,7 @@ class Worker(threading.Thread):
         dah[Action.ACTION_CALL_CANCEL] = self._handle_action_call_cancel
         # papylib specific
         dah[Action.ACTION_DISCONNECT_OTHER_ENDPOINTS] = self._handle_action_disconnect_other_endpoints
+        dah[Action.ACTION_DISCONNECT_ENDPOINT] = self._handle_action_disconnect_endpoint
 
         self.action_handlers = dah
 
@@ -404,4 +405,7 @@ class Worker(threading.Thread):
         pass
 
     def _handle_action_disconnect_other_endpoints(self):
+        pass
+
+    def _handle_action_disconnect_endpoint(self, name):
         pass

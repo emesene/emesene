@@ -172,5 +172,5 @@ class Session(e3.Session):
 
     def disconnect_endpoint(self, name):
         '''disconnects a single endpoint from msn'''
-        self.add_action(e3.Action.ACTION_DISCONNECT_ENDPOINT, name)
+        self.add_action(e3.Action.ACTION_DISCONNECT_ENDPOINT, (name,))
 
