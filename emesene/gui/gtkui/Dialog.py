@@ -85,16 +85,6 @@ class Dialog(object):
         return image
 
     @classmethod
-    def window_add_button(cls, window, stock_id, label=''):
-        '''add a button to the window'''
-
-        button = gtk.Button(label, stock=stock_id)
-        window.bbox.pack_start(button, True, True)
-        button.show()
-
-        return button
-
-    @classmethod
     def window_add_label(cls, window, text):
         '''add a label with the text (as pango) on the window'''
 
@@ -542,28 +532,6 @@ class Dialog(object):
         GUI logic on your code and not client logic
         cb args: response, group_name'''
         window = cls.entry_window(_("Group name"), '', response_cb, title)
-        window.show()
-
-    @classmethod
-    def set_nick(cls, nick, response_cb, title=_("Change nick")):
-        '''show a dialog asking for a new nick and displaying the current
-        one, the response_cb receives the old nick, the new nick,
-        and the response (stock.ACCEPT, stock.CANCEL or stock.CLOSE)
-        cb args: response, old_nick, new_nick'''
-        window = cls.entry_window(_("New nick"), nick, response_cb, title,
-        nick)
-        window.show()
-
-    @classmethod
-    def set_message(cls, message, response_cb,
-        title=_("Change personal message")):
-        '''show a dialog asking for a new personal message and displaying
-        the current one, the response_cb receives the old personal message
-        , the new personal message and the response
-        (stock.ACCEPT, stock.CANCEL or stock.CLOSE)
-        cb args: response, old_pm, new_pm'''
-        window = cls.entry_window(_("New personal message"),
-            message, response_cb, title, message)
         window.show()
 
     @classmethod
