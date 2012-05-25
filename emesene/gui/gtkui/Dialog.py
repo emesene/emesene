@@ -937,32 +937,24 @@ class Dialog(object):
         hbox = gtk.HBox(spacing=5)
         vbox = gtk.VBox()
 
-        frame = gtk.Frame(_('Picture'))
-
-        avatar = gtk.Image()
+        Avatar = extension.get_default('avatar')
+        avatar = Avatar()
         avatar.set_size_request(96, 96)
-        frame.add(avatar)
-
-        if utils.file_readable(last_avatar):
-            pixbuf = gtk.gdk.pixbuf_new_from_file(last_avatar)
-        else:
-            pixbuf = gtk.gdk.pixbuf_new_from_file(gui.theme.image_theme.logo)
-
-        avatar.set_from_pixbuf(pixbuf)
+        avatar.set_from_file(last_avatar)
         avatarEventBox = gtk.EventBox()
-        avatarEventBox.add(frame)
+        avatarEventBox.add(avatar)
 
         hbox.pack_start(avatarEventBox)
         hbox.pack_start(vbox)
 
         nick_label = gtk.Label(_('Nick:'))
-        nick_label.set_alignment(0.0,0.5)
+        nick_label.set_alignment(0.0, 0.5)
 
         nick = gtk.Entry()
         nick.set_text(user_nick)
 
-        pm_label = gtk.Label(_('PM:'))
-        pm_label.set_alignment(0.0,0.5)
+        pm_label = gtk.Label(_('Message:'))
+        pm_label.set_alignment(0.0, 0.5)
 
         pm = gtk.Entry()
         pm.set_text(user_message)
