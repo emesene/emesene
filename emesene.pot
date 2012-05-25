@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-24 22:07+0200\n"
+"POT-Creation-Date: 2012-05-25 21:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: emesene/temp_translations_file.py:23
+#: emesene/temp_translations_file.py:27
 msgid "Instant messaging client for MSN, Gtalk and Facebook"
 msgstr ""
 
-#: emesene/temp_translations_file.py:23
+#: emesene/temp_translations_file.py:27
 msgid "Open a new instance"
 msgstr ""
 
@@ -39,7 +39,7 @@ msgstr ""
 msgid "Available"
 msgstr ""
 
-#: emesene/e3/base/status.py:26 emesene/gui/gtkui/ContactList.py:500
+#: emesene/e3/base/status.py:26 emesene/gui/gtkui/ContactList.py:503
 msgid "Offline"
 msgstr ""
 
@@ -353,7 +353,7 @@ msgid "E-Mail"
 msgstr ""
 
 #: emesene/gui/gtkui/ContactInformation.py:147
-#: emesene/gui/gtkui/Dialog.py:1024 emesene/gui/gtkui/ExtensionList.py:40
+#: emesene/gui/gtkui/Dialog.py:1024 emesene/gui/gtkui/ExtensionList.py:47
 #: emesene/gui/gtkui/Login.py:66 emesene/gui/gtkui/MainMenu.py:108
 #: emesene/gui/gtkui/Tooltips.py:59 emesene/gui/common/TrayIcon.py:177
 msgid "Status"
@@ -402,11 +402,11 @@ msgstr ""
 msgid "Too many messages to display"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactList.py:521
+#: emesene/gui/gtkui/ContactList.py:524
 msgid "Online"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactList.py:542
+#: emesene/gui/gtkui/ContactList.py:545
 msgid "No group"
 msgstr ""
 
@@ -895,57 +895,55 @@ msgid ""
 "Do you want to add him/her to your contact list?"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1903
+#: emesene/gui/gtkui/Dialog.py:1903 emesene/gui/gtkui/ExtensionList.py:148
 msgid "Cancel"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:46 emesene/gui/gtkui/Preferences.py:1032
+#: emesene/gui/gtkui/ExtensionList.py:53 emesene/gui/gtkui/Preferences.py:1032
 msgid "Name"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:248
+#: emesene/gui/gtkui/ExtensionList.py:251
 msgid "Refresh extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:249
-msgid "Refreshing extensions"
-msgstr ""
-
-#: emesene/gui/gtkui/ExtensionList.py:318
+#: emesene/gui/gtkui/ExtensionList.py:358
 msgid "Download"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:332
+#: emesene/gui/gtkui/ExtensionList.py:372
 msgid "Supported"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:333
+#: emesene/gui/gtkui/ExtensionList.py:373
 msgid "Community"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:397
-#: emesene/gui/gtkui/ExtensionList.py:398
+#: emesene/gui/gtkui/ExtensionList.py:436
 msgid "Downloading extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:440
+#: emesene/gui/gtkui/ExtensionList.py:481
 msgid "Available for download"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:486 emesene/gui/gtkui/PluginWindow.py:46
+#: emesene/gui/gtkui/ExtensionList.py:501
+msgid "Refresh themes"
+msgstr ""
+
+#: emesene/gui/gtkui/ExtensionList.py:529 emesene/gui/gtkui/PluginWindow.py:46
 msgid "Installed"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:527
+#: emesene/gui/gtkui/ExtensionList.py:570
 msgid "Update"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:568
-#: emesene/gui/gtkui/ExtensionList.py:569
+#: emesene/gui/gtkui/ExtensionList.py:610
 msgid "Updating extensions"
 msgstr ""
 
-#: emesene/gui/gtkui/ExtensionList.py:666
+#: emesene/gui/gtkui/ExtensionList.py:709
 #: emesene/gui/gtkui/PluginWindow.py:114 emesene/gui/gtkui/Preferences.py:68
 msgid "Plugins"
 msgstr ""
