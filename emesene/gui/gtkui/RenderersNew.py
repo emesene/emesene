@@ -265,10 +265,22 @@ class SmileyLabel(Gtk.CellView):
         self._model = Gtk.ListStore(str)
         self.set_model(self._model)
         self.crt = extension.get_and_instantiate('nick renderer')
+        self.prepare_column()
+        self._text = ""
+        extension.subscribe(self._on_nick_renderer_changed, 'nick renderer')
+
+    def __del__(self):
+        extension.unsubscribe(self._on_nick_renderer_changed, 'nick renderer')
+
+    def prepare_column(self):
         self.crt.set_property('ellipsize', Pango.ELLIPSIZE_END)
         self.pack_start(self.crt, False)
         self.add_attribute(self.crt, 'markup', 0)
-        self._text = ""
+
+    def _on_nick_renderer_changed(self, new_extension):
+        self.clear()
+        self.crt = new_extension()
+        self.prepare_column()
 
     def set_text(self, text=''):
         self._text = text

@@ -65,7 +65,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
         self._build_menus()
 
-        self.panel = UserPanel(session)
+        self.panel = UserPanel(session, self)
         self.panel.nick.connect('text-changed', self._on_nick_changed)
         self.panel.message.connect('text-changed', self._on_message_changed)
         self.panel.mail.connect('button_release_event', self._on_mail_click)
@@ -110,6 +110,38 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
         self._on_show_userpanel_changed(self.session.config.b_show_userpanel)
         self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
+
+        #extension changes
+        extension.subscribe(self._on_below_userlist_changed, "below userlist")
+        extension.subscribe(self._on_below_menu_changed, "below menu")
+        extension.subscribe(self._on_below_panel_changed, "below panel")
+
+    def _replace_widget(self, widget, new_extension, pos):
+        if widget:
+            self.remove(widget)
+            widget = None
+        if new_extension:
+            widget = new_extension(self)
+            self.pack_start(widget, False)
+            self.reorder_child(widget, pos)
+            widget.show()
+        return widget
+
+    def _on_below_userlist_changed(self, new_extension):
+        if type(self.below_userlist) != new_extension:
+            pos = len(self.get_children()) - 1
+            self.below_userlist = self._replace_widget(
+                    self.below_userlist, new_extension, pos)
+
+    def _on_below_menu_changed(self, new_extension):
+        if type(self.below_menu) != new_extension:
+            self.below_menu = self._replace_widget(
+                    self.below_menu, new_extension, 1)
+
+    def _on_below_panel_changed(self, new_extension):
+        if type(self.below_panel) != new_extension:
+            self.below_panel = self._replace_widget(
+                    self.below_panel, new_extension, 3)
 
     def _on_mail_count_changed(self, count):
         self.panel.mail.set_label("(%d)" % count)
@@ -246,34 +278,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.below_userlist.show()
         self.contact_list._set_accels(self.get_parent())
 
-    def _replace_below_userlist(self):
-        self.remove(self.below_userlist)
-        self.below_userlist = extension.get_and_instantiate('below userlist', self)
-        self.pack_start(self.below_userlist, False)
-        pos = len(self.get_children()) - 1
-        self.reorder_child(self.below_userlist, pos)
-        self.below_userlist.show()
-
-    def _replace_below_menu(self):
-        self.remove(self.below_menu)
-        self.below_menu = extension.get_and_instantiate('below menu', self)
-        self.pack_start(self.below_menu, False)
-        self.reorder_child(self.below_menu, 1)
-        self.below_menu.show()
-
-    def _replace_below_panel(self):
-        self.remove(self.below_panel)
-        self.below_panel = extension.get_and_instantiate('below panel', self)
-        self.pack_start(self.below_panel, False)
-        self.reorder_child(self.below_panel, 3)
-        self.below_panel.show()
-
-    def replace_extensions(self):
-        self._replace_below_userlist()
-        self._replace_below_menu()
-        self._replace_below_panel()
-        self.panel.replace_userpanel_extension(self)
-
     def _on_entry_changed(self, entry, *args):
         '''called when the text on entry changes'''
         self.contact_list.filter_text = entry.get_text().lower()
@@ -357,6 +361,21 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def on_disconnect(self, close=None):
         '''callback called when the disconnect option is selected'''
         gui.MainWindowBase.on_disconnect(self)
+
+        #extension changes
+        extension.unsubscribe(self._on_below_userlist_changed, "below userlist")
+        extension.unsubscribe(self._on_below_menu_changed, "below menu")
+        extension.unsubscribe(self._on_below_panel_changed, "below panel")
+
+        if self.below_userlist:
+            self.below_userlist = None
+
+        if self.below_menu:
+            self.below_v = None
+
+        if self.below_panel:
+            self.below_panel = None
+
         self.contact_list.contact_selected.unsubscribe(
             self._on_contact_selected)
         self.contact_list.group_selected.unsubscribe(self._on_group_selected)
@@ -374,6 +393,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.session.signals.contact_attr_changed.unsubscribe(
             self._on_contact_attr_changed)
         self.panel.remove_subscriptions()
+        self.panel = None
         self.session.signals.close.unsubscribe(self.on_disconnect)
 
     def _on_search_toggled(self, button):

@@ -539,11 +539,19 @@ class SmileyLabel(gtk.Label):
         gtk.Widget.__init__(self)
         self.angle = 0
         self._text = ['']
+        self.markup = ''
         self._ellipsize = True
         self._wrap = True
         self._smiley_layout = None
         self.set_flags(self.flags() | gtk.NO_WINDOW)
         self._smiley_layout = SmileyLayout(self.create_pango_context())
+        extension.subscribe(self._on_nick_renderer_changed, 'nick renderer')
+
+    def __del__(self):
+        extension.unsubscribe(self._on_nick_renderer_changed, 'nick renderer')
+
+    def _on_nick_renderer_changed(self, new_extension):
+        self.set_markup(self.markup)
 
     def set_angle(self, angle):
         self.angle = angle
@@ -561,6 +569,7 @@ class SmileyLabel(gtk.Label):
 
     def set_markup(self, text=['']):
         markup = msnplus_to_list(text)
+        self.markup = text
         self.set_text(markup)
 
     def set_text(self, text=['']):

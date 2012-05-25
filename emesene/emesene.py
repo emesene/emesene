@@ -401,6 +401,7 @@ class Controller(object):
             if self.notification:
                 self.notification.remove_subscriptions()
                 self.notification = None
+            extension.unsubscribe(self._on_tray_icon_changed, 'tray icon')
 
     def _save_application_language(self):
         '''save global settings to application config
@@ -488,6 +489,11 @@ class Controller(object):
 
         handler = gui.base.TrayIconHandler(self.session, gui.theme, self.close_session)
         self.tray_icon = trayiconcls(handler, self.window)
+        extension.subscribe(self._on_tray_icon_changed, 'tray icon')
+
+    def _on_tray_icon_changed(self, new_extension):
+        self._draw_tray_icon()
+        self.tray_icon.set_main(self.session)
 
     def _sync_emesene1(self):
         syn = extension.get_default('synch tool')
@@ -550,7 +556,6 @@ class Controller(object):
         for plugin in self.session.config.l_active_plugins:
             plugin_manager.plugin_start(plugin, self.session)
         self.session.set_default_extensions_from_config()
-        self.window.content_main.replace_extensions()
 
     def on_login_succeed(self):
         '''callback called on login succeed'''

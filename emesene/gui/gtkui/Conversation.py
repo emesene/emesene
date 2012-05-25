@@ -139,8 +139,38 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self._load_style()
         self.subscribe_signals()
+        extension.subscribe(self.on_below_conversation_changed, 'below conversation')
+        extension.subscribe(self.on_conversation_info_extension_changed, 'conversation info')
 
         self.tab_index = -1 # used to select an existing conversation
+
+    def on_conversation_info_extension_changed(self, new_extension):
+        if type(self.info) != new_extension:
+            self.hbox.remove(self.info)
+            self.info = None
+
+            if new_extension:
+                self.info = new_extension(self.session, self.members)
+                if self.session.config.get_or_set('b_avatar_on_left', False):
+                    self.hbox.pack_start(self.info, False)
+                else:
+                    self.hbox.pack_end(self.info, False)
+
+            if self.session.config.b_show_info:
+                self.info.show()
+
+    def on_below_conversation_changed(self, newvalue):
+        if type(self.below_conversation) != newvalue:
+            #replace the below conversation
+            if not self.below_conversation is None:
+                self.remove(self.below_conversation)
+                self.below_conversation = None
+
+            if newvalue:
+                self.below_conversation = newvalue(self, self.session)
+                self.pack_end(self.below_conversation, False)
+                self.below_conversation.show()
+
 
     def check_visible(self):
         return self.get_visible()
@@ -204,6 +234,10 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_close(self):
         '''called when the conversation is closed'''
         self.unsubscribe_signals()
+        extension.unsubscribe(self.on_below_conversation_changed, 'below conversation')
+        extension.unsubscribe(self.on_conversation_info_extension_changed, 'conversation info')
+        if self.below_conversation:
+            self.below_conversation = None
 
         self.destroy()
         self.info.destroy()

@@ -32,10 +32,11 @@ class UserPanel(gtk.VBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, session):
+    def __init__(self, session, main_window):
         '''constructor'''
         gtk.VBox.__init__(self)
 
+        self.main_window = main_window
         self.session = session
         self.config_dir = session.config_dir
         self._enabled = True
@@ -104,7 +105,6 @@ class UserPanel(gtk.VBox):
         #test_btn.show()
         #nick_hbox.pack_start(test_btn, False)
         self.userpanel_button = None
-
         vbox.pack_start(nick_hbox, False)
         self.message_hbox = gtk.HBox()
         self.message_hbox.pack_start(self.message, True, True)
@@ -123,19 +123,19 @@ class UserPanel(gtk.VBox):
 
         self._add_subscriptions()
 
-    def replace_userpanel_extension(self, main_window):
-        #first remove current button
-        if not self.userpanel_button is None:
-            self.message_hbox.remove(self.userpanel_button)
-            self.userpanel_button = None
+    def _on_userpanel_button_changed(self, newvalue):
+        if type(self.userpanel_button) != newvalue:
+            #first remove current button
+            if not self.userpanel_button is None:
+                self.message_hbox.remove(self.userpanel_button)
+                self.userpanel_button = None
 
-        UserPanelButton = extension.get_default('userpanel button')
-        if UserPanelButton is not None:
-            #add new button
-            self.userpanel_button = UserPanelButton(self, main_window)
-            self.message_hbox.pack_start(self.userpanel_button, False)
-            self.message_hbox.reorder_child(self.userpanel_button, 1)
-            self.userpanel_button.show()
+            if newvalue is not None:
+                #add new button
+                self.userpanel_button = newvalue(self, self.main_window)
+                self.message_hbox.pack_start(self.userpanel_button, False)
+                self.message_hbox.reorder_child(self.userpanel_button, 1)
+                self.userpanel_button.show()
 
     def show(self):
         '''override show'''
@@ -235,6 +235,9 @@ class UserPanel(gtk.VBox):
         self.session.signals.profile_set_succeed.subscribe(
             self.on_profile_update_succeed)
 
+        extension.subscribe(
+            self._on_userpanel_button_changed, "userpanel button")
+
     def remove_subscriptions(self):
         '''unsubscribe all signals'''
         self.session.signals.message_change_succeed.unsubscribe(
@@ -252,3 +255,7 @@ class UserPanel(gtk.VBox):
             self.on_profile_update_succeed)
         self.session.signals.profile_set_succeed.unsubscribe(
             self.on_profile_update_succeed)
+
+        extension.unsubscribe(
+            self._on_userpanel_button_changed, "userpanel button")
+

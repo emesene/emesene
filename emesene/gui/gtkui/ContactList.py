@@ -98,30 +98,19 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.connect('motion-notify-event', self.tooltips.on_motion)
         self.connect('leave-notify-event', self.tooltips.on_leave)
 
-        crt = extension.get_and_instantiate('nick renderer')
-        crt.set_property('ellipsize', pango.ELLIPSIZE_END)
-        pbr_status = gtk.CellRendererPixbuf()
+        self.crt = extension.get_and_instantiate('nick renderer')
 
-        column = gtk.TreeViewColumn()
-        column.set_expand(True)
+        self.column = gtk.TreeViewColumn()
+        self.column.set_expand(True)
 
         self.exp_column = gtk.TreeViewColumn()
         self.exp_column.set_max_width(16)
 
         self.append_column(self.exp_column)
-        self.append_column(column)
+        self.append_column(self.column)
         self.set_expander_column(self.exp_column)
 
-        column.pack_start(self.pbr, False)
-        column.pack_start(crt, True)
-        column.pack_start(pbr_status, False)
-
-        column.add_attribute(self.pbr, 'image', 0)
-        column.add_attribute(crt, 'markup', 2)
-        column.add_attribute(self.pbr, 'visible', 3)
-        column.add_attribute(pbr_status, 'visible', 3)
-        column.add_attribute(pbr_status, 'pixbuf', 4)
-        column.add_attribute(self.pbr, 'offline', 7)
+        self.prepare_contactlist_column()
 
         self.set_search_column(2)
         self.set_headers_visible(False)
@@ -132,6 +121,32 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.connect('row-collapsed',  self._on_collapse)
         self.connect('drag-data-get',  self._on_drag_data_get)
         self.connect('drag-drop',  self._on_drag_drop)
+        extension.subscribe(self.on_nick_renderer_changed, 'nick renderer')
+
+    def prepare_contactlist_column(self):
+        '''update column properties'''
+        self.crt.set_property('ellipsize', pango.ELLIPSIZE_END)
+        pbr_status = gtk.CellRendererPixbuf()
+        self.column.pack_start(self.pbr, False)
+        self.column.pack_start(self.crt, True)
+        self.column.pack_start(pbr_status, False)
+        self.column.add_attribute(self.pbr, 'image', 0)
+        self.column.add_attribute(self.crt, 'markup', 2)
+        self.column.add_attribute(self.pbr, 'visible', 3)
+        self.column.add_attribute(pbr_status, 'visible', 3)
+        self.column.add_attribute(pbr_status, 'pixbuf', 4)
+        self.column.add_attribute(self.pbr, 'offline', 7)
+
+    def on_nick_renderer_changed(self, new_renderer):
+        if type(self.crt) != new_renderer:
+            #remove and and again
+            self.column.clear()
+            self.crt = new_renderer()
+            self.prepare_contactlist_column()
+
+    def remove_subscriptions(self):
+        gui.ContactList.remove_subscriptions(self)
+        extension.unsubscribe(self.on_nick_renderer_changed, 'nick renderer')
 
     def _set_accels(self, mainwindow):
         """set the keyboard shortcuts

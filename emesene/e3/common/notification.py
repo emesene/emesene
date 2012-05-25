@@ -66,8 +66,19 @@ class Notification():
             self.session.signals.filetransfer_invitation.subscribe(
                 self._on_filetransfer_invitation)
 
+        extension.subscribe(self._on_notification_gui_changed, 'notificationGUI')
+        extension.subscribe(self._on_notification_image_changed, 'notificationImage')
+
         self.notify_online = False
         self.last_online = None
+
+    def _on_notification_gui_changed(self, new_extension):
+        if type(self.notifier) != new_extension:
+            self.notifier = extension.get_default('notificationGUI')
+
+    def _on_notification_image_changed(self, new_extension):
+        if type(self.picture_factory) != new_extension:
+            self.picture_factory = extension.get_default('notificationImage')
 
     def remove_subscriptions(self):
         if self.session:
@@ -85,6 +96,8 @@ class Notification():
                 self._on_filetransfer_canceled)
             self.session.signals.filetransfer_invitation.unsubscribe(
                 self._on_filetransfer_invitation)
+        extension.unsubscribe(self._on_notification_gui_changed, 'notificationGUI')
+        extension.unsubscribe(self._on_notification_image_changed, 'notificationImage')
 
     def _on_filetransfer_completed(self, args):
         uri = self.picture_factory('notification-message-email', 'mail-received')

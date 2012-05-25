@@ -503,11 +503,8 @@ class ExtensionManager(NotificationObject):
         if the category doesn't exists, return False'''
         category = self.get_category(category_name)
         if category is not None:
-            old_ext = self.get_default(category_name)
             category.default = cls
-            new_ext = self.get_default(category_name)
-            if old_ext != new_ext:
-                self.notify_change(category_name, new_ext)
+            self.notify_change(category_name, cls)
             return True
 
         return False
@@ -520,11 +517,9 @@ class ExtensionManager(NotificationObject):
         if the category doesn't exists, return False'''
         category = self.get_category(category_name)
         if category is not None:
-            old_ext = self.get_default(category_name)
             category.set_default_by_id(id_)
             new_ext = self.get_default(category_name)
-            if old_ext != new_ext:
-                self.notify_change(category_name, new_ext)
+            self.notify_change(category_name, new_ext)
             return True
 
         return False
