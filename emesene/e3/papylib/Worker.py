@@ -1480,7 +1480,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _handle_action_disconnect_endpoint(self, name):
         """ disconnects a single msnp18 mpop instance """
-        if name == 'all other endpoints':
+        if name == 'All other endpoints':
             self.disconnect_other_endpoints()
             return
         for ep in self.profile.end_points.values():

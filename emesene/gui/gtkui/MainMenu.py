@@ -104,18 +104,19 @@ class EndPointsMenu(gtk.Menu):
         self.session = session
 
         self.ep_dict = {}
-        name = 'all other endpoints'
-        ep = gtk.MenuItem(_('Disconnect') + ' ' + _(name))
+        name = 'All other endpoints'
+        ep = gtk.MenuItem(_(name))
         ep.connect('activate',
                 lambda *args : self.handler.on_disconnect_endpoint_selected(name))
         self.append(ep)
+        self.append(gtk.SeparatorMenuItem())
 
         self.session.signals.endpoint_added.subscribe(self.endpoint_added)
         self.session.signals.endpoint_removed.subscribe(self.endpoint_removed)
 
     def endpoint_added(self, name):
         self.endpoint_removed(name)
-        ep = gtk.MenuItem(_('Disconnect') + ' ' + name)
+        ep = gtk.MenuItem(name)
         ep.connect('activate',
             lambda *args: self.handler.on_disconnect_endpoint_selected(name))
         ep.show()
