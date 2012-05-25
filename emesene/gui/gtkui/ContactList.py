@@ -302,7 +302,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
     def _get_selected(self):
         '''return the selected row or None'''
-        iter_ = self.get_selection().get_selected()[1]
+        try:
+            iter_ = self.get_selection().get_selected()[1]
+        except AttributeError:
+            return None
 
         if iter_ is None:
             return None
