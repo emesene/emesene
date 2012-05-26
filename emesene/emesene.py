@@ -699,6 +699,7 @@ class Controller(object):
                 self.session.config.b_conv_maximized = False
             else:
                 self.session.config.b_conv_maximized = True
+                self.session.config.i_conv_width = width #needed for single window
             self.session.conversation_managers.remove(conv_manager)
 
         self.conversations.remove(conv_manager)

@@ -179,9 +179,12 @@ class Window(gtk.Window):
             w, h = self.get_size()
             def this_is_an_hax(*args):
                 # Really, it is! And an ugly one!
-                self.resize(self.set_or_get_width(width+w), 
-                            self.set_or_get_height(height))
-                self.box.set_position(w)
+                if self.is_maximized():
+                    self.box.set_position(w-width)
+                else:
+                    self.resize(self.set_or_get_width(width+w), 
+                                self.set_or_get_height(height))
+                    self.box.set_position(w)
                 return False
             glib.idle_add(this_is_an_hax)
         else:
