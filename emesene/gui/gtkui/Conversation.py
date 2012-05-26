@@ -290,6 +290,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         """
         update the information for a conversation with multiple users
         """
+        if self.session.account.account in self.members:
+            # this can happen sometimes (e.g. when you're invisible. see #1297)
+            self.members.remove(self.session.account.account)
+
         #TODO add plus support for nick to the tab label!
         members_nick = []
         i = 0
