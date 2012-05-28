@@ -79,7 +79,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.entry.set_icon_tooltip_text (0, _('Type to search...'))
         self.entry.set_icon_from_stock(1,gtk.STOCK_CLEAR)
         self.entry.set_icon_tooltip_text(1, _('Clear the search'))
-        self.entry.set_icon_activatable(1, False)
         self.entry.connect('changed', self._on_entry_changed)
         self.entry.connect('key-press-event', self._on_entry_key_press)
         self.entry.connect ('icon-press', self._on_icon_press)
