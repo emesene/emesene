@@ -101,7 +101,7 @@ class Worker(e3.Worker):
         self.client.get_roster(block=True)
         self.client.send_presence()
 
-        for jid in self.client.client_roster:
+        for jid in self.client.client_roster.keys():
             state = self.client.client_roster[jid]
             if jid == self.session.account.account:
                 self.session.contacts.me.nick = state['name']
@@ -111,10 +111,11 @@ class Worker(e3.Worker):
             if jid in self.session.contacts.contacts:
                 contact = self.session.contacts.contacts[jid]
             else:
-                contact = e3.Contact(jid, cid=jid)
+                contact = e3.Contact(jid, jid)
                 self.session.contacts.contacts[jid] = contact
 
-            contact.nick = state['name']
+            #contact.nick = state['name']
+            print "ADD", contact
             #TODO: Support other infos like groups, etc.
             # account, identifier=None, nick='', message=None,
             # _status=status.OFFLINE, alias='', blocked=False, cid=None
@@ -153,8 +154,8 @@ class Worker(e3.Worker):
 
         #TODO: ask for vcard only when vcard-temp:x:update and photo are
         #      in presence (?)
-        self.client.plugin['xep_0054'].get_vcard(jid=presence.get_from(),
-            block=False, callback=self._on_vcard_get)
+        #self.client.plugin['xep_0054'].get_vcard(jid=presence.get_from(),
+        #    block=False, callback=self._on_vcard_get)
 
         stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
         contact = self.session.contacts.contacts.get(account, None)

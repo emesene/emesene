@@ -123,7 +123,8 @@ class Session(e3.Session):
                         Session.SERVICE_CONTACT_INVITE,
                         Session.SERVICE_CALLS,
                         Session.SERVICE_STATUS,
-                        Session.SERVICE_FILETRANSFER]:
+                        Session.SERVICE_FILETRANSFER,
+                        Session.SERVICE_ENDPOINTS]:
             return False
 
         if service in [Session.SERVICE_PROFILE_PICTURE,
