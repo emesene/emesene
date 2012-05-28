@@ -109,16 +109,33 @@ class Worker(e3.Worker):
                 continue
 
             if jid in self.session.contacts.contacts:
-                contact = self.session.contacts.contacts[account]
+                contact = self.session.contacts.contacts[jid]
             else:
                 contact = e3.Contact(jid, cid=jid)
                 self.session.contacts.contacts[jid] = contact
 
             contact.nick = state['name']
             #TODO: Support other infos like groups, etc.
+            # account, identifier=None, nick='', message=None,
+            # _status=status.OFFLINE, alias='', blocked=False, cid=None
+
+            for group in state['groups']:
+                self._add_contact_to_group(contact, group)
 
         self.session.login_succeed()
         self.session.contact_list_ready()
+
+    def _add_group(self, group):
+        ''' method to add a group to the (gui) contact list '''
+        self.session.groups[group] = e3.base.Group(group, group)
+
+    def _add_contact_to_group(self, contact, group):
+        ''' method to add a contact to a (gui) group '''
+        if group not in self.session.groups.values():
+            self._add_group(group)
+        self.session.groups[group].contacts.append(contact.account)
+        contact = self.session.contacts.contacts[contact.account]
+        contact.groups.append(group)
 
     def _change_status(self, status_):
         '''change the user status'''
@@ -285,7 +302,8 @@ class Worker(e3.Worker):
         # MSN will kill connections that have been inactive for even
         # short periods of time. So use pings to keep the session alive;
         # whitespace keepalives do not work.
-        self.client.register_plugin('xep_0199', {'keepalive': True, 'frequency': 60})
+        if not self.session._is_facebook:
+            self.client.register_plugin('xep_0199', {'keepalive': True, 'frequency': 60})
 
         self.client.add_event_handler('session_start', self._session_started)
         self.client.add_event_handler('changed_status', self._on_presence)
