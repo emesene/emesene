@@ -215,7 +215,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         if self.panel.search.get_active():
             return
 
-        self.get_parent().emit('delete-event', gtk.gdk.Event(gtk.gdk.DELETE))
+        #TODO: this is really ugly
+        self.get_parent().get_parent().emit('delete-event', gtk.gdk.Event(gtk.gdk.DELETE))
 
     def on_key_search(self, accel_group, window, keyval, modifier):
         '''Catches Ctrl+F and opens or closes the search entry'''
