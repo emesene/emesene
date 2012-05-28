@@ -239,7 +239,7 @@ class Preferences(gtk.Window):
                          'text' : _('Live Messenger')})
             self.__refresh_list()
 
-        if 'facebook' in self.session.SERVICES:
+        if self.session._is_facebook:
         # only when session is papylib.
             if not fb_in_list:
                 self.LIST.append({'stock_id' : gtk.STOCK_NETWORK,
