@@ -212,7 +212,7 @@ class Worker(e3.Worker):
             return
 
         body = message['body']
-        account = message['from']
+        account = message['from'].bare
 
         if account in self.conversations:
             cid = self.conversations[account]
