@@ -338,7 +338,7 @@ class ContactHandler(object):
         group_src = self.contact_list.get_contact_selected_group()
 
         if contact and group_src and group_dst:
-            self.session.move_to_group(contact.account, 
+            self.session.move_to_group(contact.account,
                                     group_src.identifier, group_dst.identifier)
         else:
             self.dialog.error(_('No contact selected'))
@@ -429,11 +429,11 @@ class GroupHandler(object):
             self.contact_list.fill()
         else:
             self.dialog.error(_('No group selected'))
-    
+
     def on_unset_favorite_group_selected(self):
         ''' called when unset as favorite is selected in a favorite group '''
         group = self.contact_list.get_group_selected()
-        
+
         if group:
             # reset group weight
             self.session.config.d_weights[group.identifier] = 0
@@ -500,7 +500,7 @@ class ConversationToolbarHandler(object):
 
     def on_invite_selected(self):
         '''called when the Invite button is selected'''
-        l_buddy_exclude = self.conversation.members
+        l_buddy_exclude = list(self.conversation.members)
         self.dialog.invite_dialog(self.session,
                                   self.conversation.on_invite, l_buddy_exclude)
 
@@ -541,7 +541,7 @@ class ConversationToolbarHandler(object):
     def on_toggle_avatar_selected(self):
         '''hide or show the avatar bar'''
         self.conversation.on_toggle_avatar()
-		
+
     def on_invite_video_call_selected(self):
         '''called when the user is requesting a video-only call'''
         self.conversation.on_video_call()
@@ -585,14 +585,14 @@ class TrayIconHandler(FileHandler):
         FileHandler.__init__(self, session, on_quit)
         self.theme = theme
         self.preferences = None
-        
+
     def on_hide_show_mainwindow(self, main_window=None):
         if main_window is not None:
             if main_window.get_visible():
                 main_window.hide()
             else:
                 main_window.present()
-                
+
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
         self.preferences = extension.get_and_instantiate('preferences',
@@ -634,7 +634,7 @@ class FileTransferHandler(object):
         ''' when a file transfer is accepted by the other party'''
         self.transfer.time_start = time.time()
         self.transfer.state = e3.base.FileTransfer.TRANSFERRING
-        
+
     def reject(self):
         ''' rejects a file transfer '''
         self.transfer.state = e3.base.FileTransfer.FAILED
@@ -663,7 +663,7 @@ class CallHandler(object):
     def accepted(self):
         ''' when a call is accepted by the other party'''
         self.call.state = e3.base.Call.ESTABLISHED
-        
+
     def reject(self):
         ''' rejects a call '''
         self.call.state = e3.base.Call.FAILED
