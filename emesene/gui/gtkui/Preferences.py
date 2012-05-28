@@ -567,12 +567,6 @@ class BaseTable(gtk.Table):
     def on_update(self):
         pass
 
-    def on_redraw_main_screen(self, button):
-        """called when the Redraw main screen button is clicked"""
-        self.session.save_config()
-        self.session.signals.login_succeed.emit()
-        self.session.signals.contact_list_ready.emit()
-
     def on_import_emesene1(self, button):
         """called when the Import button is clicked"""
         syn = extension.get_default('synch tool')
@@ -1043,10 +1037,7 @@ class Extension(BaseTable):
 
         self.add_text('', 0, 7, True)
 
-        self.add_button(_('Redraw main screen'), 0, 8,
-                self.on_redraw_main_screen, 0, 0)
-
-        self.add_button(_('Import from emesene1'), 1, 8,
+        self.add_button(_('Import from emesene1'), 0, 8,
                 self.on_import_emesene1, 0, 0)
 
     def _add_categories_and_extensions_combos(self):
