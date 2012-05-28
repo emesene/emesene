@@ -146,3 +146,4 @@ class Session(e3.Session):
         '''activates/deactivates social services if avariable in protocol'''
         if not self.facebook_client is None:
             self.facebook_client.set_token(self.config.facebook_token, active)
+

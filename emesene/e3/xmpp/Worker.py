@@ -114,8 +114,7 @@ class Worker(e3.Worker):
                 contact = e3.Contact(jid, jid)
                 self.session.contacts.contacts[jid] = contact
 
-            #contact.nick = state['name']
-            print "ADD", contact
+            contact.nick = state['name']
             #TODO: Support other infos like groups, etc.
             # account, identifier=None, nick='', message=None,
             # _status=status.OFFLINE, alias='', blocked=False, cid=None
@@ -132,10 +131,9 @@ class Worker(e3.Worker):
 
     def _add_contact_to_group(self, contact, group):
         ''' method to add a contact to a (gui) group '''
-        if group not in self.session.groups.values():
+        if group not in self.session.groups.keys():
             self._add_group(group)
         self.session.groups[group].contacts.append(contact.account)
-        contact = self.session.contacts.contacts[contact.account]
         contact.groups.append(group)
 
     def _change_status(self, status_):
@@ -154,8 +152,8 @@ class Worker(e3.Worker):
 
         #TODO: ask for vcard only when vcard-temp:x:update and photo are
         #      in presence (?)
-        #self.client.plugin['xep_0054'].get_vcard(jid=presence.get_from(),
-        #    block=False, callback=self._on_vcard_get)
+        self.client.plugin['xep_0054'].get_vcard(jid=presence.get_from(),
+            block=False, callback=self._on_vcard_get)
 
         stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
         contact = self.session.contacts.contacts.get(account, None)

@@ -37,7 +37,7 @@ class Contact(object):
         self.blocked = blocked
         self.picture = ''
         self.groups = []
-        self.cid = cid
+        self.cid = cid # XXX: unused?
 
         # extra atributes (use contact.attrs.get("attr", "default"))
         self.attrs = {}
