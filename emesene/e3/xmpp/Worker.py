@@ -114,6 +114,9 @@ class Worker(e3.Worker):
                 contact = e3.Contact(jid, jid)
                 self.session.contacts.contacts[jid] = contact
 
+            avatars = self.caches.get_avatar_cache(jid)
+            if 'last' in avatars:
+                contact.picture = os.path.join(avatars.path, 'last')
             contact.nick = state['name']
             #TODO: Support other infos like groups, etc.
             # account, identifier=None, nick='', message=None,
