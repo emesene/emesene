@@ -76,12 +76,12 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         if hasattr(gtk.Entry, "set_placeholder_text"):
             self.entry.set_placeholder_text(_('Type to search...'))
         self.entry.set_icon_from_stock(0,gtk.STOCK_FIND)
-        self.entry.set_icon_tooltip_text (0, _('Type to search...'))
+        self.entry.set_icon_tooltip_text(0, _('Type to search...'))
         self.entry.set_icon_from_stock(1,gtk.STOCK_CLEAR)
         self.entry.set_icon_tooltip_text(1, _('Clear the search'))
         self.entry.connect('changed', self._on_entry_changed)
         self.entry.connect('key-press-event', self._on_entry_key_press)
-        self.entry.connect ('icon-press', self._on_icon_press)
+        self.entry.connect('icon-press', self._on_icon_press)
 
         self.pack_start(self.menu, False)
         self.pack_start(self.below_menu, False)
@@ -276,7 +276,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_list.filter_text = entry.get_text().lower()
         self.contact_list.expand_groups()
         self.contact_list.select_top_contact()
-        entry.set_icon_activatable(1, entry.get_text_length() > 0)
 
     def _on_entry_key_press(self, entry, event):
         '''called when a key is pressed on the search box'''
@@ -284,9 +283,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.panel.search.set_active(False)
             entry.hide()
 
-    def _on_icon_press (self, entry, icon_position, event):
+    def _on_icon_press(self, entry, icon_position, event):
          if icon_position == gtk.ENTRY_ICON_SECONDARY:
-             entry.set_text ("")
+             entry.set_text('')
 
     def _on_contact_selected(self, contact):
         '''callback for the contact-selected signal'''
@@ -348,9 +347,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
            not self.panel.message.has_focus():
             if event.string != "" and not self.panel.search.get_active():
                     self.panel.search.set_active(True)
-            elif event.keyval == gtk.keysyms.BackSpace and \
-                 self.entry.get_text_length() == 1:
-                self.panel.search.set_active(False)
 
     def on_disconnect(self, close=None):
         '''callback called when the disconnect option is selected'''
