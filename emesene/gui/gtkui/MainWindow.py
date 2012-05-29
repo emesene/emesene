@@ -333,12 +333,15 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         '''method called when a key is pressed on the input widget'''
         if not self.get_focus_child():
             return
+
         if (event.keyval == gtk.keysyms.Return or \
             event.keyval == gtk.keysyms.KP_Enter) and \
            self.panel.search.get_active():
-            self.contact_list.open_conversation()
-            self.panel.search.set_active(False)
-            return
+            if not self.check_im_context_filter_keypress(self.entry, event):
+                self.contact_list.open_conversation()
+                self.panel.search.set_active(False)
+                return True
+            return False
 
         if event.state & gtk.gdk.CONTROL_MASK or \
            event.keyval == gtk.keysyms.Return or \
@@ -388,3 +391,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.contact_list.is_searching = False
             self.contact_list.show_empty_groups = self.session.config.b_show_empty_groups
             self.contact_list.un_expand_groups()
+
+    def check_im_context_filter_keypress(self, target, event):
+        ''' return True if the event is handled by Input Method '''
+        if hasattr(target, 'im_context_filter_keypress') and \
+           target.im_context_filter_keypress(event):
+            return True
+        return False
