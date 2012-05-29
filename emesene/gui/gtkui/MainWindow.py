@@ -218,7 +218,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def on_key_hide(self, accel_group, window, keyval, modifier):
         '''Catches Escape and closes the window'''
         if self.panel.search.get_active():
-            return
+            if self.entry.get_text_length() > 0:
+                self.entry.set_text('')
+                return True
+            return False
 
         #TODO: this is really ugly
         self.get_parent().get_parent().emit('delete-event', gtk.gdk.Event(gtk.gdk.DELETE))
