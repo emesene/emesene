@@ -76,12 +76,12 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         if hasattr(gtk.Entry, "set_placeholder_text"):
             self.entry.set_placeholder_text(_('Type to search...'))
         self.entry.set_icon_from_stock(0,gtk.STOCK_FIND)
-        self.entry.set_icon_tooltip_text (0, _('Type to search...'))
+        self.entry.set_icon_tooltip_text(0, _('Type to search...'))
         self.entry.set_icon_from_stock(1,gtk.STOCK_CLEAR)
         self.entry.set_icon_tooltip_text(1, _('Clear the search'))
         self.entry.connect('changed', self._on_entry_changed)
         self.entry.connect('key-press-event', self._on_entry_key_press)
-        self.entry.connect ('icon-press', self._on_icon_press)
+        self.entry.connect('icon-press', self._on_icon_press)
 
         self.pack_start(self.menu, False)
         self.pack_start(self.below_menu, False)
@@ -218,7 +218,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def on_key_hide(self, accel_group, window, keyval, modifier):
         '''Catches Escape and closes the window'''
         if self.panel.search.get_active():
-            return
+            if self.entry.get_text_length() > 0:
+                self.entry.set_text('')
+                return True
+            return False
 
         #TODO: this is really ugly
         self.get_parent().get_parent().emit('delete-event', gtk.gdk.Event(gtk.gdk.DELETE))
@@ -276,7 +279,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_list.filter_text = entry.get_text().lower()
         self.contact_list.expand_groups()
         self.contact_list.select_top_contact()
-        entry.set_icon_activatable(1, entry.get_text_length() > 0)
 
     def _on_entry_key_press(self, entry, event):
         '''called when a key is pressed on the search box'''
@@ -284,9 +286,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.panel.search.set_active(False)
             entry.hide()
 
-    def _on_icon_press (self, entry, icon_position, event):
+    def _on_icon_press(self, entry, icon_position, event):
          if icon_position == gtk.ENTRY_ICON_SECONDARY:
-             entry.set_text ("")
+             entry.set_text('')
 
     def _on_contact_selected(self, contact):
         '''callback for the contact-selected signal'''
@@ -331,12 +333,15 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         '''method called when a key is pressed on the input widget'''
         if not self.get_focus_child():
             return
+
         if (event.keyval == gtk.keysyms.Return or \
             event.keyval == gtk.keysyms.KP_Enter) and \
            self.panel.search.get_active():
-            self.contact_list.open_conversation()
-            self.panel.search.set_active(False)
-            return
+            if not self.check_im_context_filter_keypress(self.entry, event):
+                self.contact_list.open_conversation()
+                self.panel.search.set_active(False)
+                return True
+            return False
 
         if event.state & gtk.gdk.CONTROL_MASK or \
            event.keyval == gtk.keysyms.Return or \
@@ -348,9 +353,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
            not self.panel.message.has_focus():
             if event.string != "" and not self.panel.search.get_active():
                     self.panel.search.set_active(True)
-            elif event.keyval == gtk.keysyms.BackSpace and \
-                 self.entry.get_text_length() == 1:
-                self.panel.search.set_active(False)
 
     def on_disconnect(self, close=None):
         '''callback called when the disconnect option is selected'''
@@ -389,3 +391,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.contact_list.is_searching = False
             self.contact_list.show_empty_groups = self.session.config.b_show_empty_groups
             self.contact_list.un_expand_groups()
+
+    def check_im_context_filter_keypress(self, target, event):
+        ''' return True if the event is handled by Input Method '''
+        if hasattr(target, 'im_context_filter_keypress') and \
+           target.im_context_filter_keypress(event):
+            return True
+        return False
