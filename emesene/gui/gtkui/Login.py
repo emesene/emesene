@@ -430,6 +430,8 @@ class Login(LoginBaseUI, gui.LoginBase):
             service = self._get_active_service()
 
         self.update_service(service)
+        ext_id, ext = self.service2id[service]
+        self.btn_status.set_sensitive(ext.SERVICE_STATUS in ext.CAPABILITIES)
 
         if account + '|' + service in self.accounts:
             account_and_service = account + '|' + service
