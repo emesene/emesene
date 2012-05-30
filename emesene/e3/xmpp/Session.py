@@ -52,6 +52,10 @@ class Session(e3.Session):
         #}
     }
 
+    CAPABILITIES = [e3.Session.SERVICE_PROFILE_PICTURE,
+                    e3.Session.SERVICE_CONTACT_NICK,
+                    e3.Session.SERVICE_CONTACT_PM]
+
     def __init__(self, id_=None, account=None):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
@@ -116,22 +120,11 @@ class Session(e3.Session):
 
     def session_has_service(self, service):
         '''returns True if some service is supported, False otherwise'''
-        if service in [Session.SERVICE_CONTACT_MANAGING,
-                        Session.SERVICE_CONTACT_BLOCK,
-                        Session.SERVICE_CONTACT_ALIAS,
-                        Session.SERVICE_GROUP_MANAGING,
-                        Session.SERVICE_CONTACT_INVITE,
-                        Session.SERVICE_CALLS,
-                        Session.SERVICE_STATUS,
-                        Session.SERVICE_FILETRANSFER,
-                        Session.SERVICE_ENDPOINTS]:
+        if service not in self.CAPABILITIES:
             return False
 
-        if service in [Session.SERVICE_PROFILE_PICTURE,
-                        Session.SERVICE_CONTACT_NICK,
-                        Session.SERVICE_CONTACT_PM]:
-            #return False if it's facebook, True otherwise
-            return not self._is_facebook
+        if self._is_facebook:
+            return False
 
         return True
 
@@ -146,4 +139,3 @@ class Session(e3.Session):
         '''activates/deactivates social services if avariable in protocol'''
         if not self.facebook_client is None:
             self.facebook_client.set_token(self.config.facebook_token, active)
-

@@ -41,6 +41,18 @@ class Session(e3.Session):
         }
     }
 
+    CAPABILITIES = [e3.Session.SERVICE_CONTACT_MANAGING,
+                    e3.Session.SERVICE_CONTACT_ALIAS,
+                    e3.Session.SERVICE_CONTACT_BLOCK,
+                    e3.Session.SERVICE_CONTACT_INVITE,
+                    e3.Session.SERVICE_GROUP_MANAGING,
+                    e3.Session.SERVICE_FILETRANSFER,
+                    e3.Session.SERVICE_PROFILE_PICTURE,
+                    e3.Session.SERVICE_STATUS,
+                    e3.Session.SERVICE_CONTACT_NICK,
+                    e3.Session.SERVICE_CONTACT_PM,
+                    e3.Session.SERVICE_ENDPOINTS]
+
     def __init__(self, id_=None, account=None):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
@@ -167,14 +179,6 @@ class Session(e3.Session):
             
         return (Membership.FORWARD & contacts[0].memberships)
 
-    def session_has_service(self, service):
-        '''returns True if some service is supported, False otherwise'''
-        #papyon support ALL services
-        if service == Session.SERVICE_CALLS:
-            return False
-        return True
-
     def disconnect_endpoint(self, name):
         '''disconnects a single endpoint from msn'''
         self.add_action(e3.Action.ACTION_DISCONNECT_ENDPOINT, (name,))
-

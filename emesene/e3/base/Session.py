@@ -37,10 +37,12 @@ class Session(object):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
+    CAPABILITIES = range(12)
+
     (SERVICE_CONTACT_MANAGING, SERVICE_CONTACT_ALIAS, SERVICE_CONTACT_BLOCK,
      SERVICE_CONTACT_INVITE, SERVICE_GROUP_MANAGING, SERVICE_FILETRANSFER,
      SERVICE_CALLS, SERVICE_PROFILE_PICTURE, SERVICE_STATUS, SERVICE_CONTACT_NICK,
-     SERVICE_CONTACT_PM, SERVICE_ENDPOINTS) = range(12)
+     SERVICE_CONTACT_PM, SERVICE_ENDPOINTS) = CAPABILITIES
 
     def __init__(self, id_=None, account=None):
         self.id_ = id_
@@ -292,7 +294,9 @@ class Session(object):
 
     def session_has_service(self, service):
         '''returns True if some service is supported, False otherwise'''
-        raise NotImplementedError('Not implemented')
+        if service not in self.CAPABILITIES:
+            return False
+        return True
 
     def send_typing_notification(self, cid):
         '''send typing notification to contact'''
