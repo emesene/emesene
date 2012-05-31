@@ -126,7 +126,8 @@ class InformationWidget(gtk.VBox):
         self.message.set_alignment(0.0, 0.5)
         self.status = gtk.Image()
         self.status.set_alignment(0.0, 0.5)
-        self.image = gtk.Image()
+        Avatar = extension.get_default('avatar')
+        self.image = Avatar()
         image_align = gtk.Alignment(0.5,0.5)
         image_align.add(self.image)
         self.blocked = gtk.Label()
@@ -186,11 +187,8 @@ class InformationWidget(gtk.VBox):
                     gobject.markup_escape_text(self.contact.message))
             self.status.set_from_file(
                 gui.theme.image_theme.status_icons[self.contact.status])
-            if (self.contact.picture):
-                self.image.set_from_file(self.contact.picture)
-            else:
-                self.image.set_from_file(gui.theme.image_theme.user)
-            if (self.contact.blocked):
+            self.image.set_from_file(self.contact.picture)
+            if self.contact.blocked:
                 self.blocked.set_markup(_('Yes'))
             else:
                 self.blocked.set_markup(_('No'))
