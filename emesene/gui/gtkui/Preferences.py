@@ -587,11 +587,6 @@ class MainWindow(BaseTable):
 
         ContactList = extension.get_default('contact list')
 
-        self.append_markup('<b>'+_('Single window:')+'</b>')
-        self.append_check(_('Incorporate conversations in emesene\'s main window.'
-                            ' Also requires tabbed conversations'),
-                          'session.config.b_single_window')
-
         self.append_markup('<b>'+_('User panel:')+'</b>')
         self.append_check(_('Show user panel'),
             'session.config.b_show_userpanel')
@@ -700,15 +695,24 @@ class ConversationWindow(BaseTable):
         self.tab_pos_cb = self.create_combo_with_label(_('Tab position'),
             self.get_tab_positions, 'session.config.i_tab_position',range(4))
 
+        self.int_mode = 2
+        if session.config.b_single_window:
+            self.int_mode = 0
+        elif session.config.b_conversation_tabs:
+            self.int_mode = 1
+            
+        self.integrated_mode_cb = self.create_combo_with_label(_('Integrated mode'),
+            self.get_integrated_mode, 'int_mode', range(3),
+            self._on_integrated_mode_change)
+
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
-        self.session.config.get_or_set('b_conversation_tabs', True)
         self.session.config.get_or_set('b_escape_hotkey', True)
         self.session.config.get_or_set('b_close_button_on_tabs', True)
-        self.append_check(_('Tabbed Conversations'),
-                'session.config.b_conversation_tabs')
-        self.append_row(self.tab_pos_cb)
         self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
+
+        self.append_row(self.integrated_mode_cb)
+        self.append_row(self.tab_pos_cb)
         self.append_check(_('Start minimized/iconified'),
                           'session.config.b_conv_minimized')
         self.append_check(_('Show emoticons'),
@@ -752,11 +756,6 @@ class ConversationWindow(BaseTable):
         self.session.config.subscribe(self._on_spell_change,
             'b_enable_spell_check')
 
-        self.session.config.subscribe(self._on_conversation_tabs_change,
-            'b_conversation_tabs')
-
-        #update tab_pos combo sensitivity
-        self._on_conversation_tabs_change(self.session.config.get_or_set('b_conversation_tabs', True))
         #update spell lang combo sensitivity
         self._on_spell_change(self.session.config.get_or_set('b_enable_spell_check', False))
         #update small-toolbar sensitivity
@@ -770,9 +769,6 @@ class ConversationWindow(BaseTable):
     def _on_spell_change(self, value):
         self.lang_menu.set_sensitive(value)
 
-    def _on_conversation_tabs_change(self, value):
-        self.tab_pos_cb.set_sensitive(value)
-
     def _on_lang_combo_change(self, combo):
         self.session.config.spell_lang = combo.get_active_text()
 
@@ -784,13 +780,29 @@ class ConversationWindow(BaseTable):
             'b_show_toolbar')
         self.session.config.unsubscribe(self._on_spell_change,
             'b_enable_spell_check')
-        self.session.config.unsubscribe(self._on_conversation_tabs_change,
-            'b_conversation_tabs')
         self.session.config.unsubscribe(self._on_cb_override_text_color_toggled,
             'b_override_text_color')
 
     def _on_cb_override_text_color_toggled(self, value):
         self.b_text_color.set_sensitive(value)
+
+    def _on_integrated_mode_change(self, combo, property_name, value):
+        self.int_mode = combo.get_active()
+        if self.int_mode == 0:
+            self.session.config.b_single_window = True
+            self.session.config.b_conversation_tabs = True
+        elif self.int_mode == 1:
+            self.session.config.b_single_window = False
+            self.session.config.b_conversation_tabs = True
+        else:
+            self.session.config.b_single_window = False
+            self.session.config.b_conversation_tabs = False
+        self.tab_pos_cb.set_sensitive(self.session.config.b_conversation_tabs)
+
+    def get_integrated_mode(self):
+        return [_("Single Window"),
+                _("Tabbed Conversations"),
+                _("Multiple Conversations")]
 
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
