@@ -321,13 +321,10 @@ class SmileyLayout(pango.Layout):
 
         pango.Layout.set_text(self, text)
 
-        if hasattr(pango, 'find_base_dir'):
-            for line in text.splitlines():
-                if (pango.find_base_dir(line, -1) == pango.DIRECTION_RTL):
-                    self._is_rtl = True
-                    break
-        else:
-            self._is_rtl = False
+        for line in text.splitlines():
+            if pango.find_base_dir(line, -1) == pango.DIRECTION_RTL:
+                self._is_rtl = True
+                break
 
         logical = self.get_line(0).get_pixel_extents()[1]
         ascent = pango.ASCENT(logical)
