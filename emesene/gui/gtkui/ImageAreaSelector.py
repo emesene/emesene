@@ -64,10 +64,8 @@ class ImageAreaSelectorDialog(gtk.Dialog):
             self.button_rcw.connect("clicked", self._on_rcw_clicked)
             self.button_rccw = gtk.Button(_("Rotate"))
             self.button_rccw.connect("clicked", self._on_rccw_clicked)
-
-            if gtk.gtk_version >= (2, 10, 0):
-                self.action_area.pack_start(self.button_rccw)
-                self.action_area.pack_end(self.button_rcw)
+            self.action_area.pack_start(self.button_rccw)
+            self.action_area.pack_end(self.button_rcw)
 
         self.action_area.pack_end(self.button_cancel)
         self.action_area.pack_end(self.button_accept)
@@ -130,9 +128,8 @@ class ImageAreaSelector(gtk.DrawingArea):
         self.dy = 0
 
     def get_selected(self):
-        if gtk.gtk_version >= (2, 10, 0):
-            angle = self.get_angle()
-            self._trans_pixbuf = self._trans_pixbuf.rotate_simple(angle)
+        angle = self.get_angle()
+        self._trans_pixbuf = self._trans_pixbuf.rotate_simple(angle)
         # handle no selection
         if self.selection == (0,0,0,0):
             #this should never happens
@@ -219,9 +216,6 @@ class ImageAreaSelector(gtk.DrawingArea):
         self._init_pixbuf(angle, False)
 
     def get_angle(self):
-        if not gtk.gtk_version >= (2, 10, 0):
-            return 0
-
         if self._angle == 1:
             angle = gtk.gdk.PIXBUF_ROTATE_CLOCKWISE
         elif self._angle == 2:
@@ -406,7 +400,7 @@ class ImageAreaSelector(gtk.DrawingArea):
     def _init_pixbuf(self, angle=None, create_selection=True):
         self.pixbuf = self._disp_pixbuf.copy()
 
-        if angle and gtk.gtk_version >= (2, 10, 0):
+        if angle:
             self.pixbuf = self.pixbuf.rotate_simple(angle)
             self.configure_event(self, None)
             tmp = self.dx
