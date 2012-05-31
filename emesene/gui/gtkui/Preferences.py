@@ -1342,9 +1342,9 @@ class Facebook(BaseTable):
                           'session.config.b_fb_picture_download')
 
         # box with help message
-        if gui.gtkui.check_gtk3():
+        if hasattr(gtk, "InfoBar"):
             eventBox = gtk.InfoBar()
-            eventBox.set_message_type(gtk.MessageType.INFO)
+            eventBox.set_message_type(gtk.MESSAGE_INFO)
             box = eventBox.get_content_area ()
         else:
             eventBox = gtk.EventBox()
@@ -1388,9 +1388,9 @@ class PrivacySettings(gtk.VBox):
         self.session = session
 
         # box with help message
-        if gui.gtkui.check_gtk3():
+        if hasattr(gtk, "InfoBar"):
             eventBox = gtk.InfoBar()
-            eventBox.set_message_type(gtk.MessageType.INFO)
+            eventBox.set_message_type(gtk.MESSAGE_INFO)
             box = eventBox.get_content_area ()
         else:
             eventBox = gtk.EventBox()
