@@ -88,19 +88,13 @@ class ContactInfoRotate(gtk.VBox):
             context.add_provider(prov, 600) #GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
             context.save()
 
-        last_avatar = self.session.config.last_avatar
-        if self.session.config_dir.file_readable(last_avatar):
-            my_picture = last_avatar
-        else:
-            my_picture = gui.theme.image_theme.user
+        my_picture = self.session.config.last_avatar
 
-        his_picture = gui.theme.image_theme.user
+        his_picture = None
         if members is not None:
             account = members[0]
             contact = self.session.contacts.safe_get(account)
-
-            if contact.picture:
-                his_picture = contact.picture
+            his_picture = contact.picture
 
         self.first = self.his_avatarBox
         self.his_avatar.set_from_file(his_picture)

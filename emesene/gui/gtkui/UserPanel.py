@@ -54,12 +54,7 @@ class UserPanel(gtk.VBox):
         self.avatarBox.set_border_width(4)
 
         self.avatar_path = self.config_dir.get_path("last_avatar")
-
-        if not self.session.config_dir.file_readable(self.avatar_path):
-            path = gui.theme.image_theme.user
-        else:
-            path = self.avatar_path
-        self.avatar.set_from_file(path)
+        self.avatar.set_from_file(self.avatar_path)
 
         self.nick = TextField.TextField(session.contacts.me.display_name, session.contacts.me.account, False)
         self.nick.set_tooltip_text(_('Click here to set your nick name'))

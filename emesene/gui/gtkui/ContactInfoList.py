@@ -66,14 +66,8 @@ class ContactInfoList(gtk.VBox):
 
         self.avatarBox.set_border_width(4)
 
-        last_avatar = self.session.config.last_avatar
-        if self.session.config_dir.file_readable(last_avatar):
-            my_picture = last_avatar
-        else:
-            my_picture = gui.theme.image_theme.user
-
         self.last = self.avatarBox
-        self.avatar.set_from_file(my_picture)
+        self.avatar.set_from_file(self.session.config.last_avatar)
 
         #contact's avatar if single chat
         self.his_avatarBox = gtk.EventBox()
@@ -186,11 +180,8 @@ class ContactInfoList(gtk.VBox):
         ''' sets the avatar of our contact '''
         self.members = members
         account = members[0]
-        contact = self.session.contacts.get(account)
-        his_picture = gui.theme.image_theme.user
-        if contact and contact.picture:
-            his_picture = contact.picture
-        self.his_avatar.set_from_file(his_picture)
+        contact = self.session.contacts.safe_get(account)
+        self.his_avatar.set_from_file(contact.picture)
         self._first_alig.set(0.5, 0.0, 1.0, 0.0)
         self.set_size_request(-1, -1)
         self.first = self.his_avatarBox
@@ -203,7 +194,7 @@ class ContactInfoList(gtk.VBox):
                                     str, gtk.gdk.Pixbuf)
         self.members = members
         for member in self.members:
-            contact = self.session.contacts.get(member)
+            contact = self.session.contacts.safe_get(member)
             picture = contact.picture or gui.theme.image_theme.user
             contact_data = (utils.safe_gtk_pixbuf_load(picture, (15, 15)),
               contact, contact.nick, utils.safe_gtk_pixbuf_load(
