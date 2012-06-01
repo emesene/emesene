@@ -115,6 +115,15 @@ class Avatar(gtk.Widget, AvatarManager):
             self.current_animation = image.get_animation()
             self._start_animation(image.get_animation())
 
+    def set_from_pixbuf(self, pixbuf):
+        if isinstance(pixbuf, gtk.gdk.Pixbuf):
+            self.__set_from_pixbuf(pixbuf)
+            self.current_animation = None
+            return
+        elif isinstance(pixbuf, gtk.gdk.PixbufAnimation):
+            self.current_animation = pixbuf
+            self._start_animation(pixbuf)
+
     def stop(self):
         '''stop the animation'''
         if self.anim_source is not None:

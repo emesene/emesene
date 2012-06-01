@@ -20,6 +20,7 @@ from __future__ import division
 
 import e3
 import utils
+import extension
 
 import gtk
 from glib import timeout_add, source_remove
@@ -54,7 +55,8 @@ class Tooltips(gtk.Window):
         self.label.set_use_markup(True)
         self.label.show()
 
-        self.image = gtk.Image()
+        Avatar = extension.get_default('avatar')
+        self.image = Avatar(cell_dimension=96, crossfade = False, cell_radius = 0)
         self.data_string = '<span size="small">(%s)\n\n'
         self.data_string += _('Status') + ': %s\n'
         self.data_string += _('Blocked')+ ': %s\n'
