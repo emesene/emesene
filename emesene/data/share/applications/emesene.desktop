@@ -5,6 +5,9 @@ Comment=Instant messaging client for MSN, Gtalk and Facebook
 Comment[pt]=Cliente de mensagens instantâneas para MSN, Gtalk e Facebook
 Comment[hu]=Azonnali üzenetküldő MSN, Gtalk és Facebook protokollokhoz
 Comment[pt_BR]=Cliente de mensagens instantâneas para  MSN, Gtalk e Facebook
+Comment[zh_TW]=適用於 MSN、GTalk 和 Facebook 的即時通訊軟體
+Comment[tr]=MSN, Gtalk ve Facebook için anlık ileti istemcisi
+Comment[es]=Cliente de mensajería instantánea para MSN, Gtalk y Facebook
 Exec=emesene -s
 Icon=emesene
 Terminal=false
@@ -16,7 +19,10 @@ X-Ayatana-Desktop-Shortcuts=NewInstance;
 
 [NewInstance Shortcut Group]
 Name=Open a new instance
+Name[pt]=Abrir uma nova instância
 Name[hu]=Új példány megnyitása
 Name[pt_BR]=Abrir uma nova instância
+Name[tr]=Yeni bir örnek aç
+Name[es]=Abrir una instancia nueva
 Exec=emesene
 OnlyShowIn=Unity;
