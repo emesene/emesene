@@ -20,7 +20,7 @@ import gtk
 
 import e3
 
-from pluginmanager import get_pluginmanager
+from e3.common.pluginmanager import get_pluginmanager
 from ExtensionList import DownloadList
 
 class PluginMainVBox(DownloadList):

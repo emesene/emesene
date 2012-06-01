@@ -37,7 +37,7 @@ if check_gtk3():
 else:
     import TinyButton
 
-from pluginmanager import get_pluginmanager
+from e3.common.pluginmanager import get_pluginmanager
 
 class ExtensionListView(gtk.TreeView):
     def __init__(self, store, radio=False):

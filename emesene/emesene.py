@@ -119,7 +119,7 @@ except ImportError, exc:
     papylib = None
     print 'Errors occurred while importing msn backend: %s' % str(exc)
 
-from pluginmanager import get_pluginmanager
+from e3.common.pluginmanager import get_pluginmanager
 import interfaces
 import gui
 from e3.common import optionprovider
