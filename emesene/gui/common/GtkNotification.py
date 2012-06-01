@@ -155,7 +155,6 @@ class Notification(gtk.Window):
 
         # constants
         self.FColor = "white"
-        avatar_size = 48
         max_width = 300
         self.callback = callback
 
@@ -179,15 +178,13 @@ class Notification(gtk.Window):
         self.messageLabel.set_justify(gtk.JUSTIFY_CENTER)
         self.messageLabel.set_ellipsize(pango.ELLIPSIZE_END)
 
+        Avatar = extension.get_default('avatar')
+
         # image
-        avatarImage = gtk.Image()
-        try:
-            userPixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
-                                  picture_path[7:], avatar_size, avatar_size)
-        except:
-            userPixbuf = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user,
-                                                 (avatar_size, avatar_size))
-        avatarImage.set_from_pixbuf(userPixbuf)
+        avatarImage = Avatar(cell_dimension=48)
+        if picture_path:
+            picture_path = picture_path[7:]
+        avatarImage.set_from_file(picture_path)
 
         # boxes
         hbox = gtk.HBox() # main box
