@@ -318,8 +318,12 @@ class Worker(threading.Thread):
         '''handle Action.ACTION_SET_MEDIA
         '''
         contact = self.session.contacts.me
-        self.session.media_change_succeed(message)
-        self.session.contacts.me.media = message
+        if message is not None:
+            self.session.media_change_succeed(message[0] + " - " + message[1])
+            self.session.contacts.me.media = message[0] + " - " + message[1]
+        else:
+            self.session.contacts.me.media = None
+            self.session.media_change_succeed(None)
 
         # log the change
         account = Logger.Account.from_contact(contact)
