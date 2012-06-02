@@ -25,8 +25,8 @@ from pyfb.pyfb import Pyfb, PyfbException, OAuthException
 import logging
 log = logging.getLogger('jabber.facebook')
 
-API_KEY = "302582423085987"
-SECRET_KEY = "a36182c056595e7d5007c9f85e3ee6bc"
+API_KEY = "323241734418016"
+SECRET_KEY = "d4bb12b27bb639deb48fea980dd5737f"
 REDIRECT_URL = "http://emesene.github.com/emesene/index.html"
 
 class FacebookCLient(object):
