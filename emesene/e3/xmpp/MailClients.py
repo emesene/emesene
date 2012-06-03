@@ -20,8 +20,7 @@
 #
 
 import imaplib
-import time
-from threading import Thread
+from threading import Thread, Timer
 
 class MailMessage(object):
 
@@ -67,14 +66,16 @@ class MailClient(Thread):
         self._port = port
         self._handlers = {}
         self._onrun = True
-        self._used_times = 5
         self._session = session
+        self.timer = None
 
     def register_handler(self, name, callback):
         self._handlers[name] = callback
 
     def on_run(self):
-        pass
+        if self._onrun:
+            self.timer = Timer(5.0, self.on_run)
+            self.timer.start()
 
     def on_initialize(self):
         pass
@@ -84,14 +85,7 @@ class MailClient(Thread):
 
     def run(self):
         self.on_initialize()
-        while self._onrun:
-            if not self._used_times == 0:
-                self._used_times -= 1
-                time.sleep(1)
-                continue
-            self.on_run()
-            self._used_times = 5
-        self.on_end()
+        self.on_run()
 
     def update_counter(self):
         pass
@@ -101,6 +95,9 @@ class MailClient(Thread):
 
     def stop(self):
         self._onrun = False
+        if self.timer:
+            self.timer.cancel()
+        self.on_end()
 
 
 class NullMail(MailClient):
@@ -125,6 +122,7 @@ class IMAPMail(MailClient):
             self._handlers["mailcount"](new_count)
             mail = self.new_mails()
             self._handlers["mailnew"](mail)
+        MailClient.on_run(self)
 
     def on_initialize(self):
         self._imap_server.login(self._username, self._password)
@@ -163,7 +161,8 @@ class FacebookMail(MailClient):
     def on_run(self):
         if not self.facebook_client is None:
             ##sincronice facebook stuff
-            self.facebook_client.process_facebook_integration()
+            self.facebook_client.process_facebook_nick()
+            self.facebook_client.process_facebook_picture()
             if self._session.config.b_fb_mail_check:
                 new_count = self.facebook_client.get_unread_mail_count()
                 if self._count < new_count:
@@ -171,6 +170,7 @@ class FacebookMail(MailClient):
                     mail = self.new_mails()
                     self._handlers["mailnew"](mail)
                     self._handlers["mailcount"](new_count)
+        MailClient.on_run(self)
 
     def on_initialize(self):
         if not self.facebook_client is None and self._session.config.b_fb_mail_check:
@@ -179,6 +179,10 @@ class FacebookMail(MailClient):
 
     def on_end(self):
         pass
+
+    def stop(self):
+        MailClient.stop(self)
+        self.facebook_client.active = False
 
     def new_mails(self):
         if not self.facebook_client is None:

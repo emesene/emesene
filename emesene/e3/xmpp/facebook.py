@@ -20,13 +20,18 @@
 
 import e3
 import os
+import urllib
 from pyfb.pyfb import Pyfb, PyfbException, OAuthException
 
 import logging
 log = logging.getLogger('jabber.facebook')
 
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 API_KEY = "323241734418016"
-SECRET_KEY = "d4bb12b27bb639deb48fea980dd5737f"
 REDIRECT_URL = "http://emesene.github.com/emesene/index.html"
 
 class FacebookCLient(object):
@@ -37,7 +42,8 @@ class FacebookCLient(object):
         self._session.config.get_or_set('b_fb_status_download', False)
         self._session.config.get_or_set('b_fb_status_write', False)
         self._session.config.get_or_set('b_fb_picture_download', False)
-        self._client = Pyfb(API_KEY)
+        self.get_app_data()
+        self._client = Pyfb(self.api_key)
         self.active = False
         self.active_social_request = False
         self._nick = None
@@ -50,12 +56,20 @@ class FacebookCLient(object):
             #reuse old token
             self.set_token(token, True)
 
+    def get_app_data(self):
+        f = urllib.urlopen("https://github.com/emesene/emesene/raw/master/emesene/e3/xmpp/facebook.json")
+        s = f.read()
+        f.close()
+        appdata = json.loads(s)
+        self.api_key = appdata["api_key"]
+        self.redirect_url = appdata["redirect_url"]
+
     def request_permitions(self):
         '''ask user to grant access to facebook APIs'''
         if self.active_social_request:
             #avoid multiple requests
             return
-        conn_url = self._client.get_auth_url(REDIRECT_URL)
+        conn_url = self._client.get_auth_url(self.redirect_url)
         self.active_social_request = True
         self._session.social_request(conn_url)
 
@@ -73,7 +87,7 @@ class FacebookCLient(object):
             try:
                 params = {}
                 params["fields"] = "name"
-                me = self._client.get_myself()
+                me = self._client.get_myself(params)
                 self._nick = me.name
             except OAuthException:
                 self.request_permitions()
@@ -99,12 +113,12 @@ class FacebookCLient(object):
         message = ""
         if self.active:
             try:
-                messages = self._client.get_statuses("me")
+                params = {}
+                params["limit"] = 1
+                params["fields"] = "message"
+                messages = self._client.get_statuses("me", params)
                 if len(messages) > 0:
-                    params = {}
-                    params["limit"] = 1
-                    params["fields"] = "message"
-                    message = self._client.get_statuses("me", params)[0].message
+                    message = messages[0].message
             except OAuthException:
                 self.request_permitions()
             except (PyfbException, IOError) as ex:
@@ -164,13 +178,12 @@ class FacebookCLient(object):
             except PyfbException, IOError:
                 #we don't have any avatar pic
                 pass
-
         return self._avatar_path
 
     picture = property(fget=_get_profile_pic, fset=None)
 
-    def process_facebook_integration(self):
-        '''Do social stuff'''
+    def process_facebook_nick(self):
+        '''Check for Nick and pm Changes'''
         if self._session.config.b_fb_status_download:
             msg = self.message
             nick = self.nick
@@ -179,6 +192,9 @@ class FacebookCLient(object):
                 self._session.contacts.me.message = msg
                 self._session.contacts.me.nick = nick
                 self._session.profile_get_succeed(nick, msg)
+
+    def process_facebook_picture(self):
+        '''Check for picture Changes'''
         if self._session.config.b_fb_picture_download:
             avatar_path = self.picture
             if not (avatar_path is None or self._session.contacts.me.picture == avatar_path):
