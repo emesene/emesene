@@ -473,6 +473,7 @@ class Controller(object):
         self.session.set_default_extensions_from_config()
 
         self._draw_tray_icon()
+        self.tray_icon.unsubscribe()
         self.tray_icon.set_main(self.session)
 
         self.window.go_main(self.session, self.on_new_conversation,
@@ -493,6 +494,7 @@ class Controller(object):
 
     def _on_tray_icon_changed(self, new_extension):
         self._draw_tray_icon()
+        self.tray_icon.unsubscribe()
         self.tray_icon.set_main(self.session)
 
     def _sync_emesene1(self):

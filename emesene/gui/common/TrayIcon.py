@@ -48,6 +48,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
 
         self.main_window = main_window
         self.last_new_message = None
+        self.menu = None
 
         self.connect('activate', self._on_activate)
         self.connect('popup-menu', self._on_popup)
@@ -134,6 +135,10 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         """
         self.menu.list_contacts._on_contact_change_something(*args)
 
+    def unsubscribe(self):
+        if self.menu:
+            self.menu.unsubscribe()
+
 class LoginMenu(gtk.Menu):
     """
     a widget that represents the menu displayed on the trayicon on the
@@ -157,6 +162,9 @@ class LoginMenu(gtk.Menu):
 
         self.append(self.hide_show_mainwindow)
         self.append(self.quit)
+
+    def unsubscribe(self):
+        pass
 
 class MainMenu(gtk.Menu):
     """
@@ -207,7 +215,6 @@ class MainMenu(gtk.Menu):
         self._on_b_mute_sounds_changed()
         self.handler.session.config.subscribe(self._on_b_mute_sounds_changed,
                                               'b_mute_sounds')
-        
         self.mute.connect('activate', self._on_mute_unmute_sounds)
 
         self.append(self.hide_show_mainwindow)
@@ -235,6 +242,10 @@ class MainMenu(gtk.Menu):
             self.mute.set_label(self.mute_label)
             self.mute.set_image(gtk.image_new_from_stock(self.mute_stock,
                                 gtk.ICON_SIZE_MENU))
+
+    def unsubscribe(self):
+        self.handler.session.config.unsubscribe(self._on_b_mute_sounds_changed,
+                                              'b_mute_sounds')
 
 class ContactsMenu(gtk.Menu):
     """
