@@ -1,0 +1,9 @@
+*.pyc
+build/
+dist/
+MANIFEST
+docs/_build/
+*.swp
+.tox/
+.coverage
+sleekxmpp.egg-info/
