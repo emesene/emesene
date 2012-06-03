@@ -91,7 +91,7 @@ class ContactInfoRotate(gtk.VBox):
         my_picture = self.session.config.last_avatar
 
         # Obtains his picture and details.
-        contact = None
+        contact = self.session.contacts.safe_get(None)
         if members is not None:
             account = members[0]
             contact = self.session.contacts.safe_get(account)
