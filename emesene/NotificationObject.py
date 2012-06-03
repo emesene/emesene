@@ -39,7 +39,11 @@ class NotificationObject(object):
             callback(item, value)
 
         for callback in self._item_callbacks.get(item, ()):
-            callback(value)
+            try:
+                callback(value)
+            except TypeError, ex:
+                print "Error calling config callback %s" % callback.f
+                raise ex
 
     def subscribe(self, callback, item=None):
         '''add callback to the list of callbacks to be notified
