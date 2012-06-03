@@ -90,14 +90,14 @@ class ContactInfoRotate(gtk.VBox):
 
         my_picture = self.session.config.last_avatar
 
-        his_picture = None
+        # Obtains his picture and details.
+        contact = None
         if members is not None:
             account = members[0]
             contact = self.session.contacts.safe_get(account)
-            his_picture = contact.picture
 
         self.first = self.his_avatarBox
-        self.his_avatar.set_from_file(his_picture)
+        self.his_avatar.set_from_file(contact.picture, contact.blocked)
 
         self.last = self.avatarBox
         self.avatar.set_from_file(my_picture)
@@ -176,7 +176,7 @@ class ContactInfoRotate(gtk.VBox):
 
         path = contact.picture
         if path != '':
-            self.his_avatar.set_from_file(path)
+            self.his_avatar.set_from_file(path, contact.blocked)
 
         self.index = (self.index+1)%len(self.members)
         return True
@@ -206,7 +206,7 @@ class ContactInfoRotate(gtk.VBox):
         contact = self.session.contacts.safe_get(account)
         if contact.picture:
             his_picture = contact.picture
-            self.his_avatar.set_from_file(his_picture)
+            self.his_avatar.set_from_file(his_picture, contact.blocked)
 
     def update_group(self, members):
         self.members = members

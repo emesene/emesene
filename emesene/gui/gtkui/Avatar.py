@@ -22,6 +22,8 @@ import gtk.gdk
 import gobject
 
 import gui
+import utils
+
 from gui.gtkui import check_gtk3
 
 from AvatarManager import AvatarManager
@@ -60,6 +62,8 @@ class Avatar(gtk.Widget, AvatarManager):
         else:
             gtk.Widget.set_has_window(self, False)
 
+        self.blocked = False
+
     def animate_callback(self):
         if self.current_frame > self.total_frames:
             self.in_animation = False
@@ -88,8 +92,9 @@ class Avatar(gtk.Widget, AvatarManager):
     #
     #public methods
     #
-    def set_from_file(self, filename):
+    def set_from_file(self, filename, blocked=False):
         self.filename = filename
+        self.blocked  = blocked
         if not gui.gtkui.utils.file_readable(filename):
             self.filename = gui.theme.image_theme.user
 
@@ -98,7 +103,18 @@ class Avatar(gtk.Widget, AvatarManager):
         except gobject.GError:
             animation = gtk.gdk.PixbufAnimation(gui.theme.image_theme.user)
 
-        if animation.is_static_image():
+        if self.blocked:
+            pixbufblock=utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay_big)
+            static_image = animation.get_static_image()
+
+            output_pixbuf =utils.simple_images_overlap(static_image, pixbufblock,
+                                                        -pixbufblock.props.width,
+                                                        -pixbufblock.props.width)
+
+            self.__set_from_pixbuf(output_pixbuf)
+            self.current_animation = None
+            return
+        elif animation.is_static_image():
             self.__set_from_pixbuf(animation.get_static_image())
             self.current_animation = None
             return

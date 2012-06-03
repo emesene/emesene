@@ -188,7 +188,7 @@ def simple_images_overlap(pixbuf_src,pixbuf_dest,x,y):
          ystart=pixbuf_src.props.height
 
     pixbuf_dest.composite(pixbuf_src, 0, 0, pixbuf_src.props.width, pixbuf_src.props.height, xstart+x, ystart+y, 1.0, 1.0, gtk.gdk.INTERP_HYPER, 255)
-    
+    return pixbuf_src
 
 def makePreview(src):
     try:
