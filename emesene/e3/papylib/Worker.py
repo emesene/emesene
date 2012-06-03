@@ -1193,7 +1193,6 @@ class Worker(e3.base.Worker, papyon.Client):
         '''handle Action.ACTION_SET_MEDIA
         '''
         e3.base.Worker._handle_action_set_media(self, message)
-        contact = self.session.contacts.me
         self.profile.personal_message_current_media = self.profile.personal_message, message
 
     def _handle_action_set_message(self, message):
