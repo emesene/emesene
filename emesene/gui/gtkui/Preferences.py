@@ -880,7 +880,7 @@ class Notification(BaseTable):
         self.array.append(self.append_check(_('Only when available'),
             'session.config.b_notify_only_when_available'))
 
-        self._on_mute_notification_changed(self.session.config.b_mute_sounds)
+        self._on_mute_notification_changed(self.session.config.b_mute_notification)
 
         self.session.config.subscribe(self._on_mute_notification_changed,
             'b_mute_notification')
