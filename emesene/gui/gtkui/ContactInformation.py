@@ -48,6 +48,7 @@ class ContactInformation(gtk.Window, gui.base.ContactInformation):
         '''constructor'''
         gui.base.ContactInformation.__init__(self, session, account)
         gtk.Window.__init__(self)
+        self.session = session
         self.set_default_size(640, 350)
         self.set_title(_('Contact information (%s)') % (account,))
         self.set_position(gtk.WIN_POS_CENTER)
@@ -182,12 +183,16 @@ class InformationWidget(gtk.VBox):
                 self.nick.set_markup(
                         gobject.markup_escape_text(self.contact.nick
                             + ' (' + self.contact.display_name + ')'))
+
             self.mail.set_markup(self.contact.account)
             self.message.set_markup(
-                    gobject.markup_escape_text(self.contact.message))
+                gobject.markup_escape_text(self.contact.message))
             self.status.set_from_file(
-                gui.theme.image_theme.status_icons[self.contact.status])
-            self.image.set_from_file(self.contact.picture)
+            gui.theme.image_theme.status_icons[self.contact.status])
+            
+            self.image.set_from_file(self.contact.picture,
+                                     self.contact.blocked)
+
             if self.contact.blocked:
                 self.blocked.set_markup(_('Yes'))
             else:
