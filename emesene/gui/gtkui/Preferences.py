@@ -340,9 +340,9 @@ class BaseTable(gtk.Table):
         if increment_current_row:
             self.current_row += 1
 
-    def append_entry_default(self, text, format_type, 
-                             property_name, default, tooltip_text):
-        """append a row with a label and a entry, set the value to the
+    def create_entry_default(self, text, format_type,
+                             property_name, default, tooltip_text, has_help=True):
+        """creates a row with a label and a entry, set the value to the
         value of property_name if exists, if not set it to default.
          Add a reset button that sets the value to the default"""
 
@@ -369,57 +369,18 @@ class BaseTable(gtk.Table):
         entry.set_text(text)
 
         reset = gtk.Button()
-        entry_help = gtk.Button()
 
         hbox.pack_start(label)
         hbox.pack_start(entry, False)
         hbox.pack_start(reset, False)
-        hbox.pack_start(entry_help, False)
-
-        reset_image = gtk.image_new_from_stock(gtk.STOCK_CLEAR,
-                                               gtk.ICON_SIZE_MENU)
-        reset.set_label(_('Reset'))
-        reset.set_image(reset_image)
-        reset.connect('clicked', on_reset_clicked, entry, default)
-        entry.connect('changed', on_entry_changed, property_name)
-
-        help_image = gtk.image_new_from_stock(gtk.STOCK_HELP,
-                                              gtk.ICON_SIZE_MENU)
-        entry_help.set_image(help_image)
-        entry_help.connect('clicked', on_help_clicked, format_type)
-        entry_help.set_tooltip_text(tooltip_text)
-
-        self.append_row(hbox, None)
-
-    def append_entry_nohelp_noappend(self, text, format_type, 
-                             property_name, default, tooltip_text):
-        """append a row with a label and a entry, set the value to the
-        value of property_name if exists, if not set it to default.
-         Add a reset button that sets the value to the default"""
-
-        def on_reset_clicked(button, entry, default):
-            """called when the reset button is clicked, set
-            entry text to default"""
-            entry.set_text(default)
-
-        def on_entry_changed(entry, property_name):
-            """called when the content of an entry changes,
-            set the value of the property to the new value"""
-            self.set_attr(property_name, entry.get_text())
-
-        hbox = gtk.HBox(spacing=4)
-        label = gtk.Label(text)
-        label.set_alignment(0.0, 0.5)
-        text = self.get_attr(property_name)
-
-        entry = gtk.Entry()
-        entry.set_text(text)
-
-        reset = gtk.Button()
-
-        hbox.pack_start(label)
-        hbox.pack_start(entry, False)
-        hbox.pack_start(reset, False)
+        if has_help:
+            entry_help = gtk.Button()
+            hbox.pack_start(entry_help, False)
+            help_image = gtk.image_new_from_stock(gtk.STOCK_HELP,
+                                                  gtk.ICON_SIZE_MENU)
+            entry_help.set_image(help_image)
+            entry_help.connect('clicked', on_help_clicked, format_type)
+            entry_help.set_tooltip_text(tooltip_text)
 
         reset_image = gtk.image_new_from_stock(gtk.STOCK_CLEAR,
                                                gtk.ICON_SIZE_MENU)
@@ -429,6 +390,16 @@ class BaseTable(gtk.Table):
         entry.connect('changed', on_entry_changed, property_name)
 
         return hbox
+
+    def append_entry_default(self, text, format_type,
+                             property_name, default, tooltip_text, has_help=True):
+        """append a row with a label and a entry, set the value to the
+        value of property_name if exists, if not set it to default.
+         Add a reset button that sets the value to the default"""
+        hbox = self.create_entry_default(text, format_type,
+                             property_name, default, tooltip_text, has_help)
+
+        self.append_row(hbox, None)
 
     def create_check(self, text, property_name):
         """create a CheckButton and
@@ -1315,10 +1286,9 @@ class MSNPapylib(BaseTable):
         c_ep.set_active(self.session.config.b_papylib_disconnect_ep)
         c_ep.connect('toggled', self._on_ep_toggled)
         vbox.pack_start(c_ep, False, False)
-
-        s_entry = self.append_entry_nohelp_noappend(_('Endpoint name'), 'epname',
+        s_entry = self.create_entry_default(_('Endpoint name'), 'epname',
                                   'session.config.s_papylib_endpoint_name',
-                                  'emesene', _('Name for this endpoint'))
+                                  'emesene', _('Name for this endpoint'), has_help=False)
         vbox.pack_start(s_entry, False, False)
 
         l_text = gtk.Label(_('If you have problems with your nickname/message/picture '
