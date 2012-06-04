@@ -698,33 +698,29 @@ class ConversationWindow(BaseTable):
         self.session.config.get_or_set('b_close_button_on_tabs', True)
         self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
 
+        self.append_markup('<b>'+_('Layout')+'</b>')
         self.append_row(self.integrated_mode_cb)
         self.append_row(self.tab_pos_cb)
-        self.append_check(_('Start minimized/iconified'),
-                          'session.config.b_conv_minimized')
-        self.append_check(_('Show emoticons'),
-                          'session.config.b_show_emoticons')
         self.append_check(_('Show conversation header'),
             'session.config.b_show_header')
         self.append_check(_('Show conversation toolbar'),
             'session.config.b_show_toolbar')
         self.append_check(_('Show close button on tabs'),
             'session.config.b_close_button_on_tabs')
-        self.append_check(_('Enable escape hotkey to close tabs'),
-            'session.config.b_escape_hotkey')
+        # Avatar-on-left sensitivity depends on side panel visibility
+        self.cb_avatar_left = self.create_check(_('Avatar on conversation left side'),
+            'session.config.b_avatar_on_left')
+        self.append_row(self.cb_avatar_left)
+
+        self.append_markup('<b>'+_('Appareance')+'</b>')
+        self.append_check(_('Show emoticons'),
+                          'session.config.b_show_emoticons')
         # small-toolbar sensitivity depends on conversation toolbar visibility
         self.cb_small_toolbar = self.create_check(_('Small conversation toolbar'),
             'session.config.b_toolbar_small')
         self.session.config.subscribe(self._on_cb_show_toolbar_changed,
             'b_show_toolbar')
         self.append_row(self.cb_small_toolbar)
-
-        # Avatar-on-left sensitivity depends on side panel visibility
-        self.cb_avatar_left = self.create_check(_('Avatar on conversation left side'),
-            'session.config.b_avatar_on_left')
-        self.append_row(self.cb_avatar_left)
-        self.append_check(_('Allow auto scroll in conversation'),
-            'session.config.b_allow_auto_scroll')
         self.append_check(_('Show avatars in taskbar instead of status icons'),
             'session.config.b_show_avatar_in_taskbar')
 
@@ -742,6 +738,14 @@ class ConversationWindow(BaseTable):
 
         #update small-toolbar sensitivity
         self._on_cb_show_toolbar_changed(self.session.config.get_or_set('b_show_toolbar', True))
+
+        self.append_markup('<b>'+_('Behavior')+'</b>')
+        self.append_check(_('Start minimized/iconified'),
+                          'session.config.b_conv_minimized')
+        self.append_check(_('Enable escape hotkey to close tabs'),
+            'session.config.b_escape_hotkey')
+        self.append_check(_('Allow auto scroll in conversation'),
+            'session.config.b_allow_auto_scroll')
 
         self.show_all()
 
