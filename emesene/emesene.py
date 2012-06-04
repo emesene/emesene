@@ -122,7 +122,7 @@ except ImportError, exc:
 from e3.common.pluginmanager import get_pluginmanager
 import interfaces
 import gui
-from e3.common import optionprovider
+import optionprovider
 
 class Controller(object):
     '''class that handle the transition between states of the windows'''
@@ -233,9 +233,9 @@ class Controller(object):
         self.emesene_is_running = False
         try:
             if os.name == 'posix':
-                from e3.common.SingleInstance import SingleInstancePosix as SingleInstance
+                from SingleInstance import SingleInstancePosix as SingleInstance
             else:
-                from e3.common.SingleInstance import SingleInstanceWin32 as SingleInstance
+                from SingleInstance import SingleInstanceWin32 as SingleInstance
 
             self.single_instance = SingleInstance()
             if self.single_instance.emesene_is_running():
