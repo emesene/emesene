@@ -179,6 +179,7 @@ class Preferences(gtk.Window):
         self.conversation.remove_subscriptions()
         self.sound.remove_subscriptions()
         self.notifications_page.remove_subscriptions()
+        self.desktop.remove_subscriptions()
         if hasattr(self, 'msn_papylib'):
             self.msn_papylib.privacy.remove_subscriptions()
 
@@ -652,19 +653,6 @@ class ConversationWindow(BaseTable):
         self.set_border_width(5)
         self.session = session
 
-        #language option
-        self.session.config.get_or_set("spell_lang", "en")
-        self.lang_menu = self.create_combo(self.get_spell_langs, 'session.config.spell_lang')
-
-        cb_check_spelling = self.create_check(
-            _('Enable spell check if available (requires %s)') 
-            % 'python-gtkspell',
-            'session.config.b_enable_spell_check')
-
-        h_lang_box = gtk.HBox()
-        h_lang_box.pack_start(cb_check_spelling)
-        h_lang_box.pack_start(self.lang_menu)
-
         # override text color option
 
         cb_override_text_color = self.create_check(
@@ -737,11 +725,11 @@ class ConversationWindow(BaseTable):
         self.append_row(self.cb_avatar_left)
         self.append_check(_('Allow auto scroll in conversation'),
             'session.config.b_allow_auto_scroll')
-        self.append_row(h_lang_box)
         self.append_check(_('Show avatars in taskbar instead of status icons'),
             'session.config.b_show_avatar_in_taskbar')
 
         self.append_row(h_color_box)
+
         #update ColorButton sensitive
         self._on_cb_override_text_color_toggled(
                 self.session.config.get_or_set('b_override_text_color', False))
@@ -752,11 +740,6 @@ class ConversationWindow(BaseTable):
         avatar_size.add_mark(64, gtk.POS_BOTTOM, None)
         avatar_size.add_mark(96, gtk.POS_BOTTOM, None)
 
-        self.session.config.subscribe(self._on_spell_change,
-            'b_enable_spell_check')
-
-        #update spell lang combo sensitivity
-        self._on_spell_change(self.session.config.get_or_set('b_enable_spell_check', False))
         #update small-toolbar sensitivity
         self._on_cb_show_toolbar_changed(self.session.config.get_or_set('b_show_toolbar', True))
 
@@ -765,20 +748,12 @@ class ConversationWindow(BaseTable):
     def _on_cb_show_toolbar_changed(self, value):
         self.cb_small_toolbar.set_sensitive(value)
 
-    def _on_spell_change(self, value):
-        self.lang_menu.set_sensitive(value)
-
-    def get_spell_langs(self):
-        return sorted(set(list_dicts()))
-
     def get_tab_positions(self):
         return [_("Top"), _("Bottom"), _("Left"), _("Right")]
 
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_cb_show_toolbar_changed,
             'b_show_toolbar')
-        self.session.config.unsubscribe(self._on_spell_change,
-            'b_enable_spell_check')
         self.session.config.unsubscribe(self._on_cb_override_text_color_toggled,
             'b_override_text_color')
 
@@ -1159,7 +1134,7 @@ class DesktopTab(BaseTable):
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 3, 2)
+        BaseTable.__init__(self, 4, 2)
         self.set_border_width(5)
         self.session = session
 
@@ -1211,12 +1186,30 @@ class DesktopTab(BaseTable):
         self.language_combo.connect('changed', self.on_language_combo_changed,
                                     'session.config.language_config')
 
-        self.attach(self.language_combo, 2, 3, 3, 4, gtk.EXPAND|gtk.FILL, 0)
+        self.attach(self.language_combo, 2, 3, 3, 4, gtk.FILL, 0)
+
+        #language option
+        self.session.config.get_or_set("spell_lang", "en")
+        self.lang_menu = self.create_combo(self.get_spell_langs, 'session.config.spell_lang')
+
+        cb_check_spelling = self.create_check(
+            _('Enable spell check if available \n(requires %s)')
+            % 'python-gtkspell',
+            'session.config.b_enable_spell_check')
+
+        self.append_row(cb_check_spelling)
+        self.attach(self.lang_menu, 2, 3, 4, 5, gtk.FILL, 0)
+
+        self.session.config.subscribe(self._on_spell_change,
+            'b_enable_spell_check')
+
+        #update spell lang combo sensitivity
+        self._on_spell_change(self.session.config.get_or_set('b_enable_spell_check', False))
 
         self.append_markup('<b>'+_('File transfers')+'</b>')
         self.append_check(_('Sort received files by sender'),
                           'session.config.b_download_folder_per_account')
-        self.add_text(_('Save files to:'), 0, 6, True)
+        self.add_text(_('Save files to:'), 0, 7, True)
 
         def on_path_selected(f_chooser):
             ''' updates the download dir config value '''
@@ -1235,12 +1228,16 @@ class DesktopTab(BaseTable):
             #setting on path_chooser didn't work
             fc_button.set_action (gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER)
         fc_button.connect('selection-changed', on_path_selected)
-        self.attach(fc_button, 2, 3, 6, 7, gtk.EXPAND|gtk.FILL, 0)
+        self.attach(fc_button, 2, 3, 7, 8, gtk.EXPAND|gtk.FILL, 0)
 
         # mail settings
         self.append_markup('<b>'+_('Mail')+'</b>')
         self.append_check(_('Open mail in default desktop client'),
                           'session.config.b_open_mail_in_desktop')
+
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_spell_change,
+            'b_enable_spell_check')
 
     def _on_language_changed(self,  lang):
         self._language_management.install_desired_translation(lang)
@@ -1250,6 +1247,11 @@ class DesktopTab(BaseTable):
         lang_key = combo.get_model()[index][0]
         self.set_attr(property_name, lang_key)
 
+    def _on_spell_change(self, value):
+        self.lang_menu.set_sensitive(value)
+
+    def get_spell_langs(self):
+        return sorted(set(list_dicts()))
 
 class MSNPapylib(BaseTable):
     """ This panel contains some msn-papylib specific settings """
