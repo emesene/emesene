@@ -391,6 +391,45 @@ class BaseTable(gtk.Table):
 
         self.append_row(hbox, None)
 
+    def append_entry_nohelp_noappend(self, text, format_type, 
+                             property_name, default, tooltip_text):
+        """append a row with a label and a entry, set the value to the
+        value of property_name if exists, if not set it to default.
+         Add a reset button that sets the value to the default"""
+
+        def on_reset_clicked(button, entry, default):
+            """called when the reset button is clicked, set
+            entry text to default"""
+            entry.set_text(default)
+
+        def on_entry_changed(entry, property_name):
+            """called when the content of an entry changes,
+            set the value of the property to the new value"""
+            self.set_attr(property_name, entry.get_text())
+
+        hbox = gtk.HBox(spacing=4)
+        label = gtk.Label(text)
+        label.set_alignment(0.0, 0.5)
+        text = self.get_attr(property_name)
+
+        entry = gtk.Entry()
+        entry.set_text(text)
+
+        reset = gtk.Button()
+
+        hbox.pack_start(label)
+        hbox.pack_start(entry, False)
+        hbox.pack_start(reset, False)
+
+        reset_image = gtk.image_new_from_stock(gtk.STOCK_CLEAR,
+                                               gtk.ICON_SIZE_MENU)
+        reset.set_label(_('Reset'))
+        reset.set_image(reset_image)
+        reset.connect('clicked', on_reset_clicked, entry, default)
+        entry.connect('changed', on_entry_changed, property_name)
+
+        return hbox
+
     def create_check(self, text, property_name):
         """create a CheckButton and
         set the check state with default
@@ -1276,6 +1315,11 @@ class MSNPapylib(BaseTable):
         c_ep.set_active(self.session.config.b_papylib_disconnect_ep)
         c_ep.connect('toggled', self._on_ep_toggled)
         vbox.pack_start(c_ep, False, False)
+
+        s_entry = self.append_entry_nohelp_noappend(_('Endpoint name'), 'epname',
+                                  'session.config.s_papylib_endpoint_name',
+                                  'emesene', _('Name for this endpoint'))
+        vbox.pack_start(s_entry, False, False)
 
         l_text = gtk.Label(_('If you have problems with your nickname/message/picture '
                         'just click on this button, sign in with your account '
