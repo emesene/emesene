@@ -69,6 +69,12 @@ class BaseTray(object):
 
         self.signals_have_been_connected = False
 
+    def unsubscribe(self):
+        """
+        This is called when Tray icon unsubscribe
+        """
+        pass
+
     def _on_conv_message(self, cid, account, msgobj, cedict=None):
         """
         This is fired when a new message arrives to a user.

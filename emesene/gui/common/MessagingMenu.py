@@ -204,6 +204,3 @@ class MessagingMenu(gui.BaseTray):
         This is fired when the user clicks on the server indicator item.
         """
         self.main_window.present()
-
-    def unsubscribe(self):
-        pass
