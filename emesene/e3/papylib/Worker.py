@@ -179,7 +179,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.profile.client_capabilities.has_webcam = PAPY_HAS_AUDIOVIDEO
 
         self.profile.privacy = papyon.profile.Privacy.BLOCK
-        self.profile.end_point_name = self.session.config.get_or_set("s_papylib_endpoint_name", "emesene")
 
         # initialize caches
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)

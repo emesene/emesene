@@ -61,6 +61,7 @@ class Session(e3.Session):
         '''load the config of the session'''
         e3.Session.load_config(self)
 
+        self.__worker.profile.end_point_name = self.session.config.get_or_set("s_papylib_endpoint_name", "emesene")
         # keepalive conversations...or not
         b_keepalive = self.config.get_or_set("b_papylib_keepalive", False)
         self.__worker.keepalive_conversations = b_keepalive
