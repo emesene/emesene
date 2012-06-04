@@ -478,7 +478,7 @@ class BaseTable(gtk.Table):
                           property_name, values)
         return combo
 
-    def create_combo_with_label(self, text, 
+    def create_combo_with_label(self, text,
                                 getter, property_name, 
                                 values=None, changed_cb = None):
         """creates and return a new ComboBox with a label and append 
@@ -653,19 +653,8 @@ class ConversationWindow(BaseTable):
         self.session = session
 
         #language option
-
-        langs = list_dicts()
-
-        self.spell_lang = self.session.config.get_or_set("spell_lang", "en")
-        self.lang_menu = gtk.combo_box_new_text()
-        self.lang_menu.connect("changed", self._on_lang_combo_change)
-
-        index = 0
-        for lang in langs:
-            self.lang_menu.append_text(lang)
-            if lang == self.spell_lang:
-                self.lang_menu.set_active(index)
-            index += 1
+        self.session.config.get_or_set("spell_lang", "en")
+        self.lang_menu = self.create_combo(self.get_spell_langs, 'session.config.spell_lang')
 
         cb_check_spelling = self.create_check(
             _('Enable spell check if available (requires %s)') 
@@ -779,8 +768,8 @@ class ConversationWindow(BaseTable):
     def _on_spell_change(self, value):
         self.lang_menu.set_sensitive(value)
 
-    def _on_lang_combo_change(self, combo):
-        self.session.config.spell_lang = combo.get_active_text()
+    def get_spell_langs(self):
+        return sorted(set(list_dicts()))
 
     def get_tab_positions(self):
         return [_("Top"), _("Bottom"), _("Left"), _("Right")]
