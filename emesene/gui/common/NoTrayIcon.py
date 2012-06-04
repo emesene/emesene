@@ -35,3 +35,6 @@ class NoTrayIcon(gui.BaseTray):
         """
         gui.BaseTray.__init__(self, handler)
         self.quit_on_close = True
+
+    def unsubscribe(self):
+        pass
