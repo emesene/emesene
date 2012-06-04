@@ -179,6 +179,7 @@ class Worker(e3.base.Worker, papyon.Client):
         self.profile.client_capabilities.has_webcam = PAPY_HAS_AUDIOVIDEO
 
         self.profile.privacy = papyon.profile.Privacy.BLOCK
+        self.profile.end_point_name = self.session.config.get_or_set("s_papylib_endpoint_name", "emesene")
 
         # initialize caches
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
@@ -937,7 +938,6 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.login_started()
         self.login(account, password)
-        self.profile.end_point_name = "emesene" #TODO: FIXME: This does not seem to work
 
     def _handle_action_logout(self):
         ''' handle Action.ACTION_LOGOUT '''
