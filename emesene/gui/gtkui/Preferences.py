@@ -421,7 +421,7 @@ class BaseTable(gtk.Table):
         return widget
 
     def append_range(self, text, property_name, 
-                     min_val, max_val,is_int=True):
+                     min_val, max_val,is_int=True, marks=[]):
         """append a row with a scale to select an integer value between
         min and max
         """
@@ -440,6 +440,9 @@ class BaseTable(gtk.Table):
 
         if is_int:
             scale.set_digits(0)
+
+        for mark in marks:
+            scale.add_mark(mark, gtk.POS_BOTTOM, None)
 
         hbox.pack_start(label, True, True)
         hbox.pack_start(scale, False)
@@ -605,9 +608,7 @@ class MainWindow(BaseTable):
             'session.config.b_show_mail_inbox')
         self.append_markup('<b>'+_('Contact list:')+'</b>')
         avatar_size = self.append_range(_('Contact list avatar size'),
-            'session.config.i_avatar_size', 18, 64)
-
-        avatar_size.add_mark(32, gtk.POS_BOTTOM, None)
+            'session.config.i_avatar_size', 18, 64, marks=[32, 48])
 
         self.append_entry_default(_('Nick format'), 'nick',
                                   'session.config.nick_template_clist',
@@ -731,10 +732,7 @@ class ConversationWindow(BaseTable):
                 self.session.config.get_or_set('b_override_text_color', False))
 
         avatar_size = self.append_range(_('Conversation avatar size'),
-            'session.config.i_conv_avatar_size', 18, 128)
-
-        avatar_size.add_mark(64, gtk.POS_BOTTOM, None)
-        avatar_size.add_mark(96, gtk.POS_BOTTOM, None)
+            'session.config.i_conv_avatar_size', 18, 128, marks=[32,64,96])
 
         #update small-toolbar sensitivity
         self._on_cb_show_toolbar_changed(self.session.config.get_or_set('b_show_toolbar', True))
