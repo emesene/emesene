@@ -586,10 +586,16 @@ class BaseContact(gobject.GObject):
     def _diff_end_points(self, old_eps, new_eps):
         added_eps = set(new_eps.keys()) - set(old_eps.keys())
         removed_eps = set(old_eps.keys()) - set(new_eps.keys())
+        union_eps = set(old_eps.keys()) & set(new_eps.keys())
         for ep in added_eps:
             self.emit("end-point-added", new_eps[ep])
         for ep in removed_eps:
             self.emit("end-point-removed", old_eps[ep])
+        # NOTE: Can we just update endpoint name?
+        for ep in union_eps:
+            if new_eps[ep].name != old_eps[ep].name:
+                self.emit("end-point-removed", old_eps[ep])
+                self.emit("end-point-added", new_eps[ep])
 
     def do_get_property(self, pspec):
         name = pspec.name.lower().replace("-", "_")
@@ -624,7 +630,7 @@ class Profile(BaseContact):
         self._network_id = NetworkID.MSN
         self._display_name = self._account.split("@", 1)[0]
         self._privacy = Privacy.BLOCK
-        self._end_point_name = ""
+        self._end_point_name = "" # NOTE: This set in Session
 
         self._client_capabilities = ClientCapabilities(10)
         self._client_capabilities.supports_sip_invite = True
@@ -726,8 +732,6 @@ class Profile(BaseContact):
     @rw_property
     def end_point_name():
         def fset(self, name):
-            if name == self._end_point_name:
-                return
             self._ns_client.set_end_point_name(name)
         def fget(self):
             return self._end_point_name

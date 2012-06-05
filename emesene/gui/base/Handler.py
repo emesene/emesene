@@ -72,8 +72,8 @@ class FileHandler(object):
         else:
             self.session.close(True)
 
-    def on_disconnect_endpoint_selected(self, name):
-        self.session.disconnect_endpoint(name)
+    def on_disconnect_endpoint_selected(self, ep_id):
+        self.session.disconnect_endpoint(ep_id)
 
 class ActionsHandler(object):
     '''this handler contains all the handlers needed to handle the actions

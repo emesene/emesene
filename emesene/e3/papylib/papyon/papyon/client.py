@@ -312,12 +312,12 @@ class Client(EventsDispatcher):
         self._protocol.send_user_notification("goawyplzthxbye-nomorempop",
            self.profile.account, "", 4)
 
-    def disconnect_endpoint(self, id_):
+    def disconnect_endpoint(self, ep_id):
         """ Disconnects single endpoint """
         if self._state == ClientState.CLOSED:
             return
         self._protocol.send_user_notification("goawyplzthxbye",
-           self.profile.account, id_, 4)
+           self.profile.account, ep_id, 4)
 
     ### Protected API --------------------------------------------------------
     @property

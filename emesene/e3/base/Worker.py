@@ -411,5 +411,5 @@ class Worker(threading.Thread):
     def _handle_action_disconnect_other_endpoints(self):
         pass
 
-    def _handle_action_disconnect_endpoint(self, name):
+    def _handle_action_disconnect_endpoint(self, ep_id):
         pass

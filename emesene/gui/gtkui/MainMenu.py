@@ -105,28 +105,28 @@ class EndPointsMenu(gtk.Menu):
 
         self.ep_dict = {}
         name = 'All other endpoints'
-        ep = gtk.MenuItem(_(name))
-        ep.connect('activate',
-                lambda *args : self.handler.on_disconnect_endpoint_selected(name))
-        self.append(ep)
+        ep_item = gtk.MenuItem(_(name))
+        ep_item.connect('activate',
+                lambda *args : self.handler.on_disconnect_endpoint_selected(""))
+        self.append(ep_item)
         self.append(gtk.SeparatorMenuItem())
 
         self.session.signals.endpoint_added.subscribe(self.endpoint_added)
         self.session.signals.endpoint_removed.subscribe(self.endpoint_removed)
 
-    def endpoint_added(self, name):
-        self.endpoint_removed(name)
-        ep = gtk.MenuItem(name)
-        ep.connect('activate',
-            lambda *args: self.handler.on_disconnect_endpoint_selected(name))
-        ep.show()
-        self.append(ep)
-        self.ep_dict[name] = ep
+    def endpoint_added(self, ep_id, ep_name):
+        self.endpoint_removed(ep_id)
+        ep_item = gtk.MenuItem(ep_name)
+        ep_item.connect('activate',
+            lambda *args: self.handler.on_disconnect_endpoint_selected(ep_id))
+        ep_item.show()
+        self.append(ep_item)
+        self.ep_dict[ep_id] = ep_item
 
-    def endpoint_removed(self, name):
-        if name in self.ep_dict:
-            self.ep_dict[name].hide()
-            del self.ep_dict[name]
+    def endpoint_removed(self, ep_id):
+        if ep_id in self.ep_dict:
+            self.ep_dict[ep_id].hide()
+            del self.ep_dict[ep_id]
 
 class FileMenu(gtk.Menu):
     """
