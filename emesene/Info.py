@@ -16,8 +16,8 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-EMESENE_VERSION = "2.12.4-dev"
-EMESENE_LAST_STABLE = "2.12.3"
+EMESENE_VERSION = "2.12.5"
+EMESENE_LAST_STABLE = "2.12.5"
 EMESENE_WEBSITE = "http://www.emesene.org"
 EMESENE_AUTHORS = "marianoguerra & c10ud"
 EMESENE_CONTRIBUTORS = [ # TODO: Load this from CONTRIBUTORS
