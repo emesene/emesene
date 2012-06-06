@@ -113,6 +113,7 @@ class EndPointsMenu(gtk.Menu):
 
         self.session.signals.endpoint_added.subscribe(self.endpoint_added)
         self.session.signals.endpoint_removed.subscribe(self.endpoint_removed)
+        self.session.signals.endpoint_updated.subscribe(self.endpoint_updated)
 
     def endpoint_added(self, ep_id, ep_name):
         self.endpoint_removed(ep_id)
@@ -127,6 +128,10 @@ class EndPointsMenu(gtk.Menu):
         if ep_id in self.ep_dict:
             self.ep_dict[ep_id].hide()
             del self.ep_dict[ep_id]
+
+    def endpoint_updated(self, ep_id, ep_name):
+        if ep_id in self.ep_dict:
+            self.ep_dict[ep_id].set_label(ep_name)
 
 class FileMenu(gtk.Menu):
     """

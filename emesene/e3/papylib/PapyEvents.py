@@ -217,6 +217,9 @@ class ProfileEvent(papyon.event.ProfileEventInterface):
     def on_profile_end_point_removed(self, ep):
         self._client._on_profile_end_point_removed(ep)
 
+    def on_profile_end_point_updated(self, ep):
+        self._client._on_profile_end_point_updated(ep)
+
 class CallEvent(papyon.event.CallEventInterface):
     def __init__(self, call, client):
         papyon.event.CallEventInterface.__init__(self, call)

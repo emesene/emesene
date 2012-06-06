@@ -70,7 +70,8 @@ EVENTS = (\
  'contact added you', 'user typing',
  'mail received', 'mail count changed',
  'broken profile', 'close', 'social request',
- 'gui message', 'endpoint added', 'endpoint removed')
+ 'gui message', 'endpoint added', 'endpoint removed',
+ 'endpoint updated')
 
 ACTIONS = (\
  'login'            , 'logout'           ,

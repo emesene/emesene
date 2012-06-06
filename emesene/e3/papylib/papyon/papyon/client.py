@@ -413,6 +413,7 @@ class Client(EventsDispatcher):
             self.profile.connect(name, event, name)
         connect_signal("end-point-added")
         connect_signal("end-point-removed")
+        connect_signal("end-point-updated")
 
     def __connect_mailbox_signals(self):
         """Connect mailbox signals"""

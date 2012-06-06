@@ -394,6 +394,10 @@ class BaseContact(gobject.GObject):
             "end-point-removed": (gobject.SIGNAL_RUN_FIRST,
                 gobject.TYPE_NONE,
                 (object,)),
+
+            "end-point-updated": (gobject.SIGNAL_RUN_FIRST,
+                gobject.TYPE_NONE,
+                (object,)),
             }
 
     __gproperties__ = {
@@ -587,15 +591,14 @@ class BaseContact(gobject.GObject):
         added_eps = set(new_eps.keys()) - set(old_eps.keys())
         removed_eps = set(old_eps.keys()) - set(new_eps.keys())
         union_eps = set(old_eps.keys()) & set(new_eps.keys())
+
         for ep in added_eps:
             self.emit("end-point-added", new_eps[ep])
         for ep in removed_eps:
             self.emit("end-point-removed", old_eps[ep])
-        # NOTE: Can we just update endpoint name?
         for ep in union_eps:
-            if new_eps[ep].name != old_eps[ep].name:
-                self.emit("end-point-removed", old_eps[ep])
-                self.emit("end-point-added", new_eps[ep])
+            if new_eps[ep] != old_eps[ep]:
+                self.emit("end-point-updated", new_eps[ep])
 
     def do_get_property(self, pspec):
         name = pspec.name.lower().replace("-", "_")
