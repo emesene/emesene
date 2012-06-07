@@ -28,6 +28,9 @@ import glib
 import Queue
 import threading
 
+import logging
+log = logging.getLogger('gtkui.utils')
+
 import e3
 import urllib
 
@@ -255,6 +258,7 @@ class GtkRunner(threading.Thread):
         try:
             result = (True, self.func(*self.args, **self.kwargs))
         except Exception, ex:
+            log.exception(ex)
             result = (False, ex)
 
         self.result.put(result)

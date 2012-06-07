@@ -321,8 +321,6 @@ class DownloadListBase(ExtensionListTab):
     def show_update_callback(self, result=None):
         '''method used as callback, because both GtkRunner and buttons
         need the first argument on the on_update method'''
-        if result is not None and not result[0]:
-            log.error(str(result[1]))
         if not self.progress:
             return
 
