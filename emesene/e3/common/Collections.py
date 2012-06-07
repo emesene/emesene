@@ -91,9 +91,10 @@ class Collection(object):
             f.close()
 
         self.remove(self.get_abspath(type_, label))
-        first_path = os.path.split(self.get_path(type_, label))
-        first_path = first_path[0] or first_path[1]
-        self.move(os.path.join(tmp_dir, first_path), self.dest_folder)
+        path = self.get_path(type_, label)
+        split_path = os.path.split(path)
+        first_path = split_path[0] if split_path[1] else ''
+        self.move(os.path.join(tmp_dir, path), os.path.join(self.dest_folder, first_path))
         self.remove(tmp_dir)
         self.progress = 0.0
 
