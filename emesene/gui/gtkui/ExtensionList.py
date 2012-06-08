@@ -388,25 +388,42 @@ class DownloadList(DownloadListBase):
 
     def on_cursor_changed(self, list_view, type_, extra_button=None):
         '''called when a row is selected'''
-        if extra_button is None:
-            extra_button = self.no_button
+        self.extra_button = extra_button
+        if self.extra_button is None:
+            self.extra_button = self.no_button
 
         value = self.get_selected_name(list_view)
         if value is not None:
-            if value in self.download_list.get(type_, []):
+            if ( value in self.download_list.get(type_, []) ) and \
+               not self.progress:
                 self.download_item = value
-                self.download_button.show()
-                extra_button.hide()
+                self.show_download_button(True)
             else:
-                self.download_button.hide()
-                extra_button.show()
-            if value in self.removable_list.get(type_, {}):
+                self.show_download_button(False)
+            if ( value in self.removable_list.get(type_, {}) ) and \
+               not self.progress:
                 self.remove_item = (type_, value)
-                self.no_button2.hide()
-                self.remove_button.show()
+                self.show_remove_button(True)
             else:
-                self.remove_button.hide()
-                self.no_button2.show()
+                self.show_remove_button(False)
+
+    def show_download_button(self, value):
+        '''show download buttons when action can be performed'''
+        if value:
+            self.download_button.show()
+            self.extra_button.hide()
+        else:
+            self.download_button.hide()
+            self.extra_button.show()
+
+    def show_remove_button(self, value):
+        '''show remove buttons when action can be performed'''
+        if value:
+            self.no_button2.hide()
+            self.remove_button.show()
+        else:
+            self.no_button2.show()
+            self.remove_button.hide()
 
     def get_selected_name(self, list_view):
         '''Gets the current selected name in the list view.'''
@@ -430,6 +447,8 @@ class DownloadList(DownloadListBase):
         if self.progress:
             return
 
+        self.show_download_button(False)
+
         self.progress = True
         self.set_action(_('Downloading extensions'))
         self.progressbox.show_all()
@@ -450,6 +469,8 @@ class DownloadList(DownloadListBase):
         self.current_collection.remove(path)
         self.removable_list[self.remove_item[0]].pop(self.remove_item[1])
         self.show_update()
+
+        self.show_remove_button(False)
 
     def fetch_metadata(self, type_, name):
         ''' fetch metadata '''
