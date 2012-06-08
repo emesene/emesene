@@ -63,17 +63,19 @@ def replace_emoticons(text):
     emote_theme = gui.theme.emote_theme
     shortcuts = emote_theme.shortcuts
     emoticon_list = []
+    unescaped_text = gui.base.MarkupParser.unescape(text)
     for shortcut in shortcuts:
         eshort = gui.base.MarkupParser.escape(shortcut)
-        if eshort in text:
+        if shortcut in unescaped_text:
             if shortcut in emote_theme.shortcuts:
                 path = emote_theme.emote_to_path(shortcut, remove_protocol=True)
 
             if path is not None:
-                pos = text.find(eshort)
+                pos = unescaped_text.find(shortcut)
                 while pos > -1:
                     emoticon_list.append([pos, eshort, path])
-                    pos = text.find(eshort, pos + 1)
+                    pos = unescaped_text.find(shortcut, pos + 1)
+
     emoticon_list.sort()
     text_list = [text]
     for emoticon in emoticon_list:
