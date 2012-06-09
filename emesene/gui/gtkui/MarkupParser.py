@@ -24,6 +24,7 @@ import gui
 
 TAG_REGEX = re.compile("(.*?)<span([^>]*)>", re.IGNORECASE | re.DOTALL)
 CLOSE_TAG_REGEX = re.compile("(.*?)</span>", re.IGNORECASE | re.DOTALL)
+HTML_CODE_REGEX = re.compile("&\w+;", re.IGNORECASE | re.DOTALL)
 
 def replace_markup(markup):
     '''replace the tags defined in gui.base.ContactList'''
@@ -63,41 +64,49 @@ def replace_emoticons(text):
     emote_theme = gui.theme.emote_theme
     shortcuts = emote_theme.shortcuts
     emoticon_list = []
-    unescaped_text = gui.base.MarkupParser.unescape(text)
     for shortcut in shortcuts:
         eshort = gui.base.MarkupParser.escape(shortcut)
-        if shortcut in unescaped_text:
+        if eshort in text:
             if shortcut in emote_theme.shortcuts:
                 path = emote_theme.emote_to_path(shortcut, remove_protocol=True)
 
             if path is not None:
-                pos = unescaped_text.find(shortcut)
+                hclist = html_code_list(text)
+                pos = text.find(eshort)
                 while pos > -1:
-                    emoticon_list.append([pos, eshort, path])
-                    pos = unescaped_text.find(shortcut, pos + 1)
+                    if pos not in hclist:
+                        emoticon_list.append([pos, eshort, path])
+                    pos = text.find(eshort, pos + 1)
 
     emoticon_list.sort()
-    text_list = [text]
+    parsed_pos = 0
+    text_list = []
+    close_tags_index = []
     for emoticon in emoticon_list:
-        if len(text_list) == 1:
-            temp_list = text.partition(emoticon[1])
-            text1, text2 = close_tags(temp_list[0], temp_list[2])
-            text_list = [text1]
+        if emoticon[0] >= parsed_pos:
+            # append non-empty string into list 
+            if emoticon[0] != parsed_pos:
+                text_list.append(text[parsed_pos:emoticon[0]])
+                close_tags_index.append(len(text_list) - 1)
             text_list.append(utils.safe_gtk_pixbuf_load(emoticon[2]))
-            text_list.append(text2)
-            old_emoticon = emoticon
-        elif emoticon[0] >= old_emoticon[0] + len(old_emoticon[1]):
-            temp_list = text_list[len(text_list) - 1].partition(emoticon[1])
-            text1, text2 = close_tags(temp_list[0], temp_list[2])
-            text_list[len(text_list) - 1] = text1
-            text_list.append(utils.safe_gtk_pixbuf_load(emoticon[2]))
-            text_list.append(text2)
-            old_emoticon = emoticon
-    # make sure broken plus tags are parsed in the right way
-    text1, text2 = close_tags(text_list[len(text_list)-1])
-    text_list[len(text_list) - 1] = text1
+            parsed_pos = emoticon[0] + len(emoticon[1])
+    text_list.append(text[parsed_pos:])
+    close_tags_index.append(len(text_list) - 1)
+
+    for idx in range(len(close_tags_index) - 1):
+        tl_idx1 = close_tags_index[idx]
+        tl_idx2 = close_tags_index[idx + 1]
+        text_list[tl_idx1], text_list[tl_idx2] = close_tags(text_list[tl_idx1], text_list[tl_idx2])
 
     return text_list
+
+def html_code_list(text):
+    '''return positions of specify html codes in input string'''
+    html_list = []
+    for hc in HTML_CODE_REGEX.finditer(text):
+        if hc.group() in gui.base.MarkupParser.dic_inv:
+            html_list.append(hc.end() - 1)
+    return html_list
 
 def close_tags(text1, text2=''):
     '''make sure the plus and emesene tags are closed before an emoticon'''
