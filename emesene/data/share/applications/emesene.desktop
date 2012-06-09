@@ -16,7 +16,6 @@ Icon=emesene
 Terminal=false
 StartupNotify=true
 Type=Application
-OnlyShowIn=GNOME;Unity;
 Categories=Network;InstantMessaging;
 X-Ayatana-Desktop-Shortcuts=NewInstance;
 
@@ -30,4 +29,4 @@ Name[ru]=Открыть новую копию
 Name[es]=Abrir una instancia nueva
 Name[it]=Apri una nuova istanza
 Exec=emesene
-OnlyShowIn=Unity;
+TargetEnvironment=Unity
