@@ -105,6 +105,12 @@ class Worker(e3.Worker):
         self._add_contact('thirteen@hotmail.com',
                 '[c=7][b][I am][/c=yellow][/b][c=70][/c=89][c=89] so [A]wesome that [I] only use invalid tags [/c]',
                 e3.status.BUSY, '', False)
+        self._add_contact('fourteen@hotmail.com',
+                '\')")&apos;&quot;:)(H);)&quot;&apos;")\')',
+                e3.status.BUSY, '', False)
+        self._add_contact('fifteen@hotmail.com',
+                '1:)2;)3\')4\')5;)6:)7',
+                e3.status.BUSY, '', False)
 
         self._add_group('ninjas')
         self._add_group('pirätes')
@@ -140,6 +146,8 @@ class Worker(e3.Worker):
         self._add_contact_to_group('eleven@hotmail.com', 'strange nicks')
         self._add_contact_to_group('twelve@hotmail.com', 'strange nicks')
         self._add_contact_to_group('thirteen@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('fourteen@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('fifteen@hotmail.com', 'strange nicks')
 
         #test pending contact dialog
         self._add_pending_contacts()
