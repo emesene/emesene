@@ -76,7 +76,7 @@ class Session(e3.Session):
 
     def login(self, account, password, status, proxy, host, port, use_http=False):
         '''start the login process'''
-        self.__worker = Worker('emesene2', self, proxy, use_http)
+        self.__worker = Worker(self, proxy, use_http)
         self.__worker.start()
 
         # msn password must have 16 chars max.

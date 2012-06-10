@@ -63,9 +63,9 @@ STATUS_MAP_REVERSE['unavailable'] = e3.status.OFFLINE
 class Worker(e3.Worker):
     '''xmpp's Worker thread'''
 
-    def __init__(self, app_name, session, proxy, use_http=False):
+    def __init__(self, session, proxy, use_http=False):
         '''class constructor'''
-        e3.Worker.__init__(self, app_name, session)
+        e3.Worker.__init__(self, session)
 
         self.client = None
 

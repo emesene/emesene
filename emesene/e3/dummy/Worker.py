@@ -12,10 +12,9 @@ log = logging.getLogger('dummy.Worker')
 class Worker(e3.Worker):
     '''dummy Worker implementation to make it easy to test emesene'''
 
-    def __init__(self, app_name, session, proxy, use_http=False):
+    def __init__(self, session, proxy, use_http=False):
         '''class constructor'''
-        e3.Worker.__init__(self, app_name, session)
-        self.session = session
+        e3.Worker.__init__(self, session)
 
     def _fill_contact_list(self):
         """

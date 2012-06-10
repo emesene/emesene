@@ -105,13 +105,11 @@ class Worker(threading.Thread):
     '''this class represent an object that waits for commands from the queue
     of a socket, process them and add it as events to its own queue'''
 
-    def __init__(self, app_name, session):
+    def __init__(self, session):
         '''class constructor'''
         threading.Thread.__init__(self)
         self._continue = True
         self.setDaemon(True)
-
-        self.app_name = app_name
 
         self.in_login = False
         self.session = session
