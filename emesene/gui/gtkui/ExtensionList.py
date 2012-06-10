@@ -586,12 +586,15 @@ class UpdateList(DownloadListBase):
         self.theme_names = {}
         self.theme_configs = {}
 
+        refresh_button = gtk.Button(stock=gtk.STOCK_REFRESH)
+        refresh_button.connect('clicked', self.on_update, True)
+
         self.download_button = gtk.Button(_('Update'))
         self.download_button.set_image(gtk.image_new_from_stock(
                                        gtk.STOCK_REFRESH, gtk.ICON_SIZE_MENU))
         self.download_button.connect('clicked', self.start_download)
 
-        self.buttonbox.set_layout(gtk.BUTTONBOX_END)
+        self.buttonbox.pack_start(refresh_button, fill=False)
         self.buttonbox.pack_start(self.download_button, fill=False)
 
     def on_toggled(self, widget, path, model, type_):
