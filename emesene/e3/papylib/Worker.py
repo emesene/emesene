@@ -120,26 +120,6 @@ class Worker(e3.base.Worker, papyon.Client):
         self.calls = {}
         self.rcalls = {}
 
-    def run(self):
-        '''main method, block waiting for data, process it, and send data back
-        '''
-        self._mainloop = glib.MainLoop(is_running=True)
-        while self._mainloop.is_running():
-            try:
-                action = self.session.actions.get(True, 0.1)
-
-                if action.id_ == Action.ACTION_QUIT:
-                    log.debug('closing thread')
-                    if not self.state == papyon.event.ClientState.CLOSED:
-                        self.logout()
-                    self.session.logger.quit()
-                    self.session.signals.quit()
-                    break
-
-                self._process_action(action)
-            except Queue.Empty:
-                pass
-
     # some useful methods (mostly, gui only)
     def set_initial_infos(self):
         '''this is called on login'''
@@ -942,6 +922,14 @@ class Worker(e3.base.Worker, papyon.Client):
     def _handle_action_logout(self):
         ''' handle Action.ACTION_LOGOUT '''
         self.session.close()
+
+    def _handle_action_quit(self):
+        '''handle Action.ACTION_QUIT
+        '''
+        #chain up to base class
+        e3.base.Worker._handle_action_quit(self)
+        if not self.state == papyon.event.ClientState.CLOSED:
+            self.logout()
 
     # e3 action handlers - address book
     def _handle_action_add_contact(self, account):

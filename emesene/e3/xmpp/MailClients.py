@@ -60,6 +60,7 @@ class MailClient(Thread):
 
     def __init__(self, session, server = "", port = 0, username = "", password = ""):
         Thread.__init__(self)
+        self.setDaemon(True)
         self._username = username
         self._password = password
         self._server = server

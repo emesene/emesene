@@ -86,16 +86,6 @@ class Worker(e3.Worker):
         self.roster = None
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
 
-    def run(self):
-        '''main method, block waiting for data, process it, and send data back
-        '''
-        while self._continue:
-            try:
-                action = self.session.actions.get(True, 0.1)
-                self._process_action(action)
-            except Queue.Empty:
-                pass
-
     def _session_started(self, event):
         '''Process the session_start event'''
         self.client.get_roster(block=True)
@@ -253,11 +243,10 @@ class Worker(e3.Worker):
     def _handle_action_quit(self):
         '''handle Action.ACTION_QUIT
         '''
-        self.session.logger.quit()
-        self.session.signals.quit()
+        #chain up to base class
+        e3.base.Worker._handle_action_quit(self)
         self.session.disconnected(None, False)
         self.client.disconnect(wait=True)
-        self._continue = False
 
     def _handle_action_add_contact(self, account):
         '''handle Action.ACTION_ADD_CONTACT

@@ -17,23 +17,6 @@ class Worker(e3.Worker):
         e3.Worker.__init__(self, app_name, session)
         self.session = session
 
-    def run(self):
-        '''main method, block waiting for data, process it, and send data back
-        '''
-        while True:
-            try:
-                action = self.session.actions.get(True, 0.1)
-
-                if action.id_ == e3.Action.ACTION_QUIT:
-                    log.debug('closing thread')
-                    self.session.logger.quit()
-                    self.session.signals.quit()
-                    break
-
-                self._process_action(action)
-            except Queue.Empty:
-                pass
-
     def _fill_contact_list(self):
         """
         method to fill the contact list with something

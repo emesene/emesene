@@ -23,6 +23,9 @@ import traceback
 import bisect
 
 import Logger
+import logging
+log = logging.getLogger('e3.base.Worker')
+
 from Event import Event
 from Action import Action
 
@@ -113,9 +116,6 @@ class Worker(threading.Thread):
         self.in_login = False
         self.session = session
 
-        # this queue receives a Command object
-        self.command_queue = Queue.Queue()
-
         self.action_handlers = {}
         Worker._set_handlers(self)
 
@@ -177,7 +177,12 @@ class Worker(threading.Thread):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
-        raise NotImplementedError('not implemented')
+        while self._continue:
+            try:
+                action = self.session.actions.get(True, 0.1)
+                self._process_action(action)
+            except Queue.Empty:
+                pass
 
     def _process_action(self, action):
         '''process an action'''
@@ -232,6 +237,10 @@ class Worker(threading.Thread):
     def _handle_action_quit(self):
         '''handle Action.ACTION_QUIT
         '''
+        log.debug('closing thread')
+        self.session.logger.quit()
+        self.session.signals.quit()
+        self._continue = False
 
     def _handle_action_change_status(self, status_):
         '''handle Action.ACTION_CHANGE_STATUS
