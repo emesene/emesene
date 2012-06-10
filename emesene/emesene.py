@@ -382,6 +382,8 @@ class Controller(object):
                 self.tray_icon.set_visible(False)
 
             extension.get_and_instantiate('quit')
+            if os.name == "nt":
+                os._exit(0)
 
     def _remove_subscriptions(self):
         '''remove the subscriptions to signals'''
