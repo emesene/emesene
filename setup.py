@@ -14,21 +14,19 @@ import sys
 
 import emesene.Info
 
-python_version = platform.python_version()[0:3]
-
 setup_info = dict(
     name = "emesene",
     version = emesene.Info.EMESENE_VERSION,
     description = "Instant Messaging Client",
-    author = "Luis Mariano Guerra",
+    author = emesene.Info.EMESENE_AUTHORS,
     author_email = "luismarianoguerra@gmail.com",
     keywords = "messenger im msn jabber gtalk live facebook",
     long_description = """emesene is an istant messenger capable of connecting
     to various networks and utilizing different graphical toolkits.
-    Currently msn and jabber are supported through papyon and xmppy,
+    Currently msn and jabber are supported through papyon and SleekXMPP,
     which allows emesene to connect to various IM services such as
     Windows Live Messenger, GTalk, Facebook Chat, etc.""",
-    url = "http://www.emesene.org/",
+    url = emesene.Info.EMESENE_WEBSITE,
     license = "GNU GPL 3",
     classifiers = [
         "Development Status :: 3 - Alpha",
@@ -49,14 +47,6 @@ setup_info = dict(
     }
 )
 
-
-def windows_check():
-    return platform.system() in ("Windows", "Microsoft")
-
-def osx_check():
-    return platform.system() == "Darwin"
-
-
 if os.name == "nt":
     import py2exe
 
@@ -65,7 +55,7 @@ if os.name == "nt":
     #include data files, like images, xml, html files
     for dir in ['emesene/e3', 'emesene/gui', 'emesene/po', 'emesene/themes']:
         for dirname, dirnames, files in os.walk(dir):
-            if dirname.find("xmppy") == -1 and dirname.find("papylib\papyon") == -1:
+            if dirname.find("SleekXMPP") == -1 and dirname.find("papylib\papyon") == -1:
                 fpath = []
                 for f in files:
                     #ignore pyc, py, .gitignore, .doxygen and lintreport.sh files
@@ -140,7 +130,8 @@ if os.name == "nt":
                 "plistlib", "win32gui", "OpenSSL", "Crypto", "Queue", "sqlite3",
                 "glob", "webbrowser", "json", "imaplib", "cgi", "gzip", "uuid",
                 "platform", "imghdr", "ctypes", "optparse", "plugin_base",
-                "e3.msn", "pyfb", "papyon", "xmpp", "plugins","webkit"]
+                "pyfb", "papyon", "e3.xmpp", "plugins", "webkit",
+                "unicodedata", "dnspython"]
 
     # incude gui.common modules manually, i guess py2exe doesn't do that
     # automatically because the imports are made inside some functions    
@@ -173,8 +164,8 @@ if os.name == "nt":
     sys.path.insert(0, os.path.abspath("./dlls"))
     sys.path.insert(0, os.path.abspath("./emesene"))
     sys.path.insert(0, os.path.abspath("./emesene/e3/papylib/papyon"))
-    sys.path.insert(0, os.path.abspath("./emesene/e3/jabber/xmppy"))
-    sys.path.insert(0, os.path.abspath("./emesene/e3/jabber/pyfb"))
+    sys.path.insert(0, os.path.abspath("./emesene/e3/xmpp/SleekXMPP"))
+    sys.path.insert(0, os.path.abspath("./emesene/e3/xmpp/pyfb"))
 
     # run setup
     setup(
