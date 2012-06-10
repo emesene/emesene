@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-09 20:04+0200\n"
+"POT-Creation-Date: 2012-06-10 12:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1678,4 +1678,33 @@ msgstr ""
 
 #: emesene/gui/common/TrayIcon.py:255
 msgid "A menu with sessions' contacts"
+msgstr ""
+
+#: emesene/plugins/music/MusicButton.py:55
+msgid "Disable Music Plugin"
+msgstr ""
+
+#: emesene/plugins/music/MusicButton.py:58
+msgid "Enable Music Plugin"
+msgstr ""
+
+#: emesene/plugins/music/songretriever.py:43
+msgid "Message Format: "
+msgstr ""
+
+#: emesene/plugins/music/songretriever.py:44
+msgid "Use the album art as an avatar"
+msgstr ""
+
+#: emesene/plugins/music/songretriever.py:45
+msgid "See the \"listening to\" option in the extentions tab of the"
+msgstr ""
+
+#: emesene/plugins/music/songretriever.py:46
+msgid "preference window to select a preferred media player"
+msgstr ""
+
+#: emesene/plugins/typing_notification/TypingNotification.py:57
+#, python-format
+msgid "%s is typing"
 msgstr ""
