@@ -305,25 +305,3 @@ class Worker(e3.Worker):
         account = random.choice(self.session.contacts.contacts.keys())
         e3.Logger.log_message(self.session, [account], message, True)
         gobject.timeout_add_seconds(1, self._return_message, cid, account, message)
-
-    # p2p handlers
-
-    def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
-        '''handle Action.ACTION_P2P_INVITE,
-         cid is the conversation id
-         pid is the p2p session id, both are numbers that identify the
-            conversation and the session respectively, time.time() is
-            recommended to be used.
-         dest is the destination account
-         type_ is one of the e3.Transfer.TYPE_* constants
-         identifier is the data that is needed to be sent for the invitation
-        '''
-        pass
-
-    def _handle_action_p2p_accept(self, pid):
-        '''handle Action.ACTION_P2P_ACCEPT'''
-        pass
-
-    def _handle_action_p2p_cancel(self, pid):
-        '''handle Action.ACTION_P2P_CANCEL'''
-        pass
