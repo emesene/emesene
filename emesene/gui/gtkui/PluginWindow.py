@@ -37,7 +37,7 @@ class PluginMainVBox(DownloadList):
         self.buttonbox.pack_start(self.config_button, fill=False)
         self.on_cursor_changed(self.list_view)
 
-    def show_update(self):
+    def show_update(self, installed_only=False):
         '''called when the liststore need to be changed'''
         self.removable_list = {}
         self.removable_list['plugin'] = {}
@@ -54,7 +54,7 @@ class PluginMainVBox(DownloadList):
                 self.removable_list['plugin'][name] = path
             self.append(is_active, name, name, path=path,
                         description=pluginmanager.plugin_description(name))
-        DownloadList.show_update(self)
+        DownloadList.show_update(self, installed_only)
 
     def on_toggled(self, widget, path, model, type_):
         '''called when the toggle button in list view is pressed'''

@@ -283,6 +283,8 @@ class DownloadListBase(ExtensionListTab):
         if self.progress:
             return
 
+        self.show_update(True)
+
         self.progress = True
         self.set_action(self.default_action)
         self.progressbox.show_all()
@@ -488,8 +490,11 @@ class DownloadList(DownloadListBase):
 
         return True
 
-    def show_update(self):
+    def show_update(self, installed_only=False):
         '''show an update list of the set collection'''
+        if installed_only:
+            return
+
         self.download_list = {}
 
         for box in self.boxes:
@@ -537,7 +542,7 @@ class ThemeList(DownloadList):
     def set_theme(self, property_name, value):
         self.set_attr(property_name, value)
 
-    def show_update(self):
+    def show_update(self, installed_only=False):
         '''called when the liststore need to be changed'''
         self.removable_list = {}
 
@@ -556,7 +561,7 @@ class ThemeList(DownloadList):
                 if path.startswith(self.config_dir.base_dir) and not is_current:
                     self.removable_list[box.extension_type][name] = path
                 box.append(is_current, label, name, path=path)
-        DownloadList.show_update(self)
+        DownloadList.show_update(self, installed_only)
 
     def strip_name(self, name, type_):
         '''return a stripped version of theme name.'''
@@ -695,7 +700,7 @@ class UpdateList(DownloadListBase):
 
         return False
 
-    def show_update(self):
+    def show_update(self, installed_only=False):
         '''called when the liststore need to be changed'''
         self.clear_all()
         self.update_amount = 0
