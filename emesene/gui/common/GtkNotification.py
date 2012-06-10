@@ -25,6 +25,7 @@ import glib
 import gtk
 import pango
 import os
+import extension
 
 import logging
 log = logging.getLogger('gui.common.GtkNotification')
