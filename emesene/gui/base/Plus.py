@@ -466,6 +466,18 @@ def _unescape_special_chars(text):
     text = text.replace('\xc2\xb7\'', '\xc2\xb7&apos;')
     return text
 
+def _strip_tags(text, strip_list):
+    '''strip msnplus tags with the striplist'''
+    def strip_tags(match):
+        if match.start() in strip_list:
+            return ''
+        return match.group(0)
+
+    text = tag_plus_strip_re.sub(strip_tags, text)
+    text = tag_plus_old_strip_re.sub('', text)
+
+    return text
+
 def msnplus_strip(text, useless_arg=None):
     '''
     given a string with msn+ formatting, give a string with same text but
@@ -474,16 +486,9 @@ def msnplus_strip(text, useless_arg=None):
     @param useless_arg This is actually useless, and is mantained just for
     compatibility with text
     '''
-    
-    def replace_function(mobj):
-        if mobj.start() in tags_list:
-            return ''
-        return mobj.group(0)
-
     text = _escape_special_chars(text)
-    tags_list = _msnplus_tags_extract(text, True)
-    text = tag_plus_strip_re.sub(replace_function, text)
-    text = tag_plus_old_strip_re.sub('', text)
+    strip_list = _msnplus_tags_extract(text, True)
+    text = _strip_tags(text, strip_list)
     text = _unescape_special_chars(text)
 
     return text
