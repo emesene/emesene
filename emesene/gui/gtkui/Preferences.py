@@ -794,6 +794,11 @@ class Sound(BaseTable):
         self.append_markup('<b>'+_('General:')+'</b>')
         self.append_check(_('Mute sounds'),
             'session.config.b_mute_sounds')
+        self.append_markup('<b>'+_('Users events:')+'</b>')
+        self.array.append(self.append_check(_('Play sound on contact online'),
+            'session.config.b_play_contact_online'))
+        self.array.append(self.append_check(_('Play sound on contact offline'),
+            'session.config.b_play_contact_offline'))
         self.append_markup('<b>'+_('Messages events:')+'</b>')
         self.array.append(self.append_check(_('Play sound on sent message'),
             'session.config.b_play_send'))
@@ -805,11 +810,6 @@ class Sound(BaseTable):
             'session.config.b_play_nudge'))
         self.array.append(self.append_check(_('Mute sounds when the conversation has focus'),
             'session.config.b_mute_sounds_when_focussed'))
-        self.append_markup('<b>'+_('Users events:')+'</b>')
-        self.array.append(self.append_check(_('Play sound on contact online'),
-            'session.config.b_play_contact_online'))
-        self.array.append(self.append_check(_('Play sound on contact offline'),
-            'session.config.b_play_contact_offline'))
 
         self._on_mute_sounds_changed(self.session.config.b_mute_sounds)
 
