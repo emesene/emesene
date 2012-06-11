@@ -249,6 +249,12 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def on_key_hide(self, accel_group, window, keyval, modifier):
         '''Catches Escape and closes the window'''
+        if self.panel.nick.has_focus() or \
+           self.panel.message.has_focus():
+            # NOTE: need a better way to cancel focus
+            self.contact_list.grab_focus()
+            return True
+
         if self.panel.search.get_active():
             if self.entry.get_text_length() > 0:
                 self.entry.set_text('')
@@ -356,7 +362,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         if not self.panel.nick.has_focus() and \
            not self.panel.message.has_focus():
             if event.string != "" and not self.panel.search.get_active():
-                    self.panel.search.set_active(True)
+                self.panel.search.set_active(True)
 
     def on_disconnect(self, close=None):
         '''callback called when the disconnect option is selected'''
