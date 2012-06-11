@@ -159,7 +159,7 @@ def _get_best_match(msnplus):
     return match
 
 def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
-                     was_double_color=False):
+                     was_double_color=False, tag_queue=None):
     '''convert it into a dict, as the one used by XmlParser'''
 
     match = _get_best_match(msnplus)
@@ -197,7 +197,9 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         _close_stack_tags(message_stack, do_parse_emotes)
         message_stack[-1]['childs'].append('\n')
 
-    if close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
+    if tag_queue and tag_queue[0][0] == match.group(3) and not tag_queue[0][2]:
+        message_stack[-1]['childs'].append(match.group(0))
+    elif close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
        (tag in COLOR_TAGS and (arg or not open_)))):
         if open_:
             if text_before.strip(' ') and not was_double_color:
@@ -212,8 +214,10 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         message_stack[-1]['childs'].append(match.group(0))
 
     #go recursive!
+    if tag_queue:
+        tag_queue.pop(0)
     _msnplus_to_dict(msnplus[entire_match_len:], message_stack,
-                     do_parse_emotes, is_double_color)
+                     do_parse_emotes, is_double_color, tag_queue)
 
     return {'tag': 'span', 'childs': message_stack}
 
@@ -388,11 +392,47 @@ def msnplus(text, do_parse_emotes=True):
     representing its formatting.'''
     message_stack = [{'tag':'', 'childs':[]}]
     text = unicode(text, 'utf8') if not isinstance(text, unicode) else text
-    dictlike = _msnplus_to_dict(text, message_stack, do_parse_emotes)
+    tags_list = _msnplus_tags_extract(text)
+    dictlike = _msnplus_to_dict(text, message_stack, do_parse_emotes, tag_queue=tags_list)
     _hex_colors(dictlike)
     _dict_gradients(dictlike)
     _dict_translate_tags(dictlike)
     return DictObj(dictlike)
+
+def _msnplus_tags_extract(msnplus):
+    '''extract all msnplus tags from input'''
+    # one symbol for each msnplus tag
+    tags_re = re.compile(
+        '\[(/?)(\w{1})(\=(\#?[0-9a-f]+|\w+))?\]',
+        re.IGNORECASE | re.DOTALL)
+
+    tags_list = []
+    for m in tags_re.finditer(msnplus):
+        is_opened_tag = False if m.group(1) != '' else True
+        # (tag text, an opened_tag?, does it paired?)
+        tags_list.append((m.group(2), is_opened_tag, False))
+
+    return _msnplus_tags_pair(tags_list)
+
+def _msnplus_tags_pair(tags_list):
+    '''find out dangling tags in list based on an assumption that
+    all tags are well-formed'''
+    # we use the strategy like stack but no pop/push operations
+    for i in range(len(tags_list)):
+        # do not process opened tag
+        if tags_list[i][1]:
+            continue
+        for p in range(i):
+            # find out an unpaired opened_tag with the same type
+            # and mark them paired; we only care about the number
+            # of tags, not the actually paired one
+            if tags_list[p][1] and not tags_list[p][2] and \
+               tags_list[p][0].lower() == tags_list[i][0].lower():
+                tags_list[p] = (tags_list[p][0], tags_list[p][1], True)
+                tags_list[i] = (tags_list[i][0], tags_list[i][1], True)
+                break
+
+    return tags_list
 
 def msnplus_parse(text):
     '''
