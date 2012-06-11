@@ -111,6 +111,9 @@ class Worker(e3.Worker):
         self._add_contact('fifteen@hotmail.com',
                 '1:)2;)3\')4\')5;)6:)7',
                 e3.status.BUSY, '', False)
+        self._add_contact('sixteen@hotmail.com',
+                '[C=80][i][b][I][/b]Single I[/i][/c=30][b][/C]Single /C[/B]',
+                e3.status.BUSY, '', False)
 
         self._add_group('ninjas')
         self._add_group('pirätes')
@@ -148,6 +151,7 @@ class Worker(e3.Worker):
         self._add_contact_to_group('thirteen@hotmail.com', 'strange nicks')
         self._add_contact_to_group('fourteen@hotmail.com', 'strange nicks')
         self._add_contact_to_group('fifteen@hotmail.com', 'strange nicks')
+        self._add_contact_to_group('sixteen@hotmail.com', 'strange nicks')
 
         #test pending contact dialog
         self._add_pending_contacts()
