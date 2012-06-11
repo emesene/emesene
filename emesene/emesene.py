@@ -135,7 +135,7 @@ class Controller(object):
         self.minimize = False
         self.single_instance = None
         self.config = e3.common.Config()
-        self.config_dir = e3.common.ConfigDir('emesene2')
+        self.config_dir = e3.common.ConfigDir()
         self.config_path = self.config_dir.join('config')
         self.config.load(self.config_path)
 

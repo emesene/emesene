@@ -252,7 +252,7 @@ class DownloadListBase(ExtensionListTab):
         self.progress = False
 
 
-        self.config_dir = e3.common.ConfigDir('emesene2')
+        self.config_dir = e3.common.ConfigDir()
 
         self.list_types = ['plugins', 'themes']
 
@@ -517,7 +517,7 @@ class DownloadList(DownloadListBase):
 
 class ThemeList(DownloadList):
     def __init__(self, session):
-        self.config_dir = e3.common.ConfigDir('emesene2')
+        self.config_dir = e3.common.ConfigDir()
         DownloadList.__init__(
             self, session, 'themes',
             self.config_dir.join('themes'), True, True)

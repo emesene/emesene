@@ -22,10 +22,10 @@ import os
 class ConfigDir(object):
     '''a class that handles the files and directories of the configuration'''
 
-    def __init__(self, app_name, base_dir=None):
+    def __init__(self, base_dir=None):
         '''constructor'''
 
-        self.app_name = app_name
+        self.app_name = 'emesene2'
 
         self.paths = {}
 

@@ -66,7 +66,6 @@ def gtk_main(Controller):
         INFOBARERROR = True
     import NiceBar
 
-    import PluginWindow
     import Preferences
 
     if not check_gtk3():
@@ -174,8 +173,6 @@ def setup():
     extension.category_register('conversation input', TextBox.InputText)
     extension.category_register('conversation toolbar', \
         ConversationToolbar.ConversationToolbar)
-    extension.category_register('plugin window', \
-        PluginWindow.PluginWindow)
     if not check_gtk3():
         extension.category_register('image area selector', ImageAreaSelector.ImageAreaSelectorDialog)
     else:

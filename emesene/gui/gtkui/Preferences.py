@@ -107,7 +107,7 @@ class Preferences(gtk.Window):
         hbox.pack_start(self.notebook, True, True)
         vbox.pack_start(hbox, True, True) # hbox, True, True
 
-        config_dir = e3.common.ConfigDir('emesene2')
+        config_dir = e3.common.ConfigDir()
 
         self.main = MainWindow(session)
         self.conversation = ConversationWindow(session)

@@ -32,7 +32,7 @@ class Theme(object):
                  conv_name='renkoo.AdiumMessageStyle', conv_variant = ''):
         '''class constructor'''
         self.emote_theme = None
-        config_dir = ConfigDir.ConfigDir('emesene2')
+        config_dir = ConfigDir.ConfigDir()
         config_path = config_dir.join('')
 
         #check for themes in .config dir

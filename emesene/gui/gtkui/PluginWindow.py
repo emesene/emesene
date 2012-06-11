@@ -28,7 +28,7 @@ class PluginMainVBox(DownloadList):
         DownloadList.__init__(
             self, session, 'plugins', init_path)
 
-        self.config_dir = e3.common.ConfigDir('emesene2')
+        self.config_dir = e3.common.ConfigDir()
 
         self.config_button = gtk.Button(stock=gtk.STOCK_PREFERENCES)
         self.config_button.connect('clicked', self.on_config)
@@ -106,18 +106,3 @@ class PluginMainVBox(DownloadList):
 
         if name and pluginmanager.plugin_is_active(name):
                 pluginmanager.plugin_config(name, self.session)
-
-class PluginWindow(gtk.Window):
-    def __init__(self, session):
-        gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
-        self.set_default_size(500, 300)
-        self.set_title(_('Plugins'))
-        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
-
-        self.session = session
-        config_dir = e3.common.ConfigDir('emesene2')
-
-        self.main_vbox = PluginMainVBox(session, config_dir.join('plugins'))
-
-        self.add(self.main_vbox)
-        self.show_all()
