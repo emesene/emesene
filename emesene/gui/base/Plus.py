@@ -82,6 +82,12 @@ close_tag_old_re = re.compile(
     '(.*?)\xb7(0)()()()()()',
     re.IGNORECASE | re.DOTALL)
 
+# one symbol for each msnplus tag
+msnplus_tags_re = re.compile(
+    '\[(/?)(\w{1})(\=(\#?[0-9a-f]+|\w+))?\]',
+    re.IGNORECASE | re.DOTALL)
+
+
 #TODO: I think the other 'InGradient' regexes from the old parser have to be used too
 special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
 
@@ -399,22 +405,17 @@ def msnplus(text, do_parse_emotes=True):
     _dict_translate_tags(dictlike)
     return DictObj(dictlike)
 
-def _msnplus_tags_extract(msnplus):
+def _msnplus_tags_extract(msnplus, strip=False):
     '''extract all msnplus tags from input'''
-    # one symbol for each msnplus tag
-    tags_re = re.compile(
-        '\[(/?)(\w{1})(\=(\#?[0-9a-f]+|\w+))?\]',
-        re.IGNORECASE | re.DOTALL)
-
     tags_list = []
-    for m in tags_re.finditer(msnplus):
+    for m in msnplus_tags_re.finditer(msnplus):
         is_opened_tag = False if m.group(1) != '' else True
-        # (tag text, an opened_tag?, does it paired?)
-        tags_list.append((m.group(2), is_opened_tag, False))
+        # (tag, an opened_tag?, does it paired?, start pos)
+        tags_list.append([m.group(2), is_opened_tag, False, m.start()])
 
-    return _msnplus_tags_pair(tags_list)
+    return _msnplus_tags_pair(tags_list, strip)
 
-def _msnplus_tags_pair(tags_list):
+def _msnplus_tags_pair(tags_list, strip=False):
     '''find out dangling tags in list based on an assumption that
     all tags are well-formed'''
     # we use the strategy like stack but no pop/push operations
@@ -428,9 +429,15 @@ def _msnplus_tags_pair(tags_list):
             # of tags, not the actually paired one
             if tags_list[p][1] and not tags_list[p][2] and \
                tags_list[p][0].lower() == tags_list[i][0].lower():
-                tags_list[p] = (tags_list[p][0], tags_list[p][1], True)
-                tags_list[i] = (tags_list[i][0], tags_list[i][1], True)
+                tags_list[p][2] = True
+                tags_list[i][2] = True
                 break
+
+    # we only need position of paired tags in strip mode
+    if strip:
+        tags_list = filter(lambda x: x[2], tags_list)
+        for index, tag in enumerate(tags_list):
+            tags_list[index] = tag[3]
 
     return tags_list
 
@@ -467,9 +474,15 @@ def msnplus_strip(text, useless_arg=None):
     @param useless_arg This is actually useless, and is mantained just for
     compatibility with text
     '''
+    
+    def replace_function(mobj):
+        if mobj.start() in tags_list:
+            return ''
+        return mobj.group(0)
 
     text = _escape_special_chars(text)
-    text = tag_plus_strip_re.sub('', text)
+    tags_list = _msnplus_tags_extract(text, True)
+    text = tag_plus_strip_re.sub(replace_function, text)
     text = tag_plus_old_strip_re.sub('', text)
     text = _unescape_special_chars(text)
 
