@@ -449,7 +449,6 @@ def msnplus_parse(text):
     '''
     text = _escape_special_chars(text)
     dictlike = msnplus(text, False)
-    text = _unescape_special_chars(dictlike.to_xml())
     return dictlike.to_xml()
 
 def _escape_special_chars(text):
@@ -457,6 +456,10 @@ def _escape_special_chars(text):
     text = text.replace('\xc2\xb7&amp;', '\xc2\xb7&')
     text = text.replace('\xc2\xb7&quot;', '\xc2\xb7"')
     text = text.replace('\xc2\xb7&apos;', '\xc2\xb7\'')
+    #escape special chars in unicode
+    text = text.replace('&amp;', '&')
+    text = text.replace('&quot;', '"')
+    text = text.replace('&apos;', '\'')
     return text
 
 def _unescape_special_chars(text):
@@ -464,6 +467,10 @@ def _unescape_special_chars(text):
     text = text.replace('\xc2\xb7&', '\xc2\xb7&amp;')
     text = text.replace('\xc2\xb7"', '\xc2\xb7&quot;')
     text = text.replace('\xc2\xb7\'', '\xc2\xb7&apos;')
+    #unescape special chars in unicode
+    text = text.replace('&', '&amp;')
+    text = text.replace('"', '&quot;')
+    text = text.replace('\'', '&apos;')
     return text
 
 def _strip_tags(text, strip_list):
@@ -489,6 +496,5 @@ def msnplus_strip(text, useless_arg=None):
     text = _escape_special_chars(text)
     strip_list = _msnplus_tags_extract(text, True)
     text = _strip_tags(text, strip_list)
-    text = _unescape_special_chars(text)
 
     return text
