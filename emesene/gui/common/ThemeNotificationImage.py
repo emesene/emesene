@@ -35,6 +35,8 @@ def ThemeNotificationImage(picture, const_value):
         return "file://" + gui.theme.image_theme.transfer_success
     elif const_value == 'file-transf-canceled':
         return "file://" + gui.theme.image_theme.transfer_unsuccess
+    elif const_value == 'logo':
+        return "file://" + gui.theme.image_theme.logo
     elif const_value == 'message-im':
         return "file://" + gui.theme.image_theme.user_def_imagetool
     else:

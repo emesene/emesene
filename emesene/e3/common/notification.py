@@ -201,11 +201,12 @@ class Notification():
 
     def _on_endpoint_added(self, ep_id, ep_name):
         '''callled when endpoints added'''
-        title = _('Notification')
-        text = _('You have signed in from another location')
-        tooltip = ""
-        sound = None
-        self._notify(None, title, text, tooltip, sound)
+        if self.session.config.b_notify_endpoint_added:
+            title = _('Notification')
+            text = _('You have signed in from another location')
+            tooltip = ""
+            sound = None
+            self._notify("logo", title, text, tooltip, sound)
 
     def _notify(self, contact, title, text, tooltip, sound=None):
         """
@@ -218,12 +219,15 @@ class Notification():
         only_when_available = self.session.config.b_notify_only_when_available
         #Only show notifications when available
         if not only_when_available or (only_when_available and self.session.account.status == status.ONLINE):
-            if contact is not None and contact.picture is not None and contact.picture != "":
-                uri = "file://" + contact.picture
+            if contact is not None and contact == 'logo':
+                uri = self.picture_factory('notification-endpoint-added', 'logo')
             else:
-                uri = 'notification-message-im'
+                if contact is not None and contact.picture is not None and contact.picture != "":
+                    uri = "file://" + contact.picture
+                else:
+                    uri = 'notification-message-im'
 
-            uri = self.picture_factory(uri, 'message-im')
+                uri = self.picture_factory(uri, 'message-im')
 
             if text is not None:
                 self.notifier(title if title else '', text, uri, 'message-im', None, tooltip)
