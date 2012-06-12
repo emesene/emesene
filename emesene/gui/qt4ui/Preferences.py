@@ -528,6 +528,8 @@ class Notification(BaseTable):
             'session.config.b_notify_contact_offline')
         self.append_check(tr('Notify on received message'),
             'session.config.b_notify_receive_message')
+        self.append_check(tr('Notify when signed in from another location'),
+            'session.config.b_notify_endpoint_added')
 
 
 
