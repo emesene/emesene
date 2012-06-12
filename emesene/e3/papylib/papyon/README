@@ -9,9 +9,8 @@ gory details. papyon is a fork of the unmaintained library pymsn
 
 Dependencies
 ============
-python (>= 2.5)
+python (>= 2.6)
 python-gobject (>= 2.10)
-pyOpenSSL (>= 0.6)
 gst-python (>= 0.10)
 python-farsight
 pycrypto

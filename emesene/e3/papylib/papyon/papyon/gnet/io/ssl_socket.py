@@ -25,7 +25,7 @@ from iochannel import GIOChannelClient
 import gobject
 import socket
 import sys
-import OpenSSL.SSL as OpenSSL
+import ssl
 
 __all__ = ['SSLSocketClient']
 
@@ -47,8 +47,7 @@ class SSLSocketClient(GIOChannelClient):
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
             except AttributeError:
                 pass
-        context = OpenSSL.Context(OpenSSL.SSLv3_METHOD)
-        ssl_sock = OpenSSL.Connection(context, sock)
+        ssl_sock = ssl.wrap_socket(sock, ssl_version=ssl.PROTOCOL_SSLv3)
         GIOChannelClient._pre_open(self, ssl_sock)
 
     def _post_open(self):
@@ -66,11 +65,10 @@ class SSLSocketClient(GIOChannelClient):
             return False
         if self._status == IoStatus.OPENING:
             try:
-                self._transport.set_connect_state()
-            except (OpenSSL.WantX509LookupError,
-                    OpenSSL.WantReadError, OpenSSL.WantWriteError):
-                return True
-            except OpenSSL.Error, err:
+                self._transport.do_handshake()
+            except ssl.SSLError, err:
+                if err.args[0] in (ssl.SSL_ERROR_WANT_READ, ssl.SSL_ERROR_WANT_WRITE):
+                    return True
                 self.emit("error", SSLError(str(err)))
                 self.close()
                 return False
@@ -87,12 +85,10 @@ class SSLSocketClient(GIOChannelClient):
                         elif sys.platform != "win32":
                             self.close()
                             return False
-                except (OpenSSL.WantX509LookupError,
-                        OpenSSL.WantReadError, OpenSSL.WantWriteError):
-                    pass
-                except OpenSSL.Error:
-                    self.close()
-                    return False
+                except (ssl.SSLError, socket.error), err:
+                    if err.args[0] not in (ssl.SSL_ERROR_WANT_READ, ssl.SSL_ERROR_WANT_WRITE):
+                        self.close()
+                        return False
 
             if cond & (gobject.IO_ERR | gobject.IO_HUP):
                 self.close()
@@ -103,12 +99,12 @@ class SSLSocketClient(GIOChannelClient):
                     item = self._outgoing_queue[0]
                     try:
                         ret = self._transport.send(item.read())
-                    except (OpenSSL.WantX509LookupError,
-                            OpenSSL.WantReadError, OpenSSL.WantWriteError):
-                        return True
-                    except OpenSSL.Error:
-                        self.close()
-                        return False
+                    except (ssl.SSLError, socket.error), err:
+                        if err.args[0] in (ssl.SSL_ERROR_WANT_READ, ssl.SSL_ERROR_WANT_WRITE):
+                            return True
+                        else:
+                            self.close()
+                            return False
                     item.sent(ret)
                     if item.is_complete(): # sent item
                         self.emit("sent", item.buffer, item.size)
