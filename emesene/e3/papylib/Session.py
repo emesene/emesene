@@ -180,6 +180,6 @@ class Session(e3.Session):
             
         return (Membership.FORWARD & contacts[0].memberships)
 
-    def disconnect_endpoint(self, name):
+    def disconnect_endpoint(self, ep_id):
         '''disconnects a single endpoint from msn'''
-        self.add_action(e3.Action.ACTION_DISCONNECT_ENDPOINT, (name,))
+        self.add_action(e3.Action.ACTION_DISCONNECT_ENDPOINT, (ep_id,))
