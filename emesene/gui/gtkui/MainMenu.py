@@ -104,8 +104,7 @@ class EndPointsMenu(gtk.Menu):
         self.session = session
 
         self.ep_dict = {}
-        name = 'All other endpoints'
-        ep_item = gtk.MenuItem(_(name))
+        ep_item = gtk.MenuItem(_('All other endpoints'))
         ep_item.connect('activate',
                 lambda *args : self.handler.on_disconnect_endpoint_selected(""))
         self.append(ep_item)
@@ -116,7 +115,6 @@ class EndPointsMenu(gtk.Menu):
         self.session.signals.endpoint_updated.subscribe(self.endpoint_updated)
 
     def endpoint_added(self, ep_id, ep_name):
-        self.endpoint_removed(ep_id)
         ep_item = gtk.MenuItem(ep_name)
         ep_item.connect('activate',
             lambda *args: self.handler.on_disconnect_endpoint_selected(ep_id))
@@ -133,6 +131,10 @@ class EndPointsMenu(gtk.Menu):
         if ep_id in self.ep_dict:
             self.ep_dict[ep_id].set_label(ep_name)
 
+    @property
+    def endpoint_amount(self):
+        return len(self.ep_dict)
+
 class FileMenu(gtk.Menu):
     """
     A widget that represents the File popup menu located on the main menu
@@ -146,6 +148,7 @@ class FileMenu(gtk.Menu):
         """
         gtk.Menu.__init__(self)
         self.handler = handler
+        self.session = session
 
         if session and session.session_has_service(e3.Session.SERVICE_STATUS):
             StatusMenu = extension.get_default('menu status')
@@ -161,6 +164,13 @@ class FileMenu(gtk.Menu):
             self.ep_menu = EndPointsMenu(handler, session)
             self.ep.set_submenu(self.ep_menu)
             self.append(self.ep)
+            # set ep_menu hide by default and ignore show_all when init
+            self.ep_menu.show_all()
+            self.ep.hide()
+            self.ep.set_no_show_all(True)
+
+            self.session.signals.endpoint_added.subscribe(self.ep_menu_display)
+            self.session.signals.endpoint_removed.subscribe(self.ep_menu_display)
 
         self.disconnect = gtk.ImageMenuItem(gtk.STOCK_DISCONNECT)
         self.disconnect.connect('activate',
@@ -172,6 +182,16 @@ class FileMenu(gtk.Menu):
         self.append(self.disconnect)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)
+
+    def ep_menu_display(self, ep_id, ep_name=None):
+        '''called when signal changed'''
+        if self.ep_menu:
+            # only added signal will have valid name
+            if ep_name is not None:
+                self.ep.show()
+            # signal triggered before dict operations
+            elif self.ep_menu.endpoint_amount == 1:
+                self.ep.hide()
 
 class ActionsMenu(gtk.Menu):
     """
