@@ -855,9 +855,10 @@ class Notification(BaseTable):
             'session.config.b_notify_typing'))
         self.array.append(self.append_check(_('Notify also when the conversation has focus'),
             'session.config.b_notify_when_focussed'))
-        self.append_markup('<b>'+_('Security events:')+'</b>')
-        self.append_check(_('Notify when signed in from another location'),
-            'session.config.b_notify_endpoint_added')
+        if self.session and self.session.session_has_service(e3.Session.SERVICE_ENDPOINTS):
+            self.append_markup('<b>'+_('Security events:')+'</b>')
+            self.append_check(_('Notify when signed in from another location'),
+                'session.config.b_notify_endpoint_added')
 
         self._on_mute_notification_changed(self.session.config.b_mute_notification)
 
