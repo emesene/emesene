@@ -2,6 +2,7 @@
 Name=emesene
 GenericName=emesene
 Comment=Instant messaging client for MSN, Gtalk and Facebook
+Comment[nl]=Chatprogramma voor MSN, Google Talk en Facebook
 Comment[pt]=Cliente de mensagens instantâneas para MSN, Gtalk e Facebook
 Comment[hu]=Azonnali üzenetküldő MSN, Gtalk és Facebook protokollokhoz
 Comment[pt_BR]=Cliente de mensagens instantâneas para  MSN, Gtalk e Facebook
@@ -21,12 +22,14 @@ X-Ayatana-Desktop-Shortcuts=NewInstance;
 
 [NewInstance Shortcut Group]
 Name=Open a new instance
+Name[nl]=Open een nieuwe instantie
 Name[pt]=Abrir uma nova instância
 Name[hu]=Új példány megnyitása
 Name[pt_BR]=Abrir uma nova instância
 Name[tr]=Yeni bir örnek aç
 Name[ru]=Открыть новую копию
 Name[es]=Abrir una instancia nueva
+Name[et]=Ava uus eksemplar
 Name[it]=Apri una nuova istanza
 Exec=emesene
 TargetEnvironment=Unity
