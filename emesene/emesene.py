@@ -80,11 +80,6 @@ import e3
 from e3 import dummy
 
 try:
-    from e3.common.DBus import DBusController
-except ImportError:
-    DBusController = None
-
-try:
     from gui import gtkui
 except ImportError, exc:
     print 'Cannot import gtkui: %s' % str(exc)
@@ -169,14 +164,8 @@ class Controller(object):
         else:
             extension.set_default('session', dummy.Session)
 
-        #DBus extension stuffs
-        if DBusController is not None:
-            extension.category_register('external api', DBusController)
-            extension.set_default('external api', DBusController)
-            self.dbus_ext = extension.get_and_instantiate('external api')
-        else:
-            self.dbus_ext = None
-
+        #external API stuff
+        self.dbus_ext = extension.get_and_instantiate('external api')
         self.network_checker = extension.get_and_instantiate(
             'network checker')
 
@@ -288,8 +277,7 @@ class Controller(object):
         signals.picture_change_succeed.subscribe(self.on_picture_change_succeed)
 
         #let's start dbus and unity launcher
-        if self.dbus_ext is not None:
-            self.dbus_ext.set_new_session(self.session, self.window)
+        self.dbus_ext.set_new_session(self.session, self.window)
         if self.unity_launcher is not None:
             self.unity_launcher.set_session(self.session)
 

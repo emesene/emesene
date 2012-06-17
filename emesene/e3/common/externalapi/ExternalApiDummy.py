@@ -1,5 +1,5 @@
+'''This module provides a dummy external implementation API for emesene'''
 # -*- coding: utf-8 -*-
-
 #    This file is part of emesene.
 #
 #    emesene is free software; you can redistribute it and/or modify
@@ -16,22 +16,14 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys
-sys.path.append('..')
-import locations
-import notification
-import Collections
-import networkmanager
-import externalapi
+import logging
+log = logging.getLogger("emesene.e3.common.DBus")
+import extension
 
-import XmlParser
+class DummyExternalAPI(object):
+    provides=('external api', )
+    def set_new_session(self, session, window):
+        pass
 
-from utils import *
-from Config import Config
-from Signal import Signal
-from Signals import Signals
-from ConfigDir import ConfigDir
-from RingBuffer import RingBuffer
-from MessageFormatter import MessageFormatter
-from Sounds import SoundPlayer
-from OrderedDict import OrderedDict
+extension.register('external api', DummyExternalAPI)
+extension.set_default('external api', DummyExternalAPI)
