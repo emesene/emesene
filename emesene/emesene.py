@@ -334,8 +334,8 @@ class Controller(object):
 
         self.window.on_disconnect(self.close_session)
 
-        self._save_application_language()
         if self.session is not None:
+            self._save_application_language()
             self.session.save_extensions_config()
 
         self._save_login_dimensions()
@@ -379,8 +379,6 @@ class Controller(object):
         '''save global settings to application config
            obtained from session settings.
         '''
-        if self.session is None:
-            return
         if self.config is None:
             return
         self.config.language_config = self.session.config.language_config
