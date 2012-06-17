@@ -60,4 +60,6 @@ class Session(e3.Session):
             '%s requests your attention' % (account, ), account)
         self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
 
-extension.implements(Session, 'session')
+extension.category_register('session', Session,
+                single_instance=True)
+extension.set_default('session', Session)
