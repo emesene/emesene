@@ -138,6 +138,9 @@ class DBusNetworkChecker():
             # 1 means reconnect
             self.__session.add_event(Event.EVENT_DISCONNECTED, 'Network error', 1)
 
+extension.category_register('network checker', DBusNetworkChecker)
+extension.set_default('network checker', DBusNetworkChecker)
+
 class ModemManagerHelper(object):
 
     # data taken from 

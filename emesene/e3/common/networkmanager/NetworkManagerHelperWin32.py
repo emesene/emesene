@@ -173,6 +173,9 @@ class Win32NetworkChecker():
         # 1 means reconnect
         self.__session.add_event(Event.EVENT_DISCONNECTED, 'Network error', 1)
 
+extension.category_register('network checker', Win32NetworkChecker)
+extension.set_default('network checker', Win32NetworkChecker)
+
 if __name__ == '__main__':
     # Run an expample of the code so that the user can test the code in
     # real life.

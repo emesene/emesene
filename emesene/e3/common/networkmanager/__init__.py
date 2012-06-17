@@ -16,21 +16,15 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys
-sys.path.append('..')
-import locations
-import notification
-import Collections
-import networkmanager
+from NetworkManagerHelperDummy import DummyNetworkChecker
 
-import XmlParser
+try:
+    from NetworkManagerHelperDBus import DBusNetworkChecker
+except ImportError:
+    pass
 
-from utils import *
-from Config import Config
-from Signal import Signal
-from Signals import Signals
-from ConfigDir import ConfigDir
-from RingBuffer import RingBuffer
-from MessageFormatter import MessageFormatter
-from Sounds import SoundPlayer
-from OrderedDict import OrderedDict
+try:
+    from NetworkManagerHelperWin32 import Win32NetworkChecker as NetworkChecker
+except ImportError:
+    pass
+

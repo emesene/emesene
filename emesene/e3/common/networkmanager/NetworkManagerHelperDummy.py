@@ -15,22 +15,22 @@
 #    You should have received a copy of the GNU General Public License
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+"""Dummy Implementation of a Network Manager."""
 
-import sys
-sys.path.append('..')
-import locations
-import notification
-import Collections
-import networkmanager
+import logging
+log = logging.getLogger("emesene.e3.common.NetworkManagerHelper")
+import extension
 
-import XmlParser
+class DummyNetworkChecker():
+    ''' this class does lazy checks for network availability and 
+    disconnects emesene if the network goes down '''
 
-from utils import *
-from Config import Config
-from Signal import Signal
-from Signals import Signals
-from ConfigDir import ConfigDir
-from RingBuffer import RingBuffer
-from MessageFormatter import MessageFormatter
-from Sounds import SoundPlayer
-from OrderedDict import OrderedDict
+    #Public methods
+    def set_new_session(self, session):
+        pass
+
+    def stop(self):
+        pass
+
+extension.category_register('network checker', DummyNetworkChecker)
+extension.set_default('network checker', DummyNetworkChecker)

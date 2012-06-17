@@ -436,7 +436,12 @@ class ExtensionManager(NotificationObject):
 
     def get_multiextension_categories(self):
         ''' get available categories'''
-        categories_blacklisted = ['option provider', 'session', 'external api', 'quit', 'main']
+        categories_blacklisted = ['option provider',
+                                    'session',
+                                    'external api',
+                                    'quit',
+                                    'main',
+                                    'network checker']
         categories = [ctg for ctg in self.get_categories().keys()
                         if len(self.get_extensions(ctg)) > 1 and not ctg in categories_blacklisted]
         categories.sort()

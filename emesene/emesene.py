@@ -85,15 +85,6 @@ except ImportError:
     DBusController = None
 
 try:
-    from e3.common.NetworkManagerHelper import DBusNetworkChecker as NetworkChecker
-except ImportError:
-    #try windows network check
-    try:
-        from e3.common.NetworkManagerHelperWin32 import Win32NetworkChecker as NetworkChecker
-    except ImportError:
-        NetworkChecker = None
-
-try:
     from gui import gtkui
 except ImportError, exc:
     print 'Cannot import gtkui: %s' % str(exc)
@@ -186,13 +177,8 @@ class Controller(object):
         else:
             self.dbus_ext = None
 
-        if NetworkChecker is not None:
-            extension.category_register('network checker', NetworkChecker)
-            extension.set_default('network checker', NetworkChecker)
-            self.network_checker = extension.get_and_instantiate(
-                    'network checker')
-        else:
-            self.network_checker = None
+        self.network_checker = extension.get_and_instantiate(
+            'network checker')
 
         self.unity_launcher = extension.get_and_instantiate('unity launcher')
 
@@ -571,9 +557,8 @@ class Controller(object):
 
         self.session.start_mail_client()
         self.logged_in = True
+        self.network_checker.set_new_session(self.session)
 
-        if self.network_checker is not None:
-            self.network_checker.set_new_session(self.session)
 
     def on_login_connect(self, account, session_id, proxy,
                          use_http, host=None, port=None, on_reconnect=False):
