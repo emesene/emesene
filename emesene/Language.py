@@ -182,3 +182,12 @@ class Language(object):
             self._languages.sort()
 
         return self._languages
+
+_instance = None
+def get_language_manager():
+    '''instance Language object, if needed. otherwise, return it'''
+    global _instance
+    if _instance:
+        return _instance
+    _instance = Language()
+    return _instance

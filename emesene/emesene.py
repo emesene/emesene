@@ -55,14 +55,10 @@ def project_path():
 
 os.chdir(os.path.abspath(project_path()))
 
-from Language import Language
-import extension
-
-extension.category_register('language', Language, 
-                            single_instance=True)
-
-language_management = extension.get_and_instantiate('language')
+from Language import get_language_manager
+language_management = get_language_manager()
 language_management.install_default_translation()
+import extension
 
 if 'USE_GI' in os.environ:
     try:

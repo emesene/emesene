@@ -25,7 +25,7 @@ import subprocess
 import sys
 import extension
 import stock
-from Language import Language
+from Language import Language, get_language_manager
 
 from gui.base import MarkupParser
 
@@ -1151,7 +1151,7 @@ class DesktopTab(BaseTable):
         # language settings
         self.append_markup('<b>'+_('Language')+'</b>')
         # languages combobox
-        self._language_management = extension.get_and_instantiate('language')
+        self._language_management = get_language_manager()
 
         self.session.config.subscribe(self._on_language_changed,
                                       'language_config')
