@@ -19,7 +19,7 @@
 EMESENE_VERSION = "2.12.6-dev"
 EMESENE_LAST_STABLE = "2.12.5"
 EMESENE_WEBSITE = "http://www.emesene.org"
-EMESENE_AUTHORS = "marianoguerra & c10ud"
+EMESENE_AUTHORS = "c10ud, sbte & marianoguerra"
 EMESENE_CONTRIBUTORS = [ # TODO: Load this from CONTRIBUTORS
 'Riccardo (c10ud) <c10ud.dev@gmail.com>',
 'Mariano Guerra <luismarianoguerra@gmail.com>',
