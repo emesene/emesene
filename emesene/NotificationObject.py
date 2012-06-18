@@ -17,6 +17,9 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import logging
+log = logging.getLogger('NotificationObject')
+
 from WeakMethod import WeakMethod
 
 class NotificationObject(object):
@@ -42,7 +45,8 @@ class NotificationObject(object):
             try:
                 callback(value)
             except TypeError, ex:
-                print "Error calling config callback %s" % callback.f
+                log.exception("Error calling config callback %s for %s" %
+                                (callback.f, item))
                 raise ex
 
     def subscribe(self, callback, item=None):
