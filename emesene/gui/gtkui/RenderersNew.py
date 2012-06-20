@@ -278,9 +278,10 @@ class SmileyLabel(Gtk.CellView):
         self.add_attribute(self.crt, 'markup', 0)
 
     def _on_nick_renderer_changed(self, new_extension):
-        self.clear()
-        self.crt = new_extension()
-        self.prepare_column()
+        if not isinstance(self.crt, new_extension):
+            self.clear()
+            self.crt = new_extension()
+            self.prepare_column()
 
     def set_text(self, text=''):
         self._text = text
