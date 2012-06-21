@@ -71,7 +71,13 @@ import glib
 import shutil
 import signal
 import Info
-
+try:
+    contrib = open("CONTRIBUTORS", "r")
+    Info.EMESENE_CONTRIBUTORS = contrib.read().split("\n")
+    contrib.close()
+except: #gotta catch 'em all!
+    Info.EMESENE_CONTRIBUTORS = ['BUG: CONTRIBUTORS file is missing!',
+                                 'Report this to whoever made the package you\'re using.']
 import debugger
 import logging
 log = logging.getLogger('emesene')
