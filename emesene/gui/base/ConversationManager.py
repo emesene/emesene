@@ -320,11 +320,11 @@ class ConversationManager(object):
 
         if len(self.conversations) == 0:
             log.debug('Closing the conversation window')
+            self.unsubscribe_signals()
             self.on_last_close()
 
     def close_all(self):
         '''close and finish all conversations'''
-        self.unsubscribe_signals()
         for conversation in self.conversations.values():
             self.close(conversation)
 

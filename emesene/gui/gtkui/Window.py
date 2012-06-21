@@ -251,7 +251,8 @@ class Window(gtk.Window):
         then dont close the window'''
         self.save_dimensions()
         if self.content_conv and not self.content_main:
-            return self.cb_on_close_conv(self.content_conv)
+            self.content_conv.close_all()
+            return False
         else:
             return self.cb_on_close()
 
