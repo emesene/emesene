@@ -25,11 +25,9 @@ log = logging.getLogger('gui.base.ConversationManager')
 class ConversationManager(object):
     '''the main conversation, it only contains other conversations'''
 
-    def __init__(self, session, on_last_close):
+    def __init__(self, session):
         '''class constructor'''
         self.session = session
-        self.on_last_close = on_last_close
-
         self.conversations = {}
         self.subscribe_signals()
 
@@ -320,11 +318,10 @@ class ConversationManager(object):
 
         if len(self.conversations) == 0:
             log.debug('Closing the conversation window')
-            self.on_last_close()
+            self.unsubscribe_signals()
 
     def close_all(self):
         '''close and finish all conversations'''
-        self.unsubscribe_signals()
         for conversation in self.conversations.values():
             self.close(conversation)
 

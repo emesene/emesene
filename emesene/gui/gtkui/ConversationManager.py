@@ -33,10 +33,10 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, session, on_last_close):
+    def __init__(self, session):
         '''class constructor'''
         gtk.Notebook.__init__(self)
-        gui.ConversationManager.__init__(self, session, on_last_close)
+        gui.ConversationManager.__init__(self, session)
 
         self.set_scrollable(True)
         self.set_can_focus(False)

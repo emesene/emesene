@@ -164,7 +164,7 @@ class Window(gtk.Window):
     def go_conversation(self, session, on_close_cb):
         '''change to a conversation window'''
         ConversationManager = extension.get_default('conversation window')
-        self.content_conv = ConversationManager(session, self._on_last_tab_close)
+        self.content_conv = ConversationManager(session)
         self.connect('focus-in-event', self.content_conv._on_focus)
         self.connect('key-press-event', self.content_conv._on_key_press)
         self.content_conv.show()
@@ -251,13 +251,15 @@ class Window(gtk.Window):
         then dont close the window'''
         self.save_dimensions()
         if self.content_conv and not self.content_main:
-            return self.cb_on_close_conv(self.content_conv)
+            self._on_last_tab_close()
+            return False
         else:
             return self.cb_on_close()
 
     def _on_last_tab_close(self):
         '''do the action when the last tab is closed on a conversation window
         '''
+        self.content_conv.close_all()
         self.cb_on_close_conv(self.content_conv)
         self.content_conv = None
         if not self.content_main:
