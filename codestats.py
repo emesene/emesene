@@ -63,3 +63,6 @@ for c_sort in c_sorted:
 f = open("CONTRIBUTORS", "w")
 f.write(CONTRIB_STRING)
 f.close()
+f = open("emesene/CONTRIBUTORS", "w")
+f.write(CONTRIB_STRING)
+f.close()
