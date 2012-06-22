@@ -260,6 +260,10 @@ class Session(object):
         '''rename the group identified by gid with the new name'''
         self.add_action(Action.ACTION_RENAME_GROUP, (gid, name))
 
+    def set_endpoint_name(self, ep_name):
+        '''set the endpoint name of the session'''
+        self.add_action(Action.ACTION_SET_ENDPOINT_NAME, (ep_name,))
+
     def set_nick(self, nick):
         '''set the nick of the session'''
         self.add_action(Action.ACTION_SET_NICK, (nick,))

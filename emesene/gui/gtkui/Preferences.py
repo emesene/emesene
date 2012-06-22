@@ -174,7 +174,6 @@ class Preferences(gtk.Window):
         '''Catches ESC key event and closes preferences window'''
         self.save_and_hide(None)
 
-
     def remove_subscriptions(self):
         self.conversation.remove_subscriptions()
         self.sound.remove_subscriptions()
@@ -342,7 +341,8 @@ class BaseTable(gtk.Table):
             self.current_row += 1
 
     def create_entry_default(self, text, format_type,
-                             property_name, default, tooltip_text, has_help=True):
+                             property_name, default, tooltip_text,
+                             has_help=True, has_apply=False):
         """creates a row with a label and a entry, set the value to the
         value of property_name if exists, if not set it to default.
          Add a reset button that sets the value to the default"""
@@ -357,6 +357,17 @@ class BaseTable(gtk.Table):
             set the value of the property to the new value"""
             self.set_attr(property_name, entry.get_text())
 
+        def on_apply_clicked(button, entry, property_name):
+            """called when the apply button is clicked"""
+            on_entry_changed(entry, property_name)
+
+        def on_key_press(self, event, property_name):
+            """called when ENTER or RETURN is pressed"""
+            if (event.keyval == gtk.keysyms.Return or \
+                event.keyval == gtk.keysyms.KP_Enter):
+                on_entry_changed(entry, property_name)
+                return
+
         def on_help_clicked(button, format_type):
             """called when the help button is clicked"""
             extension.get_default('dialog').contactlist_format_help(format_type)
@@ -369,11 +380,29 @@ class BaseTable(gtk.Table):
         entry = gtk.Entry()
         entry.set_text(text)
 
-        reset = gtk.Button()
-
         hbox.pack_start(label)
         hbox.pack_start(entry, False)
+
+        if has_apply:
+            entry_apply = gtk.Button()
+            entry_apply.set_label(_('Apply'))
+            hbox.pack_start(entry_apply, False)
+            help_image = gtk.image_new_from_stock(gtk.STOCK_APPLY,
+                                                  gtk.ICON_SIZE_MENU)
+            entry_apply.set_image(help_image)
+            entry_apply.connect('clicked', on_apply_clicked, entry, property_name)
+            entry.connect('key-press-event', on_key_press, property_name)
+        else:
+            entry.connect('changed', on_entry_changed, property_name)
+
+        reset = gtk.Button()
         hbox.pack_start(reset, False)
+        reset_image = gtk.image_new_from_stock(gtk.STOCK_CLEAR,
+                                               gtk.ICON_SIZE_MENU)
+        reset.set_label(_('Reset'))
+        reset.set_image(reset_image)
+        reset.connect('clicked', on_reset_clicked, entry, default)
+
         if has_help:
             entry_help = gtk.Button()
             hbox.pack_start(entry_help, False)
@@ -383,22 +412,17 @@ class BaseTable(gtk.Table):
             entry_help.connect('clicked', on_help_clicked, format_type)
             entry_help.set_tooltip_text(tooltip_text)
 
-        reset_image = gtk.image_new_from_stock(gtk.STOCK_CLEAR,
-                                               gtk.ICON_SIZE_MENU)
-        reset.set_label(_('Reset'))
-        reset.set_image(reset_image)
-        reset.connect('clicked', on_reset_clicked, entry, default)
-        entry.connect('changed', on_entry_changed, property_name)
-
         return hbox
 
     def append_entry_default(self, text, format_type,
-                             property_name, default, tooltip_text, has_help=True):
+                             property_name, default, tooltip_text,
+                             has_help=True, has_apply=False):
         """append a row with a label and a entry, set the value to the
         value of property_name if exists, if not set it to default.
          Add a reset button that sets the value to the default"""
         hbox = self.create_entry_default(text, format_type,
-                             property_name, default, tooltip_text, has_help)
+                             property_name, default, tooltip_text,
+                             has_help, has_apply)
 
         self.append_row(hbox, None)
 
@@ -1285,7 +1309,10 @@ class MSNPapylib(BaseTable):
         vbox.pack_start(c_ep, False, False)
         s_entry = self.create_entry_default(_('Endpoint name'), 'epname',
                                   'session.config.s_papylib_endpoint_name',
-                                  'emesene', _('Name for this endpoint'), has_help=False)
+                                  'emesene', _('Name for this endpoint'),
+                                  has_help=False, has_apply=True)
+        self.session.config.subscribe(self._on_endpoint_name_changed,
+                                      's_papylib_endpoint_name')
         vbox.pack_start(s_entry, False, False)
 
         l_text = gtk.Label(_('If you have problems with your nickname/message/picture '
@@ -1329,6 +1356,13 @@ class MSNPapylib(BaseTable):
         ''' called when live profile button is clicked '''
         profile_url = self.session.get_worker().profile_url
         gui.base.Desktop.open(profile_url)
+
+    def _on_endpoint_name_changed(self, value):
+        self.session.set_endpoint_name(value)
+
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_endpoint_name_changed,
+                                        's_papylib_endpoint_name')
 
 class Facebook(BaseTable):
     """ This panel contains some facebook specific settings """

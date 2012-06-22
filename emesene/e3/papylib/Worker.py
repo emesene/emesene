@@ -1466,3 +1466,6 @@ class Worker(e3.base.Worker, papyon.Client):
             return
         self.disconnect_endpoint(ep_id)
 
+    def _handle_action_set_endpoint_name(self, ep_name):
+        '''handle Action.ACTION_SET_ENDPOINT_NAME'''
+        self.profile.end_point_name = ep_name
