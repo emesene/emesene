@@ -220,6 +220,8 @@ class Worker(e3.Worker):
             type_ = e3.Message.TYPE_MESSAGE
 
         msgobj = e3.Message(type_, body, account)
+        # override font size!
+        msgobj.style.size = self.session.config.i_font_size
         self.session.conv_message(cid, account, msgobj)
         # log message
         e3.Logger.log_message(self.session, None, msgobj, False)
