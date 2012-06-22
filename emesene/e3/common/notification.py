@@ -40,6 +40,7 @@ class Notification():
         self.session = session
         self.session.config.get_or_set('b_mute_notification', False)
         self.session.config.get_or_set('b_notify_endpoint_added', True)
+        self.session.config.get_or_set('b_notify_endpoint_updated', False)
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
@@ -68,6 +69,8 @@ class Notification():
                 self._on_filetransfer_invitation)
             self.session.signals.endpoint_added.subscribe(
                 self._on_endpoint_added)
+            self.session.signals.endpoint_updated.subscribe(
+                self._on_endpoint_updated)
 
         extension.subscribe(self._on_notification_gui_changed, 'notificationGUI')
         extension.subscribe(self._on_notification_image_changed, 'notificationImage')
@@ -200,10 +203,19 @@ class Notification():
             self._notify(contact, contact.nick, text, contact.account, sound)
 
     def _on_endpoint_added(self, ep_id, ep_name):
-        '''callled when endpoints added'''
+        '''called when endpoints added'''
         if self.session.config.b_notify_endpoint_added:
             title = _('Notification')
             text = _('You have signed in from another location')
+            tooltip = ""
+            sound = None
+            self._notify("logo", title, text, tooltip, sound)
+
+    def _on_endpoint_updated(self, ep_id, ep_name):
+        '''called when endpoints updated'''
+        if self.session.config.b_notify_endpoint_updated:
+            title = _('Notification')
+            text = _('Information of another signed in location has been changed')
             tooltip = ""
             sound = None
             self._notify("logo", title, text, tooltip, sound)

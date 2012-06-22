@@ -883,6 +883,8 @@ class Notification(BaseTable):
             self.append_markup('<b>'+_('Security events:')+'</b>')
             self.append_check(_('Notify when signed in from another location'),
                 'session.config.b_notify_endpoint_added')
+            self.append_check(_('Notify when information of signed in location is changed'),
+                'session.config.b_notify_endpoint_updated')
 
         self._on_mute_notification_changed(self.session.config.b_mute_notification)
 

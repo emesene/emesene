@@ -902,7 +902,8 @@ class Worker(e3.base.Worker, papyon.Client):
 
     def _on_profile_end_point_updated(self, ep):
         """Called when endpoints change (updated)"""
-        self.session.endpoint_updated(ep.id, ep.name)
+        if ep.id != self.machine_guid:
+            self.session.endpoint_updated(ep.id, ep.name)
 
 ################################################################################
 # BELOW THIS LINE, ONLY e3 HANDLERS
