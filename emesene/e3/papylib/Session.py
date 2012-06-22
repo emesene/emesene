@@ -183,6 +183,3 @@ class Session(e3.Session):
     def disconnect_endpoint(self, ep_id):
         '''disconnects a single endpoint from msn'''
         self.add_action(e3.Action.ACTION_DISCONNECT_ENDPOINT, (ep_id,))
-
-extension.register('session', Session)
-extension.set_default('session', Session)

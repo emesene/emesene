@@ -20,7 +20,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import socket
-import extension
 
 from Worker import Worker
 from MailClients import *
@@ -140,6 +139,3 @@ class Session(e3.Session):
         '''activates/deactivates social services if avariable in protocol'''
         if not self.facebook_client is None:
             self.facebook_client.set_token(self.config.facebook_token, active)
-
-extension.register('session', Session)
-extension.set_default('session', Session)

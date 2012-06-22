@@ -83,6 +83,7 @@ import logging
 log = logging.getLogger('emesene')
 
 import e3
+from e3 import dummy
 
 try:
     from gui import gtkui
@@ -90,19 +91,20 @@ except ImportError, exc:
     print 'Cannot import gtkui: %s' % str(exc)
 
 try:
+    from e3 import xmpp
+except ImportError, exc:
+    xmpp = None
+    print 'Errors occurred while importing xmpp backend: %s' % str(exc)
+
+try:
     from gui import qt4ui
 except ImportError, exc:
     log.error('Cannot import qtui: %s' % str(exc))
 
-from e3 import dummy
-try:
-    from e3 import xmpp
-except ImportError, exc:
-    print 'Errors occurred while importing xmpp backend: %s' % str(exc)
-
 try:
     from e3 import papylib
 except ImportError, exc:
+    papylib = None
     print 'Errors occurred while importing msn backend: %s' % str(exc)
 
 from e3.common.pluginmanager import get_pluginmanager
@@ -156,6 +158,18 @@ class Controller(object):
 
     def _setup(self):
         '''register core extensions'''
+        extension.category_register('session', dummy.Session,
+                single_instance=True)
+        if xmpp is not None:
+            extension.register('session', xmpp.Session)
+        extension.register('session', dummy.Session)
+
+        if papylib is not None:
+            extension.register('session', papylib.Session)
+            extension.set_default('session', papylib.Session)
+        else:
+            extension.set_default('session', dummy.Session)
+
         #external API stuff
         self.dbus_ext = extension.get_and_instantiate('external api')
         self.network_checker = extension.get_and_instantiate(
@@ -717,6 +731,7 @@ def main():
     """
     the main method of emesene
     """
+    extension.category_register('session', dummy.Session, single_instance=True)
     extension.category_register('option provider', None,
             interfaces=interfaces.IOptionProvider)
     extension.register('quit', sys.exit)
