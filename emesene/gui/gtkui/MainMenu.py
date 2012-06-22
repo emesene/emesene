@@ -131,10 +131,6 @@ class EndPointsMenu(gtk.Menu):
         if ep_id in self.ep_dict:
             self.ep_dict[ep_id].set_label(ep_name)
 
-    @property
-    def endpoint_amount(self):
-        return len(self.ep_dict)
-
 class FileMenu(gtk.Menu):
     """
     A widget that represents the File popup menu located on the main menu
@@ -149,6 +145,8 @@ class FileMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
         self.session = session
+
+        self.ep_dict = {}
 
         if session and session.session_has_service(e3.Session.SERVICE_STATUS):
             StatusMenu = extension.get_default('menu status')
@@ -186,12 +184,12 @@ class FileMenu(gtk.Menu):
     def ep_menu_display(self, ep_id, ep_name=None):
         '''called when signal changed'''
         if self.ep_menu:
-            # only added signal will have valid name
+            # only added signal with valid name
             if ep_name is not None:
-                self.ep.show()
-            # signal triggered before dict operations
-            elif self.ep_menu.endpoint_amount == 1:
-                self.ep.hide()
+                self.ep_dict[ep_id] = True
+            elif ep_id in self.ep_dict:
+                del self.ep_dict[ep_id]
+            self.ep.set_visible(len(self.ep_dict) > 0)
 
 class ActionsMenu(gtk.Menu):
     """
