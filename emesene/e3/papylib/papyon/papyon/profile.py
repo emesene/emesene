@@ -270,6 +270,9 @@ class ClientCapabilities(gobject.GObject):
             client_id = str(self.capabilities)
         return client_id
 
+    def __eq__(self, other):
+        return str(self) == str(other)
+
 
 class NetworkID(object):
     """Refers to the contact Network ID"""
@@ -597,7 +600,7 @@ class BaseContact(gobject.GObject):
         for ep in removed_eps:
             self.emit("end-point-removed", old_eps[ep])
         for ep in union_eps:
-            if new_eps[ep] != old_eps[ep]:
+            if not new_eps[ep] == old_eps[ep]:
                 self.emit("end-point-updated", new_eps[ep])
 
     def do_get_property(self, pspec):
