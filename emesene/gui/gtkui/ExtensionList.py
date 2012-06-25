@@ -594,9 +594,9 @@ class UpdateList(DownloadListBase):
         refresh_button = gtk.Button(stock=gtk.STOCK_REFRESH)
         refresh_button.connect('clicked', self.on_update, True)
 
-        self.download_button = gtk.Button(_('Update'))
+        self.download_button = gtk.Button(_('Download'))
         self.download_button.set_image(gtk.image_new_from_stock(
-                                       gtk.STOCK_REFRESH, gtk.ICON_SIZE_MENU))
+                                       gtk.STOCK_GO_DOWN, gtk.ICON_SIZE_MENU))
         self.download_button.connect('clicked', self.start_download)
 
         self.buttonbox.pack_start(refresh_button, fill=False)
