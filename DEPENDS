@@ -36,5 +36,6 @@ NOTE: Packagers might want to set recommended packages as hard dependencies
 
 === Indicators ===
  * indicator-status-provider-emesene (optional, recommended)
+ * python-indicate (optional, recommended)
  * python-appindicator (optional)
 
