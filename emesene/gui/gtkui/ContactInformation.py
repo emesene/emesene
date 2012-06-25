@@ -411,10 +411,21 @@ class ChatWidget(gtk.VBox):
         else:
             self.text.clear()
 
+    def request_information(self, msg):
+        '''display a message for user'''
+        contact = self.session.contacts.me
+        message = e3.Message(e3.Message.TYPE_MESSAGE, msg, None, None)
+        msg = gui.Message.from_information(contact, message)
+
+        self.text.information(self.formatter, msg)
+        self.conv_status.post_process_message(msg)
+        self.conv_status.update_status()
+
     def refresh_history(self):
         '''refresh the history according to the values on the calendars
         '''
         self._prepare_history()
+        self.request_information(_('Loading chat history. Hang tight for a moment...'))
         self.request_chats_between(1000, self._on_chats_ready)
 
     def _get_from_timestamp(self):
@@ -463,6 +474,7 @@ class ChatWidget(gtk.VBox):
 
         if not results:
             self.search_mode = False
+            self.request_information(_("No chat history found"))
             return
 
         self.conv_status.clear()
