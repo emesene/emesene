@@ -183,7 +183,8 @@ class FacebookMail(MailClient):
 
     def stop(self):
         MailClient.stop(self)
-        self.facebook_client.active = False
+        if self.facebook_client:
+            self.facebook_client.active = False
 
     def new_mails(self):
         if not self.facebook_client is None:
