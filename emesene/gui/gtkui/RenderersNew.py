@@ -79,7 +79,7 @@ inherited by extensions.
         width = self.calculate_lines_width()
         natural_width = width + self.xpad * 2
         #FIXME: fix min_width calculation
-        min_width = min (100, natural_width)
+        min_width = min (50, natural_width)
         return min_width, natural_width
 
     def do_get_preferred_height(self, wid):
@@ -141,9 +141,9 @@ inherited by extensions.
         #add padding to first line
         y_coord += y_padding / 2
 
-        self.calculate_positions(ctx, widget, x_coord, y_coord)
+        self.calculate_positions(ctx, widget, x_coord, y_coord, width)
 
-    def calculate_positions(self, ctx, widget, x_base=0, y_base=0):
+    def calculate_positions(self, ctx, widget, x_base=0, y_base=0, width=0):
         '''calculate x,y coord of each element'''
         current_line = 1
 
@@ -154,6 +154,9 @@ inherited by extensions.
         context = widget.get_style_context()
 
         for w in self.update_markup():
+            #calculate remaining space in current line
+            avariable_width = width - x_coord
+
             if isinstance(w, basestring):
                 lines = w.split("\n")
                 lines_count = len(lines)
@@ -161,7 +164,16 @@ inherited by extensions.
                     lbl = Gtk.Label()
                     lbl.set_markup(lines[i])
                     layout = lbl.get_layout()
-                    Gtk.render_layout(context, ctx, x_coord, y_coord, layout)
+                    lblwidth = lbl.get_preferred_width()[1]
+
+                    # only render if we have enought space
+                    # otherwise only do the calculation for coords
+                    if avariable_width > 0:
+                        # if can can't render the label entirely, elipside it.
+                        if avariable_width < lblwidth:
+                            layout.set_width(avariable_width * Pango.SCALE)
+                            layout.set_ellipsize(Pango.ELLIPSIZE_END)
+                        Gtk.render_layout(context, ctx, x_coord, y_coord, layout)
 
                     #if we aren't in last line then update coords
                     if lines_count > 1 and i != lines_count - 1:
@@ -171,12 +183,14 @@ inherited by extensions.
                         current_line += i
                     else:
                         #update only x coord because we can have smileys in this line
-                        x_coord += lbl.get_preferred_width()[1]
+                        x_coord += lblwidth
             elif isinstance(w, GdkPixbuf.Pixbuf):
                 #scale image to the text height
                 size = min(self._lines_height[current_line], w.get_width())
                 pix = w.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR)
-                Gtk.render_icon(context, ctx, pix, x_coord, y_coord)
+                # only render the image if it's totally into the visible area
+                if avariable_width > size:
+                    Gtk.render_icon(context, ctx, pix, x_coord, y_coord)
                 x_coord += pix.get_width()
             else:
                 log.error("unhandled type %s" % type(i))
