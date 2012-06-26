@@ -16,6 +16,10 @@ from optparse import OptionParser
 
 import sleekxmpp
 
+import ssl
+from sleekxmpp.xmlstream import cert
+
+
 # Python versions before 3.0 do not use UTF-8 encoding
 # by default. To ensure that Unicode is handled properly
 # throughout SleekXMPP, we will set the default encoding
@@ -27,18 +31,16 @@ else:
     raw_input = input
 
 
-class PingTest(sleekxmpp.ClientXMPP):
+class GTalkBot(sleekxmpp.ClientXMPP):
 
     """
-    A simple SleekXMPP bot that will send a ping request
-    to a given JID.
+    A demonstration of using SleekXMPP with accounts from a Google Apps
+    account with a custom domain, because it requires custom certificate
+    validation.
     """
 
-    def __init__(self, jid, password, pingjid):
+    def __init__(self, jid, password):
         sleekxmpp.ClientXMPP.__init__(self, jid, password)
-        if pingjid is None:
-            pingjid = self.jid
-        self.pingjid = pingjid
 
         # The session_start event will be triggered when
         # the bot establishes its connection with the server
@@ -46,6 +48,27 @@ class PingTest(sleekxmpp.ClientXMPP):
         # listen for this event so that we we can initialize
         # our roster.
         self.add_event_handler("session_start", self.start)
+
+        # The message event is triggered whenever a message
+        # stanza is received. Be aware that that includes
+        # MUC messages and error messages.
+        self.add_event_handler("message", self.message)
+
+        # Using a Google Apps custom domain, the certificate
+        # does not contain the custom domain, just the GTalk
+        # server name. So we will need to process invalid
+        # certifcates ourselves and check that it really
+        # is from Google.
+        self.add_event_handler("ssl_invalid_cert", self.invalid_cert)
+
+    def invalid_cert(self, pem_cert):
+        der_cert = ssl.PEM_cert_to_DER_cert(pem_cert)
+        try:
+            cert.verify('talk.google.com', der_cert)
+            logging.debug("CERT: Found GTalk certificate")
+        except cert.CertificateError as err:
+            log.error(err.message)
+            self.disconnect(send_close=False)
 
     def start(self, event):
         """
@@ -62,17 +85,21 @@ class PingTest(sleekxmpp.ClientXMPP):
         """
         self.send_presence()
         self.get_roster()
-        result = self['xep_0199'].send_ping(self.pingjid,
-                                            timeout=10,
-                                            errorfalse=True)
-        logging.info("Pinging...")
-        if result is False:
-            logging.info("Couldn't ping.")
-            self.disconnect()
-            sys.exit(1)
-        else:
-            logging.info("Success! RTT: %s", str(result))
-            self.disconnect()
+
+    def message(self, msg):
+        """
+        Process incoming message stanzas. Be aware that this also
+        includes MUC messages and error messages. It is usually
+        a good idea to check the messages's type before processing
+        or sending replies.
+
+        Arguments:
+            msg -- The received message stanza. See the documentation
+                   for stanza objects and the Message stanza to see
+                   how it may be used.
+        """
+        if msg['type'] in ('chat', 'normal'):
+            msg.reply("Thanks for sending\n%(body)s" % msg).send()
 
 
 if __name__ == '__main__':
@@ -89,9 +116,6 @@ if __name__ == '__main__':
     optp.add_option('-v', '--verbose', help='set logging to COMM',
                     action='store_const', dest='loglevel',
                     const=5, default=logging.INFO)
-    optp.add_option('-t', '--pingto', help='set jid to ping',
-                    action='store', type='string', dest='pingjid',
-                    default=None)
 
     # JID and password options.
     optp.add_option("-j", "--jid", dest="jid",
@@ -110,14 +134,14 @@ if __name__ == '__main__':
     if opts.password is None:
         opts.password = getpass.getpass("Password: ")
 
-    # Setup the PingTest and register plugins. Note that while plugins may
+    # Setup the GTalkBot and register plugins. Note that while plugins may
     # have interdependencies, the order in which you register them does
     # not matter.
-    xmpp = PingTest(opts.jid, opts.password, opts.pingjid)
-    xmpp.register_plugin('xep_0030')  # Service Discovery
-    xmpp.register_plugin('xep_0004')  # Data Forms
-    xmpp.register_plugin('xep_0060')  # PubSub
-    xmpp.register_plugin('xep_0199')  # XMPP Ping
+    xmpp = GTalkBot(opts.jid, opts.password)
+    xmpp.register_plugin('xep_0030') # Service Discovery
+    xmpp.register_plugin('xep_0004') # Data Forms
+    xmpp.register_plugin('xep_0060') # PubSub
+    xmpp.register_plugin('xep_0199') # XMPP Ping
 
     # If you are working with an OpenFire server, you may need
     # to adjust the SSL version used:
