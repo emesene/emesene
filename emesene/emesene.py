@@ -715,6 +715,8 @@ class Controller(object):
                                          self.config.session, proxy, use_http, \
                                          self.cur_service)
 
+        self.tray_icon.set_login()
+
     def on_picture_change_succeed(self, account, path):
         '''save the avatar change as the last avatar'''
         if account == self.session.account.account:
