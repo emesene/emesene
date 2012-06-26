@@ -27,11 +27,13 @@ __all__ = [
     'xep_0054',  # vcard-temp
     'xep_0059',  # Result Set Management
     'xep_0060',  # Pubsub (Client)
+    'xep_0065',  # SOCKS5 Bytestreams
     'xep_0066',  # Out of Band Data
     'xep_0077',  # In-Band Registration
 #   'xep_0078',  # Non-SASL auth. Don't automatically load
     'xep_0080',  # User Location
     'xep_0082',  # XMPP Date and Time Profiles
+    'xep_0084',  # User Avatar
     'xep_0085',  # Chat State Notifications
     'xep_0086',  # Legacy Error Codes
     'xep_0092',  # Software Version
@@ -44,11 +46,19 @@ __all__ = [
     'xep_0163',  # Personal Eventing Protocol
     'xep_0172',  # User Nickname
     'xep_0184',  # Message Receipts
+    'xep_0186',  # Invisible Command
     'xep_0198',  # Stream Management
     'xep_0199',  # Ping
     'xep_0202',  # Entity Time
     'xep_0203',  # Delayed Delivery
+    'xep_0221',  # Data Forms Media Element
+    'xep_0222',  # Persistent Storage of Public Data via Pubsub
+    'xep_0223',  # Persistent Storage of Private Data via Pubsub
     'xep_0224',  # Attention
     'xep_0231',  # Bits of Binary
     'xep_0249',  # Direct MUC Invitations
+    'xep_0256',  # Last Activity in Presence
+    'xep_0258',  # Security Labels in XMPP
+    'xep_0270',  # XMPP Compliance Suites 2010
+    'xep_0302',  # XMPP Compliance Suites 2012
 ]
