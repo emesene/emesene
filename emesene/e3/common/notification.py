@@ -102,6 +102,10 @@ class Notification():
                 self._on_filetransfer_canceled)
             self.session.signals.filetransfer_invitation.unsubscribe(
                 self._on_filetransfer_invitation)
+            self.session.signals.endpoint_added.unsubscribe(
+                self._on_endpoint_added)
+            self.session.signals.endpoint_updated.unsubscribe(
+                self._on_endpoint_updated)
         extension.unsubscribe(self._on_notification_gui_changed, 'notificationGUI')
         extension.unsubscribe(self._on_notification_image_changed, 'notificationImage')
 
