@@ -281,6 +281,8 @@ class Worker(e3.Worker):
     def _handle_action_login(self, account, password, status_, host, port):
         '''handle Action.ACTION_LOGIN
         '''
+        self.session.contacts.me.status = e3.status.ONLINE
+
         self.my_avatars = self.caches.get_avatar_cache(
                 self.session.account.account)
 
