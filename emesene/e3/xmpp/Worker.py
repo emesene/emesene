@@ -287,6 +287,8 @@ class Worker(e3.Worker):
                 self.session.account.account)
 
         self.client = xmpp.ClientXMPP(account, password)
+        #FIXME: add config option
+        self.client.use_ipv6 = False
         self.client.process(block=False)
         self.client.register_plugin('xep_0004') # Data Forms
         self.client.register_plugin('xep_0030') # Service Discovery
