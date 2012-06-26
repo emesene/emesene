@@ -1268,6 +1268,8 @@ class DesktopTab(BaseTable):
                           'session.config.b_open_mail_in_desktop')
 
     def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_language_changed,
+            'language_config')
         self.session.config.unsubscribe(self._on_spell_change,
             'b_enable_spell_check')
 

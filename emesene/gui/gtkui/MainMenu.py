@@ -131,6 +131,11 @@ class EndPointsMenu(gtk.Menu):
         if ep_id in self.ep_dict:
             self.ep_dict[ep_id].set_label(ep_name)
 
+    def remove_subscriptions(self):
+        self.session.signals.endpoint_added.unsubscribe(self.endpoint_added)
+        self.session.signals.endpoint_removed.unsubscribe(self.endpoint_removed)
+        self.session.signals.endpoint_updated.unsubscribe(self.endpoint_updated)
+
 class FileMenu(gtk.Menu):
     """
     A widget that represents the File popup menu located on the main menu
@@ -190,6 +195,11 @@ class FileMenu(gtk.Menu):
             elif ep_id in self.ep_dict:
                 del self.ep_dict[ep_id]
             self.ep.set_visible(len(self.ep_dict) > 0)
+
+    def remove_subscriptions(self):
+        if session and session.session_has_service(e3.Session.SERVICE_ENDPOINTS):
+            self.session.signals.endpoint_added.unsubscribe(self.ep_menu_display)
+            self.session.signals.endpoint_removed.unsubscribe(self.ep_menu_display)
 
 class ActionsMenu(gtk.Menu):
     """
