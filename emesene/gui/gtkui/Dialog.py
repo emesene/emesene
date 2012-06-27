@@ -796,10 +796,12 @@ class Dialog(object):
         for ext_id, ext in extension.get_extensions('session').iteritems():
             for service_name, service_data in ext.SERVICES.iteritems():
                 if service_name == service:
-                    t_server_host.set_text(proxy.host or service_data['host'])
-                    t_server_port.set_text(proxy.port or service_data['port'])
+                    t_server_host.set_text(service_data['host'])
+                    t_server_port.set_text(service_data['port'])
                     session_id = ext_id
 
+        t_proxy_host.set_text(proxy.host or '')
+        t_proxy_port.set_text(proxy.port or '')
         t_user.set_text(proxy.user or '')
         t_passwd.set_text(proxy.passwd or '')
         t_passwd.set_visibility(False)
