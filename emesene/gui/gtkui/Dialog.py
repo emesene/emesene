@@ -863,6 +863,9 @@ class Dialog(object):
                 callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
                         user, passwd, session_id, service, server_host, server_port)
 
+            for widget in proxy_settings:
+                widget.destroy()
+
             window.destroy()
 
         def button_cb(button, window, response_cb, response):
@@ -888,9 +891,6 @@ class Dialog(object):
                 button_cb)
 
         window.show_all()
-
-        for widget in proxy_settings:
-            widget.destroy()
 
     @classmethod
     def edit_profile(cls, handler, user_nick, user_message, last_avatar):
