@@ -539,7 +539,7 @@ class Worker(e3.base.Worker, papyon.Client):
             if not emotes.has_emote(shortcut):
                 self.msn_object_store.request(msn_object,
                     (download_ok, download_failed,
-                     received_custom_emoticons, emoticon_hash, shortcut))
+                     received_custom_emoticons, emoticon_hash, shortcut), peer=papycontact)
 
         self.session.conv_message(cid, account, msgobj,
                 received_custom_emoticons)
