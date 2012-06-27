@@ -107,6 +107,10 @@ class Avatar(gtk.Widget, AvatarManager):
             pixbufblock = utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay_big)
             static_image = animation.get_static_image()
 
+            # use the small block image for small avatars
+            if pixbufblock.get_width() > static_image.get_width() * 0.6:
+                pixbufblock = utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay)
+
             output_pixbuf = utils.simple_images_overlap(static_image, pixbufblock,
                                                         -pixbufblock.props.width,
                                                         -pixbufblock.props.width)
