@@ -86,7 +86,8 @@ class TopLevelWindow (QtGui.QMainWindow):
 
     # TODO: don't reinstantiate existing pages, or don't preserve old pages.
     def go_login(self, callback, on_preferences_changed, config=None, 
-                 config_dir=None, config_path=None, proxy=None, use_http=None, 
+                 config_dir=None, config_path=None, proxy=None,
+                 use_http=None, use_ipv6=None,
                  session_id=None, cancel_clicked=False, no_autologin=False):
                #emesene's
         # pylint: disable=R0913
@@ -94,7 +95,8 @@ class TopLevelWindow (QtGui.QMainWindow):
         log.debug('GO LOGIN! ^_^')
         login_window_cls = extension.get_default('login window')
         login_page = login_window_cls(callback, on_preferences_changed, config,
-                                      config_dir, config_path, proxy,use_http, 
+                                      config_dir, config_path, proxy, 
+                                      use_http, use_ipv6,
                                       session_id, cancel_clicked, no_autologin)
         self._content_type = 'login'
         if not login_page.autologin_started:

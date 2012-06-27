@@ -238,21 +238,24 @@ class Controller(object):
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
+        use_ipv6 = self.config.get_or_set('b_use_ipv6', False)
 
         #cancel autologin if another emesene instance is running
-        self.go_login(proxy, use_http, no_autologin=self.emesene_is_running)
+        self.go_login(proxy, use_http, use_ipv6, no_autologin=self.emesene_is_running)
 
         if self.minimize:
             self.window.iconify()
         self.window.show()
 
-    def go_login(self, proxy=None, use_http=None,
+    def go_login(self, proxy=None, use_http=None, use_ipv6=None,
                  cancel_clicked=False, no_autologin=False):
         '''shows the login GUI'''
         if proxy is None:
             proxy = self._get_proxy_settings()
         if use_http is None:
             use_http = self.config.get_or_set('b_use_http', False)
+        if use_ipv6 is None:
+            use_ipv6 = self.config.get_or_set('b_use_ipv6', False)
 
         self._save_login_dimensions()
         self._set_location(self.window)
@@ -260,7 +263,7 @@ class Controller(object):
         self.window.go_login(self.on_login_connect,
                              self.on_preferences_changed, self.config,
                              self.config_dir, self.config_path, proxy,
-                             use_http, self.config.session,
+                             use_http, use_ipv6, self.config.session,
                              cancel_clicked, no_autologin)
         self.tray_icon.set_login()
 
@@ -504,11 +507,12 @@ class Controller(object):
 
         window.set_location(width, height, posx, posy, single_window and is_conv)
 
-    def on_preferences_changed(self, use_http, proxy, session_id, service):
+    def on_preferences_changed(self, use_http, use_ipv6, proxy, session_id, service):
         '''called when the preferences on login change'''
         self.config.session = session_id
         extension.set_default_by_id('session', session_id)
         self.config.b_use_http = use_http
+        self.config.b_use_ipv6 = use_ipv6
         self.config.service = service
         self._save_proxy_settings(proxy)
 
@@ -553,14 +557,15 @@ class Controller(object):
 
 
     def on_login_connect(self, account, session_id, proxy,
-                         use_http, host=None, port=None, on_reconnect=False):
+                         use_http, use_ipv6, 
+                         host=None, port=None, on_reconnect=False):
         '''called when the user press the connect button'''
         self._save_login_dimensions()
         self._set_location(self.window)
         self.cur_service = [host, port]
         if not on_reconnect:
-            self.on_preferences_changed(use_http, proxy, session_id,
-                    self.config.service)
+            self.on_preferences_changed(use_http, use_ipv6,
+                    proxy, session_id, self.config.service)
             self.avatar_path = self.config_dir.join(host, account.account,
                     'avatars', 'last')
             self.window.go_connect(self.on_cancel_login, self.avatar_path,
@@ -603,7 +608,7 @@ class Controller(object):
         self.session.config.get_or_set('b_open_mail_in_desktop', False)
 
         self.session.login(account.account, account.password, account.status,
-            proxy, host, port, use_http)
+            proxy, host, port, use_http, use_ipv6)
 
     def on_cancel_login(self):
         '''
@@ -711,9 +716,10 @@ class Controller(object):
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
+        use_ipv6 = self.config.get_or_set('b_use_ipv6', False)
         self.window.content_main.on_reconnect(self.on_login_connect, account, \
                                          self.config.session, proxy, use_http, \
-                                         self.cur_service)
+                                         use_ipv6, self.cur_service)
 
         self.tray_icon.set_login()
 

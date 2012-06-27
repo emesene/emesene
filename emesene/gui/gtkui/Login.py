@@ -258,13 +258,13 @@ class Login(LoginBaseUI, gui.LoginBase):
     '''
     def __init__(self, callback, on_preferences_changed,
                  config, config_dir, config_path, proxy=None,
-                 use_http=None, session_id=None, cancel_clicked=False,
+                 use_http=None, use_ipv6=None, session_id=None, cancel_clicked=False,
                  no_autologin=False):
 
         LoginBaseUI.__init__(self, callback)
         gui.LoginBase.__init__(self, callback, on_preferences_changed,
                                config, config_dir, config_path,
-                               proxy, use_http, session_id, no_autologin)
+                               proxy, use_http, use_ipv6, session_id, no_autologin)
 
         self.cancel_clicked = cancel_clicked
 
@@ -315,7 +315,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         service = self._get_active_service()
         session_id, ext = self.service2id[service]
         self._on_new_preferences(
-            self.use_http, self.proxy.use_proxy, self.proxy.host,
+            self.use_http, self.use_ipv6, self.proxy.use_proxy, self.proxy.host,
             self.proxy.port, self.proxy.use_auth, self.proxy.user,
             self.proxy.passwd, session_id, service,
             ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
@@ -386,7 +386,7 @@ class Login(LoginBaseUI, gui.LoginBase):
                             auto_login)
 
         self.callback(account, self.session_id, self.proxy, self.use_http,
-                      self.server_host, self.server_port)
+                      self.use_ipv6, self.server_host, self.server_port)
 
     def _on_account_changed(self, entry):
         '''
@@ -626,9 +626,9 @@ class Login(LoginBaseUI, gui.LoginBase):
             service = self.config.d_user_service.get(account, 'msn')
 
         extension.get_default('dialog').login_preferences(service,
-            self._on_new_preferences, self.use_http, self.proxy)
+            self._on_new_preferences, self.use_http, self.use_ipv6, self.proxy)
 
-    def _on_new_preferences(self, use_http, use_proxy, proxy_host, proxy_port,
+    def _on_new_preferences(self, use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
                             use_auth, user, passwd, session_id, 
                             service, server_host, server_port):
         '''
@@ -639,10 +639,11 @@ class Login(LoginBaseUI, gui.LoginBase):
 
         self.session_id = session_id
         self.use_http = use_http
+        self.use_ipv6 = use_ipv6
         self.server_host = server_host
         self.server_port = server_port
 
-        self.on_preferences_changed(self.use_http, self.proxy, 
+        self.on_preferences_changed(self.use_http, self.use_ipv6, self.proxy, 
                                     self.session_id, service)
 
         self._update_fields(self.cmb_account.get_active_text(), True)
@@ -728,7 +729,7 @@ class ConnectingWindow(Login):
         self.callback()
 
     def _on_connect_now_clicked(self, button, callback, account, session_id,
-                                proxy, use_http, service):
+                                proxy, use_http, use_ipv6, service):
         '''
         don't wait for timout to reconnect
         '''
@@ -736,7 +737,7 @@ class ConnectingWindow(Login):
         self.avatar.stop()
         gobject.source_remove(self.reconnect_timer_id)
         self.reconnect_timer_id = None
-        callback(account, session_id, proxy, use_http,\
+        callback(account, session_id, proxy, use_http, use_ipv6,\
                  service[0], service[1], on_reconnect=True)
 
     def clear_connect(self):
@@ -747,7 +748,7 @@ class ConnectingWindow(Login):
         self.throbber.show()
 
     def on_reconnect(self, callback, account, session_id,
-                     proxy, use_http, service):
+                     proxy, use_http, use_ipv6, service):
         '''
         show the reconnect countdown
         '''
@@ -755,7 +756,7 @@ class ConnectingWindow(Login):
         self.b_connect.show()
         self.b_connect.connect('clicked', self._on_connect_now_clicked, 
                                callback, account, session_id, proxy, 
-                               use_http, service)
+                               use_http, use_ipv6, service)
 
         self.throbber.hide()
         self.reconnect_after = 30
@@ -763,13 +764,13 @@ class ConnectingWindow(Login):
             self.reconnect_timer_id = gobject.timeout_add_seconds(1, \
                                             self.update_reconnect_timer, 
                                             callback, account, session_id,
-                                            proxy, use_http, service)
+                                            proxy, use_http, use_ipv6, service)
 
         self.update_reconnect_timer(callback, account, session_id,
-                                    proxy, use_http, service)
+                                    proxy, use_http, use_ipv6, service)
 
     def update_reconnect_timer(self, callback, account, session_id,
-                               proxy, use_http, service):
+                               proxy, use_http, use_ipv6, service):
         '''
         updates reconnect label and launches login if counter is 0
         '''
@@ -781,7 +782,7 @@ class ConnectingWindow(Login):
             self.reconnect_timer_id = None
             self.b_connect.hide()
             #do login
-            callback(account, session_id, proxy, use_http,\
+            callback(account, session_id, proxy, use_http, use_ipv6,\
                      service[0], service[1], on_reconnect=True)
             return False
         else:

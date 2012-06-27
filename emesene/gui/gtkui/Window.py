@@ -124,14 +124,14 @@ class Window(gtk.Window):
 
     def go_login(self, callback, on_preferences_changed,
                  config=None, config_dir=None, config_path=None,
-                 proxy=None, use_http=None, session_id=None,
+                 proxy=None, use_http=None, use_ipv6=None, session_id=None,
                  cancel_clicked=False, no_autologin=False):
         '''draw the login window on the main window'''
         LoginWindow = extension.get_default('login window')
 
         self.content_main = LoginWindow(callback, on_preferences_changed,
-            config, config_dir, config_path, proxy, use_http, session_id,
-            cancel_clicked, no_autologin)
+            config, config_dir, config_path, proxy, use_http, use_ipv6,
+            session_id, cancel_clicked, no_autologin)
         self.content_main.show()
         self.content_main.cmb_account.grab_focus()
         self.content_main.check_autologin()

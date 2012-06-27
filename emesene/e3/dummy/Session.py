@@ -28,10 +28,11 @@ class Session(e3.Session):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
 
-    def login(self, account, password, status, proxy, host, port, use_http=False):
+    def login(self, account, password, status, proxy, host, port,
+              use_http=False, use_ipv6=False):
         '''start the login process'''
         self.account = e3.Account(account, password, status, host)
-        worker = Worker.Worker(self, proxy, use_http)
+        worker = Worker.Worker(self, proxy, use_http, use_ipv6)
         worker.start()
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status))

@@ -106,7 +106,7 @@ class ConnectingPage(QtGui.QWidget):
         
         
     def on_reconnect(self, callback, account, session_id,
-                     proxy, use_http, service):
+                     proxy, use_http, use_ipv6, service):
         self._widget_d['label'].setText(self._reconnect_txt % 30)
         self._widget_d['cancel_btn'].setText(tr(u'Reconnect now'))
         self._widget_d['cancel_btn'].clicked.disconnect()
@@ -115,17 +115,17 @@ class ConnectingPage(QtGui.QWidget):
         self._reconnect_time = 30
         self._timer.timeout.connect(
             lambda: self._on_timer_timeout(callback, account, session_id, 
-                                           proxy, use_http, service))
+                                           proxy, use_http, use_ipv6, service))
         self._timer.start(1000)
         
         
     def _on_timer_timeout(self, callback, account, session_id, 
-                               proxy, use_http, service):
+                               proxy, use_http, use_ipv6, service):
         self._reconnect_time -= 1
         
         if self._reconnect_time <= 0:
             self._timer.stop()
-            callback(account, session_id, proxy, use_http,
+            callback(account, session_id, proxy, use_http, use_ipv6,
                      service[0], service[1], on_reconnect=True)
         else:    
             self._widget_d['label'].setText(self._reconnect_txt % 

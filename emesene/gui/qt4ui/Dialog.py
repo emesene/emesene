@@ -254,7 +254,7 @@ Do you want to fix your profile now?''')
 
     @classmethod
     def login_preferences(cls, service, service_host, service_port,
-                          callback, use_http, proxy):
+                          callback, use_http, use_ipv6, proxy):
         """
         display the preferences dialog for the login window
 
@@ -264,6 +264,8 @@ Do you want to fix your profile now?''')
             new values
         use_http -- boolean that indicates if the e3 should use http
             method
+        use_ipv6 -- boolean that indicates if the xmpp should use ipv6
+            to established connection
         proxy -- a e3.Proxy object
         """
         def on_session_changed(*args):
@@ -298,6 +300,7 @@ Do you want to fix your profile now?''')
             get the new values and call callback with those values'''
             if response == gui.stock.ACCEPT:
                 use_http = http_chk.isChecked()
+                use_ipv6 = ipv6_chk.isChecked()
                 use_proxy = proxy_chk.isChecked()
                 use_auth = auth_chk.isChecked()
                 proxy_host = str(proxy_host_edit.text())
@@ -310,7 +313,7 @@ Do you want to fix your profile now?''')
                 service = str(session_cmb.currentText())
                 session_id, ext = name_to_ext[service]
                 log.debug(str(session_id))
-                callback(use_http, use_proxy, proxy_host, proxy_port,
+                callback(use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
                          use_auth, user, passwd, session_id, service,
                          server_host, server_port)
             dialog.hide()
@@ -365,6 +368,7 @@ Do you want to fix your profile now?''')
         pwd_edit.setText(proxy.passwd or '')
         #pwd_edit.setVisible(False)
         http_chk.setChecked(use_http)
+        http_chk.setChecked(use_ipv6)
 
         index = 0
         count = 0

@@ -74,9 +74,10 @@ class Session(e3.Session):
         for endp in self.__worker.profile.end_points.values():
             self.__worker._on_profile_end_point_added(endp)
 
-    def login(self, account, password, status, proxy, host, port, use_http=False):
+    def login(self, account, password, status, proxy, host, port,
+              use_http=False, use_ipv6=False):
         '''start the login process'''
-        self.__worker = Worker(self, proxy, use_http)
+        self.__worker = Worker(self, proxy, use_http, use_ipv6)
         self.__worker.start()
 
         # msn password must have 16 chars max.

@@ -63,7 +63,7 @@ STATUS_MAP_REVERSE['unavailable'] = e3.status.OFFLINE
 class Worker(e3.Worker):
     '''xmpp's Worker thread'''
 
-    def __init__(self, session, proxy, use_http=False):
+    def __init__(self, session, proxy, use_http=False, use_ipv6=False):
         '''class constructor'''
         e3.Worker.__init__(self, session)
 
@@ -80,6 +80,8 @@ class Worker(e3.Worker):
             if self.proxy.use_auth:
                 self.proxy_data['username'] = self.proxy.user
                 self.proxy_data['password'] = self.proxy.passwd
+
+        self.use_ipv6 = use_ipv6
 
         self.conversations = {}
         self.rconversations = {}
@@ -289,8 +291,7 @@ class Worker(e3.Worker):
                 self.session.account.account)
 
         self.client = xmpp.ClientXMPP(account, password)
-        #FIXME: add config option
-        self.client.use_ipv6 = False
+        self.client.use_ipv6 = self.use_ipv6
         self.client.process(block=False)
         self.client.register_plugin('xep_0004') # Data Forms
         self.client.register_plugin('xep_0030') # Service Discovery

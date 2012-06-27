@@ -29,8 +29,8 @@ class LoginBase(object):
     '''a widget that contains all the components inside'''
 
     def __init__(self, callback, on_preferences_changed, config, config_dir,
-                config_path, proxy=None, use_http=None, session_id=None,
-                no_autologin=False):
+                config_path, proxy=None, use_http=None, use_ipv6=None,
+                session_id=None, no_autologin=False):
         '''constructor'''
 
         self.callback = callback
@@ -42,6 +42,7 @@ class LoginBase(object):
         # the id of the default extension that handles the session
         # used to select the default session on the preference dialog
         self.use_http = use_http
+        self.use_ipv6 = use_ipv6
         self.session_id = session_id
         self.proxy = proxy or e3.Proxy()
         self.server_host = None

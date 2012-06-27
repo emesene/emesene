@@ -41,7 +41,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
     # pylint: enable=W0612
 
     def __init__(self, callback, on_preferences_changed, config=None,
-                 config_dir=None, config_path=None, proxy=None, use_http=None,
+                 config_dir=None, config_path=None, proxy=None, use_http=None, use_ipv6=None
                  session_id=None, cancel_clicked=False, no_autologin=False,
                  parent=None):
         '''Constructor'''
@@ -54,7 +54,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         QtGui.QWidget.__init__(self, parent)
         gui.LoginBase.__init__(self, callback, on_preferences_changed,
                                 config, config_dir, config_path,
-                                proxy, use_http, session_id, no_autologin)
+                                proxy, use_http, use_ipv6, session_id, no_autologin)
 
         # a widget dic to avoid proliferation of instance variables:
         self._widget_d = {}
@@ -277,7 +277,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
     def _on_connection_preferences_clicked(self):
         '''Callback invoked when the user clicks the connection preferences
         button'''
-        def new_preferences_cb(use_http, use_proxy, proxy_host, proxy_port,
+        def new_preferences_cb(use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
                                use_auth, user, passwd, session_id, service, 
                                server_host, server_port):
             '''called when the user press accept on the preferences dialog'''
@@ -291,7 +291,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                 self.config.d_user_service[account_email] = service
                 # to trigger eventual update of dp:
             self._on_account_combo_text_changed(account_email)
-            self.on_preferences_changed(use_http, self.proxy, session_id,
+            self.on_preferences_changed(use_http, use_ipv6, self.proxy, session_id,
                     service)
             
 
@@ -301,7 +301,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             service = self.config.d_user_service[account]
         extension.get_default('dialog').login_preferences(service, self.server_host,
                                         self.server_port, new_preferences_cb, 
-                                        self.config.b_use_http, self.proxy)
+                                        self.config.b_use_http, self.config.b_use_ipv6, self.proxy)
 
     def _on_forget_me_clicked(self):
         ''''''
@@ -344,7 +344,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             
         # Invoke the  login callback
         self.callback(e3_account, self.session_id, self.proxy,
-                             self.use_http, self.server_host, self.server_port)
+                             self.use_http, self.use_ipv6, self.server_host, self.server_port)
 
     def clear_login_form(self, clear_pic=False):
         ''' Resets the login form '''

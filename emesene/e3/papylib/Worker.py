@@ -79,7 +79,7 @@ PAPY_HAS_AUDIOVIDEO = False
 class Worker(e3.base.Worker, papyon.Client):
     ''' papylib's worker - an emesene extension for papyon library '''
 
-    def __init__(self, session, proxy, use_http=False):
+    def __init__(self, session, proxy, use_http=False, use_ipv6=False):
         '''class constructor'''
         e3.base.Worker.__init__(self, session)
         server = ('messenger.hotmail.com', 1863)

@@ -12,7 +12,7 @@ log = logging.getLogger('dummy.Worker')
 class Worker(e3.Worker):
     '''dummy Worker implementation to make it easy to test emesene'''
 
-    def __init__(self, session, proxy, use_http=False):
+    def __init__(self, session, proxy, use_http=False, use_ipv6=False):
         '''class constructor'''
         e3.Worker.__init__(self, session)
 

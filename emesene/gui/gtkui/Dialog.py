@@ -731,7 +731,7 @@ class Dialog(object):
         InviteWindow(session, callback, l_buddy_exclude)
 
     @classmethod
-    def login_preferences(cls, service, callback, use_http, proxy):
+    def login_preferences(cls, service, callback, use_http, use_ipv6, proxy):
         """
         display the preferences dialog for the login window
 
@@ -741,12 +741,14 @@ class Dialog(object):
             new values
         use_http -- boolean that indicates if the e3 should use http
             method
+        use_ipv6 -- boolean that indicates if the xmpp should use ipv6
+            to establish connection
         proxy -- a e3.Proxy object
         """
 
         content = gtk.VBox(spacing=4)
         advanced = gtk.Expander(_("Advanced"))
-        box = gtk.Table(10, 2)
+        box = gtk.Table(11, 2)
         box.set_property('row-spacing', 4)
         box.set_property('column-spacing', 4)
 
@@ -788,6 +790,7 @@ class Dialog(object):
             for entry in entries:
                 entry.set_sensitive(check_button.get_active())
 
+        c_use_ipv6 = gtk.CheckButton(_('Use IPv6 connecion'))
         c_use_http = gtk.CheckButton(_('Use HTTP method'))
         c_use_proxy = gtk.CheckButton(_('Use proxy'))
         c_use_proxy.connect('toggled', on_toggled, t_proxy_host, t_proxy_port, c_use_auth)
@@ -806,6 +809,7 @@ class Dialog(object):
         t_passwd.set_text(proxy.passwd or '')
         t_passwd.set_visibility(False)
         c_use_http.set_active(use_http)
+        c_use_ipv6.set_active(use_ipv6)
         c_use_proxy.set_active(proxy.use_proxy)
         c_use_proxy.toggled()
         c_use_auth.set_active(proxy.use_auth)
@@ -833,26 +837,29 @@ class Dialog(object):
         box.attach(t_server_host, 1, 2, 0, 1)
         box.attach(l_server_port, 0, 1, 1, 2)
         box.attach(t_server_port, 1, 2, 1, 2)
-        box.attach(c_use_http, 0, 2, 2, 3)
+        if service == 'gtalk':
+            box.attach(c_use_ipv6, 0, 2, 2, 3)
+        box.attach(c_use_http, 0, 2, 3, 4)
         # TODO: FIXME: Temporary hack for 2.0 release.
         # msn (papylib) automagically gets system proxies
         if service != 'msn':
-            box.attach(c_use_proxy, 0, 2, 3, 4)
-            box.attach(l_host, 0, 1, 4, 5)
-            box.attach(t_proxy_host, 1, 2, 4, 5)
-            box.attach(l_port, 0, 1, 5, 6)
-            box.attach(t_proxy_port, 1, 2, 5, 6)
-            box.attach(c_use_auth, 0, 2, 6, 7)
-            box.attach(l_user, 0, 1, 7, 8)
-            box.attach(t_user, 1, 2, 7, 8)
-            box.attach(l_passwd, 0, 1, 8, 9)
-            box.attach(t_passwd, 1, 2, 8, 9)
+            box.attach(c_use_proxy, 0, 2, 4, 5)
+            box.attach(l_host, 0, 1, 5, 6)
+            box.attach(t_proxy_host, 1, 2, 5, 6)
+            box.attach(l_port, 0, 1, 6, 7)
+            box.attach(t_proxy_port, 1, 2, 6, 7)
+            box.attach(c_use_auth, 0, 2, 7, 8)
+            box.attach(l_user, 0, 1, 8, 9)
+            box.attach(t_user, 1, 2, 8, 9)
+            box.attach(l_passwd, 0, 1, 9, 10)
+            box.attach(t_passwd, 1, 2, 9, 10)
 
         def response_cb(response):
             '''called on any response (close, accept, cancel) if accept
             get the new values and call callback with those values'''
             if response == stock.ACCEPT:
                 use_http = c_use_http.get_active()
+                use_ipv6 = c_use_ipv6.get_active()
                 use_proxy = c_use_proxy.get_active()
                 use_auth = c_use_auth.get_active()
                 proxy_host = t_proxy_host.get_text()
@@ -862,7 +869,7 @@ class Dialog(object):
                 user = t_user.get_text()
                 passwd = t_passwd.get_text()
 
-                callback(use_http, use_proxy, proxy_host, proxy_port, use_auth,
+                callback(use_http, use_ipv6, use_proxy, proxy_host, proxy_port, use_auth,
                         user, passwd, session_id, service, server_host, server_port)
 
             for widget in proxy_settings:

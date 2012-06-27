@@ -31,7 +31,8 @@ from e3 import jabber
 class Example(object):
     '''a example object, you can do it on another way..'''
 
-    def __init__(self, account, password, status, proxy, use_http_method=False):
+    def __init__(self, account, password, status, proxy,
+                 use_http_method=False, use_ipv6_method=False):
         '''class constructor'''
         self.session = msn.Session()
         #self.session = jabber.Session()
@@ -44,7 +45,7 @@ class Example(object):
         signals.conv_message.subscribe( self.on_conv_message)
 
         self.session.login(account, password, status,
-            proxy, use_http_method)
+            proxy, use_http_method, use_ipv6_method)
         gobject.timeout_add(500, self.session.signals._handle_events)
 
         self.first_contact_list_ready = True

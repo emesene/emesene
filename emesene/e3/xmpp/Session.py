@@ -63,7 +63,8 @@ class Session(e3.Session):
         self.facebook_client = None
         self.mail_client = NullMail()
 
-    def login(self, account, password, status, proxy, host, port, use_http=False):
+    def login(self, account, password, status, proxy, host, port,
+              use_http=False, use_ipv6=False):
         '''start the login process'''
         self.account = e3.Account(account, password, status, host)
 
@@ -85,7 +86,7 @@ class Session(e3.Session):
         self.mail_client.register_handler('mailnew', self.mail_received)
         self.mail_client.register_handler('socialreq', self.social_request)
 
-        self.__worker = Worker(self, proxy, use_http)
+        self.__worker = Worker(self, proxy, use_http, use_ipv6)
         self.__worker.start()
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
