@@ -104,10 +104,10 @@ class Avatar(gtk.Widget, AvatarManager):
             animation = gtk.gdk.PixbufAnimation(gui.theme.image_theme.user)
 
         if self.blocked:
-            pixbufblock=utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay_big)
+            pixbufblock = utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay_big)
             static_image = animation.get_static_image()
 
-            output_pixbuf =utils.simple_images_overlap(static_image, pixbufblock,
+            output_pixbuf = utils.simple_images_overlap(static_image, pixbufblock,
                                                         -pixbufblock.props.width,
                                                         -pixbufblock.props.width)
 
