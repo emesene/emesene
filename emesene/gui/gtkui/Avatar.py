@@ -152,7 +152,7 @@ class Avatar(gtk.Widget, AvatarManager):
     if check_gtk3():
         #FIXME: this is broken on gtk3, use static pixbuf for now
         def _start_animation(self, animation):
-            self.__set_from_pixbuf(animation.get_pixbuf())
+            self.__set_from_pixbuf(animation.get_static_image())
     else:
         def _start_animation(self, animation):
             iteran = animation.get_iter()
