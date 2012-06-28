@@ -86,7 +86,6 @@ class Window(gtk.Window):
             if self.accel_group:
                 self.remove_accel_group(self.accel_group)
                 self.accel_group = None
-            self._content_main.destroy()
             del self._content_main
         self._content_main = content_main
         self.box.pack1(self._content_main)
@@ -105,7 +104,6 @@ class Window(gtk.Window):
             if self.accel_group:
                 self.remove_accel_group(self.accel_group)
                 self.accel_group = None
-            self._content_conv.destroy()
             del self._content_conv
         self._content_conv = content_conv
         if content_conv:
