@@ -357,9 +357,12 @@ class Controller(object):
         self.config.save(self.config_path)
 
         #http://www.lshift.net/blog/2008/11/14/tracing-python-memory-leaks
+        #http://mg.pov.lt/objgraph/
         # install python-objgraph
+        # also you can run emesene in pdb: pdb ./emesene.py
+        # then 'r' and CTRL+C when you need the shell.
         #import objgraph
-        #objgraph.show_most_common_types()
+        ##objgraph.show_most_common_types()
         #objgraph.show_growth()
 
         if do_exit:
