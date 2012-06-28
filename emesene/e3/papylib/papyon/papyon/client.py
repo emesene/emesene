@@ -359,11 +359,15 @@ class Client(EventsDispatcher):
     def protocol_version(self):
         return self._protocol._protocol_version
 
-    @property
-    def machine_guid(self):
-        if not hasattr(self, '_guid'):
-            self._guid = uuid.uuid4()
-        return self._guid
+    @rw_property
+    def machine_guid():
+        def fget(self):
+            if not hasattr(self, '_guid'):
+                self._guid = uuid.uuid4()
+            return self._guid
+        def fset(self, guid):
+            self._guid = uuid.UUID(guid)
+        return locals()
 
     @rw_property
     def _state():

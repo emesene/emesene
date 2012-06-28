@@ -94,6 +94,10 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.profile_url = PROFILE_URL
 
+        # set machine guid
+        if session.account_uuid is not None:
+            self.machine_guid = session.account_uuid
+
         self._event_handler = ClientEvents(self)
         self._contact_handler = ContactEvent(self)
         self._invite_handler = InviteEvent(self)
