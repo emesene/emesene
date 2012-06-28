@@ -41,6 +41,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         gtk.VBox.__init__(self)
         gui.MainWindowBase.__init__(self, session, on_new_conversation)
 
+        self.quit_cb = None
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
 
@@ -234,8 +235,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.group_menu = GroupMenu(group_handler)
             self.group_menu.show_all()
 
-    def set_accels(self):
+    def set_accels(self, quit_cb):
         ''' set accels group to the given window '''
+        self.quit_cb = quit_cb
         accel_group = gtk.AccelGroup()
         self.get_parent().add_accel_group(accel_group)
         self.get_parent().accel_group = accel_group
@@ -259,10 +261,13 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             if self.entry.get_text_length() > 0:
                 self.entry.set_text('')
                 return True
+            else:
+                self.panel.search.set_active(False)
+                return True
             return False
 
-        #TODO: this is really ugly
-        self.get_parent().get_parent().emit('delete-event', gtk.gdk.Event(gtk.gdk.DELETE))
+        if self.quit_cb:
+            self.quit_cb()
 
     def on_key_search(self, accel_group, window, keyval, modifier):
         '''Catches Ctrl+F and opens or closes the search entry'''

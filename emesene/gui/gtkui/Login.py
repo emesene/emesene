@@ -252,6 +252,18 @@ class LoginBaseUI(gtk.Alignment):
         '''
         return
 
+    def set_accels(self, quit_cb):
+        ''' set accels group to the given window '''
+        accel_group = gtk.AccelGroup()
+        self.get_parent().add_accel_group(accel_group)
+        self.get_parent().accel_group = accel_group
+        accel_group.connect_group(gtk.keysyms.Q,
+                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
+                                  quit_cb)
+        accel_group.connect_group(gtk.keysyms.Escape,
+                                  0, gtk.ACCEL_LOCKED,
+                                  quit_cb)
+
 class Login(LoginBaseUI, gui.LoginBase):
     '''
     widget that represents the login window
