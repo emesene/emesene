@@ -257,9 +257,14 @@ class LoginBaseUI(gtk.Alignment):
         accel_group = gtk.AccelGroup()
         parent.add_accel_group(accel_group)
         parent.accel_group = accel_group
-        accel_group.connect_group(gtk.keysyms.Q,
-                                  gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
-                                  quit_cb)
+        if sys.platform == 'darwin':
+            accel_group.connect_group(gtk.keysyms.Q,
+                                      gtk.gdk.META_MASK, gtk.ACCEL_LOCKED,
+                                      quit_cb)
+        else:
+            accel_group.connect_group(gtk.keysyms.Q,
+                                      gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
+                                      quit_cb)
         accel_group.connect_group(gtk.keysyms.Escape,
                                   0, gtk.ACCEL_LOCKED,
                                   quit_cb)
