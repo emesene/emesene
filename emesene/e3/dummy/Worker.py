@@ -136,7 +136,7 @@ class Worker(e3.Worker):
         self._add_contact_to_group('sixteen@hotmail.com', 'strange nicks')
 
         #test pending contact dialog
-        self._add_pending_contacts()
+        #self._add_pending_contacts()
 
     def _add_pending_contacts(self):
         tmp_cont = e3.base.Contact("test1@test.com", 1,
@@ -228,7 +228,11 @@ class Worker(e3.Worker):
         self.session.nick_change_succeed('dummy nick is dummy')
         self._fill_contact_list()
         self.session.contact_list_ready()
-        gobject.timeout_add_seconds(4, self._late_contact_add)
+        #gobject.timeout_add_seconds(4, self._late_contact_add)
+        #memleak checks
+        from e3.base.Event import Event
+        self.session.add_event(Event.EVENT_DISCONNECTED,
+                                           'CHECKING MEMLEAKS :D', 1)
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT
