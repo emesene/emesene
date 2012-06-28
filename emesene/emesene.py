@@ -607,6 +607,9 @@ class Controller(object):
         self.session.config.get_or_set('b_single_window', True)
         self.session.config.get_or_set('b_open_mail_in_desktop', False)
 
+        # set account uuid for session
+        self.session.account_uuid = account.uuid
+
         self.session.login(account.account, account.password, account.status,
             proxy, host, port, use_http, use_ipv6)
 

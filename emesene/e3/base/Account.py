@@ -20,9 +20,10 @@
 class Account(object):
     '''a class to handle the account'''
 
-    def __init__(self, account, password, status, service):
+    def __init__(self, account, password, status, service, uuid=None):
         self.account    = account
         self.password   = password
         self.status     = status
-        self.service   = service
+        self.service    = service
+        self.uuid       = uuid
 

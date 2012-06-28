@@ -385,6 +385,8 @@ class Login(LoginBaseUI, gui.LoginBase):
                             remember_account, remember_password, 
                             auto_login)
 
+        account.uuid = self.account_uuid
+
         self.callback(account, self.session_id, self.proxy, self.use_http,
                       self.use_ipv6, self.server_host, self.server_port)
 

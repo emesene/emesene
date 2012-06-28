@@ -341,6 +341,8 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
 
         self.config_account(e3_account, service_name, save_account, save_password,
                             auto_login)
+
+        account.uuid = self.account_uuid
             
         # Invoke the  login callback
         self.callback(e3_account, self.session_id, self.proxy,
