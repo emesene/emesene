@@ -356,6 +356,12 @@ class Controller(object):
 
         self.config.save(self.config_path)
 
+        #http://www.lshift.net/blog/2008/11/14/tracing-python-memory-leaks
+        # install python-objgraph
+        #import objgraph
+        #objgraph.show_most_common_types()
+        #objgraph.show_growth()
+
         if do_exit:
             if self.tray_icon is not None:
                 self.tray_icon.set_visible(False)
