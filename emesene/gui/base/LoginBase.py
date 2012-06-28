@@ -20,6 +20,7 @@
 import extension
 import e3
 import base64
+import uuid
 from shutil import rmtree
 
 import logging
@@ -47,11 +48,13 @@ class LoginBase(object):
         self.proxy = proxy or e3.Proxy()
         self.server_host = None
         self.server_port = None
+        self.account_uuid = str(uuid.uuid4())
 
         self.config.get_or_set('service', 'msn')
         self.remembers = self.config.get_or_set('d_remembers', {})
         self.config.get_or_set('d_user_service', {})
         self.status = self.config.get_or_set('d_status', {})
+        self.uuids = self.config.get_or_set('d_uuids', {})
         account = self.config.get_or_set('last_logged_account', '')
         self._setup_account(account)
 
@@ -78,12 +81,16 @@ class LoginBase(object):
                 self.config.d_status[account_and_service] = \
                     self.config.d_status.get(_account)
                 self.config.d_status.pop(_account, None)
+                self.config.d_uuids[account_and_service] = \
+                    self.config.d_uuids.get(_account)
+                self.config.d_uuids.pop(_account, None)
                 _value = self.config.d_accounts.get(_account)
                 if _value:
                     self.config.d_accounts[account_and_service] = _value
                 self.config.d_accounts.pop(_account, None)
             self.remembers = self.config.d_remembers
             self.status = self.config.d_status
+            self.uuids = self.config.d_uuids
         self.accounts = self.config.d_accounts
 
     def _setup_services(self, session_id):
@@ -105,6 +112,11 @@ class LoginBase(object):
             self.server_host = 'messenger.hotmail.com'
             self.server_port = '1863'
 
+    def check_and_set_uuid(self, account_and_service):
+        '''set uuid for current account'''
+        if account_and_service not in self.config.d_uuids:
+            self.config.d_uuids[account_and_service] = str(uuid.uuid4())
+
     def config_account(self, account, service, remember_account, remember_password,
                          auto_login):
         '''
@@ -119,19 +131,26 @@ class LoginBase(object):
             self.config.d_user_service[account.account] = service
 
         if auto_login:#+1 account,+1 password,+1 autologin =  3
+            self.check_and_set_uuid(account_and_session)
             self.accounts[account_and_session] = base64.b64encode(account.password)
             self.remembers[account_and_session] = 3
 
         elif remember_password:#+1 account,+1 password = 2
+            self.check_and_set_uuid(account_and_session)
             self.accounts[account_and_session] = base64.b64encode(account.password)
             self.remembers[account_and_session] = 2
 
         elif remember_account:#+1 account = 1
+            self.check_and_set_uuid(account_and_session)
             self.accounts[account_and_session] = ''
             self.remembers[account_and_session] = 1
 
         else:#means i have logged with nothing checked
             self.config.last_logged_account = ''
+
+        # use stored uuid if possible
+        if account_and_session in self.config.d_uuids:
+            self.account_uuid = self.config.d_uuids[account_and_session]
 
         self.config.save(self.config_path)
 
@@ -168,6 +187,8 @@ class LoginBase(object):
             del self.remembers[account_and_service]
         if account_and_service in self.status:
             del self.status[account_and_service]
+        if account_and_service in self.uuids:
+            del self.uuids[account_and_service]
         if account in self.config.d_user_service:
             del self.config.d_user_service[account]
         if account_and_service == self.config.last_logged_account:
