@@ -235,12 +235,12 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.group_menu = GroupMenu(group_handler)
             self.group_menu.show_all()
 
-    def set_accels(self, quit_cb):
+    def set_accels(self, parent, quit_cb):
         ''' set accels group to the given window '''
         self.quit_cb = quit_cb
         accel_group = gtk.AccelGroup()
-        self.get_parent().add_accel_group(accel_group)
-        self.get_parent().accel_group = accel_group
+        parent.add_accel_group(accel_group)
+        parent.accel_group = accel_group
         self.menu.set_accels(accel_group)
         accel_group.connect_group(gtk.keysyms.F,
                                   gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,

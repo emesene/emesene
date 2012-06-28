@@ -135,7 +135,7 @@ class Window(gtk.Window):
         self.content_main.show()
         self.content_main.cmb_account.grab_focus()
         self.content_main.check_autologin()
-        self.content_main.set_accels(self.__delete_event_helper)
+        self.content_main.set_accels(self, self.__delete_event_helper)
 
     def go_connect(self, callback, avatar_path, config):
         '''draw the window that handles logging in'''
@@ -150,7 +150,7 @@ class Window(gtk.Window):
         self.content_main = MainWindow(session, on_new_conversation)
         self.connect('key-press-event', self.content_main._on_key_press)
         self.content_main.show()
-        self.content_main.set_accels(self.__delete_event_helper)
+        self.content_main.set_accels(self, self.__delete_event_helper)
 
         # hide the main window only when the user is connected
         if quit_on_close:

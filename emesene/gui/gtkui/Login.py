@@ -252,11 +252,11 @@ class LoginBaseUI(gtk.Alignment):
         '''
         return
 
-    def set_accels(self, quit_cb):
+    def set_accels(self, parent, quit_cb):
         ''' set accels group to the given window '''
         accel_group = gtk.AccelGroup()
-        self.get_parent().add_accel_group(accel_group)
-        self.get_parent().accel_group = accel_group
+        parent.add_accel_group(accel_group)
+        parent.accel_group = accel_group
         accel_group.connect_group(gtk.keysyms.Q,
                                   gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,
                                   quit_cb)
