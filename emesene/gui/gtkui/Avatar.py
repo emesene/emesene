@@ -96,16 +96,30 @@ class Avatar(gtk.Widget, AvatarManager):
         self.filename = filename
         self.blocked  = blocked
         if not gui.gtkui.utils.file_readable(filename):
-            self.filename = gui.theme.image_theme.user
+            if self._dimension > 32:
+                # use big fallback image
+                self.filename = gui.theme.image_theme.user_def_image
+            else:
+                self.filename = gui.theme.image_theme.user
 
         try:
             animation = gtk.gdk.PixbufAnimation(self.filename)
         except gobject.GError:
             animation = gtk.gdk.PixbufAnimation(gui.theme.image_theme.user)
 
+        if animation.is_static_image() or self.blocked:
+            static_image = animation.get_static_image()
+            static_image = static_image.scale_simple(self._dimension,
+                                                    self._dimension,
+                                                    gtk.gdk.INTERP_BILINEAR)
+        else:
+            animation = utils.simple_animation_scale(self.filename,
+                                                self._dimension,
+                                                self._dimension)
+            static_image = animation.get_static_image()
+
         if self.blocked:
             pixbufblock = utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay_big)
-            static_image = animation.get_static_image()
 
             # use the small block image for small avatars
             if pixbufblock.get_width() > static_image.get_width() * 0.6:
@@ -118,7 +132,8 @@ class Avatar(gtk.Widget, AvatarManager):
             self.__set_from_pixbuf(output_pixbuf)
             self.current_animation = None
             return
-        elif animation.is_static_image():
+        #FIXME: animations are broken on gtk3, use static pixbuf for now
+        elif animation.is_static_image() or check_gtk3():
             self.__set_from_pixbuf(animation.get_static_image())
             self.current_animation = None
             return

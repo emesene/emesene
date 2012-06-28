@@ -183,60 +183,16 @@ class ContactList(gui.ContactList, gtk.TreeView):
         '''try to return a pixbuf of the user picture or the default
         picture
         '''
-        if contact.picture:
-            # TODO: This could be handled in AvatarManager in the same
-            # way as avatars from the Avatar class
-            try:
-                animation = gtk.gdk.PixbufAnimation(contact.picture)
-            except gobject.GError:
-                pix = utils.gtk_pixbuf_load(gui.theme.image_theme.user,
-                        (self.avatar_size, self.avatar_size))
-                picture = gtk.image_new_from_pixbuf(pix)
-                return picture
+        Avatar = extension.get_default('avatar')
+        avatar_image = Avatar(cell_dimension=self.avatar_size, crossfade = False, cell_radius = 0)
+        avatar_image.set_from_file(contact.picture, bool(contact.blocked))
 
-            if animation.is_static_image():
-                pix = utils.gtk_pixbuf_load(contact.picture,
-                        (self.avatar_size, self.avatar_size))
-
-                if bool(contact.blocked):
-                    pixbufblock=utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay)
-                    utils.simple_images_overlap(pix, pixbufblock,
-                                                -pixbufblock.props.width,
-                                                -pixbufblock.props.width)
-
-                picture = gtk.image_new_from_pixbuf(pix)
-            else:
-                myanimation = utils.simple_animation_scale(contact.picture,
-                                                           self.avatar_size,
-                                                           self.avatar_size)
-
-                if bool(contact.blocked):
-                    pixbufblock=utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay)
-                    static_image = myanimation.get_static_image()
-                    pix = static_image.scale_simple(self.avatar_size,
-                                                    self.avatar_size,
-                                                    gtk.gdk.INTERP_BILINEAR)
-
-                    utils.simple_images_overlap(pix, pixbufblock,
-                                                -pixbufblock.props.width,
-                                                -pixbufblock.props.width)
-
-                    picture = gtk.image_new_from_pixbuf(pix)
-                else:
-                    picture = gtk.image_new_from_animation(myanimation)
+        if avatar_image.current_animation:
+            image = gtk.image_new_from_animation(avatar_image.current_animation)
         else:
-            pix = utils.gtk_pixbuf_load(gui.theme.image_theme.user,
-                        (self.avatar_size, self.avatar_size))
+            image = gtk.image_new_from_pixbuf(avatar_image._pixbuf)
 
-            if bool(contact.blocked):
-                pixbufblock=utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay)
-                utils.simple_images_overlap(pix, pixbufblock,
-                                            -pixbufblock.props.width,
-                                            -pixbufblock.props.width)
-
-            picture = gtk.image_new_from_pixbuf(pix)
-
-        return picture
+        return image
 
     def _visible_func(self, model, _iter, *args):
         '''return True if the row should be displayed according to the
