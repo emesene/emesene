@@ -57,3 +57,6 @@ class Signals(threading.Thread):
     def quit(self):
         '''stop the signals thread'''
         self._stop = True
+        for name in self.event_names:
+            delattr(self, name.replace(' ', '_'))
+

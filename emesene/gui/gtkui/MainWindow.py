@@ -56,9 +56,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         scroll.set_shadow_type(gtk.SHADOW_IN)
         scroll.set_border_width(1)
 
-        self.session.signals.contact_attr_changed.subscribe(
-            self._on_contact_attr_changed)
-        self.session.signals.close.subscribe(self.on_disconnect)
+        # XXX: unused
+        #self.session.signals.contact_attr_changed.subscribe(
+        #    self._on_contact_attr_changed)
 
         self.menu = None
         self.contact_menu = None
@@ -369,9 +369,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             if event.string != "" and not self.panel.search.get_active():
                 self.panel.search.set_active(True)
 
-    def on_disconnect(self, close=None):
+    def unsubscribe_signals(self, close=None):
         '''callback called when the disconnect option is selected'''
-        gui.MainWindowBase.on_disconnect(self)
+        gui.MainWindowBase.unsubscribe_signals(self)
 
         #extension changes
         extension.unsubscribe(self._on_below_userlist_changed, "below userlist")
@@ -403,11 +403,10 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             'b_show_userpanel')
         self.session.config.unsubscribe(self._on_show_mail_inbox_changed,
             'b_show_mail_inbox')
-        self.session.signals.contact_attr_changed.unsubscribe(
-            self._on_contact_attr_changed)
+        #self.session.signals.contact_attr_changed.unsubscribe(
+        #    self._on_contact_attr_changed)
         self.panel.remove_subscriptions()
         self.panel = None
-        self.session.signals.close.unsubscribe(self.on_disconnect)
 
     def _on_search_toggled(self, button):
         '''called when the search button is toggled'''

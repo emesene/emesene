@@ -74,20 +74,7 @@ class MainMenu(gtk.MenuBar):
         """
         Set accelerators for menu items
         """
-        if sys.platform == 'darwin':
-            self.file_menu.quit.add_accelerator(
-                    'activate', accel_group, gtk.keysyms.Q,
-                    gtk.gdk.META_MASK, gtk.ACCEL_VISIBLE)
-            self.file_menu.disconnect.add_accelerator(
-                    'activate', accel_group, gtk.keysyms.D,
-                    gtk.gdk.META_MASK, gtk.ACCEL_VISIBLE)
-        else:
-            self.file_menu.quit.add_accelerator(
-                    'activate', accel_group, gtk.keysyms.Q,
-                    gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
-            self.file_menu.disconnect.add_accelerator(
-                    'activate', accel_group, gtk.keysyms.D,
-                    gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
+        self.file_menu.set_accels(accel_group)
 
     def remove_subscriptions(self):
         self.file_menu.remove_subscriptions()
@@ -158,12 +145,12 @@ class FileMenu(gtk.Menu):
 
         if session and session.session_has_service(e3.Session.SERVICE_STATUS):
             StatusMenu = extension.get_default('menu status')
-            self.status = gtk.ImageMenuItem(_('Status'))
-            self.status.set_image(gtk.image_new_from_stock(gtk.STOCK_CONVERT,
+            status = gtk.ImageMenuItem(_('Status'))
+            status.set_image(gtk.image_new_from_stock(gtk.STOCK_CONVERT,
                 gtk.ICON_SIZE_MENU))
-            self.status_menu = StatusMenu(handler.on_status_selected)
-            self.status.set_submenu(self.status_menu)
-            self.append(self.status)
+            status_menu = StatusMenu(handler.on_status_selected)
+            status.set_submenu(status_menu)
+            self.append(status)
 
         if session and session.session_has_service(e3.Session.SERVICE_ENDPOINTS):
             self.ep = gtk.MenuItem(_('Disconnect endpoints'))
@@ -188,6 +175,22 @@ class FileMenu(gtk.Menu):
         self.append(self.disconnect)
         self.append(gtk.SeparatorMenuItem())
         self.append(self.quit)
+
+    def set_accels(self, accel_group):
+        if sys.platform == 'darwin':
+            self.quit.add_accelerator(
+                    'activate', accel_group, gtk.keysyms.Q,
+                    gtk.gdk.META_MASK, gtk.ACCEL_VISIBLE)
+            self.disconnect.add_accelerator(
+                    'activate', accel_group, gtk.keysyms.D,
+                    gtk.gdk.META_MASK, gtk.ACCEL_VISIBLE)
+        else:
+            self.quit.add_accelerator(
+                    'activate', accel_group, gtk.keysyms.Q,
+                    gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
+            self.disconnect.add_accelerator(
+                    'activate', accel_group, gtk.keysyms.D,
+                    gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
 
     def ep_menu_display(self, ep_id, ep_name=None):
         '''called when signal changed'''
