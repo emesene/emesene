@@ -327,6 +327,18 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         return self.model.convert_iter_to_child_iter(iter_)
 
+    def _get_selected_multi(self):
+        '''return multiple selected rows or None'''
+        try:
+            pathlist_ = self.get_selection().get_selected_rows()[1]
+        except AttributeError:
+            return None
+
+        if pathlist_ is None:
+            return None
+
+        return pathlist_
+
     def open_conversation(self, *args):
         """
         Opens a new conversation if a contact is selected
@@ -431,6 +443,14 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def get_contact_selected(self):
         '''return a contact object if there is a group selected, None otherwise
         '''
+        if self.get_selection().get_mode() == gtk.SELECTION_MULTIPLE:
+            sels = self._get_selected_multi()
+
+            if sels is None:
+                return None
+
+            return [self._model[sel][1] for sel in sels if hasattr(self._model[sel][1], "account")]
+
         selected = self._get_selected()
 
         if selected is None:

@@ -1571,6 +1571,8 @@ class InviteWindow(gtk.Window):
         self.callback = callback
         ContactList = extension.get_default('contact list')
         self.contact_list = ContactList(session)
+        sel = self.contact_list.get_selection()
+        sel.set_mode(gtk.SELECTION_MULTIPLE)	
         self.contact_list.destroy_on_filtering = True
         self.contact_list.nick_template = \
             '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
@@ -1648,13 +1650,14 @@ class InviteWindow(gtk.Window):
         """
         method called when the add button is clicked
         """
-        contact = self.contact_list.get_contact_selected()
+        contacts = self.contact_list.get_contact_selected()
 
-        if contact is None:
+        if len(contacts) == 0:
             Dialog.error(_("No contact selected"))
             return
 
-        self.callback(contact.account)
+        for contact in contacts:
+            self.callback(contact.account)
         self.destroy()
 
     def _on_search_changed(self, entry):
