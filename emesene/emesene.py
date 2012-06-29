@@ -473,7 +473,6 @@ class Controller(object):
         if self.tray_icon is not None:
             if trayiconcls == self.tray_icon.__class__:
                 return
-            self.tray_icon.set_visible(False)
 
         handler = gui.base.TrayIconHandler(self.session, gui.theme, self.close_session)
         self.tray_icon = trayiconcls(handler, self.window)
