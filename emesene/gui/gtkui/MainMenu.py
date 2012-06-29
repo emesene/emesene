@@ -42,8 +42,6 @@ class MainMenu(gtk.MenuBar):
         """
         gtk.MenuBar.__init__(self)
 
-        self.handlers = handlers
-
         FileMenu = extension.get_default('menu file')
         ActionsMenu = extension.get_default('menu actions')
         OptionsMenu = extension.get_default('menu options')
