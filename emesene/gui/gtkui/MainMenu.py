@@ -89,6 +89,9 @@ class MainMenu(gtk.MenuBar):
                     'activate', accel_group, gtk.keysyms.D,
                     gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
 
+    def remove_subscriptions(self):
+        self.file_menu.remove_subscriptions()
+
 class EndPointsMenu(gtk.Menu):
     """
     A widget that contains all the endpoints
@@ -197,7 +200,9 @@ class FileMenu(gtk.Menu):
             self.ep.set_visible(len(self.ep_dict) > 0)
 
     def remove_subscriptions(self):
-        if session and session.session_has_service(e3.Session.SERVICE_ENDPOINTS):
+        if self.session and self.session.session_has_service(e3.Session.SERVICE_ENDPOINTS):
+            self.ep_menu.remove_subscriptions()
+
             self.session.signals.endpoint_added.unsubscribe(self.ep_menu_display)
             self.session.signals.endpoint_removed.unsubscribe(self.ep_menu_display)
 
