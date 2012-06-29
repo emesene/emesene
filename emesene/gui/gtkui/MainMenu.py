@@ -49,26 +49,26 @@ class MainMenu(gtk.MenuBar):
         OptionsMenu = extension.get_default('menu options')
         HelpMenu = extension.get_default('menu help')
 
-        self.file = gtk.MenuItem(_('_File'))
-        self.file_menu = FileMenu(self.handlers.file_handler, session)
-        self.file.set_submenu(self.file_menu)
+        file_ = gtk.MenuItem(_('_File'))
+        self.file_menu = FileMenu(handlers.file_handler, session)
+        file_.set_submenu(self.file_menu)
 
-        self.actions = gtk.MenuItem(_('_Actions'))
-        self.actions_menu = ActionsMenu(self.handlers.actions_handler, session)
-        self.actions.set_submenu(self.actions_menu)
+        actions = gtk.MenuItem(_('_Actions'))
+        actions_menu = ActionsMenu(handlers.actions_handler, session)
+        actions.set_submenu(actions_menu)
 
-        self.options = gtk.MenuItem(_('_Options'))
-        self.options_menu = OptionsMenu(self.handlers.options_handler, session.config)
-        self.options.set_submenu(self.options_menu)
+        options = gtk.MenuItem(_('_Options'))
+        options_menu = OptionsMenu(handlers.options_handler, session.config)
+        options.set_submenu(options_menu)
 
-        self.help = gtk.MenuItem(_('_Help'))
-        self.help_menu = HelpMenu(self.handlers.help_handler)
-        self.help.set_submenu(self.help_menu)
+        help = gtk.MenuItem(_('_Help'))
+        help_menu = HelpMenu(handlers.help_handler)
+        help.set_submenu(help_menu)
 
-        self.append(self.file)
-        self.append(self.actions)
-        self.append(self.options)
-        self.append(self.help)
+        self.append(file_)
+        self.append(actions)
+        self.append(options)
+        self.append(help)
 
     def set_accels(self, accel_group):
         """
@@ -138,7 +138,6 @@ class FileMenu(gtk.Menu):
         handler -- e3common.Handler.FileHandler
         """
         gtk.Menu.__init__(self)
-        self.handler = handler
         self.session = session
 
         self.ep_dict = {}
@@ -167,10 +166,10 @@ class FileMenu(gtk.Menu):
 
         self.disconnect = gtk.ImageMenuItem(gtk.STOCK_DISCONNECT)
         self.disconnect.connect('activate',
-            lambda *args: self.handler.on_disconnect_selected())
+            lambda *args: handler.on_disconnect_selected())
         self.quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit.connect('activate',
-            lambda *args: self.handler.on_quit_selected())
+            lambda *args: handler.on_quit_selected())
 
         self.append(self.disconnect)
         self.append(gtk.SeparatorMenuItem())
@@ -221,34 +220,33 @@ class ActionsMenu(gtk.Menu):
         handler -- e3common.Handler.ActionsHandler
         """
         gtk.Menu.__init__(self)
-        self.handler = handler
 
         ContactsMenu = extension.get_default('menu contact')
         AccountMenu = extension.get_default('menu account')
 
-        self.contact = gtk.ImageMenuItem(_('_Contact'))
-        self.contact.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
-        self.contact_menu = ContactsMenu(self.handler.contact_handler, session)
-        self.contact.set_submenu(self.contact_menu)
-        self.account = gtk.ImageMenuItem(_('_Account'))
-        self.account.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
+        contact = gtk.ImageMenuItem(_('_Contact'))
+        contact.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
+        contact_menu = ContactsMenu(handler.contact_handler, session)
+        contact.set_submenu(contact_menu)
+        account = gtk.ImageMenuItem(_('_Account'))
+        account.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
 
-        self.account_menu = AccountMenu(self.handler.my_account_handler)
-        self.myaccount = gtk.ImageMenuItem(_('_Profile'))
-        self.myaccount.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
-        self.myaccount.set_submenu(self.account_menu)
+        account_menu = AccountMenu(handler.my_account_handler)
+        myaccount = gtk.ImageMenuItem(_('_Profile'))
+        myaccount.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
+        myaccount.set_submenu(account_menu)
 
-        self.append(self.contact)
+        self.append(contact)
 
         if session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
             GroupsMenu = extension.get_default('menu group')
-            self.group = gtk.ImageMenuItem(_('_Group'))
-            self.group.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.group_chat))
-            self.group_menu = GroupsMenu(self.handler.group_handler)
-            self.group.set_submenu(self.group_menu)
-            self.append(self.group)
+            group = gtk.ImageMenuItem(_('_Group'))
+            group.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.group_chat))
+            group_menu = GroupsMenu(handler.group_handler)
+            group.set_submenu(group_menu)
+            self.append(group)
 
-        self.append(self.myaccount)
+        self.append(myaccount)
 
 class OptionsMenu(gtk.Menu):
     """
@@ -262,7 +260,6 @@ class OptionsMenu(gtk.Menu):
         handler -- e3common.Handler.OptionsHandler
         """
         gtk.Menu.__init__(self)
-        self.handler = handler
 
         if not check_gtk3():
             self.by_status = gtk.RadioMenuItem(None, _('Order by _status'))
@@ -274,8 +271,8 @@ class OptionsMenu(gtk.Menu):
         self.by_group.set_active(config.b_order_by_group)
         self.by_status.set_active(not config.b_order_by_group)
 
-        self.show_menu = gtk.MenuItem(_('Show...'))
-        self.show_submenu = gtk.Menu()
+        show_menu = gtk.MenuItem(_('Show...'))
+        show_submenu = gtk.Menu()
 
         self.show_offline = gtk.CheckMenuItem(_('Show _offline contacts'))
         self.show_offline.set_active(config.b_show_offline)
@@ -288,45 +285,45 @@ class OptionsMenu(gtk.Menu):
         self.order_by_name = gtk.CheckMenuItem(_('Sort by name'))
         self.order_by_name.set_active(config.b_order_by_name)
 
-        self.preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
-        self.preferences.connect('activate',
-            lambda *args: self.handler.on_preferences_selected())
+        preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
+        preferences.connect('activate',
+            lambda *args: handler.on_preferences_selected())
 
         self.by_status.connect('toggled',
-            lambda *args: self.handler.on_order_by_status_toggled(
+            lambda *args: handler.on_order_by_status_toggled(
                 self.by_status.get_active()))
         self.by_group.connect('toggled',
-            lambda *args: self.handler.on_order_by_group_toggled(
+            lambda *args: handler.on_order_by_group_toggled(
                 self.by_group.get_active()))
         self.show_empty_groups.connect('toggled',
-            lambda *args: self.handler.on_show_empty_groups_toggled(
+            lambda *args: handler.on_show_empty_groups_toggled(
                 self.show_empty_groups.get_active()))
         self.show_offline.connect('toggled',
-            lambda *args: self.handler.on_show_offline_toggled(
+            lambda *args: handler.on_show_offline_toggled(
                 self.show_offline.get_active()))
         self.group_offline.connect('toggled',
-            lambda *args: self.handler.on_group_offline_toggled(
+            lambda *args: handler.on_group_offline_toggled(
                 self.group_offline.get_active()))
         self.show_blocked.connect('toggled',
-            lambda *args: self.handler.on_show_blocked_toggled(
+            lambda *args: handler.on_show_blocked_toggled(
                 self.show_blocked.get_active()))
         self.order_by_name.connect('toggled',
-            lambda *args: self.handler.on_order_by_name_toggled(
+            lambda *args: handler.on_order_by_name_toggled(
                 self.order_by_name.get_active()))
 
-        self.show_menu.set_submenu(self.show_submenu)
-        self.show_submenu.append(self.show_offline)
+        show_menu.set_submenu(show_submenu)
+        show_submenu.append(self.show_offline)
 
         self.append(self.by_status)
         self.append(self.by_group)
         self.append(gtk.SeparatorMenuItem())
-        self.append(self.show_menu)
-        self.show_submenu.append(self.show_empty_groups)
-        self.show_submenu.append(self.show_blocked)
-        self.show_submenu.append(self.order_by_name)
+        self.append(show_menu)
+        show_submenu.append(self.show_empty_groups)
+        show_submenu.append(self.show_blocked)
+        show_submenu.append(self.order_by_name)
         self.append(self.group_offline)
         self.append(gtk.SeparatorMenuItem())
-        self.append(self.preferences)
+        self.append(preferences)
 
 class HelpMenu(gtk.Menu):
     """
@@ -340,28 +337,27 @@ class HelpMenu(gtk.Menu):
         handler -- e3common.Handler.HelpHandler
         """
         gtk.Menu.__init__(self)
-        self.handler = handler
 
-        self.website = gtk.ImageMenuItem(_('_Website'))
-        self.website.set_image(gtk.image_new_from_stock(gtk.STOCK_HOME,
+        website = gtk.ImageMenuItem(_('_Website'))
+        website.set_image(gtk.image_new_from_stock(gtk.STOCK_HOME,
             gtk.ICON_SIZE_MENU))
-        self.website.connect('activate',
-            lambda *args: self.handler.on_website_selected())
-        self.about = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
-        self.about.connect('activate',
-            lambda *args: self.handler.on_about_selected())
+        website.connect('activate',
+            lambda *args: handler.on_website_selected())
+        about = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
+        about.connect('activate',
+            lambda *args: handler.on_about_selected())
 
-        self.debug = gtk.MenuItem(_('Debug'))
-        self.debug.connect('activate',
-                lambda *args: self.handler.on_debug_selected())
+        debug = gtk.MenuItem(_('Debug'))
+        debug.connect('activate',
+                lambda *args: handler.on_debug_selected())
                 
-        self.updatecheck = gtk.ImageMenuItem(_('Check for updates'))
-        self.updatecheck.set_image(gtk.image_new_from_stock(gtk.STOCK_REFRESH,
+        updatecheck = gtk.ImageMenuItem(_('Check for updates'))
+        updatecheck.set_image(gtk.image_new_from_stock(gtk.STOCK_REFRESH,
             gtk.ICON_SIZE_MENU))
-        self.updatecheck.connect('activate', lambda *args: self.handler.on_check_update_selected())
+        updatecheck.connect('activate', lambda *args: handler.on_check_update_selected())
 
-        self.append(self.website)
-        self.append(self.about)
-        self.append(self.debug)
+        self.append(website)
+        self.append(about)
+        self.append(debug)
         self.append(gtk.SeparatorMenuItem())
-        self.append(self.updatecheck)
+        self.append(updatecheck)
