@@ -119,7 +119,7 @@ class ContactMenu(gtk.Menu):
         self.set_unblocked()
 
         if self.session.session_has_service(e3.Session.SERVICE_CONTACT_MANAGING):
-            append(self.add)
+            self.append(add)
         if self.session.session_has_service(e3.Session.SERVICE_CONTACT_BLOCK):
             self.append(block)
             self.append(unblock)
