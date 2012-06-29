@@ -40,29 +40,29 @@ class ContactMenu(gtk.Menu):
 
         add = gtk.ImageMenuItem(gtk.STOCK_ADD)
         add.connect('activate',
-            lambda *args: self.handler.on_add_contact_selected())
+            lambda *args: handler.on_add_contact_selected())
 
         remove = gtk.ImageMenuItem(gtk.STOCK_REMOVE)
         remove.connect('activate',
-            lambda *args: self.handler.on_remove_contact_selected())
+            lambda *args: handler.on_remove_contact_selected())
 
         self.block = gtk.ImageMenuItem(_('Block'))
         self.block.set_image(gtk.image_new_from_stock(gtk.STOCK_CANCEL,
             gtk.ICON_SIZE_MENU))
         self.block.connect('activate',
-            lambda *args: self.handler.on_block_contact_selected())
+            lambda *args: handler.on_block_contact_selected())
 
         self.unblock = gtk.ImageMenuItem(_('Unblock'))
         self.unblock.set_image(gtk.image_new_from_stock(gtk.STOCK_APPLY,
             gtk.ICON_SIZE_MENU))
         self.unblock.connect('activate',
-            lambda *args: self.handler.on_unblock_contact_selected())
+            lambda *args: handler.on_unblock_contact_selected())
 
         set_alias = gtk.ImageMenuItem(_('Set alias'))
         set_alias.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
             gtk.ICON_SIZE_MENU))
         set_alias.connect('activate',
-            lambda *args: self.handler.on_set_alias_contact_selected())
+            lambda *args: handler.on_set_alias_contact_selected())
 
         self.move_groups_submenu = gtk.Menu()
         self.copy_groups_submenu = gtk.Menu()
@@ -72,21 +72,21 @@ class ContactMenu(gtk.Menu):
         move_to_group.set_image(gtk.image_new_from_stock(gtk.STOCK_GO_FORWARD,
             gtk.ICON_SIZE_MENU))
         move_to_group.connect('activate', 
-                    lambda *args: self.on_move_to_group())
+                    lambda *args: self.update_submenus())
         move_to_group.set_submenu(self.move_groups_submenu)
 
         self.copy_to_group = gtk.ImageMenuItem(_('Copy to group'))
         self.copy_to_group.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY,
             gtk.ICON_SIZE_MENU))
         self.copy_to_group.connect('activate', 
-                    lambda *args: self.on_copy_to_group())
+                    lambda *args: self.update_submenus())
         self.copy_to_group.set_submenu(self.copy_groups_submenu)
 
         self.remove_from_group = gtk.ImageMenuItem(_('Remove from group'))
         self.remove_from_group.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE,
             gtk.ICON_SIZE_MENU))
         self.remove_from_group.connect('activate',
-            lambda *args: self.on_remove_from_group())
+            lambda *args: self.update_submenus())
         self.remove_from_group.set_submenu(self.remove_group_submenu)
         self.groups_to_remove = 0
 
@@ -94,7 +94,7 @@ class ContactMenu(gtk.Menu):
         view_info.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
             gtk.ICON_SIZE_MENU))
         view_info.connect('activate',
-            lambda *args: self.handler.on_view_information_selected())
+            lambda *args: handler.on_view_information_selected())
 
         copy = gtk.ImageMenuItem(_('Copy contact information'))
         copy.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY,
@@ -160,15 +160,6 @@ class ContactMenu(gtk.Menu):
         if contact:
             clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
             clipboard.set_text(contact.message)
-
-    def on_move_to_group(self):
-        self.update_submenus()
-
-    def on_copy_to_group(self):
-        self.update_submenus()
-
-    def on_remove_from_group(self):
-        self.update_submenus()
 
     def update_submenus(self):
         for i in self.move_groups_submenu.get_children():
