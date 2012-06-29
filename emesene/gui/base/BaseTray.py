@@ -32,7 +32,6 @@ class BaseTray(object):
         """
         method called to set the state to the main window
         """
-        self.disconnect_signals()
         self.handler.session = session
         self.handler.session.signals.contact_attr_changed.subscribe(
             self._on_contact_attr_changed)
