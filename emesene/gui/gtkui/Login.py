@@ -421,11 +421,14 @@ class Login(LoginBaseUI, gui.LoginBase):
         if event.keyval == gtk.keysyms.Tab:
             self.txt_password.grab_focus()
 
-    def _update_fields(self, account, from_preferences=False):
+    def _update_fields(self, account, from_preferences=False, from_dialog=False):
         '''
         update the different fields according to the account that is
         on the account entry
         '''
+        if from_dialog:
+            return
+
         self._clear_all()
 
         if self.txt_password.get_text() == '':
@@ -649,7 +652,7 @@ class Login(LoginBaseUI, gui.LoginBase):
 
     def _on_new_preferences(self, use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
                             use_auth, user, passwd, session_id, 
-                            service, server_host, server_port):
+                            service, server_host, server_port, from_dialog=False):
         '''
         called when the user press accept on the preferences dialog
         '''
@@ -665,7 +668,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         self.on_preferences_changed(self.use_http, self.use_ipv6, self.proxy, 
                                     self.session_id, service)
 
-        self._update_fields(self.cmb_account.get_active_text(), True)
+        self._update_fields(self.cmb_account.get_active_text(), True, from_dialog)
 
         def searchService(model, path, iter, user_data):
             if(model.get(iter,0)[0]==user_data[0]):

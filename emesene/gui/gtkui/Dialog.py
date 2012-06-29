@@ -870,7 +870,7 @@ class Dialog(object):
                 passwd = t_passwd.get_text()
 
                 callback(use_http, use_ipv6, use_proxy, proxy_host, proxy_port, use_auth,
-                        user, passwd, session_id, service, server_host, server_port)
+                        user, passwd, session_id, service, server_host, server_port, True)
 
             for widget in proxy_settings:
                 widget.destroy()
