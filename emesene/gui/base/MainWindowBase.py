@@ -64,7 +64,7 @@ class MainWindowBase(object):
         dialog = extension.get_default('dialog')
         dialog.broken_profile(self.session.close, profile_url)
 
-    def on_disconnect(self):
+    def unsubscribe_signals(self):
         '''callback called when the disconnect option is selected'''
         self.session.signals.mail_count_changed.unsubscribe(
             self._on_mail_count_changed)
