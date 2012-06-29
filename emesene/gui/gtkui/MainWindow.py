@@ -382,10 +382,12 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.below_userlist = None
 
         if self.below_menu:
-            self.below_v = None
+            self.below_menu = None
 
         if self.below_panel:
             self.below_panel = None
+
+        self.menu.remove_subscriptions()
 
         self.contact_list.contact_selected.unsubscribe(
             self._on_contact_selected)
