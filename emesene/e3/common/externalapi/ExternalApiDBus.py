@@ -61,7 +61,7 @@ class DBusController():
 
     def stop(self):
         self.__session.signals.status_change_succeed.unsubscribe(self.__on_status_changed)
-        self.destroy_dbus_session()
+        self.__destroy_dbus_session()
 
     #Private methods
     def __setup(self):
