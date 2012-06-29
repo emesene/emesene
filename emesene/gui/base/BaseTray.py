@@ -22,12 +22,6 @@ class BaseTray(object):
         """
         pass
 
-    def set_visible(self, arg):
-        """ remove subscriptions if not overridden """
-        if arg:
-            return
-        self.disconnect_signals()
-
     def set_main(self, session):
         """
         method called to set the state to the main window

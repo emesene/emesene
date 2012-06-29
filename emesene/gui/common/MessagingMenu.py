@@ -66,11 +66,7 @@ class MessagingMenu(gui.BaseTray):
         self.sid = self.server.connect("server-display", self._server_display)
         self.server.show()
 
-    def set_visible(self, arg):
-        """ we are exiting from emesene: disconnect all signals """
-        if arg:
-            return
-
+    def unsubscribe(self):
         for key in self.r_indicator_dict.keys():
             ind = self.r_indicator_dict[key]
             if ind is not None:
@@ -80,10 +76,12 @@ class MessagingMenu(gui.BaseTray):
             if self.r_indicator_dict[key] is not None:
                 del self.r_indicator_dict[key]
 
-        self.server.disconnect(self.sid)
-        self.server.hide()
-        self.server = None
-        self.sid = None
+        if self.server:
+            # self.server is None if there's no messaging menu yet
+            self.server.disconnect(self.sid)
+            self.server.hide()
+            self.server = None
+            self.sid = None
 
     def _on_conv_message(self, cid, account, msgobj, cedict=None):
         """
