@@ -39,32 +39,32 @@ class GroupMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        self.add = gtk.ImageMenuItem(gtk.STOCK_ADD)
-        self.add.connect('activate', 
-            lambda *args: self.handler.on_add_group_selected())
+        add = gtk.ImageMenuItem(gtk.STOCK_ADD)
+        add.connect('activate',
+            lambda *args: handler.on_add_group_selected())
 
-        self.remove = gtk.ImageMenuItem(gtk.STOCK_REMOVE)
-        self.remove.connect('activate', 
-            lambda *args: self.handler.on_remove_group_selected())
+        remove = gtk.ImageMenuItem(gtk.STOCK_REMOVE)
+        remove.connect('activate',
+            lambda *args: handler.on_remove_group_selected())
 
-        self.rename = gtk.ImageMenuItem(_('Rename'))
-        self.rename.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
+        rename = gtk.ImageMenuItem(_('Rename'))
+        rename.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
             gtk.ICON_SIZE_MENU))
-        self.rename.connect('activate', 
-            lambda *args: self.handler.on_rename_group_selected())
+        rename.connect('activate',
+            lambda *args: handler.on_rename_group_selected())
 
 
         self.set_favorite = gtk.ImageMenuItem(_('Set as favorite'))
         self.set_favorite.set_image(utils.gtk_ico_image_load(gui.theme.image_theme.favorite,
                                                              gtk.ICON_SIZE_MENU))
-        self.set_favorite.connect('activate', 
+        self.set_favorite.connect('activate',
                               lambda *args: self.on_favorite_group_selected())
         
         
         self.unset_favorite = gtk.ImageMenuItem(_('Unset as favorite'))
         self.unset_favorite.set_image(gtk.image_new_from_stock(gtk.STOCK_CANCEL,
                                                                gtk.ICON_SIZE_MENU))
-        self.unset_favorite.connect('activate', 
+        self.unset_favorite.connect('activate',
                               lambda *args: self.on_unset_favorite_group_selected())
         
         if self.handler.contact_list.is_favorite_group_selected():
@@ -72,9 +72,9 @@ class GroupMenu(gtk.Menu):
         else:
             self.show_set_favorite_item()
 
-        self.append(self.add)
-        self.append(self.remove)
-        self.append(self.rename)
+        self.append(add)
+        self.append(remove)
+        self.append(rename)
         self.append(self.set_favorite)
         self.append(self.unset_favorite)
 

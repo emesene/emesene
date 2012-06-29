@@ -111,8 +111,8 @@ class ConversationToolbar(gtk.Toolbar):
         else:
             size = gtk.ICON_SIZE_LARGE_TOOLBAR
 
-        self.settings = self.get_settings()
-        self.settings.set_long_property('gtk-toolbar-icon-size', size,
+        settings = self.get_settings()
+        settings.set_long_property('gtk-toolbar-icon-size', size,
                                         'ConversationToolbar.py:37')
 
         # check if we have theme-specific toolbar-icons

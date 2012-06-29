@@ -34,13 +34,12 @@ class AccountMenu(gtk.Menu):
         handler -- a e3common.Handler.AccountHandler
         """
         gtk.Menu.__init__(self)
-        self.handler = handler
 
-        self.change_profile = gtk.ImageMenuItem(_('Change profile'))
-        self.change_profile.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
+        change_profile = gtk.ImageMenuItem(_('Change profile'))
+        change_profile.set_image(gtk.image_new_from_stock(gtk.STOCK_EDIT,
             gtk.ICON_SIZE_MENU))
-        self.change_profile.connect('activate',
-            lambda *args: self.handler.change_profile())
+        change_profile.connect('activate',
+            lambda *args: handler.change_profile())
 
-        self.append(self.change_profile)
+        self.append(change_profile)
 
