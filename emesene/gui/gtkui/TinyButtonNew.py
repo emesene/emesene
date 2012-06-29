@@ -16,22 +16,20 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk
 
 class TinyButton(Gtk.Button):
     '''a simple and tiny button'''
 
     def __init__(self, stock):
         '''constructor'''
-        GObject.GObject.__init__(self)
+        Gtk.Button.__init__(self)
 
         # name the button to link it to a style
         self.set_name("close-button")
 
-        self.image = Gtk.Image.new_from_stock(stock, Gtk.IconSize.MENU)
-
-        self.set_image(self.image)
-        self.image.show()
+        image = Gtk.Image.new_from_stock(stock, Gtk.IconSize.MENU)
+        self.set_image(image)
 
         self.set_focus_on_click(False)
         self.set_relief(Gtk.ReliefStyle.NONE)

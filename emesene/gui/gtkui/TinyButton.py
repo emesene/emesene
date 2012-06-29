@@ -28,13 +28,11 @@ class TinyButton(gtk.Button):
         # name the button to link it to a style
         self.set_name("close-button")
 
-        self.image = gtk.image_new_from_stock(stock, gtk.ICON_SIZE_MENU)
-
-        self.set_image(self.image)
+        image = gtk.image_new_from_stock(stock, gtk.ICON_SIZE_MENU)
+        self.set_image(image)
 
         width, height = gtk.icon_size_lookup(gtk.ICON_SIZE_MENU)
         self.set_size_request(width + 2, height + 2)
-        self.image.show()
 
         self.set_focus_on_click(False)
         self.set_relief(gtk.RELIEF_NONE)
