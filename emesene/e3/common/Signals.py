@@ -48,10 +48,16 @@ class Signals(threading.Thread):
         '''process events'''
         if event.id_ < len(self.event_names):
             event_name = self.event_names[event.id_].replace(' ', '_')
-            signal = getattr(self, event_name)
-            # uncomment this to get the signals that are being fired
-            # print event_name, event.args
-            signal.emit(*event.args)
+            try:
+                signal = getattr(self, event_name)
+                # uncomment this to get the signals that are being fired
+                # print event_name, event.args
+                signal.emit(*event.args)
+            except AttributeError:
+                # This can happen when we stop the thread but there still
+                # are some events in queue and we already removed the 
+                # signal it was going to emit
+                pass
         return False
 
     def quit(self):
