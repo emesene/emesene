@@ -231,8 +231,8 @@ class Worker(e3.Worker):
         #gobject.timeout_add_seconds(4, self._late_contact_add)
         #memleak checks
         from e3.base.Event import Event
-        self.session.add_event(Event.EVENT_DISCONNECTED,
-                                           'CHECKING MEMLEAKS :D', 1)
+        #self.session.add_event(Event.EVENT_DISCONNECTED,
+        #                                   'CHECKING MEMLEAKS :D', 1)
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT

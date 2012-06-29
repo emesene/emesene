@@ -341,8 +341,6 @@ class Controller(object):
             self.session.stop_mail_client()
             self.session.quit()
 
-        self.window.on_disconnect(self.close_session)
-
         if self.session is not None:
             self._save_application_language()
             self.session.save_extensions_config()
@@ -391,6 +389,10 @@ class Controller(object):
             if self.notification:
                 self.notification.remove_subscriptions()
                 self.notification = None
+            if self.tray_icon:
+                self.tray_icon.unsubscribe()
+            self.window.on_disconnect(self.close_session)
+            self.dbus_ext.stop()
             extension.unsubscribe(self._on_tray_icon_changed, 'tray icon')
 
     def _save_application_language(self):
