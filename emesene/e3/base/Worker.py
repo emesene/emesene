@@ -20,7 +20,6 @@
 import Queue
 import threading
 import traceback
-import bisect
 
 import Logger
 import logging
