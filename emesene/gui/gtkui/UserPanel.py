@@ -38,7 +38,6 @@ class UserPanel(gtk.VBox):
 
         self.main_window = main_window
         self.session = session
-        self.config_dir = session.config_dir
         self._enabled = True
 
         Avatar = extension.get_default('avatar')
@@ -52,33 +51,32 @@ class UserPanel(gtk.VBox):
             self.avatarBox.set_tooltip_text(_('Click here to set your avatar'))
         self.avatarBox.add(self.avatar)
         self.avatarBox.set_border_width(4)
-
-        self.avatar_path = self.config_dir.get_path("last_avatar")
-        self.avatar.set_from_file(self.avatar_path)
+        self.avatar.set_from_file(session.config_dir.get_path("last_avatar"))
 
         self.nick = TextField.TextField(session.contacts.me.display_name, session.contacts.me.account, False)
         self.nick.set_tooltip_text(_('Click here to set your nick name'))
+
         self.status = StatusButton.StatusButton(session)
         self.status.set_tooltip_text(_('Click here to change your status'))
         self.status.set_status(session.contacts.me.status)
+
         self.search = gtk.ToggleButton()
         self.search.set_tooltip_text(_('Search (Ctrl+F)'))
-        self.mail = gtk.Button(label="(0)")
-        self.mail.set_tooltip_text(_('Click here to access your mail'))
-
-        self.mail.get_settings().set_property( "gtk-button-images", True )
-
-        self.mail.set_image(gtk.image_new_from_file(gui.theme.image_theme.mailbox))
-        self.mail.set_relief(gtk.RELIEF_NONE)
         self.search.set_image(gtk.image_new_from_stock(gtk.STOCK_FIND,
             gtk.ICON_SIZE_MENU))
         self.search.set_relief(gtk.RELIEF_NONE)
 
-        self.empty_message_text = _("Click here to set your message")
+        self.mail = gtk.Button(label="(0)")
+        self.mail.set_tooltip_text(_('Click here to access your mail'))
+        self.mail.get_settings().set_property( "gtk-button-images", True )
+        self.mail.set_image(gtk.image_new_from_file(gui.theme.image_theme.mailbox))
+        self.mail.set_relief(gtk.RELIEF_NONE)
+
+        empty_message_text = _("Click here to set your message")
         self.message = TextField.TextField(session.contacts.me.message,
-            '[I]' + self.empty_message_text + '[/I]',
+            '[I]' + empty_message_text + '[/I]',
             True)
-        self.message.set_tooltip_text(self.empty_message_text)
+        self.message.set_tooltip_text(empty_message_text)
         self.toolbar = gtk.HBox()
 
         hbox = gtk.HBox()

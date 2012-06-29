@@ -56,6 +56,5 @@ class StatusMenu(gtk.Menu):
         """
         method called when a status menu item is called
         """
-
         self.on_status_selected(stat)
 
