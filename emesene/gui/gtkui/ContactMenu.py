@@ -121,8 +121,8 @@ class ContactMenu(gtk.Menu):
         if self.session.session_has_service(e3.Session.SERVICE_CONTACT_MANAGING):
             self.append(add)
         if self.session.session_has_service(e3.Session.SERVICE_CONTACT_BLOCK):
-            self.append(block)
-            self.append(unblock)
+            self.append(self.block)
+            self.append(self.unblock)
         if self.session.session_has_service(e3.Session.SERVICE_CONTACT_MANAGING):
             self.append(remove)
             self.append(gtk.SeparatorMenuItem())
