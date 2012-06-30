@@ -40,6 +40,7 @@ import logging
 log = logging.getLogger('gtkui.ContactInformation')
 
 from IconView import IconView
+from SearchEntry import SearchEntry
 
 class ContactInformation(gtk.Window, gui.base.ContactInformation):
     '''a window that displays information about a contact'''
@@ -321,9 +322,7 @@ class ChatWidget(gtk.VBox):
         #Search Widgets
         searchbox = gtk.HBox()
         search_label = gtk.Label(_("Search:"))
-        self.search_entry = gtk.Entry(50)
-        self.search_entry.set_icon_from_stock(1, gtk.STOCK_FIND)
-        self.search_entry.set_icon_tooltip_text (1, _('Search'))
+        self.search_entry = SearchEntry()
         self.search_entry.connect('icon-press', self._on_search_button_press)
         self.search_entry.connect('key-press-event', self._on_search_key_press)
 

@@ -33,6 +33,7 @@ import stock
 import extension
 
 import ContactInformation
+import SearchEntry
 
 import logging
 log = logging.getLogger('gtkui.Dialog')
@@ -1600,13 +1601,8 @@ class InviteWindow(gtk.Window):
         badd = gtk.Button(stock=gtk.STOCK_ADD)
         bclose = gtk.Button(stock=gtk.STOCK_CLOSE)
 
-        search = gtk.Entry()
-        if hasattr(gtk.Entry, "set_placeholder_text"):
-            search.set_placeholder_text(_('Type to search...'))
-        search.set_icon_from_stock(0,gtk.STOCK_FIND)
-        search.set_icon_tooltip_text(0, _('Type to search...'))
-        search.set_icon_from_stock(1,gtk.STOCK_CLEAR)
-        search.set_icon_tooltip_text(1, _('Clear the search'))
+        search = SearchEntry.SearchEntry()
+        search.connect('changed', self._on_search_changed)
 
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
@@ -1624,8 +1620,6 @@ class InviteWindow(gtk.Window):
 
         badd.connect('clicked', self._on_add_clicked)
         bclose.connect('clicked', lambda *args: self.destroy())
-        search.connect('changed', self._on_search_changed)
-        search.connect('icon-press', self._on_icon_press)
         self.connect('key-press-event', self._on_key_press)
         self.connect('delete-event', lambda *args: self.destroy())
         self.contact_list.contact_selected.subscribe(
@@ -1641,10 +1635,6 @@ class InviteWindow(gtk.Window):
     def _on_key_press(self, widget, event):
         if event.keyval == gtk.keysyms.Escape:
             self.destroy()
-
-    def _on_icon_press(self, entry, icon_position, event):
-         if icon_position == gtk.ENTRY_ICON_SECONDARY:
-             entry.set_text('')
 
     def _on_add_clicked(self, button):
         """

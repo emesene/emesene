@@ -126,14 +126,6 @@ class MenuItem(Gtk.MenuItem):
         return item
 Gtk.MenuItem = MenuItem
 
-class Entry(Gtk.Entry):
-    def __new__(self, length=0):
-        entry = Gtk.Entry.new()
-        if length != 0:
-            entry.set_max_length(length)
-        return entry
-Gtk.Entry = Entry
-
 def about_dialog_set_url_hook(hook):
     pass
 def about_dialog_set_email_hook(hook):
