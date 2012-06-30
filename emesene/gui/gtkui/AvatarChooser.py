@@ -89,10 +89,10 @@ class AvatarChooser(gtk.Window):
         self.connect("key-press-event", self.on_key_press)
 
         Avatar = extension.get_default('avatar')
-        self.img_current = Avatar()
-        self.img_current.set_size_request(96, 96)
+        img_current = Avatar()
+        img_current.set_size_request(96, 96)
         frame_current = gtk.Frame(_("Current"))
-        frame_current.add(self.img_current)
+        frame_current.add(img_current)
 
         hbbox.pack_start(b_clear, False)
         hbbox.pack_start(b_cancel, False)
@@ -122,7 +122,7 @@ class AvatarChooser(gtk.Window):
         self.add(vbox)
         
         current_avatar = session.config.last_avatar
-        self.img_current.set_from_file(current_avatar)
+        img_current.set_from_file(current_avatar)
 
     def _on_tab_changed(self, notebook, page, page_num):
         if page_num == 1: # System Pictures

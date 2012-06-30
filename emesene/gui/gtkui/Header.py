@@ -41,12 +41,12 @@ class Header(gtk.HBox):
         self.set_border_width(2)
         self._information = Renderers.SmileyLabel()
 
-        self.eventBox = gtk.EventBox()
-        self.eventBox.set_visible_window(False)
-        self.eventBox.add(self._information)
-        self.eventBox.connect('button-press-event', self.on_clicked)
+        eventBox = gtk.EventBox()
+        eventBox.set_visible_window(False)
+        eventBox.add(self._information)
+        eventBox.connect('button-press-event', self.on_clicked)
 
-        self.pack_start(self.eventBox, True, True)
+        self.pack_start(eventBox, True, True)
 
         self.session = session
         self.members = members
