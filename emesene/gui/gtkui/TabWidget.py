@@ -65,16 +65,16 @@ class TabWidget(gtk.HBox):
         self.set_border_width(0)
         self.set_spacing(4)
 
-        self.session = conversation.session
+        self.config = conversation.session.config
         self.image = gtk.Image()
-        self.label = gtk.EventBox()
-        self.label.connect('button-press-event', self.on_tab_clicked,
+        label = gtk.EventBox()
+        label.connect('button-press-event', self.on_tab_clicked,
                            on_close_clicked, conversation)
-        self.label.set_visible_window(False)
+        label.set_visible_window(False)
         self._label = Renderers.SmileyLabel()
         self._label.set_ellipsize(True)
         self._label.set_text(text)
-        self.label.add(self._label)
+        label.add(self._label)
         self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
         self.close.set_tooltip_text(_('Close Tab (Ctrl+W)'))
         self.close.connect('clicked', on_close_clicked,
@@ -83,36 +83,36 @@ class TabWidget(gtk.HBox):
         if CLOSE_ON_LEFT:
             self.pack_start(self.close, False, False, 0)
             self.pack_start(self.image, False, False, 0)
-            self.pack_start(self.label, True, True, 0)
+            self.pack_start(label, True, True, 0)
         else:
             self.pack_start(self.image, False, False, 0)
-            self.pack_start(self.label, True, True, 0)
+            self.pack_start(label, True, True, 0)
             self.pack_start(self.close, False, False, 0)
 
-        self.session.config.subscribe(self._on_close_button_on_tabs_visible,
+        self.config.subscribe(self._on_close_button_on_tabs_visible,
             'b_close_button_on_tabs')
         self._on_close_button_on_tabs_visible(
-              self.session.config.get_or_set('b_close_button_on_tabs', True))
+              self.config.get_or_set('b_close_button_on_tabs', True))
 
 
-        if self.session.config.i_tab_position > 1:
+        if self.config.i_tab_position > 1:
             self.set_orientation(gtk.ORIENTATION_VERTICAL)
             self._label.set_angle(90)
         else:
             self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
             self._label.set_angle(0)
 
-        self.session.config.subscribe(self.on_tab_position_change, 
+        self.config.subscribe(self.on_tab_position_change, 
                                       'i_tab_position')
 
         self.image.show()
-        self.label.show()
+        label.show()
         self._label.show()
 
     def remove_subscriptions(self):
-        self.session.config.unsubscribe(self.on_tab_position_change, 
+        self.config.unsubscribe(self.on_tab_position_change, 
                                         'i_tab_position')
-        self.session.config.unsubscribe(self._on_close_button_on_tabs_visible,
+        self.config.unsubscribe(self._on_close_button_on_tabs_visible,
                                         'b_close_button_on_tabs')
 
     def set_image(self, path):
@@ -134,7 +134,7 @@ class TabWidget(gtk.HBox):
         self.close.set_visible(value)
 
     def on_tab_position_change(self, position):
-        if self.session.config.i_tab_position > 1:
+        if self.config.i_tab_position > 1:
             self.set_orientation(gtk.ORIENTATION_VERTICAL)
             self._label.set_angle(90)
         else:
