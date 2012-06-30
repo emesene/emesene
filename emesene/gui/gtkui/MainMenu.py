@@ -280,8 +280,8 @@ class OptionsMenu(gtk.Menu):
         self.show_empty_groups.set_active(config.b_show_empty_groups)
         self.show_blocked = gtk.CheckMenuItem(_('Show _blocked contacts'))
         self.show_blocked.set_active(config.b_show_blocked)
-        self.order_by_name = gtk.CheckMenuItem(_('Sort by name'))
-        self.order_by_name.set_active(config.b_order_by_name)
+        self.sort_by_name = gtk.CheckMenuItem(_('Sort contacts by _name'))
+        self.sort_by_name.set_active(config.b_order_by_name)
 
         preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
         preferences.connect('activate',
@@ -305,20 +305,20 @@ class OptionsMenu(gtk.Menu):
         self.show_blocked.connect('toggled',
             lambda *args: handler.on_show_blocked_toggled(
                 self.show_blocked.get_active()))
-        self.order_by_name.connect('toggled',
+        self.sort_by_name.connect('toggled',
             lambda *args: handler.on_order_by_name_toggled(
-                self.order_by_name.get_active()))
+                self.sort_by_name.get_active()))
 
         show_menu.set_submenu(show_submenu)
         show_submenu.append(self.show_offline)
+        show_submenu.append(self.show_blocked)
+        show_submenu.append(self.show_empty_groups)
 
         self.append(self.by_status)
         self.append(self.by_group)
         self.append(gtk.SeparatorMenuItem())
         self.append(show_menu)
-        show_submenu.append(self.show_empty_groups)
-        show_submenu.append(self.show_blocked)
-        show_submenu.append(self.order_by_name)
+        self.append(self.sort_by_name)
         self.append(self.group_offline)
         self.append(gtk.SeparatorMenuItem())
         self.append(preferences)
