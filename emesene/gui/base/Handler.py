@@ -444,10 +444,6 @@ class MyAccountHandler(object):
     def __init__(self, session):
         '''constructor'''
         self.session = session
-        self.dialog = extension.get_default('dialog')
-
-        self.old_nick = self.session.contacts.me.nick
-        self.old_pm = self.session.contacts.me.message
 
     def change_profile(self):
         '''show a dialog to edit the user account information'''
@@ -455,7 +451,8 @@ class MyAccountHandler(object):
         nick = self.session.contacts.me.nick
         message = self.session.contacts.me.message
 
-        self.dialog.edit_profile(self, nick, message, last_avatar)
+        dialog = extension.get_default('dialog')
+        dialog.edit_profile(self, nick, message, last_avatar)
 
     def save_profile(self, nick, pm):
         '''save the new profile'''
@@ -578,7 +575,6 @@ class TrayIconHandler(FileHandler):
         """
         FileHandler.__init__(self, session, on_quit)
         self.theme = theme
-        self.preferences = None
 
     def on_hide_show_mainwindow(self, main_window=None):
         if main_window is not None:
@@ -589,17 +585,9 @@ class TrayIconHandler(FileHandler):
 
     def on_preferences_selected(self):
         '''called when the preference button is selected'''
-        self.preferences = extension.get_and_instantiate('preferences',
-                                                         self.session)
-
-        if self.session is not self.preferences.session:
-            self.preferences.remove_subscriptions()
-            extension.delete_instance('preferences')
-            self.preferences = extension.get_and_instantiate('preferences',
-                                                             self.session)
-
-        self.preferences.show()
-        self.preferences.present()
+        prefs = extension.get_and_instantiate('preferences', self.session)
+        prefs.show()
+        prefs.present()
 
 class FileTransferHandler(object):
     ''' this handler handles a file transfer object '''

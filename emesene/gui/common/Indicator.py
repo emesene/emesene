@@ -117,3 +117,9 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         name = os.path.basename(os.path.join(os.getcwd(), icon_path))
         name = os.path.splitext(name)
         return name[0]
+
+    def unsubscribe(self):
+        self.disconnect_signals()
+        if self.menu:
+            self.menu.unsubscribe()
+

@@ -234,7 +234,7 @@ class Controller(object):
         self.window = windowcls(self.close_session) # main window
         self._set_location(self.window)
 
-        self._draw_tray_icon()
+        self._draw_tray_icon() # default tray icon
 
         proxy = self._get_proxy_settings()
         use_http = self.config.get_or_set('b_use_http', False)
@@ -459,8 +459,7 @@ class Controller(object):
         self.config.save(self.config_path)
         self.session.set_default_extensions_from_config()
 
-        self._draw_tray_icon()
-        self.tray_icon.unsubscribe()
+        self._draw_tray_icon() # user-specific tray icon
         self.tray_icon.set_main(self.session)
 
         self.window.go_main(self.session, self.on_new_conversation,
@@ -473,6 +472,7 @@ class Controller(object):
         if self.tray_icon is not None:
             if trayiconcls == self.tray_icon.__class__:
                 return
+            self.tray_icon.unsubscribe()
 
         handler = gui.base.TrayIconHandler(self.session, gui.theme, self.close_session)
         self.tray_icon = trayiconcls(handler, self.window)
@@ -480,7 +480,6 @@ class Controller(object):
 
     def _on_tray_icon_changed(self, new_extension):
         self._draw_tray_icon()
-        self.tray_icon.unsubscribe()
         self.tray_icon.set_main(self.session)
 
     def _sync_emesene1(self):

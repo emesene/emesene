@@ -67,6 +67,7 @@ class MessagingMenu(gui.BaseTray):
         self.server.show()
 
     def unsubscribe(self):
+        self.disconnect_signals()
         for key in self.r_indicator_dict.keys():
             ind = self.r_indicator_dict[key]
             if ind is not None:
