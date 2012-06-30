@@ -436,12 +436,12 @@ class ContactList(object):
         template = self.group_template
         maxtotal = len(self.contacts.contacts)
 
-        if self.order_by_status:
+        if group == self.offline_group:
             template = template.replace('[$ONLINE_COUNT]', str(total))
             template = template.replace('[$TOTAL_COUNT]', str(maxtotal))
         else:
-            if group == self.offline_group:
-                template = template.replace('[$ONLINE_COUNT]', str(total))
+            if self.order_by_status:
+                template = template.replace('[$ONLINE_COUNT]', str(online))
                 template = template.replace('[$TOTAL_COUNT]', str(maxtotal))
             else:
                 template = template.replace('[$ONLINE_COUNT]', str(online))

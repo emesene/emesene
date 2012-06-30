@@ -548,8 +548,10 @@ class ContactList(gui.ContactList, gtk.TreeView):
             return self._model.append(self.offline_group_iter, contact_data)
 
         # if we are in order by status mode and contact is online,
+        # or no offline group and contact offline,
         # we add online contacts to their online group :)
-        if self.order_by_status and is_online:
+        if (self.order_by_status and is_online) or \
+           (self.order_by_status and self.group_offline and offline):
             duplicate = self._duplicate_check(contact)
             if duplicate is not None:
                 return duplicate
