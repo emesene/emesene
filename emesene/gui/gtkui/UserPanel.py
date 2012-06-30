@@ -55,6 +55,7 @@ class UserPanel(gtk.VBox):
 
         self.nick = TextField.TextField(session.contacts.me.display_name, session.contacts.me.account, False)
         self.nick.set_tooltip_text(_('Click here to set your nick name'))
+        self.nick.connect('text-changed', self._on_nick_changed)
 
         self.status = StatusButton.StatusButton(session)
         self.status.set_tooltip_text(_('Click here to change your status'))
@@ -71,12 +72,14 @@ class UserPanel(gtk.VBox):
         self.mail.get_settings().set_property( "gtk-button-images", True )
         self.mail.set_image(gtk.image_new_from_file(gui.theme.image_theme.mailbox))
         self.mail.set_relief(gtk.RELIEF_NONE)
+        self.mail.connect('clicked', lambda *args : main_window.on_mail_click())
 
         empty_message_text = _("Click here to set your message")
         self.message = TextField.TextField(session.contacts.me.message,
             '[I]' + empty_message_text + '[/I]',
             True)
         self.message.set_tooltip_text(empty_message_text)
+        self.message.connect('text-changed', self._on_message_changed)
         self.toolbar = gtk.HBox()
 
         hbox = gtk.HBox()
@@ -209,6 +212,14 @@ class UserPanel(gtk.VBox):
         av_chooser = extension.get_and_instantiate('avatar chooser',  self.session)
         av_chooser.set_modal(True)
         av_chooser.show()
+
+    def _on_nick_changed(self, textfield, old_text, new_text):
+        '''method called when the nick is changed'''
+        self.session.set_nick(new_text)
+
+    def _on_message_changed(self, textfield, old_text, new_text):
+        '''method called when the nick is changed'''
+        self.session.set_message(new_text)
 
     def _add_subscriptions(self):
         '''subscribe all signals'''

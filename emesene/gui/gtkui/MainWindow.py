@@ -68,9 +68,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self._build_menus()
 
         self.panel = UserPanel(session, self)
-        self.panel.nick.connect('text-changed', self._on_nick_changed)
-        self.panel.message.connect('text-changed', self._on_message_changed)
-        self.panel.mail.connect('button_release_event', self._on_mail_click)
         self.panel.search.connect('toggled', self._on_search_toggled)
         self.panel.enabled = False
 
@@ -140,10 +137,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
     def _on_mail_count_changed(self, count):
         self.panel.mail.set_label("(%d)" % count)
-
-    def _on_mail_click(self, widget, event):
-        if event.button == 1:
-            self.on_mail_click()
 
     def _on_social_request(self, conn_url):
 
@@ -325,14 +318,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         contact = self.session.contacts.get(account)
         if not contact:
             log.debug('account %s not found on contacts' % account)
-
-    def _on_nick_changed(self, textfield, old_text, new_text):
-        '''method called when the nick is changed on the panel'''
-        self.session.set_nick(new_text)
-
-    def _on_message_changed(self, textfield, old_text, new_text):
-        '''method called when the nick is changed on the panel'''
-        self.session.set_message(new_text)
 
     def _on_key_press(self, widget, event):
         '''method called when a key is pressed on the input widget'''
