@@ -795,6 +795,8 @@ class Profile(BaseContact):
         self._ns_client.set_presence(*self.__pending_set_presence)
 
     def _server_property_changed(self, name, value):
+        if name == "presence" and value is not None:
+            self.__pending_set_presence[0] = value
         if name == "msn-object" and value is not None:
             self.__pending_set_presence[2] = value
         BaseContact._server_property_changed(self, name, value)
