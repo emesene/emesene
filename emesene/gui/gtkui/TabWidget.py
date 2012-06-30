@@ -59,14 +59,13 @@ class TabWidget(gtk.HBox):
     WEBSITE = 'www.emesene.org'
 
     def __init__(self, text, on_tab_menu, 
-                 on_close_clicked, conversation, mozilla_like):
+                 on_close_clicked, conversation):
         '''constructor'''
         gtk.HBox.__init__(self)
         self.set_border_width(0)
         self.set_spacing(4)
 
         self.session = conversation.session
-        self.mozilla_like = mozilla_like
         self.image = gtk.Image()
         self.label = gtk.EventBox()
         self.label.connect('button-press-event', self.on_tab_clicked,
@@ -129,8 +128,6 @@ class TabWidget(gtk.HBox):
     def set_text(self, text):
         '''set the text of the label'''
         self._label.set_markup(gobject.markup_escape_text(text))
-        if self.mozilla_like:
-            self.set_size_request(235, 18) # Empiric measures.
 
     def _on_close_button_on_tabs_visible(self, value):
         '''callback called when b_close_button_on_tabs changes'''

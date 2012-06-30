@@ -43,10 +43,6 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         self.set_tab_pos(pos=self.get_tab_position())
         #self.set_scrollable(session.config.get_or_set('b_conv_tab_scroll',
         #    True))
-
-        # mozilla tabs are fixed-width, otherwise do the same as emesene-1
-        self.mozilla_tabs = session.config.get_or_set('b_conv_tab_mozilla_like', False)
-
         self.connect('switch-page', self._on_switch_page)
         self.connect('page-reordered', self._on_page_reordered)
         self.session.config.subscribe(self._on_tab_position_changed,
@@ -218,13 +214,13 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         TabWidget = extension.get_default('conversation tab')
         conversation = Conversation(self.session, cid, self.update_window, None, members)
         label = TabWidget('Connecting', self._on_tab_menu, self._on_tab_close,
-            conversation, self.mozilla_tabs)
+            conversation)
         label.set_image(gui.theme.image_theme.connect)
         del conversation.tab_label
         conversation.tab_label = label
         conversation.tab_index = self.append_page_menu(conversation, label)
 
-        self.child_set_property(conversation, "tab-expand", not self.mozilla_tabs)
+        self.child_set_property(conversation, "tab-expand", True)
         self.set_tab_reorderable(conversation, True)
         self.update_close_buttons()
 
