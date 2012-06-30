@@ -878,28 +878,25 @@ class ContactList(gui.ContactList, gtk.TreeView):
         if override != 0:
             return override
 
-        if self.order_by_name:
-            # first order by status, online contacts first
-            result = cmp(e3.status.ORDERED.index(contact1.status),
-                e3.status.ORDERED.index(contact2.status))
-            if result == 0:
-                #same status, order by name
-                result = cmp(Plus.msnplus_strip(contact1.display_name),
-                            Plus.msnplus_strip(contact2.display_name))
-            return result
+        rst_status = cmp(e3.status.ORDERED.index(contact1.status),
+                         e3.status.ORDERED.index(contact2.status))
 
-        result = cmp(e3.status.ORDERED.index(contact1.status),
-            e3.status.ORDERED.index(contact2.status))
+        rst_name = cmp(Plus.msnplus_strip(contact1.display_name.lower()),
+                       Plus.msnplus_strip(contact2.display_name.lower()))
 
-        if result != 0:
-            return result
-
-        if self.order_by_status:
-            return cmp(contact1.display_name, contact2.display_name)
+        if self.order_by_status or self.order_by_group:
+            if self.order_by_name:
+                return rst_name
+            else:
+                if rst_status == 0:
+                    return rst_name
+                else:
+                    return rst_status
 
         if len(contact1.groups) == 0:
             if len(contact2.groups) == 0:
-                return cmp(contact1.display_name, contact2.display_name)
+                return cmp(contact1.display_name.lower(),
+                           contact2.display_name.lower())
             else:
                 return -1
         elif len(contact2.groups) == 0:
@@ -925,7 +922,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             display_name = self.get_contact_selected().display_name
 
             if selection.target == 'text/html':
-                display_name = gui.base.Plus.msnplus_parse(display_name)
+                display_name = Plus.msnplus_parse(display_name)
 
                 for x in range(len(display_name)):
                     if isinstance(display_name[x], dict):
