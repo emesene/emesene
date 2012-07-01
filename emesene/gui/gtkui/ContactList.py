@@ -507,7 +507,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         # or no offline group and contact offline,
         # we add online contacts to their online group :)
         if (self.order_by_status and is_online) or \
-           (self.order_by_status and self.group_offline and offline):
+           (self.order_by_status and not self.group_offline and offline):
             duplicate = self._duplicate_check(contact)
             if duplicate is not None:
                 return duplicate
@@ -839,17 +839,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
         rst_status = cmp(e3.status.ORDERED.index(contact1.status),
                          e3.status.ORDERED.index(contact2.status))
 
-        rst_name = cmp(Plus.msnplus_strip(contact1.display_name.lower()),
-                       Plus.msnplus_strip(contact2.display_name.lower()))
-
         if self.order_by_status or self.order_by_group:
-            if self.order_by_name:
-                return rst_name
-            else:
-                if rst_status == 0:
-                    return rst_name
-                else:
-                    return rst_status
+            if self.order_by_name or rst_status == 0:
+                return cmp(Plus.msnplus_strip(contact1.display_name.lower()),
+                           Plus.msnplus_strip(contact2.display_name.lower()))
+            return rst_status
 
         if len(contact1.groups) == 0:
             if len(contact2.groups) == 0:
