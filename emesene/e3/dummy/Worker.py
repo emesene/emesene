@@ -96,6 +96,11 @@ class Worker(e3.Worker):
         self._add_contact('sixteen@hotmail.com',
                 '[C=80][i][b][I][/b]Single I[/i][/c=30][b][/C]Single /C[/B]',
                 e3.status.OFFLINE, '', False)
+        # TODO: FIXME: display different between nickname and message
+        # because of the NICK_TPL for ContactList but plain for others
+        self._add_contact('seventeen@hotmail.com',
+                '[/c][c=48][c=12][b]Colorful nickname[/b][/c=50]',
+                e3.status.OFFLINE, '', False, '[/c][c=48][c=12][b]Colorful message[/b][/c=50]')
 
         self._add_group('ninjas')
         self._add_group('pirätes')
@@ -168,12 +173,12 @@ class Worker(e3.Worker):
         e3.Logger.log_message(self.session, None, message, False)
         return False
 
-    def _add_contact(self, mail, nick, status_, alias, blocked):
+    def _add_contact(self, mail, nick, status_, alias, blocked, msg="..."):
         """
         method to add a contact to the contact list
         """
         self.session.contacts.contacts[mail] = e3.Contact(mail, mail,
-            nick, '...', status_, alias, blocked)
+            nick, msg, status_, alias, blocked)
 
     def _add_group(self, name):
         """
