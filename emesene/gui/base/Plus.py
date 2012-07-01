@@ -407,15 +407,16 @@ def msnplus(text, do_parse_emotes=True):
 
 def _msnplus_tags_extract(msnplus, strip=False):
     '''extract all msnplus tags from input'''
+    nl_pos = msnplus.find('\n')
     tags_list = []
     for m in msnplus_tags_re.finditer(msnplus):
         is_opened_tag = False if m.group(1) != '' else True
         # (tag, an opened_tag?, does it paired?, start pos)
         tags_list.append([m.group(2), is_opened_tag, False, m.start()])
 
-    return _msnplus_tags_pair(tags_list, strip)
+    return _msnplus_tags_pair(tags_list, nl_pos, strip)
 
-def _msnplus_tags_pair(tags_list, strip=False):
+def _msnplus_tags_pair(tags_list, nl_pos, strip=False):
     '''find out dangling tags in list based on an assumption that
     all tags are well-formed'''
     # we use the strategy like stack but no pop/push operations
@@ -429,9 +430,14 @@ def _msnplus_tags_pair(tags_list, strip=False):
             # of tags, not the actually paired one
             if tags_list[p][1] and not tags_list[p][2] and \
                tags_list[p][0].lower() == tags_list[i][0].lower():
-                tags_list[p][2] = True
-                tags_list[i][2] = True
-                break
+                # avoid to cross newline, eg: nickname nl message
+                # pair if there is no newline, or pair in the same part
+                if nl_pos == -1 or \
+                   (tags_list[p][3] > nl_pos and tags_list[i][3] > nl_pos) or \
+                   (tags_list[p][3] < nl_pos and tags_list[i][3] < nl_pos):
+                    tags_list[p][2] = True
+                    tags_list[i][2] = True
+                    break
 
     # we only need position of paired tags in strip mode
     if strip:
