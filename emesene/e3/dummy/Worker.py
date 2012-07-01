@@ -60,7 +60,7 @@ class Worker(e3.Worker):
                 e3.status.BUSY, '', False)
         self._add_contact('four@hotmail.com',
                 '[c=48][b]hy[/b][/c=11] ·#·$3,3\'_·$#fcfcfc,#fcfcfc\'_·$4,4\'_·0·$28',
-                e3.status.BUSY, '', False)
+                e3.status.ONLINE, '', False)
         self._add_contact('five@hotmail.com',
                 '·&·#·$9X.|̲̅·$10X·$9̲̅·$10x·$9̲̅·$10x·$9̲̅·$10x·$9̲̅·$10x·$9̲̅|·$10·#',
                 e3.status.BUSY, '', False)
@@ -71,7 +71,7 @@ class Worker(e3.Worker):
                 e3.status.BUSY, '', False)
         self._add_contact('eight@hotmail.com',
                 '[i][B][C=12]☆[/C=0][C=0]☆[/C=12][c=12]☆[/c=0] (W) [C=12]Bellamezz[/c=49] (F) [c=0]☆[/c=0][c=12]☆[/c=12][c=0]☆[/c=0][/B][/i]',
-                e3.status.BUSY, '', False)
+                e3.status.AWAY, '', False)
         self._add_contact('nine@hotmail.com',
                 '[b](*) ... [c=12]Ricky[/c=33] ...(*)[/b]',
                 e3.status.BUSY, '', False)
@@ -80,13 +80,13 @@ class Worker(e3.Worker):
                 e3.status.BUSY, '', False)
         self._add_contact('eleven@hotmail.com',
                 '·$,32·$59«·$,41·$50«·$,50·$41«·$,59·$32«·$,66·$23«·$32,1« :: nube ::»·$,66·$23»·$,59·$32»·$,50·$41»·$,41·$50»·$,32·$59»·0 ·$0',
-                e3.status.BUSY, '', False)
+                e3.status.AWAY, '', False)
         self._add_contact('twelve@hotmail.com',
                 '·$4Red·$11Aqua·$6,8PurpleOnYellow·$14GrayOnYellow·0Black·$9Lime',
                 e3.status.BUSY, '', False)
         self._add_contact('thirteen@hotmail.com',
                 '[c=7][b][I am][/c=yellow][/b][c=70][/c=89][c=89] so [A]wesome that [I] only use invalid tags [/c]',
-                e3.status.BUSY, '', False)
+                e3.status.ONLINE, '', False)
         self._add_contact('fourteen@hotmail.com',
                 '\')")&apos;&quot;:)(H);)&quot;&apos;")\')',
                 e3.status.BUSY, '', False)
@@ -95,7 +95,7 @@ class Worker(e3.Worker):
                 e3.status.BUSY, '', False)
         self._add_contact('sixteen@hotmail.com',
                 '[C=80][i][b][I][/b]Single I[/i][/c=30][b][/C]Single /C[/B]',
-                e3.status.BUSY, '', False)
+                e3.status.OFFLINE, '', False)
 
         self._add_group('ninjas')
         self._add_group('pirätes')
