@@ -841,14 +841,14 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         if self.order_by_status or self.order_by_group:
             if self.order_by_name or rst_status == 0:
-                return cmp(Plus.msnplus_strip(contact1.display_name.lower()),
-                           Plus.msnplus_strip(contact2.display_name.lower()))
+                return cmp(Plus.msnplus_strip(contact1.display_name).lower(),
+                           Plus.msnplus_strip(contact2.display_name).lower())
             return rst_status
 
         if len(contact1.groups) == 0:
             if len(contact2.groups) == 0:
-                return cmp(contact1.display_name.lower(),
-                           contact2.display_name.lower())
+                return cmp(Plus.msnplus_strip(contact1.display_name).lower(),
+                           Plus.msnplus_strip(contact2.display_name).lower())
             else:
                 return -1
         elif len(contact2.groups) == 0:
