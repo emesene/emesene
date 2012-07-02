@@ -819,6 +819,21 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     if path and state:
                         self.expand_row(path, False)
 
+    def update_format_nick(self):
+        '''update the format of contact nick name'''
+        for row in self._model:
+            if isinstance(row[1], e3.Group):
+                for contact_row in row.iterchildren():
+                    contact_row[2] = self.format_nick(contact_row[1])
+            elif isinstance(row[1], e3.Contact):
+                row[2] = self.format_nick(row[1]) 
+
+    def update_format_group(self):
+        '''update the format of group name'''
+        for row in self._model:
+            if isinstance(row[1], e3.Group):
+                row[2] = self.format_group(row[1]) 
+
     def set_avatar_size(self, size):
         """set the size of the avatars on the contact list
         """

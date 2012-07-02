@@ -61,6 +61,10 @@ class ContactList(object):
 
         self.session.config.subscribe(self._on_avatarssize_changed,
             'i_avatar_size')
+        self.session.config.subscribe(self._on_nick_template_changed,
+            'nick_template_clist')
+        self.session.config.subscribe(self._on_group_template_changed,
+            'group_template')
 
         self.avatar_size = self.session.config.get_or_set('i_avatar_size', 32)
         self.set_avatar_size(self.avatar_size)
@@ -133,13 +137,17 @@ class ContactList(object):
 
     def remove_subscriptions(self):
         '''disconnect signals subscriptions'''
+        self.session.config.unsubscribe(self._on_avatarssize_changed,
+            'i_avatar_size')
+        self.session.config.unsubscribe(self._on_nick_template_changed,
+            'nick_template_clist')
+        self.session.config.unsubscribe(self._on_group_template_changed,
+            'group_template')
+
         self.session.signals.contact_list_ready.unsubscribe(
             self.on_contact_list_ready)
         self.session.signals.contact_added_you.unsubscribe(
             self.on_pending_contacts)
-
-        self.session.config.unsubscribe(self._on_avatarssize_changed,
-            'i_avatar_size')
         self.session.signals.contact_attr_changed.unsubscribe(
             self._on_contact_attr_changed)
         self.session.signals.picture_change_succeed.unsubscribe(
@@ -193,6 +201,18 @@ class ContactList(object):
         '''callback called when config.i_avatar_size changes'''
         self.set_avatar_size(value)
         self.fill()
+
+    def _on_nick_template_changed(self, value):
+        '''callback called when config.nick_template_clist changes'''
+	if self.nick_template != value:
+            self.nick_template = value
+            self.update_format_nick()
+
+    def _on_group_template_changed(self, value):
+        '''callback called when config.group_template changes'''
+	if self.group_template != value:
+            self.group_template = value
+            self.update_format_group()
 
     def _on_contact_attr_changed(self, account, *args):
         '''called when an attribute of the contact changes
@@ -531,6 +551,14 @@ class ContactList(object):
 
     def update_group(self, group):
         '''update the data of group'''
+        raise NotImplementedError()
+
+    def update_format_nick(self):
+        '''update the format of contact nick name'''
+        raise NotImplementedError()
+
+    def update_format_group(self):
+        '''update the format of group name'''
         raise NotImplementedError()
 
     def set_group_state(self, group, state):

@@ -636,10 +636,12 @@ class MainWindow(BaseTable):
 
         self.append_entry_default(_('Nick format'), 'nick',
                                   'session.config.nick_template_clist',
-                                  ContactList.NICK_TPL, _('Nick Format Help'))
+                                  ContactList.NICK_TPL, _('Nick Format Help'),
+                                  has_apply=True)
         self.append_entry_default(_('Group format'), 'group',
                                   'session.config.group_template',
-                                  ContactList.GROUP_TPL, _('Group Format Help'))
+                                  ContactList.GROUP_TPL, _('Group Format Help'),
+                                  has_apply=True)
 
         if sys.platform == 'darwin':
 
