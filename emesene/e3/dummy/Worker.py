@@ -86,21 +86,24 @@ class Worker(e3.Worker):
                 e3.status.BUSY, '', False)
         self._add_contact('thirteen@hotmail.com',
                 '[c=7][b][I am][/c=yellow][/b][c=70][/c=89][c=89] so [A]wesome that [I] only use invalid tags [/c]',
-                e3.status.ONLINE, '', False)
+                e3.status.ONLINE, '', False,
+                '[ I am ] so [ A ]wesome that [ I ] only use invalid tags ')
         self._add_contact('fourteen@hotmail.com',
-                '\')")&apos;&quot;:)(H);)&quot;&apos;")\')',
-                e3.status.BUSY, '', False)
+                '")&apos;:)(H);)&quot;\')',
+                e3.status.BUSY, '', False,
+                '\")&apos;(emo)(emo)(emo)&quot;\')')
         self._add_contact('fifteen@hotmail.com',
                 '1:)2;)3\')4\')5;)6:)7',
-                e3.status.BUSY, '', False)
+                e3.status.BUSY, '', False,
+                '1(emo)2(emo)3(emo)4(emo)5(emo)6(emo)7')
         self._add_contact('sixteen@hotmail.com',
-                '[C=80][i][b][I][/b]Single I[/i][/c=30][b][/C]Single /C[/B]',
-                e3.status.OFFLINE, '', False)
-        # TODO: FIXME: display different between nickname and message
-        # because of the NICK_TPL for ContactList but plain for others
+                '[C=80][i][b][I][/b]Single i[/i][/c=30][b][/C]Single /C[/B]',
+                e3.status.OFFLINE, '', False,
+                '[ i ]Single i[ /C ]Single /C')
         self._add_contact('seventeen@hotmail.com',
                 '[/c][c=48][c=12][b]Colorful nickname[/b][/c=50]',
-                e3.status.OFFLINE, '', False, '[/c][c=48][c=12][b]Colorful message[/b][/c=50]')
+                e3.status.OFFLINE, '', False,
+                '[ /c ][ c=48 ]Colorful nickname')
 
         self._add_group('ninjas')
         self._add_group('pirätes')
