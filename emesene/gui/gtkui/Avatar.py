@@ -98,7 +98,7 @@ class Avatar(gtk.Widget, AvatarManager):
         if not gui.gtkui.utils.file_readable(filename):
             if self._dimension > 32:
                 # use big fallback image
-                self.filename = gui.theme.image_theme.user_def_image
+                self.filename = gui.theme.image_theme.user_def_imagetool
             else:
                 self.filename = gui.theme.image_theme.user
 
@@ -134,7 +134,7 @@ class Avatar(gtk.Widget, AvatarManager):
             return
         #FIXME: animations are broken on gtk3, use static pixbuf for now
         elif animation.is_static_image() or check_gtk3():
-            self.__set_from_pixbuf(animation.get_static_image())
+            self.__set_from_pixbuf(static_image)
             self.current_animation = None
             return
 

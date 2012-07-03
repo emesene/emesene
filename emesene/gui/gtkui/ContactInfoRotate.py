@@ -49,7 +49,6 @@ class ContactInfoRotate(gtk.VBox):
         self.pack_end(self._last_alig)
 
         Avatar = extension.get_default('avatar')
-
         avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
 
         self.avatarBox = gtk.EventBox()
@@ -88,8 +87,6 @@ class ContactInfoRotate(gtk.VBox):
             context.add_provider(prov, 600) #GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
             context.save()
 
-        my_picture = self.session.config.last_avatar
-
         # Obtains his picture and details.
         contact = self.session.contacts.safe_get(None)
         if members is not None:
@@ -98,9 +95,8 @@ class ContactInfoRotate(gtk.VBox):
 
         self.first = self.his_avatarBox
         self.his_avatar.set_from_file(contact.picture, contact.blocked)
-
         self.last = self.avatarBox
-        self.avatar.set_from_file(my_picture)
+        self.avatar.set_from_file(self.session.config.last_avatar)
 
         self.index = 0 # used for the rotate picture function
         self.timer = None
