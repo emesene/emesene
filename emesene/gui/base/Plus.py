@@ -203,9 +203,10 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         _close_stack_tags(message_stack, do_parse_emotes)
         message_stack[-1]['childs'].append('\n')
 
-    if tag_queue and tag_queue[0][0] == match.group(3) and not tag_queue[0][2]:
-        message_stack[-1]['childs'].append(match.group(0))
-    elif close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
+    #if tag_queue and tag_queue[0][0] == match.group(3) and not tag_queue[0][2]:
+    #    message_stack[-1]['childs'].append(match.group(0))
+    #el
+    if close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
        (tag in COLOR_TAGS and (arg or not open_)))):
         if open_:
             if text_before.strip(' ') and not was_double_color:
@@ -475,9 +476,9 @@ def _unescape_special_chars(text):
 def _strip_tags(text, strip_list):
     '''strip msnplus tags with the striplist'''
     def strip_tags(match):
-        if match.start() in strip_list:
+        #if match.start() in strip_list:
             return ''
-        return match.group(0)
+        #return match.group(0)
 
     text = tag_plus_strip_re.sub(strip_tags, text)
     text = tag_plus_old_strip_re.sub('', text)
