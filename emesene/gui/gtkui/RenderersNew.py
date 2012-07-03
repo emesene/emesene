@@ -234,12 +234,12 @@ inherited by extensions.
         try:
             decorated_markup = self._prepare_markup(self.markup, self.is_plus)
         except Exception, error: #We really want to catch all exceptions
-            log.error("this nick: '%s' made the parser go crazy, striping. Error: %s" % (
+            log.info("Text: '%s' made the parser go crazy, striping. Error: %s" % (
                     self.markup, error))
             try:
                 decorated_markup = self._prepare_markup(self.markup, False)
             except Exception, error: #We really want to catch all exceptions
-                log.error("Even stripping plus markup doesn't help. Error: %s" % error)
+                log.info("Even stripping plus markup doesn't help. Error: %s" % error)
                 decorated_markup = self.markup
 
         return decorated_markup
