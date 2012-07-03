@@ -203,10 +203,9 @@ def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
         _close_stack_tags(message_stack, do_parse_emotes)
         message_stack[-1]['childs'].append('\n')
 
-    #if tag_queue and tag_queue[0][0] == match.group(3) and not tag_queue[0][2]:
-    #    message_stack[-1]['childs'].append(match.group(0))
-    #el
-    if close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
+    if tag_queue and tag_queue[0][0] == match.group(3) and not tag_queue[0][2]:
+        message_stack[-1]['childs'].append(match.group(0))
+    elif close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
        (tag in COLOR_TAGS and (arg or not open_)))):
         if open_:
             if text_before.strip(' ') and not was_double_color:
@@ -412,8 +411,9 @@ def _msnplus_tags_extract(msnplus, strip=False):
     tags_list = []
     for m in msnplus_tags_re.finditer(msnplus):
         is_opened_tag = False if m.group(1) != '' else True
-        # (tag, an opened_tag?, does it paired?, start pos)
-        tags_list.append([m.group(2), is_opened_tag, False, m.start()])
+        has_attr = False if not m.group(4) else True
+        # (tag, an opened_tag?, does it paired?, start pos, tag with attr?)
+        tags_list.append([m.group(2), is_opened_tag, False, m.start(), has_attr])
 
     return _msnplus_tags_pair(tags_list, nl_pos, strip)
 
@@ -425,14 +425,20 @@ def _msnplus_tags_pair(tags_list, nl_pos, strip=False):
         # do not process opened tag
         if tags_list[i][1]:
             continue
-        for p in range(i):
+
+        for p in reversed(range(i)):
             # find out an unpaired opened_tag with the same type
-            # and mark them paired; we only care about the number
-            # of tags, not the actually paired one
+            # and mark them paired, like stack (msnplus-like)
+            # we allow mixing upper case and lower case in code
             if tags_list[p][1] and not tags_list[p][2] and \
                tags_list[p][0].lower() == tags_list[i][0].lower():
+                # a color tag must have attribute
+                if tags_list[p][0].lower() in ['a', 'c'] and \
+                   not tags_list[p][4]:
+                    continue
+
                 # avoid to cross newline, eg: nickname nl message
-                # pair if there is no newline, or pair in the same part
+                # pair if there is no newline, or in the same part
                 if nl_pos == -1 or \
                    (tags_list[p][3] > nl_pos and tags_list[i][3] > nl_pos) or \
                    (tags_list[p][3] < nl_pos and tags_list[i][3] < nl_pos):
@@ -476,9 +482,9 @@ def _unescape_special_chars(text):
 def _strip_tags(text, strip_list):
     '''strip msnplus tags with the striplist'''
     def strip_tags(match):
-        #if match.start() in strip_list:
+        if match.start() in strip_list:
             return ''
-        #return match.group(0)
+        return match.group(0)
 
     text = tag_plus_strip_re.sub(strip_tags, text)
     text = tag_plus_old_strip_re.sub('', text)
