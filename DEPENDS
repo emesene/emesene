@@ -25,8 +25,8 @@ NOTE: Packagers might want to set recommended packages as hard dependencies
 === Gtk3 UI ===
  * pygobject >= 3.2
  * gir1.2-gtk-3.0
- * gir1.2-gst-plugins-base-0.10
- * gir1.2-gstreamer-0.10
+ * gir1.2-gst-plugins-base-0.10 (optional, recommended)
+ * gir1.2-gstreamer-0.10 (optional, recommended)
  * gir1.2-webkit-3.0 (optional, recommended)
  * gir1.2-appindicator3 (optional, recommended)
  * gir1.2-notify-0.7 (optional, recommended)

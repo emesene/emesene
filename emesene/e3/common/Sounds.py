@@ -19,30 +19,45 @@
 import os
 import subprocess
 import e3
+import gobject
 
-HAVE_GSTREAMER = True
-try:
-    import pygst
-    import gst
+def is_gi():
+    return hasattr(gobject, '_introspection_module')
 
-    def gst_on_message(bus, message, player):
-        #FIXME: we are affected by bug
-        #https://bugzilla.gnome.org/show_bug.cgi?id=660612
+#check for gst GI support
+def have_gi_gst():
+    try:
+        from gi import pygtkcompat
+        pygtkcompat.enable_gst()
+    except (ImportError, ValueError) as ex:
+        return False
+    return True
+
+HAVE_GSTREAMER = False
+if not is_gi() or have_gi_gst():
+    HAVE_GSTREAMER = True
+    try:
+        import pygst
+        import gst
+
+        def gst_on_message(bus, message, player):
+            #FIXME: we are affected by bug
+            #https://bugzilla.gnome.org/show_bug.cgi?id=660612
+            if hasattr(gst, "init"):
+                 player.set_state(gst.State.NULL)
+            else:
+                if message.type == gst.MESSAGE_EOS:
+                    player.set_state(gst.STATE_NULL)
+
         if hasattr(gst, "init"):
-             player.set_state(gst.State.NULL)
-        else:
-            if message.type == gst.MESSAGE_EOS:
-                player.set_state(gst.STATE_NULL)
-
-    if hasattr(gst, "init"):
-        gst.init(None)
-    gst_player = gst.element_factory_make("playbin", "player")
-    bus = gst_player.get_bus()
-    bus.enable_sync_message_emission()
-    bus.add_signal_watch()
-    bus.connect('message', gst_on_message, gst_player)
-except ImportError:
-    HAVE_GSTREAMER = False
+            gst.init(None)
+        gst_player = gst.element_factory_make("playbin", "player")
+        bus = gst_player.get_bus()
+        bus.enable_sync_message_emission()
+        bus.add_signal_watch()
+        bus.connect('message', gst_on_message, gst_player)
+    except ImportError:
+        HAVE_GSTREAMER = False
 
 def is_on_path(fname):
     """
