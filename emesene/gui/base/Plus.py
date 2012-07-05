@@ -504,4 +504,7 @@ def msnplus_strip(text, useless_arg=None):
     text = _strip_tags(text, strip_list)
     text = _unescape_special_chars(text)
 
+    # try to decode and ignore any errors
+    text = text.decode("utf-8", errors="ignore")
+
     return text
