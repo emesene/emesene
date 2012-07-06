@@ -500,6 +500,7 @@ def msnplus_strip(text, useless_arg=None):
     compatibility with text
     '''
     text = _escape_special_chars(text)
+    text = unicode(text, 'utf8') if not isinstance(text, unicode) else text
     strip_list = _msnplus_tags_extract(text, True)
     text = _strip_tags(text, strip_list)
     text = _unescape_special_chars(text)
