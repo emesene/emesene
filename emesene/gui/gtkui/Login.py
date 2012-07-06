@@ -316,7 +316,8 @@ class Login(LoginBaseUI, gui.LoginBase):
 
         account = self.config.get_or_set('last_logged_account', '')
 
-        if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
+        if account != '' and int(self.config.d_remembers.get(account, 0)) == 3 and \
+           self.service_available(account.rpartition('|')[2]):
             password = self.decode_password(account)
 
             self.cmb_account.get_children()[0].set_text(account.rpartition('|')[0])
@@ -454,6 +455,11 @@ class Login(LoginBaseUI, gui.LoginBase):
                 self.session_name_to_index.get(service, 0))
         else:
             service = self._get_active_service()
+
+        if not self.service_available(service):
+            self.show_error(_("%s service is not supported on your system") % 
+                            service)
+            return
 
         self.update_service(service)
         ext_id, ext = self.service2id[service]

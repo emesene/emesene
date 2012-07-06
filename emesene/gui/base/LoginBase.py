@@ -195,3 +195,6 @@ class LoginBase(object):
             self.config.last_logged_account = ''
 
         self.config.save(self.config_path)
+
+    def service_available(self, service):
+        return (service in self.services)
