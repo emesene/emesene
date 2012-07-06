@@ -119,6 +119,7 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         return name[0]
 
     def unsubscribe(self):
+        self.set_status(appindicator.STATUS_PASSIVE)
         self.disconnect_signals()
         if self.menu:
             self.menu.unsubscribe()
