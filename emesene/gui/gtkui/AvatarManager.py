@@ -131,7 +131,7 @@ class AvatarManager(gobject.GObject):
         pix_width = pixbuf.get_width()
         pix_height = pixbuf.get_height()
 
-        if (pix_width > dimension) or (pix_height > dimension):
+        if (pix_width != dimension) or (pix_height != dimension):
             scale_factor = float(dimension) / max (pix_width, pix_height)
         else:
             scale_factor = 1
