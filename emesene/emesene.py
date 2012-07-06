@@ -473,10 +473,11 @@ class Controller(object):
             if trayiconcls == self.tray_icon.__class__:
                 return
             self.tray_icon.unsubscribe()
+        else:
+            extension.subscribe(self._on_tray_icon_changed, 'tray icon')
 
         handler = gui.base.TrayIconHandler(self.session, gui.theme, self.close_session)
         self.tray_icon = trayiconcls(handler, self.window)
-        extension.subscribe(self._on_tray_icon_changed, 'tray icon')
 
     def _on_tray_icon_changed(self, new_extension):
         self._draw_tray_icon()
