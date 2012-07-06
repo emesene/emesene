@@ -102,6 +102,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.column = gtk.TreeViewColumn()
         self.column.set_expand(True)
+        self.column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
 
         self.exp_column = gtk.TreeViewColumn()
         self.exp_column.set_max_width(16)
