@@ -491,6 +491,11 @@ Do you want to fix your profile now?''')
             color = Utils.qcolor_to_e3_color(new_qt_color)
             callback(color)
 
+    @classmethod
+    def close_all(cls):
+        #FIXME: close the hidden dialogs
+        pass
+
 class StandardButtonDialog (QtGui.QDialog):
     '''Skeleton for a dialog window with standard buttons'''
     def __init__(self, title, expanding=False, parent=None):
