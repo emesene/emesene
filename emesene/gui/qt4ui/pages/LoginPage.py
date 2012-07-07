@@ -41,7 +41,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
     # pylint: enable=W0612
 
     def __init__(self, callback, on_preferences_changed, config=None,
-                 config_dir=None, config_path=None, proxy=None, use_http=None, use_ipv6=None
+                 config_dir=None, config_path=None, proxy=None, use_http=None, use_ipv6=None,
                  session_id=None, cancel_clicked=False, no_autologin=False,
                  parent=None):
         '''Constructor'''

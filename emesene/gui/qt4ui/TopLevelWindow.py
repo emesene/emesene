@@ -51,8 +51,9 @@ class TopLevelWindow (QtGui.QMainWindow):
         #QtGui.QMainWindow.show(self)
         QtGui.QMainWindow.activateWindow(self)
 
-    def set_location(self, width, height, posx, posy): #emesene's
+    def set_location(self, width, height, posx, posy, single_window=False): #emesene's
         '''Sets size and position on screen '''
+        #FIXME: single window
         self.resize(width, height)
         self.move(posx, posy)
 

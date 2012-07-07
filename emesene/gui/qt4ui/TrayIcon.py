@@ -40,7 +40,6 @@ class TrayIcon (QtGui.QSystemTrayIcon, gui.BaseTray):
         self.activated.connect(self._on_tray_icon_clicked)
         
         self.set_login()
-        gui.BaseTray.set_visible(self, True)
 
         # TODO: this is for mac os, and should be changed in the 
         # future (probably no tray icon at all, just the dock icon)
