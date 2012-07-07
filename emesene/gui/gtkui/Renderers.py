@@ -689,13 +689,7 @@ class AvatarRenderer(gtk.GenericCellRenderer, AvatarManager):
         """Requisition size"""
         xpad, ypad = self._get_padding()
 
-        if self._dimension >= 32:
-            width = self._dimension
-        elif self._corner:
-            width = self._dimension * 2
-        else:
-            width = self._dimension
-
+        width = self._dimension + (xpad * 2)
         height = self._dimension + (ypad * 2)
 
         return (0, 0,  width, height)
