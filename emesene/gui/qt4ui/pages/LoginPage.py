@@ -337,15 +337,15 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             self.session_id = self.config.session
         self.config.d_user_service[user] = service_name
         
-        e3_account = e3.Account(user, password, status, self.server_host)
+        account = e3.Account(user, password, status, self.server_host)
 
-        self.config_account(e3_account, service_name, save_account, save_password,
+        self.config_account(account, service_name, save_account, save_password,
                             auto_login)
 
         account.uuid = self.account_uuid
             
         # Invoke the  login callback
-        self.callback(e3_account, self.session_id, self.proxy,
+        self.callback(account, self.session_id, self.proxy,
                              self.use_http, self.use_ipv6, self.server_host, self.server_port)
 
     def clear_login_form(self, clear_pic=False):
