@@ -749,5 +749,7 @@ class AvatarRenderer(gtk.GenericCellRenderer, AvatarManager):
                 gtk.STATE_INSENSITIVE, -1, widget, "gtk-image")
 
         if avatar:
-            self.draw_avatar(ctx, avatar, width - dim, ypad, dim,
+            x_coord = (width - dim) / 2
+            y_coord = (height - dim) / 2
+            self.draw_avatar(ctx, avatar, x_coord, y_coord, dim,
                 gtk.gdk.GRAVITY_CENTER, self._radius_factor, alpha)
