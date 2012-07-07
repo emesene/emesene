@@ -46,7 +46,6 @@ class DisplayPic (QtGui.QLabel):
                                   self._default_pic, self)
         
         self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        self.setFrameStyle(QtGui.QFrame.StyledPanel)
         if clickable:
             self.setAttribute(Qt.WA_Hover)
             self.setFrameShadow(QtGui.QFrame.Plain)
