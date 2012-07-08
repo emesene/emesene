@@ -19,6 +19,7 @@
 import gtk
 
 from gui.gtkui import check_gtk3
+from gui.base import Plus
 
 if check_gtk3():
     import RenderersNew as Renderers
@@ -81,7 +82,7 @@ class Header(gtk.HBox):
         nick_list = []
         for member in self.members:
             contact = self.session.contacts.safe_get(member)
-            nick_list.append(contact.nick)
+            nick_list.append(Plus.msnplus_strip(contact.nick))
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
         clipboard.set_text(', '.join(nick_list))
@@ -90,7 +91,7 @@ class Header(gtk.HBox):
         pm_list = []
         for member in self.members:
             contact = self.session.contacts.safe_get(member)
-            pm_list.append(contact.message)
+            pm_list.append(Plus.msnplus_strip(contact.message))
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
         clipboard.set_text(', '.join(pm_list))
