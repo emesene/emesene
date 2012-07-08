@@ -268,14 +268,6 @@ Do you want to fix your profile now?''')
             to established connection
         proxy -- a e3.Proxy object
         """
-        def on_session_changed(*args):
-            '''Callback called when the session type in the combo is
-            called'''
-            service = str(session_cmb.currentText())
-            session_id, ext = name_to_ext[service]
-            server_host_edit.setText(ext.SERVICES[service]['host'])
-            server_port_edit.setText(ext.SERVICES[service]['port'])
-
         def on_use_auth_toggled(is_enabled, is_checked):
             '''called when the auth check button is toggled, receive a set
             of entries, enable or disable auth related widgets deppending
@@ -310,7 +302,6 @@ Do you want to fix your profile now?''')
                 user = str(user_edit.text())
                 passwd = str(pwd_edit.text())
 
-                service = str(session_cmb.currentText())
                 session_id, ext = name_to_ext[service]
                 log.debug(str(session_id))
                 callback(use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
@@ -320,7 +311,7 @@ Do you want to fix your profile now?''')
 
         dialog           = OkCancelDialog(unicode(tr('Connection preferences')))
         session_lbl      = QtGui.QLabel(unicode(tr('Session:')))
-        session_cmb      = QtGui.QComboBox()
+        session_cmb      = QtGui.QLabel(service)
         server_host_lbl  = QtGui.QLabel(unicode(tr('Server')))
         server_host_edit = QtGui.QLineEdit()
         server_port_lbl  = QtGui.QLabel(unicode(tr('Port')))
@@ -370,30 +361,6 @@ Do you want to fix your profile now?''')
         http_chk.setChecked(use_http)
         http_chk.setChecked(use_ipv6)
 
-        index = 0
-        count = 0
-        name_to_ext = {}
-        session_found = False
-        default_session_index = 0
-        default_session = extension.get_default('session')
-        for ext_id, ext in extension.get_extensions('session').iteritems():
-            if default_session.NAME == ext.NAME:
-                default_session_index = count
-            for service_name, service_data in ext.SERVICES.iteritems():
-                if service == service_name:
-                    index = count
-                    server_host_edit.setText(service_data['host'])
-                    server_port_edit.setText(service_data['port'])
-                    session_found = True
-                session_cmb.addItem(service_name)
-                name_to_ext[service_name] = (ext_id, ext)
-                count += 1
-        if session_found:
-            session_cmb.setCurrentIndex(index)
-        else:
-            session_cmb.setCurrentIndex(default_session_index)
-
-        session_cmb.currentIndexChanged.connect(on_session_changed)
         proxy_chk.toggled.connect(on_use_proxy_toggled)
         auth_chk.toggled.connect(lambda checked:
                                  on_use_auth_toggled(auth_chk.isEnabled(), checked))
