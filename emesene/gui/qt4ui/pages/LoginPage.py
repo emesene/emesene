@@ -209,23 +209,9 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         login_btn.setMinimumWidth(110)
         self.new_combo_session()
 
+
     def _setup_accounts(self):
         '''Builds up the account list'''
-        class Account(object):
-            '''Convenience class to store account's settings'''
-            def __init__(self, service, email, password, status, remember_lvl):
-                '''Constructor'''
-                self.service, self.status = service, status
-                self.email, self.password = email, password
-                self.save_account, self.save_password = False, False
-                self.auto_login = False
-                if remember_lvl >= 1:
-                    self.save_account   = True
-                if remember_lvl >= 2:
-                    self.save_password  = True
-                if remember_lvl >= 3:
-                    self.auto_login     = True
-
         emails = self.remembers.keys()
         default_acc_email = self.config.last_logged_account
 
@@ -241,19 +227,19 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             status = self.config.d_status.get(email, e3.status.ONLINE)
             password = self.decode_password(email)
 
-            account = Account(service, acc, password, status, remember_lvl)
+            account = LoginPage.Account(service, acc, password, status, remember_lvl)
             self._account_list.append(account)
 
-    def _on_account_combo_text_changed(self, new_text): #new text is a QString
+    def _on_account_combo_text_changed(self, new_text, from_preferences=False): #new text is a QString
         ''' Slot executed when the text in the account combo changes '''
         log.info('*** _on_account_combo_text_changed')
         index = self._widget_d['account_combo'].findText(new_text)
-        if index > -1:
+        service = str(self._widget_d['service_combo'].currentText())
+        if index > -1 and from_preferences and self.search_account(service, new_text):
             self._on_chosen_account_changed(index)
         else:
             self.clear_login_form(clear_pic=True)
         self._on_checkbox_state_refresh()
-
 
     def _on_chosen_account_changed(self, acc_index):
         ''' Slot executed when the user select another account from the drop
@@ -282,63 +268,57 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             # status:
             widget_d['status_combo'].set_status(account.status)
             # checkboxes:
-            widget_d['save_account_chk'] .setChecked(account.save_account)
+            widget_d['save_account_chk'].setChecked(account.save_account)
             widget_d['save_password_chk'].setChecked(account.save_password)
-            widget_d['auto_login_chk']   .setChecked(account.auto_login)
+            widget_d['auto_login_chk'].setChecked(account.auto_login)
 
             self.update_service(account.service)
         self._on_checkbox_state_refresh()
 
-    def on_session_changed(self, *args):
+    def _search_account(self, service, email):
+        for account in self._account_list:
+            if account.email == email and account.service == service:
+                return account
+        account = LoginPage.Account(service, email, '', e3.status.ONLINE, 0)
+        self._account_list.append(account)
+        return account
+
+    def search_account(self, service, email):
+        for account in self._account_list:
+            if account.email == email and account.service == service:
+                return True
+        return False
+
+    def on_session_changed(self, index, *args):
         '''Callback called when the session type in the combo is
             called'''
         service = str(self._widget_d['service_combo'].currentText())
         session_id, ext = self.service2id[service]
+        account_email = str(self._widget_d['account_combo'].currentText())
+        if account_email != '':
+            self.config.d_user_service[account_email] = service
+
         self.new_preferences_cb(
             self.use_http, self.use_ipv6, self.proxy.use_proxy, self.proxy.host,
             self.proxy.port, self.proxy.use_auth, self.proxy.user,
             self.proxy.passwd, session_id, service,
             ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
 
+        # to trigger eventual update of dp:
+        self._on_account_combo_text_changed(account_email, True)
+
+    def service_add_cb(self, s_name, service_name):
+        '''Add a new service to the service combo'''
+        if not s_name is None:
+            image = QtGui.QIcon(s_name)
+        else:
+            image = None
+        self._widget_d['service_combo'].addItem(image, service_name)
+
     def new_combo_session(self):
-        account = self.config.get_or_set('last_logged_account', '')
-        default_session = extension.get_default('session')
-        count = 0
-        session_found = False
-
-        self.session_name_to_index = {}
-
-        if account in self.accounts:
-            service = self.config.d_user_service.get(
-                            account.rpartition('|')[0], 'msn')
-        else:
-            service = self.config.service
-
-        for ext_id, ext in extension.get_extensions('session').iteritems():
-            if default_session.NAME == ext.NAME:
-                default_session_index = count
-
-            for service_name, service_data in ext.SERVICES.iteritems():
-                if service == service_name:
-                    index = count
-                    session_found = True
-
-                try:
-                    s_name = getattr(gui.theme.image_theme, 
-                                     "service_" + service_name)
-                    image = QtGui.QIcon(s_name)
-                except:
-                    image = None
-
-                self._widget_d['service_combo'].addItem(image, service_name)
-                self.session_name_to_index[service_name] = count
-                count += 1
-
-        if session_found:
-            self._widget_d['service_combo'].setCurrentIndex(index)
-        else:
-            self._widget_d['service_combo'].setCurrentIndex(default_session_index)
-
+        '''populate service combo with avariable services'''
+        index = gui.LoginBase.new_combo_session(self, self.service_add_cb)
+        self._widget_d['service_combo'].setCurrentIndex(index)
         self._widget_d['service_combo'].currentIndexChanged.connect(self.on_session_changed)
 
     def new_preferences_cb(self, use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
@@ -350,11 +330,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                                 proxy_port, use_auth, user, passwd)
         self.server_host = server_host
         self.server_port = server_port
-        account_email = str(self._widget_d['account_combo'].currentText())
-        if account_email != '':
-            self.config.d_user_service[account_email] = service
-            # to trigger eventual update of dp:
-        self._on_account_combo_text_changed(account_email)
         self.on_preferences_changed(use_http, use_ipv6, self.proxy, session_id,
                 service)
 
@@ -492,3 +467,18 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             return True
         else:
             return False
+
+    class Account(object):
+        '''Convenience class to store account's settings'''
+        def __init__(self, service, email, password, status, remember_lvl):
+            '''Constructor'''
+            self.service, self.status = service, status
+            self.email, self.password = email, password
+            self.save_account, self.save_password = False, False
+            self.auto_login = False
+            if remember_lvl >= 1:
+                self.save_account = True
+            if remember_lvl >= 2:
+                self.save_password = True
+            if remember_lvl >= 3:
+                self.auto_login = True
