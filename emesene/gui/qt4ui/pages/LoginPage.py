@@ -275,14 +275,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             self.update_service(account.service)
         self._on_checkbox_state_refresh()
 
-    def _search_account(self, service, email):
-        for account in self._account_list:
-            if account.email == email and account.service == service:
-                return account
-        account = LoginPage.Account(service, email, '', e3.status.ONLINE, 0)
-        self._account_list.append(account)
-        return account
-
     def search_account(self, service, email):
         for account in self._account_list:
             if account.email == email and account.service == service:
@@ -325,7 +317,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                             use_auth, user, passwd, session_id, service, 
                             server_host, server_port):
         '''called when the user press accept on the preferences dialog'''
-            
         self.proxy = e3.Proxy(use_proxy, proxy_host,
                                 proxy_port, use_auth, user, passwd)
         self.server_host = server_host
