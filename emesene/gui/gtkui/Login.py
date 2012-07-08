@@ -342,48 +342,19 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.proxy.passwd, session_id, service,
             ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
 
+    def service_add_cb(self, s_name, service_name):
+        '''Add a new service to the service combo'''
+        if not s_name is None:
+            image = utils.safe_gtk_pixbuf_load(s_name)
+        else:
+            image = None
+        self.session_combo.get_model().append([image, service_name])
+
     def new_combo_session(self):
-        account = self.config.get_or_set('last_logged_account', '')
-        default_session = extension.get_default('session')
-        count = 0
-        session_found = False
-
-        self.session_name_to_index = {}
-
-        if account in self.accounts:
-            service = self.config.d_user_service.get(
-                            account.rpartition('|')[0], 'msn')
-        else:
-            service = self.config.service
-
-        for ext_id, ext in extension.get_extensions('session').iteritems():
-            if default_session.NAME == ext.NAME:
-                default_session_index = count
-
-            for service_name, service_data in ext.SERVICES.iteritems():
-                if service == service_name:
-                    index = count
-                    session_found = True
-
-                try:
-                    s_name = getattr(gui.theme.image_theme, 
-                                     "service_" + service_name)
-
-                    image = utils.safe_gtk_pixbuf_load(s_name)
-                except:
-                    image = None
-
-                self.session_combo.get_model().append([image, service_name])
-                self.session_name_to_index[service_name] = count
-                count += 1
-
-        if session_found:
-            self.session_combo.set_active(index)
-        else:
-            self.session_combo.set_active(default_session_index)
-
+        '''populate service combo with avariable services'''
+        index = gui.LoginBase.new_combo_session(self, self.service_add_cb)
+        self.session_combo.set_active(index)
         self.session_combo.connect('changed', self._on_session_changed)
-
         self._combo_session_list.append(self.session_combo)
 
     def do_connect(self):
