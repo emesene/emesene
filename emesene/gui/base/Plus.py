@@ -82,21 +82,19 @@ close_tag_old_re = re.compile(
     '(.*?)\xb7(0)()()()()()',
     re.IGNORECASE | re.DOTALL)
 
+
+#TODO: I think the other 'InGradient' regexes from the old parser have to be used too
+special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
+
+# regex used to remove plus markup
 # one symbol for each msnplus tag
 msnplus_tags_re = re.compile(
     '\[(/?)(\w{1})(\=(\#?[0-9a-f]+|\w+))?\]',
     re.IGNORECASE | re.DOTALL)
 
-
-#TODO: I think the other 'InGradient' regexes from the old parser have to be used too
-special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
-
-#regex used to remove plus markup
-tag_plus_strip_re = re.compile(
-    '(\[(/)?\w(\=#?[0-9a-f]+|\=\w+)?\])',
-    re.IGNORECASE)
-tag_plus_old_strip_re = re.compile(
-    '\·([#&\'@0])|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
+msnplus_tags_old_re = re.compile(
+    '\xb7()([\$#&\'@0])()((\#?[0-9a-f]{6}|\d{1,2})?),?((\#?[0-9a-f]{6}|\d{1,2})?)',
+    re.IGNORECASE | re.DOTALL)
 
 hex_tag_re = re.compile('([0-9a-f]{3}|[0-9a-f]{6})$', re.IGNORECASE)
 
@@ -486,8 +484,8 @@ def _strip_tags(text, strip_list):
             return ''
         return match.group(0)
 
-    text = tag_plus_strip_re.sub(strip_tags, text)
-    text = tag_plus_old_strip_re.sub('', text)
+    text = msnplus_tags_re.sub(strip_tags, text)
+    text = msnplus_tags_old_re.sub('', text)
 
     return text
 
