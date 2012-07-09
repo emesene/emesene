@@ -9,6 +9,7 @@ from gui.qt4ui.Utils import tr
 
 import extension
 import gui
+from gui.qt4ui.widgets import StatusButton
 
 class MainPage (QtGui.QWidget, gui.MainWindowBase):
     '''The main page (the one with the contact list)'''
@@ -49,7 +50,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         widget_dict = self._widget_dict
 
         nick_edit_cls = extension.get_default('nick edit')
-        status_combo_cls = extension.get_default('status combo')
         avatar_cls = extension.get_default('avatar')
         contact_list_cls = extension.get_default('contact list')
 
@@ -68,14 +68,16 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
             empty_message=QtCore.QString(
                 tr('<u>Click here to set a personal message...</u>')))
         widget_dict['current_media'] = QtGui.QLabel()
-        widget_dict['status_combo'] = status_combo_cls()
+        widget_dict['status_combo'] = StatusButton.StatusButton(self.session)
+        psm_box = QtGui.QHBoxLayout()
+        psm_box.addWidget(widget_dict['psm_edit'])
+        psm_box.addWidget(widget_dict['current_media'])
+        psm_box.addWidget(widget_dict['status_combo'])
         widget_dict['display_pic'] = avatar_cls(self.session)
         widget_dict['contact_list'] = contact_list_cls(self.session)
         my_info_lay_left = QtGui.QVBoxLayout()
         my_info_lay_left.addLayout(nick_box)
-        my_info_lay_left.addWidget(widget_dict['psm_edit'])
-        my_info_lay_left.addWidget(widget_dict['current_media'])
-        my_info_lay_left.addWidget(widget_dict['status_combo'])
+        my_info_lay_left.addLayout(psm_box)
 
         my_info_lay = QtGui.QHBoxLayout()
         my_info_lay.addWidget(widget_dict['display_pic'])
@@ -93,8 +95,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
                                         self._on_set_new_nick)
         widget_dict['psm_edit'].nick_changed.connect(
                                         self._on_set_new_psm)
-        widget_dict['status_combo'].status_changed.connect(
-                                        self._on_set_new_status)
         widget_dict['display_pic'].clicked.connect(
                                         self._on_display_pic_clicked)
         widget_dict['contact_list'].new_conversation_requested.connect(
@@ -132,11 +132,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     def _on_set_new_psm(self, psm):
         '''Slot called when the user tries to set a new psm'''
         self.session.set_message(psm)
-        # to be completed handling the subsequent signal from e3
-
-    def _on_set_new_status(self, status):
-        '''Slot called when the user tries to set a new status'''
-        self.session.set_status(status)
         # to be completed handling the subsequent signal from e3
 
     def _on_display_pic_clicked(self):
