@@ -28,6 +28,7 @@ from gui.qt4ui.Utils import tr
 import extension
 import e3
 import gui
+from gui.qt4ui.widgets import StatusButton
 
 log = logging.getLogger('qt4ui.LoginPage')
 
@@ -84,7 +85,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
         avatar_cls = extension.get_default('avatar')
-        status_combo_cls = extension.get_default('status combo')
         widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.image_theme.logo,
                                             clickable=False)
 
@@ -112,7 +112,11 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         widget_d['password_img'] = password_img
         password_box.addWidget(widget_d['password_img'])
         password_box.addWidget(widget_d['password_edit'])
-        password_box.addSpacing(36)
+
+        widget_d['status_btn'] = StatusButton.StatusButton()
+        widget_d['status_btn'].setToolTip(_('Status'))
+        widget_d['status_btn'].set_status(e3.status.ONLINE)
+        password_box.addWidget(widget_d['status_btn'])
 
         service_box = QtGui.QHBoxLayout()
         widget_d['service_box'] = service_box
@@ -128,13 +132,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         service_box.addWidget(widget_d['service_img'])
         service_box.addWidget(widget_d['service_combo'])
         service_box.addWidget(widget_d['advanced_btn'])
-
-        status_box = QtGui.QHBoxLayout()
-        widget_d['status_box'] = status_box
-        widget_d['status_combo']  = status_combo_cls()
-        status_box.addSpacing(36)
-        status_box.addWidget(widget_d['status_combo'])
-        status_box.addSpacing(36)
 
         layv = QtGui.QVBoxLayout()
         widget_d['save_account_chk'] =    \
@@ -152,7 +149,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         lay.addLayout(widget_d['account_box'])
         lay.addLayout(widget_d['password_box'])
         lay.addLayout(widget_d['service_box'])
-        lay.addLayout(widget_d['status_box'])
         lay.addSpacing(20)
         lay.addWidget(widget_d['save_account_chk'])
         lay.addWidget(widget_d['save_password_chk'])
@@ -194,7 +190,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                                     self._on_forget_me_clicked)
         widget_d['login_btn'].clicked.connect(
                                     self._on_start_login)
-
         self.installEventFilter(self)
 
         account_combo = widget_d['account_combo']
@@ -208,7 +203,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         login_btn.setEnabled(False)
         login_btn.setMinimumWidth(110)
         self.new_combo_session()
-
 
     def _setup_accounts(self):
         '''Builds up the account list'''
@@ -266,7 +260,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             widget_d['service_combo'].setCurrentIndex(
                         self.session_name_to_index.get(account.service, 0))
             # status:
-            widget_d['status_combo'].set_status(account.status)
+            widget_d['status_btn'].set_status(account.status)
             # checkboxes:
             widget_d['save_account_chk'].setChecked(account.save_account)
             widget_d['save_password_chk'].setChecked(account.save_password)
@@ -356,7 +350,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         widget_dic = self._widget_d
         user = str(widget_dic['account_combo'].currentText())
         password = str(widget_dic['password_edit'].text())
-        status = widget_dic['status_combo'].status()
+        status = widget_dic['status_btn'].status
         save_account = widget_dic['save_account_chk'].isChecked()
         save_password = widget_dic['save_password_chk'].isChecked()
         auto_login = widget_dic['auto_login_chk'].isChecked()
@@ -387,7 +381,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         if clear_pic:
             widget_dic['display_pic'].set_default_pic()
         widget_dic['password_edit'].clear()
-        widget_dic['status_combo'].set_status(e3.status.ONLINE)
+        widget_dic['status_btn'].set_status(e3.status.ONLINE)
         # _on_checkbox_state_changed enables them:
         widget_dic['auto_login_chk'].setChecked(False)
         widget_dic['save_password_chk'].setChecked(False)
@@ -432,7 +426,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         if clear_pic:
             widget_dic['display_pic'].set_default_pic()
         widget_dic['password_edit'].clear()
-        widget_dic['status_combo'].set_status(e3.status.ONLINE)
+        widget_dic['status_btn'].set_status(e3.status.ONLINE)
         # _on_checkbox_state_changed enables them:
         widget_dic['auto_login_chk'].setChecked(False)
         widget_dic['save_password_chk'].setChecked(False)
