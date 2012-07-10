@@ -220,7 +220,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
 
     def _on_account_combo_text_changed(self, new_text, from_preferences=False): #new text is a QString
         ''' Slot executed when the text in the account combo changes '''
-        log.info('*** _on_account_combo_text_changed')
         index = self._widget_d['account_combo'].findText(new_text)
         service = str(self._widget_d['service_combo'].currentText())
         if index > -1 and from_preferences and self.search_account(service, new_text):
@@ -254,6 +253,8 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             widget_d['service_combo'].setCurrentIndex(
                         self.session_name_to_index.get(account.service, 0))
             # status:
+            ext = self.service2id[account.service][1]
+            widget_d['status_btn'].setEnabled(ext.SERVICE_STATUS in ext.CAPABILITIES)
             widget_d['status_btn'].set_status(account.status)
             # checkboxes:
             widget_d['save_account_chk'].setChecked(account.save_account)
@@ -300,8 +301,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         self._widget_d['service_combo'].currentIndexChanged.connect(self.on_session_changed)
 
     def new_preferences_cb(self, use_http, use_ipv6, proxy,
-                            service,
-                            server_host, server_port):
+                            service, server_host, server_port):
         '''called when the user press accept on the preferences dialog'''
         self.session_id = self.service2id[service][0]
         self.use_http = use_http
