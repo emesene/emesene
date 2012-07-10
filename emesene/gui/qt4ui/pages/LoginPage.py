@@ -47,11 +47,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                  parent=None):
         '''Constructor'''
         # pylint: disable=R0913
-
-        # NOTE: a 'session' is an object like e3.jabber.Session.Session, so, representing a protocol
-        # a 'service' is a service using a given protocol.
-
-        # instance variables:
         QtGui.QWidget.__init__(self, parent)
         gui.LoginBase.__init__(self, callback, on_preferences_changed,
                                 config, config_dir, config_path,
@@ -87,7 +82,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         avatar_cls = extension.get_default('avatar')
         widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.image_theme.logo,
                                             clickable=False)
-
         account_box = QtGui.QHBoxLayout()
         widget_d['account_box'] = account_box
         widget_d['account_combo'] = QtGui.QComboBox()
@@ -363,7 +357,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
 
     def clear_login_form(self, clear_pic=False):
         ''' Resets the login form '''
-        log.info('*** clear_login_form')
         widget_dic = self._widget_d
         if clear_pic:
             widget_dic['display_pic'].set_default_pic()
@@ -419,11 +412,11 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         widget_dic['save_password_chk'].setChecked(False)
         widget_dic['save_account_chk'].setChecked(False)
 
-    def show_error(self, reason):
-        #implement nicebar in qt4
+    def show_error(self, reason, login_failed=False):
         '''
         show an error on the top of the window using nicebar
         '''
+        #FIXME: implement nicebar in qt4
         pass
 
     # -------------------- QT_OVERRIDE
