@@ -416,8 +416,9 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         '''
         show an error on the top of the window using nicebar
         '''
+        if login_failed:
+            self._widget_dic['auto_login_chk'].setChecked(False)
         #FIXME: implement nicebar in qt4
-        pass
 
     # -------------------- QT_OVERRIDE
 
