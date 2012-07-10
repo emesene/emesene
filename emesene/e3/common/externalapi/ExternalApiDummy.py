@@ -24,6 +24,9 @@ class DummyExternalAPI(object):
     provides=('external api', )
     def set_new_session(self, session, window):
         pass
+        
+    def stop(self):
+        pass
 
 extension.register('external api', DummyExternalAPI)
 extension.set_default('external api', DummyExternalAPI)
