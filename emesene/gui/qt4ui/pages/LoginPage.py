@@ -285,9 +285,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             self.config.d_user_service[account_email] = service
 
         self.new_preferences_cb(
-            self.use_http, self.use_ipv6, self.proxy.use_proxy, self.proxy.host,
-            self.proxy.port, self.proxy.use_auth, self.proxy.user,
-            self.proxy.passwd, session_id, service,
+            self.use_http, self.use_ipv6, self.proxy, service,
             ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
 
         # to trigger eventual update of dp:
@@ -307,15 +305,17 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         self._widget_d['service_combo'].setCurrentIndex(index)
         self._widget_d['service_combo'].currentIndexChanged.connect(self.on_session_changed)
 
-    def new_preferences_cb(self, use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
-                            use_auth, user, passwd, session_id, service, 
+    def new_preferences_cb(self, use_http, use_ipv6, proxy,
+                            service,
                             server_host, server_port):
         '''called when the user press accept on the preferences dialog'''
-        self.proxy = e3.Proxy(use_proxy, proxy_host,
-                                proxy_port, use_auth, user, passwd)
+        self.session_id = self.service2id[service][0]
+        self.use_http = use_http
+        self.use_ipv6 = use_ipv6
         self.server_host = server_host
         self.server_port = server_port
-        self.on_preferences_changed(use_http, use_ipv6, self.proxy, session_id,
+        self.proxy = proxy
+        self.on_preferences_changed(use_http, use_ipv6, self.proxy, self.session_id,
                 service)
 
     def _on_connection_preferences_clicked(self):
@@ -325,9 +325,12 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         account = str(self._widget_d['account_combo'].currentText())
         if account in self.config.d_user_service.keys():
             service = self.config.d_user_service[account]
-        extension.get_default('dialog').login_preferences(service, self.server_host,
-                                        self.server_port, self.new_preferences_cb, 
-                                        self.config.b_use_http, self.config.b_use_ipv6, self.proxy)
+
+        ext = self.service2id[service][1]
+
+        extension.get_default('dialog').login_preferences(service, ext,
+                                        self.new_preferences_cb, self.config.b_use_http,
+                                        self.config.b_use_ipv6, self.proxy)
 
     def _on_forget_me_clicked(self):
         ''''''

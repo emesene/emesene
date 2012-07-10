@@ -247,7 +247,7 @@ class LoginBaseUI(gtk.Alignment):
         vbox.show_all()
 
     def unsubscribe_signals(self):
-        ''' overload this if needed '''        
+        ''' overload this if needed '''
         pass
 
     def _on_cancel_clicked(self, button):
@@ -335,11 +335,10 @@ class Login(LoginBaseUI, gui.LoginBase):
 
     def _on_session_changed(self, session_combo):
         service = self._get_active_service()
-        session_id, ext = self.service2id[service]
+        ext = self.service2id[service][1]
+
         self._on_new_preferences(
-            self.use_http, self.use_ipv6, self.proxy.use_proxy, self.proxy.host,
-            self.proxy.port, self.proxy.use_auth, self.proxy.user,
-            self.proxy.passwd, session_id, service,
+            self.use_http, self.use_ipv6, self.proxy, service,
             ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
 
     def service_add_cb(self, s_name, service_name):
@@ -628,25 +627,23 @@ class Login(LoginBaseUI, gui.LoginBase):
         if account in self.accounts:
             service = self.config.d_user_service.get(account, 'msn')
 
-        extension.get_default('dialog').login_preferences(service,
+        ext = self.service2id[service][1]
+        extension.get_default('dialog').login_preferences(service, ext,
             self._on_new_preferences, self.use_http, self.use_ipv6, self.proxy)
 
-    def _on_new_preferences(self, use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
-                            use_auth, user, passwd, session_id, 
+    def _on_new_preferences(self, use_http, use_ipv6, proxy,
                             service, server_host, server_port, from_dialog=False):
         '''
         called when the user press accept on the preferences dialog
         '''
-        self.proxy = e3.Proxy(use_proxy, proxy_host, proxy_port, 
-                              use_auth, user, passwd)
-
-        self.session_id = session_id
+        self.session_id = self.service2id[service][0]
         self.use_http = use_http
         self.use_ipv6 = use_ipv6
         self.server_host = server_host
         self.server_port = server_port
+        self.proxy = proxy
 
-        self.on_preferences_changed(self.use_http, self.use_ipv6, self.proxy, 
+        self.on_preferences_changed(self.use_http, self.use_ipv6, self.proxy,
                                     self.session_id, service)
 
         self._update_fields(self.cmb_account.get_active_text(), True, from_dialog)

@@ -11,6 +11,7 @@ from PyQt4.QtCore  import Qt
 from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
 
+import e3
 import gui
 import extension
 
@@ -253,7 +254,7 @@ Do you want to fix your profile now?''')
         dialog.exec_()
 
     @classmethod
-    def login_preferences(cls, service, service_host, service_port,
+    def login_preferences(cls, service, ext,
                           callback, use_http, use_ipv6, proxy):
         """
         display the preferences dialog for the login window
@@ -302,10 +303,10 @@ Do you want to fix your profile now?''')
                 user = str(user_edit.text())
                 passwd = str(pwd_edit.text())
 
-                session_id, ext = name_to_ext[service]
-                log.debug(str(session_id))
-                callback(use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
-                         use_auth, user, passwd, session_id, service,
+                proxy = e3.Proxy(use_proxy, proxy_host, proxy_port,
+                                    use_auth, user, passwd)
+
+                callback(use_http, use_ipv6, proxy, service,
                          server_host, server_port)
             dialog.hide()
 
@@ -316,6 +317,7 @@ Do you want to fix your profile now?''')
         server_host_edit = QtGui.QLineEdit()
         server_port_lbl  = QtGui.QLabel(unicode(tr('Port')))
         server_port_edit = QtGui.QLineEdit()
+        ipv6_chk         = QtGui.QCheckBox(unicode(tr('Use IPv6 connecion')))
         http_chk         = QtGui.QCheckBox(unicode(tr('Use HTTP method')))
         proxy_chk        = QtGui.QCheckBox(unicode(tr('Use proxy')))
         host_lbl         = QtGui.QLabel(unicode(tr('Host')))
@@ -337,29 +339,31 @@ Do you want to fix your profile now?''')
         grid_lay.addWidget(server_host_edit, 1, 2)
         grid_lay.addWidget(server_port_lbl, 2, 0)
         grid_lay.addWidget(server_port_edit, 2, 2)
-        grid_lay.addWidget(http_chk, 3, 0, 1, -1)
-        grid_lay.addWidget(proxy_chk, 4, 0, 1, -1)
-        grid_lay.addWidget(host_lbl, 5, 0)
-        grid_lay.addWidget(proxy_host_edit, 5, 2)
-        grid_lay.addWidget(port_lbl, 6, 0)
-        grid_lay.addWidget(proxy_port_edit, 6, 2)
-        grid_lay.addWidget(auth_chk, 7, 0, 1, -1)
-        grid_lay.addWidget(user_lbl, 8, 0)
-        grid_lay.addWidget(user_edit, 8, 2)
-        grid_lay.addWidget(pwd_lbl, 9, 0)
-        grid_lay.addWidget(pwd_edit, 9, 2)
+        grid_lay.addWidget(ipv6_chk, 3, 0, 1, -1)
+        grid_lay.addWidget(http_chk, 4, 0, 1, -1)
+        grid_lay.addWidget(proxy_chk, 5, 0, 1, -1)
+        grid_lay.addWidget(host_lbl, 6, 0)
+        grid_lay.addWidget(proxy_host_edit, 6, 2)
+        grid_lay.addWidget(port_lbl, 7, 0)
+        grid_lay.addWidget(proxy_port_edit, 7, 2)
+        grid_lay.addWidget(auth_chk, 8, 0, 1, -1)
+        grid_lay.addWidget(user_lbl, 9, 0)
+        grid_lay.addWidget(user_edit, 9, 2)
+        grid_lay.addWidget(pwd_lbl, 10, 0)
+        grid_lay.addWidget(pwd_edit, 10, 2)
         dialog.setLayout(grid_lay)
 
+        service_data = ext.SERVICES[service]
+
         dialog.setWindowTitle(tr('Preferences'))
-        server_host_edit.setText(service_host)
-        server_port_edit.setText(service_port)
+        server_host_edit.setText(service_data['host'])
+        server_port_edit.setText(service_data['port'])
         proxy_host_edit.setText(proxy.host or '')
         proxy_port_edit.setText(proxy.port or '')
         user_edit.setText(proxy.user or '')
         pwd_edit.setText(proxy.passwd or '')
-        #pwd_edit.setVisible(False)
         http_chk.setChecked(use_http)
-        http_chk.setChecked(use_ipv6)
+        ipv6_chk.setChecked(use_ipv6)
 
         proxy_chk.toggled.connect(on_use_proxy_toggled)
         auth_chk.toggled.connect(lambda checked:

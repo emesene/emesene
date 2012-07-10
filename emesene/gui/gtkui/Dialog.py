@@ -732,7 +732,7 @@ class Dialog(object):
         InviteWindow(session, callback, l_buddy_exclude)
 
     @classmethod
-    def login_preferences(cls, service, callback, use_http, use_ipv6, proxy):
+    def login_preferences(cls, service, ext, callback, use_http, use_ipv6, proxy):
         """
         display the preferences dialog for the login window
 
@@ -797,12 +797,9 @@ class Dialog(object):
         c_use_proxy.connect('toggled', on_toggled, t_proxy_host, t_proxy_port, c_use_auth)
         c_use_auth.connect('toggled', on_toggled, t_user, t_passwd)
 
-        for ext_id, ext in extension.get_extensions('session').iteritems():
-            for service_name, service_data in ext.SERVICES.iteritems():
-                if service_name == service:
-                    t_server_host.set_text(service_data['host'])
-                    t_server_port.set_text(service_data['port'])
-                    session_id = ext_id
+        service_data = ext.SERVICES[service]
+        t_server_host.set_text(service_data['host'])
+        t_server_port.set_text(service_data['port'])
 
         t_proxy_host.set_text(proxy.host or '')
         t_proxy_port.set_text(proxy.port or '')
@@ -870,8 +867,10 @@ class Dialog(object):
                 user = t_user.get_text()
                 passwd = t_passwd.get_text()
 
-                callback(use_http, use_ipv6, use_proxy, proxy_host, proxy_port, use_auth,
-                        user, passwd, session_id, service, server_host, server_port, True)
+                proxy = e3.Proxy(use_proxy, proxy_host, proxy_port,
+                                              use_auth, user, passwd)
+                callback(use_http, use_ipv6, proxy,
+                            service, server_host, server_port, True)
 
             for widget in proxy_settings:
                 widget.destroy()
