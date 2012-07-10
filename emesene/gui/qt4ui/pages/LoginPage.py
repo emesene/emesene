@@ -321,16 +321,8 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
     def _on_connection_preferences_clicked(self):
         '''Callback invoked when the user clicks the connection preferences
         button'''
-        service = self.config.service
         account = str(self._widget_d['account_combo'].currentText())
-        if account in self.config.d_user_service.keys():
-            service = self.config.d_user_service[account]
-
-        ext = self.service2id[service][1]
-
-        extension.get_default('dialog').login_preferences(service, ext,
-                                        self.new_preferences_cb, self.config.b_use_http,
-                                        self.config.b_use_ipv6, self.proxy)
+        self._on_preferences_open(account, self.new_preferences_cb)
 
     def _on_forget_me_clicked(self):
         ''''''
@@ -357,25 +349,17 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         save_account = widget_dic['save_account_chk'].isChecked()
         save_password = widget_dic['save_password_chk'].isChecked()
         auto_login = widget_dic['auto_login_chk'].isChecked()
-        
-        if user in self.config.d_user_service.keys():
-            service_name = self.config.d_user_service[user]
-            self.session_id = self.service2id[service_name][0]
-        else:
-            service_name = self.config.service
-            self.session_id = self.config.session
-        self.config.d_user_service[user] = service_name
-        
-        account = e3.Account(user, password, status, self.server_host)
+        service_name = str(self._widget_d['service_combo'].currentText())
 
+        account = e3.Account(user, password, status, self.server_host)
         self.config_account(account, service_name, save_account, save_password,
                             auto_login)
-
         account.uuid = self.account_uuid
             
         # Invoke the  login callback
         self.callback(account, self.session_id, self.proxy,
-                             self.use_http, self.use_ipv6, self.server_host, self.server_port)
+                            self.use_http, self.use_ipv6, self.server_host,
+                            self.server_port)
 
     def clear_login_form(self, clear_pic=False):
         ''' Resets the login form '''

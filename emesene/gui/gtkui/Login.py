@@ -620,16 +620,8 @@ class Login(LoginBaseUI, gui.LoginBase):
         '''
         called when the user clicks the preference button
         '''
-        service = self.config.get_or_set('service', 'msn')
-
         account = self.cmb_account.get_active_text()
-
-        if account in self.accounts:
-            service = self.config.d_user_service.get(account, 'msn')
-
-        ext = self.service2id[service][1]
-        extension.get_default('dialog').login_preferences(service, ext,
-            self._on_new_preferences, self.use_http, self.use_ipv6, self.proxy)
+        self._on_preferences_open(account, self._on_new_preferences)
 
     def _on_new_preferences(self, use_http, use_ipv6, proxy,
                             service, server_host, server_port, from_dialog=False):

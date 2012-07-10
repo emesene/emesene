@@ -241,3 +241,14 @@ class LoginBase(object):
             return index
 
         return default_session_index
+
+    def _on_preferences_open(self, account, callback):
+        '''called when the user clicks the preference button'''
+        service = self.config.get_or_set('service', 'msn')
+        if account in self.accounts:
+            service = self.config.d_user_service.get(account, 'msn')
+
+        ext = self.service2id[service][1]
+        extension.get_default('dialog').login_preferences(service, ext,
+            callback, self.use_http, self.use_ipv6, self.proxy)
+
