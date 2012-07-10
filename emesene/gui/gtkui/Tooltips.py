@@ -120,10 +120,10 @@ class Tooltips(gtk.Window):
             self.tag = timeout_add(Tooltips.DELAY, self.show_tooltip, \
                                             view, eventCoords, \
                                             path_array, obj)
-        elif (self.tag == -1)and (path_array[0] == self.path_array):
+        elif (self.tag == -1) and (path_array[0] == self.path_array):
             # Tooltip visible, no TO, mouse still in the same element
             return
-        elif (self.tag == -1)and not (path_array[0] == self.path_array):
+        elif (self.tag == -1) and not (path_array[0] == self.path_array):
             # Tooltip visible, no TO, mouse moves
             self.hide()
             self.path_array = path_array[0]
@@ -153,6 +153,7 @@ class Tooltips(gtk.Window):
         self.label.set_markup(text)
 
         # Sets tooltip image
+        self.image.stop()
         self.image.set_from_file(obj.picture, bool(obj.blocked))
         self.image.show()
 
