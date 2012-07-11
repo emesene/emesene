@@ -33,7 +33,6 @@ class AvatarChooser(Dialog.OkCancelDialog):
         picture_path is the path of the current display picture'''
         Dialog.OkCancelDialog.__init__(self, tr('Avatar chooser'), 
                                        expanding=True, parent=parent)
-        
         self._session = session
         self._avatar_manager = gui.base.AvatarManager(session)
         # view names:
@@ -55,22 +54,20 @@ class AvatarChooser(Dialog.OkCancelDialog):
             self._populate_list(self._vn[1], path)
         for path in cached_paths:
             self._populate_list(self._vn[2], path)
-        
-            
-        
+
     def _setup_ui(self):
         '''Builds up the UI'''
         widget_d = self._widget_d
         
-        widget_d['tab_widget']   = QtGui.QTabWidget()
-        widget_d['group_box']    = QtGui.QGroupBox()
+        widget_d['tab_widget'] = QtGui.QTabWidget()
+        widget_d['group_box'] = QtGui.QGroupBox()
         widget_d['preview_dpic'] = widgets.DisplayPic(self._session,
-                                                             clickable=False)
-        widget_d['add_btn']      = QtGui.QPushButton(tr('Add...'))
-        widget_d['remove_btn']   = QtGui.QPushButton(tr('Remove'))
-        widget_d[self._vn[0]]    = QtGui.QListView()
-        widget_d[self._vn[1]]    = QtGui.QListView()
-        widget_d[self._vn[2]]    = QtGui.QListView()
+                                                             clickable=False, size=QtCore.QSize(96, 96))
+        widget_d['add_btn'] = QtGui.QPushButton(tr('Add...'))
+        widget_d['remove_btn'] = QtGui.QPushButton(tr('Remove'))
+        widget_d[self._vn[0]] = QtGui.QListView()
+        widget_d[self._vn[1]] = QtGui.QListView()
+        widget_d[self._vn[2]] = QtGui.QListView()
         
         
         group_box_lay = QtGui.QVBoxLayout()
