@@ -28,6 +28,8 @@ from e3 import status
 import gui
 import gui.gtkui.utils as utils
 
+from gui import Plus
+
 class TrayIcon(gtk.StatusIcon, gui.BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
@@ -262,6 +264,10 @@ class ContactsMenu(gtk.Menu):
         """
         constructor
         """
+        def strip_nick(contact1, contact2):
+            return cmp(Plus.msnplus_strip(contact1.nick).lower(),
+                       Plus.msnplus_strip(contact2.nick).lower())
+
         gtk.Menu.__init__(self)
         self.handler = handler
         self.main_window = main_window
@@ -271,7 +277,8 @@ class ContactsMenu(gtk.Menu):
 
         self.contactmanager = self.handler.session.contacts
 
-        for contact in self.contactmanager.get_online_list():
+        for contact in sorted(self.contactmanager.get_online_list(),
+                              cmp = strip_nick):
             self.__append_contact(contact)
 
     def __append_contact(self, contact):
