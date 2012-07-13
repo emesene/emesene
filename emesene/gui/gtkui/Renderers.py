@@ -154,12 +154,12 @@ def plus_text_parse(item):
         try:
             item = Plus.msnplus_parse(item)
         except Exception, error: # We really want to catch all exceptions
-            log.info("Text: '%s' made the parser go crazy, stripping. Error: %s" % (
+            log.exception("Text: '%s' made the parser go crazy, stripping. Error: %s" % (
                       item, error))
             try:
                 item = Plus.msnplus_strip(item)
             except Exception, error: # We really want to catch all exceptions
-                log.info("Even stripping plus markup doesn't help. Error: %s" % error)
+                log.exception("Even stripping plus markup doesn't help. Error: %s" % error)
     else:
         item = Plus.msnplus_strip(item)
     return item
