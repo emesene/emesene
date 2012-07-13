@@ -310,18 +310,16 @@ class Plus(object):
 
     def _hex_colors(self, msgdict):
         '''convert colors to hex'''
-        if msgdict['tag']:
-            tag = msgdict['tag']
+        tag = msgdict.get('tag')
+        if tag in COLOR_TAGS:
+            param = msgdict[tag]
 
-            if tag in COLOR_TAGS:
-                param = msgdict[tag]
+            if isinstance(param, tuple): #gradient
+                param1, param2 = param
+                msgdict[tag] = (self._color_to_hex(param1), self._color_to_hex(param2))
 
-                if isinstance(param, tuple): #gradient
-                    param1, param2 = param
-                    msgdict[tag] = (self._color_to_hex(param1), self._color_to_hex(param2))
-
-                else: #normal color
-                    msgdict[tag] = self._color_to_hex(param)
+            else: #normal color
+                msgdict[tag] = self._color_to_hex(param)
 
         for child in msgdict['childs']:
             if child and not isinstance(child, basestring):
