@@ -422,29 +422,29 @@ class Plus(object):
         '''find out dangling tags in list based on an assumption that
         all tags are well-formed'''
         # we use the strategy like stack but no pop/push operations
-        for i in range(len(self.tag_queue)):
+        for i, tag in enumerate(self.tag_queue):
             # do not process opened tag
-            if self.tag_queue[i][1]:
+            if tag[1]:
                 continue
 
-            for p in reversed(range(i)):
+            for previous_tag in reversed(self.tag_queue[:i]):
                 # find out an unpaired opened_tag with the same type
                 # and mark them paired, like stack (msnplus-like)
                 # we allow mixing upper case and lower case in code
-                if self.tag_queue[p][1] and not self.tag_queue[p][2] and \
-                   self.tag_queue[p][0].lower() == self.tag_queue[i][0].lower():
+                if previous_tag[1] and not previous_tag[2] and \
+                   previous_tag[0].lower() == tag[0].lower():
                     # a color tag must have attribute
-                    if self.tag_queue[p][0].lower() in ['a', 'c'] and \
-                       not self.tag_queue[p][4]:
+                    if previous_tag[0].lower() in ('a', 'c') and \
+                       not previous_tag[4]:
                         continue
 
                     # avoid to cross newline, eg: nickname nl message
                     # pair if there is no newline, or in the same part
                     if nl_pos == -1 or \
-                       (self.tag_queue[p][3] > nl_pos and self.tag_queue[i][3] > nl_pos) or \
-                       (self.tag_queue[p][3] < nl_pos and self.tag_queue[i][3] < nl_pos):
-                        self.tag_queue[p][2] = True
-                        self.tag_queue[i][2] = True
+                       (previous_tag[3] > nl_pos and tag[3] > nl_pos) or \
+                       (previous_tag[3] < nl_pos and tag[3] < nl_pos):
+                        previous_tag[2] = True
+                        tag[2] = True
                         break
 
         # we only need position of paired tags in strip mode
