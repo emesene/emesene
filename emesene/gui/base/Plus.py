@@ -117,34 +117,34 @@ class Plus(object):
 
     def __init__(self, text):
         self.text = unicode(text, 'utf8') if not isinstance(text, unicode) else text
-        self.message_stack = [{'tag':'', 'childs':[]}]
+        self.stack = [{'tag':'', 'childs':[]}]
         self.tag_queue = []
 
     def _close_tags(self, text_before, tag, arg, do_parse_emotes):
         '''close tags that are open'''
         stack_index = -1
-        for i, message in enumerate(reversed(self.message_stack)):
+        for i, message in enumerate(reversed(self.stack)):
             if tag in message:
                 stack_index = -i - 1
                 break
         if arg:
-            start_tag = self.message_stack[stack_index][tag]
-            self.message_stack[stack_index][tag] = (start_tag, arg)
+            start_tag = self.stack[stack_index][tag]
+            self.stack[stack_index][tag] = (start_tag, arg)
         if text_before.strip(' '):
             if do_parse_emotes:
                 text_before = parse_emotes(text_before)
-                self.message_stack[stack_index]['childs'] += text_before
+                self.stack[stack_index]['childs'] += text_before
             else:
-                self.message_stack[stack_index]['childs'].append(text_before)
-        tag_we_re_closing = self.message_stack.pop(stack_index)
-        if isinstance(self.message_stack[stack_index], dict):
-            self.message_stack[stack_index]['childs'].append(tag_we_re_closing)
+                self.stack[stack_index]['childs'].append(text_before)
+        tag_we_re_closing = self.stack.pop(stack_index)
+        if isinstance(self.stack[stack_index], dict):
+            self.stack[stack_index]['childs'].append(tag_we_re_closing)
         else:
-            self.message_stack.append(tag_we_re_closing)
+            self.stack.append(tag_we_re_closing)
 
     def _close_stack_tags(self, do_parse_emotes=True):
         '''Closes all open tags in stack'''
-        tags_to_close = len(self.message_stack)
+        tags_to_close = len(self.stack)
         for i in range(tags_to_close-1):
             self._close_tags('', '', '', do_parse_emotes)
 
@@ -172,11 +172,11 @@ class Plus(object):
     def to_dict(self, do_parse_emotes=True):
         '''convert it into a dict, as the one used by XmlParser'''
         self._to_dict(self.text, do_parse_emotes)
-        self.message_stack = {'tag': 'span', 'childs': self.message_stack}
-        self._hex_colors(self.message_stack)
-        self._dict_gradients(self.message_stack)
-        self._dict_translate_tags(self.message_stack)
-        return self.message_stack
+        self.stack = {'tag': 'span', 'childs': self.stack}
+        self._hex_colors(self.stack)
+        self._dict_gradients(self.stack)
+        self._dict_translate_tags(self.stack)
+        return self.stack
 
     def _to_dict(self, text, do_parse_emotes=True,
                          was_double_color=False):
@@ -190,7 +190,7 @@ class Plus(object):
             else:
                 parsed_markup = [text]
 
-            self.message_stack.append(text)
+            self.stack.append(text)
             self._close_stack_tags(do_parse_emotes)
             return
 
@@ -212,26 +212,26 @@ class Plus(object):
         if '\n' in text_before:
             splitted_text = text_before.partition('\n')
             if splitted_text[0].strip(' '):
-                self.message_stack[-1]['childs'].append(splitted_text[0])
+                self.stack[-1]['childs'].append(splitted_text[0])
             text_before = splitted_text[2]
             self._close_stack_tags(do_parse_emotes)
-            self.message_stack[-1]['childs'].append('\n')
+            self.stack[-1]['childs'].append('\n')
 
         if self.tag_queue and self.tag_queue[0][0] == match.group(3) and not self.tag_queue[0][2]:
-            self.message_stack[-1]['childs'].append(match.group(0))
+            self.stack[-1]['childs'].append(match.group(0))
         elif close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
            (tag in COLOR_TAGS and (arg or not open_)))):
             if open_:
                 if text_before.strip(' ') and not was_double_color:
-                    self.message_stack[-1]['childs'].append(text_before)
+                    self.stack[-1]['childs'].append(text_before)
                 msgdict = {'tag': tag, tag: arg, 'childs': []}
-                self.message_stack.append(msgdict)
+                self.stack.append(msgdict)
             else: #closing tags
                 self._close_tags(text_before, tag, arg, do_parse_emotes)
                 if close_all_tags:
                     self._close_stack_tags(do_parse_emotes)
         else:
-            self.message_stack[-1]['childs'].append(match.group(0))
+            self.stack[-1]['childs'].append(match.group(0))
 
         if self.tag_queue:
             self.tag_queue.pop(0)
