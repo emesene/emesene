@@ -115,12 +115,13 @@ def parse_emotes(markup):
 
 class Plus(object):
 
-    def __init__(self, text):
+    def __init__(self, text, parse_emotes=True):
         self.text = unicode(text, 'utf8') if not isinstance(text, unicode) else text
         self.stack = [{'tag':'', 'childs':[]}]
         self.tag_queue = []
+        self.parse_emotes = parse_emotes
 
-    def _close_tags(self, text_before, tag, arg, do_parse_emotes):
+    def _close_tags(self, text_before, tag, arg):
         '''close tags that are open'''
         stack_index = -1
         for i, message in enumerate(reversed(self.stack)):
@@ -131,7 +132,7 @@ class Plus(object):
             start_tag = self.stack[stack_index][tag]
             self.stack[stack_index][tag] = (start_tag, arg)
         if text_before.strip(' '):
-            if do_parse_emotes:
+            if self.parse_emotes:
                 text_before = parse_emotes(text_before)
                 self.stack[stack_index]['childs'] += text_before
             else:
@@ -142,11 +143,11 @@ class Plus(object):
         else:
             self.stack.append(tag_we_re_closing)
 
-    def _close_stack_tags(self, do_parse_emotes=True):
+    def _close_stack_tags(self):
         '''Closes all open tags in stack'''
         tags_to_close = len(self.stack)
         for i in range(tags_to_close-1):
-            self._close_tags('', '', '', do_parse_emotes)
+            self._close_tags('', '', '')
 
     def _get_shortest_match(self, match1, match2):
         '''get the match that comes earliest'''
@@ -169,29 +170,28 @@ class Plus(object):
         match = self._get_shortest_match(match, match_close_old)
         return match
 
-    def to_dict(self, do_parse_emotes=True):
+    def to_dict(self):
         '''convert it into a dict, as the one used by XmlParser'''
-        self._to_dict(self.text, do_parse_emotes)
+        self._to_dict(self.text)
         self.stack = {'tag': 'span', 'childs': self.stack}
         self._hex_colors(self.stack)
         self._dict_gradients(self.stack)
         self._dict_translate_tags(self.stack)
         return self.stack
 
-    def _to_dict(self, text, do_parse_emotes=True,
-                         was_double_color=False):
+    def _to_dict(self, text, was_double_color=False):
         '''convert it into a dict, as the one used by XmlParser'''
 
         match = self._get_best_match(text)
 
         if not match: #only text
-            if do_parse_emotes:
+            if self.parse_emotes:
                 parsed_markup = parse_emotes(text)
             else:
                 parsed_markup = [text]
 
             self.stack.append(text)
-            self._close_stack_tags(do_parse_emotes)
+            self._close_stack_tags()
             return
 
         text_before = match.group(1)
@@ -214,7 +214,7 @@ class Plus(object):
             if splitted_text[0].strip(' '):
                 self.stack[-1]['childs'].append(splitted_text[0])
             text_before = splitted_text[2]
-            self._close_stack_tags(do_parse_emotes)
+            self._close_stack_tags()
             self.stack[-1]['childs'].append('\n')
 
         if self.tag_queue and self.tag_queue[0][0] == match.group(3) and not self.tag_queue[0][2]:
@@ -227,17 +227,16 @@ class Plus(object):
                 msgdict = {'tag': tag, tag: arg, 'childs': []}
                 self.stack.append(msgdict)
             else: #closing tags
-                self._close_tags(text_before, tag, arg, do_parse_emotes)
+                self._close_tags(text_before, tag, arg)
                 if close_all_tags:
-                    self._close_stack_tags(do_parse_emotes)
+                    self._close_stack_tags()
         else:
             self.stack[-1]['childs'].append(match.group(0))
 
         if self.tag_queue:
             self.tag_queue.pop(0)
 
-        self._to_dict(text[entire_match_len:],
-                         do_parse_emotes, is_double_color)
+        self._to_dict(text[entire_match_len:], is_double_color)
 
     def _nchars_dict(self, msgdict):
         '''count how many character are there'''
@@ -482,9 +481,9 @@ def _unescape_special_chars(text):
 def msnplus(text, do_parse_emotes=True):
     '''given a string with msn+ formatting, give a DictObj
     representing its formatting.'''
-    plus = Plus(text)
+    plus = Plus(text, do_parse_emotes)
     plus.tags_extract()
-    dictlike = plus.to_dict(do_parse_emotes)
+    dictlike = plus.to_dict()
     return DictObj(dictlike)
 
 def msnplus_parse(text):
