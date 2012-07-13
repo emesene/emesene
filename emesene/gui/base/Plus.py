@@ -160,37 +160,37 @@ class Plus(object):
         else:
             return match2
 
-    def _get_best_match(self, msnplus):
+    def _get_best_match(self, text):
         '''get the best match out of all regexes'''
-        match = open_tag_re.match(msnplus)
-        match_old = open_tag_old_re.match(msnplus)
-        match_close_old = close_tag_old_re.match(msnplus)
+        match = open_tag_re.match(text)
+        match_old = open_tag_old_re.match(text)
+        match_close_old = close_tag_old_re.match(text)
         match = self._get_shortest_match(match, match_old)
         match = self._get_shortest_match(match, match_close_old)
         return match
 
-    def msnplus_to_dict(self, do_parse_emotes=True):
+    def to_dict(self, do_parse_emotes=True):
         '''convert it into a dict, as the one used by XmlParser'''
-        self._msnplus_to_dict(self.text, do_parse_emotes)
+        self._to_dict(self.text, do_parse_emotes)
         self.message_stack = {'tag': 'span', 'childs': self.message_stack}
         self._hex_colors(self.message_stack)
         self._dict_gradients(self.message_stack)
         self._dict_translate_tags(self.message_stack)
         return self.message_stack
 
-    def _msnplus_to_dict(self, msnplus, do_parse_emotes=True,
+    def _to_dict(self, text, do_parse_emotes=True,
                          was_double_color=False):
         '''convert it into a dict, as the one used by XmlParser'''
 
-        match = self._get_best_match(msnplus)
+        match = self._get_best_match(text)
 
         if not match: #only text
             if do_parse_emotes:
-                parsed_markup = parse_emotes(msnplus)
+                parsed_markup = parse_emotes(text)
             else:
-                parsed_markup = [msnplus]
+                parsed_markup = [text]
 
-            self.message_stack.append(msnplus)
+            self.message_stack.append(text)
             self._close_stack_tags(do_parse_emotes)
             return
 
@@ -236,7 +236,7 @@ class Plus(object):
         if self.tag_queue:
             self.tag_queue.pop(0)
 
-        self._msnplus_to_dict(msnplus[entire_match_len:],
+        self._to_dict(text[entire_match_len:],
                          do_parse_emotes, is_double_color)
 
     def _nchars_dict(self, msgdict):
@@ -407,7 +407,7 @@ class Plus(object):
             if isinstance(child, dict):
                 self._dict_translate_tags(child)
 
-    def msnplus_tags_extract(self, strip=False):
+    def tags_extract(self, strip=False):
         '''extract all msnplus tags from input'''
         nl_pos = self.text.find('\n')
         for m in msnplus_tags_re.finditer(self.text):
@@ -416,9 +416,9 @@ class Plus(object):
             # (tag, an opened_tag?, does it paired?, start pos, tag with attr?)
             self.tag_queue.append([m.group(2), is_opened_tag, False, m.start(), has_attr])
 
-        self._msnplus_tags_pair(nl_pos, strip)
+        self._tags_pair(nl_pos, strip)
 
-    def _msnplus_tags_pair(self, nl_pos, strip=False):
+    def _tags_pair(self, nl_pos, strip=False):
         '''find out dangling tags in list based on an assumption that
         all tags are well-formed'''
         # we use the strategy like stack but no pop/push operations
@@ -483,8 +483,8 @@ def msnplus(text, do_parse_emotes=True):
     '''given a string with msn+ formatting, give a DictObj
     representing its formatting.'''
     plus = Plus(text)
-    plus.msnplus_tags_extract()
-    dictlike = plus.msnplus_to_dict(do_parse_emotes)
+    plus.tags_extract()
+    dictlike = plus.to_dict(do_parse_emotes)
     return DictObj(dictlike)
 
 def msnplus_parse(text):
@@ -508,7 +508,7 @@ def msnplus_strip(text, useless_arg=None):
     '''
     text = _escape_special_chars(text)
     plus = Plus(text)
-    plus.msnplus_tags_extract(True)
+    plus.tags_extract(True)
     text = plus.strip_tags()
     text = _unescape_special_chars(text)
 
