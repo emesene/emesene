@@ -361,16 +361,14 @@ class Plus(object):
             msgdict['tag'] = ''
             del msgdict[attr]
 
-        i = 0
-        while colors and i < len(msgdict['childs']):
-            this_child = msgdict['childs'][i]
+        if not colors:
+            return
 
-            if isinstance(this_child, basestring):
-                msgdict['childs'][i] = self._gradientify_string(this_child, attr, colors) #will consumate some items from colors!
+        for i, child in enumerate(msgdict['childs']):
+            if isinstance(child, basestring):
+                 msgdict['childs'][i] = self._gradientify_string(child, attr, colors) #will consumate some items from colors!
             else:
-                self._gradientify(this_child, attr, colors)
-
-            i += 1
+                self._gradientify(child, attr, colors)
 
     def _dict_gradients(self, msgdict):
         '''apply gradients where needed'''
