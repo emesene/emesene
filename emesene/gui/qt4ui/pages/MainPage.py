@@ -119,7 +119,7 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         # investigate display pic...
         widget_dict['display_pic'].set_display_pic_of_account()
 
-    def _on_new_conversation_requested(self, account):
+    def _on_new_conversation_requested(self, account, on_close):
         '''Slot called when the user doubleclicks
         an entry in the contact list'''
         self.on_new_conversation_requested(account)

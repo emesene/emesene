@@ -10,7 +10,6 @@ from PyQt4.QtCore import Qt
 import extension
 import gui
 
-
 log = logging.getLogger('qt4ui.TopLevelWindow')
 
 class TopLevelWindow (QtGui.QMainWindow):
@@ -29,6 +28,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         self._cb_on_close = cb_on_close
         self._given_cb_on_close = cb_on_close
         self._content = None
+        self._content_conv = None
 
         self.setObjectName('mainwindow')
         self.setWindowIcon(QtGui.QIcon(gui.theme.image_theme.logo))
@@ -38,6 +38,18 @@ class TopLevelWindow (QtGui.QMainWindow):
     def __del__(self):
         log.debug('adieu TLW!!!')
 
+    def _get_content_conv(self):
+        '''content getter'''
+        return self._content_conv
+
+    def _set_content_conv(self, content_conv):
+        '''content setter'''
+        if self._content_conv:
+            del self._content_conv
+        self._content_conv = content_conv
+
+    content_conv = property(_get_content_conv, _set_content_conv)
+
     def clear(self): #emesene's
         '''remove the content from the main window'''
         pass
@@ -46,9 +58,8 @@ class TopLevelWindow (QtGui.QMainWindow):
         '''Iconifies the window'''
         self.setWindowState(Qt.WindowMinimized)
         
-    def present(self): # emesene's
+    def present(self, b_single_window=False): # emesene's
         '''(Tries to) raise the window'''
-        #QtGui.QMainWindow.show(self)
         QtGui.QMainWindow.activateWindow(self)
 
     def set_location(self, width, height, posx, posy, single_window=False): #emesene's
@@ -75,13 +86,13 @@ class TopLevelWindow (QtGui.QMainWindow):
         self._switch_to_page(connecting_page)
         self.menuBar().hide()
         
-    def go_conversation(self, session):
+    def go_conversation(self, session, on_close):
         '''Adds a conversation page to the top level window and shows it'''
-        log.debug('GO CONVERSATION! ^_^')
         conversation_window_cls = extension.get_default('conversation window')
         conversation_page = conversation_window_cls(session, 
                             on_last_close=self._on_last_tab_close, parent=self)
         self._content_type = 'conversation'
+        self.content_conv = conversation_page
         self._switch_to_page(conversation_page)
         self.menuBar().hide()
 
@@ -93,7 +104,6 @@ class TopLevelWindow (QtGui.QMainWindow):
                #emesene's
         # pylint: disable=R0913
         '''Adds a login page to the top level window and shows it'''
-        log.debug('GO LOGIN! ^_^')
         login_window_cls = extension.get_default('login window')
         login_page = login_window_cls(callback, on_preferences_changed, config,
                                       config_dir, config_path, proxy, 

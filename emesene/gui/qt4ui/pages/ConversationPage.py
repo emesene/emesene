@@ -88,7 +88,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         # FIXME: again, why is this heeeeeeeeeereeeeeeeeeee????
         return self.get_parent().isMaximized()
 
-    def present(self, conversation): # emesene's
+    def present(self, conversation, b_single_window=False):
         '''Raises the tab containing the given conversation'''
         self.setCurrentIndex(conversation.tab_index)
         
