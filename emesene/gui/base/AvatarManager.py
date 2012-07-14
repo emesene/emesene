@@ -112,7 +112,6 @@ class AvatarManager(object):
             print error
             return None, fpath
 
-
     def add_new_avatar_from_toolkit_pix(self, toolkit_pix):
         ''' add a new picture into the avatar cache '''
         fd, fn = tempfile.mkstemp(prefix='emsnpic')
@@ -123,7 +122,6 @@ class AvatarManager(object):
         results = self.add_new_avatar(fn)
         os.remove(fn)
         return results
-
 
     def set_as_avatar(self, filename):
         ''' set a picture as the current avatar 
@@ -153,3 +151,11 @@ class AvatarManager(object):
                 shutil.copy(fpath, self.avatar_path)
             except OSError, error:
                 print error
+
+    def remove_avatar(self, path):
+        '''remove the avatar file from disk'''
+        try:
+            os.remove(path)
+            parts = os.path.splitext(path)
+        except OSError:
+            print _("could not remove"), path

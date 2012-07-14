@@ -178,12 +178,7 @@ class AvatarChooser(gtk.Window):
         '''remove the avatar in path'''
         view = self.views[self.notebook.get_current_page()]
         del view.model[self.get_iter_from_filename(path)]
-        try:
-            os.remove(path)
-            parts = os.path.splitext(path)
-            #os.remove(parts[0] + "_thumb" + parts[1])
-        except OSError:
-            print _("could not remove"), path
+        self.avatar_manager.remove_avatar(path)
 
     def remove_selected(self):
         '''Removes avatar from a TreeIter'''

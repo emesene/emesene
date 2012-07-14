@@ -44,10 +44,11 @@ class AvatarChooser(Dialog.OkCancelDialog):
         self._widget_d = {}
         
         self._setup_ui()
-        used_path    = self._avatar_manager.get_avatars_dir()
+        # update buttons
+        self._on_tab_changed(0)
+        used_path = self._avatar_manager.get_avatars_dir()
         system_paths = self._avatar_manager.get_system_avatars_dirs()
-        # TODO: update get_cached_avatars_dir's name (should be plural)
-        cached_paths  = self._avatar_manager.get_cached_avatars_dir()
+        cached_paths = self._avatar_manager.get_cached_avatars_dir()
         
         self._populate_list(self._vn[0], used_path)
         for path in system_paths:
@@ -65,19 +66,21 @@ class AvatarChooser(Dialog.OkCancelDialog):
                                                              clickable=False, size=QtCore.QSize(96, 96))
         widget_d['add_btn'] = QtGui.QPushButton(tr('Add...'))
         widget_d['remove_btn'] = QtGui.QPushButton(tr('Remove'))
+        widget_d['remove_all_btn'] = QtGui.QPushButton(tr('Remove All'))
+        widget_d['no_picture_btn'] = QtGui.QPushButton(tr('No picture'))
         widget_d[self._vn[0]] = QtGui.QListView()
         widget_d[self._vn[1]] = QtGui.QListView()
         widget_d[self._vn[2]] = QtGui.QListView()
-        
-        
+
         group_box_lay = QtGui.QVBoxLayout()
         group_box_lay.addWidget(widget_d['preview_dpic'])
         widget_d['group_box'].setLayout(group_box_lay)
         right_lay = QtGui.QVBoxLayout()
         right_lay.addWidget(widget_d['group_box'])
-        right_lay.addSpacing(50)
         right_lay.addWidget(widget_d['add_btn'])
         right_lay.addWidget(widget_d['remove_btn'])
+        right_lay.addWidget(widget_d['remove_all_btn'])
+        right_lay.addWidget(widget_d['no_picture_btn'])
         right_lay.addStretch(20)
         lay = QtGui.QHBoxLayout()
         lay.addWidget(widget_d['tab_widget'])
@@ -92,18 +95,18 @@ class AvatarChooser(Dialog.OkCancelDialog):
             selection_model = QtGui.QItemSelectionModel(model, listview)
             widget_d['tab_widget'].addTab(listview, view_name)
             listview.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-            listview.setViewMode      (QtGui.QListView.IconMode)
-            listview.setMovement      (QtGui.QListView.Static)
-            listview.setResizeMode    (QtGui.QListView.Adjust)
-            listview.setModel         (model)
+            listview.setViewMode(QtGui.QListView.IconMode)
+            listview.setMovement(QtGui.QListView.Static)
+            listview.setResizeMode(QtGui.QListView.Adjust)
+            listview.setModel(model)
             listview.setSelectionModel(selection_model)
-            listview.setItemDelegate  (delegate)
+            listview.setItemDelegate(delegate)
+        widget_d['tab_widget'].currentChanged.connect(self._on_tab_changed)
         widget_d['group_box'].setTitle(tr('Preview'))
         widget_d['preview_dpic'].set_display_pic_of_account()
         widget_d['add_btn'].setIcon(QtGui.QIcon.fromTheme('list-add'))
         widget_d['remove_btn'].setIcon(QtGui.QIcon.fromTheme('list-remove'))
-        
-        
+
         widget_d[self._vn[0]].selectionModel().currentChanged.   \
             connect(                                                       \
                 lambda *args:                                              \
@@ -117,43 +120,83 @@ class AvatarChooser(Dialog.OkCancelDialog):
                 lambda *args:                                              \
                     self._on_selection_changed(self._vn[2], *args))
         widget_d['add_btn'].clicked.connect(self._on_add_clicked)
-        
-    
-    
+        widget_d['remove_btn'].clicked.connect(self._on_remove_clicked)
+        widget_d['remove_all_btn'].clicked.connect(self._on_remove_all)
+        widget_d['no_picture_btn'].clicked.connect(self._on_clear)
+
     def _add_image_to_view(self, view_name, filename):
         '''Adds an image element in the view having the given view_name'''
         listview = self._widget_d[view_name] 
         item = QtGui.QStandardItem(filename)
         listview.model().appendRow(item)
         return item
-    
-    
+
     def _populate_list(self, view_name, path):
         '''Iteratively finds elements to be added to a view, and adds 
         them'''
-        #print 'PATH: %s' % path
         if not os.path.exists(path):
             return
         entries = os.listdir(path)
         for entry in entries:
+            # filter out last avatar
+            if entry == 'last':
+                continue
             entry = os.path.join(path, entry)
             if not os.path.isfile(entry):
                 continue
             if not QtGui.QImageReader(entry).canRead():
                 continue
             self._add_image_to_view(view_name, entry)
-            
-            
+
     def _get_selection(self):
         '''Returns the selected item'''
         if not self._view_with_selection:
             return None
         listview = self._widget_d[self._view_with_selection]
         selection_idxs = listview.selectionModel().selection().indexes()
+        if len(selection_idxs) == 0:
+            return None
         filename = listview.model().data(selection_idxs[0]).toString()
         return unicode(filename)
-            
-            
+
+    def _on_clear(self, button):
+        '''clear user avatar'''
+        self._avatar_manager.set_as_avatar('')
+        self._widget_d['preview_dpic'].set_display_pic_from_file('')
+
+    def _on_remove_all(self, button):
+        '''Removes all avatars from the cache'''
+        def on_response_cb(response):
+            '''response callback for the confirm dialog'''
+            if response == gui.stock.YES:
+                self.remove_all()
+
+        extension.get_default('dialog').yes_no(
+            _("Are you sure you want to remove all items?"),
+            on_response_cb)
+
+    def _on_remove_clicked(self):
+        '''remove current selected avatar'''
+        if not self._view_with_selection:
+            return None
+        listview = self._widget_d[self._view_with_selection]
+        selected_index = listview.selectionModel().selection().indexes()[0]
+        row = selected_index.row()
+        path = unicode(listview.model().data(selected_index).toString())
+        listview.model().removeRows(row, 1)
+        self._avatar_manager.remove_avatar(path)
+
+    def remove_all(self):
+        '''remove all avatars from curent tab'''
+        tab_index = self._widget_d['tab_widget'].currentIndex()
+        listview = self._widget_d[self._vn[tab_index]]
+        for index in range(0,listview.model().rowCount()):
+            selected_index = listview.model().index(index, 0)
+            path = unicode(listview.model().data(selected_index).toString())
+            self._avatar_manager.remove_avatar(path)
+            row = selected_index.row()
+            listview.model().removeRows(row, 1)
+
     def _on_add_clicked(self):
         '''This slot is executed when the user clicks the 'Add' button.
         It shows up a file chooser, than if the image can be manipulate through
@@ -170,7 +213,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
             # select the new appended image:
             self._widget_d[self._vn[0]].selectionModel().\
                         select(item.index(), QtGui.QItemSelectionModel.Select)
-                            
+
         def response_cb(response, pixmap):
             '''Callback invoked when the crop_image dialog is closed.
             If the user clicks ok calls adds the picture to the cache
@@ -194,23 +237,30 @@ class AvatarChooser(Dialog.OkCancelDialog):
         else:
             filename = self._avatar_manager.add_new_avatar(filename)
             add_and_select(filename)
-    
-    
+
     def _on_selection_changed(self, view_name, current_idx, previous_idx):
         '''This slot is called when the selected image in a view changes.
         Currently it doesn't anything useful nor interesting :P'''
         if current_idx.isValid():
             self._view_with_selection = view_name
-            log_debug_msg = 'Valid: [%d:%d]' % (previous_idx.row(), current_idx.row())
             listview = self._widget_d[self._view_with_selection]
             filename = unicode(listview.model().data(current_idx).toString())
             self._widget_d['preview_dpic'].set_display_pic_from_file(filename)
-        else:
-            log_debug_msg = 'Invalid',
-        log_debug_msg += '   %s' % view_name
-        log.debug(log_debug_msg)
-        
-    
+
+    def _on_tab_changed(self, index):
+        if index == 0:
+            self._widget_d['add_btn'].setEnabled(True)
+            self._widget_d['remove_btn'].setEnabled(True)
+            self._widget_d['remove_all_btn'].setEnabled(True)
+        elif index == 1:
+            self._widget_d['add_btn'].setEnabled(False)
+            self._widget_d['remove_btn'].setEnabled(False)
+            self._widget_d['remove_all_btn'].setEnabled(False)
+        elif index == 2:
+            self._widget_d['add_btn'].setEnabled(False)
+            self._widget_d['remove_btn'].setEnabled(True)
+            self._widget_d['remove_all_btn'].setEnabled(True)
+
     # OVERRIDE
     def _on_accept(self):
         '''This method overrides OkCancelDialog class' _on_accept.
@@ -218,12 +268,6 @@ class AvatarChooser(Dialog.OkCancelDialog):
         as the user's avatar'''
         filename = self._get_selection()
         if filename:
-            log.info('Avatar Choosed: [%s]' % filename)
             if os.path.exists(filename):
                 self._avatar_manager.set_as_avatar(filename)
-            else:
-                log.info('Avatar Choosed: [Cancel]')
         Dialog.OkCancelDialog._on_accept(self)
-        
-
-        
