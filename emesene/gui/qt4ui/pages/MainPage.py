@@ -9,7 +9,6 @@ from gui.qt4ui.Utils import tr
 
 import extension
 import gui
-from gui.qt4ui.widgets import UserPanel
 
 class MainPage (QtGui.QWidget, gui.MainWindowBase):
     '''The main page (the one with the contact list)'''
@@ -50,8 +49,9 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         nick_edit_cls = extension.get_default('nick edit')
         avatar_cls = extension.get_default('avatar')
         contact_list_cls = extension.get_default('contact list')
+        user_panel_cls = extension.get_default('user panel')
 
-        widget_dict['user_panel'] = UserPanel.UserPanel(self.session, self)
+        widget_dict['user_panel'] = user_panel_cls(self.session, self)
         widget_dict['contact_list'] = contact_list_cls(self.session)
 
         lay = QtGui.QVBoxLayout()
