@@ -97,11 +97,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
         self.session.config.subscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
-        self.session.config.subscribe(self._on_show_mail_inbox_changed,
-            'b_show_mail_inbox')
-
         self._on_show_userpanel_changed(self.session.config.b_show_userpanel)
-        self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
 
         #extension changes
         extension.subscribe(self._on_below_userlist_changed, "below userlist")
@@ -136,7 +132,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
                     self.below_panel, new_extension, 3)
 
     def _on_mail_count_changed(self, count):
-        self.panel.mail.set_label("(%d)" % count)
+        self.panel.set_mail_count(count)
 
     def _on_social_request(self, conn_url):
 
@@ -194,11 +190,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.panel.show()
         else:
             self.panel.hide()
-        self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
-
-    def _on_show_mail_inbox_changed(self, value):
-        '''callback called when config.b_show_mail_inbox changes'''
-        self.panel.mail.set_visible(value)
 
     def _build_menus(self):
         '''buildall the menus used on the client'''
@@ -376,8 +367,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_list.remove_subscriptions()
         self.session.config.unsubscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
-        self.session.config.unsubscribe(self._on_show_mail_inbox_changed,
-            'b_show_mail_inbox')
         #self.session.signals.contact_attr_changed.unsubscribe(
         #    self._on_contact_attr_changed)
         self.panel.remove_subscriptions()

@@ -49,7 +49,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         QtGui.QTabWidget.setCurrentIndex(self, tab_index)
 
     #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
-    
+
     def add_new_conversation(self, session, conv_id, members):
         '''Creates a new chat tab and returns it. This implements base's
         class abstract method.'''
@@ -61,14 +61,11 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         self.setTabIcon(conversation.tab_index, 
                         QtGui.QIcon(gui.theme.image_theme.status_icons[account.status]))
         return conversation
-        
+
     def get_dimensions(self):
         '''
         Returns a tuple containing width, height, x coordinate, y coordinate
         '''
-        # FIXME: Why is this method called on this?? this a conversation
-        # manager, this sould be called on the toplevelwindow containing this
-        # but emesene.py calls this in _on_converastion_window_closed. WROOONG!
         size = self.size()
         position = self.pos()
         return size.width(), size.height(), position.x(), position.y()
@@ -79,19 +76,16 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         self.get_parent().hide()
 
     def is_active(self):
-        '''
-        return True if the conversation manager is active
-        '''
+        '''return True if the conversation manager is active'''
         return self.get_parent().hasFocus()
 
     def is_maximized(self):
-        # FIXME: again, why is this heeeeeeeeeereeeeeeeeeee????
         return self.get_parent().isMaximized()
 
     def present(self, conversation, b_single_window=False):
         '''Raises the tab containing the given conversation'''
         self.setCurrentIndex(conversation.tab_index)
-        
+
     def remove_conversation(self, conversation):
         '''Removes the chat tab. This implements base's class 
         abstract method.'''
@@ -119,11 +113,8 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
                 icon = QtGui.QIcon(gui.theme.image_theme.status_icons[account.status])
                 self.setTabIcon(index, icon)
                 self.setTabText(index, unicode(account.display_name))
-                
-                
-    #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
-                
 
+    #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
     def _on_tab_close_request(self, index):
         '''Slot executed when the use clicks the close button in a tab'''
         self.close(self.widget(index))

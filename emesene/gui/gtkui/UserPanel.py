@@ -116,7 +116,6 @@ class UserPanel(gtk.VBox):
         nick_hbox.show()
         self.message_hbox.show()
         vbox.show()
-
         self._add_subscriptions()
 
     def _on_userpanel_button_changed(self, newvalue):
@@ -148,7 +147,8 @@ class UserPanel(gtk.VBox):
         self.search.show()
         if self.userpanel_button:
             self.userpanel_button.show()
-        self.mail.show()
+        if self.session.config.b_show_mail_inbox:
+            self.mail.show()
         self.toolbar.show()
 
     def show_all(self):
@@ -221,6 +221,13 @@ class UserPanel(gtk.VBox):
         '''method called when the nick is changed'''
         self.session.set_message(new_text)
 
+    def _on_show_mail_inbox_changed(self, value):
+        '''callback called when config.b_show_mail_inbox changes'''
+        self.mail.set_visible(value)
+
+    def set_mail_count(self, count):
+        self.mail.set_label("(%d)" % count)
+
     def _add_subscriptions(self):
         '''subscribe all signals'''
         self.session.signals.message_change_succeed.subscribe(
@@ -238,6 +245,8 @@ class UserPanel(gtk.VBox):
             self.on_profile_update_succeed)
         self.session.signals.profile_set_succeed.subscribe(
             self.on_profile_update_succeed)
+        self.session.config.subscribe(self._on_show_mail_inbox_changed,
+            'b_show_mail_inbox')
 
         extension.subscribe(
             self._on_userpanel_button_changed, "userpanel button")
@@ -259,6 +268,8 @@ class UserPanel(gtk.VBox):
             self.on_profile_update_succeed)
         self.session.signals.profile_set_succeed.unsubscribe(
             self.on_profile_update_succeed)
+        self.session.config.unsubscribe(self._on_show_mail_inbox_changed,
+            'b_show_mail_inbox')
 
         extension.unsubscribe(
             self._on_userpanel_button_changed, "userpanel button")
