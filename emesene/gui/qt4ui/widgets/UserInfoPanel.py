@@ -29,6 +29,7 @@ class UserInfoPanel (QtGui.QWidget):
         self._message_lbl       = QtGui.QLabel()
         
         lay = QtGui.QHBoxLayout()
+        lay.setContentsMargins (0,0,0,0)
         lay.addWidget(self._message_lbl)
         self.setLayout(lay)
         self._message_lbl.setTextFormat(Qt.RichText)

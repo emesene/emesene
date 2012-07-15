@@ -37,7 +37,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         
         # a widget dic to avoid proliferation of instance variables:
         self._widget_d = {}
-        
         self._setup_ui()
 
         #update information
@@ -77,15 +76,16 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d = self._widget_d
         
         # Classes
-        conv_output_cls     = extension.get_default('conversation output')
-        smiley_chooser_cls  = extension.get_default('smiley chooser')
-        avatar_cls          = extension.get_default('avatar')
-        info_panel_cls      = extension.get_default('info panel')
-        conv_toolbar_cls      = extension.get_default('conversation toolbar')
+        conv_output_cls = extension.get_default('conversation output')
+        smiley_chooser_cls = extension.get_default('smiley chooser')
+        avatar_cls = extension.get_default('avatar')
+        info_panel_cls = extension.get_default('info panel')
+        conv_toolbar_cls = extension.get_default('conversation toolbar')
         
         # TOP LEFT
         widget_d['chat_output'] = conv_output_cls(self.session.config)
         top_left_lay = QtGui.QHBoxLayout()
+        top_left_lay.setContentsMargins (0,0,0,0)
         top_left_lay.addWidget(widget_d['chat_output'])
 
         # BOTTOM LEFT
@@ -97,15 +97,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         widget_d['chat_input'] = Widgets.ChatInput()
 
-        text_edit_lay = QtGui.QHBoxLayout()
-        text_edit_lay.addWidget(widget_d['chat_input'])
-        
         bottom_left_lay = QtGui.QVBoxLayout()
+        bottom_left_lay.setContentsMargins (0,0,0,0)
         bottom_left_lay.addWidget(widget_d['toolbar'])
-        bottom_left_lay.addLayout(text_edit_lay)
+        bottom_left_lay.addWidget(widget_d['chat_input'])
 
         widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.emotes)
-
         widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
         widget_d['chat_input'].return_pressed.connect(
@@ -134,6 +131,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d['my_display_pic'] = avatar_cls(self.session)
         
         right_lay = QtGui.QVBoxLayout()
+        right_lay.setContentsMargins (1,1,1,1)
         right_lay.addWidget(widget_d['his_display_pic'])
         right_lay.addStretch()
         right_lay.addWidget(widget_d['my_display_pic'])
@@ -145,6 +143,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         lay_no_info.addWidget(left_widget)
         lay_no_info.addLayout(right_lay)
         lay = QtGui.QVBoxLayout()
+        lay.setContentsMargins (1,1,1,1)
         lay.addWidget(widget_d['info_panel'])
         lay.addLayout(lay_no_info)
 

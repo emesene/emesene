@@ -137,6 +137,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         widget_d['login_btn'] = QtGui.QPushButton(tr('Connect'))
 
         lay = QtGui.QVBoxLayout()
+        lay.setContentsMargins (0,0,0,0)
         lay.addSpacing(40)
         lay.addWidget(widget_d['display_pic'], 0, Qt.AlignCenter)
         lay.addSpacing(40)

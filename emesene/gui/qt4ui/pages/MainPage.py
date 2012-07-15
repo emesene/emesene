@@ -55,6 +55,7 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         widget_dict['contact_list'] = contact_list_cls(self.session)
 
         lay = QtGui.QVBoxLayout()
+        lay.setContentsMargins (0,0,0,0)
         lay.addWidget(widget_dict['user_panel'])
         lay.addWidget(widget_dict['contact_list'])
         self.setLayout(lay)

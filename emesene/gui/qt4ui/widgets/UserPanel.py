@@ -62,18 +62,21 @@ class UserPanel(QtGui.QWidget):
                 tr('<u>Click here to set a personal message...</u>')))
         widget_dict['status_combo'] = StatusButton.StatusButton(self.session)
         psm_box = QtGui.QHBoxLayout()
+        psm_box.setContentsMargins (0,0,0,0)
         psm_box.addWidget(widget_dict['psm_edit'])
         psm_box.addWidget(widget_dict['status_combo'])
         widget_dict['psm_box'] = psm_box
         widget_dict['display_pic'] = avatar_cls(self.session)
 
         my_info_lay_left = QtGui.QVBoxLayout()
+        my_info_lay_left.setContentsMargins (0,0,0,0)
         my_info_lay_left.addLayout(nick_box)
         my_info_lay_left.addLayout(psm_box)
 
         my_info_lay = QtGui.QHBoxLayout()
         my_info_lay.addWidget(widget_dict['display_pic'])
         my_info_lay.addLayout(my_info_lay_left)
+        my_info_lay.setContentsMargins (0,0,0,0)
         self.setLayout(my_info_lay)
         self.session.signals.status_change_succeed.subscribe(
                                 self._widget_dict['status_combo'].set_status)
