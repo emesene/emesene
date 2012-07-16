@@ -38,7 +38,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self._setup_ui()
 
         # emesene's
-        self.contact_list = self._widget_dict['contact_list']
         self.session.config.subscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
         self._on_show_userpanel_changed(self.session.config.b_show_userpanel)
@@ -52,9 +51,11 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         user_panel_cls = extension.get_default('user panel')
 
         widget_dict['user_panel'] = user_panel_cls(self.session, self)
-        widget_dict['contact_list'] = contact_list_cls(self.session)
+        self.contact_list = contact_list_cls(self.session)
         widget_dict['search_entry'] = widgets.SearchEntry()
         widget_dict['search_entry'].setVisible(False)
+        widget_dict['search_entry'].textChanged.connect(
+                                    self._on_search_changed)
         widget_dict['user_panel'].search.clicked.connect(
                                     self._on_search_click)
 
@@ -62,14 +63,23 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         lay.setContentsMargins (0,0,0,0)
         lay.addWidget(widget_dict['user_panel'])
         lay.addWidget(widget_dict['search_entry'])
-        lay.addWidget(widget_dict['contact_list'])
+        lay.addWidget(self.contact_list)
         self.setLayout(lay)
-
-        widget_dict['contact_list'].new_conversation_requested.connect(
+        self.contact_list.new_conversation_requested.connect(
                                         self.on_new_conversation_requested)
 
     def _on_search_click(self, status):
         self._widget_dict['search_entry'].setVisible(status)
+        if not status:
+            #clean search entry when search is disabled
+            self._widget_dict['search_entry'] = ''
+            self._on_search_changed(QtCore.QString(''))
+        self.contact_list.is_searching = status
+
+    def _on_search_changed(self, new_text):
+        self.contact_list.filter_text = new_text.toLower()
+        self.contact_list.expand_groups()
+        self.contact_list.select_top_contact()
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''

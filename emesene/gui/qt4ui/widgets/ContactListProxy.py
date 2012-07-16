@@ -4,9 +4,9 @@
 
 import logging
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
+from PyQt4.QtCore import Qt
 
 import e3
 
@@ -14,20 +14,6 @@ from gui.qt4ui  import Utils
 from gui.qt4ui.widgets.ContactListModel import ContactListModel
 from gui.qt4ui.widgets.ContactListModel import Role
 
-#class ContactListProxy435 (QtGui.QSortFilterProxyModel):
-#    def __init__(self, config, parent=None):
-#        QtGui.QSortFilterProxyModel.__init__(self, parent)
-#        
-#        self.setSortRole(Role.SortRole)
-#        self.setDynamicSortFilter(True)
-#        
-#    def filterAcceptsRow(self, row, parent_idx):
-#        model = self.sourceModel()
-#        index = model.index(row, 0, parent_idx)
-#        print 'FR: %s[%s]' % (self.data(index, Role.FilterRole).toPyObject(), 
-#                              index.isValid())
-#        return self.data(index, Role.FilterRole).toPyObject()
-            
 log = logging.getLogger('qt4ui.widgets.ContactListProxy')
 
 class ContactListProxy (QtGui.QSortFilterProxyModel):
@@ -38,25 +24,30 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
     
     def __init__(self, config, parent=None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
-        QtGui.QSortFilterProxyModel.setSourceModel(self, 
-                                            InternalContactListProxy(config, 
-                                                                     self  ))
-        
+        self._internal_proxy = InternalContactListProxy(config, self)
+        QtGui.QSortFilterProxyModel.setSourceModel(self, self._internal_proxy)
         self.setSortRole(Role.SortRole)
         self.setDynamicSortFilter(True)
-        
         self._config = config
         #config = session.config
-        self._show_empty     = config.b_show_empty_groups
-        self._group_offline  = config.b_group_offline
+        self._show_empty = config.b_show_empty_groups
+        self._group_offline = config.b_group_offline
         
-        config.subscribe(self._on_cc_group_offline,     'b_group_offline')
+        config.subscribe(self._on_cc_group_offline, 'b_group_offline')
         config.subscribe(self._on_cc_show_empty_groups, 'b_show_empty_groups')
         config.subscribe(self._on_cc_show_empty_groups, 'b_show_offline')
         
     def setSourceModel(self, source_model):
         self.sourceModel().setSourceModel(source_model)
-        
+
+    def set_filter_text(self, filter_text):
+        if filter_text != '':
+            self._show_empty = False
+        else:
+            self._show_empty = self._config.b_show_empty_groups
+        self._internal_proxy.set_filter_text(filter_text)
+        self.invalidateFilter()
+
     def filterAcceptsRow (self, row, parent_idx):
         model = self.sourceModel()
         index = model.index(row, 0, parent_idx)
@@ -84,10 +75,8 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
                    
         log.debug('*** Showing group: %s [%d]' % (model.data(index, Role.DisplayRole).toString(), model.rowCount(index)))
         return True
-            
         
     def sort(self, column, order):
-        log.info('About to Sort')
         QtGui.QSortFilterProxyModel.sort(self, 0, Qt.AscendingOrder)  
        
     # cc = configchange       
@@ -100,14 +89,10 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
         self.invalidateFilter()
     
     def _on_cc_show_offline(self, value):
-        log.debug('----------> SHOW OFFLINE: %s' % value)
         self._show_offline = value
         self._config.b_show_empty_groups = not self._config.b_show_empty_groups
         self._config.b_show_empty_groups = not self._config.b_show_empty_groups
         self.invalidateFilter()
-
-
-
 
 class InternalContactListProxy (QtGui.QSortFilterProxyModel):
     '''This class provides a proxy to access the contact list
@@ -120,7 +105,7 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
         
         self.setSortRole(Role.SortRole)
         self.setDynamicSortFilter(True)
-        
+        self._filter_text = ''
         #config = session.config
         self._config = config
         self._show_offline   = config.b_show_offline
@@ -129,15 +114,28 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
         
         config.subscribe(self._on_cc_show_offline,  'b_show_offline')
         config.subscribe(self._on_cc_group_offline, 'b_group_offline')
-        
-        
+
+    def set_filter_text(self, filter_text):
+        self._filter_text = filter_text
+        self.invalidateFilter()
+
     def filterAcceptsRow (self, row, parent_idx):
         model = self.sourceModel()
         index = model.index(row, 0, parent_idx)
         
         # Filtering just contacts:
         if index.parent().isValid():
-            
+            if not self._filter_text is '':
+                contact_name = model.data(index, Role.DisplayRole).toString()
+                contact_message = model.data(index, Role.MessageRole).toString()
+                contact_account = model.data(index, Role.ToolTipRole).toString()
+                if (contact_name.indexOf(self._filter_text) != -1 or
+                    contact_message.indexOf(self._filter_text) != -1 or
+                    contact_account.indexOf(self._filter_text) != -1):
+                    return True
+                else:
+                    return False
+
             if not self._config.b_show_offline and \
                model.data(index, Role.StatusRole) == e3.status.OFFLINE:
                    log.debug('****** Contact %s filtered because of _show_offline=%s' % (
@@ -160,16 +158,14 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
                               self.mapFromSource(index.parent()))
         return True
             
-        
     def sort(self, column, order):
         pass
-       
+
     # cc = configchange       
     def _on_cc_group_offline(self, value):
         self._group_offline = value
         self.invalidateFilter()
-    
+
     def _on_cc_show_offline(self, value):
-        log.debug('----------> SHOW OFFLINE: %s' % value)
         self._show_offline = value
         self.invalidateFilter()

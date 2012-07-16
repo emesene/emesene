@@ -120,8 +120,17 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         return True
         
     def refilter(self):
+        self._pmodel.set_filter_text(self.filter_text)
+
+    def expand_groups(self):
+        ''' expand groups while searching'''
+        if self.is_searching:
+            self.expandAll()
+
+    def select_top_contact(self):
+        #FIXME
         pass
-        
+
     # [END] -------------------- GUI.CONTACTLIST_OVERRIDE
 
     def _on_item_double_clicked(self, index):

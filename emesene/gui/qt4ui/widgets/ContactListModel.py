@@ -5,11 +5,11 @@
 import logging
 import xml
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
+from PyQt4.QtCore import Qt
 
-from gui.qt4ui  import Utils
+from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
 
 import e3
@@ -245,15 +245,15 @@ class ContactListModel (QtGui.QStandardItemModel):
         message      = Utils.escape(unicode(contact.message))
         sort_role    = self.sort_role_dict[contact.status] + display_name
         
-        contact_item.setData(display_name,      Role.DisplayRole)
-        contact_item.setData(message,           Role.MessageRole)
-        contact_item.setData(contact.picture,   Role.DecorationRole)
-        contact_item.setData(contact.media,     Role.MediaRole)
-        contact_item.setData(contact.status,    Role.StatusRole)
-        contact_item.setData(contact.blocked,   Role.BlockedRole)
-        contact_item.setData(contact.account,   Role.ToolTipRole)
-        contact_item.setData(sort_role,         Role.SortRole)
-        contact_item.setData(contact,           Role.DataRole)
+        contact_item.setData(display_name, Role.DisplayRole)
+        contact_item.setData(message, Role.MessageRole)
+        contact_item.setData(contact.picture, Role.DecorationRole)
+        contact_item.setData(contact.media, Role.MediaRole)
+        contact_item.setData(contact.status, Role.StatusRole)
+        contact_item.setData(contact.blocked, Role.BlockedRole)
+        contact_item.setData(contact.account, Role.ToolTipRole)
+        contact_item.setData(sort_role, Role.SortRole)
+        contact_item.setData(contact, Role.DataRole)
         #self.sort(0)
         
     def _set_filter_role(self, index):
