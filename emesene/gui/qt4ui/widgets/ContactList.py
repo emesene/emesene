@@ -123,12 +123,10 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         pass
         
     # [END] -------------------- GUI.CONTACTLIST_OVERRIDE
-        
 
     def _on_item_double_clicked(self, index):
         '''Slot called when the user double clicks a contact. requests
         a new conversation'''
-        log.debug(self._pmodel.data(index, Role.UidRole).toPyObject())
         if index.parent().isValid():
             contact = self._pmodel.data(index, Role.DataRole).toPyObject()
             self.new_conversation_requested.emit(str(contact.account))
@@ -137,16 +135,10 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
             if not group:
                 return
             if self.isExpanded(index):
-                log.debug('Expanded: %s' % group.name)
                 self.on_group_expanded(group)
             else:
-                log.debug('Collapsed: %s' % group.name)
                 self.on_group_collapsed(group)
-            
 
     def escaper(self, text):
         ''' escape the text, this is a toolkit dependant method '''
         return unicode(text)
-
-
-

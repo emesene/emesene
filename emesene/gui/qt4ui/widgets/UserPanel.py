@@ -48,25 +48,39 @@ class UserPanel(QtGui.QWidget):
 
         nick_box = QtGui.QHBoxLayout()
         widget_dict['nick_edit'] = nick_edit_cls()
+        widget_dict['nick_edit'].setToolTip(tr('Click here to set your nick name'))
         widget_dict['mail_btn'] = QtGui.QToolButton()
         widget_dict['mail_btn'].setAutoRaise(True)
         widget_dict['mail_btn'].setIcon(
                                     QtGui.QIcon.fromTheme('mail-unread'))
         widget_dict['mail_btn'].setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         widget_dict['mail_btn'].setText("(0)")
+        widget_dict['mail_btn'].setToolTip(tr('Click here to access your mail'))
+
+        widget_dict['find_btn'] = QtGui.QToolButton()
+        widget_dict['find_btn'].setCheckable(True)
+        widget_dict['find_btn'].setIcon(
+                                    QtGui.QIcon.fromTheme('edit-find'))
+        widget_dict['find_btn'].setToolTip(tr('Search (Ctrl+F)'))
+        #TODO: implement search
         nick_box.addWidget(widget_dict['nick_edit'])
         nick_box.addWidget(widget_dict['mail_btn'])
+        nick_box.addWidget(widget_dict['find_btn'])
 
+        empty_message_text = tr("Click here to set your message")
         widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True,
             empty_message=QtCore.QString(
-                tr('<u>Click here to set a personal message...</u>')))
+                '<u>' + empty_message_text + '</u>'))
+        widget_dict['psm_edit'].setToolTip(empty_message_text)
         widget_dict['status_combo'] = StatusButton.StatusButton(self.session)
+        widget_dict['status_combo'].setToolTip(tr('Click here to change your status'))
         psm_box = QtGui.QHBoxLayout()
         psm_box.setContentsMargins (0,0,0,0)
         psm_box.addWidget(widget_dict['psm_edit'])
         psm_box.addWidget(widget_dict['status_combo'])
         widget_dict['psm_box'] = psm_box
         widget_dict['display_pic'] = avatar_cls(self.session)
+        widget_dict['display_pic'].setToolTip(tr('Click here to set your avatar'))
 
         my_info_lay_left = QtGui.QVBoxLayout()
         my_info_lay_left.setContentsMargins (0,0,0,0)

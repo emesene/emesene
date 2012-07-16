@@ -14,7 +14,6 @@ from gui.qt4ui.Utils import tr
 
 import e3
 
-
 log = logging.getLogger('qt4ui.widgets.ContactListModel')
 
 class ContactListModel (QtGui.QStandardItemModel):
@@ -25,11 +24,11 @@ class ContactListModel (QtGui.QStandardItemModel):
                        e3.status.AWAY    : u'20',
                        e3.status.IDLE    : u'30',
                        e3.status.OFFLINE : u'40' }
-                    
+
     NO_GRP_UID  = 'nogroup'
     ONL_GRP_UID = 'onlinegroup'
     OFF_GRP_UID = 'offlinegroup'
-    
+
     def __init__(self, config, parent=None):
         '''Constructor'''
         QtGui.QStandardItemModel.__init__(self,  parent)
@@ -51,8 +50,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         config.subscribe(self._on_cc_show_blocked, 'b_show_blocked')
         config.subscribe(self._on_cc_order_by_group, 'b_order_by_group')
         config.subscribe(self._on_cc_group_offline, 'b_group_offline')
-        
-        
+
     def add_contact(self, contact, group=None):
         '''Add a contact'''
         # TODO: check adding an existing contact
@@ -61,7 +59,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         else:
             gname = 'NONE'
         log.info('add %s to group %s' % (contact.display_name, gname))
-        
+
         # decide in which group we have to add the contact:
         if self._config.b_order_by_group:
             if not group:
@@ -90,8 +88,7 @@ class ContactListModel (QtGui.QStandardItemModel):
                 # increment the online count:
                 onl_count = group_item.data(Role.OnlCountRole).toPyObject()
                 group_item.setData(tot_count+1, Role.OnlCountRole)
-                
-        
+
         if self._config.b_order_by_group and \
                                         contact.status == e3.status.OFFLINE:
             group_item = self._search_item(self.OFF_GRP_UID, self)
@@ -106,8 +103,7 @@ class ContactListModel (QtGui.QStandardItemModel):
             onl_count = group_item.data(Role.OnlCountRole).toPyObject()
             group_item.setData(tot_count+1, Role.OnlCountRole)
         #self.refilter()
-            
-    
+
     def update_contact(self, contact):
         '''Update a contact'''
         # TODO: Keep a {contact uid:group item} dict... maybe..
@@ -320,7 +316,6 @@ class ContactListModel (QtGui.QStandardItemModel):
         new_group_item.setData(group, Role.DataRole)
         self.appendRow(new_group_item)
         #self.refilter()
-
     
     def clear(self):
         '''Clears the model'''
@@ -378,13 +373,6 @@ class ContactListModel (QtGui.QStandardItemModel):
     def _on_cc_group_offline(self, value):
         self._group_offline = value
         #self.refilter()
-    
-    
-    
-
-        
-
-
 
 class Role (object):
     '''A Class representing various custom Qt User Roles'''

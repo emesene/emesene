@@ -173,5 +173,3 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
         log.debug('----------> SHOW OFFLINE: %s' % value)
         self._show_offline = value
         self.invalidateFilter()
-       
-       
