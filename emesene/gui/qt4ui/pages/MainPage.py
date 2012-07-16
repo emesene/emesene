@@ -6,6 +6,7 @@ import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
 from gui.qt4ui.Utils import tr
+from gui.qt4ui import widgets
 
 import extension
 import gui
@@ -45,7 +46,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
-
         nick_edit_cls = extension.get_default('nick edit')
         avatar_cls = extension.get_default('avatar')
         contact_list_cls = extension.get_default('contact list')
@@ -53,15 +53,23 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
 
         widget_dict['user_panel'] = user_panel_cls(self.session, self)
         widget_dict['contact_list'] = contact_list_cls(self.session)
+        widget_dict['search_entry'] = widgets.SearchEntry()
+        widget_dict['search_entry'].setVisible(False)
+        widget_dict['user_panel'].search.clicked.connect(
+                                    self._on_search_click)
 
         lay = QtGui.QVBoxLayout()
         lay.setContentsMargins (0,0,0,0)
         lay.addWidget(widget_dict['user_panel'])
+        lay.addWidget(widget_dict['search_entry'])
         lay.addWidget(widget_dict['contact_list'])
         self.setLayout(lay)
 
         widget_dict['contact_list'].new_conversation_requested.connect(
                                         self.on_new_conversation_requested)
+
+    def _on_search_click(self, status):
+        self._widget_dict['search_entry'].setVisible(status)
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''

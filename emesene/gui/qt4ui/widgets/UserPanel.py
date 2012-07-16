@@ -62,15 +62,14 @@ class UserPanel(QtGui.QWidget):
         widget_dict['find_btn'].setIcon(
                                     QtGui.QIcon.fromTheme('edit-find'))
         widget_dict['find_btn'].setToolTip(tr('Search (Ctrl+F)'))
-        #TODO: implement search
+        self.search = widget_dict['find_btn']
         nick_box.addWidget(widget_dict['nick_edit'])
         nick_box.addWidget(widget_dict['mail_btn'])
         nick_box.addWidget(widget_dict['find_btn'])
 
         empty_message_text = tr("Click here to set your message")
         widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True,
-            empty_message=QtCore.QString(
-                '<u>' + empty_message_text + '</u>'))
+            empty_message=empty_message_text)
         widget_dict['psm_edit'].setToolTip(empty_message_text)
         widget_dict['status_combo'] = StatusButton.StatusButton(self.session)
         widget_dict['status_combo'].setToolTip(tr('Click here to change your status'))

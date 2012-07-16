@@ -33,13 +33,11 @@ class NickEdit(QtGui.QStackedWidget):
         self._allow_empty = allow_empty
         self._empty_message = u'<u>' + empty_message + u'</u>'
         self._is_empty_message_displayed = False
-
         self._text = ''
-        
+
         self.line_edit = QtGui.QLineEdit()
         self.label = QLabelEmph(QtCore.QString('If you see this, " \
                             "please invoke setText on NickEdit.'))
-
         self.set_text(QtCore.QString())
 
         self.addWidget(self.line_edit)
@@ -47,12 +45,9 @@ class NickEdit(QtGui.QStackedWidget):
         self.setCurrentWidget(self.label)
         self.setSizePolicy(QtGui.QSizePolicy.Expanding, 
                            QtGui.QSizePolicy.Fixed)
-
         self.label.clicked.connect(self._on_label_clicked)
         self.line_edit.editingFinished.connect(self._on_line_edited)
 
-        
-        
     def text(self):
         '''Returns the displayed text as a QString'''
         if self._is_empty_message_displayed:
@@ -60,7 +55,6 @@ class NickEdit(QtGui.QStackedWidget):
         text = unicode(self._text)
         #text = Utils.unescape(text)
         return QtCore.QString(text)
-        
         
     def set_text(self, text):
         '''Displays the given text'''
@@ -136,7 +130,7 @@ class QLabelEmph(QtGui.QLabel):
             self.clicked.emit()    
             
     #received even if mouse tracking not explicitly enabled
-    def enterEvent(self, event): 
+    def enterEvent(self, event):
         # pylint: disable=C0103
         '''Handles mouse-in events'''
         QtGui.QLabel.setText(self, QLabelEmph._LE + 
