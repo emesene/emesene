@@ -1659,7 +1659,14 @@ class InviteWindow(gtk.Window):
         """
         method called when the contact is selected
         """
-        self.callback(contact.account)
+        contacts = self.contact_list.get_contact_selected()
+
+        if len(contacts) == 0:
+            Dialog.error(_("No contact selected"))
+            return
+
+        for contact in contacts:
+            self.callback(contact.account)
         self.destroy()
 
     def destroy(self):

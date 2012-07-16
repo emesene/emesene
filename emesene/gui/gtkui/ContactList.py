@@ -288,6 +288,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def _get_selected_multi(self):
         '''return multiple selected rows or None'''
         try:
+            model = self.get_selection().get_selected_rows()[0]
             pathlist_ = self.get_selection().get_selected_rows()[1]
         except AttributeError:
             return None
@@ -379,6 +380,16 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def get_group_selected(self):
         '''return a group object if there is a group selected, None otherwise
         '''
+        if self.get_selection().get_mode() == gtk.SELECTION_MULTIPLE:
+            sels = self._get_selected_multi()
+
+            if sels is None:
+                return None
+
+            model = self.get_selection().get_selected_rows()[0]
+
+            return [model[sel][1] for sel in sels if isinstance(model[sel][1], e3.Group)]
+
         selected = self._get_selected()
 
         if selected is None:
@@ -407,7 +418,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
             if sels is None:
                 return None
 
-            return [self._model[sel][1] for sel in sels if hasattr(self._model[sel][1], "account")]
+            model = self.get_selection().get_selected_rows()[0]
+
+            return [model[sel][1] for sel in sels if isinstance(model[sel][1], e3.Contact)]
 
         selected = self._get_selected()
 
