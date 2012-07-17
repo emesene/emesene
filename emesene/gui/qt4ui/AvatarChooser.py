@@ -19,7 +19,7 @@ log = logging.getLogger('qt4ui.AvatarChooser')
 
 class AvatarChooser(Dialog.OkCancelDialog):
     '''A dialog to choose an avatar'''
-    # differently from the Gtk one, this handles avatar 
+    # differently from the Gtk one, this handles avatar
     # manager /internally/ because, at the time of writing
     # AvatarManager is alredy available in gui.base
     NAME = 'Avatar Chooser'
@@ -31,25 +31,25 @@ class AvatarChooser(Dialog.OkCancelDialog):
         '''Constructor, response_cb receive the response number, the new file
         selected and a list of the paths on the icon view.
         picture_path is the path of the current display picture'''
-        Dialog.OkCancelDialog.__init__(self, tr('Avatar chooser'), 
+        Dialog.OkCancelDialog.__init__(self, tr('Avatar chooser'),
                                        expanding=True, parent=parent)
         self._session = session
         self._avatar_manager = gui.base.AvatarManager(session)
         # view names:
-        self._vn = [ tr('Used pictures'   ), 
-                     tr('System pictures' ), 
+        self._vn = [ tr('Used pictures'   ),
+                     tr('System pictures' ),
                      tr('Contact pictures')  ]
         self._view_with_selection = None
         self._current_avatar = session.config_dir.get_path('last_avatar')
         self._widget_d = {}
-        
+
         self._setup_ui()
         # update buttons
         self._on_tab_changed(0)
         used_path = self._avatar_manager.get_avatars_dir()
         system_paths = self._avatar_manager.get_system_avatars_dirs()
         cached_paths = self._avatar_manager.get_cached_avatars_dir()
-        
+
         self._populate_list(self._vn[0], used_path)
         for path in system_paths:
             self._populate_list(self._vn[1], path)
@@ -59,7 +59,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
     def _setup_ui(self):
         '''Builds up the UI'''
         widget_d = self._widget_d
-        
+
         widget_d['tab_widget'] = QtGui.QTabWidget()
         widget_d['group_box'] = QtGui.QGroupBox()
         widget_d['preview_dpic'] = widgets.DisplayPic(self._session,
@@ -87,7 +87,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
         lay.addLayout(right_lay)
         self.setLayout(lay)
         self.resize(725, 430)
-        
+
         delegate = widgets.IconViewDelegate()
         for view_name in self._vn:
             listview = widget_d[view_name]
@@ -126,13 +126,13 @@ class AvatarChooser(Dialog.OkCancelDialog):
 
     def _add_image_to_view(self, view_name, filename):
         '''Adds an image element in the view having the given view_name'''
-        listview = self._widget_d[view_name] 
+        listview = self._widget_d[view_name]
         item = QtGui.QStandardItem(filename)
         listview.model().appendRow(item)
         return item
 
     def _populate_list(self, view_name, path):
-        '''Iteratively finds elements to be added to a view, and adds 
+        '''Iteratively finds elements to be added to a view, and adds
         them'''
         if not os.path.exists(path):
             return
@@ -190,7 +190,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
         '''remove all avatars from curent tab'''
         tab_index = self._widget_d['tab_widget'].currentIndex()
         listview = self._widget_d[self._vn[tab_index]]
-        for index in range(0,listview.model().rowCount()):
+        for index in range(0, listview.model().rowCount()):
             selected_index = listview.model().index(index, 0)
             path = unicode(listview.model().data(selected_index).toString())
             self._avatar_manager.remove_avatar(path)
@@ -201,10 +201,10 @@ class AvatarChooser(Dialog.OkCancelDialog):
         '''This slot is executed when the user clicks the 'Add' button.
         It shows up a file chooser, than if the image can be manipulate through
         toolkit function (Test is performed through PictureHandler) shows an
-        image area selector. Then, the image in added to the cache (through 
+        image area selector. Then, the image in added to the cache (through
         AvatarManager object, and to the views'''
         def add_and_select(filename):
-            '''Adds the image with he given filename to the first view and 
+            '''Adds the image with he given filename to the first view and
             selects it'''
             # append the image to the first tab:
             item = self._add_image_to_view(self._vn[0], filename)
@@ -222,9 +222,9 @@ class AvatarChooser(Dialog.OkCancelDialog):
                 filename = self._avatar_manager.\
                         add_new_avatar_from_toolkit_pix(pixmap)
                 add_and_select(filename)
-        
+
         filename = QtGui.QFileDialog.getOpenFileName(
-                                         self, tr('Select an image'), 
+                                         self, tr('Select an image'),
                                          QtCore.QString(),
                                          'Images (*.jpeg *.jpg *.png *.gif')
         if filename.isEmpty():

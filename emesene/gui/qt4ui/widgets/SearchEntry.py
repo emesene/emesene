@@ -13,7 +13,7 @@ class LineEditButton(QToolButton):
     def __init__(self, parent, iconname):
         QToolButton.__init__(self, parent)
         self.setIcon(QIcon.fromTheme(iconname))
-        self.setIconSize(QSize(16,16))
+        self.setIconSize(QSize(16, 16))
         self.setCursor(Qt.ArrowCursor)
         self.setPopupMode(QToolButton.InstantPopup)
         self.setStyleSheet(
@@ -95,7 +95,7 @@ class SearchEntry(QLineEdit):
         else:
             spacing = self.right_layout.spacing()
             w = self.right.sizeHint().width()
-        return w + spacing*2
+        return w + spacing * 2
 
     def paintEvent(self, event):
         QLineEdit.paintEvent(self, event)
@@ -103,20 +103,19 @@ class SearchEntry(QLineEdit):
            self.inactive_text and \
            not self.hasFocus():
 
-             panel = QStyleOptionFrameV2()
-             self.initStyleOption(panel)
-             textRect = self.style().subElementRect(
-                 QStyle.SE_LineEditContents, panel, self)
-             horizontalMargin = 2;
-             textRect.adjust(horizontalMargin, 0, 0, 0)
+            panel = QStyleOptionFrameV2()
+            self.initStyleOption(panel)
+            textRect = self.style().subElementRect(
+                QStyle.SE_LineEditContents, panel, self)
+            horizontalMargin = 2
+            textRect.adjust(horizontalMargin, 0, 0, 0)
 
-             left = self.textMargin(LineEditSide.Left)
-             right = self.textMargin(LineEditSide.Right)
-             textRect.adjust(left, 0, -right, 0);
-             
-             painter = QPainter(self)
-             painter.setPen(
-                 self.palette().brush(
-                     QPalette.Disabled, QPalette.Text).color())
-             painter.drawText(
-                 textRect, Qt.AlignLeft | Qt.AlignVCenter, self.inactive_text)
+            left = self.textMargin(LineEditSide.Left)
+            right = self.textMargin(LineEditSide.Right)
+            textRect.adjust(left, 0, -right, 0)
+
+            painter = QPainter(self)
+            painter.setPen(self.palette().brush(
+                QPalette.Disabled, QPalette.Text).color())
+            painter.drawText(
+                textRect, Qt.AlignLeft | Qt.AlignVCenter, self.inactive_text)

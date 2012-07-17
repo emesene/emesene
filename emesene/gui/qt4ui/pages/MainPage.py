@@ -45,8 +45,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_dict = self._widget_dict
-        nick_edit_cls = extension.get_default('nick edit')
-        avatar_cls = extension.get_default('avatar')
         contact_list_cls = extension.get_default('contact list')
         user_panel_cls = extension.get_default('user panel')
 
@@ -60,7 +58,7 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
                                     self._on_search_click)
 
         lay = QtGui.QVBoxLayout()
-        lay.setContentsMargins (0,0,0,0)
+        lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(widget_dict['user_panel'])
         lay.addWidget(widget_dict['search_entry'])
         lay.addWidget(self.contact_list)
@@ -70,16 +68,19 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
 
     def _on_search_click(self, status):
         self._widget_dict['search_entry'].setVisible(status)
+        self.contact_list.is_searching = status
         if not status:
             #clean search entry when search is disabled
-            self._widget_dict['search_entry'] = ''
+            self._widget_dict['search_entry'].clear()
             self._on_search_changed(QtCore.QString(''))
-        self.contact_list.is_searching = status
 
     def _on_search_changed(self, new_text):
         self.contact_list.filter_text = new_text.toLower()
-        self.contact_list.expand_groups()
-        self.contact_list.select_top_contact()
+        if new_text != '':
+            self.contact_list.expand_groups()
+            self.contact_list.select_top_contact()
+        else:
+            self.contact_list.un_expand_groups()
 
     def _on_show_userpanel_changed(self, value):
         '''callback called when config.b_show_userpanel changes'''

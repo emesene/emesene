@@ -25,6 +25,7 @@ import PyQt4.QtCore as QtCore
 from gui.qt4ui.Utils import tr
 from gui.qt4ui.widgets import StatusButton
 
+
 class UserPanel(QtGui.QWidget):
     '''a panel to display and manipulate the user information'''
     NAME = 'User Panel'
@@ -57,15 +58,14 @@ class UserPanel(QtGui.QWidget):
         widget_dict['mail_btn'].setText("(0)")
         widget_dict['mail_btn'].setToolTip(tr('Click here to access your mail'))
 
-        widget_dict['find_btn'] = QtGui.QToolButton()
-        widget_dict['find_btn'].setCheckable(True)
-        widget_dict['find_btn'].setIcon(
+        self.search = QtGui.QToolButton()
+        self.search.setCheckable(True)
+        self.search.setIcon(
                                     QtGui.QIcon.fromTheme('edit-find'))
-        widget_dict['find_btn'].setToolTip(tr('Search (Ctrl+F)'))
-        self.search = widget_dict['find_btn']
+        self.search.setToolTip(tr('Search (Ctrl+F)'))
         nick_box.addWidget(widget_dict['nick_edit'])
         nick_box.addWidget(widget_dict['mail_btn'])
-        nick_box.addWidget(widget_dict['find_btn'])
+        nick_box.addWidget(self.search)
 
         empty_message_text = tr("Click here to set your message")
         widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True,
@@ -74,7 +74,7 @@ class UserPanel(QtGui.QWidget):
         widget_dict['status_combo'] = StatusButton.StatusButton(self.session)
         widget_dict['status_combo'].setToolTip(tr('Click here to change your status'))
         psm_box = QtGui.QHBoxLayout()
-        psm_box.setContentsMargins (0,0,0,0)
+        psm_box.setContentsMargins(0, 0, 0, 0)
         psm_box.addWidget(widget_dict['psm_edit'])
         psm_box.addWidget(widget_dict['status_combo'])
         widget_dict['psm_box'] = psm_box
@@ -82,14 +82,14 @@ class UserPanel(QtGui.QWidget):
         widget_dict['display_pic'].setToolTip(tr('Click here to set your avatar'))
 
         my_info_lay_left = QtGui.QVBoxLayout()
-        my_info_lay_left.setContentsMargins (0,0,0,0)
+        my_info_lay_left.setContentsMargins(0, 0, 0, 0)
         my_info_lay_left.addLayout(nick_box)
         my_info_lay_left.addLayout(psm_box)
 
         my_info_lay = QtGui.QHBoxLayout()
         my_info_lay.addWidget(widget_dict['display_pic'])
         my_info_lay.addLayout(my_info_lay_left)
-        my_info_lay.setContentsMargins (0,0,0,0)
+        my_info_lay.setContentsMargins(0, 0, 0, 0)
         self.setLayout(my_info_lay)
         self.session.signals.status_change_succeed.subscribe(
                                 self._widget_dict['status_combo'].set_status)
@@ -108,7 +108,8 @@ class UserPanel(QtGui.QWidget):
 
         self.on_profile_update_succeed(self.session.contacts.me.display_name,
             self.session.contacts.me.message)
-        self.on_picture_change_succeed(self.session.account.account, self.session.contacts.me.picture)
+        self.on_picture_change_succeed(self.session.account.account,
+            self.session.contacts.me.picture)
         self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
         self._add_subscriptions()
 

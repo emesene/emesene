@@ -3,7 +3,7 @@
 '''This module contains the ContactList class'''
 
 import logging
-                            
+
 import PyQt4.QtGui      as QtGui
 import PyQt4.QtCore     as QtCore
 
@@ -26,9 +26,9 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
-    
+
     new_conversation_requested = QtCore.pyqtSignal(basestring)
-    
+
     def __init__(self, session, parent=None):
         QtGui.QTreeView.__init__(self, parent)
         dialog = extension.get_default('dialog')
@@ -36,7 +36,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         self._model = ContactListModel.ContactListModel(session.config, self)
         self._pmodel = ContactListProxy.ContactListProxy(session.config, self)
         gui.ContactList.__init__(self, session)
-        
+
         self._pmodel.setSourceModel(self._model)
         self.setModel(self._pmodel)
         delegate = ContactListDelegate.ContactListDelegate(session, self)
@@ -48,57 +48,52 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.setSortingEnabled(True)
-        self.viewport().setStyleSheet( 'QWidget{                    \
+        self.viewport().setStyleSheet('QWidget{                    \
             background-attachment: fixed;           \
             background-origin: content;             \
             background-position: bottom left;       \
             background-repeat: no-repeat;           \
             background-clip: content;}')
-            # background-color: rgb(178, 216, 255);   \
-        #self.verticalScrollBar().setStyleSheet("QScrollBar:vertical{}")
         self.setIndentation(0)
         self.doubleClicked.connect(self._on_item_double_clicked)
 
-    
+
     # [START] -------------------- GUI.CONTACTLIST_OVERRIDE
-    
+
     def add_contact(self, contact, group=None):
         '''Add a contact to the view. Resent to model.'''
         self._model.add_contact(contact, group)
-        
+
     def update_contact(self, contact):
         '''Update a contact in the view. Resent to model'''
         self._model.update_contact(contact)
-        
+
     def remove_contact(self, contact, group=None):
         '''remove a contact from the specified group, if group is None
         then remove him from all groups'''
         log.debug('remove contact: [%s,%s]' % (contact, group))
-        
+        #FIXME: implement contact remove
+
     def add_group(self, group):
         '''Add a group to the view. Resent to model.'''
         self._model.add_group(group)
-    
-    def fill(self, clear=True): # emesene's
+
+    def fill(self, clear=True):
         '''Fill the contact list. Resent to model'''
-        log.debug('redirecting to base\'s fill')
         gui.ContactList.fill(self, clear)
-        
+
     def get_contact_selected(self):
-        log.debug('*** GET CONTACT SELECTED ***')
         idx_list = self.selectedIndexes()
-        if len(idx_list) != 1 :
-            log.debug('Returning None because of len!=1')
+        if len(idx_list) != 1:
             return None
         index = idx_list[0]
-        log.debug(index)
         log.debug(' --> (%d, %d)[%s]' % (index.row(), index.column(), index.isValid()))
         if not index.parent().isValid():
             log.debug('Returning None because of group.')
             return None
         log.debug('Returning %s' % self._pmodel.data(index, Role.DataRole).toPyObject())
         return self._pmodel.data(index, Role.DataRole).toPyObject()
-        
+
     def get_group_selected(self):
         idx_list = self.selectedIndexes()
         index = idx_list[0]
@@ -113,12 +108,12 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
             return None
         log.debug('Returning %s' % self._pmodel.data(index, Role.DataRole).toPyObject())
         return self._pmodel.data(index, Role.DataRole).toPyObject()
-    
+
     def clear(self):
         '''Clears the contact list. Resent to model.'''
         self._model.clear()
         return True
-        
+
     def refilter(self):
         self._pmodel.set_filter_text(self.filter_text)
 
@@ -126,6 +121,27 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         ''' expand groups while searching'''
         if self.is_searching:
             self.expandAll()
+
+    def un_expand_groups(self):
+        ''' restore groups after a search'''
+        # deactivate animations to avoid visual noise
+        self.setAnimated(False)
+        for index in range(0, self._pmodel.rowCount()):
+            selected_index = self._pmodel.index(index, 0)
+            if selected_index.parent().isValid():
+                continue
+            group = self._pmodel.data(selected_index,
+                Role.DataRole).toPyObject()
+            if group is None:
+                group_name = unicode(self._pmodel.data(selected_index,
+                Role.DisplayRole).toString())
+            else:
+                group_name = group.name
+            state = self.group_state.get(group_name, False)
+            if state:
+                self.setExpanded(selected_index, False)
+        # reactivate animations
+        self.setAnimated(True)
 
     def select_top_contact(self):
         #FIXME
