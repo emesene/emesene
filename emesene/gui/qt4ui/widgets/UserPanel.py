@@ -17,7 +17,6 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import e3
-import gui
 import extension
 
 import PyQt4.QtGui as QtGui
@@ -48,8 +47,8 @@ class UserPanel(QtGui.QWidget):
         widget_dict = self._widget_dict
 
         nick_box = QtGui.QHBoxLayout()
-        widget_dict['nick_edit'] = nick_edit_cls()
-        widget_dict['nick_edit'].setToolTip(tr('Click here to set your nick name'))
+        self.nick = nick_edit_cls()
+        self.nick.setToolTip(tr('Click here to set your nick name'))
         widget_dict['mail_btn'] = QtGui.QToolButton()
         widget_dict['mail_btn'].setAutoRaise(True)
         widget_dict['mail_btn'].setIcon(
@@ -60,22 +59,22 @@ class UserPanel(QtGui.QWidget):
 
         self.search = QtGui.QToolButton()
         self.search.setCheckable(True)
-        self.search.setIcon(
-                                    QtGui.QIcon.fromTheme('edit-find'))
+        self.search.setIcon(QtGui.QIcon.fromTheme('edit-find'))
         self.search.setToolTip(tr('Search (Ctrl+F)'))
-        nick_box.addWidget(widget_dict['nick_edit'])
+        nick_box.addWidget(self.nick)
         nick_box.addWidget(widget_dict['mail_btn'])
         nick_box.addWidget(self.search)
 
         empty_message_text = tr("Click here to set your message")
-        widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True,
+        self.message = nick_edit_cls(allow_empty=True,
             empty_message=empty_message_text)
-        widget_dict['psm_edit'].setToolTip(empty_message_text)
+        self.message = self.message
+        self.message.setToolTip(empty_message_text)
         widget_dict['status_combo'] = StatusButton.StatusButton(self.session)
         widget_dict['status_combo'].setToolTip(tr('Click here to change your status'))
         psm_box = QtGui.QHBoxLayout()
         psm_box.setContentsMargins(0, 0, 0, 0)
-        psm_box.addWidget(widget_dict['psm_edit'])
+        psm_box.addWidget(self.message)
         psm_box.addWidget(widget_dict['status_combo'])
         widget_dict['psm_box'] = psm_box
         widget_dict['display_pic'] = avatar_cls(self.session)
@@ -96,9 +95,9 @@ class UserPanel(QtGui.QWidget):
         self.session.config.subscribe(self._on_show_mail_inbox_changed,
             'b_show_mail_inbox')
 
-        widget_dict['nick_edit'].nick_changed.connect(
+        self.nick.nick_changed.connect(
                                         self.on_nick_changed)
-        widget_dict['psm_edit'].nick_changed.connect(
+        self.message.nick_changed.connect(
                                         self.on_message_changed)
         if session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
             widget_dict['display_pic'].clicked.connect(
@@ -169,14 +168,14 @@ class UserPanel(QtGui.QWidget):
     def on_message_change_succeed(self, message):
         '''callback called when the message has been changed successfully'''
         if self.session.contacts.me.media is None or self.session.contacts.me.media is "":
-            self._widget_dict['psm_edit'].set_text(message)
+            self.message.set_text(message)
         else:
-            self._widget_dict['psm_edit'].set_text('♫ ' + self.session.contacts.me.media)
+            self.message.set_text('♫ ' + self.session.contacts.me.media)
 
     def on_media_change_succeed(self, message):
         '''callback called when the message has been changed successfully'''
         if not message is None:
-            self._widget_dict['psm_edit'].set_text(message)
+            self.message.set_text(message)
 
     def on_contact_list_ready(self):
         '''callback called when the contact list is ready to be used'''
@@ -191,9 +190,9 @@ class UserPanel(QtGui.QWidget):
     def on_profile_update_succeed(self, nick, message):
         '''method called when information about our profile is obtained
         '''
-        self._widget_dict['nick_edit'].set_text(nick)
+        self.nick.set_text(nick)
         if message is not '':
-            self._widget_dict['psm_edit'].set_text(message)
+            self.message.set_text(message)
 
     def on_avatar_click(self):
         '''method called when user click on his avatar

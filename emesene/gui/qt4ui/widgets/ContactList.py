@@ -1,5 +1,20 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''This module contains the ContactList class'''
 
 import logging
@@ -42,6 +57,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         delegate = ContactListDelegate.ContactListDelegate(session, self)
         delegate.set_nick_formatter(self.format_nick)
         self.setItemDelegate(delegate)
+        self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection);
         self.setAnimated(True)
         self.setRootIsDecorated(False)
         self.setHeaderHidden(True)
@@ -87,11 +103,9 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         if len(idx_list) != 1:
             return None
         index = idx_list[0]
-        log.debug(' --> (%d, %d)[%s]' % (index.row(), index.column(), index.isValid()))
         if not index.parent().isValid():
             log.debug('Returning None because of group.')
             return None
-        log.debug('Returning %s' % self._pmodel.data(index, Role.DataRole).toPyObject())
         return self._pmodel.data(index, Role.DataRole).toPyObject()
 
     def get_group_selected(self):
@@ -108,6 +122,14 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
             return None
         log.debug('Returning %s' % self._pmodel.data(index, Role.DataRole).toPyObject())
         return self._pmodel.data(index, Role.DataRole).toPyObject()
+
+    def open_conversation(self, *args):
+        """
+        Opens a new conversation if a contact is selected
+        """
+        contact = self.get_contact_selected()
+        if contact:
+            self.new_conversation_requested.emit(str(contact.account))
 
     def clear(self):
         '''Clears the contact list. Resent to model.'''
@@ -144,8 +166,13 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         self.setAnimated(True)
 
     def select_top_contact(self):
-        #FIXME
-        pass
+        selection = QtGui.QItemSelectionModel(self._pmodel)
+        index = self._pmodel.index(0, 0)
+        #check for contact
+        if not index.parent().isValid():
+            index = index.child(0,0)
+        selection = self.selectionModel()
+        selection.select(index, QtGui.QItemSelectionModel.Select)
 
     # [END] -------------------- GUI.CONTACTLIST_OVERRIDE
 
