@@ -73,6 +73,8 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
             #clean search entry when search is disabled
             self._widget_dict['search_entry'].clear()
             self._on_search_changed(QtCore.QString(''))
+        else:
+            self._widget_dict['search_entry'].setFocus()
 
     def _on_search_changed(self, new_text):
         self.contact_list.filter_text = new_text.toLower()
