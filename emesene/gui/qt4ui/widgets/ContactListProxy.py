@@ -9,8 +9,6 @@ import PyQt4.QtCore as QtCore
 from PyQt4.QtCore import Qt
 
 import e3
-
-from gui.qt4ui  import Utils
 from gui.qt4ui.widgets.ContactListModel import ContactListModel
 from gui.qt4ui.widgets.ContactListModel import Role
 
@@ -55,25 +53,16 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
         if not index.parent().isValid():
             uid = model.data(index, Role.UidRole).toPyObject()
             if self._config.b_order_by_group and \
-                uid == ContactListModel.ONL_GRP_UID :
-                    log.debug('*** Group %s filtered because of _order_by_group=%s' % (
-                            model.data(index, Role.DisplayRole).toString(), self._config.b_order_by_group))
+                uid == ContactListModel.ONL_GRP_UID:
                     return False
             if not self._config.b_group_offline and \
                uid == ContactListModel.OFF_GRP_UID:
-                   log.debug('*** Group %s filtered because of _group_offline=%s' % (
-                        model.data(index, Role.DisplayRole).toString(), self._group_offline))
-                   return False
+                    return False
 
             if not self._config.b_show_empty_groups and \
                 model.rowCount(index) == 0:
                     # well here we should effectively /count/ the items...
-                    log.debug('*** Group %s filtered because of _show_empty = %s [%d]' % (
-                        model.data(index, Role.DisplayRole).toString(), self._config.b_show_empty_groups, model.rowCount(index)))
                     return False
-
-
-        log.debug('*** Showing group: %s [%d]' % (model.data(index, Role.DisplayRole).toString(), model.rowCount(index)))
         return True
 
     def sort(self, column, order):
@@ -108,18 +97,18 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
         self._filter_text = ''
         #config = session.config
         self._config = config
-        self._show_offline   = config.b_show_offline
-        self._show_blocked   = config.b_show_blocked
-        self._group_offline  = config.b_group_offline
+        self._show_offline = config.b_show_offline
+        self._show_blocked = config.b_show_blocked
+        self._group_offline = config.b_group_offline
 
-        config.subscribe(self._on_cc_show_offline,  'b_show_offline')
+        config.subscribe(self._on_cc_show_offline, 'b_show_offline')
         config.subscribe(self._on_cc_group_offline, 'b_group_offline')
 
     def set_filter_text(self, filter_text):
         self._filter_text = filter_text
         self.invalidateFilter()
 
-    def filterAcceptsRow (self, row, parent_idx):
+    def filterAcceptsRow(self, row, parent_idx):
         model = self.sourceModel()
         index = model.index(row, 0, parent_idx)
 
@@ -138,22 +127,17 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
 
             if not self._config.b_show_offline and \
                model.data(index, Role.StatusRole) == e3.status.OFFLINE:
-                   log.debug('****** Contact %s filtered because of _show_offline=%s' % (
-                        model.data(index, Role.DisplayRole).toString(), self._show_offline))
-                   self.dataChanged.emit(self.mapFromSource(index.parent()),
-                                         self.mapFromSource(index.parent()))
-                   return False
+                    self.dataChanged.emit(self.mapFromSource(index.parent()),
+                        self.mapFromSource(index.parent()))
+                    return False
 
             if self._config.b_group_offline and \
                 model.data(index, Role.StatusRole) == e3.status.OFFLINE and \
                 model.data(index.parent(), Role.UidRole) != ContactListModel.OFF_GRP_UID:
-                    log.debug('****** Contact %s filtered because of _group_offline=%s' % (
-                        model.data(index, Role.DisplayRole).toString(), self._group_offline))
                     self.dataChanged.emit(self.mapFromSource(index.parent()),
                                           self.mapFromSource(index.parent()))
                     return False
 
-        log.debug('****** Showing contact: %s' % model.data(index, Role.DisplayRole).toString())
         self.dataChanged.emit(self.mapFromSource(index.parent()),
                               self.mapFromSource(index.parent()))
         return True
