@@ -1572,7 +1572,7 @@ class InviteWindow(gtk.Window):
         ContactList = extension.get_default('contact list')
         self.contact_list = ContactList(session)
         sel = self.contact_list.get_selection()
-        sel.set_mode(gtk.SELECTION_MULTIPLE)	
+        sel.set_mode(gtk.SELECTION_MULTIPLE)
         self.contact_list.destroy_on_filtering = True
         self.contact_list.nick_template = \
             '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
@@ -1675,6 +1675,8 @@ class InviteWindow(gtk.Window):
         """
         global dialogs
         dialogs.remove(self)
+        # close current tooltip before window destroy
+        self.contact_list.tooltips.hide()
         self.contact_list.contact_selected.unsubscribe(
             self._on_contact_selected)
         gtk.Window.destroy(self)
