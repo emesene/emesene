@@ -215,11 +215,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         to update the contacts infos'''
         # account is a string containing the email
         # does this have to update the picture too?
-        log.debug('UPSingInfo Start')
         status = self.session.contacts.get(account).status
-        log.debug('UpSingInfo: [%s], [%s], [%s], [%s]' % (status, nick, message, account))
-        self._widget_d['info_panel'].set_all(Utils.unescape(message), account)
-        log.debug('UPSingInfo Stop')
+        self._widget_d['info_panel'].information = (Utils.unescape(message), account)
 
     def show(self, other_started=False):
         '''Shows the widget'''

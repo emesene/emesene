@@ -44,8 +44,6 @@ class UserInfoPanel (QtGui.QWidget):
 
         self.session = session
         self.members = members
-
-        self._account = ''
         self._message_lbl = QtGui.QLabel()
 
         lay = QtGui.QHBoxLayout()
@@ -103,19 +101,15 @@ class UserInfoPanel (QtGui.QWidget):
         clipboard = QtGui.QApplication.clipboard()
         clipboard.setText(', '.join(mail_list))
 
-    def set_all(self, message, account):
-        '''Updates the infos shown in the panel'''
-        self._account = account
-        self.set_message(message)
-
-    def set_icon(self, icon):
-        '''Updates the icon'''
-        self._emblem_lbl = QtGui.QLabel(self)
-        self._emblem_lbl.setPixmap(QtGui.QPixmap(icon))
-
-    def set_message(self, message):
-        '''Updates the message'''
+    def _set_information(self, lines):
+        message, account = lines
         message = Utils.escape(message)
         message = Utils.parse_emotes(unicode(message))
-        message = message + (u'<br /><span style="font-size: small;">[%s]</span>' % self._account)
+        message = u'%s<br /><span style="font-size: small;">%s</span>' % (message, account)
         self._message_lbl.setText(message)
+
+    def _get_information(self):
+        '''return the text on the information'''
+        return self._message_lbl.text()
+
+    information = property(fget=_get_information, fset=_set_information)
