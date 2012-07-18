@@ -418,7 +418,7 @@ Do you want to fix your profile now?''')
         Yes and No, return the response as stock.YES or stock.NO or
         stock.CLOSE if the user closes the window'''
         dialog  = YesNoDialog('')
-        icon    = QtGui.QLabel()
+        icon = QtGui.QLabel()
         message = QtGui.QLabel(unicode(message))
 
         lay = QtGui.QHBoxLayout()
@@ -469,6 +469,67 @@ Do you want to fix your profile now?''')
     def close_all(cls):
         #FIXME: close the hidden dialogs
         pass
+
+    @classmethod
+    def edit_profile(cls, handler, user_nick, user_message, last_avatar):
+
+        dialog = OkCancelDialog(unicode(tr('Change profile')))
+        dialog.setWindowTitle(tr('Change profile'))
+
+        hbox = QtGui.QHBoxLayout()
+        hbox.setContentsMargins(0, 0, 0, 0)
+
+        Avatar = extension.get_default('avatar')
+        avatar = Avatar(handler.session, size=QtCore.QSize(96, 96))
+        avatar.set_display_pic_from_file(last_avatar)
+        if handler.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
+            avatar.clicked.connect(lambda *args: handler.on_set_picture_selected(handler.session))
+            avatar.setToolTip(tr('Click here to set your avatar'))
+
+            def on_picture_change_succeed(self, account, path):
+                '''callback called when the picture of an account is changed'''
+                # our account
+                if account == handler.session.account.account:
+                    avatar.set_from_file(path)
+            handler.session.signals.picture_change_succeed.subscribe(
+                on_picture_change_succeed)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.setContentsMargins(0, 0, 0, 0)
+
+        hbox.addWidget(avatar)
+        hbox.addLayout(vbox)
+        dialog.setLayout(hbox)
+
+        nick_label = QtGui.QLabel(unicode(tr('Nick:')))
+
+        nick = QtGui.QLineEdit()
+        nick.setText(user_nick)
+
+        pm_label = QtGui.QLabel(unicode(tr('Message:')))
+
+        pm = QtGui.QLineEdit()
+        pm.setText(user_message)
+
+        vbox.addWidget(nick_label)
+        vbox.addWidget(nick)
+        vbox.addWidget(pm_label)
+        vbox.addWidget(pm)
+
+        def save_profile():
+            '''save the new profile'''
+            new_nick = nick.text()
+            new_pm = pm.text()
+            handler.save_profile(new_nick, new_pm)
+
+        dialog.show()
+        response = dialog.exec_()
+        if response == QtGui.QDialog.Accepted:
+            response = gui.stock.ACCEPT
+            save_profile()
+
+        dialog.hide()
+
 
 class StandardButtonDialog (QtGui.QDialog):
     '''Skeleton for a dialog window with standard buttons'''
