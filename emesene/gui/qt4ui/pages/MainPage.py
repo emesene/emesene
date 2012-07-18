@@ -75,15 +75,15 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self.below_userlist = extension.get_and_instantiate('below userlist',
                                                             self)
 
-        lay = QtGui.QVBoxLayout()
-        lay.setContentsMargins(0, 0, 0, 0)
-        lay.addWidget(self.below_menu)
-        lay.addWidget(self.panel)
-        lay.addWidget(self.below_panel)
-        lay.addWidget(self.search_entry)
-        lay.addWidget(self.contact_list)
-        lay.addWidget(self.below_userlist)
-        self.setLayout(lay)
+        self.lay = QtGui.QGridLayout()
+        self.lay.setContentsMargins(0, 0, 0, 0)
+        self.lay.addWidget(self.below_menu, 1, 0)
+        self.lay.addWidget(self.panel, 2, 0)
+        self.lay.addWidget(self.below_panel, 3, 0)
+        self.lay.addWidget(self.search_entry, 4, 0)
+        self.lay.addWidget(self.contact_list, 5, 0)
+        self.lay.addWidget(self.below_userlist, 6, 0)
+        self.setLayout(self.lay)
         self.contact_list.new_conversation_requested.connect(
                                         self.on_new_conversation_requested)
 
@@ -142,8 +142,33 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     def _on_mail_count_changed(self, count):
         self.panel.set_mail_count(count)
 
-    def replace_extensions(self):
-        #FIXME: add extension support
-        #below_userlist, below_menu, below_panel
-        #we can only import qt extensions
-        pass
+        #extension changes
+        extension.subscribe(self._on_below_userlist_changed, "below userlist")
+        extension.subscribe(self._on_below_menu_changed, "below menu")
+        extension.subscribe(self._on_below_panel_changed, "below panel")
+
+    def _replace_widget(self, widget, new_extension, pos):
+        if widget:
+            self.lay.removeWidget(widget)
+            widget = None
+        if new_extension:
+            widget = new_extension(self)
+            self.lay.addWidget(widget, pos, 0)
+            widget.show()
+        return widget
+
+    def _on_below_userlist_changed(self, new_extension):
+        if type(self.below_userlist) != new_extension:
+            pos = self.lay.rowCount() - 1
+            self.below_userlist = self._replace_widget(
+                    self.below_userlist, new_extension, pos)
+
+    def _on_below_menu_changed(self, new_extension):
+        if type(self.below_menu) != new_extension:
+            self.below_menu = self._replace_widget(
+                    self.below_menu, new_extension, 1)
+
+    def _on_below_panel_changed(self, new_extension):
+        if type(self.below_panel) != new_extension:
+            self.below_menu = self._replace_widget(
+                    self.below_menu, new_extension, 3)
