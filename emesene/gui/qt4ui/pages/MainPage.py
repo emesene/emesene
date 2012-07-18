@@ -46,7 +46,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self._main_menu = None
         self._contact_menu = None
         self._group_menu = None
-        self.session = session
 
         self._setup_ui()
 
