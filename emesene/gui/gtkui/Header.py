@@ -73,10 +73,12 @@ class Header(gtk.HBox):
         '''set the text on the information, lines is a tuple of size 3 with 3
         strings that will be replaced on the template'''
         self._information.set_markup(Header.INFO_TPL % lines)
-        
+
     def _get_information(self):
         '''return the text on the information'''
         return self._information.get_markup()
+
+    information = property(fget=_get_information, fset=_set_information)
 
     def copy_nick(self, data, widget=None):
         nick_list = []
@@ -108,5 +110,3 @@ class Header(gtk.HBox):
         '''called when the header clicked'''
         if event.button == 3:
             self.menu.popup(None, None, None, event.button, event.time, None)
-
-    information = property(fget=_get_information, fset=_set_information)
