@@ -87,6 +87,11 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self.contact_list.new_conversation_requested.connect(
                                         self.on_new_conversation_requested)
 
+        #extension changes
+        extension.subscribe(self._on_below_userlist_changed, "below userlist")
+        extension.subscribe(self._on_below_menu_changed, "below menu")
+        extension.subscribe(self._on_below_panel_changed, "below panel")
+
     def _on_search_click(self, status):
         self.search_entry.setVisible(status)
         self.contact_list.is_searching = status
@@ -141,11 +146,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
 
     def _on_mail_count_changed(self, count):
         self.panel.set_mail_count(count)
-
-        #extension changes
-        extension.subscribe(self._on_below_userlist_changed, "below userlist")
-        extension.subscribe(self._on_below_menu_changed, "below menu")
-        extension.subscribe(self._on_below_panel_changed, "below panel")
 
     def _replace_widget(self, widget, new_extension, pos):
         if widget:
