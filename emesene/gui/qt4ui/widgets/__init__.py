@@ -18,3 +18,4 @@ from UserInfoPanel import UserInfoPanel
 from ConversationToolbar import ConversationToolbar
 from UserPanel import UserPanel
 from SearchEntry import SearchEntry
+from EmptyWidget import EmptyWidget

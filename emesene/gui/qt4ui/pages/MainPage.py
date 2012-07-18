@@ -61,6 +61,7 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         user_panel_cls = extension.get_default('user panel')
 
         self.panel = user_panel_cls(self.session, self)
+        self.panel.enabled = False
         self.contact_list = contact_list_cls(self.session)
         self.search_entry = widgets.SearchEntry()
         self.search_entry.setVisible(False)
@@ -69,11 +70,19 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self.panel.search.clicked.connect(
                                     self._on_search_click)
 
+        self.below_menu = extension.get_and_instantiate('below menu', self)
+        self.below_panel = extension.get_and_instantiate('below panel', self)
+        self.below_userlist = extension.get_and_instantiate('below userlist',
+                                                            self)
+
         lay = QtGui.QVBoxLayout()
         lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(self.below_menu)
         lay.addWidget(self.panel)
+        lay.addWidget(self.below_panel)
         lay.addWidget(self.search_entry)
         lay.addWidget(self.contact_list)
+        lay.addWidget(self.below_userlist)
         self.setLayout(lay)
         self.contact_list.new_conversation_requested.connect(
                                         self.on_new_conversation_requested)
