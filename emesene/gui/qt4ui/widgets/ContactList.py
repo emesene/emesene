@@ -46,7 +46,6 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
 
     def __init__(self, session, parent=None):
         QtGui.QTreeView.__init__(self, parent)
-        dialog = extension.get_default('dialog')
         # We need a model *before* callig gui.ContactList's costructor!!
         self._model = ContactListModel.ContactListModel(session.config, self)
         self._pmodel = ContactListProxy.ContactListProxy(session.config, self)
@@ -73,6 +72,22 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         self.setIndentation(0)
         self.doubleClicked.connect(self._on_item_double_clicked)
 
+        # set context menu policy
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
+
+    def showContextMenu(self, point):
+        contact = self.get_contact_selected()
+        if not contact is None:
+            self.contact_menu_selected.emit(contact, point)
+            return
+
+        group = self.get_group_selected()
+        if not group is None:
+            self.group_menu_selected.emit(group, point)
+            return
+
+        log.debug('empty paths?')
 
     # [START] -------------------- GUI.CONTACTLIST_OVERRIDE
 

@@ -155,7 +155,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         ''' Getter method for "content_type" property'''
         return self._content_type
 
-    content_type = property(_get_content_type) #emesene's
+    content_type = property(_get_content_type)
 
     def _on_last_tab_close(self):
         '''Slot called when the user closes the last tab in
@@ -165,32 +165,10 @@ class TopLevelWindow (QtGui.QMainWindow):
 
     def _setup_main_menu(self, session, contact_list):
         '''build all the menus used on the client'''
-
-        # retrieving classes:
-        dialog_cls = extension.get_default('dialog')
-        avatar_manager_cls = extension.get_default('avatar manager')
-        # creating the avatar manager:
-        avatar_manager = None #avatar_manager_cls(self._session)
-
-        # create menu handlers
         menu_hnd = gui.base.MenuHandler(session, contact_list)
-
-        contact_hnd = gui.base.ContactHandler(session, contact_list)
-        group_hnd = gui.base.GroupHandler(session, contact_list)
-        # retrieve menu classes
         main_menu_cls = extension.get_default('main menu')
-        contact_menu_cls = extension.get_default('menu contact')
-        group_menu_cls = extension.get_default('menu group')
-
-        # instantiate menu objects:
-        menu = main_menu_cls(menu_hnd, session.config)
-
-#        self._contact_menu = contact_menu_cls(contact_hnd)
-#        self._group_menu = group_menu_cls(group_hnd)
-#        self._contact_menu.show_all()
-#        self._group_menu.show_all()
+        menu = main_menu_cls(menu_hnd, session)
         self.setMenuBar(menu)
-
 
     def _switch_to_page(self, page_widget):
         ''' Shows the given page '''

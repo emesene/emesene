@@ -25,6 +25,8 @@ from gui.qt4ui import widgets
 
 import extension
 import gui
+import e3
+
 
 class MainPage (QtGui.QWidget, gui.MainWindowBase):
     '''The main page (the one with the contact list)'''
@@ -43,12 +45,12 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self._set_menu_bar_cb = set_menu_bar_cb
 
         # menu objects:
-        self._main_menu = None
-        self._contact_menu = None
-        self._group_menu = None
+        self.main_menu = None
+        self.contact_menu = None
+        self.group_menu = None
 
         self._setup_ui()
-
+        self._build_menus()
         # emesene's
         self.session.config.subscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
@@ -85,11 +87,52 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self.setLayout(self.lay)
         self.contact_list.new_conversation_requested.connect(
                                         self.on_new_conversation_requested)
+        self.contact_list.contact_menu_selected.subscribe(
+            self._on_contact_menu_selected)
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            self.contact_list.group_menu_selected.subscribe(
+                self._on_group_menu_selected)
 
         #extension changes
         extension.subscribe(self._on_below_userlist_changed, "below userlist")
         extension.subscribe(self._on_below_menu_changed, "below menu")
         extension.subscribe(self._on_below_panel_changed, "below panel")
+
+    def _build_menus(self):
+        '''buildall the menus used on the client'''
+
+        handler = gui.base.MenuHandler(self.session, self.contact_list)
+
+        contact_handler = gui.base.ContactHandler(self.session,
+            self.contact_list)
+
+        MainMenu = extension.get_default('main menu')
+        ContactMenu = extension.get_default('menu contact')
+
+        self.menu = MainMenu(handler, self.session)
+        self.contact_menu = ContactMenu(contact_handler, self.session)
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            group_handler = gui.base.GroupHandler(self.session,
+                self.contact_list)
+            GroupMenu = extension.get_default('menu group')
+            self.group_menu = GroupMenu(group_handler)
+
+    def _on_contact_menu_selected(self, contact, point):
+        '''callback for the contact-menu-selected signal'''
+        if contact.blocked:
+            self.contact_menu.set_blocked()
+        else:
+            self.contact_menu.set_unblocked()
+        self.contact_menu.exec_(self.contact_list.mapToGlobal(point))
+
+    def _on_group_menu_selected(self, group, point):
+        '''callback for the group-menu-selected signal'''
+        #FIXME:
+#        if self.contact_list.is_favorite_group_selected():
+#            self.group_menu.show_unset_favorite_item()
+#        else:
+#            self.group_menu.show_set_favorite_item()
+        self.group_menu.exec_(self.contact_list.mapToGlobal(point))
 
     def _on_search_click(self, status):
         self.search_entry.setVisible(status)
