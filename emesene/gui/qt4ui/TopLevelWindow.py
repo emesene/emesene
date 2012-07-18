@@ -34,7 +34,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         self.setWindowIcon(QtGui.QIcon(gui.theme.image_theme.logo))
         self._page_stack = QtGui.QStackedWidget()
         self.setCentralWidget(self._page_stack)
-        
+
     def __del__(self):
         log.debug('adieu TLW!!!')
 
@@ -53,11 +53,11 @@ class TopLevelWindow (QtGui.QMainWindow):
     def clear(self): #emesene's
         '''remove the content from the main window'''
         pass
-        
+
     def iconify(self):
         '''Iconifies the window'''
         self.setWindowState(Qt.WindowMinimized)
-        
+
     def present(self, b_single_window=False): # emesene's
         '''(Tries to) raise the window'''
         QtGui.QMainWindow.activateWindow(self)
@@ -75,21 +75,21 @@ class TopLevelWindow (QtGui.QMainWindow):
         size = self.size()
         position = self.pos()
         return size.width(), size.height(), position.x(), position.y()
-    
+
     def go_connect(self, on_cancel_login, avatar_path, config):
         '''Adds a 'connecting' page to the top level window and shows it'''
         log.debug('GO CONNECT! ^_^')
         connecting_window_cls = extension.get_default('connecting window')
-        connecting_page = connecting_window_cls(on_cancel_login, 
+        connecting_page = connecting_window_cls(on_cancel_login,
                                                 avatar_path, config)
         self._content_type = 'connecting'
         self._switch_to_page(connecting_page)
         self.menuBar().hide()
-        
+
     def go_conversation(self, session, on_close):
         '''Adds a conversation page to the top level window and shows it'''
         conversation_window_cls = extension.get_default('conversation window')
-        conversation_page = conversation_window_cls(session, 
+        conversation_page = conversation_window_cls(session,
                             on_last_close=self._on_last_tab_close, parent=self)
         self._content_type = 'conversation'
         self.content_conv = conversation_page
@@ -97,7 +97,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         self.menuBar().hide()
 
     # TODO: don't reinstantiate existing pages, or don't preserve old pages.
-    def go_login(self, callback, on_preferences_changed, config=None, 
+    def go_login(self, callback, on_preferences_changed, config=None,
                  config_dir=None, config_path=None, proxy=None,
                  use_http=None, use_ipv6=None,
                  session_id=None, cancel_clicked=False, no_autologin=False):
@@ -106,7 +106,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         '''Adds a login page to the top level window and shows it'''
         login_window_cls = extension.get_default('login window')
         login_page = login_window_cls(callback, on_preferences_changed, config,
-                                      config_dir, config_path, proxy, 
+                                      config_dir, config_path, proxy,
                                       use_http, use_ipv6,
                                       session_id, cancel_clicked, no_autologin)
         self._content_type = 'login'
@@ -118,8 +118,8 @@ class TopLevelWindow (QtGui.QMainWindow):
         '''Adds a main page (the one with the contact list) to the top
         level window and shows it'''
         log.debug('GO MAIN! ^_^')
-        # TODO: handle quit_on_close (??) [consider creating a base class and 
-        # moving code there.] 
+        # TODO: handle quit_on_close (??) [consider creating a base class and
+        # moving code there.]
         main_window_cls = extension.get_default('main window')
         main_page = main_window_cls(session, on_new_conversation, self.setMenuBar)
         self._content_type = 'main'
@@ -130,47 +130,48 @@ class TopLevelWindow (QtGui.QMainWindow):
             self._cb_on_close = self._given_cb_on_close
         else:
             self._cb_on_close = lambda *args: self.hide()
-        
+
     def is_maximized(self):
         '''Checks wether the window is maximized'''
         return QtGui.QMainWindow.isMaximized(self)
-    
+
     def maximize(self):
         '''Tries to maximize the window'''
         QtGui.QMainWindow.showMaximized(self)
-        
+
     def on_disconnect(self, cb_on_close):
         '''called when the user is disconnected'''
+        self.content.unsubscribe_signals()
         self._cb_on_close = cb_on_close
-    
+
     def _get_content(self):
         '''Getter method for propery "content"'''
         log.debug('Getting \'content\'')
         return self._content
-        
+
     content = property(_get_content)
-    
+
     def _get_content_type(self):
         ''' Getter method for "content_type" property'''
         return self._content_type
 
     content_type = property(_get_content_type) #emesene's
-    
+
     def _on_last_tab_close(self):
-        '''Slot called when the user closes the last tab in 
+        '''Slot called when the user closes the last tab in
         a conversation window'''
         self._cb_on_close(self._content)
         self.hide()
-        
+
     def _setup_main_menu(self, session, contact_list):
         '''build all the menus used on the client'''
-        
+
         # retrieving classes:
         dialog_cls = extension.get_default('dialog')
         avatar_manager_cls = extension.get_default('avatar manager')
         # creating the avatar manager:
         avatar_manager = None #avatar_manager_cls(self._session)
-        
+
         # create menu handlers
         menu_hnd = gui.base.MenuHandler(session, contact_list)
 
@@ -180,7 +181,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         main_menu_cls = extension.get_default('main menu')
         contact_menu_cls = extension.get_default('menu contact')
         group_menu_cls = extension.get_default('menu group')
-        
+
         # instantiate menu objects:
         menu = main_menu_cls(menu_hnd, session.config)
 
@@ -190,7 +191,7 @@ class TopLevelWindow (QtGui.QMainWindow):
 #        self._group_menu.show_all()
         self.setMenuBar(menu)
 
-    
+
     def _switch_to_page(self, page_widget):
         ''' Shows the given page '''
         index = self._page_stack.indexOf(page_widget)
@@ -198,7 +199,6 @@ class TopLevelWindow (QtGui.QMainWindow):
             index = self._page_stack.addWidget(page_widget)
         self._page_stack.setCurrentIndex(index)
         self._content = page_widget
-
 
 # -------------------- QT_OVERRIDE
 
@@ -210,11 +210,11 @@ class TopLevelWindow (QtGui.QMainWindow):
         cb_result = self._cb_on_close(self._content)
         if (cb_result is None) or (cb_result is True):
             event.ignore()
-        # FIXME: dirty HACK. when we close the conversation window, 
-        # self._cb_on_close closes each conversation tab without checking 
-        # if it isclosing the last tab, so _on_last_tab_close doesn't get 
+        # FIXME: dirty HACK. when we close the conversation window,
+        # self._cb_on_close closes each conversation tab without checking
+        # if it isclosing the last tab, so _on_last_tab_close doesn't get
         #called and the conversation window remains opened and empty.
         if str(self._cb_on_close).find(
                 'Controller._on_conversation_window_close') > -1:
             self.hide()
-        
+

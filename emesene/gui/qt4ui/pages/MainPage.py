@@ -172,3 +172,26 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         if type(self.below_panel) != new_extension:
             self.below_menu = self._replace_widget(
                     self.below_menu, new_extension, 3)
+
+    def unsubscribe_signals(self, close=None):
+        '''callback called when the disconnect option is selected'''
+        gui.MainWindowBase.unsubscribe_signals(self)
+
+        #extension changes
+        extension.unsubscribe(self._on_below_userlist_changed, "below userlist")
+        extension.unsubscribe(self._on_below_menu_changed, "below menu")
+        extension.unsubscribe(self._on_below_panel_changed, "below panel")
+
+        if self.below_userlist:
+            self.below_userlist = None
+
+        if self.below_menu:
+            self.below_menu = None
+
+        if self.below_panel:
+            self.below_panel = None
+
+        self.session.config.unsubscribe(self._on_show_userpanel_changed,
+            'b_show_userpanel')
+        self.panel.remove_subscriptions()
+        self.panel = None
