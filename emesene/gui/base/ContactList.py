@@ -625,3 +625,11 @@ class ContactList(object):
             return 1
         else:
             return cmp(contact1.display_name, contact2.display_name)
+
+    def is_favorite_group_selected(self):
+        group = self.get_group_selected()
+        if group is not None and \
+            group.identifier == self.session.config.favorite_group_id:
+            return True
+
+        return False

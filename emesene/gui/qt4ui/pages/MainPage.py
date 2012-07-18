@@ -127,11 +127,7 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
 
     def _on_group_menu_selected(self, group, point):
         '''callback for the group-menu-selected signal'''
-        #FIXME:
-#        if self.contact_list.is_favorite_group_selected():
-#            self.group_menu.show_unset_favorite_item()
-#        else:
-#            self.group_menu.show_set_favorite_item()
+        self.group_menu.update_items()
         self.group_menu.exec_(self.contact_list.mapToGlobal(point))
 
     def _on_search_click(self, status):

@@ -125,17 +125,13 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
 
     def get_group_selected(self):
         idx_list = self.selectedIndexes()
+        if len(idx_list) == 0:
+            return None
         index = idx_list[0]
-        log.debug('*** GET GROUP SELECTED ***')
-        log.debug(index)
-        log.debug(' --> (%d, %d)[%s]' % (index.row(), index.column(), index.isValid()))
-        if len(idx_list) > 1 :
-            log.debug('Returning None because of len>1')
+        if len(idx_list) > 1:
             return None
         if index.parent().isValid():
-            log.debug('Returning None because of contact.')
             return None
-        log.debug('Returning %s' % self._pmodel.data(index, Role.DataRole).toPyObject())
         return self._pmodel.data(index, Role.DataRole).toPyObject()
 
     def open_conversation(self, *args):

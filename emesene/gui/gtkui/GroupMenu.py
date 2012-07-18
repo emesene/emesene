@@ -59,18 +59,15 @@ class GroupMenu(gtk.Menu):
                                                              gtk.ICON_SIZE_MENU))
         self.set_favorite.connect('activate',
                               lambda *args: self.on_favorite_group_selected())
-        
-        
+
+
         self.unset_favorite = gtk.ImageMenuItem(_('Unset as favorite'))
         self.unset_favorite.set_image(gtk.image_new_from_stock(gtk.STOCK_CANCEL,
                                                                gtk.ICON_SIZE_MENU))
         self.unset_favorite.connect('activate',
                               lambda *args: self.on_unset_favorite_group_selected())
-        
-        if self.handler.contact_list.is_favorite_group_selected():
-            self.show_unset_favorite_item()
-        else:
-            self.show_set_favorite_item()
+
+        self.update_items()
 
         self.append(add)
         self.append(remove)
@@ -78,16 +75,22 @@ class GroupMenu(gtk.Menu):
         self.append(self.set_favorite)
         self.append(self.unset_favorite)
 
+    def update_items(self):
+        if self.handler.contact_list.is_favorite_group_selected():
+            self.show_unset_favorite_item()
+        else:
+            self.show_set_favorite_item()
+
     def on_favorite_group_selected(self):
         ''' handle favorite group selection '''
         if not self.handler.is_by_group_view(): return
         self.handler.on_favorite_group_selected()
-    
+
     def on_unset_favorite_group_selected(self):
         ''' handle unset group as favorite '''
         if not self.handler.is_by_group_view(): return
         self.handler.on_unset_favorite_group_selected()
-    
+
     def show_set_favorite_item(self):
         '''
         Called when the user right clicks on a non favorite group.
@@ -95,7 +98,7 @@ class GroupMenu(gtk.Menu):
         '''
         self.unset_favorite.hide()
         self.set_favorite.show()
-    
+
     def show_unset_favorite_item(self):
         '''
         Called when the user right clicks on a favorite group.
@@ -103,4 +106,3 @@ class GroupMenu(gtk.Menu):
         '''
         self.set_favorite.hide()
         self.unset_favorite.show()
-

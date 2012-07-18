@@ -400,15 +400,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         return None
 
-    def is_favorite_group_selected(self):
-        group = self.get_group_selected()
-
-        if group is not None and \
-            group.identifier == self.session.config.favorite_group_id:
-            return True
-
-        return False
-
     def get_contact_selected(self):
         '''return a contact object if there is a group selected, None otherwise
         '''
@@ -841,13 +832,13 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 for contact_row in row.iterchildren():
                     contact_row[2] = self.format_nick(contact_row[1])
             elif isinstance(row[1], e3.Contact):
-                row[2] = self.format_nick(row[1]) 
+                row[2] = self.format_nick(row[1])
 
     def update_format_group(self):
         '''update the format of group name'''
         for row in self._model:
             if isinstance(row[1], e3.Group):
-                row[2] = self.format_group(row[1]) 
+                row[2] = self.format_group(row[1])
 
     def set_avatar_size(self, size):
         """set the size of the avatars on the contact list
