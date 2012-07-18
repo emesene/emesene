@@ -57,10 +57,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         scroll.set_shadow_type(gtk.SHADOW_IN)
         scroll.set_border_width(1)
 
-        # XXX: unused
-        #self.session.signals.contact_attr_changed.subscribe(
-        #    self._on_contact_attr_changed)
-
         self.menu = None
         self.contact_menu = None
         self.group_menu = None
@@ -303,13 +299,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.group_menu.show_set_favorite_item()
         self.group_menu.popup(None, None, None, 0, 0)
 
-    def _on_contact_attr_changed(self, account, change_type, old_value,
-            do_notify=True):
-        '''callback called when an attribute of a contact changed'''
-        contact = self.session.contacts.get(account)
-        if not contact:
-            log.debug('account %s not found on contacts' % account)
-
     def _on_key_press(self, widget, event):
         '''method called when a key is pressed on the input widget'''
         if not self.get_focus_child():
@@ -367,8 +356,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.contact_list.remove_subscriptions()
         self.session.config.unsubscribe(self._on_show_userpanel_changed,
             'b_show_userpanel')
-        #self.session.signals.contact_attr_changed.unsubscribe(
-        #    self._on_contact_attr_changed)
         self.panel.remove_subscriptions()
         self.panel = None
 
