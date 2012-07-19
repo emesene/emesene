@@ -95,7 +95,7 @@ try:
 except ImportError, exc:
     xmpp = None
     print 'Errors occurred while importing xmpp backend: %s' % str(exc)
-
+    
 try:
     from gui import qt4ui
 except ImportError, exc:
@@ -107,6 +107,12 @@ except ImportError, exc:
     papylib = None
     print 'Errors occurred while importing msn backend: %s' % str(exc)
 
+try:
+    from e3 import webqq
+except ImportError , exc:
+    webqq = None
+    print 'Errors occurred while importing webqq backend: %s' % str(exc)
+    
 from e3.common.pluginmanager import get_pluginmanager
 import interfaces
 import gui
@@ -164,6 +170,10 @@ class Controller(object):
             extension.register('session', xmpp.Session)
         extension.register('session', dummy.Session)
 
+        if webqq is not None:
+            extension.register('session', webqq.Session)
+        extension.register('session', dummy.Session)
+        
         if papylib is not None:
             extension.register('session', papylib.Session)
             extension.set_default('session', papylib.Session)
