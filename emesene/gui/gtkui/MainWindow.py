@@ -46,11 +46,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
 
-        self.below_menu = extension.get_and_instantiate('below menu', self)
-        self.below_panel = extension.get_and_instantiate('below panel', self)
-        self.below_userlist = extension.get_and_instantiate('below userlist',
-                                                            self)
-
         self.contact_list = ContactList(session)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
@@ -91,14 +86,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         scroll.add(self.contact_list)
         scroll.show_all()
 
-        self.session.config.subscribe(self._on_show_userpanel_changed,
-            'b_show_userpanel')
         self._on_show_userpanel_changed(self.session.config.b_show_userpanel)
-
-        #extension changes
-        extension.subscribe(self._on_below_userlist_changed, "below userlist")
-        extension.subscribe(self._on_below_menu_changed, "below menu")
-        extension.subscribe(self._on_below_panel_changed, "below panel")
 
     def _replace_widget(self, widget, new_extension, pos):
         if widget:
@@ -110,22 +98,6 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
             self.reorder_child(widget, pos)
             widget.show()
         return widget
-
-    def _on_below_userlist_changed(self, new_extension):
-        if type(self.below_userlist) != new_extension:
-            pos = len(self.get_children()) - 1
-            self.below_userlist = self._replace_widget(
-                    self.below_userlist, new_extension, pos)
-
-    def _on_below_menu_changed(self, new_extension):
-        if type(self.below_menu) != new_extension:
-            self.below_menu = self._replace_widget(
-                    self.below_menu, new_extension, 1)
-
-    def _on_below_panel_changed(self, new_extension):
-        if type(self.below_panel) != new_extension:
-            self.below_panel = self._replace_widget(
-                    self.below_panel, new_extension, 3)
 
     def _on_mail_count_changed(self, count):
         self.panel.set_mail_count(count)
@@ -325,34 +297,16 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         '''callback called when the disconnect option is selected'''
         gui.MainWindowBase.unsubscribe_signals(self)
 
-        #extension changes
-        extension.unsubscribe(self._on_below_userlist_changed, "below userlist")
-        extension.unsubscribe(self._on_below_menu_changed, "below menu")
-        extension.unsubscribe(self._on_below_panel_changed, "below panel")
-
-        if self.below_userlist:
-            self.below_userlist = None
-
-        if self.below_menu:
-            self.below_menu = None
-
-        if self.below_panel:
-            self.below_panel = None
-
         self.menu.remove_subscriptions()
-
         self.contact_list.contact_selected.unsubscribe(
             self._on_contact_selected)
         self.contact_list.group_selected.unsubscribe(self._on_group_selected)
         self.contact_list.contact_menu_selected.unsubscribe(
             self._on_contact_menu_selected)
-
         if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
             self.contact_list.group_menu_selected.unsubscribe(
                 self._on_group_menu_selected)
         self.contact_list.remove_subscriptions()
-        self.session.config.unsubscribe(self._on_show_userpanel_changed,
-            'b_show_userpanel')
         self.panel.remove_subscriptions()
         self.panel = None
 

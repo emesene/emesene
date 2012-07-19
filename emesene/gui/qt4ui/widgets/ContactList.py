@@ -205,3 +205,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
     def escaper(self, text):
         ''' escape the text, this is a toolkit dependant method '''
         return unicode(text)
+
+    def remove_subscriptions(self):
+        #FIXME: implement
+        pass

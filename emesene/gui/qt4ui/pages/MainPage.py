@@ -52,8 +52,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self._setup_ui()
         self._build_menus()
         # emesene's
-        self.session.config.subscribe(self._on_show_userpanel_changed,
-            'b_show_userpanel')
         self._on_show_userpanel_changed(self.session.config.b_show_userpanel)
 
     def _setup_ui(self):
@@ -71,11 +69,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self.panel.search.clicked.connect(
                                     self._on_search_click)
 
-        self.below_menu = extension.get_and_instantiate('below menu', self)
-        self.below_panel = extension.get_and_instantiate('below panel', self)
-        self.below_userlist = extension.get_and_instantiate('below userlist',
-                                                            self)
-
         self.lay = QtGui.QGridLayout()
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.addWidget(self.below_menu, 1, 0)
@@ -92,11 +85,6 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
             self.contact_list.group_menu_selected.subscribe(
                 self._on_group_menu_selected)
-
-        #extension changes
-        extension.subscribe(self._on_below_userlist_changed, "below userlist")
-        extension.subscribe(self._on_below_menu_changed, "below menu")
-        extension.subscribe(self._on_below_panel_changed, "below panel")
 
     def _build_menus(self):
         '''buildall the menus used on the client'''
@@ -195,41 +183,15 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
             widget.show()
         return widget
 
-    def _on_below_userlist_changed(self, new_extension):
-        if type(self.below_userlist) != new_extension:
-            pos = self.lay.rowCount() - 1
-            self.below_userlist = self._replace_widget(
-                    self.below_userlist, new_extension, pos)
-
-    def _on_below_menu_changed(self, new_extension):
-        if type(self.below_menu) != new_extension:
-            self.below_menu = self._replace_widget(
-                    self.below_menu, new_extension, 1)
-
-    def _on_below_panel_changed(self, new_extension):
-        if type(self.below_panel) != new_extension:
-            self.below_menu = self._replace_widget(
-                    self.below_menu, new_extension, 3)
-
     def unsubscribe_signals(self, close=None):
         '''callback called when the disconnect option is selected'''
         gui.MainWindowBase.unsubscribe_signals(self)
-
-        #extension changes
-        extension.unsubscribe(self._on_below_userlist_changed, "below userlist")
-        extension.unsubscribe(self._on_below_menu_changed, "below menu")
-        extension.unsubscribe(self._on_below_panel_changed, "below panel")
-
-        if self.below_userlist:
-            self.below_userlist = None
-
-        if self.below_menu:
-            self.below_menu = None
-
-        if self.below_panel:
-            self.below_panel = None
-
-        self.session.config.unsubscribe(self._on_show_userpanel_changed,
-            'b_show_userpanel')
         self.panel.remove_subscriptions()
         self.panel = None
+
+        self.contact_list.contact_menu_selected.unsubscribe(
+            self._on_contact_menu_selected)
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            self.contact_list.group_menu_selected.unsubscribe(
+                self._on_group_menu_selected)
+        self.contact_list.remove_subscriptions()

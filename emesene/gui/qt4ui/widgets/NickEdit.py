@@ -1,10 +1,26 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module contains the NickEdit class'''
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
+from PyQt4.QtCore import Qt
 
 from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
@@ -23,6 +39,7 @@ class NickEdit(QtGui.QStackedWidget):
     # pylint: enable=W0612
 
     nick_changed = QtCore.pyqtSignal(basestring)
+
     def __init__(self, allow_empty=False,
                  empty_message=tr('Click here to write'),
                  parent=None):
@@ -94,7 +111,7 @@ class QLabelEmph(QtGui.QLabel):
     _RI = QtCore.QString('</em></u>')
 
     clicked = QtCore.pyqtSignal()
-    def __init__(self, text=QtCore.QString(), parent = None):
+    def __init__(self, text=QtCore.QString(), parent=None):
         '''Constructor'''
         QtGui.QLabel.__init__(self, parent)
         self._text = QtCore.QString()
@@ -104,7 +121,6 @@ class QLabelEmph(QtGui.QLabel):
 
     #you can pass either a pythonic string or a QString
     def setText(self, text):
-        # pylint: disable=C0103
         '''sets the text'''
         text = QtCore.QString(text)
         self._text = QtCore.QString(text)
@@ -112,12 +128,10 @@ class QLabelEmph(QtGui.QLabel):
 
     #returns a QString
     def text(self):
-        # pylint: disable=C0103
         '''Returns the text'''
         return self._text
 
     def mousePressEvent(self, event):
-        # pylint: disable=C0103
         '''Handles mouse presses'''
         QtGui.QLabel.mousePressEvent(self, event)
         if event.button() == Qt.LeftButton:
@@ -125,7 +139,6 @@ class QLabelEmph(QtGui.QLabel):
 
     #received even if mouse tracking not explicitly enabled
     def enterEvent(self, event):
-        # pylint: disable=C0103
         '''Handles mouse-in events'''
         QtGui.QLabel.setText(self, QLabelEmph._LE +
                                    self._text +
@@ -134,8 +147,6 @@ class QLabelEmph(QtGui.QLabel):
 
     #received even if mouse tracking not explicitly enabled
     def leaveEvent(self, event):
-        # pylint: disable=C0103
         '''Handles mouse-out events'''
         QtGui.QLabel.setText(self, self._text)
         event.accept()
-
