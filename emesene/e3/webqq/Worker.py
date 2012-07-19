@@ -9,6 +9,7 @@ import e3
 import StringIO
 import logging
 import libwebqqpython
+import simplejson as json
 
 log = logging.getLogger('WebQQ.Worker')
 
@@ -49,7 +50,8 @@ class Worker(e3.Worker):
 
     webqq_plugin = None
     res_manager = None
-
+    nick_uin_map = {}
+    
     def __init__(self, app_name, session, proxy, use_http=False, use_ipv6=False):
         '''class constructor'''
         e3.Worker.__init__(self, session)
@@ -80,8 +82,30 @@ class Worker(e3.Worker):
         '''
         while self._continue == True:
             try:
+                event_queue = self.res_manager.event_queue
+                if not event_queue.empty() :
+                    self.res_manager.lock()
+                    while not event_queue.empty():
+                        item = event_queue.front()
+                        event_queue.pop_front()
+        
+                        if item[0] == libwebqqpython.ON_BUDDY_MESSAGE :
+                            print 'ON_BUDDY_MESSAGE'
+                            data = json.loads(item[1])
+                            
+                            to_uin = data['to_uin']
+                            body = data['content'][-1]
+                            type_ = e3.Message.TYPE_MESSAGE
+                            msgobj = e3.Message(type_, body, to_uin)
+                            self._on_message(msgobj)
+                        else:
+                            print 'Un implementation callback functions'
+                            
+                    self.res_manager.ulock()
+                    
                 action = self.session.actions.get(True, 0.1)
                 self._process_action(action)
+
             except Queue.Empty:
                 pass
 
@@ -104,21 +128,18 @@ class Worker(e3.Worker):
         categories_dict[0] = default_group
         
         for index in self.res_manager.categories.keys():
-            print index
             group = e3.Group( self.res_manager.categories[index].name, index)
             categories_dict[index] = group
             
         for uin in self.res_manager.contacts.keys():
-            print uin
-            contact = e3.Contact(uin,message = self.res_manager.contacts[uin].lnick, _status = e3.status.ONLINE)
+            nick = self.res_manager.contacts[uin].nick
+            contact = e3.Contact(nick, message = self.res_manager.contacts[uin].lnick, _status = e3.status.ONLINE)
             index = self.res_manager.contacts[uin].cate_index
             group = categories_dict[index]
             self._add_contact_to_group( contact, group.name )
-            print contact
-
-        print self.session.groups
-        for group in self.session.groups:
-            print group
+            self.session.contacts.contacts[nick] = contact
+            self.nick_uin_map[nick] = uin
+            
         self.session.login_succeed()
         self.session.contact_list_ready()
 
@@ -168,10 +189,11 @@ class Worker(e3.Worker):
             self.session.log('message change', contact.status,
                 contact.message, log_account)
 
-    def _on_message(self, client, message):
+    def _on_message(self, message):
         '''handle the reception of a message'''
-        body = message.getBody()
-        account = message.getFrom().getStripped()
+        print 'Call back on_message'
+        body = message.body
+        account = message.account
 
         if account in self.conversations:
             cid = self.conversations[account]
@@ -190,6 +212,7 @@ class Worker(e3.Worker):
         self.session.conv_message(cid, account, msgobj)
 
         # log message
+        print 'log message'
         e3.Logger.log_message(self.session, None, msgobj, False)
 
 
@@ -356,14 +379,21 @@ class Worker(e3.Worker):
             log.warning('conversation %s not found' % cid)
 
     def _handle_action_send_message(self, cid, message):
+        
         '''handle Action.ACTION_SEND_MESSAGE
         cid is the conversation id, message is a Message object
         '''
 
         recipients = self.rconversations.get(cid, ())
+        print "Message : " +message.body
+        
+        for nick in recipients:
+            print nick
+            recipient = self.nick_uin_map[nick]
 
-        for recipient in recipients:
-            self.webqq_plugin.send_buddy_message(recipient, message.body)
+            print "Recipient: " + recipient
+            print 'Message Account ' + message.account
+            self.webqq_plugin.send_buddy_message(recipient, str(message.body))
             # log message
         e3.Logger.log_message(self.session, recipients, message, True)
 
