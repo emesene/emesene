@@ -267,7 +267,7 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
         new_bridge = self._transport_manager.create_transport(self.peer,
                 self.peer_guid, transresp.bridge)
         if new_bridge is None or new_bridge.connected:
-            self._bridge_selected()
+            self._on_bridge_selected()
         else:
             new_bridge.connect("connected", self._bridge_switched)
             new_bridge.connect("failed", self._bridge_failed)
