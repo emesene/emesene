@@ -39,9 +39,9 @@ class ConversationStatus(object):
                                        incomming, tstamp, 
                                        mtype = mtype, mstyle=cstyle)
 
+        msg.message = MarkupParser.escape(msg.message)
         if self.config.b_show_emoticons:
-            msg.message = MarkupParser.replace_emotes(
-                                              MarkupParser.escape(msg.message),
+            msg.message = MarkupParser.replace_emotes( msg.message,
                                               cedict, cepath, msg.sender)
 
         msg.message = MarkupParser.urlify(msg.message)
