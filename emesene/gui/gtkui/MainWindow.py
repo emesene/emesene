@@ -42,6 +42,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         gtk.VBox.__init__(self)
         gui.MainWindowBase.__init__(self, session, on_new_conversation)
 
+        self.on_new_conversation = on_new_conversation
         self.quit_cb = None
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
@@ -170,9 +171,9 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         MainMenu = extension.get_default('main menu')
         ContactMenu = extension.get_default('menu contact')
 
-        self.menu = MainMenu(handler, self.session)
+        self.menu = MainMenu(handler, self.session, self.on_new_conversation)
 
-        self.contact_menu = ContactMenu(contact_handler, self.session)
+        self.contact_menu = ContactMenu(contact_handler, self.session, self.on_new_conversation)
         self.contact_menu.show_all()
         if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
             group_handler = gui.base.GroupHandler(self.session,

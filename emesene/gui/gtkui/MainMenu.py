@@ -34,7 +34,7 @@ class MainMenu(gtk.MenuBar):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, handlers, session):
+    def __init__(self, handlers, session, on_new_conversation):
         """
         constructor
 
@@ -52,7 +52,7 @@ class MainMenu(gtk.MenuBar):
         file_.set_submenu(self.file_menu)
 
         actions = gtk.MenuItem(_('_Actions'))
-        actions_menu = ActionsMenu(handlers.actions_handler, session)
+        actions_menu = ActionsMenu(handlers.actions_handler, session, on_new_conversation)
         actions.set_submenu(actions_menu)
 
         options = gtk.MenuItem(_('_Options'))
@@ -211,7 +211,7 @@ class ActionsMenu(gtk.Menu):
     A widget that represents the Actions popup menu located on the main menu
     """
 
-    def __init__(self, handler, session):
+    def __init__(self, handler, session, on_new_conversation):
         """
         constructor
 
@@ -224,7 +224,7 @@ class ActionsMenu(gtk.Menu):
 
         contact = gtk.ImageMenuItem(_('_Contact'))
         contact.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
-        contact_menu = ContactsMenu(handler.contact_handler, session)
+        contact_menu = ContactsMenu(handler.contact_handler, session, on_new_conversation)
         contact.set_submenu(contact_menu)
         account = gtk.ImageMenuItem(_('_Account'))
         account.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.chat))
