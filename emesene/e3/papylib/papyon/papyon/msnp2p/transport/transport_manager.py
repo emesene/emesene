@@ -67,6 +67,7 @@ class P2PTransportManager(gobject.GObject):
         self._default_transport = "SBBridge"
         self._supported_transports = {"SBBridge" : SwitchboardP2PTransport,
                                       "TCPv1"    : DirectP2PTransport}
+
         self._transports = set()
         self._transport_signals = {}
         self._data_blobs = {} # (peer, peer_guid, session_id) => blob

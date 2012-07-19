@@ -20,7 +20,6 @@
 
 from papyon.gnet.constants import *
 from papyon.gnet.io import *
-from papyon.msnp.message import MessageAcknowledgement
 from papyon.msnp2p.constants import *
 from papyon.msnp2p.transport.TLPv1 import MessageChunk as NonceChunk
 from papyon.msnp2p.transport.TLP import MessageChunk
@@ -231,6 +230,7 @@ class DirectP2PTransport(BaseP2PTransport):
             self.emit("listening", ip, port)
 
     def _send_chunk(self, peer, peer_guid, chunk):
+        #TODO: FIXME: Fix sending chunks (WLM does not recognize them)
         self._send_data(str(chunk), (self.__on_chunk_sent, peer, peer_guid, chunk))
 
     def __on_chunk_sent(self, peer, peer_guid, chunk):
@@ -342,8 +342,13 @@ class DirectP2PTransport(BaseP2PTransport):
                 return
 
             if not self.__nonce_received:
-                chunk = NonceChunk.parse(body)
-                self._receive_nonce(chunk)
+                #TODO: FIXME: Fix nonce chunk parsing
+                #chunk = NonceChunk.parse(body)
+                #self._receive_nonce(chunk)
+                self.__nonce_received = True
+                logger.debug("Connected")
+                self._connected = True
+                self.emit("connected")
             else:
                 chunk = MessageChunk.parse(self.version, body)
                 if chunk.body == "\x00" *4:

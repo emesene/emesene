@@ -234,7 +234,9 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
         # use active bridge if any
         bridge = self._transport_manager.find_transport(self._peer, self._peer_guid, None)
 
-        if bridge is not None and bridge.rating > 0:
+        #TODO: FIXME: Change -1 to 0 once all direct connect issues are fixed
+        # This will enable sending transreq to other clients
+        if bridge is not None and bridge.rating > -1:
             logger.info("Use already active %s connection" % bridge.name)
             self._on_bridge_selected()
         else:
@@ -246,8 +248,7 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
             proto = "TCPv1"
         else:
             proto = self._transport_manager._default_transport
-        new_bridge = self._transport_manager.create_transport(self.peer,
-                self.peer_guid, proto)
+            new_bridge = self._transport_manager.create_transport(self.peer, self.peer_guid, proto)
 
         if new_bridge is None or new_bridge.connected:
             self._on_bridge_selected()
@@ -274,7 +275,7 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
             try:
                 new_bridge.open(transresp.nonce, transresp.external_ips[0],
                                 transresp.external_port)
-            except IndexError:
+            except IndexError: # Fallback to internal ip if external is unavailable
                 new_bridge.open(transresp.nonce, transresp.internal_ips[0],
                                 transresp.internal_port)
 
