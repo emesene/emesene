@@ -51,7 +51,7 @@ class Worker(e3.Worker):
     webqq_plugin = None
     res_manager = None
     nick_uin_map = {}
-    
+    uin_nick_map = {}   
     def __init__(self, app_name, session, proxy, use_http=False, use_ipv6=False):
         '''class constructor'''
         e3.Worker.__init__(self, session)
@@ -90,13 +90,12 @@ class Worker(e3.Worker):
                         event_queue.pop_front()
         
                         if item[0] == libwebqqpython.ON_BUDDY_MESSAGE :
-                            print 'ON_BUDDY_MESSAGE'
                             data = json.loads(item[1])
                             
-                            to_uin = data['to_uin']
+                            from_uin = str(data['from_uin'])
                             body = data['content'][-1]
                             type_ = e3.Message.TYPE_MESSAGE
-                            msgobj = e3.Message(type_, body, to_uin)
+                            msgobj = e3.Message(type_, body, self.uin_nick_map[from_uin])
                             self._on_message(msgobj)
                         else:
                             print 'Un implementation callback functions'
@@ -133,13 +132,13 @@ class Worker(e3.Worker):
             
         for uin in self.res_manager.contacts.keys():
             nick = self.res_manager.contacts[uin].nick
-            contact = e3.Contact(nick, message = self.res_manager.contacts[uin].lnick, _status = e3.status.ONLINE)
+            contact = e3.Contact(account = nick, identifier = int(uin), nick = nick, message = self.res_manager.contacts[uin].lnick, _status = e3.status.ONLINE, blocked = False, cid = uin)
             index = self.res_manager.contacts[uin].cate_index
             group = categories_dict[index]
             self._add_contact_to_group( contact, group.name )
             self.session.contacts.contacts[nick] = contact
             self.nick_uin_map[nick] = uin
-            
+       	    self.uin_nick_map[uin] = nick     
         self.session.login_succeed()
         self.session.contact_list_ready()
 
@@ -365,6 +364,7 @@ class Worker(e3.Worker):
     def _handle_action_new_conversation(self, account, cid):
         '''handle Action.ACTION_NEW_CONVERSATION
         '''
+	print "New conversation account : %s, cid : %s" %(account, cid)
         self.conversations[account] = cid
         self.rconversations[cid] = [account]
 
@@ -388,9 +388,8 @@ class Worker(e3.Worker):
         print "Message : " +message.body
         
         for nick in recipients:
-            print nick
-            recipient = self.nick_uin_map[nick]
-
+	    recipient = self.nick_uin_map[nick]
+	    print "Nick: " + nick
             print "Recipient: " + recipient
             print 'Message Account ' + message.account
             self.webqq_plugin.send_buddy_message(recipient, str(message.body))
