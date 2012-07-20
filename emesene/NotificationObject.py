@@ -54,7 +54,7 @@ class NotificationObject(object):
         on an attribute change, if item is None then notify on
         all item changes, it item is a string, then notify on
         the change of that item'''
-        callback = WeakMethod(callback)
+        weak_callback = WeakMethod(callback)
 
         if self._callbacks is None:
             self._callbacks = []
@@ -63,20 +63,21 @@ class NotificationObject(object):
             self._item_callbacks = {}
 
         if item is None:
-            if callback not in self._callbacks:
-                self._callbacks.append(callback)
+            if weak_callback not in self._callbacks:
+                self._callbacks.append(weak_callback)
         else:
             if item not in self._item_callbacks:
                 self._item_callbacks[item] = []
 
-            if callback not in self._item_callbacks[item]:
-                self._item_callbacks[item].append(callback)
+            if weak_callback not in self._item_callbacks[item]:
+                self._item_callbacks[item].append(weak_callback)
 
     def unsubscribe(self, callback, item=None):
         '''remove the callback from the callback list, if item is None
         try to remove the callback from the global callback list, if it's
         a string try to remove from the callback list of that item'''
         callbacks = []
+        weak_callback = WeakMethod(callback)
 
         if item is None:
             callbacks = self._callbacks
@@ -85,7 +86,7 @@ class NotificationObject(object):
 
         to_remove = None
         for weakmethod in callbacks:
-            if callback.im_func == weakmethod.f:
+            if weak_callback == weakmethod:
                 to_remove = weakmethod
 
         if to_remove is not None:

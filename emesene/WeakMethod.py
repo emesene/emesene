@@ -23,14 +23,17 @@ import weakref
 class WeakMethodBound(object):
 
     def __init__(self, f):
-        self.f = f.im_func
+        self.f = weakref.ref(f.im_func)
         self.c = weakref.ref(f.im_self)
 
     def __call__(self, *arg):
         if self.c() is None:
             raise TypeError('Method called on dead object')
 
-        self.f(self.c(), *arg)
+        self.f()(self.c(), *arg)
+
+    def __eq__(self, other):
+        return self.f == other.f and self.c == other.c
 
 class WeakMethodFree(object):
 
@@ -42,6 +45,9 @@ class WeakMethodFree(object):
             raise TypeError('Function no longer exist')
 
         self.f()(*arg)
+
+    def __eq__(self, other):
+        return self.f == other.f
 
 def WeakMethod(f):
     try:
