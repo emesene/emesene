@@ -244,7 +244,7 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
 
     def _switch_bridge(self, transreq):
         choices = transreq.body.bridges # offered by other client
-        if "TCPv1" in choices:
+        if "TCPv1" in choices and 0: # TODO: FIXME: Enable when you want direct connection
             proto = "TCPv1"
         else:
             proto = self._transport_manager._default_transport
