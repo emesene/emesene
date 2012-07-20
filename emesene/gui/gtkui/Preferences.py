@@ -818,7 +818,7 @@ class Sound(BaseTable):
         self.session = session
         self.array = []
         self.append_markup('<b>'+_('General:')+'</b>')
-        self.append_check(_('Mute sounds'),
+        self.mute_sound = self.append_check(_('Mute sounds'),
             'session.config.b_mute_sounds')
         self.append_markup('<b>'+_('Users events:')+'</b>')
         self.array.append(self.append_check(_('Play sound on contact online'),
@@ -845,6 +845,7 @@ class Sound(BaseTable):
         self.show_all()
 
     def _on_mute_sounds_changed(self, value):
+        self.mute_sound.set_active(value)
         for i in self.array:
             i.set_sensitive(not value)
 
