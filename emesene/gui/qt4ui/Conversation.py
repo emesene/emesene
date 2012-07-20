@@ -34,6 +34,7 @@ from   gui.qt4ui     import Utils
 
 log = logging.getLogger('qt4ui.Conversation')
 
+
 class Conversation (gui.base.Conversation, QtGui.QWidget):
     '''This widget represents the contents of a chat tab in the conversations
     page'''
@@ -74,7 +75,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         #        implemented
         self._on_typing_timer.setSingleShot(True)
         self._on_typing_timer.timeout.connect(
-            lambda *args: self._widget_d['info_panel'].set_icon(
+            lambda *args: self.header.set_icon(
                 gui.theme.image_theme.status_icons[
                     self.session.contacts.get(
                         self.members[0]).status]))
@@ -140,14 +141,14 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.info = ContactInfo(self.session, self.members)
 
         # LEFT & RIGHT
-        widget_d['info_panel'] = info_panel_cls(self.session, self.members)
+        self.header = info_panel_cls(self.session, self.members)
 
         lay_no_info = QtGui.QHBoxLayout()
         lay_no_info.addWidget(left_widget)
         lay_no_info.addWidget(self.info)
         lay = QtGui.QVBoxLayout()
         lay.setContentsMargins(1, 1, 1, 1)
-        lay.addWidget(widget_d['info_panel'])
+        lay.addWidget(self.header)
         lay.addLayout(lay_no_info)
 
         self.setLayout(lay)
@@ -201,15 +202,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''callback called when config.b_toolbar_small changes'''
         pass
 
-    def on_picture_change_succeed(self, account, path):
-        '''callback called when the picture of an account is changed'''
-        #FIXME: make qt4 avatar API compatible with the gtk one
-        #and move this to base class
-        if account == self.session.account.account:
-            self.info.avatar.set_display_pic_from_file(path)
-        elif account in self.members:
-            self.info.his_avatar.set_display_pic_from_file(path)
-
     def update_message_waiting(self, is_waiting):
         """
         update the information on the conversation to inform if a message
@@ -222,8 +214,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''This method is called from the core (e3 or base class or whatever
         to update the contacts infos'''
         self.info.update_single(self.members)
-        self._widget_d['info_panel'].information = (Utils.unescape(message), account)
-        #FIXME: update tab info
+        self.header.information = (Utils.unescape(message), account)
+        self.update_tab()
 
     def show(self, other_started=False):
         '''Shows the widget'''
@@ -267,55 +259,28 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                 # moment. That's probably because 'set message
                 # waiting' stuff is still not implemented (in fact
                 # self.icon returns that icon.)
-                #self._widget_d['info_panel'].set_icon(self.icon)
+                #self.header.set_icon(self.icon)
                 status = self.session.contacts.get(account).status
                 icon =  gui.theme.image_theme.status_icons[status]
-                self._widget_d['info_panel'].set_icon(icon)
+                self.header.set_icon(icon)
             elif what == 'nick':
-                self._widget_d['info_panel'].set_nick(self.text)
+                self.header.set_nick(self.text)
             elif what == 'message':
                 message = self.session.contacts.get(account).message
-                self._widget_d['info_panel'].set_message(message)
+                self.header.set_message(message)
 
     def on_user_typing(self, account):
         '''method called when a someone is typing'''
         # TODO: this should update the tabs' icon, not this one.
         # updating the tab icon should be done here, not in the Conversation
         # page class.
-        self._widget_d['info_panel'].set_icon(gui.theme.image_theme.typing)
+#        self.header.set_icon(gui.theme.image_theme.typing)
         self._on_typing_timer.start(3000)
 
-    def update_group_information(self):
-        """
-        update the information for a conversation with multiple users
-        """
-        #FIXME: move to base class
-        if self.session.account.account in self.members:
-            # this can happen sometimes (e.g. when you're invisible. see #1297)
-            self.members.remove(self.session.account.account)
-
-        #TODO add plus support for nick to the tab label!
-        members_nick = []
-        i = 0
-        for account in self.members:
-            i += 1
-            contact = self.session.contacts.get(account)
-
-            if contact is None or contact.nick is None:
-                nick = account
-            elif len(contact.nick) > 20 and i != len(self.members):
-                nick = contact.nick[:20] + '...'
-            else:
-                nick = contact.nick
-
-            members_nick.append(nick)
-
-        self.header.information = \
-            (_('%d members') % (len(self.members) + 1, ),
-                    ", ".join(members_nick))
-        self.info.update_group(self.members)
-        #FIXME: implement this
-#        self.update_tab()
+    def update_tab(self):
+        '''update the values of the tab'''
+        #FIXME: implement
+        pass
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         """
@@ -326,7 +291,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.info.set_sensitive(is_sensitive or force_sensitive_block_button)
         self._widget_d['toolbar'].set_sensitive(is_sensitive, force_sensitive_block_button)
         self._widget_d['chat_input'].setEnabled(is_sensitive)
-        self._widget_d['info_panel'].setEnabled(is_sensitive or force_sensitive_block_button)
+        self.header.setEnabled(is_sensitive or force_sensitive_block_button)
 
         # redraws block button to its corresponding icon and tooltip
         contact_unblocked = not force_sensitive_block_button or is_sensitive
@@ -346,7 +311,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
-        self._widget_d['info_panel'].setVisible(is_visible)
+        self.header.setVisible(is_visible)
 
     def set_toolbar_visible(self, is_visible):
         '''

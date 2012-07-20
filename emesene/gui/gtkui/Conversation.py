@@ -134,7 +134,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             display_name = contact.display_name
             self.set_sensitive(not contact.blocked, True)
             my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
-            self.output.clear(account, nick, display_name, 
+            self.output.clear(account, nick, display_name,
                               my_picture, his_picture)
 
         self._load_style()
@@ -315,40 +315,10 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.tab_label.set_text(self.text)
 
         if self.show_avatar_in_taskbar:
-            self.update_window(self.text, self.info.his_avatar.filename, 
+            self.update_window(self.text, self.info.his_avatar.filename,
                                self.tab_index)
         else:
             self.update_window(self.text, self.icon, self.tab_index)
-
-    def update_group_information(self):
-        """
-        update the information for a conversation with multiple users
-        """
-        if self.session.account.account in self.members:
-            # this can happen sometimes (e.g. when you're invisible. see #1297)
-            self.members.remove(self.session.account.account)
-
-        #TODO add plus support for nick to the tab label!
-        members_nick = []
-        i = 0
-        for account in self.members:
-            i += 1
-            contact = self.session.contacts.get(account)
-
-            if contact is None or contact.nick is None:
-                nick = account
-            elif len(contact.nick) > 20 and i != len(self.members):
-                nick = contact.nick[:20] + '...'
-            else:
-                nick = contact.nick
-
-            members_nick.append(nick)
-
-        self.header.information = \
-            (_('%d members') % (len(self.members) + 1, ),
-                    ", ".join(members_nick))
-        self.info.update_group(self.members)
-        self.update_tab()
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         """
@@ -405,13 +375,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''called when an emoticon is selected'''
         self.input.append(glib.markup_escape_text(emote))
         self.input_grab_focus()
-
-    def on_picture_change_succeed(self, account, path):
-        '''callback called when the picture of an account is changed'''
-        if account == self.session.account.account:
-            self.info.avatar.set_from_file(path)
-        elif account in self.members:
-            self.info.his_avatar.set_from_file(path)
 
     def _on_avatarsize_changed(self, value):
         self.info._on_avatarsize_changed(value)
@@ -502,7 +465,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         account = self.members[0]
         self.call_widget.show_all()
         x_other, x_self = self.call_widget.get_xids()
-        self.session.call_invite(self.cid, account, 0, 
+        self.session.call_invite(self.cid, account, 0,
                                  x_other, x_self) # 0 = Video only
 
     def on_voice_call(self):
@@ -510,7 +473,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         account = self.members[0]
         self.call_widget.show_all()
         x_other, x_self = self.call_widget.get_xids()
-        self.session.call_invite(self.cid, account, 1, 
+        self.session.call_invite(self.cid, account, 1,
                                  x_other, x_self) # 1 = Audio only
 
     def on_av_call(self):
@@ -518,11 +481,11 @@ class Conversation(gtk.VBox, gui.Conversation):
         account = self.members[0]
         self.call_widget.show_all()
         x_other, x_self = self.call_widget.get_xids()
-        self.session.call_invite(self.cid, account, 2, 
+        self.session.call_invite(self.cid, account, 2,
                                  x_other, x_self) # 2 = Audio/Video
 
-    def on_drag_data_received(self, widget, context, 
-                              posx, posy, selection, 
+    def on_drag_data_received(self, widget, context,
+                              posx, posy, selection,
                               info, timestamp):
         '''called when a file is received by text input widget'''
         uri = selection.data.strip()

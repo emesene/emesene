@@ -59,9 +59,8 @@ class ContactInfoRotate(QtGui.QWidget):
             account = members[0]
             contact = self.session.contacts.safe_get(account)
 
-        #FIXME: Blocked Status set_from_file(contact.picture, contact.blocked)
-        self.his_avatar.set_display_pic_from_file(contact.picture)
-        self.avatar.set_display_pic_from_file(self.session.config.last_avatar)
+        self.his_avatar.set_from_file(contact.picture, contact.blocked)
+        self.avatar.set_from_file(self.session.config.last_avatar)
 
         self.index = 0  # used for the rotate picture function
         self.timer = None
@@ -115,8 +114,7 @@ class ContactInfoRotate(QtGui.QWidget):
 
         path = contact.picture
         if path != '':
-            # FIXME .set_from_file(path, contact.blocked)
-            self.his_avatar.set_display_pic_from_file(path)
+            self.his_avatar.set_from_file(path, contact.blocked)
 
         self.index = (self.index + 1) % len(self.members)
         return True
@@ -146,8 +144,7 @@ class ContactInfoRotate(QtGui.QWidget):
         contact = self.session.contacts.safe_get(account)
         if contact.picture:
             his_picture = contact.picture
-#FIXME:            self.his_avatar.set_from_file(his_picture, contact.blocked)
-            self.his_avatar.set_display_pic_from_file(his_picture)
+            self.his_avatar.set_from_file(his_picture, contact.blocked)
 
     def update_group(self, members):
         self.members = members

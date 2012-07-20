@@ -30,6 +30,7 @@ from e3.common.RingBuffer import RingBuffer
 import logging
 log = logging.getLogger('gui.base.Conversation')
 
+
 class Conversation(object):
     '''a widget that contains all the components inside'''
 
@@ -66,6 +67,7 @@ class Conversation(object):
 
         # the base class should override this attributes
         self.info = None
+        self.header = None
         self.input = None
         self.output = None
         self.soundPlayer = extension.get_and_instantiate('sound', session)
@@ -228,6 +230,13 @@ class Conversation(object):
         # widget visibility is handled in _on_show_info_changed
         self.session.config.b_show_info = not self.session.config.b_show_info
 
+    def on_picture_change_succeed(self, account, path):
+        '''callback called when the picture of an account is changed'''
+        if account == self.session.account.account:
+            self.info.avatar.set_from_file(path)
+        elif account in self.members:
+            self.info.his_avatar.set_from_file(path)
+
     def on_voice_call(self):
         '''called when the user is requesting an audio-only call'''
         raise NotImplementedError
@@ -293,7 +302,7 @@ class Conversation(object):
 
     def update_message_waiting(self, is_waiting):
         """
-        update the information on the conversation to inform 
+        update the information on the conversation to inform
         if a message is waiting
 
         is_waiting -- boolean value that indicates if a message is waiting
@@ -314,6 +323,34 @@ class Conversation(object):
         """
         update the information for a conversation with multiple users
         """
+        if self.session.account.account in self.members:
+            # this can happen sometimes (e.g. when you're invisible. see #1297)
+            self.members.remove(self.session.account.account)
+
+        #TODO add plus support for nick to the tab label!
+        members_nick = []
+        i = 0
+        for account in self.members:
+            i += 1
+            contact = self.session.contacts.get(account)
+
+            if contact is None or contact.nick is None:
+                nick = account
+            elif len(contact.nick) > 20 and i != len(self.members):
+                nick = contact.nick[:20] + '...'
+            else:
+                nick = contact.nick
+
+            members_nick.append(nick)
+
+        self.header.information = \
+            (_('%d members') % (len(self.members) + 1, ),
+                    ", ".join(members_nick))
+        self.info.update_group(self.members)
+        self.update_tab()
+
+    def update_tab(self):
+        '''update the values of the tab'''
         raise NotImplementedError("Method not implemented")
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
@@ -326,10 +363,10 @@ class Conversation(object):
 
     def set_image_visible(self, is_visible):
         """
-        set the visibility of the widget that displays the images 
+        set the visibility of the widget that displays the images
         of the members
 
-        is_visible -- boolean that says if the message should 
+        is_visible -- boolean that says if the message should
                       be shown or hidden
         """
         raise NotImplementedError("Method not implemented")
@@ -338,7 +375,7 @@ class Conversation(object):
         '''
         hide or show the widget according to is_visible
 
-        is_visible -- boolean that says if the widget should 
+        is_visible -- boolean that says if the widget should
                       be shown or hidden
         '''
         raise NotImplementedError("Method not implemented")
@@ -347,7 +384,7 @@ class Conversation(object):
         '''
         hide or show the widget according to is_visible
 
-        is_visible -- boolean that says if the widget should 
+        is_visible -- boolean that says if the widget should
                       be shown or hidden
         '''
         raise NotImplementedError("Method not implemented")
@@ -404,7 +441,7 @@ class Conversation(object):
         cedict = self.emcache.parse()
         custom_emoticons = gui.base.MarkupParser.get_custom_emotes(text, cedict)
 
-        self.session.send_message(self.cid, text, self.cstyle, 
+        self.session.send_message(self.cid, text, self.cstyle,
                                   cedict, custom_emoticons)
 
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
@@ -432,7 +469,7 @@ class Conversation(object):
 
         if message.type == e3.Message.TYPE_MESSAGE or \
            message.type == e3.Message.TYPE_FLNMSG:
-                
+
             if self.session.config.b_override_text_color:
                 message.style.color = \
                 e3.base.Color.from_hex(self.session.config.override_text_color)
@@ -444,7 +481,7 @@ class Conversation(object):
                 self.output_message(message, None)
                 return
 
-            self.input_message(message, contact, 
+            self.input_message(message, contact,
                                received_custom_emoticons, user_emcache.path)
 
             self.play_type()
