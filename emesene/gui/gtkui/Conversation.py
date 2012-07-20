@@ -376,9 +376,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.input.append(glib.markup_escape_text(emote))
         self.input_grab_focus()
 
-    def _on_avatarsize_changed(self, value):
-        self.info._on_avatarsize_changed(value)
-
     def on_contact_attr_changed_succeed(self, account, what, old,
             do_notify=True):
         ''' called when contacts change their attributes'''

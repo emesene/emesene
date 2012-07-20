@@ -98,21 +98,21 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # TOP LEFT
         widget_d['chat_output'] = conv_output_cls(self.session.config)
         top_left_lay = QtGui.QHBoxLayout()
-        top_left_lay.setContentsMargins (0,0,0,0)
+        top_left_lay.setContentsMargins (0, 0, 0, 0)
         top_left_lay.addWidget(widget_d['chat_output'])
 
         # BOTTOM LEFT
         self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session, gui.theme, self)
-        widget_d['toolbar'] = conv_toolbar_cls(self.toolbar_handler, self.session)
-        widget_d['toolbar'].redraw_ublock_button(self._get_first_contact().blocked)
-        widget_d['toolbar'].update_toggle_avatar_icon(self.session.config.b_show_info)
+        self.toolbar = conv_toolbar_cls(self.toolbar_handler, self.session)
+        self.toolbar.redraw_ublock_button(self._get_first_contact().blocked)
+        self.toolbar.update_toggle_avatar_icon(self.session.config.b_show_info)
 
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         widget_d['chat_input'] = Widgets.ChatInput()
 
         bottom_left_lay = QtGui.QVBoxLayout()
         bottom_left_lay.setContentsMargins(0, 0, 0, 0)
-        bottom_left_lay.addWidget(widget_d['toolbar'])
+        bottom_left_lay.addWidget(self.toolbar)
         bottom_left_lay.addWidget(widget_d['chat_input'])
 
         widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.emotes)
@@ -124,18 +124,18 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             self._on_new_style_selected)
 
         # LEFT (TOP & BOTTOM)
-        left_widget = QtGui.QSplitter(Qt.Vertical)
+        self.left_widget = QtGui.QSplitter(Qt.Vertical)
         splitter_up = QtGui.QWidget()
         splitter_down = QtGui.QWidget()
         splitter_up.setLayout(top_left_lay)
         splitter_down.setLayout(bottom_left_lay)
-        left_widget.addWidget(splitter_up)
-        left_widget.addWidget(splitter_down)
+        self.left_widget.addWidget(splitter_up)
+        self.left_widget.addWidget(splitter_down)
 
-        left_widget.setCollapsible(0, False)
-        left_widget.setCollapsible(1, False)
-        _, splitter_pos = left_widget.getRange(1)
-        left_widget.moveSplitter(splitter_pos, 1)
+        self.left_widget.setCollapsible(0, False)
+        self.left_widget.setCollapsible(1, False)
+        _, splitter_pos = self.left_widget.getRange(1)
+        self.left_widget.moveSplitter(splitter_pos, 1)
 
         # RIGHT
         self.info = ContactInfo(self.session, self.members)
@@ -143,17 +143,16 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # LEFT & RIGHT
         self.header = info_panel_cls(self.session, self.members)
 
-        lay_no_info = QtGui.QHBoxLayout()
-        lay_no_info.addWidget(left_widget)
-        lay_no_info.addWidget(self.info)
+        self.lay_no_info = QtGui.QGridLayout()
+        self.lay_no_info.addWidget(self.left_widget, 0, 1)
+        self.lay_no_info.addWidget(self.info, 0, 2)
         lay = QtGui.QVBoxLayout()
         lay.setContentsMargins(1, 1, 1, 1)
         lay.addWidget(self.header)
-        lay.addLayout(lay_no_info)
+        lay.addLayout(self.lay_no_info)
 
         self.setLayout(lay)
-
-    # emesene's
+        extension.subscribe(self.on_conversation_info_extension_changed, 'conversation info')
 
     def on_font_selected(self, style):
         '''called when a new font is selected'''
@@ -164,21 +163,35 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''sets the focus on the input widget'''
         self._widget_d['chat_input'].setFocus(Qt.OtherFocusReason)
 
-    # TODO: put this (and maybe the following) in the base
-    # class as abstract methods
+    def on_conversation_info_extension_changed(self, new_extension):
+        if type(self.info) != new_extension:
+            self.lay_no_info.removeWidget(self.info)
+            self.info = None
+
+            if new_extension:
+                self.info = new_extension(self.session, self.members)
+                if self.session.config.get_or_set('b_avatar_on_left', False):
+                    self.lay_no_info.addWidget(widget, 0, 1)
+                    self.lay_no_info.removeWidget(self.left_widget)
+                    self.lay_no_info.addWidget(self.left_widget, 0, 2)
+                else:
+                    self.lay_no_info.removeWidget(self.left_widget)
+                    self.lay_no_info.addWidget(self.left_widget, 0, 1)
+                    self.lay_no_info.addWidget(widget, 0, 2)
+
+            if self.session.config.b_show_info:
+                self.info.show()
+
     def on_close(self):
         '''Method called when this chat widget is about to be closed'''
         self.unsubscribe_signals()
-        pass
+        extension.unsubscribe(self.on_conversation_info_extension_changed,
+                                'conversation info')
+        self.info.destroy()
 
     # emesene's
-
     def iconify(self):
         '''override the iconify method'''
-        pass
-
-    def _on_avatarsize_changed(self, value):
-        '''callback called when config.i_conv_avatar_size changes'''
         pass
 
     def _on_show_toolbar_changed(self, value):
@@ -192,11 +205,18 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def _on_show_info_changed(self, value):
         '''callback called when config.b_show_info changes'''
         self.set_image_visible(value)
-        self._widget_d['toolbar'].update_toggle_avatar_icon(value)
+        self.toolbar.update_toggle_avatar_icon(value)
 
     def _on_show_avatar_onleft(self, value):
         '''callback called when config.b_avatar_on_left changes'''
-        pass
+        if self.session.config.get_or_set('b_avatar_on_left', False):
+            self.lay_no_info.addWidget(self.info, 0, 1)
+            self.lay_no_info.removeWidget(self.left_widget)
+            self.lay_no_info.addWidget(self.left_widget, 0, 2)
+        else:
+            self.lay_no_info.removeWidget(self.left_widget)
+            self.lay_no_info.addWidget(self.left_widget, 0, 1)
+            self.lay_no_info.addWidget(self.info, 0, 2)
 
     def _on_icon_size_change(self, value):
         '''callback called when config.b_toolbar_small changes'''
@@ -208,7 +228,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         is waiting
         is_waiting -- boolean value that indicates if a message is waiting
         """
-        pass
+        self.update_tab()
 
     def update_single_information(self, nick, message, account): # emesene's
         '''This method is called from the core (e3 or base class or whatever
@@ -289,13 +309,13 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         sensitive when the user is reconnected
         """
         self.info.set_sensitive(is_sensitive or force_sensitive_block_button)
-        self._widget_d['toolbar'].set_sensitive(is_sensitive, force_sensitive_block_button)
+        self.toolbar.set_sensitive(is_sensitive, force_sensitive_block_button)
         self._widget_d['chat_input'].setEnabled(is_sensitive)
         self.header.setEnabled(is_sensitive or force_sensitive_block_button)
 
         # redraws block button to its corresponding icon and tooltip
         contact_unblocked = not force_sensitive_block_button or is_sensitive
-        self._widget_d['toolbar'].redraw_ublock_button(contact_unblocked)
+        self.toolbar.redraw_ublock_button(contact_unblocked)
 
     def set_image_visible(self, is_visible):
         """
@@ -319,7 +339,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         '''
-        self._widget_d['toolbar'].setVisible(is_visible)
+        self.toolbar.setVisible(is_visible)
 
     def _get_first_contact(self):
         account = self.members[0]

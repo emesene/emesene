@@ -230,6 +230,9 @@ class Conversation(object):
         # widget visibility is handled in _on_show_info_changed
         self.session.config.b_show_info = not self.session.config.b_show_info
 
+    def _on_avatarsize_changed(self, value):
+        self.info._on_avatarsize_changed(value)
+
     def on_picture_change_succeed(self, account, path):
         '''callback called when the picture of an account is changed'''
         if account == self.session.account.account:
