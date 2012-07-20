@@ -19,6 +19,8 @@
 import e3
 import gtk
 
+from gui.base import Plus
+
 class ContactMenu(gtk.Menu):
     """
     A class that represents a menu to handle contact related information
@@ -152,14 +154,14 @@ class ContactMenu(gtk.Menu):
 
         if contact:
             clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
-            clipboard.set_text(contact.nick)
+            clipboard.set_text(Plus.msnplus_strip(contact.nick))
 
     def on_copy_message_to_clipboard(self):
         contact = self.handler.contact_list.get_contact_selected()
 
         if contact:
             clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
-            clipboard.set_text(contact.message)
+            clipboard.set_text(Plus.msnplus_strip(contact.message))
 
     def update_submenus(self):
         for i in self.move_groups_submenu.get_children():

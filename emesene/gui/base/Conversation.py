@@ -450,7 +450,7 @@ class Conversation(object):
             self.play_type()
 
         elif message.type == e3.Message.TYPE_NUDGE:
-            message.body = _('%s just sent you a nudge!') % (contact.display_name,)
+            message.body = _('%s just sent you a nudge!') % (MarkupParser.escape(contact.display_name),)
             msg = gui.Message.from_information(contact, message)
 
             self.output.information(self.formatter, msg)
@@ -542,7 +542,7 @@ class Conversation(object):
             contact = self.session.contacts.safe_get(account)
             if len(self.members) > 1:
                 message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
-                _('%s has joined the conversation') % (contact.display_name), \
+                _('%s has joined the conversation') % (MarkupParser.escape(contact.display_name)), \
                 account)
                 msg = gui.Message.from_information(contact, message)
 
@@ -559,7 +559,7 @@ class Conversation(object):
             self.update_data()
             contact = self.session.contacts.safe_get(account)
             message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
-            _('%s has left the conversation') % (contact.display_name), \
+            _('%s has left the conversation') % (MarkupParser.escape(contact.display_name)), \
             account)
             msg = gui.Message.from_information(contact, message)
 

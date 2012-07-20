@@ -102,6 +102,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         self.column = gtk.TreeViewColumn()
         self.column.set_expand(True)
+        self.column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
 
         self.exp_column = gtk.TreeViewColumn()
         self.exp_column.set_max_width(16)
@@ -126,6 +127,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def prepare_contactlist_column(self):
         '''update column properties'''
         self.crt.set_property('ellipsize', pango.ELLIPSIZE_END)
+        self.crt.set_property('yalign', 0.5)
         pbr_status = gtk.CellRendererPixbuf()
         self.column.pack_start(self.pbr, False)
         self.column.pack_start(self.crt, True)
@@ -286,6 +288,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def _get_selected_multi(self):
         '''return multiple selected rows or None'''
         try:
+            model = self.get_selection().get_selected_rows()[0]
             pathlist_ = self.get_selection().get_selected_rows()[1]
         except AttributeError:
             return None
@@ -377,6 +380,16 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def get_group_selected(self):
         '''return a group object if there is a group selected, None otherwise
         '''
+        if self.get_selection().get_mode() == gtk.SELECTION_MULTIPLE:
+            sels = self._get_selected_multi()
+
+            if sels is None:
+                return None
+
+            model = self.get_selection().get_selected_rows()[0]
+
+            return [model[sel][1] for sel in sels if isinstance(model[sel][1], e3.Group)]
+
         selected = self._get_selected()
 
         if selected is None:
@@ -387,15 +400,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
 
         return None
 
-    def is_favorite_group_selected(self):
-        group = self.get_group_selected()
-
-        if group is not None and \
-            group.identifier == self.session.config.favorite_group_id:
-            return True
-
-        return False
-
     def get_contact_selected(self):
         '''return a contact object if there is a group selected, None otherwise
         '''
@@ -405,7 +409,9 @@ class ContactList(gui.ContactList, gtk.TreeView):
             if sels is None:
                 return None
 
-            return [self._model[sel][1] for sel in sels if hasattr(self._model[sel][1], "account")]
+            model = self.get_selection().get_selected_rows()[0]
+
+            return [model[sel][1] for sel in sels if isinstance(model[sel][1], e3.Contact)]
 
         selected = self._get_selected()
 
@@ -826,13 +832,13 @@ class ContactList(gui.ContactList, gtk.TreeView):
                 for contact_row in row.iterchildren():
                     contact_row[2] = self.format_nick(contact_row[1])
             elif isinstance(row[1], e3.Contact):
-                row[2] = self.format_nick(row[1]) 
+                row[2] = self.format_nick(row[1])
 
     def update_format_group(self):
         '''update the format of group name'''
         for row in self._model:
             if isinstance(row[1], e3.Group):
-                row[2] = self.format_group(row[1]) 
+                row[2] = self.format_group(row[1])
 
     def set_avatar_size(self, size):
         """set the size of the avatars on the contact list

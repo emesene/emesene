@@ -49,6 +49,11 @@ inherited by extensions.
                 "",
                 "",
                 True, #default value
+                GObject.PARAM_READWRITE),
+            'yalign': (GObject.TYPE_FLOAT,
+                "The fraction of vertical free space above the child.",
+                "0.0 means no free space above, 1.0 means all free space above.",
+                0.0, 1.0, 0.0, #default value
                 GObject.PARAM_READWRITE)
             }
 
@@ -57,6 +62,7 @@ inherited by extensions.
     def __init__(self, is_plus):
         Gtk.CellRenderer.__init__(self)
         self.__dict__['markup'] = ''
+        self.__dict__['yalign'] = 0.0
         self.is_plus = is_plus
 
         #caching
@@ -136,10 +142,9 @@ inherited by extensions.
         total_lines_count = self.calculate_lines_count()
         total_text_height = self.calculate_lines_height()
 
-        y_padding = max(((height - total_text_height) / (total_lines_count * 2)), 0)
-
-        #add padding to first line
-        y_coord += y_padding / 2
+        padding = (height - total_text_height) * self.yalign
+        y_coord += padding
+        height -= padding
 
         self.calculate_positions(ctx, widget, x_coord, y_coord, width)
 

@@ -133,9 +133,12 @@ class MSNObject(object):
         return hash(str(self._type) + self._data_sha)
 
     def __set_data(self, data):
-        if self._data_sha != self.__compute_data_hash(data):
-            logger.warning("Received data doesn't match the MSNObject data hash.")
-            return
+        shad = self.__compute_data_hash(data)
+        if self._data_sha != shad:
+            logger.warning("Received data doesn't match the MSNObject data hash")
+            logger.warning("Got: %s Expected: %s" % (base64.b64encode(shad), base64.b64encode(self._data_sha)))
+            logger.warning("Overriding the expected SHA1D")
+            self._data_sha = shad
 
         old_pos = data.tell()
         data.seek(0, os.SEEK_END)

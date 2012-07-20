@@ -38,8 +38,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                               'nick_template')
         self._config.subscribe(self._on_template_change,
                                'group_template')
-    
-    
+
     def set_nick_formatter(self, func):
         self._format_nick = func
         self.parent().update()
@@ -54,7 +53,6 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         data_role = model.data(index, Role.DataRole).toPyObject()
         if is_group:
             name = model.data(index, Role.DisplayRole).toPyObject()
-            
             #name = Utils.escape(name)
             online = model.data(index, Role.OnlCountRole).toPyObject()
             total = model.data(index, Role.TotalCountRole).toPyObject()
@@ -164,7 +162,6 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                 painter.drawPixmap(target, picture, source)
         
             # -> Start setting up the text_doc:
-            #text = _build_display_role(index)
             text = self._build_display_role(index)
             # set the text into text_doc
             text_doc.setHtml(text)
@@ -201,12 +198,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             return QtCore.QSize( text_width,
                           max(text_height, 
                               self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
-                              
-                              
-    
-            
-        
-                          
+
 def _format_contact_display_role(text):
     '''Formats correctly a string part of a display role. Parses emotes, and
     scales them.'''
@@ -238,4 +230,3 @@ def replace_markup(markup):
     markup = markup.replace("[$i]", "<i>")
     markup = markup.replace("[$/i]", "</i>")
     return markup
-    

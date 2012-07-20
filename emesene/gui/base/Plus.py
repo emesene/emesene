@@ -82,21 +82,19 @@ close_tag_old_re = re.compile(
     '(.*?)\xb7(0)()()()()()',
     re.IGNORECASE | re.DOTALL)
 
+
+#TODO: I think the other 'InGradient' regexes from the old parser have to be used too
+special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
+
+# regex used to remove plus markup
 # one symbol for each msnplus tag
 msnplus_tags_re = re.compile(
     '\[(/?)(\w{1})(\=(\#?[0-9a-f]+|\w+))?\]',
     re.IGNORECASE | re.DOTALL)
 
-
-#TODO: I think the other 'InGradient' regexes from the old parser have to be used too
-special_character_re = re.compile('(&[a-zA-Z]+\d{0,3};|\%.)')
-
-#regex used to remove plus markup
-tag_plus_strip_re = re.compile(
-    '(\[(/)?\w(\=#?[0-9a-f]+|\=\w+)?\])',
-    re.IGNORECASE)
-tag_plus_old_strip_re = re.compile(
-    '\·([#&\'@0])|\·\$(\d+|\#\w+)?(\,(\d+|\#\w+))?')
+msnplus_tags_old_re = re.compile(
+    '\xb7()([\$#&\'@0])()((\#?[0-9a-f]{6}|\d{1,2})?),?((\#?[0-9a-f]{6}|\d{1,2})?)',
+    re.IGNORECASE | re.DOTALL)
 
 hex_tag_re = re.compile('([0-9a-f]{3}|[0-9a-f]{6})$', re.IGNORECASE)
 
@@ -115,355 +113,352 @@ def parse_emotes(markup):
 
     return accum
 
-def _close_tags(message_stack, text_before, tag, arg, do_parse_emotes):
-    '''close tags that are open'''
-    stack_index = -1
-    for i, message in enumerate(reversed(message_stack)):
-        if tag in message:
-            stack_index = -i - 1
-            break
-    if arg:
-        start_tag = message_stack[stack_index][tag]
-        message_stack[stack_index][tag] = (start_tag, arg)
-    if text_before.strip(' '):
-        if do_parse_emotes:
-            text_before = parse_emotes(text_before)
-            message_stack[stack_index]['childs'] += text_before
-        else:
-            message_stack[stack_index]['childs'].append(text_before)
-    tag_we_re_closing = message_stack.pop(stack_index)
-    if isinstance(message_stack[stack_index], dict):
-        message_stack[stack_index]['childs'].append(tag_we_re_closing)
-    else:
-        message_stack.append(tag_we_re_closing)
+class Plus(object):
 
-def _close_stack_tags(message_stack, do_parse_emotes=True):
-    '''Closes all open tags in stack'''
-    tags_to_close = len(message_stack)
-    for i in range(tags_to_close-1):
-        _close_tags(message_stack, '', '', '', do_parse_emotes)
+    def __init__(self, text, parse_emotes=True):
+        self.text = unicode(text, 'utf8') if not isinstance(text, unicode) else text
+        self.stack = [{'tag':'', 'childs':[]}]
+        self.tag_queue = []
+        self.parse_emotes = parse_emotes
 
-def _get_shortest_match(match1, match2):
-    '''get the match that comes earliest'''
-    if match1 and match2:
-        if len(match1.group(1)) > len(match2.group(1)):
-            return match2
+    def _close_tags(self, text_before, tag, arg):
+        '''close tags that are open'''
+        stack_index = -1
+        for i, message in enumerate(reversed(self.stack)):
+            if tag in message:
+                stack_index = -i - 1
+                break
+        if arg:
+            start_tag = self.stack[stack_index][tag]
+            self.stack[stack_index][tag] = (start_tag, arg)
+        if text_before.strip(' '):
+            if self.parse_emotes:
+                text_before = parse_emotes(text_before)
+                self.stack[stack_index]['childs'] += text_before
+            else:
+                self.stack[stack_index]['childs'].append(text_before)
+        tag_we_re_closing = self.stack.pop(stack_index)
+        if isinstance(self.stack[stack_index], dict):
+            self.stack[stack_index]['childs'].append(tag_we_re_closing)
         else:
+            self.stack.append(tag_we_re_closing)
+
+    def _close_stack_tags(self):
+        '''Closes all open tags in stack'''
+        tags_to_close = len(self.stack)
+        for i in range(tags_to_close-1):
+            self._close_tags('', '', '')
+
+    def _get_shortest_match(self, match1, match2):
+        '''get the match that comes earliest'''
+        if match1 and match2:
+            if len(match1.group(1)) > len(match2.group(1)):
+                return match2
+            else:
+                return match1
+        elif match1:
             return match1
-    elif match1:
-        return match1
-    else:
-        return match2
-
-def _get_best_match(msnplus):
-    '''get the best match out of all regexes'''
-    match = open_tag_re.match(msnplus)
-    match_old = open_tag_old_re.match(msnplus)
-    match_close_old = close_tag_old_re.match(msnplus)
-    match = _get_shortest_match(match, match_old)
-    match = _get_shortest_match(match, match_close_old)
-    return match
-
-def _msnplus_to_dict(msnplus, message_stack, do_parse_emotes=True,
-                     was_double_color=False, tag_queue=None):
-    '''convert it into a dict, as the one used by XmlParser'''
-
-    match = _get_best_match(msnplus)
-
-    if not match: #only text
-        if do_parse_emotes:
-            parsed_markup = parse_emotes(msnplus)
         else:
-            parsed_markup = [msnplus]
+            return match2
 
-        message_stack.append(msnplus)
-        _close_stack_tags(message_stack, do_parse_emotes)
-        return {'tag': 'span', 'childs': parsed_markup}
+    def _get_best_match(self, text):
+        '''get the best match out of all regexes'''
+        match = open_tag_re.match(text)
+        match_old = open_tag_old_re.match(text)
+        match_close_old = close_tag_old_re.match(text)
+        match = self._get_shortest_match(match, match_old)
+        match = self._get_shortest_match(match, match_close_old)
+        return match
 
-    text_before = match.group(1)
-    open_ = match.group(2) == ''
-    close_all_tags = match.group(2) == '0'
-    tag = match.group(3)
-    tag = tag.lower()
-    arg = match.group(5)
-    arg2 = match.group(7)
-    is_double_color = arg2 and arg and not was_double_color
-    entire_match_len = len(match.group(0))
-    if is_double_color:
-        entire_match_len = 0
-    elif arg2:
-        arg = arg2
-        tag = 'a'
+    def to_dict(self):
+        '''convert it into a dict, as the one used by XmlParser'''
+        self._to_dict(self.text)
+        self.stack = {'tag': 'span', 'childs': self.stack}
+        self._hex_colors(self.stack)
+        self._dict_gradients(self.stack)
+        self._dict_translate_tags(self.stack)
+        return self.stack
 
-    if '\n' in text_before:
-        splitted_text = text_before.partition('\n')
-        if splitted_text[0].strip(' '):
-            message_stack[-1]['childs'].append(splitted_text[0])
-        text_before = splitted_text[2]
-        _close_stack_tags(message_stack, do_parse_emotes)
-        message_stack[-1]['childs'].append('\n')
+    def _to_dict(self, text, was_double_color=False):
+        '''convert it into a dict, as the one used by XmlParser'''
 
-    if tag_queue and tag_queue[0][0] == match.group(3) and not tag_queue[0][2]:
-        message_stack[-1]['childs'].append(match.group(0))
-    elif close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
-       (tag in COLOR_TAGS and (arg or not open_)))):
-        if open_:
-            if text_before.strip(' ') and not was_double_color:
-                message_stack[-1]['childs'].append(text_before)
-            msgdict = {'tag': tag, tag: arg, 'childs': []}
-            message_stack.append(msgdict)
-        else: #closing tags
-            _close_tags(message_stack, text_before, tag, arg, do_parse_emotes)
-            if close_all_tags:
-                _close_stack_tags(message_stack, do_parse_emotes)
-    else:
-        message_stack[-1]['childs'].append(match.group(0))
+        match = self._get_best_match(text)
 
-    #go recursive!
-    if tag_queue:
-        tag_queue.pop(0)
-    _msnplus_to_dict(msnplus[entire_match_len:], message_stack,
-                     do_parse_emotes, is_double_color, tag_queue)
+        if not match: #only text
+            if self.parse_emotes:
+                parsed_markup = parse_emotes(text)
+            else:
+                parsed_markup = [text]
 
-    return {'tag': 'span', 'childs': message_stack}
+            self.stack.append(text)
+            self._close_stack_tags()
+            return
 
-def _nchars_dict(msgdict):
-    '''count how many character are there'''
-    nchars = 0
-    for child in msgdict['childs']:
-        if isinstance(child, basestring):
-            nchars += len(special_character_re.sub('a', child))
+        text_before = match.group(1)
+        open_ = match.group(2) == ''
+        close_all_tags = match.group(2) == '0'
+        tag = match.group(3)
+        tag = tag.lower()
+        arg = match.group(5)
+        arg2 = match.group(7)
+        is_double_color = arg2 and arg and not was_double_color
+        entire_match_len = len(match.group(0))
+        if is_double_color:
+            entire_match_len = 0
+        elif arg2:
+            arg = arg2
+            tag = 'a'
+
+        if '\n' in text_before:
+            splitted_text = text_before.partition('\n')
+            if splitted_text[0].strip(' '):
+                self.stack[-1]['childs'].append(splitted_text[0])
+            text_before = splitted_text[2]
+            self._close_stack_tags()
+            self.stack[-1]['childs'].append('\n')
+
+        if self.tag_queue and self.tag_queue[0][0] == match.group(3) and not self.tag_queue[0][2]:
+            self.stack[-1]['childs'].append(match.group(0))
+        elif close_all_tags or (tag in TAG_DICT and (tag not in COLOR_TAGS or \
+           (tag in COLOR_TAGS and (arg or not open_)))):
+            if open_:
+                if text_before.strip(' ') and not was_double_color:
+                    self.stack[-1]['childs'].append(text_before)
+                msgdict = {'tag': tag, tag: arg, 'childs': []}
+                self.stack.append(msgdict)
+            else: #closing tags
+                self._close_tags(text_before, tag, arg)
+                if close_all_tags:
+                    self._close_stack_tags()
         else:
-            nchars += _nchars_dict(child)
+            self.stack[-1]['childs'].append(match.group(0))
 
-    return nchars
+        if self.tag_queue:
+            self.tag_queue.pop(0)
 
-def _color_gradient(color1, color2, length):
-    '''returns a list of colors. Its length is length'''
+        self._to_dict(text[entire_match_len:], is_double_color)
 
-    def dec2hex(n):
-        """return the hexadecimal string representation of integer n"""
-        if n < 16:
-            return '0' + "%X" % n
-        else:
-            return "%X" % n
+    def _nchars_dict(self, msgdict):
+        '''count how many character are there'''
+        nchars = 0
+        for child in msgdict['childs']:
+            if isinstance(child, basestring):
+                nchars += len(special_character_re.sub('a', child))
+            else:
+                nchars += self._nchars_dict(child)
 
-    def hex2dec(s):
-        """return the integer value of a hexadecimal string s"""
-        return int('0x' + s, 16)
+        return nchars
 
-    def full_hex2dec(colorstring):
-        """return a tuple containing the integer values of the rgb colors"""
-        hex3tohex6 = lambda col: col[0] * 2 + col[1] * 2 + col[2] * 2
+    def _color_gradient(self, color1, color2, length):
+        '''returns a list of colors. Its length is length'''
 
-        colorstring = colorstring.strip()
+        def dec2hex(n):
+            """return the hexadecimal string representation of integer n"""
+            if n < 16:
+                return '0' + "%X" % n
+            else:
+                return "%X" % n
 
-        if colorstring.startswith('#'):
-            colorstring = colorstring[1:]
+        def hex2dec(s):
+            """return the integer value of a hexadecimal string s"""
+            return int('0x' + s, 16)
 
-        if len(colorstring) == 3:
-            colorstring = hex3tohex6(colorstring)
+        def full_hex2dec(colorstring):
+            """return a tuple containing the integer values of the rgb colors"""
+            hex3tohex6 = lambda col: col[0] * 2 + col[1] * 2 + col[2] * 2
 
-        r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
-        r, g, b = [hex2dec(i.upper()) for i in (r, g, b)]
-        return (r, g, b)
+            colorstring = colorstring.strip()
 
-    if length == 0:
-        return
+            if colorstring.startswith('#'):
+                colorstring = colorstring[1:]
 
-    rgb_tuple1 = full_hex2dec(color1)
-    rgb_tuple2 = full_hex2dec(color2)
+            if len(colorstring) == 3:
+                colorstring = hex3tohex6(colorstring)
 
-    colors = [''] * length
-    for color_part in zip(rgb_tuple1, rgb_tuple2):
-        step = (color_part[1] - color_part[0]) / (length - 1.0)
-        for i in range(length - 1):
-            colors[i] += dec2hex(int(color_part[0] + step * i))
-        colors[length - 1] += dec2hex(color_part[1])
+            r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
+            r, g, b = [hex2dec(i.upper()) for i in (r, g, b)]
+            return (r, g, b)
 
-    return colors
+        if length == 0:
+            return
 
-def _color_to_hex(color):
-    '''
-    convert non-hex colors like names or plus codes to hex colors
-    '''
-    color = COLOR_NAME_DICT.get(color.lower(), color)
-    if color.startswith('#'):
-        color = color[1:]
-    if len(color) <= 2 and int(color) < len(COLOR_MAP):
-        color = COLOR_MAP[int(color)]
-    elif not hex_tag_re.match(color):
-        color = COLOR_MAP[1]
+        rgb_tuple1 = full_hex2dec(color1)
+        rgb_tuple2 = full_hex2dec(color2)
 
-    return color
+        colors = [''] * length
+        for color_part in zip(rgb_tuple1, rgb_tuple2):
+            step = (color_part[1] - color_part[0]) / (length - 1.0)
+            for i in range(length - 1):
+                colors[i] += dec2hex(int(color_part[0] + step * i))
+            colors[length - 1] += dec2hex(color_part[1])
 
-def _hex_colors(msgdict):
-    '''convert colors to hex'''
-    if msgdict['tag']:
-        tag = msgdict['tag']
+        return colors
 
+    def _color_to_hex(self, color):
+        '''
+        convert non-hex colors like names or plus codes to hex colors
+        '''
+        color = COLOR_NAME_DICT.get(color.lower(), color)
+        if color.startswith('#'):
+            color = color[1:]
+        if len(color) <= 2 and int(color) < len(COLOR_MAP):
+            color = COLOR_MAP[int(color)]
+        elif not hex_tag_re.match(color):
+            color = COLOR_MAP[1]
+
+        return color
+
+    def _hex_colors(self, msgdict):
+        '''convert colors to hex'''
+        tag = msgdict.get('tag')
         if tag in COLOR_TAGS:
             param = msgdict[tag]
 
             if isinstance(param, tuple): #gradient
                 param1, param2 = param
-                msgdict[tag] = (_color_to_hex(param1), _color_to_hex(param2))
+                msgdict[tag] = (self._color_to_hex(param1), self._color_to_hex(param2))
 
             else: #normal color
-                msgdict[tag] = _color_to_hex(param)
+                msgdict[tag] = self._color_to_hex(param)
 
-    for child in msgdict['childs']:
-        if child and not isinstance(child, basestring):
-            _hex_colors(child)
+        for child in msgdict['childs']:
+            if child and not isinstance(child, basestring):
+                self._hex_colors(child)
 
-def _gradientify_string(msg, attr, colors):
-    '''apply sequence "colors" of colors (type attr) to msg'''
-    result = {'tag': '', 'childs': []}
+    def _gradientify_string(self, msg, attr, colors):
+        '''apply sequence "colors" of colors (type attr) to msg'''
+        result = {'tag': '', 'childs': []}
 
-    split_msg = special_character_re.split(msg)
+        split_msg = special_character_re.split(msg)
 
-    for text in split_msg:
-        if special_character_re.match(text):
-            color = colors.pop(0)
-            result['childs'].append({'tag': attr, attr: color,
-                                     'childs': [text]})
-            continue
-        for char in text:
-            color = colors.pop(0)
-            result['childs'].append({'tag': attr, attr: color,
-                                     'childs': [char]})
+        for text in split_msg:
+            if special_character_re.match(text):
+                color = colors.pop(0)
+                result['childs'].append({'tag': attr, attr: color,
+                                         'childs': [text]})
+                continue
+            for char in text:
+                color = colors.pop(0)
+                result['childs'].append({'tag': attr, attr: color,
+                                         'childs': [char]})
 
-    return result
+        return result
 
-def _gradientify(msgdict, attr=None, colors=None):
-    '''apply a gradient to that msgdict'''
-    if not attr:
-        attr = msgdict['tag']
+    def _gradientify(self, msgdict, attr=None, colors=None):
+        '''apply a gradient to that msgdict'''
+        if not attr:
+            attr = msgdict['tag']
 
-    if colors is None:
-        param_from, param_to = msgdict[attr]
-        #param_from = COLOR_MAP[int(param_from)]
-        #param_to = COLOR_MAP[int(param_to)]
-        length = _nchars_dict(msgdict)
-        if length != 1:
-            colors = _color_gradient(param_from, param_to, length)
-        msgdict['tag'] = ''
-        del msgdict[attr]
+        if colors is None:
+            param_from, param_to = msgdict[attr]
+            #param_from = COLOR_MAP[int(param_from)]
+            #param_to = COLOR_MAP[int(param_to)]
+            length = self._nchars_dict(msgdict)
+            if length != 1:
+                colors = self._color_gradient(param_from, param_to, length)
+            msgdict['tag'] = ''
+            del msgdict[attr]
 
-    i = 0
-    while colors and i < len(msgdict['childs']):
-        this_child = msgdict['childs'][i]
+        if not colors:
+            return
 
-        if isinstance(this_child, basestring):
-            msgdict['childs'][i] = _gradientify_string(this_child, attr, colors) #will consumate some items from colors!
-        else:
-            _gradientify(this_child, attr, colors)
+        for i, child in enumerate(msgdict['childs']):
+            if isinstance(child, basestring):
+                 msgdict['childs'][i] = self._gradientify_string(child, attr, colors) #will consumate some items from colors!
+            else:
+                self._gradientify(child, attr, colors)
 
-        i += 1
+    def _dict_gradients(self, msgdict):
+        '''apply gradients where needed'''
+        if not isinstance(msgdict, dict):
+            return
 
-def _dict_gradients(msgdict):
-    '''apply gradients where needed'''
-    if not isinstance(msgdict, dict): return
-    for subdict in msgdict['childs']:
-        if isinstance(subdict, dict):
-            tag = subdict['tag']
-            if tag in subdict and isinstance(subdict[tag], tuple):
-                _gradientify(subdict)
-            _dict_gradients(subdict)
+        for subdict in msgdict['childs']:
+            if isinstance(subdict, dict):
+                tag = subdict['tag']
+                if tag in subdict and isinstance(subdict[tag], tuple):
+                    self._gradientify(subdict)
+                self._dict_gradients(subdict)
 
-def _dict_translate_tags(msgdict):
-    '''translate 'a' to 'span' etc...'''
-    tag = msgdict['tag']
-    if tag in TAG_DICT:
-        msgdict['tag'] = 'span'
-        if tag in COLOR_TAGS:
-            msgdict[TAG_DICT[tag]] = '#%s' % msgdict[tag].upper()
-        else:
-            msgdict[TAG_DICT[tag][0]] = TAG_DICT[tag][1]
-        del msgdict[tag]
-    elif tag == 'img':
-        pass
-    elif tag not in ('span', ''):
-        del msgdict[tag]
-        msgdict['tag'] = ''
-        msgdict['childs'].insert(0, '[%s]' % (tag, ))
+    def _dict_translate_tags(self, msgdict):
+        '''translate 'a' to 'span' etc...'''
+        tag = msgdict['tag']
+        if tag in TAG_DICT:
+            msgdict['tag'] = 'span'
+            if tag in COLOR_TAGS:
+                msgdict[TAG_DICT[tag]] = '#%s' % msgdict[tag].upper()
+            else:
+                msgdict[TAG_DICT[tag][0]] = TAG_DICT[tag][1]
+            del msgdict[tag]
+        elif tag == 'img':
+            pass
+        elif tag not in ('span', ''):
+            del msgdict[tag]
+            msgdict['tag'] = ''
+            msgdict['childs'].insert(0, '[%s]' % (tag, ))
 
-    #Then go recursive!
-    for child in msgdict['childs']:
-        if isinstance(child, dict):
-            _dict_translate_tags(child)
+        #Then go recursive!
+        for child in msgdict['childs']:
+            if isinstance(child, dict):
+                self._dict_translate_tags(child)
 
-def msnplus(text, do_parse_emotes=True):
-    '''given a string with msn+ formatting, give a DictObj
-    representing its formatting.'''
-    message_stack = [{'tag':'', 'childs':[]}]
-    text = unicode(text, 'utf8') if not isinstance(text, unicode) else text
-    tags_list = _msnplus_tags_extract(text)
-    dictlike = _msnplus_to_dict(text, message_stack, do_parse_emotes, tag_queue=tags_list)
-    _hex_colors(dictlike)
-    _dict_gradients(dictlike)
-    _dict_translate_tags(dictlike)
-    return DictObj(dictlike)
+    def tags_extract(self, strip=False):
+        '''extract all msnplus tags from input'''
+        nl_pos = self.text.find('\n')
+        for m in msnplus_tags_re.finditer(self.text):
+            is_opened_tag = False if m.group(1) != '' else True
+            has_attr = False if not m.group(4) else True
+            # (tag, an opened_tag?, does it paired?, start pos, tag with attr?)
+            self.tag_queue.append([m.group(2), is_opened_tag, False, m.start(), has_attr])
 
-def _msnplus_tags_extract(msnplus, strip=False):
-    '''extract all msnplus tags from input'''
-    nl_pos = msnplus.find('\n')
-    tags_list = []
-    for m in msnplus_tags_re.finditer(msnplus):
-        is_opened_tag = False if m.group(1) != '' else True
-        has_attr = False if not m.group(4) else True
-        # (tag, an opened_tag?, does it paired?, start pos, tag with attr?)
-        tags_list.append([m.group(2), is_opened_tag, False, m.start(), has_attr])
+        self._tags_pair(nl_pos, strip)
 
-    return _msnplus_tags_pair(tags_list, nl_pos, strip)
+    def _tags_pair(self, nl_pos, strip=False):
+        '''find out dangling tags in list based on an assumption that
+        all tags are well-formed'''
+        # we use the strategy like stack but no pop/push operations
+        for i, tag in enumerate(self.tag_queue):
+            # do not process opened tag
+            if tag[1]:
+                continue
 
-def _msnplus_tags_pair(tags_list, nl_pos, strip=False):
-    '''find out dangling tags in list based on an assumption that
-    all tags are well-formed'''
-    # we use the strategy like stack but no pop/push operations
-    for i in range(len(tags_list)):
-        # do not process opened tag
-        if tags_list[i][1]:
-            continue
+            for previous_tag in reversed(self.tag_queue[:i]):
+                # find out an unpaired opened_tag with the same type
+                # and mark them paired, like stack (msnplus-like)
+                # we allow mixing upper case and lower case in code
+                if previous_tag[1] and not previous_tag[2] and \
+                   previous_tag[0].lower() == tag[0].lower():
+                    # a color tag must have attribute
+                    if previous_tag[0].lower() in ('a', 'c') and \
+                       not previous_tag[4]:
+                        continue
 
-        for p in reversed(range(i)):
-            # find out an unpaired opened_tag with the same type
-            # and mark them paired, like stack (msnplus-like)
-            # we allow mixing upper case and lower case in code
-            if tags_list[p][1] and not tags_list[p][2] and \
-               tags_list[p][0].lower() == tags_list[i][0].lower():
-                # a color tag must have attribute
-                if tags_list[p][0].lower() in ['a', 'c'] and \
-                   not tags_list[p][4]:
-                    continue
+                    # avoid to cross newline, eg: nickname nl message
+                    # pair if there is no newline, or in the same part
+                    if nl_pos == -1 or \
+                       (previous_tag[3] > nl_pos and tag[3] > nl_pos) or \
+                       (previous_tag[3] < nl_pos and tag[3] < nl_pos):
+                        previous_tag[2] = True
+                        tag[2] = True
+                        break
 
-                # avoid to cross newline, eg: nickname nl message
-                # pair if there is no newline, or in the same part
-                if nl_pos == -1 or \
-                   (tags_list[p][3] > nl_pos and tags_list[i][3] > nl_pos) or \
-                   (tags_list[p][3] < nl_pos and tags_list[i][3] < nl_pos):
-                    tags_list[p][2] = True
-                    tags_list[i][2] = True
-                    break
+        # we only need position of paired tags in strip mode
+        if strip:
+            self.tag_queue = filter(lambda x: x[2], self.tag_queue)
+            for index, tag in enumerate(self.tag_queue):
+                self.tag_queue[index] = tag[3]
 
-    # we only need position of paired tags in strip mode
-    if strip:
-        tags_list = filter(lambda x: x[2], tags_list)
-        for index, tag in enumerate(tags_list):
-            tags_list[index] = tag[3]
+    def strip_tags(self):
+        '''strip msnplus tags with the striplist'''
+        def strip_tags(match):
+            if match.start() in self.tag_queue:
+                return ''
+            return match.group(0)
 
-    return tags_list
+        text = msnplus_tags_re.sub(strip_tags, self.text)
+        text = msnplus_tags_old_re.sub('', text)
 
-def msnplus_parse(text):
-    '''
-    given a string with msn+ formatting, give a string with same text but
-    with Pango Markup
-    @param text The original string
-    '''
-    text = _escape_special_chars(text)
-    dictlike = msnplus(text, False)
-    text = _unescape_special_chars(dictlike.to_xml())
-    return dictlike.to_xml()
+        return text
 
 def _escape_special_chars(text):
     #escape special chars
@@ -479,16 +474,23 @@ def _unescape_special_chars(text):
     text = text.replace('\xc2\xb7\'', '\xc2\xb7&apos;')
     return text
 
-def _strip_tags(text, strip_list):
-    '''strip msnplus tags with the striplist'''
-    def strip_tags(match):
-        if match.start() in strip_list:
-            return ''
-        return match.group(0)
+def msnplus(text, do_parse_emotes=True):
+    '''given a string with msn+ formatting, give a DictObj
+    representing its formatting.'''
+    plus = Plus(text, do_parse_emotes)
+    plus.tags_extract()
+    dictlike = plus.to_dict()
+    return DictObj(dictlike)
 
-    text = tag_plus_strip_re.sub(strip_tags, text)
-    text = tag_plus_old_strip_re.sub('', text)
-
+def msnplus_parse(text):
+    '''
+    given a string with msn+ formatting, give a string with same text but
+    with Pango Markup
+    @param text The original string
+    '''
+    text = _escape_special_chars(text)
+    dictlike = msnplus(text, False)
+    text = _unescape_special_chars(dictlike.to_xml())
     return text
 
 def msnplus_strip(text, useless_arg=None):
@@ -500,8 +502,9 @@ def msnplus_strip(text, useless_arg=None):
     compatibility with text
     '''
     text = _escape_special_chars(text)
-    strip_list = _msnplus_tags_extract(text, True)
-    text = _strip_tags(text, strip_list)
+    plus = Plus(text)
+    plus.tags_extract(True)
+    text = plus.strip_tags()
     text = _unescape_special_chars(text)
 
     return text

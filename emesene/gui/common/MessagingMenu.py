@@ -77,6 +77,9 @@ class MessagingMenu(gui.BaseTray):
             if self.r_indicator_dict[key] is not None:
                 del self.r_indicator_dict[key]
 
+    def hide(self):
+        self.unsubscribe()
+
         if self.server:
             # self.server is None if there's no messaging menu yet
             self.server.disconnect(self.sid)

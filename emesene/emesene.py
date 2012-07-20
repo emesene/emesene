@@ -280,8 +280,7 @@ class Controller(object):
     def _new_session(self, account=None):
         '''create a new session object'''
 
-        if self.session is not None:
-            self.session.quit()
+        self.close_session(False)
 
         self.session = extension.get_and_instantiate('session')
 
@@ -350,8 +349,6 @@ class Controller(object):
         if self.session:
             self.session.stop_mail_client()
             self.session.quit()
-
-        if self.session is not None:
             self._save_application_language()
             self.session.save_extensions_config()
 
@@ -359,8 +356,9 @@ class Controller(object):
 
         if self.session and self.logged_in:
             self.session.save_config()
-            self.session = None
             self.logged_in = False
+
+        self.session = None
 
         self.config.save(self.config_path)
 
@@ -400,7 +398,6 @@ class Controller(object):
                 self.tray_icon.unsubscribe()
             self.window.on_disconnect(self.close_session)
             self.dbus_ext.stop()
-            extension.unsubscribe(self._on_tray_icon_changed, 'tray icon')
 
     def _save_application_language(self):
         '''save global settings to application config
@@ -482,11 +479,12 @@ class Controller(object):
         if self.tray_icon is not None:
             if trayiconcls == self.tray_icon.__class__:
                 return
-            self.tray_icon.unsubscribe()
+            self.tray_icon.hide()
+        else:
+            extension.subscribe(self._on_tray_icon_changed, 'tray icon')
 
         handler = gui.base.TrayIconHandler(self.session, gui.theme, self.close_session)
         self.tray_icon = trayiconcls(handler, self.window)
-        extension.subscribe(self._on_tray_icon_changed, 'tray icon')
 
     def _on_tray_icon_changed(self, new_extension):
         self._draw_tray_icon()
@@ -633,8 +631,7 @@ class Controller(object):
         '''
         method called when user select cancel login
         '''
-        if self.session is not None:
-            self.session.quit()
+        self.close_session(False)
         self.go_login(cancel_clicked=True, no_autologin=True)
 
     def on_contact_list_ready(self):

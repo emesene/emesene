@@ -69,6 +69,12 @@ class BaseTray(object):
         """
         pass
 
+    def hide(self):
+        """
+        Hide the tray icon
+        """
+        pass
+
     def _on_conv_message(self, cid, account, msgobj, cedict=None):
         """
         This is fired when a new message arrives to a user.

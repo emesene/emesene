@@ -22,7 +22,8 @@ class Session(e3.Session):
                     e3.Session.SERVICE_STATUS,
                     e3.Session.SERVICE_CONTACT_NICK,
                     e3.Session.SERVICE_CONTACT_PM,
-                    e3.Session.SERVICE_ENDPOINTS]
+                    e3.Session.SERVICE_ENDPOINTS,
+                    e3.Session.SERVICE_GROUP_MANAGING]
 
     def __init__(self, id_=None, account=None):
         '''constructor'''

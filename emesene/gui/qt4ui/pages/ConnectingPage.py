@@ -14,8 +14,6 @@ import extension
 import e3
 import gui
 
-
-
 class ConnectingPage(QtGui.QWidget):
     ''' The page shown during the connection process'''
     # pylint: disable=W0612
@@ -39,8 +37,7 @@ class ConnectingPage(QtGui.QWidget):
         self._widget_d = {}
         self._setup_ui()
         self.clear_connect()
-        
-        
+
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
@@ -55,7 +52,7 @@ class ConnectingPage(QtGui.QWidget):
         widget_d['label']        = QtGui.QLabel()
         widget_d['progress_bar'] = QtGui.QProgressBar()
         widget_d['cancel_btn']   = QtGui.QPushButton(tr('Cancel'))
-        
+
         lay = QtGui.QVBoxLayout()
         lay.addSpacing(40)
         lay.addWidget(widget_d['display_pic'], 0, Qt.AlignCenter)
@@ -66,7 +63,6 @@ class ConnectingPage(QtGui.QWidget):
         lay.addStretch()
         lay.addWidget(widget_d['cancel_btn'], 0, Qt.AlignCenter)
         lay.addSpacing(45)
-        
 
         hor_lay = QtGui.QHBoxLayout()
         hor_lay.addStretch()
@@ -75,7 +71,7 @@ class ConnectingPage(QtGui.QWidget):
         hor_lay.addSpacing(40)
         hor_lay.addStretch()
         self.setLayout(hor_lay)
-        
+
         # _avatar_path is passed to setPixmap/setMovie to avoid dpic's 
         # flickering
         pic_handler = extension.get_and_instantiate('picture handler', 
@@ -92,8 +88,7 @@ class ConnectingPage(QtGui.QWidget):
         widget_d['progress_bar'].setMinimum(0)
         widget_d['progress_bar'].setMaximum(0)
         widget_d['progress_bar'].setMinimumWidth(220)
-        
-    
+
     def clear_connect(self):
         self._timer.stop()
         self._widget_d['label'].setText(tr('Please wait while signing in...'))
@@ -103,8 +98,7 @@ class ConnectingPage(QtGui.QWidget):
         except TypeError:
             pass
         self._widget_d['cancel_btn'].clicked.connect(self._on_cancel_login)
-        
-        
+
     def on_reconnect(self, callback, account, session_id,
                      proxy, use_http, use_ipv6, service):
         self._widget_d['label'].setText(self._reconnect_txt % 30)
@@ -117,8 +111,7 @@ class ConnectingPage(QtGui.QWidget):
             lambda: self._on_timer_timeout(callback, account, session_id, 
                                            proxy, use_http, use_ipv6, service))
         self._timer.start(1000)
-        
-        
+
     def _on_timer_timeout(self, callback, account, session_id, 
                                proxy, use_http, use_ipv6, service):
         self._reconnect_time -= 1
@@ -130,10 +123,6 @@ class ConnectingPage(QtGui.QWidget):
         else:    
             self._widget_d['label'].setText(self._reconnect_txt % 
                                             self._reconnect_time)
-        
-                         
+
     def _on_reconnect_now(self):
         self._reconnect_time = -1
-        
-        
-

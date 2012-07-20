@@ -537,8 +537,8 @@ class XMLStream(object):
                     try:
                         cert.verify(self._expected_server_name, self._der_cert)
                     except cert.CertificateError as err:
-                        log.error(err.message)
                         if not self.event_handled('ssl_invalid_cert'):
+                            log.error(err.message)
                             self.disconnect(send_close=False)
                         else:
                             self.event('ssl_invalid_cert',
@@ -828,8 +828,8 @@ class XMLStream(object):
             try:
                 cert.verify(self._expected_server_name, self._der_cert)
             except cert.CertificateError as err:
-                log.error(err.message)
                 if not self.event_handled('ssl_invalid_cert'):
+                    log.error(err.message)
                     self.disconnect(self.auto_reconnect, send_close=False)
                 else:
                     self.event('ssl_invalid_cert', pem_cert, direct=True)
@@ -953,6 +953,10 @@ class XMLStream(object):
             self.__filters[mode].insert(order, handler)
         else:
             self.__filters[mode].append(handler)
+
+    def del_filter(self, mode, handler):
+        """Remove an incoming or outgoing filter."""
+        self.__filters[mode].remove(handler)
 
     def add_handler(self, mask, pointer, name=None, disposable=False,
                     threaded=False, filter=False, instream=False):

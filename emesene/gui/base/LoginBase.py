@@ -22,6 +22,7 @@ import e3
 import base64
 import uuid
 from shutil import rmtree
+import gui
 
 import logging
 log = logging.getLogger('gui.base.Conversation')
@@ -195,3 +196,59 @@ class LoginBase(object):
             self.config.last_logged_account = ''
 
         self.config.save(self.config_path)
+
+    def service_available(self, service):
+        return (service in self.services)
+
+    def new_combo_session(self, add_cb):
+        '''Fill the service combo with the avariable services.
+           For each service we call the add_cb function with it's image path
+           and service description.
+           This function return the index of the current service.
+        '''
+        account = self.config.get_or_set('last_logged_account', '')
+        default_session = extension.get_default('session')
+        count = 0
+        session_found = False
+
+        self.session_name_to_index = {}
+
+        if account in self.accounts:
+            service = self.config.d_user_service.get(
+                            account.rpartition('|')[0], 'msn')
+        else:
+            service = self.config.service
+
+        for ext_id, ext in extension.get_extensions('session').iteritems():
+            if default_session.NAME == ext.NAME:
+                default_session_index = count
+
+            for service_name, service_data in ext.SERVICES.iteritems():
+                if service == service_name:
+                    index = count
+                    session_found = True
+                try:
+                    s_name = getattr(gui.theme.image_theme,
+                                        "service_" + service_name)
+                except:
+                    s_name = None
+
+                add_cb(s_name, service_name)
+                self.session_name_to_index[service_name] = count
+                count += 1
+
+        if session_found:
+            return index
+
+        return default_session_index
+
+    def _on_preferences_open(self, account, callback):
+        '''called when the user clicks the preference button'''
+        service = self.config.get_or_set('service', 'msn')
+        if account in self.accounts:
+            service = self.config.d_user_service.get(account, 'msn')
+
+        ext = self.service2id[service][1]
+        extension.get_default('dialog').login_preferences(service, ext,
+            callback, self.use_http, self.use_ipv6, self.proxy)
+

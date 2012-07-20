@@ -11,6 +11,7 @@ from PyQt4.QtCore  import Qt
 from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
 
+import e3
 import gui
 import extension
 
@@ -253,7 +254,7 @@ Do you want to fix your profile now?''')
         dialog.exec_()
 
     @classmethod
-    def login_preferences(cls, service, service_host, service_port,
+    def login_preferences(cls, service, ext,
                           callback, use_http, use_ipv6, proxy):
         """
         display the preferences dialog for the login window
@@ -268,14 +269,6 @@ Do you want to fix your profile now?''')
             to established connection
         proxy -- a e3.Proxy object
         """
-        def on_session_changed(*args):
-            '''Callback called when the session type in the combo is
-            called'''
-            service = str(session_cmb.currentText())
-            session_id, ext = name_to_ext[service]
-            server_host_edit.setText(ext.SERVICES[service]['host'])
-            server_port_edit.setText(ext.SERVICES[service]['port'])
-
         def on_use_auth_toggled(is_enabled, is_checked):
             '''called when the auth check button is toggled, receive a set
             of entries, enable or disable auth related widgets deppending
@@ -290,7 +283,6 @@ Do you want to fix your profile now?''')
             enables or disables widgets to insert proxy settings accordingly'''
             proxy_settings = (host_lbl, proxy_host_edit, port_lbl,
                               proxy_port_edit, auth_chk)
-            log.info('upt')
             for widget in proxy_settings:
                 widget.setEnabled(is_checked)
             on_use_auth_toggled(is_checked, auth_chk.isChecked())
@@ -310,32 +302,32 @@ Do you want to fix your profile now?''')
                 user = str(user_edit.text())
                 passwd = str(pwd_edit.text())
 
-                service = str(session_cmb.currentText())
-                session_id, ext = name_to_ext[service]
-                log.debug(str(session_id))
-                callback(use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
-                         use_auth, user, passwd, session_id, service,
+                proxy = e3.Proxy(use_proxy, proxy_host, proxy_port,
+                                    use_auth, user, passwd)
+
+                callback(use_http, use_ipv6, proxy, service,
                          server_host, server_port)
             dialog.hide()
 
-        dialog           = OkCancelDialog(unicode(tr('Connection preferences')))
-        session_lbl      = QtGui.QLabel(unicode(tr('Session:')))
-        session_cmb      = QtGui.QComboBox()
-        server_host_lbl  = QtGui.QLabel(unicode(tr('Server')))
+        dialog = OkCancelDialog(unicode(tr('Connection preferences')))
+        session_lbl = QtGui.QLabel(unicode(tr('Session:')))
+        session_cmb = QtGui.QLabel(service)
+        server_host_lbl = QtGui.QLabel(unicode(tr('Server')))
         server_host_edit = QtGui.QLineEdit()
-        server_port_lbl  = QtGui.QLabel(unicode(tr('Port')))
+        server_port_lbl = QtGui.QLabel(unicode(tr('Port')))
         server_port_edit = QtGui.QLineEdit()
-        http_chk         = QtGui.QCheckBox(unicode(tr('Use HTTP method')))
-        proxy_chk        = QtGui.QCheckBox(unicode(tr('Use proxy')))
-        host_lbl         = QtGui.QLabel(unicode(tr('Host')))
-        proxy_host_edit  = QtGui.QLineEdit()
-        port_lbl         = QtGui.QLabel(unicode(tr('Port')))
-        proxy_port_edit  = QtGui.QLineEdit()
-        auth_chk         = QtGui.QCheckBox(unicode(tr('Use authentication')))
-        user_lbl         = QtGui.QLabel(unicode(tr('User')))
-        user_edit        = QtGui.QLineEdit()
-        pwd_lbl          = QtGui.QLabel(unicode(tr('Password')))
-        pwd_edit         = QtGui.QLineEdit()
+        ipv6_chk = QtGui.QCheckBox(unicode(tr('Use IPv6 connecion')))
+        http_chk = QtGui.QCheckBox(unicode(tr('Use HTTP method')))
+        proxy_chk = QtGui.QCheckBox(unicode(tr('Use proxy')))
+        host_lbl = QtGui.QLabel(unicode(tr('Host')))
+        proxy_host_edit = QtGui.QLineEdit()
+        port_lbl = QtGui.QLabel(unicode(tr('Port')))
+        proxy_port_edit = QtGui.QLineEdit()
+        auth_chk = QtGui.QCheckBox(unicode(tr('Use authentication')))
+        user_lbl = QtGui.QLabel(unicode(tr('User')))
+        user_edit = QtGui.QLineEdit()
+        pwd_lbl = QtGui.QLabel(unicode(tr('Password')))
+        pwd_edit = QtGui.QLineEdit()
 
         grid_lay = QtGui.QGridLayout()
         grid_lay.setHorizontalSpacing(20)
@@ -346,54 +338,37 @@ Do you want to fix your profile now?''')
         grid_lay.addWidget(server_host_edit, 1, 2)
         grid_lay.addWidget(server_port_lbl, 2, 0)
         grid_lay.addWidget(server_port_edit, 2, 2)
-        grid_lay.addWidget(http_chk, 3, 0, 1, -1)
-        grid_lay.addWidget(proxy_chk, 4, 0, 1, -1)
-        grid_lay.addWidget(host_lbl, 5, 0)
-        grid_lay.addWidget(proxy_host_edit, 5, 2)
-        grid_lay.addWidget(port_lbl, 6, 0)
-        grid_lay.addWidget(proxy_port_edit, 6, 2)
-        grid_lay.addWidget(auth_chk, 7, 0, 1, -1)
-        grid_lay.addWidget(user_lbl, 8, 0)
-        grid_lay.addWidget(user_edit, 8, 2)
-        grid_lay.addWidget(pwd_lbl, 9, 0)
-        grid_lay.addWidget(pwd_edit, 9, 2)
+        if service == 'gtalk' or service == 'facebook':
+            grid_lay.addWidget(ipv6_chk, 3, 0, 1, -1)
+        grid_lay.addWidget(http_chk, 4, 0, 1, -1)
+
+        # TODO: FIXME: Temporary hack for 2.0 release.
+        # msn (papylib) automagically gets system proxies
+        if service != 'msn':
+            grid_lay.addWidget(proxy_chk, 5, 0, 1, -1)
+            grid_lay.addWidget(host_lbl, 6, 0)
+            grid_lay.addWidget(proxy_host_edit, 6, 2)
+            grid_lay.addWidget(port_lbl, 7, 0)
+            grid_lay.addWidget(proxy_port_edit, 7, 2)
+            grid_lay.addWidget(auth_chk, 8, 0, 1, -1)
+            grid_lay.addWidget(user_lbl, 9, 0)
+            grid_lay.addWidget(user_edit, 9, 2)
+            grid_lay.addWidget(pwd_lbl, 10, 0)
+            grid_lay.addWidget(pwd_edit, 10, 2)
         dialog.setLayout(grid_lay)
 
+        service_data = ext.SERVICES[service]
+
         dialog.setWindowTitle(tr('Preferences'))
-        server_host_edit.setText(service_host)
-        server_port_edit.setText(service_port)
+        server_host_edit.setText(service_data['host'])
+        server_port_edit.setText(service_data['port'])
         proxy_host_edit.setText(proxy.host or '')
         proxy_port_edit.setText(proxy.port or '')
         user_edit.setText(proxy.user or '')
         pwd_edit.setText(proxy.passwd or '')
-        #pwd_edit.setVisible(False)
         http_chk.setChecked(use_http)
-        http_chk.setChecked(use_ipv6)
+        ipv6_chk.setChecked(use_ipv6)
 
-        index = 0
-        count = 0
-        name_to_ext = {}
-        session_found = False
-        default_session_index = 0
-        default_session = extension.get_default('session')
-        for ext_id, ext in extension.get_extensions('session').iteritems():
-            if default_session.NAME == ext.NAME:
-                default_session_index = count
-            for service_name, service_data in ext.SERVICES.iteritems():
-                if service == service_name:
-                    index = count
-                    server_host_edit.setText(service_data['host'])
-                    server_port_edit.setText(service_data['port'])
-                    session_found = True
-                session_cmb.addItem(service_name)
-                name_to_ext[service_name] = (ext_id, ext)
-                count += 1
-        if session_found:
-            session_cmb.setCurrentIndex(index)
-        else:
-            session_cmb.setCurrentIndex(default_session_index)
-
-        session_cmb.currentIndexChanged.connect(on_session_changed)
         proxy_chk.toggled.connect(on_use_proxy_toggled)
         auth_chk.toggled.connect(lambda checked:
                                  on_use_auth_toggled(auth_chk.isEnabled(), checked))
@@ -404,7 +379,6 @@ Do you want to fix your profile now?''')
         auth_chk.setChecked(not proxy.use_auth)
         auth_chk.setChecked(proxy.use_auth)
 
-        dialog.resize(300, 300)
         dialog.show()
 
         #for widget in proxy_settings:
@@ -444,7 +418,7 @@ Do you want to fix your profile now?''')
         Yes and No, return the response as stock.YES or stock.NO or
         stock.CLOSE if the user closes the window'''
         dialog  = YesNoDialog('')
-        icon    = QtGui.QLabel()
+        icon = QtGui.QLabel()
         message = QtGui.QLabel(unicode(message))
 
         lay = QtGui.QHBoxLayout()
@@ -490,6 +464,72 @@ Do you want to fix your profile now?''')
         if new_qt_color.isValid() and not new_qt_color == qt_color:
             color = Utils.qcolor_to_e3_color(new_qt_color)
             callback(color)
+
+    @classmethod
+    def close_all(cls):
+        #FIXME: close the hidden dialogs
+        pass
+
+    @classmethod
+    def edit_profile(cls, handler, user_nick, user_message, last_avatar):
+
+        dialog = OkCancelDialog(unicode(tr('Change profile')))
+        dialog.setWindowTitle(tr('Change profile'))
+
+        hbox = QtGui.QHBoxLayout()
+        hbox.setContentsMargins(0, 0, 0, 0)
+
+        Avatar = extension.get_default('avatar')
+        avatar = Avatar(handler.session, size=QtCore.QSize(96, 96))
+        avatar.set_display_pic_from_file(last_avatar)
+        if handler.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
+            avatar.clicked.connect(lambda *args: handler.on_set_picture_selected(handler.session))
+            avatar.setToolTip(tr('Click here to set your avatar'))
+
+            def on_picture_change_succeed(self, account, path):
+                '''callback called when the picture of an account is changed'''
+                # our account
+                if account == handler.session.account.account:
+                    avatar.set_from_file(path)
+            handler.session.signals.picture_change_succeed.subscribe(
+                on_picture_change_succeed)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.setContentsMargins(0, 0, 0, 0)
+
+        hbox.addWidget(avatar)
+        hbox.addLayout(vbox)
+        dialog.setLayout(hbox)
+
+        nick_label = QtGui.QLabel(unicode(tr('Nick:')))
+
+        nick = QtGui.QLineEdit()
+        nick.setText(user_nick)
+
+        pm_label = QtGui.QLabel(unicode(tr('Message:')))
+
+        pm = QtGui.QLineEdit()
+        pm.setText(user_message)
+
+        vbox.addWidget(nick_label)
+        vbox.addWidget(nick)
+        vbox.addWidget(pm_label)
+        vbox.addWidget(pm)
+
+        def save_profile():
+            '''save the new profile'''
+            new_nick = nick.text()
+            new_pm = pm.text()
+            handler.save_profile(new_nick, new_pm)
+
+        dialog.show()
+        response = dialog.exec_()
+        if response == QtGui.QDialog.Accepted:
+            response = gui.stock.ACCEPT
+            save_profile()
+
+        dialog.hide()
+
 
 class StandardButtonDialog (QtGui.QDialog):
     '''Skeleton for a dialog window with standard buttons'''

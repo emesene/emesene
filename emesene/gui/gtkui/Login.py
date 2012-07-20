@@ -247,7 +247,7 @@ class LoginBaseUI(gtk.Alignment):
         vbox.show_all()
 
     def unsubscribe_signals(self):
-        ''' overload this if needed '''        
+        ''' overload this if needed '''
         pass
 
     def _on_cancel_clicked(self, button):
@@ -316,7 +316,8 @@ class Login(LoginBaseUI, gui.LoginBase):
 
         account = self.config.get_or_set('last_logged_account', '')
 
-        if account != '' and int(self.config.d_remembers.get(account, 0)) == 3:
+        if account != '' and int(self.config.d_remembers.get(account, 0)) == 3 and \
+           self.service_available(account.rpartition('|')[2]):
             password = self.decode_password(account)
 
             self.cmb_account.get_children()[0].set_text(account.rpartition('|')[0])
@@ -334,55 +335,25 @@ class Login(LoginBaseUI, gui.LoginBase):
 
     def _on_session_changed(self, session_combo):
         service = self._get_active_service()
-        session_id, ext = self.service2id[service]
+        ext = self.service2id[service][1]
+
         self._on_new_preferences(
-            self.use_http, self.use_ipv6, self.proxy.use_proxy, self.proxy.host,
-            self.proxy.port, self.proxy.use_auth, self.proxy.user,
-            self.proxy.passwd, session_id, service,
+            self.use_http, self.use_ipv6, self.proxy, service,
             ext.SERVICES[service]['host'], ext.SERVICES[service]['port'])
 
+    def service_add_cb(self, s_name, service_name):
+        '''Add a new service to the service combo'''
+        if not s_name is None:
+            image = utils.safe_gtk_pixbuf_load(s_name)
+        else:
+            image = None
+        self.session_combo.get_model().append([image, service_name])
+
     def new_combo_session(self):
-        account = self.config.get_or_set('last_logged_account', '')
-        default_session = extension.get_default('session')
-        count = 0
-        session_found = False
-
-        self.session_name_to_index = {}
-
-        if account in self.accounts:
-            service = self.config.d_user_service.get(
-                            account.rpartition('|')[0], 'msn')
-        else:
-            service = self.config.service
-
-        for ext_id, ext in extension.get_extensions('session').iteritems():
-            if default_session.NAME == ext.NAME:
-                default_session_index = count
-
-            for service_name, service_data in ext.SERVICES.iteritems():
-                if service == service_name:
-                    index = count
-                    session_found = True
-
-                try:
-                    s_name = getattr(gui.theme.image_theme, 
-                                     "service_" + service_name)
-
-                    image = utils.safe_gtk_pixbuf_load(s_name)
-                except:
-                    image = None
-
-                self.session_combo.get_model().append([image, service_name])
-                self.session_name_to_index[service_name] = count
-                count += 1
-
-        if session_found:
-            self.session_combo.set_active(index)
-        else:
-            self.session_combo.set_active(default_session_index)
-
+        '''populate service combo with avariable services'''
+        index = gui.LoginBase.new_combo_session(self, self.service_add_cb)
+        self.session_combo.set_active(index)
         self.session_combo.connect('changed', self._on_session_changed)
-
         self._combo_session_list.append(self.session_combo)
 
     def do_connect(self):
@@ -454,6 +425,11 @@ class Login(LoginBaseUI, gui.LoginBase):
                 self.session_name_to_index.get(service, 0))
         else:
             service = self._get_active_service()
+
+        if not self.service_available(service):
+            self.show_error(_("%s service is not supported on your system") % 
+                            service)
+            return
 
         self.update_service(service)
         ext_id, ext = self.service2id[service]
@@ -644,32 +620,22 @@ class Login(LoginBaseUI, gui.LoginBase):
         '''
         called when the user clicks the preference button
         '''
-        service = self.config.get_or_set('service', 'msn')
-
         account = self.cmb_account.get_active_text()
+        self._on_preferences_open(account, self._on_new_preferences)
 
-        if account in self.accounts:
-            service = self.config.d_user_service.get(account, 'msn')
-
-        extension.get_default('dialog').login_preferences(service,
-            self._on_new_preferences, self.use_http, self.use_ipv6, self.proxy)
-
-    def _on_new_preferences(self, use_http, use_ipv6, use_proxy, proxy_host, proxy_port,
-                            use_auth, user, passwd, session_id, 
+    def _on_new_preferences(self, use_http, use_ipv6, proxy,
                             service, server_host, server_port, from_dialog=False):
         '''
         called when the user press accept on the preferences dialog
         '''
-        self.proxy = e3.Proxy(use_proxy, proxy_host, proxy_port, 
-                              use_auth, user, passwd)
-
-        self.session_id = session_id
+        self.session_id = self.service2id[service][0]
         self.use_http = use_http
         self.use_ipv6 = use_ipv6
         self.server_host = server_host
         self.server_port = server_port
+        self.proxy = proxy
 
-        self.on_preferences_changed(self.use_http, self.use_ipv6, self.proxy, 
+        self.on_preferences_changed(self.use_http, self.use_ipv6, self.proxy,
                                     self.session_id, service)
 
         self._update_fields(self.cmb_account.get_active_text(), True, from_dialog)

@@ -27,17 +27,16 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
-    
+
     def __init__(self, session, conv_id, members=None, parent=None):
         '''Constructor'''
         gui.base.Conversation.__init__(self, session, conv_id, None, members)
         QtGui.QWidget.__init__(self, parent)
-        
+
         self._on_typing_timer = QtCore.QTimer()
-        
+
         # a widget dic to avoid proliferation of instance variables:
         self._widget_d = {}
-        
         self._setup_ui()
 
         #update information
@@ -57,7 +56,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         #FIXME: move this to base class
         self._load_style()
         self._widget_d['chat_input'].e3_style = self.cstyle
-        
+
         # not a particularly nice lambda....
         # FIXME: This will have to be changed when groups will be
         #        implemented
@@ -75,17 +74,18 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
-        
+
         # Classes
-        conv_output_cls     = extension.get_default('conversation output')
-        smiley_chooser_cls  = extension.get_default('smiley chooser')
-        avatar_cls          = extension.get_default('avatar')
-        info_panel_cls      = extension.get_default('info panel')
-        conv_toolbar_cls      = extension.get_default('conversation toolbar')
-        
+        conv_output_cls = extension.get_default('conversation output')
+        smiley_chooser_cls = extension.get_default('smiley chooser')
+        avatar_cls = extension.get_default('avatar')
+        info_panel_cls = extension.get_default('info panel')
+        conv_toolbar_cls = extension.get_default('conversation toolbar')
+
         # TOP LEFT
         widget_d['chat_output'] = conv_output_cls(self.session.config)
         top_left_lay = QtGui.QHBoxLayout()
+        top_left_lay.setContentsMargins (0,0,0,0)
         top_left_lay.addWidget(widget_d['chat_output'])
 
         # BOTTOM LEFT
@@ -97,15 +97,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         widget_d['chat_input'] = Widgets.ChatInput()
 
-        text_edit_lay = QtGui.QHBoxLayout()
-        text_edit_lay.addWidget(widget_d['chat_input'])
-        
         bottom_left_lay = QtGui.QVBoxLayout()
+        bottom_left_lay.setContentsMargins (0,0,0,0)
         bottom_left_lay.addWidget(widget_d['toolbar'])
-        bottom_left_lay.addLayout(text_edit_lay)
+        bottom_left_lay.addWidget(widget_d['chat_input'])
 
         widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.emotes)
-
         widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
         widget_d['chat_input'].return_pressed.connect(
@@ -114,7 +111,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                             self._on_new_style_selected)
 
         dialog = extension.get_default('dialog')
-        
+
         # LEFT (TOP & BOTTOM)
         left_widget = QtGui.QSplitter(Qt.Vertical)
         splitter_up = QtGui.QWidget()
@@ -132,19 +129,21 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # RIGHT
         widget_d['his_display_pic'] = avatar_cls(self.session)
         widget_d['my_display_pic'] = avatar_cls(self.session)
-        
+
         right_lay = QtGui.QVBoxLayout()
+        right_lay.setContentsMargins (1,1,1,1)
         right_lay.addWidget(widget_d['his_display_pic'])
         right_lay.addStretch()
         right_lay.addWidget(widget_d['my_display_pic'])
-        
+
         # LEFT & RIGHT
-        widget_d['info_panel'] = info_panel_cls()
-        
+        widget_d['info_panel'] = info_panel_cls(self.session, self.members)
+
         lay_no_info = QtGui.QHBoxLayout()
         lay_no_info.addWidget(left_widget)
         lay_no_info.addLayout(right_lay)
         lay = QtGui.QVBoxLayout()
+        lay.setContentsMargins (1,1,1,1)
         lay.addWidget(widget_d['info_panel'])
         lay.addLayout(lay_no_info)
 
@@ -161,19 +160,19 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''sets the focus on the input widget'''
         self._widget_d['chat_input'].setFocus(Qt.OtherFocusReason)
 
-    # TODO: put this (and maybe the following) in the base 
+    # TODO: put this (and maybe the following) in the base
     # class as abstract methods
     def on_close(self):
         '''Method called when this chat widget is about to be closed'''
         self.unsubscribe_signals()
         pass
-        
+
     # emesene's
 
     def iconify(self):
         '''override the iconify method'''
         pass
-    
+
     def _on_avatarsize_changed(self, value):
         '''callback called when config.i_conv_avatar_size changes'''
         pass
@@ -216,18 +215,15 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         to update the contacts infos'''
         # account is a string containing the email
         # does this have to update the picture too?
-        log.debug('UPSingInfo Start')
         status = self.session.contacts.get(account).status
-        log.debug('UpSingInfo: [%s], [%s], [%s], [%s]' % (status, nick, message, account))
-        self._widget_d['info_panel'].set_all(Utils.unescape(message), account)
-        log.debug('UPSingInfo Stop')
-        
+        self._widget_d['info_panel'].information = (Utils.unescape(message), account)
+
     def show(self, other_started=False):
         '''Shows the widget'''
         QtGui.QWidget.show(self)
-    
+
     def _on_new_style_selected(self):
-        '''Slot called when the user clicks ok in the color chooser or the 
+        '''Slot called when the user clicks ok in the color chooser or the
         font chooser'''
         self.cstyle = self._widget_d['chat_input'].e3_style
 
@@ -237,7 +233,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._widget_d['smiley_chooser'].show()
 
     def _on_smiley_selected(self, shortcut):
-        '''Slot called when the user selects a smiley in the smiley 
+        '''Slot called when the user selects a smiley in the smiley
         chooser panel. Inserts the smiley in the chat edit'''
         # handles cursor position
         self._widget_d['chat_input'].insert_text_after_cursor(shortcut)
@@ -250,8 +246,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             return
         self._widget_d['chat_input'].clear()
         gui.base.Conversation._on_send_message(self, message_string)
-        
-        
+
+
     # TODO: use self.icon extensively
     # TODO: could we handle this directly in UserInfoPanel (but I think that
     #       this wouldn't make self.icon usable :/)
@@ -260,7 +256,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         ''' called when contacts change their attributes'''
         if account in self.members:
             if what  == 'status':
-                # FIXME: self.icon doesn't beahave correctly at the 
+                # FIXME: self.icon doesn't beahave correctly at the
                 # moment. That's probably because 'set message
                 # waiting' stuff is still not implemented (in fact
                 # self.icon returns that icon.)
@@ -273,12 +269,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             elif what == 'message':
                 message = self.session.contacts.get(account).message
                 self._widget_d['info_panel'].set_message(message)
-                
+
     def on_user_typing(self, account):
         '''method called when a someone is typing'''
         # TODO: this should update the tabs' icon, not this one.
         # updating the tab icon should be done here, not in the Conversation
-        # page class. 
+        # page class.
         self._widget_d['info_panel'].set_icon(gui.theme.image_theme.typing)
         self._on_typing_timer.start(3000)
 
@@ -337,8 +333,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         ''' called when a new file transfer is issued '''
         if self.icid != conv_id:
             return
-            
-        self.transferw = extension.get_and_instantiate('filetransfer widget', 
+
+        self.transferw = extension.get_and_instantiate('filetransfer widget',
                                                        self.session, transfer)
         self.transferw.show()
 
@@ -353,7 +349,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def on_filetransfer_rejected(self, transfer):
         ''' called when a file transfer is rejected '''
         pass
-        
+
     def on_filetransfer_completed(self, transfer):
         ''' called when a file transfer is completed '''
         pass

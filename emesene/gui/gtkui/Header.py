@@ -19,6 +19,7 @@
 import gtk
 
 from gui.gtkui import check_gtk3
+from gui.base import Plus
 
 if check_gtk3():
     import RenderersNew as Renderers
@@ -72,16 +73,18 @@ class Header(gtk.HBox):
         '''set the text on the information, lines is a tuple of size 3 with 3
         strings that will be replaced on the template'''
         self._information.set_markup(Header.INFO_TPL % lines)
-        
+
     def _get_information(self):
         '''return the text on the information'''
         return self._information.get_markup()
+
+    information = property(fget=_get_information, fset=_set_information)
 
     def copy_nick(self, data, widget=None):
         nick_list = []
         for member in self.members:
             contact = self.session.contacts.safe_get(member)
-            nick_list.append(contact.nick)
+            nick_list.append(Plus.msnplus_strip(contact.nick))
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
         clipboard.set_text(', '.join(nick_list))
@@ -90,7 +93,7 @@ class Header(gtk.HBox):
         pm_list = []
         for member in self.members:
             contact = self.session.contacts.safe_get(member)
-            pm_list.append(contact.message)
+            pm_list.append(Plus.msnplus_strip(contact.message))
 
         clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
         clipboard.set_text(', '.join(pm_list))
@@ -107,5 +110,3 @@ class Header(gtk.HBox):
         '''called when the header clicked'''
         if event.button == 3:
             self.menu.popup(None, None, None, event.button, event.time, None)
-
-    information = property(fget=_get_information, fset=_set_information)

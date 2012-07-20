@@ -1,14 +1,32 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module contains classes to represent the main page.'''
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-
-from gui.qt4ui.Utils import tr
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
+from PyQt4.QtCore import Qt
+from gui.qt4ui import widgets
 
 import extension
 import gui
+import e3
+
 
 class MainPage (QtGui.QWidget, gui.MainWindowBase):
     '''The main page (the one with the contact list)'''
@@ -19,7 +37,7 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     WEBSITE = ''
     # pylint: enable=W0612
 
-    def __init__(self,  session, on_new_conversation, set_menu_bar_cb, parent=None):
+    def __init__(self, session, on_new_conversation, set_menu_bar_cb, parent=None):
         '''Constructor'''
         QtGui.QWidget.__init__(self, parent)
         gui.MainWindowBase.__init__(self, session, on_new_conversation)
@@ -27,134 +45,153 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
         self._set_menu_bar_cb = set_menu_bar_cb
 
         # menu objects:
-        self._main_menu = None
-        self._contact_menu = None
-        self._group_menu = None
+        self.main_menu = None
+        self.contact_menu = None
+        self.group_menu = None
 
-        # a widget dic to avoid proliferation of instance variables:
-        self._widget_dict = {}
         self._setup_ui()
-
+        self._build_menus()
         # emesene's
-        self.contact_list = self._widget_dict['contact_list']
-
-        # Session's Signals: [Remember to unsubscribe! O_O]
-        session.signals.profile_get_succeed.subscribe(
-                                self._on_ss_profile_get_succeed)
-        session.signals.status_change_succeed.subscribe(
-                                self._widget_dict['status_combo'].set_status)
+        self._on_show_userpanel_changed(self.session.config.b_show_userpanel)
 
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
-        widget_dict = self._widget_dict
-
-        nick_edit_cls = extension.get_default('nick edit')
-        status_combo_cls = extension.get_default('status combo')
-        avatar_cls = extension.get_default('avatar')
         contact_list_cls = extension.get_default('contact list')
+        user_panel_cls = extension.get_default('user panel')
 
-        nick_box = QtGui.QHBoxLayout()
-        widget_dict['nick_edit'] = nick_edit_cls()
-        widget_dict['mail_btn']  = QtGui.QToolButton()
-        widget_dict['mail_btn'].setAutoRaise(True)
-        widget_dict['mail_btn'].setIcon(
-                                    QtGui.QIcon.fromTheme('mail-unread'))
-        widget_dict['mail_btn'].setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-        widget_dict['mail_btn'].setText("(0)")
-        nick_box.addWidget(widget_dict['nick_edit'])
-        nick_box.addWidget(widget_dict['mail_btn'])
+        self.panel = user_panel_cls(self.session, self)
+        self.panel.enabled = False
+        self.contact_list = contact_list_cls(self.session)
+        self.search_entry = widgets.SearchEntry()
+        self.search_entry.setVisible(False)
+        self.search_entry.textChanged.connect(
+                                    self._on_search_changed)
+        self.panel.search.clicked.connect(
+                                    self._on_search_click)
 
-        widget_dict['psm_edit'] = nick_edit_cls(allow_empty=True,
-            empty_message=QtCore.QString(
-                tr('<u>Click here to set a personal message...</u>')))
-        widget_dict['current_media'] = QtGui.QLabel()
-        widget_dict['status_combo'] = status_combo_cls()
-        widget_dict['display_pic'] = avatar_cls(self.session)
-        widget_dict['contact_list'] = contact_list_cls(self.session)
-        my_info_lay_left = QtGui.QVBoxLayout()
-        my_info_lay_left.addLayout(nick_box)
-        my_info_lay_left.addWidget(widget_dict['psm_edit'])
-        my_info_lay_left.addWidget(widget_dict['current_media'])
-        my_info_lay_left.addWidget(widget_dict['status_combo'])
-
-        my_info_lay = QtGui.QHBoxLayout()
-        my_info_lay.addWidget(widget_dict['display_pic'])
-        my_info_lay.addLayout(my_info_lay_left)
-
-        lay = QtGui.QVBoxLayout()
-        lay.addLayout(my_info_lay)
-        lay.addWidget(widget_dict['contact_list'])
-        self.setLayout(lay)
-
-        # First fill of personal Infos:
-        self._on_ss_profile_get_succeed('','')
-
-        widget_dict['nick_edit'].nick_changed.connect(
-                                        self._on_set_new_nick)
-        widget_dict['psm_edit'].nick_changed.connect(
-                                        self._on_set_new_psm)
-        widget_dict['status_combo'].status_changed.connect(
-                                        self._on_set_new_status)
-        widget_dict['display_pic'].clicked.connect(
-                                        self._on_display_pic_clicked)
-        widget_dict['contact_list'].new_conversation_requested.connect(
+        self.lay = QtGui.QGridLayout()
+        self.lay.setContentsMargins(0, 0, 0, 0)
+        self.lay.addWidget(self.below_menu, 1, 0)
+        self.lay.addWidget(self.panel, 2, 0)
+        self.lay.addWidget(self.below_panel, 3, 0)
+        self.lay.addWidget(self.search_entry, 4, 0)
+        self.lay.addWidget(self.contact_list, 5, 0)
+        self.lay.addWidget(self.below_userlist, 6, 0)
+        self.setLayout(self.lay)
+        self.contact_list.new_conversation_requested.connect(
                                         self.on_new_conversation_requested)
-        widget_dict['mail_btn'].clicked.connect(
-                                    self._on_mail_click)
+        self.contact_list.contact_menu_selected.subscribe(
+            self._on_contact_menu_selected)
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            self.contact_list.group_menu_selected.subscribe(
+                self._on_group_menu_selected)
 
-    def _on_ss_profile_get_succeed(self, nick, psm):
-        '''This method sets the displayed account's info,
-        retrieving data from "_session" object'''
-        if nick == '':
-            nick = self.session.contacts.me.display_name
-        if psm == '':
-            psm = self.session.contacts.me.message
-        status = self.session.contacts.me.status
+    def _build_menus(self):
+        '''buildall the menus used on the client'''
 
-        widget_dict = self._widget_dict
-        widget_dict['nick_edit'].set_text(nick)
-        widget_dict['psm_edit'].set_text(psm)
-        widget_dict['status_combo'].set_status(status)
-        #print "display pic path: %s" % display_pic_path
-        # investigate display pic...
-        widget_dict['display_pic'].set_display_pic_of_account()
+        handler = gui.base.MenuHandler(self.session, self.contact_list)
 
-    def _on_new_conversation_requested(self, account):
+        contact_handler = gui.base.ContactHandler(self.session,
+            self.contact_list)
+
+        MainMenu = extension.get_default('main menu')
+        ContactMenu = extension.get_default('menu contact')
+
+        self.menu = MainMenu(handler, self.session)
+        self.contact_menu = ContactMenu(contact_handler, self.session)
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            group_handler = gui.base.GroupHandler(self.session,
+                self.contact_list)
+            GroupMenu = extension.get_default('menu group')
+            self.group_menu = GroupMenu(group_handler)
+
+    def _on_contact_menu_selected(self, contact, point):
+        '''callback for the contact-menu-selected signal'''
+        if contact.blocked:
+            self.contact_menu.set_blocked()
+        else:
+            self.contact_menu.set_unblocked()
+        self.contact_menu.exec_(self.contact_list.mapToGlobal(point))
+
+    def _on_group_menu_selected(self, group, point):
+        '''callback for the group-menu-selected signal'''
+        self.group_menu.update_items()
+        self.group_menu.exec_(self.contact_list.mapToGlobal(point))
+
+    def _on_search_click(self, status):
+        self.search_entry.setVisible(status)
+        self.contact_list.is_searching = status
+        if not status:
+            #clean search entry when search is disabled
+            self.search_entry.clear()
+            self._on_search_changed(QtCore.QString(''))
+        else:
+            self.search_entry.setFocus()
+
+    def _on_search_changed(self, new_text):
+        self.contact_list.filter_text = new_text.toLower()
+        if new_text != '':
+            self.contact_list.expand_groups()
+            self.contact_list.select_top_contact()
+        else:
+            self.contact_list.un_expand_groups()
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter) and \
+            self.search_entry.hasFocus():
+                self.contact_list.open_conversation()
+                self.panel.search.setChecked(False)
+                self._on_search_click(False)
+                return
+        if event.key() == Qt.Key_Escape and \
+            self.search_entry.hasFocus():
+                self.panel.search.setChecked(False)
+                self._on_search_click(False)
+                self.contact_list.setFocus()
+                return
+        if not self.panel.nick.hasFocus() and \
+           not self.panel.message.hasFocus():
+            if not self.panel.search.isChecked():
+                self.panel.search.setChecked(True)
+                self._on_search_click(True)
+                # add missing key into entry text
+                prev_text = self.search_entry.text()
+                if not event.text().trimmed().isEmpty():
+                    self.search_entry.setText(prev_text.append(event.text()))
+                return
+        QtGui.QWidget.keyPressEvent(self, event)
+
+    def _on_show_userpanel_changed(self, value):
+        '''callback called when config.b_show_userpanel changes'''
+        self.panel.setVisible(value)
+
+    def _on_new_conversation_requested(self, account, on_close):
         '''Slot called when the user doubleclicks
         an entry in the contact list'''
         self.on_new_conversation_requested(account)
 
-    def _on_set_new_nick(self, nick):
-        '''Slot called when user tries to se a new nick'''
-        self.session.set_nick(nick)
-        # to be completed handling the subsequent signal from e3
-
-    def _on_set_new_psm(self, psm):
-        '''Slot called when the user tries to set a new psm'''
-        self.session.set_message(psm)
-        # to be completed handling the subsequent signal from e3
-
-    def _on_set_new_status(self, status):
-        '''Slot called when the user tries to set a new status'''
-        self.session.set_status(status)
-        # to be completed handling the subsequent signal from e3
-
-    def _on_display_pic_clicked(self):
-        '''Slot called when the user clicks the display pic. It shows
-        the AvatarChooser'''
-        chooser = extension.get_and_instantiate('avatar chooser', self.session)
-        chooser.exec_()
-
     def _on_mail_count_changed(self, count):
-        widget_dict = self._widget_dict
-        widget_dict['mail_btn'].setText("(%d)" % count)
+        self.panel.set_mail_count(count)
 
-    def _on_mail_click(self):
-        self.on_mail_click()
+    def _replace_widget(self, widget, new_extension, pos):
+        if widget:
+            self.lay.removeWidget(widget)
+            widget = None
+        if new_extension:
+            widget = new_extension(self)
+            self.lay.addWidget(widget, pos, 0)
+            widget.show()
+        return widget
 
-    def replace_extensions(self):
-        #FIXME: add extension support
-        #below_userlist, below_menu, below_panel
-        #we can only import qt extensions
-        pass
+    def unsubscribe_signals(self, close=None):
+        '''callback called when the disconnect option is selected'''
+        gui.MainWindowBase.unsubscribe_signals(self)
+        self.panel.remove_subscriptions()
+        self.panel = None
 
+        self.contact_list.contact_menu_selected.unsubscribe(
+            self._on_contact_menu_selected)
+        if self.session.session_has_service(e3.Session.SERVICE_GROUP_MANAGING):
+            self.contact_list.group_menu_selected.unsubscribe(
+                self._on_group_menu_selected)
+        self.contact_list.remove_subscriptions()

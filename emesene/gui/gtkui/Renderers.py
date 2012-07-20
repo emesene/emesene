@@ -48,6 +48,11 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 "",
                 "",
                 True, #default value
+                gobject.PARAM_READWRITE),
+            'yalign': (gobject.TYPE_FLOAT,
+                "The fraction of vertical free space above the child.",
+                "0.0 means no free space above, 1.0 means all free space above.",
+                0.0, 1.0, 0.0, #default value
                 gobject.PARAM_READWRITE)
             }
 
@@ -57,6 +62,7 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         self.__gobject_init__()
         gtk.GenericCellRenderer.__init__(self)
         self.__dict__['markup'] = ''
+        self.__dict__['yalign'] = 0.0
         self.function = function
         self._style_handler_id = None
         self._selected_flgs = (int(gtk.CELL_RENDERER_SELECTED),
@@ -113,7 +119,11 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         ctx = win.cairo_create()
         layout = self.get_layout(widget)
         if layout:
-            layout.set_width(width  * pango.SCALE)
+            padding = (height - layout.get_size()[1] / pango.SCALE) * self.yalign
+            y_coord += padding
+            height -= padding
+
+            layout.set_width(width * pango.SCALE)
             layout.set_in_color_override_mode(flags in self._selected_flgs)
             layout.draw(ctx, (x_coord, y_coord, width, height))
 
@@ -144,12 +154,12 @@ def plus_text_parse(item):
         try:
             item = Plus.msnplus_parse(item)
         except Exception, error: # We really want to catch all exceptions
-            log.info("Text: '%s' made the parser go crazy, stripping. Error: %s" % (
+            log.exception("Text: '%s' made the parser go crazy, stripping. Error: %s" % (
                       item, error))
             try:
                 item = Plus.msnplus_strip(item)
             except Exception, error: # We really want to catch all exceptions
-                log.info("Even stripping plus markup doesn't help. Error: %s" % error)
+                log.exception("Even stripping plus markup doesn't help. Error: %s" % error)
     else:
         item = Plus.msnplus_strip(item)
     return item
@@ -443,7 +453,7 @@ class SmileyLayout(pango.Layout):
             if self._width >= 0:
                 inline, byte = 0, 1
                 X, Y, W, H = 0, 1, 2, 3
-                layout_width = height*1024 if (self.angle == 90) else self._width
+                layout_width = height*pango.SCALE if (self.angle == 90) else self._width
                 lst = self.get_attributes()
                 e_ascent = pango.ASCENT(
                         self._elayout.get_line(0).get_pixel_extents()[1])
@@ -679,13 +689,7 @@ class AvatarRenderer(gtk.GenericCellRenderer, AvatarManager):
         """Requisition size"""
         xpad, ypad = self._get_padding()
 
-        if self._dimension >= 32:
-            width = self._dimension
-        elif self._corner:
-            width = self._dimension * 2
-        else:
-            width = self._dimension
-
+        width = self._dimension + (xpad * 2)
         height = self._dimension + (ypad * 2)
 
         return (0, 0,  width, height)
@@ -745,5 +749,7 @@ class AvatarRenderer(gtk.GenericCellRenderer, AvatarManager):
                 gtk.STATE_INSENSITIVE, -1, widget, "gtk-image")
 
         if avatar:
-            self.draw_avatar(ctx, avatar, width - dim, ypad, dim,
+            x_coord = (width - dim) / 2
+            y_coord = (height - dim) / 2
+            self.draw_avatar(ctx, avatar, x_coord, y_coord, dim,
                 gtk.gdk.GRAVITY_CENTER, self._radius_factor, alpha)

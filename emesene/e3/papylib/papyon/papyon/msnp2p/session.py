@@ -234,7 +234,9 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
         # use active bridge if any
         bridge = self._transport_manager.find_transport(self._peer, self._peer_guid, None)
 
-        if bridge is not None and bridge.rating > 0:
+        #TODO: FIXME: Change -1 to 0 once all direct connect issues are fixed
+        # This will enable sending transreq to other clients
+        if bridge is not None and bridge.rating > -1:
             logger.info("Use already active %s connection" % bridge.name)
             self._on_bridge_selected()
         else:
@@ -242,12 +244,11 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
 
     def _switch_bridge(self, transreq):
         choices = transreq.body.bridges # offered by other client
-        if "TCPv1" in choices:
+        if "TCPv1" in choices and 0: # TODO: FIXME: Enable when you want direct connection
             proto = "TCPv1"
         else:
             proto = self._transport_manager._default_transport
-        new_bridge = self._transport_manager.create_transport(self.peer,
-                self.peer_guid, proto)
+            new_bridge = self._transport_manager.create_transport(self.peer, self.peer_guid, proto)
 
         if new_bridge is None or new_bridge.connected:
             self._on_bridge_selected()
@@ -267,12 +268,16 @@ class P2PSession(gobject.GObject, EventsDispatcher, Timer):
         new_bridge = self._transport_manager.create_transport(self.peer,
                 self.peer_guid, transresp.bridge)
         if new_bridge is None or new_bridge.connected:
-            self._bridge_selected()
+            self._on_bridge_selected()
         else:
             new_bridge.connect("connected", self._bridge_switched)
             new_bridge.connect("failed", self._bridge_failed)
-            new_bridge.open(transresp.nonce, transresp.external_ips[0],
-                            transresp.external_port)
+            try:
+                new_bridge.open(transresp.nonce, transresp.external_ips[0],
+                                transresp.external_port)
+            except IndexError: # Fallback to internal ip if external is unavailable
+                new_bridge.open(transresp.nonce, transresp.internal_ips[0],
+                                transresp.internal_port)
 
     def _bridge_listening(self, new_bridge, external_ip, external_port,
             transreq):
