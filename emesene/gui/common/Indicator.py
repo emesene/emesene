@@ -89,6 +89,8 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         method called to set the state to the main window
         """
         gui.BaseTray.set_main(self, session)
+        if self.menu:
+            self.menu.unsubscribe()
         self.menu = TrayIcon.MainMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_menu(self.menu)
@@ -123,4 +125,3 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         self.disconnect_signals()
         if self.menu:
             self.menu.unsubscribe()
-

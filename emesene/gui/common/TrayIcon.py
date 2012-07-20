@@ -73,6 +73,8 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         method called to set the state to the main window
         """
         gui.BaseTray.set_main(self, session)
+        if self.menu:
+            self.menu.unsubscribe()
         self.menu = MainMenu(self.handler, self.main_window)
         self.menu.show_all()
         self.set_tooltip("emesene - " + self.handler.session.account.account)
