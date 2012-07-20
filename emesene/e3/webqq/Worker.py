@@ -24,14 +24,14 @@ else:
     raw_input = input
 
 STATUS_MAP = {}
-STATUS_MAP[e3.status.BUSY] = 'dnd'
+STATUS_MAP[e3.status.BUSY] = 'busy'
 STATUS_MAP[e3.status.AWAY] = 'away'
 STATUS_MAP[e3.status.IDLE] = 'xa'
 STATUS_MAP[e3.status.ONLINE] = 'chat'
 STATUS_MAP[e3.status.OFFLINE] = 'unavailable'
 
 STATUS_MAP_REVERSE = {}
-STATUS_MAP_REVERSE['dnd'] = e3.status.BUSY
+STATUS_MAP_REVERSE['busy'] = e3.status.BUSY
 STATUS_MAP_REVERSE['away'] = e3.status.AWAY
 STATUS_MAP_REVERSE['xa'] = e3.status.IDLE
 STATUS_MAP_REVERSE['chat'] = e3.status.ONLINE
@@ -90,13 +90,8 @@ class Worker(e3.Worker):
                         event_queue.pop_front()
         
                         if item[0] == libwebqqpython.ON_BUDDY_MESSAGE :
-                            data = json.loads(item[1])
                             
-                            from_uin = str(data['from_uin'])
-                            body = data['content'][-1]
-                            type_ = e3.Message.TYPE_MESSAGE
-                            msgobj = e3.Message(type_, body, self.uin_nick_map[from_uin])
-                            self._on_message(msgobj)
+                            self._on_message(item[1])
                         else:
                             print 'Un implementation callback functions'
                             
@@ -132,7 +127,10 @@ class Worker(e3.Worker):
             
         for uin in self.res_manager.contacts.keys():
             nick = self.res_manager.contacts[uin].nick
-            contact = e3.Contact(account = nick, identifier = int(uin), nick = nick, message = self.res_manager.contacts[uin].lnick, _status = e3.status.ONLINE, blocked = False, cid = uin)
+            _status = e3.status.OFFLINE
+            if not self.res_manager.contacts[uin].status  == '':
+                _status = e3.status.ONLINE
+            contact = e3.Contact(account = nick, identifier = int(uin), nick = nick, message = self.res_manager.contacts[uin].lnick, _status = _status, blocked = False, cid = uin)
             index = self.res_manager.contacts[uin].cate_index
             group = categories_dict[index]
             self._add_contact_to_group( contact, group.name )
@@ -190,9 +188,12 @@ class Worker(e3.Worker):
 
     def _on_message(self, message):
         '''handle the reception of a message'''
-        print 'Call back on_message'
-        body = message.body
-        account = message.account
+        data = json.loads(message)
+                            
+        from_uin = str(data['from_uin'])
+        account = self.uin_nick_map[from_uin]
+        body = data['content'][-1]
+        type_ = e3.Message.TYPE_MESSAGE
 
         if account in self.conversations:
             cid = self.conversations[account]
@@ -201,11 +202,6 @@ class Worker(e3.Worker):
             self.conversations[account] = cid
             self.rconversations[cid] = [account]
             self.session.conv_first_action(cid, [account])
-
-        if body is None:
-            type_ = e3.Message.TYPE_TYPING
-        else:
-            type_ = e3.Message.TYPE_MESSAGE
 
         msgobj = e3.Message(type_, body, account)
         self.session.conv_message(cid, account, msgobj)
@@ -389,10 +385,8 @@ class Worker(e3.Worker):
         
         for nick in recipients:
 	    recipient = self.nick_uin_map[nick]
-	    print "Nick: " + nick
-            print "Recipient: " + recipient
-            print 'Message Account ' + message.account
-            self.webqq_plugin.send_buddy_message(recipient, str(message.body))
+            
+            self.webqq_plugin.send_buddy_message( str(recipient), str(message.body))
             # log message
         e3.Logger.log_message(self.session, recipients, message, True)
 
