@@ -471,7 +471,7 @@ class Controller(object):
         if self.tray_icon is not None:
             if trayiconcls == self.tray_icon.__class__:
                 return
-            self.tray_icon.unsubscribe()
+            self.tray_icon.hide()
         else:
             extension.subscribe(self._on_tray_icon_changed, 'tray icon')
 

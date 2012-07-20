@@ -120,8 +120,11 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         name = os.path.splitext(name)
         return name[0]
 
-    def unsubscribe(self):
+    def hide(self):
+        self.unsubscribe()
         self.set_status(appindicator.STATUS_PASSIVE)
+
+    def unsubscribe(self):
         self.disconnect_signals()
         if self.menu:
             self.menu.unsubscribe()

@@ -139,8 +139,11 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         """
         self.menu.list_contacts._on_contact_change_something(*args)
 
-    def unsubscribe(self):
+    def hide(self):
+        self.unsubscribe()
         gtk.StatusIcon.set_visible(self, False)
+
+    def unsubscribe(self):
         self.disconnect_signals()
         if self.menu:
             self.menu.unsubscribe()
