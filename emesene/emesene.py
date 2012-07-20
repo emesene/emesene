@@ -361,7 +361,7 @@ class Controller(object):
         # then 'r' and CTRL+C when you need the shell.
         #import objgraph
         ##objgraph.show_most_common_types()
-        #objgraph.show_growth()
+        #objgraph.show_growth(limit=9999)
 
         if do_exit:
             extension.get_and_instantiate('quit')
@@ -371,23 +371,25 @@ class Controller(object):
     def _remove_subscriptions(self):
         '''remove the subscriptions to signals'''
         if self.session is not None:
-            signals = self.session.signals
-            signals.close.unsubscribe(self.on_close)
-            signals.login_succeed.unsubscribe(self.on_login_succeed)
-            signals.login_failed.unsubscribe(self.on_login_failed)
-            signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
-            signals.conv_first_action.unsubscribe(self.on_new_conversation)
-            signals.disconnected.unsubscribe(self.on_disconnected)
-            signals.picture_change_succeed.unsubscribe(
+            if not self.session.signals._stop:
+                signals = self.session.signals
+                signals.close.unsubscribe(self.on_close)
+                signals.login_succeed.unsubscribe(self.on_login_succeed)
+                signals.login_failed.unsubscribe(self.on_login_failed)
+                signals.contact_list_ready.unsubscribe(self.on_contact_list_ready)
+                signals.conv_first_action.unsubscribe(self.on_new_conversation)
+                signals.disconnected.unsubscribe(self.on_disconnected)
+                signals.picture_change_succeed.unsubscribe(
                     self.on_picture_change_succeed)
-            if self.unity_launcher is not None:
-                self.unity_launcher.remove_session()
-            # unsubscribe notifications signals
-            if self.notification:
-                self.notification.remove_subscriptions()
-                self.notification = None
-            if self.tray_icon:
-                self.tray_icon.unsubscribe()
+                if self.unity_launcher is not None:
+                    self.unity_launcher.remove_session()
+                    self.unity_launcher = None
+                # unsubscribe notifications signals
+                if self.notification is not None:
+                    self.notification.remove_subscriptions()
+                    self.notification = None
+                if self.tray_icon is not None:
+                    self.tray_icon.unsubscribe()
             self.window.on_disconnect(self.close_session)
             self.dbus_ext.stop()
 
@@ -623,8 +625,7 @@ class Controller(object):
         '''
         method called when user select cancel login
         '''
-        if self.session is not None:
-            self.session.quit()
+        self.close_session(False)
         self.go_login(cancel_clicked=True, no_autologin=True)
 
     def on_contact_list_ready(self):
