@@ -19,31 +19,31 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
-    
+
     def __init__(self, session, on_last_close, parent):
         '''Constructor'''
         gui.base.ConversationManager.__init__(self, session, on_last_close)
         QtGui.QTabWidget.__init__(self, parent)
-        
+
         self.setTabsClosable(True)
         self.setDocumentMode(True)
-        
+
         # to prevent top level window's destruction:
         self.qt_parent = parent
-        
+
         self.tabCloseRequested.connect(self._on_tab_close_request)
         # this was sbuscribed in base class' constructor. Now it's not
         self.session.signals.contact_attr_changed.subscribe(
                                     self._on_contact_attr_changed)
 
-        
+
     def __del__(self):
         log.debug('conversation manager adieeeeeeeuuuu ;______;')
-        
+
     def get_parent(self): # emesene's
         '''Return a reference to the top level window containing this page'''
         return QtGui.QTabWidget.parent(self).parent()
-                
+
     def set_current_page(self, tab_index): # emesene's
         '''Show the chat tab at the given index'''
         QtGui.QTabWidget.setCurrentIndex(self, tab_index)
@@ -56,9 +56,9 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         conversation_cls = extension.get_default('conversation')
         conversation = conversation_cls(session, conv_id, members)
         account = session.contacts.get(members[0])
-        conversation.tab_index = self.addTab(conversation, 
+        conversation.tab_index = self.addTab(conversation,
                     (unicode(account.display_name)))
-        self.setTabIcon(conversation.tab_index, 
+        self.setTabIcon(conversation.tab_index,
                         QtGui.QIcon(gui.theme.image_theme.status_icons[account.status]))
         return conversation
 
@@ -87,14 +87,14 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         self.setCurrentIndex(conversation.tab_index)
 
     def remove_conversation(self, conversation):
-        '''Removes the chat tab. This implements base's class 
+        '''Removes the chat tab. This implements base's class
         abstract method.'''
         index = self.indexOf(conversation)
         self.removeTab(index)
 
     def set_message_waiting(self, conversation, is_waiting): # emesene's
         '''Not Sure what to do here....'''
-        log.info('Conversation: %s; is_waiting: %s' % 
+        log.info('Conversation: %s; is_waiting: %s' %
                  (conversation, is_waiting))
 
     def _on_contact_attr_changed(self, account, change_type, old_value,
@@ -102,9 +102,9 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         '''called when an attribute of a contact changes.
         Overridden to update tabs'''
         # it's not subscribed in base class anymore, so don't invoke this
-        #gui.base.ConversationManager._on_contact_attr_changed(self, account, 
-        #                                                      change_type, 
-        #                                                      old_value, 
+        #gui.base.ConversationManager._on_contact_attr_changed(self, account,
+        #                                                      change_type,
+        #                                                      old_value,
         #                                                      do_notify)
         for conversation in self.conversations.values():
             if account in conversation.members:

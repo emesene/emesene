@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module contains classes to represent the conversation tab.'''
 
 import logging
@@ -40,12 +56,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._setup_ui()
 
         #update information
-        self._widget_d['my_display_pic'].set_display_pic_of_account()
         if self.members:
             account = self.members[0]
             contact = self.session.contacts.safe_get(account)
-            self._widget_d['his_display_pic'].set_display_pic_of_account(
-                                                                account)
             self.set_sensitive(not contact.blocked, True)
 
         # emesene's
@@ -53,7 +66,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.input = self._widget_d['chat_input']
         self.output = self._widget_d['chat_output']
 
-        #FIXME: move this to base class
         self._load_style()
         self._widget_d['chat_input'].e3_style = self.cstyle
 
@@ -78,9 +90,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # Classes
         conv_output_cls = extension.get_default('conversation output')
         smiley_chooser_cls = extension.get_default('smiley chooser')
-        avatar_cls = extension.get_default('avatar')
         info_panel_cls = extension.get_default('info panel')
         conv_toolbar_cls = extension.get_default('conversation toolbar')
+        ContactInfo = extension.get_default('conversation info')
 
         # TOP LEFT
         widget_d['chat_output'] = conv_output_cls(self.session.config)
@@ -98,7 +110,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d['chat_input'] = Widgets.ChatInput()
 
         bottom_left_lay = QtGui.QVBoxLayout()
-        bottom_left_lay.setContentsMargins (0,0,0,0)
+        bottom_left_lay.setContentsMargins(0, 0, 0, 0)
         bottom_left_lay.addWidget(widget_d['toolbar'])
         bottom_left_lay.addWidget(widget_d['chat_input'])
 
@@ -110,8 +122,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d['chat_input'].style_changed.connect(
                             self._on_new_style_selected)
 
-        dialog = extension.get_default('dialog')
-
         # LEFT (TOP & BOTTOM)
         left_widget = QtGui.QSplitter(Qt.Vertical)
         splitter_up = QtGui.QWidget()
@@ -121,29 +131,22 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         left_widget.addWidget(splitter_up)
         left_widget.addWidget(splitter_down)
 
-        left_widget.setCollapsible (0, False)
-        left_widget.setCollapsible (1, False)
+        left_widget.setCollapsible(0, False)
+        left_widget.setCollapsible(1, False)
         _, splitter_pos = left_widget.getRange(1)
         left_widget.moveSplitter(splitter_pos, 1)
 
         # RIGHT
-        widget_d['his_display_pic'] = avatar_cls(self.session)
-        widget_d['my_display_pic'] = avatar_cls(self.session)
-
-        right_lay = QtGui.QVBoxLayout()
-        right_lay.setContentsMargins (1,1,1,1)
-        right_lay.addWidget(widget_d['his_display_pic'])
-        right_lay.addStretch()
-        right_lay.addWidget(widget_d['my_display_pic'])
+        self.info = ContactInfo(self.session, self.members)
 
         # LEFT & RIGHT
         widget_d['info_panel'] = info_panel_cls(self.session, self.members)
 
         lay_no_info = QtGui.QHBoxLayout()
         lay_no_info.addWidget(left_widget)
-        lay_no_info.addLayout(right_lay)
+        lay_no_info.addWidget(self.info)
         lay = QtGui.QVBoxLayout()
-        lay.setContentsMargins (1,1,1,1)
+        lay.setContentsMargins(1, 1, 1, 1)
         lay.addWidget(widget_d['info_panel'])
         lay.addLayout(lay_no_info)
 
@@ -190,7 +193,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.set_image_visible(value)
         self._widget_d['toolbar'].update_toggle_avatar_icon(value)
 
-    def _on_show_avatar_onleft(self,value):
+    def _on_show_avatar_onleft(self, value):
         '''callback called when config.b_avatar_on_left changes'''
         pass
 
@@ -200,12 +203,17 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
     def on_picture_change_succeed(self, account, path):
         '''callback called when the picture of an account is changed'''
-        pass
+        #FIXME: make qt4 avatar API compatible with the gtk one
+        #and move this to base class
+        if account == self.session.account.account:
+            self.info.avatar.set_display_pic_from_file(path)
+        elif account in self.members:
+            self.info.his_avatar.set_display_pic_from_file(path)
 
     def update_message_waiting(self, is_waiting):
         """
-        update the information on the conversation to inform if a message is waiting
-
+        update the information on the conversation to inform if a message
+        is waiting
         is_waiting -- boolean value that indicates if a message is waiting
         """
         pass
@@ -213,10 +221,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def update_single_information(self, nick, message, account): # emesene's
         '''This method is called from the core (e3 or base class or whatever
         to update the contacts infos'''
-        # account is a string containing the email
-        # does this have to update the picture too?
-        status = self.session.contacts.get(account).status
+        self.info.update_single(self.members)
         self._widget_d['info_panel'].information = (Utils.unescape(message), account)
+        #FIXME: update tab info
 
     def show(self, other_started=False):
         '''Shows the widget'''
@@ -282,8 +289,33 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         """
         update the information for a conversation with multiple users
         """
-        pass
+        #FIXME: move to base class
+        if self.session.account.account in self.members:
+            # this can happen sometimes (e.g. when you're invisible. see #1297)
+            self.members.remove(self.session.account.account)
 
+        #TODO add plus support for nick to the tab label!
+        members_nick = []
+        i = 0
+        for account in self.members:
+            i += 1
+            contact = self.session.contacts.get(account)
+
+            if contact is None or contact.nick is None:
+                nick = account
+            elif len(contact.nick) > 20 and i != len(self.members):
+                nick = contact.nick[:20] + '...'
+            else:
+                nick = contact.nick
+
+            members_nick.append(nick)
+
+        self.header.information = \
+            (_('%d members') % (len(self.members) + 1, ),
+                    ", ".join(members_nick))
+        self.info.update_group(self.members)
+        #FIXME: implement this
+#        self.update_tab()
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         """
@@ -291,6 +323,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         is still open while the user is disconnected and to set it back to
         sensitive when the user is reconnected
         """
+        self.info.set_sensitive(is_sensitive or force_sensitive_block_button)
         self._widget_d['toolbar'].set_sensitive(is_sensitive, force_sensitive_block_button)
         self._widget_d['chat_input'].setEnabled(is_sensitive)
         self._widget_d['info_panel'].setEnabled(is_sensitive or force_sensitive_block_button)
@@ -305,8 +338,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         is_visible -- boolean that says if the widget should be shown or hidden
         """
-        self._widget_d['his_display_pic'].setVisible(is_visible)
-        self._widget_d['my_display_pic'].setVisible(is_visible)
+        self.info.setVisible(is_visible)
 
     def set_header_visible(self, is_visible):
         '''
