@@ -183,7 +183,7 @@ class ClientCapabilities(gobject.GObject):
             'supports_uucp_sip_stack' : 0x04,
             #'supports_application_messages' : 0x08,
             'supports_rtc_video' : 0x10,
-            'supports_p2pv2' : 0x20,
+            'supports_p2pv2' : 0x30,
             #'is_authenticated_webim_user' : 0x40,
             #'supports_1on1_via_group' : 0x80,
             #'supports_oim' : 0x100,
