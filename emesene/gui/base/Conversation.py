@@ -305,12 +305,12 @@ class Conversation(object):
 
     def update_message_waiting(self, is_waiting):
         """
-        update the information on the conversation to inform
-        if a message is waiting
+        update the information on the conversation to inform if a message
+        is waiting
 
         is_waiting -- boolean value that indicates if a message is waiting
         """
-        raise NotImplementedError("Method not implemented")
+        self.update_tab()
 
     def update_single_information(self, nick, message, account):
         """
@@ -320,7 +320,9 @@ class Conversation(object):
         message -- the message of the other account (escaped)
         account -- the account
         """
-        raise NotImplementedError("Method not implemented")
+        self.header.information = (message, account)
+        self.info.update_single(self.members)
+        self.update_tab()
 
     def update_group_information(self):
         """

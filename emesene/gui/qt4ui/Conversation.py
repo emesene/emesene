@@ -222,21 +222,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''callback called when config.b_toolbar_small changes'''
         pass
 
-    def update_message_waiting(self, is_waiting):
-        """
-        update the information on the conversation to inform if a message
-        is waiting
-        is_waiting -- boolean value that indicates if a message is waiting
-        """
-        self.update_tab()
-
-    def update_single_information(self, nick, message, account): # emesene's
-        '''This method is called from the core (e3 or base class or whatever
-        to update the contacts infos'''
-        self.info.update_single(self.members)
-        self.header.information = (Utils.unescape(message), account)
-        self.update_tab()
-
     def show(self, other_started=False):
         '''Shows the widget'''
         QtGui.QWidget.show(self)

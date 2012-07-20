@@ -281,27 +281,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         pos = self.panel.get_position()
         self.session.config.i_input_panel_position = pos
 
-    def update_message_waiting(self, is_waiting):
-        """
-        update the information on the conversation to inform if a message
-        is waiting
-
-        is_waiting -- boolean value that indicates if a message is waiting
-        """
-        self.update_tab()
-
-    def update_single_information(self, nick, message, account):
-        """
-        update the information for a conversation with a single user
-
-        nick -- the nick of the other account (escaped)
-        message -- the message of the other account (escaped)
-        account -- the account
-        """
-        self.header.information = (message, account)
-        self.info.update_single(self.members)
-        self.update_tab()
-
     def show_tab_menu(self):
         '''callback called when the user press a button over a widget
         chek if it's the right button and display the menu'''
