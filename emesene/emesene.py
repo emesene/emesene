@@ -390,7 +390,6 @@ class Controller(object):
                 self.tray_icon.unsubscribe()
             self.window.on_disconnect(self.close_session)
             self.dbus_ext.stop()
-            extension.unsubscribe(self._on_tray_icon_changed, 'tray icon')
 
     def _save_application_language(self):
         '''save global settings to application config
