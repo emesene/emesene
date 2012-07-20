@@ -65,4 +65,3 @@ class Signals(threading.Thread):
         self._stop = True
         for name in self.event_names:
             delattr(self, name.replace(' ', '_'))
-

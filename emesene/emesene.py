@@ -270,8 +270,7 @@ class Controller(object):
     def _new_session(self, account=None):
         '''create a new session object'''
 
-        if self.session is not None:
-            self.session.quit()
+        self.close_session(False)
 
         self.session = extension.get_and_instantiate('session')
 
@@ -340,8 +339,6 @@ class Controller(object):
         if self.session:
             self.session.stop_mail_client()
             self.session.quit()
-
-        if self.session is not None:
             self._save_application_language()
             self.session.save_extensions_config()
 
@@ -349,8 +346,9 @@ class Controller(object):
 
         if self.session and self.logged_in:
             self.session.save_config()
-            self.session = None
             self.logged_in = False
+
+        self.session = None
 
         self.config.save(self.config_path)
 
