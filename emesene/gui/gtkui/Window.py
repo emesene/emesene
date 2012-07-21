@@ -131,7 +131,7 @@ class Window(gtk.Window):
             config, config_dir, config_path, proxy, use_http, use_ipv6,
             session_id, cancel_clicked, no_autologin)
         self.content_main.show()
-        self.content_main.cmb_account.grab_focus()
+        self.content_main.account_entry.grab_focus()
         self.content_main.check_autologin()
         self.content_main.set_accels(self, self.__delete_event_helper)
 
