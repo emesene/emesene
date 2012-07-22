@@ -47,11 +47,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
 
         # to prevent top level window's destruction:
         self.qt_parent = parent
-
         self.tabCloseRequested.connect(self._on_tab_close_request)
-        # this was sbuscribed in base class' constructor. Now it's not
-        self.session.signals.contact_attr_changed.subscribe(
-                                    self._on_contact_attr_changed)
 
     def get_parent(self):
         '''Return a reference to the top level window containing this page'''
@@ -108,23 +104,6 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         '''Not Sure what to do here....'''
         log.info('Conversation: %s; is_waiting: %s' %
                  (conversation, is_waiting))
-
-    def _on_contact_attr_changed(self, account, change_type, old_value,
-            do_notify=True):
-        '''called when an attribute of a contact changes.
-        Overridden to update tabs'''
-        # it's not subscribed in base class anymore, so don't invoke this
-        #gui.base.ConversationManager._on_contact_attr_changed(self, account,
-        #                                                      change_type,
-        #                                                      old_value,
-        #                                                      do_notify)
-        for conversation in self.conversations.values():
-            if account in conversation.members:
-                index = self.indexOf(conversation)
-                account = self.session.contacts.get(conversation.members[0])
-                icon = QtGui.QIcon(gui.theme.image_theme.status_icons[account.status])
-                self.setTabIcon(index, icon)
-                self.setTabText(index, unicode(account.display_name))
 
     #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
     def _on_tab_close_request(self, index):
