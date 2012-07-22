@@ -20,18 +20,15 @@
 
 import logging
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
+from PyQt4.QtCore import Qt
 
 from gui.qt4ui.Utils import tr
 
 import extension
 import gui
 import gui.qt4ui.widgets as Widgets
-from   gui.qt4ui     import Utils
-
-
 log = logging.getLogger('qt4ui.Conversation')
 
 
@@ -64,21 +61,17 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         # emesene's
         self.tab_index = 0
+        self.conv_manager = None
         self.input = self._widget_d['chat_input']
         self.output = self._widget_d['chat_output']
 
         self._load_style()
         self._widget_d['chat_input'].e3_style = self.cstyle
 
-        # not a particularly nice lambda....
-        # FIXME: This will have to be changed when groups will be
-        #        implemented
-        self._on_typing_timer.setSingleShot(True)
-        self._on_typing_timer.timeout.connect(
-            lambda *args: self.header.set_icon(
-                gui.theme.image_theme.status_icons[
-                    self.session.contacts.get(
-                        self.members[0]).status]))
+        self.typing_timeout = QtCore.QTimer()
+        self.typing_timeout.setSingleShot(False)
+        self.typing_timeout.timeout.connect(self.update_tab)
+
         self.subscribe_signals()
 
     def __del__(self):
@@ -98,11 +91,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # TOP LEFT
         widget_d['chat_output'] = conv_output_cls(self.session.config)
         top_left_lay = QtGui.QHBoxLayout()
-        top_left_lay.setContentsMargins (0, 0, 0, 0)
+        top_left_lay.setContentsMargins(0, 0, 0, 0)
         top_left_lay.addWidget(widget_d['chat_output'])
 
         # BOTTOM LEFT
-        self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session, gui.theme, self)
+        self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
+                                 gui.theme, self)
         self.toolbar = conv_toolbar_cls(self.toolbar_handler, self.session)
         self.toolbar.redraw_ublock_button(self._get_first_contact().blocked)
         self.toolbar.update_toggle_avatar_icon(self.session.config.b_show_info)
@@ -152,7 +146,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         lay.addLayout(self.lay_no_info)
 
         self.setLayout(lay)
-        extension.subscribe(self.on_conversation_info_extension_changed, 'conversation info')
+        extension.subscribe(self.on_conversation_info_extension_changed,
+            'conversation info')
 
     def on_font_selected(self, style):
         '''called when a new font is selected'''
@@ -171,13 +166,13 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             if new_extension:
                 self.info = new_extension(self.session, self.members)
                 if self.session.config.get_or_set('b_avatar_on_left', False):
-                    self.lay_no_info.addWidget(widget, 0, 1)
+                    self.lay_no_info.addWidget(self.info, 0, 1)
                     self.lay_no_info.removeWidget(self.left_widget)
                     self.lay_no_info.addWidget(self.left_widget, 0, 2)
                 else:
                     self.lay_no_info.removeWidget(self.left_widget)
                     self.lay_no_info.addWidget(self.left_widget, 0, 1)
-                    self.lay_no_info.addWidget(widget, 0, 2)
+                    self.lay_no_info.addWidget(self.info, 0, 2)
 
             if self.session.config.b_show_info:
                 self.info.show()
@@ -251,41 +246,32 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._widget_d['chat_input'].clear()
         gui.base.Conversation._on_send_message(self, message_string)
 
-
-    # TODO: use self.icon extensively
-    # TODO: could we handle this directly in UserInfoPanel (but I think that
-    #       this wouldn't make self.icon usable :/)
     def on_contact_attr_changed_succeed(self, account, what, old,
             do_notify=True):
         ''' called when contacts change their attributes'''
-        if account in self.members:
-            if what  == 'status':
-                # FIXME: self.icon doesn't beahave correctly at the
-                # moment. That's probably because 'set message
-                # waiting' stuff is still not implemented (in fact
-                # self.icon returns that icon.)
-                #self.header.set_icon(self.icon)
-                status = self.session.contacts.get(account).status
-                icon =  gui.theme.image_theme.status_icons[status]
-                self.header.set_icon(icon)
-            elif what == 'nick':
-                self.header.set_nick(self.text)
-            elif what == 'message':
-                message = self.session.contacts.get(account).message
-                self.header.set_message(message)
+        if account in self.members and what in ('status', 'nick'):
+            self.update_tab()
+        else:
+            if what == 'media' or what == 'message':
+                self.update_data()
 
     def on_user_typing(self, account):
-        '''method called when a someone is typing'''
-        # TODO: this should update the tabs' icon, not this one.
-        # updating the tab icon should be done here, not in the Conversation
-        # page class.
-#        self.header.set_icon(gui.theme.image_theme.typing)
-        self._on_typing_timer.start(3000)
+        """
+        inform that the other user has started typing
+        """
+        if account in self.members:
+            self.tab_label.set_image(gui.theme.image_theme.typing)
+            if self.typing_timeout.isActive():
+                self.typing_timeout.stop()
+            self.typing_timeout.start(3000)
 
     def update_tab(self):
         '''update the values of the tab'''
-        #FIXME: implement
-        pass
+        self.typing_timeout.stop()
+        self.conv_manager.setTabText(self.tab_index, self.text)
+        self.conv_manager.setTabIcon(self.tab_index, QtGui.QIcon(self.icon))
+
+        #FIXME: implement show_avatar_in_taskbar option
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         """
