@@ -29,6 +29,7 @@ from gui.gtkui import check_gtk3
 import extension
 import e3
 
+
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
     NAME = 'Conversation'
@@ -139,10 +140,10 @@ class Conversation(gtk.VBox, gui.Conversation):
 
         self._load_style()
         self.subscribe_signals()
-        extension.subscribe(self.on_below_conversation_changed, 'below conversation')
-        extension.subscribe(self.on_conversation_info_extension_changed, 'conversation info')
+        extension.subscribe(self.on_below_conversation_changed,
+            'below conversation')
 
-        self.tab_index = -1 # used to select an existing conversation
+        self.tab_index = -1  # used to select an existing conversation
 
     def on_conversation_info_extension_changed(self, new_extension):
         if type(self.info) != new_extension:
@@ -170,7 +171,6 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.below_conversation = newvalue(self, self.session)
                 self.pack_end(self.below_conversation, False)
                 self.below_conversation.show()
-
 
     def check_visible(self):
         return self.get_visible()
@@ -234,8 +234,8 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_close(self):
         '''called when the conversation is closed'''
         self.unsubscribe_signals()
-        extension.unsubscribe(self.on_below_conversation_changed, 'below conversation')
-        extension.unsubscribe(self.on_conversation_info_extension_changed, 'conversation info')
+        extension.unsubscribe(self.on_below_conversation_changed,
+            'below conversation')
         if self.below_conversation:
             self.below_conversation = None
 

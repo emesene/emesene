@@ -112,6 +112,9 @@ class Conversation(object):
         self.session.signals.contact_unblock_succeed.subscribe(
                 self.on_contact_unblock_succeed)
 
+        extension.subscribe(self.on_conversation_info_extension_changed,
+            'conversation info')
+
     def unsubscribe_signals(self):
         ''' unsubscribes current session's signals '''
         self.session.config.unsubscribe(self._on_avatarsize_changed,
@@ -151,6 +154,9 @@ class Conversation(object):
                 self.on_contact_block_succeed)
         self.session.signals.contact_unblock_succeed.unsubscribe(
                 self.on_contact_unblock_succeed)
+
+        extension.unsubscribe(self.on_conversation_info_extension_changed,
+            'conversation info')
 
     def _get_style(self):
         '''return the value of style'''

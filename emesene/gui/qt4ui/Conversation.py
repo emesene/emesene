@@ -144,8 +144,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         lay.addLayout(self.lay_no_info)
 
         self.setLayout(lay)
-        extension.subscribe(self.on_conversation_info_extension_changed,
-            'conversation info')
 
     def on_font_selected(self, style):
         '''called when a new font is selected'''
@@ -178,8 +176,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def on_close(self):
         '''Method called when this chat widget is about to be closed'''
         self.unsubscribe_signals()
-        extension.unsubscribe(self.on_conversation_info_extension_changed,
-                                'conversation info')
         self.info.destroy()
 
     # emesene's
