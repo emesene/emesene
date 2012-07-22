@@ -89,28 +89,28 @@ def setup():
     extension.category_register('notificationGUI', Notifier.Notifier)
     extension.category_register('preferences',     Preferences.Preferences,
                                                    single_instance=True)
-    extension.category_register('window frame',  TopLevelWindow.TopLevelWindow)
-    extension.category_register('tray icon',       TrayIcon.TrayIcon)
+    extension.category_register('window frame', TopLevelWindow.TopLevelWindow)
+    extension.category_register('tray icon', TrayIcon.TrayIcon)
     #FIXME:
     extension.set_default('tray icon', TrayIcon.TrayIcon)
 
-    extension.category_register('connecting window',   pages.ConnectingPage)
+    extension.category_register('connecting window', pages.ConnectingPage)
     extension.category_register('conversation window', pages.ConversationPage)
-    extension.category_register('login window',        pages.LoginPage)
-    extension.category_register('main window',         pages.MainPage)
+    extension.category_register('login window', pages.LoginPage)
+    extension.category_register('main window', pages.MainPage)
 
-
-    extension.category_register('contact list',        widgets.ContactList)
-    extension.category_register('conversation input',  widgets.ChatInput)
-    extension.category_register('conversation toolbar',  widgets.ConversationToolbar)
-    extension.category_register('avatar',              widgets.DisplayPic)
+    extension.category_register('contact list', widgets.ContactList)
+    extension.category_register('conversation input', widgets.ChatInput)
+    extension.category_register('conversation toolbar', widgets.ConversationToolbar)
+    extension.category_register('avatar', widgets.DisplayPic)
     extension.category_register('image area selector',
                                                     widgets.ImageAreaSelector)
-    extension.category_register('nick edit',           widgets.NickEdit)
-    extension.category_register('smiley chooser',   widgets.SmileyPopupChooser)
-    extension.category_register('status combo',        widgets.StatusCombo)
-    extension.category_register('info panel',          widgets.UserInfoPanel)
+    extension.category_register('nick edit', widgets.NickEdit)
+    extension.category_register('smiley chooser', widgets.SmileyPopupChooser)
+    extension.category_register('status combo', widgets.StatusCombo)
+    extension.category_register('info panel', widgets.UserInfoPanel)
     extension.category_register('user panel', widgets.UserPanel)
+    extension.category_register('conversation info', widgets.ContactInfoRotate)
     #extension.category_register('filetransfer widget', widgets.FileTransfer)
     try:
         import PyQt4.QtWebKit

@@ -56,7 +56,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         delegate = ContactListDelegate.ContactListDelegate(session, self)
         delegate.set_nick_formatter(self.format_nick)
         self.setItemDelegate(delegate)
-        self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection);
+        self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.setAnimated(True)
         self.setRootIsDecorated(False)
         self.setHeaderHidden(True)
@@ -181,7 +181,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         index = self._pmodel.index(0, 0)
         #check for contact
         if not index.parent().isValid():
-            index = index.child(0,0)
+            index = index.child(0, 0)
         selection = self.selectionModel()
         selection.select(index, QtGui.QItemSelectionModel.Select)
 

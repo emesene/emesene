@@ -19,3 +19,4 @@ from ConversationToolbar import ConversationToolbar
 from UserPanel import UserPanel
 from SearchEntry import SearchEntry
 from EmptyWidget import EmptyWidget
+from ContactInfoRotate import ContactInfoRotate
