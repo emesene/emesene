@@ -358,6 +358,15 @@ class Conversation(object):
         '''update the values of the tab'''
         raise NotImplementedError("Method not implemented")
 
+    def on_contact_attr_changed_succeed(self, account, what, old,
+            do_notify=True):
+        ''' called when contacts change their attributes'''
+        if account in self.members and what in ('status', 'nick'):
+            self.update_tab()
+        else:
+            if what == 'media':
+                self.update_data()
+
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         """
         used to make the conversation insensitive while the conversation

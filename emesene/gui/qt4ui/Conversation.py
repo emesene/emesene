@@ -62,11 +62,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         # emesene's
         self.tab_index = 0
         self.conv_manager = None
-        self.input = self._widget_d['chat_input']
-        self.output = self._widget_d['chat_output']
 
         self._load_style()
-        self._widget_d['chat_input'].e3_style = self.cstyle
+        self.input.e3_style = self.cstyle
 
         self.typing_timeout = QtCore.QTimer()
         self.typing_timeout.setSingleShot(False)
@@ -89,10 +87,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         ContactInfo = extension.get_default('conversation info')
 
         # TOP LEFT
-        widget_d['chat_output'] = conv_output_cls(self.session.config)
+        self.output = conv_output_cls(self.session.config)
         top_left_lay = QtGui.QHBoxLayout()
         top_left_lay.setContentsMargins(0, 0, 0, 0)
-        top_left_lay.addWidget(widget_d['chat_output'])
+        top_left_lay.addWidget(self.output)
 
         # BOTTOM LEFT
         self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
@@ -102,19 +100,19 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.toolbar.update_toggle_avatar_icon(self.session.config.b_show_info)
 
         widget_d['smiley_chooser'] = smiley_chooser_cls()
-        widget_d['chat_input'] = Widgets.ChatInput()
+        self.input = Widgets.ChatInput()
 
         bottom_left_lay = QtGui.QVBoxLayout()
         bottom_left_lay.setContentsMargins(0, 0, 0, 0)
         bottom_left_lay.addWidget(self.toolbar)
-        bottom_left_lay.addWidget(widget_d['chat_input'])
+        bottom_left_lay.addWidget(self.input)
 
-        widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.emotes)
+        self.input.set_smiley_dict(gui.theme.emote_theme.emotes)
         widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
-        widget_d['chat_input'].return_pressed.connect(
+        self.input.return_pressed.connect(
                             self._on_send_btn_clicked)
-        widget_d['chat_input'].style_changed.connect(
+        self.input.style_changed.connect(
                             self._on_new_style_selected)
 
         # LEFT (TOP & BOTTOM)
@@ -152,11 +150,11 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def on_font_selected(self, style):
         '''called when a new font is selected'''
         gui.base.Conversation.on_font_selected(self, style)
-        self._widget_d['chat_input'].e3_style = style
+        self.input.e3_style = style
 
     def input_grab_focus(self):
         '''sets the focus on the input widget'''
-        self._widget_d['chat_input'].setFocus(Qt.OtherFocusReason)
+        self.input.setFocus(Qt.OtherFocusReason)
 
     def on_conversation_info_extension_changed(self, new_extension):
         if type(self.info) != new_extension:
@@ -224,7 +222,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def _on_new_style_selected(self):
         '''Slot called when the user clicks ok in the color chooser or the
         font chooser'''
-        self.cstyle = self._widget_d['chat_input'].e3_style
+        self.cstyle = self.input.e3_style
 
     def _on_show_smiley_chooser(self):
         '''Slot called when the user clicks the smiley button.
@@ -235,25 +233,16 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''Slot called when the user selects a smiley in the smiley
         chooser panel. Inserts the smiley in the chat edit'''
         # handles cursor position
-        self._widget_d['chat_input'].insert_text_after_cursor(shortcut)
+        self.input.insert_text_after_cursor(shortcut)
 
     def _on_send_btn_clicked(self):
-        '''Slot called when the user clicks the send button or presses Enter in
+        '''Slot called when the user presses Enter in
         the chat line editor. Sends the message'''
-        message_string = unicode(self._widget_d['chat_input'].toPlainText())
+        message_string = unicode(self.input.toPlainText())
         if len(message_string) == 0:
             return
-        self._widget_d['chat_input'].clear()
+        self.input.clear()
         gui.base.Conversation._on_send_message(self, message_string)
-
-    def on_contact_attr_changed_succeed(self, account, what, old,
-            do_notify=True):
-        ''' called when contacts change their attributes'''
-        if account in self.members and what in ('status', 'nick'):
-            self.update_tab()
-        else:
-            if what == 'media' or what == 'message':
-                self.update_data()
 
     def on_user_typing(self, account):
         """
@@ -281,7 +270,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         """
         self.info.set_sensitive(is_sensitive or force_sensitive_block_button)
         self.toolbar.set_sensitive(is_sensitive, force_sensitive_block_button)
-        self._widget_d['chat_input'].setEnabled(is_sensitive)
+        self.input.setEnabled(is_sensitive)
         self.header.setEnabled(is_sensitive or force_sensitive_block_button)
 
         # redraws block button to its corresponding icon and tooltip

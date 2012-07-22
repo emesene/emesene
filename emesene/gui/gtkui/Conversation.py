@@ -355,15 +355,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.input.append(glib.markup_escape_text(emote))
         self.input_grab_focus()
 
-    def on_contact_attr_changed_succeed(self, account, what, old,
-            do_notify=True):
-        ''' called when contacts change their attributes'''
-        if account in self.members and what in ('status', 'nick'):
-            self.update_tab()
-        else:
-            if what == 'media':
-                self.update_data()
-
     def on_filetransfer_invitation(self, transfer, cid):
         ''' called when a new file transfer is issued '''
         if transfer.contact.account == self.members[0]:
