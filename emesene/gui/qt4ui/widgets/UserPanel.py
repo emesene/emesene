@@ -108,7 +108,7 @@ class UserPanel(QtGui.QWidget):
         self.on_profile_update_succeed(self.session.contacts.me.display_name,
             self.session.contacts.me.message)
         self.on_picture_change_succeed(self.session.account.account,
-            self.session.contacts.me.picture)
+            self.session.config.last_avatar)
         self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
         self._add_subscriptions()
 
