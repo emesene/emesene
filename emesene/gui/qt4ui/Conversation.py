@@ -54,10 +54,19 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._setup_ui()
 
         #update information
-        if self.members:
+        if len(self.members) == 0:
+            self.header.information = ('connecting', 'creating conversation')
+        else:
+            #update adium theme header/footer
             account = self.members[0]
             contact = self.session.contacts.safe_get(account)
+            his_picture = contact.picture
+            nick = contact.nick
+            display_name = contact.display_name
             self.set_sensitive(not contact.blocked, True)
+            my_picture = self.session.contacts.me.picture
+            self.output.clear(account, nick, display_name,
+                              my_picture, his_picture)
 
         # emesene's
         self.tab_index = 0
