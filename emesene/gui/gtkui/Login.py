@@ -41,25 +41,16 @@ class LoginBaseUI(gtk.Alignment):
         Avatar = extension.get_default('avatar')
         NiceBar = extension.get_default('nice bar')
 
-        self.liststore = gtk.ListStore(gobject.TYPE_STRING, gtk.gdk.Pixbuf)
-        completion = gtk.EntryCompletion()
-        completion.set_model(self.liststore)
-        pixbufcell = gtk.CellRendererPixbuf()
-        completion.pack_start(pixbufcell)
-        completion.add_attribute(pixbufcell, 'pixbuf', 1)
-        completion.set_text_column(0)
-        completion.set_inline_selection(True)
+        self.account_entry = gtk.Entry(max=20)
+        self.account_entry.set_tooltip_text(_('Account'))
 
         self.pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user)
-
-        self.cmb_account = gtk.ComboBoxEntry(self.liststore, 0)
-        self.cmb_account.set_tooltip_text(_('Account'))
-        self.cmb_account.get_children()[0].set_completion(completion)
-        self.cmb_account.get_children()[0].connect('key-press-event',
+        self.account_entry.set_icon_from_stock('GTK_ENTRY_ICON_SECONDARY',gtk.STOCK_CLEAR)
+        self.account_entry.set_icon_sensitive('GTK_ENTRY_ICON_SECONDARY', False)
+        self.account_entry.connect('icon-press', self.clear_account_entry)
+        self.account_entry.connect('key-press-event',
             self._on_account_key_press)
-        self.cmb_account.connect('changed',
-            self._on_account_changed)
-        self.acc_key_rel_handler = self.cmb_account.connect('key-release-event',
+        self.acc_key_rel_handler = self.account_entry.connect('key-release-event',
                                                    self._on_account_key_release)
 
         self.btn_status = StatusButton.StatusButton()
@@ -70,11 +61,10 @@ class LoginBaseUI(gtk.Alignment):
         self.txt_password = gtk.Entry()
         self.txt_password.set_tooltip_text(_('Password'))
         self.txt_password.set_visibility(False)
+        self.txt_password.set_sensitive(False)
         self.txt_password.connect('key-press-event',
             self._on_password_key_press)
         self.txt_password.connect('changed', self._on_password_changed)
-        self.txt_password.set_sensitive(False)
-
         pix_account = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.user)
         pix_password = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.password)
 
@@ -129,17 +119,26 @@ class LoginBaseUI(gtk.Alignment):
 
         vbox_content = gtk.VBox()
 
-        hbox_account = gtk.HBox(spacing=6)
-        img_accountpix = gtk.Image()
-        img_accountpix.set_from_pixbuf(utils.scale_nicely(pix_account))
+        hbox_account = gtk.HBox(spacing=2)
+        img_accountpix = gtk.Button()
+        img_accountpix.set_size_request(34, -1)
+        img_accountpix.set_tooltip_text(_('Choose an account'))
+        img_accountpix.set_border_width(0)
+        img_accountpix.set_relief(gtk.RELIEF_NONE)
+        account_img = gtk.image_new_from_pixbuf(utils.scale_nicely(pix_account))
+        img_accountpix.set_image(account_img)
+        img_accountpix.connect('clicked', self._on_clicked)
+        self.accounts_menu = gtk.Menu()
+        self.accounts_menu.show_all()
+
         hbox_account.pack_start(img_accountpix, False)
-        hbox_account.pack_start(self.cmb_account)
+        hbox_account.pack_start(self.account_entry)
         hbox_account.pack_start(self.forget_me, False)
 
-        hbox_password = gtk.HBox(spacing=6)
+        hbox_password = gtk.HBox(spacing=2)
         img_password = gtk.Image()
         img_password.set_from_pixbuf(utils.scale_nicely(pix_password))
-        hbox_password.pack_start(img_password, False)
+        hbox_password.pack_start(img_password, False, False, 7)
         hbox_password.pack_start(self.txt_password)
         hbox_password.pack_start(self.btn_status, False)
 
@@ -246,6 +245,15 @@ class LoginBaseUI(gtk.Alignment):
         self.add(vbox)
         vbox.show_all()
 
+    def clear_account_entry(self, *args):
+        self.account_entry.set_text("")
+        self.account_entry.set_icon_sensitive('GTK_ENTRY_ICON_SECONDARY', False)
+        self.forget_me.set_sensitive(False)
+
+    def _on_clicked(self,button):
+
+        self.accounts_menu.popup(None, None, None, 0, 0)
+
     def unsubscribe_signals(self):
         ''' overload this if needed '''
         pass
@@ -306,8 +314,10 @@ class Login(LoginBaseUI, gui.LoginBase):
         self.b_cancel.hide()
 
         if account != '':
-            self.cmb_account.get_children()[0].set_text(
+            self.account_entry.set_text(
                 account.rpartition('|')[0])
+            self._update_fields(self.account_entry.get_text())
+            self.txt_password.set_sensitive(True)
 
     def check_autologin(self):
         '''check if autologin is set and can be started'''
@@ -320,7 +330,7 @@ class Login(LoginBaseUI, gui.LoginBase):
            self.service_available(account.rpartition('|')[2]):
             password = self.decode_password(account)
 
-            self.cmb_account.get_children()[0].set_text(account.rpartition('|')[0])
+            self.account_entry.set_text(account.rpartition('|')[0])
             self.txt_password.set_text(password)
 
             if not self.no_autologin:
@@ -361,7 +371,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         do all the stuffs needed to connect
         '''
         self.nicebar.empty_queue()
-        user = self.cmb_account.get_active_text().strip().lower()
+        user = self.account_entry.get_text().strip().lower()
         password = self.txt_password.get_text()
         account = e3.Account(user, password, self.btn_status.status,
                 self.server_host)
@@ -386,13 +396,14 @@ class Login(LoginBaseUI, gui.LoginBase):
         '''
         called when the content of the account entry changes
         '''
-        self._update_fields(self.cmb_account.get_active_text())
+        self._update_fields(self.account_entry.get_text())
+        self.account_entry.set_icon_sensitive('GTK_ENTRY_ICON_SECONDARY', True)
 
     def _on_account_key_release(self, entry, event):
         '''
         called when a key is released in the account field
         '''
-        self._update_fields(self.cmb_account.get_active_text())
+        self._update_fields(self.account_entry.get_text())
         if event.keyval == gtk.keysyms.Tab:
             self.txt_password.grab_focus()
 
@@ -411,6 +422,7 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.auto_login.set_sensitive(False)
 
         if account == '':
+            self.account_entry.set_icon_sensitive('GTK_ENTRY_ICON_SECONDARY', False)
             self.remember_account.set_sensitive(False)
             self.txt_password.set_text('')
             self.txt_password.set_sensitive(False)
@@ -440,6 +452,7 @@ class Login(LoginBaseUI, gui.LoginBase):
             attr = int(self.remembers[account_and_service])
             self.remember_account.set_sensitive(False)
             self.forget_me.set_sensitive(True)
+            self.account_entry.set_icon_sensitive('GTK_ENTRY_ICON_SECONDARY', True)
             self.btn_status.set_status(int(self.status[account_and_service]))
 
             passw = self.decode_password(account_and_service)
@@ -484,7 +497,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         call clear_all and clean also the account combobox
         '''
         self._clear_all()
-        self.cmb_account.get_children()[0].set_text('')
+        self.account_entry.set_text('')
 
     def show_error(self, reason, login_failed=False):
         '''
@@ -496,19 +509,42 @@ class Login(LoginBaseUI, gui.LoginBase):
 
     def _reload_account_list(self, *args):
         '''
-        reload the account list in the combobox
+        reload the account list in the Menu
         '''
-        self.liststore.clear()
         mail_list = []
+        for i in self.accounts_menu.get_children():
+            self.accounts_menu.remove(i)
+
         for account in sorted(self.accounts):
             mail = account.rpartition('|')[0]
+            service = account.rpartition('|')[2]
+            pixbuf = None
+
             if mail not in mail_list:
                 mail_list.append(mail)
-                self.liststore.append([mail, utils.scale_nicely(self.pixbuf)])
+                account_sv = gtk.ImageMenuItem(_(mail))
+                if service == "msn":
+                    pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.service_msn, 
+                                            None, animated=False)
+                elif service == "dummy":
+                    pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.service_dummy, 
+                                            None, animated=False)
+                elif service == "facebook":
+                    pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.service_facebook, 
+                                            None, animated=False)
+                elif service == "gtalk":
+                    pixbuf = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.service_gtalk, 
+                                            None, animated=False)
 
-        #this resolves a small bug
-        if not len(self.liststore):
-            self.liststore = None
+                account_sv.set_image(gtk.image_new_from_pixbuf(utils.scale_nicely(pixbuf)))
+                account_sv.connect('activate', self.choose_account)
+                self.accounts_menu.append(account_sv)
+                account_sv.show()
+
+    def choose_account(self, widget):
+        self.account_entry.set_text(widget.get_label())
+        self._on_account_changed(self.account_entry)
+
 
     def _on_password_key_press(self, widget, event):
         '''
@@ -539,6 +575,7 @@ class Login(LoginBaseUI, gui.LoginBase):
             self.txt_password.grab_focus()
             if not self.txt_password.is_focus():
                 self.do_connect()
+        self.account_entry.set_icon_sensitive('GTK_ENTRY_ICON_SECONDARY', True)
 
     def _on_forget_me_clicked(self, *args):
         '''
@@ -547,15 +584,16 @@ class Login(LoginBaseUI, gui.LoginBase):
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
             if response == stock.YES:
-                account = self.cmb_account.get_active_text()
+                account = self.account_entry.get_text()
                 service = self._get_active_service()
                 self.forget_user(account, service)
                 self._reload_account_list()
-                self.cmb_account.get_children()[0].set_text('')
+                self.account_entry.set_text('')
+                self.forget_me.set_sensitive(False)
 
         self.dialog.yes_no(
                _('Are you sure you want to delete the account %s ?') % \
-                      self.cmb_account.get_active_text(), _yes_no_cb)
+                      self.account_entry.get_text(), _yes_no_cb)
 
     def _on_connect_clicked(self, button):
         '''
@@ -620,7 +658,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         '''
         called when the user clicks the preference button
         '''
-        account = self.cmb_account.get_active_text()
+        account = self.account_entry.get_text()
         self._on_preferences_open(account, self._on_new_preferences)
 
     def _on_new_preferences(self, use_http, use_ipv6, proxy,
@@ -638,7 +676,7 @@ class Login(LoginBaseUI, gui.LoginBase):
         self.on_preferences_changed(self.use_http, self.use_ipv6, self.proxy,
                                     self.session_id, service)
 
-        self._update_fields(self.cmb_account.get_active_text(), True, from_dialog)
+        self._update_fields(self.account_entry.get_text(), True, from_dialog)
 
         def searchService(model, path, iter, user_data):
             if(model.get(iter,0)[0]==user_data[0]):
@@ -666,7 +704,7 @@ class ConnectingWindow(Login):
         self.reconnect_timer_id = None
         
         # Disconnect inherited and unneeded event
-        self.cmb_account.disconnect(self.acc_key_rel_handler)
+        self.account_entry.disconnect(self.acc_key_rel_handler)
 
         account = config.get_or_set('last_logged_account', '')
         remembers = config.get_or_set('d_remembers', {})
@@ -681,11 +719,11 @@ class ConnectingWindow(Login):
                 self.remember_account.set_active(True)
 
             password = base64.b64decode(config.d_accounts.get(account, ""))
-            self.cmb_account.get_children()[0].set_text(account.rpartition('|')[0])
+            self.account_entry.set_text(account.rpartition('|')[0])
             self.txt_password.set_text(password)
 
         #FIXME: If not account remembered, txt_password & cmb_account, left without text.
-        self.cmb_account.set_sensitive(False)
+        self.account_entry.set_sensitive(False)
         self.b_preferences.set_sensitive(False)
         self.btn_status.set_sensitive(False)
         self.txt_password.set_sensitive(False)

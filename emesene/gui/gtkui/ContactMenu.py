@@ -18,8 +18,8 @@
 
 import e3
 import gtk
-
 from gui.base import Plus
+import time
 
 class ContactMenu(gtk.Menu):
     """
@@ -30,16 +30,24 @@ class ContactMenu(gtk.Menu):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, handler, session):
+    def __init__(self, handler, session, on_new_conversation):
         """
         constructor
 
         handler -- a e3common.Handler.ContactHandler
         """
         gtk.Menu.__init__(self)
+        self.on_new_conversation = on_new_conversation
         self.handler = handler
         self.session = session
+        self.contact_selected = e3.common.Signal()
 
+        open_conv = gtk.ImageMenuItem(_('Open conversation'))
+        open_conv.set_image(gtk.image_new_from_stock(gtk.STOCK_OPEN,
+            gtk.ICON_SIZE_MENU))
+        open_conv.connect('activate',
+            lambda *args: self.open_conversation())
+            
         add = gtk.ImageMenuItem(gtk.STOCK_ADD)
         add.connect('activate',
             lambda *args: handler.on_add_contact_selected())
@@ -120,6 +128,7 @@ class ContactMenu(gtk.Menu):
 
         self.set_unblocked()
 
+        self.append(open_conv)
         if self.session.session_has_service(e3.Session.SERVICE_CONTACT_MANAGING):
             self.append(add)
         if self.session.session_has_service(e3.Session.SERVICE_CONTACT_BLOCK):
@@ -141,6 +150,15 @@ class ContactMenu(gtk.Menu):
         copy_menu.append(nick_to_clipboard)
         copy_menu.append(message_to_clipboard)
         copy_menu.append(account_to_clipboard)
+
+    def open_conversation(self):
+
+        contact = self.handler.contact_list.get_contact_selected()
+        if contact:
+            cid = time.time()
+            self.on_new_conversation(cid, [contact.account], False)
+            self.session.new_conversation(contact.account, cid)
+
 
     def on_copy_account_to_clipboard(self):
         contact = self.handler.contact_list.get_contact_selected()

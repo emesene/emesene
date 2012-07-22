@@ -162,6 +162,11 @@ class ContactList(gui.ContactList, gtk.TreeView):
                                   gtk.gdk.CONTROL_MASK,
                                   gtk.ACCEL_LOCKED,
                                   self.open_conversation)
+          
+        accel_group.connect_group(gtk.keysyms.M,
+                                  gtk.gdk.CONTROL_MASK,
+                                  gtk.ACCEL_LOCKED,
+                                  self.show_contact_menu)
 
     def _on_key_delete_item(self, accel_group, window, keyval, mod):
         if self.is_focus():
@@ -344,6 +349,12 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     self.contact_menu_selected.emit(obj)
             else:
                 log.debug('empty paths?')
+
+    def show_contact_menu(self, *args):
+        contact = self.get_contact_selected()
+
+        if contact:
+            self.contact_menu_selected.emit(contact)
 
     def escaper(self, text):
         ''' escape the text, this is a toolkit dependant method '''
