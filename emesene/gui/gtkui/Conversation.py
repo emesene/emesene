@@ -65,7 +65,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         TransfersBar = extension.get_default('filetransfer pool')
         CallWidget = extension.get_default('call widget')
 
-        self.below_conversation = None
         BelowConversation = extension.get_default('below conversation')
         if BelowConversation is not None:
             self.below_conversation = BelowConversation(self, session)
@@ -130,19 +129,18 @@ class Conversation(gtk.VBox, gui.Conversation):
             #update adium theme header/footer
             account = self.members[0]
             contact = self.session.contacts.safe_get(account)
-            his_picture = contact.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+            his_picture = contact.picture or \
+                utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
             nick = contact.nick
             display_name = contact.display_name
             self.set_sensitive(not contact.blocked, True)
-            my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+            my_picture = self.session.contacts.me.picture or \
+                utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
             self.output.clear(account, nick, display_name,
                               my_picture, his_picture)
 
         self._load_style()
         self.subscribe_signals()
-        extension.subscribe(self.on_below_conversation_changed,
-            'below conversation')
-
         self.tab_index = -1  # used to select an existing conversation
 
     def on_conversation_info_extension_changed(self, new_extension):
@@ -234,11 +232,6 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_close(self):
         '''called when the conversation is closed'''
         self.unsubscribe_signals()
-        extension.unsubscribe(self.on_below_conversation_changed,
-            'below conversation')
-        if self.below_conversation:
-            self.below_conversation = None
-
         self.destroy()
         self.info.destroy()
         self.header.destroy()

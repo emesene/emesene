@@ -102,10 +102,12 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         widget_d['smiley_chooser'] = smiley_chooser_cls()
         self.input = Widgets.ChatInput()
 
-        bottom_left_lay = QtGui.QVBoxLayout()
-        bottom_left_lay.setContentsMargins(0, 0, 0, 0)
-        bottom_left_lay.addWidget(self.toolbar)
-        bottom_left_lay.addWidget(self.input)
+        self.bottom_left_lay = QtGui.QVBoxLayout()
+        self.bottom_left_lay.setContentsMargins(0, 0, 0, 0)
+        self.bottom_left_lay.addWidget(self.toolbar)
+        self.bottom_left_lay.addWidget(self.input)
+        if self.below_conversation:
+            self.bottom_left_lay.addWidget(self.below_conversation)
 
         self.input.set_smiley_dict(gui.theme.emote_theme.emotes)
         widget_d['smiley_chooser'].emoticon_selected.connect(
@@ -115,12 +117,16 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.input.style_changed.connect(
                             self._on_new_style_selected)
 
+        BelowConversation = extension.get_default('below conversation')
+        if BelowConversation is not None:
+            self.below_conversation = BelowConversation(self, self.session)
+
         # LEFT (TOP & BOTTOM)
         self.left_widget = QtGui.QSplitter(Qt.Vertical)
         splitter_up = QtGui.QWidget()
         splitter_down = QtGui.QWidget()
         splitter_up.setLayout(top_left_lay)
-        splitter_down.setLayout(bottom_left_lay)
+        splitter_down.setLayout(self.bottom_left_lay)
         self.left_widget.addWidget(splitter_up)
         self.left_widget.addWidget(splitter_down)
 
@@ -172,6 +178,18 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
             if self.session.config.b_show_info:
                 self.info.show()
+
+    def on_below_conversation_changed(self, newvalue):
+        if type(self.below_conversation) != newvalue:
+            #replace the below conversation
+            if not self.below_conversation is None:
+                self.bottom_left_lay.removeWidget(self.below_conversation)
+                self.below_conversation = None
+
+            if newvalue:
+                self.below_conversation = newvalue(self, self.session)
+                self.bottom_left_lay.addWidget(self.below_conversation)
+                self.below_conversation.show()
 
     def on_close(self):
         '''Method called when this chat widget is about to be closed'''

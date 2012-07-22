@@ -70,6 +70,7 @@ class Conversation(object):
         self.header = None
         self.input = None
         self.output = None
+        self.below_conversation = None
         self.soundPlayer = extension.get_and_instantiate('sound', session)
 
     def subscribe_signals(self):
@@ -114,6 +115,8 @@ class Conversation(object):
 
         extension.subscribe(self.on_conversation_info_extension_changed,
             'conversation info')
+        extension.subscribe(self.on_below_conversation_changed,
+            'below conversation')
 
     def unsubscribe_signals(self):
         ''' unsubscribes current session's signals '''
@@ -157,6 +160,10 @@ class Conversation(object):
 
         extension.unsubscribe(self.on_conversation_info_extension_changed,
             'conversation info')
+        extension.unsubscribe(self.on_below_conversation_changed,
+            'below conversation')
+        if self.below_conversation:
+            self.below_conversation = None
 
     def _get_style(self):
         '''return the value of style'''
