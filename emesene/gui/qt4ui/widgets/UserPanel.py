@@ -46,7 +46,7 @@ class UserPanel(QtGui.QWidget):
 
         widget_dict = self._widget_dict
 
-        nick_box = QtGui.QHBoxLayout()
+        self.nick_box = QtGui.QHBoxLayout()
         self.nick = nick_edit_cls()
         self.nick.setToolTip(tr('Click here to set your nick name'))
         widget_dict['mail_btn'] = QtGui.QToolButton()
@@ -57,16 +57,15 @@ class UserPanel(QtGui.QWidget):
         widget_dict['mail_btn'].setText("(0)")
         widget_dict['mail_btn'].setToolTip(tr('Click here to access your mail'))
 
-        #FIXME: implement userpanel_button
         self.userpanel_button = None
 
         self.search = QtGui.QToolButton()
         self.search.setCheckable(True)
         self.search.setIcon(QtGui.QIcon.fromTheme('edit-find'))
         self.search.setToolTip(tr('Search (Ctrl+F)'))
-        nick_box.addWidget(self.nick)
-        nick_box.addWidget(widget_dict['mail_btn'])
-        nick_box.addWidget(self.search)
+        self.nick_box.addWidget(self.nick)
+        self.nick_box.addWidget(widget_dict['mail_btn'])
+        self.nick_box.addWidget(self.search)
 
         empty_message_text = tr("Click here to set your message")
         self.message = nick_edit_cls(allow_empty=True,
@@ -84,7 +83,7 @@ class UserPanel(QtGui.QWidget):
 
         my_info_lay_left = QtGui.QVBoxLayout()
         my_info_lay_left.setContentsMargins(0, 0, 0, 0)
-        my_info_lay_left.addLayout(nick_box)
+        my_info_lay_left.addLayout(self.nick_box)
         my_info_lay_left.addLayout(psm_box)
 
         my_info_lay = QtGui.QHBoxLayout()
@@ -132,6 +131,9 @@ class UserPanel(QtGui.QWidget):
         self.session.signals.profile_set_succeed.subscribe(
             self.on_profile_update_succeed)
 
+        extension.unsubscribe(
+            self._on_userpanel_button_changed, "userpanel button")
+
     def remove_subscriptions(self):
         '''unsubscribe all signals'''
         self.session.signals.message_change_succeed.unsubscribe(
@@ -149,6 +151,22 @@ class UserPanel(QtGui.QWidget):
             self.on_profile_update_succeed)
         self.session.signals.profile_set_succeed.unsubscribe(
             self.on_profile_update_succeed)
+
+        extension.unsubscribe(
+            self._on_userpanel_button_changed, "userpanel button")
+
+    def _on_userpanel_button_changed(self, newvalue):
+        if type(self.userpanel_button) != newvalue:
+            #first remove current button
+            if not self.userpanel_button is None:
+                self.nick_box.removeWidget(self.userpanel_button)
+                self.userpanel_button = None
+
+            if newvalue is not None:
+                #add new button
+                self.userpanel_button = newvalue(self, self.main_window)
+                self.nick_box.AddWidget(self.userpanel_button)
+                self.userpanel_button.show()
 
     def _set_enabled(self, value):
         '''set the value of enabled and modify the widgets to reflect the status
