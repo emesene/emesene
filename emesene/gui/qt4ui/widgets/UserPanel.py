@@ -57,6 +57,9 @@ class UserPanel(QtGui.QWidget):
         widget_dict['mail_btn'].setText("(0)")
         widget_dict['mail_btn'].setToolTip(tr('Click here to access your mail'))
 
+        #FIXME: implement userpanel_button
+        self.userpanel_button = None
+
         self.search = QtGui.QToolButton()
         self.search.setCheckable(True)
         self.search.setIcon(QtGui.QIcon.fromTheme('edit-find'))
@@ -68,7 +71,6 @@ class UserPanel(QtGui.QWidget):
         empty_message_text = tr("Click here to set your message")
         self.message = nick_edit_cls(allow_empty=True,
             empty_message=empty_message_text)
-        self.message = self.message
         self.message.setToolTip(empty_message_text)
         widget_dict['status_combo'] = StatusButton.StatusButton(self.session)
         widget_dict['status_combo'].setToolTip(tr('Click here to change your status'))
@@ -151,7 +153,12 @@ class UserPanel(QtGui.QWidget):
     def _set_enabled(self, value):
         '''set the value of enabled and modify the widgets to reflect the status
         '''
-        #FIXME: implement
+        self.nick.setEnabled(value)
+        self.message.setEnabled(value)
+        self._widget_dict['status_combo'].setEnabled(value)
+        self.search.setEnabled(value)
+        if self.userpanel_button:
+            self.userpanel_button.setEnabled(value)
         self._enabled = value
 
     def _get_enabled(self):

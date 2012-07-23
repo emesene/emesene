@@ -19,7 +19,6 @@
 ''' This module contains the tray icon's class'''
 
 import sys
-
 import PyQt4.QtGui as QtGui
 
 import gui
