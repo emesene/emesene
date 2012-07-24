@@ -25,11 +25,6 @@ import utils
 
 from gui.gtkui import check_gtk3
 
-if check_gtk3():
-    import TinyButtonNew as TinyButton
-else:
-    import TinyButton
-
 CLOSE_ON_LEFT = 0
 
 #FIXME: find correct GSettings value and replace this in gtk3
@@ -71,7 +66,9 @@ class TabWidget(gtk.HBox):
         self._label.set_ellipsize(True)
         self._label.set_text(text)
         label.add(self._label)
-        self.close = TinyButton.TinyButton(gtk.STOCK_CLOSE)
+        'tiny button'
+
+        self.close = extension.get_default('tiny button')(gtk.STOCK_CLOSE)
         self.close.set_tooltip_text(_('Close Tab (Ctrl+W)'))
         self.close.connect('clicked', on_close_clicked,
             conversation)

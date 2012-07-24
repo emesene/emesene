@@ -86,6 +86,11 @@ def gtk_main(Controller):
 
     import PictureHandler
 
+    if check_gtk3():
+        import TinyButtonNew
+    else:
+        import TinyButton
+
     setup()
     gobject.threads_init()
     gtk.gdk.threads_init()
@@ -177,8 +182,11 @@ def setup():
         ConversationToolbar.ConversationToolbar)
     if not check_gtk3():
         extension.category_register('image area selector', ImageAreaSelector.ImageAreaSelectorDialog)
+        extension.category_register('tiny button', TinyButton.TinyButton)
     else:
         extension.category_register('image area selector', ImageAreaSelectorNew.ImageAreaSelectorDialog)
+        extension.category_register('tiny button', TinyButtonNew.TinyButton)
+
     extension.category_register('filetransfer pool', FileTransferBarWidget.FileTransferBarWidget)
     extension.category_register('filetransfer widget', FileTransferWidget.FileTransferWidget)
 

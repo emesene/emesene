@@ -30,13 +30,6 @@ import gobject
 import gui
 import Info
 
-from gui.gtkui import check_gtk3
-
-if check_gtk3():
-    import TinyButtonNew as TinyButton
-else:
-    import TinyButton
-
 from e3.common.pluginmanager import get_pluginmanager
 
 class ExtensionListView(gtk.TreeView):
@@ -144,7 +137,8 @@ class ExtensionListTab(gtk.VBox):
         box.set_border_width(2)
         self.progresslabel = gtk.Label()
         self.progressbar = gtk.ProgressBar()
-        self.progress_cancel_button = TinyButton.TinyButton(gtk.STOCK_CANCEL)
+        TinyButton = extension.get_default('tiny button')
+        self.progress_cancel_button = TinyButton(gtk.STOCK_CANCEL)
         self.progress_cancel_button.set_tooltip_text(_('Cancel'))
         self.end_progress_handler = None
 
