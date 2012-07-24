@@ -149,6 +149,10 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
                 self._on_search_click(False)
                 self.contact_list.setFocus()
                 return
+        if event.key() == Qt.Key_Alt or \
+            event.key() == Qt.Key_Control or \
+            event.key() == Qt.Key_Meta:
+            return
         if not self.panel.nick.hasFocus() and \
            not self.panel.message.hasFocus():
             if not self.panel.search.isChecked():
