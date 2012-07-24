@@ -497,8 +497,8 @@ Do you want to fix your profile now?''')
         hbox.setContentsMargins(0, 0, 0, 0)
 
         Avatar = extension.get_default('avatar')
-        avatar = Avatar(handler.session, size=QtCore.QSize(96, 96))
-        avatar.set_display_pic_from_file(last_avatar)
+        avatar = Avatar(handler.session, size=96)
+        avatar.set_from_file(last_avatar)
         if handler.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
             avatar.clicked.connect(lambda *args: handler.on_set_picture_selected(handler.session))
             avatar.setToolTip(tr('Click here to set your avatar'))

@@ -56,14 +56,9 @@ class ConnectingPage(QtGui.QWidget):
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
-        # FIXME: ok, this should be substituted with the picture handler
-        # too lazy to do it now -.-'
-        if not os.path.exists(self._avatar_path):
-            self._avatar_path = gui.theme.image_theme.logo
         avatar_cls = extension.get_default('avatar')
 
-        widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.image_theme.logo,
-                                             clickable=False)
+        widget_d['display_pic'] = avatar_cls(clickable=False, crossfade=False)
         widget_d['label'] = QtGui.QLabel()
         widget_d['progress_bar'] = QtGui.QProgressBar()
         widget_d['cancel_btn'] = QtGui.QPushButton(tr('Cancel'))
@@ -87,19 +82,7 @@ class ConnectingPage(QtGui.QWidget):
         hor_lay.addStretch()
         self.setLayout(hor_lay)
 
-        # _avatar_path is passed to setPixmap/setMovie to avoid dpic's
-        # flickering
-        pic_handler = extension.get_and_instantiate('picture handler',
-                                                    self._avatar_path)
-        if pic_handler.can_handle():
-            pixmap = QtGui.QPixmap(self._avatar_path).scaled(96, 96,
-                                        transformMode=Qt.SmoothTransformation)
-            widget_d['display_pic'].setPixmap(pixmap)
-        else:
-            movie = QtGui.QMovie(self._avatar_path, parent=self)
-            movie.setScaledSize(QtCore.QSize(96, 96))
-            movie.start()
-            widget_d['display_pic'].setMovie(movie)
+        widget_d['display_pic'].set_from_file(self._avatar_path)
         widget_d['progress_bar'].setMinimum(0)
         widget_d['progress_bar'].setMaximum(0)
         widget_d['progress_bar'].setMinimumWidth(220)

@@ -78,7 +78,7 @@ class UserPanel(QtGui.QWidget):
         psm_box.addWidget(self.message)
         psm_box.addWidget(widget_dict['status_combo'])
         widget_dict['psm_box'] = psm_box
-        widget_dict['display_pic'] = avatar_cls(self.session)
+        widget_dict['display_pic'] = avatar_cls(self.session, size=64)
         widget_dict['display_pic'].setToolTip(tr('Click here to set your avatar'))
 
         my_info_lay_left = QtGui.QVBoxLayout()
@@ -210,7 +210,7 @@ class UserPanel(QtGui.QWidget):
         '''callback called when the picture of an account is changed'''
         # out account
         if account == self.session.account.account:
-            self._widget_dict['display_pic'].set_display_pic_from_file(path)
+            self._widget_dict['display_pic'].set_from_file(path)
 
     def on_profile_update_succeed(self, nick, message):
         '''method called when information about our profile is obtained
