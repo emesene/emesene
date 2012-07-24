@@ -19,21 +19,15 @@
 import gtk
 import pango
 import gobject
-
-from gui.gtkui import check_gtk3
-
-if check_gtk3():
-    import RenderersNew as Renderers
-else:
-    import Renderers
+import extension
 
 class TextField(gtk.VBox):
     '''this class represent a widget that is a button and when clicked
     it shows a textfield until the text is set, then the button appears again'''
 
     __gsignals__ = {
-        'text-changed': (gobject.SIGNAL_RUN_LAST, 
-                gobject.TYPE_NONE, 
+        'text-changed': (gobject.SIGNAL_RUN_LAST,
+                gobject.TYPE_NONE,
                 (gobject.TYPE_PYOBJECT,gobject.TYPE_PYOBJECT))
         }
 
@@ -44,8 +38,9 @@ class TextField(gtk.VBox):
         gtk.VBox.__init__(self)
 
         self.entry = gtk.Entry()
-        self.label = Renderers.SmileyLabel()
-        #self.label.set_ellipsize(pango.ELLIPSIZE_END)
+        SmileyLabel = extension.get_default('smiley label')
+        self.label = SmileyLabel()
+        self.label.set_ellipsize(pango.ELLIPSIZE_END)
         self.button = gtk.Button()
         self.button.set_alignment(0.0, 0.5)
         self.button.set_relief(gtk.RELIEF_NONE)

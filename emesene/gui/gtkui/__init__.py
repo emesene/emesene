@@ -132,10 +132,12 @@ def setup():
         extension.category_register('avatar renderer', Renderers.AvatarRenderer)
         extension.category_register('nick renderer', Renderers.CellRendererPlus)
         extension.register('nick renderer', Renderers.CellRendererNoPlus)
+        extension.register('smiley label', Renderers.SmileyLabel)
     else:
         extension.category_register('avatar renderer', RenderersNew.AvatarRenderer)
         extension.category_register('nick renderer', RenderersNew.CellRendererPlus)
         extension.register('nick renderer', RenderersNew.CellRendererNoPlus)
+        extension.register('smiley label', RenderersNew.SmileyLabel)
 
     extension.category_register('user panel', UserPanel.UserPanel)
 

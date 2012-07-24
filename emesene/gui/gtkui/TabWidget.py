@@ -19,6 +19,7 @@
 import sys
 import gtk
 import gobject
+import extension
 
 import utils
 
@@ -28,12 +29,6 @@ if check_gtk3():
     import TinyButtonNew as TinyButton
 else:
     import TinyButton
-
-if check_gtk3():
-    import RenderersNew as Renderers
-else:
-    import Renderers
-
 
 CLOSE_ON_LEFT = 0
 
@@ -58,7 +53,7 @@ class TabWidget(gtk.HBox):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, text, on_tab_menu, 
+    def __init__(self, text, on_tab_menu,
                  on_close_clicked, conversation):
         '''constructor'''
         gtk.HBox.__init__(self)
@@ -71,7 +66,8 @@ class TabWidget(gtk.HBox):
         label.connect('button-press-event', self.on_tab_clicked,
                            on_close_clicked, conversation)
         label.set_visible_window(False)
-        self._label = Renderers.SmileyLabel()
+        SmileyLabel = extension.get_default('smiley label')
+        self._label = SmileyLabel()
         self._label.set_ellipsize(True)
         self._label.set_text(text)
         label.add(self._label)
@@ -94,7 +90,6 @@ class TabWidget(gtk.HBox):
         self._on_close_button_on_tabs_visible(
               self.config.get_or_set('b_close_button_on_tabs', True))
 
-
         if self.config.i_tab_position > 1:
             self.set_orientation(gtk.ORIENTATION_VERTICAL)
             self._label.set_angle(90)
@@ -102,7 +97,7 @@ class TabWidget(gtk.HBox):
             self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
             self._label.set_angle(0)
 
-        self.config.subscribe(self.on_tab_position_change, 
+        self.config.subscribe(self.on_tab_position_change,
                                       'i_tab_position')
 
         self.image.show()
@@ -110,7 +105,7 @@ class TabWidget(gtk.HBox):
         self._label.show()
 
     def remove_subscriptions(self):
-        self.config.unsubscribe(self.on_tab_position_change, 
+        self.config.unsubscribe(self.on_tab_position_change,
                                         'i_tab_position')
         self.config.unsubscribe(self._on_close_button_on_tabs_visible,
                                         'b_close_button_on_tabs')
