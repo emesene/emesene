@@ -66,7 +66,6 @@ class TabWidget(gtk.HBox):
         self._label.set_ellipsize(True)
         self._label.set_text(text)
         label.add(self._label)
-        'tiny button'
 
         self.close = extension.get_default('tiny button')(gtk.STOCK_CLOSE)
         self.close.set_tooltip_text(_('Close Tab (Ctrl+W)'))
