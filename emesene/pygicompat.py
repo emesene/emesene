@@ -155,7 +155,7 @@ def get_slice(self, start, end, include_hidden_chars=False):
 Gtk.TextBuffer.get_slice = get_slice
 
 orig_forward_search = Gtk.TextIter.forward_search
-def forward_search(self, text, flags, limit=None ):
+def forward_search(self, text, flags, limit=None):
      return orig_forward_search(self, text, flags, limit)
 Gtk.TextIter.forward_search = forward_search
 
