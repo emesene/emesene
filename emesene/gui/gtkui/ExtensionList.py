@@ -27,7 +27,6 @@ import utils
 import extension
 import e3
 import gobject
-import gui
 import Info
 
 from e3.common.pluginmanager import get_pluginmanager

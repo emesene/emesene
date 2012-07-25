@@ -16,10 +16,8 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import gui
 from gui.base import MarkupParser
 from gui.base import Plus
-import gui.gtkui.utils as utils
 
 import glib
 import gtk

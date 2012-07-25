@@ -17,7 +17,6 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
-import gui
 
 class SearchEntry(gtk.Entry):
     def __init__(self, hint_text=_('Type to search...'), clear_text=_('Clear the search')):
@@ -42,4 +41,3 @@ class SearchEntry(gtk.Entry):
         else:
             self.set_icon_from_stock(1, gtk.STOCK_CLEAR)
             self.set_icon_tooltip_text(1, self.clear_text)
-

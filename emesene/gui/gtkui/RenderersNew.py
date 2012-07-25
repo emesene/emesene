@@ -19,11 +19,8 @@
 
 from __future__ import division
 
-import sys
-
 from gi.repository import Gtk, Gdk, GObject, GdkPixbuf
-from gi.repository import Pango, PangoCairo
-import cairo
+from gi.repository import Pango
 
 from gui.base import Plus
 import MarkupParser
