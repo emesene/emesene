@@ -375,6 +375,22 @@ class QQPlugin(object):
 QQPlugin_swigregister = _libwebqqpython.QQPlugin_swigregister
 QQPlugin_swigregister(QQPlugin)
 
+class QQEventQueue(object):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _libwebqqpython.new_QQEventQueue(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def pop(self): return _libwebqqpython.QQEventQueue_pop(self)
+    def push(self, *args): return _libwebqqpython.QQEventQueue_push(self, *args)
+    def size(self): return _libwebqqpython.QQEventQueue_size(self)
+    def empty(self): return _libwebqqpython.QQEventQueue_empty(self)
+    __swig_destroy__ = _libwebqqpython.delete_QQEventQueue
+    __del__ = lambda self : None;
+QQEventQueue_swigregister = _libwebqqpython.QQEventQueue_swigregister
+QQEventQueue_swigregister(QQEventQueue)
+
 class SingletonQQConfig(object):
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     def __init__(self, *args, **kwargs): raise AttributeError("No constructor defined - class is abstract")
@@ -573,15 +589,15 @@ class map_string_qqbuddy(object):
 map_string_qqbuddy_swigregister = _libwebqqpython.map_string_qqbuddy_swigregister
 map_string_qqbuddy_swigregister(map_string_qqbuddy)
 
-class pair_event_string(object):
+class pair_int_string(object):
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
     def __init__(self, *args): 
-        this = _libwebqqpython.new_pair_event_string(*args)
+        this = _libwebqqpython.new_pair_int_string(*args)
         try: self.this.append(this)
         except: self.this = this
-    first = _swig_property(_libwebqqpython.pair_event_string_first_get, _libwebqqpython.pair_event_string_first_set)
-    second = _swig_property(_libwebqqpython.pair_event_string_second_get, _libwebqqpython.pair_event_string_second_set)
+    first = _swig_property(_libwebqqpython.pair_int_string_first_get, _libwebqqpython.pair_int_string_first_set)
+    second = _swig_property(_libwebqqpython.pair_int_string_second_get, _libwebqqpython.pair_int_string_second_set)
     def __len__(self): return 2
     def __repr__(self): return str((self.first, self.second))
     def __getitem__(self, index): 
@@ -594,10 +610,10 @@ class pair_event_string(object):
         self.first = val
       else:
         self.second = val
-    __swig_destroy__ = _libwebqqpython.delete_pair_event_string
+    __swig_destroy__ = _libwebqqpython.delete_pair_int_string
     __del__ = lambda self : None;
-pair_event_string_swigregister = _libwebqqpython.pair_event_string_swigregister
-pair_event_string_swigregister(pair_event_string)
+pair_int_string_swigregister = _libwebqqpython.pair_int_string_swigregister
+pair_int_string_swigregister(pair_int_string)
 
 class list_pair_event_string(object):
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
@@ -643,6 +659,32 @@ class list_pair_event_string(object):
     __del__ = lambda self : None;
 list_pair_event_string_swigregister = _libwebqqpython.list_pair_event_string_swigregister
 list_pair_event_string_swigregister(list_pair_event_string)
+
+class pair_event_string(object):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _libwebqqpython.new_pair_event_string(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    first = _swig_property(_libwebqqpython.pair_event_string_first_get, _libwebqqpython.pair_event_string_first_set)
+    second = _swig_property(_libwebqqpython.pair_event_string_second_get, _libwebqqpython.pair_event_string_second_set)
+    def __len__(self): return 2
+    def __repr__(self): return str((self.first, self.second))
+    def __getitem__(self, index): 
+      if not (index % 2): 
+        return self.first
+      else:
+        return self.second
+    def __setitem__(self, index, val):
+      if not (index % 2): 
+        self.first = val
+      else:
+        self.second = val
+    __swig_destroy__ = _libwebqqpython.delete_pair_event_string
+    __del__ = lambda self : None;
+pair_event_string_swigregister = _libwebqqpython.pair_event_string_swigregister
+pair_event_string_swigregister(pair_event_string)
 
 class pymap(object):
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')

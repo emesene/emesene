@@ -86,8 +86,7 @@ class Worker(e3.Worker):
                 if not event_queue.empty() :
                     self.res_manager.lock()
                     while not event_queue.empty():
-                        item = event_queue.front()
-                        event_queue.pop_front()
+                        item = event_queue.pop()
         
                         if item[0] == libwebqqpython.ON_BUDDY_MESSAGE :
                             
@@ -130,13 +129,21 @@ class Worker(e3.Worker):
             _status = e3.status.OFFLINE
             if not self.res_manager.contacts[uin].status  == '':
                 _status = e3.status.ONLINE
+                
             contact = e3.Contact(account = nick, identifier = int(uin), nick = nick, message = self.res_manager.contacts[uin].lnick, _status = _status, blocked = False, cid = uin)
+            
+            if contact.cid  == self.session.account.account :
+                print nick
+                self.session.contacts.me.nick = nick
+                self.session.nick_change_succeed(nick)
+                continue
             index = self.res_manager.contacts[uin].cate_index
             group = categories_dict[index]
             self._add_contact_to_group( contact, group.name )
             self.session.contacts.contacts[nick] = contact
             self.nick_uin_map[nick] = uin
-       	    self.uin_nick_map[uin] = nick     
+       	    self.uin_nick_map[uin] = nick
+            
         self.session.login_succeed()
         self.session.contact_list_ready()
 
