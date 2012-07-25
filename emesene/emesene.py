@@ -270,7 +270,8 @@ class Controller(object):
     def _new_session(self, account=None):
         '''create a new session object'''
 
-        self.close_session(False)
+        if self.session:
+            self.close_session(False)
 
         self.session = extension.get_and_instantiate('session')
 
