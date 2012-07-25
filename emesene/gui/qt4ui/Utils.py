@@ -20,12 +20,26 @@
 
 import xml
 import e3
+import os
+import urllib
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
+from PyQt4.QtCore import Qt
 
 from gui.base import MarkupParser
+
+def path_to_url(path):
+    if os.name == "nt":
+        # on windows os.path.join uses backslashes
+        path = path.replace("\\", "/")
+        path = path[2:]
+
+    path = path.encode("iso-8859-1")
+    path = urllib.quote(path)
+    path = "file://" + path
+
+    return path
 
 def qfont_to_style(qfont, color=None):
 

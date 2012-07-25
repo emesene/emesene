@@ -18,6 +18,7 @@
 
 '''This module contains the AdiumChatOutput class'''
 import base64
+import xml
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -27,65 +28,105 @@ import e3
 import gui
 from gui.base import Plus
 from gui.qt4ui import Utils
-from gui.qt4ui.Utils import tr
-
 
 class AdiumChatOutput (QtGui.QScrollArea):
     '''A widget which displays various messages of a conversation
     using Adium themes'''
-    # pylint: disable=W0612
     NAME = 'AdiumChatOutput'
     DESCRIPTION = 'A widget to display conversation messages with Adium' \
                   'themes. Based on Webkit technology.'
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
-    # pylint: enable=W0612
+
+    search_request = QtCore.pyqtSignal(basestring)
+
+    #FIXME: implement custom context menu and steal emoticon option
 
     def __init__(self, config, parent=None):
         QtGui.QScrollArea.__init__(self, parent)
-
         self.theme = gui.theme.conv_theme
         self.config = config
         self._qwebview = QtWebKit.QWebView(self)
 
+        self.locked = 0
+        self.pending = []
+
         self.setWidget(self._qwebview)
         self.setWidgetResizable(True)
+        settings = self._qwebview.page().settings()
+        settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 8)
         self._qwebview.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
         self._qwebview.page().setLinkDelegationPolicy(
                                     QtWebKit.QWebPage.DelegateAllLinks)
+        self.clear()
+        self._qwebview.loadFinished.connect(self._loading_finished_cb)
+        self._qwebview.linkClicked.connect(self.on_link_clicked)
 
-        pic = gui.theme.image_theme.user
-        body = gui.theme.conv_theme.get_body('', '', '', pic, pic)
-        self._qwebview.setHtml(body)
+    def _loading_finished_cb(self, ok):
+        self.ready = True
 
-        self._qwebview.linkClicked.connect(
-                        lambda qt_url: gui.base.Desktop.open(qt_url.toString()))
+        for function in self.pending:
+            self._append_message(function, self.config.b_allow_auto_scroll)
+        self.pending = []
+
+    def on_link_clicked(self, url):
+        '''callback called when a link is clicked'''
+        href = unicode(url.toString())
+        if href.startswith("search://"):
+            self.search_request.emit(href)
+            return True
+
+        if not href.startswith("file://"):
+            gui.base.Desktop.open(href)
+            return True
+
+        return False
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
         '''clear the content'''
         body = self.theme.get_body(source, target, target_display, source_img,
                 target_img)
-        self._qwebview.setHtml(body)
+        self._qwebview.setHtml(body, QtCore.QUrl(Utils.path_to_url(self.theme.path)))
+        self.pending = []
+        self.ready = False
 
     def _append_message(self, msg, scroll=True):
         '''add a message to the conversation'''
-
         html = self.theme.format(msg, scroll)
         self._qwebview.page().mainFrame().evaluateJavaScript(html)
 
+    def lock(self):
+        self.locked += 1
+
+    def unlock(self):
+        #add messages and then unlock
+        self.locked -= 1
+        if self.locked <= 0:
+            for msg in self.pending:
+                self._append_message(msg, self.config.b_allow_auto_scroll)
+            self.pending = []
+            self.locked = 0
+
     def send_message(self, formatter, msg):
         '''add a message to the widget'''
-        self._append_message(msg, self.config.b_allow_auto_scroll)
+        self.append(msg)
 
     def receive_message(self, formatter, msg):
         '''add a message to the widget'''
-        self._append_message(msg, self.config.b_allow_auto_scroll)
+        self.append(msg)
 
     def information(self, formatter, msg):
         '''add an information message to the widget'''
         msg.message = Plus.msnplus_strip(msg.message)
-        self._append_message(msg, self.config.b_allow_auto_scroll)
+        self.append(msg)
+
+    def append(self, msg):
+        '''appends a msg into the view'''
+        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
+            self.pending.append(msg)
+        else:
+            self._append_message(msg, self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
