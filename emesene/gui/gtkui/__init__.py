@@ -86,6 +86,11 @@ def gtk_main(Controller):
 
     import PictureHandler
 
+    if check_gtk3():
+        import TinyButtonNew
+    else:
+        import TinyButton
+
     setup()
     gobject.threads_init()
     gtk.gdk.threads_init()
@@ -132,10 +137,12 @@ def setup():
         extension.category_register('avatar renderer', Renderers.AvatarRenderer)
         extension.category_register('nick renderer', Renderers.CellRendererPlus)
         extension.register('nick renderer', Renderers.CellRendererNoPlus)
+        extension.register('smiley label', Renderers.SmileyLabel)
     else:
         extension.category_register('avatar renderer', RenderersNew.AvatarRenderer)
         extension.category_register('nick renderer', RenderersNew.CellRendererPlus)
         extension.register('nick renderer', RenderersNew.CellRendererNoPlus)
+        extension.register('smiley label', RenderersNew.SmileyLabel)
 
     extension.category_register('user panel', UserPanel.UserPanel)
 
@@ -175,8 +182,11 @@ def setup():
         ConversationToolbar.ConversationToolbar)
     if not check_gtk3():
         extension.category_register('image area selector', ImageAreaSelector.ImageAreaSelectorDialog)
+        extension.category_register('tiny button', TinyButton.TinyButton)
     else:
         extension.category_register('image area selector', ImageAreaSelectorNew.ImageAreaSelectorDialog)
+        extension.category_register('tiny button', TinyButtonNew.TinyButton)
+
     extension.category_register('filetransfer pool', FileTransferBarWidget.FileTransferBarWidget)
     extension.category_register('filetransfer widget', FileTransferWidget.FileTransferWidget)
 

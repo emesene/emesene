@@ -41,7 +41,7 @@ class UserPanel(gtk.VBox):
         self._enabled = True
 
         Avatar = extension.get_default('avatar')
-        
+
         self.avatar = Avatar(cell_dimension=48)
 
         self.avatarBox = gtk.EventBox()
@@ -92,7 +92,7 @@ class UserPanel(gtk.VBox):
         nick_hbox.pack_start(self.mail, False)
         nick_hbox.pack_start(self.search, False)
 
-        # enable this code and you'll get a nice button which fires a signal        
+        # enable this code and you'll get a nice button which fires a signal
         #def do_something_weird(item):
         #    from e3.base.Event import Event
         #    session.add_event(Event.EVENT_DISCONNECTED, 'Tested disconnection', 0)

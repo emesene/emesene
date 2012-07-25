@@ -27,13 +27,6 @@ import gui
 import utils
 import extension
 import gobject
-from gui.gtkui import check_gtk3
-
-if check_gtk3():
-    import RenderersNew as Renderers
-else:
-    import Renderers
-
 import gui.base.ConversationStatus as ConversationStatus
 
 import logging
@@ -116,21 +109,22 @@ class InformationWidget(gtk.VBox):
         else:
             self.contact = None
 
-        self.nick = Renderers.SmileyLabel()
+        SmileyLabel = extension.get_default('smiley label')
+        self.nick = SmileyLabel()
         self.nick.set_alignment(0.0, 0.5)
         self.nick.set_ellipsize(pango.ELLIPSIZE_END)
         self.mail = gtk.Label()
         self.mail.set_alignment(0.0, 0.5)
         self.mail.set_ellipsize(pango.ELLIPSIZE_END)
         self.mail.set_selectable(True)
-        self.message = Renderers.SmileyLabel()
+        self.message = SmileyLabel()
         self.message.set_ellipsize(pango.ELLIPSIZE_END)
         self.message.set_alignment(0.0, 0.5)
         self.status = gtk.Image()
         self.status.set_alignment(0.0, 0.5)
         Avatar = extension.get_default('avatar')
         self.image = Avatar()
-        image_align = gtk.Alignment(0.5,0.5)
+        image_align = gtk.Alignment(0.5, 0.5)
         image_align.add(self.image)
         self.blocked = gtk.Label()
         self.blocked.set_alignment(0.0, 0.5)
@@ -190,7 +184,7 @@ class InformationWidget(gtk.VBox):
                 gobject.markup_escape_text(self.contact.message))
             self.status.set_from_file(
             gui.theme.image_theme.status_icons[self.contact.status])
-            
+
             self.image.set_from_file(self.contact.picture,
                                      self.contact.blocked)
 
@@ -226,7 +220,8 @@ class ListWidget(gtk.VBox):
         column2 = gtk.TreeViewColumn()
         column2.set_expand(True)
 
-        crt = Renderers.CellRendererPlus()
+        NickRenderer = extension.get_default('nick renderer')
+        crt = NickRenderer()
         crt_timestamp = gtk.CellRendererText()
         crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr = gtk.CellRendererPixbuf()

@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 ''' This module contains the utilities'''
 
 import xml
@@ -50,7 +66,7 @@ def escape(string, add_dic=None):
     add_dic.update(MarkupParser.dic)
     add_dic.update(dic)
     return xml.sax.saxutils.escape(string, add_dic)
-    
+
 
 def unescape(string, add_dic_inv=None):
     '''replace the values on dic_inv keys with the values'''
@@ -63,39 +79,39 @@ def unescape(string, add_dic_inv=None):
 
 
 def pixmap_rounder(qpixmap, perc_radius=16.7):
-    '''Return the given pixmap with corners 
+    '''Return the given pixmap with corners
     rounded by the given radius'''
-    
+
     # create the clipping path:
     clip_path = QtGui.QPainterPath()
-    clip_path.addRoundedRect( QtCore.QRectF( qpixmap.rect()), 
-                              perc_radius, perc_radius, 
+    clip_path.addRoundedRect( QtCore.QRectF( qpixmap.rect()),
+                              perc_radius, perc_radius,
                               Qt.RelativeSize)
-    
+
     # create the target pixmap, completerly tansparent
     rounded_pixmap = QtGui.QPixmap(qpixmap.size())
     rounded_pixmap.fill(Qt.transparent)
-    
+
     # create the painter
     painter = QtGui.QPainter(rounded_pixmap)
     painter.setRenderHint(QtGui.QPainter.Antialiasing)
     painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
-    
-    # paints a black rounded rect. This will be the area where 
+
+    # paints a black rounded rect. This will be the area where
     # we will paint the original pixmap
     painter.fillPath(clip_path, Qt.black)
-    
+
     # paints the original pixmap in the black area.
     painter.setCompositionMode(QtGui.QPainter.CompositionMode_SourceIn)
     rect = QtCore.QRect(QtCore.QPoint(0, 0), qpixmap.size())
     painter.drawPixmap(rect, qpixmap, rect)
-    
+
     painter.end()
     return rounded_pixmap
-    
-    
-    
-    
+
+
+
+
 
 def parse_emotes(text, include_table_tags=True):
     '''Parses emotes in text string, returning a html string laid out
@@ -110,22 +126,22 @@ def parse_emotes(text, include_table_tags=True):
 
 def tr(string):
     '''Returns the given string translated by gettext, and converted
-    explicitly to unicode. Needed for compatibility issues between 
+    explicitly to unicode. Needed for compatibility issues between
     PyQt and gettext. See issue #586'''
     return unicode(_(string))
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
 from HTMLParser import HTMLParser
 class MyHTMLParser (HTMLParser):
     '''This class parses html text, collecting plain
-    text and substituting <img> tags with a proper 
+    text and substituting <img> tags with a proper
     smiley shortcut if any'''
-    
+
     def __init__(self, include_table_tags):
         '''Constructor'''
         HTMLParser.__init__(self)
@@ -161,7 +177,7 @@ class MyHTMLParser (HTMLParser):
             self._small = True
         if tag == 'br':
             self._data += u'</tr></table><table cellspacing="0"><tr>'
-        
+
 
     def handle_endtag(self, tag):
         '''Handle closing tags'''
@@ -171,14 +187,14 @@ class MyHTMLParser (HTMLParser):
             self._bold = False
         if tag == 'small':
             self._small = False
-            
-            
+
+
     def handle_charref(self, name):
         self._data += u'<td>&%s;</td>' % name
-    
+
     def handle_entityref(self, name):
         self._data += u'<td>&%s;</td>' % name
-    
+
     def handle_data(self, data):
         '''Handle data sequences'''
         if self._italic:

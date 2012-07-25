@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''a module that defines the api of objects that display dialogs'''
 
 import logging
@@ -16,6 +32,7 @@ import gui
 import extension
 
 log = logging.getLogger('qt4ui.Dialog')
+
 
 class Dialog(object):
     '''a class full of static methods to handle dialogs, dont instantiate it'''
@@ -480,8 +497,8 @@ Do you want to fix your profile now?''')
         hbox.setContentsMargins(0, 0, 0, 0)
 
         Avatar = extension.get_default('avatar')
-        avatar = Avatar(handler.session, size=QtCore.QSize(96, 96))
-        avatar.set_display_pic_from_file(last_avatar)
+        avatar = Avatar(handler.session, size=96)
+        avatar.set_from_file(last_avatar)
         if handler.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):
             avatar.clicked.connect(lambda *args: handler.on_set_picture_selected(handler.session))
             avatar.setToolTip(tr('Click here to set your avatar'))

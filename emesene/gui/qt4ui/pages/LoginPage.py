@@ -73,22 +73,18 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
                 self.autologin_started = True
                 self._on_start_login()
 
-        # TODO: this way, if there are remembered accounts, but no default 
-        #account, no display pic is shown....
-
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
         avatar_cls = extension.get_default('avatar')
-        widget_d['display_pic'] = avatar_cls(default_pic=gui.theme.image_theme.logo,
-                                            clickable=False)
+        widget_d['display_pic'] = avatar_cls(clickable=False)
         account_box = QtGui.QHBoxLayout()
         widget_d['account_box'] = account_box
         widget_d['account_combo'] = QtGui.QComboBox()
         account_img = QtGui.QLabel()
         account_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.user))
         widget_d['account_img'] = account_img
-        widget_d['forget_me_btn']  = QtGui.QToolButton()
+        widget_d['forget_me_btn'] = QtGui.QToolButton()
         widget_d['forget_me_btn'].setAutoRaise(True)
         widget_d['forget_me_btn'].setIcon(
                                     QtGui.QIcon.fromTheme('edit-delete'))
@@ -232,19 +228,18 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
     def _on_chosen_account_changed(self, acc_index):
         ''' Slot executed when the user select another account from the drop
         down menu of the account combo'''
-        log.info('*** _on_chosen_account_changed')
         widget_d = self._widget_d
-        account_combo  = widget_d['account_combo']
-        password_edit  = widget_d['password_edit']
+        account_combo = widget_d['account_combo']
+        password_edit = widget_d['password_edit']
         index_in_account_list = account_combo.itemData(acc_index).toPyObject()
-        # If we don't have any account at all, this slots gets called but 
+        # If we don't have any account at all, this slots gets called but
         # index_in_account_list is None.
         if not index_in_account_list is None:
             account = self._account_list[index_in_account_list]
             self.clear_login_form()
             # display_pic
             path = self.current_avatar_path(account.email)
-            widget_d['display_pic'].set_display_pic_from_file(path)
+            widget_d['display_pic'].set_from_file(path)
             # password:
             if account.password:
                 password_edit.setText(account.password)
@@ -350,7 +345,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         self.config_account(account, service_name, save_account, save_password,
                             auto_login)
         account.uuid = self.account_uuid
-            
+
         # Invoke the  login callback
         self.callback(account, self.session_id, self.proxy,
                             self.use_http, self.use_ipv6, self.server_host,
@@ -360,15 +355,15 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         ''' Resets the login form '''
         widget_dic = self._widget_d
         if clear_pic:
-            widget_dic['display_pic'].set_default_pic()
+            widget_dic['display_pic'].set_from_file(None)
         widget_dic['password_edit'].clear()
         widget_dic['status_btn'].set_status(e3.status.ONLINE)
         # _on_checkbox_state_changed enables them:
         widget_dic['auto_login_chk'].setChecked(False)
         widget_dic['save_password_chk'].setChecked(False)
         widget_dic['save_account_chk'].setChecked(False)
-        
-    
+
+
     def _on_checkbox_state_refresh(self):
         ''' Checks wether each checkbox in the login page should be
         enabled or disabled, checked or unchecked and changes its
@@ -380,21 +375,21 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         save_password_chk   = widget_dict['save_password_chk']
         auto_login_chk      = widget_dict['auto_login_chk']
         login_btn           = widget_dict['login_btn']
-        
+
         if auto_login_chk.isChecked():
             save_password_chk.setChecked(True)
             save_password_chk.setEnabled(False)
         else:
             save_password_chk.setEnabled(True)
-            
+
         if save_password_chk.isChecked():
             save_account_chk.setChecked(True)
             save_account_chk.setEnabled(False)
         else:
             save_account_chk.setEnabled(True)
-            
+
         if (not account_combo.currentText().isEmpty()) and  \
-           (not password_edit.text().isEmpty()):  
+           (not password_edit.text().isEmpty()):
             login_btn.setEnabled(True)
         else:
             login_btn.setEnabled(False)
@@ -403,15 +398,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         '''
         clear all login fields and checkbox
         '''
-        widget_dic = self._widget_d
-        if clear_pic:
-            widget_dic['display_pic'].set_default_pic()
-        widget_dic['password_edit'].clear()
-        widget_dic['status_btn'].set_status(e3.status.ONLINE)
-        # _on_checkbox_state_changed enables them:
-        widget_dic['auto_login_chk'].setChecked(False)
-        widget_dic['save_password_chk'].setChecked(False)
-        widget_dic['save_account_chk'].setChecked(False)
+        self.clear_login_form(clear_pic)
 
     def show_error(self, reason, login_failed=False):
         '''

@@ -1,15 +1,32 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module contains classes to represent the conversation page.'''
 
 import logging
 
-import PyQt4.QtGui      as QtGui
+import PyQt4.QtGui as QtGui
 
 import gui
 import extension
 
 log = logging.getLogger('qt4ui.ConversationPage')
+
 
 class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     '''The Conversation Page'''
@@ -30,21 +47,13 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
 
         # to prevent top level window's destruction:
         self.qt_parent = parent
-
         self.tabCloseRequested.connect(self._on_tab_close_request)
-        # this was sbuscribed in base class' constructor. Now it's not
-        self.session.signals.contact_attr_changed.subscribe(
-                                    self._on_contact_attr_changed)
 
-
-    def __del__(self):
-        log.debug('conversation manager adieeeeeeeuuuu ;______;')
-
-    def get_parent(self): # emesene's
+    def get_parent(self):
         '''Return a reference to the top level window containing this page'''
         return QtGui.QTabWidget.parent(self).parent()
 
-    def set_current_page(self, tab_index): # emesene's
+    def set_current_page(self, tab_index):
         '''Show the chat tab at the given index'''
         QtGui.QTabWidget.setCurrentIndex(self, tab_index)
 
@@ -58,8 +67,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         account = session.contacts.get(members[0])
         conversation.tab_index = self.addTab(conversation,
                     (unicode(account.display_name)))
-        self.setTabIcon(conversation.tab_index,
-                        QtGui.QIcon(gui.theme.image_theme.status_icons[account.status]))
+        conversation.conv_manager = self
         return conversation
 
     def get_dimensions(self):
@@ -92,27 +100,10 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         index = self.indexOf(conversation)
         self.removeTab(index)
 
-    def set_message_waiting(self, conversation, is_waiting): # emesene's
+    def set_message_waiting(self, conversation, is_waiting):
         '''Not Sure what to do here....'''
         log.info('Conversation: %s; is_waiting: %s' %
                  (conversation, is_waiting))
-
-    def _on_contact_attr_changed(self, account, change_type, old_value,
-            do_notify=True):
-        '''called when an attribute of a contact changes.
-        Overridden to update tabs'''
-        # it's not subscribed in base class anymore, so don't invoke this
-        #gui.base.ConversationManager._on_contact_attr_changed(self, account,
-        #                                                      change_type,
-        #                                                      old_value,
-        #                                                      do_notify)
-        for conversation in self.conversations.values():
-            if account in conversation.members:
-                index = self.indexOf(conversation)
-                account = self.session.contacts.get(conversation.members[0])
-                icon = QtGui.QIcon(gui.theme.image_theme.status_icons[account.status])
-                self.setTabIcon(index, icon)
-                self.setTabText(index, unicode(account.display_name))
 
     #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
     def _on_tab_close_request(self, index):

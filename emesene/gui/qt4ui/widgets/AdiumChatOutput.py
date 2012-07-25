@@ -1,21 +1,37 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module contains the AdiumChatOutput class'''
 import base64
 
-from PyQt4      import QtGui
-from PyQt4      import QtCore
-from PyQt4      import QtWebKit
+from PyQt4 import QtGui
+from PyQt4 import QtCore
+from PyQt4 import QtWebKit
 
 import e3
 import gui
 from gui.base import Plus
-from gui.qt4ui  import Utils
+from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
 
 
 class AdiumChatOutput (QtGui.QScrollArea):
-    '''A widget which displays various messages of a conversation 
+    '''A widget which displays various messages of a conversation
     using Adium themes'''
     # pylint: disable=W0612
     NAME = 'AdiumChatOutput'
@@ -24,27 +40,26 @@ class AdiumChatOutput (QtGui.QScrollArea):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
-    
-    
+
     def __init__(self, config, parent=None):
         QtGui.QScrollArea.__init__(self, parent)
-        
+
         self.theme = gui.theme.conv_theme
         self.config = config
         self._qwebview = QtWebKit.QWebView(self)
-        
+
         self.setWidget(self._qwebview)
         self.setWidgetResizable(True)
         self._qwebview.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
         self._qwebview.page().setLinkDelegationPolicy(
                                     QtWebKit.QWebPage.DelegateAllLinks)
-        
+
         pic = gui.theme.image_theme.user
         body = gui.theme.conv_theme.get_body('', '', '', pic, pic)
         self._qwebview.setHtml(body)
-        
+
         self._qwebview.linkClicked.connect(
-                        lambda qt_url: gui.base.Desktop.open(qt_url.toString()) )
+                        lambda qt_url: gui.base.Desktop.open(qt_url.toString()))
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
@@ -57,7 +72,6 @@ class AdiumChatOutput (QtGui.QScrollArea):
         '''add a message to the conversation'''
 
         html = self.theme.format(msg, scroll)
-
         self._qwebview.page().mainFrame().evaluateJavaScript(html)
 
     def send_message(self, formatter, msg):
@@ -79,7 +93,7 @@ class AdiumChatOutput (QtGui.QScrollArea):
             _creator, _friendly, path = what
             _friendly = xml.sax.saxutils.unescape(_friendly)
             #see gui/base/MarkupParser.py:
-            _id = base64.b64encode(_creator + _friendly) 
+            _id = base64.b64encode(_creator + _friendly)
             mystr = '''
                         var now=new Date();
                         var x=document.images;

@@ -17,14 +17,9 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gtk
-
-from gui.gtkui import check_gtk3
+import extension
 from gui.base import Plus
 
-if check_gtk3():
-    import RenderersNew as Renderers
-else:
-    import Renderers
 
 class Header(gtk.HBox):
     '''a widget used to display some information about the conversation'''
@@ -40,7 +35,8 @@ class Header(gtk.HBox):
         '''constructor'''
         gtk.HBox.__init__(self)
         self.set_border_width(2)
-        self._information = Renderers.SmileyLabel()
+        SmileyLabel = extension.get_default('smiley label')
+        self._information = SmileyLabel()
 
         eventBox = gtk.EventBox()
         eventBox.set_visible_window(False)

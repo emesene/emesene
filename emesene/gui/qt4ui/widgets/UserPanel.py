@@ -46,7 +46,7 @@ class UserPanel(QtGui.QWidget):
 
         widget_dict = self._widget_dict
 
-        nick_box = QtGui.QHBoxLayout()
+        self.nick_box = QtGui.QHBoxLayout()
         self.nick = nick_edit_cls()
         self.nick.setToolTip(tr('Click here to set your nick name'))
         widget_dict['mail_btn'] = QtGui.QToolButton()
@@ -57,18 +57,19 @@ class UserPanel(QtGui.QWidget):
         widget_dict['mail_btn'].setText("(0)")
         widget_dict['mail_btn'].setToolTip(tr('Click here to access your mail'))
 
+        self.userpanel_button = None
+
         self.search = QtGui.QToolButton()
         self.search.setCheckable(True)
         self.search.setIcon(QtGui.QIcon.fromTheme('edit-find'))
         self.search.setToolTip(tr('Search (Ctrl+F)'))
-        nick_box.addWidget(self.nick)
-        nick_box.addWidget(widget_dict['mail_btn'])
-        nick_box.addWidget(self.search)
+        self.nick_box.addWidget(self.nick)
+        self.nick_box.addWidget(widget_dict['mail_btn'])
+        self.nick_box.addWidget(self.search)
 
         empty_message_text = tr("Click here to set your message")
         self.message = nick_edit_cls(allow_empty=True,
             empty_message=empty_message_text)
-        self.message = self.message
         self.message.setToolTip(empty_message_text)
         widget_dict['status_combo'] = StatusButton.StatusButton(self.session)
         widget_dict['status_combo'].setToolTip(tr('Click here to change your status'))
@@ -77,12 +78,12 @@ class UserPanel(QtGui.QWidget):
         psm_box.addWidget(self.message)
         psm_box.addWidget(widget_dict['status_combo'])
         widget_dict['psm_box'] = psm_box
-        widget_dict['display_pic'] = avatar_cls(self.session)
+        widget_dict['display_pic'] = avatar_cls(self.session, size=64)
         widget_dict['display_pic'].setToolTip(tr('Click here to set your avatar'))
 
         my_info_lay_left = QtGui.QVBoxLayout()
         my_info_lay_left.setContentsMargins(0, 0, 0, 0)
-        my_info_lay_left.addLayout(nick_box)
+        my_info_lay_left.addLayout(self.nick_box)
         my_info_lay_left.addLayout(psm_box)
 
         my_info_lay = QtGui.QHBoxLayout()
@@ -108,7 +109,7 @@ class UserPanel(QtGui.QWidget):
         self.on_profile_update_succeed(self.session.contacts.me.display_name,
             self.session.contacts.me.message)
         self.on_picture_change_succeed(self.session.account.account,
-            self.session.contacts.me.picture)
+            self.session.config.last_avatar)
         self._on_show_mail_inbox_changed(self.session.config.b_show_mail_inbox)
         self._add_subscriptions()
 
@@ -130,6 +131,9 @@ class UserPanel(QtGui.QWidget):
         self.session.signals.profile_set_succeed.subscribe(
             self.on_profile_update_succeed)
 
+        extension.unsubscribe(
+            self._on_userpanel_button_changed, "userpanel button")
+
     def remove_subscriptions(self):
         '''unsubscribe all signals'''
         self.session.signals.message_change_succeed.unsubscribe(
@@ -148,10 +152,31 @@ class UserPanel(QtGui.QWidget):
         self.session.signals.profile_set_succeed.unsubscribe(
             self.on_profile_update_succeed)
 
+        extension.unsubscribe(
+            self._on_userpanel_button_changed, "userpanel button")
+
+    def _on_userpanel_button_changed(self, newvalue):
+        if type(self.userpanel_button) != newvalue:
+            #first remove current button
+            if not self.userpanel_button is None:
+                self.nick_box.removeWidget(self.userpanel_button)
+                self.userpanel_button = None
+
+            if newvalue is not None:
+                #add new button
+                self.userpanel_button = newvalue(self, self.main_window)
+                self.nick_box.AddWidget(self.userpanel_button)
+                self.userpanel_button.show()
+
     def _set_enabled(self, value):
         '''set the value of enabled and modify the widgets to reflect the status
         '''
-        #FIXME: implement
+        self.nick.setEnabled(value)
+        self.message.setEnabled(value)
+        self._widget_dict['status_combo'].setEnabled(value)
+        self.search.setEnabled(value)
+        if self.userpanel_button:
+            self.userpanel_button.setEnabled(value)
         self._enabled = value
 
     def _get_enabled(self):
@@ -185,7 +210,7 @@ class UserPanel(QtGui.QWidget):
         '''callback called when the picture of an account is changed'''
         # out account
         if account == self.session.account.account:
-            self._widget_dict['display_pic'].set_display_pic_from_file(path)
+            self._widget_dict['display_pic'].set_from_file(path)
 
     def on_profile_update_succeed(self, nick, message):
         '''method called when information about our profile is obtained

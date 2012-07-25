@@ -20,7 +20,6 @@ import gtk
 
 import e3
 import gui
-from gui.gtkui import check_gtk3
 import utils
 
 

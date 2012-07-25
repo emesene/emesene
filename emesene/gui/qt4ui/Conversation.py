@@ -20,18 +20,15 @@
 
 import logging
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
+from PyQt4.QtCore import Qt
 
 from gui.qt4ui.Utils import tr
 
 import extension
 import gui
 import gui.qt4ui.widgets as Widgets
-from   gui.qt4ui     import Utils
-
-
 log = logging.getLogger('qt4ui.Conversation')
 
 
@@ -57,28 +54,31 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self._setup_ui()
 
         #update information
-        if self.members:
+        if len(self.members) == 0:
+            self.header.information = ('connecting', 'creating conversation')
+        else:
+            #update adium theme header/footer
             account = self.members[0]
             contact = self.session.contacts.safe_get(account)
+            his_picture = contact.picture
+            nick = contact.nick
+            display_name = contact.display_name
             self.set_sensitive(not contact.blocked, True)
+            my_picture = self.session.contacts.me.picture
+            self.output.clear(account, nick, display_name,
+                              my_picture, his_picture)
 
         # emesene's
         self.tab_index = 0
-        self.input = self._widget_d['chat_input']
-        self.output = self._widget_d['chat_output']
+        self.conv_manager = None
 
         self._load_style()
-        self._widget_d['chat_input'].e3_style = self.cstyle
+        self.input.e3_style = self.cstyle
 
-        # not a particularly nice lambda....
-        # FIXME: This will have to be changed when groups will be
-        #        implemented
-        self._on_typing_timer.setSingleShot(True)
-        self._on_typing_timer.timeout.connect(
-            lambda *args: self.header.set_icon(
-                gui.theme.image_theme.status_icons[
-                    self.session.contacts.get(
-                        self.members[0]).status]))
+        self.typing_timeout = QtCore.QTimer()
+        self.typing_timeout.setSingleShot(False)
+        self.typing_timeout.timeout.connect(self.update_tab)
+
         self.subscribe_signals()
 
     def __del__(self):
@@ -96,39 +96,46 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         ContactInfo = extension.get_default('conversation info')
 
         # TOP LEFT
-        widget_d['chat_output'] = conv_output_cls(self.session.config)
+        self.output = conv_output_cls(self.session.config)
         top_left_lay = QtGui.QHBoxLayout()
-        top_left_lay.setContentsMargins (0, 0, 0, 0)
-        top_left_lay.addWidget(widget_d['chat_output'])
+        top_left_lay.setContentsMargins(0, 0, 0, 0)
+        top_left_lay.addWidget(self.output)
 
         # BOTTOM LEFT
-        self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session, gui.theme, self)
+        self.toolbar_handler = gui.base.ConversationToolbarHandler(self.session,
+                                 gui.theme, self)
         self.toolbar = conv_toolbar_cls(self.toolbar_handler, self.session)
         self.toolbar.redraw_ublock_button(self._get_first_contact().blocked)
         self.toolbar.update_toggle_avatar_icon(self.session.config.b_show_info)
 
         widget_d['smiley_chooser'] = smiley_chooser_cls()
-        widget_d['chat_input'] = Widgets.ChatInput()
+        self.input = Widgets.ChatInput()
 
-        bottom_left_lay = QtGui.QVBoxLayout()
-        bottom_left_lay.setContentsMargins(0, 0, 0, 0)
-        bottom_left_lay.addWidget(self.toolbar)
-        bottom_left_lay.addWidget(widget_d['chat_input'])
+        self.bottom_left_lay = QtGui.QVBoxLayout()
+        self.bottom_left_lay.setContentsMargins(0, 0, 0, 0)
+        self.bottom_left_lay.addWidget(self.toolbar)
+        self.bottom_left_lay.addWidget(self.input)
+        if self.below_conversation:
+            self.bottom_left_lay.addWidget(self.below_conversation)
 
-        widget_d['chat_input'].set_smiley_dict(gui.theme.emote_theme.emotes)
+        self.input.set_smiley_dict(gui.theme.emote_theme.emotes)
         widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
-        widget_d['chat_input'].return_pressed.connect(
+        self.input.return_pressed.connect(
                             self._on_send_btn_clicked)
-        widget_d['chat_input'].style_changed.connect(
+        self.input.style_changed.connect(
                             self._on_new_style_selected)
+
+        BelowConversation = extension.get_default('below conversation')
+        if BelowConversation is not None:
+            self.below_conversation = BelowConversation(self, self.session)
 
         # LEFT (TOP & BOTTOM)
         self.left_widget = QtGui.QSplitter(Qt.Vertical)
         splitter_up = QtGui.QWidget()
         splitter_down = QtGui.QWidget()
         splitter_up.setLayout(top_left_lay)
-        splitter_down.setLayout(bottom_left_lay)
+        splitter_down.setLayout(self.bottom_left_lay)
         self.left_widget.addWidget(splitter_up)
         self.left_widget.addWidget(splitter_down)
 
@@ -152,16 +159,15 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         lay.addLayout(self.lay_no_info)
 
         self.setLayout(lay)
-        extension.subscribe(self.on_conversation_info_extension_changed, 'conversation info')
 
     def on_font_selected(self, style):
         '''called when a new font is selected'''
         gui.base.Conversation.on_font_selected(self, style)
-        self._widget_d['chat_input'].e3_style = style
+        self.input.e3_style = style
 
     def input_grab_focus(self):
         '''sets the focus on the input widget'''
-        self._widget_d['chat_input'].setFocus(Qt.OtherFocusReason)
+        self.input.setFocus(Qt.OtherFocusReason)
 
     def on_conversation_info_extension_changed(self, new_extension):
         if type(self.info) != new_extension:
@@ -171,22 +177,32 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             if new_extension:
                 self.info = new_extension(self.session, self.members)
                 if self.session.config.get_or_set('b_avatar_on_left', False):
-                    self.lay_no_info.addWidget(widget, 0, 1)
+                    self.lay_no_info.addWidget(self.info, 0, 1)
                     self.lay_no_info.removeWidget(self.left_widget)
                     self.lay_no_info.addWidget(self.left_widget, 0, 2)
                 else:
                     self.lay_no_info.removeWidget(self.left_widget)
                     self.lay_no_info.addWidget(self.left_widget, 0, 1)
-                    self.lay_no_info.addWidget(widget, 0, 2)
+                    self.lay_no_info.addWidget(self.info, 0, 2)
 
             if self.session.config.b_show_info:
                 self.info.show()
 
+    def on_below_conversation_changed(self, newvalue):
+        if type(self.below_conversation) != newvalue:
+            #replace the below conversation
+            if not self.below_conversation is None:
+                self.bottom_left_lay.removeWidget(self.below_conversation)
+                self.below_conversation = None
+
+            if newvalue:
+                self.below_conversation = newvalue(self, self.session)
+                self.bottom_left_lay.addWidget(self.below_conversation)
+                self.below_conversation.show()
+
     def on_close(self):
         '''Method called when this chat widget is about to be closed'''
         self.unsubscribe_signals()
-        extension.unsubscribe(self.on_conversation_info_extension_changed,
-                                'conversation info')
         self.info.destroy()
 
     # emesene's
@@ -229,7 +245,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def _on_new_style_selected(self):
         '''Slot called when the user clicks ok in the color chooser or the
         font chooser'''
-        self.cstyle = self._widget_d['chat_input'].e3_style
+        self.cstyle = self.input.e3_style
 
     def _on_show_smiley_chooser(self):
         '''Slot called when the user clicks the smiley button.
@@ -240,52 +256,34 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         '''Slot called when the user selects a smiley in the smiley
         chooser panel. Inserts the smiley in the chat edit'''
         # handles cursor position
-        self._widget_d['chat_input'].insert_text_after_cursor(shortcut)
+        self.input.insert_text_after_cursor(shortcut)
 
     def _on_send_btn_clicked(self):
-        '''Slot called when the user clicks the send button or presses Enter in
+        '''Slot called when the user presses Enter in
         the chat line editor. Sends the message'''
-        message_string = unicode(self._widget_d['chat_input'].toPlainText())
+        message_string = unicode(self.input.toPlainText())
         if len(message_string) == 0:
             return
-        self._widget_d['chat_input'].clear()
+        self.input.clear()
         gui.base.Conversation._on_send_message(self, message_string)
 
-
-    # TODO: use self.icon extensively
-    # TODO: could we handle this directly in UserInfoPanel (but I think that
-    #       this wouldn't make self.icon usable :/)
-    def on_contact_attr_changed_succeed(self, account, what, old,
-            do_notify=True):
-        ''' called when contacts change their attributes'''
-        if account in self.members:
-            if what  == 'status':
-                # FIXME: self.icon doesn't beahave correctly at the
-                # moment. That's probably because 'set message
-                # waiting' stuff is still not implemented (in fact
-                # self.icon returns that icon.)
-                #self.header.set_icon(self.icon)
-                status = self.session.contacts.get(account).status
-                icon =  gui.theme.image_theme.status_icons[status]
-                self.header.set_icon(icon)
-            elif what == 'nick':
-                self.header.set_nick(self.text)
-            elif what == 'message':
-                message = self.session.contacts.get(account).message
-                self.header.set_message(message)
-
     def on_user_typing(self, account):
-        '''method called when a someone is typing'''
-        # TODO: this should update the tabs' icon, not this one.
-        # updating the tab icon should be done here, not in the Conversation
-        # page class.
-#        self.header.set_icon(gui.theme.image_theme.typing)
-        self._on_typing_timer.start(3000)
+        """
+        inform that the other user has started typing
+        """
+        if account in self.members:
+            self.tab_label.set_image(gui.theme.image_theme.typing)
+            if self.typing_timeout.isActive():
+                self.typing_timeout.stop()
+            self.typing_timeout.start(3000)
 
     def update_tab(self):
         '''update the values of the tab'''
-        #FIXME: implement
-        pass
+        self.typing_timeout.stop()
+        self.conv_manager.setTabText(self.tab_index, self.text)
+        self.conv_manager.setTabIcon(self.tab_index, QtGui.QIcon(self.icon))
+
+        #FIXME: implement show_avatar_in_taskbar option
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         """
@@ -295,7 +293,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         """
         self.info.set_sensitive(is_sensitive or force_sensitive_block_button)
         self.toolbar.set_sensitive(is_sensitive, force_sensitive_block_button)
-        self._widget_d['chat_input'].setEnabled(is_sensitive)
+        self.input.setEnabled(is_sensitive)
         self.header.setEnabled(is_sensitive or force_sensitive_block_button)
 
         # redraws block button to its corresponding icon and tooltip

@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 ''' This module contains the DisplayPic class'''
 
 from PyQt4 import QtGui
@@ -7,6 +23,7 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import Qt
 
 import gui
+import os
 
 from gui.qt4ui import Utils
 from gui.qt4ui import PictureHandler
@@ -15,35 +32,33 @@ from gui.qt4ui import PictureHandler
 class DisplayPic (QtGui.QLabel):
     ''' A DisplayPic widget. Supports changing the displayPic, and emits
     a "clicked" signal.'''
-    # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to display avatars, aka display pictures'
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
-    # pylint: enable=W0612
 
     clicked = QtCore.pyqtSignal()
 
-    def __init__(self, session=None, default_pic=gui.theme.image_theme.user,
-                 size=None, clickable=True, parent=None):
+    def __init__(self, session=None,
+                 size=96, clickable=True, parent=None, crossfade=True):
         '''constructor'''
         QtGui.QLabel.__init__(self, parent)
 
         self._session = session
-        self._default_pic = default_pic
         if size:
-            self._size = size
-        elif not session:
-            self._size = QtCore.QSize(96, 96)
-        else:
-            size = session.config.get_or_set('i_conv_avatar_size', 96)
             self._size = QtCore.QSize(size, size)
+        else:
+            self._size = QtCore.QSize(96, 96)
+
         self._clickable = clickable
 
+        self.blocked = False
+        self.crossfade = crossfade
         self._movie = None
         self._last = None
         self._fader = PixmapFader(self.setPixmap, self._size,
-                                  self._default_pic, self)
+                                  gui.theme.image_theme.user_def_imagetool,
+                                  self)
 
         self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         if clickable:
@@ -53,7 +68,7 @@ class DisplayPic (QtGui.QLabel):
             self.setFrameShadow(QtGui.QFrame.Sunken)
         self.setAlignment(Qt.AlignCenter)
 
-        self.set_display_pic_from_file(default_pic)
+        self.set_from_file('')
         self.installEventFilter(self)
 
         self._fader.movie_fadein_complete.connect(
@@ -63,45 +78,41 @@ class DisplayPic (QtGui.QLabel):
         self._size = QtCore.QSize(self._session.config.i_conv_avatar_size,
                                   self._session.config.i_conv_avatar_size)
         self._fader.set_size(self._size)
-        self.set_display_pic_from_file(self._last)
+        self.set_from_file(self._last)
 
-    def set_default_pic(self):
-        '''Sets the default pic'''
-        self.set_display_pic_from_file(self._default_pic)
-
-    def set_display_pic_of_account(self, email=None):
-        '''set a display pic from the account's name, the contact name, and pic
-        name. If no contact is provided, the account's user's pic is set.
-        If no pic is specified, then the last one is set'''
-        if not self._session:
-            raise RuntimeError('Trying to set display pic from account\'s'
-                               'email, but no "session" provided')
-
-        if not email:
-            path = self._session.contacts.me.picture
-        else:
-            path = self._session.contacts.get(email).picture
-        self.set_display_pic_from_file(path)
-
-    def set_display_pic_from_file(self, path):
-        ''' sets the display pic from the path'''
-        pic_handler = PictureHandler.PictureHandler(path)
+    def set_from_file(self, filename, blocked=False):
+        self.filename = filename
+        self.blocked = blocked
+        if filename and not os.path.exists(filename):
+            if self._size.width() > 32:
+                # use big fallback image
+                self.filename = gui.theme.image_theme.user_def_imagetool
+            else:
+                self.filename = gui.theme.image_theme.user
+        pic_handler = PictureHandler.PictureHandler(self.filename)
         if pic_handler.can_handle():
-            pixmap = QtGui.QPixmap(path)
+            pixmap = QtGui.QPixmap(self.filename)
             if pixmap.isNull():
-                pixmap = QtGui.QPixmap(self._default_pic)
+                pixmap = QtGui.QPixmap(gui.theme.image_theme.user)
 
             pixmap = Utils.pixmap_rounder(pixmap.scaled(self._size,
                                         transformMode=Qt.SmoothTransformation))
-            self._fader.add_pixmap(pixmap)
+            if self.crossfade:
+                self._fader.add_pixmap(pixmap)
+            else:
+                self.setPixmap(pixmap)
         else:
-            self._movie = QtGui.QMovie(path)
-            self._fader.add_pixmap(self._movie)
-        self._last = path
+            self._movie = QtGui.QMovie(self.filename)
+            self._movie.setScaledSize(self._size)
+            if self.crossfade:
+                self._fader.add_pixmap(self._movie)
+            else:
+                self.setMovie(self._movie)
 
-    def set_from_file(self, filename, blocked=False):
-        #FIXME: implement fallback support, blocked support
-        self.set_display_pic_from_file(filename)
+        if self.blocked:
+            #FIXME: implement
+            pass
+        self._last = self.filename
 
     # -------------------- QT_OVERRIDE
 
@@ -146,13 +157,13 @@ class PixmapFader(QtCore.QObject):
         QtCore.QObject.__init__(self, parent)
         self._elements = []
         self._size = pixmap_size
-        self._rect= QtCore.QRect(QtCore.QPoint(0, 0), self._size)
+        self._rect = QtCore.QRect(QtCore.QPoint(0, 0), self._size)
         self._callback = callback
         # timer initialization
         self._timer = QtCore.QTimer(QtGui.QApplication.instance())
         self._timer.timeout.connect(self._on_timeout)
-        self._fpms = 0.12 # frames / millisencond
-        self._duration = 1000.0 # millisecond
+        self._fpms = 0.12  # frames / millisencond
+        self._duration = 1000.0  # millisecond
         self._frame_time = 1 / self._fpms
         self._alpha_step = self._frame_time / self._duration
         # pixmap painting initializations
@@ -164,7 +175,7 @@ class PixmapFader(QtCore.QObject):
 
     def set_size(self, qsize):
         self._size = qsize
-        self._rect= QtCore.QRect(QtCore.QPoint(0, 0), self._size)
+        self._rect = QtCore.QRect(QtCore.QPoint(0, 0), self._size)
         self._result = self._result.scaled(self._size,
                                        transformMode=Qt.SmoothTransformation)
 

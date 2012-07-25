@@ -29,6 +29,7 @@ from gui.gtkui import check_gtk3
 import extension
 import e3
 
+
 class Conversation(gtk.VBox, gui.Conversation):
     '''a widget that contains all the components inside'''
     NAME = 'Conversation'
@@ -64,7 +65,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         TransfersBar = extension.get_default('filetransfer pool')
         CallWidget = extension.get_default('call widget')
 
-        self.below_conversation = None
         BelowConversation = extension.get_default('below conversation')
         if BelowConversation is not None:
             self.below_conversation = BelowConversation(self, session)
@@ -129,20 +129,19 @@ class Conversation(gtk.VBox, gui.Conversation):
             #update adium theme header/footer
             account = self.members[0]
             contact = self.session.contacts.safe_get(account)
-            his_picture = contact.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+            his_picture = contact.picture or \
+                utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
             nick = contact.nick
             display_name = contact.display_name
             self.set_sensitive(not contact.blocked, True)
-            my_picture = self.session.contacts.me.picture or utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
+            my_picture = self.session.contacts.me.picture or \
+                utils.path_to_url(os.path.abspath(gui.theme.image_theme.user))
             self.output.clear(account, nick, display_name,
                               my_picture, his_picture)
 
         self._load_style()
         self.subscribe_signals()
-        extension.subscribe(self.on_below_conversation_changed, 'below conversation')
-        extension.subscribe(self.on_conversation_info_extension_changed, 'conversation info')
-
-        self.tab_index = -1 # used to select an existing conversation
+        self.tab_index = -1  # used to select an existing conversation
 
     def on_conversation_info_extension_changed(self, new_extension):
         if type(self.info) != new_extension:
@@ -170,7 +169,6 @@ class Conversation(gtk.VBox, gui.Conversation):
                 self.below_conversation = newvalue(self, self.session)
                 self.pack_end(self.below_conversation, False)
                 self.below_conversation.show()
-
 
     def check_visible(self):
         return self.get_visible()
@@ -234,11 +232,6 @@ class Conversation(gtk.VBox, gui.Conversation):
     def on_close(self):
         '''called when the conversation is closed'''
         self.unsubscribe_signals()
-        extension.unsubscribe(self.on_below_conversation_changed, 'below conversation')
-        extension.unsubscribe(self.on_conversation_info_extension_changed, 'conversation info')
-        if self.below_conversation:
-            self.below_conversation = None
-
         self.destroy()
         self.info.destroy()
         self.header.destroy()
@@ -354,15 +347,6 @@ class Conversation(gtk.VBox, gui.Conversation):
         '''called when an emoticon is selected'''
         self.input.append(glib.markup_escape_text(emote))
         self.input_grab_focus()
-
-    def on_contact_attr_changed_succeed(self, account, what, old,
-            do_notify=True):
-        ''' called when contacts change their attributes'''
-        if account in self.members and what in ('status', 'nick'):
-            self.update_tab()
-        else:
-            if what == 'media':
-                self.update_data()
 
     def on_filetransfer_invitation(self, transfer, cid):
         ''' called when a new file transfer is issued '''

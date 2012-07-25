@@ -41,8 +41,7 @@ class ContactInfoRotate(QtGui.QWidget):
         self.setLayout(lay)
 
         Avatar = extension.get_default('avatar')
-        iavatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
-        avatar_size = QtCore.QSize(iavatar_size, iavatar_size)
+        avatar_size = self.session.config.get_or_set('i_conv_avatar_size', 64)
 
         self.avatar = Avatar(self.session, size=avatar_size)
         if self.session.session_has_service(e3.Session.SERVICE_PROFILE_PICTURE):

@@ -1,12 +1,27 @@
 # -*- coding: utf-8 -*-
 
-'''This module contains classes to represent the notifications. At the moment 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+'''This module contains classes to represent the notifications. At the moment
 this class is just a placeholder.'''
 
-import PyQt4.QtGui      as QtGui
+import PyQt4.QtGui as QtGui
 
-
-def Notifier(title, text, picturePath=None, const=None, 
+def Notifier(title, text, picturePath=None, const=None,
              callback=None, tooltip=None):
     # pylint: disable=W0612
     NAME = 'Notifier'
@@ -14,9 +29,9 @@ def Notifier(title, text, picturePath=None, const=None,
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
     # pylint: enable=W0612
-    print (unicode(title) + unicode(text)     + unicode(picturePath) + 
+    print (unicode(title) + unicode(text)     + unicode(picturePath) +
            unicode(const) + unicode(callback) + unicode(tooltip)     )
-                 
+
 
 #class Notifier (object):
 #    ''' Class representing the notifications '''
@@ -26,17 +41,17 @@ def Notifier(title, text, picturePath=None, const=None,
 #    AUTHOR = 'Gabriele "Whisky" Visconti'
 #    WEBSITE = ''
 #    # pylint: enable=W0612
-#    
+#
 #    def __init__(self, title, text, picturePath=None, const=None):
-#        #QtGui.QLabel.__init__(self, unicode(title) + 
+#        #QtGui.QLabel.__init__(self, unicode(title) +
 #        #                            unicode(text)  +
 #        #                            unicode(picturePath)    )
-#                                    
-#        print (unicode(title) + 
+#
+#        print (unicode(title) +
 #               unicode(text)  +
 #               unicode(picturePath)    )
 #        self.show()
-#        
+#
 #    def show(self):
 #        pass
 

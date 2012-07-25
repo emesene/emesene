@@ -70,6 +70,7 @@ class Conversation(object):
         self.header = None
         self.input = None
         self.output = None
+        self.below_conversation = None
         self.soundPlayer = extension.get_and_instantiate('sound', session)
 
     def subscribe_signals(self):
@@ -112,6 +113,11 @@ class Conversation(object):
         self.session.signals.contact_unblock_succeed.subscribe(
                 self.on_contact_unblock_succeed)
 
+        extension.subscribe(self.on_conversation_info_extension_changed,
+            'conversation info')
+        extension.subscribe(self.on_below_conversation_changed,
+            'below conversation')
+
     def unsubscribe_signals(self):
         ''' unsubscribes current session's signals '''
         self.session.config.unsubscribe(self._on_avatarsize_changed,
@@ -151,6 +157,13 @@ class Conversation(object):
                 self.on_contact_block_succeed)
         self.session.signals.contact_unblock_succeed.unsubscribe(
                 self.on_contact_unblock_succeed)
+
+        extension.unsubscribe(self.on_conversation_info_extension_changed,
+            'conversation info')
+        extension.unsubscribe(self.on_below_conversation_changed,
+            'below conversation')
+        if self.below_conversation:
+            self.below_conversation = None
 
     def _get_style(self):
         '''return the value of style'''
@@ -357,6 +370,15 @@ class Conversation(object):
     def update_tab(self):
         '''update the values of the tab'''
         raise NotImplementedError("Method not implemented")
+
+    def on_contact_attr_changed_succeed(self, account, what, old,
+            do_notify=True):
+        ''' called when contacts change their attributes'''
+        if account in self.members and what in ('status', 'nick'):
+            self.update_tab()
+        else:
+            if what == 'media':
+                self.update_data()
 
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         """

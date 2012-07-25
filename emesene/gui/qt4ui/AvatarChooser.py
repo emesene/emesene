@@ -17,6 +17,7 @@ import gui
 
 log = logging.getLogger('qt4ui.AvatarChooser')
 
+
 class AvatarChooser(Dialog.OkCancelDialog):
     '''A dialog to choose an avatar'''
     # differently from the Gtk one, this handles avatar
@@ -63,7 +64,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
         widget_d['tab_widget'] = QtGui.QTabWidget()
         widget_d['group_box'] = QtGui.QGroupBox()
         widget_d['preview_dpic'] = widgets.DisplayPic(self._session,
-                                                             clickable=False, size=QtCore.QSize(96, 96))
+                                                clickable=False, size=96)
         widget_d['add_btn'] = QtGui.QPushButton(tr('Add...'))
         widget_d['remove_btn'] = QtGui.QPushButton(tr('Remove'))
         widget_d['remove_all_btn'] = QtGui.QPushButton(tr('Remove All'))
@@ -103,7 +104,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
             listview.setItemDelegate(delegate)
         widget_d['tab_widget'].currentChanged.connect(self._on_tab_changed)
         widget_d['group_box'].setTitle(tr('Preview'))
-        widget_d['preview_dpic'].set_display_pic_of_account()
+        widget_d['preview_dpic'].set_from_file(self._current_avatar)
         widget_d['add_btn'].setIcon(QtGui.QIcon.fromTheme('list-add'))
         widget_d['remove_btn'].setIcon(QtGui.QIcon.fromTheme('list-remove'))
 
@@ -162,7 +163,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
     def _on_clear(self, button):
         '''clear user avatar'''
         self._avatar_manager.set_as_avatar('')
-        self._widget_d['preview_dpic'].set_display_pic_from_file('')
+        self._widget_d['preview_dpic'].set_from_file('')
 
     def _on_remove_all(self, button):
         '''Removes all avatars from the cache'''
@@ -245,7 +246,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
             self._view_with_selection = view_name
             listview = self._widget_d[self._view_with_selection]
             filename = unicode(listview.model().data(current_idx).toString())
-            self._widget_d['preview_dpic'].set_display_pic_from_file(filename)
+            self._widget_d['preview_dpic'].set_from_file(filename)
 
     def _on_tab_changed(self, index):
         if index == 0:
