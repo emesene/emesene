@@ -48,11 +48,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
                 "",
                 "",
                 True, #default value
-                gobject.PARAM_READWRITE),
-            'yalign': (gobject.TYPE_FLOAT,
-                "The fraction of vertical free space above the child.",
-                "0.0 means no free space above, 1.0 means all free space above.",
-                0.0, 1.0, 0.0, #default value
                 gobject.PARAM_READWRITE)
             }
 
@@ -62,7 +57,6 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         self.__gobject_init__()
         gtk.GenericCellRenderer.__init__(self)
         self.__dict__['markup'] = ''
-        self.__dict__['yalign'] = 0.0
         self.function = function
         self._style_handler_id = None
         self._selected_flgs = (int(gtk.CELL_RENDERER_SELECTED),
@@ -117,9 +111,12 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         y_coord += self.ypad
         width -= self.xpad
         ctx = win.cairo_create()
+
+        xalign, yalign = self.get_alignment()
+
         layout = self.get_layout(widget)
         if layout:
-            padding = (height - layout.get_size()[1] / pango.SCALE) * self.yalign
+            padding = (height - layout.get_pixel_size()[1]) * yalign
             y_coord += padding
             height -= padding
 
@@ -626,9 +623,17 @@ class SmileyLabel(gtk.Label):
         gtk.Widget.do_size_allocate(self, allocation)
 
     def do_expose_event(self, event):
-        area = self.get_allocation()
+        x_coord, y_coord, width, height = self.get_allocation()
         ctx = event.window.cairo_create()
-        self._smiley_layout.draw(ctx, area)
+
+        xalign, yalign = self.get_alignment()
+
+        if self._smiley_layout:
+            padding = (height - self._smiley_layout.get_pixel_size()[1]) * yalign
+            y_coord += padding
+            height -= padding
+
+            self._smiley_layout.draw(ctx, (x_coord, y_coord, width, height))
 
 #from emesene1 by mariano guerra adapted by cando
 #animation support by cando

@@ -127,7 +127,6 @@ class ContactList(gui.ContactList, gtk.TreeView):
     def prepare_contactlist_column(self):
         '''update column properties'''
         self.crt.set_property('ellipsize', pango.ELLIPSIZE_END)
-        self.crt.set_property('yalign', 0.5)
         pbr_status = gtk.CellRendererPixbuf()
         self.column.pack_start(self.pbr, False)
         self.column.pack_start(self.crt, True)

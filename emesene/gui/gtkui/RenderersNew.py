@@ -46,11 +46,6 @@ inherited by extensions.
                 "",
                 "",
                 True, #default value
-                GObject.PARAM_READWRITE),
-            'yalign': (GObject.TYPE_FLOAT,
-                "The fraction of vertical free space above the child.",
-                "0.0 means no free space above, 1.0 means all free space above.",
-                0.0, 1.0, 0.0, #default value
                 GObject.PARAM_READWRITE)
             }
 
@@ -59,7 +54,6 @@ inherited by extensions.
     def __init__(self, is_plus):
         Gtk.CellRenderer.__init__(self)
         self.__dict__['markup'] = ''
-        self.__dict__['yalign'] = 0.0
         self.is_plus = is_plus
 
         #caching
@@ -139,7 +133,9 @@ inherited by extensions.
         total_lines_count = self.calculate_lines_count()
         total_text_height = self.calculate_lines_height()
 
-        padding = (height - total_text_height) * self.yalign
+        xalign, yalign = self.get_alignment()
+
+        padding = (height - total_text_height) * yalign
         y_coord += padding
         height -= padding
 
@@ -314,12 +310,6 @@ class SmileyLabel(Gtk.CellView):
 
     def set_ellipsize(self, mode=Pango.ELLIPSIZE_END):
         self.crt.set_property('ellipsize', mode)
-
-    def set_alignment(self, x=0.0, y=0.5):
-        #FIXME: aligment??
-#        self.x_align = x
-#        self.y_align = y
-        pass
 
     def set_angle(self, angle):
         #FIXME: add support for this in cellrenderer
