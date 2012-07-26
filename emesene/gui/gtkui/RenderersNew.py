@@ -448,5 +448,7 @@ class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
             avatar = Gtk.render_icon_pixbuf (context, source, -1)
 
         if avatar:
-            self.draw_avatar(ctx, avatar, width - dim, ypad, dim,
+            x_coord = (width - dim) / 2
+            y_coord = (height - dim) / 2
+            self.draw_avatar(ctx, avatar, x_coord, y_coord, dim,
                 Gdk.Gravity.CENTER, self._radius_factor, alpha)
