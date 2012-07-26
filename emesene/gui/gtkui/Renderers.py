@@ -116,7 +116,7 @@ class CellRendererFunction(gtk.GenericCellRenderer):
 
         layout = self.get_layout(widget)
         if layout:
-            padding = (height - layout.get_pixel_size()[1]) * yalign
+            padding = int((height - layout.get_pixel_size()[1]) * yalign)
             y_coord += padding
             height -= padding
 
@@ -629,7 +629,7 @@ class SmileyLabel(gtk.Label):
         xalign, yalign = self.get_alignment()
 
         if self._smiley_layout:
-            padding = (height - self._smiley_layout.get_pixel_size()[1]) * yalign
+            padding = int((height - self._smiley_layout.get_pixel_size()[1]) * yalign)
             y_coord += padding
             height -= padding
 

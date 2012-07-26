@@ -135,7 +135,7 @@ inherited by extensions.
 
         xalign, yalign = self.get_alignment()
 
-        padding = (height - total_text_height) * yalign
+        padding = int((height - total_text_height) * yalign)
         y_coord += padding
         height -= padding
 
