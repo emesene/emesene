@@ -1,36 +1,48 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module contains the ChatInput class'''
 
 import logging
 import os
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore  as QtCore
+from PyQt4.QtCore import Qt
 
 import e3
 import gui
-
+from HTMLParser import HTMLParser
 from gui.qt4ui import Utils
-
-
 log = logging.getLogger('qt4ui.widgets.ChatInput')
+
 
 class ChatInput (QtGui.QTextEdit):
     '''A widget suited for editing chat lines. Provides as-you-type
     smileys, color settings and font settings, chat line history'''
-    # pylint: disable=W0612
-    NAME = 'MainPage'
-    DESCRIPTION = 'A widget used to to edit chat lines'
+    NAME = 'Input Text'
+    DESCRIPTION = 'A widget to enter messages on the conversation'
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
-    # pylint: enable=W0612
-    
-    
+
     return_pressed = QtCore.pyqtSignal()
     style_changed = QtCore.pyqtSignal()
-    
+
     def __init__(self, parent=None):
         '''Constructor'''
         QtGui.QTextEdit.__init__(self, parent)
@@ -39,65 +51,62 @@ class ChatInput (QtGui.QTextEdit):
 
         self._smiley_dict = {}
         self._max_shortcut_len = 0
-        
+
         self._emote_theme = gui.theme.emote_theme
         self._qt_color = QtGui.QColor(Qt.black)
-        
+
     # emesene's
     def update_style(self, style):
         '''update style'''
         self.e3_style = style
-    
 
     def set_smiley_dict(self, smiley_dict):
         '''Sets the smiley recognized by this widget'''
         shortcuts = smiley_dict.keys()
-        
+
         for shortcut in shortcuts:
             path = unicode(self._emote_theme.emote_to_path(shortcut))
             if not path:
-                login.warning('No image path for: \t%s, %s' 
+                log.warning('No image path for: \t%s, %s'
                               % (shortcut, smiley_dict[shortcut]))
                 continue
             shortcut = unicode(shortcut)
             path = os.path.abspath(path[7:])
             self._smiley_dict[shortcut] = path
-            
+
             current_len = len(shortcut)
             if current_len > self._max_shortcut_len:
                 self._max_shortcut_len = current_len
-
 
     def insert_text_after_cursor(self, text):
         '''Insert given text at current cursor's position'''
         text = unicode(text)
         for i in range(len(text)):
             # It's a little bit dirty, but seems to work....
-            fake_event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, 0, 
+            fake_event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, 0,
                                          Qt.NoModifier, text[i])
             self.keyPressEvent(fake_event)
-            
 
     def _insert_char(self, char):
         '''Inserts a single char, checking for smileys'''
         # this method uses python's builtin string type, not QString
-        
+
         max_shortcut_len = self._max_shortcut_len
         shortcuts = self._smiley_dict.keys()
 
         cursor = self.textCursor()
         text_search = unicode(char)
         i = 0
-        while i < max_shortcut_len-1:
+        while i < max_shortcut_len - 1:
             # TODO: check if the returned QChar is valid
-            last_char = self.document().characterAt(cursor.position()-1-i)
+            last_char = self.document().characterAt(cursor.position() - 1 - i)
             if last_char.isPrint():
-                last_char   = QtCore.QString(last_char)
+                last_char = QtCore.QString(last_char)
                 text_search = unicode(last_char) + text_search
             i += 1
             length = len(text_search)
             if text_search in shortcuts:
-                for i in range(length-1):
+                for i in range(length - 1):
                     cursor.deletePreviousChar()
                 self._insert_image_resource(text_search)
                 cursor.insertImage(text_search)
@@ -105,24 +114,23 @@ class ChatInput (QtGui.QTextEdit):
                 self.setTextColor(self._qt_color)
                 return True
         return False
-        
-        
+
     def _insert_image_resource(self, shortcut):
         '''Appends an image resource to this widget's
         QTextDocument'''
         image = QtGui.QImage(self._smiley_dict[shortcut])
-        self.document().addResource(QtGui.QTextDocument.ImageResource, 
+        self.document().addResource(QtGui.QTextDocument.ImageResource,
                                    QtCore.QUrl(shortcut), image)
 
     def _swap_to_chat_line(self, idx):
         '''Swaps to the given chat line in the history'''
-        if idx < 0 or idx > len(self._chat_lines)-1:
+        if idx < 0 or idx > len(self._chat_lines) - 1:
             return
         else:
             self._chat_lines[self._current_chat_line_idx] = self.toHtml()
             QtGui.QTextEdit.setHtml(self, self._chat_lines[idx])
             cur = self.textCursor()
-            cur.setPosition( self.document().characterCount()-1 )
+            cur.setPosition(self.document().characterCount() - 1)
             self.setTextCursor(cur)
             self._current_chat_line_idx = idx
 
@@ -135,13 +143,13 @@ class ChatInput (QtGui.QTextEdit):
 
     def _set_e3_style(self, e3_style):
         '''Sets the font style, given an e3 style'''
-        qt_color =  Utils.e3_color_to_qcolor(e3_style.color)
+        qt_color = Utils.e3_color_to_qcolor(e3_style.color)
         qt_font = QtGui.QFont()
-        qt_font.setFamily(      e3_style.font   )
-        qt_font.setBold(        e3_style.bold   )
-        qt_font.setItalic(      e3_style.italic )
-        qt_font.setStrikeOut(   e3_style.strike )
-        qt_font.setPointSize(   e3_style.size   )
+        qt_font.setFamily(e3_style.font)
+        qt_font.setBold(e3_style.bold)
+        qt_font.setItalic(e3_style.italic)
+        qt_font.setStrikeOut(e3_style.strike)
+        qt_font.setPointSize(e3_style.size)
 
         self._set_qt_color(qt_color)
         self._set_qt_font(qt_font)
@@ -163,21 +171,21 @@ class ChatInput (QtGui.QTextEdit):
         '''Sets the color'''
         old_color = self._qt_color
         self._qt_color = new_color
-        
-        cursor = self.textCursor() 
+
+        cursor = self.textCursor()
         cursor_position = cursor.position()
         cursor.select(QtGui.QTextCursor.Document)
         char_format = QtGui.QTextCharFormat()
         char_format.setForeground(QtGui.QBrush(new_color))
         cursor.mergeCharFormat(char_format)
         cursor.setPosition(cursor_position)
-        
+
         # We need this beacause the previous stuff doesn't work for the last
         # block, if the block is empty. (i.e.: empty QTextEdit, QTextEdit's
         # document ends with an image (so there's an empty block after it))
         # Oh, and obviously this is not enough (and we need the previous part
-        # because it just changes current block's format! 
-        self.setTextColor(new_color) 
+        # because it just changes current block's format!
+        self.setTextColor(new_color)
 
 # -------------------- QT_OVERRIDE
 
@@ -209,11 +217,9 @@ class ChatInput (QtGui.QTextEdit):
             if self._insert_char(event.text()):
                 return
         QtGui.QTextEdit.keyPressEvent(self, event)
-        
-    
+
     def canInsertFromMimeData(self, source):
         '''Makes only plain text insertable'''
-        # pylint: disable=C0103
         if source.hasText():
             return True
         else:
@@ -221,46 +227,37 @@ class ChatInput (QtGui.QTextEdit):
 
     def insertFromMimeData(self, source):
         '''Inserts from mime data'''
-        # pylint: disable=C0103
         self.insert_text_after_cursor(source.text())
 
     def createMimeDataFromSelection(self):
         '''Creates a mime data object from selection'''
-        # pylint: disable=C0103
         mime_data = QtGui.QTextEdit.createMimeDataFromSelection(self)
         if mime_data.hasHtml():
             parser = MyHTMLParser()
             parser.feed(mime_data.html())
             mime_data.setText(parser.get_data())
         return mime_data
-        
-        
+
     def clear(self):
         '''clears the widget's contents, saving them'''
-        # pylint: disable=C0103
         self._chat_lines.insert(0, "")
         self._current_chat_line_idx += 1
         if len(self._chat_lines) > 100:
             self._chat_lines = self._chat_lines[0:99]
         self._swap_to_chat_line(0)
-    
+
     def toPlainText(self):
         '''Gets a plain text representation of the contents'''
-        # pylint: disable=C0103
         parser = MyHTMLParser()
         parser.feed(self.toHtml())
         return parser.get_data()
 
 
-
-
-
-from HTMLParser import HTMLParser
 class MyHTMLParser (HTMLParser):
     '''This class parses html text, collecting plain
-    text and substituting <img> tags with a proper 
+    text and substituting <img> tags with a proper
     smiley shortcut if any'''
-    
+
     def __init__(self):
         '''Constructor'''
         HTMLParser.__init__(self)
@@ -301,31 +298,14 @@ class MyHTMLParser (HTMLParser):
         '''Handle data sequences'''
         if self._in_body:
             self._data += data
-    
+
     def handle_charref(self, name):
         self._data += Utils.unescape(u'&%s;' % name)
-        
-    
+
     def handle_entityref(self, name):
         self._data += Utils.unescape(u'&%s;' % name)
-        
 
     def get_data(self):
         '''returns parsed string'''
         # [1:] is to trim the leading line break.
         return self._data[1:]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
