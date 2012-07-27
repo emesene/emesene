@@ -242,7 +242,9 @@ class ContactHandler(object):
                 else:
                     self.session.add_contact(account)
 
-        self.dialog.add_contact(self.session.groups.values(), None, add_cb)
+        group = self.contact_list.get_contact_selected_group()
+        self.dialog.add_contact(self.session.groups.values(),
+                                (group.name if group else None), add_cb)
 
     def on_remove_contact_selected(self):
         '''called when remove contact is selected'''
