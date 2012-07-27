@@ -40,4 +40,4 @@ class MailManager:
             return "http://www.facebook.com/messages/"
         else:
             hotmail = Hotmail.Hotmail(self.session)
-            return hotmail._get_login_page()
+            return hotmail.get_login_page()
