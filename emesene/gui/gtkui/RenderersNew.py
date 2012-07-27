@@ -451,4 +451,4 @@ class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
             x_coord = (width - dim) / 2
             y_coord = (height - dim) / 2
             self.draw_avatar(ctx, avatar, x_coord, y_coord, dim,
-                Gdk.Gravity.CENTER, self._radius_factor, alpha)
+                self._radius_factor, alpha)
