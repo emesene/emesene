@@ -40,20 +40,27 @@ class ChatInput (QtGui.QTextEdit):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
 
-    return_pressed = QtCore.pyqtSignal()
     style_changed = QtCore.pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, on_send_message, on_cycle_history,
+                    send_typing_notification, parent=None):
         '''Constructor'''
         QtGui.QTextEdit.__init__(self, parent)
-        self._chat_lines = [""]
-        self._current_chat_line_idx = 0
 
         self._smiley_dict = {}
         self._max_shortcut_len = 0
 
+        self.on_send_message = on_send_message
+        self.on_cycle_history = on_cycle_history
+        self.send_typing_notification = send_typing_notification
+
         self._emote_theme = gui.theme.emote_theme
         self._qt_color = QtGui.QColor(Qt.black)
+
+        # typing notification
+        self.typing_timer = QtCore.QTimer()
+        self.typing_timer.setSingleShot(False)
+        self.typing_timer.timeout.connect(self.on_send_typing_notification)
 
     # emesene's
     def update_style(self, style):
@@ -121,18 +128,6 @@ class ChatInput (QtGui.QTextEdit):
         image = QtGui.QImage(self._smiley_dict[shortcut])
         self.document().addResource(QtGui.QTextDocument.ImageResource,
                                    QtCore.QUrl(shortcut), image)
-
-    def _swap_to_chat_line(self, idx):
-        '''Swaps to the given chat line in the history'''
-        if idx < 0 or idx > len(self._chat_lines) - 1:
-            return
-        else:
-            self._chat_lines[self._current_chat_line_idx] = self.toHtml()
-            QtGui.QTextEdit.setHtml(self, self._chat_lines[idx])
-            cur = self.textCursor()
-            cur.setPosition(self.document().characterCount() - 1)
-            self.setTextCursor(cur)
-            self._current_chat_line_idx = idx
 
     def _get_e3_style(self):
         '''Returns the font style in e3 format'''
@@ -203,20 +198,45 @@ class ChatInput (QtGui.QTextEdit):
                                  event.count())
                 event = temp
             else:
-                self.return_pressed.emit()
+                self._on_send_btn_clicked()
                 return
-        if event.key() == Qt.Key_Up and     \
+
+        if (event.key() == Qt.Key_Up or event.key() == Qt.Key_P) and \
            event.modifiers() == Qt.ControlModifier:
-            self._swap_to_chat_line(self._current_chat_line_idx + 1)
-            return
-        if event.key() == Qt.Key_Down and   \
+                self.on_cycle_history()
+                return
+        if (event.key() == Qt.Key_Down or event.key() == Qt.Key_N) and \
            event.modifiers() == Qt.ControlModifier:
-            self._swap_to_chat_line(self._current_chat_line_idx - 1)
-            return
+                self.on_cycle_history(1)
+                return
         if event.text().length() > 0:
+            if not self.typing_timer.isActive():
+                self.send_typing_notification()
+                self.typing_timer.start(3000)
             if self._insert_char(event.text()):
                 return
         QtGui.QTextEdit.keyPressEvent(self, event)
+
+    def on_send_typing_notification(self):
+        self.typing_timer.stop()
+
+    def _on_send_btn_clicked(self):
+        '''Slot called when the user presses Enter in
+        the chat line editor. Sends the message'''
+        message_string = unicode(self.toPlainText())
+        if len(message_string) == 0:
+            return
+        self.clear()
+        self.on_send_message(message_string)
+
+    def _get_text(self):
+        return unicode(self.toPlainText())
+
+    def _set_text(self, text):
+        self.clear()
+        self.insert_text_after_cursor(text)
+
+    text = property(fget=_get_text, fset=_set_text)
 
     def canInsertFromMimeData(self, source):
         '''Makes only plain text insertable'''
@@ -237,14 +257,6 @@ class ChatInput (QtGui.QTextEdit):
             parser.feed(mime_data.html())
             mime_data.setText(parser.get_data())
         return mime_data
-
-    def clear(self):
-        '''clears the widget's contents, saving them'''
-        self._chat_lines.insert(0, "")
-        self._current_chat_line_idx += 1
-        if len(self._chat_lines) > 100:
-            self._chat_lines = self._chat_lines[0:99]
-        self._swap_to_chat_line(0)
 
     def toPlainText(self):
         '''Gets a plain text representation of the contents'''
