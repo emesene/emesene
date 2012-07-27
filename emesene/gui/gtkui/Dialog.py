@@ -489,7 +489,7 @@ class Dialog(object):
         combo.append_text("")
 
         groups = list(groups)
-        groups.sort()
+        groups.sort(key = lambda x: x.name)
 
         selected = 0
 
