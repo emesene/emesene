@@ -25,6 +25,7 @@ import PyQt4.QtCore as QtCore
 
 import e3
 from gui.base import Plus
+from gui.base import Desktop
 
 log = logging.getLogger('qt4ui.widgets.ChatOutput')
 
@@ -36,6 +37,8 @@ class ChatOutput (QtGui.QTextBrowser):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
 
+    search_request = QtCore.pyqtSignal(basestring)
+
     def __init__(self, config, parent=None):
         '''Constructor'''
         QtGui.QTextBrowser.__init__(self, parent)
@@ -43,6 +46,18 @@ class ChatOutput (QtGui.QTextBrowser):
         self.config = config
         self.locked = 0
         self.pending = []
+        self.setOpenLinks(False)
+        self.anchorClicked.connect(self._on_link_clicked)
+
+    def _on_link_clicked(self, url):
+        href = unicode(url.toString())
+        if href.startswith("search://"):
+            self.search_request.emit(href)
+            return
+
+        if not href.startswith("file://"):
+            Desktop.open(href)
+            return
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
