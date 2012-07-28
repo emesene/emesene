@@ -101,9 +101,14 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         self.removeTab(index)
 
     def set_message_waiting(self, conversation, is_waiting):
-        '''Not Sure what to do here....'''
-        log.info('Conversation: %s; is_waiting: %s' %
-                 (conversation, is_waiting))
+        """
+        inform the user that a message is waiting for the conversation
+        """
+        parent = self.get_parent()
+        if parent is not None and conversation in self.conversations.values():
+            current_index = self.currentIndex()
+            if (is_waiting and current_index != conversation.tab_index):
+                conversation.message_waiting = is_waiting
 
     #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
     def _on_tab_close_request(self, index):
