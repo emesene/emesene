@@ -1,14 +1,31 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''This module contains the ContactList class'''
 
 import logging
 
-from PyQt4      import QtCore
-from PyQt4      import QtGui
+from PyQt4 import QtCore
+from PyQt4 import QtGui
 
 import gui
 from gui.base import Plus
+from gui.base import ContactList
+from gui.base import MarkupParser
 
 from gui.qt4ui import Utils
 from gui.qt4ui.widgets.ContactListModel import Role
@@ -19,65 +36,50 @@ log = logging.getLogger('qt4ui.widgets.ContactListDelegate')
 
 class ContactListDelegate (QtGui.QStyledItemDelegate):
     '''A Qt Delegate to paint an item of the contact list'''
-    # Consider implementing a caching mechanism, if it's worth
-    # _PICTURE_SIZE = defaultPictureSize
-    _PICTURE_SIZE = 50.0
-    # _MIN_PICTURE_MARGIN = defaultPicture(Outer)Margin
-    _MIN_PICTURE_MARGIN = 3.0
-    
-    def __init__(self, session, parent):
+    def __init__(self, contact_list, session):
         '''Constructor'''
-        QtGui.QStyledItemDelegate.__init__(self, parent)
-        
-        self._config = session.config
-        self._PICTURE_SIZE = self._config.get_or_set('i_avatar_size', 50)
-        self._pic_size = QtCore.QSizeF(self._PICTURE_SIZE, self._PICTURE_SIZE)
-        self._format_nick  = (lambda nick:  nick )
-        
-        self._config.subscribe(self._on_template_change, 
-                              'nick_template')
-        self._config.subscribe(self._on_template_change,
-                               'group_template')
+        QtGui.QStyledItemDelegate.__init__(self, contact_list)
 
-    def set_nick_formatter(self, func):
-        self._format_nick = func
-        self.parent().update()
-        
+        self.session = session
+        self.contact_list = contact_list
+        self._PICTURE_SIZE = self.session.config.get_or_set('i_avatar_size', 50)
+        self._MIN_PICTURE_MARGIN = 3.0
+        self._pic_size = QtCore.QSizeF(self._PICTURE_SIZE, self._PICTURE_SIZE)
+
+        self.session.config.subscribe(self._on_template_change, 'nick_template')
+        self.session.config.subscribe(self._on_template_change, 'group_template')
+
     def _on_template_change(self, *args):
         log.info('template changed')
         self.parent().repaint()
-    
+
     def _build_display_role(self, index, is_group=False):
         '''Build a string to be used as item's display role'''
         model = index.model()
         data_role = model.data(index, Role.DataRole).toPyObject()
+
         if is_group:
-            name = model.data(index, Role.DisplayRole).toPyObject()
-            #name = Utils.escape(name)
-            online = model.data(index, Role.OnlCountRole).toPyObject()
-            total = model.data(index, Role.TotalCountRole).toPyObject()
-            display_role = self._config.group_template
-            display_role = replace_markup(display_role)
-            display_role = display_role.replace('[$NAME]', name)
-            display_role = display_role.replace('[$ONLINE_COUNT]', str(online))
-            display_role = display_role.replace('[$TOTAL_COUNT]', str(total))
+            display_role = self.contact_list.format_group(data_role)
         else:
-            # TODO: consider changing how data is stored inside the model, 
-            # if useful
-            display_role = self._format_nick(data_role)
-            display_role = _format_contact_display_role(display_role)
-    #        message = model.data(index, Role.MessageRole).toString()
-    #        if not message.isEmpty():
-    #            display_role += u'<p style="-qt-paragraph-type:empty; ' \
-    #                            u'margin-top:5px; margin-bottom:0px; '  \
-    #                            u'margin-left:0px; margin-right:0px; '  \
-    #                            u'-qt-block-indent:0; text-indent:0px;"></p>'
-    #            message = u'<i>' + message + u'</i>'
-    #            display_role += _format_contact_display_role(message)
-            # display_role = _format_contact_display_role(display_role)
-            #display_role += '</table>'
-        return display_role
-        
+            display_role = self.contact_list.format_nick(data_role)
+
+        text = MarkupParser.replace_markup(display_role)
+        text_list = MarkupParser.replace_emoticons(text)
+
+        return text_list
+
+    def _put_display_role(self, text_doc, text_list):
+        '''Adds the data and sets the html in the QTextDocument'''
+        text = ''
+        for item in text_list:
+            if type(item) == QtGui.QImage:
+                text_doc.addResource(QtGui.QTextDocument.ImageResource,
+                    QtCore.QUrl("mydata://%s" % item.cacheKey()), QtCore.QVariant(item))
+                text += "<img src=\"mydata://%s\" />" % item.cacheKey()
+            else:
+                text += item
+        text_doc.setHtml(text)
+
 # -------------------- QT_OVERRIDE
         
     def paint(self, painter, option, index):
@@ -100,10 +102,10 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         
         if not index.parent().isValid():
             # -> Start drawing the text_doc:
-            text = self._build_display_role(index, True)
+            text_list = self._build_display_role(index, True)
             painter.translate( QtCore.QPointF(option.rect.topLeft()) )
             # create the text_doc
-            text_doc.setHtml(text)
+            self._put_display_role(text_doc, text_list)
             # draw the text_doc
             text_doc.drawContents(painter)
             
@@ -162,9 +164,9 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                 painter.drawPixmap(target, picture, source)
         
             # -> Start setting up the text_doc:
-            text = self._build_display_role(index)
+            text_list = self._build_display_role(index)
             # set the text into text_doc
-            text_doc.setHtml(text)
+            self._put_display_role(text_doc, text_list)
             # calculate the vertical offset, to center the text_doc vertically
             y_text_offset = \
                 abs(option.rect.height() - text_doc.size().height()) / 2
@@ -177,7 +179,6 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
 
         # -> It's done!
         painter.restore()
-        
 
     def sizeHint(self, option, index):
         '''Returns a size hint for the contact'''
@@ -185,13 +186,13 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         text = index.model().data(index, Role.DisplayRole).toString()
         text_doc = QtGui.QTextDocument()
         if not index.parent().isValid():
-            text = self._build_display_role(index, is_group=True)
-            text_doc.setHtml(text)
+            text_list = self._build_display_role(index, is_group=True)
+            self._put_display_role(text_doc, text_list)
             text_size = text_doc.size().toSize()
             return text_size
         else:
-            text = self._build_display_role(index)
-            text_doc.setHtml(text)
+            text_list = self._build_display_role(index)
+            self._put_display_role(text_doc, text_list)
             text_size = text_doc.size().toSize()
             text_width  = text_size.width()
             text_height = text_size.height()
@@ -199,34 +200,3 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                           max(text_height, 
                               self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
 
-def _format_contact_display_role(text):
-    '''Formats correctly a string part of a display role. Parses emotes, and
-    scales them.'''
-    # TODO: calculate smiley size from text's size.
-    smiley_size = 16
-    #text = Utils.escape(text)
-    #log.debug(text)
-    text = replace_markup(text)
-    # temporary stuff:
-    text = Plus.msnplus_strip(text)
-    text = text.replace('[C=c10ud]', '')
-    text = Utils.parse_emotes(unicode(text))
-    text = text.replace('<img src', '<img width="%d" height="%d" src' % 
-                 (smiley_size, smiley_size))
-    #log.debug(text)
-    return text
-    
-def replace_markup(markup):
-    '''replace the tags defined in gui.base.ContactList'''
-    markup = markup.replace("[$NL]", "<br />")
-    markup = markup.replace("\n",    "<br />")
-
-    markup = markup.replace("[$small]", "<small>")
-    markup = markup.replace("[$/small]", "</small>")
-
-    markup = markup.replace("[$b]", "<b>")
-    markup = markup.replace("[$/b]", "</b>")
-
-    markup = markup.replace("[$i]", "<i>")
-    markup = markup.replace("[$/i]", "</i>")
-    return markup

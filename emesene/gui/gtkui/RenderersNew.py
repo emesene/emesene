@@ -23,7 +23,7 @@ from gi.repository import Gtk, Gdk, GObject, GdkPixbuf
 from gi.repository import Pango
 
 from gui.base import Plus
-import MarkupParser
+from gui.base import MarkupParser
 import extension
 from AvatarManager import AvatarManager
 

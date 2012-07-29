@@ -18,8 +18,7 @@
 
 import gtk
 
-from gui   import base
-
+from gui import base
 
 class PictureHandler (base.PictureHandler): 
     NAME = 'PictureHandler'
@@ -27,41 +26,41 @@ class PictureHandler (base.PictureHandler):
                    'gui toolkit\'s facilities'
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
-    
+
     def __init__(self, source_filename=None):
         '''Constructor'''
         base.PictureHandler.__init__(self, source_filename)
         self._is_animated = False
-        
+
         if not source_filename:
             return
-            
+
         self._pixbuf = gtk.gdk.PixbufAnimation(source_filename)
         if self._pixbuf.is_static_image():
             self._pixbuf = gtk.gdk.pixbuf_new_from_file(source_filename)
             self._is_animated = False
         else:
             self._is_animated = True
-    
-    
+
     def _resize(self, new_size):
         '''Resizes to new_size the given avatar pix. Overrides base's 
         class abstract method.'''
         self._pixbuf = self._pixbuf.scale_simple(new_size, new_size, 
                                                  gtk.gdk.INTERP_BILINEAR)
-        
-            
+
     def _save(self, dest_filename):
         '''Saves the image to disk'''
         self._pixbuf.save(dest_filename, 'png')
         self._source_filename = dest_filename
-        
-        
+
     def can_handle(self):
         '''Returns true if the image is an animation'''
         return not self._is_animated
-        
-        
+
+    def get_image(self):
+        '''Returns the toolkit-dependant object '''
+        return self._pixbuf
+
     @staticmethod
     def from_toolkit(pix):
         '''Builds a PictureHandler object from a pix object, whose type
@@ -69,6 +68,4 @@ class PictureHandler (base.PictureHandler):
         picturehandler = PictureHandler()
         picturehandler._pixbuf = pix
         return picturehandler
-    
-    
-    
+

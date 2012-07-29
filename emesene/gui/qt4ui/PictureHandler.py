@@ -63,6 +63,10 @@ class PictureHandler (base.PictureHandler):
         '''Returns true if the image is an animation'''
         return not self._is_animated
 
+    def get_image(self):
+        '''Returns the toolkit-dependant object '''
+        return self._qimage
+
     @staticmethod
     def from_toolkit(pix):
         '''Builds a PictureHandler object from a pix object, whose type
