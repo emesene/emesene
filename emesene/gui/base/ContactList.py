@@ -42,6 +42,10 @@ class ContactList(object):
         self.groups = session.groups
         self.session = session
 
+        self.online_group = None
+        self.no_group = None
+        self.offline_group = None
+
         self.session.config.get_or_set('b_order_by_name', True)
         self.session.config.get_or_set('b_order_by_group', True)
         self.session.config.get_or_set('b_show_nick', True)
@@ -204,13 +208,13 @@ class ContactList(object):
 
     def _on_nick_template_changed(self, value):
         '''callback called when config.nick_template_clist changes'''
-	if self.nick_template != value:
+        if self.nick_template != value:
             self.nick_template = value
             self.update_format_nick()
 
     def _on_group_template_changed(self, value):
         '''callback called when config.group_template changes'''
-	if self.group_template != value:
+        if self.group_template != value:
             self.group_template = value
             self.update_format_group()
 
