@@ -19,8 +19,8 @@
 
 import logging
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
 
 import extension
 import gui
@@ -29,7 +29,6 @@ from gui.qt4ui.widgets import ContactListDelegate
 from gui.qt4ui.widgets import ContactListModel
 from gui.qt4ui.widgets import ContactListProxy
 from gui.qt4ui.widgets.ContactListModel import Role
-
 
 log = logging.getLogger('qt4ui.widgets.ContactList')
 

@@ -437,8 +437,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         '''add a group to the contact list'''
 
         try:
-            weight = int(self.session.config.d_weights.get(group.identifier,
-                                                           0))
+            weight = int(self.session.config.d_weights.get(group.identifier, 0))
         except ValueError:
             weight = 0
 

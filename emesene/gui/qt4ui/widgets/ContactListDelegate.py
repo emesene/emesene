@@ -53,6 +53,19 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         log.info('template changed')
         self.parent().repaint()
 
+    def plus_text_parse(self, item):
+        '''parse plus in the contact list'''
+        try:
+            item = Plus.msnplus_parse(item)
+        except Exception, error: # We really want to catch all exceptions
+            log.exception("Text: '%s' made the parser go crazy, stripping. Error: %s" % (
+                          item, error))
+            try:
+                item = Plus.msnplus_strip(item)
+            except Exception, error: # We really want to catch all exceptions
+                log.exception("Even stripping plus markup doesn't help. Error: %s" % error)
+        return item
+
     def _build_display_role(self, index, is_group=False):
         '''Build a string to be used as item's display role'''
         model = index.model()
@@ -63,7 +76,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         else:
             display_role = self.contact_list.format_nick(data_role)
 
-        text = MarkupParser.replace_markup(display_role)
+        text = MarkupParser.replace_markup(self.plus_text_parse(display_role))
         text_list = MarkupParser.replace_emoticons(text)
 
         return text_list
