@@ -25,7 +25,7 @@ import pango
 import gobject
 
 from gui.base import Plus
-import MarkupParser
+from gui.base import MarkupParser
 import extension
 from AvatarManager import AvatarManager
 

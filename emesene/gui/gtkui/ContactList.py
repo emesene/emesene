@@ -51,11 +51,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.set_enable_search(False) # Enable our searching widget
                                       # with CTRL+F in MainWindow.py
 
-        self.online_group = None # added
         self.online_group_iter = None # added
-        self.no_group = None
         self.no_group_iter = None
-        self.offline_group = None
         self.offline_group_iter = None
         self.hide_on_filtering = False
 
@@ -440,8 +437,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
         '''add a group to the contact list'''
 
         try:
-            weight = int(self.session.config.d_weights.get(group.identifier,
-                                                           0))
+            weight = int(self.session.config.d_weights.get(group.identifier, 0))
         except ValueError:
             weight = 0
 

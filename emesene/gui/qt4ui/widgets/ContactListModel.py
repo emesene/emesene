@@ -53,13 +53,6 @@ class ContactListModel (QtGui.QStandardItemModel):
 
     def add_contact(self, contact, group=None):
         '''Add a contact'''
-        # TODO: check adding an existing contact
-        if group:
-            gname = group.name
-        else:
-            gname = 'NONE'
-        log.info('add %s to group %s' % (contact.display_name, gname))
-
         # decide in which group we have to add the contact:
         if self._config.b_order_by_group:
             if not group:
@@ -296,6 +289,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         '''Add a group.'''
         if not self._config.b_order_by_group:
             return
+
         new_group_item = QtGui.QStandardItem(
                     Utils.escape(unicode(group.name)))
         new_group_item.setData(group.identifier, Role.UidRole)
@@ -326,19 +320,20 @@ class ContactListModel (QtGui.QStandardItemModel):
             found_uid = found_item.data(Role.UidRole).toString()
             if found_uid == QtCore.QString(str(uid)).trimmed():
                 return found_item
-        if uid in [self.NO_GRP_UID,
-                   self.ONL_GRP_UID,
-                   self.OFF_GRP_UID]:
-            group_name = {self.NO_GRP_UID: tr(u'No Group'),
-                          self.OFF_GRP_UID: tr(u'Offline'),
-                          self.ONL_GRP_UID: tr(u'Online')}
-            new_group_item = QtGui.QStandardItem(group_name[uid])
+        if uid in [self.NO_GRP_UID, self.ONL_GRP_UID, self.OFF_GRP_UID]:
+            if uid == self.NO_GRP_UID:
+                group = e3.Group(tr("No group"), identifier='0', type_ = e3.Group.NONE)
+            elif uid == self.ONL_GRP_UID:
+                group = e3.Group(tr("Online"), identifier='0', type_=e3.Group.ONLINE)
+            elif uid == self.OFF_GRP_UID:
+                group = e3.Group(tr("Offline"), identifier='1', type_=e3.Group.OFFLINE)
+            new_group_item = QtGui.QStandardItem(group.name)
             new_group_item.setData(uid, Role.UidRole)
             new_group_item.setData(0, Role.TotalCountRole)
             new_group_item.setData(0, Role.OnlCountRole)
+            new_group_item.setData(group, Role.DataRole)
             self.appendRow(new_group_item)
             return new_group_item
-
 
     # cc = configchange
     def _on_cc_show_offline(self, value):

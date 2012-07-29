@@ -90,7 +90,7 @@ class ConnectingPage(QtGui.QWidget):
     def clear_connect(self):
         self._timer.stop()
         self._widget_d['label'].setText(tr('Please wait while signing in...'))
-        self._widget_d['cancel_btn'].setText(tr('Cancel login'))
+        self._widget_d['cancel_btn'].setText(tr('Cancel'))
         try:
             self._widget_d['cancel_btn'].clicked.disconnect()
         except TypeError:
@@ -100,7 +100,7 @@ class ConnectingPage(QtGui.QWidget):
     def on_reconnect(self, callback, account, session_id,
                      proxy, use_http, use_ipv6, service):
         self._widget_d['label'].setText(self._reconnect_txt % 30)
-        self._widget_d['cancel_btn'].setText(tr(u'Reconnect now'))
+        self._widget_d['cancel_btn'].setText(tr(u'Connect now'))
         self._widget_d['cancel_btn'].clicked.disconnect()
         self._widget_d['cancel_btn'].clicked.connect(self._on_reconnect_now)
 

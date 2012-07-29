@@ -19,8 +19,8 @@
 
 import logging
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
 
 import extension
 import gui
@@ -29,7 +29,6 @@ from gui.qt4ui.widgets import ContactListDelegate
 from gui.qt4ui.widgets import ContactListModel
 from gui.qt4ui.widgets import ContactListProxy
 from gui.qt4ui.widgets.ContactListModel import Role
-
 
 log = logging.getLogger('qt4ui.widgets.ContactList')
 
@@ -53,8 +52,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
 
         self._pmodel.setSourceModel(self._model)
         self.setModel(self._pmodel)
-        delegate = ContactListDelegate.ContactListDelegate(session, self)
-        delegate.set_nick_formatter(self.format_nick)
+        delegate = ContactListDelegate.ContactListDelegate(self, session)
         self.setItemDelegate(delegate)
         self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.setAnimated(True)
