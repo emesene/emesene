@@ -160,7 +160,8 @@ class OutputView(webkit.WebView):
 
         return False
 
-class OutputText(gtk.ScrolledWindow):
+
+class OutputText(gui.base.OutputBase, gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
     text in the widget'''
     NAME = 'Adium Output'
@@ -177,8 +178,7 @@ class OutputText(gtk.ScrolledWindow):
     def __init__(self, config, handler):
         '''constructor'''
         gtk.ScrolledWindow.__init__(self)
-
-        self.config = config
+        gui.base.OutputBase.__init__(self, config)
 
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
@@ -189,48 +189,20 @@ class OutputText(gtk.ScrolledWindow):
         self.clear()
         self.view.show()
         self.add(self.view)
-        self.locked = 0
-        self.pending = []
 
     def _search_request_cb(self, view, link):
         self.emit("search_request", link)
-
-    def lock (self):
-        self.locked += 1
-
-    def unlock(self):
-        #add messages and then unlock
-        self.locked -=1
-        if self.locked <=0:
-            for msg in self.pending:
-                self.view.add_message(msg, self.config.b_allow_auto_scroll)
-            self.pending = []
-            self.locked = 0
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
         '''clear the content'''
         self.view.clear(source, target, target_display, source_img, target_img)
+        self.pending = []
 
-    def send_message(self, formatter, msg):
-        '''add a message to the widget'''
-        self.append(msg)
-
-    def receive_message(self, formatter, msg):
-        '''add a message to the widget'''
-        self.append(msg)
-
-    def information(self, formatter, msg):
-        '''add an information message to the widget'''
-        msg.message = Plus.msnplus_strip(msg.message)
-        self.append(msg)
-
-    def append(self, msg):
-        '''appends a msg into the view'''
-        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
-            self.pending.append(msg)
-        else:
-            self.view.add_message(msg, self.config.b_allow_auto_scroll)
+    def add_message(self, msg, scroll):
+        if msg.type == "status":
+            msg.message = Plus.msnplus_strip(msg.message)
+        self.view.add_message(msg, self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''

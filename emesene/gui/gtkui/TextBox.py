@@ -318,7 +318,7 @@ class InputText(TextBox):
                   position, end = result
                   mark_begin = self._buffer.create_mark(None, start, False)
                   mark_end = self._buffer.create_mark(None, end, False)
-                  
+
                   self._buffer.delete(position, end)
                   pos = self._buffer.get_iter_at_mark(mark_end)
                   anchor = self._buffer.create_child_anchor(pos)
@@ -389,7 +389,8 @@ class InputText(TextBox):
             self._buffer.apply_tag(self._tag, self._buffer.get_start_iter(),
                 self._buffer.get_end_iter())
 
-class OutputText(TextBox):
+
+class OutputText(gui.base.OutputBase, TextBox):
     '''a widget that is used to display the messages on the conversation'''
     NAME = 'Output Text'
     DESCRIPTION = _('A widget to display the conversation messages')
@@ -399,57 +400,27 @@ class OutputText(TextBox):
     def __init__(self, config, handler):
         '''constructor'''
         TextBox.__init__(self, config)
+        gui.base.OutputBase.__init__(self, config)
         self.set_shadow_type(gtk.SHADOW_IN)
         self._textbox.set_editable(False)
         self._textbox.set_cursor_visible(False)
-        self.locked = 0
-        self.pending = []
+        self.clear()
 
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
         '''clear the content'''
         TextBox.clear(self)
-    
-    def lock (self):
-        self.locked += 1
+        self.pending = []
 
-    def unlock(self):
-        #add messages and then unlock
-        self.locked -=1
-        if self.locked <=0:
-            for text in self.pending:
-                TextBox.append(self, text, self.config.b_allow_auto_scroll)
-            self.pending = []
-            self.locked = 0
-
-    def append(self, text, msg, scroll=True):
-        '''append formatted text to the widget'''
-        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
-            self.pending.append(text)
+    def add_message(self, msg, scroll):
+        if msg.type == "status":
+            msg.message = Plus.msnplus_strip(msg.message)
+            text = self.formatter.format_information(msg.message)
         else:
-            TextBox.append(self, text, scroll)
-
-    def send_message(self, formatter, msg):
-        '''add a message to the widget'''
-        msg.alias = Plus.msnplus_strip(msg.alias)
-        msg.display_name = Plus.msnplus_strip(msg.display_name)
-
-        text = formatter.format(msg)
-        self.append(text, msg, self.config.b_allow_auto_scroll)
-
-    def receive_message(self, formatter, msg):
-        '''add a message to the widget'''
-        msg.alias = Plus.msnplus_strip(msg.alias)
-        msg.display_name = Plus.msnplus_strip(msg.display_name)
-
-        text = formatter.format(msg)
-        self.append(text, msg, self.config.b_allow_auto_scroll)
-
-    def information(self, formatter, msg):
-        '''add an information message to the widget'''
-        msg.message = Plus.msnplus_strip(msg.message)
-        text = formatter.format_information(msg.message)
-        self.append(text, msg, self.config.b_allow_auto_scroll)
+            msg.alias = Plus.msnplus_strip(msg.alias)
+            msg.display_name = Plus.msnplus_strip(msg.display_name)
+            text = self.formatter.format(msg)
+        TextBox.append(self, text, scroll)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''

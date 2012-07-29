@@ -24,17 +24,16 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4 import QtWebKit
 
-import e3
 import gui
-from gui.base import Plus
 from gui.qt4ui import Utils
+from gui.base import Plus
 
-class AdiumChatOutput (QtGui.QScrollArea):
+
+class AdiumChatOutput (QtGui.QScrollArea, gui.base.OutputBase):
     '''A widget which displays various messages of a conversation
     using Adium themes'''
     NAME = 'AdiumChatOutput'
-    DESCRIPTION = 'A widget to display conversation messages with Adium' \
-                  'themes. Based on Webkit technology.'
+    DESCRIPTION = _('A widget to display conversation messages using adium style')
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
 
@@ -44,12 +43,9 @@ class AdiumChatOutput (QtGui.QScrollArea):
 
     def __init__(self, config, parent=None):
         QtGui.QScrollArea.__init__(self, parent)
+        gui.base.OutputBase.__init__(self, config)
         self.theme = gui.theme.conv_theme
-        self.config = config
         self._qwebview = QtWebKit.QWebView(self)
-
-        self.locked = 0
-        self.pending = []
 
         self.setWidget(self._qwebview)
         self.setWidgetResizable(True)
@@ -66,7 +62,7 @@ class AdiumChatOutput (QtGui.QScrollArea):
         self.ready = True
 
         for function in self.pending:
-            self._append_message(function, self.config.b_allow_auto_scroll)
+            self.add_message(function, self.config.b_allow_auto_scroll)
         self.pending = []
 
     def on_link_clicked(self, url):
@@ -87,46 +83,17 @@ class AdiumChatOutput (QtGui.QScrollArea):
         '''clear the content'''
         body = self.theme.get_body(source, target, target_display, source_img,
                 target_img)
-        self._qwebview.setHtml(body, QtCore.QUrl(Utils.path_to_url(self.theme.path)))
+        url = QtCore.QUrl(Utils.path_to_url(self.theme.path))
+        self._qwebview.setHtml(body, url)
         self.pending = []
         self.ready = False
 
-    def _append_message(self, msg, scroll=True):
+    def add_message(self, msg, scroll):
         '''add a message to the conversation'''
+        if msg.type == "status":
+            msg.message = Plus.msnplus_strip(msg.message)
         html = self.theme.format(msg, scroll)
         self._qwebview.page().mainFrame().evaluateJavaScript(html)
-
-    def lock(self):
-        self.locked += 1
-
-    def unlock(self):
-        #add messages and then unlock
-        self.locked -= 1
-        if self.locked <= 0:
-            for msg in self.pending:
-                self._append_message(msg, self.config.b_allow_auto_scroll)
-            self.pending = []
-            self.locked = 0
-
-    def send_message(self, formatter, msg):
-        '''add a message to the widget'''
-        self.append(msg)
-
-    def receive_message(self, formatter, msg):
-        '''add a message to the widget'''
-        self.append(msg)
-
-    def information(self, formatter, msg):
-        '''add an information message to the widget'''
-        msg.message = Plus.msnplus_strip(msg.message)
-        self.append(msg)
-
-    def append(self, msg):
-        '''appends a msg into the view'''
-        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
-            self.pending.append(msg)
-        else:
-            self._append_message(msg, self.config.b_allow_auto_scroll)
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''

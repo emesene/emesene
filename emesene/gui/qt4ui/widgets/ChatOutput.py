@@ -23,14 +23,13 @@ import logging
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 
-import e3
+import gui
 from gui.base import Plus
 from gui.base import Desktop
-
 log = logging.getLogger('qt4ui.widgets.ChatOutput')
 
 
-class ChatOutput (QtGui.QTextBrowser):
+class ChatOutput (gui.base.OutputBase, QtGui.QTextBrowser):
     '''A widget which displays various messages of a conversation'''
     NAME = 'Output Text'
     DESCRIPTION = _('A widget to display the conversation messages')
@@ -42,12 +41,11 @@ class ChatOutput (QtGui.QTextBrowser):
     def __init__(self, config, parent=None):
         '''Constructor'''
         QtGui.QTextBrowser.__init__(self, parent)
+        gui.base.OutputBase.__init__(self, config)
         self._chat_text = QtCore.QString('')
-        self.config = config
-        self.locked = 0
-        self.pending = []
         self.setOpenLinks(False)
         self.anchorClicked.connect(self._on_link_clicked)
+        self.clear()
 
     def _on_link_clicked(self, url):
         href = unicode(url.toString())
@@ -63,47 +61,18 @@ class ChatOutput (QtGui.QTextBrowser):
             source_img="", target_img=""):
         '''clear the content'''
         QtGui.QTextBrowser.clear(self)
+        self._chat_text = QtCore.QString('')
+        self.pending = []
 
-    def lock(self):
-        self.locked += 1
-
-    def unlock(self):
-        #add messages and then unlock
-        self.locked -= 1
-        if self.locked <= 0:
-            for text in self.pending:
-                self._append_to_chat(text, self.config.b_allow_auto_scroll)
-            self.pending = []
-            self.locked = 0
-
-    def append(self, text, msg, scroll=True):
-        '''append formatted text to the widget'''
-        if self.locked and msg.type != e3.Message.TYPE_OLDMSG:
-            self.pending.append(text)
+    def add_message(self, msg, scroll):
+        if msg.type == "status":
+            msg.message = Plus.msnplus_strip(msg.message)
+            text = self.formatter.format_information(msg.message)
         else:
-            self._append_to_chat(text, scroll)
-
-    def send_message(self, formatter, msg):
-        '''add a message to the widget'''
-        msg.alias = Plus.msnplus_strip(msg.alias)
-        msg.display_name = Plus.msnplus_strip(msg.display_name)
-
-        text = formatter.format(msg)
-        self.append(text, msg, self.config.b_allow_auto_scroll)
-
-    def receive_message(self, formatter, msg):
-        '''add a message to the widget'''
-        msg.alias = Plus.msnplus_strip(msg.alias)
-        msg.display_name = Plus.msnplus_strip(msg.display_name)
-
-        text = formatter.format(msg)
-        self.append(text, msg, self.config.b_allow_auto_scroll)
-
-    def information(self, formatter, msg):
-        '''add an information message to the widget'''
-        msg.message = Plus.msnplus_strip(msg.message)
-        text = formatter.format_information(msg.message)
-        self.append(text, msg, self.config.b_allow_auto_scroll)
+            msg.alias = Plus.msnplus_strip(msg.alias)
+            msg.display_name = Plus.msnplus_strip(msg.display_name)
+            text = self.formatter.format(msg)
+        self._append_to_chat(text, scroll)
 
     def _append_to_chat(self, html_string, scroll):
         '''Method that appends an html string to the chat view'''
