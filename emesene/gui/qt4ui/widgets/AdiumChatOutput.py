@@ -29,7 +29,7 @@ from gui.qt4ui import Utils
 from gui.base import Plus
 
 
-class AdiumChatOutput (QtGui.QScrollArea, gui.base.OutputBase):
+class AdiumChatOutput (QtGui.QScrollArea, gui.base.OutputText):
     '''A widget which displays various messages of a conversation
     using Adium themes'''
     NAME = 'AdiumChatOutput'
@@ -43,7 +43,7 @@ class AdiumChatOutput (QtGui.QScrollArea, gui.base.OutputBase):
 
     def __init__(self, config, parent=None):
         QtGui.QScrollArea.__init__(self, parent)
-        gui.base.OutputBase.__init__(self, config)
+        gui.base.OutputText.__init__(self, config)
         self.theme = gui.theme.conv_theme
         self._qwebview = QtWebKit.QWebView(self)
 
@@ -85,7 +85,7 @@ class AdiumChatOutput (QtGui.QScrollArea, gui.base.OutputBase):
                 target_img)
         url = QtCore.QUrl(Utils.path_to_url(self.theme.path))
         self._qwebview.setHtml(body, url)
-        self.pending = []
+        gui.base.OutputText.clear(self)
         self.ready = False
 
     def add_message(self, msg, scroll):

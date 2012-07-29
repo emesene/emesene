@@ -30,7 +30,7 @@ from PictureHandler import PictureHandler
 from ContactInformation import ContactInformation
 from BaseTray import BaseTray
 from MainWindowBase import MainWindowBase
-from OutputBase import OutputBase
+from OutputText import OutputText
 from Hotmail import Hotmail
 
 theme = Theme()

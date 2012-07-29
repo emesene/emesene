@@ -161,7 +161,7 @@ class OutputView(webkit.WebView):
         return False
 
 
-class OutputText(gui.base.OutputBase, gtk.ScrolledWindow):
+class OutputText(gui.base.OutputText, gtk.ScrolledWindow):
     '''a text box inside a scroll that provides methods to get and set the
     text in the widget'''
     NAME = 'Adium Output'
@@ -178,7 +178,7 @@ class OutputText(gui.base.OutputBase, gtk.ScrolledWindow):
     def __init__(self, config, handler):
         '''constructor'''
         gtk.ScrolledWindow.__init__(self)
-        gui.base.OutputBase.__init__(self, config)
+        gui.base.OutputText.__init__(self, config)
 
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.set_shadow_type(gtk.SHADOW_IN)
@@ -197,7 +197,7 @@ class OutputText(gui.base.OutputBase, gtk.ScrolledWindow):
             source_img="", target_img=""):
         '''clear the content'''
         self.view.clear(source, target, target_display, source_img, target_img)
-        self.pending = []
+        gui.base.OutputText.clear(self)
 
     def add_message(self, msg, scroll):
         if msg.type == "status":

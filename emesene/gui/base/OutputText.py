@@ -19,7 +19,7 @@
 import e3
 
 
-class OutputBase(object):
+class OutputText(object):
     '''Base class to display conversation messages'''
 
     def __init__(self, config):
@@ -27,7 +27,6 @@ class OutputBase(object):
         self.config = config
         self.locked = 0
         self.pending = []
-        self.formatter = e3.common.MessageFormatter()
 
     def lock(self):
         '''lock the output, appended messages will be queued until
@@ -46,17 +45,17 @@ class OutputBase(object):
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
         '''clear the content'''
-        raise NotImplementedError("Method not implemented")
+        self.pending = []
 
-    def send_message(self, formatter, msg):
+    def send_message(self, msg):
         '''add a message to the widget'''
         self.append(msg)
 
-    def receive_message(self, formatter, msg):
+    def receive_message(self, msg):
         '''add a message to the widget'''
         self.append(msg)
 
-    def information(self, formatter, msg):
+    def information(self, msg):
         '''add an information message to the widget'''
         self.append(msg)
 

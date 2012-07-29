@@ -364,7 +364,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             _('File transfer accepted by %s') % (contact.display_name), \
             transfer.contact.account)
             msg = gui.Message.from_information(contact, message)
-            self.output.information(self.formatter, msg)
+            self.output.information(msg)
             self.conv_status.post_process_message(msg)
 
     def on_filetransfer_progress(self, transfer):
@@ -383,7 +383,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             _('File transfer rejected by %s') % (contact.display_name), \
             transfer.contact.account)
             msg = gui.Message.from_information(contact, message)
-            self.output.information(self.formatter, msg)
+            self.output.information(msg)
             self.conv_status.post_process_message(msg)
 
     def on_filetransfer_canceled(self, transfer):
@@ -397,7 +397,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             _('File transfer canceled by %s') % (contact.display_name), \
             transfer.contact.account)
             msg = gui.Message.from_information(contact, message)
-            self.output.information(self.formatter, msg)
+            self.output.information(msg)
             self.conv_status.post_process_message(msg)
 
     def on_filetransfer_completed(self, transfer):
@@ -410,7 +410,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             message = e3.base.Message(e3.base.Message.TYPE_MESSAGE, \
             _('File transfer completed!'), transfer.contact.account)
             msg = gui.Message.from_information(contact, message)
-            self.output.information(self.formatter, msg)
+            self.output.information(msg)
             self.conv_status.post_process_message(msg)
 
     def on_call_invitation(self, call, cid, westart=False):

@@ -21,6 +21,7 @@ import gobject
 import os
 
 import e3
+from e3.common import MessageFormatter
 import gui
 from gui.gtkui import check_gtk3
 import utils
@@ -390,7 +391,7 @@ class InputText(TextBox):
                 self._buffer.get_end_iter())
 
 
-class OutputText(gui.base.OutputBase, TextBox):
+class OutputText(gui.base.OutputText, TextBox):
     '''a widget that is used to display the messages on the conversation'''
     NAME = 'Output Text'
     DESCRIPTION = _('A widget to display the conversation messages')
@@ -400,7 +401,8 @@ class OutputText(gui.base.OutputBase, TextBox):
     def __init__(self, config, handler):
         '''constructor'''
         TextBox.__init__(self, config)
-        gui.base.OutputBase.__init__(self, config)
+        gui.base.OutputText.__init__(self, config)
+        self.formatter = MessageFormatter()
         self.set_shadow_type(gtk.SHADOW_IN)
         self._textbox.set_editable(False)
         self._textbox.set_cursor_visible(False)
@@ -410,7 +412,7 @@ class OutputText(gui.base.OutputBase, TextBox):
             source_img="", target_img=""):
         '''clear the content'''
         TextBox.clear(self)
-        self.pending = []
+        gui.base.OutputText.clear(self)
 
     def add_message(self, msg, scroll):
         if msg.type == "status":

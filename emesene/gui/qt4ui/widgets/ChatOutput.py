@@ -23,13 +23,14 @@ import logging
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 
+from e3.common import MessageFormatter
 import gui
 from gui.base import Plus
 from gui.base import Desktop
 log = logging.getLogger('qt4ui.widgets.ChatOutput')
 
 
-class ChatOutput (gui.base.OutputBase, QtGui.QTextBrowser):
+class ChatOutput (gui.base.OutputText, QtGui.QTextBrowser):
     '''A widget which displays various messages of a conversation'''
     NAME = 'Output Text'
     DESCRIPTION = _('A widget to display the conversation messages')
@@ -41,7 +42,8 @@ class ChatOutput (gui.base.OutputBase, QtGui.QTextBrowser):
     def __init__(self, config, parent=None):
         '''Constructor'''
         QtGui.QTextBrowser.__init__(self, parent)
-        gui.base.OutputBase.__init__(self, config)
+        gui.base.OutputText.__init__(self, config)
+        self.formatter = MessageFormatter()
         self._chat_text = QtCore.QString('')
         self.setOpenLinks(False)
         self.anchorClicked.connect(self._on_link_clicked)
@@ -62,7 +64,7 @@ class ChatOutput (gui.base.OutputBase, QtGui.QTextBrowser):
         '''clear the content'''
         QtGui.QTextBrowser.clear(self)
         self._chat_text = QtCore.QString('')
-        self.pending = []
+        gui.base.OutputText.clear(self)
 
     def add_message(self, msg, scroll):
         if msg.type == "status":
