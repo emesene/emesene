@@ -31,12 +31,10 @@ log = logging.getLogger('qt4ui.ConversationPage')
 
 class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     '''The Conversation Page'''
-    # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to display the conversation screen'
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
-    # pylint: enable=W0612
 
     def __init__(self, session, on_last_close, parent):
         '''Constructor'''
@@ -45,10 +43,17 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
 
         self.setTabsClosable(True)
         self.setDocumentMode(True)
+        self.setTabPosition(self.session.config.get_or_set('i_tab_position', 0))
 
         # to prevent top level window's destruction:
         self.qt_parent = parent
         self.tabCloseRequested.connect(self._on_tab_close_request)
+        self.session.config.subscribe(self._on_tab_position_changed,
+            'i_tab_position')
+
+    def _on_tab_position_changed(self, value):
+        '''callback called when i_tab_position changes'''
+        self.setTabPosition(value)
 
     def get_parent(self):
         '''Return a reference to the top level window containing this page'''
