@@ -35,7 +35,6 @@ class QtTags(object):
     FONT_SIZE_SMALL = 'style=\"font-size : small\"'
     FONT_WEIGHT_BOLD = 'style=\"font-weight : bold\"'
     FONT_STYLE_ITALIC = 'style=\"font-style : italic\"'
-    FONT_COLOR = 'color'
     PLUS_TAG_DICT = {
         'a': ('style', 'background-color : #%s'),
         'c': ('style', 'color : #%s'),
