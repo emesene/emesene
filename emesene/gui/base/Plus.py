@@ -376,7 +376,7 @@ class Plus(object):
         if tag in TAG_DICT:
             msgdict['tag'] = 'span'
             if tag in COLOR_TAGS:
-                msgdict[TAG_DICT[tag]] = '#%s' % msgdict[tag].upper()
+                msgdict[TAG_DICT[tag][0]] = TAG_DICT[tag][1] % msgdict[tag].upper()
             else:
                 msgdict[TAG_DICT[tag][0]] = TAG_DICT[tag][1]
             del msgdict[tag]

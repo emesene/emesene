@@ -37,18 +37,21 @@ class QtTags(object):
     FONT_STYLE_ITALIC = 'style=\"font-style : italic\"'
     FONT_COLOR = 'color'
     PLUS_TAG_DICT = {
-        'a': 'background-color',
-        'c': 'style=\"color',
-        'b': ('font weight', 'bold'),
-        'u': ('font', 'single'),
-        'i': ('font style', 'italic'),
-        's': ('text-decoration', 'line-through'),
-        '$': 'color',
-        '#': ('font weight', 'bold'),
-        '@': ('text-decoration', 'underline'),
-        '&': ('font style', 'italic'),
-        '\'': ('text-decoration', 'line-through')
+        'a': ('style', 'background-color : %s'),
+        'c': ('style', 'color : %s'),
+        'b': ('style', 'font-weight : bold'),
+        'u': ('style', 'single'), #FIXME
+        'i': ('style', 'font-style : italic'),
+        's': ('text-decoration', 'line-through'), #FIXME
+        '$': ('style', 'color : %s'),
+        '#': ('style', 'font-weight : bold'),
+        '@': ('text-decoration', 'underline'), #FIXME
+        '&': ('style', 'font-style : italic'),
+        '\'': ('text-decoration', 'line-through') #FIXME
     }
+    def FONT_COLOR(self, color):
+        return 'style=\"color : %s\"' % color
+
 extension.implements('toolkit tags', QtTags)
 
 def path_to_url(path):

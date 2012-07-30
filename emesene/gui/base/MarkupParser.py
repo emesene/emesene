@@ -60,8 +60,8 @@ def replace_markup(markup):
         if color.count("#") == 0:
             hexcolor = "#" + color
 
-        markup = markup.replace("[$COLOR=" + color + "]", \
-                "<span %s='" % Tags.FONT_COLOR + hexcolor + "'>")
+        markup = markup.replace("[$COLOR=%s]" % color, \
+                "<span %s>" % Tags.FONT_COLOR(hexcolor))
     markup = markup.replace("[$/COLOR]", "</span>")
 
     markup = markup.replace("[$b]", "<span %s>" % Tags.FONT_WEIGHT_BOLD)
