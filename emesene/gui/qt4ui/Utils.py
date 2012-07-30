@@ -27,7 +27,29 @@ import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 from PyQt4.QtCore import Qt
 
+import extension
+
 from gui.base import MarkupParser
+
+class QtTags(object):
+    FONT_SIZE = 'font-size'
+    FONT_WEIGHT = 'font-weight'
+    FONT_STYLE = 'font-style'
+    FONT_COLOR = 'color'
+    PLUS_TAG_DICT = {
+        'a': 'background-color',
+        'c': 'color',
+        'b': ('font-weight', 'bold'),
+        'u': ('font', 'single'),
+        'i': ('font-style', 'italic'),
+        's': ('text-decoration', 'line-through'),
+        '$': 'color',
+        '#': ('font-weight', 'bold'),
+        '@': ('text-decoration', 'underline'),
+        '&': ('font-style', 'italic'),
+        '\'': ('text-decoration', 'line-through')
+    }
+extension.implements('toolkit tags', QtTags)
 
 def path_to_url(path):
     if os.name == "nt":

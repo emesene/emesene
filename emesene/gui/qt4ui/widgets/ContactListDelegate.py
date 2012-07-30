@@ -76,10 +76,13 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         else:
             display_role = self.contact_list.format_nick(data_role)
 
-        text = MarkupParser.replace_markup(self.plus_text_parse(display_role))
-        text_list = MarkupParser.replace_emoticons(text)
+        text = self.plus_text_parse(display_role) if not is_group else display_role
+        text = MarkupParser.replace_markup(text)
+        if not is_group:
+            text_list = MarkupParser.replace_emoticons(text)
+            return text_list
 
-        return text_list
+        return [text]
 
     def _put_display_role(self, text_doc, text_list):
         '''Adds the data and sets the html in the QTextDocument'''
@@ -195,21 +198,8 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
 
     def sizeHint(self, option, index):
         '''Returns a size hint for the contact'''
-        # pylint: disable=C0103
-        text = index.model().data(index, Role.DisplayRole).toString()
-        text_doc = QtGui.QTextDocument()
-        if not index.parent().isValid():
-            text_list = self._build_display_role(index, is_group=True)
-            self._put_display_role(text_doc, text_list)
-            text_size = text_doc.size().toSize()
-            return text_size
-        else:
-            text_list = self._build_display_role(index)
-            self._put_display_role(text_doc, text_list)
-            text_size = text_doc.size().toSize()
-            text_width  = text_size.width()
-            text_height = text_size.height()
-            return QtCore.QSize( text_width,
-                          max(text_height, 
-                              self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
+        model = index.model()
+        data_role = model.data(index, Role.DataRole).toPyObject()
+        #if type(data_role) == e3.base.Group:
+        return QtCore.QSize(0, self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN)
 

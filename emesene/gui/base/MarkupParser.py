@@ -48,10 +48,11 @@ HTML_CODE_REGEX = re.compile("&\w+;", re.IGNORECASE | re.DOTALL)
 
 def replace_markup(markup):
     '''replace the tags defined in gui.base.ContactList'''
+    Tags = extension.get_default('toolkit tags')
 
     markup = markup.replace("[$nl]", "\n")
 
-    markup = markup.replace("[$small]", "<span size=\"small\">")
+    markup = markup.replace("[$small]", "<span %s=\"small\">" % Tags.FONT_SIZE)
     markup = markup.replace("[$/small]", "</span>")
 
     while markup.count("[$COLOR=") > 0:
@@ -60,13 +61,13 @@ def replace_markup(markup):
             hexcolor = "#" + color
 
         markup = markup.replace("[$COLOR=" + color + "]", \
-                "<span foreground='" + hexcolor + "'>")
+                "<span %s='" % Tags.FONT_COLOR + hexcolor + "'>")
     markup = markup.replace("[$/COLOR]", "</span>")
 
-    markup = markup.replace("[$b]", "<span weight=\"bold\">")
+    markup = markup.replace("[$b]", "<span %s=\"bold\">" % Tags.FONT_WEIGHT)
     markup = markup.replace("[$/b]", "</span>")
 
-    markup = markup.replace("[$i]", "<span style=\"italic\">")
+    markup = markup.replace("[$i]", "<span %s=\"italic\">" % Tags.FONT_STYLE)
     markup = markup.replace("[$/i]", "</span>")
 
     # Close all tags before a new line

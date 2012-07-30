@@ -31,10 +31,31 @@ import threading
 import logging
 log = logging.getLogger('gtkui.utils')
 
+import extension
 import e3
 import urllib
 
 pixbufs = {}
+
+class GTKTags(object):
+    FONT_SIZE = 'size'
+    FONT_WEIGHT = 'weight'
+    FONT_STYLE = 'style'
+    FONT_COLOR = 'foreground'
+    PLUS_TAG_DICT = {
+        'a': 'background',
+        'c': 'foreground',
+        'b': ('weight', 'bold'),
+        'u': ('underline', 'single'),
+        'i': ('style', 'italic'),
+        's': ('strikethrough', 'true'),
+        '$': 'foreground',
+        '#': ('weight', 'bold'),
+        '@': ('underline', 'single'),
+        '&': ('style', 'italic'),
+        '\'': ('strikethrough', 'true')
+    }
+extension.implements('toolkit tags', GTKTags)
 
 def safe_gtk_image_load(path, size=None):
     '''try to return a gtk image from path, if fails, return a broken image'''
