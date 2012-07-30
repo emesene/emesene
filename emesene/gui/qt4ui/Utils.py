@@ -37,13 +37,13 @@ class QtTags(object):
     FONT_STYLE_ITALIC = 'style=\"font-style : italic\"'
     FONT_COLOR = 'color'
     PLUS_TAG_DICT = {
-        'a': ('style', 'background-color : %s'),
-        'c': ('style', 'color : %s'),
+        'a': ('style', 'background-color : #%s'),
+        'c': ('style', 'color : #%s'),
         'b': ('style', 'font-weight : bold'),
         'u': ('style', 'single'), #FIXME
         'i': ('style', 'font-style : italic'),
         's': ('text-decoration', 'line-through'), #FIXME
-        '$': ('style', 'color : %s'),
+        '$': ('style', 'color : #%s'),
         '#': ('style', 'font-weight : bold'),
         '@': ('text-decoration', 'underline'), #FIXME
         '&': ('style', 'font-style : italic'),
