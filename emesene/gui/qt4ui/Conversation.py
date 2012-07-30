@@ -28,6 +28,7 @@ from gui.qt4ui.Utils import tr
 
 import extension
 import gui
+from gui.base import Plus
 import gui.qt4ui.widgets as Widgets
 log = logging.getLogger('qt4ui.Conversation')
 
@@ -35,12 +36,10 @@ log = logging.getLogger('qt4ui.Conversation')
 class Conversation (gui.base.Conversation, QtGui.QWidget):
     '''This widget represents the contents of a chat tab in the conversations
     page'''
-    # pylint: disable=W0612
     NAME = 'MainPage'
     DESCRIPTION = 'The widget used to to display a single conversation'
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
-    # pylint: enable=W0612
 
     def __init__(self, session, conv_id, members=None, parent=None):
         '''Constructor'''
@@ -271,7 +270,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def update_tab(self):
         '''update the values of the tab'''
         self.typing_timeout.stop()
-        self.conv_manager.setTabText(self.tab_index, self.text)
+        self.conv_manager.setTabText(self.tab_index,
+            Plus.msnplus_strip(self.text))
         self.conv_manager.setTabIcon(self.tab_index, QtGui.QIcon(self.icon))
 
         #FIXME: implement show_avatar_in_taskbar option
