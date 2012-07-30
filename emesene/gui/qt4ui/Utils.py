@@ -40,14 +40,14 @@ class QtTags(object):
         'a': ('style', 'background-color : #%s'),
         'c': ('style', 'color : #%s'),
         'b': ('style', 'font-weight : bold'),
-        'u': ('style', 'single'), #FIXME
+        'u': ('style', 'text-decoration : underline'),
         'i': ('style', 'font-style : italic'),
-        's': ('text-decoration', 'line-through'), #FIXME
+        's': ('style', 'text-decoration : line-through'),
         '$': ('style', 'color : #%s'),
         '#': ('style', 'font-weight : bold'),
-        '@': ('text-decoration', 'underline'), #FIXME
+        '@': ('style', 'text-decoration : underline'),
         '&': ('style', 'font-style : italic'),
-        '\'': ('text-decoration', 'line-through') #FIXME
+        '\'': ('style', 'text-decoration : line-through')
     }
     def FONT_COLOR(self, color):
         return 'style=\"color : %s\"' % color
