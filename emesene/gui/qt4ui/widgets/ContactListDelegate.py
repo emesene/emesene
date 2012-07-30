@@ -22,6 +22,7 @@ import logging
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
+import e3
 import gui
 from gui.base import Plus
 from gui.base import ContactList
@@ -94,11 +95,9 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                 text += "<img src=\"mydata://%s\" />" % item.cacheKey()
             else:
                 text += item
-        print ">>>", text
+
         text_doc.setHtml(text)
 
-# -------------------- QT_OVERRIDE
-        
     def paint(self, painter, option, index):
         '''Paints the contact'''
         # pylint: disable=C0103
@@ -201,6 +200,11 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         '''Returns a size hint for the contact'''
         model = index.model()
         data_role = model.data(index, Role.DataRole).toPyObject()
-        #if type(data_role) == e3.base.Group:
-        return QtCore.QSize(0, self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN)
+        text_doc = QtGui.QTextDocument()
+        text_list = self._build_display_role(index, type(data_role) == e3.base.Group)
+        self._put_display_role(text_doc, text_list)
+        text_height = text_doc.size().toSize().height()
+        if type(data_role) == e3.base.Group:
+            return QtCore.QSize(0, text_height)
+        return QtCore.QSize(0, max(text_height, self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
 
