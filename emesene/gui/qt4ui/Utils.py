@@ -32,6 +32,7 @@ import extension
 from gui.base import MarkupParser
 
 class QtTags(object):
+    NEWLINE = "<br/>"
     FONT_SIZE_SMALL = 'style=\"font-size : small\"'
     FONT_WEIGHT_BOLD = 'style=\"font-weight : bold\"'
     FONT_STYLE_ITALIC = 'style=\"font-style : italic\"'

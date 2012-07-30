@@ -38,6 +38,7 @@ import urllib
 pixbufs = {}
 
 class GTKTags(object):
+    NEWLINE = "\n"
     FONT_SIZE_SMALL = 'size=\"small\"'
     FONT_WEIGHT_BOLD = 'weight=\"bold\"'
     FONT_STYLE_ITALIC = 'style=\"italic\"'

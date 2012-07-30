@@ -196,15 +196,16 @@ class Plus(object):
             arg = arg2
             tag = 'a'
 
+        ToolkitTags = extension.get_default('toolkit tags')
+        TAG_DICT = ToolkitTags.PLUS_TAG_DICT
+
         if '\n' in text_before:
             splitted_text = text_before.partition('\n')
             if splitted_text[0].strip(' '):
                 self.stack[-1]['childs'].append(splitted_text[0])
             text_before = splitted_text[2]
             self._close_stack_tags()
-            self.stack[-1]['childs'].append('\n')
-
-        TAG_DICT = extension.get_default('toolkit tags').PLUS_TAG_DICT
+            self.stack[-1]['childs'].append(ToolkitTags.NEWLINE)
 
         if self.tag_queue and self.tag_queue[0][0] == match.group(3) and not self.tag_queue[0][2]:
             self.stack[-1]['childs'].append(match.group(0))

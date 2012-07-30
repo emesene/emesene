@@ -50,7 +50,7 @@ def replace_markup(markup):
     '''replace the tags defined in gui.base.ContactList'''
     Tags = extension.get_default('toolkit tags')
 
-    markup = markup.replace("[$nl]", "\n")
+    markup = markup.replace("[$nl]", Tags.NEWLINE)
 
     markup = markup.replace("[$small]", "<span %s>" % Tags.FONT_SIZE_SMALL)
     markup = markup.replace("[$/small]", "</span>")
