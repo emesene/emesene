@@ -38,9 +38,9 @@ import urllib
 pixbufs = {}
 
 class GTKTags(object):
-    FONT_SIZE = 'size'
-    FONT_WEIGHT = 'weight'
-    FONT_STYLE = 'style'
+    FONT_SIZE_SMALL = 'size=\"small\"'
+    FONT_WEIGHT_BOLD = 'weight=\"bold\"'
+    FONT_STYLE_ITALIC = 'style=\"italic\"'
     FONT_COLOR = 'foreground'
     PLUS_TAG_DICT = {
         'a': 'background',

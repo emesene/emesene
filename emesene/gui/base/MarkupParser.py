@@ -52,7 +52,7 @@ def replace_markup(markup):
 
     markup = markup.replace("[$nl]", "\n")
 
-    markup = markup.replace("[$small]", "<span %s=\"small\">" % Tags.FONT_SIZE)
+    markup = markup.replace("[$small]", "<span %s>" % Tags.FONT_SIZE_SMALL)
     markup = markup.replace("[$/small]", "</span>")
 
     while markup.count("[$COLOR=") > 0:
@@ -64,10 +64,10 @@ def replace_markup(markup):
                 "<span %s='" % Tags.FONT_COLOR + hexcolor + "'>")
     markup = markup.replace("[$/COLOR]", "</span>")
 
-    markup = markup.replace("[$b]", "<span %s=\"bold\">" % Tags.FONT_WEIGHT)
+    markup = markup.replace("[$b]", "<span %s>" % Tags.FONT_WEIGHT_BOLD)
     markup = markup.replace("[$/b]", "</span>")
 
-    markup = markup.replace("[$i]", "<span %s=\"italic\">" % Tags.FONT_STYLE)
+    markup = markup.replace("[$i]", "<span %s>" % Tags.FONT_STYLE_ITALIC)
     markup = markup.replace("[$/i]", "</span>")
 
     # Close all tags before a new line

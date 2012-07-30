@@ -94,6 +94,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                 text += "<img src=\"mydata://%s\" />" % item.cacheKey()
             else:
                 text += item
+        print ">>>", text
         text_doc.setHtml(text)
 
 # -------------------- QT_OVERRIDE
