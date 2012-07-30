@@ -22,7 +22,6 @@ import logging
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4.QtCore import Qt
-
 from gui.qt4ui.Utils import tr
 
 import extension
@@ -56,7 +55,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         self._widget_d = {}
         self._account_list = []
         self.autologin_started = False
-
+        self.account_list=[]
         # setup code:
         self._setup_accounts()
         self._setup_ui()
@@ -81,10 +80,14 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         account_box = QtGui.QHBoxLayout()
         widget_d['account_box'] = account_box
         widget_d['account_combo'] = QtGui.QComboBox()
+        widget_d['account_combo'].setEditable(True)
+        widget_d['account_combo'].setToolTip(_('Account'))
         account_img = QtGui.QLabel()
-        account_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.user))
+        account_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.user).scaled(20,20))
         widget_d['account_img'] = account_img
         widget_d['forget_me_btn'] = QtGui.QToolButton()
+        widget_d['forget_me_btn'].setToolTip(_('Delete User'))
+        widget_d['forget_me_btn'].setEnabled(False)
         widget_d['forget_me_btn'].setAutoRaise(True)
         widget_d['forget_me_btn'].setIcon(
                                     QtGui.QIcon.fromTheme('edit-delete'))
@@ -95,10 +98,12 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         password_box = QtGui.QHBoxLayout()
         widget_d['password_box'] = password_box
         widget_d['password_edit'] = QtGui.QLineEdit()
+        widget_d['password_edit'].setToolTip(_('Password'))
+        widget_d['password_edit'].setEnabled(False)
         # TODO: Investigate completion
         widget_d['password_edit'].setEchoMode(QtGui.QLineEdit.Password)
         password_img = QtGui.QLabel()
-        password_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.password))
+        password_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.password).scaled(20,20))
         widget_d['password_img'] = password_img
         password_box.addWidget(widget_d['password_img'])
         password_box.addWidget(widget_d['password_edit'])
@@ -106,16 +111,19 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         widget_d['status_btn'] = StatusButton.StatusButton()
         widget_d['status_btn'].setToolTip(_('Status'))
         widget_d['status_btn'].set_status(e3.status.ONLINE)
+        widget_d['status_btn'].setEnabled(False)
         password_box.addWidget(widget_d['status_btn'])
 
         service_box = QtGui.QHBoxLayout()
         widget_d['service_box'] = service_box
         widget_d['service_combo'] = QtGui.QComboBox()
+        widget_d['service_combo'].setToolTip(_('Service'))
         widget_d['service_combo'].setMinimumWidth(220)
         service_img = QtGui.QLabel()
         service_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.connect))
         widget_d['service_img'] = service_img
         widget_d['advanced_btn'] = QtGui.QToolButton()
+        widget_d['advanced_btn'].setToolTip(_('Preferences'))
         widget_d['advanced_btn'].setAutoRaise(True)
         widget_d['advanced_btn'].setIcon(
                                     QtGui.QIcon.fromTheme('preferences-other'))
@@ -160,7 +168,9 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         # insert accounts in the combo box:
         account_combo = widget_d['account_combo']
         for account in self._account_list:
-            account_combo.addItem(account.email,
+            if not account.email in self.account_list:
+                self.account_list.append(account.email)
+                account_combo.addItem(account.email,
                                   self._account_list.index(account))
 
         widget_d['account_combo'].currentIndexChanged.connect(
@@ -186,7 +196,6 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         account_combo = widget_d['account_combo']
         account_combo.setMinimumWidth(220)
         account_combo.setEditable(1)
-        account_combo.setDuplicatesEnabled(False) #not working... why?
         account_combo.setInsertPolicy(QtGui.QComboBox.NoInsert)
 
         login_btn = widget_d['login_btn']
@@ -217,11 +226,26 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
 
     def _on_account_combo_text_changed(self, new_text, from_preferences=False): #new text is a QString
         ''' Slot executed when the text in the account combo changes '''
+        widget_d = self._widget_d
+        account_combo = widget_d['account_combo']
+        forget_me_btn = widget_d['forget_me_btn']
+        password_edit = widget_d['password_edit']
+        save_account_chk = widget_d['save_account_chk']
+        status_btn = widget_d['status_btn']
+        if not account_combo.currentText():
+            password_edit.setEnabled(False)
+            status_btn.setEnabled(False)
+        else:
+            password_edit.setEnabled(True)
+            status_btn.setEnabled(True)
+            save_account_chk.setEnabled(True)
+
         index = self._widget_d['account_combo'].findText(new_text)
         service = str(self._widget_d['service_combo'].currentText())
         if index > -1 and from_preferences and self.search_account(service, new_text):
             self._on_chosen_account_changed(index)
         else:
+            forget_me_btn.setEnabled(False)
             self.clear_login_form(clear_pic=True)
         self._on_checkbox_state_refresh()
 
@@ -230,7 +254,13 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         down menu of the account combo'''
         widget_d = self._widget_d
         account_combo = widget_d['account_combo']
+        forget_me_btn = widget_d['forget_me_btn']
         password_edit = widget_d['password_edit']
+        if not account_combo.currentText():
+            forget_me_btn.setEnabled(False)
+        else:
+            password_edit.setEnabled(True)
+            
         index_in_account_list = account_combo.itemData(acc_index).toPyObject()
         # If we don't have any account at all, this slots gets called but
         # index_in_account_list is None.
@@ -256,7 +286,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             widget_d['save_account_chk'].setChecked(account.save_account)
             widget_d['save_password_chk'].setChecked(account.save_password)
             widget_d['auto_login_chk'].setChecked(account.auto_login)
-
+            forget_me_btn.setEnabled(True)
             self.update_service(account.service)
         self._on_checkbox_state_refresh()
 
@@ -319,11 +349,13 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         def _yes_no_cb(response):
             '''callback from the confirmation dialog'''
             if (response == 36): #Accepted
+                index = widget_dic['account_combo'].currentIndex()
                 account = str(widget_dic['account_combo'].currentText())
                 service = self.config.d_user_service.get(account, self.config.service)
                 self.forget_user(account, service)
-                #FIXME: remove fron account_list and combo
-                widget_dic['account_combo'].setCurrentIndex(0)
+                #remove from account_list and combo
+                widget_dic['account_combo'].removeItem(index)
+                self.account_list.remove(account)
 
         widget_dic = self._widget_d
         extension.get_default('dialog').yes_no(
@@ -383,6 +415,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             save_password_chk.setEnabled(True)
 
         if save_password_chk.isChecked():
+            auto_login_chk.setEnabled(True)
             save_account_chk.setChecked(True)
             save_account_chk.setEnabled(False)
         else:
@@ -393,6 +426,9 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             login_btn.setEnabled(True)
         else:
             login_btn.setEnabled(False)
+            save_account_chk.setEnabled(False)
+            save_password_chk.setEnabled(False)
+            auto_login_chk.setEnabled(False)
 
     def clear_all(self, clear_pic=False):
         '''
