@@ -281,8 +281,6 @@ class ChatWidget(gtk.VBox):
         self.text = OutputText(session.config, None)
         self.text.connect("search_request", self._search_request_cb)
 
-        self.formatter = e3.common.MessageFormatter()
-
         buttons = gtk.HButtonBox()
         buttons.set_border_width(2)
         buttons.set_layout(gtk.BUTTONBOX_END)
@@ -411,7 +409,7 @@ class ChatWidget(gtk.VBox):
         message = e3.Message(e3.Message.TYPE_MESSAGE, msg, None, None)
         msg = gui.Message.from_information(contact, message)
 
-        self.text.information(self.formatter, msg)
+        self.text.information(msg)
         self.conv_status.post_process_message(msg)
         self.conv_status.update_status()
 
@@ -494,7 +492,7 @@ class ChatWidget(gtk.VBox):
             if is_me:
                 msg = self.conv_status.pre_process_message(contact, message,
                     False, None, None, message.timestamp, message.type, None)
-                self.text.send_message(self.formatter, msg)
+                self.text.send_message(msg)
             else:
                 try:
                     account_colors[account]
@@ -507,7 +505,7 @@ class ChatWidget(gtk.VBox):
                 message.style = self._get_style(account_colors[account])
                 msg = self.conv_status.pre_process_message(contact, message,
                     True, None, None, message.timestamp, message.type, message.style)
-                self.text.receive_message(self.formatter, msg)
+                self.text.receive_message(msg)
 
             self.conv_status.post_process_message(msg)
             self.conv_status.update_status()
