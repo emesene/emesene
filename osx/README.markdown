@@ -28,3 +28,8 @@ sh build_osx.sh
 You should end up with an emesene.app in the dist folder
 
 If you are planning to release emesene at step 3, run sh build_osx.sh dorelease, this will create a folder ready to be made into a DMG.
+
+### Caveats
+
+* DMG has to be built manually, just create a new disk image from the dist/emesene folder. The background image is in dist/emesene/.background
+* DMG volume icon has to be set manually
