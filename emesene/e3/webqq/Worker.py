@@ -91,6 +91,10 @@ class Worker(e3.Worker):
                         if item[0] == libwebqqpython.ON_BUDDY_MESSAGE :
                             
                             self._on_message(item[1])
+                        elif item[0] == libwebqqpython.ON_NICK_CHANGE:
+
+                            self._on_nick_update(item[1])
+                            
                         else:
                             print 'Un implementation callback functions'
                             
@@ -125,24 +129,24 @@ class Worker(e3.Worker):
             categories_dict[index] = group
             
         for uin in self.res_manager.contacts.keys():
-            nick = self.res_manager.contacts[uin].nick
+            #nick = self.res_manager.contacts[uin].nick
             _status = e3.status.OFFLINE
             if not self.res_manager.contacts[uin].status  == '':
                 _status = e3.status.ONLINE
                 
-            contact = e3.Contact(account = nick, identifier = int(uin), nick = nick, message = self.res_manager.contacts[uin].lnick, _status = _status, blocked = False, cid = uin)
-            
+            contact = e3.Contact(account = uin, identifier = int(uin),  message = self.res_manager.contacts[uin].lnick, _status = _status, blocked = False, cid = uin)
+            '''
             if contact.cid  == self.session.account.account :
-                print nick
                 self.session.contacts.me.nick = nick
                 self.session.nick_change_succeed(nick)
                 continue
+            '''
             index = self.res_manager.contacts[uin].cate_index
             group = categories_dict[index]
             self._add_contact_to_group( contact, group.name )
-            self.session.contacts.contacts[nick] = contact
-            self.nick_uin_map[nick] = uin
-       	    self.uin_nick_map[uin] = nick
+            self.session.contacts.contacts[uin] = contact
+            #self.nick_uin_map[nick] = uin
+       	    #self.uin_nick_map[uin] = nick
             
         self.session.login_succeed()
         self.session.contact_list_ready()
@@ -156,14 +160,7 @@ class Worker(e3.Worker):
 
     def _on_presence(self, presence):
         '''handle the reception of a presence message'''
-        #<presence to="rikyz619@gmail.com/5C034291" from="0daebwjuox4mk0hgq7idl2wxqe@public.talk.google.com/TalkGadgetE00E7FDA">
-        #  <show>away</show>
-        #  <priority>24</priority>
-        #  <c xmlns="http://jabber.org/protocol/caps" node="http://talkgadget.google.com/client/caps" ext="pmuc-v1 vavinvite-v1 share-v1" ver="1.0" />
-        #  <x xmlns="vcard-temp:x:update">
-        #    <photo>a34d1397a11a7be2d244293a2569e9cd1b53c7af</photo>
-        #  </x>
-        #</presence>,
+        
         message = ''
         show = presence.get_type()
         account = presence.get_from().bare
@@ -198,7 +195,9 @@ class Worker(e3.Worker):
         data = json.loads(message)
                             
         from_uin = str(data['from_uin'])
-        account = self.uin_nick_map[from_uin]
+        #account = self.uin_nick_map[from_uin]
+        
+        account = from_uin
         body = data['content'][-1]
         type_ = e3.Message.TYPE_MESSAGE
 
@@ -217,7 +216,31 @@ class Worker(e3.Worker):
         print 'log message'
         e3.Logger.log_message(self.session, None, msgobj, False)
 
+    def _on_nick_update(self, value):
+        data = json.loads(value)
+        uin = data["uin"]
+        nick = data["nick"]
+        contact = self.session.contacts.contacts.get(uin, None)
+        account = uin
+        if not contact:
+            contact = e3.Contact(account)
+            self.session.contacts.contacts[account] = contact
 
+        if contact.cid  == self.session.account.account :
+                self.session.contacts.me.nick = nick
+                self.session.nick_change_succeed(nick)
+            
+        log_account = e3.Logger.Account(contact.cid, None, contact.account, contact.status, contact.nick, contact.message, contact.picture)
+
+        contact.nick = nick
+        status_ = contact.status
+        old_nick = contact.nick
+        if not old_nick or old_nick != nick:
+            self.session.contact_attr_changed(account, 'nick', old_nick)
+            self.session.log('nick change', status_, nick,        log_account)
+        pass
+        
+        
     def _on_photo_update(self, session, stanza):
         pass
     def _on_contact_jabber_changed(self, session, stanza):
@@ -390,9 +413,8 @@ class Worker(e3.Worker):
         recipients = self.rconversations.get(cid, ())
         print "Message : " +message.body
         
-        for nick in recipients:
-	    recipient = self.nick_uin_map[nick]
-            
+        for recipient in recipients:
+	    #recipient = self.nick_uin_map[nick]
             self.webqq_plugin.send_buddy_message( str(recipient), str(message.body))
             # log message
         e3.Logger.log_message(self.session, recipients, message, True)
