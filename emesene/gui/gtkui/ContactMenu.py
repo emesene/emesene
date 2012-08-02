@@ -177,7 +177,11 @@ class ContactMenu(gtk.Menu):
         all_groups = self.handler.get_all_groups()
         contact_groups = self.handler.get_contact_groups()
 
-        for key, group in all_groups.iteritems():
+        if all_groups:
+            all_groups = sorted(all_groups.items(),
+                             key = lambda x: Plus.msnplus_strip(x[1].name).lower())
+
+        for key, group in all_groups:
             if key not in contact_groups:
                 item = gtk.MenuItem(group.name)
                 item.connect('activate', 

@@ -30,7 +30,7 @@ def qt4_main(controller_cls):
     #KdeCore.KCmdLineArgs.init(sys.argv[2:], about_data)
     g_main_loop = gobject.MainLoop()
     app = QtGui.QApplication(sys.argv)
-    app.setApplicationName('emesene2')
+    app.setApplicationName('emesene')
 
     idletimer = QtCore.QTimer(QtGui.QApplication.instance())
     idletimer.timeout.connect(on_idle)
@@ -80,6 +80,7 @@ def setup():
     import menus
     import pages
     import widgets
+    import Utils
 
 
     extension.category_register('avatar chooser',  AvatarChooser.AvatarChooser)
@@ -140,6 +141,8 @@ def setup():
     extension.category_register('below menu', widgets.EmptyWidget)
     extension.category_register('below panel', widgets.EmptyWidget)
     extension.category_register('below userlist', widgets.EmptyWidget)
+
+    extension.category_register('toolkit tags', Utils.QtTags)
 
 def on_idle():
     '''When there's nothing to do in the Qt event loop

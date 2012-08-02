@@ -18,7 +18,6 @@
 
 import e3
 import gtk
-import gui
 import extension
 import glib
 from gui.gtkui import check_gtk3

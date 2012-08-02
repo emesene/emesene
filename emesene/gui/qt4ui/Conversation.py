@@ -109,7 +109,9 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.toolbar.update_toggle_avatar_icon(self.session.config.b_show_info)
 
         widget_d['smiley_chooser'] = smiley_chooser_cls()
-        self.input = Widgets.ChatInput()
+        self.input = Widgets.ChatInput(self._on_send_message,
+                               self.cycle_history,
+                               self._send_typing_notification)
 
         self.bottom_left_lay = QtGui.QVBoxLayout()
         self.bottom_left_lay.setContentsMargins(0, 0, 0, 0)
@@ -121,8 +123,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.input.set_smiley_dict(gui.theme.emote_theme.emotes)
         widget_d['smiley_chooser'].emoticon_selected.connect(
                             self._on_smiley_selected)
-        self.input.return_pressed.connect(
-                            self._on_send_btn_clicked)
         self.input.style_changed.connect(
                             self._on_new_style_selected)
 
@@ -257,15 +257,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         chooser panel. Inserts the smiley in the chat edit'''
         # handles cursor position
         self.input.insert_text_after_cursor(shortcut)
-
-    def _on_send_btn_clicked(self):
-        '''Slot called when the user presses Enter in
-        the chat line editor. Sends the message'''
-        message_string = unicode(self.input.toPlainText())
-        if len(message_string) == 0:
-            return
-        self.input.clear()
-        gui.base.Conversation._on_send_message(self, message_string)
 
     def on_user_typing(self, account):
         """

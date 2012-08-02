@@ -17,7 +17,6 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import e3
-import extension
 
 import logging
 log = logging.getLogger('gui.base.ConversationManager')

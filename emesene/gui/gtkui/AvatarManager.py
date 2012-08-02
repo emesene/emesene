@@ -27,11 +27,7 @@ from gui.gtkui import check_gtk3
 class AvatarManager(gobject.GObject):
     '''Manager for avatars'''
 
-    #key-position, is aa Anchor Type constant. Refer to 
-    #http://www.pygtk.org/docs/pygtk/gtk-constants.html#gtk-anchor-type-constants
-
-    def __init__(self, cell_dimension = 32, cell_radius = 0.11,
-                crossfade = True, cell_key_position = gtk.gdk.GRAVITY_CENTER):
+    def __init__(self, cell_dimension = 32, cell_radius = 0.11, crossfade = True):
         ''' constructor'''
         gobject.GObject.__init__(self)
 
@@ -40,7 +36,6 @@ class AvatarManager(gobject.GObject):
         self._image = None
         self._dimension = cell_dimension
         self._radius_factor = cell_radius
-        self._key_position = cell_key_position
         self._offline = False
 
         # variables related to animation
@@ -67,8 +62,6 @@ class AvatarManager(gobject.GObject):
             return self._pixbuf
         elif property.name == 'pixbuf-animation':
             return self._pixbuf
-        elif property.name == 'key-position':
-            return self._key_position
         elif property.name == 'crossfade':
             return self._crossfade
         else:
@@ -87,8 +80,6 @@ class AvatarManager(gobject.GObject):
             self._set_pixbuf(value)
         elif property.name == 'pixbuf-animation':
             self._pixbuf = value
-        elif property.name == 'key-position':
-            self._key_position = value
         elif property.name == 'crossfade':
             self._crossfade = value
         else:
@@ -122,7 +113,7 @@ class AvatarManager(gobject.GObject):
             return True
 
     def draw_avatar(self, context, pixbuf, xpos, ypos, dimension,
-                    position, radius, alpha):
+                    radius, alpha):
         '''draw the avatar'''
         context.save()
         context.set_antialias(cairo.ANTIALIAS_SUBPIXEL)
@@ -139,10 +130,6 @@ class AvatarManager(gobject.GObject):
         scale_width = pix_width * scale_factor
         scale_height = pix_height * scale_factor
 
-        #tranlate position
-        self.translate_key_postion(context, position, dimension,
-                dimension, scale_width, scale_height)
-
         if radius > 0 :
             self.rounded_rectangle(context, 0, 0, scale_width,
                     scale_height, dimension * radius)
@@ -156,29 +143,6 @@ class AvatarManager(gobject.GObject):
 
         context.paint_with_alpha(alpha)
         context.restore()
-
-    def translate_key_postion(self, context, position, width, height,
-                             scale_width, scale_height):
-        ''' translate anchor type constants to an actual position'''
-        if position in (gtk.gdk.GRAVITY_NORTH_WEST, gtk.gdk.GRAVITY_WEST,
-                        gtk.gdk.GRAVITY_SOUTH_WEST):
-            xpos = 0
-        elif position in (gtk.gdk.GRAVITY_NORTH, gtk.gdk.GRAVITY_CENTER,
-                          gtk.gdk.GRAVITY_SOUTH):
-            xpos = (width // 2) - (scale_width // 2)
-        else:
-            xpos = width - scale_width
-
-        if position in (gtk.gdk.GRAVITY_NORTH_WEST, gtk.gdk.GRAVITY_NORTH,
-                        gtk.gdk.GRAVITY_NORTH_EAST):
-            ypos = 0
-        elif position in (gtk.gdk.GRAVITY_EAST, gtk.gdk.GRAVITY_CENTER,
-                          gtk.gdk.GRAVITY_WEST):
-            ypos = (height // 2) - (scale_height // 2)
-        else:
-            ypos = height - scale_height
-
-        context.translate(xpos, ypos)
 
     def rounded_rectangle(self, context, xpos, ypos, width, height, radius=5):
         """Create rounded rectangle path"""

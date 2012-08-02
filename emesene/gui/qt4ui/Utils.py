@@ -20,12 +20,51 @@
 
 import xml
 import e3
+import os
+import urllib
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
+from PyQt4.QtCore import Qt
+
+import extension
 
 from gui.base import MarkupParser
+
+class QtTags(object):
+    NEWLINE = "<br/>"
+    FONT_SIZE_SMALL = 'style=\"font-size : small\"'
+    FONT_WEIGHT_BOLD = 'style=\"font-weight : bold\"'
+    FONT_STYLE_ITALIC = 'style=\"font-style : italic\"'
+    PLUS_TAG_DICT = {
+        'a': ('style', 'background-color : #%s'),
+        'c': ('style', 'color : #%s'),
+        'b': ('style', 'font-weight : bold'),
+        'u': ('style', 'text-decoration : underline'),
+        'i': ('style', 'font-style : italic'),
+        's': ('style', 'text-decoration : line-through'),
+        '$': ('style', 'color : #%s'),
+        '#': ('style', 'font-weight : bold'),
+        '@': ('style', 'text-decoration : underline'),
+        '&': ('style', 'font-style : italic'),
+        '\'': ('style', 'text-decoration : line-through')
+    }
+    def FONT_COLOR(self, color):
+        return 'style=\"color : %s\"' % color
+
+extension.implements('toolkit tags', QtTags)
+
+def path_to_url(path):
+    if os.name == "nt":
+        # on windows os.path.join uses backslashes
+        path = path.replace("\\", "/")
+        path = path[2:]
+
+    path = path.encode("iso-8859-1")
+    path = urllib.quote(path)
+    path = "file://" + path
+
+    return path
 
 def qfont_to_style(qfont, color=None):
 

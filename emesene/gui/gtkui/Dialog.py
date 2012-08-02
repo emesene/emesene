@@ -489,7 +489,7 @@ class Dialog(object):
         combo.append_text("")
 
         groups = list(groups)
-        groups.sort()
+        groups.sort(key = lambda x: x.name)
 
         selected = 0
 
@@ -1377,7 +1377,8 @@ class EmotesWindow(gtk.Window):
     def destroy(self):
         '''override destroy method'''
         global dialogs
-        dialogs.remove(self)
+        if self in dialogs:
+            dialogs.remove(self)
         gtk.Window.destroy(self)
 
     def on_leave_notify_event(self, *args):

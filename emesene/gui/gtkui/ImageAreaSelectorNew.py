@@ -17,8 +17,7 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from gi.repository import Gtk, GObject, Gdk, GdkPixbuf
-import cairo
+from gi.repository import Gtk, Gdk, GdkPixbuf
 from gi.repository import Pango
 from sys import platform
 
@@ -393,4 +392,3 @@ class ImageAreaSelector(Gtk.DrawingArea):
             self.selection = (x1, y1, sw, sw)
         else:
             self.selection = (0, 0, 0, 0)
-

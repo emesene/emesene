@@ -19,14 +19,12 @@
 from __future__ import division
 
 import e3
-import utils
 import extension
 
 import gtk
 from glib import timeout_add, source_remove
 import xml.sax.saxutils
 
-import gui
 from gui.gtkui import check_gtk3
 from gui.base import Plus
 

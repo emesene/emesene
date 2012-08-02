@@ -29,6 +29,8 @@ def gtk_main(Controller):
     import gtk
     import gobject
 
+    import utils
+
     import AccountMenu
     import Avatar
     import AvatarChooser
@@ -58,7 +60,6 @@ def gtk_main(Controller):
     import Login
     import MainMenu
     import MainWindow
-    import MarkupParser
 
     try:
         import InfoBar
@@ -197,6 +198,7 @@ def setup():
         extension.category_register('conversation output', TextBox.OutputText)
 
     extension.category_register('picture handler', PictureHandler.PictureHandler)
+    extension.category_register('toolkit tags', utils.GTKTags)
 
 def check_gtk3():
     '''return true if it's gtk3'''

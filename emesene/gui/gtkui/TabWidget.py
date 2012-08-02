@@ -16,30 +16,11 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys
 import gtk
 import gobject
 import extension
 
 import utils
-
-from gui.gtkui import check_gtk3
-
-CLOSE_ON_LEFT = 0
-
-#FIXME: find correct GSettings value and replace this in gtk3
-if not check_gtk3():
-    try:
-        import gconf
-        gclient = gconf.client_get_default()
-        val = gclient.get("/apps/metacity/general/button_layout")
-        if val.get_string().startswith("close"):
-            CLOSE_ON_LEFT = 1
-    except:
-        pass
-
-if sys.platform == 'darwin':
-    CLOSE_ON_LEFT = 1
 
 class TabWidget(gtk.HBox):
     '''a widget that is placed on the tab on a notebook'''
@@ -72,14 +53,9 @@ class TabWidget(gtk.HBox):
         self.close.connect('clicked', on_close_clicked,
             conversation)
 
-        if CLOSE_ON_LEFT:
-            self.pack_start(self.close, False, False, 0)
-            self.pack_start(self.image, False, False, 0)
-            self.pack_start(label, True, True, 0)
-        else:
-            self.pack_start(self.image, False, False, 0)
-            self.pack_start(label, True, True, 0)
-            self.pack_start(self.close, False, False, 0)
+        self.pack_start(self.image, False, False, 0)
+        self.pack_start(label, True, True, 0)
+        self.pack_start(self.close, False, False, 0)
 
         self.config.subscribe(self._on_close_button_on_tabs_visible,
             'b_close_button_on_tabs')

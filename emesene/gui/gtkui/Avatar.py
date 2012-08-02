@@ -43,20 +43,15 @@ class Avatar(gtk.Widget, AvatarManager):
         'pixbuf-animation': (gtk.gdk.Pixbuf, 'Pixbuf', 'pixbuf from animation',
             gobject.PARAM_READWRITE),
         'crossfade': (bool, 'animate by crossfade if true','',True,
-            gobject.PARAM_READWRITE),
-        'key-position': (object, 'position of avatar',
-            'corresponds to position of key in numpad',
-            gobject.PARAM_READWRITE),
+            gobject.PARAM_READWRITE)
          }
 
     if not check_gtk3():
         __gsignals__ = { 'size_request': 'override', 'expose-event': 'override' }
 
-    def __init__(self, cell_dimension = 96, crossfade = True, cell_radius = 0.05,
-                 cell_key_position = gtk.gdk.GRAVITY_CENTER):
+    def __init__(self, cell_dimension = 96, crossfade = True, cell_radius = 0.05):
         gtk.Widget.__init__(self)
-        AvatarManager.__init__(self, cell_dimension, cell_radius, crossfade,
-            cell_key_position)
+        AvatarManager.__init__(self, cell_dimension, cell_radius, crossfade)
         if not check_gtk3():
             self.set_flags(self.flags() | gtk.NO_WINDOW)
         else:
@@ -204,14 +199,14 @@ class Avatar(gtk.Widget, AvatarManager):
 
         if self.in_animation:
             self.draw_avatar(ctx, self._pixbuf, cell_x,
-                cell_y, self._dimension, self._key_position, self._radius_factor,
+                cell_y, self._dimension, self._radius_factor,
                 1 - (float(self.current_frame) / self.total_frames))
             self.draw_avatar(ctx, self.transition_pixbuf,
-                cell_x, cell_y, self._dimension, self._key_position, self._radius_factor,
+                cell_x, cell_y, self._dimension, self._radius_factor,
                 (float(self.current_frame) / self.total_frames))
         else:
             self.draw_avatar(ctx, self._pixbuf, cell_x,
-                cell_y, self._dimension, self._key_position, self._radius_factor, 1)
+                cell_y, self._dimension, self._radius_factor, 1)
 
         return False
 

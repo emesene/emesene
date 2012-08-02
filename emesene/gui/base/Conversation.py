@@ -43,7 +43,6 @@ class Conversation(object):
 
         self.cid = float(cid)
         self.icid = self.cid
-        self.formatter = e3.common.MessageFormatter()
 
         self._header_visible = True
         self._image_visible = True
@@ -303,7 +302,7 @@ class Conversation(object):
         message = e3.Message(e3.Message.TYPE_NUDGE, '', None, None)
         message.body = _('You just sent a nudge!')
         msg = gui.Message.from_information(self.session.contacts.me, message)
-        self.output.information(self.formatter, msg)
+        self.output.information(msg)
         self.conv_status.post_process_message(msg)
 
         self.play_nudge()
@@ -459,7 +458,7 @@ class Conversation(object):
             message, False, cedict, self.emcache.path, message.timestamp,
             message.type, self.cstyle)
 
-        self.output.send_message(self.formatter, msg)
+        self.output.send_message(msg)
 
         self.conv_status.post_process_message(msg)
 
@@ -486,7 +485,7 @@ class Conversation(object):
                 message, True, cedict, cepath,
                 message.timestamp, message.type, message.style)
 
-        self.output.receive_message(self.formatter, msg)
+        self.output.receive_message(msg)
 
         self.conv_status.post_process_message(msg)
 
@@ -517,7 +516,7 @@ class Conversation(object):
             message.body = _('%s just sent you a nudge!') % (MarkupParser.escape(contact.display_name),)
             msg = gui.Message.from_information(contact, message)
 
-            self.output.information(self.formatter, msg)
+            self.output.information(msg)
             self.conv_status.post_process_message(msg)
 
             self.play_nudge()
@@ -525,7 +524,7 @@ class Conversation(object):
         elif message.type == e3.Message.TYPE_INFO:
             msg = gui.Message.from_information(contact, message)
 
-            self.output.information(self.formatter, msg)
+            self.output.information(msg)
             self.conv_status.post_process_message(msg)
 
         self.conv_status.update_status()
@@ -537,7 +536,7 @@ class Conversation(object):
         message.body = _('Error delivering message')
         msg = gui.Message.from_information(contact, message)
 
-        self.output.information(self.formatter, msg)
+        self.output.information(msg)
         self.conv_status.post_process_message(msg)
         self.conv_status.update_status()
 
@@ -610,7 +609,7 @@ class Conversation(object):
                 account)
                 msg = gui.Message.from_information(contact, message)
 
-                self.output.information(self.formatter, msg)
+                self.output.information(msg)
                 self.conv_status.post_process_message(msg)
 
         self.update_data()
@@ -627,7 +626,7 @@ class Conversation(object):
             account)
             msg = gui.Message.from_information(contact, message)
 
-            self.output.information(self.formatter, msg)
+            self.output.information(msg)
             self.conv_status.post_process_message(msg)
 
     def on_group_started(self):

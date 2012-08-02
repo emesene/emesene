@@ -53,6 +53,25 @@ if not hasattr(Gdk, 'screen_width'):
     Gtk.StatusIcon.set_tooltip = Gtk.StatusIcon.set_tooltip_text
     Gtk.clipboard_get = Gtk.Clipboard.get
 
+try:
+    #newer pygobject versions has compat for indexed attrs
+    GdkPixbuf.Pixbuf.get_formats()[0]
+except:
+    orig_get_formats = GdkPixbuf.Pixbuf.get_formats
+    def get_formats():
+        formats = orig_get_formats()
+        old_formats = []
+        def make_dict(format_):
+            temp = {}
+            temp['description'] = format_.get_description()
+            temp['name'] = format_.get_name()
+            temp['mime_types'] = format_.get_mime_types()
+            temp['extensions'] = format_.get_extensions()
+            return temp
+        for format_ in formats:
+            old_formats.append(make_dict(format_))
+        return old_formats
+    Gdk.pixbuf_get_formats = get_formats
 
 Gtk.SeparatorMenuItem = Gtk.SeparatorMenuItem.new
 
@@ -85,22 +104,6 @@ Gdk.PixbufAnimation = PixbufAnimation
 def save(self, filename, extension):
     GdkPixbuf.Pixbuf.savev(self, filename, extension, [], [])
 Gdk.Pixbuf.save = save
-
-orig_get_formats = GdkPixbuf.Pixbuf.get_formats
-def get_formats():
-    formats = orig_get_formats()
-    old_formats = []
-    def make_dict(format_):
-        temp = {}
-        temp['description'] = format_.get_description()
-        temp['name'] = format_.get_name()
-        temp['mime_types'] = format_.get_mime_types()
-        temp['extensions'] = format_.get_extensions()
-        return temp
-    for format_ in formats:
-        old_formats.append(make_dict(format_))
-    return old_formats
-Gdk.pixbuf_get_formats = get_formats
 
 class ImageMenuItem(Gtk.ImageMenuItem):
     def __new__(self, mnemonic=""):
@@ -169,7 +172,7 @@ def append_page(self, widget, label=None):
     return orig_append_page(self, widget, label)
 Gtk.Notebook.append_page = append_page
 
-#XXX: this only work with 
+#XXX: this only work with
 # treeViewColumn.set_attributes(cellText, text=1)
 def set_attributes(self, cellText, text=0):
     self.add_attribute(cellText, 'text', text)

@@ -19,6 +19,7 @@
 import re
 from e3.common.XmlParser import DictObj
 import gui
+import extension
 
 COLOR_MAP = (
     'ffffff','000000','00007F','009300','FF0000','7F0000','9C009C','FC7F00',
@@ -52,20 +53,6 @@ COLOR_NAME_DICT = {
     'silver': '#D2D2D2',
     'mohr': '#ff00de',
     'c10ud': '#696969'
-}
-
-TAG_DICT = {
-    'a': 'background',
-    'c': 'foreground',
-    'b': ('weight', 'bold'),
-    'u': ('underline', 'single'),
-    'i': ('style', 'italic'),
-    's': ('strikethrough', 'true'),
-    '$': 'foreground',
-    '#': ('weight', 'bold'),
-    '@': ('underline', 'single'),
-    '&': ('style', 'italic'),
-    '\'': ('strikethrough', 'true')
 }
 
 COLOR_TAGS = ('a', 'c', '$')
@@ -209,13 +196,16 @@ class Plus(object):
             arg = arg2
             tag = 'a'
 
+        ToolkitTags = extension.get_default('toolkit tags')
+        TAG_DICT = ToolkitTags.PLUS_TAG_DICT
+
         if '\n' in text_before:
             splitted_text = text_before.partition('\n')
             if splitted_text[0].strip(' '):
                 self.stack[-1]['childs'].append(splitted_text[0])
             text_before = splitted_text[2]
             self._close_stack_tags()
-            self.stack[-1]['childs'].append('\n')
+            self.stack[-1]['childs'].append(ToolkitTags.NEWLINE)
 
         if self.tag_queue and self.tag_queue[0][0] == match.group(3) and not self.tag_queue[0][2]:
             self.stack[-1]['childs'].append(match.group(0))
@@ -383,10 +373,11 @@ class Plus(object):
     def _dict_translate_tags(self, msgdict):
         '''translate 'a' to 'span' etc...'''
         tag = msgdict['tag']
+        TAG_DICT = extension.get_default('toolkit tags').PLUS_TAG_DICT
         if tag in TAG_DICT:
             msgdict['tag'] = 'span'
             if tag in COLOR_TAGS:
-                msgdict[TAG_DICT[tag]] = '#%s' % msgdict[tag].upper()
+                msgdict[TAG_DICT[tag][0]] = TAG_DICT[tag][1] % msgdict[tag].upper()
             else:
                 msgdict[TAG_DICT[tag][0]] = TAG_DICT[tag][1]
             del msgdict[tag]

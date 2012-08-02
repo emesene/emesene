@@ -27,6 +27,7 @@ from e3 import status
 
 import gui
 import gui.gtkui.utils as utils
+import gui.gtkui.StatusMenu as StatusMenu
 
 from gui import Plus
 
@@ -190,11 +191,10 @@ class MainMenu(gtk.Menu):
         gtk.Menu.__init__(self)
         self.handler = handler
 
-        StatusMenu = extension.get_default('menu status')
         self.status = gtk.ImageMenuItem(_('Status'))
         self.status.set_image(gtk.image_new_from_stock(gtk.STOCK_CONVERT,
             gtk.ICON_SIZE_MENU))
-        self.status_menu = StatusMenu(handler.on_status_selected)
+        self.status_menu = StatusMenu.StatusMenu(handler.on_status_selected)
         self.status.set_submenu(self.status_menu)
 
         self.list = gtk.ImageMenuItem(_('Contacts'))

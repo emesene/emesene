@@ -19,7 +19,6 @@
 import os
 import time
 import gui.gtkui.utils as utils
-import e3
 
 from gui.gtkui import check_gtk3
 
