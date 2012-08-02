@@ -6,3 +6,4 @@ emesene.egg-info/*
 dist/*
 docs/_build
 emesene/build
+osx/gtk/*
