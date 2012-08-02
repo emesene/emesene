@@ -1,0 +1,14 @@
+--- /Users/Josh/Code/Builds/Current/emesene/emesene/emesene.py	2012-07-10 11:06:04.000000000 +0100
++++ /Users/Josh/Code/Builds/Current/emesene-osxchanges/emesene/emesene.py	2012-07-12 08:31:42.000000000 +0100
+@@ -21,6 +21,11 @@
+ import os
+ import sys
+ 
++sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.7/site-packages")
++sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.7/site-packages/gtk-2.0")
++sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.6/site-packages")
++sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.6/site-packages/gtk-2.0")
++
+ # Extract any non-GStreamer arguments, and leave the GStreamer arguments for
+ # processing by GStreamer. This needs to be done before GStreamer is imported,
+ # so that GStreamer doesn't hijack e.g. ``--help``.
