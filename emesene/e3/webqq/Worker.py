@@ -158,37 +158,6 @@ class Worker(e3.Worker):
 
         e3.base.Worker._handle_action_change_status(self, status_)
 
-    def _on_presence(self, presence):
-        '''handle the reception of a presence message'''
-        
-        message = ''
-        show = presence.get_type()
-        account = presence.get_from().bare
-
-        stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
-        contact = self.session.contacts.contacts.get(account, None)
-
-        if not contact:
-            contact = e3.Contact(account)
-            self.session.contacts.contacts[account] = contact
-
-        old_message = contact.message
-        old_status = contact.status
-        contact.message = message
-        contact.status = stat
-
-        log_account =  e3.Logger.Account(contact.cid, None,
-            contact.account, contact.status, contact.nick, contact.message,
-            contact.picture)
-
-        if old_status != stat:
-            self.session.contact_attr_changed(account, 'status', old_status)
-            self.session.log('status change', stat, str(stat), log_account)
-
-        if old_message != contact.message:
-            self.session.contact_attr_changed(account, 'message', old_message)
-            self.session.log('message change', contact.status,
-                contact.message, log_account)
 
     def _on_message(self, message):
         '''handle the reception of a message'''
@@ -220,8 +189,10 @@ class Worker(e3.Worker):
         data = json.loads(value)
         uin = data["uin"]
         nick = data["nick"]
+        print nick
         contact = self.session.contacts.contacts.get(uin, None)
         account = uin
+        old_nick = contact.nick
         if not contact:
             contact = e3.Contact(account)
             self.session.contacts.contacts[account] = contact
@@ -229,16 +200,14 @@ class Worker(e3.Worker):
         if contact.cid  == self.session.account.account :
                 self.session.contacts.me.nick = nick
                 self.session.nick_change_succeed(nick)
-            
-        log_account = e3.Logger.Account(contact.cid, None, contact.account, contact.status, contact.nick, contact.message, contact.picture)
-
-        contact.nick = nick
+        
         status_ = contact.status
-        old_nick = contact.nick
-        if not old_nick or old_nick != nick:
-            self.session.contact_attr_changed(account, 'nick', old_nick)
-            self.session.log('nick change', status_, nick,        log_account)
-        pass
+        log_account = e3.Logger.Account(contact.cid, None, contact.account, contact.status, contact.nick, contact.message, contact.picture)
+        if not nick == "" :
+           contact.nick = nick
+           contact.alias = nick
+           self.session.contact_attr_changed(account, 'nick', old_nick)
+           self.session.log('nick change', status_, nick,  log_account)
         
         
     def _on_photo_update(self, session, stanza):
