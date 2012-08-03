@@ -26,16 +26,16 @@ else:
 STATUS_MAP = {}
 STATUS_MAP[e3.status.BUSY] = 'busy'
 STATUS_MAP[e3.status.AWAY] = 'away'
-STATUS_MAP[e3.status.IDLE] = 'xa'
-STATUS_MAP[e3.status.ONLINE] = 'chat'
-STATUS_MAP[e3.status.OFFLINE] = 'unavailable'
+STATUS_MAP[e3.status.IDLE] = 'silent'
+STATUS_MAP[e3.status.ONLINE] = 'online'
+STATUS_MAP[e3.status.OFFLINE] = 'offline'
 
 STATUS_MAP_REVERSE = {}
 STATUS_MAP_REVERSE['busy'] = e3.status.BUSY
 STATUS_MAP_REVERSE['away'] = e3.status.AWAY
-STATUS_MAP_REVERSE['xa'] = e3.status.IDLE
-STATUS_MAP_REVERSE['chat'] = e3.status.ONLINE
-STATUS_MAP_REVERSE['unavailable'] = e3.status.OFFLINE
+STATUS_MAP_REVERSE['silent'] = e3.status.IDLE
+STATUS_MAP_REVERSE['online'] = e3.status.ONLINE
+STATUS_MAP_REVERSE['offline'] = e3.status.OFFLINE
 
 PHOTO_TYPES = {
     'image/png': '.png',
@@ -92,9 +92,9 @@ class Worker(e3.Worker):
                             
                             self._on_message(item[1])
                         elif item[0] == libwebqqpython.ON_NICK_CHANGE:
-
                             self._on_nick_update(item[1])
-                            
+                        elif item[0] == libwebqqpython.ON_BUDDY_STATUS_CHANGE:
+                            self._on_status_change(item[1])
                         else:
                             print 'Un implementation callback functions'
                             
@@ -145,8 +145,6 @@ class Worker(e3.Worker):
             group = categories_dict[index]
             self._add_contact_to_group( contact, group.name )
             self.session.contacts.contacts[uin] = contact
-            #self.nick_uin_map[nick] = uin
-       	    #self.uin_nick_map[uin] = nick
             
         self.session.login_succeed()
         self.session.contact_list_ready()
@@ -187,9 +185,8 @@ class Worker(e3.Worker):
 
     def _on_nick_update(self, value):
         data = json.loads(value)
-        uin = data["uin"]
+        uin = str(data["uin"])
         nick = data["nick"]
-        print nick
         contact = self.session.contacts.contacts.get(uin, None)
         account = uin
         old_nick = contact.nick
@@ -209,7 +206,28 @@ class Worker(e3.Worker):
            self.session.contact_attr_changed(account, 'nick', old_nick)
            self.session.log('nick change', status_, nick,  log_account)
         
-        
+
+    def _on_status_change(self, value):
+        data = json.loads(value)
+        uin = str(data["uin"])
+        status_ = data["status"]
+        contact = self.session.contacts.contacts.get(uin, None)
+        account = uin
+        old_status = contact.status
+        stat = None
+        try:
+            stat = STATUS_MAP_REVERSE[status_]
+        except:
+            stat = e3.status.ONLINE
+        contact.status = stat
+        self.session.contact_attr_changed(account, 'status', old_status)
+
+        acc = e3.Logger.Account(contact.cid,
+                                None, contact.account, contact.status, contact.nick,
+                                contact.message, contact.picture)
+        self.session.log('status change', contact.status,
+                         old_status, acc)
+
     def _on_photo_update(self, session, stanza):
         pass
     def _on_contact_jabber_changed(self, session, stanza):
