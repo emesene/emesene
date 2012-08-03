@@ -209,7 +209,7 @@ class Worker(e3.Worker):
         
         for group in self.res_manager.group_contacts.keys():
           if self.res_manager.group_contacts[group].count(send_uin) == 1:
-              display_name = self.res_manager.group_contacts[group][send_uin]
+              display_name = self.res_manager.group_contacts[group][send_uin].nick
               break
           
         account = group_code
@@ -243,7 +243,7 @@ class Worker(e3.Worker):
             contact = e3.Contact(account)
             self.session.contacts.contacts[account] = contact
 
-        if contact.cid  == self.session.account.account :
+        if contact.account  == self.session.account.account :
                 self.session.contacts.me.nick = nick
                 self.session.nick_change_succeed(nick)
         
