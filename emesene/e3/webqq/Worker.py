@@ -205,7 +205,13 @@ class Worker(e3.Worker):
         group_code = str(data["group_code"])
         send_uin = str(data["send_uin"])
         body = data['content'][-1]
+        display_name=send_uin
         
+        for group in self.res_manager.group_contacts.keys():
+          if self.res_manager.group_contacts[group].count(send_uin) == 1:
+              display_name = self.res_manager.group_contacts[group][send_uin]
+              break
+          
         account = group_code
         if account in self.conversations:
             cid = self.conversations[account]
@@ -216,8 +222,8 @@ class Worker(e3.Worker):
             self.session.conv_first_action(cid, [account])
 
         type_ = e3.Message.TYPE_MESSAGE
-        msgobj = e3.Message(type_, body, send_uin)
-        self.session.conv_message(cid, send_uin, msgobj)
+        msgobj = e3.Message(type_, body, display_name)
+        self.session.conv_message(cid, display_name, msgobj)
         print 'log message'
         e3.Logger.log_message(self.session, None, msgobj, False)
             
@@ -255,6 +261,8 @@ class Worker(e3.Worker):
         uin = str(data["uin"])
         status_ = data["status"]
         contact = self.session.contacts.contacts.get(uin, None)
+        if contact == None:
+            return
         account = uin
         old_status = contact.status
         stat = None
