@@ -16,15 +16,13 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-# http://code.activestate.com/recipes/81253/
-
 import weakref
 
 class WeakMethodBound(object):
 
     def __init__(self, f):
-        self.f = weakref.ref(f.im_func)
-        self.c = weakref.ref(f.im_self)
+        self.f = weakref.ref(f.__func__)
+        self.c = weakref.ref(f.__self__)
 
     def __call__(self, *arg):
         if self.c() is None:
@@ -34,6 +32,10 @@ class WeakMethodBound(object):
 
     def __eq__(self, other):
         return self.f == other.f and self.c == other.c
+
+    def __str__(self):
+        if self.f() is not None:
+            return self.c().__class__.__name__ + "." + self.f().__name__
 
 class WeakMethodFree(object):
 
@@ -49,10 +51,12 @@ class WeakMethodFree(object):
     def __eq__(self, other):
         return self.f == other.f
 
-def WeakMethod(f):
-    try:
-        f.im_func
-    except AttributeError:
-        return WeakMethodFree(f)
+    def __str__(self):
+        if self.f() is not None:
+            return self.f().__class__.__name__ + "." + self.f().__name__
 
-    return WeakMethodBound(f)
+def WeakMethod(f):
+    if hasattr(f, '__func__'):
+        return WeakMethodBound(f)
+    else:
+        return WeakMethodFree(f)
