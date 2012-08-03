@@ -687,6 +687,52 @@ class pair_event_string(object):
 pair_event_string_swigregister = _libwebqqpython.pair_event_string_swigregister
 pair_event_string_swigregister(pair_event_string)
 
+class map_string_map_string_buddy(object):
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def iterator(self): return _libwebqqpython.map_string_map_string_buddy_iterator(self)
+    def __iter__(self): return self.iterator()
+    def __nonzero__(self): return _libwebqqpython.map_string_map_string_buddy___nonzero__(self)
+    def __bool__(self): return _libwebqqpython.map_string_map_string_buddy___bool__(self)
+    def __len__(self): return _libwebqqpython.map_string_map_string_buddy___len__(self)
+    def __iter__(self): return self.key_iterator()
+    def iterkeys(self): return self.key_iterator()
+    def itervalues(self): return self.value_iterator()
+    def iteritems(self): return self.iterator()
+    def __getitem__(self, *args): return _libwebqqpython.map_string_map_string_buddy___getitem__(self, *args)
+    def __delitem__(self, *args): return _libwebqqpython.map_string_map_string_buddy___delitem__(self, *args)
+    def has_key(self, *args): return _libwebqqpython.map_string_map_string_buddy_has_key(self, *args)
+    def keys(self): return _libwebqqpython.map_string_map_string_buddy_keys(self)
+    def values(self): return _libwebqqpython.map_string_map_string_buddy_values(self)
+    def items(self): return _libwebqqpython.map_string_map_string_buddy_items(self)
+    def __contains__(self, *args): return _libwebqqpython.map_string_map_string_buddy___contains__(self, *args)
+    def key_iterator(self): return _libwebqqpython.map_string_map_string_buddy_key_iterator(self)
+    def value_iterator(self): return _libwebqqpython.map_string_map_string_buddy_value_iterator(self)
+    def __setitem__(self, *args): return _libwebqqpython.map_string_map_string_buddy___setitem__(self, *args)
+    def asdict(self): return _libwebqqpython.map_string_map_string_buddy_asdict(self)
+    def __init__(self, *args): 
+        this = _libwebqqpython.new_map_string_map_string_buddy(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def empty(self): return _libwebqqpython.map_string_map_string_buddy_empty(self)
+    def size(self): return _libwebqqpython.map_string_map_string_buddy_size(self)
+    def clear(self): return _libwebqqpython.map_string_map_string_buddy_clear(self)
+    def swap(self, *args): return _libwebqqpython.map_string_map_string_buddy_swap(self, *args)
+    def get_allocator(self): return _libwebqqpython.map_string_map_string_buddy_get_allocator(self)
+    def begin(self): return _libwebqqpython.map_string_map_string_buddy_begin(self)
+    def end(self): return _libwebqqpython.map_string_map_string_buddy_end(self)
+    def rbegin(self): return _libwebqqpython.map_string_map_string_buddy_rbegin(self)
+    def rend(self): return _libwebqqpython.map_string_map_string_buddy_rend(self)
+    def count(self, *args): return _libwebqqpython.map_string_map_string_buddy_count(self, *args)
+    def erase(self, *args): return _libwebqqpython.map_string_map_string_buddy_erase(self, *args)
+    def find(self, *args): return _libwebqqpython.map_string_map_string_buddy_find(self, *args)
+    def lower_bound(self, *args): return _libwebqqpython.map_string_map_string_buddy_lower_bound(self, *args)
+    def upper_bound(self, *args): return _libwebqqpython.map_string_map_string_buddy_upper_bound(self, *args)
+    __swig_destroy__ = _libwebqqpython.delete_map_string_map_string_buddy
+    __del__ = lambda self : None;
+map_string_map_string_buddy_swigregister = _libwebqqpython.map_string_map_string_buddy_swigregister
+map_string_map_string_buddy_swigregister(map_string_map_string_buddy)
+
 class pymap(object):
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
