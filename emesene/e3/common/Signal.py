@@ -67,21 +67,13 @@ class Signal(object):
             except TypeError:
                 to_remove.append(callback)
                 log.exception('Method called on dead object: %s' %
-                        format_callback_name(callback))
+                        str(callback))
             except Exception, error:
                 log.exception('Signal handler (%s) error: %s' %
-                        (format_callback_name(callback), str(error)))
+                        (str(callback), str(error)))
 
         for item in to_remove:
             del self._subscribers[item]
-
-def format_callback_name(func):
-    '''return a pretty representation for a function name
-    '''
-    if isinstance(func, WeakMethodBound):
-        return func.f.__name__ + "." + func.f.__name__
-    else:
-        return func.im_class.__name__ + "." + func.__name__
 
 def extend(func):
     '''allow the extention of a method'''
