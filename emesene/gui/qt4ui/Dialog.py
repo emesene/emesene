@@ -20,9 +20,9 @@
 
 import logging
 
-from PyQt4  import QtCore
-from PyQt4  import QtGui
-from PyQt4.QtCore  import Qt
+from PyQt4 import QtCore
+from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
@@ -261,12 +261,37 @@ Do you want to fix your profile now?''')
 
         dialog.add_button(QtGui.QDialogButtonBox.Ok)
         dialog.setMinimumWidth(250)
-#        dialog.setSizeGripEnabled(False)
-#        dialog.setSizePolicy(QtGui.QSizePolicy.Fixed,
-#                             QtGui.QSizePolicy.Fixed)
-    #dialog.setModal(True)
-#        dialog.setWindowModality(Qt.WindowModal)
         icon.setPixmap(QtGui.QIcon.fromTheme('dialog-error').pixmap(64, 64))
+        message.setAlignment(Qt.AlignCenter)
+        dialog.exec_()
+
+    @classmethod
+    def information(cls, message, response_cb=None, title=tr('Information')):
+        '''show an error dialog displaying the message, this dialog should
+        have only the option to close and the response callback is optional
+        since in few cases one want to know when the error dialog was closed,
+        but it can happen, so return stock.CLOSE to the callback if its set'''
+        '''show a warning dialog displaying the messge, this dialog should
+        have only the option to accept, like the error dialog, the response
+        callback is optional, but you have to check if it's not None and
+        send the response (that can be stock.ACCEPT or stock.CLOSE, if
+        the user closed the window with the x)'''
+        dialog = StandardButtonDialog(title)
+        def accept_response():
+            pass
+        dialog.accept_response = accept_response
+        icon = QtGui.QLabel()
+        message = QtGui.QLabel(unicode(message))
+        message.setTextFormat(Qt.RichText)
+        lay = QtGui.QHBoxLayout()
+        lay.addWidget(icon)
+        lay.addWidget(message)
+        dialog.setLayout(lay)
+
+        dialog.add_button(QtGui.QDialogButtonBox.Ok)
+        dialog.setMinimumWidth(250)
+        icon.setPixmap(QtGui.QIcon.fromTheme('dialog-warning').pixmap(64, 64))
+        message.setWordWrap(True)
         message.setAlignment(Qt.AlignCenter)
         dialog.exec_()
 
@@ -556,7 +581,7 @@ class StandardButtonDialog (QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
 
         self.central_widget = QtGui.QWidget()
-        self.button_box  = QtGui.QDialogButtonBox()
+        self.button_box = QtGui.QDialogButtonBox()
 
         vlay = QtGui.QVBoxLayout()
         vlay.addWidget(self.central_widget)
@@ -575,9 +600,7 @@ class StandardButtonDialog (QtGui.QDialog):
         return self.button_box.addButton(button)
 
     def add_button_by_text_and_role(self, text, role):
-        print '*'
         r = self.button_box.addButton(text, role)
-        print '*'
         return r
 
     def _on_accept(self):
