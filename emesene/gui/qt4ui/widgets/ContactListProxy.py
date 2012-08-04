@@ -101,6 +101,13 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
         self._show_offline = value
         self.invalidateFilter()
 
+    def remove_subscriptions(self):
+        self._config.unsubscribe(self._on_cc_group_offline, 'b_group_offline')
+        self._config.unsubscribe(self._on_cc_show_empty_groups,
+                                'b_show_empty_groups')
+        self._config.unsubscribe(self._on_cc_show_offline, 'b_show_offline')
+        self._internal_proxy.remove_subscriptions()
+
 
 class InternalContactListProxy (QtGui.QSortFilterProxyModel):
     '''This class provides a proxy to access the contact list
@@ -187,3 +194,8 @@ class InternalContactListProxy (QtGui.QSortFilterProxyModel):
     def _on_cc_show_blocked(self, value):
         self._show_blocked = value
         self.invalidateFilter()
+
+    def remove_subscriptions(self):
+        self._config.unsubscribe(self._on_cc_show_offline, 'b_show_offline')
+        self._config.unsubscribe(self._on_cc_group_offline, 'b_group_offline')
+        self._config.unsubscribe(self._on_cc_show_blocked, 'b_show_blocked')

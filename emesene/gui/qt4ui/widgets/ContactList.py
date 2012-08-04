@@ -52,8 +52,8 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         self._filter_text = QtCore.QString('')
         self._pmodel.setSourceModel(self._model)
         self.setModel(self._pmodel)
-        delegate = ContactListDelegate.ContactListDelegate(self, session)
-        self.setItemDelegate(delegate)
+        self.delegate = ContactListDelegate.ContactListDelegate(self, session)
+        self.setItemDelegate(self.delegate)
         self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.setAnimated(True)
         self.setRootIsDecorated(False)
@@ -205,5 +205,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         return unicode(text)
 
     def remove_subscriptions(self):
-        #FIXME: implement
-        pass
+        gui.ContactList.remove_subscriptions(self)
+        self._model.remove_subscriptions()
+        self._pmodel.remove_subscriptions()
+        self.delegate.remove_subscriptions()

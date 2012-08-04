@@ -841,6 +841,7 @@ class InviteWindow(OkCancelDialog):
         self.contact_list.session.config.b_show_offline = show_offline
         if response == QtGui.QDialog.Accepted:
             self.on_add_clicked()
+        self.contact_list.remove_subscriptions()
         self.hide()
 
     def _on_search_changed(self, new_text):

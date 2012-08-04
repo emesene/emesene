@@ -335,6 +335,13 @@ class ContactListModel (QtGui.QStandardItemModel):
         self._group_offline = value
         #self.refilter()
 
+    def remove_subscriptions(self):
+        self._config.unsubscribe(self._on_cc_show_offline, 'b_show_offline')
+        self._config.unsubscribe(self._on_cc_show_empty, 'b_show_empty_groups')
+        self._config.unsubscribe(self._on_cc_show_blocked, 'b_show_blocked')
+        self._config.unsubscribe(self._on_cc_order_by_group, 'b_order_by_group')
+        self._config.unsubscribe(self._on_cc_group_offline, 'b_group_offline')
+
 
 class Role (object):
     '''A Class representing various custom Qt User Roles'''
