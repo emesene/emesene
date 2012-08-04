@@ -99,7 +99,6 @@ class ContactListProxy (QtGui.QSortFilterProxyModel):
 
     def _on_cc_show_offline(self, value):
         self._show_offline = value
-#        self._config.b_show_empty_groups = not self._config.b_show_empty_groups
         self.invalidateFilter()
 
 

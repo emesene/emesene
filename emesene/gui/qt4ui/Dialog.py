@@ -26,6 +26,7 @@ from PyQt4.QtCore import Qt
 
 from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
+from gui.qt4ui import widgets
 
 import e3
 import gui
@@ -169,6 +170,14 @@ Do you want to fix your profile now?''')
             real response_cb'''
             print results
         dialog = ContactAddedYouDialog(accounts, response_cb, title)
+
+    @classmethod
+    def invite_dialog(cls, session, callback, l_buddy_exclude):
+        '''select a contact to add to the conversation, receives a session
+        object of the current session the callback receives the response and
+        a string containing the selected account
+        '''
+        dialog = InviteWindow(session, callback, l_buddy_exclude)
 
     @classmethod
     def crop_image(cls, response_cb, filename, title=tr('Select image area')):
@@ -791,3 +800,79 @@ class EntryDialog (OkCancelDialog):
 
     def text(self):
         return unicode(self.edit.text())
+
+
+class InviteWindow(OkCancelDialog):
+
+    def __init__(self, session, callback, l_buddy_exclude):
+        """
+        A window that display a list of users to select the ones to invite to
+        the conversarion
+        """
+        OkCancelDialog.__init__(self, tr('Invite friend'))
+        self.session = session
+        self.callback = callback
+        ContactList = extension.get_default('contact list')
+        self.contact_list = ContactList(session)
+        #FIXME: allow multiple selection
+        self.contact_list.nick_template = \
+            '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
+
+        order_by_group = self.contact_list.session.config.b_order_by_group
+        show_blocked = self.contact_list.session.config.b_show_blocked
+        show_offline = self.contact_list.session.config.b_show_offline
+        self.contact_list.order_by_group = False
+        self.contact_list.show_blocked = False
+        self.contact_list.show_offline = False
+
+        self.search_entry = widgets.SearchEntry()
+        self.search_entry.textChanged.connect(
+                                    self._on_search_changed)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.contact_list)
+        vbox.addWidget(self.search_entry)
+        self.central_widget.setLayout(vbox)
+
+        self.show()
+        response = self.exec_()
+        self.contact_list.session.config.b_order_by_group = order_by_group
+        self.contact_list.session.config.b_show_blocked = show_blocked
+        self.contact_list.session.config.b_show_offline = show_offline
+        if response == QtGui.QDialog.Accepted:
+            self.on_add_clicked()
+        self.hide()
+
+    def _on_search_changed(self, new_text):
+        """
+        called when the content of the entry changes
+        """
+        self.contact_list.filter_text = new_text.toLower()
+        if not new_text.isEmpty():
+            self.contact_list.is_searching = True
+            self.contact_list.expand_groups()
+        else:
+            self.contact_list.is_searching = False
+            self.contact_list.un_expand_groups()
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            self.done(QtGui.QDialog.Accepted)
+            return
+        if event.key() == Qt.Key_Escape:
+            self.done(QtGui.QDialog.Rejected)
+            return
+        QtGui.QWidget.keyPressEvent(self, event)
+
+    def on_add_clicked(self):
+        """
+        method called when the add button is clicked
+        """
+        #FIXME: multiple contact selection
+        contacts = self.contact_list.get_contact_selected()
+
+        if contacts is None:
+            Dialog.error(tr("No contact selected"))
+            return
+
+        self.callback(contacts.account)
