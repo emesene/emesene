@@ -239,22 +239,24 @@ class Worker(e3.Worker):
         
         account = uin
         old_nick = contact.nick
-        if not contact:
-            contact = e3.Contact(account)
-            self.session.contacts.contacts[account] = contact
-
-        if contact.account  == self.session.account.account :
-                self.session.contacts.me.nick = nick
-                self.session.nick_change_succeed(nick)
-        
         status_ = contact.status
+
         log_account = e3.Logger.Account(contact.cid, None, contact.account, contact.status, contact.nick, contact.message, contact.picture)
         if not nick == "" :
            contact.nick = nick
            contact.alias = nick
            self.session.contact_attr_changed(account, 'nick', old_nick)
            self.session.log('nick change', status_, nick,  log_account)
-        
+
+        if contact.account  == self.session.account.account :
+            me = self.session.contacts.me
+            log_account =e3.Logger.Account(me.cid, None, me.account,
+                                         me.status, nick, me.message, me.picture)
+            self.session.log('nick change', contact.status, nick,
+                             log_account)
+            self.session.contacts.me.nick = nick
+            self.session.contacts.me.alias = nick
+            self.session.nick_change_succeed(nick)
 
     def _on_status_change(self, value):
         data = json.loads(value)
