@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module constains the ContactListModel class'''
 
 import logging
@@ -15,6 +31,7 @@ from gui.qt4ui.Utils import tr
 import e3
 
 log = logging.getLogger('qt4ui.widgets.ContactListModel')
+
 
 class ContactListModel (QtGui.QStandardItemModel):
     '''Item model which represents a contact list'''
@@ -179,44 +196,6 @@ class ContactListModel (QtGui.QStandardItemModel):
                     onl_count = self._onl_grp.data(Role.OnlCountRole).toPyObject()
                     self._onl_grp.setData(onl_count + 1, Role.OnlCountRole)
         #self.refilter()
-
-
-
-#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLIN:
-#            group_item.removeRow(contact_item.index().row())
-#
-#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLIN:
-#            group_item = self._search_item(self._offline_group_uid, self)
-#            contact_item = contact_item.clone()
-#            contact_item.setData(contact_item.data(Role.UidRole)+'FLN')
-#            group_item.appendRow(contact_item)
-#
-#
-#
-#
-#
-#        if not contact_item:
-#            print '***** NOT FOUND: %s' % (contact)
-#            return
-#
-#        old_status = contact_item.data(Role.StatusRole)
-#        new_status = contact.status
-#
-#        self._set_contact_info(contact_item, contact)
-#
-#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLIN:
-#            group_item = self._search_item(self._offline_group_uid, self)
-#            group_item.takeRow(contact_item.index().row())
-#            if not self._order_by_group:
-#                group_item = self._search_item(self._online_group_uid, self)
-#                group_item.appendRow(contact_item)
-#
-#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLIN:
-#            if not self._order_by_group:
-#                group_item = self._search_item(self._online_group_uid, self)
-#                group_item.takeRow(contact_item.index().row())
-#            group_item = self._search_item(self._offline_group_uid, self)
-#            group_item.appendRow(contact_item)
 
     def _set_contact_info(self, contact_item, contact):
         '''Fills the contact Item with data'''
