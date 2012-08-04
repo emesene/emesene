@@ -248,7 +248,7 @@ class ContactListModel (QtGui.QStandardItemModel):
             if  uid == self.OFF_GRP_UID and not self._group_offline:
                 filter_role = False
             # 2) Check for empty groups
-            if self._is_group_empty(index) and not self._show_empty:
+            if not self._show_empty and self._is_group_empty(index):
                 filter_role = False
         else:
             blocked = self.data(index, Role.BlockedRole).toPyObject()
@@ -277,13 +277,13 @@ class ContactListModel (QtGui.QStandardItemModel):
         '''Checks if a group has no visible child'''
         if index.parent().isValid():
             raise ValueError('Not a group')
-        visible_contacts = 0
         group_item = self.itemFromIndex(index)
         for i in range(group_item.rowCount()):
             contact_item = group_item.child(i, 0)
             if contact_item.data(Role.FilterRole) == True:
-                visible_contacts += 1
-        return visible_contacts > 0
+                #found one visible contact
+                return True
+        return False
 
     def add_group(self, group):
         '''Add a group.'''
@@ -355,6 +355,7 @@ class ContactListModel (QtGui.QStandardItemModel):
     def _on_cc_group_offline(self, value):
         self._group_offline = value
         #self.refilter()
+
 
 class Role (object):
     '''A Class representing various custom Qt User Roles'''

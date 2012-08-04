@@ -49,7 +49,7 @@ class ContactList (gui.ContactList, QtGui.QTreeView):
         self._model = ContactListModel.ContactListModel(session.config, self)
         self._pmodel = ContactListProxy.ContactListProxy(session.config, self)
         gui.ContactList.__init__(self, session)
-
+        self._filter_text = QtCore.QString('')
         self._pmodel.setSourceModel(self._model)
         self.setModel(self._pmodel)
         delegate = ContactListDelegate.ContactListDelegate(self, session)
