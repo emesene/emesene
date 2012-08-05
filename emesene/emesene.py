@@ -21,6 +21,12 @@
 import os
 import sys
 
+if sys.platform == 'darwin':
+    sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.7/site-packages")
+    sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.7/site-packages/gtk-2.0")
+    sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.6/site-packages")
+    sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.6/site-packages/gtk-2.0")
+
 # Extract any non-GStreamer arguments, and leave the GStreamer arguments for
 # processing by GStreamer. This needs to be done before GStreamer is imported,
 # so that GStreamer doesn't hijack e.g. ``--help``.
