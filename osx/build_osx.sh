@@ -29,9 +29,6 @@ cp -r gtk /tmp/emesene/emesene.app/Contents/Resources/
 echo "Bundling emesene..."
 cp -r ../emesene /tmp/emesene/emesene.app/Contents/Resources/
 
-echo "Patching emesene..."
-patch /tmp/emesene/emesene.app/Contents/Resources/emesene/emesene.py < emesenepygtkpatch.patch
-
 defaults write /tmp/emesene/emesene.app/Contents/Info LSMinimumSystemVersion -string "10.6"
 
 mkdir ../dist
