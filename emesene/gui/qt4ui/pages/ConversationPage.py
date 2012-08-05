@@ -99,6 +99,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
     def present(self, conversation, b_single_window=False):
         '''Raises the tab containing the given conversation'''
         self.setCurrentIndex(conversation.tab_index)
+        conversation.input.setFocus()
 
     def remove_conversation(self, conversation):
         '''Removes the chat tab. This implements base's class

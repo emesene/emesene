@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module constains the ContactListModel class'''
 
 import logging
@@ -15,6 +31,7 @@ from gui.qt4ui.Utils import tr
 import e3
 
 log = logging.getLogger('qt4ui.widgets.ContactListModel')
+
 
 class ContactListModel (QtGui.QStandardItemModel):
     '''Item model which represents a contact list'''
@@ -180,44 +197,6 @@ class ContactListModel (QtGui.QStandardItemModel):
                     self._onl_grp.setData(onl_count + 1, Role.OnlCountRole)
         #self.refilter()
 
-
-
-#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLIN:
-#            group_item.removeRow(contact_item.index().row())
-#
-#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLIN:
-#            group_item = self._search_item(self._offline_group_uid, self)
-#            contact_item = contact_item.clone()
-#            contact_item.setData(contact_item.data(Role.UidRole)+'FLN')
-#            group_item.appendRow(contact_item)
-#
-#
-#
-#
-#
-#        if not contact_item:
-#            print '***** NOT FOUND: %s' % (contact)
-#            return
-#
-#        old_status = contact_item.data(Role.StatusRole)
-#        new_status = contact.status
-#
-#        self._set_contact_info(contact_item, contact)
-#
-#        if old_status == e3.status.OFFLINE and new_status != e3.status.OFFLIN:
-#            group_item = self._search_item(self._offline_group_uid, self)
-#            group_item.takeRow(contact_item.index().row())
-#            if not self._order_by_group:
-#                group_item = self._search_item(self._online_group_uid, self)
-#                group_item.appendRow(contact_item)
-#
-#        if old_status != e3.status.OFFLINE and new_status == e3.status.OFFLIN:
-#            if not self._order_by_group:
-#                group_item = self._search_item(self._online_group_uid, self)
-#                group_item.takeRow(contact_item.index().row())
-#            group_item = self._search_item(self._offline_group_uid, self)
-#            group_item.appendRow(contact_item)
-
     def _set_contact_info(self, contact_item, contact):
         '''Fills the contact Item with data'''
         # TODO: handle moving contact between groups
@@ -248,7 +227,7 @@ class ContactListModel (QtGui.QStandardItemModel):
             if  uid == self.OFF_GRP_UID and not self._group_offline:
                 filter_role = False
             # 2) Check for empty groups
-            if self._is_group_empty(index) and not self._show_empty:
+            if not self._show_empty and self._is_group_empty(index):
                 filter_role = False
         else:
             blocked = self.data(index, Role.BlockedRole).toPyObject()
@@ -277,13 +256,13 @@ class ContactListModel (QtGui.QStandardItemModel):
         '''Checks if a group has no visible child'''
         if index.parent().isValid():
             raise ValueError('Not a group')
-        visible_contacts = 0
         group_item = self.itemFromIndex(index)
         for i in range(group_item.rowCount()):
             contact_item = group_item.child(i, 0)
             if contact_item.data(Role.FilterRole) == True:
-                visible_contacts += 1
-        return visible_contacts > 0
+                #found one visible contact
+                return True
+        return False
 
     def add_group(self, group):
         '''Add a group.'''
@@ -355,6 +334,14 @@ class ContactListModel (QtGui.QStandardItemModel):
     def _on_cc_group_offline(self, value):
         self._group_offline = value
         #self.refilter()
+
+    def remove_subscriptions(self):
+        self._config.unsubscribe(self._on_cc_show_offline, 'b_show_offline')
+        self._config.unsubscribe(self._on_cc_show_empty, 'b_show_empty_groups')
+        self._config.unsubscribe(self._on_cc_show_blocked, 'b_show_blocked')
+        self._config.unsubscribe(self._on_cc_order_by_group, 'b_order_by_group')
+        self._config.unsubscribe(self._on_cc_group_offline, 'b_group_offline')
+
 
 class Role (object):
     '''A Class representing various custom Qt User Roles'''
