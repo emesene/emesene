@@ -35,6 +35,7 @@ from gui.qt4ui.widgets.ContactListModel import ContactListModel
 
 log = logging.getLogger('qt4ui.widgets.ContactListDelegate')
 
+
 class ContactListDelegate (QtGui.QStyledItemDelegate):
     '''A Qt Delegate to paint an item of the contact list'''
     def __init__(self, contact_list, session):
@@ -107,15 +108,15 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         # -> Configure the painter
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
         # especially useful for scaled smileys.
-        painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)  
+        painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
         painter.setClipRect(option.rect)
         painter.setClipping(True)
         # -> Draw the skeleton of a ItemView widget: highlighting, selection...
-        QtGui.QApplication.style().drawControl(QtGui.QStyle.CE_ItemViewItem, 
+        QtGui.QApplication.style().drawControl(QtGui.QStyle.CE_ItemViewItem,
                                                option, painter, self.parent())
         status = model.data(index, Role.StatusRole).toPyObject()
         text_doc = QtGui.QTextDocument()
-        
+
         if not index.parent().isValid():
             # -> Start drawing the text_doc:
             text_list = self._build_display_role(index, True)
@@ -124,7 +125,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             self._put_display_role(text_doc, text_list)
             # draw the text_doc
             text_doc.drawContents(painter)
-            
+
         else:
             top_left_point = QtCore.QPointF(option.rect.topLeft())
             # a little additional margin
@@ -143,27 +144,27 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             else:
                 picture = Utils.pixmap_rounder(picture)
             # calculate the target position
-            source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
+            source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0),
                                     QtCore.QSizeF(picture.size()) )
-            target = QtCore.QRectF( top_left_point + xy_pic_margin, 
+            target = QtCore.QRectF( top_left_point + xy_pic_margin,
                                     self._pic_size )
             # draw the picture
             painter.drawPixmap(target, picture, source)
-    
+
             # -> start drawing the status emblem
             picture_path  = gui.theme.image_theme.status_icons[
                             model.data(index, Role.StatusRole).toPyObject()]
             picture = QtGui.QPixmap(picture_path)
-            source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0), 
+            source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0),
                                     QtCore.QSizeF(picture.size()) )
             x_emblem_offset = self._PICTURE_SIZE - picture.size().width()
             y_emblem_offset = self._PICTURE_SIZE - picture.size().height()
             xy_emblem_offset = QtCore.QPointF(x_emblem_offset, y_emblem_offset)
-            target = QtCore.QRectF( top_left_point + xy_pic_margin + 
+            target = QtCore.QRectF( top_left_point + xy_pic_margin +
                                         xy_emblem_offset,
                                     QtCore.QSizeF(picture.size()) )
             painter.drawPixmap(target, picture, source)
-            
+
             # -> start drawing the 'blocked' emblem
             if model.data(index, Role.BlockedRole).toPyObject():
                 picture_path = gui.theme.image_theme.blocked_overlay
@@ -172,13 +173,13 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                                         QtCore.QSizeF(picture.size()) )
                 x_emblem_offset = 0
                 y_emblem_offset = self._PICTURE_SIZE - picture.size().height()
-                xy_emblem_offset = QtCore.QPointF(x_emblem_offset, 
+                xy_emblem_offset = QtCore.QPointF(x_emblem_offset,
                                                   y_emblem_offset)
-                target = QtCore.QRectF( top_left_point + xy_pic_margin + 
+                target = QtCore.QRectF( top_left_point + xy_pic_margin +
                                                       xy_emblem_offset,
                                                   QtCore.QSizeF(picture.size()))
                 painter.drawPixmap(target, picture, source)
-        
+
             # -> Start setting up the text_doc:
             text_list = self._build_display_role(index)
             # set the text into text_doc
@@ -201,10 +202,13 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         model = index.model()
         data_role = model.data(index, Role.DataRole).toPyObject()
         text_doc = QtGui.QTextDocument()
-        text_list = self._build_display_role(index, type(data_role) == e3.base.Group)
+        text_list = self._build_display_role(index, isinstance(data_role, e3.base.Group))
         self._put_display_role(text_doc, text_list)
         text_height = text_doc.size().toSize().height()
-        if type(data_role) == e3.base.Group:
+        if isinstance(data_role, e3.base.Group):
             return QtCore.QSize(0, text_height)
         return QtCore.QSize(0, max(text_height, self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
 
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_template_change, 'nick_template')
+        self.session.config.unsubscribe(self._on_template_change, 'group_template')

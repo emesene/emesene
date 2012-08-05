@@ -20,12 +20,13 @@
 
 import logging
 
-from PyQt4  import QtCore
-from PyQt4  import QtGui
-from PyQt4.QtCore  import Qt
+from PyQt4 import QtCore
+from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
+from gui.qt4ui import widgets
 
 import e3
 import gui
@@ -171,6 +172,14 @@ Do you want to fix your profile now?''')
         dialog = ContactAddedYouDialog(accounts, response_cb, title)
 
     @classmethod
+    def invite_dialog(cls, session, callback, l_buddy_exclude):
+        '''select a contact to add to the conversation, receives a session
+        object of the current session the callback receives the response and
+        a string containing the selected account
+        '''
+        dialog = InviteWindow(session, callback, l_buddy_exclude)
+
+    @classmethod
     def crop_image(cls, response_cb, filename, title=tr('Select image area')):
         '''Shows a dialog to select a portion of an image.'''
         dialog = OkCancelDialog(title, expanding=True)
@@ -261,12 +270,37 @@ Do you want to fix your profile now?''')
 
         dialog.add_button(QtGui.QDialogButtonBox.Ok)
         dialog.setMinimumWidth(250)
-#        dialog.setSizeGripEnabled(False)
-#        dialog.setSizePolicy(QtGui.QSizePolicy.Fixed,
-#                             QtGui.QSizePolicy.Fixed)
-    #dialog.setModal(True)
-#        dialog.setWindowModality(Qt.WindowModal)
         icon.setPixmap(QtGui.QIcon.fromTheme('dialog-error').pixmap(64, 64))
+        message.setAlignment(Qt.AlignCenter)
+        dialog.exec_()
+
+    @classmethod
+    def information(cls, message, response_cb=None, title=tr('Information')):
+        '''show an error dialog displaying the message, this dialog should
+        have only the option to close and the response callback is optional
+        since in few cases one want to know when the error dialog was closed,
+        but it can happen, so return stock.CLOSE to the callback if its set'''
+        '''show a warning dialog displaying the messge, this dialog should
+        have only the option to accept, like the error dialog, the response
+        callback is optional, but you have to check if it's not None and
+        send the response (that can be stock.ACCEPT or stock.CLOSE, if
+        the user closed the window with the x)'''
+        dialog = StandardButtonDialog(title)
+        def accept_response():
+            pass
+        dialog.accept_response = accept_response
+        icon = QtGui.QLabel()
+        message = QtGui.QLabel(unicode(message))
+        message.setTextFormat(Qt.RichText)
+        lay = QtGui.QHBoxLayout()
+        lay.addWidget(icon)
+        lay.addWidget(message)
+        dialog.setLayout(lay)
+
+        dialog.add_button(QtGui.QDialogButtonBox.Ok)
+        dialog.setMinimumWidth(250)
+        icon.setPixmap(QtGui.QIcon.fromTheme('dialog-warning').pixmap(64, 64))
+        message.setWordWrap(True)
         message.setAlignment(Qt.AlignCenter)
         dialog.exec_()
 
@@ -556,7 +590,7 @@ class StandardButtonDialog (QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
 
         self.central_widget = QtGui.QWidget()
-        self.button_box  = QtGui.QDialogButtonBox()
+        self.button_box = QtGui.QDialogButtonBox()
 
         vlay = QtGui.QVBoxLayout()
         vlay.addWidget(self.central_widget)
@@ -575,9 +609,7 @@ class StandardButtonDialog (QtGui.QDialog):
         return self.button_box.addButton(button)
 
     def add_button_by_text_and_role(self, text, role):
-        print '*'
         r = self.button_box.addButton(text, role)
-        print '*'
         return r
 
     def _on_accept(self):
@@ -768,3 +800,80 @@ class EntryDialog (OkCancelDialog):
 
     def text(self):
         return unicode(self.edit.text())
+
+
+class InviteWindow(OkCancelDialog):
+
+    def __init__(self, session, callback, l_buddy_exclude):
+        """
+        A window that display a list of users to select the ones to invite to
+        the conversarion
+        """
+        OkCancelDialog.__init__(self, tr('Invite friend'))
+        self.session = session
+        self.callback = callback
+        ContactList = extension.get_default('contact list')
+        self.contact_list = ContactList(session)
+        #FIXME: allow multiple selection
+        self.contact_list.nick_template = \
+            '[$DISPLAY_NAME][$NL][$small][$ACCOUNT][$/small]'
+
+        order_by_group = self.contact_list.session.config.b_order_by_group
+        show_blocked = self.contact_list.session.config.b_show_blocked
+        show_offline = self.contact_list.session.config.b_show_offline
+        self.contact_list.order_by_group = False
+        self.contact_list.show_blocked = False
+        self.contact_list.show_offline = False
+
+        self.search_entry = widgets.SearchEntry()
+        self.search_entry.textChanged.connect(
+                                    self._on_search_changed)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.contact_list)
+        vbox.addWidget(self.search_entry)
+        self.central_widget.setLayout(vbox)
+
+        self.show()
+        response = self.exec_()
+        self.contact_list.session.config.b_order_by_group = order_by_group
+        self.contact_list.session.config.b_show_blocked = show_blocked
+        self.contact_list.session.config.b_show_offline = show_offline
+        if response == QtGui.QDialog.Accepted:
+            self.on_add_clicked()
+        self.contact_list.remove_subscriptions()
+        self.hide()
+
+    def _on_search_changed(self, new_text):
+        """
+        called when the content of the entry changes
+        """
+        self.contact_list.filter_text = new_text.toLower()
+        if not new_text.isEmpty():
+            self.contact_list.is_searching = True
+            self.contact_list.expand_groups()
+        else:
+            self.contact_list.is_searching = False
+            self.contact_list.un_expand_groups()
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            self.done(QtGui.QDialog.Accepted)
+            return
+        if event.key() == Qt.Key_Escape:
+            self.done(QtGui.QDialog.Rejected)
+            return
+        QtGui.QWidget.keyPressEvent(self, event)
+
+    def on_add_clicked(self):
+        """
+        method called when the add button is clicked
+        """
+        #FIXME: multiple contact selection
+        contacts = self.contact_list.get_contact_selected()
+
+        if contacts is None:
+            Dialog.error(tr("No contact selected"))
+            return
+
+        self.callback(contacts.account)

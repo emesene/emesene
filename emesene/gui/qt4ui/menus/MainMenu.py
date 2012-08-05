@@ -1,11 +1,25 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module contains menu widgets' classes'''
 
 import PyQt4.QtGui      as QtGui
-
 from gui.qt4ui.Utils import tr
-
 import extension
 
 ICON = QtGui.QIcon.fromTheme
@@ -13,12 +27,10 @@ ICON = QtGui.QIcon.fromTheme
 
 class MainMenu(QtGui.QMenuBar):
     '''A widget that represents the main menu of the main window'''
-    # pylint: disable=W0612
     NAME = 'Main Menu'
     DESCRIPTION = 'The Main Menu of the main window'
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
-    # pylint: enable=W0612
 
     def __init__(self, handlers, session, parent=None):
         '''Constructor'''
@@ -187,12 +199,15 @@ class HelpMenu(QtGui.QMenu):
         self.handler = handler
 
         self.website = QtGui.QAction(tr('Website'), self)
-        self.about =   QtGui.QAction(tr('About'), self)
-        self.debug =   QtGui.QAction(tr('Debug'), self)
+        self.about = QtGui.QAction(tr('About'), self)
+        self.debug = QtGui.QAction(tr('Debug'), self)
+        self.updatecheck = QtGui.QAction(tr('Check for updates'), self)
 
         self.addAction(self.website)
         self.addAction(self.about)
         self.addAction(self.debug)
+        self.addSeparator()
+        self.addAction(self.updatecheck)
 
         self.website.triggered.connect(
             lambda *args: self.handler.on_website_selected())
@@ -200,14 +215,5 @@ class HelpMenu(QtGui.QMenu):
             lambda *args: self.handler.on_about_selected())
         self.debug.triggered.connect(
             lambda *args: self.handler.on_debug_selected())
-
-
-
-
-
-
-
-
-
-
-
+        self.updatecheck.triggered.connect(
+            lambda *args: self.handler.on_check_update_selected())

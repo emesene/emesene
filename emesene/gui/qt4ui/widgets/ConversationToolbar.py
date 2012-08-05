@@ -53,7 +53,7 @@ class ConversationToolbar (QtGui.QToolBar):
 
         self._action_dict['ublock'].setToolTip(tooltip_text)
         self._action_dict['ublock'].setIcon(ublock_icon)
-   
+
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         self._action_dict['ublock'].setEnabled(force_sensitive_block_button or is_sensitive)
         self._action_dict['toggle_avatars'].setEnabled(force_sensitive_block_button or is_sensitive)
@@ -62,8 +62,8 @@ class ConversationToolbar (QtGui.QToolBar):
         self._action_dict['clean'].setEnabled(is_sensitive)
         self._action_dict['change_color'].setEnabled(is_sensitive)
         self._action_dict['add_smiley'].setEnabled(is_sensitive)
+        self._action_dict['invite'].setEnabled(is_sensitive)
 
-#        self.invite.set_sensitive(is_sensitive)
 #        self.invite_av_call.set_sensitive(is_sensitive)
 #        self.invite_video_call.set_sensitive(is_sensitive)
 #        self.invite_audio_call.set_sensitive(is_sensitive)
@@ -141,11 +141,9 @@ class ConversationToolbar (QtGui.QToolBar):
         action_dict['send_nudge'].triggered.connect(
                             self.handler.on_notify_attention_selected)
 
-#        self.invite = gtk.ToolButton(theme_tool_invite)
-#        self.invite.set_label(_('Invite a buddy'))
-#        self.invite.set_tooltip_text(_('Invite a buddy'))
-#        self.invite.connect('clicked',
-#            lambda *args: self.handler.on_invite_selected())
+        action_dict['invite'] = QtGui.QAction(theme_tool_invite, tr('Invite a buddy'), self)
+        action_dict['invite'].triggered.connect(
+                            self.handler.on_invite_selected)
 
         action_dict['clean'] = QtGui.QAction(theme_tool_clean, tr('Clean the conversation'), self)
         action_dict['clean'].triggered.connect(
@@ -158,12 +156,12 @@ class ConversationToolbar (QtGui.QToolBar):
 #            lambda *args: self.handler.on_invite_file_transfer_selected())
 
         action_dict['ublock'] = QtGui.QAction(
-                            self.theme_tool_show_avatar, tr('Block/Unblock contact'), self) 
+                            self.theme_tool_show_avatar, tr('Block/Unblock contact'), self)
         action_dict['ublock'].triggered.connect(
                             self.handler.on_ublock_selected)
 
         action_dict['toggle_avatars'] = QtGui.QAction(
-                            self.theme_tool_block, tr('Hide/Show avatar'), self) 
+                            self.theme_tool_block, tr('Hide/Show avatar'), self)
         action_dict['toggle_avatars'].triggered.connect(
                             self.handler.on_toggle_avatar_selected)
         self.update_toggle_avatar_icon(self.session.config.b_show_info)
@@ -193,10 +191,10 @@ class ConversationToolbar (QtGui.QToolBar):
         self.addAction(action_dict['add_smiley'])
         self.addAction(action_dict['send_nudge'])
 
+        if self.handler.session_service_supported(e3.Session.SERVICE_CONTACT_INVITE):
+            self.addSeparator()
+            self.addAction(action_dict['invite'])
 #FIXME: implement this actions
-#        if self.handler.session_service_supported(e3.Session.SERVICE_CONTACT_INVITE):
-#            self.addSeparator()
-#            self.add(self.invite)
 #        if self.handler.session_service_supported(e3.Session.SERVICE_FILETRANSFER):
 #            self.add(self.invite_file_transfer)
         self.addSeparator()

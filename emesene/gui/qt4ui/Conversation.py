@@ -137,11 +137,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         splitter_down.setLayout(self.bottom_left_lay)
         self.left_widget.addWidget(splitter_up)
         self.left_widget.addWidget(splitter_down)
-
+        self.left_widget.splitterMoved.connect(self.on_input_panel_resize)
         self.left_widget.setCollapsible(0, False)
         self.left_widget.setCollapsible(1, False)
-        _, splitter_pos = self.left_widget.getRange(1)
-        self.left_widget.moveSplitter(splitter_pos, 1)
+        self.update_panel_position()
 
         # RIGHT
         self.info = ContactInfo(self.session, self.members)
@@ -204,7 +203,19 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.unsubscribe_signals()
         self.info.destroy()
 
-    # emesene's
+    def update_panel_position(self):
+        """update the panel position to be on the 80% of the height
+        """
+        min_, max_ = self.left_widget.getRange(1)
+        height = max_ - min_
+        if height > 0:
+            pos = self.session.config.get_or_set("i_input_panel_position",
+                    int(height * 0.8))
+            self.left_widget.moveSplitter(pos, 1)
+
+    def on_input_panel_resize(self, pos, index):
+        self.session.config.i_input_panel_position = pos
+
     def iconify(self):
         '''override the iconify method'''
         pass
