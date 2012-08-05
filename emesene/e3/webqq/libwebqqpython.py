@@ -162,7 +162,7 @@ SwigPyIterator_swigregister(SwigPyIterator)
 ON_BUDDY_MESSAGE = _libwebqqpython.ON_BUDDY_MESSAGE
 ON_GROUP_MESSAGE = _libwebqqpython.ON_GROUP_MESSAGE
 ON_SEND_MESSAGE = _libwebqqpython.ON_SEND_MESSAGE
-ON_RECEIVE_AVATAR = _libwebqqpython.ON_RECEIVE_AVATAR
+ON_AVATAR_UPDATE = _libwebqqpython.ON_AVATAR_UPDATE
 ON_BUDDY_STATUS_CHANGE = _libwebqqpython.ON_BUDDY_STATUS_CHANGE
 ON_NICK_CHANGE = _libwebqqpython.ON_NICK_CHANGE
 ON_SHAKE_MESSAGE = _libwebqqpython.ON_SHAKE_MESSAGE

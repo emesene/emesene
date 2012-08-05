@@ -94,6 +94,8 @@ class Worker(e3.Worker):
                             self._on_status_change(item[1])
                         elif item[0] == libwebqqpython.ON_GROUP_MESSAGE:
                             self._on_group_message(item[1])
+                        elif item[0] == libwebqqpython.ON_AVATAR_UPDATE:
+                            self._on_photo_update(item[1])
                         else:
                             print 'Un implementation callback functions'
                             
@@ -275,13 +277,33 @@ class Worker(e3.Worker):
         contact.status = stat
         self.session.contact_attr_changed(account, 'status', old_status)
 
-        acc = e3.Logger.Account(contact.cid,
-                                None, contact.account, contact.status, contact.nick,
-                                contact.message, contact.picture)
+        acc = e3.Logger.Account.from_contact(self.session.contacts.me)
         self.session.log('status change', contact.status,
                          old_status, acc)
 
-    def _on_photo_update(self, session, stanza):
+    def _on_photo_update(self, uin):
+        account = uin
+        photo_bin = self.res_manager.contacts[account].face
+        
+        contact = self.session.contacts.contacts.get(account, None)
+        if contact == None:
+            return
+        if not photo_bin:
+            return
+        photo_hash = hashlib.sha1()
+        photo_hash.update(photo_bin)
+        photo_hash = photo_hash.hexdigest()
+
+        ctct = self.session.contacts.get(account)
+        avatars = self.caches.get_avatar_cache(account)
+        avatar_path = os.path.join(avatars.path, photo_hash)
+        ctct.picture = avatar_path
+
+        if photo_hash not in avatars:
+            avatars.insert_raw(StringIO.StringIO(photo_bin))
+
+        self.session.picture_change_succeed(account, avatar_path)
+        
         pass
     def _on_contact_jabber_changed(self, session, stanza):
         pass
