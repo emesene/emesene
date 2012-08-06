@@ -58,9 +58,9 @@ class Preferences(gtk.Window):
         self.session = session
 
         self.LIST = [
+            {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('General')},
             {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Main Window')},
             {'stock_id' : gtk.STOCK_PAGE_SETUP,'text' : _('Conversation Window')},
-            {'stock_id' : gtk.STOCK_FLOPPY,'text' : _('General')},
             {'stock_id' : gtk.STOCK_MEDIA_PLAY,'text' : _('Sounds')},
             {'stock_id' : gtk.STOCK_LEAVE_FULLSCREEN,'text' : _('Notifications')},
             {'stock_id' : gtk.STOCK_SELECT_COLOR,'text' : _('Theme')},
@@ -109,9 +109,9 @@ class Preferences(gtk.Window):
 
         config_dir = e3.common.ConfigDir()
 
+        self.general = GeneralTab(session)
         self.main = MainWindow(session)
         self.conversation = ConversationWindow(session)
-        self.desktop = DesktopTab(session)
         self.sound = Sound(session)
         self.notification = Notification(session)
         self.theme = Theme(session)
@@ -134,9 +134,9 @@ class Preferences(gtk.Window):
         self.page_dict = []
 
         # Keep local copies of the objects
+        self.general_page = self.general
         self.main_page = self.main
         self.conversation_page = self.conversation
-        self.desktop_page = self.desktop
         self.sound_page = self.sound
         self.notifications_page = self.notification
         self.theme_page = self.theme
@@ -158,7 +158,7 @@ class Preferences(gtk.Window):
     def save_and_hide(self, widget):
         self.hide()
         self.session.save_config()
-        
+
     def set_accels(self):
         """
         set the keyboard shortcuts
@@ -178,7 +178,7 @@ class Preferences(gtk.Window):
         self.conversation.remove_subscriptions()
         self.sound.remove_subscriptions()
         self.notifications_page.remove_subscriptions()
-        self.desktop.remove_subscriptions()
+        self.general.remove_subscriptions()
         if hasattr(self, 'msn_papylib'):
             self.msn_papylib.privacy.remove_subscriptions()
 
@@ -201,9 +201,9 @@ class Preferences(gtk.Window):
 
         # Whack the pages into a dict for future reference
 
+        self.page_dict.append(self.general_page)
         self.page_dict.append(self.main_page)
         self.page_dict.append(self.conversation_page)
-        self.page_dict.append(self.desktop_page)
         self.page_dict.append(self.sound_page)
         self.page_dict.append(self.notifications_page)
         self.page_dict.append(self.theme_page)
@@ -296,7 +296,7 @@ class BaseTable(gtk.Table):
 
         self.current_row = 0
 
-    def add_text(self, text, column, row, 
+    def add_text(self, text, column, row,
                  align_left=False, line_wrap=True):
         """add a label with thext to row and column, align the text left if
         align_left is True
@@ -317,8 +317,8 @@ class BaseTable(gtk.Table):
         self.current_row += 1
 
 
-    def add_button(self, text, column, row, 
-                   on_click, xoptions=gtk.EXPAND|gtk.FILL, 
+    def add_button(self, text, column, row,
+                   on_click, xoptions=gtk.EXPAND|gtk.FILL,
                    yoptions=gtk.EXPAND|gtk.FILL):
         """add a button with text to the row and column, connect the clicked
         event to on_click"""
@@ -444,7 +444,7 @@ class BaseTable(gtk.Table):
         self.append_row(widget, row)
         return widget
 
-    def append_range(self, text, property_name, 
+    def append_range(self, text, property_name,
                      min_val, max_val,is_int=True, marks=[]):
         """append a row with a scale to select an integer value between
         min and max
@@ -499,7 +499,7 @@ class BaseTable(gtk.Table):
         combo = gtk.combo_box_new_text()
         self.fill_combo(combo, getter, property_name, values)
         if changed_cb:
-            combo.connect('changed', changed_cb, 
+            combo.connect('changed', changed_cb,
                           property_name, values)
         else:
             combo.connect('changed', self.on_combo_changed,
@@ -507,9 +507,9 @@ class BaseTable(gtk.Table):
         return combo
 
     def create_combo_with_label(self, text,
-                                getter, property_name, 
+                                getter, property_name,
                                 values=None, changed_cb = None):
-        """creates and return a new ComboBox with a label and append 
+        """creates and return a new ComboBox with a label and append
            values to the combo
         """
         hbox = gtk.HBox()
@@ -656,13 +656,13 @@ class MainWindow(BaseTable):
                                     ' LSUIElement -bool true', shell=True)
 
             self.append_markup('<b>'+_('OS X Integration:')+'</b>')
-            self.session.config.get_or_set('b_show_dock_icon', True)    
-            
+            self.session.config.get_or_set('b_show_dock_icon', True)
+
             button = self.append_check(_('Show dock icon '
                                        '(requires restart of emesene)'),
                                        'session.config.b_show_dock_icon')
             button.connect("toggled", do_hideshow)
-            self.session.config.get_or_set('b_hide_menu', False)    
+            self.session.config.get_or_set('b_hide_menu', False)
             button = self.append_check(_('Hide menu'),
                                        'session.config.b_hide_menu')
 
@@ -692,7 +692,7 @@ class ConversationWindow(BaseTable):
         def on_color_selected(cb):
             col = cb.get_color()
             col_e3 = e3.base.Color(col.red, col.green, col.blue)
-            self.set_attr('session.config.override_text_color', 
+            self.set_attr('session.config.override_text_color',
                           '#'+col_e3.to_hex())
 
         self.b_text_color = gtk.ColorButton(color=gtk.gdk.color_parse(
@@ -714,7 +714,7 @@ class ConversationWindow(BaseTable):
             self.int_mode = 0
         elif session.config.b_conversation_tabs:
             self.int_mode = 1
-            
+
         self.integrated_mode_cb = self.create_combo_with_label(_('Integrated mode'),
             self.get_integrated_mode, 'int_mode', range(3),
             self._on_integrated_mode_change)
@@ -928,12 +928,12 @@ class Theme(BaseTable):
                                    'session.config.sound_theme',
                                    self._on_sound_combo_changed)
 
-        self.tabs.append_theme_tab(_('Emote theme'), 'emotes', 
+        self.tabs.append_theme_tab(_('Emote theme'), 'emotes',
                                    gui.theme.emote_themes,
                                    'session.config.emote_theme')
 
         adium_tab = self.tabs.append_theme_tab(_('Adium theme'),
-                                           'conversations', 
+                                           'conversations',
                                            gui.theme.conv_themes,
                                            'session.config.adium_theme',
                                            self._on_adium_theme_combo_changed)
@@ -958,9 +958,9 @@ class Theme(BaseTable):
         self.set_attr(property_name, value)
         gui.theme.sound_theme = value
 
-    def _on_adium_variant_combo_changed(self, combo, 
+    def _on_adium_variant_combo_changed(self, combo,
                                         property_name, value):
-        
+
         variant_name = combo.get_active_text()
         #update adium variants combo
         self.set_attr(property_name, variant_name)
@@ -993,7 +993,7 @@ class Update(BaseTable):
         self.tabs.append_theme(_('Image theme'), 'images',
                                gui.theme.image_themes,
                                'session.config.image_theme')
-                               
+
         self.tabs.append_theme(_('Sound theme'), 'sounds',
                                gui.theme.sound_themes,
                                'session.config.sound_theme')
@@ -1163,7 +1163,7 @@ class Extension(BaseTable):
             self.categories.set_model(model)
         self.categories.set_active(0)
 
-class DesktopTab(BaseTable):
+class GeneralTab(BaseTable):
     """ This panel contains some msn-papylib specific settings """
 
     def __init__(self, session):
@@ -1176,7 +1176,7 @@ class DesktopTab(BaseTable):
         self.append_markup('<b>'+_('Logger')+'</b>')
         self.append_check(_('Enable logger'),
                           'session.config.b_log_enabled')
-                          
+
         # language settings
         self.append_markup('<b>'+_('Language')+'</b>')
         # languages combobox
@@ -1278,7 +1278,7 @@ class DesktopTab(BaseTable):
 
     def _on_language_changed(self,  lang):
         self._language_management.install_desired_translation(lang)
-    
+
     def on_language_combo_changed(self, combo, property_name):
         index = combo.get_active()
         lang_key = combo.get_model()[index][0]
