@@ -17,6 +17,7 @@ def qt4_main(controller_cls):
     import sys
     import gobject
     import PyQt4.QtCore as QtCore
+    from PyQt4.QtCore import Qt
     import PyQt4.QtGui as QtGui
 
     reload(sys)
@@ -31,7 +32,7 @@ def qt4_main(controller_cls):
     g_main_loop = gobject.MainLoop()
     app = QtGui.QApplication(sys.argv)
     app.setApplicationName('emesene')
-
+    app.setAttribute(Qt.AA_DontShowIconsInMenus, False)
     idletimer = QtCore.QTimer(QtGui.QApplication.instance())
     idletimer.timeout.connect(on_idle)
 
