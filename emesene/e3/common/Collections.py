@@ -20,6 +20,7 @@
 #
 
 import os
+import re
 import shutil
 import tempfile
 
@@ -32,6 +33,8 @@ import logging
 log = logging.getLogger('e3.common.Collections')
 
 import extension
+import Info
+import MetaData
 from Github import Github
 from utils import AsyncAction
 
@@ -153,15 +156,18 @@ class Collection(object):
 
             file_name = item.get('path')
 
-            (type, name) = self.plugin_name_from_file(file_name)
+            (type_, name) = self.plugin_name_from_file(file_name)
 
-            if type is None:
+            if type_ is None:
+                continue
+
+            if not self.check_version(type_, name):
                 continue
 
             try:
-                extype = self.extensions_descs[type]
+                extype = self.extensions_descs[type_]
             except KeyError:
-                extype = self.extensions_descs[type] = {}
+                extype = self.extensions_descs[type_] = {}
 
             try:
                 pl = extype[name]
@@ -207,6 +213,55 @@ class Collection(object):
 
         current_ext.metadata = {}
         return current_ext.metadata
+
+    def version_value(self, version):
+        '''return an integer version value'''
+        if isinstance(version, int):
+            return version
+
+        stripped_version = re.sub(r'[^\d.]+', '', version)
+        split_version = stripped_version.split(".")
+        split_version.reverse()
+        value = 0
+        for i, val in enumerate(split_version):
+            value += (int(val) << (i * 8))
+
+        return value
+
+    def check_version(self, type_, name):
+        '''check whether the current version of emesene is compatible'''
+        meta = self.fetch_metadata(type_, name)
+        if not meta or not meta.get('required emesene version'):
+            return True
+
+        if self.version_value(meta.get('required emesene version')) > \
+           self.version_value(Info.EMESENE_VERSION):
+            return False
+
+        return True
+
+    def check_updates(self, type_, path):
+        '''check whether updates are available'''
+        name = os.path.basename(path)
+        meta = self.fetch_metadata(type_, name)
+        if not meta or not meta.get('version') or not meta.get('required emesene version'):
+            return False
+
+        local_meta = MetaData.get_metadata_from_path(path)
+        if not local_meta or not local_meta.get('required emesene version'):
+            return True
+
+        if self.version_value(meta.get('required emesene version')) > \
+           self.version_value(Info.EMESENE_VERSION):
+            return False
+
+        if not local_meta.get('version'):
+            return True
+
+        if self.version_value(meta.get('version')) > self.version_value(local_meta.get('version')):
+            return True
+
+        return False
 
 class PluginsCollection(Collection):
 

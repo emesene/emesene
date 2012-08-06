@@ -18,7 +18,6 @@
 
 import os
 import gtk
-import re
 
 import logging
 log = logging.getLogger('gtkui.ExtensionList')
@@ -27,7 +26,6 @@ import utils
 import extension
 import e3
 import gobject
-import Info
 
 from e3.common.pluginmanager import get_pluginmanager
 
@@ -220,21 +218,6 @@ class ExtensionListTab(gtk.VBox):
 
         setattr(obj, terms[-1], value)
         return obj
-
-    def version_value(self, version):
-        '''return an integer version value'''
-        if isinstance(version, int):
-            return version
-
-        stripped_version = re.sub(r'[^\d.]+', '', version)
-        split_version = stripped_version.split(".")
-        split_version.reverse()
-        value = 0
-        for i, val in enumerate(split_version):
-            value += (int(val) << (i * 8))
-
-        return value
-
 
 class DownloadListBase(ExtensionListTab):
     def __init__(self, session, radio=False, use_tabs=False):
@@ -472,17 +455,6 @@ class DownloadList(DownloadListBase):
         meta = self.current_collection.fetch_metadata(type_, name)
         return meta
 
-    def check_version(self, type_, name):
-        meta = self.fetch_metadata(type_, name)
-        if not meta or not meta.get('required emesene version'):
-            return True
-
-        if self.version_value(meta.get('required emesene version')) > \
-           self.version_value(Info.EMESENE_VERSION):
-            return False
-
-        return True
-
     def show_update(self, installed_only=False):
         '''show an update list of the set collection'''
         if installed_only:
@@ -499,8 +471,6 @@ class DownloadList(DownloadListBase):
                        'installable', visible=False)
 
             for label in element:
-                if not self.check_version(box.extension_type, label):
-                    continue
                 if label not in box.extension_list:
                     self.download_list[box.extension_type].append(label)
 
@@ -672,26 +642,9 @@ class UpdateList(DownloadListBase):
 
     def check_updates(self, collection, type_, path, instance=None):
         '''check whether updates are available'''
-        name = os.path.basename(path)
-        meta = self.fetch_metadata(collection, type_, name)
-        if not meta or not meta.get('version') or not meta.get('required emesene version'):
-            return False
-
-        local_meta = e3.common.MetaData.get_metadata_from_path(path)
-        if not local_meta or not local_meta.get('required emesene version'):
-            return True
-
-        if self.version_value(meta.get('required emesene version')) > \
-           self.version_value(Info.EMESENE_VERSION):
-            return False
-
-        if not local_meta.get('version'):
-            return True
-
-        if self.version_value(meta.get('version')) > self.version_value(local_meta.get('version')):
-            return True
-
-        return False
+        if not self.collections[collection]['supported'].check_updates(type_, path):
+            return self.collections[collection]['community'].check_updates(type_, path)
+        return True
 
     def show_update(self, installed_only=False):
         '''called when the liststore need to be changed'''
