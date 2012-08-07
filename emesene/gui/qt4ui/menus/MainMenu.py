@@ -71,7 +71,7 @@ class FileMenu(QtGui.QMenu):
         status_menu_cls = extension.get_default('menu status')
 
         self.status_menu = status_menu_cls(handler.on_status_selected)
-        disconnect_action = QtGui.QAction(ICON('network-disconnect'),
+        disconnect_action = QtGui.QAction(ICON('window-close'),
                                           tr('Disconnect'), self)
         quit_action = QtGui.QAction(ICON('application-exit'), tr('Quit'), self)
 
@@ -156,7 +156,7 @@ class OptionsMenu(QtGui.QMenu):
         by_status = QtGui.QAction(tr('Order by status'), self)
         by_group = QtGui.QAction(tr('Order by group'), self)
         group_offline = QtGui.QAction(tr('Group offline contacts'), self)
-        preferences = QtGui.QAction(ICON('preferences-other'),
+        preferences = QtGui.QAction(ICON('document-properties'),
                                     tr('Preferences...'), self)
 
         self.addAction(by_status)
@@ -199,7 +199,7 @@ class HelpMenu(QtGui.QMenu):
         self.handler = handler
 
         self.website = QtGui.QAction(tr('Website'), self)
-        self.about = QtGui.QAction(tr('About'), self)
+        self.about = QtGui.QAction(ICON('help-about'), tr('About'), self)
         self.debug = QtGui.QAction(tr('Debug'), self)
         self.updatecheck = QtGui.QAction(tr('Check for updates'), self)
 

@@ -68,7 +68,8 @@ class ContactMenu(QtGui.QMenu):
         action_d['copy_to'] = QtGui.QMenu(tr('Copy to group'), self)
         action_d['remove_from'] = QtGui.QMenu(tr('Remove from group'), self)
 
-        action_d['view_info'] = QtGui.QAction(tr('View information'), self)
+        action_d['view_info'] = QtGui.QAction(ICON('document-properties'),
+            tr('View information'), self)
         action_d['view_info'].triggered.connect(
             lambda *args: self._handler.on_view_information_selected())
 

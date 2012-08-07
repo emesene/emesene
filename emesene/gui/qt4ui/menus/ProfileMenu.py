@@ -28,9 +28,9 @@ class ProfileMenu(QtGui.QMenu):
 
         self.change_profile = QtGui.QAction(tr('Change profile'), self)
         self.addAction(self.change_profile)
-        
+
         self.setIcon(ICON('document-properties'))
-        
+
         self.change_profile.triggered.connect(
             lambda *args: self._handler.change_profile())
 
