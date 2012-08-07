@@ -182,7 +182,7 @@ class Window(gtk.Window):
                 if self.is_maximized():
                     self.box.set_position(w-width)
                 else:
-                    self.resize(self.set_or_get_width(width+w), 
+                    self.resize(self.set_or_get_width(width+w),
                                 self.set_or_get_height(height))
                     self.box.set_position(w)
                 return False

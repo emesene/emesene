@@ -130,7 +130,6 @@ class TopLevelWindow (QtGui.QMainWindow):
                  config_dir=None, config_path=None, proxy=None,
                  use_http=None, use_ipv6=None,
                  session_id=None, cancel_clicked=False, no_autologin=False):
-               #emesene's
         '''Adds a login page to the top level window and shows it'''
         login_window_cls = extension.get_default('login window')
         login_page = login_window_cls(callback, on_preferences_changed, config,
@@ -152,8 +151,9 @@ class TopLevelWindow (QtGui.QMainWindow):
         self._switch_to_page(main_page)
         self._setup_main_menu(session, main_page.contact_list)
 
+        # hide the main window only when the user is connected
         if quit_on_close:
-            self._cb_on_close = self._given_cb_on_close
+            self._cb_on_close = self.cb_on_quit
         else:
             self._cb_on_close = lambda *args: self.hide()
 
@@ -207,20 +207,19 @@ class TopLevelWindow (QtGui.QMainWindow):
         if self.content_type != 'conversation':
             self._content_main = page_widget
 
+    def save_dimensions(self):
+        '''save the window dimensions'''
+        #FIXME: implement
+        pass
+
 # -------------------- QT_OVERRIDE
 
     def closeEvent(self, event):
         ''' Overrides QMainWindow's close event '''
-        log.debug('TopLevelWindow\'s close event: %s, %s' % (
-                                    self.content, str(self._cb_on_close)))
-        cb_result = self._cb_on_close(self._content)
-        if (cb_result is None) or (cb_result is True):
+        self.save_dimensions()
+        if self.content_conv and not self.content_main:
+            self.content_conv.close_all()
             event.ignore()
-        # FIXME: dirty HACK. when we close the conversation window,
-        # self._cb_on_close closes each conversation tab without checking
-        # if it isclosing the last tab, so _on_last_tab_close doesn't get
-        #called and the conversation window remains opened and empty.
-        if str(self._cb_on_close).find(
-                'Controller._on_conversation_window_close') > -1:
-            self.hide()
-
+        else:
+            self._cb_on_close()
+            event.ignore()
