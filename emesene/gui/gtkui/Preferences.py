@@ -1287,6 +1287,10 @@ class GeneralTab(BaseTable):
         self.append_check(_('Open mail in default desktop client'),
                           'session.config.b_open_mail_in_desktop')
 
+        self.append_markup('<b>'+_('Updates')+'</b>')
+        self.append_check(_('Weekly check for plugins/themes updates on startup'),
+                          'session.config.b_check_for_updates')
+
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_language_changed,
             'language_config')

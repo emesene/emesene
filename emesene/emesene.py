@@ -754,7 +754,7 @@ class Controller(object):
 
     def check_for_updates(self):
         '''Search for any updates'''
-        if not self.config.get_or_set('b_check_for_updates', True):
+        if not self.session.config.get_or_set('b_check_for_updates', True):
             return
 
         updates_time = datetime.date.fromtimestamp(
