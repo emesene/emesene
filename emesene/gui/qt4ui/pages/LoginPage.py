@@ -365,7 +365,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
     def _on_start_login(self):
         ''' Slot executed when the user clicks the login button'''
         widget_dic = self._widget_d
-        user = str(widget_dic['account_combo'].currentText())
+        user = str(widget_dic['account_combo'].currentText()).lower()
         password = str(widget_dic['password_edit'].text())
         status = widget_dic['status_btn'].status
         save_account = widget_dic['save_account_chk'].isChecked()
@@ -462,9 +462,12 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         '''Convenience class to store account's settings'''
         def __init__(self, service, email, password, status, remember_lvl):
             '''Constructor'''
-            self.service, self.status = service, status
-            self.email, self.password = email, password
-            self.save_account, self.save_password = False, False
+            self.service = service
+            self.status = status
+            self.email = email
+            self.password = password
+            self.save_account = False
+            self.save_password = False
             self.auto_login = False
             if remember_lvl >= 1:
                 self.save_account = True
