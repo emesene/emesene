@@ -549,6 +549,7 @@ class UpdateList(DownloadListBase):
         self.update_list = {'plugins': {}, 'themes': {}}
 
         self.update_amount = 0
+        self.first = True
 
         self.themes = {}
         self.theme_names = {}
@@ -685,6 +686,10 @@ class UpdateList(DownloadListBase):
             self.update_amount += 1
             self.append(True, name, name, path=path, type_='plugin',
                         description=pluginmanager.plugin_description(name))
+
+        if self.update_amount > 0 and self.first:
+            self.first = False
+            extension.get_instance('preferences').show_updates_tab()
 
     def append_theme(self, name, theme_type, theme, theme_config):
         self.themes[theme_type] = theme

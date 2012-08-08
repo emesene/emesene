@@ -114,6 +114,9 @@ class Preferences(QtGui.QWidget):
         '''Does Nothing...'''
         pass
 
+    def check_for_updates(self):
+        pass
+
 
 
 class QListViewMod (QtGui.QListView):
@@ -720,4 +723,3 @@ class MSNPapylib(BaseTable):
         ''' called when live profile button is clicked '''
         profile_url = self.session.get_worker().profile_url
         gui.base.Desktop.open(profile_url)
-
