@@ -18,9 +18,9 @@
 
 import gtk
 import extension
+import utils
 from gui.base import Plus
 import gui
-
 
 class Header(gtk.HBox):
     '''a widget used to display some information about the conversation'''
@@ -51,14 +51,12 @@ class Header(gtk.HBox):
 
         self.menu = gtk.Menu()
         copynick = gtk.ImageMenuItem(_('Copy nick'))
-        nick_img = gtk.gdk.pixbuf_new_from_file_at_size(gui.theme.image_theme.user, 16, 16)
-        copynick.set_image(gtk.image_new_from_pixbuf(nick_img))
+        copynick.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.user))
         copypm = gtk.ImageMenuItem(_('Copy personal message'))
         copypm.set_image(gtk.image_new_from_stock(gtk.STOCK_DIALOG_INFO,
             gtk.ICON_SIZE_MENU))
         copymail = gtk.ImageMenuItem(_('Copy mail'))
-        email_img = gtk.gdk.pixbuf_new_from_file_at_size(gui.theme.image_theme.email, 16, 16)
-        copymail.set_image(gtk.image_new_from_pixbuf(email_img))
+        copymail.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.email))
         self.menu.append(copynick)
         self.menu.append(copypm)
         self.menu.append(copymail)
