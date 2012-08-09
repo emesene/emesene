@@ -249,6 +249,39 @@ Do you want to fix your profile now?''')
 
         response_cb(response, selected_pixmap)
 
+
+    @classmethod
+    def about_dialog(cls, name, version, copyright, comments, license, website,
+        authors, translators, logo_path):
+        '''show an about dialog of the application:
+        * title: the title of the window
+        * name: the name of the appliaction
+        * version: version as string
+        * copyright: the name of the copyright holder
+        * comments: a description of the application
+        * license: the license text
+        * website: the website url
+        * authors: a list or tuple of strings containing the contributors
+        * translators: a string containing the translators
+        '''
+        image = gui.theme.image_theme.user
+        dialog  = StandardButtonDialog('About emesene')
+        info = (logo_path, name, version, comments, copyright, website, website)
+        body = '''<center><img src= %s ><H1>%s %s</H1> <H4>%s</H4>
+               %s<H6><A href="%s" />%s</A></H6></center>''' % info
+        body_label = QtGui.QLabel(unicode(body))
+        button_box = QtGui.QDialogButtonBox()
+        body_box = QtGui.QHBoxLayout()
+        body_box.addWidget(body_label)
+        dialog.setLayout(body_box)
+        dialog.add_button(button_box.Close)
+        dialog.setMinimumWidth(400)
+        dialog.setMaximumWidth(400)
+        dialog.setMaximumHeight(330)
+        dialog.setMinimumHeight(330)
+        body_label.setAlignment(Qt.AlignCenter)
+        dialog.exec_()
+
     @classmethod
     def error(cls, message, response_cb=None, title=tr('Error!')):
         '''show an error dialog displaying the message, this dialog should
