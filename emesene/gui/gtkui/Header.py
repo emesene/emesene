@@ -19,6 +19,7 @@
 import gtk
 import extension
 from gui.base import Plus
+import gui
 
 
 class Header(gtk.HBox):
@@ -49,12 +50,15 @@ class Header(gtk.HBox):
         self.members = members
 
         self.menu = gtk.Menu()
-        copynick = gtk.ImageMenuItem(_('Copy nick to clipboard'))
-        copynick.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY, gtk.ICON_SIZE_MENU))
-        copypm = gtk.ImageMenuItem(_('Copy personal message to clipboard'))
-        copypm.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY, gtk.ICON_SIZE_MENU))
-        copymail = gtk.ImageMenuItem(_('Copy mail to clipboard'))
-        copymail.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY, gtk.ICON_SIZE_MENU))
+        copynick = gtk.ImageMenuItem(_('Copy nick'))
+        nick_img = gtk.gdk.pixbuf_new_from_file_at_size(gui.theme.image_theme.user, 16, 16)
+        copynick.set_image(gtk.image_new_from_pixbuf(nick_img))
+        copypm = gtk.ImageMenuItem(_('Copy personal message'))
+        copypm.set_image(gtk.image_new_from_stock(gtk.STOCK_DIALOG_INFO,
+            gtk.ICON_SIZE_MENU))
+        copymail = gtk.ImageMenuItem(_('Copy mail'))
+        email_img = gtk.gdk.pixbuf_new_from_file_at_size(gui.theme.image_theme.email, 16, 16)
+        copymail.set_image(gtk.image_new_from_pixbuf(email_img))
         self.menu.append(copynick)
         self.menu.append(copypm)
         self.menu.append(copymail)

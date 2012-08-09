@@ -18,7 +18,7 @@
 
 import e3
 import gtk
-
+import gui
 from gui.base import Plus
 
 class ContactMenu(gtk.Menu):
@@ -103,18 +103,23 @@ class ContactMenu(gtk.Menu):
             gtk.ICON_SIZE_MENU))
         copy_menu = gtk.Menu()
         copy.set_submenu(copy_menu)
-        account_to_clipboard = gtk.MenuItem(_('Email address'))
+        account_to_clipboard = gtk.ImageMenuItem(_('Email address'))
+        email_img = gtk.gdk.pixbuf_new_from_file_at_size(gui.theme.image_theme.email, 16, 16)
+        account_to_clipboard.set_image(gtk.image_new_from_pixbuf(email_img))
 
         account_to_clipboard.connect('activate',
             lambda *args: self.on_copy_account_to_clipboard())
 
-        nick_to_clipboard = gtk.MenuItem(_('Nickname'))
+        nick_to_clipboard = gtk.ImageMenuItem(_('Nickname'))
+        nick_img = gtk.gdk.pixbuf_new_from_file_at_size(gui.theme.image_theme.user, 16, 16)
+        nick_to_clipboard.set_image(gtk.image_new_from_pixbuf(nick_img))
 
         nick_to_clipboard.connect('activate',
             lambda *args: self.on_copy_nick_to_clipboard())
 
-        message_to_clipboard = gtk.MenuItem(_('Personal message'))
-
+        message_to_clipboard = gtk.ImageMenuItem(_('Personal message'))
+        message_to_clipboard.set_image(gtk.image_new_from_stock(gtk.STOCK_DIALOG_INFO,
+            gtk.ICON_SIZE_MENU))
         message_to_clipboard.connect('activate',
             lambda *args: self.on_copy_message_to_clipboard())
 
