@@ -61,7 +61,7 @@ Clicking Yes will close emesene.
 Do you want to fix your profile now?''')
         gui.base.Desktop.open(url)
 
-        reply = QtGui.QMessageBox.warning(None, _("You have a broken profile"),
+        reply = QtGui.QMessageBox.warning(None, tr("You have a broken profile"),
                                           message, QtGui.QMessageBox.Yes |
                                           QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 
@@ -78,10 +78,9 @@ Do you want to fix your profile now?''')
         added (give a empty tuple if you don't implement this feature,
         the controls are made by the callback, you just ask for the email,
         don't make any control, you are just implementing a GUI! :P'''
-        log.info(str(response_cb))
-        dialog      = OkCancelDialog(title)
-        text_label  = QtGui.QLabel(tr('E-mail:'))
-        text_edit   = QtGui.QLineEdit()
+        dialog = OkCancelDialog(title)
+        text_label = QtGui.QLabel(tr('E-mail:'))
+        text_edit = QtGui.QLineEdit()
         group_label = QtGui.QLabel(tr('Group:'))
         group_combo = QtGui.QComboBox()
 
@@ -99,7 +98,6 @@ Do you want to fix your profile now?''')
                                  Qt.AlignVCenter)
         dialog.setMinimumWidth(300)
 
-        log.debug(str(groups))
         groups = list(groups)
         log.debug(groups)
         groups.sort()
@@ -124,10 +122,9 @@ Do you want to fix your profile now?''')
         callback, to make a unified behaviour, and also, to only implement
         GUI logic on your code and not client logic
         cb args: response, group_name'''
-        log.debug(str(response_cb))
         dialog = OkCancelDialog(title)
-        group_label = QtGui.QLabel(tr('New group\'s name:'))
-        group_edit  = QtGui.QLineEdit()
+        group_label = QtGui.QLabel(tr("Group name"))
+        group_edit = QtGui.QLineEdit()
 
         lay = QtGui.QHBoxLayout()
         lay.addWidget(group_label)
@@ -291,13 +288,13 @@ Do you want to fix your profile now?''')
         have only the option to close and the response callback is optional
         since in few cases one want to know when the error dialog was closed,
         but it can happen, so return stock.CLOSE to the callback if its set'''
-        # TODO: Consider an error notification like dolphin's notifications
-        # and or consider desktop integration with windows.
-        # TODO: Consider making a more abstract class to use as a base for
-        # every kind of message box: error, info, attention, etc...
         dialog = StandardButtonDialog(title)
         icon = QtGui.QLabel()
         message = QtGui.QLabel(unicode(message))
+        message = QtGui.QLabel(unicode(message))
+        message.setTextFormat(Qt.RichText)
+        message.setWordWrap(True)
+        message.setAlignment(Qt.AlignCenter)
 
         lay = QtGui.QHBoxLayout()
         lay.addWidget(icon)
@@ -477,7 +474,6 @@ Do you want to fix your profile now?''')
             response = gui.stock.ACCEPT
         elif response == QtGui.QDialog.Rejected:
             response = gui.stock.CANCEL
-        log.debug(str(response))
 
         response_cb(response)
 
@@ -504,7 +500,7 @@ Do you want to fix your profile now?''')
         '''show a confirm dialog displaying a question and two buttons:
         Yes and No, return the response as stock.YES or stock.NO or
         stock.CLOSE if the user closes the window'''
-        dialog  = YesNoDialog('')
+        dialog = YesNoDialog('')
         icon = QtGui.QLabel()
         message = QtGui.QLabel(unicode(message))
 
@@ -609,12 +605,10 @@ Do you want to fix your profile now?''')
             new_pm = pm.text()
             handler.save_profile(new_nick, new_pm)
 
-        dialog.show()
-        response = dialog.exec_()
-        if response == QtGui.QDialog.Accepted:
-            response = gui.stock.ACCEPT
-            save_profile()
+        dialog.accept_response = save_profile
 
+        dialog.show()
+        dialog.exec_()
         dialog.hide()
 
 
@@ -766,8 +760,8 @@ class ContactAddedYouDialog (QtCore.QObject):
             text = text.replace('\n', '<br />')
 
             txt = tr('Remind me later')
-            add_btn   = button_box.addButton(tr('Yes'), QtGui.QDialogButtonBox.AcceptRole)
-            dont_btn  = button_box.addButton(tr('No'), QtGui.QDialogButtonBox.RejectRole)
+            add_btn = button_box.addButton(tr('Yes'), QtGui.QDialogButtonBox.AcceptRole)
+            dont_btn = button_box.addButton(tr('No'), QtGui.QDialogButtonBox.RejectRole)
             later_btn = button_box.addButton(txt, QtGui.QDialogButtonBox.ResetRole)
 
             self.setWindowTitle(title)
@@ -777,7 +771,6 @@ class ContactAddedYouDialog (QtCore.QObject):
             add_btn.clicked.connect(lambda *args: self.done(self.AddRole))
             dont_btn.clicked.connect(lambda *args: self.done(self.DontRole))
             later_btn.clicked.connect(lambda *args: self.done(self.LaterRole))
-
 
         def exec_(self):
             log.debug('Don\'t call \'exec_\' on a Page')
@@ -823,6 +816,7 @@ class ContactAddedYouDialog (QtCore.QObject):
 
     def __del__(self):
         log.debug('ContactAddedYouDialog destroyed')
+
 
 class EntryDialog (OkCancelDialog):
     '''Dialog window with a text entry.'''
