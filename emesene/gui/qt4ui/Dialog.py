@@ -188,11 +188,11 @@ Do you want to fix your profile now?''')
         act_dict = {}
         act_dict['rotate_left'] = QtGui.QAction(tr('Rotate Left'), dialog)
         act_dict['rotate_right'] = QtGui.QAction(tr('Rotate right'), dialog)
-        act_dict['fit_zoom']     = QtGui.QAction(tr('Zoom to fit'), dialog)
-        act_dict['fit_zoom']     = QtGui.QAction(tr('Zoom to fit'), dialog)
-        act_dict['reset_zoom']   = QtGui.QAction(tr('Reset zoom'), dialog)
-        act_dict['select_all']   = QtGui.QAction(tr('Select All'), dialog)
-        act_dict['select_unsc']  = QtGui.QAction(tr('Select Unscaled'), dialog)
+        act_dict['fit_zoom'] = QtGui.QAction(tr('Zoom to fit'), dialog)
+        act_dict['fit_zoom'] = QtGui.QAction(tr('Zoom to fit'), dialog)
+        act_dict['reset_zoom'] = QtGui.QAction(tr('Reset zoom'), dialog)
+        act_dict['select_all'] = QtGui.QAction(tr('Select All'), dialog)
+        act_dict['select_unsc'] = QtGui.QAction(tr('Select Unscaled'), dialog)
 
         # widgets
         toolbar = QtGui.QToolBar()
@@ -249,7 +249,6 @@ Do you want to fix your profile now?''')
 
         response_cb(response, selected_pixmap)
 
-
     @classmethod
     def about_dialog(cls, name, version, copyright, comments, license, website,
         authors, translators, logo_path):
@@ -264,12 +263,16 @@ Do you want to fix your profile now?''')
         * authors: a list or tuple of strings containing the contributors
         * translators: a string containing the translators
         '''
-        image = gui.theme.image_theme.user
-        dialog  = StandardButtonDialog('About emesene')
+        dialog = StandardButtonDialog('About emesene')
+        def reject_response():
+            pass
+        dialog.reject_response = reject_response
         info = (logo_path, name, version, comments, copyright, website, website)
         body = '''<center><img src= %s ><H1>%s %s</H1> <H4>%s</H4>
-               %s<H6><A href="%s" />%s</A></H6></center>''' % info
+               %s<H6><a href="%s">%s</a></H6></center>''' % info
         body_label = QtGui.QLabel(unicode(body))
+        body_label.setWordWrap(True)
+        body_label.setAlignment(Qt.AlignCenter)
         button_box = QtGui.QDialogButtonBox()
         body_box = QtGui.QHBoxLayout()
         body_box.addWidget(body_label)
@@ -292,8 +295,8 @@ Do you want to fix your profile now?''')
         # and or consider desktop integration with windows.
         # TODO: Consider making a more abstract class to use as a base for
         # every kind of message box: error, info, attention, etc...
-        dialog  = StandardButtonDialog(title)
-        icon    = QtGui.QLabel()
+        dialog = StandardButtonDialog(title)
+        icon = QtGui.QLabel()
         message = QtGui.QLabel(unicode(message))
 
         lay = QtGui.QHBoxLayout()
@@ -677,6 +680,7 @@ class StandardButtonDialog (QtGui.QDialog):
         # pylint: disable=C0103
         self.central_widget.setLayout(layout)
 
+
 class OkCancelDialog (StandardButtonDialog):
     '''Skeleton for a dialog window having Ok and Cancel buttons'''
     def __init__(self, title, expanding=False, parent=None):
@@ -699,6 +703,7 @@ class OkCancelDialog (StandardButtonDialog):
 
     def set_reject_response(self, response):
         self._reject_response = response
+
 
 class YesNoDialog (StandardButtonDialog):
     '''Skeleton for a dialog window having Ok and Cancel buttons'''
@@ -723,14 +728,15 @@ class YesNoDialog (StandardButtonDialog):
     def set_reject_response(self, response):
         self._reject_response = response
 
+
 class ContactAddedYouDialog (QtCore.QObject):
     '''Dialog window asking wether to add to the contact list
     a contact which has just added you'''
 
     class Page(QtGui.QDialog):
         '''This is the actual dialog window'''
-        AddRole   = QtGui.QDialog.Accepted
-        DontRole  = QtGui.QDialog.Accepted + 1
+        AddRole = QtGui.QDialog.Accepted
+        DontRole = QtGui.QDialog.Accepted + 1
         LaterRole = QtGui.QDialog.Rejected
 
         def __init__(self, mail, nick, title, parent=None):
