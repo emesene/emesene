@@ -110,7 +110,7 @@ Do you want to fix your profile now?''')
 
         response = dialog.exec_()
 
-        email = unicode(text_edit.text())
+        email = unicode(text_edit.text().lower())
         group = group_combo.itemData(group_combo.currentIndex()).toPyObject()
         log.debug('[%s,%s]' % (email, group))
         response_cb(response, email, group)

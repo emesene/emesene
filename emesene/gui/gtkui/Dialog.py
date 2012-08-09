@@ -174,7 +174,7 @@ class Dialog(object):
     def add_contact_cb(cls, widget, window, response_cb, response):
         '''callback called when a button is selected on the add_contact
         dialog'''
-        contact = window.entry.get_text()
+        contact = window.entry.get_text().lower()
         group = window.combo.get_model().get_value(
             window.combo.get_active_iter(), 0)
 
@@ -1864,7 +1864,7 @@ class AddBuddy(gtk.Window):
     def cb_add(self, button):
         '''Callback when the add button is clicked'''
         mail, nick = self.mails[self.pointer]
-        self.accepted.append(mail)
+        self.accepted.append(mail.lower())
         self.mails.pop(self.pointer)
         self.switchmail(None, -1)
 
