@@ -30,11 +30,15 @@ import gui
 dic = {
     '\"'    :    '&quot;',
     '\''    :    '&apos;',
+    '>'     :    '&gt;',
+    '<'     :    '&lt;'
 }
 
 dic_inv = {
     '&quot;'    :'\"',
-    '&apos;'    :'\''
+    '&apos;'    :'\'',
+    '&gt;'      :'>',
+    '&lt;'      :'<'
 }
 
 URL_REGEX_STR = '(http[s]?://|www\.)(?:[a-zA-Z]|[0-9]|[$\-_@\.&+]|[!*\"\'\(\),]|[=;/#?:]|(?:%[0-9a-fA-F][0-9a-fA-F])|[\{\}\|\[\]\\\^~])+'
@@ -220,10 +224,9 @@ def replace_emoticons(text):
     shortcuts = emote_theme.shortcuts
     emoticon_list = []
     for shortcut in shortcuts:
-        eshort = gui.base.MarkupParser.escape(shortcut)
+        eshort = escape(shortcut)
         if eshort in text:
-            if shortcut in emote_theme.shortcuts:
-                path = emote_theme.emote_to_path(shortcut, remove_protocol=True)
+            path = emote_theme.emote_to_path(shortcut, remove_protocol=True)
 
             if path is not None:
                 hclist = html_code_list(text)
@@ -260,7 +263,7 @@ def html_code_list(text):
     '''return positions of specify html codes in input string'''
     html_list = []
     for hc in HTML_CODE_REGEX.finditer(text):
-        if hc.group() in gui.base.MarkupParser.dic_inv:
+        if hc.group() in dic_inv:
             html_list.append(hc.end() - 1)
     return html_list
 
