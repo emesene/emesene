@@ -91,7 +91,6 @@ class ClientEvents(papyon.event.ClientEventInterface):
                 log.error("Client got an error: %s %s" % (error_type, error))
         elif error_type == papyon.event.ClientErrorType.ADDRESSBOOK:
             log.error("Client got an error handling addressbook: %s %s" % (error_type, error))
-            self._client.session.add_event(Event.EVENT_DISCONNECTED, "%s %s" % (error, error_type), 0)
         elif error_type == papyon.event.ClientErrorType.OFFLINE_MESSAGES:#TODO
             log.error("Client got an error handling offline messages: %s %s" % (error_type, error))
         else:

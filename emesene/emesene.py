@@ -76,6 +76,8 @@ if 'USE_GI' in os.environ:
 import glib
 import shutil
 import signal
+import time
+import datetime
 import Info
 try:
     contrib = open("CONTRIBUTORS", "r")
@@ -572,6 +574,8 @@ class Controller(object):
 
         self._sync_emesene1()
 
+        self.check_for_updates()
+
         self.session.start_mail_client()
         self.logged_in = True
         self.network_checker.set_new_session(self.session)
@@ -627,6 +631,7 @@ class Controller(object):
         self.session.config.get_or_set('b_conversation_tabs', True)
         self.session.config.get_or_set('b_single_window', True)
         self.session.config.get_or_set('b_open_mail_in_desktop', False)
+        self.session.config.get_or_set('b_mute_notification', False)
 
         # set account uuid for session
         self.session.account_uuid = account.uuid
@@ -757,6 +762,28 @@ class Controller(object):
                     os.remove(last_avatar_path)
                 except OSError, e:
                     log.warning("Cannot remove file: %s" % e)
+
+    def check_for_updates(self):
+        '''Search for any updates'''
+        if not self.session.config.get_or_set('b_check_for_updates', True):
+            return
+
+        updates_time = datetime.date.fromtimestamp(
+                        self.config.get_or_set('f_check_updates_time', 0))
+        now = datetime.date.today()
+        delta = datetime.timedelta(weeks=1)
+        if now - updates_time < delta:
+            return
+
+        self.config.f_check_updates_time = time.time()
+        preferences = extension.get_and_instantiate('preferences',
+                                                    self.session)
+        if self.session is not preferences.session:
+            extension.delete_instance('preferences')
+            preferences = extension.get_and_instantiate('preferences',
+                                                        self.session)
+
+        preferences.check_for_updates()
 
 def main():
     """

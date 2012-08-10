@@ -155,6 +155,18 @@ class Preferences(gtk.Window):
             self.hide()
             return True
 
+    def check_for_updates(self):
+        self.showPage(self.page_dict.index(self.updates_page))
+        self.showPage(0)
+
+    def show_updates_tab(self):
+        if self.get_visible():
+            return
+
+        self.show()
+        self.present()
+        self.set_page(self.page_dict.index(self.updates_page))
+
     def save_and_hide(self, widget):
         self.hide()
         self.session.save_config()
@@ -281,6 +293,11 @@ class Preferences(gtk.Window):
         self.notebook.set_current_page(index)
         self.current_page = index
         self.page_dict[index].on_update()
+
+    def set_page(self, index):
+        self.showPage(index)
+        selection = self.treeview.get_selection()
+        selection.select_path(index)
 
 class BaseTable(gtk.Table):
     """a base table to display preferences
@@ -1269,6 +1286,10 @@ class GeneralTab(BaseTable):
         self.append_markup('<b>'+_('Mail')+'</b>')
         self.append_check(_('Open mail in default desktop client'),
                           'session.config.b_open_mail_in_desktop')
+
+        self.append_markup('<b>'+_('Updates')+'</b>')
+        self.append_check(_('Weekly check for plugins/themes updates on startup'),
+                          'session.config.b_check_for_updates')
 
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_language_changed,
