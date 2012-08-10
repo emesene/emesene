@@ -507,7 +507,10 @@ class Worker(e3.Worker):
         for recipient in recipients:
             group_keys = []
             for group in self.res_manager.groups:
-                group_keys.append(group.key())
+                if not webqqswig == None:
+                    group_keys.append(group)
+                else:
+                    group_keys.append(group.key())
             if str(recipient) in group_keys:
                 self.webqq_plugin.send_group_message( str(recipient), str(message.body))
             else:
