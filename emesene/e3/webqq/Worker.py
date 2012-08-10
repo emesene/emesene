@@ -238,11 +238,14 @@ class Worker(e3.Worker):
         body = data['content'][-1]
         display_name=send_uin
         
-        for group in self.res_manager.group_contacts.keys():
-          if self.res_manager.group_contacts[group].count(send_uin) == 1:
-              display_name = self.res_manager.group_contacts[group][send_uin].nick
-              break
-          
+        for group in self.res_manager.group_contacts:
+            group_key = group if not webqqswig == None else group.key()
+            try:
+                display_name = self.res_manager.group_contacts[group_key][send_uin].nick
+                break
+            except KeyError, e:
+                pass
+            
         account = group_code
         if account in self.conversations:
             cid = self.conversations[account]
