@@ -13,38 +13,32 @@ echo "Preparing to build emesene $version. Press enter to continue..."
 read
 
 #Remove old builds
-rm -rf /tmp/emesene
 rm -rf ../dist
 
-#Create /tmp/emesene dir
-#We have to work outside ../dist because patch will fail otherwise
-mkdir /tmp/emesene
+#Create temp dir
+mkdir ../dist
 
 #Build the app with Platypus
-/usr/local/bin/platypus -i 'emesene.icns' -a 'emesene' -V ''$version'' -o 'None' -p '/bin/sh' -u 'The emesene team and Josh Fradley' -I org.emesene.emesene -R 'emesene.sh' '/tmp/emesene/emesene.app'
+/usr/local/bin/platypus -i 'emesene.icns' -a 'emesene' -V ''$version'' -o 'None' -p '/bin/sh' -u 'The emesene team and Josh Fradley' -I org.emesene.emesene -R 'emesene.sh' '../dist/emesene.app'
 
 echo "Bundling GTK..."
-cp -r gtk /tmp/emesene/emesene.app/Contents/Resources/
+cp -r gtk ../dist/emesene.app/Contents/Resources/
 
 echo "Bundling emesene..."
-cp -r ../emesene /tmp/emesene/emesene.app/Contents/Resources/
+cp -r ../emesene ../dist/emesene.app/Contents/Resources/
 
-defaults write /tmp/emesene/emesene.app/Contents/Info LSMinimumSystemVersion -string "10.6"
-
-mkdir ../dist
+defaults write ../dist/emesene.app/Contents/Info LSMinimumSystemVersion -string "10.6"
 
 if [[ "$1" == *dorelease* ]]
 then
     #Last stable
     mkdir ../dist/emesene
-    mv /tmp/emesene/emesene.app ../dist/emesene
+    mv ../dist/emesene.app ../dist/emesene
     cp Uninstall.command ../dist/emesene
-    mkdir ../dist/emesene/.background
-    ln -s /Applications ../dist/emesene
-    cp emesenedmg.png ../dist/emesene/.background
     chmod +x ../dist/emesene/Uninstall.command
-else
-    mv /tmp/emesene/emesene.app ../dist
+    ln -s /Applications ../dist/emesene
+    mkdir ../dist/emesene/.background
+    cp emesenedmg.png ../dist/emesene/.background
 fi
 
 echo "Successfully built emesene $version".
