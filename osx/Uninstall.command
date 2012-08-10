@@ -1,11 +1,9 @@
 #!/bin/sh
 
-#emesene uninstaller rev 4
+#emesene uninstaller rev 5
 
-#Copyright 2012 Josh Fradley
+#Copyright Josh Fradley
 #I accept no responsiblity for any damage done to your system
-
-os=`sw_vers -productVersion`
 
 echo "Welcome to the emesene uninstaller"
 read -p "Press enter to continue..."
@@ -20,13 +18,13 @@ else
 fi
 
 #Kill emesene if it is running
-app="Python"
-isrunning=`ps -cx | grep "$app"`
+isrunning=`ps -cx | grep "emesene"`
 if [ -z "$isrunning" ]
 then
     continue
 else
-    killall -9 "$app"
+    killall emesene
+    killall python
 fi
 
 #emesene files
@@ -35,6 +33,8 @@ rm -rf "/Users/$USER/Library/Caches/org.emesene.emesene"
 rm -f "/Users/$USER/Library/Preferences/org.emesene.emesene.plist" 
 rm -f "/Users/$USER/Library/Application Support/Growl/Tickets/emesene.growlTicket" 
 
+#Remove OS X 10.7 specific files
+os=`sw_vers -productVersion`
 if [[ "$os" == *10.7* ]]
 then
     rm -rf "/Users/$USER/Library/Saved Application State/org.emesene.emesene.savedState" 
