@@ -23,7 +23,6 @@ import PyQt4.QtGui as QtGui
 
 import gui
 import extension
-import e3
 from e3 import status
 
 

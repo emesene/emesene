@@ -66,7 +66,9 @@ class ContactMenu(QtGui.QMenu):
 
         action_d['move_to'] = QtGui.QMenu(tr('Move to group'), self)
         action_d['copy_to'] = QtGui.QMenu(tr('Copy to group'), self)
+        action_d['copy_to'].setIcon(ICON('edit-copy'))
         action_d['remove_from'] = QtGui.QMenu(tr('Remove from group'), self)
+        action_d['remove_from'].setIcon(ICON('edit-delete'))
 
         action_d['view_info'] = QtGui.QAction(ICON('document-properties'),
             tr('View information'), self)
@@ -74,6 +76,7 @@ class ContactMenu(QtGui.QMenu):
             lambda *args: self._handler.on_view_information_selected())
 
         action_d['copy_info'] = QtGui.QMenu(tr('Copy contact information'), self)
+        action_d['copy_info'].setIcon(ICON('edit-copy'))
 
         action_d['nick_clipboard'] = QtGui.QAction(tr('Nickname'), self)
         action_d['copy_info'].addAction(action_d['nick_clipboard'])

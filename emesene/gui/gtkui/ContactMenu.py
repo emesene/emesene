@@ -18,7 +18,8 @@
 
 import e3
 import gtk
-
+import gui
+import utils
 from gui.base import Plus
 
 class ContactMenu(gtk.Menu):
@@ -103,18 +104,21 @@ class ContactMenu(gtk.Menu):
             gtk.ICON_SIZE_MENU))
         copy_menu = gtk.Menu()
         copy.set_submenu(copy_menu)
-        account_to_clipboard = gtk.MenuItem(_('Email address'))
+        account_to_clipboard = gtk.ImageMenuItem(_('Email address'))
+        account_to_clipboard.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.email))
 
         account_to_clipboard.connect('activate',
             lambda *args: self.on_copy_account_to_clipboard())
 
-        nick_to_clipboard = gtk.MenuItem(_('Nickname'))
+        nick_to_clipboard = gtk.ImageMenuItem(_('Nickname'))
+        nick_to_clipboard.set_image(utils.safe_gtk_image_load(gui.theme.image_theme.user))
 
         nick_to_clipboard.connect('activate',
             lambda *args: self.on_copy_nick_to_clipboard())
 
-        message_to_clipboard = gtk.MenuItem(_('Personal message'))
-
+        message_to_clipboard = gtk.ImageMenuItem(_('Personal message'))
+        message_to_clipboard.set_image(gtk.image_new_from_stock(gtk.STOCK_DIALOG_INFO,
+            gtk.ICON_SIZE_MENU))
         message_to_clipboard.connect('activate',
             lambda *args: self.on_copy_message_to_clipboard())
 

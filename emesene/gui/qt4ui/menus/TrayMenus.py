@@ -212,7 +212,7 @@ class ContactsMenu(QtGui.QMenu):
         """
         acc = self.item_to_contacts[menu_item].account
         cid = time.time()
-        self.main_window.content.on_new_conversation(cid, [acc], other_started=False)
+        self.main_window.content_main.on_new_conversation(cid, [acc], other_started=False)
         self.handler.session.new_conversation(acc, cid)
 
     def __get_contact_pixbuf_or_default(self, filename):
