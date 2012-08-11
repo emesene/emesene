@@ -136,7 +136,7 @@ def replace_shortcut_with_tag(string, short, tag):
         return token
     irreplaceable = []
     result = URL_REGEX.sub(extract, string)
-    #result = HTML_CODE_REGEX.sub(extract, result)
+    result = HTML_CODE_REGEX.sub(extract, result)
     escaped_result = IMAGE_TAG.sub(extract, result)
     if IMAGE_TAG.sub(extract, short) not in escaped_result:
         result = escaped_result
