@@ -119,7 +119,8 @@ class Worker(e3.Worker):
                             
                         elif item[0] == 517:
                             self._on_nick_update(item[1])
-                        
+                        elif item[0] == 518:
+                            self._on_shake_message(item[1])
                         else:
                             print 'Un implementation callback functions'
                             
@@ -228,7 +229,6 @@ class Worker(e3.Worker):
         self.session.conv_message(cid, account, msgobj)
 
         # log message
-        print 'log message'
         e3.Logger.log_message(self.session, None, msgobj, False)
 
     def _on_group_message(self, message):
@@ -258,7 +258,6 @@ class Worker(e3.Worker):
         type_ = e3.Message.TYPE_MESSAGE
         msgobj = e3.Message(type_, body, display_name)
         self.session.conv_message(cid, display_name, msgobj)
-        print 'log message'
         e3.Logger.log_message(self.session, None, msgobj, False)
             
     
@@ -336,7 +335,31 @@ class Worker(e3.Worker):
 
         self.session.picture_change_succeed(account, avatar_path)
         
-        pass
+
+    def _on_shake_message(self, value):
+
+        data = json.loads(value)
+        from_uin = data["from_uin"]
+        account = str(from_uin)
+        contact = self.session.contacts.contacts.get(account, None)
+        if contact == None:
+            return
+        
+        if account in self.conversations:
+            cid = self.conversations[account]
+        else:
+            cid = time.time()
+            self.conversations[account] = cid
+            self.rconversations[cid] = [account]
+            self.session.conv_first_action(cid, [account])
+
+        
+        msgobj = e3.Message(e3.Message.TYPE_MESSAGE,
+                            '%s requests your attention' % (contact.nick, ), account)
+        self.session.conv_message(cid, account, msgobj)
+        # log message
+        e3.Logger.log_message(self.session, None, msgobj, False)
+        
     def _on_contact_jabber_changed(self, session, stanza):
         pass
     # mailbox handlers
@@ -523,6 +546,12 @@ class Worker(e3.Worker):
 
     # p2p handlers
 
+    def send_buddy_nudge(self, cid):
+        recipients = self.rconversations.get(cid, ())
+        for recipient in recipients:
+            if not webqqboost == None or not webqqswig == None:
+                self.webqq_plugin.send_buddy_nudge(str(recipient))
+        
     def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
         '''handle Action.ACTION_P2P_INVITE,
          cid is the conversation id

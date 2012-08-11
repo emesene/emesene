@@ -1,5 +1,21 @@
 from Worker import Worker
 
+try:
+    import libwebqqpython as webqqswig
+except ImportError , exc:
+    webqqswig = None
+    print 'Errors occurred while importing webqq swig wrapper backend: %s' % str(exc)
+
+if webqqswig == None:
+    try:
+        import libwebqqboost as webqqboost
+    except ImportError, exc:
+        webqqboost = None
+        print 'Errors occurred while importing webqq boost wrapper backend: %s' % str(exc)
+        
+if webqqswig == None and webqqboost == None:
+    print 'Unable to import webqq wrapper'
+ 
 import e3
 
 import logging
@@ -70,8 +86,13 @@ class Session(e3.Session):
 
     def request_attention(self, cid):
         '''request the attention of the contact'''
-        account = self.account.account
-        message = e3.Message(e3.Message.TYPE_MESSAGE,
-            '%s requests your attention' % (account, ), account)
-        self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
+        if not webqqswig == None:
+            account = self.account.account
+            message = e3.Message(e3.Message.TYPE_MESSAGE,
+                                 '%s requests your attention' % (account, ), account)
+            self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
+        elif not webqqboost == None:
+            self.__worker.send_buddy_nudge(cid)
+        else:
+            pass
 
