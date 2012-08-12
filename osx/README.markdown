@@ -33,4 +33,3 @@ If you are planning to release emesene, run sh build_osx.sh dorelease, this will
 
 * DMG has to be built manually, just create a new disk image from the dist/emesene folder. The background image is in dist/emesene/.background
 * DMG volume icon has to be set manually
-* Occasionally script randomly creates a dist folder in ~/Library
