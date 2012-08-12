@@ -27,7 +27,7 @@ cp -r gtk ../dist/emesene.app/Contents/Resources/
 echo "Bundling emesene..."
 cp -r ../emesene ../dist/emesene.app/Contents/Resources/
 
-defaults write ../dist/emesene.app/Contents/Info LSMinimumSystemVersion -string "10.6"
+defaults write ${PWD}/../dist/emesene.app/Contents/Info LSMinimumSystemVersion -string "10.6"
 
 if [[ "$1" == *dorelease* ]]
 then
