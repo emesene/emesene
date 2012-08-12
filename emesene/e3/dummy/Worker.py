@@ -93,9 +93,9 @@ class Worker(e3.Worker):
                 e3.status.BUSY, '', False,
                 '\")&apos;(emo)(emo)(emo)&quot;\')')
         self._add_contact('fifteen@hotmail.com',
-                '1:)2;)3\')4\')5;)6:)7',
+                '1:)2;)3\')4(><)5;)6:)7',
                 e3.status.BUSY, '', False,
-                '1(emo)2(emo)3(emo)4(emo)5(emo)6(emo)7')
+                '1(emo)2(emo)3\')4(><)5(emo)6(emo)7')
         self._add_contact('sixteen@hotmail.com',
                 '[C=80][i][b][I][/b]Single i[/i][/c=30][b][/C]Single /C[/B]',
                 e3.status.OFFLINE, '', False,
