@@ -38,7 +38,7 @@ class Notification():
         Class Constructor
         """
         self.session = session
-        self.session.config.get_or_set('b_mute_notification', False)
+        self.session.config.get_or_set('b_mute_notifications', False)
         self.session.config.get_or_set('b_notify_endpoint_added', True)
         self.session.config.get_or_set('b_notify_endpoint_updated', False)
         self.session.config.get_or_set('b_notify_contact_online', True)
