@@ -549,7 +549,7 @@ class Worker(e3.Worker):
     def send_buddy_nudge(self, cid):
         recipients = self.rconversations.get(cid, ())
         for recipient in recipients:
-            if not webqqboost == None or not webqqswig == None:
+            if not webqqswig == None or not webqqboost == None:
                 self.webqq_plugin.send_buddy_nudge(str(recipient))
         
     def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
