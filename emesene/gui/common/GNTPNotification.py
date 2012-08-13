@@ -20,8 +20,9 @@ try:
     import gntp.notifier
 except ImportError:
     print "Sorry either Growl is not installed or GNTP Python bindings are missing..."
-    
+
 from gui.base import Plus
+import gui
 
 NAME = 'GNTPNotification'
 DESCRIPTION = 'Wrapper around GNTP for the notification system'
@@ -33,8 +34,8 @@ def GNTPNotification(title, text, picture_path=None, const=None,
                       callback=None, tooltip=None):
 
     title = Plus.msnplus_strip(title)
-    
-    appicon = open("themes/images/default/logo.png").read()
+
+    appicon = open(gui.theme.image_theme.logo).read()
     imagepath = picture_path.replace( "file:///", "/" )
     icon = open(imagepath).read()
 
