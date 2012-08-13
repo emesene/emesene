@@ -6,7 +6,7 @@
 version=`grep 'EMESENE_VERSION = ".*"' ../emesene/Info.py | cut -d '"' -f 2`
     
 echo "############################################################################"
-echo "### Welcome to the emesene builder. Version 3.2.0 Copyright Josh Fradley ###" 
+echo "### Welcome to the emesene builder. Version 3.3.0 Copyright Josh Fradley ###" 
 echo "############################################################################"
 
 echo "Preparing to build emesene $version. Press enter to continue..."
@@ -19,7 +19,8 @@ rm -rf ../dist
 mkdir ../dist
 
 #Build the app with Platypus
-/usr/local/bin/platypus -i 'emesene.icns' -a 'emesene' -V ''$version'' -o 'None' -p '/bin/sh' -u 'The emesene team and Josh Fradley' -I org.emesene.emesene -R 'emesene.sh' '../dist/emesene.app'
+echo "Building app..."
+/usr/local/bin/platypus -i 'emesene.icns' -a 'emesene' -V ''$version'' -o 'None' -p '/bin/sh' -u 'The emesene team and Josh Fradley' -I org.emesene.emesene -R 'emesene.sh' '../dist/emesene.app' > /dev/null 2>&1
 
 echo "Bundling GTK..."
 cp -r gtk ../dist/emesene.app/Contents/Resources/
