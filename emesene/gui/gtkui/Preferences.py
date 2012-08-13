@@ -884,7 +884,7 @@ class Notification(BaseTable):
 
         self.append_markup('<b>'+_('General:')+'</b>')
         self.append_check(_('Mute notifications'),
-            'session.config.b_mute_notifications')
+            'session.config.b_mute_notification')
         self.array.append(self.append_check(_('Only when available'),
             'session.config.b_notify_only_when_available'))
         self.append_markup('<b>'+_('Users events:')+'</b>')
