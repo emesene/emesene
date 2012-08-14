@@ -19,7 +19,7 @@
 
 from __future__ import division
 
-from gi.repository import Gtk, Gdk, GObject, GdkPixbuf
+from gi.repository import Gtk, GObject, GdkPixbuf
 from gi.repository import Pango
 
 from gui.base import Plus
@@ -29,6 +29,7 @@ from AvatarManager import AvatarManager
 
 import logging
 log = logging.getLogger('gtkui.Renderers')
+
 
 class CellRendererFunction(Gtk.CellRenderer):
     '''
@@ -76,7 +77,7 @@ inherited by extensions.
         width = self.calculate_lines_width()
         natural_width = width + self.xpad * 2
         #FIXME: fix min_width calculation
-        min_width = min (50, natural_width)
+        min_width = min(50, natural_width)
         return min_width, natural_width
 
     def do_get_preferred_height(self, wid):
@@ -242,6 +243,7 @@ inherited by extensions.
 
         return decorated_markup
 
+
 class CellRendererPlus(CellRendererFunction):
     '''Nick renderer that parse the MSN+ markup, showing colors, gradients and
     effects'''
@@ -255,6 +257,7 @@ class CellRendererPlus(CellRendererFunction):
         CellRendererFunction.__init__(self, True)
 
 extension.implements(CellRendererPlus, 'nick renderer')
+
 
 class CellRendererNoPlus(CellRendererFunction):
     '''Nick renderer that "strip" MSN+ markup, not showing any effect/color,
@@ -343,7 +346,7 @@ class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
             GObject.PARAM_READWRITE),
          }
 
-    def __init__(self, cell_dimension = 32, cell_radius = 0.11):
+    def __init__(self, cell_dimension=32, cell_radius=0.11):
         GObject.GObject.__init__(self)
         AvatarManager.__init__(self, cell_dimension, cell_radius)
 
@@ -388,26 +391,25 @@ class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
         return min_height, natural_height
 
     def func(self, model, path, iter, image_and_tree):
-      image, tree = image_and_tree
-      if model.get_value(iter, 0) == image:
-         self.redraw = 1
-         cell_area = tree.get_cell_area(path, tree.get_column(1))
-         tree.queue_draw_area(cell_area.x, cell_area.y, cell_area.width,
-            cell_area.height)
+        image, tree = image_and_tree
+        if model.get_value(iter, 0) == image:
+            self.redraw = 1
+            cell_area = tree.get_cell_area(path, tree.get_column(1))
+            tree.queue_draw_area(cell_area.x, cell_area.y, cell_area.width,
+                cell_area.height)
 
-#FIXME: get_iter didn't function
-#    def animation_timeout(self, tree, image):
-#       if image.get_storage_type() == Gtk.ImageType.ANIMATION:
-#          self.redraw = 0
-#          image.get_data('iter').advance()
-#          model = tree.get_model()
-#          model.foreach(self.func, (image, tree))
+    def animation_timeout(self, tree, image):
+        if image.get_storage_type() == Gtk.ImageType.ANIMATION:
+            self.redraw = 0
+            image.get_data('iter').advance(None)
+            model = tree.get_model()
+            model.foreach(self.func, (image, tree))
 
-#          if self.redraw:
-#             GObject.timeout_add(image.get_data('iter').get_delay_time(),
-#                self.animation_timeout, tree, image)
-#          else:
-#             image.set_data('iter', None)
+            if self.redraw:
+                GObject.timeout_add(image.get_data('iter').get_delay_time(),
+                    self.animation_timeout, tree, image)
+            else:
+                image.set_data('iter', None)
 
     def do_render(self, ctx, widget, bg_area, cell_area, flags):
         """Prepare rendering setting for avatar"""
@@ -424,20 +426,22 @@ class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
         dim = self._dimension
 
         if self._image.get_storage_type() == Gtk.ImageType.ANIMATION:
-#FIXME: this is broken on gtk3, use static pixbuf for now
-#           if not self._image.get_data('iter'):
-#                animation = self._image.get_animation()
-#                self._image.set_data('iter', animation.get_iter())
-#                GObject.timeout_add(self._image.get_data('iter').get_delay_time(),
-#                   self.animation_timeout, widget, self._image)
+            #this is broken on some version of gtk3, use static pixbuf for those cases
+            try:
+                if not self._image.get_data('iter'):
+                    animation = self._image.get_animation()
+                    self._image.set_data('iter', animation.get_iter(None))
+                    GObject.timeout_add(self._image.get_data('iter').get_delay_time(),
+                       self.animation_timeout, widget, self._image)
 
-#            avatar = self._image.get_data('iter').get_pixbuf()
-            avatar = self._image.get_pixbuf()
+                avatar = self._image.get_data('iter').get_pixbuf()
+            except TypeError:
+                avatar = self._image.get_pixbuf()
 
         elif self._image.get_storage_type() == Gtk.ImageType.PIXBUF:
             avatar = self._image.get_pixbuf()
         else:
-           return
+            return
 
         if self._gray and self._offline and avatar != None:
             alpha = 1
@@ -445,7 +449,7 @@ class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
             source.set_pixbuf(avatar)
             context = widget.get_style_context()
             context.set_state(Gtk.StateFlags.INSENSITIVE)
-            avatar = Gtk.render_icon_pixbuf (context, source, -1)
+            avatar = Gtk.render_icon_pixbuf(context, source, -1)
 
         if avatar:
             x_coord = (width - dim) / 2
