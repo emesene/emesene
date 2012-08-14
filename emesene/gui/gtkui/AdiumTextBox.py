@@ -193,6 +193,10 @@ class OutputText(gui.base.OutputText, gtk.ScrolledWindow):
     def _search_request_cb(self, view, link):
         self.emit("search_request", link)
 
+    def search_text(self, text, prev=False):
+        ''' initiate a text search '''
+        self.view.search_text(text, False, not prev, True)
+
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
         '''clear the content'''

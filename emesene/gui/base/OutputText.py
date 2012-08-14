@@ -42,6 +42,10 @@ class OutputText(object):
             self.pending = []
             self.locked = 0
 
+    def search_text(text, prev=False):
+        ''' initiate a text search '''
+        raise NotImplementedError
+
     def clear(self, source="", target="", target_display="",
             source_img="", target_img=""):
         '''clear the content'''
@@ -68,8 +72,9 @@ class OutputText(object):
 
     def add_message(self, msg, scroll):
         '''add the message to the output'''
-        raise NotImplementedError("Method not implemented")
+        raise NotImplementedError
 
     def update_p2p(self, account, _type, *what):
         ''' new p2p data has been received (custom emoticons) '''
-        raise NotImplementedError("Method not implemented")
+        raise NotImplementedError
+

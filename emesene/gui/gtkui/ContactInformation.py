@@ -256,8 +256,8 @@ class ChatWidget(gtk.VBox):
         '''constructor'''
         gtk.VBox.__init__(self)
         self.set_border_width(2)
-        all = gtk.HBox()
-        all.set_border_width(2)
+        h_all = gtk.HBox()
+        h_all.set_border_width(2)
         self.conv_status = ConversationStatus.ConversationStatus(session.config)
 
         self.search_mode = False
@@ -325,17 +325,28 @@ class ChatWidget(gtk.VBox):
 
         searchbox.pack_start(gtk.Label(_('Max lines:')))
         searchbox.pack_start(self.max_lines)
-        searchbox.pack_end(self.search_entry, False)
-        searchbox.pack_end(search_label, False)
+        searchbox.pack_start(self.search_entry, False)
+        searchbox.pack_start(search_label, False)
+
+        #if OutputText is webkit
+        prev_button = gtk.Button(_("Previous"))
+        next_button = gtk.Button(_("Next"))
+        prev_button.connect("clicked",
+                            lambda x: self.text.search_text(self.search_entry.get_text(), True))
+        next_button.connect("clicked",
+                            lambda x: self.text.search_text(self.search_entry.get_text()))
+
+        searchbox.pack_start(prev_button, False)
+        searchbox.pack_start(next_button, False)
 
         chat_box.pack_start(self.nicebar, False)
-        chat_box.pack_start(searchbox, False)
         chat_box.pack_start(self.text, True, True)
 
-        all.pack_start(self.calendars, False)
-        all.pack_start(chat_box, True, True)
+        h_all.pack_start(self.calendars, False)
+        h_all.pack_start(chat_box, True, True)
 
-        self.pack_start(all, True, True)
+        self.pack_start(searchbox, True, True)
+        self.pack_start(h_all, True, True)
         self.pack_start(buttons, False)
         self.refresh_history()
 
