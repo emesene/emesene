@@ -280,6 +280,7 @@ class ChatWidget(gtk.VBox):
         OutputText = extension.get_default('conversation output')
         self.text = OutputText(session.config, None)
         self.text.connect("search_request", self._search_request_cb)
+        self.text.connect("key-press-event", self._on_text_key_press)
 
         buttons = gtk.HButtonBox()
         buttons.set_border_width(2)
@@ -344,6 +345,11 @@ class ChatWidget(gtk.VBox):
         '''
         if event.keyval == gtk.keysyms.Return:
             self._search_history(entry.get_text())
+
+    def _on_text_key_press(self, entry, event):
+        '''focuses search when key is pressed
+        '''
+        self.search_entry.emit('key-press-event', event)
 
     def _search_history(self, keywords):
         '''search history for certain keywords
