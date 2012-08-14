@@ -38,15 +38,6 @@ class Notification():
         Class Constructor
         """
         self.session = session
-        self.session.config.get_or_set('b_mute_notification', False)
-        self.session.config.get_or_set('b_notify_endpoint_added', True)
-        self.session.config.get_or_set('b_notify_endpoint_updated', False)
-        self.session.config.get_or_set('b_notify_contact_online', True)
-        self.session.config.get_or_set('b_notify_contact_offline', True)
-        self.session.config.get_or_set('b_notify_receive_message', True)
-        self.session.config.get_or_set('b_notify_typing', False)
-        self.session.config.get_or_set('b_notify_when_focussed', False)
-        self.session.config.get_or_set('b_notify_only_when_available', True)
 
         self.notifier = extension.get_default('notificationGUI')
         self.picture_factory = extension.get_default('notificationImage')

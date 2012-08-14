@@ -594,6 +594,7 @@ class Controller(object):
         # set default values if not already set
         self.session.config.get_or_set('b_conv_minimized', True)
         self.session.config.get_or_set('b_conv_maximized', False)
+
         self.session.config.get_or_set('b_mute_sounds', False)
         self.session.config.get_or_set('b_play_send', False)
         self.session.config.get_or_set('b_play_nudge', True)
@@ -602,10 +603,17 @@ class Controller(object):
         self.session.config.get_or_set('b_mute_sounds_when_focussed', True)
         self.session.config.get_or_set('b_play_contact_online', True)
         self.session.config.get_or_set('b_play_contact_offline', True)
+
+        self.session.config.get_or_set('b_mute_notification', False)
+        self.session.config.get_or_set('b_notify_endpoint_added', True)
+        self.session.config.get_or_set('b_notify_endpoint_updated', False)
         self.session.config.get_or_set('b_notify_contact_online', True)
         self.session.config.get_or_set('b_notify_contact_offline', True)
         self.session.config.get_or_set('b_notify_receive_message', True)
+        self.session.config.get_or_set('b_notify_typing', False)
+        self.session.config.get_or_set('b_notify_when_focussed', False)
         self.session.config.get_or_set('b_notify_only_when_available', True)
+
         self.session.config.get_or_set('b_show_userpanel', True)
         self.session.config.get_or_set('b_show_mail_inbox', True)
         self.session.config.get_or_set('b_show_emoticons', True)
@@ -621,7 +629,6 @@ class Controller(object):
         self.session.config.get_or_set('b_conversation_tabs', True)
         self.session.config.get_or_set('b_single_window', True)
         self.session.config.get_or_set('b_open_mail_in_desktop', False)
-        self.session.config.get_or_set('b_mute_notification', False)
 
         # set account uuid for session
         self.session.account_uuid = account.uuid
