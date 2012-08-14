@@ -16,13 +16,10 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-try:
-    import gntp.notifier
-except ImportError:
-    print "Sorry either Growl is not installed or GNTP Python bindings are missing..."
+import gntp.notifier
 
-from gui.base import Plus
 import gui
+from gui.base import Plus
 
 NAME = 'GNTPNotification'
 DESCRIPTION = 'Wrapper around GNTP for the notification system'
