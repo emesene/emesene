@@ -311,6 +311,9 @@ class SmileyLabel(Gtk.CellView):
     def get_markup(self):
         return self._text
 
+    def set_alignment(self, x, y):
+        pass
+
     def set_ellipsize(self, mode=Pango.ELLIPSIZE_END):
         self.crt.set_property('ellipsize', mode)
 

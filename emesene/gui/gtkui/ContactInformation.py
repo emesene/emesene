@@ -111,7 +111,6 @@ class InformationWidget(gtk.VBox):
 
         SmileyLabel = extension.get_default('smiley label')
         self.nick = SmileyLabel()
-        self.nick.set_alignment(0.0, 0.5)
         self.nick.set_ellipsize(pango.ELLIPSIZE_END)
         self.mail = gtk.Label()
         self.mail.set_alignment(0.0, 0.5)
@@ -320,8 +319,10 @@ class ChatWidget(gtk.VBox):
         self.search_entry.connect('icon-press', self._on_search_button_press)
         self.search_entry.connect('key-press-event', self._on_search_key_press)
 
-        self.max_lines = gtk.SpinButton(gtk.Adjustment(value=1000, lower=100, 
-                            upper=10000, step_incr=10))
+        adjustment = gtk.Adjustment(value=1000, lower=100,
+                            upper=10000, step_incr=10)
+        self.max_lines = gtk.SpinButton()
+        self.max_lines.set_adjustment(adjustment)
 
         searchbox.pack_start(gtk.Label(_('Max lines:')), False)
         searchbox.pack_start(self.max_lines, False)
