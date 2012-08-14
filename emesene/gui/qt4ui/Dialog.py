@@ -857,6 +857,7 @@ class InviteWindow(OkCancelDialog):
         self.contact_list.order_by_group = False
         self.contact_list.show_blocked = False
         self.contact_list.show_offline = False
+        self.contact_list.hide_on_filtering = True
 
         self.search_entry = widgets.SearchEntry()
         self.search_entry.textChanged.connect(

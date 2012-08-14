@@ -1584,6 +1584,7 @@ class InviteWindow(gtk.Window):
         self.contact_list.order_by_group = False
         self.contact_list.show_blocked = False
         self.contact_list.show_offline = False
+        self.contact_list.hide_on_filtering = True
         self.contact_list.session.config.b_order_by_group = order_by_group
         self.contact_list.session.config.b_show_blocked = show_blocked
         self.contact_list.session.config.b_show_offline = show_offline
