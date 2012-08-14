@@ -320,7 +320,11 @@ class ChatWidget(gtk.VBox):
         self.search_entry.connect('icon-press', self._on_search_button_press)
         self.search_entry.connect('key-press-event', self._on_search_key_press)
 
+        self.max_lines = gtk.SpinButton(gtk.Adjustment(value=1000, lower=100, 
+                            upper=10000, step_incr=10))
 
+        searchbox.pack_start(gtk.Label(_('Max lines:')))
+        searchbox.pack_start(self.max_lines)
         searchbox.pack_end(self.search_entry, False)
         searchbox.pack_end(search_label, False)
 
@@ -360,7 +364,7 @@ class ChatWidget(gtk.VBox):
         self._prepare_history()
         self.search_mode = True
         self.session.logger.get_chats_by_keyword(self.account,
-            self.session.account.account, from_t, to_t, keywords, 1000,
+            self.session.account.account, from_t, to_t, keywords, self.max_lines.get_value(),
             self._on_chats_ready)
 
     def _search_request_cb(self, view, link):
@@ -424,7 +428,7 @@ class ChatWidget(gtk.VBox):
         '''
         self._prepare_history()
         self.request_information(_('Loading chat history. Hang tight for a moment...'))
-        self.request_chats_between(1000, self._on_chats_ready)
+        self.request_chats_between(self.max_lines.get_value(), self._on_chats_ready)
 
     def _get_from_timestamp(self):
         '''read from_calendar widget and return a timestamp
@@ -446,7 +450,7 @@ class ChatWidget(gtk.VBox):
         self.session.logger.get_chats_between(self.account,
             self.session.account.account, from_t, to_t, limit, callback)
 
-    def save_chats(self, path, limit=1000):
+    def save_chats(self, path):
         '''request amount of messages between our account and the current
         account, save it to path'''
         def _on_save_chats_ready(results):
@@ -459,7 +463,7 @@ class ChatWidget(gtk.VBox):
 
             exporter(results, open(path, "w"))
 
-        self.request_chats_between(limit, _on_save_chats_ready)
+        self.request_chats_between(self.max_lines.get_value(), _on_save_chats_ready)
 
     def _on_chats_ready(self, results):
         '''called when the chat history is ready'''
@@ -516,7 +520,7 @@ class ChatWidget(gtk.VBox):
             self.conv_status.post_process_message(msg)
             self.conv_status.update_status()
 
-        if len(results) >= 1000:
+        if len(results) >= self.max_lines.get_value():
             self.nicebar.new_message(_('Too many messages to display'),
                 gtk.STOCK_DIALOG_WARNING)
 
