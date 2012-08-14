@@ -323,12 +323,9 @@ class ChatWidget(gtk.VBox):
         self.max_lines = gtk.SpinButton(gtk.Adjustment(value=1000, lower=100, 
                             upper=10000, step_incr=10))
 
-        searchbox.pack_start(gtk.Label(_('Max lines:')))
-        searchbox.pack_start(self.max_lines)
-        searchbox.pack_start(self.search_entry, False)
-        searchbox.pack_start(search_label, False)
+        searchbox.pack_start(gtk.Label(_('Max lines:')), False)
+        searchbox.pack_start(self.max_lines, False)
 
-        #if OutputText is webkit
         prev_button = gtk.Button(_("Previous"))
         next_button = gtk.Button(_("Next"))
         prev_button.connect("clicked",
@@ -336,8 +333,11 @@ class ChatWidget(gtk.VBox):
         next_button.connect("clicked",
                             lambda x: self.text.search_text(self.search_entry.get_text()))
 
-        searchbox.pack_start(prev_button, False)
-        searchbox.pack_start(next_button, False)
+        searchbox.pack_end(next_button, False)
+        searchbox.pack_end(prev_button, False)
+
+        searchbox.pack_end(self.search_entry, False)
+        searchbox.pack_end(search_label, False)
 
         chat_box.pack_start(self.nicebar, False)
         chat_box.pack_start(self.text, True, True)
