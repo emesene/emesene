@@ -581,7 +581,7 @@ class Dialog(object):
             gui.base.Desktop.open(web)
 
         def on_email_hook(dialog, mail):
-            gui.base.Desktop.open("mailto://"+mail)
+            gui.base.Desktop.open("mailto:"+mail)
 
         about = gtk.AboutDialog()
         gtk.about_dialog_set_url_hook(on_website_hook)
