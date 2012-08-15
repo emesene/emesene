@@ -581,7 +581,7 @@ class Dialog(object):
             gui.base.Desktop.open(web)
 
         def on_email_hook(dialog, mail):
-            gui.base.Desktop.open("mailto://"+mail)
+            gui.base.Desktop.open("mailto:"+mail)
 
         about = gtk.AboutDialog()
         gtk.about_dialog_set_url_hook(on_website_hook)
@@ -1345,7 +1345,7 @@ class EmotesWindow(gtk.Window):
 
         #XXX: Don't set undecorated on macos lion, it crash see #1065
         import platform, sys
-        if not (sys.platform == 'darwin' and platform.release().startswith('11.3')):
+        if not (sys.platform == 'darwin' and platform.mac_ver()[0].startswith('10.7')):
             self.set_decorated(False)
         self.set_role("emotes")
         self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
