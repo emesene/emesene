@@ -95,7 +95,7 @@ class Worker(e3.Worker):
                         try:
                             call_back_dict[item[0]](item[1])
                         except KeyError , e:
-                            print 'Un implemented callback function'
+                            log.error('Un implemented callback function')
                             
                     self.res_manager.ulock()
                     
@@ -360,11 +360,7 @@ class Worker(e3.Worker):
     def _handle_action_quit(self):
         '''handle Action.ACTION_QUIT
         '''
-        log.debug('closing thread')
-        self.session.events.queue.clear()
-        self.session.logger.quit()
-        self.session.signals.quit()
-        self._continue = False
+        e3.base.Worker._handle_action_quit(self)
         self.session.disconnected(None, False)
 
     def _handle_action_add_contact(self, account):
@@ -404,14 +400,9 @@ class Worker(e3.Worker):
         self.my_avatars = self.caches.get_avatar_cache(
                 self.session.account.account)
 
-        if self.webqq_plugin.webqq_login(account, password,"online") is True:
-            print "Login Success"
-        else:
-            print "Login Fail"
-        ### Fix this if login fail
-        
-        self._session_started()
-        self.session.login_started()
+        if self.webqq_plugin.webqq_login(account, password,"online") :
+            self._session_started()
+            self.session.login_started()
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT
@@ -476,7 +467,6 @@ class Worker(e3.Worker):
     def _handle_action_new_conversation(self, account, cid):
         '''handle Action.ACTION_NEW_CONVERSATION
         '''
-	print "New conversation account : %s, cid : %s" %(account, cid)
         self.conversations[account] = cid
         self.rconversations[cid] = [account]
 
@@ -497,7 +487,6 @@ class Worker(e3.Worker):
         '''
 
         recipients = self.rconversations.get(cid, ())
-        print "Message : " +message.body
         
         for recipient in recipients:
             group_keys = []
