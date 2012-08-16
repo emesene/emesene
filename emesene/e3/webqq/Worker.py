@@ -85,7 +85,7 @@ class Worker(e3.Worker):
                            515 : self._on_photo_update , 516 : self._on_status_change,
                            517 : self._on_nick_update , 518 : self._on_shake_message}
         
-        while self._continue == True:
+        while self._continue :
             try:
                 event_queue = self.res_manager.event_queue
                 if not event_queue.empty() :

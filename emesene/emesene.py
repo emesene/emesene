@@ -103,7 +103,6 @@ try:
 except ImportError, exc:
     xmpp = None
     print 'Errors occurred while importing xmpp backend: %s' % str(exc)
-    
 try:
     from gui import qt4ui
 except ImportError, exc:
