@@ -11,7 +11,7 @@ import logging
 
 
 import libwebqqboost as webqqboost
-        
+
 import simplejson as json
 
 log = logging.getLogger('WebQQ.Worker')
@@ -49,7 +49,7 @@ class Worker(e3.Worker):
 
     webqq_plugin = None
     res_manager = None
-     
+
     def __init__(self, app_name, session, proxy, use_http=False, use_ipv6=False):
         '''class constructor'''
         e3.Worker.__init__(self, session)
@@ -71,12 +71,11 @@ class Worker(e3.Worker):
         self.conversations = {}
         self.rconversations = {}
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
-        
-        
+
         singleton = webqqboost.SingletonInstance()
         self.webqq_plugin = singleton.getQQPluginSingletonInstance()
         self.res_manager = singleton.getResManagerSingletonInstance()
-        
+
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
@@ -84,7 +83,7 @@ class Worker(e3.Worker):
         call_back_dict = { 512 : self._on_message, 513 : self._on_group_message,
                            515 : self._on_photo_update , 516 : self._on_status_change,
                            517 : self._on_nick_update , 518 : self._on_shake_message}
-        
+
         while self._continue :
             try:
                 event_queue = self.res_manager.event_queue
@@ -96,9 +95,9 @@ class Worker(e3.Worker):
                             call_back_dict[item[0]](item[1])
                         except KeyError , e:
                             log.error('Un implemented callback function')
-                            
+
                     self.res_manager.ulock()
-                    
+
                 action = self.session.actions.get(True, 0.1)
                 self._process_action(action)
 
@@ -106,18 +105,18 @@ class Worker(e3.Worker):
                 pass
 
     def _session_started(self):
-      
+
         categories_dict = {}
         default_group = e3.Group('Friends','Friends')
         group_group = e3.Group('Groups', 'Groups')
         categories_dict[0] = default_group
         categories_dict[-1] = group_group
-        
+
         for index in self.res_manager.categories:
             key = index.key()
-            group = e3.Group( self.res_manager.categories[key].name, key) 
+            group = e3.Group( self.res_manager.categories[key].name, key)
             categories_dict[key] = group
-            
+
         for uin in self.res_manager.contacts:
             key =  uin.key()
             #nick = self.res_manager.contacts[uin].nick
@@ -127,21 +126,21 @@ class Worker(e3.Worker):
                     _status = STATUS_MAP_REVERSE[self.res_manager.contacts[key].status]
             except KeyError , e:
                 _stauts = e3.status.ONLINE
-                
+
             contact = e3.Contact(account = key, identifier = int(key),  message = self.res_manager.contacts[key].lnick, _status = _status, blocked = False, cid = key)
-           
+
             index = self.res_manager.contacts[key].cate_index
             group = categories_dict[index]
             self._add_contact_to_group( contact, group.name )
             self.session.contacts.contacts[key] = contact
-        
+
         for group_id in self.res_manager.groups:
             group_id_key = group_id.key()
             _status = e3.status.ONLINE
             contact = e3.Contact(account = group_id_key, identifier = int(group_id_key), nick =  self.res_manager.groups[group_id_key].name ,
                                  message = self.res_manager.groups[group_id_key].memo,  _status = _status, blocked = False, cid = group_id_key)
             self._add_contact_to_group(contact, group_group.name)
-            
+
             self.session.contacts.contacts[group_id_key] = contact
 
             for uins in self.res_manager.group_contacts[group_id_key]:
@@ -151,7 +150,7 @@ class Worker(e3.Worker):
                 _status = e3.status.ONLINE
                 contact = e3.Contact(account = uin, identifier = int(uin),  nick = buddy.nick, message = buddy.lnick  , _status = _status, blocked = False, cid = uin)
                 #self.session.contacts.contacts[uin] = contact
-                
+
         self.session.login_succeed()
         self.session.contact_list_ready()
 
@@ -166,9 +165,9 @@ class Worker(e3.Worker):
     def _on_message(self, message):
         '''handle the reception of a message'''
         data = json.loads(message)
-                            
+
         from_uin = str(data['from_uin'])
-        
+
         account = from_uin
         body = data['content'][-1]
         type_ = e3.Message.TYPE_MESSAGE
@@ -193,7 +192,7 @@ class Worker(e3.Worker):
         send_uin = str(data["send_uin"])
         body = data['content'][-1]
         display_name=send_uin
-        
+
         for group in self.res_manager.group_contacts:
             group_key = group.key()
             try:
@@ -201,7 +200,7 @@ class Worker(e3.Worker):
                 break
             except KeyError, e:
                 pass
-            
+
         account = group_code
         if account in self.conversations:
             cid = self.conversations[account]
@@ -215,8 +214,8 @@ class Worker(e3.Worker):
         msgobj = e3.Message(type_, body, display_name)
         self.session.conv_message(cid, display_name, msgobj)
         e3.Logger.log_message(self.session, None, msgobj, False)
-            
-    
+
+
     def _on_nick_update(self, value):
         data = json.loads(value)
         uin = str(data["uin"])
@@ -270,7 +269,7 @@ class Worker(e3.Worker):
     def _on_photo_update(self, uin):
         account = uin
         photo_bin = self.res_manager.contacts[account].face
-        
+
         contact = self.session.contacts.contacts.get(account, None)
         if contact is None:
             return
@@ -291,7 +290,7 @@ class Worker(e3.Worker):
                 qqnumber = self.res_manager.groups[account].gnumber
             except KeyError, e:
                 qqnumber = None
-            
+
         if qqnumber is None:
             avatars = self.caches.get_avatar_cache(account)
         else:
@@ -303,7 +302,7 @@ class Worker(e3.Worker):
             avatars.insert_raw(StringIO.StringIO(photo_bin))
 
         self.session.picture_change_succeed(account, avatar_path)
-        
+
 
     def _on_shake_message(self, value):
 
@@ -313,7 +312,7 @@ class Worker(e3.Worker):
         contact = self.session.contacts.contacts.get(account, None)
         if contact is None:
             return
-        
+
         if account in self.conversations:
             cid = self.conversations[account]
         else:
@@ -322,13 +321,13 @@ class Worker(e3.Worker):
             self.rconversations[cid] = [account]
             self.session.conv_first_action(cid, [account])
 
-        
+
         msgobj = e3.Message(e3.Message.TYPE_MESSAGE,
                             '%s requests your attention' % (contact.nick, ), account)
         self.session.conv_message(cid, account, msgobj)
         # log message
         e3.Logger.log_message(self.session, None, msgobj, False)
-        
+
     def _on_contact_jabber_changed(self, session, stanza):
         pass
     # mailbox handlers
@@ -355,7 +354,7 @@ class Worker(e3.Worker):
             self._add_group(group)
         self.session.groups[group].contacts.append(contact.account)
         contact.groups.append(group)
-        
+
     # action handlers
     def _handle_action_quit(self):
         '''handle Action.ACTION_QUIT
@@ -371,7 +370,7 @@ class Worker(e3.Worker):
     def _handle_action_add_group(self, name):
         '''handle Action.ACTION_ADD_GROUP
         '''
-        
+
         pass
 
     def _handle_action_add_to_group(self, account, gid):
@@ -408,7 +407,7 @@ class Worker(e3.Worker):
         '''handle Action.ACTION_LOGOUT
         '''
         pass
-    
+
     def _handle_action_move_to_group(self, account, src_gid, dest_gid):
         '''handle Action.ACTION_MOVE_TO_GROUP
         '''
@@ -481,13 +480,13 @@ class Worker(e3.Worker):
             log.warning('conversation %s not found' % cid)
 
     def _handle_action_send_message(self, cid, message):
-        
+
         '''handle Action.ACTION_SEND_MESSAGE
         cid is the conversation id, message is a Message object
         '''
 
         recipients = self.rconversations.get(cid, ())
-        
+
         for recipient in recipients:
             group_keys = []
             for group in self.res_manager.groups:
@@ -505,7 +504,7 @@ class Worker(e3.Worker):
         recipients = self.rconversations.get(cid, ())
         for recipient in recipients:
             self.webqq_plugin.send_buddy_nudge(str(recipient))
-        
+
     def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
         '''handle Action.ACTION_P2P_INVITE,
          cid is the conversation id

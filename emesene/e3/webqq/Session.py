@@ -1,5 +1,5 @@
 from Worker import Worker
- 
+
 import e3
 
 import logging
@@ -12,21 +12,21 @@ class Session(e3.Session):
     DESCRIPTION = 'Session to connect to the WebQQ network'
     AUTHOR = 'Xiang Wang (Devil Wang)'
     WEBSITE = 'www.emesene.org'
-   
+
     SERVICES = {
         "webqq": {
             "host": "web.qq.com",
             "port": "80"
         },
     }
- 
+
     def __init__(self, id_=None, account=None):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
 
     def login(self, account, password, status, proxy, host, port , use_http=False, use_ipv6=None):
         '''start the login process'''
-        
+
         self.account = e3.Account(account, password, status, host)
 
         self.__worker = Worker('emesene2', self, proxy, use_http)
@@ -34,7 +34,6 @@ class Session(e3.Session):
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
             host, port))
-
 
     def send_message(self, cid, text, style=None, cedict=None, celist=None):
         '''send a common message'''
@@ -71,4 +70,3 @@ class Session(e3.Session):
     def request_attention(self, cid):
         '''request the attention of the contact'''
         self.__worker.send_buddy_nudge(cid)
-
