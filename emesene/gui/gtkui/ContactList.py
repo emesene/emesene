@@ -59,7 +59,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
         self.enable_model_drag_source(gtk.gdk.BUTTON1_MASK, [
                                       ('emesene-contact', 0, 0),
                                       ('text/html', 0, 1),
-                                      ('text/plain', 0, 2)],
+                                      ('text/plain', 0, 2),
+                                      ('emesene-invite', 0, 3)],
                                       gtk.gdk.ACTION_COPY)
 
         self.enable_model_drag_dest([('emesene-contact', 0, 0)],
@@ -901,6 +902,8 @@ class ContactList(gui.ContactList, gtk.TreeView):
                     8, u'{0} &lt;<a href="mailto:{1}">{1}</a>&gt;'.format(''.join(display_name), account))
             elif selection.target == 'text/plain':
                 selection.set(selection.target, 8, u'%s <%s>' % (Plus.msnplus_strip(display_name), account))
+            elif selection.target == 'emesene-invite':
+                selection.set(selection.target, 8, u'%s' % (account))
 
     def _on_drag_drop(self, widget, drag_context, x, y, time):
         drag_context.finish(True, False, time)
