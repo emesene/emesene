@@ -256,9 +256,8 @@ class Worker(e3.Worker):
         nick = data["nick"]
         contact = self.session.contacts.contacts.get(uin, None)
 
-        if contact == None:
+        if contact is None:
             return
-        
         account = uin
         old_nick = contact.nick
         status_ = contact.status
@@ -285,7 +284,7 @@ class Worker(e3.Worker):
         uin = str(data["uin"])
         status_ = data["status"]
         contact = self.session.contacts.contacts.get(uin, None)
-        if contact == None:
+        if contact is None:
             return
         account = uin
         old_status = contact.status
@@ -306,7 +305,7 @@ class Worker(e3.Worker):
         photo_bin = self.res_manager.contacts[account].face
         
         contact = self.session.contacts.contacts.get(account, None)
-        if contact == None:
+        if contact is None:
             return
         if not photo_bin:
             return
@@ -326,8 +325,7 @@ class Worker(e3.Worker):
             except KeyError, e:
                 qqnumber = None
             
-        print 'qqnumber' + qqnumber
-        if qqnumber == None:
+        if qqnumber is None:
             avatars = self.caches.get_avatar_cache(account)
         else:
             avatars = self.caches.get_avatar_cache(qqnumber)
@@ -346,7 +344,7 @@ class Worker(e3.Worker):
         from_uin = data["from_uin"]
         account = str(from_uin)
         contact = self.session.contacts.contacts.get(account, None)
-        if contact == None:
+        if contact is None:
             return
         
         if account in self.conversations:
