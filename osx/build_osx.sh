@@ -20,7 +20,12 @@ mkdir ../dist
 
 #Build the app with Platypus
 echo "Building app..."
-/usr/local/bin/platypus -i 'emesene.icns' -a 'emesene' -V ''$version'' -o 'None' -p '/bin/sh' -u 'The emesene team and Josh Fradley' -I org.emesene.emesene -R 'emesene.sh' '../dist/emesene.app' > /dev/null 2>&1
+/usr/local/bin/platypus -i 'emesene.icns' -a 'emesene' -o 'None' -p '/bin/sh' -u 'The emesene team and Josh Fradley' -I org.emesene.emesene -R 'emesene.sh' '../dist/emesene.app' > /dev/null 2>&1
+
+echo "Setting version..."
+#There is a bug in Platypus which sets CFBundle rather than CFBundleShortVersionString
+defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleVersion -string "330"
+defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleShortVersionString -string "$version"
 
 echo "Bundling GTK..."
 cp -r gtk ../dist/emesene.app/Contents/Resources/
