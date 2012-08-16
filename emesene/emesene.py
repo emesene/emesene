@@ -103,6 +103,7 @@ try:
 except ImportError, exc:
     xmpp = None
     print 'Errors occurred while importing xmpp backend: %s' % str(exc)
+
 try:
     from gui import qt4ui
 except ImportError, exc:
@@ -118,8 +119,7 @@ try:
     from e3 import webqq
 except ImportError , exc:
     webqq = None
-    print 'Errors occurred while importing webqq backend: %s' % str(exc)
-    
+
 from e3.common.pluginmanager import get_pluginmanager
 import interfaces
 import gui
