@@ -10,12 +10,7 @@ import StringIO
 import logging
 
 
-try:
-    import libwebqqboost as webqqboost
-except ImportError, exc:
-    webqqboost = None
-    print 'Errors occurred while importing webqq boost wrapper backend: %s' % str(exc)
-        
+import libwebqqboost as webqqboost
         
 import simplejson as json
 
