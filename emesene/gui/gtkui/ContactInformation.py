@@ -479,6 +479,7 @@ class ChatWidget(gtk.VBox):
 
     def _on_chats_ready(self, results):
         '''called when the chat history is ready'''
+        self._prepare_history()
 
         account_colors = {}
         style = e3.Style()
