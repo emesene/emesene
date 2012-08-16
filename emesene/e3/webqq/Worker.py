@@ -16,10 +16,6 @@ import simplejson as json
 
 log = logging.getLogger('WebQQ.Worker')
 
-# Python versions before 3.0 do not use UTF-8 encoding
-# by default. To ensure that Unicode is handled properly
-# throughout SleekXMPP, we will set the default encoding
-# ourselves to UTF-8.
 if sys.version_info < (3, 0):
     reload(sys)
     sys.setdefaultencoding('utf8')
@@ -110,18 +106,6 @@ class Worker(e3.Worker):
                 pass
 
     def _session_started(self):
-        """
-        Process the session_start event.
-
-        Typical actions for the session_start event are
-        requesting the roster and broadcasting an initial
-        presence stanza.
-
-        Arguments:
-            event -- An empty dictionary. The session_start
-                     event does not provide any additional
-                     data.
-        """
       
         categories_dict = {}
         default_group = e3.Group('Friends','Friends')
@@ -145,12 +129,7 @@ class Worker(e3.Worker):
                 _stauts = e3.status.ONLINE
                 
             contact = e3.Contact(account = key, identifier = int(key),  message = self.res_manager.contacts[key].lnick, _status = _status, blocked = False, cid = key)
-            '''
-            if contact.cid  == self.session.account.account :
-                self.session.contacts.me.nick = nick
-                self.session.nick_change_succeed(nick)
-                continue
-            '''
+           
             index = self.res_manager.contacts[key].cate_index
             group = categories_dict[index]
             self._add_contact_to_group( contact, group.name )
