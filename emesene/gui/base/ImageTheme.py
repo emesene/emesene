@@ -59,6 +59,7 @@ class ImageTheme(MetaData):
         self.service_msn        = None
         self.service_facebook   = None
         self.service_gtalk      = None
+        self.service_webqq      = None
         self.service_dummy      = None
         self.favorite           = None
 
@@ -109,6 +110,7 @@ class ImageTheme(MetaData):
         self.service_msn = self.get_image(path, "msn.png")
         self.service_facebook = self.get_image(path, "facebook.png")
         self.service_gtalk = self.get_image(path, "gtalk.png")
+        self.service_webqq = self.get_image(path, "webqq.png")
         self.service_dummy = self.get_image(path, "dummy.png")
         self.favorite = self.get_image(path, "favorite.png")
 
