@@ -9,21 +9,13 @@ import e3
 import StringIO
 import logging
 
-try:
-    import libwebqqpython as webqqswig
-except ImportError , exc:
-    webqqswig = None
-    print 'Errors occurred while importing webqq swig wrapper backend: %s' % str(exc)
 
-if webqqswig == None:
-    try:
-        import libwebqqboost as webqqboost
-    except ImportError, exc:
-        webqqboost = None
-        print 'Errors occurred while importing webqq boost wrapper backend: %s' % str(exc)
+try:
+    import libwebqqboost as webqqboost
+except ImportError, exc:
+    webqqboost = None
+    print 'Errors occurred while importing webqq boost wrapper backend: %s' % str(exc)
         
-if webqqswig == None and webqqboost == None:
-    print 'Unable to import webqq wrapper'
         
 import simplejson as json
 
@@ -89,13 +81,10 @@ class Worker(e3.Worker):
         self.rconversations = {}
         self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         
-        if not webqqswig == None:
-            self.webqq_plugin = webqqswig.SingletonQQPlugin_getInstance()
-            self.res_manager = webqqswig.SingletonResourceManager_getInstance()
-        elif not webqqboost == None:
-            singleton = webqqboost.SingletonInstance()
-            self.webqq_plugin = singleton.getQQPluginSingletonInstance()
-            self.res_manager = singleton.getResManagerSingletonInstance()
+        
+        singleton = webqqboost.SingletonInstance()
+        self.webqq_plugin = singleton.getQQPluginSingletonInstance()
+        self.res_manager = singleton.getResManagerSingletonInstance()
         
     def run(self):
         '''main method, block waiting for data, process it, and send data back
@@ -153,12 +142,12 @@ class Worker(e3.Worker):
         categories_dict[-1] = group_group
         
         for index in self.res_manager.categories:
-            key = index if not webqqswig == None else index.key()
+            key = index.key()
             group = e3.Group( self.res_manager.categories[key].name, key) 
             categories_dict[key] = group
             
         for uin in self.res_manager.contacts:
-            key = uin if not webqqswig == None else uin.key()
+            key =  uin.key()
             #nick = self.res_manager.contacts[uin].nick
             _status = e3.status.OFFLINE
             try:
@@ -180,7 +169,7 @@ class Worker(e3.Worker):
             self.session.contacts.contacts[key] = contact
         
         for group_id in self.res_manager.groups:
-            group_id_key = group_id if not webqqswig == None else group_id.key()
+            group_id_key = group_id.key()
             _status = e3.status.ONLINE
             contact = e3.Contact(account = group_id_key, identifier = int(group_id_key), nick =  self.res_manager.groups[group_id_key].name ,
                                  message = self.res_manager.groups[group_id_key].memo,  _status = _status, blocked = False, cid = group_id_key)
@@ -189,7 +178,7 @@ class Worker(e3.Worker):
             self.session.contacts.contacts[group_id_key] = contact
 
             for uins in self.res_manager.group_contacts[group_id_key]:
-                uin_key = uins if not webqqswig == None else uins.key()
+                uin_key = uins.key()
                 buddy = self.res_manager.group_contacts[group_id_key][uin_key]
                 uin = buddy.uin
                 _status = e3.status.ONLINE
@@ -239,7 +228,7 @@ class Worker(e3.Worker):
         display_name=send_uin
         
         for group in self.res_manager.group_contacts:
-            group_key = group if not webqqswig == None else group.key()
+            group_key = group.key()
             try:
                 display_name = self.res_manager.group_contacts[group_key][send_uin].nick
                 break
@@ -326,7 +315,22 @@ class Worker(e3.Worker):
         photo_hash = photo_hash.hexdigest()
 
         ctct = self.session.contacts.get(account)
-        avatars = self.caches.get_avatar_cache(account)
+        avatars = None
+        qqnumber = None
+
+        try:
+            qqnumber = self.res_manager.contacts[account].qqnumber
+        except KeyError, e:
+            try:
+                qqnumber = self.res_manager.groups[account].gnumber
+            except KeyError, e:
+                qqnumber = None
+            
+        print 'qqnumber' + qqnumber
+        if qqnumber == None:
+            avatars = self.caches.get_avatar_cache(account)
+        else:
+            avatars = self.caches.get_avatar_cache(qqnumber)
         avatar_path = os.path.join(avatars.path, photo_hash)
         ctct.picture = avatar_path
 
@@ -533,10 +537,7 @@ class Worker(e3.Worker):
         for recipient in recipients:
             group_keys = []
             for group in self.res_manager.groups:
-                if not webqqswig == None:
-                    group_keys.append(group)
-                else:
-                    group_keys.append(group.key())
+                group_keys.append(group.key())
             if str(recipient) in group_keys:
                 self.webqq_plugin.send_group_message( str(recipient), str(message.body))
             else:
@@ -549,8 +550,7 @@ class Worker(e3.Worker):
     def send_buddy_nudge(self, cid):
         recipients = self.rconversations.get(cid, ())
         for recipient in recipients:
-            if not webqqswig == None or not webqqboost == None:
-                self.webqq_plugin.send_buddy_nudge(str(recipient))
+            self.webqq_plugin.send_buddy_nudge(str(recipient))
         
     def _handle_action_p2p_invite(self, cid, pid, dest, type_, identifier):
         '''handle Action.ACTION_P2P_INVITE,
