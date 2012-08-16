@@ -80,9 +80,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
 
         self.subscribe_signals()
 
-    def __del__(self):
-        log.debug('conversation adieeeeeeeuuuu ;______;')
-
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
         widget_d = self._widget_d
@@ -212,6 +209,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             pos = self.session.config.get_or_set("i_input_panel_position",
                     int(height * 0.8))
             self.left_widget.moveSplitter(pos, 1)
+
+        policy = self.left_widget.sizePolicy()
+        policy.setHorizontalStretch(80)
+        self.left_widget.setSizePolicy(policy)
 
     def on_input_panel_resize(self, pos, index):
         self.session.config.i_input_panel_position = pos
