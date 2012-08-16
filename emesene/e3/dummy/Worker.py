@@ -39,7 +39,7 @@ class Worker(e3.Worker):
                 'one love', True)
         self._add_contact('nassty@emesene.org', 'nassto', e3.status.IDLE,
                 '', False)
-        self._add_contact('j0hn@emesene.org', 'juan', e3.status.IDLE, '', False)
+        self._add_contact('j0hn@emesene.org', 'juán', e3.status.IDLE, '', False)
         self._add_contact('c0n0@emesene.org', 'conoconocono', e3.status.IDLE,
                 '', True)
         self._add_contact('warlo@emesene.org', 'warlo', e3.status.OFFLINE,

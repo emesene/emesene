@@ -824,7 +824,7 @@ class EntryDialog (OkCancelDialog):
         OkCancelDialog.__init__(self, title, expanding, parent)
 
         label = QtGui.QLabel(label)
-        self.edit = QtGui.QLineEdit(text)
+        self.edit = QtGui.QLineEdit(unicode(text))
 
         lay = QtGui.QHBoxLayout()
         lay.addWidget(label, 100)
