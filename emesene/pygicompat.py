@@ -55,7 +55,8 @@ if not hasattr(Gdk, 'screen_width'):
 
 try:
     #newer pygobject versions has compat for indexed attrs
-    GdkPixbuf.Pixbuf.get_formats()[0]
+    GdkPixbuf.Pixbuf.get_formats()[0]['description']
+    Gdk.pixbuf_get_formats = GdkPixbuf.Pixbuf.get_formats
 except:
     orig_get_formats = GdkPixbuf.Pixbuf.get_formats
     def get_formats():

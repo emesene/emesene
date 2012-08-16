@@ -195,6 +195,10 @@ class InputView(gtk.TextView):
         gtk.TextView.__init__(self)
         self.connect('key-press-event', self.on_key_press_event)
 
+        self.drag_dest_set(gtk.gdk.BUTTON1_MASK,
+                           [('emesene-invite', 0, 3)],
+                           gtk.gdk.ACTION_DEFAULT)
+
     def on_key_press_event(self, widget, event):
         if event.keyval in [gtk.keysyms.Return, gtk.keysyms.KP_Enter] and \
             not event.state & gtk.gdk.SHIFT_MASK:

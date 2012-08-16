@@ -1,14 +1,30 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module contains the ChatInput class'''
 
-import PyQt4.QtGui      as QtGui
-import PyQt4.QtCore     as QtCore
-from PyQt4.QtCore   import Qt
-
-# Addition imports to improve developer's
-# fingers life :)
+import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
+from PyQt4.QtCore import Qt
 from PyQt4.QtCore import QRect, QSize, QPoint
+
+import logging
+log = logging.getLogger('qt4ui.widgets.ImageAreaSelector')
 
 
 class ImageAreaSelector (QtGui.QWidget):
@@ -267,13 +283,3 @@ class ImageAreaSelector (QtGui.QWidget):
         sel_rect_scaled = QRect(self._selection_rect.topLeft() * self._zoom,
                                 self._selection_rect.size() * self._zoom)
         return QtGui.QPixmap.grabWidget(self, sel_rect_scaled)
-        
-        
-        
-
-
-
-
-
-
-

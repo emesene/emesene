@@ -938,18 +938,28 @@ class Worker(e3.base.Worker, papyon.Client):
     # e3 action handlers - address book
     def _handle_action_add_contact(self, account):
         ''' handle Action.ACTION_ADD_CONTACT '''
-        def add_contact_fail(*args):
-            log.error("Error adding a contact: %s", args)
-            # account
+        def add_contact_fail(ab_error):
+            log.error("Error adding a contact: %s", ab_error)
             self.session.contact_add_failed('')
 
         def add_contact_succeed(contact):
             self.session.contact_add_succeed(contact.account)
 
-        #TODO: support fancy stuff like: invite_display_name='',
-        #    invite_message='', groups=[], network_id=NetworkID.MSN,
-        #    auto_allow=True, done_cb=None, failed_cb=None
-        self.address_book.add_messenger_contact(account,
+        papycontact = self.contact_by_account(account)
+        if account in self.session.contacts.pending:
+            if papycontact is None:
+                return
+            self.address_book.accept_contact_invitation(
+                papycontact, add_to_contact_list=True,
+                done_cb=(add_contact_succeed,),
+                failed_cb=(add_contact_fail,))
+        else:
+            if papycontact is not None:
+                n_id = papycontact.network_id
+            else:
+                n_id = NetworkID.MSN
+            self.address_book.add_messenger_contact(account,
+                network_id=n_id,
                 done_cb=(add_contact_succeed,),
                 failed_cb=(add_contact_fail,))
 
@@ -1315,8 +1325,8 @@ class Worker(e3.base.Worker, papyon.Client):
             except AttributeError:
                 switchboard = None
 
-            if first_dude.presence == papyon.Presence.OFFLINE or \
-               first_dude.network_id == papyon.profile.NetworkID.EXTERNAL:
+            if first_dude.presence == papyon.Presence.OFFLINE and \
+               first_dude.network_id != papyon.profile.NetworkID.EXTERNAL:
                 if switchboard is None or \
                    switchboard.state != papyon.msnp.ProtocolState.OPEN:
 

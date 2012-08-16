@@ -215,8 +215,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             emails[0], emails[index] = emails[index], emails[0]
 
         for email in emails:
-            acc = email.rpartition('|')[0]
-            service = self.config.d_user_service.get(acc, 'msn')
+            acc, dummy, service = email.rpartition('|')
             remember_lvl = self.remembers[email]
             status = self.config.d_status.get(email, e3.status.ONLINE)
             password = self.decode_password(email)
@@ -242,30 +241,29 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
 
         index = self._widget_d['account_combo'].findText(new_text)
         service = str(self._widget_d['service_combo'].currentText())
-        if index > -1 and from_preferences and self.search_account(service, new_text):
-            self._on_chosen_account_changed(index)
+        if index > -1 and from_preferences and self.search_account(new_text, service):
+            self._on_chosen_account_changed(index, service)
         else:
             forget_me_btn.setEnabled(False)
             self.clear_login_form(clear_pic=True)
         self._on_checkbox_state_refresh()
 
-    def _on_chosen_account_changed(self, acc_index):
+    def _on_chosen_account_changed(self, acc_index, service=None):
         ''' Slot executed when the user select another account from the drop
         down menu of the account combo'''
         widget_d = self._widget_d
         account_combo = widget_d['account_combo']
         forget_me_btn = widget_d['forget_me_btn']
         password_edit = widget_d['password_edit']
-        if not account_combo.currentText():
+
+        email = account_combo.itemText(acc_index)
+        if not email:
             forget_me_btn.setEnabled(False)
         else:
             password_edit.setEnabled(True)
-            
-        index_in_account_list = account_combo.itemData(acc_index).toPyObject()
-        # If we don't have any account at all, this slots gets called but
-        # index_in_account_list is None.
-        if not index_in_account_list is None:
-            account = self._account_list[index_in_account_list]
+
+        account = self.search_account(email, service)
+        if account is not None:
             self.clear_login_form()
             # display_pic
             path = self.current_avatar_path(account.email)
@@ -290,11 +288,13 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
             self.update_service(account.service)
         self._on_checkbox_state_refresh()
 
-    def search_account(self, service, email):
+    def search_account(self, email, service=None):
+        if service is None:
+            service = self.config.d_user_service.get(unicode(email), 'msn')
         for account in self._account_list:
             if account.email == email and account.service == service:
-                return True
-        return False
+                return account
+        return None
 
     def on_session_changed(self, index, *args):
         '''Callback called when the session type in the combo is

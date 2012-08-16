@@ -152,7 +152,7 @@ class ConversationMessage(object):
 
 class TextFormat(object):
 
-    DEFAULT_FONT = 'MS Sans Serif'
+    DEFAULT_FONT = 'SANS'
 
     # effects
     NO_EFFECT = 0

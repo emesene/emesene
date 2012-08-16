@@ -448,6 +448,14 @@ class Conversation(gtk.VBox, gui.Conversation):
                               posx, posy, selection,
                               info, timestamp):
         '''called when a file is received by text input widget'''
+        # user invitation
+        if selection.target == 'emesene-invite':
+            account = selection.data.strip()
+            if self.session.contacts.exists(account):
+                self.on_invite(account)
+                return
+
+        # file transfer
         uri = selection.data.strip()
         uri_splitted = uri.split()
         for uri in uri_splitted:

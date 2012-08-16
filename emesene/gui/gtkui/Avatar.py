@@ -89,7 +89,7 @@ class Avatar(gtk.Widget, AvatarManager):
     #
     def set_from_file(self, filename, blocked=False):
         self.filename = filename
-        self.blocked  = blocked
+        self.blocked = blocked
         if not gui.gtkui.utils.file_readable(filename):
             if self._dimension > 32:
                 # use big fallback image
@@ -129,8 +129,7 @@ class Avatar(gtk.Widget, AvatarManager):
             self.__set_from_pixbuf(output_pixbuf)
             self.current_animation = None
             return
-        #FIXME: animations are broken on gtk3, use static pixbuf for now
-        elif animation.is_static_image() or check_gtk3():
+        elif animation.is_static_image():
             self.__set_from_pixbuf(static_image)
             self.current_animation = None
             return
@@ -166,9 +165,26 @@ class Avatar(gtk.Widget, AvatarManager):
     #
 
     if check_gtk3():
-        #FIXME: this is broken on gtk3, use static pixbuf for now
         def _start_animation(self, animation):
-            self.__set_from_pixbuf(animation.get_static_image())
+            #this is broken on some version of gtk3, use static pixbuf for those cases
+            try:
+                iteran = animation.get_iter(None)
+            except TypeError:
+                self.__set_from_pixbuf(animation.get_static_image())
+                return
+
+            #we don't need to resize here!
+            self.__set_from_pixbuf(iteran.get_pixbuf())
+
+            if self.anim_source is None:
+                self.anim_source = gobject.timeout_add(iteran.get_delay_time(),
+                    self._advance, iteran)
+
+        def _advance(self, iteran):
+            iteran.advance(None)
+            self.__set_from_pixbuf_animation(iteran.get_pixbuf())
+            self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
+            return False
     else:
         def _start_animation(self, animation):
             iteran = animation.get_iter()
@@ -176,7 +192,8 @@ class Avatar(gtk.Widget, AvatarManager):
             self.__set_from_pixbuf(iteran.get_pixbuf())
 
             if self.anim_source is None:
-                self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
+                self.anim_source = gobject.timeout_add(iteran.get_delay_time(),
+                    self._advance, iteran)
 
         def _advance(self, iteran):
             iteran.advance()
@@ -184,7 +201,7 @@ class Avatar(gtk.Widget, AvatarManager):
             self.anim_source = gobject.timeout_add(iteran.get_delay_time(), self._advance, iteran)
             return False
 
-    def do_draw (self, ctx):
+    def do_draw(self, ctx):
         if not self._pixbuf:
             return False
 
@@ -193,9 +210,7 @@ class Avatar(gtk.Widget, AvatarManager):
             cell_x, cell_y, cell_width, cell_height = cell_area
         else:
             cell_x = 0
-            cell_width = cell_area.width
             cell_y = 0
-            cell_height = cell_area.height
 
         if self.in_animation:
             self.draw_avatar(ctx, self._pixbuf, cell_x,
@@ -211,7 +226,7 @@ class Avatar(gtk.Widget, AvatarManager):
         return False
 
     if not check_gtk3():
-        def do_size_request(self,requisition):
+        def do_size_request(self, requisition):
             requisition.width = self._dimension
             requisition.height = self._dimension
 

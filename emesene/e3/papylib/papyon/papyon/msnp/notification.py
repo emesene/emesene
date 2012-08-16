@@ -281,6 +281,7 @@ class NotificationProtocol(BaseProtocol, Timer):
             message_type = 2
         else:
             message_type = 1
+        message.headers['MIME-Version'] = '1.0'
         tr_id = self._send_command('UUM',
                 (contact.account, contact.network_id, message_type),
                 payload=message, callback=callback)

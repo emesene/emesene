@@ -111,7 +111,6 @@ class InformationWidget(gtk.VBox):
 
         SmileyLabel = extension.get_default('smiley label')
         self.nick = SmileyLabel()
-        self.nick.set_alignment(0.0, 0.5)
         self.nick.set_ellipsize(pango.ELLIPSIZE_END)
         self.mail = gtk.Label()
         self.mail.set_alignment(0.0, 0.5)
@@ -256,8 +255,8 @@ class ChatWidget(gtk.VBox):
         '''constructor'''
         gtk.VBox.__init__(self)
         self.set_border_width(2)
-        all = gtk.HBox()
-        all.set_border_width(2)
+        h_all = gtk.HBox()
+        h_all.set_border_width(2)
         self.conv_status = ConversationStatus.ConversationStatus(session.config)
 
         self.search_mode = False
@@ -280,6 +279,7 @@ class ChatWidget(gtk.VBox):
         OutputText = extension.get_default('conversation output')
         self.text = OutputText(session.config, None)
         self.text.connect("search_request", self._search_request_cb)
+        self.text.connect("key-press-event", self._on_text_key_press)
 
         buttons = gtk.HButtonBox()
         buttons.set_border_width(2)
@@ -319,18 +319,35 @@ class ChatWidget(gtk.VBox):
         self.search_entry.connect('icon-press', self._on_search_button_press)
         self.search_entry.connect('key-press-event', self._on_search_key_press)
 
+        adjustment = gtk.Adjustment(value=1000, lower=100,
+                            upper=10000, step_incr=10)
+        self.max_lines = gtk.SpinButton()
+        self.max_lines.set_adjustment(adjustment)
+
+        searchbox.pack_start(gtk.Label(_('Max lines:')), False)
+        searchbox.pack_start(self.max_lines, False)
+
+        prev_button = gtk.Button(_("Previous"))
+        next_button = gtk.Button(_("Next"))
+        prev_button.connect("clicked",
+                            lambda x: self.text.search_text(self.search_entry.get_text(), True))
+        next_button.connect("clicked",
+                            lambda x: self.text.search_text(self.search_entry.get_text()))
+
+        searchbox.pack_end(next_button, False)
+        searchbox.pack_end(prev_button, False)
 
         searchbox.pack_end(self.search_entry, False)
         searchbox.pack_end(search_label, False)
 
         chat_box.pack_start(self.nicebar, False)
-        chat_box.pack_start(searchbox, False)
         chat_box.pack_start(self.text, True, True)
 
-        all.pack_start(self.calendars, False)
-        all.pack_start(chat_box, True, True)
+        h_all.pack_start(self.calendars, False)
+        h_all.pack_start(chat_box, True, True)
 
-        self.pack_start(all, True, True)
+        self.pack_start(searchbox, True, True)
+        self.pack_start(h_all, True, True)
         self.pack_start(buttons, False)
         self.refresh_history()
 
@@ -345,6 +362,11 @@ class ChatWidget(gtk.VBox):
         if event.keyval == gtk.keysyms.Return:
             self._search_history(entry.get_text())
 
+    def _on_text_key_press(self, entry, event):
+        '''focuses search when key is pressed
+        '''
+        self.search_entry.emit('key-press-event', event)
+
     def _search_history(self, keywords):
         '''search history for certain keywords
         '''
@@ -354,7 +376,7 @@ class ChatWidget(gtk.VBox):
         self._prepare_history()
         self.search_mode = True
         self.session.logger.get_chats_by_keyword(self.account,
-            self.session.account.account, from_t, to_t, keywords, 1000,
+            self.session.account.account, from_t, to_t, keywords, self.max_lines.get_value(),
             self._on_chats_ready)
 
     def _search_request_cb(self, view, link):
@@ -418,7 +440,7 @@ class ChatWidget(gtk.VBox):
         '''
         self._prepare_history()
         self.request_information(_('Loading chat history. Hang tight for a moment...'))
-        self.request_chats_between(1000, self._on_chats_ready)
+        self.request_chats_between(self.max_lines.get_value(), self._on_chats_ready)
 
     def _get_from_timestamp(self):
         '''read from_calendar widget and return a timestamp
@@ -440,7 +462,7 @@ class ChatWidget(gtk.VBox):
         self.session.logger.get_chats_between(self.account,
             self.session.account.account, from_t, to_t, limit, callback)
 
-    def save_chats(self, path, limit=1000):
+    def save_chats(self, path):
         '''request amount of messages between our account and the current
         account, save it to path'''
         def _on_save_chats_ready(results):
@@ -453,7 +475,7 @@ class ChatWidget(gtk.VBox):
 
             exporter(results, open(path, "w"))
 
-        self.request_chats_between(limit, _on_save_chats_ready)
+        self.request_chats_between(self.max_lines.get_value(), _on_save_chats_ready)
 
     def _on_chats_ready(self, results):
         '''called when the chat history is ready'''
@@ -510,7 +532,7 @@ class ChatWidget(gtk.VBox):
             self.conv_status.post_process_message(msg)
             self.conv_status.update_status()
 
-        if len(results) >= 1000:
+        if len(results) >= self.max_lines.get_value():
             self.nicebar.new_message(_('Too many messages to display'),
                 gtk.STOCK_DIALOG_WARNING)
 

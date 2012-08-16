@@ -19,6 +19,7 @@
 import os
 import sys
 import gtk
+import gobject
 import time
 
 import extension
@@ -52,6 +53,7 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         self.main_window = main_window
         self.last_new_message = None
         self.menu = None
+        self.tag = None # keeps the gobject id for the windows-hide-menu hack
 
         self.connect('activate', self._on_activate)
         self.connect('popup-menu', self._on_popup)
@@ -67,6 +69,10 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         """
         self.menu = LoginMenu(self.handler, self.main_window)
         self.menu.show_all()
+        if sys.platform == "win32":
+            self.menu.connect('leave-notify-event', self.on_leave_notify_event)
+            self.menu.connect('enter-notify-event', self.on_enter_notify_event)
+
         self.set_from_file(self.handler.theme.image_theme.logo_panel)
 
     def set_main(self, session):
@@ -78,8 +84,31 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
             self.menu.unsubscribe()
         self.menu = MainMenu(self.handler, self.main_window)
         self.menu.show_all()
+        if sys.platform == "win32":
+            self.menu.connect('leave-notify-event', self.on_leave_notify_event)
+            self.menu.connect('enter-notify-event', self.on_enter_notify_event)
+
         self.set_tooltip("emesene - " + self.handler.session.account.account)
         self._on_status_change_succeed(self.handler.session.account.status)
+
+    def windows_workaround(self, *args):
+        if self.menu:
+            self.menu.hide()
+
+    def on_leave_notify_event(self, *args):
+        """
+        callback called when the mouse leaves this window
+        """
+        if self.tag is None:
+            self.tag = gobject.timeout_add_seconds(1, self.windows_workaround)
+
+    def on_enter_notify_event(self, *args):
+        """
+        callback called when the mouse enters this window
+        """
+        if self.tag:
+            gobject.source_remove(self.tag)
+            self.tag = None
 
     def _on_conv_message(self, cid, account, msgobj, cedict=None):
         """
