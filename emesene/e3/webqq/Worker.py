@@ -89,6 +89,11 @@ class Worker(e3.Worker):
     def run(self):
         '''main method, block waiting for data, process it, and send data back
         '''
+
+        call_back_dict = { 512 : self._on_message, 513 : self._on_group_message,
+                           515 : self._on_photo_update , 516 : self._on_status_change,
+                           517 : self._on_nick_update , 518 : self._on_shake_message}
+        
         while self._continue == True:
             try:
                 event_queue = self.res_manager.event_queue
@@ -96,22 +101,10 @@ class Worker(e3.Worker):
                     self.res_manager.lock()
                     while not event_queue.empty():
                         item = event_queue.pop()
-                        if item[0] == 512 :
-                            self._on_message(item[1])
-                        elif item[0] == 513:
-                            self._on_group_message(item[1])
-                        elif item[0] == 515:
-                            self._on_photo_update(item[1])
-
-                        elif item[0] == 516 :
-                            self._on_status_change(item[1])
-                            
-                        elif item[0] == 517:
-                            self._on_nick_update(item[1])
-                        elif item[0] == 518:
-                            self._on_shake_message(item[1])
-                        else:
-                            print 'Un implementation callback functions'
+                        try:
+                            call_back_dict[item[0]](item[1])
+                        except KeyError , e:
+                            print 'Un implemented callback function'
                             
                     self.res_manager.ulock()
                     
