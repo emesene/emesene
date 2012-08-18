@@ -274,7 +274,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         inform that the other user has started typing
         """
         if account in self.members:
-            self.tab_label.set_image(gui.theme.image_theme.typing)
+            icon = QtGui.QIcon(gui.theme.image_theme.typing)
+            self.conv_manager.setTabIcon(self.tab_index, icon)
             if self.typing_timeout.isActive():
                 self.typing_timeout.stop()
             self.typing_timeout.start(3000)
