@@ -455,12 +455,20 @@ class ContactList(object):
         # + ONLINE_COUNT
         # + TOTAL_COUNT
         '''
-        contacts = self.contacts.get_contacts(group.contacts)
+        if group.type == e3.Group.NONE:
+            contacts = self.contacts.get_no_group()
+        elif group.type == e3.Group.ONLINE:
+            contacts = self.contacts.get_online_list()
+        elif group.type == e3.Group.OFFLINE:
+            contacts = self.contacts.get_offline_list()
+        else:
+            contacts = self.contacts.get_contacts(group.contacts)
+
         (online, total) = self.contacts.get_online_total_count(contacts)
         template = self.group_template
         maxtotal = len(self.contacts.contacts)
 
-        if group == self.offline_group:
+        if group.type == e3.Group.OFFLINE:
             template = template.replace('[$ONLINE_COUNT]', str(total))
             template = template.replace('[$TOTAL_COUNT]', str(maxtotal))
         else:

@@ -29,7 +29,7 @@ class Group(object):
 
     def dict(self):
         '''return a dict representing the object'''
-        return dict(type_ = self.type, 
+        return dict(type_ = self.type,
           name = self.name,
           identifier = self.identifier,
           contacts = self.contacts)
