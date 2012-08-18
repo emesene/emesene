@@ -270,6 +270,10 @@ Do you want to fix your profile now?''')
         body_label = QtGui.QLabel(unicode(body))
         body_label.setWordWrap(True)
         body_label.setAlignment(Qt.AlignCenter)
+        def _on_link_clicked(link):
+            gui.base.Desktop.open(link)
+
+        body_label.linkActivated.connect(_on_link_clicked)
         button_box = QtGui.QDialogButtonBox()
         body_box = QtGui.QHBoxLayout()
         body_box.addWidget(body_label)
