@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
 
+#    This file is part of emesene.
+#
+#    emesene is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    emesene is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with emesene; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 '''This module contains a class to select an avatar'''
 
 import os
@@ -37,9 +53,9 @@ class AvatarChooser(Dialog.OkCancelDialog):
         self._session = session
         self._avatar_manager = gui.base.AvatarManager(session)
         # view names:
-        self._vn = [ tr('Used pictures'   ),
-                     tr('System pictures' ),
-                     tr('Contact pictures')  ]
+        self._vn = [tr('Used pictures'),
+                     tr('System pictures'),
+                     tr('Contact pictures')]
         self._view_with_selection = None
         self._current_avatar = session.config_dir.get_path('last_avatar')
         self._widget_d = {}
@@ -65,7 +81,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
         widget_d['group_box'] = QtGui.QGroupBox()
         widget_d['preview_dpic'] = widgets.DisplayPic(self._session,
                                                 clickable=False, size=96)
-        widget_d['add_btn'] = QtGui.QPushButton(tr('Add...'))
+        widget_d['add_btn'] = QtGui.QPushButton(tr('Add'))
         widget_d['remove_btn'] = QtGui.QPushButton(tr('Remove'))
         widget_d['remove_all_btn'] = QtGui.QPushButton(tr('Remove All'))
         widget_d['no_picture_btn'] = QtGui.QPushButton(tr('No picture'))
