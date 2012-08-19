@@ -957,7 +957,7 @@ class Worker(e3.base.Worker, papyon.Client):
             if papycontact is not None:
                 n_id = papycontact.network_id
             else:
-                n_id = NetworkID.MSN
+                n_id = papyon.profile.NetworkID.MSN
             self.address_book.add_messenger_contact(account,
                 network_id=n_id,
                 done_cb=(add_contact_succeed,),
