@@ -25,6 +25,8 @@ class Worker(e3.Worker):
                 '', False)
         self._add_contact('boyska@emesene.org', 'boyska', e3.status.ONLINE,
                 '', True)
+        self._add_contact('jamesaxl@mish.org', 'Bili mish', e3.status.ONLINE,
+                '', False)
         self._add_contact('pochu@emesene.org', '<3 debian', e3.status.BUSY,
                 '', False)
         self._add_contact('cloud@emesene.org', 'nube', e3.status.BUSY,
@@ -117,6 +119,7 @@ class Worker(e3.Worker):
         self._add_contact_to_group('j0hn@emesene.org', 'pirätes')
         self._add_contact_to_group('c0n0@emesene.org', 'pirätes')
         self._add_contact_to_group('nassty@emesene.org', 'lulz')
+        self._add_contact_to_group('jamesaxl@mish.org', 'lulz')
         self._add_contact_to_group('warlo@emesene.org', 'lulz')
         self._add_contact_to_group('you@emesene.org', 'lulz')
         self._add_contact_to_group('cloud@emesene.org', 'lulz')
@@ -144,7 +147,7 @@ class Worker(e3.Worker):
         self._add_contact_to_group('sixteen@hotmail.com', 'strange nicks')
 
         #test pending contact dialog
-        #self._add_pending_contacts()
+        self._add_pending_contacts()
 
     def _add_pending_contacts(self):
         tmp_cont = e3.base.Contact("test1@test.com", 1,
@@ -158,16 +161,6 @@ class Worker(e3.Worker):
             e3.status.ONLINE, '',
             True)
         self.session.contacts.pending["test2@test.com"] = tmp_cont
-
-    def _late_contact_add(self):
-        '''this simulates adding a contact after we show the contactlist'''
-        tmp_cont = e3.base.Contact("testlate1@test.com", 1,
-            "testlate1", "testlate1nick",
-            e3.status.BUSY, '',
-            True)
-        self.session.contacts.pending["testlate1@test.com"] = tmp_cont
-        self.session.contact_added_you()
-        return False
 
     def _return_message(self, cid, account, message):
         ''' Method to return a message after some timeout '''
@@ -236,11 +229,6 @@ class Worker(e3.Worker):
         self.session.nick_change_succeed('dummy nick is dummy')
         self._fill_contact_list()
         self.session.contact_list_ready()
-        #gobject.timeout_add_seconds(4, self._late_contact_add)
-        #memleak checks
-        from e3.base.Event import Event
-        #self.session.add_event(Event.EVENT_DISCONNECTED,
-        #                                   'CHECKING MEMLEAKS :D', 1)
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT
