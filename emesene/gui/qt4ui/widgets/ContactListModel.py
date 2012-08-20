@@ -141,7 +141,7 @@ class ContactListModel (QtGui.QStandardItemModel):
                 new_status = contact.status
                 self._set_contact_info(contact_item, contact)
                 if new_status == e3.status.OFFLINE:
-                    self._exchange_contact(self, self._off_grp, self._onl_grp,
+                    self._exchange_contact(self._off_grp, self._onl_grp,
                         contact_item)
             else:
                 contact_item = self._search_item(contact.identifier,
@@ -152,7 +152,7 @@ class ContactListModel (QtGui.QStandardItemModel):
                 new_status = contact.status
                 self._set_contact_info(contact_item, contact)
                 if new_status != e3.status.OFFLINE:
-                    self._exchange_contact(self, self._onl_grp, self._off_grp,
+                    self._exchange_contact(self._onl_grp, self._off_grp,
                         contact_item)
 
     def _exchange_contact(self, group_add, group_del, contact_item):

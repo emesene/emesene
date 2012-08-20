@@ -214,19 +214,20 @@ class FacebookClient(object):
         url_path = self._get_url_path({'query' : query, 'access_token' : self.access_token, 'format' : 'json'})
         url = "%s%s" % (self.FBQL_BASE_URL, url_path)
         data = self._make_request(url)
-        if "error" in str(data):
-            ex = self.factory.make_object('Error', data)
+        obj_raw = self.factory.loads(data)
+        if 'error_code' in obj_raw:
+            ex = self.factory._make_object('Error', obj_raw)
             etype = None
             if hasattr(ex, "error_type"):
                 etype = ex.error_type
-            raise self._make_exception(ex.error_msg, etype)
-        return self.factory.make_objects_list(table, data)
+            raise self._make_exception(ex.error_msg, etype, ex.error_code)
+        return self.factory.make_objects_list(table, obj_raw)
 
-    def _make_exception(self, message, etype=None):
+    def _make_exception(self, message, etype=None, ecode=None):
         """
             make corresponding exception
         """
-        if etype == "OAuthException":
+        if etype == "OAuthException" or ecode == 190:
             return OAuthException(message)
         else:
             return PyfbException(message)
