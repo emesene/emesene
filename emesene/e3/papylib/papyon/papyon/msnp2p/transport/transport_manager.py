@@ -149,6 +149,7 @@ class P2PTransportManager(gobject.GObject):
             return None
         transport_class = self._supported_transports[proto]
         transport = transport_class.handle_peer(self._client, peer, peer_guid, self)
+        logger.debug("Created new transport: %s" % transport)
         return transport
 
     def close_transport(self, peer, peer_guid):
@@ -165,7 +166,7 @@ class P2PTransportManager(gobject.GObject):
                 if best is None or transport.rating > best.rating:
                     if transport.connected:
                         best = transport
-                    logger.debug("Best transport is now: %s" % best)
+                        logger.debug("Best transport is now: %s" % best)
         return best
 
     def _get_transport(self, peer, peer_guid, blob):
