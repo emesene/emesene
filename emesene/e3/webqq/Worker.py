@@ -142,7 +142,8 @@ class Worker(e3.Worker):
             self._add_contact_to_group(contact, group_group.name)
 
             self.session.contacts.contacts[group_id_key] = contact
-
+            
+            '''
             for uins in self.res_manager.group_contacts[group_id_key]:
                 uin_key = uins.key()
                 buddy = self.res_manager.group_contacts[group_id_key][uin_key]
@@ -150,7 +151,8 @@ class Worker(e3.Worker):
                 _status = e3.status.ONLINE
                 contact = e3.Contact(account = uin, identifier = int(uin),  nick = buddy.nick, message = buddy.lnick  , _status = _status, blocked = False, cid = uin)
                 #self.session.contacts.contacts[uin] = contact
-
+            '''
+            
         self.session.login_succeed()
         self.session.contact_list_ready()
 
@@ -158,7 +160,7 @@ class Worker(e3.Worker):
         '''change the user status'''
         contact = self.session.contacts.me
         stat = STATUS_MAP[status_]
-
+        
         e3.base.Worker._handle_action_change_status(self, status_)
 
 
