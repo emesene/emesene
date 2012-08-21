@@ -520,6 +520,11 @@ Do you want to fix your profile now?''')
         response_cb(response, *args)
 
     @classmethod
+    def contact_information_dialog(cls, session, account):
+        '''shows information about the account'''
+        raise NotImplementedError
+
+    @classmethod
     def select_font(cls, style, callback):
         '''select font and if available size and style, receives a
         e3.Message.Style object with the current style
