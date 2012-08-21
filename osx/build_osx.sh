@@ -6,11 +6,10 @@
 version=`grep 'EMESENE_VERSION = ".*"' ../emesene/Info.py | cut -d '"' -f 2`
     
 echo "############################################################################"
-echo "### Welcome to the emesene builder. Version 3.3.0 Copyright Josh Fradley ###" 
+echo "### Welcome to the emesene builder. Version 3.4.0 Copyright Josh Fradley ###" 
 echo "############################################################################"
 
-echo "Preparing to build emesene $version. Press enter to continue..."
-read
+read -p "Preparing to build emesene $version. Press enter to continue..."
 
 #Remove old builds
 rm -rf ../dist
@@ -23,8 +22,8 @@ echo "Building app..."
 /usr/local/bin/platypus -i 'emesene.icns' -a 'emesene' -o 'None' -p '/bin/sh' -u 'The emesene team and Josh Fradley' -I org.emesene.emesene -R 'emesene.sh' '../dist/emesene.app' > /dev/null 2>&1
 
 echo "Setting version..."
-#There is a bug in Platypus which sets CFBundle rather than CFBundleShortVersionString
-defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleVersion -string "330"
+#There is a bug in Platypus which sets CFBundle rather than CFBundleShortVersionString, should be fixed in Platypus 4.8
+defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleVersion -string "340"
 defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleShortVersionString -string "$version"
 
 echo "Bundling GTK..."
@@ -49,13 +48,12 @@ then
     hdiutil attach -quiet ${PWD}/../dist/emesenetemp.dmg
     SetFile -c icnC /Volumes/emesene/.VolumeIcon.icns
     SetFile -a C /Volumes/emesene
-    echo "Please set the background and icon location now. This must be done manually. Then hit enter..."
-    read
+    read -p "Please set the background and icon location now, this must be done manually. Then come back here and hit enter..."
     SetFile -a V /Volumes/emesene/emesenedmg.png
-    hdiutil detach /Volumes/emesene -quiet
+    hdiutil detach -quiet /Volumes/emesene
     dmgversion=`echo $version | tr -d "."`
     hdiutil convert ${PWD}/../dist/emesenetemp.dmg -format UDZO -imagekey zlib-level=9 -quiet -o ${PWD}/../dist/emesene$dmgversion.dmg
     rm ../dist/emesenetemp.dmg
 fi
 
-echo "Successfully built emesene $version".
+echo "Successfully built emesene $version"
