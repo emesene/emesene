@@ -1,0 +1,43 @@
+{
+  "name": "emesene",
+  "version": "0.3.0",
+  "author": "emesene team <emesene@emesene.org>",
+  "description": "emesene is a chat program that allows you to connect to different networks like MSN, Gtalk, Facebook chat, Jabber and others.",
+  "contributors": [
+    {
+      "name": "c10ud",
+      "email": "c10ud.dev@gmail.com"
+    },
+    {
+      "name": "pepeleproso",
+      "email": ""
+    },
+    {
+      "name": "sbte",
+      "email": ""
+    },
+    {
+      "name": "marianoguerra",
+      "email": "mariano@marianoguerra.org"
+    }
+  ],
+  "bin": {
+    "http-server": "./bin/emesene"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emesene/emesene"
+  },
+  "keywords": [
+    "msn", "jabber", "im", "gtalk", "facebook", "xmpp", "chat", "gtk", "qt"
+  ],
+  "dependencies" : {
+    "gtk"   :  "2.x",
+  },
+  "devDependencies": {
+  },
+  "license": "GPL",
+  "engine": {
+    "python": ">=2.6"
+  }
+}
