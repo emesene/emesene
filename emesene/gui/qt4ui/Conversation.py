@@ -18,13 +18,14 @@
 
 '''This module contains classes to represent the conversation tab.'''
 
+import os
 import logging
 
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 from PyQt4.QtCore import Qt
 
-from gui.qt4ui.Utils import tr
+from gui.qt4ui.Utils import tr, path_to_url
 
 import extension
 import gui
@@ -59,7 +60,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             #update adium theme header/footer
             account = self.members[0]
             contact = self.session.contacts.safe_get(account)
-            his_picture = contact.picture
+            his_picture = contact.picture or \
+                path_to_url(os.path.abspath(gui.theme.image_theme.user))
             nick = contact.nick
             display_name = contact.display_name
             self.set_sensitive(not contact.blocked, True)
