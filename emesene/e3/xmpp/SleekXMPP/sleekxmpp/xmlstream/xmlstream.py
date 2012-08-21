@@ -26,14 +26,11 @@ import time
 import random
 import weakref
 import uuid
-try:
-    import queue
-except ImportError:
-    import Queue as queue
 
 from xml.parsers.expat import ExpatError
 
 import sleekxmpp
+from sleekxmpp.util import Queue, QueueEmpty
 from sleekxmpp.thirdparty.statemachine import StateMachine
 from sleekxmpp.xmlstream import Scheduler, tostring, cert
 from sleekxmpp.xmlstream.stanzabase import StanzaBase, ET, ElementBase
@@ -141,6 +138,17 @@ class XMLStream(object):
         #:     be consulted, even if they are not in the provided file.
         self.ca_certs = None
 
+        #: Path to a file containing a client certificate to use for
+        #: authenticating via SASL EXTERNAL. If set, there must also
+        #: be a corresponding `:attr:keyfile` value.
+        self.certfile = None
+
+        #: Path to a file containing the private key for the selected
+        #: client certificate to use for authenticating via SASL EXTERNAL.
+        self.keyfile = None
+
+        self._der_cert = None
+
         #: The time in seconds to wait for events from the event queue,
         #: and also the time between checks for the process stop signal.
         self.wait_timeout = WAIT_TIMEOUT
@@ -184,6 +192,7 @@ class XMLStream(object):
 
         #: The expected name of the server, for validation.
         self._expected_server_name = ''
+        self._service_name = ''
 
         #: The desired, or actual, address of the connected server.
         self.address = (host, int(port))
@@ -214,6 +223,10 @@ class XMLStream(object):
 
         #: If set to ``True``, attempt to use IPv6.
         self.use_ipv6 = True
+
+        #: Use CDATA for escaping instead of XML entities. Defaults
+        #: to ``False``.
+        self.use_cdata = False
 
         #: An optional dictionary of proxy settings. It may provide:
         #: :host: The host offering proxy services.
@@ -270,10 +283,10 @@ class XMLStream(object):
         self.end_session_on_disconnect = True
 
         #: A queue of stream, custom, and scheduled events to be processed.
-        self.event_queue = queue.Queue()
+        self.event_queue = Queue()
 
         #: A queue of string data to be sent over the stream.
-        self.send_queue = queue.Queue()
+        self.send_queue = Queue()
         self.send_queue_lock = threading.Lock()
         self.send_lock = threading.RLock()
 
@@ -461,8 +474,10 @@ class XMLStream(object):
 
         if self.default_domain:
             try:
-                self.address = self.pick_dns_answer(self.default_domain,
-                                                    self.address[1])
+                host, address, port = self.pick_dns_answer(self.default_domain,
+                                                           self.address[1])
+                self.address = (address, port)
+                self._service_name = host
             except StopIteration:
                 log.debug("No remaining DNS records to try.")
                 self.dns_answers = None
@@ -498,6 +513,8 @@ class XMLStream(object):
                 cert_policy = ssl.CERT_REQUIRED
 
             ssl_socket = ssl.wrap_socket(self.socket,
+                                         certfile=self.certfile,
+                                         keyfile=self.keyfile,
                                          ca_certs=self.ca_certs,
                                          cert_reqs=cert_policy,
                                          do_handshake_on_connect=False)
@@ -661,6 +678,9 @@ class XMLStream(object):
                               args=(reconnect, wait, send_close))
 
     def _disconnect(self, reconnect=False, wait=None, send_close=True):
+        if not reconnect:
+            self.auto_reconnect = False
+
         if self.end_session_on_disconnect or send_close:
             self.event('session_end', direct=True)
 
@@ -684,7 +704,6 @@ class XMLStream(object):
         # closed in the other direction. If we didn't
         # send a stream footer we don't need to wait
         # since the server won't know to respond.
-        self.auto_reconnect = reconnect
         if send_close:
             log.info('Waiting for %s from server', self.stream_footer)
             self.stream_end_event.wait(4)
@@ -706,6 +725,20 @@ class XMLStream(object):
             #clear your application state
             self.event("disconnected", direct=True)
             return True
+
+    def abort(self):
+        self.session_started_event.clear()
+        self.stop.set()
+        if self._disconnect_wait_for_threads:
+            self._wait_for_threads()
+        try:
+            self.socket.shutdown(Socket.SHUT_RDWR)
+            self.socket.close()
+            self.filesocket.close()
+        except Socket.error:
+            pass
+        self.state.transition_any(['connected', 'disconnected'], 'disconnected', func=lambda: True)
+        self.event("killed", direct=True)
 
     def reconnect(self, reattempt=True, wait=False, send_close=True):
         """Reset the stream's state and reconnect to the server."""
@@ -798,6 +831,8 @@ class XMLStream(object):
                 cert_policy = ssl.CERT_REQUIRED
 
             ssl_socket = ssl.wrap_socket(self.socket,
+                                         certfile=self.certfile,
+                                         keyfile=self.keyfile,
                                          ssl_version=self.ssl_version,
                                          do_handshake_on_connect=False,
                                          ca_certs=self.ca_certs,
@@ -866,9 +901,15 @@ class XMLStream(object):
             log.warn('CERT: Certificate has expired.')
             restart()
 
+        try:
+            total_seconds = cert_ttl.total_seconds()
+        except AttributeError:
+            # for Python < 2.7
+            total_seconds = (cert_ttl.microseconds + (cert_ttl.seconds + cert_ttl.days * 24 * 3600) * 10**6) / 10**6
+
         log.info('CERT: Time until certificate expiration: %s' % cert_ttl)
         self.schedule('Certificate Expiration',
-                      cert_ttl.seconds,
+                      total_seconds,
                       restart)
 
     def _start_keepalive(self, event):
@@ -1586,7 +1627,7 @@ class XMLStream(object):
                 try:
                     wait = self.wait_timeout
                     event = self.event_queue.get(True, timeout=wait)
-                except queue.Empty:
+                except QueueEmpty:
                     event = None
                 if event is None:
                     continue
@@ -1655,7 +1696,7 @@ class XMLStream(object):
                 else:
                     try:
                         data = self.send_queue.get(True, 1)
-                    except queue.Empty:
+                    except QueueEmpty:
                         continue
                 log.debug("SEND: %s", data)
                 enc_data = data.encode('utf-8')

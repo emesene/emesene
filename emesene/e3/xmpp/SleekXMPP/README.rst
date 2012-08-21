@@ -45,13 +45,11 @@ The latest source code for SleekXMPP may be found on `Github
 ``develop`` branch.
 
 **Latest Release**
-    - `1.1.8 <http://github.com/fritzy/SleekXMPP/zipball/1.1.8>`_
+    - `1.1.10 <http://github.com/fritzy/SleekXMPP/zipball/1.1.10>`_
 
 **Develop Releases**
     - `Latest Develop Version <http://github.com/fritzy/SleekXMPP/zipball/develop>`_
 
-**Older Stable Releases**
-    - `1.0 <http://github.com/fritzy/SleekXMPP/zipball/1.0>`_
 
 Installing DNSPython
 ---------------------
@@ -73,6 +71,7 @@ help with SleekXMPP.
 
 **Chat**
     `sleek@conference.jabber.org <xmpp:sleek@conference.jabber.org?join>`_
+
 
 Documentation and Testing
 -------------------------

@@ -68,10 +68,20 @@ class BaseXMPP(XMLStream):
         #: An identifier for the stream as given by the server.
         self.stream_id = None
 
-        #: The JabberID (JID) used by this connection.
+        #: The JabberID (JID) requested for this connection.
+        self.requested_jid = JID(jid)
+
+        #: The JabberID (JID) used by this connection,
+        #: as set after session binding. This may even be a
+        #: different bare JID than what was requested.
         self.boundjid = JID(jid)
 
         self._expected_server_name = self.boundjid.host
+        self._redirect_attempts = 0
+
+        #: The maximum number of consecutive see-other-host
+        #: redirections that will be followed before quitting.
+        self.max_redirects = 5
 
         self.session_bind_event = threading.Event()
 
@@ -91,13 +101,13 @@ class BaseXMPP(XMLStream):
         #: owner JIDs, as in the case for components. For clients
         #: which only have a single JID, see :attr:`client_roster`.
         self.roster = roster.Roster(self)
-        self.roster.add(self.boundjid.bare)
+        self.roster.add(self.boundjid)
 
         #: The single roster for the bound JID. This is the
         #: equivalent of::
         #:
         #:     self.roster[self.boundjid.bare]
-        self.client_roster = self.roster[self.boundjid.bare]
+        self.client_roster = self.roster[self.boundjid]
 
         #: The distinction between clients and components can be
         #: important, primarily for choosing how to handle the
@@ -144,6 +154,8 @@ class BaseXMPP(XMLStream):
                      MatchXPath("{%s}error" % self.stream_ns),
                      self._handle_stream_error))
 
+        self.add_event_handler('session_start',
+                               self._handle_session_start)
         self.add_event_handler('disconnected',
                                self._handle_disconnected)
         self.add_event_handler('presence_available',
@@ -591,7 +603,7 @@ class BaseXMPP(XMLStream):
 
     @resource.setter
     def resource(self, value):
-        log.warning("fulljid property deprecated. Use boundjid.full")
+        log.warning("fulljid property deprecated. Use boundjid.resource")
         self.boundjid.resource = value
 
     @property
@@ -656,6 +668,10 @@ class BaseXMPP(XMLStream):
     def getjidbare(self, fulljid):
         return fulljid.split('/', 1)[0]
 
+    def _handle_session_start(self, event):
+        """Reset redirection attempt count."""
+        self._redirect_attempts = 0
+
     def _handle_disconnected(self, event):
         """When disconnected, reset the roster"""
         self.roster.reset()
@@ -666,6 +682,15 @@ class BaseXMPP(XMLStream):
 
         if error['condition'] == 'see-other-host':
             other_host = error['see_other_host']
+            if not other_host:
+                log.warning("No other host specified.")
+                return
+
+            if self._redirect_attempts > self.max_redirects:
+                log.error("Exceeded maximum number of redirection attempts.")
+                return
+
+            self._redirect_attempts += 1
 
             host = other_host
             port = 5222
@@ -691,17 +716,13 @@ class BaseXMPP(XMLStream):
             msg['to'] = self.boundjid
         self.event('message', msg)
 
-    def _handle_available(self, presence):
-        pto = presence['to'].bare
-        pfrom = presence['from'].bare
-        self.roster[pto][pfrom].handle_available(presence)
+    def _handle_available(self, pres):
+        self.roster[pres['to']][pres['from']].handle_available(pres)
 
-    def _handle_unavailable(self, presence):
-        pto = presence['to'].bare
-        pfrom = presence['from'].bare
-        self.roster[pto][pfrom].handle_unavailable(presence)
+    def _handle_unavailable(self, pres):
+        self.roster[pres['to']][pres['from']].handle_unavailable(pres)
 
-    def _handle_new_subscription(self, stanza):
+    def _handle_new_subscription(self, pres):
         """Attempt to automatically handle subscription requests.
 
         Subscriptions will be approved if the request is from
@@ -713,8 +734,8 @@ class BaseXMPP(XMLStream):
         If a subscription is accepted, a request for a mutual
         subscription will be sent if :attr:`auto_subscribe` is ``True``.
         """
-        roster = self.roster[stanza['to'].bare]
-        item = self.roster[stanza['to'].bare][stanza['from'].bare]
+        roster = self.roster[pres['to']]
+        item = self.roster[pres['to']][pres['from']]
         if item['whitelisted']:
             item.authorize()
         elif roster.auto_authorize:
@@ -724,30 +745,20 @@ class BaseXMPP(XMLStream):
         elif roster.auto_authorize == False:
             item.unauthorize()
 
-    def _handle_removed_subscription(self, presence):
-        pto = presence['to'].bare
-        pfrom = presence['from'].bare
-        self.roster[pto][pfrom].unauthorize()
+    def _handle_removed_subscription(self, pres):
+        self.roster[pres['to']][pres['from']].handle_unauthorize(pres)
 
-    def _handle_subscribe(self, presence):
-        pto = presence['to'].bare
-        pfrom = presence['from'].bare
-        self.roster[pto][pfrom].handle_subscribe(presence)
+    def _handle_subscribe(self, pres):
+        self.roster[pres['to']][pres['from']].handle_subscribe(pres)
 
-    def _handle_subscribed(self, presence):
-        pto = presence['to'].bare
-        pfrom = presence['from'].bare
-        self.roster[pto][pfrom].handle_subscribed(presence)
+    def _handle_subscribed(self, pres):
+        self.roster[pres['to']][pres['from']].handle_subscribed(pres)
 
-    def _handle_unsubscribe(self, presence):
-        pto = presence['to'].bare
-        pfrom = presence['from'].bare
-        self.roster[pto][pfrom].handle_unsubscribe(presence)
+    def _handle_unsubscribe(self, pres):
+        self.roster[pres['to']][pres['from']].handle_unsubscribe(pres)
 
-    def _handle_unsubscribed(self, presence):
-        pto = presence['to'].bare
-        pfrom = presence['from'].bare
-        self.roster[pto][pfrom].handle_unsubscribed(presence)
+    def _handle_unsubscribed(self, pres):
+        self.roster[pres['to']][pres['from']].handle_unsubscribed(pres)
 
     def _handle_presence(self, presence):
         """Process incoming presence stanzas.

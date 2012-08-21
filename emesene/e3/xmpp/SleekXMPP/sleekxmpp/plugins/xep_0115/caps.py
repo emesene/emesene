@@ -33,15 +33,16 @@ class XEP_0115(BasePlugin):
     description = 'XEP-0115: Entity Capabilities'
     dependencies = set(['xep_0030', 'xep_0128', 'xep_0004'])
     stanza = stanza
+    default_config = {
+        'hash': 'sha-1',
+        'caps_node': None,
+        'broadcast': True
+    }
 
     def plugin_init(self):
         self.hashes = {'sha-1': hashlib.sha1,
                        'sha1': hashlib.sha1,
                        'md5': hashlib.md5}
-
-        self.hash = self.config.get('hash', 'sha-1')
-        self.caps_node = self.config.get('caps_node', None)
-        self.broadcast = self.config.get('broadcast', True)
 
         if self.caps_node is None:
             ver = sleekxmpp.__version__
@@ -103,12 +104,17 @@ class XEP_0115(BasePlugin):
         self.xmpp['xep_0030'].add_feature(stanza.Capabilities.namespace)
 
     def _filter_add_caps(self, stanza):
-        if isinstance(stanza, Presence) and self.broadcast:
-            ver = self.get_verstring(stanza['from'])
-            if ver:
-                stanza['caps']['node'] = self.caps_node
-                stanza['caps']['hash'] = self.hash
-                stanza['caps']['ver'] = ver
+        if not isinstance(stanza, Presence) or not self.broadcast:
+            return stanza
+
+        if stanza['type'] not in ('available', 'chat', 'away', 'dnd', 'xa'):
+            return stanza
+
+        ver = self.get_verstring(stanza['from'])
+        if ver:
+            stanza['caps']['node'] = self.caps_node
+            stanza['caps']['hash'] = self.hash
+            stanza['caps']['ver'] = ver
         return stanza
 
     def _handle_caps(self, presence):
