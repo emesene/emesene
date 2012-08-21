@@ -1,6 +1,7 @@
 {
   "name": "emesene",
-  "version": "0.3.0",
+  "version": "2.12.5",
+  "dev-version": "2.12.6-dev",
   "author": "emesene team <emesene@emesene.org>",
   "description": "emesene is a chat program that allows you to connect to different networks like MSN, Gtalk, Facebook chat, Jabber and others.",
   "contributors": [
