@@ -22,6 +22,7 @@ import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 from PyQt4.QtCore import Qt
 from gui.qt4ui import widgets
+from gui.qt4ui.Utils import tr
 
 import extension
 import gui
@@ -104,6 +105,33 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
                 self.contact_list)
             GroupMenu = extension.get_default('menu group')
             self.group_menu = GroupMenu(group_handler)
+
+    def _on_social_request(self, conn_url):
+        #FIXME: move this into base class or session class?
+        def get_token(token_url):
+            '''strips the access token from an url'''
+            if token_url is None:
+                return token_url
+
+            if token_url.find("#access_token=") == -1:
+                return None
+
+            pattern_start_token = "#access_token="
+            pattern_end_token = "&expires_in"
+            start_token = token_url.find(pattern_start_token) + len(pattern_start_token)
+            end_token = token_url.find(pattern_end_token)
+            return token_url[start_token:end_token]
+
+        def set_token(token_url):
+            '''callback used by webkit'''
+            self.session.config.facebook_token = get_token(token_url)
+            #only activate service if we have an access token
+            activate = bool(self.session.config.facebook_token is not None)
+            self.session.activate_social_services(activate)
+
+        dialog = extension.get_default('dialog')
+        dialog.web_window(tr("Connect Emesene and Facebook"),
+                              conn_url, set_token)
 
     def _on_contact_menu_selected(self, contact, point):
         '''callback for the contact-menu-selected signal'''

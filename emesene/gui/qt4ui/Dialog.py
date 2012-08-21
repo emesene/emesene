@@ -27,6 +27,7 @@ from PyQt4.QtCore import Qt
 from gui.qt4ui import Utils
 from gui.qt4ui.Utils import tr
 from gui.qt4ui import widgets
+from PyQt4 import QtWebKit
 
 import e3
 import gui
@@ -44,7 +45,7 @@ class Dialog(object):
     @classmethod
     def broken_profile(cls, close_cb, url):
         '''a dialog that asks you to fix your profile'''
-        message = _('''\
+        message = tr('''\
 Your live profile seems to be broken,
 which will cause you to experience issues
 with your display name, picture
@@ -149,6 +150,12 @@ Do you want to fix your profile now?''')
         dialog = EntryDialog(tr('New group name:'), group.name, title)
         response = dialog.exec_()
         response_cb(response, group, dialog.text())
+
+    @classmethod
+    def web_window(cls, title, url, callback):
+        '''returns a window with a webview'''
+        dialog = WebWindow(title, url, callback)
+        dialog.exec_()
 
     @classmethod
     def contact_added_you(cls, accounts, response_cb,
@@ -522,7 +529,7 @@ Do you want to fix your profile now?''')
 
     @classmethod
     def contact_information_dialog(cls, session, account):
-        '''shows information about the account'''
+        '''shows information about the account'''
         raise NotImplementedError
 
     @classmethod
@@ -759,7 +766,7 @@ class ContactAdded(QtGui.QDialog):
         icon_reject = QtGui.QIcon.fromTheme('edit-delete')
         icon_remind_me = QtGui.QIcon.fromTheme('go-next')
         icon_quit = QtGui.QIcon.fromTheme('application-exit')
-        QtGui.QWidget.__init__(self) 
+        QtGui.QWidget.__init__(self)
         self.setWindowTitle(tr("Add contact"))
         self.center()
         self.tab_widget = QtGui.QTabWidget()
@@ -776,7 +783,7 @@ class ContactAdded(QtGui.QDialog):
                 text = '<b>%s</b>' % accounts[i][0]
             text += tr(' has added you.\nDo you want to add '
                        'him/her to your contact list?\n')
-            text = text.replace('\n', '<br />') 
+            text = text.replace('\n', '<br />')
             text_lbl[i].setText(text)
             icon_lbl[i].setPixmap(icon_info.pixmap(30, 30))
             add_btn.append(QtGui.QPushButton(tr("Add")))
@@ -787,9 +794,9 @@ class ContactAdded(QtGui.QDialog):
             reject_btn[i].setIcon(icon_reject)
             remind_btn[i].setIcon(icon_remind_me)
             quit_btn[i].setIcon(icon_quit)
-            QtCore.QObject.connect(add_btn[i],QtCore.SIGNAL('clicked()'), 
+            QtCore.QObject.connect(add_btn[i],QtCore.SIGNAL('clicked()'),
                  lambda account=accounts[i][0]:self.add(account))
-            QtCore.QObject.connect(reject_btn[i],QtCore.SIGNAL('clicked()'), 
+            QtCore.QObject.connect(reject_btn[i],QtCore.SIGNAL('clicked()'),
                  lambda account=accounts[i][0]:self.reject_(account))
             QtCore.QObject.connect(remind_btn[i],QtCore.SIGNAL('clicked()'), self.remove_tab)
             QtCore.QObject.connect(quit_btn[i],QtCore.SIGNAL('clicked()'), self.close)
@@ -829,9 +836,9 @@ class ContactAdded(QtGui.QDialog):
         if len(self._tabs) == 0:
             self._done_cb(self._results)
 
-    def center(self): 
-        screen = QtGui.QDesktopWidget().screenGeometry() 
-        size = self.geometry() 
+    def center(self):
+        screen = QtGui.QDesktopWidget().screenGeometry()
+        size = self.geometry()
         self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
 
 class EntryDialog (OkCancelDialog):
@@ -927,3 +934,31 @@ class InviteWindow(OkCancelDialog):
             return
 
         self.callback(contacts.account)
+
+
+class WebWindow(StandardButtonDialog):
+    '''A class for a progressbar dialog'''
+
+    def __init__(self, title, url, callback=None, parent=None):
+        '''Constructor. Packs widgets'''
+        StandardButtonDialog.__init__(self, title, False, parent)
+        self.add_button(QtGui.QDialogButtonBox.Cancel)
+        self._callback = callback
+
+        bro = QtWebKit.QWebView()
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(bro)
+        self.setLayout(vbox)
+        bro.setMinimumWidth(250)
+        bro.setMinimumHeight(250)
+        bro.urlChanged.connect(self._url_changed_cb)
+        qurl = QtCore.QUrl.fromEncoded(url)
+        bro.load(qurl)
+
+    def _url_changed_cb(self, qurl):
+        #FIXME: this is ugly
+        if qurl.host() == 'emesene.github.com':
+            self._callback(uri)
+
+    def reject_response(self):
+        pass
