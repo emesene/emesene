@@ -1025,63 +1025,75 @@ class LoggerProcess(threading.Thread):
         '''add all contacts, groups and relations to the database'''
         self.input.put(('add_contact_by_group', (contacts, groups, None)))
 
+class ExporterTxt():
+    NAME = 'Exporter Txt'
+    DESCRIPTION = 'export logs as simple text'
+    AUTHOR = 'emesene team'
+    WEBSITE = 'www.emesene.org'
 
-def save_logs_as_txt(results, handle):
-    '''save the chats in results (from get_chats or get_chats_between) as txt
-    to handle (file like object)
+    @staticmethod
+    def export(results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as txt
+        to handle (file like object)
 
-    the caller is responsible of closing the handle
-    '''
+        the caller is responsible of closing the handle
+        '''
 
-    for stat, timestamp, message, nick, account in results:
-        date_text = time.strftime('[%c]', time.gmtime(timestamp))
-        handle.write("%s %s: %s\n" % (date_text, nick, message))
+        for stat, timestamp, message, nick, account in results:
+            date_text = time.strftime('[%c]', time.gmtime(timestamp))
+            handle.write("%s %s: %s\n" % (date_text, nick, message))
 
+class ExporterXml():
+    NAME = 'Exporter Xml'
+    DESCRIPTION = 'export logs as xml data'
+    AUTHOR = 'emesene team'
+    WEBSITE = 'www.emesene.org'
 
-def save_logs_as_xml(results, handle):
-    '''save the chats in results (from get_chats or get_chats_between) as xml
-    to handle (file like object)
+    @staticmethod
+    def export(results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as xml
+        to handle (file like object)
 
-    the caller is responsible of closing the handle
-    '''
-    from xml.dom.minidom import Document
+        the caller is responsible of closing the handle
+        '''
+        from xml.dom.minidom import Document
 
-    doc = Document()
-    doc.appendChild(doc.createProcessingInstruction("xml-stylesheet",
+        doc = Document()
+        doc.appendChild(doc.createProcessingInstruction("xml-stylesheet",
                                 "type=\"text/css\" href=\"conversation.css\""))
-    conversation = doc.createElement("conversation")
-    doc.appendChild(conversation)
+        conversation = doc.createElement("conversation")
+        doc.appendChild(conversation)
 
-    for stat, timestamp, message, nick, account in results:
+        for stat, timestamp, message, nick, account in results:
 
-        timestamp_tag = doc.createElement("timestamp")
-        date_text = time.strftime('[%c]', time.gmtime(timestamp))
-        timestamp_text = doc.createTextNode(date_text)
-        timestamp_tag.appendChild(timestamp_text)
+            timestamp_tag = doc.createElement("timestamp")
+            date_text = time.strftime('[%c]', time.gmtime(timestamp))
+            timestamp_text = doc.createTextNode(date_text)
+            timestamp_tag.appendChild(timestamp_text)
 
-        nick_tag = doc.createElement("nick")
-        nick_text = doc.createTextNode(nick)
-        nick_tag.appendChild(nick_text)
-        timestamp_tag.appendChild(nick_tag)
+            nick_tag = doc.createElement("nick")
+            nick_text = doc.createTextNode(nick)
+            nick_tag.appendChild(nick_text)
+            timestamp_tag.appendChild(nick_tag)
 
-        status_tag = doc.createElement("status")
-        status_text = doc.createTextNode(str(stat))
-        status_tag.appendChild(status_text)
-        timestamp_tag.appendChild(status_tag)
+            status_tag = doc.createElement("status")
+            status_text = doc.createTextNode(str(stat))
+            status_tag.appendChild(status_text)
+            timestamp_tag.appendChild(status_tag)
 
-        account_tag = doc.createElement("account")
-        account_text = doc.createTextNode(account)
-        account_tag.appendChild(account_text)
-        timestamp_tag.appendChild(account_tag)
+            account_tag = doc.createElement("account")
+            account_text = doc.createTextNode(account)
+            account_tag.appendChild(account_text)
+            timestamp_tag.appendChild(account_tag)
 
-        message_tag = doc.createElement("message")
-        message_text = doc.createTextNode(message)
-        message_tag.appendChild(message_text)
-        timestamp_tag.appendChild(message_tag)
+            message_tag = doc.createElement("message")
+            message_text = doc.createTextNode(message)
+            message_tag.appendChild(message_text)
+            timestamp_tag.appendChild(message_tag)
 
-        conversation.appendChild(timestamp_tag)
+            conversation.appendChild(timestamp_tag)
 
-    handle.write(doc.toprettyxml(indent="  ",  encoding="UTF-8"))
+        handle.write(doc.toprettyxml(indent="  ",  encoding="UTF-8"))
 
 
 def log_message(session, members, message, sent, error=False, cid=None):
