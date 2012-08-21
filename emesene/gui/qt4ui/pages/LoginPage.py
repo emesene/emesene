@@ -204,6 +204,7 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         account_combo.setMaximumWidth(320)
         account_combo.setEditable(1)
         account_combo.setInsertPolicy(QtGui.QComboBox.NoInsert)
+        account_combo.setFocus()
 
         login_btn = widget_d['login_btn']
         login_btn.setAutoDefault(True)
