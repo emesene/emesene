@@ -37,14 +37,25 @@ defaults write ${PWD}/../dist/emesene.app/Contents/Info LSMinimumSystemVersion -
 
 if [[ "$1" == *dorelease* ]]
 then
-    #Last stable
     mkdir ../dist/emesene
     mv ../dist/emesene.app ../dist/emesene
     cp Uninstall.command ../dist/emesene
     chmod +x ../dist/emesene/Uninstall.command
     ln -s /Applications ../dist/emesene
-    mkdir ../dist/emesene/.background
-    cp emesenedmg.png ../dist/emesene/.background
+    cp emesenedmg.png ../dist/emesene
+    cp VolumeIcon.icns ../dist/emesene/.VolumeIcon.icns
+    hdiutil detach -quiet /Volumes/emesene
+    hdiutil create -quiet ${PWD}/../dist/emesenetemp.dmg -srcfolder ${PWD}/../dist/emesene -volname emesene -format UDRW -ov
+    hdiutil attach -quiet ${PWD}/../dist/emesenetemp.dmg
+    SetFile -c icnC /Volumes/emesene/.VolumeIcon.icns
+    SetFile -a C /Volumes/emesene
+    echo "Please set the background and icon location now. This must be done manually. Then hit enter..."
+    read
+    SetFile -a V /Volumes/emesene/emesenedmg.png
+    hdiutil detach /Volumes/emesene -quiet
+    dmgversion=`echo $version | tr -d "."`
+    hdiutil convert ${PWD}/../dist/emesenetemp.dmg -format UDZO -imagekey zlib-level=9 -quiet -o ${PWD}/../dist/emesene$dmgversion.dmg
+    rm ../dist/emesenetemp.dmg
 fi
 
 echo "Successfully built emesene $version".
