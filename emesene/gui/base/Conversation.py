@@ -593,8 +593,12 @@ class Conversation(object):
         '''update the data on the conversation'''
         if len(self.members) == 1:
             self._update_single_information(self.members[0])
+            is_sensitive = True
         elif len(self.members) > 1:
             self.update_group_information()
+            is_sensitive = False
+
+        self.toolbar.set_ublock_sensitive(is_sensitive)
 
     def update_p2p(self, account, _type, *what):
         ''' update the p2p data in the conversation (custom emoticons) '''

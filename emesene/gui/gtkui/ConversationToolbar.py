@@ -85,6 +85,9 @@ class ConversationToolbar(gtk.Toolbar):
         else:
             self.toggle_avatar.set_stock_id(toggle_avatar_icon)
 
+    def set_ublock_sensitive(self, is_sensitive):
+        self.ublock.set_sensitive(is_sensitive)
+
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         self.ublock.set_sensitive(force_sensitive_block_button or is_sensitive)
         self.toggle_avatar.set_sensitive(force_sensitive_block_button or is_sensitive)
