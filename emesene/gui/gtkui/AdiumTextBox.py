@@ -57,6 +57,7 @@ class OutputView(webkit.WebView):
         self.handler = handler
         self.theme = theme
         self.ready = True
+        self.load_ready = True
         self.pending = Queue.Queue()
         self.connect('load-finished', self._loading_finished_cb)
         self.connect('populate-popup', self.on_populate_popup)
@@ -67,10 +68,11 @@ class OutputView(webkit.WebView):
     def _loading_finished_cb(self, *args):
         '''callback called when the content finished loading
         '''
-        self.ready = True
-        while not self.pending.empty() and self.ready:
+        self.load_ready = True
+        while not self.pending.empty() and self.load_ready:
             function, args = self.pending.get(False)
             function(*args)
+        self.ready = self.load_ready
 
     def delayed_call(self, function, *args):
         '''call a function or add it to the pending queue'''
@@ -81,8 +83,9 @@ class OutputView(webkit.WebView):
 
     def _load_string(self, *args):
         '''call load_string or add it to the pending queue'''
-        self.load_string(*args)
         self.ready = False
+        self.load_ready = False
+        gobject.idle_add(self.load_string, *args)
 
     def _error_cb(self, view, message, line, source_id):
         '''called when a message is sent to the console'''
@@ -102,7 +105,7 @@ class OutputView(webkit.WebView):
         if the renderer finished loading, append it to
         pending if still loading'''
         function = self.theme.format(msg, scroll)
-        self.delayed_call(self.execute_script, function)
+        self.delayed_call(gobject.idle_add, self.execute_script, function)
 
     def _set_text(self, text):
         '''set the text on the widget'''
