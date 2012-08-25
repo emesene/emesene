@@ -521,9 +521,9 @@ Do you want to fix your profile now?''')
         response_cb(response, *args)
 
     @classmethod
-    def contact_information_dialog(cls, session, account):
-        '''shows information about the account'''
-        raise NotImplementedError
+    def contact_information_dialog(cls, session, account):
+        '''shows information about the account'''
+        raise NotImplementedError
 
     @classmethod
     def select_font(cls, style, callback):
