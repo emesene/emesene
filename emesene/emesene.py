@@ -200,6 +200,9 @@ class Controller(object):
                 e3.common.notification.Notification)
         extension.category_register('history exporter', e3.Logger.ExporterTxt)
         extension.register('history exporter', e3.Logger.ExporterXml)
+        extension.register('history exporter', e3.Logger.ExporterHtml)
+        extension.register('history exporter', e3.Logger.ExporterCsv)
+        extension.register('history exporter', e3.Logger.ExporterJSON)
 
         if self.config.session is None:
             default_id = extension.get_category('session').default_id

@@ -18,6 +18,7 @@
 
 import sys
 sys.path.append('..')
+import html
 import locations
 import notification
 import Collections

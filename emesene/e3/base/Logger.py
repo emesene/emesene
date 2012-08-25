@@ -17,9 +17,11 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-import shutil
+import csv
+import json
 import time
 import Queue
+import shutil
 import threading
 import sqlite3.dbapi2 as sqlite
 
@@ -29,7 +31,6 @@ import logging
 log = logging.getLogger('e3.base.Logger')  # oh snap!
 
 import e3
-
 
 class Account(object):
     '''a class to store account data'''
@@ -1024,6 +1025,177 @@ class LoggerProcess(threading.Thread):
     def add_contact_by_group(self, contacts, groups):
         '''add all contacts, groups and relations to the database'''
         self.input.put(('add_contact_by_group', (contacts, groups, None)))
+
+class ExporterCsv():
+    NAME = 'Exporter CSV'
+    DESCRIPTION = 'export logs as csv'
+    AUTHOR = 'marianoguerra'
+    WEBSITE = 'www.emesene.org'
+
+    @classmethod
+    def export(cls, results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as
+        csv to handle (file like object)
+
+        the caller is responsible of closing the handle
+        '''
+
+        writer = csv.writer(handle)
+        for stat, timestamp, message, nick, account in results:
+            date_text = time.strftime('%c', time.gmtime(timestamp))
+            writer.writerow((date_text, nick, message, account, stat, timestamp))
+
+class ExporterJSON():
+    NAME = 'Exporter JSON'
+    DESCRIPTION = 'export logs as json'
+    AUTHOR = 'marianoguerra'
+    WEBSITE = 'www.emesene.org'
+
+    @classmethod
+    def export(cls, results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as
+        json to handle (file like object)
+
+        the caller is responsible of closing the handle
+        '''
+
+        convs = []
+
+        for stat, timestamp, message, nick, account in results:
+            convs.append({
+                "nick": nick,
+                "message": message,
+                "account": account,
+                "stat": stat,
+                "timestamp": timestamp
+            })
+
+        json.dump(convs, handle)
+
+class ExporterHtml():
+    NAME = 'Exporter Html'
+    DESCRIPTION = 'export logs as html'
+    AUTHOR = 'marianoguerra'
+    WEBSITE = 'www.emesene.org'
+
+    BASE_STYLE = """
+html, body, div, span{
+ margin: 0;
+ padding: 0;
+}
+
+body{
+ color: #333333;
+ font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+ font-size: 14px;
+ line-height: 20px;
+}
+
+.message{
+ width: 78%;
+ margin-left: 10%;
+ margin-top: 1em;
+ padding: 1%;
+ border-radius: 4px;
+}
+
+.header, .body, .footer{
+ width: 98%;
+}
+
+.header{
+ font-size: small;
+}
+
+.footer{
+ font-size: x-small;
+ text-align: right;
+ color: #555;
+}
+
+.nick{
+ font-weight: bold;
+}
+
+.account{
+ font-size: small;
+ color: #555;
+ float: right;
+}
+"""
+
+    @classmethod
+    def make_base_page(cls):
+        '''return the basic page structure and the tag where you have to
+        add the conversation'''
+        html = e3.common.html
+
+        convs = html.Div(class_="conversations")
+        head = html.Head(html.Title("conversations"))
+
+        page = html.Html(head, html.Body(convs))
+
+        return page, head, convs
+
+    @classmethod
+    def make_message(cls, stat, timestamp, message, nick, account):
+        html = e3.common.html
+
+        div = html.Div
+        span = html.Span
+        date_text = time.strftime('[%c]', time.gmtime(timestamp))
+        account_class = "account-" + str(hash(account))
+
+        return div(
+                div(
+                    span(nick, class_="nick"),
+                    span(account, class_="account"),
+                    class_="header"),
+                div(message, class_="body"),
+                div(span(date_text, class_="date"), class_="footer"),
+
+                class_="message " + account_class)
+
+
+    @classmethod
+    def export(cls, results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as
+        html to handle (file like object)
+
+        the caller is responsible of closing the handle
+        '''
+        html = e3.common.html
+        colors = {}
+
+        def gen_color(account):
+            hue = hash(account) % 256
+            return "hsl(%d, 100%%, 90%%)" % hue
+
+        def color_generator(account):
+            color = colors.get(account, None)
+
+            if color is None:
+                color = gen_color(account)
+                colors[account] = color
+
+            return color
+
+        page, head, body = cls.make_base_page()
+
+        for stat, timestamp, message, nick, account in results:
+            color_generator(account)
+            body.append(cls.make_message(stat, timestamp, message, nick,
+                account))
+
+        styles = []
+        for account, color in colors.items():
+            account_class = ".account-" + str(hash(account))
+            styles.append(account_class + "{background-color:" + color + "}")
+
+        head.append(html.Style(cls.BASE_STYLE))
+        head.append(html.Style("\n".join(styles)))
+
+        handle.write(str(page))
 
 class ExporterTxt():
     NAME = 'Exporter Txt'
