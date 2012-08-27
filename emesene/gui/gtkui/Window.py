@@ -33,8 +33,7 @@ class Window(gtk.Window):
     AUTHOR = 'Mariano Guerra'
     WEBSITE = 'www.emesene.org'
 
-    def __init__(self, cb_on_close, height=410, width=250,
-                 posx=100, posy=100):
+    def __init__(self, cb_on_close, height=410, width=250, posx=100, posy=100):
         gtk.Window.__init__(self)
         self.box = gtk.HPaned()
         self.box.set_can_focus(False)

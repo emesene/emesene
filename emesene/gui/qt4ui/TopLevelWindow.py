@@ -37,24 +37,23 @@ class TopLevelWindow (QtGui.QMainWindow):
     AUTHOR = 'Gabriele "Whisky" Visconti'
     WEBSITE = ''
 
-    def __init__(self, cb_on_close):
-        log.debug('Creating a new main window!')
+    def __init__(self, cb_on_close, height=410, width=250, posx=100, posy=100):
         QtGui.QMainWindow.__init__(self)
-        self._content_type = 'empty'
         self._cb_on_close = cb_on_close
-        self._given_cb_on_close = cb_on_close
 
         self.cb_on_close_conv = cb_on_close
         self.cb_on_quit = cb_on_close
 
-        self._content = None
         self._content_main = None
         self._content_conv = None
 
+        self.set_location(width, height, posx, posy)
+
         self.setObjectName('mainwindow')
         self.setWindowIcon(QtGui.QIcon(gui.theme.image_theme.logo))
-        self._page_stack = QtGui.QStackedWidget()
-        self.setCentralWidget(self._page_stack)
+
+        self.splitter = QtGui.QSplitter()
+        self.setCentralWidget(self.splitter)
 
     def _get_content_conv(self):
         '''content getter'''
@@ -62,9 +61,16 @@ class TopLevelWindow (QtGui.QMainWindow):
 
     def _set_content_conv(self, content_conv):
         '''content setter'''
+        #w = self.splitter.sizes()[0]
         if self._content_conv:
-            del self._content_conv
+            self._content_conv.hide()
+            self._content_conv.setParent(None)
+            self._content_conv.destroy()
         self._content_conv = content_conv
+        self.splitter.insertWidget(1, self._content_conv)
+        #else:
+        #    self.resize(self.set_or_get_width(w),
+        #                self.set_or_get_height(0))
 
     content_conv = property(_get_content_conv, _set_content_conv)
 
@@ -74,16 +80,14 @@ class TopLevelWindow (QtGui.QMainWindow):
 
     def _set_content_main(self, content_main):
         '''content setter'''
-        #FIXME: check this
         if self._content_main:
-            del self._content_main
+            self._content_main.hide()
+            self._content_main.setParent(None)
+            self._content_main.destroy()
         self._content_main = content_main
+        self.splitter.insertWidget(0, self._content_main)
 
     content_main = property(_get_content_main, _set_content_main)
-
-    def clear(self):
-        '''remove the content from the main window'''
-        pass
 
     def iconify(self):
         '''Iconifies the window'''
@@ -92,12 +96,22 @@ class TopLevelWindow (QtGui.QMainWindow):
     def present(self, b_single_window=False):
         '''(Tries to) raise the window'''
         QtGui.QMainWindow.activateWindow(self)
+        if not b_single_window:
+            self.set_location()
 
     def set_location(self, width, height, posx, posy, single_window=False):
         '''Sets size and position on screen '''
-        #FIXME: single window
-        self.resize(width, height)
-        self.move(posx, posy)
+        if single_window:
+            size = self.size()
+            if self.is_maximized():
+                self.splitter.setSizes([size.width()-width, width])
+            else:
+                self.resize(self.set_or_get_width(width+size.width()), 
+                   self.set_or_get_height(size.height()))
+                self.splitter.setSizes([size.width(), width+size.width()])
+        else:
+            self.resize(self.set_or_get_width(width), self.set_or_get_height(height))
+            self.move(self.set_or_get_posx(posx), self.set_or_get_posy(posy))
 
     def get_dimensions(self):
         '''
@@ -112,8 +126,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         connecting_window_cls = extension.get_default('connecting window')
         connecting_page = connecting_window_cls(on_cancel_login,
                                                 avatar_path, config)
-        self._content_type = 'connecting'
-        self._switch_to_page(connecting_page)
+        self.content_main = connecting_page
         self.menuBar().hide()
 
     def go_conversation(self, session, on_close):
@@ -121,10 +134,8 @@ class TopLevelWindow (QtGui.QMainWindow):
         conversation_window_cls = extension.get_default('conversation window')
         conversation_page = conversation_window_cls(session,
                             on_last_close=self._on_last_tab_close, parent=self)
-        self._content_type = 'conversation'
+
         self.content_conv = conversation_page
-        self._switch_to_page(conversation_page)
-        self.menuBar().hide()
 
     def go_login(self, callback, on_preferences_changed, config=None,
                  config_dir=None, config_path=None, proxy=None,
@@ -136,9 +147,7 @@ class TopLevelWindow (QtGui.QMainWindow):
                                       config_dir, config_path, proxy,
                                       use_http, use_ipv6,
                                       session_id, cancel_clicked, no_autologin)
-        self._content_type = 'login'
-        if not login_page.autologin_started:
-            self._switch_to_page(login_page)
+        self.content_main = login_page
         self.setMenuBar(None)
 
     def go_main(self, session, on_new_conversation, quit_on_close=False):
@@ -146,8 +155,8 @@ class TopLevelWindow (QtGui.QMainWindow):
         level window and shows it'''
         main_window_cls = extension.get_default('main window')
         main_page = main_window_cls(session, on_new_conversation, self.setMenuBar)
-        self._content_type = 'main'
-        self._switch_to_page(main_page)
+
+        self.content_main = main_page
         self._setup_main_menu(session, main_page.contact_list)
 
         # hide the main window only when the user is connected
@@ -166,20 +175,8 @@ class TopLevelWindow (QtGui.QMainWindow):
 
     def on_disconnect(self, cb_on_close):
         '''called when the user is disconnected'''
-        self.content.unsubscribe_signals()
+        self.content_main.unsubscribe_signals()
         self._cb_on_close = cb_on_close
-
-    def _get_content(self):
-        '''Getter method for propery "content"'''
-        return self._content
-
-    content = property(_get_content)
-
-    def _get_content_type(self):
-        ''' Getter method for "content_type" property'''
-        return self._content_type
-
-    content_type = property(_get_content_type)
 
     def _on_last_tab_close(self):
         '''Slot called when the user closes the last tab in
@@ -196,20 +193,30 @@ class TopLevelWindow (QtGui.QMainWindow):
         menu = main_menu_cls(menu_hnd, session)
         self.setMenuBar(menu)
 
-    def _switch_to_page(self, page_widget):
-        ''' Shows the given page '''
-        index = self._page_stack.indexOf(page_widget)
-        if index == -1:
-            index = self._page_stack.addWidget(page_widget)
-        self._page_stack.setCurrentIndex(index)
-        self._content = page_widget
-        if self.content_type != 'conversation':
-            self._content_main = page_widget
-
     def save_dimensions(self):
         '''save the window dimensions'''
-        #FIXME: implement
-        pass
+        width, height, posx, posy = self.get_dimensions()
+
+        self.set_or_get_width(width)
+        self.set_or_get_height(height)
+        self.set_or_get_posx(posx)
+        self.set_or_get_posy(posy)
+
+    def set_or_get_height(self, height=0):
+        self._height = height if height > 0 else self._height
+        return self._height
+
+    def set_or_get_width(self, width=0):
+        self._width = width if width > 0 else self._width
+        return self._width
+
+    def set_or_get_posx(self, posx=None):
+        self._posx = posx if posx != None and posx > -self._width else self._posx
+        return self._posx
+
+    def set_or_get_posy(self, posy=-1):
+        self._posy = posy if posy != None and posy > -self._height else self._posy
+        return self._posy
 
 # -------------------- QT_OVERRIDE
 

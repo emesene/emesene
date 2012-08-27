@@ -190,8 +190,9 @@ class MainPage (QtGui.QWidget, gui.MainWindowBase):
     def unsubscribe_signals(self, close=None):
         '''callback called when the disconnect option is selected'''
         gui.MainWindowBase.unsubscribe_signals(self)
-        self.panel.remove_subscriptions()
-        self.panel = None
+        if self.panel is not None:
+            self.panel.remove_subscriptions()
+            self.panel = None
 
         self.contact_list.contact_menu_selected.unsubscribe(
             self._on_contact_menu_selected)
