@@ -732,7 +732,7 @@ class YesNoDialog (StandardButtonDialog):
     def set_reject_response(self, response):
         self._reject_response = response
 
-class ContactAdded(QtGui.QWidget):
+class ContactAdded(QtGui.QDialog):
 
     def __init__(self, accounts, done_cb, expanding=False, parent=None):
         '''I intialize {tab, gridLayout, add_btn, reject_btn, remind_btn, quit_btn, text_lbl, icon_lbl}
@@ -788,13 +788,11 @@ class ContactAdded(QtGui.QWidget):
             remind_btn[i].setIcon(icon_remind_me)
             quit_btn[i].setIcon(icon_quit)
             QtCore.QObject.connect(add_btn[i],QtCore.SIGNAL('clicked()'), 
-                (lambda account=accounts[i][0]:self.add(account)))
+                 lambda account=accounts[i][0]:self.add(account))
             QtCore.QObject.connect(reject_btn[i],QtCore.SIGNAL('clicked()'), 
-                (lambda account=accounts[i][0]:self.reject(account)))
+                 lambda account=accounts[i][0]:self.reject_(account))
             QtCore.QObject.connect(remind_btn[i],QtCore.SIGNAL('clicked()'), self.remove_tab)
             QtCore.QObject.connect(quit_btn[i],QtCore.SIGNAL('clicked()'), self.close)
-            gridLayout.setSpacing(3)
-            gridLayout.setContentsMargins(3, 3, 3, 3)
             gridLayout.addWidget(icon_lbl[i], 3, 0)
             gridLayout.addWidget(text_lbl[i], 3, 1, 1, 3)
             gridLayout.addWidget(add_btn[i], 4, 0)
@@ -808,12 +806,12 @@ class ContactAdded(QtGui.QWidget):
 
         self.setLayout(vbox)
 
-    def add(self,account):
+    def add(self, account):
         self._results['accepted'].append(account)
         self._finish(account)
         self.remove_tab()
 
-    def reject(self,account):
+    def reject_(self, account):
         self._results['rejected'].append(account)
         self._finish(account)
         self.remove_tab()
@@ -826,7 +824,7 @@ class ContactAdded(QtGui.QWidget):
             if self.tab_widget.count() < 1:
                 self.close()
 
-    def _finish(self,account):
+    def _finish(self, account):
         del self._tabs[account]
         if len(self._tabs) == 0:
             self._done_cb(self._results)
@@ -835,9 +833,6 @@ class ContactAdded(QtGui.QWidget):
         screen = QtGui.QDesktopWidget().screenGeometry() 
         size = self.geometry() 
         self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
-
-    def exec_(self):
-        QtGui.QDialog.exec_(self)
 
 class EntryDialog (OkCancelDialog):
     '''Dialog window with a text entry.'''
