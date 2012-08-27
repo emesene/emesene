@@ -761,7 +761,6 @@ class ContactAdded(QtGui.QWidget):
         icon_quit = QtGui.QIcon.fromTheme('application-exit')
         QtGui.QWidget.__init__(self) 
         self.setWindowTitle(tr("Add contact"))
-        self.setFixedSize(700,200)
         self.center()
         self.tab_widget = QtGui.QTabWidget()
         for i in range(len(accounts)):
@@ -838,7 +837,7 @@ class ContactAdded(QtGui.QWidget):
         self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
 
     def exec_(self):
-        raise NotImplementedError()
+        QtGui.QDialog.exec_(self)
 
 class EntryDialog (OkCancelDialog):
     '''Dialog window with a text entry.'''
