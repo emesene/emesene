@@ -1371,6 +1371,8 @@ class Worker(e3.base.Worker, papyon.Client):
                     d_msn_objects)
             # send through the network
             papyconversation.send_text_message(msg)
+        else:
+            return # Do NOT process other message types
 
         members = [x.account for x in papyconversation.total_participants]
         e3.Logger.log_message(self.session, members, message, True, cid = cid)

@@ -204,6 +204,10 @@ class Controller(object):
         extension.register('history exporter', e3.Logger.ExporterCsv)
         extension.register('history exporter', e3.Logger.ExporterJSON)
 
+        # ui callbacks for plugins
+        extension.category_register('send message callback handler', e3.common.PriorityList)
+        extension.category_register('receive message callback handler', e3.common.PriorityList)
+
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
             self.config.session = default_id
@@ -292,6 +296,9 @@ class Controller(object):
             self.close_session(False)
 
         self.session = extension.get_and_instantiate('session')
+
+        self.session.cb_gui_send_message = extension.get_and_instantiate('send message callback handler')
+        self.session.cb_gui_recv_message = extension.get_and_instantiate('receive message callback handler')
 
         # if you add a signal here, add it on _remove_subscriptions
         signals = self.session.signals

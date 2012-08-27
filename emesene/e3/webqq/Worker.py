@@ -486,6 +486,9 @@ class Worker(e3.Worker):
         '''handle Action.ACTION_SEND_MESSAGE
         cid is the conversation id, message is a Message object
         '''
+        if message.type not in (e3.Message.TYPE_MESSAGE, e3.Message.TYPE_TYPING,
+           e3.Message.TYPE_NUDGE):
+            return # Do NOT process other message types
 
         recipients = self.rconversations.get(cid, ())
 

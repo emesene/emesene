@@ -473,6 +473,10 @@ class Conversation(object):
                                   cedict, custom_emoticons)
 
         message = e3.Message(e3.Message.TYPE_MESSAGE, text, None, self.cstyle)
+
+        for callback in self.session.cb_gui_send_message.sorted():
+            callback(message)
+
         self.output_message(message, cedict)
 
         self.messages.push(text)
@@ -493,6 +497,9 @@ class Conversation(object):
 
     def on_receive_message(self, message, account, received_custom_emoticons):
         '''method called when a message arrives to the conversation'''
+        for callback in self.session.cb_gui_recv_message.sorted():
+            callback(message)
+
         contact = self.session.contacts.safe_get(account)
 
         if message.type == e3.Message.TYPE_MESSAGE or \
@@ -756,3 +763,4 @@ class Conversation(object):
         receives the path or the uri for the emoticon to be added
         """
         raise NotImplementedError("Method not implemented")
+

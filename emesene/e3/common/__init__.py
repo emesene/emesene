@@ -36,3 +36,5 @@ from RingBuffer import RingBuffer
 from MessageFormatter import MessageFormatter
 from Sounds import SoundPlayer
 from OrderedDict import OrderedDict
+from PriorityList import PriorityList
+
