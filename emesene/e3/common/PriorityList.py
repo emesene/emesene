@@ -37,7 +37,7 @@ class PriorityList:
 
     def sorted(self):
         ''' returns a sorted copy of items '''
-        return self.items
+        return [k[1] for k in self.items]
 
 def main():
     p = PriorityList()
