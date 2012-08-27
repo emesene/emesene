@@ -16,12 +16,6 @@ import simplejson as json
 
 log = logging.getLogger('WebQQ.Worker')
 
-if sys.version_info < (3, 0):
-    reload(sys)
-    sys.setdefaultencoding('utf8')
-else:
-    raw_input = input
-
 STATUS_MAP = {}
 STATUS_MAP[e3.status.BUSY] = 'busy'
 STATUS_MAP[e3.status.AWAY] = 'away'

@@ -20,9 +20,6 @@ def qt4_main(controller_cls):
     from PyQt4.QtCore import Qt
     import PyQt4.QtGui as QtGui
 
-    reload(sys)
-    sys.setdefaultencoding("utf8")
-
     setup()
 
     os.putenv('QT_NO_GLIB', '1')

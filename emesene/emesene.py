@@ -21,6 +21,15 @@
 import os
 import sys
 
+# Python versions before 3.0 do not use UTF-8 encoding
+# by default. To ensure that Unicode is handled properly
+# we will set the default encoding ourselves to UTF-8.
+if sys.version_info < (3, 0):
+    reload(sys)
+    sys.setdefaultencoding('utf8')
+else:
+    raw_input = input
+
 if sys.platform == 'darwin':
     sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.7/site-packages")
     sys.path.append("/Applications/emesene.app/Contents/Resources/gtk/inst/lib/python2.7/site-packages/gtk-2.0")
