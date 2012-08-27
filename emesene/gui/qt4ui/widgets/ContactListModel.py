@@ -94,7 +94,7 @@ class ContactListModel (QtGui.QStandardItemModel):
         if self._order_by_group and contact.status == e3.status.OFFLINE:
             group_item = self._search_item(self.OFF_GRP_UID, self)
             new_contact_item = QtGui.QStandardItem(contact.display_name)
-            new_contact_item.setData(contact.identifier + 'FLN', Role.UidRole)
+            new_contact_item.setData(str(contact.identifier) + 'FLN', Role.UidRole)
             self._set_contact_info(new_contact_item, contact)
             group_item.appendRow(new_contact_item)
 
@@ -123,7 +123,7 @@ class ContactListModel (QtGui.QStandardItemModel):
             self._set_contact_info(contact_item, contact)
 
             if old_status == e3.status.OFFLINE:
-                contact_item = self._search_item(contact.identifier + 'FLN',
+                contact_item = self._search_item(str(contact.identifier) + 'FLN',
                                                  self._off_grp)
                 self._set_contact_info(contact_item, contact)
                 if new_status != e3.status.OFFLINE:
