@@ -214,8 +214,10 @@ class Controller(object):
         extension.register('history exporter', e3.Logger.ExporterJSON)
 
         # ui callbacks for plugins
-        extension.category_register('send message callback handler', e3.common.PriorityList)
-        extension.category_register('receive message callback handler', e3.common.PriorityList)
+        extension.category_register('send message callback handler',
+            e3.common.PriorityList, single_instance=True)
+        extension.category_register('receive message callback handler',
+            e3.common.PriorityList, single_instance=True)
 
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
