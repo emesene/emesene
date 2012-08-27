@@ -79,8 +79,8 @@ class P2PSessionManager(gobject.GObject):
         del self._sessions[session.id]
         self._transport_manager.add_to_blacklist(session.peer,
                 session.peer_guid, session.id)
-        if not self._search_session_by_peer(session.peer, session.peer_guid):
-            self._transport_manager.close_transport(session.peer, session.peer_guid)
+        #if not self._search_session_by_peer(session.peer, session.peer_guid):
+        #    self._transport_manager.close_transport(session.peer, session.peer_guid)
 
     def _get_session(self, session_id):
         if session_id in self._sessions:
