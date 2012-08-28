@@ -188,9 +188,9 @@ class HelpHandler(object):
             if len(rem_ver[2]) > 2:
                 return # no RCs, BETAs or DEVELs
             if len(loc_ver[2]) > 2:
-                self.dialog.information(_("You're running a development version of emesene, "
-                                          "you might want to use the latest stable version "
-                                          "(%s) unless you know what you're doing") % (s[0][0]))
+                self.dialog.information(_("You're running a development version of emesene.\n"
+                                          "You might want to use the latest stable version (%s)\n"
+                                          "unless you know what you're doing") % (s[0][0]))
                 return
             if int(loc_ver[0]) == int(rem_ver[0]):
                 if int(loc_ver[1]) < int(rem_ver[1]):

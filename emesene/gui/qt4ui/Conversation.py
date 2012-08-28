@@ -18,13 +18,14 @@
 
 '''This module contains classes to represent the conversation tab.'''
 
+import os
 import logging
 
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 from PyQt4.QtCore import Qt
 
-from gui.qt4ui.Utils import tr
+from gui.qt4ui.Utils import tr, path_to_url
 
 import extension
 import gui
@@ -59,7 +60,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
             #update adium theme header/footer
             account = self.members[0]
             contact = self.session.contacts.safe_get(account)
-            his_picture = contact.picture
+            his_picture = contact.picture or \
+                path_to_url(os.path.abspath(gui.theme.image_theme.user))
             nick = contact.nick
             display_name = contact.display_name
             self.set_sensitive(not contact.blocked, True)
@@ -79,9 +81,6 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.typing_timeout.timeout.connect(self.update_tab)
 
         self.subscribe_signals()
-
-    def __del__(self):
-        log.debug('conversation adieeeeeeeuuuu ;______;')
 
     def _setup_ui(self):
         '''Instantiates the widgets, and sets the layout'''
@@ -213,6 +212,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                     int(height * 0.8))
             self.left_widget.moveSplitter(pos, 1)
 
+        policy = self.left_widget.sizePolicy()
+        policy.setHorizontalStretch(80)
+        self.left_widget.setSizePolicy(policy)
+
     def on_input_panel_resize(self, pos, index):
         self.session.config.i_input_panel_position = pos
 
@@ -273,7 +276,8 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         inform that the other user has started typing
         """
         if account in self.members:
-            self.tab_label.set_image(gui.theme.image_theme.typing)
+            icon = QtGui.QIcon(gui.theme.image_theme.typing)
+            self.conv_manager.setTabIcon(self.tab_index, icon)
             if self.typing_timeout.isActive():
                 self.typing_timeout.stop()
             self.typing_timeout.start(3000)

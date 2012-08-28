@@ -15,10 +15,9 @@
 import time
 import threading
 import logging
-try:
-    import queue
-except ImportError:
-    import Queue as queue
+import itertools
+
+from sleekxmpp.util import Queue, QueueEmpty
 
 
 log = logging.getLogger(__name__)
@@ -102,7 +101,7 @@ class Scheduler(object):
 
     def __init__(self, parentstop=None):
         #: A queue for storing tasks
-        self.addq = queue.Queue()
+        self.addq = Queue()
 
         #: A list of tasks in order of execution time.
         self.schedule = []
@@ -157,18 +156,24 @@ class Scheduler(object):
                               elapsed < wait:
                             newtask = self.addq.get(True, 0.1)
                             elapsed += 0.1
-                except queue.Empty:
-                    cleanup = []
+                except QueueEmpty:
                     self.schedule_lock.acquire()
-                    for task in self.schedule:
-                        if time.time() >= task.next:
-                            updated = True
-                            if not task.run():
-                                cleanup.append(task)
+                    # select only those tasks which are to be executed now
+                    relevant = itertools.takewhile(
+                        lambda task: time.time() >= task.next, self.schedule)
+                    # run the tasks and keep the return value in a tuple
+                    status = map(lambda task: (task, task.run()), relevant)
+                    # remove non-repeating tasks
+                    for task, doRepeat in status:
+                        if not doRepeat:
+                            try:
+                                self.schedule.remove(task)
+                            except ValueError:
+                                pass
                         else:
-                            break
-                    for task in cleanup:
-                        self.schedule.pop(self.schedule.index(task))
+                            # only need to resort tasks if a repeated task has
+                            # been kept in the list.
+                            updated = True
                 else:
                     updated = True
                     self.schedule_lock.acquire()
@@ -176,8 +181,7 @@ class Scheduler(object):
                         self.schedule.append(newtask)
                 finally:
                     if updated:
-                        self.schedule = sorted(self.schedule,
-                                               key=lambda task: task.next)
+                        self.schedule.sort(key=lambda task: task.next)
                     self.schedule_lock.release()
         except KeyboardInterrupt:
             self.run = False

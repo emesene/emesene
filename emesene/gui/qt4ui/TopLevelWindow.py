@@ -140,7 +140,6 @@ class TopLevelWindow (QtGui.QMainWindow):
         if not login_page.autologin_started:
             self._switch_to_page(login_page)
         self.setMenuBar(None)
-        self.content_main._widget_d['account_combo'].setFocus()
 
     def go_main(self, session, on_new_conversation, quit_on_close=False):
         '''Adds a main page (the one with the contact list) to the top

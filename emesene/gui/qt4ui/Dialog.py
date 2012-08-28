@@ -31,7 +31,6 @@ from gui.qt4ui import widgets
 import e3
 import gui
 import extension
-
 log = logging.getLogger('qt4ui.Dialog')
 
 
@@ -166,7 +165,9 @@ Do you want to fix your profile now?''')
             '''Simply prints the results instead of invocating the
             real response_cb'''
             print results
-        dialog = ContactAddedYouDialog(accounts, response_cb, title)
+        dialog = ContactAdded(accounts, response_cb)
+        dialog.show()
+        response = dialog.exec_()
 
     @classmethod
     def invite_dialog(cls, session, callback, l_buddy_exclude):
@@ -270,6 +271,10 @@ Do you want to fix your profile now?''')
         body_label = QtGui.QLabel(unicode(body))
         body_label.setWordWrap(True)
         body_label.setAlignment(Qt.AlignCenter)
+        def _on_link_clicked(link):
+            gui.base.Desktop.open(link)
+
+        body_label.linkActivated.connect(_on_link_clicked)
         button_box = QtGui.QDialogButtonBox()
         body_box = QtGui.QHBoxLayout()
         body_box.addWidget(body_label)
@@ -516,6 +521,11 @@ Do you want to fix your profile now?''')
         response_cb(response, *args)
 
     @classmethod
+    def contact_information_dialog(cls, session, account):
+        '''shows information about the account'''
+        raise NotImplementedError
+
+    @classmethod
     def select_font(cls, style, callback):
         '''select font and if available size and style, receives a
         e3.Message.Style object with the current style
@@ -722,101 +732,113 @@ class YesNoDialog (StandardButtonDialog):
     def set_reject_response(self, response):
         self._reject_response = response
 
+class ContactAdded(QtGui.QWidget):
 
-class ContactAddedYouDialog (QtCore.QObject):
-    '''Dialog window asking wether to add to the contact list
-    a contact which has just added you'''
-
-    class Page(QtGui.QDialog):
-        '''This is the actual dialog window'''
-        AddRole = QtGui.QDialog.Accepted
-        DontRole = QtGui.QDialog.Accepted + 1
-        LaterRole = QtGui.QDialog.Rejected
-
-        def __init__(self, mail, nick, title, parent=None):
-            QtGui.QDialog.__init__(self, parent)
-
-            text_lbl = QtGui.QLabel()
-            icon_lbl = QtGui.QLabel()
-            button_box = QtGui.QDialogButtonBox()
-
-            hlay = QtGui.QHBoxLayout()
-            hlay.addWidget(icon_lbl)
-            hlay.addWidget(text_lbl)
-            lay = QtGui.QVBoxLayout()
-            lay.addLayout(hlay)
-            lay.addSpacing(10)
-            lay.addWidget(button_box)
-            lay.addStretch()
-            QtGui.QDialog.setLayout(self, lay)
-
-            icon = QtGui.QIcon.fromTheme('dialog-information')
-            if nick != mail:
-                text = '<b>%s</b>\n<b>(%s)</b>' % (nick, mail)
-            else:
-                text = '<b>%s</b>' % mail
-            text += tr(' has added you.\nDo you want to add '
-                       'him/her to your contact list?')
-            text = text.replace('\n', '<br />')
-
-            txt = tr('Remind me later')
-            add_btn = button_box.addButton(tr('Yes'), QtGui.QDialogButtonBox.AcceptRole)
-            dont_btn = button_box.addButton(tr('No'), QtGui.QDialogButtonBox.RejectRole)
-            later_btn = button_box.addButton(txt, QtGui.QDialogButtonBox.ResetRole)
-
-            self.setWindowTitle(title)
-            icon_lbl.setPixmap(icon.pixmap(64, 64))
-            text_lbl.setText(text)
-
-            add_btn.clicked.connect(lambda *args: self.done(self.AddRole))
-            dont_btn.clicked.connect(lambda *args: self.done(self.DontRole))
-            later_btn.clicked.connect(lambda *args: self.done(self.LaterRole))
-
-        def exec_(self):
-            log.debug('Don\'t call \'exec_\' on a Page')
-            return None
-
-    def __init__(self, accounts, done_cb, title, expanding=False, parent=None):
-        '''Constructor'''
-        QtCore.QObject.__init__(self, parent)
+    def __init__(self, accounts, done_cb, expanding=False, parent=None):
+        '''I intialize {tab, gridLayout, add_btn, reject_btn, remind_btn, quit_btn, text_lbl, icon_lbl}
+            because every index of these lists represent an account
+            N.B: if someone has a better solution just share it :)'''
 
         self._done_cb  = done_cb
-        self._accounts = accounts
-        self._dialogs  = {}
+        self._tabs  = {}
         self._results  = {'accepted': [],
                         'rejected': []}
-        i = 0
-        for account in accounts:
-            mail, nick = account
-            page = self.Page(mail, nick, title)
-            self._dialogs[mail] = page
-            page.finished.connect(self._create_slot(mail))
 
-            page.show()
-            pos = page.pos()
-            x = pos.x()
-            y = pos.y()
-            page.move(x + i * 40, y + i * 40)
-            i += 1
+        tab = []
+        gridLayout = []
+        add_btn = []
+        reject_btn = []
+        remind_btn = []
+        quit_btn = []
+        text_lbl = []
+        icon_lbl = []
 
-    def _create_slot(self, mail):
-        return lambda result: self._on_finished(mail, result)
+        text = None
+        icon_info = QtGui.QIcon.fromTheme('dialog-information')
+        icon_add = QtGui.QIcon.fromTheme('add')
+        icon_reject = QtGui.QIcon.fromTheme('edit-delete')
+        icon_remind_me = QtGui.QIcon.fromTheme('go-next')
+        icon_quit = QtGui.QIcon.fromTheme('application-exit')
+        QtGui.QWidget.__init__(self) 
+        self.setWindowTitle(tr("Add contact"))
+        self.setFixedSize(700,200)
+        self.center()
+        self.tab_widget = QtGui.QTabWidget()
+        for i in range(len(accounts)):
+            tab.append(QtGui.QWidget())
+            self._tabs[accounts[i][0]] = tab[i]
+            gridLayout = QtGui.QGridLayout(tab[i])
+            self.tab_widget.addTab(tab[i], accounts[i][0])
+            text_lbl.append(QtGui.QLabel())
+            icon_lbl.append(QtGui.QLabel())
+            if accounts[i][0] != accounts[i][1]:
+                text = '<b>%s</b>\n<b>(%s)</b>' % (accounts[i][0], accounts[i][1])
+            else:
+                text = '<b>%s</b>' % accounts[i][0]
+            text += tr(' has added you.\nDo you want to add '
+                       'him/her to your contact list?\n')
+            text = text.replace('\n', '<br />') 
+            text_lbl[i].setText(text)
+            icon_lbl[i].setPixmap(icon_info.pixmap(30, 30))
+            add_btn.append(QtGui.QPushButton(tr("Add")))
+            reject_btn.append(QtGui.QPushButton(tr("Remove")))
+            remind_btn.append(QtGui.QPushButton(tr("Remind me later")))
+            quit_btn.append(QtGui.QPushButton(tr("Quit")))
+            add_btn[i].setIcon(icon_add)
+            reject_btn[i].setIcon(icon_reject)
+            remind_btn[i].setIcon(icon_remind_me)
+            quit_btn[i].setIcon(icon_quit)
+            QtCore.QObject.connect(add_btn[i],QtCore.SIGNAL('clicked()'), 
+                (lambda account=accounts[i][0]:self.add(account)))
+            QtCore.QObject.connect(reject_btn[i],QtCore.SIGNAL('clicked()'), 
+                (lambda account=accounts[i][0]:self.reject(account)))
+            QtCore.QObject.connect(remind_btn[i],QtCore.SIGNAL('clicked()'), self.remove_tab)
+            QtCore.QObject.connect(quit_btn[i],QtCore.SIGNAL('clicked()'), self.close)
+            gridLayout.setSpacing(3)
+            gridLayout.setContentsMargins(3, 3, 3, 3)
+            gridLayout.addWidget(icon_lbl[i], 3, 0)
+            gridLayout.addWidget(text_lbl[i], 3, 1, 1, 3)
+            gridLayout.addWidget(add_btn[i], 4, 0)
+            gridLayout.addWidget(reject_btn[i], 4, 2)
+            gridLayout.addWidget(remind_btn[i], 4, 3)
+            gridLayout.addWidget(quit_btn[i], 4, 4)
 
-    def _on_finished(self, mail, result):
-        if   result == self.Page.AddRole:
-            self._results['accepted'].append(mail)
-        elif result == self.Page.DontRole:
-            self._results['rejected'].append(mail)
-        elif result != self.Page.LaterRole:
-            raise TypeError('Dialog returned wrong result code: %s' %
-                            result)
-        del self._dialogs[mail]
-        if len(self._dialogs) == 0:
+        vbox = QtGui.QVBoxLayout()
+        vbox.addStretch(1)
+        vbox.addWidget(self.tab_widget)
+
+        self.setLayout(vbox)
+
+    def add(self,account):
+        self._results['accepted'].append(account)
+        self._finish(account)
+        self.remove_tab()
+
+    def reject(self,account):
+        self._results['rejected'].append(account)
+        self._finish(account)
+        self.remove_tab()
+
+    def remove_tab(self):
+        widget = self.tab_widget.currentWidget()
+        if widget is not None:
+            self.tab_widget.removeTab(self.tab_widget.indexOf(widget))
+            widget.deleteLater()
+            if self.tab_widget.count() < 1:
+                self.close()
+
+    def _finish(self,account):
+        del self._tabs[account]
+        if len(self._tabs) == 0:
             self._done_cb(self._results)
 
-    def __del__(self):
-        log.debug('ContactAddedYouDialog destroyed')
+    def center(self): 
+        screen = QtGui.QDesktopWidget().screenGeometry() 
+        size = self.geometry() 
+        self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
 
+    def exec_(self):
+        raise NotImplementedError()
 
 class EntryDialog (OkCancelDialog):
     '''Dialog window with a text entry.'''
@@ -824,7 +846,7 @@ class EntryDialog (OkCancelDialog):
         OkCancelDialog.__init__(self, title, expanding, parent)
 
         label = QtGui.QLabel(label)
-        self.edit = QtGui.QLineEdit(text)
+        self.edit = QtGui.QLineEdit(unicode(text))
 
         lay = QtGui.QHBoxLayout()
         lay.addWidget(label, 100)

@@ -17,9 +17,11 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-import shutil
+import csv
+import json
 import time
 import Queue
+import shutil
 import threading
 import sqlite3.dbapi2 as sqlite
 
@@ -29,7 +31,6 @@ import logging
 log = logging.getLogger('e3.base.Logger')  # oh snap!
 
 import e3
-
 
 class Account(object):
     '''a class to store account data'''
@@ -1025,63 +1026,246 @@ class LoggerProcess(threading.Thread):
         '''add all contacts, groups and relations to the database'''
         self.input.put(('add_contact_by_group', (contacts, groups, None)))
 
+class ExporterCsv():
+    NAME = 'Exporter CSV'
+    DESCRIPTION = 'export logs as csv'
+    AUTHOR = 'marianoguerra'
+    WEBSITE = 'www.emesene.org'
 
-def save_logs_as_txt(results, handle):
-    '''save the chats in results (from get_chats or get_chats_between) as txt
-    to handle (file like object)
+    @classmethod
+    def export(cls, results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as
+        csv to handle (file like object)
 
-    the caller is responsible of closing the handle
-    '''
+        the caller is responsible of closing the handle
+        '''
 
-    for stat, timestamp, message, nick, account in results:
+        writer = csv.writer(handle)
+        for stat, timestamp, message, nick, account in results:
+            date_text = time.strftime('%c', time.gmtime(timestamp))
+            writer.writerow((date_text, nick, message, account, stat, timestamp))
+
+class ExporterJSON():
+    NAME = 'Exporter JSON'
+    DESCRIPTION = 'export logs as json'
+    AUTHOR = 'marianoguerra'
+    WEBSITE = 'www.emesene.org'
+
+    @classmethod
+    def export(cls, results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as
+        json to handle (file like object)
+
+        the caller is responsible of closing the handle
+        '''
+
+        convs = []
+
+        for stat, timestamp, message, nick, account in results:
+            convs.append({
+                "nick": nick,
+                "message": message,
+                "account": account,
+                "stat": stat,
+                "timestamp": timestamp
+            })
+
+        json.dump(convs, handle)
+
+class ExporterHtml():
+    NAME = 'Exporter Html'
+    DESCRIPTION = 'export logs as html'
+    AUTHOR = 'marianoguerra'
+    WEBSITE = 'www.emesene.org'
+
+    BASE_STYLE = """
+html, body, div, span{
+ margin: 0;
+ padding: 0;
+}
+
+body{
+ color: #333333;
+ font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+ font-size: 14px;
+ line-height: 20px;
+}
+
+.message{
+ width: 78%;
+ margin-left: 10%;
+ margin-top: 1em;
+ padding: 1%;
+ border-radius: 4px;
+}
+
+.header, .body, .footer{
+ width: 98%;
+}
+
+.header{
+ font-size: small;
+}
+
+.footer{
+ font-size: x-small;
+ text-align: right;
+ color: #555;
+}
+
+.nick{
+ font-weight: bold;
+}
+
+.account{
+ font-size: small;
+ color: #555;
+ float: right;
+}
+"""
+
+    @classmethod
+    def make_base_page(cls):
+        '''return the basic page structure and the tag where you have to
+        add the conversation'''
+        html = e3.common.html
+
+        convs = html.Div(class_="conversations")
+        head = html.Head(html.Title("conversations"))
+
+        page = html.Html(head, html.Body(convs))
+
+        return page, head, convs
+
+    @classmethod
+    def make_message(cls, stat, timestamp, message, nick, account):
+        html = e3.common.html
+
+        div = html.Div
+        span = html.Span
         date_text = time.strftime('[%c]', time.gmtime(timestamp))
-        handle.write("%s %s: %s\n" % (date_text, nick, message))
+        account_class = "account-" + str(hash(account))
+
+        return div(
+                div(
+                    span(nick, class_="nick"),
+                    span(account, class_="account"),
+                    class_="header"),
+                div(message, class_="body"),
+                div(span(date_text, class_="date"), class_="footer"),
+
+                class_="message " + account_class)
 
 
-def save_logs_as_xml(results, handle):
-    '''save the chats in results (from get_chats or get_chats_between) as xml
-    to handle (file like object)
+    @classmethod
+    def export(cls, results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as
+        html to handle (file like object)
 
-    the caller is responsible of closing the handle
-    '''
-    from xml.dom.minidom import Document
+        the caller is responsible of closing the handle
+        '''
+        html = e3.common.html
+        colors = {}
 
-    doc = Document()
-    doc.appendChild(doc.createProcessingInstruction("xml-stylesheet",
+        def gen_color(account):
+            hue = hash(account) % 256
+            return "hsl(%d, 100%%, 90%%)" % hue
+
+        def color_generator(account):
+            color = colors.get(account, None)
+
+            if color is None:
+                color = gen_color(account)
+                colors[account] = color
+
+            return color
+
+        page, head, body = cls.make_base_page()
+
+        for stat, timestamp, message, nick, account in results:
+            color_generator(account)
+            body.append(cls.make_message(stat, timestamp, message, nick,
+                account))
+
+        styles = []
+        for account, color in colors.items():
+            account_class = ".account-" + str(hash(account))
+            styles.append(account_class + "{background-color:" + color + "}")
+
+        head.append(html.Style(cls.BASE_STYLE))
+        head.append(html.Style("\n".join(styles)))
+
+        handle.write(str(page))
+
+class ExporterTxt():
+    NAME = 'Exporter Txt'
+    DESCRIPTION = 'export logs as simple text'
+    AUTHOR = 'emesene team'
+    WEBSITE = 'www.emesene.org'
+
+    @staticmethod
+    def export(results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as txt
+        to handle (file like object)
+
+        the caller is responsible of closing the handle
+        '''
+
+        for stat, timestamp, message, nick, account in results:
+            date_text = time.strftime('[%c]', time.gmtime(timestamp))
+            handle.write("%s %s: %s\n" % (date_text, nick, message))
+
+class ExporterXml():
+    NAME = 'Exporter Xml'
+    DESCRIPTION = 'export logs as xml data'
+    AUTHOR = 'emesene team'
+    WEBSITE = 'www.emesene.org'
+
+    @staticmethod
+    def export(results, handle):
+        '''save the chats in results (from get_chats or get_chats_between) as xml
+        to handle (file like object)
+
+        the caller is responsible of closing the handle
+        '''
+        from xml.dom.minidom import Document
+
+        doc = Document()
+        doc.appendChild(doc.createProcessingInstruction("xml-stylesheet",
                                 "type=\"text/css\" href=\"conversation.css\""))
-    conversation = doc.createElement("conversation")
-    doc.appendChild(conversation)
+        conversation = doc.createElement("conversation")
+        doc.appendChild(conversation)
 
-    for stat, timestamp, message, nick, account in results:
+        for stat, timestamp, message, nick, account in results:
 
-        timestamp_tag = doc.createElement("timestamp")
-        date_text = time.strftime('[%c]', time.gmtime(timestamp))
-        timestamp_text = doc.createTextNode(date_text)
-        timestamp_tag.appendChild(timestamp_text)
+            timestamp_tag = doc.createElement("timestamp")
+            date_text = time.strftime('[%c]', time.gmtime(timestamp))
+            timestamp_text = doc.createTextNode(date_text)
+            timestamp_tag.appendChild(timestamp_text)
 
-        nick_tag = doc.createElement("nick")
-        nick_text = doc.createTextNode(nick)
-        nick_tag.appendChild(nick_text)
-        timestamp_tag.appendChild(nick_tag)
+            nick_tag = doc.createElement("nick")
+            nick_text = doc.createTextNode(nick)
+            nick_tag.appendChild(nick_text)
+            timestamp_tag.appendChild(nick_tag)
 
-        status_tag = doc.createElement("status")
-        status_text = doc.createTextNode(str(stat))
-        status_tag.appendChild(status_text)
-        timestamp_tag.appendChild(status_tag)
+            status_tag = doc.createElement("status")
+            status_text = doc.createTextNode(str(stat))
+            status_tag.appendChild(status_text)
+            timestamp_tag.appendChild(status_tag)
 
-        account_tag = doc.createElement("account")
-        account_text = doc.createTextNode(account)
-        account_tag.appendChild(account_text)
-        timestamp_tag.appendChild(account_tag)
+            account_tag = doc.createElement("account")
+            account_text = doc.createTextNode(account)
+            account_tag.appendChild(account_text)
+            timestamp_tag.appendChild(account_tag)
 
-        message_tag = doc.createElement("message")
-        message_text = doc.createTextNode(message)
-        message_tag.appendChild(message_text)
-        timestamp_tag.appendChild(message_tag)
+            message_tag = doc.createElement("message")
+            message_text = doc.createTextNode(message)
+            message_tag.appendChild(message_text)
+            timestamp_tag.appendChild(message_tag)
 
-        conversation.appendChild(timestamp_tag)
+            conversation.appendChild(timestamp_tag)
 
-    handle.write(doc.toprettyxml(indent="  ",  encoding="UTF-8"))
+        handle.write(doc.toprettyxml(indent="  ",  encoding="UTF-8"))
 
 
 def log_message(session, members, message, sent, error=False, cid=None):

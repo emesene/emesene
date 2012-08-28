@@ -448,11 +448,18 @@ class Conversation(gtk.VBox, gui.Conversation):
                               posx, posy, selection,
                               info, timestamp):
         '''called when a file is received by text input widget'''
+
+        # skip group from contact list, it is None now
+        if selection.data is None:
+            return
+
         # user invitation
         if selection.target == 'emesene-invite':
-            account = selection.data.strip()
-            if self.session.contacts.exists(account):
-                self.on_invite(account)
+            inviter = self.session.contacts.safe_get(self.members[0])
+            invitee = self.session.contacts.get(selection.data.strip())
+            if invitee and not invitee.blocked and \
+               not inviter.blocked:
+                self.on_invite(invitee.account)
                 return
 
         # file transfer

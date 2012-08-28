@@ -82,9 +82,11 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         widget_d['account_combo'] = QtGui.QComboBox()
         widget_d['account_combo'].setEditable(True)
         widget_d['account_combo'].setToolTip(_('Account'))
+        
         account_img = QtGui.QLabel()
         account_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.user).scaled(20,20))
         widget_d['account_img'] = account_img
+        widget_d['account_img'].setMaximumWidth(20)
         widget_d['forget_me_btn'] = QtGui.QToolButton()
         widget_d['forget_me_btn'].setToolTip(_('Delete User'))
         widget_d['forget_me_btn'].setEnabled(False)
@@ -98,6 +100,8 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         password_box = QtGui.QHBoxLayout()
         widget_d['password_box'] = password_box
         widget_d['password_edit'] = QtGui.QLineEdit()
+        widget_d['password_edit'].setMinimumWidth(220)
+        widget_d['password_edit'].setMaximumWidth(320)
         widget_d['password_edit'].setToolTip(_('Password'))
         widget_d['password_edit'].setEnabled(False)
         # TODO: Investigate completion
@@ -119,9 +123,11 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
         widget_d['service_combo'] = QtGui.QComboBox()
         widget_d['service_combo'].setToolTip(_('Service'))
         widget_d['service_combo'].setMinimumWidth(220)
+        widget_d['service_combo'].setMaximumWidth(320)
         service_img = QtGui.QLabel()
         service_img.setPixmap(QtGui.QPixmap(gui.theme.image_theme.connect))
         widget_d['service_img'] = service_img
+        widget_d['service_img'].setMaximumWidth(20)
         widget_d['advanced_btn'] = QtGui.QToolButton()
         widget_d['advanced_btn'].setToolTip(_('Preferences'))
         widget_d['advanced_btn'].setAutoRaise(True)
@@ -195,8 +201,10 @@ class LoginPage(QtGui.QWidget, gui.LoginBase):
 
         account_combo = widget_d['account_combo']
         account_combo.setMinimumWidth(220)
+        account_combo.setMaximumWidth(320)
         account_combo.setEditable(1)
         account_combo.setInsertPolicy(QtGui.QComboBox.NoInsert)
+        account_combo.setFocus()
 
         login_btn = widget_d['login_btn']
         login_btn.setAutoDefault(True)

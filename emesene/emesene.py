@@ -173,19 +173,19 @@ class Controller(object):
         '''register core extensions'''
         extension.category_register('session', dummy.Session,
                 single_instance=True)
-        if xmpp is not None:
-            extension.register('session', xmpp.Session)
         extension.register('session', dummy.Session)
 
         if webqq is not None:
             extension.register('session', webqq.Session)
-        extension.register('session', dummy.Session)
-        
+            extension.set_default('session', webqq.Session)
+
+        if xmpp is not None:
+            extension.register('session', xmpp.Session)
+            extension.set_default('session', xmpp.Session)
+
         if papylib is not None:
             extension.register('session', papylib.Session)
             extension.set_default('session', papylib.Session)
-        else:
-            extension.set_default('session', dummy.Session)
 
         #external API stuff
         self.dbus_ext = extension.get_and_instantiate('external api')
@@ -198,10 +198,11 @@ class Controller(object):
                 None, True)
         extension.category_register('notification',
                 e3.common.notification.Notification)
-        extension.category_register('history exporter',
-                e3.Logger.save_logs_as_txt)
-        extension.register('history exporter',
-                e3.Logger.save_logs_as_xml)
+        extension.category_register('history exporter', e3.Logger.ExporterTxt)
+        extension.register('history exporter', e3.Logger.ExporterXml)
+        extension.register('history exporter', e3.Logger.ExporterHtml)
+        extension.register('history exporter', e3.Logger.ExporterCsv)
+        extension.register('history exporter', e3.Logger.ExporterJSON)
 
         if self.config.session is None:
             default_id = extension.get_category('session').default_id
@@ -581,7 +582,7 @@ class Controller(object):
 
 
     def on_login_connect(self, account, session_id, proxy,
-                         use_http, use_ipv6, 
+                         use_http, use_ipv6,
                          host=None, port=None, on_reconnect=False):
         '''called when the user press the connect button'''
         self._save_login_dimensions()

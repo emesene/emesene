@@ -50,7 +50,7 @@ class AdiumChatOutput (QtGui.QScrollArea, gui.base.OutputText):
         self.setWidget(self._qwebview)
         self.setWidgetResizable(True)
         settings = self._qwebview.page().settings()
-        settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 8)
+        settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 12)
         self._qwebview.setRenderHints(QtGui.QPainter.SmoothPixmapTransform)
         self._qwebview.page().setLinkDelegationPolicy(
                                     QtWebKit.QWebPage.DelegateAllLinks)

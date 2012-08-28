@@ -118,6 +118,13 @@ class ContactManager(object):
         return [contact for contact in contacts \
                 if contact.status != status.OFFLINE]
 
+    def get_offline_list(self, contacts=None):
+        '''return a list of non offline contacts'''
+        contacts = contacts or self.contacts.values()
+
+        return [contact for contact in contacts \
+                if contact.status == status.OFFLINE]
+
     def get_online_total_count(self, contacts):
         '''return a tuple with two values, the first is the number of
         non offline contacts on the list, the secont is the total number

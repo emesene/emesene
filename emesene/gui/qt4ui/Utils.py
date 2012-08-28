@@ -106,7 +106,6 @@ def escape(string, add_dic=None):
     add_dic.update(dic)
     return xml.sax.saxutils.escape(string, add_dic)
 
-
 def unescape(string, add_dic_inv=None):
     '''replace the values on dic_inv keys with the values'''
     dic_inv = {'&nbsp;': ' '}
@@ -115,7 +114,6 @@ def unescape(string, add_dic_inv=None):
     add_dic_inv.update(MarkupParser.dic_inv)
     add_dic_inv.update(dic_inv)
     return xml.sax.saxutils.unescape(string, add_dic_inv)
-
 
 def pixmap_rounder(qpixmap, perc_radius=16.7):
     '''Return the given pixmap with corners
@@ -148,10 +146,6 @@ def pixmap_rounder(qpixmap, perc_radius=16.7):
     painter.end()
     return rounded_pixmap
 
-
-
-
-
 def parse_emotes(text, include_table_tags=True):
     '''Parses emotes in text string, returning a html string laid out
     using a table, to vertically align emotes correctly'''
@@ -161,19 +155,23 @@ def parse_emotes(text, include_table_tags=True):
     text2 = parser.get_data()
     return text2
 
-
-
 def tr(string):
     '''Returns the given string translated by gettext, and converted
     explicitly to unicode. Needed for compatibility issues between
     PyQt and gettext. See issue #586'''
     return unicode(_(string))
 
+def path_to_url(path):
+    if os.name == "nt":
+        # on windows os.path.join uses backslashes
+        path = path.replace("\\", "/")
+        path = path[2:]
 
+    path = path.encode("iso-8859-1")
+    path = urllib.quote(path)
+    path = "file://" + path
 
-
-
-
+    return path
 
 from HTMLParser import HTMLParser
 class MyHTMLParser (HTMLParser):

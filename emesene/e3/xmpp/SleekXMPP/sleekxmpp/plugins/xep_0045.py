@@ -137,7 +137,7 @@ class XEP_0045(BasePlugin):
     def handle_groupchat_invite(self, inv):
         """ Handle an invite into a muc.
         """
-        logging.debug("MUC invite to %s from %s: %s", inv['from'], inv["from"], inv)
+        logging.debug("MUC invite to %s from %s: %s", inv['to'], inv["from"], inv)
         if inv['from'] not in self.rooms.keys():
             self.xmpp.event("groupchat_invite", inv)
 
@@ -156,6 +156,7 @@ class XEP_0045(BasePlugin):
         entry = pr['muc'].getStanzaValues()
         entry['show'] = pr['show']
         entry['status'] = pr['status']
+        entry['alt_nick'] = pr['nick']
         if pr['type'] == 'unavailable':
             if entry['nick'] in self.rooms[entry['room']]:
                 del self.rooms[entry['room']][entry['nick']]

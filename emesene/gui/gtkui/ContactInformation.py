@@ -473,12 +473,13 @@ class ChatWidget(gtk.VBox):
 
             exporter = extension.get_default('history exporter')
 
-            exporter(results, open(path, "w"))
+            exporter.export(results, open(path, "w"))
 
         self.request_chats_between(self.max_lines.get_value(), _on_save_chats_ready)
 
     def _on_chats_ready(self, results):
         '''called when the chat history is ready'''
+        self._prepare_history()
 
         account_colors = {}
         style = e3.Style()

@@ -54,6 +54,9 @@ class ConversationToolbar (QtGui.QToolBar):
         self._action_dict['ublock'].setToolTip(tooltip_text)
         self._action_dict['ublock'].setIcon(ublock_icon)
 
+    def set_ublock_sensitive(self, is_sensitive):
+        self._action_dict['ublock'].setEnabled(is_sensitive)
+
     def set_sensitive(self, is_sensitive, force_sensitive_block_button=False):
         self._action_dict['ublock'].setEnabled(force_sensitive_block_button or is_sensitive)
         self._action_dict['toggle_avatars'].setEnabled(force_sensitive_block_button or is_sensitive)

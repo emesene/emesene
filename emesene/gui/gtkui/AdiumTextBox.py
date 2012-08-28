@@ -38,6 +38,7 @@ import e3
 import gui
 from gui.base import Plus
 import utils
+import Queue
 
 class OutputView(webkit.WebView):
     '''a class that represents the output widget of a conversation
@@ -55,8 +56,9 @@ class OutputView(webkit.WebView):
 
         self.handler = handler
         self.theme = theme
-        self.ready = False
-        self.pending = []
+        self.ready = True
+        self.load_ready = True
+        self.pending = Queue.Queue()
         self.connect('load-finished', self._loading_finished_cb)
         self.connect('populate-popup', self.on_populate_popup)
         self.connect('navigation-requested', self.on_navigation_requested)
@@ -66,11 +68,24 @@ class OutputView(webkit.WebView):
     def _loading_finished_cb(self, *args):
         '''callback called when the content finished loading
         '''
-        self.ready = True
+        self.load_ready = True
+        while not self.pending.empty() and self.load_ready:
+            function, args = self.pending.get(False)
+            function(*args)
+        self.ready = self.load_ready
 
-        for function in self.pending:
-            self.execute_script(function)
-        self.pending = []
+    def delayed_call(self, function, *args):
+        '''call a function or add it to the pending queue'''
+        if not self.ready:
+            self.pending.put((function, args))
+        else:
+            function(*args)
+
+    def _load_string(self, *args):
+        '''call load_string or add it to the pending queue'''
+        self.ready = False
+        self.load_ready = False
+        gobject.idle_add(self.load_string, *args)
 
     def _error_cb(self, view, message, line, source_id):
         '''called when a message is sent to the console'''
@@ -82,28 +97,19 @@ class OutputView(webkit.WebView):
         '''clear the content'''
         body = self.theme.get_body(source, target, target_display, source_img,
                 target_img)
-        self.load_string(body,
+        self.delayed_call(self._load_string, body,
                 "text/html", "utf-8", utils.path_to_url(self.theme.path))
-        self.pending = []
-        self.ready = False
 
     def add_message(self, msg, scroll=True):
         '''add a message to the conversation. append the message directly
         if the renderer finished loading, append it to
         pending if still loading'''
-
         function = self.theme.format(msg, scroll)
-
-        if self.ready:
-            gobject.idle_add(self.execute_script, function)
-        else:
-            self.pending.append(function)
+        self.delayed_call(gobject.idle_add, self.execute_script, function)
 
     def _set_text(self, text):
         '''set the text on the widget'''
-        self.load_string(text, "text/html", "utf-8", "")
-        self.pending = []
-        self.ready = False
+        self.delayed_call(self._load_string, text, "text/html", "utf-8", "")
 
     def _get_text(self):
         '''return the text of the widget'''

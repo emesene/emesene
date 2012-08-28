@@ -113,9 +113,10 @@ class ClientXMPP(BaseXMPP):
         self.register_plugin('feature_starttls')
         self.register_plugin('feature_bind')
         self.register_plugin('feature_session')
+        self.register_plugin('feature_rosterver')
+        self.register_plugin('feature_preapproval')
         self.register_plugin('feature_mechanisms',
                 pconfig={'use_mech': sasl_mech} if sasl_mech else None)
-        self.register_plugin('feature_rosterver')
 
     @property
     def password(self):
@@ -179,8 +180,7 @@ class ClientXMPP(BaseXMPP):
         self._stream_feature_order.remove((order, name))
         self._stream_feature_order.sort()
 
-    def update_roster(self, jid, name=None, subscription=None, groups=[],
-                            block=True, timeout=None, callback=None):
+    def update_roster(self, jid, **kwargs):
         """Add or change a roster item.
 
         :param jid: The JID of the entry to modify.
@@ -201,6 +201,16 @@ class ClientXMPP(BaseXMPP):
                          Will be executed when the roster is received.
                          Implies ``block=False``.
         """
+        current = self.client_roster[jid]
+
+        name = kwargs.get('name', current['name'])
+        subscription = kwargs.get('subscription', current['subscription'])
+        groups = kwargs.get('groups', current['groups'])
+
+        block = kwargs.get('block', True)
+        timeout = kwargs.get('timeout', None)
+        callback = kwargs.get('callback', None)
+
         return self.client_roster.update(jid, name, subscription, groups,
                                          block, timeout, callback)
 
@@ -277,15 +287,17 @@ class ClientXMPP(BaseXMPP):
         if iq['roster']['ver']:
             roster.version = iq['roster']['ver']
         items = iq['roster']['items']
-        for jid in items:
-            item = items[jid]
-            roster[jid]['name'] = item['name']
-            roster[jid]['groups'] = item['groups']
-            roster[jid]['from'] = item['subscription'] in ['from', 'both']
-            roster[jid]['to'] = item['subscription'] in ['to', 'both']
-            roster[jid]['pending_out'] = (item['ask'] == 'subscribe')
 
-            roster[jid].save(remove=(item['subscription'] == 'remove'))
+        valid_subscriptions = ('to', 'from', 'both', 'none', 'remove')
+        for jid, item in items.items():
+            if item['subscription'] in valid_subscriptions:
+                roster[jid]['name'] = item['name']
+                roster[jid]['groups'] = item['groups']
+                roster[jid]['from'] = item['subscription'] in ('from', 'both')
+                roster[jid]['to'] = item['subscription'] in ('to', 'both')
+                roster[jid]['pending_out'] = (item['ask'] == 'subscribe')
+
+                roster[jid].save(remove=(item['subscription'] == 'remove'))
 
         self.event("roster_update", iq)
         if iq['type'] == 'set':

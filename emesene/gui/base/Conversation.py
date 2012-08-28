@@ -23,6 +23,7 @@ import extension
 import e3
 import gui
 import MarkupParser
+import Plus
 import ConversationStatus
 
 from e3.common.RingBuffer import RingBuffer
@@ -345,6 +346,7 @@ class Conversation(object):
             self.members.remove(self.session.account.account)
 
         #TODO add plus support for nick to the tab label!
+        # We now strip Plus tags when we cut the nickname
         members_nick = []
         i = 0
         for account in self.members:
@@ -354,7 +356,7 @@ class Conversation(object):
             if contact is None or contact.nick is None:
                 nick = account
             elif len(contact.nick) > 20 and i != len(self.members):
-                nick = contact.nick[:20] + '...'
+                nick = Plus.msnplus_strip(contact.nick.decode('utf-8'))[:20] + '...'
             else:
                 nick = contact.nick
 
@@ -591,8 +593,12 @@ class Conversation(object):
         '''update the data on the conversation'''
         if len(self.members) == 1:
             self._update_single_information(self.members[0])
+            is_sensitive = True
         elif len(self.members) > 1:
             self.update_group_information()
+            is_sensitive = False
+
+        self.toolbar.set_ublock_sensitive(is_sensitive)
 
     def update_p2p(self, account, _type, *what):
         ''' update the p2p data in the conversation (custom emoticons) '''
