@@ -756,7 +756,7 @@ class ConversationWindow(BaseTable):
             'session.config.b_avatar_on_left')
         self.append_row(self.cb_avatar_left)
 
-        self.append_markup('<b>'+_('Appareance')+'</b>')
+        self.append_markup('<b>'+_('Appearance')+'</b>')
         self.append_check(_('Show emoticons'),
                           'session.config.b_show_emoticons')
         # small-toolbar sensitivity depends on conversation toolbar visibility
