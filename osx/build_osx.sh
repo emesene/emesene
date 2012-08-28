@@ -36,6 +36,7 @@ defaults write ${PWD}/../dist/emesene.app/Contents/Info LSMinimumSystemVersion -
 
 if [[ "$1" == *dorelease* ]]
 then
+    echo "Building DMG..."
     mkdir ../dist/emesene
     mv ../dist/emesene.app ../dist/emesene
     cp Uninstall.command ../dist/emesene
