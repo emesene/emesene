@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-08-16 14:38+0200\n"
+"POT-Creation-Date: 2012-08-28 10:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,12 +25,12 @@ msgstr ""
 msgid "Open a new instance"
 msgstr ""
 
-#: emesene/e3/base/Logger.py:1110 emesene/gui/base/Conversation.py:303
+#: emesene/e3/base/Logger.py:1294 emesene/gui/base/Conversation.py:304
 msgid "You just sent a nudge!"
 msgstr ""
 
-#: emesene/e3/base/Logger.py:1146 emesene/e3/common/notification.py:149
-#: emesene/gui/base/Conversation.py:516
+#: emesene/e3/base/Logger.py:1330 emesene/e3/common/notification.py:149
+#: emesene/gui/base/Conversation.py:525
 #, python-format
 msgid "%s just sent you a nudge!"
 msgstr ""
@@ -147,29 +147,29 @@ msgstr ""
 msgid "Blocked"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:284 emesene/gui/base/Handler.py:276
+#: emesene/gui/base/Conversation.py:285 emesene/gui/base/Handler.py:276
 msgid "Are you sure you want to block this contact?"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:364
+#: emesene/gui/base/Conversation.py:366
 #, python-format
 msgid "%d members"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:536
+#: emesene/gui/base/Conversation.py:545
 msgid "Error delivering message"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:578
+#: emesene/gui/base/Conversation.py:587
 msgid "Group chat"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:608
+#: emesene/gui/base/Conversation.py:621
 #, python-format
 msgid "%s has joined the conversation"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:625
+#: emesene/gui/base/Conversation.py:638
 #, python-format
 msgid "%s has left the conversation"
 msgstr ""
@@ -193,8 +193,9 @@ msgstr ""
 #: emesene/gui/base/Handler.py:191
 #, python-format
 msgid ""
-"You're running a development version of emesene, you might want to use the "
-"latest stable version (%s) unless you know what you're doing"
+"You're running a development version of emesene.\n"
+"You might want to use the latest stable version (%s)\n"
+"unless you know what you're doing"
 msgstr ""
 
 #: emesene/gui/base/Handler.py:206
@@ -248,19 +249,23 @@ msgstr ""
 msgid "Change profile"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:126
+#: emesene/gui/gtkui/AdiumTextBox (copy).py:171
+#: emesene/gui/gtkui/AdiumTextBox.py:132
 msgid "Save"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:131
+#: emesene/gui/gtkui/AdiumTextBox (copy).py:176
+#: emesene/gui/gtkui/AdiumTextBox.py:137
 msgid "Select All"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:136
+#: emesene/gui/gtkui/AdiumTextBox (copy).py:181
+#: emesene/gui/gtkui/AdiumTextBox.py:142
 msgid "Clear"
 msgstr ""
 
-#: emesene/gui/gtkui/AdiumTextBox.py:168
+#: emesene/gui/gtkui/AdiumTextBox (copy).py:213
+#: emesene/gui/gtkui/AdiumTextBox.py:174
 msgid "A widget to display conversation messages using adium style"
 msgstr ""
 
@@ -427,11 +432,11 @@ msgstr ""
 msgid "Loading chat history. Hang tight for a moment..."
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:491
+#: emesene/gui/gtkui/ContactInformation.py:492
 msgid "No chat history found"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:536
+#: emesene/gui/gtkui/ContactInformation.py:537
 msgid "Too many messages to display"
 msgstr ""
 
@@ -542,64 +547,64 @@ msgstr ""
 msgid "Show avatar"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:156
-#: emesene/gui/gtkui/ConversationToolbar.py:157
+#: emesene/gui/gtkui/ConversationToolbar.py:159
+#: emesene/gui/gtkui/ConversationToolbar.py:160
 #: emesene/gui/gtkui/Dialog.py:615 emesene/gui/gtkui/Dialog.py:616
 #: emesene/gui/gtkui/Dialog.py:647
 msgid "Select font"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:162
-#: emesene/gui/gtkui/ConversationToolbar.py:163
+#: emesene/gui/gtkui/ConversationToolbar.py:165
+#: emesene/gui/gtkui/ConversationToolbar.py:166
 msgid "Select font color"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:169
-#: emesene/gui/gtkui/ConversationToolbar.py:170
+#: emesene/gui/gtkui/ConversationToolbar.py:172
+#: emesene/gui/gtkui/ConversationToolbar.py:173
 msgid "Send an emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:176
-#: emesene/gui/gtkui/ConversationToolbar.py:177
+#: emesene/gui/gtkui/ConversationToolbar.py:179
+#: emesene/gui/gtkui/ConversationToolbar.py:180
 msgid "Request attention"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:182
-#: emesene/gui/gtkui/ConversationToolbar.py:183
+#: emesene/gui/gtkui/ConversationToolbar.py:185
+#: emesene/gui/gtkui/ConversationToolbar.py:186
 msgid "Invite a buddy"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:188
-#: emesene/gui/gtkui/ConversationToolbar.py:189
+#: emesene/gui/gtkui/ConversationToolbar.py:191
+#: emesene/gui/gtkui/ConversationToolbar.py:192
 msgid "Clean the conversation"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:194
-#: emesene/gui/gtkui/ConversationToolbar.py:195
+#: emesene/gui/gtkui/ConversationToolbar.py:197
+#: emesene/gui/gtkui/ConversationToolbar.py:198
 msgid "Send a file"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:200
-#: emesene/gui/gtkui/ConversationToolbar.py:201
+#: emesene/gui/gtkui/ConversationToolbar.py:203
+#: emesene/gui/gtkui/ConversationToolbar.py:204
 msgid "Block/Unblock contact"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:206
+#: emesene/gui/gtkui/ConversationToolbar.py:209
 msgid "Hide/Show avatar"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:212
-#: emesene/gui/gtkui/ConversationToolbar.py:213
+#: emesene/gui/gtkui/ConversationToolbar.py:215
+#: emesene/gui/gtkui/ConversationToolbar.py:216
 msgid "Video Call"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:218
-#: emesene/gui/gtkui/ConversationToolbar.py:219
+#: emesene/gui/gtkui/ConversationToolbar.py:221
+#: emesene/gui/gtkui/ConversationToolbar.py:222
 msgid "Voice Call"
 msgstr ""
 
-#: emesene/gui/gtkui/ConversationToolbar.py:224
-#: emesene/gui/gtkui/ConversationToolbar.py:225
+#: emesene/gui/gtkui/ConversationToolbar.py:227
+#: emesene/gui/gtkui/ConversationToolbar.py:228
 msgid "Audio/Video Call"
 msgstr ""
 
@@ -1761,11 +1766,9 @@ msgid "Use the album art as an avatar"
 msgstr ""
 
 #: emesene/plugins/music/songretriever.py:45
-msgid "See the \"listening to\" option in the extentions tab of the"
-msgstr ""
-
-#: emesene/plugins/music/songretriever.py:46
-msgid "preference window to select a preferred media player"
+msgid ""
+"See the \"listening to\" option in the extentions tab of the\n"
+"preference window to select a preferred media player"
 msgstr ""
 
 #: emesene/plugins/typing_notification/TypingNotification.py:57
