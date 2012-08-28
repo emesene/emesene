@@ -201,6 +201,7 @@ class Worker(e3.Worker):
                 display_name = self.res_manager.group_contacts[group_key][send_uin].nick
                 break
             except KeyError, e:
+                log.error("Can not get group buddy display name")
                 pass
 
         account = group_code
@@ -245,6 +246,8 @@ class Worker(e3.Worker):
                              log_account)
             self.session.contacts.me.nick = nick
             self.session.contacts.me.alias = nick
+
+            e3.base.Worker._handle_action_set_message(self, self.res_manager.contacts[me.account].lnick)
             self.session.nick_change_succeed(nick)
 
     def _on_status_change(self, value):
@@ -448,8 +451,12 @@ class Worker(e3.Worker):
     def _handle_action_set_message(self, message):
         '''handle Action.ACTION_SET_MESSAGE
         '''
-        pass
-
+        contact = self.session.contacts.me
+        stat = STATUS_MAP[contact.status]
+        
+        self.webqq_plugin.set_long_nick(message)
+        e3.base.Worker._handle_action_set_message(self, message)
+        
     def _handle_action_set_media(self, message):
         '''handle Action.ACTION_SET_MEDIA
         '''
