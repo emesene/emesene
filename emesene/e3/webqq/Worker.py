@@ -121,7 +121,7 @@ class Worker(e3.Worker):
             except KeyError , e:
                 _stauts = e3.status.ONLINE
 
-            contact = e3.Contact(account = key, identifier = int(key),  message = self.res_manager.contacts[key].lnick, _status = _status, blocked = False, cid = key)
+            contact = e3.Contact(account = key, identifier = str(key),  message = self.res_manager.contacts[key].lnick, _status = _status, blocked = False, cid = key)
 
             index = self.res_manager.contacts[key].cate_index
             group = categories_dict[index]
@@ -131,7 +131,7 @@ class Worker(e3.Worker):
         for group_id in self.res_manager.groups:
             group_id_key = group_id.key()
             _status = e3.status.ONLINE
-            contact = e3.Contact(account = group_id_key, identifier = int(group_id_key), nick =  self.res_manager.groups[group_id_key].name ,
+            contact = e3.Contact(account = group_id_key, identifier = str(group_id_key), nick =  self.res_manager.groups[group_id_key].name ,
                                  message = self.res_manager.groups[group_id_key].memo,  _status = _status, blocked = False, cid = group_id_key)
             self._add_contact_to_group(contact, group_group.name)
 
@@ -143,7 +143,7 @@ class Worker(e3.Worker):
                 buddy = self.res_manager.group_contacts[group_id_key][uin_key]
                 uin = buddy.uin
                 _status = e3.status.ONLINE
-                contact = e3.Contact(account = uin, identifier = int(uin),  nick = buddy.nick, message = buddy.lnick  , _status = _status, blocked = False, cid = uin)
+                contact = e3.Contact(account = uin, identifier = str(uin),  nick = buddy.nick, message = buddy.lnick  , _status = _status, blocked = False, cid = uin)
                 #self.session.contacts.contacts[uin] = contact
             '''
             
@@ -154,7 +154,7 @@ class Worker(e3.Worker):
         '''change the user status'''
         contact = self.session.contacts.me
         stat = STATUS_MAP[status_]
-        
+        self.webqq_plugin.change_status(stat)
         e3.base.Worker._handle_action_change_status(self, status_)
 
 
