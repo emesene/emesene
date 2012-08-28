@@ -24,7 +24,7 @@ class Session(e3.Session):
         '''constructor'''
         e3.Session.__init__(self, id_, account)
 
-    def login(self, account, password, status, proxy, host, port , use_http=False, use_ipv6=None):
+    def login(self, account, password, status, proxy, host, port , use_http=False, use_ipv6=False):
         '''start the login process'''
 
         self.account = e3.Account(account, password, status, host)
@@ -61,7 +61,6 @@ class Session(e3.Session):
                         Session.SERVICE_GROUP_MANAGING,
                         Session.SERVICE_CONTACT_INVITE,
                         Session.SERVICE_CALLS,
-                        Session.SERVICE_STATUS,
                         Session.SERVICE_FILETRANSFER]:
             return False
         else:

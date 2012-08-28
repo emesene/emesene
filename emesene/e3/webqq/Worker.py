@@ -395,9 +395,12 @@ class Worker(e3.Worker):
     def _handle_action_login(self, account, password, status_, host, port):
         '''handle Action.ACTION_LOGIN
         '''
-        self.my_avatars = self.caches.get_avatar_cache(
-                self.session.account.account)
-
+        
+        self.session.account.account = account
+        self.session.account.password = password
+        self.session.account.status = status_
+        self.session.contacts.me.status = status_
+        
         if self.webqq_plugin.webqq_login(account, password,"online") :
             self._session_started()
             self.session.login_started()
