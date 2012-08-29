@@ -124,6 +124,7 @@ class Language(object):
                 language = language.split("_")[0]
 
             self._lang = language
+            os.putenv('LANGUAGE', language)
 
             # gettext.translation() receives a _list_ of languages, so make it a list.
             language = [language]
