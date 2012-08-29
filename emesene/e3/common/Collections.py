@@ -187,10 +187,14 @@ class Collection(object):
     def fetch_all_metadata(self, refresh=True):
         self._stop = False
         for type_, exts in self.extensions_descs.iteritems():
-            for name in exts.iterkeys():
-                if self._stop:
-                    return
-                self.fetch_metadata(type_, name, refresh)
+            try:
+                for name in exts.iterkeys():
+                    if self._stop:
+                        return
+                    self.fetch_metadata(type_, name, refresh)
+            except RuntimeError:
+                self._stop = True
+                return
 
     def fetch_metadata(self, type_, name, refresh=False):
         '''fetch metadata if available'''
