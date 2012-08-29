@@ -211,12 +211,11 @@ class SwitchboardHandler(object):
     def __on_message_undelivered(self, trid):
         callback, errback = self._delivery_callbacks.pop(trid, (None, None))
         error = MessageError.DELIVERY_FAILED
-        if hasattr(self, "max_chunk_size"):
-            err_type = ConversationErrorType.P2P
-        else:
-            err_type = ConversationErrorType.MESSAGE
         run(errback, error)
-        self._on_error(err_type, error)
+        if hasattr(self, "max_chunk_size"):
+            self._on_error(ConversationErrorType.P2P, error)
+        else:
+            self._on_error(ConversationErrorType.MESSAGE, error)
 
     # Helper functions
     def _process_pending_queues(self):
@@ -415,11 +414,8 @@ class SwitchboardManager(gobject.GObject):
                 while True:
                     try:
                         handler = handlers.pop()
-                        handler_participants = handler.total_participants
-                        switchboard_participants = set(switchboard.participants.values())
-                        if handler_participants == switchboard_participants:
-                            self._switchboards[switchboard].add(handler)
-                            handler._switchboard = switchboard
+                        self._switchboards[switchboard].add(handler)
+                        handler._switchboard = switchboard
                     except KeyError:
                         break
                 del self._pending_switchboards[switchboard]
