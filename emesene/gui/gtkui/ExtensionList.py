@@ -159,7 +159,7 @@ class ExtensionListTab(gtk.VBox):
 
     def update_action(self, progress):
         '''called when the progress is updated'''
-        self.progressbar.set_fraction(progress / 100.0)
+        self.progressbar.set_fraction(min(progress / 100.0, 1.0))
         self.progressbar.set_text("%d %s" % (progress, "%"))
 
     def _make_list(self, type_, radio):
