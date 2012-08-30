@@ -103,34 +103,11 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.panel.set_mail_count(count)
 
     def _on_social_request(self, conn_url):
-
-        def get_token(token_url):
-            '''strips the access token from an url'''
-            if token_url is None:
-                return token_url
-
-            if token_url.find("#access_token=") == -1:
-                return None
-
-            pattern_start_token = "#access_token="
-            pattern_end_token = "&expires_in"
-            start_token = token_url.find(pattern_start_token) + len(pattern_start_token)
-            end_token = token_url.find(pattern_end_token)
-            return token_url[start_token:end_token]
-
-        def set_token(token_url):
-            '''callback used by webkit'''
-            self.session.config.facebook_token = get_token(token_url)
-            #only activate service if we have an access token
-            activate = bool(self.session.config.facebook_token is not None)
-            self.session.activate_social_services(activate)
-
         def set_token_fallback(response, data, token_url):
             '''callback used as fallback when webkit isn't avariable'''
-            self.session.config.facebook_token = get_token(token_url)
-            #only activate service if user press accept and we have an access token
-            activate = bool(response == 1 and self.session.config.facebook_token is not None)
-            self.session.activate_social_services(activate)
+            if response == 1:
+                token_url = None
+            self.session.set_social_token(token_url)
 
         dialog = extension.get_default('dialog')
 
@@ -140,7 +117,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
 
         if not use_fallback:
             dialog.web_window(_("Connect Emesene and Facebook"),
-                              conn_url, set_token)
+                              conn_url, self.session.set_social_token)
         else:
             #Fallback method
             #Open a browser and ask user to copy the access token

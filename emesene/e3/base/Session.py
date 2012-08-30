@@ -292,8 +292,9 @@ class Session(object):
         '''send a common message'''
         raise NotImplementedError('Not implemented')
 
-    def activate_social_services(self, active):
-        '''activates/deactivates social services if avariable in protocol'''
+    def set_social_token(self, raw_token):
+        '''store the social service token.
+        raw_token is the raw uri to be processed internally'''
         #XXX: override to add support
         pass
 

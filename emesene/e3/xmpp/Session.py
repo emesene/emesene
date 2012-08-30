@@ -30,6 +30,7 @@ import e3
 import logging
 log = logging.getLogger('xmpp.Session')
 
+
 class Session(e3.Session):
     '''a specialization of e3.Session'''
     NAME = 'XMPP Session'
@@ -73,7 +74,7 @@ class Session(e3.Session):
                 self.mail_client = IMAPMail(self, "imap.gmail.com", 993, account, password)
             except socket.error, sockerr:
                 log.warn("couldn't connect to mail server " + str(sockerr))
-                
+
             # gtalk allows to connect on port 80, it's not HTTP protocol but
             # the port is HTTP so it will pass through firewalls (yay!)
             if use_http:
@@ -140,3 +141,24 @@ class Session(e3.Session):
         '''activates/deactivates social services if avariable in protocol'''
         if not self.facebook_client is None:
             self.facebook_client.set_token(self.config.facebook_token, active)
+
+    def set_social_token(self, raw_token):
+        '''store the social service token.
+        raw_token is the raw uri to be processed internally'''
+        def get_token(token_url):
+            '''strips the access token from an url'''
+            if token_url is None:
+                return token_url
+
+            if token_url.find("#access_token=") == -1:
+                return None
+
+            token_start = "#access_token="
+            start_token = token_url.find(token_start) + len(token_start)
+            end_token = token_url.find("&expires_in")
+            return token_url[start_token:end_token]
+
+        self.session.config.facebook_token = get_token(token_url)
+        #only activate service if we have an access token
+        activate = bool(self.session.config.facebook_token is not None)
+        self.session.activate_social_services(activate)
