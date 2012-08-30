@@ -138,7 +138,7 @@ class Session(e3.Session):
         contacts = self.__worker.address_book.contacts
         return [c.account for c in contacts if (Membership.BLOCK & c.memberships) and \
                 ((Membership.FORWARD & c.memberships) or (Membership.REVERSE & c.memberships))]
-    
+
     def get_allowed_contacts(self):
         '''return a list containing the contacts in the address book with the
         ALLOW flag set'''
@@ -158,7 +158,7 @@ class Session(e3.Session):
 
         return (Membership.REVERSE & contacts[0].memberships) and \
                 not (Membership.FORWARD & contacts[0].memberships)
-        
+
     def is_only_forward(self, account):
         '''return True if the contact has set the FORWARD flag and not the
         REVERSE flag; otherwise False.
@@ -168,7 +168,7 @@ class Session(e3.Session):
 
         if len(contacts) == 0:
             return False
-        
+
         return (Membership.FORWARD & contacts[0].memberships) and \
                 not (Membership.REVERSE & contacts[0].memberships)
 
@@ -178,9 +178,20 @@ class Session(e3.Session):
 
         if len(contacts) == 0:
             return False
-            
+
         return (Membership.FORWARD & contacts[0].memberships)
 
     def disconnect_endpoint(self, ep_id):
         '''disconnects a single endpoint from msn'''
         self.add_action(e3.Action.ACTION_DISCONNECT_ENDPOINT, (ep_id,))
+
+    def get_mail_url(self):
+        '''return the mail url for the service.
+        if mail isn't supported returns None'''
+        # WARNING: This depends on papyon!
+        self.profile = self.get_profile()
+        post_url, token = self.profile.request_mail_url()
+        post_url += self.profile.profile['lang_preference']
+
+        return 'http://emesene.github.com/emesene-pages/hotmail?&&'+post_url+'?&&'+token['token']
+

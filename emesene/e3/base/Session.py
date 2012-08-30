@@ -172,6 +172,11 @@ class Session(object):
     def stop_mail_client(self):
         pass
 
+    def get_mail_url(self):
+        '''return the mail url for the service.
+        if mail isn't supported returns None'''
+        return None
+
     def load_config(self):
         '''load the config of the session'''
         # load the global configuration

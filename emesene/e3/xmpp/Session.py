@@ -102,6 +102,17 @@ class Session(e3.Session):
     def stop_mail_client(self):
         self.mail_client.stop()
 
+    def get_mail_url(self):
+        '''return the mail url for the service.
+        if mail isn't supported returns None'''
+        current_service = self.account.service
+        if current_service == "talk.google.com":
+            return "http://mail.google.com/"
+        elif current_service == "chat.facebook.com":
+            return "http://www.facebook.com/messages/"
+
+        return None
+
     def send_message(self, cid, text, style=None, cedict=None, celist=None):
         '''send a common message'''
         if cedict is None:

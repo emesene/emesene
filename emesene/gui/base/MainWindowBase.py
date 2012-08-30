@@ -19,10 +19,12 @@
 
 import extension
 
-import MailManager
+import Desktop
+import webbrowser
 import time
 import logging
 log = logging.getLogger('gui.base.MainWindowBase')
+
 
 class MainWindowBase(object):
     '''a widget that contains all the components inside'''
@@ -33,7 +35,6 @@ class MainWindowBase(object):
         self.session = session
         self.on_new_conversation = on_new_conversation
 
-        self._mail = MailManager.MailManager(self.session)
         self.session.signals.mail_count_changed.subscribe(self._on_mail_count_changed)
         self.session.signals.social_request.subscribe(self._on_social_request)
         self.session.signals.broken_profile.subscribe(self._on_broken_profile)
@@ -71,9 +72,9 @@ class MainWindowBase(object):
 
     def on_mail_click(self):
         if self.session.config.b_open_mail_in_desktop:
-            self._mail.open_in_default_client()
+            webbrowser.open("mailto:")
         else:
-            self._mail.open_in_browser()
+            Desktop.open(self.session.get_mail_url())
 
     def on_new_conversation_requested(self, account):
         '''Slot called when the user doubleclicks
