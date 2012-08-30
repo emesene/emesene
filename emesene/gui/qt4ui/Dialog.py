@@ -958,7 +958,7 @@ class WebWindow(StandardButtonDialog):
     def _url_changed_cb(self, qurl):
         #FIXME: this is ugly
         if qurl.host() == 'emesene.github.com':
-            self._callback(uri)
+            self._callback(unicode(qurl.toString()))
 
     def reject_response(self):
         pass
