@@ -82,6 +82,7 @@ class Window(gtk.Window):
         '''content setter'''
         if self._content_main:
             self.box.remove(self._content_main)
+            self._content_main.destroy()
             if self.accel_group:
                 self.remove_accel_group(self.accel_group)
                 self.accel_group = None
