@@ -66,6 +66,9 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
             appindicator.CATEGORY_APPLICATION_STATUS,
             self._get_icon_directory(self.handler.theme.image_theme.logo_panel))
 
+        if hasattr(self.props, 'title'):
+            self.set_property('title', 'emesene')
+
         self.main_window = main_window
 
         self.menu = None
