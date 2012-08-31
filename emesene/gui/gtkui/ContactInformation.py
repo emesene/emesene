@@ -210,8 +210,10 @@ class ListWidget(gtk.VBox):
         scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
 
+        self.saved_data = ''
         self.model = gtk.ListStore(gtk.gdk.Pixbuf, str, str)
-        self.list = gtk.TreeView(self.model)
+        list_ = gtk.TreeView(self.model)
+        list_.connect('button-press-event' , self.button_press_event)
         column = gtk.TreeViewColumn()
         column.set_expand(False)
         column1 = gtk.TreeViewColumn()
@@ -225,10 +227,10 @@ class ListWidget(gtk.VBox):
         crt.set_property('ellipsize', pango.ELLIPSIZE_END)
         pbr = gtk.CellRendererPixbuf()
 
-        self.list.append_column(column)
-        self.list.append_column(column1)
-        self.list.append_column(column2)
-        self.list.set_headers_visible(False)
+        list_.append_column(column)
+        list_.append_column(column1)
+        list_.append_column(column2)
+        list_.set_headers_visible(False)
 
         column.pack_start(pbr, False)
         column1.pack_start(crt_timestamp, False)
@@ -238,15 +240,42 @@ class ListWidget(gtk.VBox):
         column1.add_attribute(crt_timestamp, 'text', 1)
         column2.add_attribute(crt, 'markup', 2)
 
-        scroll.add(self.list)
+        scroll.add(list_)
 
         self.pack_start(scroll, True, True)
+
+        self.menu = gtk.Menu()
+        copy_item = gtk.ImageMenuItem(_('Copy contact information'))
+        copy_item.set_image(gtk.image_new_from_stock(gtk.STOCK_COPY,
+            gtk.ICON_SIZE_MENU))
+        copy_item.connect('activate', lambda *args: self.copy_to_clipboard())
+        self.menu.append(copy_item)
 
     def add(self, stat, timestamp, text):
         '''add a row to the widget'''
         pix = utils.safe_gtk_pixbuf_load(gui.theme.image_theme.status_icons[stat])
         date_text = time.strftime('%c', time.localtime(timestamp))
         self.model.append((pix, date_text, text))
+
+    def button_press_event(self, treeview, event):
+        if event.button == 3: # right click
+            paths = treeview.get_path_at_pos(int(event.x), int(event.y))
+            # do something with the selected path
+            if paths is None:
+                log.debug('invalid paths')
+            elif len(paths) > 0:
+                iterator = self.model.get_iter(paths[0])
+                obj = self.model.get_value(iterator, 2)
+                self.saved_data = obj
+                self.menu.show_all()
+                self.menu.popup(None, None, None, event.button, event.time)
+            else:
+                log.debug('empty paths?')
+
+    def copy_to_clipboard(self, *args):
+        clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
+        clipboard.set_text(self.saved_data)
+
 
 class ChatWidget(gtk.VBox):
     '''a widget that displays the history of nicks'''
