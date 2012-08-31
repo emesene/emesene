@@ -31,7 +31,6 @@ from ContactInformation import ContactInformation
 from BaseTray import BaseTray
 from MainWindowBase import MainWindowBase
 from OutputText import OutputText
-from Hotmail import Hotmail
 
 theme = Theme()
 
