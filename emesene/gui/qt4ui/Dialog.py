@@ -746,9 +746,9 @@ class ContactAdded(QtGui.QDialog):
             because every index of these lists represent an account
             N.B: if someone has a better solution just share it :)'''
 
-        self._done_cb  = done_cb
-        self._tabs  = {}
-        self._results  = {'accepted': [],
+        self._done_cb = done_cb
+        self._tabs = {}
+        self._results = {'accepted': [],
                         'rejected': []}
 
         tab = []
@@ -766,10 +766,30 @@ class ContactAdded(QtGui.QDialog):
         icon_reject = QtGui.QIcon.fromTheme('edit-delete')
         icon_remind_me = QtGui.QIcon.fromTheme('go-next')
         icon_quit = QtGui.QIcon.fromTheme('application-exit')
+        icon_next = QtGui.QIcon.fromTheme('go-next')
+        icon_back = QtGui.QIcon.fromTheme('go-previous')
         QtGui.QWidget.__init__(self)
         self.setWindowTitle(tr("Add contact"))
         self.center()
+
+        hbox = QtGui.QHBoxLayout()
+        hbox.addStretch(1)
+        self.back_btn = QtGui.QToolButton()
+        self.back_btn.setAutoRaise(True)
+        self.back_btn.setIcon(icon_back)
+        self.back_btn.clicked.connect(self._go_back)
+        hbox.addWidget(self.back_btn)
+        self.count_lbl = QtGui.QLabel()
+        hbox.addWidget(self.count_lbl)
+        self.next_btn = QtGui.QToolButton()
+        self.next_btn.setAutoRaise(True)
+        self.next_btn.setIcon(icon_next)
+        self.next_btn.clicked.connect(self._go_next)
+        hbox.addWidget(self.next_btn)
+
         self.tab_widget = QtGui.QTabWidget()
+        self.tab_widget.setDocumentMode(True)
+        self.tab_widget.tabBar().hide()
         for i in range(len(accounts)):
             tab.append(QtGui.QWidget())
             self._tabs[accounts[i][0]] = tab[i]
@@ -809,9 +829,30 @@ class ContactAdded(QtGui.QDialog):
 
         vbox = QtGui.QVBoxLayout()
         vbox.addStretch(1)
+        vbox.addLayout(hbox)
         vbox.addWidget(self.tab_widget)
-
         self.setLayout(vbox)
+
+        self.tab_widget.currentChanged.connect(self._update_label_cb)
+        #refresh button before show the dialog
+        self._update_label_cb(0)
+
+    def _update_label_cb(self, index):
+        text = "(%d/%d)" % (index + 1, self.tab_widget.count())
+        self.count_lbl.setText(text)
+        current_index = self.tab_widget.currentIndex()
+        can_back = current_index != 0
+        self.back_btn.setEnabled(can_back)
+        can_next = not current_index == self.tab_widget.count() - 1
+        self.next_btn.setEnabled(can_next)
+
+    def _go_back(self):
+        back = self.tab_widget.currentIndex() - 1
+        self.tab_widget.setCurrentIndex(back)
+
+    def _go_next(self):
+        next_ = self.tab_widget.currentIndex() + 1
+        self.tab_widget.setCurrentIndex(next_)
 
     def add(self, account):
         self._results['accepted'].append(account)
