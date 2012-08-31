@@ -136,6 +136,7 @@ class TopLevelWindow (QtGui.QMainWindow):
                             on_last_close=self._on_last_tab_close, parent=self)
 
         self.content_conv = conversation_page
+        self.cb_on_close_conv = on_close
 
     def go_login(self, callback, on_preferences_changed, config=None,
                  config_dir=None, config_path=None, proxy=None,
