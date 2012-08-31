@@ -169,7 +169,7 @@ class Session(e3.Session):
             end_token = token_url.find("&expires_in")
             return token_url[start_token:end_token]
 
-        self.session.config.facebook_token = get_token(token_url)
+        self.config.facebook_token = get_token(raw_token)
         #only activate service if we have an access token
-        activate = bool(self.session.config.facebook_token is not None)
-        self.session.activate_social_services(activate)
+        activate = bool(self.config.facebook_token is not None)
+        self.activate_social_services(activate)
