@@ -283,7 +283,6 @@ class ConversationManager(object):
 
             contact = self.session.contacts.safe_get(account)
             conversation.set_sensitive(not contact.blocked, True)
- 
             self.reuse_conversation(cid, [account])
             self.session.new_conversation(account, cid)
 

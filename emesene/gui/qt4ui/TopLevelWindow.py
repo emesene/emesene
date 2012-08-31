@@ -106,7 +106,7 @@ class TopLevelWindow (QtGui.QMainWindow):
             if self.is_maximized():
                 self.splitter.setSizes([size.width()-width, width])
             else:
-                self.resize(self.set_or_get_width(width+size.width()), 
+                self.resize(self.set_or_get_width(width+size.width()),
                    self.set_or_get_height(size.height()))
                 self.splitter.setSizes([size.width(), width+size.width()])
         else:
@@ -182,7 +182,6 @@ class TopLevelWindow (QtGui.QMainWindow):
         '''Slot called when the user closes the last tab in
         a conversation window'''
         self.cb_on_close_conv(self.content_conv)
-        self.content_conv = None
         if not self.content_main:
             self.hide()
 
