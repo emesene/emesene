@@ -35,7 +35,10 @@ if check_gtk3():
     import debugger
     debugger.init(debuglevel=0)
 
-import_and_register('tray icon', 'MessagingMenu')
+if check_gtk3():
+    import_and_register('tray icon', 'MessagingMenuNew')
+else:
+    import_and_register('tray icon', 'MessagingMenu')
 import_and_register('tray icon', 'Indicator')
 import_and_register('tray icon', 'TrayIcon')
 import_and_register('tray icon', 'NoTrayIcon')
