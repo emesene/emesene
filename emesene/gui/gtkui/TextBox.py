@@ -195,7 +195,7 @@ class InputView(gtk.TextView):
         gtk.TextView.__init__(self)
         self.connect('key-press-event', self.on_key_press_event)
 
-        self.drag_dest_set(gtk.gdk.BUTTON1_MASK,
+        self.drag_dest_set(gtk.DEST_DEFAULT_DROP,
                            [('emesene-invite', 0, 3)],
                            gtk.gdk.ACTION_DEFAULT)
 
