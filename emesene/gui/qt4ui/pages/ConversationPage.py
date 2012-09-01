@@ -19,8 +19,10 @@
 '''This module contains classes to represent the conversation page.'''
 
 import logging
+import e3
 
 import PyQt4.QtGui as QtGui
+import PyQt4.QtCore as QtCore
 
 import gui
 import extension
@@ -44,12 +46,13 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         self.setTabsClosable(True)
         self.setDocumentMode(True)
         self.setTabPosition(self.session.config.get_or_set('i_tab_position', 0))
-
         # to prevent top level window's destruction:
         self.qt_parent = parent
         self.tabCloseRequested.connect(self._on_tab_close_request)
         self.session.config.subscribe(self._on_tab_position_changed,
             'i_tab_position')
+        self.installEventFilter(EventFilter(self, self.focusInEvent))
+        self.currentChanged.connect(self._on_switch_page)
 
     def _on_tab_position_changed(self, value):
         '''callback called when i_tab_position changes'''
@@ -114,10 +117,36 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         parent = self.get_parent()
         if parent is not None and conversation in self.conversations.values():
             current_index = self.currentIndex()
-            if (is_waiting and current_index != conversation.tab_index):
+            if (not conversation.hasFocus() or current_index != conversation.tab_index):
                 conversation.message_waiting = is_waiting
+
+    def focusInEvent(self, widget):
+        page = self.currentWidget()
+        if page is not None:
+            self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
+            self.set_message_waiting(page, False)
+
+    def _on_switch_page(self, index):
+        page = self.currentWidget()
+        if page is not None:
+            self.session.add_event(e3.Event.EVENT_MESSAGE_READ, page)
+            self.set_message_waiting(page, False)
+            page.input_grab_focus()
 
     #[START] -------------------- GUI.BASE.CONVERSATIONMANAGER_OVERRIDE
     def _on_tab_close_request(self, index):
         '''Slot executed when the use clicks the close button in a tab'''
         self.close(self.widget(index))
+
+
+class EventFilter(QtCore.QObject):
+    def __init__(self, parent=None, callback=None):
+        QtCore.QObject.__init__(self, parent)
+        self.callback = callback
+        self.widget = parent
+
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.WindowActivate:
+            if self.parent().isActiveWindow():
+                self.callback(self.widget)
+        return QtCore.QObject.eventFilter(self, obj, event)
