@@ -604,12 +604,12 @@ Do you want to fix your profile now?''')
         nick_label = QtGui.QLabel(unicode(tr('Nick:')))
 
         nick = QtGui.QLineEdit()
-        nick.setText(user_nick)
+        nick.setText(unicode(user_nick))
 
         pm_label = QtGui.QLabel(unicode(tr('Message:')))
 
         pm = QtGui.QLineEdit()
-        pm.setText(user_message)
+        pm.setText(unicode(user_message))
 
         vbox.addWidget(nick_label)
         vbox.addWidget(nick)
