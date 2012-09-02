@@ -301,13 +301,15 @@ Do you want to fix your profile now?''')
         since in few cases one want to know when the error dialog was closed,
         but it can happen, so return stock.CLOSE to the callback if its set'''
         dialog = StandardButtonDialog(title)
+
+        def accept_response():
+            pass
+        dialog.accept_response = accept_response
         icon = QtGui.QLabel()
-        message = QtGui.QLabel(unicode(message))
         message = QtGui.QLabel(unicode(message))
         message.setTextFormat(Qt.RichText)
         message.setWordWrap(True)
         message.setAlignment(Qt.AlignCenter)
-
         lay = QtGui.QHBoxLayout()
         lay.addWidget(icon)
         lay.addWidget(message)
@@ -316,7 +318,6 @@ Do you want to fix your profile now?''')
         dialog.add_button(QtGui.QDialogButtonBox.Ok)
         dialog.setMinimumWidth(250)
         icon.setPixmap(QtGui.QIcon.fromTheme('dialog-error').pixmap(64, 64))
-        message.setAlignment(Qt.AlignCenter)
         dialog.exec_()
 
     @classmethod
@@ -331,6 +332,7 @@ Do you want to fix your profile now?''')
         send the response (that can be stock.ACCEPT or stock.CLOSE, if
         the user closed the window with the x)'''
         dialog = StandardButtonDialog(title)
+
         def accept_response():
             pass
         dialog.accept_response = accept_response
