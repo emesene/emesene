@@ -179,8 +179,7 @@ class Conversation(gtk.VBox, gui.Conversation):
             path_uri = path_uri[7:]
             path_uri = urllib.url2pathname(path_uri)
         directory = os.path.dirname(path_uri).lower()
-        caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
-        emcache = caches.get_emoticon_cache(self.session.account.account)
+        emcache = self.session.caches.get_emoticon_cache(self.session.account.account)
         dialog = extension.get_default('dialog')
 
         if directory.endswith(gui.theme.emote_theme.path.lower()):

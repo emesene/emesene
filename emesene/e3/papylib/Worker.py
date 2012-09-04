@@ -162,9 +162,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.profile.privacy = papyon.profile.Privacy.BLOCK
 
-        # initialize caches
-        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
-        self.my_avatars = self.caches.get_avatar_cache(
+        self.my_avatars = self.session.caches.get_avatar_cache(
                 self.session.account.account)
 
     def _content_roaming_state_changed(self, cr, pspec):
@@ -240,7 +238,7 @@ class Worker(e3.base.Worker, papyon.Client):
 
         self.session.contacts.contacts[papycontact.account] = contact
 
-        avatars = self.caches.get_avatar_cache(papycontact.account)
+        avatars = self.session.caches.get_avatar_cache(papycontact.account)
 
         if 'last' in avatars:
             contact.picture = os.path.join(avatars.path, 'last')
@@ -514,7 +512,7 @@ class Worker(e3.base.Worker, papyon.Client):
         # convert papyon msnobjects to a simple dict {shortcut:identifier}
         received_custom_emoticons = {}
 
-        emotes = self.caches.get_emoticon_cache(account)
+        emotes = self.session.caches.get_emoticon_cache(account)
 
         def download_failed(reason):
             log.error("Custom emoticon download failed: %s" % reason)
@@ -719,7 +717,7 @@ class Worker(e3.base.Worker, papyon.Client):
             if STATUS_PAPY_TO_E3[contact.presence] != status.OFFLINE:
                 ctct = self.session.contacts.get(contact.account)
                 ctct.picture = None
-                avatars = self.caches.get_avatar_cache(contact.account)
+                avatars = self.session.caches.get_avatar_cache(contact.account)
                 if 'last' in avatars:
                     try:
                         os.remove(os.path.join(avatars.path, 'last'))
@@ -728,7 +726,7 @@ class Worker(e3.base.Worker, papyon.Client):
                 self.session.picture_change_succeed(contact.account, None)
             return
         if msn_object._type == papyon.p2p.MSNObjectType.DISPLAY_PICTURE:
-            avatars = self.caches.get_avatar_cache(contact.account)
+            avatars = self.session.caches.get_avatar_cache(contact.account)
             avatar_hash = msn_object._data_sha.encode("hex")
             avatar_path = os.path.join(avatars.path, avatar_hash)
             ctct = self.session.contacts.get(contact.account)
@@ -1347,7 +1345,7 @@ class Worker(e3.base.Worker, papyon.Client):
         elif message.type == e3.base.Message.TYPE_MESSAGE:
             # format the text for papy
             formatting = formatting_e3_to_papy(message.style)
-            emoticon_cache = self.caches.get_emoticon_cache(
+            emoticon_cache = self.session.caches.get_emoticon_cache(
                     self.session.account.account)
             d_msn_objects = {}
 
