@@ -112,7 +112,9 @@ class CellRendererFunction(gtk.GenericCellRenderer):
         width -= self.xpad
         ctx = win.cairo_create()
 
-        xalign, yalign = self.get_alignment()
+        # issue 1508
+        xalign = self.get_property('xalign')
+        yalign = self.get_property('yalign')
 
         layout = self.get_layout(widget)
         if layout:
@@ -626,7 +628,8 @@ class SmileyLabel(gtk.Label):
         x_coord, y_coord, width, height = self.get_allocation()
         ctx = event.window.cairo_create()
 
-        xalign, yalign = self.get_alignment()
+        xalign = self.get_property('xalign')
+        yalign = self.get_property('yalign')
 
         if self._smiley_layout:
             padding = int((height - self._smiley_layout.get_pixel_size()[1]) * yalign)

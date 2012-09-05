@@ -134,7 +134,9 @@ inherited by extensions.
         total_lines_count = self.calculate_lines_count()
         total_text_height = self.calculate_lines_height()
 
-        xalign, yalign = self.get_alignment()
+        # issue 1508
+        xalign = self.get_property('xalign')
+        yalign = self.get_property('yalign')
 
         padding = int((height - total_text_height) * yalign)
         y_coord += padding
