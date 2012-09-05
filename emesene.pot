@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-08-28 12:46+0200\n"
+"POT-Creation-Date: 2012-09-05 23:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -395,48 +395,53 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:290
-#: emesene/gui/gtkui/ContactInformation.py:400
+#: emesene/gui/gtkui/ContactInformation.py:248
+#: emesene/gui/gtkui/ContactMenu.py:102
+msgid "Copy contact information"
+msgstr ""
+
+#: emesene/gui/gtkui/ContactInformation.py:319
+#: emesene/gui/gtkui/ContactInformation.py:429
 msgid "Hide calendars"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:310
+#: emesene/gui/gtkui/ContactInformation.py:339
 msgid "Chats from"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:312
+#: emesene/gui/gtkui/ContactInformation.py:341
 msgid "Chats to"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:317
+#: emesene/gui/gtkui/ContactInformation.py:346
 msgid "Search:"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:327
+#: emesene/gui/gtkui/ContactInformation.py:356
 msgid "Max lines:"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:330
+#: emesene/gui/gtkui/ContactInformation.py:359
 msgid "Previous"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:331
+#: emesene/gui/gtkui/ContactInformation.py:360
 msgid "Next"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:397
+#: emesene/gui/gtkui/ContactInformation.py:426
 msgid "Show calendars"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:442
+#: emesene/gui/gtkui/ContactInformation.py:471
 msgid "Loading chat history. Hang tight for a moment..."
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:492
+#: emesene/gui/gtkui/ContactInformation.py:521
 msgid "No chat history found"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:537
+#: emesene/gui/gtkui/ContactInformation.py:566
 msgid "Too many messages to display"
 msgstr ""
 
@@ -474,10 +479,6 @@ msgstr ""
 
 #: emesene/gui/gtkui/ContactMenu.py:96
 msgid "View information"
-msgstr ""
-
-#: emesene/gui/gtkui/ContactMenu.py:102
-msgid "Copy contact information"
 msgstr ""
 
 #: emesene/gui/gtkui/ContactMenu.py:107
@@ -1188,11 +1189,11 @@ msgstr ""
 msgid "Check for updates"
 msgstr ""
 
-#: emesene/gui/gtkui/MainWindow.py:142
+#: emesene/gui/gtkui/MainWindow.py:119
 msgid "Connect Emesene and Facebook"
 msgstr ""
 
-#: emesene/gui/gtkui/MainWindow.py:150
+#: emesene/gui/gtkui/MainWindow.py:127
 msgid "Please login into facebook and copy the url opened in your browser here"
 msgstr ""
 
