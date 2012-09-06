@@ -22,7 +22,7 @@
 
     ; Program info
     !define PROGRAM_NAME "emesene"
-    !define PROGRAM_VERSION "2.12.5"
+    !define PROGRAM_VERSION "2.12.9"
     !define /date PROGRAM_BUILDTIME "%Y%m%d_%H%M"
     !define PROGRAM_TYPE "installer"
     !define PROGRAM_PUBLISHER "emesene team"

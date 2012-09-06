@@ -16,8 +16,9 @@
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-EMESENE_VERSION = "2.12.6-dev"
-EMESENE_LAST_STABLE = "2.12.5"
+# Use the -dev suffix for development releases, it will enable the dummy backend
+EMESENE_VERSION = "2.12.9"
+EMESENE_LAST_STABLE = "2.12.9"
 EMESENE_WEBSITE = "http://www.emesene.org"
 EMESENE_AUTHORS = "c10ud, pepeleproso, sbte & marianoguerra"
 EMESENE_CONTRIBUTORS = [] # Loaded in emesene.py at runtime from CONTRIBUTORS

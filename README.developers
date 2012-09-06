@@ -25,3 +25,5 @@ You will automagically have a https://github.com/emesene/emesene/{tar,zip}ball/v
 * How to change release versions in emesene:
 Look in emesene/Info.py
 
+* How to handle people in CONTRIBUTORS that show twice or more with different addresses:
+Just add them to the .mailmap file following the standard
