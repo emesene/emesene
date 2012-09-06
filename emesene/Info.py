@@ -17,7 +17,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 # Use the -dev suffix for development releases, it will enable the dummy backend
-EMESENE_VERSION = "2.12.9"
+EMESENE_VERSION = "2.12.10-dev"
 EMESENE_LAST_STABLE = "2.12.9"
 EMESENE_WEBSITE = "http://www.emesene.org"
 EMESENE_AUTHORS = "c10ud, pepeleproso, sbte & marianoguerra"
