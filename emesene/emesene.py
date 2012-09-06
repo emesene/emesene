@@ -182,7 +182,8 @@ class Controller(object):
         '''register core extensions'''
         extension.category_register('session', dummy.Session,
                 single_instance=True)
-        extension.register('session', dummy.Session)
+        if Info.EMESENE_VERSION.endswith("dev"):
+            extension.register('session', dummy.Session)
 
         if webqq is not None:
             extension.register('session', webqq.Session)
