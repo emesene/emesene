@@ -38,7 +38,6 @@ class MessagingMenuNew(gui.BaseTray):
         self.source_list = []
 
         self.mmapp = MessagingMenu.App(desktop_id="emesene.desktop")
-        self.mmapp.set_status(MessagingMenu.Status.AVAILABLE)
         self.mmapp.register()
         self.mmapp.connect('activate-source', self._on_source_activated)
         self.mmapp.connect('status-changed', self._on_set_status)
@@ -125,6 +124,9 @@ class MessagingMenuNew(gui.BaseTray):
         self.conv_manager.present()
 
     def _on_set_status(self, mmapp, status):
+        if not self.handler.session:
+            return
+
         if status == MessagingMenu.Status.OFFLINE:
             self.handler.session.close()
         elif status == MessagingMenu.Status.AVAILABLE:
