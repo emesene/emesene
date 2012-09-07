@@ -63,9 +63,7 @@ class MessagingMenuNew(gui.BaseTray):
             return
         icid = conv.icid
 
-        if icid not in self.source_list and conv_manager and \
-            not (conv_manager.is_active() and conv.members == [account]):
-
+        if icid not in self.source_list and not conv_manager.is_active():
             self._add_source(account, icid)
 
     def _on_message_read(self, conv):
