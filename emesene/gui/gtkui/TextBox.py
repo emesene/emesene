@@ -195,8 +195,12 @@ class InputView(gtk.TextView):
         gtk.TextView.__init__(self)
         self.connect('key-press-event', self.on_key_press_event)
 
-        self.drag_dest_set(gtk.DEST_DEFAULT_DROP,
-                           [('emesene-invite', 0, 3)],
+        if check_gtk3():
+            targets = [gtk.TargetEntry.new('emesene-invite', 0, 3)]
+        else:
+            targets = [('emesene-invite', 0, 3)]
+
+        self.drag_dest_set(gtk.DEST_DEFAULT_DROP, targets,
                            gtk.gdk.ACTION_DEFAULT)
 
     def on_key_press_event(self, widget, event):
