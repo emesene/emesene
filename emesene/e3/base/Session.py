@@ -72,8 +72,6 @@ class Session(object):
         self.signals = e3.common.Signals(EVENTS, self.events)
         self.signals.start()
 
-        self.caches = e3.cache.CacheManager(self.config_dir.base_dir)
-
     def get_conversation(self, cid, members=None):
         '''
         return a conversation that matches cid and/or members

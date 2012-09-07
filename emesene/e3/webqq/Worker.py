@@ -44,7 +44,7 @@ class Worker(e3.Worker):
     webqq_plugin = None
     res_manager = None
 
-    def __init__(self, session, proxy, use_http=False, use_ipv6=False):
+    def __init__(self, app_name, session, proxy, use_http=False, use_ipv6=False):
         '''class constructor'''
         e3.Worker.__init__(self, session)
 
@@ -64,6 +64,7 @@ class Worker(e3.Worker):
 
         self.conversations = {}
         self.rconversations = {}
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
 
         singleton = webqqboost.SingletonInstance()
         self.webqq_plugin = singleton.getQQPluginSingletonInstance()
@@ -290,9 +291,9 @@ class Worker(e3.Worker):
                 qqnumber = None
 
         if qqnumber is None:
-            avatars = self.session.caches.get_avatar_cache(account)
+            avatars = self.caches.get_avatar_cache(account)
         else:
-            avatars = self.session.caches.get_avatar_cache(qqnumber)
+            avatars = self.caches.get_avatar_cache(qqnumber)
         avatar_path = os.path.join(avatars.path, photo_hash)
         ctct.picture = avatar_path
 

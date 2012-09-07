@@ -397,7 +397,7 @@ class Controller(object):
         # then 'r' and CTRL+C when you need the shell.
         #import objgraph
         ##objgraph.show_most_common_types()
-        #objgraph.show_growth(limit=None)
+        #objgraph.show_growth()
 
         if do_exit:
             extension.get_and_instantiate('quit')

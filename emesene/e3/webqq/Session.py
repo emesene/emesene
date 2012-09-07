@@ -29,7 +29,7 @@ class Session(e3.Session):
 
         self.account = e3.Account(account, password, status, host)
 
-        self.__worker = Worker(self, proxy, use_http, use_ipv6)
+        self.__worker = Worker('emesene2', self, proxy, use_http)
         self.__worker.start()
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,

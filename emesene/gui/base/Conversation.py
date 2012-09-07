@@ -39,7 +39,7 @@ class Conversation(object):
         '''constructor'''
         self.update_window = update_window
         self.session = session
-        self.caches = self.session.caches
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
         self.emcache = self.caches.get_emoticon_cache(self.session.account.account)
 
         self.cid = float(cid)

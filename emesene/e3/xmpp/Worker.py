@@ -77,6 +77,7 @@ class Worker(e3.Worker):
         self.conversations = {}
         self.rconversations = {}
         self.roster = None
+        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
 
     def _session_started(self, event):
         '''Process the session_start event'''
@@ -96,7 +97,7 @@ class Worker(e3.Worker):
                 contact = e3.Contact(jid, jid)
                 self.session.contacts.contacts[jid] = contact
 
-            avatars = self.session.caches.get_avatar_cache(jid)
+            avatars = self.caches.get_avatar_cache(jid)
             if 'last' in avatars:
                 contact.picture = os.path.join(avatars.path, 'last')
             contact.nick = state['name']
@@ -180,7 +181,7 @@ class Worker(e3.Worker):
         photo_hash = photo_hash.hexdigest()
 
         ctct = self.session.contacts.get(account)
-        avatars = self.session.caches.get_avatar_cache(account)
+        avatars = self.caches.get_avatar_cache(account)
         avatar_path = os.path.join(avatars.path, photo_hash)
         ctct.picture = avatar_path
 
@@ -277,7 +278,7 @@ class Worker(e3.Worker):
         '''
         self.session.contacts.me.status = e3.status.ONLINE
 
-        self.my_avatars = self.session.caches.get_avatar_cache(
+        self.my_avatars = self.caches.get_avatar_cache(
                 self.session.account.account)
 
         self.client = xmpp.ClientXMPP(account, password)
