@@ -172,6 +172,9 @@ class PluginManager(object):
 
     def scan_directory(self, dir_, old_plugins=None):
         '''Find plugins and packages inside dir_'''
+        if not os.path.isdir(dir_):
+            return
+
         if not old_plugins:
             old_plugins = {}
         if dir_ not in self._plugin_dirs:
