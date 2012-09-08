@@ -40,6 +40,7 @@ Terminal=false
 StartupNotify=true
 Type=Application
 Categories=Network;InstantMessaging;
+X-MessagingMenu-UsesChatSection=true;
 X-Ayatana-Desktop-Shortcuts=NewInstance;
 
 [NewInstance Shortcut Group]
