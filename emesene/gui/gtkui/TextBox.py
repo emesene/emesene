@@ -309,8 +309,7 @@ class InputText(TextBox):
           self.changed = False
           emote_theme = gui.theme.emote_theme
 
-          caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
-          emcache = caches.get_emoticon_cache(self.session.account.account)
+          emcache = self.session.caches.get_emoticon_cache(self.session.account.account)
 
           for code, path in emote_theme.shortcuts_by_length(emcache.list()):
               if not path.startswith(emote_theme.path):

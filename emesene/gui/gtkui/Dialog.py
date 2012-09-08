@@ -1338,8 +1338,7 @@ class EmotesWindow(gtk.Window):
         dialogs.append(self)
 
         self.session = session
-        self.caches = e3.cache.CacheManager(self.session.config_dir.base_dir)
-        self.emcache = self.caches.get_emoticon_cache(self.session.account.account)
+        self.emcache = self.session.caches.get_emoticon_cache(self.session.account.account)
 
         self.shortcut_list = []
 
