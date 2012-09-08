@@ -53,6 +53,7 @@ class Session(object):
         self._account = None
         self.contacts = None
         self.logger = None
+        self.caches = None
         self.conversation_start_locked = False #if conversation start locked
         self.conversations = {}
         self.conversation_managers = []
@@ -71,8 +72,6 @@ class Session(object):
         # set the base dir of the config to the base dir plus the account
         self.signals = e3.common.Signals(EVENTS, self.events)
         self.signals.start()
-
-        self.caches = e3.cache.CacheManager(self.config_dir.base_dir)
 
     def get_conversation(self, cid, members=None):
         '''
@@ -117,6 +116,8 @@ class Session(object):
         self.logger = Logger.LoggerProcess(self.config_dir.get_path('log'))
         self.logger.start()
         self.config.get_or_set('b_log_enabled', True)
+
+        self.caches = e3.cache.CacheManager(self.config_dir.base_dir)
 
     def log(self, event, status, payload, src, dest=None, new_time=None,
             cid=None):
