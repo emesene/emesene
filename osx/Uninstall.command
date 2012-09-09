@@ -1,17 +1,17 @@
 #!/bin/sh
 
-#emesene uninstaller rev 5
+#emesene uninstaller rev 6
 
 #Copyright Josh Fradley
 #I accept no responsiblity for any damage done to your system
 
-echo "Welcome to the emesene uninstaller"
+echo "Welcome to the emesene OS X Uninstaller"
 read -p "Press enter to continue..."
 
 #Check if emesene actually exists
 if [ -d "/Applications/emesene.app" ]
 then
-    echo "Starting uninstall..."
+    echo "Starting Uninstall..."
 else
     echo "emesene is not installed..."
     exit
@@ -31,30 +31,20 @@ fi
 rm -rf "/Applications/emesene.app"
 rm -rf "/Users/$USER/Library/Caches/org.emesene.emesene" 
 rm -f "/Users/$USER/Library/Preferences/org.emesene.emesene.plist" 
+rm -f "/Users/$USER/Library/Preferences/org.emesene.emesene.plist.lockfile"
+rm -rf "/Users/$USER/Library/Saved Application State/org.emesene.emesene.savedState"
 rm -f "/Users/$USER/Library/Application Support/Growl/Tickets/emesene.growlTicket" 
-
-#Remove OS X 10.7 specific files
-os=`sw_vers -productVersion`
-if [[ "$os" == *10.7* ]]
-then
-    rm -rf "/Users/$USER/Library/Saved Application State/org.emesene.emesene.savedState" 
-    rm -f "/Users/$USER/Library/Preferences/org.emesene.emesene.plist.lockfile"
-else
-    continue
-fi
 
 #gtk files
 rm -rf "/Users/$USER/.config/gtk-2.0" 
 
 #user settings
-echo "Remove user settings? Type 'yes' if you wish to remove them. If not type anything else..."
-read doremoveusersettings
-
-if [ "$doremoveusersettings" == "yes" ]
-then
-    rm -rf "/Users/$USER/Library/Application Support/emesene2"
-else
-    continue
-fi
+echo "Remove user settings?"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) rm -rf "/Users/$USER/Library/Application Support/emesene2"; break;;
+        No ) break;;
+    esac
+done
 
 echo "emesene has been successfully uninstalled..."
