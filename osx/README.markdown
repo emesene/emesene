@@ -65,4 +65,4 @@ This will create a DMG for you and mount it in Finder, you can then move the ico
 
 ### Known Issues
 
-* Icons on the DMG has to be set manually
+* Icons on the DMG have to be set manually
