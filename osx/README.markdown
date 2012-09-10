@@ -61,8 +61,8 @@ If you are planning to release emesene run:
 sh build_osx.sh dorelease
 ```
 
-This will create a DMG for you and mount in in Finder, you can then move the icons and set the DMG background. Once that is done go back to the script and press enter. A compressed DMG will then be built.
+This will create a DMG for you and mount it in Finder, you can then move the icons and set the DMG background. Once that is done go back to the script and press enter. A compressed DMG will then be built.
 
 ### Known Issues
 
-* Icon on the DMG have to be set manually
+* Icons on the DMG has to be set manually
