@@ -21,3 +21,4 @@ make packagers' life better and hotfix eventual bugs.
 * [papyon] (https://github.com/emesene/papyon)
 * [SleekXMPP] (https://github.com/fritzy/SleekXMPP)
 * [pyfb] (https://github.com/jmg/pyfb)
+* [libwebqq](https://github.com/linuxqq/libwebqq)
