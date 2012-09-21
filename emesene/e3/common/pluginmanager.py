@@ -125,7 +125,6 @@ class PluginHandler(MetaData):
             inst.active = True
         except Exception, reason:
             log.warning('error starting "%s": %s' % (self.name, reason))
-            print 'error starting "%s": %s' % (self.name, reason)
             raise reason
 
         return True
@@ -146,7 +145,7 @@ class PluginHandler(MetaData):
     def configurable(self):
         if not self.is_active():
             return False
-        return self._instance.configurable()
+        return self.meta.get('configurable', False)
 
     def is_active(self):
         '''@return True if an instance exist and is started. False otherwise'''
@@ -156,12 +155,7 @@ class PluginHandler(MetaData):
 
     def get_description(self):
         '''@return plugin description from Plugin class'''
-        description = self.meta.get('description', '')
-        if not description: # TODO: Should be deprecated later
-            description = self.module.Plugin.description
-            description = description if description != "Your first plugin." \
-                                      else self.module.Plugin._description
-        return description
+        return self.meta.get('description', '')
 
 
 class PluginManager(object):

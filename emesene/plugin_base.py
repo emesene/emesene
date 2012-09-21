@@ -26,9 +26,7 @@ It will be inherited by every plugin.
 
 class PluginBase(object):
     '''Base class for plugins'''
-    description = 'Your first plugin.'
-    _description = description # DEPRICATE ME!
-    _authors = {}
+
     def __init__(self):
         self.active = False
 
@@ -39,11 +37,6 @@ class PluginBase(object):
     def stop(self):
         '''Method to stop the plugin'''
         return
-
-    def configurable(self):
-        '''Method returning a boolean indicating if this plugin can
-        be configured or not.'''
-        return False
 
     def config(self, session):
         '''Method to configure the plugin. Please put configurable to
