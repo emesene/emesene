@@ -52,3 +52,8 @@ class PluginBase(object):
         '''It's a placeholder. Can be safely called even if not implemented
         (that means the plugin is old-style)'''
         return False
+
+    def extension_unregister(self):
+        '''It's a placeholder. Can be safely called even if not implemented
+        (that means the plugin is old-style)'''
+        return False

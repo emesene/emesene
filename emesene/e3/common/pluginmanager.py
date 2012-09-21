@@ -133,6 +133,7 @@ class PluginHandler(MetaData):
         '''If active, stop the plugin'''
         if self.is_active():
             self._instance.stop()
+            self._instance.extension_unregister()
             self._instance.active = False
 
     def config(self, session):
