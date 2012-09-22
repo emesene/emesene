@@ -31,9 +31,6 @@ try:
 except ImportError:
     import simplejson as json
 
-API_KEY = "323241734418016"
-REDIRECT_URL = "http://emesene.github.com/emesene/index.html"
-
 class FacebookCLient(object):
 
     def __init__(self, session, token):

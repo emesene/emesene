@@ -36,7 +36,7 @@ class FacebookClient(object):
         self.permissions = self.DEFAULT_SCOPE
         self.expires = None
 
-    def _make_request(self, url, **data):
+    def _make_request(self, url, data=None):
         """
             Makes a simple request. If not data is a GET else is a POST.
         """
@@ -48,11 +48,10 @@ class FacebookClient(object):
         """
             Makes a request to the facebook Graph API.
             This method requires authentication!
-            Don't forgot to get the access token before use it.
+            Don't forget to get the access token before use it.
         """
         if self.access_token is None:
-            raise self._make_exception("Must Be authenticated. Do you forgot to get the access token?",
-                                        "OAuthException")
+            raise OAuthException("Must Be authenticated. Did you forget to get the access token?")
 
         if params is None:
             params = {}
@@ -66,7 +65,7 @@ class FacebookClient(object):
             post_data = urllib.urlencode(data)
         else:
             post_data = None
-        return urllib.urlopen(url, post_data).read()
+        return self._make_request(url, post_data)
 
     def _make_object(self, name, data):
         """
@@ -176,7 +175,14 @@ class FacebookClient(object):
         if object_name is None:
             object_name = path
         path = "%s/%s" % (id, path.lower())
-        return self.get_one(path, object_name, **params).__dict__[object_name]
+        
+        obj = self.get_one(path, object_name, **params)
+        obj_list = self.factory.make_paginated_list(obj, object_name)
+
+        if not obj_list:
+            obj_list = obj.get("data")
+
+        return obj_list
 
     def push(self, id, path, **data):
         """
@@ -185,14 +191,16 @@ class FacebookClient(object):
         if id is None:
             id = "me"
         path = "%s/%s" % (id, path)
-        self._make_auth_request(path, **data)
+        response = self._make_auth_request(path, **data)
+        return self._make_object("response", response)
 
     def delete(self, id):
         """
             Deletes a object by id
         """
         data = {"method": "delete"}
-        self._make_auth_request(id, **data)
+        response = self._make_auth_request(id, **data)
+        return self._make_object("response", response)
 
     def _get_table_name(self, query):
         """
@@ -214,14 +222,13 @@ class FacebookClient(object):
         url_path = self._get_url_path({'query' : query, 'access_token' : self.access_token, 'format' : 'json'})
         url = "%s%s" % (self.FBQL_BASE_URL, url_path)
         data = self._make_request(url)
-        obj_raw = self.factory.loads(data)
-        if 'error_code' in obj_raw:
-            ex = self.factory._make_object('Error', obj_raw)
-            etype = None
-            if hasattr(ex, "error_type"):
-                etype = ex.error_type
-            raise self._make_exception(ex.error_msg, etype, ex.error_code)
-        return self.factory.make_objects_list(table, obj_raw)
+
+        objs = self.factory.make_objects_list(table, data)
+        
+        if hasattr(objs, 'error'):
+            raise self._make_exception(objs.error.message, objs.error.type)
+
+        return objs
 
     def _make_exception(self, message, etype=None, ecode=None):
         """

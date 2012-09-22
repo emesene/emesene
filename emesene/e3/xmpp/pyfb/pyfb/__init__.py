@@ -14,7 +14,7 @@
 # MA 02110-1301, USA.
 
 __author__ = "Juan Manuel Garcia"
-__version__ = "0.3.1"
+__version__ = "0.4.1"
 __license__ = 'GPL v3'
 
 from pyfb import Pyfb, PyfbException, OAuthException
