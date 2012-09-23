@@ -61,16 +61,17 @@ class TopLevelWindow (QtGui.QMainWindow):
 
     def _set_content_conv(self, content_conv):
         '''content setter'''
-        #w = self.splitter.sizes()[0]
+        w = self.splitter.sizes()[0]
         if self._content_conv:
             self._content_conv.hide()
             self._content_conv.setParent(None)
             self._content_conv.destroy()
         self._content_conv = content_conv
-        self.splitter.insertWidget(1, self._content_conv)
-        #else:
-        #    self.resize(self.set_or_get_width(w),
-        #                self.set_or_get_height(0))
+        if content_conv is not None:
+            self.splitter.insertWidget(1, self._content_conv)
+        else:
+            self.resize(self.set_or_get_width(w),
+                        self.set_or_get_height(0))
 
     content_conv = property(_get_content_conv, _set_content_conv)
 
@@ -185,6 +186,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         self.cb_on_close_conv(self.content_conv)
         if not self.content_main:
             self.hide()
+        self.content_conv = None
 
     def _setup_main_menu(self, session, contact_list):
         '''build all the menus used on the client'''
