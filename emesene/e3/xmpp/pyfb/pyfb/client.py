@@ -44,7 +44,7 @@ class FacebookClient(object):
             data = None
         return urllib.urlopen(url, data).read()
 
-    def _make_auth_request(self, path, params = None, **data):
+    def _make_auth_request(self, path, params=None, **data):
         """
             Makes a request to the facebook Graph API.
             This method requires authentication!
@@ -125,9 +125,9 @@ class FacebookClient(object):
 
         url_path = self._get_url_path({
             "client_id": self.app_id,
-            "client_secret" : app_secret_key,
-            "redirect_uri" : redirect_uri,
-            "code" : secret_code,
+            "client_secret": app_secret_key,
+            "redirect_uri": redirect_uri,
+            "code": secret_code,
         })
         url = "%s%s" % (self.BASE_TOKEN_URL, url_path)
 
@@ -135,7 +135,7 @@ class FacebookClient(object):
 
         if not "access_token" in data:
             ex = self.factory.make_object('Error', data)
-            raise self._make_exception(ex.error.message, ex.error.type)
+            raise self._make_exception(ex.error.message, ex.error.code)
 
         data = dict(parse_qsl(data))
         self.access_token = data.get('access_token')
@@ -148,7 +148,7 @@ class FacebookClient(object):
             redirect_uri = self.DEFAULT_DIALOG_URI
 
         url_path = self._get_url_path({
-            "app_id" : self.app_id,
+            "app_id": self.app_id,
             "redirect_uri": redirect_uri,
         })
         url = "%s%s" % (self.DIALOG_BASE_URL, url_path)
@@ -162,7 +162,7 @@ class FacebookClient(object):
         obj = self._make_object(object_name, data)
 
         if hasattr(obj, 'error'):
-            raise self._make_exception(obj.error.message, obj.error.type)
+            raise self._make_exception(obj.error.message, obj.error.code)
 
         return obj
 
@@ -175,7 +175,7 @@ class FacebookClient(object):
         if object_name is None:
             object_name = path
         path = "%s/%s" % (id, path.lower())
-        
+
         obj = self.get_one(path, object_name, **params)
         obj_list = self.factory.make_paginated_list(obj, object_name)
 
@@ -211,7 +211,7 @@ class FacebookClient(object):
             index = query.index(KEY) + len(KEY) + 1
             table = query[index:].strip().split(" ")[0]
             return table
-        except Exception, e:
+        except Exception:
             raise PyfbException("Invalid FQL Sintax")
 
     def execute_fql_query(self, query):
@@ -219,25 +219,29 @@ class FacebookClient(object):
             Executes a FBQL query and return a list of objects
         """
         table = self._get_table_name(query)
-        url_path = self._get_url_path({'query' : query, 'access_token' : self.access_token, 'format' : 'json'})
+        url_path = self._get_url_path({'query': query,
+                                        'access_token': self.access_token,
+                                        'format': 'json'})
         url = "%s%s" % (self.FBQL_BASE_URL, url_path)
         data = self._make_request(url)
 
         objs = self.factory.make_objects_list(table, data)
-        
+
         if hasattr(objs, 'error'):
-            raise self._make_exception(objs.error.message, objs.error.type)
+            raise self._make_exception(objs.error.message, objs.error.code)
 
         return objs
 
-    def _make_exception(self, message, etype=None, ecode=None):
+    def _make_exception(self, message, ecode=None):
         """
             make corresponding exception
         """
-        if etype == "OAuthException" or ecode == 190:
+        # see https://developers.facebook.com/docs/authentication/access-token-expiration/
+        if ecode == 190:
             return OAuthException(message)
         else:
             return PyfbException(message)
+
 
 class PyfbException(Exception):
     """
@@ -248,6 +252,7 @@ class PyfbException(Exception):
 
     def __str__(self):
         return repr(self.value)
+
 
 class OAuthException(PyfbException):
     """
