@@ -287,11 +287,17 @@ class Worker(e3.Worker):
         self.client.register_plugin('xep_0030') # Service Discovery
         self.client.register_plugin('xep_0054') # vcard-temp
         self.client.register_plugin('xep_0060') # PubSub
+
         # MSN will kill connections that have been inactive for even
         # short periods of time. So use pings to keep the session alive;
         # whitespace keepalives do not work.
         if not self.session._is_facebook:
             self.client.register_plugin('xep_0199', {'keepalive': True, 'frequency': 60})
+
+        #facebook support typing notification with xep-85
+        if self.session._is_facebook:
+            self.client.register_plugin('xep_0085')
+            self.client.add_event_handler('chatstate_composing', self._on_typing_message_cb)
 
         self.client.add_event_handler('session_start', self._session_started)
         self.client.add_event_handler('changed_status', self._on_presence)
@@ -300,6 +306,18 @@ class Worker(e3.Worker):
         self.client.connect((host, port))
 
         self.session.login_started()
+
+    def _on_typing_message_cb(self, message):
+        ''' handle user typing event '''
+        account = message['from'].bare
+
+        if account in self.conversations:
+            cid = self.conversations[account]
+        else:
+            # we don't care about users typing if no conversation is opened
+            return
+
+        self.session.user_typing(cid, account)
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT
