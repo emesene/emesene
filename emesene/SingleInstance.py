@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-'''Allow only one instance running, I don't know why someone would want that, but well...'''
 # -*- coding: utf-8 -*-
 
 #    This file is part of emesene.
@@ -22,13 +21,13 @@ import os
 import tempfile
 import getpass
 
+
 class SingleInstancePosix:
     def __init__(self):
 
         self._bus_name = 'org.emesene.Service'
         self._object_path = '/org/emesene/Service'
 
-        self.new_dbus = False
         self.have_dbus = False
         self.dbus = None
 
@@ -40,16 +39,9 @@ class SingleInstancePosix:
 
         if self.have_dbus:
             try:
-                dbus_version = getattr(dbus, 'version', (0, 0, 0))
-                if dbus_version >= (0, 41, 0):
-                    import dbus.glib
-                if dbus_version >= (0, 80, 0):
-                    from dbus.mainloop.glib import DBusGMainLoop
-                    DBusGMainLoop(set_as_default=True)
-                    self.new_dbus = True
-                else:
-                    import dbus.mainloop.glib
-                    self.new_dbus = False
+                import dbus.glib
+                from dbus.mainloop.glib import DBusGMainLoop
+                DBusGMainLoop(set_as_default=True)
                 self.have_dbus = True
                 self.dbus = dbus
             except dbus.DBusException, error:
@@ -66,7 +58,7 @@ class SingleInstancePosix:
             try:
                 bus = self.dbus.SessionBus()
                 return bus.name_has_owner('org.emesene.Service')
-            except self.dbus.DBusException, error:
+            except self.dbus.DBusException:
                 pass
 
         import fcntl
@@ -90,6 +82,7 @@ class SingleInstancePosix:
         except self.dbus.DBusException, error:
             print "%s" % error
 
+
 class SingleInstanceWin32:
     def __init__(self):
         self.lock_file_name = os.path.normpath(tempfile.gettempdir() +
@@ -103,7 +96,7 @@ class SingleInstanceWin32:
             # (in case a previous execution was interrupted)
             if os.path.exists(self.lock_file_name):
                 os.unlink(self.lock_file_name)
-            self.lock_file =  os.open(self.lock_file_name,
+            self.lock_file = os.open(self.lock_file_name,
                 os.O_CREAT | os.O_EXCL | os.O_RDWR)
         except OSError, error:
             if error.errno == 13:
@@ -111,7 +104,7 @@ class SingleInstanceWin32:
             print error.errno
             return False
         return False
-                
+
     def show(self):
         ''' tries to bring to front the instance of emesene
         that is already running'''
