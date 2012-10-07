@@ -26,21 +26,16 @@ from e3.base import Action, Event
 
 try:
     import dbus, dbus.service
-    if getattr(dbus, 'version', (0,0,0)) >= (0,41,0):
-        import dbus.glib
-    if getattr(dbus, 'version', (0,0,0)) >= (0,80,0):
-        import _dbus_bindings as dbus_bindings
-        from dbus.mainloop.glib import DBusGMainLoop
-        DBusGMainLoop(set_as_default=True)
-    else:
-        import dbus.mainloop.glib
-        import dbus.dbus_bindings as dbus_bindings
+    import dbus.glib
+    from dbus.mainloop.glib import DBusGMainLoop
+    DBusGMainLoop(set_as_default=True)
 except ImportError, e:
     log.warning('Failed some import on dbus: %s' % str(e))
     raise e
 
 BUS_NAME = 'org.emesene.Service'
 OBJECT_PATH = '/org/emesene/Service'
+
 
 class DBusController():
 
@@ -68,14 +63,13 @@ class DBusController():
         self.__start_dbus()
         self.__session.signals.status_change_succeed.subscribe(self.__on_status_changed)
 
-
     def __start_dbus(self):
         '''Start dbus session'''
         self.__destroy_dbus_session()
         self.__session_bus = dbus.SessionBus()
-        self.__bus_name = dbus.service.BusName(BUS_NAME, \
+        self.__bus_name = dbus.service.BusName(BUS_NAME,
                                                 bus=self.__session_bus)
-        self.__dbus_object = EmeseneObject(self.__bus_name, OBJECT_PATH, \
+        self.__dbus_object = EmeseneObject(self.__bus_name, OBJECT_PATH,
                                                 self.__session, self.__window)
 
     def __destroy_dbus_session(self):
@@ -94,6 +88,7 @@ class DBusController():
 
 extension.register('external api', DBusController)
 extension.set_default('external api', DBusController)
+
 
 class EmeseneObject(dbus.service.Object):
     """
