@@ -135,11 +135,6 @@ class Worker(e3.Worker):
         show = presence.get_type()
         account = presence.get_from().bare
 
-        #TODO: ask for vcard only when vcard-temp:x:update and photo are
-        #      in presence (?)
-        self.client.plugin['xep_0054'].get_vcard(jid=presence.get_from(),
-            block=False, callback=self._on_vcard_get)
-
         stat = STATUS_MAP_REVERSE.get(show, e3.status.ONLINE)
         contact = self.session.contacts.contacts.get(account, None)
 
@@ -152,7 +147,7 @@ class Worker(e3.Worker):
         contact.message = message
         contact.status = stat
 
-        log_account =  e3.Logger.Account(contact.cid, None,
+        log_account = e3.Logger.Account(contact.cid, None,
             contact.account, contact.status, contact.nick, contact.message,
             contact.picture)
 
@@ -169,6 +164,7 @@ class Worker(e3.Worker):
         ''' vcard_get callback '''
         vcard_temp = stanza.get('vcard_temp')
         account = stanza.get_from().bare
+        log.info("Received vCard from %s" % account)
         photo = vcard_temp['PHOTO']
         if not photo:
             return
@@ -188,6 +184,12 @@ class Worker(e3.Worker):
             avatars.insert_raw(StringIO.StringIO(photo_bin))
 
         self.session.picture_change_succeed(account, avatar_path)
+
+    def on_vcard_avatar(self, pres):
+        log.info("Received vCard avatar update from %s. Asking for vcard"
+                    % pres['from'].bare)
+        self.client.plugin['xep_0054'].get_vcard(pres['from'], block=False,
+                                    callback=self._on_vcard_get)
 
     def _on_message(self, message):
         '''handle the reception of a message'''
@@ -286,6 +288,7 @@ class Worker(e3.Worker):
         self.client.register_plugin('xep_0004')  # Data Forms
         self.client.register_plugin('xep_0030')  # Service Discovery
         self.client.register_plugin('xep_0054')  # vcard-temp
+        self.client.register_plugin('xep_0153')
         self.client.register_plugin('xep_0060')  # PubSub
 
         # MSN will kill connections that have been inactive for even
@@ -304,6 +307,7 @@ class Worker(e3.Worker):
         self.client.add_event_handler('message', self._on_message)
         self.client.add_event_handler('disconnected', self._on_disconnected)
         self.client.add_event_handler('failed_auth', self._on_failed_auth)
+        self.client.add_event_handler('vcard_avatar_update', self.on_vcard_avatar)
 
         self.client.connect((host, port))
 
