@@ -283,10 +283,10 @@ class Worker(e3.Worker):
         self.client = xmpp.ClientXMPP(account, password)
         self.client.use_ipv6 = self.use_ipv6
         self.client.process(block=False)
-        self.client.register_plugin('xep_0004') # Data Forms
-        self.client.register_plugin('xep_0030') # Service Discovery
-        self.client.register_plugin('xep_0054') # vcard-temp
-        self.client.register_plugin('xep_0060') # PubSub
+        self.client.register_plugin('xep_0004')  # Data Forms
+        self.client.register_plugin('xep_0030')  # Service Discovery
+        self.client.register_plugin('xep_0054')  # vcard-temp
+        self.client.register_plugin('xep_0060')  # PubSub
 
         # MSN will kill connections that have been inactive for even
         # short periods of time. So use pings to keep the session alive;
@@ -302,6 +302,8 @@ class Worker(e3.Worker):
         self.client.add_event_handler('session_start', self._session_started)
         self.client.add_event_handler('changed_status', self._on_presence)
         self.client.add_event_handler('message', self._on_message)
+        self.client.add_event_handler('disconnected', self._on_disconnected)
+        self.client.add_event_handler('failed_auth', self._on_failed_auth)
 
         self.client.connect((host, port))
 
@@ -318,6 +320,13 @@ class Worker(e3.Worker):
             return
 
         self.session.user_typing(cid, account)
+
+    def _on_disconnected(self, event):
+        '''called when the server disconnect us'''
+        self.session.disconnected(None, False)
+
+    def _on_failed_auth(self, direct):
+        self.session.disconnected(_("Authentication failed"), False)
 
     def _handle_action_logout(self):
         '''handle Action.ACTION_LOGOUT
@@ -439,7 +448,6 @@ class Worker(e3.Worker):
         '''handle Action.ACTION_SEND_MESSAGE
         cid is the conversation id, message is a Message object
         '''
-
         if message.type not in (e3.Message.TYPE_MESSAGE, e3.Message.TYPE_TYPING,
            e3.Message.TYPE_NUDGE):
             return # Do NOT process other message types
