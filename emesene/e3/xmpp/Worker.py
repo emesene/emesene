@@ -395,13 +395,13 @@ class Worker(e3.Worker):
         vcard = self.client.plugin['xep_0054'].make_vcard()
         if avatar:
             vcard['PHOTO']['BINVAL'] = avatar
-        else: # set empty photo
+        else:  # set empty photo
             vcard['PHOTO'] = ''
 
         self.client.plugin['xep_0054'].publish_vcard(vcard, block=False)
 
         if not avatar:
-            return # TODO: reset avatar locally and remove it from the UI
+            return  # TODO: reset avatar locally and remove it from the UI
 
         avatar_hash = hashlib.sha1(avatar).hexdigest().encode("hex")
 
@@ -446,7 +446,12 @@ class Worker(e3.Worker):
 
         recipients = self.rconversations.get(cid, ())
         for recipient in recipients:
-            self.client.send_message(recipient, message.body)
+            # we can't use send_message because we have to set 'chat_state'
+            msg = self.client.make_message(recipient, message.body)
+            if message.type == e3.Message.TYPE_TYPING:
+                msg['chat_state'] = 'composing'
+            else:
+                msg['chat_state'] = 'active'
+            msg.send()
 
         e3.Logger.log_message(self.session, recipients, message, True)
-

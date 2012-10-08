@@ -135,8 +135,11 @@ class Session(e3.Session):
 
     def send_typing_notification(self, cid):
         '''send typing notification to contact'''
-        ##FIXME: implement this
-        pass
+        # only supported on facebook session by xep-0085
+        if self._is_facebook:
+            account = self.account.account
+            message = e3.Message(e3.Message.TYPE_TYPING, None, account)
+            self.add_action(e3.Action.ACTION_SEND_MESSAGE, (cid, message))
 
     def session_has_service(self, service):
         '''returns True if some service is supported, False otherwise'''
