@@ -22,8 +22,6 @@
 import os
 import sys
 import time
-import Queue
-import base64
 import hashlib
 import e3
 import StringIO
