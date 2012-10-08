@@ -64,6 +64,13 @@ class Session(e3.Session):
         self.facebook_client = None
         self.mail_client = NullMail()
 
+    def load_config(self):
+        '''load the config of the session'''
+        e3.Session.load_config(self)
+
+        # initialize preferences
+        self.config.get_or_set('b_fb_enable_integration', True)
+
     def login(self, account, password, status, proxy, host, port,
               use_http=False, use_ipv6=False):
         '''start the login process'''
@@ -94,7 +101,7 @@ class Session(e3.Session):
             host, port))
 
     def start_mail_client(self):
-        if self._is_facebook and self.config.get_or_set('b_fb_enable_integration', True):
+        if self._is_facebook and self.config.b_fb_enable_integration:
             self.facebook_client = facebook.FacebookCLient(self, self.config.facebook_token)
             self.mail_client.facebook_client = self.facebook_client
         self.mail_client.start()
