@@ -70,6 +70,10 @@ class Session(e3.Session):
 
         # initialize preferences
         self.config.get_or_set('b_fb_enable_integration', True)
+        self.config.get_or_set('b_fb_mail_check', True)
+        self.config.get_or_set('b_fb_status_download', False)
+        self.config.get_or_set('b_fb_status_write', False)
+        self.config.get_or_set('b_fb_picture_download', False)
 
     def login(self, account, password, status, proxy, host, port,
               use_http=False, use_ipv6=False):
