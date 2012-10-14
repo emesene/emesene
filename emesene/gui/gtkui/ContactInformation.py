@@ -84,11 +84,11 @@ class ContactInformation(gtk.Window, gui.base.ContactInformation):
 
     def add_nick(self, stat, timestamp, nick):
         '''add a nick to the list of nicks'''
-        self.nicks.add(stat, timestamp, nick)
+        self.nicks.add(stat, timestamp, gobject.markup_escape_text(nick))
 
     def add_message(self, stat, timestamp, message):
         '''add a message to the list of message'''
-        self.messages.add(stat, timestamp, message)
+        self.messages.add(stat, timestamp, gobject.markup_escape_text(message))
 
     def add_status(self, stat, timestamp, status):
         '''add a status to the list of status'''
