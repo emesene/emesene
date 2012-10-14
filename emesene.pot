@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-09-05 23:49+0200\n"
+"POT-Creation-Date: 2012-10-14 12:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -211,7 +211,7 @@ msgstr ""
 #: emesene/gui/base/Handler.py:288 emesene/gui/base/Handler.py:311
 #: emesene/gui/base/Handler.py:321 emesene/gui/base/Handler.py:329
 #: emesene/gui/base/Handler.py:339 emesene/gui/base/Handler.py:347
-#: emesene/gui/gtkui/Dialog.py:1647 emesene/gui/gtkui/Dialog.py:1667
+#: emesene/gui/gtkui/Dialog.py:1646 emesene/gui/gtkui/Dialog.py:1666
 msgid "No contact selected"
 msgstr ""
 
@@ -493,42 +493,42 @@ msgstr ""
 msgid "Personal message"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:187
+#: emesene/gui/gtkui/Conversation.py:186
 msgid "Can't add, default emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:189
+#: emesene/gui/gtkui/Conversation.py:188
 msgid "Can't add, own emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:198
+#: emesene/gui/gtkui/Conversation.py:197
 msgid "Shortcut already in use"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:205
+#: emesene/gui/gtkui/Conversation.py:204
 msgid "Type emoticon's shortcut: "
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:206
+#: emesene/gui/gtkui/Conversation.py:205
 msgid "Choose custom emoticon's shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:364
+#: emesene/gui/gtkui/Conversation.py:363
 #, python-format
 msgid "File transfer accepted by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:383
+#: emesene/gui/gtkui/Conversation.py:382
 #, python-format
 msgid "File transfer rejected by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:397
+#: emesene/gui/gtkui/Conversation.py:396
 #, python-format
 msgid "File transfer canceled by %s"
 msgstr ""
 
-#: emesene/gui/gtkui/Conversation.py:411
+#: emesene/gui/gtkui/Conversation.py:410
 msgid "File transfer completed!"
 msgstr ""
 
@@ -862,50 +862,50 @@ msgstr ""
 msgid "Shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1298 emesene/gui/gtkui/Dialog.py:1539
+#: emesene/gui/gtkui/Dialog.py:1298 emesene/gui/gtkui/Dialog.py:1538
 msgid "Empty shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1360
+#: emesene/gui/gtkui/Dialog.py:1359
 msgid "Add emoticon"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1510 emesene/gui/gtkui/Dialog.py:1542
+#: emesene/gui/gtkui/Dialog.py:1509 emesene/gui/gtkui/Dialog.py:1541
 msgid "Change shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1515 emesene/gui/gtkui/IconView.py:113
+#: emesene/gui/gtkui/Dialog.py:1514 emesene/gui/gtkui/IconView.py:113
 #: emesene/gui/gtkui/Preferences.py:1636
 msgid "Delete"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1541
+#: emesene/gui/gtkui/Dialog.py:1540
 msgid "New shortcut"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1569
+#: emesene/gui/gtkui/Dialog.py:1568
 msgid "Invite friend"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1704
+#: emesene/gui/gtkui/Dialog.py:1703
 msgid "Add contact"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1745
+#: emesene/gui/gtkui/Dialog.py:1744
 msgid "Quit"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1748
+#: emesene/gui/gtkui/Dialog.py:1747
 msgid "Remind me later"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1817
+#: emesene/gui/gtkui/Dialog.py:1816
 msgid ""
 " has added you.\n"
 "Do you want to add him/her to your contact list?"
 msgstr ""
 
-#: emesene/gui/gtkui/Dialog.py:1885 emesene/gui/gtkui/ExtensionList.py:139
+#: emesene/gui/gtkui/Dialog.py:1884 emesene/gui/gtkui/ExtensionList.py:139
 msgid "Cancel"
 msgstr ""
 
@@ -1664,11 +1664,11 @@ msgstr ""
 msgid "Are you sure you want to delete %s from your authorized contacts?"
 msgstr ""
 
-#: emesene/gui/gtkui/Renderers.py:176 emesene/gui/gtkui/RenderersNew.py:252
+#: emesene/gui/gtkui/Renderers.py:178 emesene/gui/gtkui/RenderersNew.py:252
 msgid "Parse MSN+ markup, showing colors, gradients and effects"
 msgstr ""
 
-#: emesene/gui/gtkui/Renderers.py:192 emesene/gui/gtkui/RenderersNew.py:267
+#: emesene/gui/gtkui/Renderers.py:194 emesene/gui/gtkui/RenderersNew.py:267
 msgid ""
 "Strip MSN+ markup, not showing any effect/color, but improving the "
 "readability"
@@ -1706,7 +1706,7 @@ msgstr ""
 msgid "Close Tab (Ctrl+W)"
 msgstr ""
 
-#: emesene/gui/gtkui/TextBox.py:401
+#: emesene/gui/gtkui/TextBox.py:404
 msgid "A widget to display the conversation messages"
 msgstr ""
 
