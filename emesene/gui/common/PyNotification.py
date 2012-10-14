@@ -56,4 +56,8 @@ def PyNotification(title, text, picture_path=None, const=None,
     if pix is not None:
         notification.set_icon_from_pixbuf(pix)
     notification.set_hint_string("append", "allowed")
-    notification.show()
+
+    try:
+        notification.show()
+    except Exception, err:
+        log.warning('An error occurred while showing a notification: %s' % str(err))
