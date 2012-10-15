@@ -26,6 +26,7 @@ def gtk_main(Controller):
     """
     global WEBKITERROR, INFOBARERROR
 
+    import os
     import gtk
     import gobject
 
@@ -94,13 +95,17 @@ def gtk_main(Controller):
 
     setup()
     gobject.threads_init()
-    gtk.gdk.threads_init()
-    gtk.gdk.threads_enter()
+    #XXX: threads are not supported on windows. In gtk3 emesene just segfault
+    # with them
+    if os.name != "nt":
+        gtk.gdk.threads_init()
+        gtk.gdk.threads_enter()
     controller = Controller()
     controller.start()
     extension.set_default('quit', gtk.main_quit)
     gtk.main()
-    gtk.gdk.threads_leave()
+    if os.name != "nt":
+        gtk.gdk.threads_leave()
 
 
 gtk_main.NAME = "Gtk main function"
