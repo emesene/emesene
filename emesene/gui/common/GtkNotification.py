@@ -153,7 +153,12 @@ class Notification(gtk.Window):
         gtk.Window.__init__(self, type=gtk.WINDOW_POPUP)
 
         # constants
-        self.FColor = "white"
+        #FIXME: on windows and gtk3 background overrides doesn't seem to work
+        # and we get white text on white windows.
+        if hasattr(self, 'window') and os.name == "nt":
+            self.FColor = "black"
+        else:
+            self.FColor = "white"
         max_width = 300
         self.callback = callback
 
