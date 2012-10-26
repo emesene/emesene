@@ -18,10 +18,18 @@
 
 from NetworkManagerHelperDummy import DummyNetworkChecker
 
+try_dbus = True
 try:
-    from NetworkManagerHelperDBus import DBusNetworkChecker
+    from NetworkManagerHelperGio import GioNetworkChecker
+    try_dbus = False
 except ImportError:
     pass
+
+if try_dbus:
+    try:
+        from NetworkManagerHelperDBus import DBusNetworkChecker
+    except ImportError:
+        pass
 
 try:
     from NetworkManagerHelperWin32 import Win32NetworkChecker as NetworkChecker
