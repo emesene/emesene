@@ -153,11 +153,6 @@ def colormap_get_system():
     return Colormap()
 Gdk.colormap_get_system = colormap_get_system
 
-orig_get_slice = Gtk.TextBuffer.get_slice
-def get_slice(self, start, end, include_hidden_chars=False):
-    return orig_get_slice(self, start, end, include_hidden_chars)
-Gtk.TextBuffer.get_slice = get_slice
-
 orig_forward_search = Gtk.TextIter.forward_search
 def forward_search(self, text, flags, limit=None):
      return orig_forward_search(self, text, flags, limit)

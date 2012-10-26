@@ -144,7 +144,7 @@ class TextBox(gtk.ScrolledWindow):
         if start.get_offset() > end.get_offset():
             start, end = end, start #set the right begining
 
-        selection = self._buffer.get_slice(start,end)
+        selection = self._buffer.get_slice(start, end, include_hidden_chars=False)
         char = u"\uFFFC" #it means "widget or pixbuf here"
 
         return_string = ""
