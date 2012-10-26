@@ -153,11 +153,6 @@ def colormap_get_system():
     return Colormap()
 Gdk.colormap_get_system = colormap_get_system
 
-orig_forward_search = Gtk.TextIter.forward_search
-def forward_search(self, text, flags, limit=None):
-     return orig_forward_search(self, text, flags, limit)
-Gtk.TextIter.forward_search = forward_search
-
 orig_append_page_menu = Gtk.Notebook.append_page_menu
 def append_page_menu(self, widget, label, menu_label=None):
     return orig_append_page_menu(self, widget, label, menu_label)

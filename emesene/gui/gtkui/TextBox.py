@@ -317,7 +317,7 @@ class InputText(TextBox):
 
               start = self._buffer.get_start_iter()
               result = start.forward_search(code,
-                      gtk.TEXT_SEARCH_VISIBLE_ONLY)
+                      gtk.TEXT_SEARCH_VISIBLE_ONLY, None)
 
               if result is None:
                   continue
@@ -335,7 +335,7 @@ class InputText(TextBox):
 
                   start = self._buffer.get_iter_at_mark(mark_end)
                   result = start.forward_search(code,
-                          gtk.TEXT_SEARCH_VISIBLE_ONLY)
+                          gtk.TEXT_SEARCH_VISIBLE_ONLY, None)
                   self._buffer.delete_mark(mark_begin)
                   self._buffer.delete_mark(mark_end)
 
