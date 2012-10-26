@@ -218,7 +218,7 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         label.set_image(gui.theme.image_theme.connect)
         del conversation.tab_label
         conversation.tab_label = label
-        conversation.tab_index = self.append_page_menu(conversation, label)
+        conversation.tab_index = self.append_page_menu(conversation, label, None)
 
         self.child_set_property(conversation, "tab-expand", True)
         self.set_tab_reorderable(conversation, True)

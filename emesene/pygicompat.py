@@ -153,11 +153,6 @@ def colormap_get_system():
     return Colormap()
 Gdk.colormap_get_system = colormap_get_system
 
-orig_append_page_menu = Gtk.Notebook.append_page_menu
-def append_page_menu(self, widget, label, menu_label=None):
-    return orig_append_page_menu(self, widget, label, menu_label)
-Gtk.Notebook.append_page_menu = append_page_menu
-
 orig_append_page = Gtk.Notebook.append_page
 def append_page(self, widget, label=None):
     return orig_append_page(self, widget, label)
