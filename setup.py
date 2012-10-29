@@ -130,7 +130,7 @@ if os.name == "nt":
                 "plistlib", "win32gui", "OpenSSL", "Crypto", "Queue", "sqlite3",
                 "glob", "webbrowser", "json", "imaplib", "cgi", "gzip", "uuid",
                 "platform", "imghdr", "ctypes", "optparse", "plugin_base",
-                "pyfb", "papyon", "e3.xmpp", "plugins", "webkit",
+                "pyfb", "papyon", "e3.xmpp", "webkit",
                 "unicodedata", "dnspython"]
 
     # incude gui.common modules manually, i guess py2exe doesn't do that
@@ -150,7 +150,7 @@ if os.name == "nt":
                 "pywin.debugger.dbgcon", "pywin.dialogs",
                 "pywin.dialogs.list", "Tkconstants", "Tkinter", "tcl",
                 "doctest", "macpath", "pdb", "cookielib", "ftplib",
-                "pickle", "win32wnet", "unicodedata",
+                "pickle", "win32wnet",
                 "getopt", "gdk"],
             "dll_excludes": ["libglade-2.0-0.dll", "w9xpopen.exe"],
             "optimize": "2",
