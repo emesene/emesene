@@ -141,6 +141,25 @@ if os.name == "nt":
             if f != "__init__.py" and f.endswith(".py"):
                 includes.append("gui.common."+f[:-2])
 
+    # get current path
+    this_module_path = os.path.dirname(unicode(__file__,
+        sys.getfilesystemencoding()))
+
+    current_path = os.path.abspath(this_module_path)
+    source_path = os.path.join(current_path, 'emesene')
+    dist_path = os.path.join(current_path, "dist")
+
+    #replace sleekxmpp dir as py2exe doesn't copy all the needed files
+    features_dir = os.path.join(dist_path, "sleekxmpp")
+    source_features_dir = os.path.join(source_path, "e3\\xmpp\\SleekXMPP\\sleekxmpp")
+    try:
+        shutil.rmtree(features_dir)
+    except:
+        pass
+    shutil.copytree(source_features_dir,
+                    features_dir,
+                    ignore=shutil.ignore_patterns(('*.pyc')))
+
     opts = {
         "py2exe": {
             "packages": ["encodings", "gtk", "OpenSSL", "Crypto", "xml",
