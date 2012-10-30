@@ -94,7 +94,7 @@ def extract_names(raw_cert):
 
 def extract_dates(raw_cert):
     if not HAVE_PYASN1:
-        log.warning("Could not find pyasn1 module. " + \
+        log.warning("Could not find pyasn1 and pyasn1_modules. " + \
                     "SSL certificate expiration COULD NOT BE VERIFIED.")
         return None, None
 
@@ -130,7 +130,7 @@ def get_ttl(raw_cert):
 
 def verify(expected, raw_cert):
     if not HAVE_PYASN1:
-        log.warning("Could not find pyasn1 module. " + \
+        log.warning("Could not find pyasn1 and pyasn1_modules. " + \
                     "SSL certificate COULD NOT BE VERIFIED.")
         return
 
@@ -147,7 +147,10 @@ def verify(expected, raw_cert):
         raise CertificateError(
                 'Certificate has expired.')
 
-    expected_wild = expected[expected.index('.'):]
+    if '.' in expected:
+        expected_wild = expected[expected.index('.'):]
+    else:
+        expected_wild = expected
     expected_srv = '_xmpp-client.%s' % expected
 
     for name in cert_names['XMPPAddr']:
@@ -160,7 +163,10 @@ def verify(expected, raw_cert):
         if name == expected:
             return True
         if name.startswith('*'):
-            name_wild = name[name.index('.'):]
+            if '.' in name:
+                name_wild = name[name.index('.'):]
+            else:
+                name_wild = name
             if expected_wild == name_wild:
                 return True
     for name in cert_names['URI']:

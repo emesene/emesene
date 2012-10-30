@@ -18,12 +18,14 @@ __all__ = [
     'xep_0004',  # Data Forms
     'xep_0009',  # Jabber-RPC
     'xep_0012',  # Last Activity
+    'xep_0013',  # Flexible Offline Message Retrieval
     'xep_0016',  # Privacy Lists
     'xep_0027',  # Current Jabber OpenPGP Usage
     'xep_0030',  # Service Discovery
     'xep_0033',  # Extended Stanza Addresses
     'xep_0045',  # Multi-User Chat (Client)
     'xep_0047',  # In-Band Bytestreams
+    'xep_0049',  # Private XML Storage
     'xep_0050',  # Ad-hoc Commands
     'xep_0054',  # vcard-temp
     'xep_0059',  # Result Set Management
@@ -37,6 +39,7 @@ __all__ = [
     'xep_0084',  # User Avatar
     'xep_0085',  # Chat State Notifications
     'xep_0086',  # Legacy Error Codes
+    'xep_0091',  # Legacy Delayed Delivery
     'xep_0092',  # Software Version
     'xep_0106',  # JID Escaping
     'xep_0107',  # User Mood
@@ -61,10 +64,17 @@ __all__ = [
     'xep_0223',  # Persistent Storage of Private Data via Pubsub
     'xep_0224',  # Attention
     'xep_0231',  # Bits of Binary
+    'xep_0235',  # OAuth Over XMPP
     'xep_0242',  # XMPP Client Compliance 2009
     'xep_0249',  # Direct MUC Invitations
     'xep_0256',  # Last Activity in Presence
+    'xep_0257',  # Client Certificate Management for SASL EXTERNAL
     'xep_0258',  # Security Labels in XMPP
     'xep_0270',  # XMPP Compliance Suites 2010
+    'xep_0279',  # Server IP Check
+    'xep_0280',  # Message Carbons
+    'xep_0297',  # Stanza Forwarding
     'xep_0302',  # XMPP Compliance Suites 2012
+    'xep_0308',  # Last Message Correction
+    'xep_0313',  # Message Archive Management
 ]

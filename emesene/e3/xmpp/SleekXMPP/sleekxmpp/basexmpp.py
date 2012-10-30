@@ -43,8 +43,8 @@ log = logging.getLogger(__name__)
 # In order to make sure that Unicode is handled properly
 # in Python 2.x, reset the default encoding.
 if sys.version_info < (3, 0):
-    reload(sys)
-    sys.setdefaultencoding('utf8')
+    from sleekxmpp.util.misc_ops import setdefaultencoding
+    setdefaultencoding('utf8')
 
 
 class BaseXMPP(XMLStream):
@@ -69,12 +69,12 @@ class BaseXMPP(XMLStream):
         self.stream_id = None
 
         #: The JabberID (JID) requested for this connection.
-        self.requested_jid = JID(jid)
+        self.requested_jid = JID(jid, cache_lock=True)
 
         #: The JabberID (JID) used by this connection,
         #: as set after session binding. This may even be a
         #: different bare JID than what was requested.
-        self.boundjid = JID(jid)
+        self.boundjid = JID(jid, cache_lock=True)
 
         self._expected_server_name = self.boundjid.host
         self._redirect_attempts = 0
@@ -113,6 +113,17 @@ class BaseXMPP(XMLStream):
         #: important, primarily for choosing how to handle the
         #: ``'to'`` and ``'from'`` JIDs of stanzas.
         self.is_component = False
+
+        #: Messages may optionally be tagged with ID values. Setting
+        #: :attr:`use_message_ids` to `True` will assign all outgoing
+        #: messages an ID. Some plugin features require enabling
+        #: this option.
+        self.use_message_ids = False
+
+        #: Presence updates may optionally be tagged with ID values.
+        #: Setting :attr:`use_message_ids` to `True` will assign all
+        #: outgoing messages an ID.
+        self.use_presence_ids = False
 
         #: The API registry is a way to process callbacks based on
         #: JID+node combinations. Each callback in the registry is
@@ -201,6 +212,10 @@ class BaseXMPP(XMLStream):
         self.stream_version = xml.get('version', '')
         self.peer_default_lang = xml.get('{%s}lang' % XML_NS, None)
 
+        if not self.is_component and not self.stream_version:
+            log.warning('Legacy XMPP 0.9 protocol detected.')
+            self.event('legacy_protocol')
+
     def process(self, *args, **kwargs):
         """Initialize plugins and begin processing the XML stream.
 
@@ -226,13 +241,6 @@ class BaseXMPP(XMLStream):
         - The send queue processor
         - The scheduler
         """
-        if 'xep_0115' in self.plugin:
-            name = 'xep_0115'
-            if not hasattr(self.plugin[name], 'post_inited'):
-                if hasattr(self.plugin[name], 'post_init'):
-                    self.plugin[name].post_init()
-                self.plugin[name].post_inited = True
-
         for name in self.plugin:
             if not hasattr(self.plugin[name], 'post_inited'):
                 if hasattr(self.plugin[name], 'post_init'):
@@ -657,7 +665,7 @@ class BaseXMPP(XMLStream):
     def set_jid(self, jid):
         """Rip a JID apart and claim it as our own."""
         log.debug("setting jid to %s", jid)
-        self.boundjid.full = jid
+        self.boundjid = JID(jid, cache_lock=True)
 
     def getjidresource(self, fulljid):
         if '/' in fulljid:
@@ -738,6 +746,8 @@ class BaseXMPP(XMLStream):
         item = self.roster[pres['to']][pres['from']]
         if item['whitelisted']:
             item.authorize()
+            if roster.auto_subscribe:
+                item.subscribe()
         elif roster.auto_authorize:
             item.authorize()
             if roster.auto_subscribe:

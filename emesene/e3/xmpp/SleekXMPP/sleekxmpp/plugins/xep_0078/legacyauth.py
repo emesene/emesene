@@ -11,6 +11,7 @@ import hashlib
 import random
 import sys
 
+from sleekxmpp.jid import JID
 from sleekxmpp.exceptions import IqError, IqTimeout
 from sleekxmpp.stanza import Iq, StreamFeatures
 from sleekxmpp.xmlstream import ElementBase, ET, register_stanza_plugin
@@ -44,16 +45,27 @@ class XEP_0078(BasePlugin):
                 restart=False,
                 order=self.order)
 
+        self.xmpp.add_event_handler('legacy_protocol',
+                self._handle_legacy_protocol)
+
         register_stanza_plugin(Iq, stanza.IqAuth)
         register_stanza_plugin(StreamFeatures, stanza.AuthFeature)
 
     def plugin_end(self):
+        self.xmpp.del_event_handler('legacy_protocol',
+                self._handle_legacy_protocol)
         self.xmpp.unregister_feature('auth', self.order)
 
     def _handle_auth(self, features):
         # If we can or have already authenticated with SASL, do nothing.
         if 'mechanisms' in features['features']:
             return False
+        return self.authenticate()
+
+    def _handle_legacy_protocol(self, event):
+        self.authenticate()
+
+    def authenticate(self):
         if self.xmpp.authenticated:
             return False
 
@@ -62,13 +74,13 @@ class XEP_0078(BasePlugin):
         # Step 1: Request the auth form
         iq = self.xmpp.Iq()
         iq['type'] = 'get'
-        iq['to'] = self.xmpp.boundjid.host
-        iq['auth']['username'] = self.xmpp.boundjid.user
+        iq['to'] = self.xmpp.requested_jid.host
+        iq['auth']['username'] = self.xmpp.requested_jid.user
 
         try:
             resp = iq.send(now=True)
-        except IqError:
-            log.info("Authentication failed: %s", resp['error']['condition'])
+        except IqError as err:
+            log.info("Authentication failed: %s", err.iq['error']['condition'])
             self.xmpp.event('failed_auth', direct=True)
             self.xmpp.disconnect()
             return True
@@ -81,13 +93,14 @@ class XEP_0078(BasePlugin):
         # Step 2: Fill out auth form for either password or digest auth
         iq = self.xmpp.Iq()
         iq['type'] = 'set'
-        iq['auth']['username'] = self.xmpp.boundjid.user
+        iq['auth']['username'] = self.xmpp.requested_jid.user
 
         # A resource is required, so create a random one if necessary
-        if self.xmpp.boundjid.resource:
-            iq['auth']['resource'] = self.xmpp.boundjid.resource
-        else:
-            iq['auth']['resource'] = '%s' % random.random()
+        resource = self.xmpp.requested_jid.resource
+        if not resource:
+            resource = uuid.uuid4()
+
+        iq['auth']['resource'] = resource
 
         if 'digest' in resp['auth']['fields']:
             log.debug('Authenticating via jabber:iq:auth Digest')
@@ -109,16 +122,22 @@ class XEP_0078(BasePlugin):
             result = iq.send(now=True)
         except IqError as err:
             log.info("Authentication failed")
-            self.xmpp.disconnect()
             self.xmpp.event("failed_auth", direct=True)
+            self.xmpp.disconnect()
         except IqTimeout:
             log.info("Authentication failed")
-            self.xmpp.disconnect()
             self.xmpp.event("failed_auth", direct=True)
+            self.xmpp.disconnect()
 
         self.xmpp.features.add('auth')
 
         self.xmpp.authenticated = True
+
+        self.xmpp.boundjid = JID(self.xmpp.requested_jid,
+                resource=resource,
+                cache_lock=True)
+        self.xmpp.event('session_bind', self.xmpp.boundjid, direct=True)
+
         log.debug("Established Session")
         self.xmpp.sessionstarted = True
         self.xmpp.session_started_event.set()

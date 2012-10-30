@@ -64,7 +64,6 @@ class ClientXMPP(BaseXMPP):
                  escape_quotes=True, sasl_mech=None, lang='en'):
         BaseXMPP.__init__(self, jid, 'jabber:client')
 
-        self.set_jid(jid)
         self.escape_quotes = escape_quotes
         self.plugin_config = plugin_config
         self.plugin_whitelist = plugin_whitelist
@@ -95,7 +94,7 @@ class ClientXMPP(BaseXMPP):
         self.bound = False
         self.bindfail = False
 
-        self.add_event_handler('connected', self._handle_connected)
+        self.add_event_handler('connected', self._reset_connection_state)
         self.add_event_handler('session_bind', self._handle_session_bind)
 
         self.register_stanza(StreamFeatures)
@@ -253,7 +252,7 @@ class ClientXMPP(BaseXMPP):
             self._handle_roster(response)
             return response
 
-    def _handle_connected(self, event=None):
+    def _reset_connection_state(self, event=None):
         #TODO: Use stream state here
         self.authenticated = False
         self.sessionstarted = False
@@ -273,6 +272,8 @@ class ClientXMPP(BaseXMPP):
                     # Don't continue if the feature requires
                     # restarting the XML stream.
                     return True
+        log.debug('Finished processing stream features.')
+        self.event('stream_negotiated')
 
     def _handle_roster(self, iq):
         """Update the roster after receiving a roster stanza.
