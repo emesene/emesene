@@ -21,43 +21,11 @@ import subprocess
 import e3
 import gobject
 
-def is_gi():
-    return hasattr(gobject, '_introspection_module')
-
-#check for gst GI support
-def have_gi_gst():
-    try:
-        from gi import pygtkcompat
-        pygtkcompat.enable_gst()
-    except (ImportError, ValueError) as ex:
-        return False
-    return True
-
-HAVE_GSTREAMER = False
-if not is_gi() or have_gi_gst():
+try:
+    import sound_gst
     HAVE_GSTREAMER = True
-    try:
-        import pygst
-        import gst
-
-        def gst_on_message(bus, message, player):
-            #FIXME: we are affected by bug
-            #https://bugzilla.gnome.org/show_bug.cgi?id=660612
-            if hasattr(gst, "init"):
-                 player.set_state(gst.State.NULL)
-            else:
-                if message.type == gst.MESSAGE_EOS:
-                    player.set_state(gst.STATE_NULL)
-
-        if hasattr(gst, "init"):
-            gst.init(None)
-        gst_player = gst.element_factory_make("playbin", "player")
-        bus = gst_player.get_bus()
-        bus.enable_sync_message_emission()
-        bus.add_signal_watch()
-        bus.connect('message', gst_on_message, gst_player)
-    except ImportError:
-        HAVE_GSTREAMER = False
+except ImportError:
+    HAVE_GSTREAMER = False
 
 def is_on_path(fname):
     """
@@ -91,6 +59,7 @@ class SoundPlayer(object):
             self._play = self.mac_play
         elif os.name == 'posix':
             if HAVE_GSTREAMER:
+                self.gst_player = sound_gst.GstPlayer()
                 self._play = self.gstreamer_play
             elif is_on_path('play'):
                 self._play = self.play_play
@@ -124,8 +93,7 @@ class SoundPlayer(object):
         macsound.play()
 
     def gstreamer_play(self, path):
-        gst_player.set_property('uri', "file://"+os.path.abspath(path))
-        gst_player.set_state(gst.STATE_PLAYING)
+        self.gst_player.play(path)
 
     def aplay_play(self, path):
         subprocess.Popen(['aplay', path],
