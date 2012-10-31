@@ -360,7 +360,8 @@ class Logger(object):
 
         try:
             self._create()
-        except sqlite.OperationalError:
+        except sqlite.OperationalError as ex:
+            log.info('Skipping log db creation. Error was %s' % str(ex))
             self._load_events()
             self._load_groups()
             self._load_accounts()
