@@ -48,7 +48,7 @@ class GioNetworkChecker():
         pass
 
     #Callback functions
-    def _on_network_alert(self, monitor, avariable):
+    def _on_network_changed(self, monitor, avariable):
         if not avariable:
             # 1 means reconnect
             self.__session.add_event(Event.EVENT_DISCONNECTED, 'Network error', 1)
