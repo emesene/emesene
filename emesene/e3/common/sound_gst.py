@@ -58,7 +58,7 @@ else:
             if message.type == gst.MESSAGE_EOS:
                 player.set_state(gst.STATE_NULL)
 
-        def play(path):
+        def play(self, path):
             self.gst_player.set_property('uri', "file://"+os.path.abspath(path))
             self.gst_player.set_state(gst.STATE_PLAYING)
 
