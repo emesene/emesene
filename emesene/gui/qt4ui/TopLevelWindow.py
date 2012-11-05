@@ -52,8 +52,9 @@ class TopLevelWindow (QtGui.QMainWindow):
         self.setObjectName('mainwindow')
         self.setWindowIcon(QtGui.QIcon(gui.theme.image_theme.logo))
 
-        self.splitter = QtGui.QSplitter()
-        self.setCentralWidget(self.splitter)
+        self.stack = QtGui.QStackedWidget()
+        self.setCentralWidget(self.stack)
+        self.check_split(True)
 
     def _get_content_conv(self):
         '''content getter'''
@@ -61,7 +62,8 @@ class TopLevelWindow (QtGui.QMainWindow):
 
     def _set_content_conv(self, content_conv):
         '''content setter'''
-        w = self.splitter.sizes()[0]
+        w = None
+        if self.splitter.sizes(): w = self.splitter.sizes()[0]
         if self._content_conv:
             self._content_conv.hide()
             self._content_conv.setParent(None)
@@ -70,7 +72,7 @@ class TopLevelWindow (QtGui.QMainWindow):
         if content_conv is not None:
             self.splitter.insertWidget(1, self._content_conv)
         else:
-            self.resize(self.set_or_get_width(w),
+            if w: self.resize(self.set_or_get_width(w),
                         self.set_or_get_height(0))
 
     content_conv = property(_get_content_conv, _set_content_conv)
@@ -187,6 +189,15 @@ class TopLevelWindow (QtGui.QMainWindow):
         if not self.content_main:
             self.hide()
         self.content_conv = None
+        if self.splitter.count() == 2: self.check_split()
+
+    def check_split(self, init = False):
+        if self.stack.count(): self.stack.removeWidget(self.splitter)
+        self.splitter = QtGui.QSplitter()
+        if not init: self.splitter.insertWidget(0, self._content_main)
+        self.stack.addWidget(self.splitter)
+        self.resize(self.set_or_get_width(0),
+                        self.set_or_get_height(0))
 
     def _setup_main_menu(self, session, contact_list):
         '''build all the menus used on the client'''
