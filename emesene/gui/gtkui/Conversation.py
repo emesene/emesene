@@ -89,7 +89,7 @@ class Conversation(gtk.VBox, gui.Conversation):
         self.transfers_bar = TransfersBar(self.session)
         self.call_widget = CallWidget(self.session)
 
-        frame_input = gtk.Frame()
+        frame_input = gtk.Frame('')
         frame_input.set_shadow_type(gtk.SHADOW_IN)
 
         input_box = gtk.VBox()

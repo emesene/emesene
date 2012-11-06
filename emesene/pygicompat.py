@@ -155,11 +155,6 @@ Gtk.about_dialog_set_url_hook = about_dialog_set_url_hook
 Gtk.about_dialog_set_email_hook = about_dialog_set_email_hook
 Gtk.Expander = Gtk.Expander.new_with_mnemonic
 
-class Frame(Gtk.Frame):
-    def __new__(self, label=""):
-        return Gtk.Frame.new(label)
-Gtk.Frame = Frame
-
 def set_tooltips(self, tooltips):
     pass
 Gtk.Toolbar.set_tooltips = set_tooltips
