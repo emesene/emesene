@@ -1415,16 +1415,9 @@ class Facebook(BaseTable):
                           'session.config.b_fb_picture_download')
 
         # box with help message
-        if hasattr(gtk, "InfoBar"):
-            eventBox = gtk.InfoBar()
-            eventBox.set_message_type(gtk.MESSAGE_INFO)
-            box = eventBox.get_content_area ()
-        else:
-            eventBox = gtk.EventBox()
-            eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))
-            # icon
-            box = gtk.HBox()
-            eventBox.add(box)
+        eventBox = gtk.InfoBar()
+        eventBox.set_message_type(gtk.MESSAGE_INFO)
+        box = eventBox.get_content_area ()
 
         # icon
         image = gtk.image_new_from_stock(gtk.STOCK_DIALOG_INFO,
@@ -1461,16 +1454,9 @@ class PrivacySettings(gtk.VBox):
         self.session = session
 
         # box with help message
-        if hasattr(gtk, "InfoBar"):
-            eventBox = gtk.InfoBar()
-            eventBox.set_message_type(gtk.MESSAGE_INFO)
-            box = eventBox.get_content_area ()
-        else:
-            eventBox = gtk.EventBox()
-            eventBox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#EDDE5C'))
-            # icon
-            box = gtk.HBox()
-            eventBox.add(box)
+        eventBox = gtk.InfoBar()
+        eventBox.set_message_type(gtk.MESSAGE_INFO)
+        box = eventBox.get_content_area ()
         self.pack_start(eventBox, False, False)
 
         # icon
