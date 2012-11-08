@@ -75,11 +75,12 @@ language_management = get_language_manager()
 language_management.install_default_translation()
 import extension
 
-try:
-    import pygicompat
-except ImportError:
-    print "error: pygi compat not found"
-    pass
+if not 'USE_GTK2' in os.environ:
+    try:
+        import pygicompat
+    except ImportError:
+        print "error: pygi compat not found"
+        pass
 
 import glib
 import shutil
