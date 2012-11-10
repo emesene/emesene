@@ -41,3 +41,10 @@ class SearchEntry(gtk.Entry):
         else:
             self.set_icon_from_stock(1, gtk.STOCK_CLEAR)
             self.set_icon_tooltip_text(1, self.clear_text)
+
+    def check_im_context_filter_keypress(self, event):
+        ''' return True if the event is handled by Input Method '''
+        if hasattr(self, 'im_context_filter_keypress') and \
+           self.im_context_filter_keypress(event):
+            return True
+        return False

@@ -394,7 +394,8 @@ class ChatWidget(gtk.VBox):
     def _on_text_key_press(self, entry, event):
         '''focuses search when key is pressed
         '''
-        self.search_entry.emit('key-press-event', event)
+        self.search_entry.grab_focus()
+        self.search_entry.check_im_context_filter_keypress(event)
 
     def _search_history(self, keywords):
         '''search history for certain keywords
