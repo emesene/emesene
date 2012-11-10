@@ -200,8 +200,7 @@ class InputView(gtk.TextView):
         else:
             targets = [('emesene-invite', 0, 3)]
 
-        self.drag_dest_set(gtk.DEST_DEFAULT_DROP, targets,
-                           gtk.gdk.ACTION_DEFAULT)
+        self.drag_dest_set(0, targets, gtk.gdk.ACTION_DEFAULT)
 
     def on_key_press_event(self, widget, event):
         if event.keyval in [gtk.keysyms.Return, gtk.keysyms.KP_Enter] and \
