@@ -37,7 +37,7 @@ if check_gtk3():
 
 if check_gtk3():
     import_and_register('tray icon', 'MessagingMenuNew')
-else:
+if extension.get_category('tray icon') is None:
     import_and_register('tray icon', 'MessagingMenu')
 import_and_register('tray icon', 'Indicator')
 import_and_register('tray icon', 'TrayIcon')

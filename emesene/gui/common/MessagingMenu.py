@@ -20,7 +20,12 @@ import os
 import time
 import gui.gtkui.utils as utils
 
-import indicate
+from gui.gtkui import check_gtk3
+if check_gtk3():
+    from gi.repository import Indicate as indicate
+    indicate.indicate_server_ref_default = indicate.Server.ref_default
+else:
+    import indicate
 import gui
 
 class MessagingMenu(gui.BaseTray):
