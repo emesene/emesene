@@ -19,11 +19,12 @@
 import extension
 
 WEBKITERROR = False
+INFOBARERROR = False
 
 def gtk_main(Controller):
     """ main method for gtk frontend
     """
-    global WEBKITERROR
+    global WEBKITERROR, INFOBARERROR
 
     import os
     import gtk
@@ -61,7 +62,10 @@ def gtk_main(Controller):
     import MainMenu
     import MainWindow
 
-    import InfoBar
+    try:
+        import InfoBar
+    except ImportError:
+        INFOBARERROR = True
     import NiceBar
 
     import Preferences
@@ -115,7 +119,7 @@ def setup():
     """
     define all the components for a gtk environment
     """
-    global WEBKITERROR
+    global WEBKITERROR, INFOBARERROR
 
     import gtk
     gtk.settings_get_default().set_property("gtk-error-bell", False)
@@ -150,8 +154,11 @@ def setup():
 
     extension.category_register('debug window', DebugWindow.DebugWindow)
 
-    extension.category_register('nice bar', InfoBar.NiceBar)
-    extension.register('nice bar', NiceBar.NiceBar)
+    if not INFOBARERROR:
+        extension.category_register('nice bar', InfoBar.NiceBar)
+        extension.register('nice bar', NiceBar.NiceBar)
+    else:
+        extension.category_register('nice bar', NiceBar.NiceBar)
 
     extension.category_register('main menu', MainMenu.MainMenu)
     extension.category_register('menu file', MainMenu.FileMenu)
