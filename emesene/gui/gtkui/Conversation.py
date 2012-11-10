@@ -448,21 +448,26 @@ class Conversation(gtk.VBox, gui.Conversation):
                               info, timestamp):
         '''called when a file is received by text input widget'''
 
+        if hasattr(selection, 'data'):
+            data = selection.data
+        else:
+            data = selection.get_data()
+
         # skip group from contact list, it is None now
-        if selection.data is None:
+        if data is None:
             return
 
         # user invitation
-        if selection.target == 'emesene-invite':
+        if selection.get_target() == 'emesene-invite':
             inviter = self.session.contacts.safe_get(self.members[0])
-            invitee = self.session.contacts.get(selection.data.strip())
+            invitee = self.session.contacts.get(data.strip())
             if invitee and not invitee.blocked and \
                not inviter.blocked:
                 self.on_invite(invitee.account)
                 return
 
         # file transfer
-        uri = selection.data.strip()
+        uri = data.strip()
         uri_splitted = uri.split()
         for uri in uri_splitted:
             path = self.__get_file_path_from_dnd_dropped_uri(uri)

@@ -890,7 +890,7 @@ class ContactList(gui.ContactList, gtk.TreeView):
             account = self.get_contact_selected().account
             display_name = self.get_contact_selected().display_name
 
-            if selection.target == 'text/html':
+            if selection.get_target() == 'text/html':
                 display_name = Plus.msnplus_parse(display_name)
 
                 for x in range(len(display_name)):
@@ -898,12 +898,12 @@ class ContactList(gui.ContactList, gtk.TreeView):
                         display_name[x] = '<img src="file://%s" alt="%s">' %\
                                 (display_name[x]["src"], display_name[x]["alt"])
 
-                selection.set(selection.target,
+                selection.set(selection.get_target(),
                     8, u'{0} &lt;<a href="mailto:{1}">{1}</a>&gt;'.format(''.join(display_name), account))
-            elif selection.target == 'text/plain':
-                selection.set(selection.target, 8, u'%s <%s>' % (Plus.msnplus_strip(display_name), account))
-            elif selection.target == 'emesene-invite':
-                selection.set(selection.target, 8, u'%s' % (account))
+            elif selection.get_target() == 'text/plain':
+                selection.set(selection.get_target(), 8, u'%s <%s>' % (Plus.msnplus_strip(display_name), account))
+            elif selection.get_target() == 'emesene-invite':
+                selection.set(selection.get_target(), 8, u'%s' % (account))
 
     def _on_drag_drop(self, widget, drag_context, x, y, time):
         drag_context.finish(True, False, time)

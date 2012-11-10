@@ -122,7 +122,10 @@ class IconView(gtk.HBox):
     def _drag_data_received(self, treeview, context, posx, posy, \
                             selection, info, timestamp):
         '''method called on an image dragged to the view'''
-        urls = selection.data.split('\n')
+        if check_gtk3():
+            urls = selection.get_data().split('\n')
+        else:
+            urls = selection.data.split('\n')
         for url in urls:
             path = url.replace('file://', '')
             path = path.replace('\r', '')
