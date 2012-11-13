@@ -2,7 +2,7 @@
 
 ## Requirements
 
-* [gtk binary](http://sidhosting.co.uk/downloads/get.php?id=gtk) (Prebuilt binary)
+* [gtk binary](http://www.mediafire.com/download.php?6vl96yienoiofsm) (Prebuilt binary)
 * [Platypus](http://sveinbjorn.org/files/software/platypus.zip) (Once downloaded go to Prefs and click the "Install" button at the bottom)
 * [git] (http://git-scm.com/downloads)
 
