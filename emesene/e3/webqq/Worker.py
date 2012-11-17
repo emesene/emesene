@@ -11,8 +11,10 @@ import logging
 
 
 import libwebqqboost as webqqboost
-
-import simplejson as json
+try:
+    import simplejson as json
+except ImportError , e:
+    import json
 
 log = logging.getLogger('WebQQ.Worker')
 
