@@ -43,6 +43,8 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         gui.MainWindowBase.__init__(self, session, on_new_conversation)
 
         self.quit_cb = None
+        self.accel_group = None
+
         UserPanel = extension.get_default('user panel')
         ContactList = extension.get_default('contact list')
 
@@ -163,7 +165,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
         self.quit_cb = quit_cb
         accel_group = gtk.AccelGroup()
         parent.add_accel_group(accel_group)
-        parent.accel_group = accel_group
+        self.accel_group = accel_group
         self.menu.set_accels(accel_group)
         accel_group.connect_group(gtk.keysyms.F,
                                   gtk.gdk.CONTROL_MASK, gtk.ACCEL_LOCKED,

@@ -68,7 +68,6 @@ class Window(gtk.Window):
         self.cb_on_quit = cb_on_close
 
         self._state = 0
-        self.accel_group = None
 
         self.add(self.box)
         self.connect('delete-event', self._on_delete_event)
@@ -81,11 +80,9 @@ class Window(gtk.Window):
     def _set_content_main(self, content_main):
         '''content setter'''
         if self._content_main:
+            self._remove_accel_group(self._content_main)
             self.box.remove(self._content_main)
             self._content_main.destroy()
-            if self.accel_group:
-                self.remove_accel_group(self.accel_group)
-                self.accel_group = None
             del self._content_main
         self._content_main = content_main
         self.box.pack1(self._content_main)
@@ -100,10 +97,8 @@ class Window(gtk.Window):
         '''content setter'''
         w = self.box.get_position()
         if self._content_conv:
+            self._remove_accel_group(self._content_conv)
             self.box.remove(self._content_conv)
-            if self.accel_group:
-                self.remove_accel_group(self.accel_group)
-                self.accel_group = None
             del self._content_conv
         self._content_conv = content_conv
         if content_conv:
@@ -113,6 +108,12 @@ class Window(gtk.Window):
                         self.set_or_get_height(0))
 
     content_conv = property(_get_content_conv, _set_content_conv)
+
+    def _remove_accel_group(self, content):
+        '''remove the accel group from the window if an accel group is
+        present on the content'''
+        if hasattr(content, 'accel_group') and content.accel_group:
+            self.remove_accel_group(content.accel_group)
 
     def set_icon(self, icon):
         '''set the icon of the window'''

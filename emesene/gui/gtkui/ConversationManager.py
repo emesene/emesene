@@ -38,6 +38,8 @@ class ConversationManager(gtk.Notebook, gui.ConversationManager):
         gtk.Notebook.__init__(self)
         gui.ConversationManager.__init__(self, session, on_last_close)
 
+        self.accel_group = None
+
         self.set_scrollable(True)
         self.set_can_focus(False)
         self.set_tab_pos(pos=self.get_tab_position())
