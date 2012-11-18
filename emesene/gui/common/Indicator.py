@@ -22,10 +22,16 @@ import gui
 from gui.gtkui import check_gtk3
 
 if check_gtk3():
-    #FIXME: port this to gtk3
-    raise ImportError
-
-import appindicator
+    try:
+        from gi.repository import AppIndicator3 as appindicator
+    except ImportError:
+        from gi.repository import AppIndicator as appindicator
+    appindicator.STATUS_ACTIVE = appindicator.IndicatorStatus.ACTIVE
+    appindicator.CATEGORY_APPLICATION_STATUS = appindicator.IndicatorCategory.APPLICATION_STATUS
+    appindicator.new_with_path = appindicator.Indicator.new_with_path
+else:
+    import appindicator
+    appindicator.new_with_path = appindicator.Indicator
 
 import logging
 log = logging.getLogger('gui.common.Indicator')
@@ -43,7 +49,7 @@ except AttributeError:
 
 import uuid
 
-class Indicator(appindicator.Indicator, gui.BaseTray):
+class Indicator(gui.BaseTray):
     """
     A widget that implements the tray icon of emesene for gtk
     """
@@ -59,33 +65,34 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         handler -- a e3common.Handler.TrayIconHandler object
         """
         gui.BaseTray.__init__(self, handler)
+
         app_name_hax = "emesene-%s" % uuid.uuid1()
-        appindicator.Indicator.__init__(
-            self, app_name_hax,
+        self.indicator = appindicator.new_with_path(
+            app_name_hax,
             self._get_icon_name(self.handler.theme.image_theme.logo_panel),
             appindicator.CATEGORY_APPLICATION_STATUS,
             self._get_icon_directory(self.handler.theme.image_theme.logo_panel))
 
-        if hasattr(self.props, 'title'):
-            self.set_property('title', 'emesene')
+        if hasattr(self.indicator.props, 'title'):
+            self.indicator.set_property('title', 'emesene')
 
         self.main_window = main_window
 
         self.menu = None
         self.set_login()
-        self.set_status(appindicator.STATUS_ACTIVE)
+        self.indicator.set_status(appindicator.STATUS_ACTIVE)
 
     def set_login(self):
         """
         method called to set the state to the login window
         """
         icon_path = self.handler.theme.image_theme.logo_panel
-        self.set_icon_theme_path(self._get_icon_directory(icon_path))
-        self.set_icon(self._get_icon_name(icon_path))
+        self.indicator.set_icon_theme_path(self._get_icon_directory(icon_path))
+        self.indicator.set_icon(self._get_icon_name(icon_path))
 
         self.menu = TrayIcon.LoginMenu(self.handler, self.main_window)
         self.menu.show_all()
-        self.set_menu(self.menu)
+        self.indicator.set_menu(self.menu)
 
     def set_main(self, session):
         """
@@ -96,7 +103,7 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
             self.menu.unsubscribe()
         self.menu = TrayIcon.MainMenu(self.handler, self.main_window)
         self.menu.show_all()
-        self.set_menu(self.menu)
+        self.indicator.set_menu(self.menu)
         self._on_status_change_succeed(self.handler.session.account.status)
 
     def _on_status_change_succeed(self, stat):
@@ -104,10 +111,10 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
         change the icon in the tray according to user's state
         """
         icon_path = self.handler.theme.image_theme.status_icons_panel[stat]
-        self.set_icon_theme_path(self._get_icon_directory(icon_path))
+        self.indicator.set_icon_theme_path(self._get_icon_directory(icon_path))
         #the appindicator takes a 'name' of an icon and NOT a filename.
         #that means that we have to strip the file extension
-        self.set_icon(self._get_icon_name(icon_path))
+        self.indicator.set_icon(self._get_icon_name(icon_path))
 
     def _get_icon_directory(self, icon_path):
         """
@@ -125,7 +132,7 @@ class Indicator(appindicator.Indicator, gui.BaseTray):
 
     def hide(self):
         self.unsubscribe()
-        self.set_status(appindicator.STATUS_PASSIVE)
+        self.indicator.set_status(appindicator.STATUS_PASSIVE)
 
     def unsubscribe(self):
         self.disconnect_signals()
