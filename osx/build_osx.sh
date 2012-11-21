@@ -6,8 +6,20 @@
 version=`grep 'EMESENE_VERSION = ".*"' ../emesene/Info.py | cut -d '"' -f 2`
     
 echo "############################################################################"
-echo "### Welcome to the emesene builder. Version 3.4.0 Copyright Josh Fradley ###" 
+echo "### Welcome to the emesene builder. Version 3.5 Copyright Josh Fradley ###" 
 echo "############################################################################"
+
+if ! [ -f "/usr/local/bin/platypus" ]
+then
+    echo "ERROR: Platpus is not installed..."
+    exit
+fi
+
+if ! [ -d "gtk" ]
+then
+    echo "ERROR: A gtk installation could not be found..."
+    exit
+fi
 
 read -p "Preparing to build emesene $version. Press enter to continue..."
 
@@ -23,7 +35,7 @@ echo "Building app..."
 
 echo "Setting version..."
 #There is a bug in Platypus which sets CFBundle rather than CFBundleShortVersionString, should be fixed in Platypus 4.8
-defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleVersion -string "340"
+defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleVersion -string "350"
 defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleShortVersionString -string "$version"
 
 echo "Bundling GTK..."
