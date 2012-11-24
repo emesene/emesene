@@ -107,7 +107,7 @@ class MainWindow(gtk.VBox, gui.MainWindowBase):
     def _on_social_request(self, conn_url):
         def set_token_fallback(response, data, token_url):
             '''callback used as fallback when webkit isn't avariable'''
-            if response == 1:
+            if response == gtk.ResponseType.OK:
                 token_url = None
             self.session.set_social_token(token_url)
 
