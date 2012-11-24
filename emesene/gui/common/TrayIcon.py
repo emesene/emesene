@@ -22,6 +22,10 @@ import gtk
 import gobject
 import time
 
+from gui.gtkui import check_gtk3
+if check_gtk3():
+    from gi.repository import Gio
+
 import extension
 import e3
 from e3 import status
@@ -54,6 +58,10 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         self.last_new_message = None
         self.menu = None
         self.tag = None # keeps the gobject id for the windows-hide-menu hack
+
+        # message count
+        self.unread_count = 0
+        self.unread_icon = None
 
         self.connect('activate', self._on_activate)
         self.connect('popup-menu', self._on_popup)
@@ -118,14 +126,25 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         conv_manager = self.handler.session.get_conversation_manager(cid, [account])
 
         if conv_manager and not conv_manager.is_active():
-            self.set_blinking(True)
+            if check_gtk3():
+                self.unread_count += 1
+                self._update_numerable_icon(self.unread_count)
+            else:
+                self.set_blinking(True)
             self.last_new_message = cid
 
     def _on_message_read(self, conv):
         """
         Stop tray blinking and resets the newest unread message reference
         """
-        self.set_blinking(False)
+        if check_gtk3():
+            #XXX: we go back to 0 because we receive only one message read event
+            if self.unread_count != 0:
+                self.unread_count = 0
+            self._update_numerable_icon(self.unread_count)
+        else:
+            self.set_blinking(False)
+
         self.last_new_message = None
 
     def _on_activate(self, trayicon):
@@ -133,8 +152,12 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         callback called when the status icon is activated
         (includes clicking the icon)
         """
+        if check_gtk3():
+            unread = self.unread_count != 0
+        else:
+            unread = self.get_blinking()
 
-        if self.last_new_message is not None and self.get_blinking():
+        if self.last_new_message is not None and unread:
             # show the tab with the latest message
             cid = self.last_new_message
             conv_manager = self.handler.session.get_conversation_manager(cid)
@@ -151,7 +174,23 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
         """
         if stat not in status.ALL or stat == -1:
             return
-        self.set_from_file(self.handler.theme.image_theme.status_icons_panel[stat])
+
+        if check_gtk3():
+            self.unread_icon = self._get_numerable_icon_for_status(stat)
+            self._update_numerable_icon(self.unread_count)
+        else:
+            self.set_from_file(self.handler.theme.image_theme.status_icons_panel[stat])
+
+    def _get_numerable_icon_for_status(self, stat):
+        '''create a new Numerable icon with current status as base image'''
+        icon_path = self.handler.theme.image_theme.status_icons_panel[stat]
+        gfile = Gio.File.new_for_path(icon_path)
+        gicon = Gio.FileIcon.new(gfile)
+        return gtk.NumerableIcon.new(gicon)
+
+    def _update_numerable_icon(self, count):
+        self.unread_icon.set_count(count)
+        self.set_from_gicon(self.unread_icon)
 
     def _on_popup(self, trayicon, button, activate_time):
         """
