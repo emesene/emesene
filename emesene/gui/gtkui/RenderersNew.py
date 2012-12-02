@@ -404,15 +404,15 @@ class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
     def animation_timeout(self, tree, image):
         if image.get_storage_type() == Gtk.ImageType.ANIMATION:
             self.redraw = 0
-            image.get_data('iter').advance(None)
+            image.iter.advance(None)
             model = tree.get_model()
             model.foreach(self.func, (image, tree))
 
             if self.redraw:
-                GObject.timeout_add(image.get_data('iter').get_delay_time(),
+                GObject.timeout_add(image.iter.get_delay_time(),
                     self.animation_timeout, tree, image)
             else:
-                image.set_data('iter', None)
+                image.iter = None
 
     def do_render(self, ctx, widget, bg_area, cell_area, flags):
         """Prepare rendering setting for avatar"""
@@ -431,13 +431,13 @@ class AvatarRenderer(Gtk.CellRendererPixbuf, AvatarManager):
         if self._image.get_storage_type() == Gtk.ImageType.ANIMATION:
             #this is broken on some version of gtk3, use static pixbuf for those cases
             try:
-                if not self._image.get_data('iter'):
+                if not hasattr(self._image, 'iter') or not self._image.iter:
                     animation = self._image.get_animation()
-                    self._image.set_data('iter', animation.get_iter(None))
-                    GObject.timeout_add(self._image.get_data('iter').get_delay_time(),
+                    self._image.iter =  animation.get_iter(None)
+                    GObject.timeout_add(self._image.iter.get_delay_time(),
                        self.animation_timeout, widget, self._image)
 
-                avatar = self._image.get_data('iter').get_pixbuf()
+                avatar = self._image.iter.get_pixbuf()
             except TypeError:
                 avatar = self._image.get_pixbuf()
 
