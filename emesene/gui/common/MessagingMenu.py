@@ -130,13 +130,7 @@ class MessagingMenu(gui.BaseTray):
         This creates a new indicator item, called by on_message, online & offline.
         """
         if indicate:
-            try:
-                # Ubuntu 9.10+
-                ind = indicate.Indicator()
-            except Exception:
-                # Ubuntu 9.04
-                ind = indicate.IndicatorMessage()
-
+            ind = indicate.Indicator()
             #Get user icon.
             contact = self.handler.session.contacts.safe_get(body)
             pixbuf = utils.safe_gtk_pixbuf_load(contact.picture or '', (48, 48))
