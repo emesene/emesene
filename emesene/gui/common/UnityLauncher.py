@@ -21,6 +21,7 @@ log = logging.getLogger("gui.common.UnityLauncher")
 
 import dbus, dbus.service
 import gui
+from NumerableTrayIcon import NumerableTrayIcon
 
 class UnityDBusController(dbus.service.Object):
     def __init__(self, app_uri):
@@ -48,84 +49,23 @@ class UnityDBusController(dbus.service.Object):
     def Query(self):
         return self.app_uri, self.properties
 
-class UnityLauncher(gui.BaseTray):
+class UnityLauncher(NumerableTrayIcon):
     ''' A widget that implements fancy unity launcher actions '''
     NAME = 'Unity Launcher'
     DESCRIPTION = 'Unity message count and quicklist'
     AUTHOR = 'Sven (Sbte)'
     WEBSITE = 'www.emesene.org'
 
-    def __init__ (self):
+    def __init__ (self, handler=None):
         '''constructor'''
-        gui.BaseTray.__init__(self)
-        self.count = 0
-        self.session = None
+        NumerableTrayIcon.__init__(self, handler)
         self.launcher = UnityDBusController("application://emesene.desktop")
 
-        self.icid_dict = {}
-
-    def set_session(self, session):
-        ''' Method called upon login '''
-        self.session = session
-        self.session.signals.conv_message.subscribe(
-            self._on_message)
-        self.session.signals.conv_ended.subscribe(
-            self._on_conv_ended)
-        self.session.signals.message_read.subscribe(
-            self._on_message_read)
-
-    def remove_session(self):
-        if self.session is not None:
-            self.session.signals.conv_message.unsubscribe(
-                self._on_message)
-            self.session.signals.conv_ended.unsubscribe(
-                self._on_conv_ended)
-            self.session.signals.message_read.unsubscribe(
-                self._on_message_read)
-            self.session = None
-
-    def _on_message(self, cid, account, msgobj, cedict=None):
-        ''' This is fired when a new message arrives '''
-        conv_manager = self.session.get_conversation_manager(cid, [account])
-        if not conv_manager:
-            return
-
-        conv = conv_manager.has_similar_conversation(cid, [account])
-        icid = conv.icid
-        if icid in self.icid_dict.keys():
-            self.icid_dict[icid] += 1
-        elif conv_manager.is_active():
-            return
-        else:
-            self.icid_dict[icid] = 1
-
-        self.count += 1
+    def count_changed(self, count):
+        show_count = (self.count == 0)
+        self.launcher.set_property("count-visible", show_count)
+        self.launcher.set_property("urgent", show_count)
         self.launcher.set_property("count", self.count)
-        self.launcher.set_property("count-visible", True)
-        self.launcher.set_property("urgent", True)
 
-    def _on_message_read(self, conv):
-        ''' This is called when the user read the message '''
-        if conv:
-            self._hide_count(conv.icid)
-
-    def _on_conv_ended(self, cid):
-        ''' This is called when the conversation is closed '''
-        conv = self.session.get_conversation(cid)
-        if conv:
-            self._hide_count(conv.icid)
-
-    def _hide_count(self, icid):
-        ''' Hide the message count if nessecary '''
-        if icid in self.icid_dict.keys():
-            self.count -= self.icid_dict[icid]
-            del self.icid_dict[icid]
-        self.launcher.set_property("count", self.count)
-        if self.icid_dict == {}:
-            self.count = 0
-        if self.count == 0:
-            self.launcher.set_property("count-visible", False)
-            self.launcher.set_property("urgent", False)
-
-    def _close_session(self, menu_item, menu_object):
-        self.session.close()
+    def unsubscribe(self):
+        self.disconnect_signals()

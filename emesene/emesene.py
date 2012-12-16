@@ -202,7 +202,9 @@ class Controller(object):
         self.network_checker = extension.get_and_instantiate(
             'network checker')
 
-        self.unity_launcher = extension.get_and_instantiate('unity launcher')
+        handler = gui.base.TrayIconHandler(self.session, gui.theme, self.close_session)
+        unitylaunchercls = extension.get_default('unity launcher')
+        self.unity_launcher = unitylaunchercls(handler)
 
         extension.category_register('sound', e3.common.Sounds.SoundPlayer,
                 None, True)
@@ -325,7 +327,7 @@ class Controller(object):
         #let's start dbus and unity launcher
         self.dbus_ext.set_new_session(self.session, self.window)
         if self.unity_launcher is not None:
-            self.unity_launcher.set_session(self.session)
+            self.unity_launcher.set_main(self.session)
 
     def _restore_session(self):
         account = self.session.account
@@ -417,7 +419,7 @@ class Controller(object):
             signals.picture_change_succeed.unsubscribe(
                     self.on_picture_change_succeed)
             if self.unity_launcher is not None:
-                self.unity_launcher.remove_session()
+                self.unity_launcher.unsubscribe()
             # unsubscribe notifications signals
             if self.notification:
                 self.notification.remove_subscriptions()

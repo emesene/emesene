@@ -35,8 +35,9 @@ import gui.gtkui.utils as utils
 import gui.gtkui.StatusMenu as StatusMenu
 
 from gui import Plus
+from NumerableTrayIcon import NumerableTrayIcon
 
-class TrayIcon(gtk.StatusIcon, gui.BaseTray):
+class TrayIcon(gtk.StatusIcon, NumerableTrayIcon):
     """
     A widget that implements the tray icon of emesene for gtk
     """
@@ -51,16 +52,14 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
 
         handler -- a gui.base.Handler.TrayIconHandler object
         """
-        gui.BaseTray.__init__(self, handler)
+        NumerableTrayIcon.__init__(self, handler)
         gtk.StatusIcon.__init__(self)
 
         self.main_window = main_window
-        self.last_new_message = None
         self.menu = None
         self.tag = None # keeps the gobject id for the windows-hide-menu hack
 
-        # message count
-        self.unread_count = 0
+        # message count icon
         self.unread_icon = None
 
         self.connect('activate', self._on_activate)
@@ -118,46 +117,12 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
             gobject.source_remove(self.tag)
             self.tag = None
 
-    def _on_conv_message(self, cid, account, msgobj, cedict=None):
-        """
-        Blink tray icon and save newest unread message
-        """
-
-        conv_manager = self.handler.session.get_conversation_manager(cid, [account])
-
-        if conv_manager and not conv_manager.is_active():
-            if check_gtk3():
-                self.unread_count += 1
-                self._update_numerable_icon(self.unread_count)
-            else:
-                self.set_blinking(True)
-            self.last_new_message = cid
-
-    def _on_message_read(self, conv):
-        """
-        Stop tray blinking and resets the newest unread message reference
-        """
-        if check_gtk3():
-            #XXX: we go back to 0 because we receive only one message read event
-            if self.unread_count != 0:
-                self.unread_count = 0
-            self._update_numerable_icon(self.unread_count)
-        else:
-            self.set_blinking(False)
-
-        self.last_new_message = None
-
     def _on_activate(self, trayicon):
         """
         callback called when the status icon is activated
         (includes clicking the icon)
         """
-        if check_gtk3():
-            unread = self.unread_count != 0
-        else:
-            unread = self.get_blinking()
-
-        if self.last_new_message is not None and unread:
+        if self.last_new_message is not None and (self.count != 0):
             # show the tab with the latest message
             cid = self.last_new_message
             conv_manager = self.handler.session.get_conversation_manager(cid)
@@ -177,9 +142,16 @@ class TrayIcon(gtk.StatusIcon, gui.BaseTray):
 
         if check_gtk3():
             self.unread_icon = self._get_numerable_icon_for_status(stat)
-            self._update_numerable_icon(self.unread_count)
+            self._update_numerable_icon(self.count)
         else:
             self.set_from_file(self.handler.theme.image_theme.status_icons_panel[stat])
+
+    def count_changed(self, count):
+        '''method called when unread message count changes'''
+        if check_gtk3():
+            self._update_numerable_icon(count)
+        else:
+            self.set_blinking((count != 0))
 
     def _get_numerable_icon_for_status(self, stat):
         '''create a new Numerable icon with current status as base image'''
