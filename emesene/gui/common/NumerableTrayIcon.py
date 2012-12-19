@@ -36,7 +36,7 @@ class NumerableTrayIcon(gui.BaseTray):
         """
         This is fired when a new message arrives to a user.
         """
-        conv_manager = self.session.get_conversation_manager(cid, [account])
+        conv_manager = self.handler.session.get_conversation_manager(cid, [account])
         if not conv_manager:
             return
 
@@ -64,7 +64,7 @@ class NumerableTrayIcon(gui.BaseTray):
         """
         This is called when the conversation ends
         """
-        conv = self.session.get_conversation(cid)
+        conv = self.handler.session.get_conversation(cid)
         if conv:
             self._hide_count(conv.icid)
 
