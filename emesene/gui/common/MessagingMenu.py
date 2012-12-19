@@ -24,6 +24,7 @@ from gui.gtkui import check_gtk3
 if check_gtk3():
     from gi.repository import Indicate as indicate
     indicate.indicate_server_ref_default = indicate.Server.ref_default
+    from gi.repository import GLib
 else:
     import indicate
 import gui
@@ -143,7 +144,10 @@ class MessagingMenu(gui.BaseTray):
                 ind.set_property("body", str(icid))
             else:
                 ind.set_property("body", body)
-            ind.set_property_time("time", time.time())
+            if check_gtk3():
+                ind.set_property_time("time", GLib.TimeVal())
+            else:
+                ind.set_property_time("time", time.time())
             ind.set_property("draw-attention", "true")
             ind.connect("user-display", self._display)
             ind.show()
