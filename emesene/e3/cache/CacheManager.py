@@ -18,6 +18,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from AvatarCache import AvatarCache
 from EmoticonCache import EmoticonCache
+from PictureCache import PictureCache
 
 class CacheManager(object):
     '''a cache manager class
@@ -33,6 +34,7 @@ class CacheManager(object):
 
         self.avatars = {}
         self.emoticons = {}
+        self.pictures = {}
 
     def get_avatar_cache(self, account):
         '''return an AvatarCache instance for account
@@ -53,4 +55,14 @@ class CacheManager(object):
 
         self.emoticons[account] = EmoticonCache(self.base_path, account)
         return self.emoticons[account]
+
+    def get_picture_cache(self, account):
+        '''return an AvatarCache instance for account
+        if account cache doesn't exist create it
+        '''
+        if account in self.pictures:
+            return self.pictures[account]
+
+        self.pictures[account] = PictureCache(self.base_path, account)
+        return self.pictures[account]
 
