@@ -536,6 +536,12 @@ class Conversation(object):
             self.output.information(msg)
             self.conv_status.post_process_message(msg)
 
+        elif message.type == e3.Message.TYPE_PICTURE:
+            msg = gui.Message.from_contact(contact, message)
+
+            self.output.information(msg)
+            self.conv_status.post_process_message(msg)
+
         self.conv_status.update_status()
 
     def on_send_message_failed(self, errorCode):

@@ -1,5 +1,4 @@
-'''a module to define a cache class for avatars
-'''
+'''a module to define a cache class for pictures'''
 # -*- coding: utf-8 -*-
 
 #   This file is part of emesene.
@@ -17,20 +16,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with emesene; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from __future__ import with_statement
-import os
-import time
-import shutil
-import tempfile
-
-import logging
-log = logging.getLogger('e3.cache.Cache.py')
-
-from urllib import urlretrieve
-
 import Cache
 
-class AvatarCache(Cache.Cache):
+class PictureCache(Cache.Cache):
+    '''a class to maintain a cache of pictures
+    '''
     '''a class to maintain a cache of an user avatars
     '''
 
@@ -40,7 +30,7 @@ class AvatarCache(Cache.Cache):
         user -- the user account or identifier
         '''
         Cache.Cache.__init__(self, os.path.join(config_path,
-            user.strip()), 'avatars', True)
+            user.strip()), 'pictures', True)
 
     def parse(self):
         '''parse the file that contains the dir information
@@ -157,3 +147,4 @@ class AvatarCache(Cache.Cache):
         if image_hash in cache: asd()
         '''
         return os.path.isfile(os.path.join(self.path, name))
+
