@@ -24,7 +24,7 @@ from gui.base import Plus
 NAME = 'GNTPNotification'
 DESCRIPTION = 'Wrapper around GNTP for the notification system'
 AUTHOR = 'joshf'
-WEBSITE = 'www.sidhosting.co.uk'
+WEBSITE = 'www.github.com/joshf'
 VERSION = '1.0'
 
 def GNTPNotification(title, text, picture_path=None, const=None, 
