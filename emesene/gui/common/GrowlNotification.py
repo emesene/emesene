@@ -30,7 +30,7 @@ log = logging.getLogger('gui.common.GrowlNotification')
 NAME = 'GrowlNotification'
 DESCRIPTION = 'Wrapper around growlnotify for the notification system'
 AUTHOR = 'joshf'
-WEBSITE = 'www.sidhosting.co.uk'
+WEBSITE = 'www.github.com/joshf'
 VERSION = '0.5'
 
 def GrowlNotification(title, text, picture_path=None, const=None, 
