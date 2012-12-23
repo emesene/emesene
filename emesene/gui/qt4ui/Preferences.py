@@ -13,6 +13,7 @@ from gui.qt4ui.Utils import tr
 import e3.common
 import extension
 import gui
+import sys
 from Language import Language, get_language_manager
 
 try:
@@ -25,6 +26,7 @@ log = logging.getLogger('qt4ui.Preferences')
 
 LIST = [
     {'stock_id' : 'preferences-desktop',               'text' : tr('General'  )},
+    {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Main Window')},
     {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Interface')},
     {'stock_id' : 'preferences-desktop-multimedia',    'text' : tr('Sounds'   )},
     {'stock_id' : 'window-new',                    'text' : tr('Notifications')},
@@ -53,6 +55,7 @@ class Preferences(QtGui.QWidget):
         self.session = session
         self.interface    = Interface(session)
         self.general      = GeneralTab(session)
+        self.main = MainWindow(session)
         self.sound        = Sound(session)
         self.notification = Notification(session)
         self.theme        = Theme(session)
@@ -91,7 +94,7 @@ class Preferences(QtGui.QWidget):
                             QtGui.QIcon.fromTheme(i['stock_id']), i['text'])
             self._list_model.appendRow(item)
         
-        for page in [self.general, self.interface,     self.sound, 
+        for page in [self.general, self.main, self.interface,     self.sound, 
                      self.notification,  self.theme,       self.extension,
                      BaseTable(1,1),     self.msn_papylib]: 
                      #self.plugins_page instead of BaseTable
@@ -225,8 +228,9 @@ class BaseTable(QtGui.QWidget):
         button.clicked.connect(on_click)
         self.grid_lay.addWidget(button, row, column)
         
-
-    def append_entry_default(self, text, property_name, default):
+    def append_entry_default(self, text, format_type,
+                             property_name, default, tooltip_text,
+                             has_help=True, has_apply=False):
         '''Append a row with a label and a line_edit, set the value to the
         value of property_name if exists, if not set it to default.
         Add a reset button that sets the value to the default'''
@@ -241,6 +245,14 @@ class BaseTable(QtGui.QWidget):
             set the value of the property to the new value'''
             self.set_attr(property_name, unicode(entry.text()))
 
+        def on_help_clicked(button, format_type):
+            """called when the help button is clicked"""
+            extension.get_default('dialog').contactlist_format_help(format_type)
+
+        def on_apply_clicked(button, entry, property_name):
+            """called when the apply button is clicked"""
+            on_entry_changed(entry, property_name)
+
         label = QtGui.QLabel(text)
         line_edit = QtGui.QLineEdit()
         reset = QtGui.QPushButton(QtGui.QIcon.fromTheme('edit-clear'), '')
@@ -249,7 +261,6 @@ class BaseTable(QtGui.QWidget):
         hlay.addWidget(label)
         hlay.addStretch()
         hlay.addWidget(line_edit)
-        hlay.addWidget(reset)
         row = QtGui.QWidget()
         row.setLayout(hlay)
         self.append_row(row)
@@ -259,9 +270,25 @@ class BaseTable(QtGui.QWidget):
         
         reset.clicked.connect(
                         lambda: on_reset_clicked(line_edit, default))
-        line_edit.textChanged.connect(
-                        lambda t: on_entry_changed(line_edit, property_name))
+        if has_apply:
+            entry_apply = QtGui.QPushButton(QtGui.QIcon.fromTheme('help-about'), '')
+            hlay.addWidget(entry_apply)
+            entry_apply.setText(tr('Apply'))
+            entry_apply.toggled.connect(
+                            lambda checked: on_apply_clicked(entry_apply, entry, property_name))
+#            entry.connect('key-press-event', on_key_press, property_name) #FIXME:
+        else:
+            line_edit.textChanged.connect(
+                            lambda t: on_entry_changed(line_edit, property_name))
 
+        hlay.addWidget(reset)
+
+        if has_help:
+            help = QtGui.QPushButton(QtGui.QIcon.fromTheme('help-about'), '')
+            hlay.addWidget(help)
+            help.setToolTip(tooltip_text)
+            help.clicked.connect(
+                        lambda: on_help_clicked(help, format_type))
 
     def create_check(self, text, property_name):
         """create a CheckButton and
@@ -282,7 +309,7 @@ class BaseTable(QtGui.QWidget):
         self.append_row(widget, row)
     	return widget
 
-    def append_range(self, text, property_name, min_val, max_val, is_int=True):
+    def append_range(self, text, property_name, min_val, max_val, is_int=True, marks=[]):
         '''Append a row with a scale to select an integer value between
         min and max'''
         
@@ -347,7 +374,7 @@ class BaseTable(QtGui.QWidget):
         '''Append a row with a check box with text as label and
         set the check state with default'''
         label = QtGui.QLabel(text)
-        combo = self.create_combo(getter, property_name, values) #QtGui.QComboBox()
+        combo = self.create_combo(getter, property_name, values)
         
         hlay = QtGui.QHBoxLayout()
         hlay.addWidget(label)
@@ -427,9 +454,6 @@ class Interface(BaseTable):
         '''
         BaseTable.__init__(self, 4, 1)
         self.session = session
-        self.append_markup('<b>'+tr('Main window:')+'</b>')
-        self.append_check(tr('Show user panel'),
-            'session.config.b_show_userpanel')
         self.append_markup('<b>'+tr('Conversation window:')+'</b>')
         self.session.config.get_or_set('b_avatar_on_left', False)
         self.session.config.get_or_set('b_toolbar_small', False)
@@ -553,6 +577,61 @@ class GeneralTab(BaseTable):
         pass
 
 
+class MainWindow(BaseTable):
+    """the panel to display/modify the config related to the gui
+    """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 17, 2)
+        self.session = session
+
+        ContactList = extension.get_default('contact list')
+
+        self.append_markup('<b>'+tr('User panel:')+'</b>')
+        self.append_check(_('Show user panel'),
+            'session.config.b_show_userpanel')
+        self.append_check(tr('Show unread mail count'),
+            'session.config.b_show_mail_inbox')
+        self.append_markup('<b>'+tr('Contact list:')+'</b>')
+        avatar_size = self.append_range(tr('Contact list avatar size'),
+            'session.config.i_avatar_size', 18, 64, marks=[32, 48])
+
+        self.append_entry_default(tr('Nick format'), 'nick',
+                                  'session.config.nick_template_clist',
+                                  ContactList.NICK_TPL, tr('Nick Format Help'),
+                                  has_apply=True)
+        self.append_entry_default(tr('Group format'), 'group',
+                                  'session.config.group_template',
+                                  ContactList.GROUP_TPL, tr('Group Format Help'),
+                                  has_apply=True)
+
+        if sys.platform == 'darwin':
+
+            def do_hideshow(widget):
+                if widget.getChecked():
+                    subprocess.call('defaults write '
+                                    '/Applications/emesene.app/Contents/Info'
+                                    ' LSUIElement -bool false', shell=True)
+                else:
+                    subprocess.call('defaults write '
+                                    '/Applications/emesene.app/Contents/Info'
+                                    ' LSUIElement -bool true', shell=True)
+
+            self.append_markup('<b>'+tr('OS X Integration:')+'</b>')
+            self.session.config.get_or_set('b_show_dock_icon', True)
+
+            button = self.append_check(tr('Show dock icon '
+                                       '(requires restart of emesene)'),
+                                       'session.config.b_show_dock_icon')
+            button.toggled.connect(
+                        lambda checked: do_hideshow(widget, property_name))
+            self.session.config.get_or_set('b_hide_menu', False)
+            button = self.append_check(tr('Hide menu'),
+                                       'session.config.b_hide_menu')
+        self.show_all()
+
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
     """
@@ -673,10 +752,6 @@ class Theme(BaseTable):
             'session.config.emote_theme')
         self.append_combo(tr('Adium theme'), gui.theme.get_adium_themes,
             'session.config.adium_theme')
-        self.append_entry_default(tr('Nick format'),
-                'session.config.nick_template', contact_list_cls.NICK_TPL)
-        self.append_entry_default(tr('Group format'),
-                'session.config.group_template', contact_list_cls.GROUP_TPL)
 
 
 
