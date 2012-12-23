@@ -493,24 +493,24 @@ class Sound(BaseTable):
         BaseTable.__init__(self, 7, 1)
         self.session = session
         self.array = []
-        self.append_markup('<b>'+_('General:')+'</b>')
+        self.append_markup('<b>'+tr('General:')+'</b>')
         self.mute_sound = self.append_check(_('Mute sounds'),
             'session.config.b_mute_sounds')
-        self.append_markup('<b>'+_('Users events:')+'</b>')
-        self.array.append(self.append_check(_('Play sound on contact online'),
+        self.append_markup('<b>'+tr('Users events:')+'</b>')
+        self.array.append(self.append_check(tr('Play sound on contact online'),
             'session.config.b_play_contact_online'))
-        self.array.append(self.append_check(_('Play sound on contact offline'),
+        self.array.append(self.append_check(tr('Play sound on contact offline'),
             'session.config.b_play_contact_offline'))
-        self.append_markup('<b>'+_('Messages events:')+'</b>')
-        self.array.append(self.append_check(_('Play sound on sent message'),
+        self.append_markup('<b>'+tr('Messages events:')+'</b>')
+        self.array.append(self.append_check(tr('Play sound on sent message'),
             'session.config.b_play_send'))
-        self.array.append(self.append_check(_('Play sound on first received message'),
+        self.array.append(self.append_check(tr('Play sound on first received message'),
             'session.config.b_play_first_send'))
-        self.array.append(self.append_check(_('Play sound on received message'),
+        self.array.append(self.append_check(tr('Play sound on received message'),
             'session.config.b_play_type'))
-        self.array.append(self.append_check(_('Play sound on nudge'),
+        self.array.append(self.append_check(tr('Play sound on nudge'),
             'session.config.b_play_nudge'))
-        self.array.append(self.append_check(_('Mute sounds when the conversation has focus'),
+        self.array.append(self.append_check(tr('Mute sounds when the conversation has focus'),
             'session.config.b_mute_sounds_when_focussed'))
 
         self._on_mute_sounds_changed(self.session.config.b_mute_sounds)
@@ -529,28 +529,56 @@ class Sound(BaseTable):
         self.session.config.unsubscribe(self._on_mute_sounds_changed,
             'b_mute_sounds')
 
+
 class Notification(BaseTable):
-    '''the panel to display/modify the config related to the notifications
-    '''
+    """the panel to display/modify the config related to the notifications
+    """
 
     def __init__(self, session):
-        '''constructor
-        '''
-        BaseTable.__init__(self, 2, 1)
+        """constructor
+        """
+        BaseTable.__init__(self, 4, 1)
         self.session = session
-        self.append_check(tr('Notify on contact online'),
-            'session.config.b_notify_contact_online')
-        self.append_check(tr('Notify on contact offline'),
-            'session.config.b_notify_contact_offline')
-        self.append_check(tr('Notify on received message'),
-            'session.config.b_notify_receive_message')
-        self.append_check(tr('Notify when signed in from another location'),
-            'session.config.b_notify_endpoint_added')
-        self.append_check(tr('Notify when information of signed in location is changed'),
-            'session.config.b_notify_endpoint_updated')
+        self.array = []
 
+        self.append_markup('<b>'+tr('General:')+'</b>')
+        self.append_check(tr('Mute notifications'),
+            'session.config.b_mute_notification')
+        self.array.append(self.append_check(tr('Only when available'),
+            'session.config.b_notify_only_when_available'))
+        self.append_markup('<b>'+tr('Users events:')+'</b>')
+        self.array.append(self.append_check(tr('Notify on contact online'),
+            'session.config.b_notify_contact_online'))
+        self.array.append(self.append_check(tr('Notify on contact offline'),
+            'session.config.b_notify_contact_offline'))
+        self.append_markup('<b>'+tr('Messages events:')+'</b>')
+        self.array.append(self.append_check(tr('Notify on received message'),
+            'session.config.b_notify_receive_message'))
+        self.array.append(self.append_check(tr('Notify when a contact is typing'),
+            'session.config.b_notify_typing'))
+        self.array.append(self.append_check(tr('Notify also when the conversation has focus'),
+            'session.config.b_notify_when_focussed'))
+        if self.session and self.session.session_has_service(e3.Session.SERVICE_ENDPOINTS):
+            self.append_markup('<b>'+tr('Security events:')+'</b>')
+            self.array.append(self.append_check(tr('Notify when signed in from another location'),
+                'session.config.b_notify_endpoint_added'))
+            self.array.append(self.append_check(tr('Notify when information of signed in location is changed'),
+                'session.config.b_notify_endpoint_updated'))
 
+        self._on_mute_notification_changed(self.session.config.b_mute_notification)
 
+        self.session.config.subscribe(self._on_mute_notification_changed,
+            'b_mute_notification')
+
+        self.show_all()
+
+    def _on_mute_notification_changed(self, value):
+        for i in self.array:
+            i.setEnabled(not value)
+
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_mute_notification_changed,
+            'b_mute_notification')
 
 
 class Theme(BaseTable):
