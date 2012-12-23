@@ -269,6 +269,7 @@ class BaseTable(QtGui.QWidget):
         
         widget.toggled.connect(
                         lambda checked: self.on_toggled(widget, property_name))
+	return widget
         
 
     def append_range(self, text, property_name, min_val, max_val, is_int=True):
@@ -480,41 +481,53 @@ class Desktop(BaseTable):
         path_edit.textChanged.connect(
                             lambda new_path: set_new_path(unicode(new_path)))
         self.show_all()
-        
-        
-        
-        
+
 
 class Sound(BaseTable):
-    '''the panel to display/modify the config related to the sounds
-    '''
+    """the panel to display/modify the config related to the sounds
+    """
 
     def __init__(self, session):
-        '''constructor
-        '''
-        BaseTable.__init__(self, 6, 1)
+        """constructor
+        """
+        BaseTable.__init__(self, 7, 1)
         self.session = session
-        self.append_markup('<b>'+tr('Messages events:')+'</b>')
-        self.append_check(tr('Mute sounds'),
+        self.array = []
+        self.append_markup('<b>'+_('General:')+'</b>')
+        self.mute_sound = self.append_check(_('Mute sounds'),
             'session.config.b_mute_sounds')
-        self.append_check(tr('Play sound on sent message'),
-            'session.config.b_play_send')
-        self.append_check(tr('Play sound on first received message'),
-            'session.config.b_play_first_send')
-        self.append_check(tr('Play sound on received message'),
-            'session.config.b_play_type')
-        self.append_check(tr('Play sound on nudge'),
-            'session.config.b_play_nudge')
+        self.append_markup('<b>'+_('Users events:')+'</b>')
+        self.array.append(self.append_check(_('Play sound on contact online'),
+            'session.config.b_play_contact_online'))
+        self.array.append(self.append_check(_('Play sound on contact offline'),
+            'session.config.b_play_contact_offline'))
+        self.append_markup('<b>'+_('Messages events:')+'</b>')
+        self.array.append(self.append_check(_('Play sound on sent message'),
+            'session.config.b_play_send'))
+        self.array.append(self.append_check(_('Play sound on first received message'),
+            'session.config.b_play_first_send'))
+        self.array.append(self.append_check(_('Play sound on received message'),
+            'session.config.b_play_type'))
+        self.array.append(self.append_check(_('Play sound on nudge'),
+            'session.config.b_play_nudge'))
+        self.array.append(self.append_check(_('Mute sounds when the conversation has focus'),
+            'session.config.b_mute_sounds_when_focussed'))
 
-        self.append_markup('<b>'+tr('Users events:')+'</b>')
-        self.append_check(tr('Play sound on contact online'),
-            'session.config.b_play_contact_online')
-        self.append_check(tr('Play sound on contact offline'),
-            'session.config.b_play_contact_offline')
+        self._on_mute_sounds_changed(self.session.config.b_mute_sounds)
 
+        self.session.config.subscribe(self._on_mute_sounds_changed,
+            'b_mute_sounds')
 
+        self.show_all()
 
+    def _on_mute_sounds_changed(self, value):
+        self.mute_sound.setChecked(value)
+        for i in self.array:
+            i.setEnabled(not value)
 
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_mute_sounds_changed,
+            'b_mute_sounds')
 
 class Notification(BaseTable):
     '''the panel to display/modify the config related to the notifications
