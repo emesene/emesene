@@ -269,22 +269,22 @@ class BaseTable(QtGui.QWidget):
         line_edit.setText(text)
         
         reset.clicked.connect(
-                        lambda: on_reset_clicked(line_edit, default))
+                        lambda checked: on_reset_clicked(line_edit, default))
         if has_apply:
-            entry_apply = QtGui.QPushButton(QtGui.QIcon.fromTheme('help-about'), '')
+            entry_apply = QtGui.QPushButton('')
             hlay.addWidget(entry_apply)
             entry_apply.setText(tr('Apply'))
             entry_apply.toggled.connect(
                             lambda checked: on_apply_clicked(entry_apply, entry, property_name))
-#            entry.connect('key-press-event', on_key_press, property_name) #FIXME:
+            line_edit.returnPressed.connect( lambda self: on_entry_changed(line_edit, property_name))
         else:
             line_edit.textChanged.connect(
-                            lambda t: on_entry_changed(line_edit, property_name))
+                            lambda text: on_entry_changed(line_edit, property_name))
 
         hlay.addWidget(reset)
 
         if has_help:
-            help = QtGui.QPushButton(QtGui.QIcon.fromTheme('help-about'), '')
+            help = QtGui.QPushButton(QtGui.QIcon.fromTheme('system-help'), '')
             hlay.addWidget(help)
             help.setToolTip(tooltip_text)
             help.clicked.connect(
