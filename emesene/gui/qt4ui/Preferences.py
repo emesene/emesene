@@ -27,7 +27,7 @@ log = logging.getLogger('qt4ui.Preferences')
 LIST = [
     {'stock_id' : 'preferences-desktop',               'text' : tr('General'  )},
     {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Main Window')},
-    {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Interface')},
+    {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Conversation Window')},
     {'stock_id' : 'preferences-desktop-multimedia',    'text' : tr('Sounds'   )},
     {'stock_id' : 'window-new',                    'text' : tr('Notifications')},
     {'stock_id' : 'preferences-desktop-theme',         'text' : tr('Theme'    )},
@@ -53,9 +53,9 @@ class Preferences(QtGui.QWidget):
         self._session = session
         #TODO: check
         self.session = session
-        self.interface    = Interface(session)
         self.general      = GeneralTab(session)
         self.main = MainWindow(session)
+        self.conversation = ConversationWindow(session)
         self.sound        = Sound(session)
         self.notification = Notification(session)
         self.theme        = Theme(session)
@@ -94,7 +94,7 @@ class Preferences(QtGui.QWidget):
                             QtGui.QIcon.fromTheme(i['stock_id']), i['text'])
             self._list_model.appendRow(item)
         
-        for page in [self.general, self.main, self.interface,     self.sound, 
+        for page in [self.general, self.main, self.conversation,     self.sound, 
                      self.notification,  self.theme,       self.extension,
                      BaseTable(1,1),     self.msn_papylib]: 
                      #self.plugins_page instead of BaseTable
@@ -370,9 +370,12 @@ class BaseTable(QtGui.QWidget):
             	lambda text: self.on_combo_changed(combo, property_name))
         return combo
 
-    def append_combo(self, text, getter, property_name, values=None):
-        '''Append a row with a check box with text as label and
-        set the check state with default'''
+    def create_combo_with_label(self, text,
+                                getter, property_name,
+                                values=None, changed_cb = None):
+        """creates and return a new ComboBox with a label and append
+           values to the combo
+        """
         label = QtGui.QLabel(text)
         combo = self.create_combo(getter, property_name, values)
         
@@ -381,10 +384,14 @@ class BaseTable(QtGui.QWidget):
         hlay.addWidget(combo)
         widget = QtGui.QWidget()
         widget.setLayout(hlay)
+
+        return widget
+
+    def append_combo(self, text, getter, property_name, values=None):
+        '''Append a row with a check box with text as label and
+        set the check state with default'''
+        widget = self.create_combo_with_label(text, getter, property_name, values)
         self.append_row(widget, None)
-        
-        combo.currentIndexChanged.connect(
-                    lambda text: self.on_combo_changed(combo, property_name))
 
     def on_combo_changed(self, combo, property_name):
         '''Callback called when the selection of the combo changed
@@ -631,6 +638,132 @@ class MainWindow(BaseTable):
             button = self.append_check(tr('Hide menu'),
                                        'session.config.b_hide_menu')
         self.show_all()
+
+
+class ConversationWindow(BaseTable):
+    """the panel to display/modify the config related to the gui
+    """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 17, 1)
+        self.session = session
+
+        # override text color option
+
+        cb_override_text_color = self.create_check(
+                                        tr('Override incoming text color'),
+                                        'session.config.b_override_text_color')
+
+        self.session.config.subscribe(self._on_cb_override_text_color_toggled,
+            'b_override_text_color')
+
+        def on_color_selected(cb):
+            col = cb.get_color()
+            col_e3 = e3.base.Color(col.red, col.green, col.blue)
+            self.set_attr('session.config.override_text_color',
+                          '#'+col_e3.to_hex())
+
+#FIXME:
+#        self.b_text_color = gtk.ColorButton(color=gtk.gdk.color_parse(
+#                            self.get_attr('session.config.override_text_color')))
+#        self.b_text_color.set_use_alpha(False)
+#        self.b_text_color.connect('color-set', on_color_selected)
+#        h_color_box = gtk.HBox()
+#        h_color_box.pack_start(cb_override_text_color)
+#        h_color_box.pack_start(self.b_text_color)
+
+        # preference list
+
+        self.session.config.get_or_set('i_tab_position', 0)
+        self.tab_pos_cb = self.create_combo_with_label(tr('Tab position'),
+            self.get_tab_positions, 'session.config.i_tab_position',range(4))
+
+        self.int_mode = 2
+        if session.config.b_single_window:
+            self.int_mode = 0
+        elif session.config.b_conversation_tabs:
+            self.int_mode = 1
+
+        self.integrated_mode_cb = self.create_combo_with_label(tr('Integrated mode'),
+            self.get_integrated_mode, 'int_mode', range(3),
+            self._on_integrated_mode_change)
+
+        self.session.config.get_or_set('b_avatar_on_left', False)
+        self.session.config.get_or_set('b_toolbar_small', False)
+        self.session.config.get_or_set('b_escape_hotkey', True)
+        self.session.config.get_or_set('b_close_button_on_tabs', True)
+        self.session.config.get_or_set('b_show_avatar_in_taskbar', True)
+
+        self.append_markup('<b>'+tr('Layout')+'</b>')
+        self.append_row(self.integrated_mode_cb)
+        self.append_row(self.tab_pos_cb)
+        self.append_check(tr('Show conversation header'),
+            'session.config.b_show_header')
+        self.append_check(tr('Show conversation toolbar'),
+            'session.config.b_show_toolbar')
+        self.append_check(tr('Show close button on tabs'),
+            'session.config.b_close_button_on_tabs')
+        # Avatar-on-left sensitivity depends on side panel visibility
+        self.cb_avatar_left = self.create_check(tr('Avatar on conversation left side'),
+            'session.config.b_avatar_on_left')
+        self.append_row(self.cb_avatar_left)
+
+        self.append_markup('<b>'+tr('Appearance')+'</b>')
+        self.append_check(tr('Show emoticons'),
+                          'session.config.b_show_emoticons')
+        self.append_check(tr('Show avatars in taskbar instead of status icons'),
+            'session.config.b_show_avatar_in_taskbar')
+
+#        self.append_row(h_color_box)
+
+        #update ColorButton sensitive
+        self._on_cb_override_text_color_toggled(
+                self.session.config.get_or_set('b_override_text_color', False))
+
+        avatar_size = self.append_range(tr('Conversation avatar size'),
+            'session.config.i_conv_avatar_size', 18, 128, marks=[32,64,96])
+
+        self.append_markup('<b>'+tr('Behavior')+'</b>')
+        self.append_check(tr('Start minimized/iconified'),
+                          'session.config.b_conv_minimized')
+        self.append_check(tr('Enable escape hotkey to close tabs'),
+            'session.config.b_escape_hotkey')
+        self.append_check(tr('Allow auto scroll in conversation'),
+            'session.config.b_allow_auto_scroll')
+
+        self.show_all()
+
+    def get_tab_positions(self):
+        return [tr("Top"), tr("Bottom"), tr("Left"), tr("Right")]
+
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_cb_override_text_color_toggled,
+            'b_override_text_color')
+
+    def _on_cb_override_text_color_toggled(self, value):
+        #self.b_text_color.setEnabled(value)
+        pass
+
+    def _on_integrated_mode_change(self, combo, property_name, value):
+        self.int_mode = combo.get_active()
+        if self.int_mode == 0:
+            self.session.config.b_single_window = True
+            self.session.config.b_conversation_tabs = True
+        elif self.int_mode == 1:
+            self.session.config.b_single_window = False
+            self.session.config.b_conversation_tabs = True
+        else:
+            self.session.config.b_single_window = False
+            self.session.config.b_conversation_tabs = False
+        self.tab_pos_cb.set_sensitive(self.session.config.b_conversation_tabs)
+
+    def get_integrated_mode(self):
+        return [tr("Single Window"),
+                tr("Tabbed Conversations"),
+                tr("Multiple Conversations")]
+
 
 class Sound(BaseTable):
     """the panel to display/modify the config related to the sounds
