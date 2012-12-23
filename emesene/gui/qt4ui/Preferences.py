@@ -13,13 +13,19 @@ from gui.qt4ui.Utils import tr
 import e3.common
 import extension
 import gui
+from Language import Language, get_language_manager
 
+try:
+    from enchant_dicts import list_dicts
+except:
+    def list_dicts():
+        return []
 
 log = logging.getLogger('qt4ui.Preferences')
 
 LIST = [
+    {'stock_id' : 'preferences-desktop',               'text' : tr('General'  )},
     {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Interface')},
-    {'stock_id' : 'preferences-desktop',               'text' : tr('Desktop'  )},
     {'stock_id' : 'preferences-desktop-multimedia',    'text' : tr('Sounds'   )},
     {'stock_id' : 'window-new',                    'text' : tr('Notifications')},
     {'stock_id' : 'preferences-desktop-theme',         'text' : tr('Theme'    )},
@@ -46,7 +52,7 @@ class Preferences(QtGui.QWidget):
         #TODO: check
         self.session = session
         self.interface    = Interface(session)
-        self.desktop      = Desktop(session)
+        self.general      = GeneralTab(session)
         self.sound        = Sound(session)
         self.notification = Notification(session)
         self.theme        = Theme(session)
@@ -85,7 +91,7 @@ class Preferences(QtGui.QWidget):
                             QtGui.QIcon.fromTheme(i['stock_id']), i['text'])
             self._list_model.appendRow(item)
         
-        for page in [self.interface,     self.desktop,     self.sound, 
+        for page in [self.general, self.interface,     self.sound, 
                      self.notification,  self.theme,       self.extension,
                      BaseTable(1,1),     self.msn_papylib]: 
                      #self.plugins_page instead of BaseTable
@@ -203,7 +209,8 @@ class BaseTable(QtGui.QWidget):
             pass
         label.setWordWrap(line_wrap)
         self.grid_lay.addWidget(label, row, column)
-    
+        self._current_row += 1
+
     def append_markup(self, text):
         '''Appends a label'''
         label = QtGui.QLabel(text)
@@ -256,21 +263,24 @@ class BaseTable(QtGui.QWidget):
                         lambda t: on_entry_changed(line_edit, property_name))
 
 
+    def create_check(self, text, property_name):
+        """create a CheckButton and
+        set the check state with default
+        """
+        default = self.get_attr(property_name)
+        widget = QtGui.QCheckBox(text)
+        widget.setChecked(default)
+        widget.toggled.connect(
+                        lambda checked: self.on_toggled(widget, property_name))
+        return widget
+
     def append_check(self, text, property_name, row=None):
         '''Append a row with a check box with text as label and
         set the check state with default'''
         # TODO: Inspect if we can put self.on_toggle inside this method.
-        widget = QtGui.QCheckBox(text)
-        
+        widget = self.create_check(text, property_name)
         self.append_row(widget, row)
-        
-        default = self.get_attr(property_name)
-        widget.setChecked(default)
-        
-        widget.toggled.connect(
-                        lambda checked: self.on_toggled(widget, property_name))
-	return widget
-        
+    	return widget
 
     def append_range(self, text, property_name, min_val, max_val, is_int=True):
         '''Append a row with a scale to select an integer value between
@@ -305,22 +315,13 @@ class BaseTable(QtGui.QWidget):
                                                             is_int))
         scale.valueChanged.connect(spin.setValue)
         spin.valueChanged.connect(scale.setValue)
-        
 
-    def append_combo(self, text, getter, property_name):
-        '''Append a row with a check box with text as label and
-        set the check state with default'''
-        label = QtGui.QLabel(text)
-        combo = QtGui.QComboBox()
-        
-        hlay = QtGui.QHBoxLayout()
-        hlay.addWidget(label)
-        hlay.addWidget(combo)
-        widget = QtGui.QWidget()
-        widget.setLayout(hlay)
-        self.append_row(widget, None)
-        
-        default = self.get_attr(property_name)
+    def fill_combo(self, combo, getter, property_name, values=None):
+        if values:
+            default = getter()[values.index(self.get_attr(property_name))]
+        else:
+            default = self.get_attr(property_name)
+
         count = 0
         default_count = 0
         for item in getter():
@@ -330,10 +331,33 @@ class BaseTable(QtGui.QWidget):
             count += 1
         combo.setCurrentIndex(default_count)
 
+    def create_combo (self, getter, property_name,
+                      values=None, changed_cb = None):
+
+        combo = QtGui.QComboBox()
+        self.fill_combo(combo, getter, property_name, values)
+        if changed_cb:
+            combo.currentIndexChanged.connect(lambda text: changed_cb(combo, property_name))
+        else:
+            combo.currentIndexChanged.connect(
+            	lambda text: self.on_combo_changed(combo, property_name))
+        return combo
+
+    def append_combo(self, text, getter, property_name, values=None):
+        '''Append a row with a check box with text as label and
+        set the check state with default'''
+        label = QtGui.QLabel(text)
+        combo = self.create_combo(getter, property_name, values) #QtGui.QComboBox()
+        
+        hlay = QtGui.QHBoxLayout()
+        hlay.addWidget(label)
+        hlay.addWidget(combo)
+        widget = QtGui.QWidget()
+        widget.setLayout(hlay)
+        self.append_row(widget, None)
+        
         combo.currentIndexChanged.connect(
                     lambda text: self.on_combo_changed(combo, property_name))
-        
-
 
     def on_combo_changed(self, combo, property_name):
         '''Callback called when the selection of the combo changed
@@ -394,9 +418,6 @@ class BaseTable(QtGui.QWidget):
         pass
 
 
-
-
-
 class Interface(BaseTable):
     '''the panel to display/modify the config related to the gui
     '''
@@ -438,36 +459,65 @@ class Interface(BaseTable):
             'session.config.i_conv_avatar_size', 18, 128)
 
 
-
-
-
-class Desktop(BaseTable):
+class GeneralTab(BaseTable):
     ''' This panel contains some desktop related settings '''
 
     def __init__(self, session):
         """constructor
         """
-        BaseTable.__init__(self, 3, 2)
-        self._session = session
+        BaseTable.__init__(self, 4, 2)
+        self.session = session
+
+        self.append_markup('<b>'+tr('Logger')+'</b>')
+        self.append_check(tr('Enable logger'),
+                          'session.config.b_log_enabled')
+
+        # language settings
+        self.append_markup('<b>'+tr('Language')+'</b>')
+        # languages combobox
+        self._language_management = get_language_manager()
+
+        self.session.config.subscribe(self._on_language_changed,
+                                      'language_config')
+
+        self.add_text(tr("Select language:"), 0, 3,  True)
+
+        #language option
+        self.session.config.get_or_set("spell_lang", "en")
+        self.lang_menu = self.create_combo(self.get_spell_langs, 'session.config.spell_lang')
+
+        cb_check_spelling = self.create_check(
+            tr('Enable spell check if available \n(requires %s)')
+            % 'python-gtkspell',
+            'session.config.b_enable_spell_check')
+
+        self.append_row(cb_check_spelling)
+        self.attach(self.lang_menu, 2, 5, 4, 1)#, gtk.FILL, 0)
+
+        self.session.config.subscribe(self._on_spell_change,
+            'b_enable_spell_check')
+
+        #update spell lang combo sensitivity
+        self._on_spell_change(self.session.config.get_or_set('b_enable_spell_check', False))
 
         self.append_markup('<b>'+tr('File transfers')+'</b>')
         self.append_check(tr('Sort received files by sender'), 
-                          '_session.config.b_download_folder_per_account')
-        self.add_text(tr('Save files to:'), 0, 2, True)
+                          'session.config.b_download_folder_per_account')
+        self.append_markup(tr('Save files to:'))
 
         def on_path_button_clicked():
             ''' updates the download dir config value '''
             new_path = unicode(QtGui.QFileDialog.getExistingDirectory(
-                            directory = self._session.config.download_folder))
+                            directory = self.session.config.download_folder))
             set_new_path(new_path)
             path_edit.setText(new_path)
         
         def set_new_path(new_path):
-            if new_path != self._session.config.download_folder:
-                self._session.config.download_folder = new_path
+            if new_path != self.session.config.download_folder:
+                self.session.config.download_folder = new_path
             
         path_edit = QtGui.QLineEdit(
-            self._session.config.get_or_set("download_folder", 
+            self.session.config.get_or_set("download_folder", 
                                            e3.common.locations.downloads()))
         path = QtGui.QWidget()
         path_button = QtGui.QPushButton( QtGui.QIcon.fromTheme('folder'), '')
@@ -475,12 +525,32 @@ class Desktop(BaseTable):
         path_lay.addWidget(path_edit)
         path_lay.addWidget(path_button)
         path.setLayout(path_lay)
-        self.attach(path, 2, 3, 2, 3)
+        self.attach(path, 5, 3, 7, 1)
         
         path_button.clicked.connect(on_path_button_clicked)
         path_edit.textChanged.connect(
                             lambda new_path: set_new_path(unicode(new_path)))
+
+        # mail settings
+        self.append_markup('<b>'+_('Mail')+'</b>')
+        self.append_check(_('Open mail in default desktop client'),
+                          'session.config.b_open_mail_in_desktop')
+
+        self.append_markup('<b>'+_('Updates')+'</b>')
+        self.append_check(_('Weekly check for plugins/themes updates on startup'),
+                          'session.config.b_check_for_updates')
+
         self.show_all()
+
+    def _on_language_changed(self,  lang):
+        self._language_management.install_desired_translation(lang)
+
+    def get_spell_langs(self):
+        return sorted(set(list_dicts()))
+
+    def _on_spell_change(self, value):
+#        self.lang_menu.set_sensitive(value)
+        pass
 
 
 class Sound(BaseTable):
