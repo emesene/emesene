@@ -315,7 +315,12 @@ class BaseTable(QtGui.QWidget):
         
         label = QtGui.QLabel(text)
         scale = QtGui.QSlider(Qt.Horizontal)
-        spin  = QtGui.QSpinBox()
+        #QT supports mark in intervals so use first value
+        for mark in marks:
+            scale.setTickInterval(mark)
+            break
+        scale.setTickPosition(QtGui.QSlider.TicksBelow)
+        spin = QtGui.QSpinBox()
         
         hlay = QtGui.QHBoxLayout()
         hlay.addWidget(label)
