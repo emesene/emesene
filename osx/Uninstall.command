@@ -34,8 +34,6 @@ rm -f "/Users/$USER/Library/Preferences/org.emesene.emesene.plist"
 rm -f "/Users/$USER/Library/Preferences/org.emesene.emesene.plist.lockfile"
 rm -rf "/Users/$USER/Library/Saved Application State/org.emesene.emesene.savedState"
 rm -f "/Users/$USER/Library/Application Support/Growl/Tickets/emesene.growlTicket"
-getid=`sqlite3 ~/Library/Containers/com.Growl.GrowlHelperApp/Data/Library/Application\ Support/Growl/tickets.database "SELECT Z_OPT FROM ZGROWLTICKET WHERE ZNAME = emesene"`
-sqlite3 ~/Library/Containers/com.Growl.GrowlHelperApp/Data/Library/Application\ Support/Growl/tickets.database "SELECT * FROM ZGROWLTICKET WHERE Z_OPT = $getid" 
 
 #gtk files
 rm -rf "/Users/$USER/.config/gtk-2.0" 
