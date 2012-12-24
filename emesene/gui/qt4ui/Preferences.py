@@ -126,6 +126,8 @@ class Preferences(QtGui.QWidget):
         self.sound.remove_subscriptions()
         self.notification.remove_subscriptions()
         self.general.remove_subscriptions()
+        if hasattr(self, 'msn_papylib'):
+            self.msn_papylib.privacy.remove_subscriptions()
 
     def present(self):
         '''Does Nothing...'''
@@ -1034,21 +1036,51 @@ class MSNPapylib(BaseTable):
         '''
         BaseTable.__init__(self, 8, 2)
         self.session = session
+        c_keep = self.append_check(tr("Keep-alive conversations"),
+                'session.config.b_papylib_keepalive')
+        c_keep.toggled.connect(self._on_keepalive_toggled)
 
-        self.add_text(tr('If you have problems with your nickname/message/\n'
+        c_ep = self.append_check(tr("Disconnect other endpoints when logging in"),
+                'session.config.b_papylib_disconnect_ep')
+        c_keep.toggled.connect(self._on_ep_toggled)
+
+        self.append_entry_default(tr('Endpoint name'), 'epname',
+                                  'session.config.s_papylib_endpoint_name',
+                                  'emesene', tr('Name for this endpoint'),
+                                  has_help=False, has_apply=True)
+        self.session.config.subscribe(self._on_endpoint_name_changed,
+                                      's_papylib_endpoint_name')
+
+        self.append_markup(tr('If you have problems with your nickname/message/\n'
                         'picture just click on this button, sign in with \n'
                         'your account and load a picture in your Live Profile.'
-                        '\nThen restart emesene and have fun.'), 0, 0, True)
-        self.add_button(tr('Open Live Profile'), 1, 0, 
+                        '\nThen restart emesene and have fun.'))
+        self.add_button(tr('Open Live Profile'), 0, 3, 
                         self._on_live_profile_clicked, 0, 0)
 
+    def _on_keepalive_toggled(self, checked):
+        ''' enable/disable conversation's keepalives in papyon '''
+        worker = self.session.get_worker()
+        worker.keepalive_conversations = checked
+        self.session.config.b_papylib_keepalive = checked
+
+    def _on_ep_toggled(self, checked):
+        ''' enable/disable disconnect other endpoints when logging in '''
+        worker = self.session.get_worker()
+        worker.disconnect_ep = checked
+        self.session.config.b_papylib_disconnect_ep = checked
 
     def _on_live_profile_clicked(self, arg):
         ''' called when live profile button is clicked '''
         profile_url = self.session.get_worker().profile_url
         gui.base.Desktop.open(profile_url)
 
+    def _on_endpoint_name_changed(self, value):
+        self.session.set_endpoint_name(value)
 
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_endpoint_name_changed,
+                                        's_papylib_endpoint_name')
 class Facebook(BaseTable):
     """ This panel contains some facebook specific settings """
 
