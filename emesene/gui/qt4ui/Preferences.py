@@ -28,10 +28,10 @@ LIST = [
     {'stock_id' : 'preferences-desktop',               'text' : tr('General'  )},
     {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Main Window')},
     {'stock_id' : 'preferences-desktop-accessibility', 'text' : tr('Conversation Window')},
-    {'stock_id' : 'preferences-desktop-multimedia',    'text' : tr('Sounds'   )},
+    {'stock_id' : 'media-playback-start',    'text' : tr('Sounds'   )},
     {'stock_id' : 'window-new',                    'text' : tr('Notifications')},
     {'stock_id' : 'preferences-desktop-theme',         'text' : tr('Theme'    )},
-    {'stock_id' : 'network-disconnect',            'text' : tr('Extensions'   )},
+    {'stock_id' : 'system-software-install',            'text' : tr('Extensions'   )},
     {'stock_id' : 'network-disconnect',                'text' : tr('Plugins'  )},
 ]
 
@@ -53,21 +53,28 @@ class Preferences(QtGui.QWidget):
         self._session = session
         #TODO: check
         self.session = session
-        self.general      = GeneralTab(session)
+        self.general = GeneralTab(session)
         self.main = MainWindow(session)
         self.conversation = ConversationWindow(session)
-        self.sound        = Sound(session)
+        self.sound = Sound(session)
         self.notification = Notification(session)
-        self.theme        = Theme(session)
-        self.extension    = Extension(session)
+        self.theme = Theme(session)
+        self.extension = Extension(session)
         #self.plugins     = PluginWindow.PluginMainVBox(session)
         self.msn_papylib = None
         if 'msn' in self._session.SERVICES: # only when session is papylib.	
             self.msn_papylib = MSNPapylib(session)
             LIST.append({'stock_id' : 'network-disconnect',
                          'text' : u'Live Messenger'})
-    
-        list_view          = QListViewMod()
+
+
+        self.facebook = None
+        if 'facebook' in self.session.SERVICES and self.session._is_facebook: # only when session is facebook	
+            self.facebook = Facebook(session)
+            LIST.append({'stock_id' : 'network-disconnect',
+                         'text' : u'Facebook'})
+
+        list_view = QListViewMod()
         self.widget_stack = QtGui.QStackedWidget()
         
         lay = QtGui.QHBoxLayout()
@@ -96,7 +103,7 @@ class Preferences(QtGui.QWidget):
         
         for page in [self.general, self.main, self.conversation,     self.sound, 
                      self.notification,  self.theme,       self.extension,
-                     BaseTable(1,1),     self.msn_papylib]: 
+                     BaseTable(1,1),     self.msn_papylib, self.facebook]: 
                      #self.plugins_page instead of BaseTable
             if page:
                 self.widget_stack.addWidget(page)
@@ -156,7 +163,6 @@ class QListViewMod (QtGui.QListView):
         size = QtGui.QListView.sizeHint(self)
         return QtCore.QSize((2*width+size.width())/3, 
                             (2*height+size.height())/3)
-
 
 
 class BaseTable(QtGui.QWidget):
@@ -297,7 +303,7 @@ class BaseTable(QtGui.QWidget):
         """
         default = self.get_attr(property_name)
         widget = QtGui.QCheckBox(text)
-        widget.setChecked(default)
+        widget.setChecked(bool(default))
         widget.toggled.connect(
                         lambda checked: self.on_toggled(widget, property_name))
         return widget
@@ -914,7 +920,6 @@ class Extension(BaseTable):
         self.extension_list   = []
 
         self._setup_ui()
-        
 
     def _setup_ui(self):
         '''add the widgets that will display the information of the 
@@ -1042,3 +1047,40 @@ class MSNPapylib(BaseTable):
         ''' called when live profile button is clicked '''
         profile_url = self.session.get_worker().profile_url
         gui.base.Desktop.open(profile_url)
+
+
+class Facebook(BaseTable):
+    """ This panel contains some facebook specific settings """
+
+    def __init__(self, session):
+        """constructor
+        """
+        BaseTable.__init__(self, 1, 1)
+        self.session = session
+
+        self.append_markup('<b>'+tr('Facebook Integration:')+'</b>')
+        self.append_check(tr('Enable Facebook integration'),
+                          'session.config.b_fb_enable_integration')
+        self.append_check(tr('Automatically check Facebook mail'),
+                          'session.config.b_fb_mail_check')
+        self.append_check(tr('Automatically download Facebook status'),
+                          'session.config.b_fb_status_download')
+        self.append_check(tr('Publish Facebook status'),
+                          'session.config.b_fb_status_write')
+        self.append_check(tr('Automatically download profile photo'),
+                          'session.config.b_fb_picture_download')
+
+        #XXX: we replace \n by <br> to use the same string as gtkui
+        self.append_markup(tr("<b>WARNING: This will reset your facebook token."
+                 "\nemesene will ask you to login into facebook on"
+                 " next login</b>").replace('\n', '<br>'))
+
+        self.add_button(tr('Reset Facebook settings'), 0, 7,
+                self.reset_facebook_login, 0, 0)
+
+        self.show_all()
+
+    def reset_facebook_login(self, button):
+        '''Reset facebook integration settings'''
+        self.session.config.avatar_url = None
+        self.session.config.facebook_token = None
