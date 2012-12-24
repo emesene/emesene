@@ -932,14 +932,13 @@ class Extension(BaseTable):
         self.add_label(self.description_info, 1, 4, True)
         self.add_label(self.author_info,      1, 5, True)
         self.add_label(self.website_info,     1, 6, True)
-        self.add_button(tr('Redraw main screen'), 1, 7,
-                self._on_redraw_main_screen)
+        self.add_button(tr('Import from emesene1'), 1, 7,
+                self.on_import_emesene1)
         self.attach(self.categories_cmb, 1, 2, 0, 1)
         self.attach(self.extensions_cmb, 1, 2, 1, 2)
         
         categories = extension.get_multiextension_categories()
         for item in categories:
-            log.info('category item: %s' % item)
             self.categories_cmb.addItem(item)
         self.categories_cmb.setCurrentIndex(0)
         self._on_category_changed(self.categories_cmb)
@@ -948,14 +947,13 @@ class Extension(BaseTable):
                 lambda text: self._on_category_changed(self.categories_cmb))
         self.extensions_cmb.currentIndexChanged.connect(
                 lambda text: self._on_extension_changed(self.extensions_cmb))
-        
-        
-    def _on_redraw_main_screen(self, button):
-        '''called when the Redraw main screen button is clicked'''
-        self._session.save_config()
-        self._session.signals.login_succeed.emit()
-        self._session.signals.contact_list_ready.emit()
 
+    def on_import_emesene1(self, button):
+        """called when the Import button is clicked"""
+        syn = extension.get_default('synch tool')
+        current_service = self._session.config.service
+        syn = syn(self._session, current_service)
+        syn.show(True)
 
     def _on_category_changed(self, combo):
         '''callback called when the category on the combo changes'''
@@ -992,13 +990,12 @@ class Extension(BaseTable):
         ext, identifier = self.extension_list[extension_index]
         if not extension.set_default_by_id(category, identifier):
             # TODO: revert the selection to the previous selected extension
-            log.warning(('Could not set %s as default extension for %s') % \
+            log.warning(tr('Could not set %1 as default extension for %2') % \
                 (extension_id, category))
             return
 
         ext = extension.get_default(category)
         self._set_extension_info(ext)
-    
 
     def on_update(self):
         '''called when changed to this page'''
@@ -1011,7 +1008,6 @@ class Extension(BaseTable):
             self.categories_cmb.addItems([item])
         self.categories_cmb.setCurrentIndex(0)
 
-    
     def _set_extension_info(self, ext):
         '''fill the information about the ext'''
         name = unicode(self.get_attr_or_default(ext, 'NAME', '?'))
