@@ -113,12 +113,13 @@ class Preferences(QtGui.QWidget):
         # Get information about the row that has been selected
         self.widget_stack.setCurrentIndex(new_idx.row())
         self.widget_stack.currentWidget().on_update()
-        
-    
+
     def remove_subscriptions(self):
         '''RemovesNothing...'''
-        pass
-    
+        self.sound.remove_subscriptions()
+        self.notification.remove_subscriptions()
+        self.general.remove_subscriptions()
+
     def present(self):
         '''Does Nothing...'''
         pass
@@ -457,44 +458,6 @@ class BaseTable(QtGui.QWidget):
         pass
 
 
-class Interface(BaseTable):
-    '''the panel to display/modify the config related to the gui
-    '''
-
-    def __init__(self, session):
-        '''constructor
-        '''
-        BaseTable.__init__(self, 4, 1)
-        self.session = session
-        self.append_markup('<b>'+tr('Conversation window:')+'</b>')
-        self.session.config.get_or_set('b_avatar_on_left', False)
-        self.session.config.get_or_set('b_toolbar_small', False)
-        self.append_check(tr('Start minimized/iconified'), 
-                           'session.config.b_conv_minimized')
-        self.append_check(tr('Show emoticons'), 
-                           'session.config.b_show_emoticons')
-        self.append_check(tr('Show conversation header'),
-            'session.config.b_show_header')
-        self.append_check(tr('Show conversation side panel'),
-            'session.config.b_show_info')
-        self.append_check(tr('Show conversation toolbar'),
-            'session.config.b_show_toolbar')
-        self.append_check(tr('Small conversation toolbar'),
-            'session.config.b_toolbar_small')
-        self.append_check(tr('Avatar on conversation left side'),
-            'session.config.b_avatar_on_left')
-        self.append_check(tr('Allow auto scroll in conversation'),
-            'session.config.b_allow_auto_scroll')
-        self.append_check(tr('Enable spell check if available (requires %s)') % \
-                                                            'python-gtkspell',
-            'session.config.b_enable_spell_check')
-
-        self.append_range(tr('Contact list avatar size'),
-            'session.config.i_avatar_size', 18, 64)
-        self.append_range(tr('Conversation avatar size'),
-            'session.config.i_conv_avatar_size', 18, 128)
-
-
 class GeneralTab(BaseTable):
     ''' This panel contains some desktop related settings '''
 
@@ -510,6 +473,7 @@ class GeneralTab(BaseTable):
 
         # language settings
         self.append_markup('<b>'+tr('Language')+'</b>')
+
         # languages combobox
         self._language_management = get_language_manager()
 
@@ -518,17 +482,44 @@ class GeneralTab(BaseTable):
 
         self.add_text(tr("Select language:"), 0, 3,  True)
 
+        default = 0
+        index = 1
+        self.language_combo = QtGui.QComboBox()
+        self.language_combo.addItem(tr('Automatic detection'), None)
+
+        lang_dict = self._language_management.LANGUAGES_DICT
+
+        for lang_key in sorted(lang_dict.keys()):
+            self.language_combo.addItem(unicode(lang_dict[lang_key]), lang_key)
+            if lang_key == self.session.config.language_config:
+                default = index
+            index += 1
+
+        #in case we have some new language and it's not already on the DICT
+        for lang_key in self._language_management.get_available_languages():
+            if lang_key not in self._language_management.LANGUAGES_DICT.keys():
+                self.language_combo.addItem(unicode(lang_key), lang_key)
+                if lang_key == self.session.config.language_config:
+                    default = index
+                index += 1
+
+        self.language_combo.currentIndexChanged.connect(
+            	lambda text: self.on_language_combo_changed(self.language_combo, 'session.config.language_config'))
+
+        self.attach(self.language_combo, 2, 5, 3, 1)
+
         #language option
         self.session.config.get_or_set("spell_lang", "en")
         self.lang_menu = self.create_combo(self.get_spell_langs, 'session.config.spell_lang')
 
+        #FIXME: implement this setting
         cb_check_spelling = self.create_check(
             tr('Enable spell check if available \n(requires %s)')
             % 'python-gtkspell',
             'session.config.b_enable_spell_check')
 
         self.append_row(cb_check_spelling)
-        self.attach(self.lang_menu, 2, 5, 4, 1)#, gtk.FILL, 0)
+        self.attach(self.lang_menu, 2, 5, 4, 1)
 
         self.session.config.subscribe(self._on_spell_change,
             'b_enable_spell_check')
@@ -578,15 +569,25 @@ class GeneralTab(BaseTable):
 
         self.show_all()
 
+    def remove_subscriptions(self):
+        self.session.config.unsubscribe(self._on_language_changed,
+            'language_config')
+        self.session.config.unsubscribe(self._on_spell_change,
+            'b_enable_spell_check')
+
     def _on_language_changed(self,  lang):
         self._language_management.install_desired_translation(lang)
+
+    def on_language_combo_changed(self, combo, property_name):
+        index = combo.currentIndex()
+        lang_key = unicode(combo.itemData(index).toString())
+        self.set_attr(property_name, lang_key)
 
     def get_spell_langs(self):
         return sorted(set(list_dicts()))
 
     def _on_spell_change(self, value):
-#        self.lang_menu.set_sensitive(value)
-        pass
+        self.lang_menu.setEnabled(value)
 
 
 class MainWindow(BaseTable):
