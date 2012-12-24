@@ -893,9 +893,6 @@ class Theme(BaseTable):
             'session.config.adium_theme')
 
 
-
-
-
 class Extension(BaseTable):
     '''the panel to display/modify the config related to the extensions_cmb
     '''
@@ -911,6 +908,7 @@ class Extension(BaseTable):
         self.description_info = QtGui.QLabel('')
         self.author_info      = QtGui.QLabel('')
         self.website_info     = QtGui.QLabel('')
+        self.website_info.setTextFormat(Qt.RichText)
         self.extensions_cmb   = QtGui.QComboBox()
         self.categories_cmb   = QtGui.QComboBox()
         self.extension_list   = []
@@ -1016,15 +1014,15 @@ class Extension(BaseTable):
     
     def _set_extension_info(self, ext):
         '''fill the information about the ext'''
-        name        = self.get_attr_or_default(ext, 'NAME', '?')
-        description = self.get_attr_or_default(ext, 'DESCRIPTION', '?')
-        author      = self.get_attr_or_default(ext, 'AUTHOR', '?')
-        website     = self.get_attr_or_default(ext, 'WEBSITE', '?')
-
+        name = unicode(self.get_attr_or_default(ext, 'NAME', '?'))
+        description = unicode(self.get_attr_or_default(ext, 'DESCRIPTION', '?'))
+        author = unicode(self.get_attr_or_default(ext, 'AUTHOR', '?'))
+        website = unicode(self.get_attr_or_default(ext, 'WEBSITE', '?'))
+        website_markup = "<a href=%s>%s</a>" % (website, website)
         self.name_info.setText(name)
         self.description_info.setText(description)
         self.author_info.setText(author)
-        self.website_info.setText(website)
+        self.website_info.setText(website_markup)
 
 
 class MSNPapylib(BaseTable):
