@@ -70,7 +70,6 @@ def setup():
     import Conversation
     import DebugWindow
     import Dialog
-    import Notifier
     import PictureHandler
     import Preferences
     import TopLevelWindow
@@ -80,12 +79,10 @@ def setup():
     import widgets
     import Utils
 
-
     extension.category_register('avatar chooser',  AvatarChooser.AvatarChooser)
     extension.category_register('conversation',    Conversation.Conversation)
     extension.category_register('dialog',          Dialog.Dialog)
     extension.category_register('debug window',    DebugWindow.DebugWindow)
-    extension.category_register('notificationGUI', Notifier.Notifier)
     extension.category_register('preferences',     Preferences.Preferences,
                                                    single_instance=True)
     extension.category_register('window frame', TopLevelWindow.TopLevelWindow)
