@@ -104,7 +104,7 @@ class Notification(QDialog):
         ttlIcon.setAlignment(Qt.AlignLeft)
         hb.addWidget(ttlIcon)
 
-        ttl = QLabel("<b>"caption + "</b>")
+        ttl = QLabel("<b>" + caption + "</b>")
         fnt = ttl.font()
         fnt.setBold(True)
         ttl.setFont(fnt)
