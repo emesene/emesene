@@ -117,6 +117,8 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         status = model.data(index, Role.StatusRole).toPyObject()
         text_doc = QtGui.QTextDocument()
 
+        origin = QtCore.QPointF(0.0, 0.0)
+
         if not index.parent().isValid():
             # -> Start drawing the text_doc:
             text_list = self._build_display_role(index, True)
@@ -144,34 +146,20 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             else:
                 picture = Utils.pixmap_rounder(picture)
             # calculate the target position
-            source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0),
+            source = QtCore.QRectF( origin,
                                     QtCore.QSizeF(picture.size()) )
             target = QtCore.QRectF( top_left_point + xy_pic_margin,
                                     self._pic_size )
             # draw the picture
             painter.drawPixmap(target, picture, source)
 
-            # -> start drawing the status emblem
-            picture_path  = gui.theme.image_theme.status_icons[
-                            model.data(index, Role.StatusRole).toPyObject()]
-            picture = QtGui.QPixmap(picture_path)
-            source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0),
-                                    QtCore.QSizeF(picture.size()) )
-            x_emblem_offset = self._PICTURE_SIZE - picture.size().width()
-            y_emblem_offset = self._PICTURE_SIZE - picture.size().height()
-            xy_emblem_offset = QtCore.QPointF(x_emblem_offset, y_emblem_offset)
-            target = QtCore.QRectF( top_left_point + xy_pic_margin +
-                                        xy_emblem_offset,
-                                    QtCore.QSizeF(picture.size()) )
-            painter.drawPixmap(target, picture, source)
-
             # -> start drawing the 'blocked' emblem
             if model.data(index, Role.BlockedRole).toPyObject():
                 picture_path = gui.theme.image_theme.blocked_overlay
                 picture = QtGui.QPixmap(picture_path)
-                source = QtCore.QRectF( QtCore.QPointF(0.0, 0.0),
+                source = QtCore.QRectF( origin,
                                         QtCore.QSizeF(picture.size()) )
-                x_emblem_offset = 0
+                x_emblem_offset = self._PICTURE_SIZE - picture.size().width()
                 y_emblem_offset = self._PICTURE_SIZE - picture.size().height()
                 xy_emblem_offset = QtCore.QPointF(x_emblem_offset,
                                                   y_emblem_offset)
@@ -179,6 +167,12 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                                                       xy_emblem_offset,
                                                   QtCore.QSizeF(picture.size()))
                 painter.drawPixmap(target, picture, source)
+
+            # -> set-up status picture for calculations
+            picture_path  = gui.theme.image_theme.status_icons[
+                            model.data(index, Role.StatusRole).toPyObject()]
+            picture = QtGui.QPixmap(picture_path)
+
 
             # -> Start setting up the text_doc:
             text_list = self._build_display_role(index)
@@ -191,8 +185,30 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             xy_text_offset = QtCore.QPointF(x_text_offset, y_text_offset)
             # move the pointer to the text_doc zone:
             painter.translate(top_left_point + xy_text_offset)
+
+            #calculate max text width = treeview width - status image width
+            max_text_width = option.rect.width() - 3 * picture.size().width() - 2* x_pic_margin
+
+            #text width is the min between text_size and max_text_size
+            x_size = min(max_text_width, text_doc.size().width())
+
+            #calculate rect size
+            target = QtCore.QRectF( origin,
+                                    QtCore.QSizeF(x_size, text_doc.size().height()) )
+
             # draw the text_doc
-            text_doc.drawContents(painter)
+            text_doc.drawContents(painter, target)
+
+            # -> start drawing the status emblem
+            source = QtCore.QRectF( origin,
+                                    QtCore.QSizeF(picture.size()) )
+
+            x_emblem_offset = max_text_width
+            y_emblem_offset = abs((option.rect.height() - picture.size().height())) / 2
+            xy_emblem_offset = QtCore.QPointF(max_text_width, y_emblem_offset)
+            target = QtCore.QRectF( xy_emblem_offset,
+                                    QtCore.QSizeF(picture.size()) )
+            painter.drawPixmap(target, picture, source)
 
         # -> It's done!
         painter.restore()
