@@ -21,6 +21,7 @@ import logging
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 import e3
 import gui
@@ -50,9 +51,13 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
 
         self.session.config.subscribe(self._on_template_change, 'nick_template')
         self.session.config.subscribe(self._on_template_change, 'group_template')
+        self.session.config.subscribe(self._on_avatar_size_change, 'i_avatar_size')
 
     def _on_template_change(self, *args):
-        log.info('template changed')
+        self.parent().repaint()
+
+    def _on_avatar_size_change(self, *args):
+        self._PICTURE_SIZE = self.session.config.get_or_set('i_avatar_size', 50)
         self.parent().repaint()
 
     def plus_text_parse(self, item):
@@ -145,13 +150,21 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                 picture = QtGui.QPixmap(gui.theme.image_theme.user)
             else:
                 picture = Utils.pixmap_rounder(picture)
+
+            #FIXME: when we scale to big sizes status icon is lost by some reason
+            #FIXME: we need to scale also the block emblem
+            #scale picture
+            scaledsize = QtCore.QSize(self._PICTURE_SIZE, self._PICTURE_SIZE)
+            scaledsizef = QtCore.QSizeF(self._PICTURE_SIZE, self._PICTURE_SIZE)
+            scaledpicture = picture.scaled(scaledsize, Qt.KeepAspectRatio)
+
             # calculate the target position
             source = QtCore.QRectF( origin,
-                                    QtCore.QSizeF(picture.size()) )
+                                    QtCore.QSizeF(scaledpicture.size()))
             target = QtCore.QRectF( top_left_point + xy_pic_margin,
-                                    self._pic_size )
+                                    scaledsizef)
             # draw the picture
-            painter.drawPixmap(target, picture, source)
+            painter.drawPixmap(target, scaledpicture, source)
 
             # -> start drawing the 'blocked' emblem
             if model.data(index, Role.BlockedRole).toPyObject():
@@ -171,8 +184,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
             # -> set-up status picture for calculations
             picture_path  = gui.theme.image_theme.status_icons[
                             model.data(index, Role.StatusRole).toPyObject()]
-            picture = QtGui.QPixmap(picture_path)
-
+            picture_status = QtGui.QPixmap(picture_path)
 
             # -> Start setting up the text_doc:
             text_list = self._build_display_role(index)
@@ -183,11 +195,12 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
                 abs(option.rect.height() - text_doc.size().height()) / 2
             x_text_offset = 2 * x_pic_margin + self._PICTURE_SIZE
             xy_text_offset = QtCore.QPointF(x_text_offset, y_text_offset)
+
             # move the pointer to the text_doc zone:
             painter.translate(top_left_point + xy_text_offset)
 
             #calculate max text width = treeview width - status image width
-            max_text_width = option.rect.width() - 3 * picture.size().width() - 2* x_pic_margin
+            max_text_width = option.rect.width() - 3 * picture_status.size().width() - 2 * x_pic_margin
 
             #text width is the min between text_size and max_text_size
             x_size = min(max_text_width, text_doc.size().width())
@@ -201,14 +214,14 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
 
             # -> start drawing the status emblem
             source = QtCore.QRectF( origin,
-                                    QtCore.QSizeF(picture.size()) )
+                                    QtCore.QSizeF(picture_status.size()) )
 
             x_emblem_offset = max_text_width
-            y_emblem_offset = abs((option.rect.height() - picture.size().height())) / 2
+            y_emblem_offset = abs((option.rect.height() - picture_status.size().height())) / 2
             xy_emblem_offset = QtCore.QPointF(max_text_width, y_emblem_offset)
             target = QtCore.QRectF( xy_emblem_offset,
-                                    QtCore.QSizeF(picture.size()) )
-            painter.drawPixmap(target, picture, source)
+                                    QtCore.QSizeF(picture_status.size()) )
+            painter.drawPixmap(target, picture_status, source)
 
         # -> It's done!
         painter.restore()
@@ -223,7 +236,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
         text_height = text_doc.size().toSize().height()
         if isinstance(data_role, e3.base.Group):
             return QtCore.QSize(0, text_height)
-        return QtCore.QSize(0, max(text_height, self._PICTURE_SIZE + 2*self._MIN_PICTURE_MARGIN))
+        return QtCore.QSize(0, max(text_height, self._PICTURE_SIZE + 2 *self._MIN_PICTURE_MARGIN))
 
     def remove_subscriptions(self):
         self.session.config.unsubscribe(self._on_template_change, 'nick_template')
