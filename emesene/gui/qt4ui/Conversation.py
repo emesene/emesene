@@ -282,6 +282,10 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
                 self.typing_timeout.stop()
             self.typing_timeout.start(3000)
 
+    def focused(self):
+        '''return if conversation has focus. Use this instead of hasFocus'''
+        return self.input.hasFocus()
+
     def update_tab(self):
         '''update the values of the tab'''
         self.typing_timeout.stop()
@@ -379,4 +383,3 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def on_av_call(self):
         '''called when the user is requesting an audio-video call'''
         pass
-

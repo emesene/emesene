@@ -117,7 +117,7 @@ class ConversationPage (gui.base.ConversationManager, QtGui.QTabWidget):
         parent = self.get_parent()
         if parent is not None and conversation in self.conversations.values():
             current_index = self.currentIndex()
-            if (not conversation.hasFocus() or current_index != conversation.tab_index):
+            if (not conversation.focused() or current_index != conversation.tab_index):
                 conversation.message_waiting = is_waiting
 
     def focusInEvent(self, widget):
