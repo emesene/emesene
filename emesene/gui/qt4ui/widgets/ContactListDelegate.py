@@ -178,7 +178,7 @@ class ContactListDelegate (QtGui.QStyledItemDelegate):
 
             #FIXME: when we scale to big sizes status icon is lost by some reason
             #scale picture
-            scaledpicture = picture.scaled(self._pic_size, Qt.KeepAspectRatio)
+            scaledpicture = picture.scaled(self._pic_size, transformMode=Qt.SmoothTransformation)
 
             # calculate the target position
             source = QtCore.QRectF( origin,
