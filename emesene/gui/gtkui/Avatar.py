@@ -116,9 +116,9 @@ class Avatar(gtk.Widget, AvatarManager):
         if self.blocked:
             if self._dimension > 32:
                 # use big fallback image
+                newdim = int(self._dimension * 0.5)
                 pixbufblock = utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay_big,
-                                                    (int(self._dimension * 0.5),
-                                                     int(self._dimension * 0.5)))
+                                                    (newdim, newdim))
             else:
                 pixbufblock = utils.gtk_pixbuf_load(gui.theme.image_theme.blocked_overlay)
 
