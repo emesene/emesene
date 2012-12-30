@@ -137,7 +137,7 @@ class PluginHandler(MetaData):
             self._instance.active = False
 
     def config(self, session):
-        if self.is_active() and self._instance.configurable():
+        if self.is_active() and self.configurable():
             self._instance.config(session)
             return True
 
