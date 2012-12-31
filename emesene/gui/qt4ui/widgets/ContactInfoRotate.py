@@ -91,16 +91,9 @@ class ContactInfoRotate(QtGui.QWidget):
 
     def _on_avatarsize_changed(self, value):
         '''callback called when config.i_conv_avatar_size changes'''
-        #FIXME: implement
-        pass
-#        self.avatarBox.remove(self.avatar)
-#        self.his_avatarBox.remove(self.his_avatar)
-#
-#        self.avatar.set_property('dimension', value)
-#        self.his_avatar.set_property('dimension', value)
-#
-#        self.avatarBox.add(self.avatar)
-#        self.his_avatarBox.add(self.his_avatar)
+        self.avatar.set_size(value)
+        self.his_avatar.set_size(value)
+        self.repaint()
 
     def rotate_picture(self):
         '''change the account picture in a multichat
@@ -125,9 +118,8 @@ class ContactInfoRotate(QtGui.QWidget):
             self.timer = None
 
         #stop the avatars animation... if any...
-#FIXME:
-#        self.avatar.stop()
-#        self.his_avatar.stop()
+        self.avatar.stop()
+        self.his_avatar.stop()
 
     def set_sensitive(self, is_sensitive):
         self.avatar.setEnabled(is_sensitive)

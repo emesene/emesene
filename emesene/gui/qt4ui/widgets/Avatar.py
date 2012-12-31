@@ -62,8 +62,8 @@ class Avatar (QtGui.QWidget):
 
         # pixmap painting initializations
         self._prepare_fallback_image()
-        self._back = (self._fallback, 0)
-        self._front = (self._fallback, 0)
+        self._back = (self._fallback, 0, self._get_fallback_image())
+        self._front = (self._fallback, 0, self._get_fallback_image())
         self._generate_block_overlay()
         self.set_from_file('')
         self.installEventFilter(self)
@@ -114,7 +114,9 @@ class Avatar (QtGui.QWidget):
                 self._movie.setScaledSize(self._size)
                 self._movie.start()
                 pixmap = self._movie
-        self.add_pixmap(pixmap)
+        else:
+            filename = self._get_fallback_image()
+        self.add_pixmap(pixmap, filename)
 
     # -------------------- QT_OVERRIDE
     def eventFilter(self, obj, event):
@@ -144,8 +146,8 @@ class Avatar (QtGui.QWidget):
         painter.save()
         painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
 
-        old_pixmap, old_opacity = self._back
-        new_pixmap, new_opacity = self._front
+        old_pixmap, old_opacity, old_filename = self._back
+        new_pixmap, new_opacity, new_filename = self._front
         if isinstance(self._back[0], QtGui.QMovie):
             old_pixmap = old_pixmap.currentPixmap()
         if isinstance(self._front[0], QtGui.QMovie):
@@ -184,8 +186,8 @@ class Avatar (QtGui.QWidget):
     def _on_timeout(self):
         '''Compute a frame. This method is called by a QTimer
         various times per second.'''
-        old_element, old_opacity = self._back
-        new_element, new_opacity = self._front
+        old_element, old_opacity, old_filename = self._back
+        new_element, new_opacity, new_filename = self._front
         old_pixmap = old_element
         new_pixmap = new_element
 
@@ -197,14 +199,14 @@ class Avatar (QtGui.QWidget):
         old_opacity -= self._alpha_step
         new_opacity += self._alpha_step
 
-        self._back = (old_element, old_opacity)
-        self._front = (new_element, new_opacity)
+        self._back = (old_element, old_opacity, old_filename)
+        self._front = (new_element, new_opacity, new_filename)
         self.repaint()
 
-    def add_pixmap(self, element):
+    def add_pixmap(self, element, filename):
         '''Adds a pixmap to the pixmap stack'''
-        self._back = (self._front[0], 1)
-        self._front = (element, 0)
+        self._back = (self._front[0], 1, self._front[2])
+        self._front = (element, 0, filename)
         # always start timer for movies because we need to update the picture
         if self.crossfade or isinstance(element, QtGui.QMovie):
             self._timer.start(self._frame_time)
@@ -215,16 +217,19 @@ class Avatar (QtGui.QWidget):
         self._rect = QtCore.QRect(QtCore.QPoint(0, 0), self._size)
         self._generate_block_overlay()
         self._prepare_fallback_image()
-        self._back = (self._rescale_picture(self._back[0]), self._back[1])
-        self._front = (self._rescale_picture(self._front[0]), self._front[1])
+        self._back = (self._rescale_picture(self._back[0], self._back[2]), self._back[1], self._back[2])
+        self._front = (self._rescale_picture(self._front[0], self._front[2]), self._front[1], self._front[2])
 
 
-    def _rescale_picture(self, picture):
+    def _rescale_picture(self, picture, filename):
         if isinstance(picture, QtGui.QMovie):
             return picture.setScaledSize(self._size)
         else:
-            return picture.scaled(self._size,
-                    transformMode=Qt.SmoothTransformation)
+            pixmap = QtGui.QPixmap(filename)
+            if not pixmap.isNull():
+                pixmap = Utils.pixmap_rounder(pixmap.scaled(self._size,
+                                    transformMode=Qt.SmoothTransformation))
+            return pixmap
 
     def stop(self):
         '''stop the animation'''
