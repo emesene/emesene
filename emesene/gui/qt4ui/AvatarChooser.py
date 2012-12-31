@@ -79,7 +79,7 @@ class AvatarChooser(Dialog.OkCancelDialog):
 
         widget_d['tab_widget'] = QtGui.QTabWidget()
         widget_d['group_box'] = QtGui.QGroupBox()
-        widget_d['preview_dpic'] = widgets.DisplayPic(self._session,
+        widget_d['preview_dpic'] = widgets.Avatar(self._session,
                                                 clickable=False, size=96)
         widget_d['add_btn'] = QtGui.QPushButton(tr('Add'))
         widget_d['remove_btn'] = QtGui.QPushButton(tr('Remove'))

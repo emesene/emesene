@@ -8,7 +8,7 @@ from AdiumChatOutput import AdiumChatOutput
 from ChatInput import ChatInput
 from ChatOutput import ChatOutput
 from ContactList import ContactList
-from DisplayPic import DisplayPic
+from Avatar import Avatar
 from IconViewDelegate import IconViewDelegate
 from ImageAreaSelector import ImageAreaSelector
 from NickEdit import NickEdit
