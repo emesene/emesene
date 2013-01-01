@@ -161,6 +161,10 @@ def tr(string):
     PyQt and gettext. See issue #586'''
     return unicode(_(string))
 
+def trs(string):
+    '''translate string and replaces _ on it for compat with gtk string'''
+    return tr(string).replace('_', '')
+
 def path_to_url(path):
     if os.name == "nt":
         # on windows os.path.join uses backslashes
