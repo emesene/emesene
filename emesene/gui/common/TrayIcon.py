@@ -151,7 +151,7 @@ class TrayIcon(gtk.StatusIcon, NumerableTrayIcon):
         if check_gtk3():
             self._update_numerable_icon(count)
         else:
-            self.set_blinking((count != 0))
+            self.set_blinking(count != 0)
 
     def _get_numerable_icon_for_status(self, stat):
         '''create a new Numerable icon with current status as base image'''

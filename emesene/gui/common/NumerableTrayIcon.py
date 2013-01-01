@@ -51,6 +51,7 @@ class NumerableTrayIcon(gui.BaseTray):
 
         self.count += 1
         self.last_new_message = cid
+        self.count_changed(self.count)
 
     def _on_message_read(self, conv):
         """
