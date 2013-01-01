@@ -31,8 +31,13 @@ from HTMLParser import HTMLParser
 from gui.qt4ui import Utils
 log = logging.getLogger('qt4ui.widgets.ChatInput')
 
+try:
+    from SpellTextEdit import SpellTextEdit as BaseInput
+except enchant.errors.DictNotFoundError:
+    from QtGui import QTextEdit as BaseInput
 
-class ChatInput (QtGui.QTextEdit):
+
+class ChatInput (BaseInput):
     '''A widget suited for editing chat lines. Provides as-you-type
     smileys, color settings and font settings, chat line history'''
     NAME = 'Input Text'
@@ -45,7 +50,7 @@ class ChatInput (QtGui.QTextEdit):
     def __init__(self, on_send_message, on_cycle_history,
                     send_typing_notification, parent=None):
         '''Constructor'''
-        QtGui.QTextEdit.__init__(self, parent)
+        BaseInput.__init__(self, parent)
 
         self._smiley_dict = {}
         self._max_shortcut_len = 0
