@@ -45,6 +45,7 @@ class Avatar (QtGui.QWidget):
 
         self._session = session
         self._size = QtCore.QSize(size, size)
+        self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         self._clickable = clickable
 
         self.blocked = False
