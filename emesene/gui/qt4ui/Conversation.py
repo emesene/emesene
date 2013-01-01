@@ -107,7 +107,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
         self.toolbar.update_toggle_avatar_icon(self.session.config.b_show_info)
 
         widget_d['smiley_chooser'] = smiley_chooser_cls()
-        self.input = Widgets.ChatInput(self._on_send_message,
+        self.input = Widgets.ChatInput(self.session, self._on_send_message,
                                self.cycle_history,
                                self._send_typing_notification)
 
@@ -200,6 +200,7 @@ class Conversation (gui.base.Conversation, QtGui.QWidget):
     def on_close(self):
         '''Method called when this chat widget is about to be closed'''
         self.unsubscribe_signals()
+        self.input.unsubscribe_signals()
         self.info.destroy()
 
     def update_panel_position(self):

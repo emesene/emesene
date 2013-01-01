@@ -47,7 +47,7 @@ class ChatInput (BaseInput):
 
     style_changed = QtCore.pyqtSignal()
 
-    def __init__(self, on_send_message, on_cycle_history,
+    def __init__(self, session, on_send_message, on_cycle_history,
                     send_typing_notification, parent=None):
         '''Constructor'''
         BaseInput.__init__(self, parent)
@@ -55,6 +55,7 @@ class ChatInput (BaseInput):
         self._smiley_dict = {}
         self._max_shortcut_len = 0
 
+        self.session = session
         self.on_send_message = on_send_message
         self.on_cycle_history = on_cycle_history
         self.send_typing_notification = send_typing_notification
@@ -66,6 +67,24 @@ class ChatInput (BaseInput):
         self.typing_timer = QtCore.QTimer()
         self.typing_timer.setSingleShot(False)
         self.typing_timer.timeout.connect(self.on_send_typing_notification)
+
+        if hasattr(BaseInput, 'setActivateSpellCheck'):
+            self.setActivateSpellCheck(self.session.config.b_enable_spell_check)
+        self.subscribe_signals()
+
+    def subscribe_signals(self):
+        if hasattr(BaseInput, 'setActivateSpellCheck'):
+            self.session.config.subscribe(self.enable_spell_check_change,
+                                            'b_enable_spell_check')
+
+    def enable_spell_check_change(self, active):
+        '''enable/disable spell check'''
+        self.setActivateSpellCheck(active)
+
+    def unsubscribe_signals(self):
+        if hasattr(BaseInput, 'setActivateSpellCheck'):
+            self.session.config.unsubscribe(self.enable_spell_check_change,
+                                            'b_enable_spell_check')
 
     # emesene's
     def update_style(self, style):

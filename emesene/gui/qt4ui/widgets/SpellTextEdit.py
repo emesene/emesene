@@ -27,10 +27,12 @@ class SpellTextEdit(QTextEdit):
     def __init__(self, *args):
         QTextEdit.__init__(self, *args)
  
+        self._active = False
         # Default dictionary based on the current locale.
         self.dict = enchant.Dict()
         self.highlighter = Highlighter(self.document())
         self.highlighter.setDict(self.dict)
+        self.highlighter.setActivateSpellCheck(self._active)
  
     def mousePressEvent(self, event):
         if event.button() == Qt.RightButton:
@@ -50,7 +52,7 @@ class SpellTextEdit(QTextEdit):
  
         # Check if the selected word is misspelled and offer spelling
         # suggestions if it is.
-        if self.textCursor().hasSelection():
+        if self.textCursor().hasSelection() and self._active:
             text = unicode(self.textCursor().selectedText())
             if not self.dict.check(text):
                 spell_menu = QMenu('Spelling Suggestions')
@@ -78,7 +80,10 @@ class SpellTextEdit(QTextEdit):
  
         cursor.endEditBlock()
  
- 
+    def setActivateSpellCheck(self, activate):
+        self._active = activate
+        self.highlighter.setActivateSpellCheck(activate)
+
 class Highlighter(QSyntaxHighlighter):
  
     WORDS = u'(?iu)[\w\']+'
@@ -87,12 +92,18 @@ class Highlighter(QSyntaxHighlighter):
         QSyntaxHighlighter.__init__(self, *args)
  
         self.dict = None
- 
+        self._active = False
+
     def setDict(self, dict):
         self.dict = dict
+        self.rehighlight()
  
+    def setActivateSpellCheck(self, activate):
+        self._active = activate
+        self.rehighlight()
+
     def highlightBlock(self, text):
-        if not self.dict:
+        if not self.dict or not self._active:
             return
  
         text = unicode(text)
@@ -105,7 +116,6 @@ class Highlighter(QSyntaxHighlighter):
             if not self.dict.check(word_object.group()):
                 self.setFormat(word_object.start(),
                     word_object.end() - word_object.start(), format)
- 
  
 class SpellAction(QAction):
     '''
