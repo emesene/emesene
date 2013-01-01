@@ -91,7 +91,8 @@ class AvatarChooser(gtk.Window):
         Avatar = extension.get_default('avatar')
         img_current = Avatar()
         img_current.set_size_request(96, 96)
-        frame_current = gtk.Frame(_("Current"))
+        frame_current = gtk.Frame()
+        frame_current.set_label(_("Current"))
         frame_current.add(img_current)
 
         hbbox.pack_start(b_clear, False)
