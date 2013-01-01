@@ -84,6 +84,10 @@ class SpellTextEdit(QTextEdit):
         self._active = activate
         self.highlighter.setActivateSpellCheck(activate)
 
+    def setDict(self, lang):
+        self.dict = enchant.Dict(lang)
+        self.highlighter.setDict(self.dict)
+
 class Highlighter(QSyntaxHighlighter):
  
     WORDS = u'(?iu)[\w\']+'

@@ -70,21 +70,31 @@ class ChatInput (BaseInput):
 
         if hasattr(BaseInput, 'setActivateSpellCheck'):
             self.setActivateSpellCheck(self.session.config.b_enable_spell_check)
+            spell_lang = self.config.get_or_set("spell_lang", "en")
+            self.setDict(spell_lang)
         self.subscribe_signals()
 
     def subscribe_signals(self):
         if hasattr(BaseInput, 'setActivateSpellCheck'):
             self.session.config.subscribe(self.enable_spell_check_change,
                                             'b_enable_spell_check')
+            self.session.config.subscribe(self.spell_lang_change,
+                                            'spell_lang')
 
     def enable_spell_check_change(self, active):
         '''enable/disable spell check'''
         self.setActivateSpellCheck(active)
 
+    def spell_lang_change(self, lang):
+        '''change spell dict'''
+        self.setDict(lang)
+
     def unsubscribe_signals(self):
         if hasattr(BaseInput, 'setActivateSpellCheck'):
             self.session.config.unsubscribe(self.enable_spell_check_change,
                                             'b_enable_spell_check')
+            self.session.config.unsubscribe(self.spell_lang_change,
+                                            'spell_lang')
 
     # emesene's
     def update_style(self, style):
