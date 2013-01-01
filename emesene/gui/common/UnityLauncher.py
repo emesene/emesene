@@ -62,7 +62,7 @@ class UnityLauncher(NumerableTrayIcon):
         self.launcher = UnityDBusController("application://emesene.desktop")
 
     def count_changed(self, count):
-        show_count = (self.count == 0)
+        show_count = (self.count != 0)
         self.launcher.set_property("count-visible", show_count)
         self.launcher.set_property("urgent", show_count)
         self.launcher.set_property("count", self.count)
