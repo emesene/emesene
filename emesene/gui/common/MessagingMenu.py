@@ -132,11 +132,13 @@ class MessagingMenu(gui.BaseTray):
         """
         if indicate:
             ind = indicate.Indicator()
+    
             #Get user icon.
-            contact = self.handler.session.contacts.safe_get(body)
-            pixbuf = utils.safe_gtk_pixbuf_load(contact.picture or '', (48, 48))
-            if pixbuf is not None:
-                ind.set_property_icon("icon", pixbuf)
+            if hasattr(ind, 'set_property_icon'):
+                contact = self.handler.session.contacts.safe_get(body)
+                pixbuf = utils.safe_gtk_pixbuf_load(contact.picture or '', (48, 48))
+                if pixbuf is not None:
+                    ind.set_property_icon("icon", pixbuf)
 
             ind.set_property("subtype", subtype)
             ind.set_property("sender", sender + extra_text)
