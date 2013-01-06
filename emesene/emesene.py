@@ -203,8 +203,7 @@ class Controller(object):
             'network checker')
 
         handler = gui.base.TrayIconHandler(self.session, gui.theme, self.close_session)
-        unitylaunchercls = extension.get_default('unity launcher')
-        self.unity_launcher = unitylaunchercls(handler)
+        self.unity_launcher = extension.get_and_instantiate('unity launcher', handler)
 
         extension.category_register('sound', e3.common.Sounds.SoundPlayer,
                 None, True)
