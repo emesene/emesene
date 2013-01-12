@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-10-14 12:54+0200\n"
+"POT-Creation-Date: 2013-01-13 00:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,11 +25,11 @@ msgstr ""
 msgid "Open a new instance"
 msgstr ""
 
-#: emesene/e3/base/Logger.py:1294 emesene/gui/base/Conversation.py:304
+#: emesene/e3/base/Logger.py:1295 emesene/gui/base/Conversation.py:304
 msgid "You just sent a nudge!"
 msgstr ""
 
-#: emesene/e3/base/Logger.py:1330 emesene/e3/common/notification.py:149
+#: emesene/e3/base/Logger.py:1331 emesene/e3/common/notification.py:149
 #: emesene/gui/base/Conversation.py:525
 #, python-format
 msgid "%s just sent you a nudge!"
@@ -156,20 +156,20 @@ msgstr ""
 msgid "%d members"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:545
+#: emesene/gui/base/Conversation.py:551
 msgid "Error delivering message"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:587
+#: emesene/gui/base/Conversation.py:593
 msgid "Group chat"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:621
+#: emesene/gui/base/Conversation.py:627
 #, python-format
 msgid "%s has joined the conversation"
 msgstr ""
 
-#: emesene/gui/base/Conversation.py:638
+#: emesene/gui/base/Conversation.py:644
 #, python-format
 msgid "%s has left the conversation"
 msgstr ""
@@ -293,15 +293,15 @@ msgstr ""
 msgid "Remove all"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:94
+#: emesene/gui/gtkui/AvatarChooser.py:95
 msgid "Current"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:251
+#: emesene/gui/gtkui/AvatarChooser.py:252
 msgid "Are you sure you want to remove all items?"
 msgstr ""
 
-#: emesene/gui/gtkui/AvatarChooser.py:268 emesene/gui/gtkui/Dialog.py:1183
+#: emesene/gui/gtkui/AvatarChooser.py:269 emesene/gui/gtkui/Dialog.py:1183
 #: emesene/gui/gtkui/Dialog.py:1303
 msgid "No picture selected"
 msgstr ""
@@ -377,7 +377,7 @@ msgstr ""
 #: emesene/gui/gtkui/ContactInformation.py:143 emesene/gui/gtkui/Dialog.py:993
 #: emesene/gui/gtkui/ExtensionList.py:37 emesene/gui/gtkui/Login.py:66
 #: emesene/gui/gtkui/MainMenu.py:145 emesene/gui/gtkui/Tooltips.py:59
-#: emesene/gui/common/TrayIcon.py:223
+#: emesene/gui/common/TrayIcon.py:236
 msgid "Status"
 msgstr ""
 
@@ -401,7 +401,7 @@ msgid "Copy contact information"
 msgstr ""
 
 #: emesene/gui/gtkui/ContactInformation.py:319
-#: emesene/gui/gtkui/ContactInformation.py:429
+#: emesene/gui/gtkui/ContactInformation.py:430
 msgid "Hide calendars"
 msgstr ""
 
@@ -429,19 +429,19 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:426
+#: emesene/gui/gtkui/ContactInformation.py:427
 msgid "Show calendars"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:471
+#: emesene/gui/gtkui/ContactInformation.py:472
 msgid "Loading chat history. Hang tight for a moment..."
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:521
+#: emesene/gui/gtkui/ContactInformation.py:522
 msgid "No chat history found"
 msgstr ""
 
-#: emesene/gui/gtkui/ContactInformation.py:566
+#: emesene/gui/gtkui/ContactInformation.py:567
 msgid "Too many messages to display"
 msgstr ""
 
@@ -1018,18 +1018,18 @@ msgstr ""
 msgid "Copy mail"
 msgstr ""
 
-#: emesene/gui/gtkui/IconView.py:142 emesene/gui/gtkui/IconView.py:145
+#: emesene/gui/gtkui/IconView.py:145 emesene/gui/gtkui/IconView.py:148
 #, python-format
 msgid ""
 "Could not add picture:\n"
 " %s"
 msgstr ""
 
-#: emesene/gui/gtkui/IconView.py:143
+#: emesene/gui/gtkui/IconView.py:146
 msgid "Drag and drop to this IconView is not allowed."
 msgstr ""
 
-#: emesene/gui/gtkui/IconView.py:160
+#: emesene/gui/gtkui/IconView.py:163
 #, python-format
 msgid "image at %s could not be loaded"
 msgstr ""
@@ -1189,11 +1189,11 @@ msgstr ""
 msgid "Check for updates"
 msgstr ""
 
-#: emesene/gui/gtkui/MainWindow.py:119
+#: emesene/gui/gtkui/MainWindow.py:121
 msgid "Connect Emesene and Facebook"
 msgstr ""
 
-#: emesene/gui/gtkui/MainWindow.py:127
+#: emesene/gui/gtkui/MainWindow.py:129
 msgid "Please login into facebook and copy the url opened in your browser here"
 msgstr ""
 
@@ -1391,7 +1391,7 @@ msgstr ""
 msgid "General:"
 msgstr ""
 
-#: emesene/gui/gtkui/Preferences.py:838 emesene/gui/common/TrayIcon.py:250
+#: emesene/gui/gtkui/Preferences.py:838 emesene/gui/common/TrayIcon.py:263
 msgid "Mute sounds"
 msgstr ""
 
@@ -1706,7 +1706,7 @@ msgstr ""
 msgid "Close Tab (Ctrl+W)"
 msgstr ""
 
-#: emesene/gui/gtkui/TextBox.py:404
+#: emesene/gui/gtkui/TextBox.py:403
 msgid "A widget to display the conversation messages"
 msgstr ""
 
@@ -1730,23 +1730,23 @@ msgstr ""
 msgid "Click here to set your message"
 msgstr ""
 
-#: emesene/gui/common/Indicator.py:51
+#: emesene/gui/common/Indicator.py:57
 msgid "The Ayatana Indicator applet extension"
 msgstr ""
 
-#: emesene/gui/common/TrayIcon.py:195 emesene/gui/common/TrayIcon.py:234
+#: emesene/gui/common/TrayIcon.py:208 emesene/gui/common/TrayIcon.py:247
 msgid "Hide/Show emesene"
 msgstr ""
 
-#: emesene/gui/common/TrayIcon.py:229
+#: emesene/gui/common/TrayIcon.py:242
 msgid "Contacts"
 msgstr ""
 
-#: emesene/gui/common/TrayIcon.py:248
+#: emesene/gui/common/TrayIcon.py:261
 msgid "Unmute sounds"
 msgstr ""
 
-#: emesene/gui/common/TrayIcon.py:293
+#: emesene/gui/common/TrayIcon.py:306
 msgid "A menu with sessions' contacts"
 msgstr ""
 
