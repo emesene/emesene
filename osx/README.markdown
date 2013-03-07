@@ -1,23 +1,24 @@
 # Building emesene on OS X
 
-## Requirements
+## Requirements and Information
 
 * [gtk binary](http://www.mediafire.com/download.php?6vl96yienoiofsm) (Prebuilt binary)
-* [Platypus](http://sveinbjorn.org/files/software/platypus.zip) (Once downloaded go to Prefs and click the "Install" button at the bottom)
-* [git] (http://git-scm.com/downloads)
+* [Platypus](http://sveinbjorn.org/files/software/platypus.zip) (Once downloaded go to Prefs and click the "Install" button at the bottom to install the command line tool)
+* [git](http://git-scm.com/downloads)
 
-## Building the latest version
+Before continuing, make sure the gtk binary folder is located in the emesene/osx directory
+
+Please note emesene.app will only work if it is in /Applications!
+
+## Building the latest version in the repo
 
 ```
 git clone https://github.com/emesene/emesene.git
 cd emesene/osx
-```
-
-Now drag the gtk folder you downloaded earlier into the osx directory.
-
-```
 sh build_osx.sh
 ```
+
+This will create emesene.app in the emesene/dist directory
 
 ## Building a specific version
 
@@ -28,13 +29,10 @@ git clone https://github.com/emesene/emesene.git
 cd emesene
 git checkout v2.12.9
 cd osx
-```
-
-Now drag the gtk folder you downloaded earlier into the osx directory.
-
-```
 sh build_osx.sh
 ```
+
+This will create emesene.app in the emesene/dist directory
 
 ### Special Cases
 
@@ -61,7 +59,7 @@ If you are planning to release emesene run:
 sh build_osx.sh dorelease
 ```
 
-This will create a DMG for you and mount it in Finder, you can then move the icons and set the DMG background. Once that is done go back to the script and press enter. A compressed DMG will then be built.
+This will create a DMG for you and mount it in Finder, you can then move the icons and set the DMG background. Once that is done go back to the script and press enter. A compressed DMG will then be built in the emesene/dist folder.
 
 ### Known Issues
 
