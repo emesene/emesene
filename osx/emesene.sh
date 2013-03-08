@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#Copyright 2012 The emesene team and Josh Fradley (http://blog.emesene.org)
+#Copyright 2013 The emesene team and Josh Fradley (http://blog.emesene.org)
 
 workdir=`dirname "$0"`
 

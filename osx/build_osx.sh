@@ -6,12 +6,12 @@
 version=`grep 'EMESENE_VERSION = ".*"' ../emesene/Info.py | cut -d '"' -f 2`
     
 echo "############################################################################"
-echo "### Welcome to the emesene builder. Version 3.5 Copyright Josh Fradley ###" 
+echo "### Welcome to the emesene builder. Version 3.6 Copyright Josh Fradley ###" 
 echo "############################################################################"
 
 if ! [ -f "/usr/local/bin/platypus" ]
 then
-    echo "ERROR: Platpus is not installed..."
+    echo "ERROR: Platpus command line tool is not installed..."
     exit
 fi
 
@@ -21,21 +21,23 @@ then
     exit
 fi
 
-read -p "Preparing to build emesene $version. Press enter to continue..."
+read -p "Preparing to build emesene $version. Press enter to continue with the build..."
 
 #Remove old builds
+echo "Removing previous builds..."
+
 rm -rf ../dist
 
-#Create temp dir
+#Create new temp dir
 mkdir ../dist
 
 #Build the app with Platypus
-echo "Building app..."
+echo "Building application..."
 /usr/local/bin/platypus -i 'emesene.icns' -a 'emesene' -o 'None' -p '/bin/sh' -u 'The emesene team and Josh Fradley' -I org.emesene.emesene -R 'emesene.sh' '../dist/emesene.app' > /dev/null 2>&1
 
 echo "Setting version..."
 #There is a bug in Platypus which sets CFBundle rather than CFBundleShortVersionString, should be fixed in Platypus 4.8
-defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleVersion -string "350"
+defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleVersion -string "360"
 defaults write ${PWD}/../dist/emesene.app/Contents/Info CFBundleShortVersionString -string "$version"
 
 echo "Bundling GTK..."
@@ -44,6 +46,7 @@ cp -r gtk ../dist/emesene.app/Contents/Resources/
 echo "Bundling emesene..."
 cp -r ../emesene ../dist/emesene.app/Contents/Resources/
 
+echo "Setting minimum OS..."
 defaults write ${PWD}/../dist/emesene.app/Contents/Info LSMinimumSystemVersion -string "10.6"
 
 if [[ "$1" == *dorelease* ]]
@@ -69,4 +72,4 @@ then
     rm ../dist/emesenetemp.dmg
 fi
 
-echo "Successfully built emesene $version"
+echo "Successfully built emesene $version."
