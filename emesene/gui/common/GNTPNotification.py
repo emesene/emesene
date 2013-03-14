@@ -18,6 +18,8 @@
 
 import gntp.notifier
 
+import sys
+
 import gui
 from gui.base import Plus
 
@@ -25,16 +27,20 @@ NAME = 'GNTPNotification'
 DESCRIPTION = 'Wrapper around GNTP for the notification system'
 AUTHOR = 'joshf'
 WEBSITE = 'www.github.com/joshf'
-VERSION = '1.0'
+VERSION = '1.1'
 
 def GNTPNotification(title, text, picture_path=None, const=None, 
                       callback=None, tooltip=None):
 
     title = Plus.msnplus_strip(title)
 
-    appicon = open(gui.theme.image_theme.logo).read()
-    imagepath = picture_path.replace( "file:///", "/" )
-    icon = open(imagepath).read()
+    if sys.platform == 'darwin':
+        appicon = open(gui.theme.image_theme.logo).read()
+        imagepath = picture_path.replace( "file:///", "/" )
+        icon = open(imagepath).read()
+    else:
+        appicon = gui.theme.image_theme.logo
+        icon = picture_path
 
     growl = gntp.notifier.GrowlNotifier(
         applicationName = "emesene",
