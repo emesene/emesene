@@ -24,6 +24,7 @@ from papyon.gnet.resolver import *
 from papyon.util.async import run
 from abstract import AbstractClient
 
+import glib
 import gobject
 import socket
 from errno import *
@@ -74,8 +75,8 @@ class GIOChannelClient(AbstractClient):
 
     def _pre_open(self, io_object):
         io_object.setblocking(False)
-        channel = gobject.IOChannel(io_object.fileno())
-        channel.set_flags(channel.get_flags() | gobject.IO_FLAG_NONBLOCK)
+        channel = glib.IOChannel(io_object.fileno())
+        channel.set_flags(channel.get_flags() | glib.IO_FLAG_NONBLOCK)
         channel.set_encoding(None)
         channel.set_buffered(False)
 
@@ -105,8 +106,8 @@ class GIOChannelClient(AbstractClient):
         except socket.error, e:
             err = e.errno
 
-        self._watch_set_cond(gobject.IO_PRI | gobject.IO_IN | gobject.IO_OUT |
-                gobject.IO_HUP | gobject.IO_ERR | gobject.IO_NVAL,
+        self._watch_set_cond(glib.IO_PRI | glib.IO_IN | glib.IO_OUT |
+                glib.IO_HUP | glib.IO_ERR | glib.IO_NVAL,
                 lambda chan, cond: self._post_open())
         if err in (0, EINPROGRESS, EALREADY, EWOULDBLOCK, EISCONN):
             return
@@ -183,5 +184,5 @@ class GIOChannelClient(AbstractClient):
             return
         self._outgoing_queue.append(OutgoingPacket(buffer, len(buffer),
             callback, errback))
-        self._watch_add_cond(gobject.IO_OUT)
+        self._watch_add_cond(glib.IO_OUT)
 gobject.type_register(GIOChannelClient)
