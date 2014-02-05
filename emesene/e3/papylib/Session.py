@@ -83,6 +83,9 @@ class Session(e3.Session):
         # msn password must have 16 chars max.
         password = password[:16]
 
+        #msn password must have 16 chars max.
+        password=password[:16]
+        #------------------------------------
         self.account = e3.Account(account, password, status, host)
 
         self.add_action(e3.Action.ACTION_LOGIN, (account, password, status,
