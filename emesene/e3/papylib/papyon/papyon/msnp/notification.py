@@ -878,6 +878,9 @@ class NotificationProtocol(BaseProtocol, Timer):
                 lists = contact.memberships & mask
                 if lists == profile.Membership.NONE:
                     continue
+                elif lists == profile.Membership.FORWARD:
+                    # forward with no allow or block? add allow to be safe
+                    lists |= profile.Membership.ALLOW
                 network_id = contact.network_id
                 node = '<c n="%s" l="%d" t="%d"/>' % (user, lists, network_id)
                 size = len(payloads[-1]) + len(node) + len('</d></ml>')
