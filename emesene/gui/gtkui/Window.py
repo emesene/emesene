@@ -51,7 +51,7 @@ class Window(gtk.Window):
         self._content_conv = None
 
         self.set_location(width, height, posx, posy)
-        self.set_title("emesene")
+        self.set_title("uazapp-im")
         image_theme = gui.theme.image_theme
         try:
             gtk.window_set_default_icon_list(

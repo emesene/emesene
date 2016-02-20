@@ -152,7 +152,7 @@ class HelpHandler(object):
 
     def on_about_selected(self):
         '''called when the about item is selected'''
-        self.dialog.about_dialog('emesene', Info.EMESENE_VERSION, Info.EMESENE_AUTHORS,
+        self.dialog.about_dialog('uazapp-im', Info.EMESENE_VERSION, Info.EMESENE_AUTHORS,
             _('A simple yet powerful instant messaging client'), Info.EMESENE_LICENSE,
             Info.EMESENE_WEBSITE, Info.EMESENE_CONTRIBUTORS, _('translator-credits'),
             gui.theme.image_theme.logo)

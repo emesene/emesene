@@ -17,18 +17,18 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 # Use the -dev suffix for development releases, it will enable the dummy backend
-EMESENE_VERSION = "2.12.10-dev"
-EMESENE_LAST_STABLE = "2.12.9"
-EMESENE_WEBSITE = "http://www.emesene.org"
-EMESENE_AUTHORS = "c10ud, pepeleproso, sbte & marianoguerra"
+EMESENE_VERSION = "0.3"
+EMESENE_LAST_STABLE = ""
+EMESENE_WEBSITE = "http://dakk.github.io/uazapp-im/"
+EMESENE_AUTHORS = "Davide Gessa"
 EMESENE_CONTRIBUTORS = [] # Loaded in emesene.py at runtime from CONTRIBUTORS
 EMESENE_LICENSE = '''
-    emesene is free software; you can redistribute it and/or modify
+    uazapp-im is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
     (at your option) any later version.
 
-    emesene is distributed in the hope that it will be useful,
+    uazapp-im is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.

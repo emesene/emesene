@@ -418,7 +418,7 @@ class Login(LoginBaseUI, gui.LoginBase):
 
         self.remember_account.set_sensitive(True)
 
-        service = self.config.d_user_service.get(account, 'msn')
+        service = self.config.d_user_service.get(account, 'whatsapp')
 
         if not from_preferences:
             self.session_combo.set_active(

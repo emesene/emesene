@@ -15,17 +15,13 @@ import sys
 import emesene.Info
 
 setup_info = dict(
-    name = "emesene",
+    name = "uazapp-im",
     version = emesene.Info.EMESENE_VERSION,
-    description = "Instant Messaging Client",
+    description = "Desktop Whatsapp Client",
     author = emesene.Info.EMESENE_AUTHORS,
-    author_email = "luismarianoguerra@gmail.com",
-    keywords = "messenger im msn jabber gtalk live facebook",
-    long_description = """emesene is an istant messenger capable of connecting
-    to various networks and utilizing different graphical toolkits.
-    Currently msn and jabber are supported through papyon and SleekXMPP,
-    which allows emesene to connect to various IM services such as
-    Windows Live Messenger, GTalk, Facebook Chat, etc.""",
+    author_email = "gessadavide@gmail.com",
+    keywords = "messenger im whatsapp",
+    long_description = """uazzap-im is an instant messenger forked from emesene capable of connecting to whatsapp from your desktop.""",
     url = emesene.Info.EMESENE_WEBSITE,
     license = "GNU GPL 3",
     classifiers = [

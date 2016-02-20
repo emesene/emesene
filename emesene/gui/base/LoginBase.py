@@ -51,7 +51,7 @@ class LoginBase(object):
         self.server_port = None
         self.account_uuid = str(uuid.uuid4())
 
-        self.config.get_or_set('service', 'msn')
+        self.config.get_or_set('service', 'whatsapp')
         self.remembers = self.config.get_or_set('d_remembers', {})
         self.config.get_or_set('d_user_service', {})
         self.status = self.config.get_or_set('d_status', {})
@@ -72,7 +72,7 @@ class LoginBase(object):
                     continue
                 account_and_service = \
                     _account + '|' + \
-                    self.config.d_user_service.get(_account, 'msn')
+                    self.config.d_user_service.get(_account, 'whatsapp')
                 if _account == account:
                     self.config.last_logged_account = account_and_service
                     account = account_and_service
@@ -105,13 +105,13 @@ class LoginBase(object):
                     self.server_host = ext.SERVICES[self.config.service]['host']
                     self.server_port = ext.SERVICES[self.config.service]['port']
             else:
-                self.config.service = 'msn'
-                self.server_host = 'messenger.hotmail.com'
-                self.server_port = '1863'
+                self.config.service = 'whatsapp'
+                self.server_host = ' '
+                self.server_port = ' '
         else:
-            self.config.service = 'msn'
-            self.server_host = 'messenger.hotmail.com'
-            self.server_port = '1863'
+            self.config.service = 'whatsapp'
+            self.server_host = ' '
+            self.server_port = ' '
 
     def check_and_set_uuid(self, account_and_service):
         '''set uuid for current account'''
@@ -215,7 +215,7 @@ class LoginBase(object):
 
         if account in self.accounts:
             service = self.config.d_user_service.get(
-                            account.rpartition('|')[0], 'msn')
+                            account.rpartition('|')[0], 'whatsapp')
         else:
             service = self.config.service
 
@@ -244,9 +244,9 @@ class LoginBase(object):
 
     def _on_preferences_open(self, account, callback):
         '''called when the user clicks the preference button'''
-        service = self.config.get_or_set('service', 'msn')
+        service = self.config.get_or_set('service', 'whatsapp')
         if account in self.accounts:
-            service = self.config.d_user_service.get(account, 'msn')
+            service = self.config.d_user_service.get(account, 'whatsapp')
 
         ext = self.service2id[service][1]
         extension.get_default('dialog').login_preferences(service, ext,
